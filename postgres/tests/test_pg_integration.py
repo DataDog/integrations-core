@@ -20,6 +20,7 @@ from .common import (
     POSTGRES_VERSION,
     check_bgw_metrics,
     check_common_metrics,
+    requires_static_version,
 )
 from .utils import requires_over_10
 
@@ -166,6 +167,7 @@ def test_wrong_version(aggregator, integration_check, pg_instance):
     assert_state_set(check)
 
 
+@requires_static_version
 def test_version_metadata(integration_check, pg_instance, datadog_agent):
     check = integration_check(pg_instance)
     check.check_id = 'test:123'

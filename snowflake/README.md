@@ -220,7 +220,7 @@ Need help? Contact [Datadog support][15].
 
 
 [1]: https://www.snowflake.com/
-[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-v6-python-3/?tab=hostagent
 [4]: https://docs.snowflake.com/en/sql-reference/account-usage.html#enabling-account-usage-for-other-roles
 [5]: https://github.com/DataDog/integrations-core/blob/master/snowflake/datadog_checks/snowflake/data/conf.yaml.example

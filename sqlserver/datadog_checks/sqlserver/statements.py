@@ -18,7 +18,7 @@ except ImportError:
 
 DEFAULT_COLLECTION_INTERVAL = 10
 
-SQL_SERVER_METRICS_COLUMNS = [
+SQL_SERVER_QUERY_METRICS_COLUMNS = [
     "execution_count",
     "total_worker_time",
     "total_physical_reads",
@@ -43,18 +43,17 @@ with qstats as (
     select text, query_hash, query_plan_hash,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'user_id') as user_id,
-           {}
+           {query_metrics_columns}
     from sys.dm_exec_query_stats
         cross apply sys.dm_exec_sql_text(sql_handle)
 )
-select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid, D.name as database_name, U.name as user_name, {}
+select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid, D.name as database_name, U.name as user_name,
+    {query_metrics_column_sums}
     from qstats S
     left join sys.databases D on S.dbid = D.database_id
     left join sys.sysusers U on S.user_id = U.uid
     group by text, query_hash, query_plan_hash, S.dbid, D.name, U.name
-""".format(
-    ', '.join(SQL_SERVER_METRICS_COLUMNS), ', '.join(['sum({}) as {}'.format(c, c) for c in SQL_SERVER_METRICS_COLUMNS])
-)
+"""
 
 PLAN_LOOKUP_QUERY = """\
 select query_plan from sys.dm_exec_query_stats
@@ -129,6 +128,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._state = StatementMetrics()
         self._init_caches()
         self._conn_key_prefix = "dbm-"
+        self._statement_metrics_query = None
 
     def _init_caches(self):
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -149,10 +149,33 @@ class SqlserverStatementMetrics(DBMAsyncJob):
     def _close_db_conn(self):
         pass
 
+    def _get_available_query_metrics_columns(self, cursor, all_expected_columns):
+        cursor.execute("select top 0 * from sys.dm_exec_query_stats")
+        all_columns = set([i[0] for i in cursor.description])
+        available_columns = [c for c in all_expected_columns if c in all_columns]
+        missing_columns = set(all_expected_columns) - set(available_columns)
+        if missing_columns:
+            self.log.debug(
+                "missing the following expected query metrics columns from dm_exec_query_stats: %s", missing_columns
+            )
+        self.log.debug("found available sys.dm_exec_query_stats columns: %s", available_columns)
+        return available_columns
+
+    def _get_statement_metrics_query_cached(self, cursor):
+        if self._statement_metrics_query:
+            return self._statement_metrics_query
+        available_columns = self._get_available_query_metrics_columns(cursor, SQL_SERVER_QUERY_METRICS_COLUMNS)
+        self._statement_metrics_query = STATEMENT_METRICS_QUERY.format(
+            query_metrics_columns=', '.join(available_columns),
+            query_metrics_column_sums=', '.join(['sum({}) as {}'.format(c, c) for c in available_columns]),
+        )
+        return self._statement_metrics_query
+
     def _load_raw_query_metrics_rows(self, cursor):
         self.log.debug("collecting sql server statement metrics")
-        self.log.debug("Running query [%s]", STATEMENT_METRICS_QUERY)
-        cursor.execute(STATEMENT_METRICS_QUERY)
+        statement_metrics_query = self._get_statement_metrics_query_cached(cursor)
+        self.log.debug("Running query [%s]", statement_metrics_query)
+        cursor.execute(statement_metrics_query)
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]

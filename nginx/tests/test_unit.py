@@ -81,6 +81,8 @@ def test_plus_api_v3(check, instance, aggregator):
     for m in aggregator.metric_names:
         total += len(aggregator.metrics(m))
     assert total == 1189
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone1', count=1)
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone2', count=1)
 

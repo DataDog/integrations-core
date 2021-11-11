@@ -4,7 +4,7 @@
 
 * [Fixed] Fix possible KeyError when collecting metrics. See [#10471](https://github.com/DataDog/integrations-core/pull/10471).
 
-## 2.1.0 / 2021-10-04
+## 2.1.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
 * [Added] Add runtime configuration validation. See [#8954](https://github.com/DataDog/integrations-core/pull/8954).

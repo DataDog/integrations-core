@@ -118,6 +118,54 @@ def instance_complex():
 
 
 @pytest.fixture
+def instance_additional_status():
+    return {
+        'host': common.HOST,
+        'user': common.USER,
+        'pass': common.PASS,
+        'port': common.PORT,
+        'tags': tags.METRIC_TAGS,
+        'disable_generic_tags': 'true',
+        'additional_status': [
+            {
+                'name': "innodb_rows_read",
+                'metric_name': "mysql.innodb.rows_read",
+                'type': "rate",
+            },
+            {
+                'name': "row_lock_time",
+                'metric_name': "mysql.innodb.row_lock_time",
+                'type': "rate",
+            },
+        ],
+    }
+
+
+@pytest.fixture
+def instance_additional_variable():
+    return {
+        'host': common.HOST,
+        'user': common.USER,
+        'pass': common.PASS,
+        'port': common.PORT,
+        'tags': tags.METRIC_TAGS,
+        'disable_generic_tags': 'true',
+        'additional_status': [
+            {
+                'name': "long_query_time",
+                'metric_name': "mysql.performance.long_query_time",
+                'type': "gauge",
+            },
+            {
+                'name': "innodb_flush_log_at_trx_commit",
+                'metric_name': "mysql.performance.innodb_flush_log_at_trx_commit",
+                'type': "gauge",
+            },
+        ],
+    }
+
+
+@pytest.fixture
 def instance_custom_queries():
     return {
         'host': common.HOST,

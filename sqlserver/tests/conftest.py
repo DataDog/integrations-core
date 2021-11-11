@@ -166,5 +166,5 @@ def dd_environment():
             )
         ]
 
-    with docker_run(compose_file=compose_file, conditions=conditions, mount_logs=True, build=True):
+    with docker_run(compose_file=compose_file, conditions=conditions, mount_logs=True, build=True, attempts=2):
         yield FULL_E2E_CONFIG

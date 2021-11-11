@@ -1,6 +1,6 @@
 # CHANGELOG - IBM MQ
 
-## 3.16.1 / 2021-10-04
+## 3.16.1 / 2021-10-04 / Agent 7.32.0
 
 * [Fixed] ibm mq queue pattern should have precedence over autodiscover. See [#10247](https://github.com/DataDog/integrations-core/pull/10247).
 

@@ -1,6 +1,6 @@
 # Mesos_master Check
 
-This check collects metrics for Mesos masters. If you are looking for the the metrics for Mesos slave, see the [Mesos Slave Integration documentation][1].
+This check collects metrics for Mesos masters. If you are looking for the metrics for Mesos slave, see the [Mesos Slave Integration documentation][1].
 
 ![Mesos master Dashboard][2]
 
@@ -41,6 +41,12 @@ If you passed the correct Master URL when starting datadog-agent, the Agent is a
 Unless your masters' API uses a self-signed certificate. In that case, set `disable_ssl_validation: true` in `mesos_master.d/conf.yaml`.
 
 #### Log collection
+
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 

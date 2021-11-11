@@ -1,6 +1,6 @@
 # CHANGELOG - Hudi
 
-## 1.0.1 / 2021-10-07
+## 1.0.1 / 2021-10-07 / Agent 7.32.0
 
 * [Fixed] Properly escape periods in regular expressions for beans. See [#10363](https://github.com/DataDog/integrations-core/pull/10363).
 

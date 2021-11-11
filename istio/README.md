@@ -97,6 +97,12 @@ kubectl patch daemonset datadog-agent -p '{"spec":{"template":{"metadata":{"anno
 
 #### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 Istio contains two types of logs. Envoy access logs that are collected with the [Envoy integration][11] and [Istio logs][12].
 
 _Available for Agent versions >6.0_
@@ -141,6 +147,45 @@ You can use the Openmetrics V2 implementation of the Istio integration to resolv
 Note: you must upgrade to at minimum Agent `7.31.0` and Python 3. See the [Configuration](#configuration) section on enabling Openmetrics V2.
 
 
+### Using the generic Openmetrics Integration in an Istio deployment
+
+If Istio proxy sidecar injection is enabled, monitoring other Prometheus metrics via the [Openmetrics integration][21] with the same metrics endpoint as `istio_mesh_endpoint` can result in high custom metrics usage and duplicated metric collection.
+
+To ensure that your Openmetrics configuration does not redundantly collect metrics, either:
+
+1. Use specific metric matching in the `metrics` configuration option, or
+2. If using the wildcard `*` value for `metrics`, consider using the following Openmetrics integration options to exclude metrics already supported by the Istio and Envoy integrations.
+
+#### Openmetrics V2 configuration with generic metric collection
+
+Be sure to exclude Istio and Envoy metrics from your configuration to avoid high custom metrics billing. Use `exclude_metrics` if using the Openmetrics V2 configuration (`openmetrics_endpoint` enabled).
+ 
+```yaml
+## Every instance is scheduled independent of the others.
+#
+instances:
+  - openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
+    metrics: [*]
+    exclude_metrics:
+      - istio_*
+      - envoy_*
+
+```
+
+#### Openmetrics V1 configuration (Legacy) with generic metric collection
+
+Be sure to exclude Istio and Envoy metrics from your configuration to avoid high custom metrics billing. Use `ignore_metrics` if using the Openmetrics V1 configuration (`prometheus_url` enabled).
+
+```yaml
+instances:
+  - prometheus_url: <PROMETHEUS_URL>
+    metrics:
+      - *
+    ignore_metrics:
+      - istio_*
+      - envoy_*
+```
+
 Need help? Contact [Datadog support][17].
 
 ## Further Reading
@@ -170,4 +215,5 @@ Additional helpful documentation, links, and articles:
 [17]: https://docs.datadoghq.com/help/
 [18]: https://www.datadoghq.com/blog/monitor-istio-with-datadog
 [19]: https://www.datadoghq.com/blog/istio-metrics/
-[20]: https://github.com/DataDog/integrations-core/blob/7.32.x/istio/datadog_checks/istio/data/conf.yaml.example
+[20]: https://docs.datadoghq.com/integrations/openmetrics/
+[21]: https://github.com/DataDog/integrations-core/blob/7.32.x/istio/datadog_checks/istio/data/conf.yaml.example

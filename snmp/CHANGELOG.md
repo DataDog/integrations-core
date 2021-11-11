@@ -1,6 +1,6 @@
 # CHANGELOG - snmp
 
-## 5.4.2 / 2021-10-07
+## 5.4.2 / 2021-10-07 / Agent 7.32.0
 
 * [Fixed] Hide collect_device_metadata by default. See [#10349](https://github.com/DataDog/integrations-core/pull/10349).
 
