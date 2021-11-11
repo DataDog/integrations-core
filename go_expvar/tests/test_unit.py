@@ -239,4 +239,4 @@ def test_warn_path_mapping(go_expvar_mock, caplog, check, aggregator):
     }
     check.check(mock_config)
 
-    assert 'Path cannot be a mapping or array; specify a more specific path to report a value' in caplog.text
+    assert 'Path array cannot be a mapping or array; specify a more specific path to report a value' in caplog.text
