@@ -179,7 +179,7 @@ class GoExpvar(AgentCheck):
                             )
                         else:
                             self.log.warning(
-                                "Path %s is a mapping; specify a more specific path to report a value", actual_path
+                                "Path cannot be a mapping or array ; specify a more specific path to report a value", actual_path
                             )
                     else:
                         self.log.warning("Unreportable value for path %s: %s", actual_path, value)
