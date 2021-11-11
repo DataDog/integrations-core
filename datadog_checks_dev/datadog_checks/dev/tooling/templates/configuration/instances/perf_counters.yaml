@@ -22,7 +22,7 @@
     type: boolean
 - name: server_tag
   description: |
-    The name used for tagging `server`.
+    The name used for tagging `server`. The value defined here will replace the `server:` tag key.
   value:
     type: string
 - name: namespace  # Only shown for the `windows_performance_counters` provider integration

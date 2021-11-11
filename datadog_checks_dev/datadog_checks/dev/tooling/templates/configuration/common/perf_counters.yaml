@@ -19,7 +19,7 @@
       name (required): This becomes the prefix of all metrics submitted for each counter.
       counters (required): This is the list of counters to collect.
       tag_name: This is the name of the tag used for instances. For example, if the tag name for
-                the `LogicalDisk` performance object is `disk`, a possible tag would be `disk:C:`.
+                the `LogicalDisk` performance object is `disk`, a possible tag would be `disk:C`.
                 If not set, the default tag name is `instance`.
       include: This is the list of regular expressions used to select which instances to monitor.
                If not set, all instances are monitored.
