@@ -365,7 +365,6 @@ class ZookeeperCheck(AgentCheck):
 
         metrics = []
         mode = 'inactive'
-
         for line in buf:
             try:
                 tags = []
@@ -376,8 +375,8 @@ class ZookeeperCheck(AgentCheck):
                 else:
                     try:
                         key, value = line.split()
-                    except Exception as e:
-                        self.log.debug("Unexpected 'mntr' output: %s - Error:%s", line, str(e))
+                    except ValueError as e:
+                        self.log.debug("Unexpected 'mntr' output `%s`: %s", line, str(e))
                         continue
 
                 if key == "zk_server_state":

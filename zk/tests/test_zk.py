@@ -78,20 +78,15 @@ def test_error_state(aggregator, dd_environment, get_conn_failure_config):
     aggregator.assert_metric(mname, value=1, count=1, tags=["mytag"])
 
 
-def test_parse_replica_mntr(aggregator, mock_mntr_output, get_test_instance, caplog):
-    def mntr_side_effect(command):
-        if command == "mntr":
-            return mock_mntr_output
-
-    expected_message = "Unexpected 'mntr' output"
+def test_parse_replica_mntr(aggregator, mock_mntr_output, get_test_instance):
+    unparsed_line = "zk_peer_state	following - broadcast\n"
+    expected_message = "Unexpected 'mntr' output `%s`: %s"
     check = ZookeeperCheck(conftest.CHECK_NAME, {}, [get_test_instance])
-    check._send_command = mock.MagicMock(side_effect=mntr_side_effect)
-
-    caplog.clear()
-    caplog.set_level(logging.WARNING)
-
-    assert expected_message not in caplog.text
-
+    check.log = mock.MagicMock()
+    metrics, mode = check.parse_mntr(mock_mntr_output)
+    assert mode == 'follower'
+    assert len(metrics) == 499
+    check.log.debug.assert_called_once_with(expected_message, unparsed_line, 'too many values to unpack (expected 2)')
     aggregator.assert_all_metrics_covered()
 
 

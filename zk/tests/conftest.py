@@ -6,7 +6,6 @@ import sys
 import time
 from copy import deepcopy
 
-import mock
 import pytest
 from six import StringIO
 
@@ -162,13 +161,10 @@ def dd_environment(get_instance):
 
 @pytest.fixture()
 def mock_mntr_output():
-
     buffer = StringIO()
     f_name = os.path.join(HERE, 'fixtures', 'mntr_metrics')
     with open(f_name) as f:
         data = f.read()
         buffer.write(data)
-        buffer.seek(0)
 
-    with mock.patch('datadog_checks.zk.zk.ZookeeperCheck._send_command', return_value=(data)):
-        yield
+    yield buffer
