@@ -196,7 +196,7 @@ class PerfCountersBaseCheckWithLegacySupport(PerfCountersBaseCheck):
                     new_config['name'] = '{}.{}'.format(self.__NAMESPACE__, new_config['name'])
                     metrics_config[object_name] = new_config
 
-            # Already did this
+            # Ensure idempotency in case this method is called multiple times due to configuration errors
             if self.namespace:
                 self.SERVICE_CHECK_HEALTH = '{}.{}'.format(self.__NAMESPACE__, self.SERVICE_CHECK_HEALTH)
 

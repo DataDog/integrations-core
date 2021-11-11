@@ -55,7 +55,8 @@
 
     The available counter options are:
 
-      type: This represents how the metric is handled, defaulting to `gauge`.
+      type: This represents how the metric is handled, defaulting to `gauge`. The available types are:
+            gauge, rate, count, monotonic_count, service_check, temporal_percent, time_elapsed
       average: When there are multiple values for the same instance name (e.g. multiple processes
                spawned with the same name) the check submits the sum. Setting this option to `true`
                instructs the check to calculate the average instead.
