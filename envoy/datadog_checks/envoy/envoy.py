@@ -6,6 +6,7 @@ from collections import defaultdict
 
 import requests
 from six.moves.urllib.parse import urljoin
+from six import PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
@@ -16,8 +17,29 @@ LEGACY_VERSION_RE = re.compile(r'/(\d\.\d\.\d)/')
 
 
 class Envoy(AgentCheck):
+    """
+    This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
+    """
+
     HTTP_CONFIG_REMAPPER = {'verify_ssl': {'name': 'tls_verify'}}
     SERVICE_CHECK_NAME = 'envoy.can_connect'
+
+    def __new__(cls, name, init_config, instances):
+        instance = instances[0]
+
+        if 'openmetrics_endpoint' in instance:
+            if PY2:
+                raise ConfigurationError(
+                    "This version of the integration is only available when using py3. "
+                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
+                    "for more information or use the older style config."
+                )
+            # TODO: when we drop Python 2 move this import up top
+            from .check import EnvoyCheck
+
+            return EnvoyCheck(name, init_config, instances)
+        else:
+            return super(Envoy, cls).__new__(cls)
 
     def __init__(self, name, init_config, instances):
         super(Envoy, self).__init__(name, init_config, instances)
