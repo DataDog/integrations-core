@@ -306,3 +306,6 @@ transactions__success_bytes{domain="https://1-13-1-app.agent.datadoghq.com",endp
 transactions__success_bytes{domain="https://1-13-1-app.agent.datadoghq.com",endpoint="intake"} 5867
 transactions__success_bytes{domain="https://1-13-1-app.agent.datadoghq.com",endpoint="series_v1"} 849
 transactions__success_bytes{domain="https://orchestrator.datadoghq.com",endpoint="orchestrator"} 22668
+# HELP secret_backend__elapsed_ms Elapsed time of secret backend invocation
+# TYPE secret_backend__elapsed_ms gauge
+secret_backend__elapsed_ms{command="/usr/local/bin/secrets",exit_code="0"} 156
