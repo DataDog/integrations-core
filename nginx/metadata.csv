@@ -148,7 +148,7 @@ nginx.stream.upstream.peers.weight,gauge,,,,Weight of the server.,0,nginx,stream
 nginx.stream.upstream.zombies,gauge,,host,,The current number of servers removed from the group but still processing active client connections.,0,nginx,stream upstr zombies
 nginx.timestamp,gauge,,millisecond,,Current time since Epoch.,0,nginx,timestamp
 nginx.upstream.keepalive,gauge,,connection,,The current number of idle keepalive connections.,0,nginx,upstr keepalive
-nginx.upstream.zombies,gauge,,server,,The current number of servers removed from the group but still processing active client connections.,0,nginx,upstr zombies
+nginx.upstream.zombies,gauge,,host,,The current number of servers removed from the group but still processing active client connections.,0,nginx,upstr zombies
 nginx.upstream.peers.active,gauge,,connection,,The current number of active connections.,0,nginx,upstr peers active
 nginx.upstream.peers.backup,gauge,,,,A boolean value indicating whether the server is a backup server.,0,nginx,upstr peers backup
 nginx.upstream.peers.downstart,gauge,,millisecond,,The time (since Epoch) when the server became "unavail" or "unhealthy".,0,nginx,upstr peers downstart
