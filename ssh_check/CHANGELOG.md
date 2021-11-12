@@ -1,5 +1,10 @@
 # CHANGELOG - ssh_check
 
+## 2.1.0 / 2021-10-04 / Agent 7.32.0
+
+* [Added] Update dependencies. See [#10258](https://github.com/DataDog/integrations-core/pull/10258).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
 ## 2.0.0 / 2021-08-22 / Agent 7.31.0
 
 * [Fixed] Fix typos in log lines. See [#9907](https://github.com/DataDog/integrations-core/pull/9907).

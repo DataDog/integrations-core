@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:php_fpm"
-      ]
+      "query_filter": "integration:php_fpm",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

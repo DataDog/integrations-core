@@ -20,8 +20,8 @@ from .common import (
     INSTANCE_AO_DOCKER_SECONDARY,
     INSTANCE_DOCKER,
     INSTANCE_E2E,
-    INSTANCE_SQL2017,
-    INSTANCE_SQL2017_DEFAULTS,
+    INSTANCE_SQL,
+    INSTANCE_SQL_DEFAULTS,
     get_local_driver,
 )
 
@@ -47,18 +47,51 @@ def init_config_alt_tables():
 
 
 @pytest.fixture
-def instance_sql2017_defaults():
-    return deepcopy(INSTANCE_SQL2017_DEFAULTS)
+def instance_sql_defaults():
+    return deepcopy(INSTANCE_SQL_DEFAULTS)
 
 
 @pytest.fixture
-def instance_sql2017():
-    return deepcopy(INSTANCE_SQL2017)
+def instance_sql():
+    return deepcopy(INSTANCE_SQL)
 
 
 @pytest.fixture
 def instance_docker():
     return deepcopy(INSTANCE_DOCKER)
+
+
+@pytest.fixture
+def datadog_conn_docker(instance_docker):
+    # Make DB connection
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
+        instance_docker['driver'], instance_docker['host'], instance_docker['username'], instance_docker['password']
+    )
+    conn = pyodbc.connect(conn_str, timeout=30)
+    yield conn
+    conn.close()
+
+
+@pytest.fixture
+def bob_conn(instance_docker):
+    # Make DB connection
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
+        instance_docker['driver'], instance_docker['host'], "bob", "hey-there-bob123"
+    )
+    conn = pyodbc.connect(conn_str, timeout=30)
+    yield conn
+    conn.close()
+
+
+@pytest.fixture
+def sa_conn(instance_docker):
+    # system administrator connection
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
+        instance_docker['driver'], instance_docker['host'], "sa", "Password123"
+    )
+    conn = pyodbc.connect(conn_str, timeout=30)
+    yield conn
+    conn.close()
 
 
 @pytest.fixture
@@ -133,9 +166,5 @@ def dd_environment():
             )
         ]
 
-    with docker_run(
-        compose_file=compose_file,
-        conditions=conditions,
-        mount_logs=True,
-    ):
+    with docker_run(compose_file=compose_file, conditions=conditions, mount_logs=True, build=True, attempts=2):
         yield FULL_E2E_CONFIG

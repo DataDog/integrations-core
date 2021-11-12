@@ -79,6 +79,28 @@ def kafka_instance():
     }
 
 
+# Dummy TLS certs
+CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
+cert = os.path.join(CERTIFICATE_DIR, 'cert.cert')
+private_key = os.path.join(CERTIFICATE_DIR, 'server.pem')
+
+
+@pytest.fixture(scope='session')
+def kafka_instance_tls():
+    return {
+        'kafka_connect_str': KAFKA_CONNECT_STR,
+        'kafka_consumer_offsets': True,
+        'tags': ['optional:tag1'],
+        'consumer_groups': {'my_consumer': {'marvel': [0]}},
+        'broker_requests_batch_size': 1,
+        'use_tls': True,
+        'tls_validate_hostname': True,
+        'tls_cert': cert,
+        'tls_private_key': private_key,
+        'tls_ca_cert': CERTIFICATE_DIR,
+    }
+
+
 @pytest.fixture(scope='session')
 def e2e_instance(kafka_instance, zk_instance):
     flavor = os.environ.get('KAFKA_OFFSETS_STORAGE')

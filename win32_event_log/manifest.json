@@ -1,7 +1,8 @@
 {
   "aliases": [
     "/integrations/event_viewer/",
-    "/integrations/eventviewer/"
+    "/integrations/eventviewer/",
+    "/integrations/faq/how-to-monitor-events-from-the-windows-event-logs/"
   ],
   "categories": [
     "os & system",
@@ -30,7 +31,9 @@
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "windows.events"
+    },
     "metrics_metadata": "metadata.csv"
   }
 }

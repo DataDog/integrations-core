@@ -24,6 +24,10 @@ def instance_empty_default_hostname(field, value):
     return False
 
 
+def instance_hostname(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_job_query_timeout(field, value):
     return 240
 

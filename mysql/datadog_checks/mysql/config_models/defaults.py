@@ -12,6 +12,14 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_additional_status(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_additional_variable(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_charset(field, value):
     return get_default_field_value(field, value)
 
@@ -54,6 +62,10 @@ def instance_min_collection_interval(field, value):
 
 def instance_obfuscator_options(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_only_custom_queries(field, value):
+    return False
 
 
 def instance_options(field, value):

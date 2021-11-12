@@ -1,5 +1,18 @@
 # CHANGELOG - SAP HANA
 
+## 1.8.2 / 2021-10-15 / Agent 7.32.0
+
+* [Fixed] Ensure `persist_db_connections` is read from init_config. See [#10417](https://github.com/DataDog/integrations-core/pull/10417).
+* [Fixed] Bump base package requirements. See [#10390](https://github.com/DataDog/integrations-core/pull/10390).
+
+## 1.8.1 / 2021-10-12
+
+* [Fixed] Bump base package requirements. See [#10390](https://github.com/DataDog/integrations-core/pull/10390).
+
+## 1.8.0 / 2021-10-04
+
+* [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
+
 ## 1.7.0 / 2021-09-20
 
 * [Added] Add option to disable persistent database connections. See [#10023](https://github.com/DataDog/integrations-core/pull/10023).

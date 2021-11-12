@@ -41,6 +41,7 @@ class DockerInterface(object):
         metadata=None,
         agent_build=None,
         api_key=None,
+        dd_site=None,
         dd_url=None,
         log_url=None,
         python_version=DEFAULT_PYTHON_VERSION,
@@ -55,6 +56,7 @@ class DockerInterface(object):
         self.metadata = metadata or {}
         self.agent_build = agent_build
         self.api_key = api_key or FAKE_API_KEY
+        self.dd_site = dd_site
         self.dd_url = dd_url
         self.log_url = log_url
         self.python_version = python_version or DEFAULT_PYTHON_VERSION
@@ -301,6 +303,8 @@ class DockerInterface(object):
             # TODO: Remove PYTHONDONTWRITEBYTECODE env var when Python 2 support is removed
             'PYTHONDONTWRITEBYTECODE': "1",
         }
+        if self.dd_site:
+            env_vars['DD_SITE'] = self.dd_site
         if self.dd_url:
             # Set custom agent intake
             env_vars['DD_DD_URL'] = self.dd_url

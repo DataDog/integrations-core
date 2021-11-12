@@ -16,6 +16,10 @@ def instance_collect_activity_metrics(field, value):
     return False
 
 
+def instance_collect_bloat_metrics(field, value):
+    return False
+
+
 def instance_collect_count_metrics(field, value):
     return True
 
@@ -117,6 +121,22 @@ def instance_service(field, value):
 
 
 def instance_ssl(field, value):
+    return False
+
+
+def instance_ssl_cert(field, value):
+    return False
+
+
+def instance_ssl_key(field, value):
+    return False
+
+
+def instance_ssl_password(field, value):
+    return False
+
+
+def instance_ssl_root_cert(field, value):
     return False
 
 

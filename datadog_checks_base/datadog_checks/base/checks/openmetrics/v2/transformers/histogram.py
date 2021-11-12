@@ -21,7 +21,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                 count_metric = f'{metric_name}.count'
 
                 def histogram(metric, sample_data, runtime_data):
-                    has_successfully_executed = runtime_data['has_successfully_executed']
+                    flush_first_value = runtime_data['flush_first_value']
 
                     for sample, tags, hostname in decumulate_histogram_buckets(sample_data):
                         sample_name = sample.name
@@ -31,7 +31,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                                 sample.value,
                                 tags=tags,
                                 hostname=hostname,
-                                flush_first_value=has_successfully_executed,
+                                flush_first_value=flush_first_value,
                             )
                         elif sample_name.endswith('_count'):
                             monotonic_count_method(
@@ -39,7 +39,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                                 sample.value,
                                 tags=tags,
                                 hostname=hostname,
-                                flush_first_value=has_successfully_executed,
+                                flush_first_value=flush_first_value,
                             )
                         elif sample_name.endswith('_bucket'):
                             lower_bound = canonicalize_numeric_label(sample.labels['lower_bound'])
@@ -60,13 +60,13 @@ def get_histogram(check, metric_name, modifiers, global_options):
                                 True,
                                 hostname,
                                 tags,
-                                flush_first_value=has_successfully_executed,
+                                flush_first_value=flush_first_value,
                             )
 
             else:
 
                 def histogram(metric, sample_data, runtime_data):
-                    has_successfully_executed = runtime_data['has_successfully_executed']
+                    flush_first_value = runtime_data['flush_first_value']
 
                     for sample, tags, hostname in decumulate_histogram_buckets(sample_data):
                         if not sample.name.endswith('_bucket'):
@@ -90,7 +90,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                             True,
                             hostname,
                             tags,
-                            flush_first_value=has_successfully_executed,
+                            flush_first_value=flush_first_value,
                         )
 
         else:
@@ -102,7 +102,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
             if global_options['non_cumulative_histogram_buckets']:
 
                 def histogram(metric, sample_data, runtime_data):
-                    has_successfully_executed = runtime_data['has_successfully_executed']
+                    flush_first_value = runtime_data['flush_first_value']
 
                     for sample, tags, hostname in decumulate_histogram_buckets(sample_data):
                         sample_name = sample.name
@@ -112,7 +112,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                                 sample.value,
                                 tags=tags,
                                 hostname=hostname,
-                                flush_first_value=has_successfully_executed,
+                                flush_first_value=flush_first_value,
                             )
                         elif sample_name.endswith('_count'):
                             monotonic_count_method(
@@ -120,7 +120,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                                 sample.value,
                                 tags=tags,
                                 hostname=hostname,
-                                flush_first_value=has_successfully_executed,
+                                flush_first_value=flush_first_value,
                             )
                         # Skip infinity upper bound as that is otherwise the
                         # same context as the sample suffixed by `_count`
@@ -130,14 +130,14 @@ def get_histogram(check, metric_name, modifiers, global_options):
                                 sample.value,
                                 tags=tags,
                                 hostname=hostname,
-                                flush_first_value=has_successfully_executed,
+                                flush_first_value=flush_first_value,
                             )
 
             # Default behavior
             else:
 
                 def histogram(metric, sample_data, runtime_data):
-                    has_successfully_executed = runtime_data['has_successfully_executed']
+                    flush_first_value = runtime_data['flush_first_value']
 
                     for sample, tags, hostname in sample_data:
                         sample_name = sample.name
@@ -147,7 +147,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                                 sample.value,
                                 tags=tags,
                                 hostname=hostname,
-                                flush_first_value=has_successfully_executed,
+                                flush_first_value=flush_first_value,
                             )
                         elif sample_name.endswith('_count'):
                             monotonic_count_method(
@@ -155,7 +155,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                                 sample.value,
                                 tags=tags,
                                 hostname=hostname,
-                                flush_first_value=has_successfully_executed,
+                                flush_first_value=flush_first_value,
                             )
                         # Skip infinity upper bound as that is otherwise the
                         # same context as the sample suffixed by `_count`
@@ -165,7 +165,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                                 sample.value,
                                 tags=tags,
                                 hostname=hostname,
-                                flush_first_value=has_successfully_executed,
+                                flush_first_value=flush_first_value,
                             )
 
     else:
@@ -174,7 +174,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
         count_metric = f'{metric_name}.count'
 
         def histogram(metric, sample_data, runtime_data):
-            has_successfully_executed = runtime_data['has_successfully_executed']
+            flush_first_value = runtime_data['flush_first_value']
 
             for sample, tags, hostname in sample_data:
                 sample_name = sample.name
@@ -184,7 +184,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                         sample.value,
                         tags=tags,
                         hostname=hostname,
-                        flush_first_value=has_successfully_executed,
+                        flush_first_value=flush_first_value,
                     )
                 elif sample_name.endswith('_count'):
                     monotonic_count_method(
@@ -192,7 +192,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                         sample.value,
                         tags=tags,
                         hostname=hostname,
-                        flush_first_value=has_successfully_executed,
+                        flush_first_value=flush_first_value,
                     )
 
     del check

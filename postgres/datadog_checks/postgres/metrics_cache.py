@@ -17,6 +17,7 @@ from .util import (
     COMMON_METRICS,
     COUNT_METRICS,
     DATABASE_SIZE_METRICS,
+    DBM_MIGRATED_METRICS,
     NEWER_91_BGW_METRICS,
     NEWER_92_BGW_METRICS,
     NEWER_92_METRICS,
@@ -31,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 class PostgresMetricsCache:
-    """ Maintains a cache of metrics to collect """
+    """Maintains a cache of metrics to collect"""
 
     def __init__(self, config):
         self.config = config
@@ -65,11 +66,15 @@ class PostgresMetricsCache:
         """
         metrics = self.instance_metrics
         if metrics is None:
+            # if DBM enabled, do not collect postgresql.connections metric in the main check
+            c_metrics = COMMON_METRICS
+            if not self.config.dbm_enabled:
+                c_metrics = dict(c_metrics, **DBM_MIGRATED_METRICS)
             # select the right set of metrics to collect depending on postgres version
             if version >= V9_2:
-                self.instance_metrics = dict(COMMON_METRICS, **NEWER_92_METRICS)
+                self.instance_metrics = dict(c_metrics, **NEWER_92_METRICS)
             else:
-                self.instance_metrics = dict(COMMON_METRICS)
+                self.instance_metrics = dict(c_metrics)
 
             # add size metrics if needed
             if self.config.collect_database_size_metrics:

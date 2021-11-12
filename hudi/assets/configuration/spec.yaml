@@ -1,0 +1,19 @@
+name: Hudi
+files:
+- name: hudi.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/jmx
+  - template: instances
+    options:
+    - template: instances/jmx
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/hudi.log
+      source: hudi
+      log_processing_rules:
+        - type: multi_line
+          pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+          name: new_log_start_with_date
