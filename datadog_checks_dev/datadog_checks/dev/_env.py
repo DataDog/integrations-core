@@ -21,6 +21,8 @@ E2E_TEAR_DOWN = '{}_DOWN'.format(E2E_PREFIX)
 E2E_PARENT_PYTHON = '{}_PYTHON_PATH'.format(E2E_PREFIX)
 AGENT_COLLECTOR_SEPARATOR = '=== JSON ==='
 
+
+
 E2E_FIXTURE_NAME = 'dd_environment'
 TESTING_PLUGIN = 'DDEV_TESTING_PLUGIN'
 SKIP_ENVIRONMENT = 'DDEV_SKIP_ENV'
@@ -134,6 +136,14 @@ def replay_check_run(agent_collector, stub_aggregator, stub_agent):
                     data['host'],
                     data.get('device'),
                 )
+
+        for data in aggregator.get('network-devices-metadata', []):
+            stub_aggregator.submit_network_devices_metadata_e2e(
+                check_name,
+                check_id,
+                data['UnmarshalledEvent'],
+                data['EventType'],
+            )
 
         for data in aggregator.get('service_checks', []):
             stub_aggregator.submit_service_check(
