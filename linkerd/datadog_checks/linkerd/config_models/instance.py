@@ -97,7 +97,7 @@ class InstanceConfig(BaseModel):
     namespace: Optional[str] = Field(None, regex='\\w*')
     non_cumulative_histogram_buckets: Optional[bool]
     ntlm_domain: Optional[str]
-    openmetrics_endpoint: str
+    openmetrics_endpoint: Optional[str]
     password: Optional[str]
     persist_connections: Optional[bool]
     proxy: Optional[Proxy]

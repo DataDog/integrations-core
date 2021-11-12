@@ -9,4 +9,5 @@ files:
     options:
     - template: instances/openmetrics
       overrides:
+        openmetrics_endpoint.required: false
         openmetrics_endpoint.value.example: http://localhost:9990/admin/metrics/prometheus
