@@ -1,0 +1,22 @@
+{ 
+    "name": "Hudi logger overview",
+    "type": "logs",
+    "page": "analytics",
+    "query": "source:hudi",
+    "timerange": {
+      "interval_ms": 3600000
+    },
+    "visible_facets": ["source", "host", "service", "status", "@logger.name", "@error.kind"],
+    "options": {
+      "group_bys": [
+        { "facet": "@logger.name" }
+      ],
+      "aggregations": [
+        { "metric": "count", "type": "count" }
+      ],
+      "step_ms": "30000",
+      "limit": "50",
+      "widget": "timeseries"
+    }
+  }
+  

@@ -13,7 +13,6 @@ files:
       - template: instances
         options:
           - name: name
-            required: true
             description: |
                Name of your DNS check instance.
                To create multiple DNS checks, create multiple instances with unique names.

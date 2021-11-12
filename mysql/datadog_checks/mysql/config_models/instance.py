@@ -85,6 +85,8 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    additional_status: Optional[Sequence[Mapping[str, Any]]]
+    additional_variable: Optional[Sequence[Mapping[str, Any]]]
     charset: Optional[str]
     connect_timeout: Optional[float]
     custom_queries: Optional[Sequence[CustomQuery]]
@@ -96,6 +98,7 @@ class InstanceConfig(BaseModel):
     max_custom_queries: Optional[int]
     min_collection_interval: Optional[float]
     obfuscator_options: Optional[ObfuscatorOptions]
+    only_custom_queries: Optional[bool]
     options: Optional[Options]
     password: Optional[str]
     port: Optional[float]

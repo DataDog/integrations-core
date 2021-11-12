@@ -58,7 +58,7 @@ def dd_environment(e2e_instance):
         lambda: time.sleep(4),
         CreateSimpleUser(),
     ]
-    with docker_run(compose_file, conditions=conditions):
+    with docker_run(compose_file, conditions=conditions, attempts=2):
         yield e2e_instance
 
 

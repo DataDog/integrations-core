@@ -57,6 +57,12 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 _Available for Agent versions >6.0_
 
 1. To modify the default log file location either set the `RABBITMQ_LOGS` environment variable or add the following to your RabbitMQ configuration file (`/etc/rabbitmq/rabbitmq.conf`):
@@ -105,6 +111,12 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 
 ##### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 _Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][10].
@@ -136,7 +148,7 @@ If you require an increase in the number of exchanges, queues, or nodes, contact
 
 ### Service Checks
 
-See [service_checks.json][18] for a list of service checks provided by this integration.
+See [service_checks.json][14] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -146,13 +158,13 @@ Need help? Contact [Datadog support][13].
 
 Additional helpful documentation, links, and articles:
 
-- [Key metrics for RabbitMQ monitoring][14]
-- [Collecting metrics with RabbitMQ monitoring tools][15]
-- [Monitoring RabbitMQ performance with Datadog][16]
+- [Key metrics for RabbitMQ monitoring][15]
+- [Collecting metrics with RabbitMQ monitoring tools][16]
+- [Monitoring RabbitMQ performance with Datadog][17]
 
 ### FAQ
 
-- [Tagging RabbitMQ queues by tag family][17]
+- [Tagging RabbitMQ queues by tag family][18]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/rabbitmq/images/rabbitmq_dashboard.png
 [2]: https://www.rabbitmq.com
@@ -167,8 +179,8 @@ Additional helpful documentation, links, and articles:
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/metadata.csv
 [13]: https://docs.datadoghq.com/help/
-[14]: https://www.datadoghq.com/blog/rabbitmq-monitoring
-[15]: https://www.datadoghq.com/blog/rabbitmq-monitoring-tools
-[16]: https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog
-[17]: https://docs.datadoghq.com/integrations/faq/tagging-rabbitmq-queues-by-tag-family/
-[18]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/assets/service_checks.json
+[14]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/assets/service_checks.json
+[15]: https://www.datadoghq.com/blog/rabbitmq-monitoring
+[16]: https://www.datadoghq.com/blog/rabbitmq-monitoring-tools
+[17]: https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog
+[18]: https://docs.datadoghq.com/integrations/faq/tagging-rabbitmq-queues-by-tag-family/

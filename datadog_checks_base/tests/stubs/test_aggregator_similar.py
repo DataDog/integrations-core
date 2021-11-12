@@ -23,14 +23,14 @@ class TestSimilarAssertionMessages(object):
 
         expected_msg = '''
     Expected:
-        MetricStub(name='test.similar_metric', type=None, value=None, tags=None, hostname=None, device=None)
+        MetricStub(name='test.similar_metric', type=None, value=None, tags=None, hostname=None, device=None, flush_first_value=None)
 Similar submitted:
 Score   Most similar
-0.88    MetricStub(name='test.most_similar_metric', type=0, value=0.0, tags=[], hostname='', device=None)
-0.83    MetricStub(name='test.another_similar_metric', type=0, value=0.0, tags=[], hostname='', device=None)
-0.62    MetricStub(name='test.very_different_metric', type=0, value=0.0, tags=[], hostname='', device=None)
-0.42    MetricStub(name='test.very_very_different', type=0, value=0.0, tags=[], hostname='', device=None)
-    '''.strip()
+0.88    MetricStub(name='test.most_similar_metric', type=0, value=0.0, tags=[], hostname='', device=None, flush_first_value=False)
+0.83    MetricStub(name='test.another_similar_metric', type=0, value=0.0, tags=[], hostname='', device=None, flush_first_value=False)
+0.62    MetricStub(name='test.very_different_metric', type=0, value=0.0, tags=[], hostname='', device=None, flush_first_value=False)
+0.42    MetricStub(name='test.very_very_different', type=0, value=0.0, tags=[], hostname='', device=None, flush_first_value=False)
+    '''.strip()  # noqa: E501
         delta = difflib.ndiff([expected_msg], [actual_msg])
         assert expected_msg == actual_msg, delta
 

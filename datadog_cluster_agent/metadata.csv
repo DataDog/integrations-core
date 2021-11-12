@@ -23,8 +23,10 @@ datadog.cluster_agent.datadog.rate_limit_queries.remaining,gauge,,query,,Number 
 datadog.cluster_agent.datadog.rate_limit_queries.reset,gauge,,second,,Number of seconds before next reset applied to the Datadog API by endpoint,0,datadog_cluster_agent,rate limit queries reset
 datadog.cluster_agent.datadog.requests,count,,request,,Requests made to Datadog by status,0,datadog_cluster_agent,datadog requests
 datadog.cluster_agent.external_metrics,gauge,,,,Number of external metrics tagged,0,datadog_cluster_agent,external metrics
+datadog.cluster_agent.external_metrics.datadog_metrics,gauge,,,,"The label valid is true if the DatadogMetric CR is valid, false otherwise",0,datadog_cluster_agent,external metrics datadog metrics
 datadog.cluster_agent.external_metrics.delay_seconds,gauge,,second,,Freshness of the metric evaluated from querying Datadog,0,datadog_cluster_agent,external metrics delay
 datadog.cluster_agent.external_metrics.processed_value,gauge,,,,Value processed from querying Datadog by metric,0,datadog_cluster_agent,external metrics processed
+datadog.cluster_agent.secret_backend.elapsed,gauge,,millisecond,,The elapsed time of secret backend invocation,0,datadog_cluster_agent,secret backend elapsed time duration
 datadog.cluster_agent.go.goroutines,gauge,,,,Number of goroutines that currently exist,0,datadog_cluster_agent,go goroutines
 datadog.cluster_agent.go.memstats.alloc_bytes,gauge,,byte,,Number of bytes allocated and still in use,0,datadog_cluster_agent,go memstats alloc bytes
 datadog.cluster_agent.go.threads,gauge,,thread,,Number of OS threads created,0,datadog_cluster_agent,go threads

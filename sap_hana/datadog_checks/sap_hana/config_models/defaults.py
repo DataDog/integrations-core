@@ -20,6 +20,10 @@ def instance_batch_size(field, value):
     return 1000
 
 
+def instance_connection_properties(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 
@@ -34,6 +38,10 @@ def instance_empty_default_hostname(field, value):
 
 def instance_min_collection_interval(field, value):
     return 15
+
+
+def instance_only_custom_queries(field, value):
+    return False
 
 
 def instance_persist_db_connections(field, value):

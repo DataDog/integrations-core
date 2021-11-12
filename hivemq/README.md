@@ -36,6 +36,12 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
    ```yaml
@@ -68,6 +74,12 @@ To configure this check for an Agent running on a host:
 For containerized environments, see the [Autodiscovery with JMX][7] guide.
 
 ##### Log collection
+
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][8].
 
@@ -120,7 +132,7 @@ See [service_checks.json][11] for a list of service checks provided by this inte
 Need help? Contact [Datadog support][5].
 
 [1]: https://www.hivemq.com/hivemq/
-[2]: https://docs.datadoghq.com/agent/
+[2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/hivemq/datadog_checks/hivemq/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/integrations/java
 [5]: https://docs.datadoghq.com/help
