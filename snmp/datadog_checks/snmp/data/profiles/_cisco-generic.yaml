@@ -12,25 +12,25 @@ extends:
 # Cisco IOS Software, IOS-XE Software, Catalyst L3 Switch Software (CAT3K_CAA-UNIVERSALK9-M), Version 03.06.06E RELEASE SOFTWARE (fc1)
 # Technical Support: http://www.cisco.com/techsupport Copyright (c) 1986-2016 by Cisco Systems, Inc. Compiled Sat 17-Dec-
 
-metadata:
-  device:
-    tags:
-    - MIB: OLD-CISCO-CHASSIS-MIB
-      OID: 1.3.6.1.4.1.9.3.6.3.0
-      name: chassisId
-      tag: chassis_id
-    - MIB: LLDP-EXT-MED-MIB
-      OID: 1.0.8802.1.1.2.1.5.4795.1.2.4.0
-      name: lldpXMedLocSoftwareRev
-      tag: software_revision
-    - MIB: LLDP-EXT-MED-MIB
-      OID: 1.0.8802.1.1.2.1.5.4795.1.2.3.0
-      name: lldpXMedLocFirmwareRev
-      tag: firmware_revision
-    - MIB: LLDP-EXT-MED-MIB
-      OID: 1.0.8802.1.1.2.1.5.4795.1.2.2.0
-      name: lldpXMedLocHardwareRev
-      tag: hardware_revision
+#metadata:
+#  device:
+#    tags:
+#    - MIB: OLD-CISCO-CHASSIS-MIB
+#      OID: 1.3.6.1.4.1.9.3.6.3.0
+#      name: chassisId
+#      tag: chassis_id
+#    - MIB: LLDP-EXT-MED-MIB
+#      OID: 1.0.8802.1.1.2.1.5.4795.1.2.4.0
+#      name: lldpXMedLocSoftwareRev
+#      tag: software_revision
+#    - MIB: LLDP-EXT-MED-MIB
+#      OID: 1.0.8802.1.1.2.1.5.4795.1.2.3.0
+#      name: lldpXMedLocFirmwareRev
+#      tag: firmware_revision
+#    - MIB: LLDP-EXT-MED-MIB
+#      OID: 1.0.8802.1.1.2.1.5.4795.1.2.2.0
+#      name: lldpXMedLocHardwareRev
+#      tag: hardware_revision
 
 #metadata:
 #  device:

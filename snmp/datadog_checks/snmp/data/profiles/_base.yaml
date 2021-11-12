@@ -7,16 +7,16 @@ metric_tags:
 
 metadata:
   device:
-    name:
-      MIB: RFC1213-MIB # optional
-      OID: 1.3.6.1.2.1.1.5.0
-      name: sysName
-    description:
-      OID: 1.3.6.1.2.1.1.1.0
-      name: sysDescr
-    sys_object_id:
-      OID: 1.3.6.1.2.1.1.2.0
-      name: sysObjectID
-    location:
-      OID: 1.3.6.1.2.1.1.X.0
-      name: sysLocation
+    fields:
+      name:
+        symbol:
+          OID: 1.3.6.1.2.1.1.5.0
+          name: sysName
+      description:
+        symbol:
+          OID: 1.3.6.1.2.1.1.1.0
+          name: sysDescr
+      sys_object_id:
+        symbol:
+          OID: 1.3.6.1.2.1.1.2.0
+          name: sysObjectID
