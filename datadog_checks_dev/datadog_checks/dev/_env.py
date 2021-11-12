@@ -137,7 +137,8 @@ def replay_check_run(agent_collector, stub_aggregator, stub_agent):
                     data.get('device'),
                 )
 
-        for data in aggregator.get('network-devices-metadata', []):
+        network_devices_events = aggregator.get('network-devices-metadata') or []
+        for data in network_devices_events:
             stub_aggregator.submit_network_devices_metadata_e2e(
                 check_name,
                 check_id,
