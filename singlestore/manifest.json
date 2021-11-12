@@ -23,14 +23,18 @@
     "log collection"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "singlestore",
   "assets": {
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
     "dashboards": {},
-    "monitors": {},
+    "monitors": {
+      "[SingleStore] License expiration": "assets/monitors/license_expiration.json",
+      "[SingleStore] Read failures rate": "assets/monitors/read_failures.json",
+      "[SingleStore] Write failures rate": "assets/monitors/write_failures.json"
+    },
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
     "logs": {

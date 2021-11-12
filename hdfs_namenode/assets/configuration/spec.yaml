@@ -13,13 +13,13 @@ files:
                 The HDFS NameNode check retrieves metrics from the HDFS NameNode's JMX
                 interface via HTTP(S) (not a JMX remote connection). This check must be installed on
                 a HDFS NameNode. The HDFS NameNode JMX URI is composed of the NameNode's hostname and port.
-                
+
                 The hostname and port can be found in the hdfs-site.xml conf file under
                 the property dfs.namenode.http-address.
-                https://hadoop.apache.org/docs/r2.7.1/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml
+                https://hadoop.apache.org/docs/r3.1.3/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml
               required: true
               value:
-                example: http://localhost:50070
+                example: http://localhost:9870
                 type: string
             - template: instances/http
             - template: instances/default

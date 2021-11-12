@@ -1,5 +1,9 @@
 # CHANGELOG - activemq
 
+## 2.2.0 / 2021-10-04 / Agent 7.32.0
+
+* [Added] Add runtime configuration validation. See [#8879](https://github.com/DataDog/integrations-core/pull/8879).
+
 ## 2.1.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Enable `new_gc_metrics` JMX config option for new installations. See [#9501](https://github.com/DataDog/integrations-core/pull/9501).

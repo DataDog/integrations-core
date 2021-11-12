@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
+from sys import maxsize
+
+import pytest
 
 from datadog_checks.dev import get_docker_hostname
 
@@ -11,11 +14,22 @@ USER = 'datadog'
 PASSWORD = 'datadog'
 DB_NAME = 'datadog_test'
 POSTGRES_VERSION = os.environ.get('POSTGRES_VERSION', None)
+POSTGRES_IMAGE = "alpine"
+
+USING_LATEST = False
+
+if POSTGRES_VERSION is not None:
+    USING_LATEST = POSTGRES_VERSION.endswith('latest')
+    POSTGRES_IMAGE = POSTGRES_VERSION + "-alpine"
+
+if USING_LATEST is True:
+    POSTGRES_VERSION = str(maxsize)
+    POSTGRES_IMAGE = "alpine"
+
 SCHEMA_NAME = 'schemaname'
 
 COMMON_METRICS = [
     'postgresql.before_xid_wraparound',
-    'postgresql.connections',
     'postgresql.commits',
     'postgresql.rollbacks',
     'postgresql.disk_read',
@@ -29,6 +43,10 @@ COMMON_METRICS = [
     'postgresql.deadlocks',
     'postgresql.temp_bytes',
     'postgresql.temp_files',
+]
+
+DBM_MIGRATED_METRICS = [
+    'postgresql.connections',
 ]
 
 COMMON_BGW_METRICS = [
@@ -45,6 +63,8 @@ COMMON_BGW_METRICS = [
 ]
 
 COMMON_BGW_METRICS_PG_ABOVE_94 = ['postgresql.archiver.archived_count', 'postgresql.archiver.failed_count']
+
+requires_static_version = pytest.mark.skipif(USING_LATEST, reason='Version `latest` is ever-changing, skipping')
 
 
 def check_common_metrics(aggregator, expected_tags, count=1):

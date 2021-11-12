@@ -20,6 +20,11 @@ from ...utils.http import RequestsWrapper
 from .. import AgentCheck
 from ..libs.prometheus import text_fd_to_metric_families
 
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
 if PY3:
     long = int
 
@@ -47,6 +52,7 @@ class OpenMetricsScraperMixin(object):
     METRIC_TYPES = ['counter', 'gauge', 'summary', 'histogram']
 
     KUBERNETES_TOKEN_PATH = '/var/run/secrets/kubernetes.io/serviceaccount/token'
+    METRICS_WITH_COUNTERS = {"counter", "histogram", "summary"}
 
     def __init__(self, *args, **kwargs):
         # Initialize AgentCheck's base class
@@ -91,6 +97,9 @@ class OpenMetricsScraperMixin(object):
 
         # Retrieve potential default instance settings for the namespace
         default_instance = self.default_instances.get(namespace, {})
+
+        def _get_setting(name, default):
+            return instance.get(name, default_instance.get(name, default))
 
         # `metrics_mapper` is a dictionary where the keys are the metrics to capture
         # and the values are the corresponding metrics names to have in datadog.
@@ -244,9 +253,13 @@ class OpenMetricsScraperMixin(object):
         # Rename bucket "le" label to "upper_bound"
         config['labels_mapper']['le'] = 'upper_bound'
 
-        # `exclude_labels` is an array of labels names to exclude. Those labels
+        # `exclude_labels` is an array of label names to exclude. Those labels
         # will just not be added as tags when submitting the metric.
         config['exclude_labels'] = default_instance.get('exclude_labels', []) + instance.get('exclude_labels', [])
+
+        # `include_labels` is an array of label names to include. If these labels are not in
+        # the `exclude_labels` list, then they are added as tags when submitting the metric.
+        config['include_labels'] = default_instance.get('include_labels', []) + instance.get('include_labels', [])
 
         # `type_overrides` is a dictionary where the keys are prometheus metric names
         # and the values are a metric type (name as string) to use instead of the one
@@ -367,7 +380,11 @@ class OpenMetricsScraperMixin(object):
             config['_default_metric_transformers'][config['metadata_metric_name']] = self.transform_metadata
 
         # Whether or not to enable flushing of the first value of monotonic counts
-        config['_successfully_executed'] = False
+        config['_flush_first_value'] = False
+
+        # Whether to use process_start_time_seconds to decide if counter-like values should  be flushed
+        # on first scrape.
+        config['use_process_start_time'] = is_affirmative(_get_setting('use_process_start_time', False))
 
         return config
 
@@ -525,14 +542,38 @@ class OpenMetricsScraperMixin(object):
         Note that if the instance has a `tags` attribute, it will be pushed
         automatically as additional custom tags and added to the metrics
         """
+
         transformers = scraper_config['_default_metric_transformers'].copy()
         if metric_transformers:
             transformers.update(metric_transformers)
 
+        counter_buffer = []
+        agent_start_time = None
+        process_start_time = None
+        if not scraper_config['_flush_first_value'] and scraper_config['use_process_start_time']:
+            agent_start_time = datadog_agent.get_process_start_time()
+
         for metric in self.scrape_metrics(scraper_config):
+            if agent_start_time is not None:
+                if metric.name == 'process_start_time_seconds' and metric.samples:
+                    min_metric_value = min(s[self.SAMPLE_VALUE] for s in metric.samples)
+                    if process_start_time is None or min_metric_value < process_start_time:
+                        process_start_time = min_metric_value
+                if metric.type in self.METRICS_WITH_COUNTERS:
+                    counter_buffer.append(metric)
+                    continue
+
             self.process_metric(metric, scraper_config, metric_transformers=transformers)
 
-        scraper_config['_successfully_executed'] = True
+        if agent_start_time and process_start_time and agent_start_time < process_start_time:
+            # If agent was started before the process, we assume counters were started recently from zero,
+            # and thus we can compute the rates.
+            scraper_config['_flush_first_value'] = True
+
+        for metric in counter_buffer:
+            self.process_metric(metric, scraper_config, metric_transformers=transformers)
+
+        scraper_config['_flush_first_value'] = True
 
     def transform_metadata(self, metric, scraper_config):
         labels = metric.samples[0][self.SAMPLE_LABELS]
@@ -842,7 +883,7 @@ class OpenMetricsScraperMixin(object):
                         val,
                         tags=tags,
                         hostname=custom_hostname,
-                        flush_first_value=scraper_config['_successfully_executed'],
+                        flush_first_value=scraper_config['_flush_first_value'],
                     )
                 elif metric.type == "rate":
                     self.rate(metric_name_with_namespace, val, tags=tags, hostname=custom_hostname)
@@ -857,7 +898,7 @@ class OpenMetricsScraperMixin(object):
                             val,
                             tags=tags,
                             hostname=custom_hostname,
-                            flush_first_value=scraper_config['_successfully_executed'],
+                            flush_first_value=scraper_config['_flush_first_value'],
                         )
         elif metric.type == "histogram":
             self._submit_gauges_from_histogram(metric_name, metric, scraper_config)
@@ -903,7 +944,7 @@ class OpenMetricsScraperMixin(object):
                     val,
                     tags=tags,
                     hostname=custom_hostname,
-                    flush_first_value=scraper_config['_successfully_executed'],
+                    flush_first_value=scraper_config['_flush_first_value'],
                 )
             elif sample[self.SAMPLE_NAME].endswith("_count"):
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
@@ -914,7 +955,7 @@ class OpenMetricsScraperMixin(object):
                     val,
                     tags=tags,
                     hostname=custom_hostname,
-                    flush_first_value=scraper_config['_successfully_executed'],
+                    flush_first_value=scraper_config['_flush_first_value'],
                 )
             else:
                 try:
@@ -961,7 +1002,7 @@ class OpenMetricsScraperMixin(object):
                     val,
                     tags=tags,
                     hostname=custom_hostname,
-                    flush_first_value=scraper_config['_successfully_executed'],
+                    flush_first_value=scraper_config['_flush_first_value'],
                 )
             elif sample[self.SAMPLE_NAME].endswith("_count") and not scraper_config['send_distribution_buckets']:
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
@@ -974,7 +1015,7 @@ class OpenMetricsScraperMixin(object):
                     val,
                     tags=tags,
                     hostname=custom_hostname,
-                    flush_first_value=scraper_config['_successfully_executed'],
+                    flush_first_value=scraper_config['_flush_first_value'],
                 )
             elif scraper_config['send_histograms_buckets'] and sample[self.SAMPLE_NAME].endswith("_bucket"):
                 if scraper_config['send_distribution_buckets']:
@@ -989,7 +1030,7 @@ class OpenMetricsScraperMixin(object):
                         val,
                         tags=tags,
                         hostname=custom_hostname,
-                        flush_first_value=scraper_config['_successfully_executed'],
+                        flush_first_value=scraper_config['_flush_first_value'],
                     )
 
     def _compute_bucket_hash(self, tags):
@@ -1085,7 +1126,7 @@ class OpenMetricsScraperMixin(object):
             True,
             hostname,
             tags,
-            flush_first_value=scraper_config['_successfully_executed'],
+            flush_first_value=scraper_config['_flush_first_value'],
         )
 
     def _submit_distribution_count(
@@ -1113,8 +1154,9 @@ class OpenMetricsScraperMixin(object):
         _tags.extend(scraper_config['_metric_tags'])
         for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
             if label_name not in scraper_config['exclude_labels']:
-                tag_name = scraper_config['labels_mapper'].get(label_name, label_name)
-                _tags.append('{}:{}'.format(to_native_string(tag_name), to_native_string(label_value)))
+                if label_name in scraper_config['include_labels'] or len(scraper_config['include_labels']) == 0:
+                    tag_name = scraper_config['labels_mapper'].get(label_name, label_name)
+                    _tags.append('{}:{}'.format(to_native_string(tag_name), to_native_string(label_value)))
         return self._finalize_tags_to_submit(
             _tags, metric_name, val, sample, custom_tags=custom_tags, hostname=hostname
         )

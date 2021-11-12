@@ -127,6 +127,7 @@ def options_validator(options, loader, file_name, *sections):
     override_errors = []
 
     option_names_origin = {}
+    hide_template = False
     for option_index, option in enumerate(options, 1):
         if not isinstance(option, dict):
             loader.errors.append(
@@ -138,8 +139,9 @@ def options_validator(options, loader, file_name, *sections):
 
         templates_resolved = False
         while 'template' in option:
-            overrides.update(option.pop('overrides', {}))
+            hide_template = option.get('hidden', False)
 
+            overrides.update(option.pop('overrides', {}))
             try:
                 template = loader.templates.load(option.pop('template'))
             except Exception as e:
@@ -209,7 +211,7 @@ def options_validator(options, loader, file_name, *sections):
                 )
             )
 
-        option.setdefault('hidden', False)
+        option.setdefault('hidden', hide_template)
         if not isinstance(option['hidden'], bool):
             loader.errors.append(
                 '{}, {}, {}{}: Attribute `hidden` must be true or false'.format(

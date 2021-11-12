@@ -277,7 +277,7 @@ def assert_not_all_zeroes(aggregator, metric_name):
 
 
 def resourcequota_was_collected(aggregator):
-    """ The metric name is created dynamically so we just check some exist. """
+    """The metric name is created dynamically so we just check some exist."""
     for m in aggregator.metric_names:
         if '.resourcequota.' in m:
             return True

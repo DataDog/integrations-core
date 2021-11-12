@@ -47,7 +47,7 @@ def load_dependency_data(req_file, dependencies, errors, check_name=None):
         try:
             req = Requirement(line)
         except InvalidRequirement as e:
-            errors.append(f'File `{req_file}` has an invalid dependency: `{line}`\n{e}')
+            errors.append(f'File `{os.path.basename(req_file)}` has an invalid dependency: `{line}`\n{e}')
             continue
 
         name = req.name.lower().replace('_', '-')

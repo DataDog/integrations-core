@@ -47,7 +47,8 @@ files:
         example: master
     - name: database_autodiscovery
       description: |
-        Auto-discover and monitor databases.  If `true`, overrides `database` option.
+        Auto-discover and monitor databases. Supported for the metrics check. 
+        If `true`, overrides `database` option.
         Can be combined with `autodiscovery_include` and `autodiscovery_exclude` options.
       value:
         type: boolean
@@ -90,6 +91,16 @@ files:
       value:
         type: integer
         example: 3600
+    - name: autodiscovery_db_service_check
+      description: |
+        When enabled with database autodiscovery, attempts to connect to the list of
+        autodiscovered databases and submits a service check that signifies whether
+        the agent can connect to that database or not.
+      enabled: true
+      value:
+        type: boolean
+        example: false
+        display_default: true
     - name: include_ao_metrics
       description: |
         Include AlwaysOn availability group metrics.
@@ -195,6 +206,31 @@ files:
       value:
         type: string
         example: "<CONNECTION_STRING>"
+    - name: dbm
+      description: |
+        Set to `true` to enable Database Monitoring.
+        Reach out to your Customer Success Manager to request access to the beta.
+      value:
+        type: boolean
+        example: false
+        display_default: false
+    - name: query_metrics
+      description: Configure collection of query metrics
+      options:
+        - name: enabled
+          description: |
+            Enable collection of query metrics. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the query metric collection interval (in seconds). Each collection involves one or more queries to
+            the SQL Server Query Plan Cache. If a non-default value is chosen then that exact same value must be used
+            for *every* check instance. Running different instances with different collection intervals is not supported.
+          value:
+            type: number
+            example: 10
     - name: command_timeout
       description: Timeout in seconds for the connection and each command run
       value:
@@ -225,6 +261,12 @@ files:
         type: boolean
         example: false
     - template: instances/default
+      overrides:
+        disable_generic_tags.hidden: False
+        disable_generic_tags.enabled: True
+        disable_generic_tags.description: |
+            Generic tags such as `host` are replaced by `sqlserver_host` to avoid
+            getting mixed with other integraton tags.
 
   - template: logs
     example:

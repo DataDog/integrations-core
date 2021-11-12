@@ -33,6 +33,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     host: str
     min_collection_interval: Optional[float]
+    only_custom_queries: Optional[bool]
     password: Optional[str]
     port: Optional[int]
     read_timeout: Optional[int]

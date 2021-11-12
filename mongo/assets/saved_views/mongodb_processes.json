@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:mongo"
-      ]
+      "query_filter": "integration:mongo",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

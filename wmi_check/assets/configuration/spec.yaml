@@ -69,23 +69,66 @@ files:
         A list of filters on the WMI query you may want.
         Filters can be in one of these forms:
           [{<FILTER_PROPERTY>: <FILTER_VALUE>},...] or
-          [{FILTER_PROPERTY>: [<FILTER_OPERATOR>, <FILTER_VALUE>]},...]
+          [{<FILTER_PROPERTY>: [<WQL_OPERATOR>, <FILTER_VALUE>]},...]
+          [{<FILTER_PROPERTY>: [[<WQL_OPERATOR>, <FILTER_VALUE>],...]},...]
+          [{<FILTER_PROPERTY>: {<BOOL_OPERATOR>: [[<WQL_OPERATOR>, <FILTER_VALUE>]]},...}]
 
-        All metrics are filtered out if any given property:
-          1. Has one or more filter(s) applied to it, AND
-          2. None of its filters evaluate to 'True'
-
-        Providing just a <FILTER_VALUE> defaults to the '=' comparison operator.
+        Providing just a <FILTER_VALUE> defaults to the '=' WQL operator.
 
           * <FILTER_PROPERTY> the name of the filter, for example 'PercentProcessorTime'.
+          * <WQL_OPERATOR>: '=' (default), '<', '>', '<=', '>=', '!=', '<>', 'LIKE'
+          * <BOOL_OPERATOR>: OR (default), AND, NOR, NAND, NOT
+
+        Examples:
+            filters:
+              - PROP1: AA
+              - PROP2: BB%
+            result> WHERE ( PROP1 = 'AA' ) OR ( PROP2 LIKE 'BB%' )
+
+            filters:
+              - PROP1: AA
+                PROP2: BB%
+            result> WHERE ( PROP1 = 'AA' AND PROP2 LIKE 'BB%' )
+
+            filters:
+              - PROP1: 
+                  - AA
+                  - BB%
+            result> WHERE ( ( PROP1 = 'AA' OR PROP1 LIKE 'BB%' ) )
+
+            filters:
+              - PROP1: 
+                 NOT:
+                  - AA
+                  - BB%
+            result> WHERE ( NOT ( PROP1 = 'AA' OR PROP1 LIKE 'BB%' ) )
+
+            filters:
+              - PROP1: 
+                  AND:
+                    - ['!=', 'AA']
+                    - ['!=', 'BB']
+                  OR:
+                    - CC%
+            result> WHERE ( ( PROP1 != 'AA' AND PROP1 != 'BB' ) OR PROP1 LIKE 'CC%' )
+
+            filters:
+              - PROP1: 
+                  NAND:
+                    - 'AA%'
+                    - '%BB'
+            result> WHERE ( NOT ( PROP1 LIKE 'AA%' AND PROP1 LIKE '%BB' ) )
       value:
         type: array
         items:
           type: object
         compact_example: true
         example:
-          - {<FILTER_PROPERTY>: [<FILTER_OPERATOR>, <FILTER_VALUE>]}
           - {<FILTER_PROPERTY>: <FILTER_VALUE>}
+          - {<FILTER_PROPERTY>: [<FILTER_VALUE>]}
+          - {<FILTER_PROPERTY>: [<WQL_OPERATOR>, <FILTER_VALUE>]}
+          - {<FILTER_PROPERTY>: [[<WQL_OPERATOR>, <FILTER_VALUE>]]}
+          - {<FILTER_PROPERTY>: {<BOOL_OPERATOR>: [[<WQL_OPERATOR>, <FILTER_VALUE>]]}}
     - name: provider
       description: |
         The WMI provider.

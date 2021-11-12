@@ -33,7 +33,7 @@ files:
   - template: logs
     example:
     - type: file
-      path: /opt/couchbase/var/lib/couchbase/logs/*.log
+      path: /opt/couchbase/var/lib/couchbase/logs/couchdb.log
       source: couchbase
 
 - name: auto_conf.yaml

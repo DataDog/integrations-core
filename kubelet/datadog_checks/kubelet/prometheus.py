@@ -344,6 +344,11 @@ class CadvisorPrometheusScraperMixin(object):
 
         samples = self._sum_values_by_context(metric, self._get_pod_uid_if_pod_metric)
         for pod_uid, sample in iteritems(samples):
+            pod = get_pod_by_uid(pod_uid, self.pod_list)
+            namespace = pod.get('metadata', {}).get('namespace', None)
+            if self.pod_list_utils.is_namespace_excluded(namespace):
+                continue
+
             if '.network.' in metric_name and self._is_pod_host_networked(pod_uid):
                 continue
             tags = tagger.tag('kubernetes_pod_uid://%s' % pod_uid, tagger.HIGH)

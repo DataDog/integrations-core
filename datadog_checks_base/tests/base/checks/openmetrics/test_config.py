@@ -39,13 +39,6 @@ class TestNamespace:
         with pytest.raises(Exception, match='^Setting `namespace` must be a string$'):
             dd_run_check(check, extract_message=True)
 
-    def test_missing(self, dd_run_check):
-        check = get_check({'openmetrics_endpoint': 'test'})
-        check.__NAMESPACE__ = ''
-
-        with pytest.raises(Exception, match='^Setting `namespace` is required$'):
-            dd_run_check(check, extract_message=True)
-
 
 class TestRawMetricPrefix:
     def test_not_string(self, dd_run_check):
@@ -90,6 +83,20 @@ class TestExcludeLabels:
         check = get_check({'exclude_labels': [9000]})
 
         with pytest.raises(Exception, match='^Entry #1 of setting `exclude_labels` must be a string$'):
+            dd_run_check(check, extract_message=True)
+
+
+class TestIncludeLabels:
+    def test_inc_not_array(self, dd_run_check):
+        check = get_check({'include_labels': 9000})
+
+        with pytest.raises(Exception, match='^Setting `include_labels` must be an array$'):
+            dd_run_check(check, extract_message=True)
+
+    def test_inc_entry_invalid_type(self, dd_run_check):
+        check = get_check({'include_labels': [9000]})
+
+        with pytest.raises(Exception, match='^Entry #1 of setting `include_labels` must be a string$'):
             dd_run_check(check, extract_message=True)
 
 

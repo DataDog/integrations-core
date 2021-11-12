@@ -523,6 +523,11 @@ class TestServiceChecks:
         check.service_check("testservicecheckwithnonemessage", AgentCheck.OK, message=None)
         aggregator.assert_service_check("testservicecheckwithnonemessage", status=AgentCheck.OK)
 
+    def test_sc_no_ok_message(self, aggregator):
+        check = AgentCheck()
+        with pytest.raises(Exception):
+            check.service_check("testservicecheck", AgentCheck.OK, tags=None, message="No message allowed")
+
     def test_namespace(self, aggregator):
         check = AgentCheck()
         check.__NAMESPACE__ = 'test'
