@@ -90,11 +90,11 @@ metadata:
       #  	sysSystemUptime	SCALAR	read-only	TimeTicks	1.3.6.1.4.1.3375.2.1.6.6.0
 
     # TODO: Separate Topic
-    types:
-      - "type1"
-      - "type2"
-      - OID: 1.3.6.1.4.1.3375.2.1.6.2.0
-        name: sysSystemNodeName # The host name of the system on the network.
+#    types:
+#      - "type1"
+#      - "type2"
+#      - OID: 1.3.6.1.4.1.3375.2.1.6.2.0
+#        name: sysSystemNodeName # The host name of the system on the network.
     #  types:  # why not use tags ?
     #     - "router"
     # device level tags are from metric_tags (rename to tags)
