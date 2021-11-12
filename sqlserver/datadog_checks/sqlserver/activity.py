@@ -17,8 +17,12 @@ DEFAULT_COLLECTION_INTERVAL = 10
 MAX_PAYLOAD_BYTES = 19e6
 
 CONNECTIONS_QUERY = """\
-SELECT login_name AS user_name, COUNT(session_id) AS connections, status, DB_NAME(database_id) AS database_name
-    FROM sys.dm_exec_sessions
+SELECT
+    login_name AS user_name,
+    COUNT(session_id) AS connections,
+    status,
+    DB_NAME(database_id) AS database_name
+FROM sys.dm_exec_sessions
     WHERE is_user_process = 1
     GROUP BY login_name, status, DB_NAME(database_id)
 """
@@ -32,9 +36,13 @@ SELECT
     at.transaction_type,
     at.transaction_state,
     sess.login_name as user_name,
+    sess.session_id as id,
     DB_NAME(sess.database_id) as database_name,
     sess.status as session_status,
     text.text as text,
+    c.client_tcp_port as client_port,
+    c.client_net_address as client_address,
+    sess.host_name as host_name,
     r.*
 FROM sys.dm_tran_active_transactions at
     INNER JOIN sys.dm_tran_session_transactions st ON st.transaction_id = at.transaction_id
@@ -44,6 +52,7 @@ FROM sys.dm_tran_active_transactions at
     LEFT OUTER JOIN sys.dm_exec_requests r
         ON c.connection_id = r.connection_id
         CROSS APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) text
+    WHERE sess.session_id != @@spid
     {extra_query_args}
 """,
 ).strip()
@@ -56,10 +65,10 @@ dm_exec_requests_exclude_keys = {
     'page_resource',
     'scheduler_id',
     'context_info',
-    # removed in favor of the session_status
-    # which is the same value, but will present
-    # for open, idle transactions as well
+    # remove status in favor of session_status
     'status',
+    # remove session_id in favor of id
+    'session_id',
 }
 
 
@@ -89,7 +98,6 @@ class SqlserverActivity(DBMAsyncJob):
             job_name="query-activity",
             shutdown_callback=self._close_db_conn,
         )
-        self._activity_last_query_start = None
         self._conn_key_prefix = "dbm-activity-"
         self._activity_payload_max_bytes = MAX_PAYLOAD_BYTES
 
@@ -121,14 +129,9 @@ class SqlserverActivity(DBMAsyncJob):
         return rows
 
     def _get_extra_activity_query_args(self):
-        extra_query_args = ""
-        if self._activity_last_query_start:
-            # do not re-read old stale connections unless they're idle, open transactions
-            extra_query_args = (
-                " WHERE NOT (r.session_id is NULL AND DATEDIFF(second, at.transaction_begin_time, '{}') < {})".format(
-                    self._activity_last_query_start, self.collection_interval
-                )
-            )
+        extra_query_args = (
+            " AND NOT (sess.status = 'sleeping' AND DATEDIFF(second, at.transaction_begin_time, GETDATE()) < {})"
+        ).format(self.collection_interval)
         # order results by tx begin time to get longest running transactions first.
         extra_query_args = extra_query_args + " ORDER BY at.transaction_begin_time ASC"
         return extra_query_args
@@ -137,10 +140,6 @@ class SqlserverActivity(DBMAsyncJob):
         normalized_rows = []
         estimated_size = 0
         for row in rows:
-            # if the self._activity_last_query_start query filter has not been set yet,
-            # filter out all idle sessions so we don't collect them on the first loop iteration
-            if self._activity_last_query_start is None and row['session_status'] == "sleeping":
-                continue
             try:
                 obfuscated_statement = datadog_agent.obfuscate_sql(row['text'])
                 row['query_signature'] = compute_sql_signature(obfuscated_statement)
@@ -148,8 +147,6 @@ class SqlserverActivity(DBMAsyncJob):
                 # obfuscation errors are relatively common so only log them during debugging
                 self.log.debug("Failed to obfuscate query: %s", e)
                 obfuscated_statement = "ERROR: failed to obfuscate"
-            # set last seen activity
-            self._activity_last_query_start = self._set_last_activity(self._activity_last_query_start, row)
             row = self._sanitize_row(row, obfuscated_statement)
             estimated_size += self._get_estimated_row_size_bytes(row)
             if estimated_size > max_bytes_limit:
@@ -173,19 +170,6 @@ class SqlserverActivity(DBMAsyncJob):
     def _get_estimated_row_size_bytes(row):
         return len(str(row))
 
-    @staticmethod
-    def _set_last_activity(current_start, row):
-        if row['start_time'] is not None:
-            if current_start is None or row['start_time'] > current_start:
-                current_start = row['start_time']
-        else:
-            # if start_time isn't set, this is an idle transaction
-            # we can set current_start to the tx begin time
-            # to prevent it from being collected again on the next loop iteration
-            if current_start is None or row['transaction_begin_time'] > current_start:
-                current_start = row['transaction_begin_time']
-        return current_start
-
     def _create_activity_event(self, active_sessions, active_connections):
         event = {
             "host": self._db_hostname,
@@ -193,7 +177,7 @@ class SqlserverActivity(DBMAsyncJob):
             "ddsource": "sqlserver",
             "dbm_type": "activity",
             "collection_interval": self.collection_interval,
-            "ddtags": ",".join(self.check.tags),
+            "ddtags": self.check.tags,
             "timestamp": time.time() * 1000,
             "sqlserver_activity": active_sessions,
             "sqlserver_connections": active_connections,

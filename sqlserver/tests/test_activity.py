@@ -9,10 +9,9 @@ import pytest
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.sqlserver import SQLServer
-from datadog_checks.sqlserver.activity import dm_exec_requests_exclude_keys
 
 from .common import CHECK_NAME
-from .utils import not_windows_ci
+from .utils import not_windows_ci, windows_ci
 
 try:
     import pyodbc
@@ -39,57 +38,31 @@ def dbm_instance(instance_docker):
     return copy(instance_docker)
 
 
-@not_windows_ci
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_collect_activity(aggregator, dd_run_check, dbm_instance):
-    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    # run the check, which should only see the current
-    # session as active, and report that
-    dd_run_check(check)
-
-    expected_instance_tags = set(dbm_instance.get('tags', []))
-
-    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
-    assert len(dbm_activity) == 1, "should have collected exactly one dbm-activity payload"
-    only_active_event = dbm_activity[0]
-    # validate common host fields
-    assert only_active_event['host'] == "stubbed.hostname", "wrong hostname"
-    assert only_active_event['dbm_type'] == "activity", "wrong dbm_type"
-    assert only_active_event['ddsource'] == "sqlserver", "wrong source"
-    assert only_active_event['ddagentversion'], "missing ddagentversion"
-    assert set(only_active_event['ddtags'].split(',')) == expected_instance_tags, "wrong instance tags activity"
-    assert type(only_active_event['collection_interval']) in (float, int), "invalid collection_interval"
-
-    assert len(only_active_event['sqlserver_activity']) > 0
-    for row in only_active_event['sqlserver_activity']:
-        assert row['user_name'] == "datadog", "incorrect user_name"
-        assert row['database_name'] == "master", "incorrect database_name"
-        assert row['session_status'] != "sleeping", "incorrect session_status"
-        assert row['query_signature'], "missing query signature"
-        assert row['transaction_begin_time'], "missing tx begin time"
-        for val in dm_exec_requests_exclude_keys:
-            assert val not in row
-
-    assert len(only_active_event['sqlserver_connections']) > 0
-    dd_conn = None
-    for conn in only_active_event['sqlserver_connections']:
-        if conn['user_name'] == "datadog":
-            dd_conn = conn
-    assert dd_conn is not None
-    assert dd_conn['connections'] == 1
-
-    # internal debug metrics
-    aggregator.assert_metric(
-        "dd.sqlserver.activity.collect_activity.time",
-        tags=['agent_hostname:stubbed.hostname'] + _expected_dbm_instance_tags(dbm_instance),
-    )
+@pytest.fixture
+def instance_sql_msoledb_dbm(instance_sql_msoledb):
+    instance_sql_msoledb['dbm'] = True
+    instance_sql_msoledb['min_collection_interval'] = 1
+    instance_sql_msoledb['query_activity'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    # not needed for this test
+    instance_sql_msoledb['query_metrics'] = {'enabled': False}
+    instance_sql_msoledb['tags'] = ['optional:tag1']
+    return instance_sql_msoledb
 
 
 @not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_collect_idle_open_transactions(aggregator, instance_docker, dd_run_check, dbm_instance):
+def test_collect_activity(aggregator, instance_docker, dd_run_check, dbm_instance):
+    _run_test_collect_activity(aggregator, instance_docker, dd_run_check, dbm_instance)
+
+
+@windows_ci
+@pytest.mark.integration
+def test_collect_activity_windows(aggregator, instance_docker, dd_run_check, instance_sql_msoledb_dbm):
+    _run_test_collect_activity(aggregator, instance_docker, dd_run_check, instance_sql_msoledb_dbm)
+
+
+def _run_test_collect_activity(aggregator, instance_docker, dd_run_check, dbm_instance):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     query = "select * from things"
     bob_conn = _get_conn_for_user(instance_docker, "bob")
@@ -102,37 +75,65 @@ def test_collect_idle_open_transactions(aggregator, instance_docker, dd_run_chec
         cursor.execute("USE {}".format("datadog_test"))
         cursor.execute(query)
 
-    # run the check once first
-    # as idle sessions are skipped on first run
-    time.sleep(1)
+    time.sleep(2)  # wait for coll interval
     dd_run_check(check)
-    aggregator.reset()
-    time.sleep(1)  # wait for coll interval
-    dd_run_check(check)
-    fred_conn.commit()  # close the open tx that belongs to fred
-    time.sleep(1)  # wait for coll interval
+    fred_conn.close()  # close the open tx that belongs to fred
+    time.sleep(2)  # wait for coll interval
     dd_run_check(check)  # run check again
+    expected_instance_tags = set(dbm_instance.get('tags', []))
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert len(dbm_activity) == 2, "should have collected exactly two dbm-activity payloads"
     first = dbm_activity[0]
-    second = dbm_activity[1]
-    assert len(first['sqlserver_activity']) > 0 and len(second['sqlserver_activity']) > 0
+    # validate common host fields
+    assert first['host'] == "stubbed.hostname", "wrong hostname"
+    assert first['dbm_type'] == "activity", "wrong dbm_type"
+    assert first['ddsource'] == "sqlserver", "wrong source"
+    assert first['ddagentversion'], "missing ddagentversion"
+    assert set(first['ddtags']) == expected_instance_tags, "wrong instance tags activity"
+    assert type(first['collection_interval']) in (float, int), "invalid collection_interval"
+
+    assert len(first['sqlserver_activity']) > 0
     # bob and fred's open transactions should have been
     # collected on first iteration. and bob's has been open longer
     # so it should come first in the payload
     first_users = [f['user_name'] for f in first['sqlserver_activity']]
+    bobs_row = first['sqlserver_activity'][0]
     assert "bob" and "fred" in first_users
-    assert first['sqlserver_activity'][0]['user_name'] == "bob"
+    assert bobs_row['user_name'] == "bob"
     assert first['sqlserver_activity'][1]['user_name'] == "fred"
-    # ... but on the second iteration, only bob's transaction is still open
+
+    # assert the data that was collected is correct
+    assert bobs_row['user_name'] == "bob", "incorrect user_name"
+    assert bobs_row['database_name'] == "datadog_test", "incorrect database_name"
+    assert bobs_row['session_status'] == "sleeping", "incorrect session_status"
+    assert bobs_row['id'], "missing session id"
+    assert bobs_row['transaction_begin_time'], "missing tx begin time"
+
+    assert len(first['sqlserver_connections']) > 0
+    b_conn = None
+    for conn in first['sqlserver_connections']:
+        if conn['user_name'] == "bob":
+            b_conn = conn
+    assert b_conn is not None
+    assert b_conn['connections'] == 1
+    assert b_conn['status'] == "sleeping"
+
+    # internal debug metrics
+    aggregator.assert_metric(
+        "dd.sqlserver.activity.collect_activity.time",
+        tags=['agent_hostname:stubbed.hostname'] + _expected_dbm_instance_tags(dbm_instance),
+    )
+
+    # finally, on the second iteration, only bob's transaction is still open
     # and we don't need to collect fred's old transaction
+    second = dbm_activity[1]
+    assert len(second['sqlserver_activity']) > 0
     second_users = [f['user_name'] for f in second['sqlserver_activity']]
     assert "bob" in second_users and "fred" not in second_users
 
-    # clean up connections
+    # clean up bob's connection
     bob_conn.close()
-    fred_conn.close()
 
 
 @pytest.mark.parametrize(
@@ -194,7 +195,7 @@ def _load_test_activity_json(filename):
 def _get_conn_for_user(instance_docker, user):
     # Make DB connection
     conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
-        instance_docker['driver'], instance_docker['host'], user, "hey-there-{}123".format(user)
+        instance_docker['driver'], instance_docker['host'], user, "Password12!"
     )
     conn = pyodbc.connect(conn_str, timeout=30, autocommit=False)
     return conn

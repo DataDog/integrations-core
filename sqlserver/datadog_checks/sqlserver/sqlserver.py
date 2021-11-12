@@ -307,7 +307,7 @@ class SQLServer(AgentCheck):
         if is_affirmative(self.instance.get('include_instance_metrics', True)):
             common_metrics = INSTANCE_METRICS
             if not self.dbm_enabled:
-                common_metrics += DBM_MIGRATED_METRICS
+                common_metrics = common_metrics + DBM_MIGRATED_METRICS
 
             self._add_performance_counters(
                 chain(common_metrics, INSTANCE_METRICS_TOTAL), metrics_to_collect, tags, db=None

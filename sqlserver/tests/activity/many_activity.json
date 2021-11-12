@@ -125,6 +125,7 @@
     "user_name": "fred",
     "database_name": "test_db",
     "session_status": "sleeping",
-    "text": "SELECT * FROM open_tx.table;"
+    "text": "SELECT * FROM open_tx.table;",
+    "session_id": 56
   }
 ]

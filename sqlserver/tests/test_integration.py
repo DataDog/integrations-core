@@ -38,19 +38,14 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
 @not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize("dbm_enabled", [True, False])
-def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, dbm_enabled):
-    instance_docker['dbm'] = dbm_enabled
-    # do not need query_metrics/activity for these tests
-    instance_docker['query_activity'] = {'enabled': False}
-    instance_docker['query_metrics'] = {'enabled': False}
+def test_check_docker(aggregator, dd_run_check, init_config, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     expected_tags = instance_docker.get('tags', []) + [
         'sqlserver_host:{}'.format(instance_docker.get('host')),
         'db:master',
     ]
-    assert_metrics(aggregator, expected_tags, dbm_enabled=dbm_enabled)
+    assert_metrics(aggregator, expected_tags)
 
 
 @not_windows_ci
