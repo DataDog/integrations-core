@@ -12,6 +12,10 @@ def shared_conf(field, value):
     return get_default_field_value(field, value)
 
 
+def shared_is_jmx(field, value):
+    return False
+
+
 def shared_new_gc_metrics(field, value):
     return False
 

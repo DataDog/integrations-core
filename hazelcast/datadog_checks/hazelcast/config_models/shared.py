@@ -28,7 +28,7 @@ class SharedConfig(BaseModel):
 
     collect_default_metrics: Optional[bool]
     conf: Optional[Sequence[Mapping[str, Any]]]
-    is_jmx: bool
+    is_jmx: Optional[bool]
     new_gc_metrics: Optional[bool]
     proxy: Optional[Proxy]
     service: Optional[str]
