@@ -777,7 +777,6 @@ def test_statement_run_explain_errors(
         )
 
 
-
 @pytest.mark.parametrize("dbstrict", [True, False])
 def test_statement_samples_dbstrict(aggregator, integration_check, dbm_instance, dbstrict):
     dbm_instance["dbstrict"] = dbstrict
