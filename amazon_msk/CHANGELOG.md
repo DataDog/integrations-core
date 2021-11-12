@@ -1,6 +1,6 @@
 # CHANGELOG - Amazon MSK
 
-## 2.0.2 / 2021-10-15
+## 2.0.2 / 2021-10-15 / Agent 7.32.0
 
 * [Fixed] [OpenMetricsV2] Allow empty namespaces. See [#10420](https://github.com/DataDog/integrations-core/pull/10420).
 

@@ -51,6 +51,12 @@ No additional installation is needed on your server.
 
 #### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 _Available for Agent >6.0_
 
 1. Flink uses the `log4j` logger by default. To activate logging to a file and customize the format edit the `log4j.properties`, `log4j-cli.properties`, `log4j-yarn-session.properties`, or `log4j-console.properties` file. See [Flink's documentation][6] for default configurations. For example `log4j.properties` contains this configuration by default:
@@ -118,6 +124,7 @@ Flink does not include any events.
 
 Need help? Contact [Datadog support][12].
 
+
 [1]: https://flink.apache.org/
 [2]: https://ci.apache.org/projects/flink/flink-docs-release-1.9/monitoring/metrics.html#datadog-orgapacheflinkmetricsdatadogdatadoghttpreporter
 [3]: https://docs.datadoghq.com/api/?lang=bash#api-reference
@@ -130,4 +137,3 @@ Need help? Contact [Datadog support][12].
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/flink/metadata.csv
 [12]: https://docs.datadoghq.com/help/
-

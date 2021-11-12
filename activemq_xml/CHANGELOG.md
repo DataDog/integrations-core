@@ -1,6 +1,6 @@
 # CHANGELOG - activemq_xml
 
-## 1.12.0 / 2021-10-04
+## 1.12.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add runtime configuration validation. See [#8880](https://github.com/DataDog/integrations-core/pull/8880).
 * [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).

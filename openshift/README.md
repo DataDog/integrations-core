@@ -63,7 +63,14 @@ Depending on your needs and the [security constraints][3] of your cluster, three
 
 #### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 Refer to the [Kubernetes Log Collection][4] documentation for further information.
+
 
 #### Restricted SCC operations
 

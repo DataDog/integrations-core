@@ -153,7 +153,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
                 f"\n    # The project's main homepage."
                 f"\n    url='https://github.com/DataDog/integrations-{repo_choice}',"
             )
-    config = construct_template_fields(name, repo_choice, **template_fields)
+    config = construct_template_fields(name, repo_choice, integration_type, **template_fields)
 
     files = create_template_files(integration_type, root, config, read=not dry_run)
     file_paths = [file.file_path.replace(f'{root}{path_sep}', '', 1) for file in files]

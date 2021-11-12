@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
+import copy
 from collections import defaultdict
 
 import click
@@ -23,7 +24,14 @@ IGNORED_DEPS = {
     'psycopg2-binary',  # https://github.com/DataDog/integrations-core/pull/10456
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
     'flup',  # https://github.com/DataDog/integrations-core/pull/1997
+    # https://github.com/DataDog/integrations-core/pull/10105;
+    # snowflake-connector-python 2.6.0 has requirement cryptography<4.0.0,>=2.5.0
+    'cryptography',
+    'dnspython',
 }
+
+# Dependencies for the downloader that are security-related and should be updated separately from the others
+SECURITY_DEPS = {'in-toto', 'tuf', 'securesystemslib'}
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage dependencies')
@@ -238,13 +246,19 @@ def is_version_compatible(marker, supported_versions):
 @click.option('--sync', '-s', is_flag=True, help='Update the `agent_requirements.in` file')
 @click.option(
     '--check-python-classifiers',
-    '-s',
+    '-c',
     is_flag=True,
     help="""Only flag a dependency as needing an update if the newest version has python classifiers matching the marker.
     NOTE: Some packages may not have proper classifiers.""",
 )
+@click.option('--include-security-deps', '-i', is_flag=True, help="Attempt to update security dependencies")
 @click.option('--batch-size', '-b', type=int, help='The maximum number of dependencies to upgrade if syncing')
-def updates(sync, check_python_classifiers, batch_size):
+def updates(sync, check_python_classifiers, include_security_deps, batch_size):
+
+    ignore_deps = copy.deepcopy(IGNORED_DEPS)
+    if not include_security_deps:
+        sec_deps = copy.deepcopy(SECURITY_DEPS)
+        ignore_deps = ignore_deps.union(sec_deps)
 
     all_agent_dependencies, errors = read_agent_dependencies()
 
@@ -260,7 +274,7 @@ def updates(sync, check_python_classifiers, batch_size):
     deps_to_update = {
         agent_dependency_definition: package_data[package]['version']
         for package, package_dependency_definitions in all_agent_dependencies.items()
-        if package not in IGNORED_DEPS
+        if package not in ignore_deps
         for agent_dep_version, agent_dependency_definitions in package_dependency_definitions.items()
         for agent_dependency_definition in agent_dependency_definitions
         if str(agent_dep_version)[2:] != package_data[package]['version']

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+from typing import Callable
 
 import pytest
 import requests
@@ -56,11 +57,11 @@ def test_check(aggregator, mock_instance):
 
 
 @pytest.mark.usefixtures("mock_server")
-def test_version_metadata(datadog_agent, mock_instance):
-    # type: (DatadogAgentStub, dict) -> None
+def test_version_metadata(datadog_agent, dd_run_check, mock_instance):
+    # type: (DatadogAgentStub, Callable, dict) -> None
     check = AzureIoTEdgeCheck('azure_iot_edge', {}, [mock_instance])
     check.check_id = 'test:123'
-    check.run()
+    dd_run_check(check)
 
     major, minor, patch, raw = common.MOCK_EDGE_AGENT_VERSION
     version_metadata = {

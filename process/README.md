@@ -11,14 +11,14 @@ The Process Check lets you:
 
 ### Installation
 
-The Process Check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your server.
+The Process Check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your server.
 
 ### Configuration
 
 Unlike many checks, the Process Check doesn't monitor anything useful by default. You must configure which processes you want to monitor, and how.
 
 
-1. While there's no standard default check configuration, here's an example `process.d/conf.yaml` that monitors SSH/SSHD processes. See the [sample process.d/conf.yaml][2] for all available configuration options:
+1. While there's no standard default check configuration, here's an example `process.d/conf.yaml` that monitors SSH/SSHD processes. See the [sample process.d/conf.yaml][3] for all available configuration options:
 
 ```yaml
   init_config:
@@ -48,17 +48,17 @@ Unlike many checks, the Process Check doesn't monitor anything useful by default
    dd-agent ALL=NOPASSWD: /bin/ls /proc/*/fd/
    ```
 
-2. [Restart the Agent][3].
+2. [Restart the Agent][4].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `process` under the Checks section.
+[Run the Agent's `status` subcommand][5] and look for `process` under the Checks section.
 
 ### Metrics notes
 
 **Note**: Some metrics are not available on Linux or OSX:
 
-- Process I/O metrics are **not** available on Linux or OSX since the files that the Agent reads (`/proc//io`) are only readable by the process's owner. For more information, [read the Agent FAQ][5]
+- Process I/O metrics are **not** available on Linux or OSX since the files that the Agent reads (`/proc//io`) are only readable by the process's owner. For more information, [read the Agent FAQ][6]
 - `system.cpu.iowait` is not available on Windows.
 
 All metrics are per `instance` configured in process.yaml, and are tagged `process_name:<instance_name>`.
@@ -72,7 +72,7 @@ For the full list of metrics, see the [Metrics section](#metrics).
 
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this check.
+See [metadata.csv][7] for a list of metrics provided by this check.
 
 ### Events
 
@@ -80,22 +80,23 @@ The Process Check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][7] for a list of service checks provided by this integration.
+See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
-To get a better idea of how (or why) to monitor process resource consumption with Datadog, check out this [series of blog posts][9] about it.
+To get a better idea of how (or why) to monitor process resource consumption with Datadog, check out this [series of blog posts][10] about it.
 
 [1]: https://docs.datadoghq.com/monitors/create/types/process_check/?tab=checkalert
-[2]: https://github.com/DataDog/integrations-core/blob/master/process/datadog_checks/process/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[5]: https://docs.datadoghq.com/agent/faq/why-don-t-i-see-the-system-processes-open-file-descriptors-metric/
-[6]: https://github.com/DataDog/integrations-core/blob/master/process/metadata.csv
-[7]: https://github.com/DataDog/integrations-core/blob/master/process/assets/service_checks.json
-[8]: https://docs.datadoghq.com/help/
-[9]: https://www.datadoghq.com/blog/process-check-monitoring
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://github.com/DataDog/integrations-core/blob/master/process/datadog_checks/process/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[6]: https://docs.datadoghq.com/agent/faq/why-don-t-i-see-the-system-processes-open-file-descriptors-metric/
+[7]: https://github.com/DataDog/integrations-core/blob/master/process/metadata.csv
+[8]: https://github.com/DataDog/integrations-core/blob/master/process/assets/service_checks.json
+[9]: https://docs.datadoghq.com/help/
+[10]: https://www.datadoghq.com/blog/process-check-monitoring

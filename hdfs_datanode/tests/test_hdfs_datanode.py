@@ -24,6 +24,7 @@ CHECK_ID = 'test:123'
 def test_check(aggregator, mocked_request):
     """
     Test that we get all the metrics we're supposed to get
+    Note: We don't do aggregator.assert_all_metrics_covered() because depending on timing, some other metrics may appear
     """
 
     instance = HDFS_DATANODE_CONFIG['instances'][0]
@@ -39,8 +40,6 @@ def test_check(aggregator, mocked_request):
 
     for metric, value in iteritems(HDFS_DATANODE_METRICS_VALUES):
         aggregator.assert_metric(metric, value=value, tags=HDFS_DATANODE_METRIC_TAGS + CUSTOM_TAGS, count=1)
-
-    aggregator.assert_all_metrics_covered()
 
 
 def test_metadata(aggregator, mocked_request, mocked_metadata_request, datadog_agent):

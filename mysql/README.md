@@ -136,6 +136,12 @@ See our [sample mysql.yaml][8] for all available configuration options, includin
 
 ##### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 _Available for Agent versions >6.0_
 
 1. By default MySQL logs everything in `/var/log/syslog` which requires root access to read. To make the logs more accessible, follow these steps:
@@ -244,6 +250,12 @@ See the [Autodiscovery template variables documentation][12] to learn how to pas
 
 #### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][13].
 
@@ -270,9 +282,9 @@ kind: Pod
 metadata:
   name: mysql
   annotations:
-    ad.datadoghq.com/nginx.check_names: '["mysql"]'
-    ad.datadoghq.com/nginx.init_configs: '[{}]'
-    ad.datadoghq.com/nginx.instances: |
+    ad.datadoghq.com/mysql.check_names: '["mysql"]'
+    ad.datadoghq.com/mysql.init_configs: '[{}]'
+    ad.datadoghq.com/mysql.instances: |
       [
         {
           "server": "%%host%%", 
@@ -290,6 +302,12 @@ spec:
 See the [Autodiscovery template variables documentation][12] to learn how to pass `<UNIQUEPASSWORD>` as an environment variable instead of a label.
 
 #### Log collection
+
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][17].
@@ -335,6 +353,12 @@ Set [Autodiscovery Integrations Templates][11] as Docker labels on your applicat
 See the [Autodiscovery template variables documentation][12] to learn how to pass `<UNIQUEPASSWORD>` as an environment variable instead of a label.
 
 ##### Log collection
+
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
 
 _Available for Agent versions >6.0_
 

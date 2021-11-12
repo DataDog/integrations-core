@@ -48,7 +48,7 @@ V2_VALID_MANIFEST = {
     "tile": {
         "changelog": "CHANGELOG.md",
         "configuration": "README.md#Setup",
-        "description": "Oracle relational database system designed for enterprise grid computing",
+        "description": "Oracle relational database system designed for enterprise grid",
         "media": [],
         "overview": "README.md#Overview",
         "title": "Oracle",
@@ -144,6 +144,16 @@ INVALID_MEDIA_MANIFEST_INCORRECT_VIMEO_ID_TYPE = JSONDict(
 IMMUTABLE_ATTRIBUTES_V1_MANIFEST = {"manifest_version": "1.0.0"}
 
 IMMUTABLE_ATTRIBUTES_V2_MANIFEST = JSONDict({"manifest_version": "2.0.0"})
+
+VALID_TILE_DESCRIPTION_V2_MANIFEST = JSONDict({"tile": {"description": "This is a valid length tile description!"}})
+
+INVALID_TILE_DESCRIPTION_V2_MANIFEST = JSONDict(
+    {
+        "tile": {
+            "description": "This description is way too long to be valid! It will be cut off when displayed in the UI."
+        }
+    }
+)
 
 
 class MockedResponseInvalid:

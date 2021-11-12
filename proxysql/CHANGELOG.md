@@ -4,7 +4,7 @@
 
 * [Added] Add pool.latency_us and correct unit for pool.latency_ms. See [#10335](https://github.com/DataDog/integrations-core/pull/10335).
 
-## 3.2.0 / 2021-10-04
+## 3.2.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
 

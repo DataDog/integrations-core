@@ -475,3 +475,23 @@ def test_manifest_v2_media_gallery_validator_incorrect_vimeo_id_type(_, setup_ro
     # Assert test case
     assert validator.result.failed, validator.result
     assert not validator.result.fixed
+
+
+def test_manifest_v2_tile_description_validator_pass(setup_route):
+    # Use specific validator
+    validator = v2_validators.TileDescriptionValidator(is_marketplace=True, version=V2, check_in_extras=True)
+    validator.validate('active_directory', input_constants.VALID_TILE_DESCRIPTION_V2_MANIFEST, False)
+
+    # Assert test case
+    assert not validator.result.failed, validator.result
+    assert not validator.result.fixed
+
+
+def test_manifest_v2_tile_description_validator_invalid(setup_route):
+    # Use specific validator
+    validator = v2_validators.TileDescriptionValidator(is_marketplace=True, version=V2, check_in_extras=True)
+    validator.validate('active_directory', input_constants.INVALID_TILE_DESCRIPTION_V2_MANIFEST, False)
+
+    # Assert test case
+    assert validator.result.failed, validator.result
+    assert not validator.result.fixed

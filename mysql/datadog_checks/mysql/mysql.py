@@ -288,7 +288,7 @@ class MySql(AgentCheck):
         metrics.update(INNODB_VARS)
         metrics.update(BINLOG_VARS)
 
-        if is_affirmative(self._config.options.get('extra_status_metrics', False)):
+        if is_affirmative(self._config.options.get('extra_status_metrics', self._config.dbm_enabled)):
             self.log.debug("Collecting Extra Status Metrics")
             metrics.update(OPTIONAL_STATUS_VARS)
 
@@ -317,10 +317,22 @@ class MySql(AgentCheck):
             results['information_schema_size'] = self._query_size_per_schema(db)
             metrics.update(SCHEMA_VARS)
 
-        if is_affirmative(self._config.options.get('replication', False)):
+        if is_affirmative(self._config.options.get('replication', self._config.dbm_enabled)):
             replication_metrics = self._collect_replication_metrics(db, results, above_560)
             metrics.update(replication_metrics)
             self._check_replication_status(results)
+
+        if len(self._config.additional_status) > 0:
+            additional_status_dict = {}
+            for status_dict in self._config.additional_status:
+                additional_status_dict[status_dict["name"]] = (status_dict["metric_name"], status_dict["type"])
+            metrics.update(additional_status_dict)
+
+        if len(self._config.additional_variable) > 0:
+            additional_variable_dict = {}
+            for variable_dict in self._config.additional_variable:
+                additional_variable_dict[variable_dict["name"]] = (variable_dict["metric_name"], variable_dict["type"])
+            metrics.update(additional_variable_dict)
 
         # "synthetic" metrics
         metrics.update(SYNTHETIC_VARS)

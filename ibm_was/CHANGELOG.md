@@ -1,6 +1,6 @@
 # CHANGELOG - IBM WAS
 
-## 1.10.1 / 2021-10-12
+## 1.10.1 / 2021-10-12 / Agent 7.32.0
 
 * [Fixed] Bump base package requirements. See [#10390](https://github.com/DataDog/integrations-core/pull/10390).
 

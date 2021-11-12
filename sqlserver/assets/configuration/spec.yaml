@@ -47,7 +47,8 @@ files:
         example: master
     - name: database_autodiscovery
       description: |
-        Auto-discover and monitor databases.  If `true`, overrides `database` option.
+        Auto-discover and monitor databases. Supported for the metrics check. 
+        If `true`, overrides `database` option.
         Can be combined with `autodiscovery_include` and `autodiscovery_exclude` options.
       value:
         type: boolean
@@ -207,7 +208,8 @@ files:
         example: "<CONNECTION_STRING>"
     - name: dbm
       description: |
-        Set to `true` to enable the Database Monitoring beta.
+        Set to `true` to enable Database Monitoring.
+        Reach out to your Customer Success Manager to request access to the beta.
       value:
         type: boolean
         example: false

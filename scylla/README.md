@@ -22,6 +22,12 @@ The Scylla check is included in the [Datadog Agent][2] package. No additional in
 
 ##### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 Scylla has different modes of outputting logs depending on the environment it's running in.  See the [Scylla documentation][5] for more specifics on how the application generates logs.
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -73,7 +79,7 @@ Need help? Contact [Datadog support][10].
 
 
 [1]: https://scylladb.com
-[2]: https://docs.datadoghq.com/agent/
+[2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/scylla/datadog_checks/scylla/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.scylladb.com/getting-started/logging/

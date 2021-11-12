@@ -294,3 +294,23 @@ def test_custom_queries(aggregator, instance_custom_queries, dd_run_check):
 
     aggregator.assert_metric('alice.age', value=25, tags=tags.METRIC_TAGS)
     aggregator.assert_metric('bob.age', value=20, tags=tags.METRIC_TAGS)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_additional_status(aggregator, dd_run_check, instance_additional_status):
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_additional_status])
+    dd_run_check(mysql_check)
+
+    aggregator.assert_metric('mysql.innodb.rows_read', metric_type=1, tags=tags.METRIC_TAGS)
+    aggregator.assert_metric('mysql.innodb.row_lock_time', metric_type=1, tags=tags.METRIC_TAGS)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_additional_variable(aggregator, dd_run_check, instance_additional_variable):
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_additional_variable])
+    dd_run_check(mysql_check)
+
+    aggregator.assert_metric('mysql.performance.long_query_time', metric_type=0, tags=tags.METRIC_TAGS)
+    aggregator.assert_metric('mysql.performance.innodb_flush_log_at_trx_commit', metric_type=0, tags=tags.METRIC_TAGS)

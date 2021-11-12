@@ -11,7 +11,7 @@ import pytest
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.sqlserver import SQLServer
-from datadog_checks.sqlserver.statements import SQL_SERVER_METRICS_COLUMNS, STATEMENT_METRICS_QUERY, obfuscate_xml_plan
+from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
 from .common import CHECK_NAME
 from .utils import not_windows_ci
@@ -36,6 +36,54 @@ def dbm_instance(instance_docker):
     # set a very small collection interval so the tests go fast
     instance_docker['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     return copy(instance_docker)
+
+
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "expected_columns,available_columns",
+    [
+        [
+            ["execution_count", "total_worker_time"],
+            ["execution_count", "total_worker_time"],
+        ],
+        [
+            ["execution_count", "total_worker_time", "some_missing_column"],
+            ["execution_count", "total_worker_time"],
+        ],
+    ],
+)
+def test_get_available_query_metrics_columns(aggregator, dbm_instance, expected_columns, available_columns):
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    check.initialize_connection()
+    _conn_key_prefix = "dbm-"
+    with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
+        with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+            result_available_columns = check.statement_metrics._get_available_query_metrics_columns(
+                cursor, expected_columns
+            )
+            assert result_available_columns == available_columns
+
+
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_get_statement_metrics_query_cached(aggregator, dbm_instance, caplog):
+    caplog.set_level(logging.DEBUG)
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    check.initialize_connection()
+    _conn_key_prefix = "dbm-"
+    with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
+        with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+            for _ in range(3):
+                query = check.statement_metrics._get_statement_metrics_query_cached(cursor)
+                assert query, "query should be non-empty"
+    times_columns_loaded = 0
+    for r in caplog.records:
+        if r.message.startswith("found available sys.dm_exec_query_stats columns"):
+            times_columns_loaded += 1
+    assert times_columns_loaded == 1, "columns should have been loaded only once"
 
 
 @not_windows_ci
@@ -128,7 +176,7 @@ def test_statement_metrics_and_plans(
         assert row['query_signature'], "missing query signature"
         assert row['database_name'] == database, "incorrect database_name"
         assert row['user_name'] == plan_user, "incorrect user_name"
-        for column in SQL_SERVER_METRICS_COLUMNS:
+        for column in SQL_SERVER_QUERY_METRICS_COLUMNS:
             assert column in row, "missing required metrics column {}".format(column)
             assert type(row[column]) in (float, int), "wrong type for metrics column {}".format(column)
 
@@ -166,7 +214,7 @@ def test_statement_metrics_and_plans(
 @not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_statement_basic_metrics_query(datadog_conn_docker):
+def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
     test_query = "select * from sys.databases"
 
     # run this test query to guarantee there's at least one application query in the query plan cache
@@ -174,14 +222,22 @@ def test_statement_basic_metrics_query(datadog_conn_docker):
         cursor.execute(test_query)
         cursor.fetchall()
 
+    # load statement_metrics_query
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    check.initialize_connection()
+    _conn_key_prefix = "dbm-"
+    with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
+        with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+            statement_metrics_query = check.statement_metrics._get_statement_metrics_query_cached(cursor)
+
     # this test ensures that we're able to run the basic STATEMENT_METRICS_QUERY without error
     # the dm_exec_plan_attributes table-valued function used in this query contains a "sql_variant" data type
     # which is not supported by pyodbc, so we need to explicitly cast the field into the type we expect to see
     # without the cast this is expected to fail with
     # pyodbc.ProgrammingError: ('ODBC SQL type -150 is not yet supported.  column-index=77  type=-150', 'HY106')
     with datadog_conn_docker.cursor() as cursor:
-        logging.debug("running statement_metrics_query: %s", STATEMENT_METRICS_QUERY)
-        cursor.execute(STATEMENT_METRICS_QUERY)
+        logging.debug("running statement_metrics_query: %s", statement_metrics_query)
+        cursor.execute(statement_metrics_query)
 
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
