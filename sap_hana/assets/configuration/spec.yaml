@@ -33,6 +33,17 @@ files:
         required: true
         value:
           type: string
+      - name: connection_properties
+        description: |
+          When `hdbcli` is installed, this defines the properties of the database connections. Any property
+          defined here overrides any default value set by the check. For more information, see:
+          https://help.sap.com/viewer/f1b440ded6144a54ada97ff95dac7adf/2.10/en-US/ee592e89dcce4480a99571a4ae7a702f.html
+        value:
+          example:
+            key: hdbuserid
+            sslUseDefaultTrustStore: false
+          type: object
+          additionalProperties: true
       - name: use_hana_hostnames
         description: |
           Whether or not to use the hostnames contained in HANA's monitoring
@@ -44,12 +55,12 @@ files:
         description: The number of rows to return with each query result.
         value:
           type: integer
-          display_default: 1000
+          example: 1000
       - name: timeout
         description: The timeout in seconds for connecting to `server`.
         value:
-          type: integer
-          display_default: 10
+          type: number
+          example: 10
       - template: instances/db
       - name: persist_db_connections
         description: Whether or not to persist database connections.

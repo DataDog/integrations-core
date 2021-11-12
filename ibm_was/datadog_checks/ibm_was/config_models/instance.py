@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence, Union
+from typing import Any, Mapping, Optional, Sequence
 
-from pydantic import BaseModel, Extra, Field, root_validator, validator
+from pydantic import BaseModel, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -21,22 +21,13 @@ class AuthToken(BaseModel):
     writer: Optional[Mapping[str, Any]]
 
 
-class ExtraMetric(BaseModel):
+class CustomQuery(BaseModel):
     class Config:
-        extra = Extra.allow
         allow_mutation = False
 
-    name: Optional[str]
-    type: Optional[str]
-
-
-class Metric(BaseModel):
-    class Config:
-        extra = Extra.allow
-        allow_mutation = False
-
-    name: Optional[str]
-    type: Optional[str]
+    metric_prefix: Optional[str]
+    stat: Optional[str]
+    tag_keys: Optional[Sequence[str]]
 
 
 class Proxy(BaseModel):
@@ -46,14 +37,6 @@ class Proxy(BaseModel):
     http: Optional[str]
     https: Optional[str]
     no_proxy: Optional[Sequence[str]]
-
-
-class ShareLabel(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    labels: Optional[Sequence[str]]
-    match: Optional[Sequence[str]]
 
 
 class InstanceConfig(BaseModel):
@@ -66,24 +49,17 @@ class InstanceConfig(BaseModel):
     aws_host: Optional[str]
     aws_region: Optional[str]
     aws_service: Optional[str]
-    cache_metric_wildcards: Optional[bool]
-    cache_shared_labels: Optional[bool]
-    collect_counters_with_distributions: Optional[bool]
-    collect_histogram_buckets: Optional[bool]
+    collect_jdbc_stats: Optional[bool]
+    collect_jvm_stats: Optional[bool]
+    collect_servlet_session_stats: Optional[bool]
+    collect_thread_pool_stats: Optional[bool]
     connect_timeout: Optional[float]
+    custom_queries: Optional[Sequence[CustomQuery]]
+    custom_queries_units_gauge: Optional[Sequence[str]]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
-    enable_health_service_check: Optional[bool]
-    exclude_labels: Optional[Sequence[str]]
-    exclude_metrics: Optional[Sequence[str]]
-    exclude_metrics_by_labels: Optional[Mapping[str, Union[bool, Sequence[str]]]]
     extra_headers: Optional[Mapping[str, Any]]
-    extra_metrics: Optional[Sequence[Union[str, Mapping[str, Union[str, ExtraMetric]]]]]
     headers: Optional[Mapping[str, Any]]
-    histogram_buckets_as_distributions: Optional[bool]
-    hostname_format: Optional[str]
-    hostname_label: Optional[str]
-    ignore_tags: Optional[Sequence[str]]
     kerberos_auth: Optional[str]
     kerberos_cache: Optional[str]
     kerberos_delegate: Optional[bool]
@@ -92,25 +68,18 @@ class InstanceConfig(BaseModel):
     kerberos_keytab: Optional[str]
     kerberos_principal: Optional[str]
     log_requests: Optional[bool]
-    metrics: Optional[Sequence[Union[str, Mapping[str, Union[str, Metric]]]]]
     min_collection_interval: Optional[float]
-    namespace: Optional[str] = Field(None, regex='\\w*')
-    non_cumulative_histogram_buckets: Optional[bool]
     ntlm_domain: Optional[str]
-    openmetrics_endpoint: Optional[str]
+    only_custom_queries: Optional[bool]
     password: Optional[str]
     persist_connections: Optional[bool]
     proxy: Optional[Proxy]
-    raw_line_filters: Optional[Sequence[str]]
-    raw_metric_prefix: Optional[str]
     read_timeout: Optional[float]
-    rename_labels: Optional[Mapping[str, Any]]
     request_size: Optional[float]
     service: Optional[str]
-    share_labels: Optional[Mapping[str, Union[bool, ShareLabel]]]
+    servlet_url: str
     skip_proxy: Optional[bool]
     tags: Optional[Sequence[str]]
-    telemetry: Optional[bool]
     timeout: Optional[float]
     tls_ca_cert: Optional[str]
     tls_cert: Optional[str]
@@ -118,9 +87,8 @@ class InstanceConfig(BaseModel):
     tls_private_key: Optional[str]
     tls_use_host_header: Optional[bool]
     tls_verify: Optional[bool]
-    use_latest_spec: Optional[bool]
+    use_global_custom_queries: Optional[str]
     use_legacy_auth_encoding: Optional[bool]
-    use_process_start_time: Optional[bool]
     username: Optional[str]
 
     @root_validator(pre=True)

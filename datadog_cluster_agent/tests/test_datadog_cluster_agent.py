@@ -37,6 +37,7 @@ METRICS = [
     'external_metrics.datadog_metrics',
     'external_metrics.delay_seconds',
     'external_metrics.processed_value',
+    'secret_backend.elapsed',
     'go.goroutines',
     'go.memstats.alloc_bytes',
     'go.threads',

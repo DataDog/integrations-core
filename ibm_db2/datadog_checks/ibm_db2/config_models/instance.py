@@ -18,6 +18,7 @@ class CustomQuery(BaseModel):
         allow_mutation = False
 
     columns: Optional[Sequence[Mapping[str, Any]]]
+    metric_prefix: Optional[str]
     query: Optional[str]
     tags: Optional[Sequence[str]]
 
@@ -26,29 +27,19 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    batch_size: Optional[int]
-    connection_properties: Optional[Mapping[str, Any]]
     custom_queries: Optional[Sequence[CustomQuery]]
+    db: str
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
+    host: Optional[str]
     min_collection_interval: Optional[float]
     only_custom_queries: Optional[bool]
     password: str
-    persist_db_connections: Optional[bool]
     port: Optional[int]
-    server: str
     service: Optional[str]
     tags: Optional[Sequence[str]]
-    timeout: Optional[float]
-    tls_ca_cert: Optional[str]
     tls_cert: Optional[str]
-    tls_private_key: Optional[str]
-    tls_private_key_password: Optional[str]
-    tls_validate_hostname: Optional[bool]
-    tls_verify: Optional[bool]
     use_global_custom_queries: Optional[str]
-    use_hana_hostnames: Optional[bool]
-    use_tls: Optional[bool]
     username: str
 
     @root_validator(pre=True)
