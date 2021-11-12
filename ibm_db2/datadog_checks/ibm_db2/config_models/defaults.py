@@ -32,6 +32,10 @@ def instance_min_collection_interval(field, value):
     return 15
 
 
+def instance_only_custom_queries(field, value):
+    return False
+
+
 def instance_port(field, value):
     return 50000
 
