@@ -19,10 +19,10 @@ class InstanceConfig(BaseModel):
 
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
-    host: str
+    host: Optional[str]
     min_collection_interval: Optional[float]
     password: Optional[str]
-    port: int
+    port: Optional[int]
     service: Optional[str]
     tags: Optional[Sequence[str]]
     tls_ca_cert: Optional[str]
