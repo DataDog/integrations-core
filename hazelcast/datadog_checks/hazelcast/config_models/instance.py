@@ -46,7 +46,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]
     headers: Optional[Mapping[str, Any]]
-    host: str
+    host: Optional[str]
     is_jmx: Optional[bool]
     java_bin_path: Optional[str]
     java_options: Optional[str]
@@ -68,7 +68,7 @@ class InstanceConfig(BaseModel):
     ntlm_domain: Optional[str]
     password: Optional[str]
     persist_connections: Optional[bool]
-    port: int
+    port: Optional[int]
     process_name_regex: Optional[str]
     proxy: Optional[Proxy]
     read_timeout: Optional[float]

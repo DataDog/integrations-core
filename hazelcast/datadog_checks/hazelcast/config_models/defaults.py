@@ -88,6 +88,10 @@ def instance_headers(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_host(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_is_jmx(field, value):
     return False
 
@@ -170,6 +174,10 @@ def instance_password(field, value):
 
 def instance_persist_connections(field, value):
     return False
+
+
+def instance_port(field, value):
+    return 1099
 
 
 def instance_process_name_regex(field, value):

@@ -85,15 +85,16 @@ init_config:
 #
 instances:
 
-    ## @param host - string - required
+  -
+    ## @param host - string - optional
     ## Hazelcast or Hazelcast Management Center server with which to connect.
     #
-  - host: <HOST>
+    # host: <HOST>
 
-    ## @param port - integer - required
+    ## @param port - integer - optional - default: 1099
     ## Hazelcast or Hazelcast Management Center port with which to connect.
     #
-    port: 1099
+    # port: 1099
 
     ## @param mc_health_check_endpoint - string - optional
     ## Hazelcast Management Center health check endpoint with which
