@@ -45,10 +45,11 @@ init_config:
 #
 instances:
 
-    ## @param openmetrics_endpoint - string - required
+  -
+    ## @param openmetrics_endpoint - string - optional - default: http://localhost:9990/admin/metrics/prometheus
     ## The URL exposing metrics in the OpenMetrics format.
     #
-  - openmetrics_endpoint: http://localhost:9990/admin/metrics/prometheus
+    # openmetrics_endpoint: http://localhost:9990/admin/metrics/prometheus
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.
