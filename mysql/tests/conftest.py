@@ -12,6 +12,7 @@ from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common, tags
+from .common import requires_static_version
 
 logger = logging.getLogger(__name__)
 
@@ -21,12 +22,12 @@ COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 
 
 @pytest.fixture(scope='session')
-def config_e2e():
+def config_e2e(instance_basic):
     logs_path = _mysql_logs_path()
 
     return {
         'init_config': {},
-        'instances': [{'host': common.HOST, 'user': common.USER, 'pass': common.PASS, 'port': common.PORT}],
+        'instances': [instance_basic],
         'logs': [
             {'type': 'file', 'path': '{}/mysql.log'.format(logs_path), 'source': 'mysql', 'service': 'local_mysql'},
             {
@@ -66,13 +67,21 @@ def dd_environment(config_e2e):
                 CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
                 populate_database,
             ],
+            attempts=2,
+            attempts_wait=10,
         ):
             yield config_e2e, e2e_metadata
 
 
 @pytest.fixture(scope='session')
-def instance_basic(config_e2e):
-    return config_e2e['instances'][0]
+def instance_basic():
+    return {
+        'host': common.HOST,
+        'user': common.USER,
+        'pass': common.PASS,
+        'port': common.PORT,
+        'disable_generic_tags': 'true',
+    }
 
 
 @pytest.fixture
@@ -82,6 +91,7 @@ def instance_complex():
         'user': common.USER,
         'pass': common.PASS,
         'port': common.PORT,
+        'disable_generic_tags': 'true',
         'options': {
             'replication': True,
             'extra_status_metrics': True,
@@ -108,6 +118,54 @@ def instance_complex():
 
 
 @pytest.fixture
+def instance_additional_status():
+    return {
+        'host': common.HOST,
+        'user': common.USER,
+        'pass': common.PASS,
+        'port': common.PORT,
+        'tags': tags.METRIC_TAGS,
+        'disable_generic_tags': 'true',
+        'additional_status': [
+            {
+                'name': "innodb_rows_read",
+                'metric_name': "mysql.innodb.rows_read",
+                'type': "rate",
+            },
+            {
+                'name': "row_lock_time",
+                'metric_name': "mysql.innodb.row_lock_time",
+                'type': "rate",
+            },
+        ],
+    }
+
+
+@pytest.fixture
+def instance_additional_variable():
+    return {
+        'host': common.HOST,
+        'user': common.USER,
+        'pass': common.PASS,
+        'port': common.PORT,
+        'tags': tags.METRIC_TAGS,
+        'disable_generic_tags': 'true',
+        'additional_status': [
+            {
+                'name': "long_query_time",
+                'metric_name': "mysql.performance.long_query_time",
+                'type': "gauge",
+            },
+            {
+                'name': "innodb_flush_log_at_trx_commit",
+                'metric_name': "mysql.performance.innodb_flush_log_at_trx_commit",
+                'type': "gauge",
+            },
+        ],
+    }
+
+
+@pytest.fixture
 def instance_custom_queries():
     return {
         'host': common.HOST,
@@ -115,6 +173,7 @@ def instance_custom_queries():
         'pass': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
+        'disable_generic_tags': 'true',
         'custom_queries': [
             {
                 'query': "SELECT * from testdb.users where name='Alice' limit 1;",
@@ -130,9 +189,10 @@ def instance_custom_queries():
 
 @pytest.fixture(scope='session')
 def instance_error():
-    return {'host': common.HOST, 'user': 'unknown', 'pass': common.PASS}
+    return {'host': common.HOST, 'user': 'unknown', 'pass': common.PASS, 'disable_generic_tags': 'true'}
 
 
+@requires_static_version
 @pytest.fixture(scope='session')
 def version_metadata():
     parts = MYSQL_VERSION.split('-')
@@ -303,7 +363,7 @@ def _mysql_logs_path():
     (which don't support interpolation of environment variables).
     """
     if MYSQL_FLAVOR == 'mysql':
-        if MYSQL_VERSION == '8.0':
+        if MYSQL_VERSION == '8.0' or MYSQL_VERSION == 'latest':
             return '/opt/bitnami/mysql/logs'
         else:
             return '/var/log/mysql'
@@ -320,7 +380,7 @@ def _mysql_docker_repo():
         # https://github.com/DataDog/integrations-core/pull/4669)
         if MYSQL_VERSION in ('5.6', '5.7'):
             return 'bergerx/mysql-replication'
-        elif MYSQL_VERSION == '8.0':
+        elif MYSQL_VERSION == '8.0' or MYSQL_VERSION == 'latest':
             return 'bitnami/mysql'
     elif MYSQL_FLAVOR == 'mariadb':
         return 'bitnami/mariadb'

@@ -1,5 +1,9 @@
 # CHANGELOG - twemproxy
 
+## 1.11.0 / 2021-10-04 / Agent 7.32.0
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
 ## 1.10.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add log support for Twemproxy. See [#9066](https://github.com/DataDog/integrations-core/pull/9066).

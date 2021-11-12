@@ -7,7 +7,10 @@ from copy import deepcopy
 import mock
 import pytest
 
-from .common import FIXTURES_PATH
+from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.nginx import Nginx
+
+from .common import CHECK_NAME, FIXTURES_PATH, TAGS
 from .utils import mocked_perform_request
 
 
@@ -78,6 +81,8 @@ def test_plus_api_v3(check, instance, aggregator):
     for m in aggregator.metric_names:
         total += len(aggregator.metrics(m))
     assert total == 1189
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone1', count=1)
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone2', count=1)
 
@@ -141,3 +146,23 @@ def test_no_version(check, instance, caplog):
 
     errors = [record for record in caplog.records if record.levelname == "ERROR"]
     assert not errors
+
+
+def test_emit_generic_and_non_generic_tags_by_default(instance):
+    instance = deepcopy(instance)
+    instance['disable_generic_tags'] = False
+    check = Nginx(CHECK_NAME, {}, [instance])
+    extra_tags = ['host:localhost']
+    tags = TAGS + extra_tags
+    normalised_tags = TAGS + ['nginx_host:localhost', 'host:localhost']
+    assert set(normalised_tags) == set(check._normalize_tags_type(tags))
+
+
+def test_emit_non_generic_tags_when_disabled(instance):
+    instance = deepcopy(instance)
+    instance['disable_generic_tags'] = True
+    check = Nginx(CHECK_NAME, {}, [instance])
+    extra_tags = ['host:localhost']
+    tags = TAGS + extra_tags
+    normalised_tags = TAGS + ['nginx_host:localhost']
+    assert set(normalised_tags) == set(check._normalize_tags_type(tags))

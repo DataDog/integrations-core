@@ -74,15 +74,15 @@ The HTTP check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][12] for a list of service checks provided by this integration.
+See [service_checks.json][10] for a list of service checks provided by this integration.
 
 To disable `http.ssl_cert`, set `check_certificate_expiration` to false.
 
-**Note:** To set an alert on these service checks, create a [Network Monitor][13].
+**Note:** To set an alert on these service checks, create a [Network Monitor][11].
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][12].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -93,7 +93,6 @@ Need help? Contact [Datadog support][11].
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/http_check/metadata.csv
-[10]: https://app.datadoghq.com/monitors#/create
-[11]: https://docs.datadoghq.com/help/
-[12]: https://github.com/DataDog/integrations-core/blob/master/http_check/assets/service_checks.json
-[13]: https://docs.datadoghq.com/monitors/monitor_types/network/?tab=checkalert
+[10]: https://github.com/DataDog/integrations-core/blob/master/http_check/assets/service_checks.json
+[11]: https://docs.datadoghq.com/monitors/monitor_types/network/?tab=checkalert
+[12]: https://docs.datadoghq.com/help/

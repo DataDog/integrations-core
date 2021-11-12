@@ -35,6 +35,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     metric_groups: Optional[Sequence[str]]
     min_collection_interval: Optional[float]
+    only_custom_queries: Optional[bool]
     password: Optional[str]
     port: Optional[int]
     server: Optional[str]

@@ -27,17 +27,19 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     batch_size: Optional[int]
+    connection_properties: Optional[Mapping[str, Any]]
     custom_queries: Optional[Sequence[CustomQuery]]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     min_collection_interval: Optional[float]
+    only_custom_queries: Optional[bool]
     password: str
     persist_db_connections: Optional[bool]
     port: Optional[int]
     server: str
     service: Optional[str]
     tags: Optional[Sequence[str]]
-    timeout: Optional[int]
+    timeout: Optional[float]
     tls_ca_cert: Optional[str]
     tls_cert: Optional[str]
     tls_private_key: Optional[str]

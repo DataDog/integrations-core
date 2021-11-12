@@ -112,12 +112,12 @@ datadog_checks_base/tests/**/test_db_util.py        @DataDog/agent-integrations 
 datadog_checks_base/tests/**/test_db_sql.py         @DataDog/database-monitoring @DataDog/agent-integrations
 **/base/utils/db/statement_metrics.py               @DataDog/database-monitoring @DataDog/agent-integrations
 datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring @DataDog/agent-integrations
-**/postgres/statements.py                           @DataDog/database-monitoring @DataDog/agent-integrations
-**/postgres/statement_samples.py                    @DataDog/database-monitoring @DataDog/agent-integrations
-**/postgres/tests/test_statements.py                @DataDog/database-monitoring @DataDog/agent-integrations
-**/mysql/statements.py                              @DataDog/database-monitoring @DataDog/agent-integrations
-**/mysql/statement_samples.py                       @DataDog/database-monitoring @DataDog/agent-integrations
-**/mysql/tests/test_statements.py                   @DataDog/database-monitoring @DataDog/agent-integrations
+/postgres/                                          @DataDog/agent-integrations @DataDog/database-monitoring
+/postgres/*.md                                      @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
+/postgres/manifest.json                             @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
+/mysql/                                             @DataDog/agent-integrations @DataDog/database-monitoring
+/mysql/*.md                                         @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
+/mysql/manifest.json                                @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
 
 # Checks base
 /datadog_checks_base/                                          @DataDog/agent-core @DataDog/agent-integrations

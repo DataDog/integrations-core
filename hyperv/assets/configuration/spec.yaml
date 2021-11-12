@@ -7,5 +7,5 @@ files:
     - template: init_config/default
   - template: instances
     options:
-    - template: instances/pdh
+    - template: instances/pdh_legacy
     - template: instances/default

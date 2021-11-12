@@ -16,6 +16,7 @@ STANDARD_FIELDS = [
     'metrics',
     'prometheus_metrics_prefix',
     'health_service_check',
+    'include_labels',
     'label_to_hostname',
     'label_joins',
     'labels_mapper',

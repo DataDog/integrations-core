@@ -1,11 +1,16 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
+
+import certifi
 import mock
 import pytest
 
 from datadog_checks.sap_hana import SapHanaCheck
 from datadog_checks.sap_hana.connection import HanaConnection
+
+from .common import requires_legacy_library, requires_proprietary_library
 
 pytestmark = pytest.mark.unit
 
@@ -44,7 +49,7 @@ def test_error_unknown(instance):
     check.query_master_database = query_master_database
 
     check.check(None)
-    check.log.error.assert_any_call('Unexpected error running `%s`: %s', 'query_master_database', 'test')
+    check.log.exception.assert_any_call('Unexpected error running `%s`: %s', 'query_master_database', 'test')
 
 
 def test_custom_query_configuration(instance):
@@ -134,6 +139,7 @@ def test_custom_query_configuration(instance):
     gauge.assert_not_called()
 
 
+@requires_legacy_library
 def test_tls_overwrite():
     """Tests that the connection class correctly overrides the `_open_socket_and_init_protocoll` method.
     The fact that there is a typo in the private method name makes it possible that this could change in the future.
@@ -149,6 +155,7 @@ def test_tls_overwrite():
         tls_context.wrap_socket.assert_called()
 
 
+@requires_legacy_library
 def test_no_tls_overwrite_by_default():
     tls_context = mock.MagicMock(__nonzero__=lambda *args: False, __bool__=lambda *args: False)
     socket = mock.MagicMock()
@@ -159,3 +166,101 @@ def test_no_tls_overwrite_by_default():
         with pytest.raises(Exception, match='Invalid message header received'):
             conn.connect()
         tls_context.wrap_socket.assert_not_called()
+
+
+@requires_legacy_library
+@pytest.mark.parametrize(
+    'init_config, instance_config, default_instance, persist',
+    [
+        pytest.param({'persist_db_connections': False}, None, True, False, id='Test option set in init_config'),
+        pytest.param({}, False, False, False, id='Test option set in instance'),
+        pytest.param({'persist_db_connections': False}, True, False, True, id='Test instance override'),
+        pytest.param({}, None, True, True, id='Test instance default behavior'),
+    ],
+)
+def test_persisted_db_connection(
+    instance, dd_run_check, caplog, init_config, instance_config, persist, default_instance
+):
+    caplog.clear()
+    caplog.set_level(logging.DEBUG)
+    expected_message = 'Refreshing database connection.'
+    if not default_instance:
+        instance['persist_db_connections'] = instance_config
+    check = SapHanaCheck('sap_hana', init_config, [instance])
+    dd_run_check(check)
+    if persist:
+        assert expected_message not in caplog.text
+    else:
+        assert expected_message in caplog.text
+    assert check._persist_db_connections == persist
+
+
+@requires_proprietary_library
+class TestConnectionProperties:
+    def test_default(self, instance):
+        check = SapHanaCheck('sap_hana', {}, [instance])
+
+        with mock.patch('datadog_checks.sap_hana.sap_hana.HanaConnection') as m:
+            check.get_connection()
+            m.assert_called_once_with(
+                address=instance['server'],
+                port=instance['port'],
+                user=instance['username'],
+                password=instance['password'],
+                communicationTimeout=10000,
+                nodeConnectTimeout=10000,
+            )
+
+    def test_defined(self, instance):
+        instance = instance.copy()
+        instance['timeout'] = 5
+        instance['connection_properties'] = {
+            'address': 'foobar',
+            'nodeConnectTimeout': 1234,
+            'key': 'hdbuserid',
+            'sslUseDefaultTrustStore': False,
+            'foo': ['bar', 'baz'],
+        }
+        check = SapHanaCheck('sap_hana', {}, [instance])
+
+        with mock.patch('datadog_checks.sap_hana.sap_hana.HanaConnection') as m:
+            check.get_connection()
+            m.assert_called_once_with(
+                address='foobar',
+                port=instance['port'],
+                user=instance['username'],
+                password=instance['password'],
+                communicationTimeout=5000,
+                nodeConnectTimeout=1234,
+                key='hdbuserid',
+                sslUseDefaultTrustStore=False,
+                foo=['bar', 'baz'],
+            )
+
+    def test_tls(self, instance):
+        instance = instance.copy()
+        instance['use_tls'] = True
+        instance['connection_properties'] = {
+            'key': 'hdbuserid',
+            'sslUseDefaultTrustStore': False,
+            'foo': ['bar', 'baz'],
+        }
+        check = SapHanaCheck('sap_hana', {}, [instance])
+
+        with mock.patch('datadog_checks.sap_hana.sap_hana.HanaConnection') as m:
+            check.get_connection()
+            m.assert_called_once_with(
+                address=instance['server'],
+                port=instance['port'],
+                user=instance['username'],
+                password=instance['password'],
+                communicationTimeout=10000,
+                nodeConnectTimeout=10000,
+                encrypt=True,
+                sslHostNameInCertificate=instance['server'],
+                sslSNIHostname=instance['server'],
+                sslTrustStore=certifi.where(),
+                key='hdbuserid',
+                sslUseDefaultTrustStore=False,
+                foo=['bar', 'baz'],
+            )

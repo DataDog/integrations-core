@@ -10,7 +10,7 @@
     The namespace to be prepended to all metrics.
   value:
     type: string
-    pattern: '\w+'
+    pattern: '\w*'
 - name: raw_metric_prefix
   description: |
     A prefix that will be removed from all exposed metric names, if present.

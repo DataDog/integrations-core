@@ -35,6 +35,12 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 1. Hazelcast supports many different [logging adapters][7]. Here is an example of a `log4j2.properties` file:
 
    ```text
@@ -113,6 +119,12 @@ For containerized environments, see the [Autodiscovery with JMX][10] guide.
 
 ##### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][11].
 
 | Parameter      | Value                                              |
@@ -168,7 +180,7 @@ Need help? Contact [Datadog support][5].
 
 
 [1]: https://hazelcast.org
-[2]: https://docs.datadoghq.com/agent/
+[2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/hazelcast/datadog_checks/hazelcast/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/integrations/java/
 [5]: https://docs.datadoghq.com/help/

@@ -1,5 +1,13 @@
 # CHANGELOG - IBM MQ
 
+## 3.16.1 / 2021-10-04 / Agent 7.32.0
+
+* [Fixed] ibm mq queue pattern should have precedence over autodiscover. See [#10247](https://github.com/DataDog/integrations-core/pull/10247).
+
+## 3.16.0 / 2021-09-27
+
+* [Added] Add support for queue status and last put/get time metrics. See [#10129](https://github.com/DataDog/integrations-core/pull/10129).
+
 ## 3.15.0 / 2021-09-20
 
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
