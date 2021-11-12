@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 23.3.0 / 2021-11-12
+
+* [Added] Add new base class for monitoring Windows performance counters. See [#10504](https://github.com/DataDog/integrations-core/pull/10504).
+* [Added] Update dependencies. See [#10580](https://github.com/DataDog/integrations-core/pull/10580).
+
 ## 23.2.0 / 2021-11-10
 
 * [Added] Add option to collect OpenMetrics counters on first scrape. See [#10589](https://github.com/DataDog/integrations-core/pull/10589).
