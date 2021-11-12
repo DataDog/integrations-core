@@ -66,7 +66,7 @@ class QueueMetricCollector(object):
     def discover_queues(self, queue_manager):
         # type: (pymqi.QueueManager) -> Set[str]
         discovered_queues = set()
-        if self.config.auto_discover_queues or self.config.queue_regex:
+        if self.config.auto_discover_queues and not self.config.queue_patterns or self.config.queue_regex:
             discovered_queues.update(self._discover_queues(queue_manager, '*'))
 
         if self.config.queue_patterns:

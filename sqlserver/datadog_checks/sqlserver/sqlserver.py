@@ -9,10 +9,18 @@ from collections import defaultdict
 from itertools import chain
 
 import six
+from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.db.utils import resolve_db_host
+from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
+
+try:
+    import datadog_agent
+except ImportError:
+    from ..stubs import datadog_agent
 
 from . import metrics
 from .connection import Connection, SQLConnectionError
@@ -65,15 +73,19 @@ class SQLServer(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(SQLServer, self).__init__(name, init_config, instances)
 
+        self._resolved_hostname = None
+        self._agent_hostname = None
         self.connection = None
         self.failed_connections = {}
         self.instance_metrics = []
-        self.instance_per_type_metrics = defaultdict(list)
+        self.instance_per_type_metrics = defaultdict(set)
         self.do_check = True
 
         self.autodiscovery = is_affirmative(self.instance.get('database_autodiscovery'))
         self.autodiscovery_include = self.instance.get('autodiscovery_include', ['.*'])
         self.autodiscovery_exclude = self.instance.get('autodiscovery_exclude', [])
+        self.autodiscovery_db_service_check = is_affirmative(self.instance.get('autodiscovery_db_service_check', True))
+        self.min_collection_interval = self.instance.get('min_collection_interval', 15)
         self._compile_patterns()
         self.autodiscovery_interval = self.instance.get('autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL)
         self.databases = set()
@@ -84,10 +96,25 @@ class SQLServer(AgentCheck):
         self.custom_metrics = init_config.get('custom_metrics', [])
 
         # use QueryManager to process custom queries
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self.instance.get("tags", []))
+        self.tags = self.instance.get("tags", [])
+        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self.tags)
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self._query_manager.compile_queries)
         self.check_initializations.append(self.initialize_connection)
+
+        # DBM
+        self.dbm_enabled = self.instance.get('dbm', False)
+        self.statement_metrics_config = self.instance.get('query_metrics', {}) or {}
+        self.statement_metrics = SqlserverStatementMetrics(self)
+
+        self.static_info_cache = TTLCache(
+            maxsize=100,
+            # cache these for a full day
+            ttl=60 * 60 * 24,
+        )
+
+    def cancel(self):
+        self.statement_metrics.cancel()
 
     def config_checks(self):
         if self.autodiscovery and self.instance.get('database'):
@@ -99,6 +126,58 @@ class SQLServer(AgentCheck):
             self.log.warning(
                 "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored"
             )
+
+    def split_sqlserver_host_port(self, host):
+        """
+        Splits the host & port out of the provided SQL Server host connection string, returning (host, port).
+        """
+        if not host:
+            return host, None
+        host_split = [s.strip() for s in host.split(',')]
+        if len(host_split) == 1:
+            return host_split[0], None
+        if len(host_split) == 2:
+            return host_split
+        # else len > 2
+        s_host, s_port = host_split[0:2]
+        self.log.warning(
+            "invalid sqlserver host string has more than one comma: %s. using only 1st two items: host:%s, port:%s",
+            host,
+            s_host,
+            s_port,
+        )
+        return s_host, s_port
+
+    @property
+    def resolved_hostname(self):
+        if self._resolved_hostname is None:
+            if self.dbm_enabled:
+                host, port = self.split_sqlserver_host_port(self.instance.get('host'))
+                self._resolved_hostname = resolve_db_host(host)
+            else:
+                self._resolved_hostname = self.agent_hostname
+        return self._resolved_hostname
+
+    def load_static_information(self):
+        if 'version' not in self.static_info_cache:
+            with self.connection.open_managed_default_connection():
+                with self.connection.get_managed_cursor() as cursor:
+                    cursor.execute("select @@version")
+                    results = cursor.fetchall()
+                    if results and len(results) > 0 and len(results[0]) > 0 and results[0][0]:
+                        self.static_info_cache["version"] = results[0][0]
+                    else:
+                        self.log.warning("failed to load version static information due to empty results")
+
+    def debug_tags(self):
+        return self.tags + ['agent_hostname:{}'.format(self.agent_hostname)]
+
+    @property
+    def agent_hostname(self):
+        # type: () -> str
+        if self._agent_hostname is None:
+            self._agent_hostname = datadog_agent.get_hostname()
+        return self._agent_hostname
 
     def initialize_connection(self):
         self.connection = Connection(self.init_config, self.instance, self.handle_service_check)
@@ -137,10 +216,13 @@ class SQLServer(AgentCheck):
 
     def handle_service_check(self, status, host, database, message=None, is_default=True):
         custom_tags = self.instance.get("tags", [])
+        disable_generic_tags = self.instance.get('disable_generic_tags', False)
         if custom_tags is None:
             custom_tags = []
-
-        service_check_tags = ['host:{}'.format(host), 'db:{}'.format(database)]
+        if disable_generic_tags:
+            service_check_tags = ['sqlserver_host:{}'.format(host), 'db:{}'.format(database)]
+        else:
+            service_check_tags = ['host:{}'.format(host), 'sqlserver_host:{}'.format(host), 'db:{}'.format(database)]
         service_check_tags.extend(custom_tags)
         service_check_tags = list(set(service_check_tags))
 
@@ -149,7 +231,7 @@ class SQLServer(AgentCheck):
 
         if is_default:
             self.service_check(SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
-        if self.autodiscovery:
+        if self.autodiscovery and self.autodiscovery_db_service_check:
             self.service_check(DATABASE_SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
 
     def _compile_patterns(self):
@@ -355,9 +437,9 @@ class SQLServer(AgentCheck):
             name = m.sql_name or m.column
             self.log.debug("Adding metric class %s named %s", cls, name)
 
-            self.instance_per_type_metrics[cls].append(name)
+            self.instance_per_type_metrics[cls].add(name)
             if m.base_name:
-                self.instance_per_type_metrics[cls].append(m.base_name)
+                self.instance_per_type_metrics[cls].add(m.base_name)
 
     def _add_performance_counters(self, metrics, metrics_to_collect, tags, db=None):
         if db is not None:
@@ -447,14 +529,18 @@ class SQLServer(AgentCheck):
 
     def check(self, _):
         if self.do_check:
+            self.load_static_information()
             if self.proc:
                 self.do_stored_procedure_check()
             else:
                 self.collect_metrics()
-            if self.autodiscovery:
+            if self.autodiscovery and self.autodiscovery_db_service_check:
                 for db_name in self.databases:
                     if db_name != self.connection.DEFAULT_DATABASE:
                         self.connection.check_database_conns(db_name)
+            if self.dbm_enabled:
+                self.statement_metrics.run_job_loop(self.tags)
+
         else:
             self.log.debug("Skipping check")
 
@@ -475,7 +561,7 @@ class SQLServer(AgentCheck):
                         instance_results[cls] = None, None
                     else:
                         try:
-                            rows, cols = getattr(metrics, cls).fetch_all_values(cursor, metric_names, self.log)
+                            rows, cols = getattr(metrics, cls).fetch_all_values(cursor, list(metric_names), self.log)
                         except Exception as e:
                             self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
                             rows, cols = None, None

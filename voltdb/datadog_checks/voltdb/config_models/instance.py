@@ -65,6 +65,7 @@ class InstanceConfig(BaseModel):
     log_requests: Optional[bool]
     min_collection_interval: Optional[float]
     ntlm_domain: Optional[str]
+    only_custom_queries: Optional[bool]
     password: str
     password_hashed: Optional[bool]
     persist_connections: Optional[bool]

@@ -1,5 +1,51 @@
 # CHANGELOG - datadog_checks_base
 
+## 23.2.0 / 2021-11-10
+
+* [Added] Add option to collect OpenMetrics counters on first scrape. See [#10589](https://github.com/DataDog/integrations-core/pull/10589).
+* [Added] Add support for OpenMetrics include_labels option. See [#10493](https://github.com/DataDog/integrations-core/pull/10493).
+* [Added] Upgrade psycopg2 on Python 3. See [#10442](https://github.com/DataDog/integrations-core/pull/10442).
+* [Added] Add more utilities. See [#10448](https://github.com/DataDog/integrations-core/pull/10448).
+* [Added] Add support for other logical operators for multiple conditions of the same property. See [#10138](https://github.com/DataDog/integrations-core/pull/10138).
+* [Fixed] Fix unintentional limit on dbm instances from ThreadPoolExecutor's default max_workers. See [#10460](https://github.com/DataDog/integrations-core/pull/10460).
+* [Fixed] Revert "Upgrade psycopg2 on Python 3". See [#10456](https://github.com/DataDog/integrations-core/pull/10456).
+* [Fixed] Update tuf to 0.19.0 for python 3. See [#10444](https://github.com/DataDog/integrations-core/pull/10444).
+* [Fixed] [OpenMetricsV2] Allow empty namespaces. See [#10420](https://github.com/DataDog/integrations-core/pull/10420).
+* [Fixed] Add warning when no query is configured. See [#10336](https://github.com/DataDog/integrations-core/pull/10336).
+
+## 23.1.5 / 2021-10-22 / Agent 7.32.0
+
+* [Fixed] Fix unintentional limit on dbm instances from ThreadPoolExecutor's default max_workers. See [#10460](https://github.com/DataDog/integrations-core/pull/10460).
+
+## 23.1.4 / 2021-10-19
+
+* [Fixed] Update tuf to 0.19.0 for Python 3. See [#10444](https://github.com/DataDog/integrations-core/pull/10444).
+
+## 23.1.3 / 2021-10-15
+
+* [Fixed] [OpenMetricsV2] Allow empty namespaces. See [#10420](https://github.com/DataDog/integrations-core/pull/10420).
+* [Fixed] Add warning when no query is configured. See [#10336](https://github.com/DataDog/integrations-core/pull/10336).
+
+## 23.1.2 / 2021-10-05
+
+* [Fixed] Remove `server` from the list of generic tags. See [#10344](https://github.com/DataDog/integrations-core/pull/10344).
+
+## 23.1.1 / 2021-10-05
+
+* [Fixed] Add warning when no query is configured. See [#10336](https://github.com/DataDog/integrations-core/pull/10336).
+
+## 23.1.0 / 2021-10-01
+
+* [Added] Add only_custom_queries option to database utils. See [#10314](https://github.com/DataDog/integrations-core/pull/10314).
+* [Added] Update dependencies. See [#10258](https://github.com/DataDog/integrations-core/pull/10258).
+
+## 23.0.0 / 2021-09-29
+
+* [Added] Update dependencies. See [#10228](https://github.com/DataDog/integrations-core/pull/10228)
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add new function to report dbm-activity events. See [#10223](https://github.com/DataDog/integrations-core/pull/10223).
+* [Changed] DBMAsyncJob send internal metrics as raw. See [#10274](https://github.com/DataDog/integrations-core/pull/10274).
+
 ## 22.0.0 / 2021-09-24
 
 * [Added] Upgrade python-dateutil to 2.8.2. See [#10206](https://github.com/DataDog/integrations-core/pull/10206).

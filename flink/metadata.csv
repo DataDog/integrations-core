@@ -1,8 +1,8 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-flink.jobmanager.Status.JVM.CPU.load,gauge,,percent,,The recent CPU usage of the JVM in the jobmanager,0,flink,jobmanager cpu load
-flink.jobmanager.Status.JVM.CPU.time,gauge,,second,,The CPU time used by the JVM in the jobmanager,0,flink,jobmanager cpu time
-flink.taskmanager.Status.JVM.CPU.load,gauge,,percent,,The recent CPU usage of the JVM in the taskmanager,0,flink,taskmanager cpu load
-flink.taskmanager.Status.JVM.CPU.time,gauge,,second,,The CPU time used by the JVM in the taskmanager,0,flink,taskmanager cpu time
+flink.jobmanager.Status.JVM.CPU.Load,gauge,,percent,,The recent CPU usage of the JVM in the jobmanager,0,flink,jobmanager cpu load
+flink.jobmanager.Status.JVM.CPU.Time,gauge,,second,,The CPU time used by the JVM in the jobmanager,0,flink,jobmanager cpu time
+flink.taskmanager.Status.JVM.CPU.Load,gauge,,percent,,The recent CPU usage of the JVM in the taskmanager,0,flink,taskmanager cpu load
+flink.taskmanager.Status.JVM.CPU.Time,gauge,,second,,The CPU time used by the JVM in the taskmanager,0,flink,taskmanager cpu time
 flink.jobmanager.Status.JVM.Memory.Heap.Used,gauge,,byte,,The amount of heap memory currently used in the jobmanager,0,flink,jobmanager heap used
 flink.jobmanager.Status.JVM.Memory.Heap.Committed,gauge,,byte,,The amount of heap memory guaranteed to be available to the JVM in the jobmanager,0,flink,jobmanager heap committed
 flink.jobmanager.Status.JVM.Memory.Heap.Max,gauge,,byte,,The maximum amount of heap memory that can be used for memory management in the jobmanager,0,flink,jobmanager heap max

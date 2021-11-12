@@ -57,6 +57,12 @@ Follow now the instructions below to configure this check for an Agent running o
 
 ##### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
@@ -96,6 +102,12 @@ To collect metrics with the Datadog-Hive integration, see the [Autodiscovery wit
 
 ##### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 _Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][10].
@@ -130,7 +142,7 @@ See [service_checks.json][13] for a list of service checks provided by this inte
 Need help? Contact [Datadog support][6].
 
 [1]: https://cwiki.apache.org/confluence/display/Hive/Home
-[2]: https://docs.datadoghq.com/agent/
+[2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://cwiki.apache.org/confluence/display/Hive/Configuration+Properties#ConfigurationProperties-Metrics
 [4]: https://github.com/DataDog/integrations-core/blob/master/hive/datadog_checks/hive/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/integrations/java/

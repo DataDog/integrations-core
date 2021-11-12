@@ -1,5 +1,65 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 15.2.0 / 2021-11-10
+
+* [Added] Update style dependencies. See [#10582](https://github.com/DataDog/integrations-core/pull/10582).
+* [Added] Add option to include security deps in dep command. See [#10523](https://github.com/DataDog/integrations-core/pull/10523).
+* [Added] Add some debug messages to release make command and some refactor. See [#10535](https://github.com/DataDog/integrations-core/pull/10535).
+* [Added] Adding to schema required field tags. See [#9777](https://github.com/DataDog/integrations-core/pull/9777).
+* [Added] Adding table metric tags validator. See [#9820](https://github.com/DataDog/integrations-core/pull/9820).
+* [Added] Allow passing multiple directories to the `validate-profile` SNMP command. See [#10029](https://github.com/DataDog/integrations-core/pull/10029).
+* [Added] Add --format-links flag to README validation. See [#10469](https://github.com/DataDog/integrations-core/pull/10469).
+* [Added] Add decimal bytes units to metric metadata validation. See [#10378](https://github.com/DataDog/integrations-core/pull/10378).
+* [Added] Add annotations to dep validation. See [#10286](https://github.com/DataDog/integrations-core/pull/10286).
+* [Added] Add new validation to warn on bad style. See [#10430](https://github.com/DataDog/integrations-core/pull/10430).
+* [Fixed] Fix location of config. See [#10590](https://github.com/DataDog/integrations-core/pull/10590).
+* [Fixed] Update README templates. See [#10564](https://github.com/DataDog/integrations-core/pull/10564).
+* [Fixed] Update ignored deps. See [#10516](https://github.com/DataDog/integrations-core/pull/10516).
+* [Fixed] Fix ddev dash export for manifest v2. See [#10503](https://github.com/DataDog/integrations-core/pull/10503).
+* [Fixed] Update checks that do not make sense to have logs. See [#10366](https://github.com/DataDog/integrations-core/pull/10366).
+* [Fixed] Fix description of jmx options. See [#10454](https://github.com/DataDog/integrations-core/pull/10454).
+
+## 15.1.0 / 2021-10-15
+
+* [Added] Annotate manifest validation. See [#10022](https://github.com/DataDog/integrations-core/pull/10022).
+* [Fixed] [OpenMetricsV2] Allow empty namespaces. See [#10420](https://github.com/DataDog/integrations-core/pull/10420).
+* [Fixed] Remove unused MIB_SOURCE_URL and use relative imports. See [#10353](https://github.com/DataDog/integrations-core/pull/10353).
+
+## 15.0.0 / 2021-10-13
+
+* [Changed] Rename legacy PDH config spec. See [#10412](https://github.com/DataDog/integrations-core/pull/10412).
+
+## 14.5.1 / 2021-10-12
+
+* [Fixed] Update dashboard validation for Manifest V2. See [#10398](https://github.com/DataDog/integrations-core/pull/10398).
+* [Fixed] Ignore metadata and service-checks when no integration included. See [#10399](https://github.com/DataDog/integrations-core/pull/10399).
+
+## 14.5.0 / 2021-10-12
+
+* [Added] Add meta command for browsing Windows performance counters. See [#10385](https://github.com/DataDog/integrations-core/pull/10385).
+
+## 14.4.1 / 2021-10-08
+
+* [Fixed] Allow entire config templates to be hidden and include Openmetrics legacy config option in models. See [#10348](https://github.com/DataDog/integrations-core/pull/10348).
+
+## 14.4.0 / 2021-10-04
+
+* [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
+* [Added] Enable E2E logs agent by default if environments mount logs. See [#10293](https://github.com/DataDog/integrations-core/pull/10293).
+* [Added] Add annotations for ci. See [#10260](https://github.com/DataDog/integrations-core/pull/10260).
+* [Fixed] Fix scope of E2E state management fixtures. See [#10316](https://github.com/DataDog/integrations-core/pull/10316).
+
+## 14.3.0 / 2021-09-30
+
+* [Added] Allow setting DD_SITE in org config. See [#10285](https://github.com/DataDog/integrations-core/pull/10285).
+* [Added] Update readme validation to check repo over support. See [#10283](https://github.com/DataDog/integrations-core/pull/10283).
+* [Added] Create and use new Manifest interface class for ddev commands. See [#10261](https://github.com/DataDog/integrations-core/pull/10261).
+* [Added] Still support python2 with mypy. See [#10272](https://github.com/DataDog/integrations-core/pull/10272).
+* [Added] Update style dependencies. See [#10238](https://github.com/DataDog/integrations-core/pull/10238).
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Fixed] Don't add null values to classifier tags. See [#10279](https://github.com/DataDog/integrations-core/pull/10279).
+* [Fixed] Set repo name after we process the `--here` flag. See [#10259](https://github.com/DataDog/integrations-core/pull/10259).
+
 ## 14.2.0 / 2021-09-27
 
 * [Added] Update AZP templates to take in a dd_url and small fixes to validator. See [#10230](https://github.com/DataDog/integrations-core/pull/10230).
