@@ -41,7 +41,8 @@
       "Kubernetes Services Overview": "assets/dashboards/kubernetes_services.json",
       "Kubernetes DaemonSets Overview": "assets/dashboards/kubernetes_daemonsets.json",
       "Kubernetes Jobs & Cronjobs Overview": "assets/dashboards/kubernetes_jobs.json",
-      "Kubernetes StatefulSets Overview": "assets/dashboards/kubernetes_statefulsets.json"
+      "Kubernetes StatefulSets Overview": "assets/dashboards/kubernetes_statefulsets.json",
+      "Kubernetes Clusters Overview": "assets/dashboards/kubernetes_clusters.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {},
