@@ -9,7 +9,7 @@ import win32pdh
 
 from ....errors import ConfigTypeError, ConfigValueError
 from .transform import NATIVE_TRANSFORMERS, TRANSFORMERS
-from .utils import construct_counter_path, get_counter_value
+from .utils import construct_counter_path, format_instance, get_counter_value
 
 
 class PerfObject:
@@ -361,9 +361,18 @@ class SingleCounter(CounterBase):
             self.counter_handle = self.counter_selector(self.connection.query_handle, self.path)
 
     def clear(self):
-        # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhremovecounter
-        # http://timgolden.me.uk/pywin32-docs/win32pdh__RemoveCounter_meth.html
-        win32pdh.RemoveCounter(self.counter_handle)
+        try:
+            # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhremovecounter
+            # http://timgolden.me.uk/pywin32-docs/win32pdh__RemoveCounter_meth.html
+            win32pdh.RemoveCounter(self.counter_handle)
+        except Exception as e:
+            self.logger.warning(
+                'Unable to remove handle for counter `%s` of performance object `%s`: %s',
+                self.name,
+                self.object_name,
+                e,
+            )
+
         self.counter_handle = None
 
 
@@ -428,7 +437,7 @@ class MultiCounter(CounterBase):
                     value = get_counter_value(counter_handle)
                 except pywintypes.error as error:
                     instance_handles_with_data -= 1
-                    self.handle_counter_value_error(error, instance if i == 0 else f'{instance}#{i}')
+                    self.handle_counter_value_error(error, format_instance(instance, i))
                 else:
                     instance_total += value
 
@@ -481,9 +490,19 @@ class MultiCounter(CounterBase):
                     for _ in range(old_count - current_count):
                         counter_handle = counter_handles.pop()
 
-                        # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhremovecounter
-                        # http://timgolden.me.uk/pywin32-docs/win32pdh__RemoveCounter_meth.html
-                        win32pdh.RemoveCounter(counter_handle)
+                        try:
+                            # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhremovecounter
+                            # http://timgolden.me.uk/pywin32-docs/win32pdh__RemoveCounter_meth.html
+                            win32pdh.RemoveCounter(counter_handle)
+                        except Exception as e:
+                            self.logger.warning(
+                                'Unable to remove handle for instance `%s` of counter `%s` '
+                                'of performance object `%s`: %s',
+                                format_instance(instance, len(counter_handles)),
+                                self.name,
+                                self.object_name,
+                                e,
+                            )
             else:
                 counter_handles = []
                 new_instances[instance] = counter_handles
@@ -505,12 +524,20 @@ class MultiCounter(CounterBase):
         self.instances = new_instances
 
     def clear(self):
-        for counter_handles in self.instances.values():
+        for instance, counter_handles in self.instances.items():
             while counter_handles:
                 counter_handle = counter_handles.pop()
-
-                # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhremovecounter
-                # http://timgolden.me.uk/pywin32-docs/win32pdh__RemoveCounter_meth.html
-                win32pdh.RemoveCounter(counter_handle)
+                try:
+                    # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhremovecounter
+                    # http://timgolden.me.uk/pywin32-docs/win32pdh__RemoveCounter_meth.html
+                    win32pdh.RemoveCounter(counter_handle)
+                except Exception as e:
+                    self.logger.warning(
+                        'Unable to remove handle for instance `%s` of counter `%s` of performance object `%s`: %s',
+                        format_instance(instance, len(counter_handles)),
+                        self.name,
+                        self.object_name,
+                        e,
+                    )
 
         self.instances.clear()

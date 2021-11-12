@@ -6,6 +6,10 @@ import win32pdh
 from .constants import COUNTER_VALUE_FORMAT
 
 
+def format_instance(instance, index):
+    return instance if index == 0 else f'{instance}#{index}'
+
+
 def construct_counter_path(*, machine_name, object_name, counter_name, instance_name=None, instance_index=0):
     # More info: https://docs.microsoft.com/en-us/windows/win32/perfctrs/specifying-a-counter-path
     #
