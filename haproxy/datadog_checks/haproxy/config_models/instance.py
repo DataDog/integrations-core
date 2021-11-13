@@ -83,6 +83,7 @@ class InstanceConfig(BaseModel):
     ignore_metrics: Optional[Sequence[str]]
     ignore_metrics_by_labels: Optional[IgnoreMetricsByLabels]
     ignore_tags: Optional[Sequence[str]]
+    include_labels: Optional[Sequence[str]]
     kerberos_auth: Optional[str]
     kerberos_cache: Optional[str]
     kerberos_delegate: Optional[bool]
@@ -130,6 +131,7 @@ class InstanceConfig(BaseModel):
     type_overrides: Optional[Mapping[str, Any]]
     url: Optional[str]
     use_legacy_auth_encoding: Optional[bool]
+    use_process_start_time: Optional[bool]
     use_prometheus: Optional[bool]
     username: Optional[str]
 

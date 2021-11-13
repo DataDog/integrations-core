@@ -336,6 +336,12 @@ class PostgresStatementSamples(DBMAsyncJob):
             tags=self._tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
+        self._check.gauge(
+            "dd.postgres.collect_statement_samples.explain_errors_cache.len",
+            len(self._explain_errors_cache),
+            tags=self._tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
 
     @staticmethod
     def _to_active_session(row):
