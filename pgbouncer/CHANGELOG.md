@@ -1,5 +1,11 @@
 # CHANGELOG - pgbouncer
 
+## 3.2.0 / 2021-11-13
+
+* [Added] Add runtime configuration validation. See [#8968](https://github.com/DataDog/integrations-core/pull/8968).
+* [Added] Upgrade psycopg2 on Python 3. See [#10442](https://github.com/DataDog/integrations-core/pull/10442).
+* [Fixed] Revert "Upgrade psycopg2 on Python 3 (#10442)". See [#10456](https://github.com/DataDog/integrations-core/pull/10456).
+
 ## 3.1.0 / 2021-09-06 / Agent 7.32.0
 
 * [Added] Add max_client_conn metric. See [#10033](https://github.com/DataDog/integrations-core/pull/10033). Thanks [JordanP](https://github.com/JordanP).
