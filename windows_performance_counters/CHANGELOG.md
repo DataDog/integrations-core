@@ -1,0 +1,2 @@
+# CHANGELOG - Windows performance counters
+
