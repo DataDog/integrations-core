@@ -1,5 +1,14 @@
 # CHANGELOG - SAP HANA
 
+## 1.9.0 / 2021-11-13
+
+* [Added] Support the `hdbcli` client library. See [#10595](https://github.com/DataDog/integrations-core/pull/10595).
+* [Fixed] Ensure `persist_db_connections` is read from init_config. See [#10417](https://github.com/DataDog/integrations-core/pull/10417).
+* [Fixed] Ensure `persist_db_connections` is read from init_config. See [#10417](https://github.com/DataDog/integrations-core/pull/10417).
+* [Fixed] Resolve unexpected errors when statuses other than 'running' or 'idle' are received. See [#10333](https://github.com/DataDog/integrations-core/pull/10333).
+* [Fixed] Bump base package requirements. See [#10390](https://github.com/DataDog/integrations-core/pull/10390).
+* [Fixed] Bump base package requirements. See [#10390](https://github.com/DataDog/integrations-core/pull/10390).
+
 ## 1.8.2 / 2021-10-15 / Agent 7.32.0
 
 * [Fixed] Ensure `persist_db_connections` is read from init_config. See [#10417](https://github.com/DataDog/integrations-core/pull/10417).
