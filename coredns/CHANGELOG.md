@@ -3,6 +3,7 @@
 ## 1.10.0 / 2021-11-13
 
 * [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
+* [Added] Document new use_process_start_time option. See [#10601](https://github.com/DataDog/integrations-core/pull/10601).
 * [Added] Add runtime configuration validation. See [#8900](https://github.com/DataDog/integrations-core/pull/8900).
 * [Added] Update coredns check with v1.8.5 metrics. See [#10187](https://github.com/DataDog/integrations-core/pull/10187). Thanks [vxcodes](https://github.com/vxcodes).
 

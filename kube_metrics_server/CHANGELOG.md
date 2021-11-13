@@ -3,6 +3,7 @@
 ## 1.4.0 / 2021-11-13
 
 * [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
+* [Added] Document new use_process_start_time option. See [#10601](https://github.com/DataDog/integrations-core/pull/10601).
 * [Added] Add kube_metrics_server config spec. See [#10509](https://github.com/DataDog/integrations-core/pull/10509).
 
 ## 1.3.0 / 2021-05-28 / Agent 7.29.0
