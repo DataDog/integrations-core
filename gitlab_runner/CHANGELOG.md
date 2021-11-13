@@ -1,5 +1,9 @@
 # CHANGELOG - gitlab_runner
 
+## 2.14.0 / 2021-11-13
+
+* [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
+
 ## 2.13.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
