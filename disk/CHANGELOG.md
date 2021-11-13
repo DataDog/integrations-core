@@ -1,5 +1,10 @@
 # CHANGELOG - disk
 
+## 4.5.0 / 2021-11-13
+
+* [Added] Add runtime configuration validation. See [#8905](https://github.com/DataDog/integrations-core/pull/8905).
+* [Fixed] [disk] Fix `tag_by_label` when used together with `use_mount`. See [#10418](https://github.com/DataDog/integrations-core/pull/10418).
+
 ## 4.4.0 / 2021-08-05 / Agent 7.31.0
 
 * [Added] Add option to use `lsblk` command for labeling. See [#9827](https://github.com/DataDog/integrations-core/pull/9827).
