@@ -248,5 +248,9 @@ def instance_use_legacy_auth_encoding(field, value):
     return True
 
 
+def instance_use_process_start_time(field, value):
+    return False
+
+
 def instance_username(field, value):
     return get_default_field_value(field, value)
