@@ -5,7 +5,7 @@
 * [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
 * [Added] Document new use_process_start_time option. See [#10601](https://github.com/DataDog/integrations-core/pull/10601).
 * [Added] Collect a metric about valid and invalid DatadogMetrics. See [#10525](https://github.com/DataDog/integrations-core/pull/10525).
-* [Fixed] fix: Add missing metric to datadog_cluster_agent. See [#10607](https://github.com/DataDog/integrations-core/pull/10607).
+* [Fixed] Add missing metric to datadog_cluster_agent. See [#10607](https://github.com/DataDog/integrations-core/pull/10607).
 
 ## 1.2.0 / 2021-10-04 / Agent 7.32.0
 
