@@ -4,10 +4,10 @@
 
 * [Added] Update dependencies. See [#10580](https://github.com/DataDog/integrations-core/pull/10580).
 * [Added] Add option to disable autodiscovery database service checks. See [#10491](https://github.com/DataDog/integrations-core/pull/10491).
-* [Fixed] handle missing DBM metrics columns on older SQL Server versions. See [#10594](https://github.com/DataDog/integrations-core/pull/10594).
-* [Fixed] fix sqlserver resolved_hostname by handling comma correctly. See [#10592](https://github.com/DataDog/integrations-core/pull/10592).
-* [Fixed] fix memory clerks metrics for sqlserver 2019. See [#10464](https://github.com/DataDog/integrations-core/pull/10464).
-* [Fixed] Upgrade datadog checks base to 23.1.5 in sqlserver integration. See [#10468](https://github.com/DataDog/integrations-core/pull/10468).
+* [Fixed] Handle missing DBM metrics columns on older SQL Server versions. See [#10594](https://github.com/DataDog/integrations-core/pull/10594).
+* [Fixed] Fix sqlserver resolved_hostname by handling comma correctly. See [#10592](https://github.com/DataDog/integrations-core/pull/10592).
+* [Fixed] Fix memory clerks metrics for sqlserver 2019. See [#10464](https://github.com/DataDog/integrations-core/pull/10464).
+* [Fixed] Upgrade datadog checks base to 23.1.5. See [#10468](https://github.com/DataDog/integrations-core/pull/10468).
 
 ## 6.0.0 / 2021-10-13
 
