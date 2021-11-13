@@ -1,5 +1,9 @@
 # CHANGELOG - zk
 
+## 3.1.1 / 2021-11-13
+
+* [Fixed] Added verbose logging for parsing 'mntr' output. See [#10531](https://github.com/DataDog/integrations-core/pull/10531). Thanks [Kyle-Neale](https://github.com/Kyle-Neale).
+
 ## 3.1.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
