@@ -1,5 +1,10 @@
 # CHANGELOG - etcd
 
+## 2.9.0 / 2021-11-13
+
+* [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
+* [Fixed] Update mapping of deprecated metrics in etcd 3.5.0. See [#10209](https://github.com/DataDog/integrations-core/pull/10209). Thanks [csmartins](https://github.com/csmartins).
+
 ## 2.8.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add runtime configuration validation. See [#8913](https://github.com/DataDog/integrations-core/pull/8913).
