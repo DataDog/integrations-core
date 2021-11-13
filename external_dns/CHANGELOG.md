@@ -1,5 +1,10 @@
 # CHANGELOG - External DNS
 
+## 1.5.0 / 2021-11-13
+
+* [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
+* [Added] Add controller last sync timestamp metric to external dns. See [#10428](https://github.com/DataDog/integrations-core/pull/10428). Thanks [mattjnewberry](https://github.com/mattjnewberry).
+
 ## 1.4.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add runtime configuration validation. See [#8915](https://github.com/DataDog/integrations-core/pull/8915).
