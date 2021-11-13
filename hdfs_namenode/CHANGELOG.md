@@ -1,5 +1,9 @@
 # CHANGELOG - hdfs_namenode
 
+## 2.2.0 / 2021-11-13
+
+* [Added] Support newer versions of Hadoop. See [#10538](https://github.com/DataDog/integrations-core/pull/10538).
+
 ## 2.1.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add runtime configuration validation. See [#8928](https://github.com/DataDog/integrations-core/pull/8928).
