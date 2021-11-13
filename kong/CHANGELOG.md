@@ -1,5 +1,10 @@
 # CHANGELOG - kong
 
+## 1.17.0 / 2021-11-13
+
+* [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
+* [Added] Add runtime configuration validation. See [#8943](https://github.com/DataDog/integrations-core/pull/8943).
+
 ## 1.16.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
