@@ -6,7 +6,7 @@ import pytest
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield {
+    instance = {
         'namespace': 'test',
         'metrics': {
             'Processor': {
@@ -23,3 +23,5 @@ def dd_environment():
         'server_tag': 'machine',
         'tags': ['foo:bar', 'bar:baz'],
     }
+    e2e_metadata = {'docker_platform': 'windows'}
+    yield instance, e2e_metadata
