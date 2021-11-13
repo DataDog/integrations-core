@@ -1,5 +1,9 @@
 # CHANGELOG - solr
 
+## 1.10.1 / 2021-11-13
+
+* [Fixed] Fix description of jmx options. See [#10454](https://github.com/DataDog/integrations-core/pull/10454).
+
 ## 1.10.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add runtime configuration validation. See [#8984](https://github.com/DataDog/integrations-core/pull/8984).
