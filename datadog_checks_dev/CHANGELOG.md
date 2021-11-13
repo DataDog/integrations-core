@@ -1,5 +1,14 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 15.3.0 / 2021-11-13
+
+* [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
+* [Added] Add new base class for monitoring Windows performance counters. See [#10504](https://github.com/DataDog/integrations-core/pull/10504).
+* [Added] Update dependencies. See [#10580](https://github.com/DataDog/integrations-core/pull/10580).
+* [Fixed] Update annotations util with relative imports. See [#10613](https://github.com/DataDog/integrations-core/pull/10613).
+* [Fixed] Remove integration style hostname submission validation. See [#10609](https://github.com/DataDog/integrations-core/pull/10609).
+* [Fixed] Update warning message about agent signature. See [#10606](https://github.com/DataDog/integrations-core/pull/10606).
+
 ## 15.2.0 / 2021-11-10
 
 * [Added] Update style dependencies. See [#10582](https://github.com/DataDog/integrations-core/pull/10582).
