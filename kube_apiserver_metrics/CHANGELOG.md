@@ -1,10 +1,10 @@
 # CHANGELOG - Kube_apiserver_metrics
 
-## 2.0.0 / 2021-11-13
+## 1.12.0 / 2021-11-13
 
 * [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
 * [Added] Document new use_process_start_time option. See [#10601](https://github.com/DataDog/integrations-core/pull/10601).
-* [Changed] feat: add kube_apiserver.etcd.db.total_size metric. See [#10569](https://github.com/DataDog/integrations-core/pull/10569).
+* [Added] Add kube_apiserver.etcd.db.total_size metric. See [#10569](https://github.com/DataDog/integrations-core/pull/10569).
 
 ## 1.11.0 / 2021-10-04 / Agent 7.32.0
 
