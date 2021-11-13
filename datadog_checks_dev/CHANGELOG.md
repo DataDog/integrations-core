@@ -3,6 +3,7 @@
 ## 15.3.0 / 2021-11-13
 
 * [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
+* [Added] Document new use_process_start_time option. See [#10601](https://github.com/DataDog/integrations-core/pull/10601).
 * [Added] Add new base class for monitoring Windows performance counters. See [#10504](https://github.com/DataDog/integrations-core/pull/10504).
 * [Added] Update dependencies. See [#10580](https://github.com/DataDog/integrations-core/pull/10580).
 * [Fixed] Update annotations util with relative imports. See [#10613](https://github.com/DataDog/integrations-core/pull/10613).
@@ -26,7 +27,7 @@
 * [Fixed] Update ignored deps. See [#10516](https://github.com/DataDog/integrations-core/pull/10516).
 * [Fixed] Fix ddev dash export for manifest v2. See [#10503](https://github.com/DataDog/integrations-core/pull/10503).
 * [Fixed] Update checks that do not make sense to have logs. See [#10366](https://github.com/DataDog/integrations-core/pull/10366).
-* [Fixed] Fix description of jmx options. See [#10454](https://github.com/DataDog/integrations-core/pull/10454).
+* [Fixed] Fix description of JMX options. See [#10454](https://github.com/DataDog/integrations-core/pull/10454).
 
 ## 15.1.0 / 2021-10-15
 

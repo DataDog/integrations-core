@@ -3,7 +3,7 @@
 ## 1.6.0 / 2021-11-13
 
 * [Added] Add runtime configuration validation. See [#8898](https://github.com/DataDog/integrations-core/pull/8898).
-* [Fixed] Fix description of jmx options. See [#10454](https://github.com/DataDog/integrations-core/pull/10454).
+* [Fixed] Fix description of JMX options. See [#10454](https://github.com/DataDog/integrations-core/pull/10454).
 
 ## 1.5.0 / 2021-07-12 / Agent 7.30.0
 
