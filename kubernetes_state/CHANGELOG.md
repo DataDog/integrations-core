@@ -1,8 +1,8 @@
 # CHANGELOG - kubernetes_state
 
-## 6.1.0 / 2021-11-13
+## 6.0.1 / 2021-11-13
 
-* [Added] Fix clustername for invalid RFC1123 cases. See [#10262](https://github.com/DataDog/integrations-core/pull/10262).
+* [Fixed] Fix clustername for invalid RFC1123 cases. See [#10262](https://github.com/DataDog/integrations-core/pull/10262).
 
 ## 6.0.0 / 2021-08-22 / Agent 7.31.0
 
