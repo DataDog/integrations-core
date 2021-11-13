@@ -1,5 +1,22 @@
 # CHANGELOG - postgres
 
+## 12.0.0 / 2021-11-13
+
+* [Added] add internal debug metric for explain error cache length. See [#10616](https://github.com/DataDog/integrations-core/pull/10616).
+* [Added] Add index bloat metric . See [#10431](https://github.com/DataDog/integrations-core/pull/10431).
+* [Added] Upgrade psycopg2 on Python 3. See [#10442](https://github.com/DataDog/integrations-core/pull/10442).
+* [Added] Add ssl configuration options to postgres integration. See [#10429](https://github.com/DataDog/integrations-core/pull/10429).
+* [Added] Adds postgres vacuumed and autoanalyzed metrics. See [#10350](https://github.com/DataDog/integrations-core/pull/10350). Thanks [jeroenj](https://github.com/jeroenj).
+* [Fixed] Use optimized pg_stat_statements function to fetch the count of rows. See [#10507](https://github.com/DataDog/integrations-core/pull/10507).
+* [Fixed] Fix bug in PG activity collection interval logic. See [#10487](https://github.com/DataDog/integrations-core/pull/10487).
+* [Fixed] Fix bug in PG activity collection interval logic. See [#10487](https://github.com/DataDog/integrations-core/pull/10487).
+* [Fixed] Upgrade datadog checks base to 23.1.5. See [#10466](https://github.com/DataDog/integrations-core/pull/10466).
+* [Fixed] Upgrade datadog checks base to 23.1.5. See [#10466](https://github.com/DataDog/integrations-core/pull/10466).
+* [Fixed] Revert "Upgrade psycopg2 on Python 3 (#10442)". See [#10456](https://github.com/DataDog/integrations-core/pull/10456).
+* [Changed] Change `postgresql.connections` metric collection when DBM is enabled . See [#10482](https://github.com/DataDog/integrations-core/pull/10482).
+* [Changed] Change `postgresql.connections` metric collection when DBM is enabled . See [#10482](https://github.com/DataDog/integrations-core/pull/10482).
+* [Changed] Add option to disable bloat metrics. See [#10406](https://github.com/DataDog/integrations-core/pull/10406).
+
 ## 11.0.0 / 2021-10-26 / Agent 7.32.0
 
 * [Fixed] Fix bug in PG activity collection interval logic. See [#10487](https://github.com/DataDog/integrations-core/pull/10487).
