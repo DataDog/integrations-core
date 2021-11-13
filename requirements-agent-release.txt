@@ -6,7 +6,7 @@ datadog-airflow==2.1.1
 datadog-amazon-msk==2.1.0
 datadog-ambari==2.2.0; sys_platform != 'win32'
 datadog-apache==2.0.0
-datadog-aspdotnet==1.7.0; sys_platform == 'win32'
+datadog-aspdotnet==1.8.0; sys_platform == 'win32'
 datadog-avi-vantage==2.0.3
 datadog-azure-iot-edge==2.2.0
 datadog-btrfs==1.11.1; sys_platform != 'win32'
