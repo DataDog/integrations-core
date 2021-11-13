@@ -1,5 +1,9 @@
 # CHANGELOG - Cloud Foundry API
 
+## 1.3.0 / 2021-11-13
+
+* [Added] Add runtime configuration validation. See [#8896](https://github.com/DataDog/integrations-core/pull/8896).
+
 ## 1.2.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
