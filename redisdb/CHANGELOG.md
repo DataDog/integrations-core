@@ -1,5 +1,9 @@
 # CHANGELOG - redisdb
 
+## 4.3.0 / 2021-11-13
+
+* [Added] Add support for monitoring Redis stream keys. See [#10549](https://github.com/DataDog/integrations-core/pull/10549). Thanks [jd](https://github.com/jd).
+
 ## 4.2.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
