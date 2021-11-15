@@ -1,5 +1,10 @@
 # CHANGELOG - hdfs_datanode
 
+## 2.2.0 / 2021-11-13
+
+* [Added] Support newer versions of Hadoop. See [#10538](https://github.com/DataDog/integrations-core/pull/10538).
+* [Fixed] Bump minimum base requirement to 15.7.0. See [#10604](https://github.com/DataDog/integrations-core/pull/10604).
+
 ## 2.1.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add runtime configuration validation. See [#8927](https://github.com/DataDog/integrations-core/pull/8927).
