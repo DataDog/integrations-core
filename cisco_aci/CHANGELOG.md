@@ -1,5 +1,10 @@
 # CHANGELOG - cisco_aci
 
+## 1.17.0 / 2021-11-13
+
+* [Added] Add runtime configuration validation. See [#8894](https://github.com/DataDog/integrations-core/pull/8894).
+* [Fixed] Harmonize check and config options. See [#10488](https://github.com/DataDog/integrations-core/pull/10488).
+
 ## 1.16.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Update dependencies. See [#10228](https://github.com/DataDog/integrations-core/pull/10228).

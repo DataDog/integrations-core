@@ -1,5 +1,9 @@
 # CHANGELOG - btrfs
 
+## 1.12.0 / 2021-11-13
+
+* [Added] Add runtime configuration validation. See [#8888](https://github.com/DataDog/integrations-core/pull/8888).
+
 ## 1.11.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).

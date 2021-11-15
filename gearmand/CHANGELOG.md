@@ -1,5 +1,9 @@
 # CHANGELOG - gearmand
 
+## 2.1.0 / 2021-11-13
+
+* [Added] Add runtime configuration validation. See [#8917](https://github.com/DataDog/integrations-core/pull/8917).
+
 ## 2.0.1 / 2021-10-04 / Agent 7.32.0
 
 * [Fixed] Add server as generic tag. See [#10100](https://github.com/DataDog/integrations-core/pull/10100).
