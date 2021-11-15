@@ -8,7 +8,7 @@ from datadog_checks.base import ConfigurationError
 from datadog_checks.pgbouncer import PgBouncer
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_critical_service_check(instance, aggregator, dd_run_check):
     instance['port'] = '123'  # Bad port
     check = PgBouncer('pgbouncer', {}, [instance])
