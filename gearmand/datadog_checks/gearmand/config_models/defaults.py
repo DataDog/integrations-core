@@ -25,7 +25,7 @@ def instance_port(field, value):
 
 
 def instance_server(field, value):
-    return 'localhost'
+    return '127.0.0.1'
 
 
 def instance_service(field, value):
