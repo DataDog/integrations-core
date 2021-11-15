@@ -46,6 +46,15 @@ def test_check(instance, aggregator, datadog_agent, dd_run_check):
 
 
 @pytest.mark.integration
+def test_critical_service_check(instance, aggregator, dd_run_check):
+    instance['port'] = '123'  # Bad port
+    check = PgBouncer('pgbouncer', {}, [instance])
+    with pytest.raises(Exception):
+        dd_run_check(check)
+    aggregator.assert_service_check(PgBouncer.SERVICE_CHECK_NAME, status=PgBouncer.CRITICAL)
+
+
+@pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_check_with_url(instance_with_url, aggregator, datadog_agent, dd_run_check):
     # run the check
