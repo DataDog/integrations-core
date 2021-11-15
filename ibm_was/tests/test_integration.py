@@ -9,9 +9,9 @@ pytestmark = pytest.mark.integration
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_check(aggregator, instance, check):
+def test_check(aggregator, instance, check, dd_run_check):
     check = check(instance)
-    check.check(instance)
+    dd_run_check(check)
 
     for metric_name in common.METRICS_ALWAYS_PRESENT:
         aggregator.assert_metric(metric_name)
