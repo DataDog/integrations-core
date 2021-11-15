@@ -21,9 +21,8 @@ def assert_metrics(aggregator):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_metrics(check, aggregator):
-    check.check(common.INSTANCE)
-    check.check(common.INSTANCE)
+def test_metrics(check, aggregator, dd_run_check):
+    dd_run_check(check(common.INSTANCE))
 
     assert_metrics(aggregator)
 

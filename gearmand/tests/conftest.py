@@ -20,8 +20,13 @@ def dd_environment():
 
 
 @pytest.fixture
-def check():
+def instance():
+    return INSTANCE
+
+
+@pytest.fixture
+def check(instance):
     # Lazily import to support E2E on Windows
     from datadog_checks.gearmand import Gearman
 
-    return Gearman(CHECK_NAME, {}, [{}])
+    return Gearman(CHECK_NAME, instance, [{}])
