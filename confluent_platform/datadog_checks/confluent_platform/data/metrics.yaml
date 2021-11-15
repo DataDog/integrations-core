@@ -1104,7 +1104,7 @@ jmx_metrics:
   #   - Confluent KSQL: https://docs.confluent.io/current/ksql/docs/installation/server-config/index.html#jmx-metrics
   - include:
       domain: io.confluent.ksql.metrics
-      bean: io.confluent.ksql.metrics:type=_confluent-ksql-default_ksql-engine-query-stats
+      bean_regex: io\.confluent\.ksql\.metrics:type=_confluent-ksql-engine-query-stats,ksql_service_id=.*
       attribute:
         bytes-consumed-total:
           # Number of bytes consumed across all queries.
