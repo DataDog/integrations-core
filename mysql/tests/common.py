@@ -13,6 +13,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 TESTS_HELPER_DIR = os.path.join(ROOT, 'datadog_checks_tests_helper')
 
+MYSQL_REPLICATION = os.getenv('MYSQL_REPLICATION')
 MYSQL_VERSION_IS_LATEST = os.getenv('MYSQL_VERSION', '').endswith('latest')
 
 if MYSQL_VERSION_IS_LATEST is False:
@@ -31,4 +32,7 @@ PASS = 'dog'
 
 requires_static_version = pytest.mark.skipif(
     MYSQL_VERSION_IS_LATEST, reason='Version `latest` is ever-changing, skipping'
+)
+requires_group_replication = pytest.mark.skipif(
+    MYSQL_REPLICATION=='group', reason='Group replication not active, skipping'
 )

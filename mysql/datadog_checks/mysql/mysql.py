@@ -10,6 +10,7 @@ from contextlib import closing, contextmanager
 from typing import Any, Dict, List, Optional
 
 import pymysql
+from pymysql import cursors
 from six import PY3, iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
@@ -42,6 +43,8 @@ from .queries import (
     SQL_95TH_PERCENTILE,
     SQL_AVG_QUERY_RUN_TIME,
     SQL_GROUP_REPLICATION_MEMBER,
+    SQL_GROUP_REPLICATION_METRICS,
+    SQL_GROUP_REPLICATION_PLUGIN_STATUS,
     SQL_INNODB_ENGINES,
     SQL_PROCESS_LIST,
     SQL_QUERY_SCHEMA_SIZE,
@@ -319,16 +322,21 @@ class MySql(AgentCheck):
             results['information_schema_size'] = self._query_size_per_schema(db)
             metrics.update(SCHEMA_VARS)
 
-        if is_affirmative(self._config.options.get('replication', self._config.dbm_enabled)):
+        if is_affirmative(self._config.options.get('replication', False)):
             if self.performance_schema_enabled:
                 self.log.debug('Performance schema enabled, trying group replication.')
                 results['group_repl_status'] = self._query_group_replica_status(db)
                 self.log.warning(results['group_repl_status'])
                 metrics.update(GROUP_REPLICATION_VARS)
-
-            replication_metrics = self._collect_replication_metrics(db, results, above_560)
-            metrics.update(replication_metrics)
-            self._check_replication_status(results)
+            # TODO: check replication type
+            if self._is_group_replication_active(db):
+                group_repl_metrics = self._collect_group_replica_metrics(db, results)
+                self.log.warning(group_repl_metrics)
+                metrics.update(group_repl_metrics)
+            else:
+                replication_metrics = self._collect_replication_metrics(db, results, above_560)
+                metrics.update(replication_metrics)
+                self._check_replication_status(results)
 
         if len(self._config.additional_status) > 0:
             additional_status_dict = {}
@@ -408,13 +416,33 @@ class MySql(AgentCheck):
         results.update(self._get_replica_status(db, above_560, nonblocking))
         return REPLICA_VARS
 
-    def _get_group_replica_status(self, db, nonblocking):
+    def _collect_group_replica_metrics(self, db, results):
         try:
             with closing(db.cursor()) as cursor:
                 cursor.execute(SQL_GROUP_REPLICATION_MEMBER)
                 replica_results = cursor.fetchone()
+                if replica_results is None:
+                    self.log.warning('Unable to get group replica status')
+                    return {}
+                status = self.OK if replica_results[1] == 'ONLINE' else self.CRITICAL
 
-                return {'role': replica_results[1], 'state': replica_results[2]}
+                self.service_check('mysql.replication.gr_status', status=status, tags=self._service_check_tags() + ['status:{}'.format(replica_results[1]), 'role:{}'.format(replica_results[2])])
+
+                cursor.execute(SQL_GROUP_REPLICATION_METRICS)
+                r = cursor.fetchone()
+                self.log.warning(r)
+                results.update({
+                    'Transactions_count': r[1],
+                    'Transactions_check': r[2],
+                    'Conflict_detected': r[3],
+                    'Transactions_row_validating': r[4],
+                    'Transactions_remote_applier_queue': r[5],
+                    'Transactions_remote_applied': r[6],
+                    'Transactions_local_proposed': r[7],
+                    'Transactions_local_rollback': r[8],
+                })
+
+                return GROUP_REPLICATION_VARS
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             self.warning("Privileges error accessing the process tables (performance_schema): %s", e)
             return {}
@@ -503,6 +531,18 @@ class MySql(AgentCheck):
 
     def _is_replica_host(self, replicas, results):
         return collect_string('Master_Host', results) or collect_string('Source_Host', results)
+
+    def _is_group_replication_active(self, db):
+        with closing(db.cursor()) as cursor:
+            cursor.execute(SQL_GROUP_REPLICATION_PLUGIN_STATUS)
+            r = cursor.fetchone()
+
+            # Plugin is installed
+            if r is not None and r[0].lower() == 'active':
+                self.log.debug('Group replicated is detected and active')
+                return True
+        self.log.debug('Group replication plugin not detected')
+        return False
 
     def _submit_metrics(self, variables, db_results, tags):
         for variable, metric in iteritems(variables):

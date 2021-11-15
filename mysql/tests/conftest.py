@@ -12,13 +12,12 @@ from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common, tags
-from .common import requires_static_version
+from .common import MYSQL_REPLICATION, requires_static_version
 
 logger = logging.getLogger(__name__)
 
 MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR')
 MYSQL_VERSION = os.getenv('MYSQL_VERSION')
-MYSQL_REPLICATION = os.getenv('MYSQL_REPLICATION')
 COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 
 
