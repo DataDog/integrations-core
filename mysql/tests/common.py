@@ -34,5 +34,8 @@ requires_static_version = pytest.mark.skipif(
     MYSQL_VERSION_IS_LATEST, reason='Version `latest` is ever-changing, skipping'
 )
 requires_group_replication = pytest.mark.skipif(
-    MYSQL_REPLICATION=='group', reason='Group replication not active, skipping'
+    MYSQL_REPLICATION!='group', reason='Group replication not active, skipping'
+)
+requires_classic_replication = pytest.mark.skipif(
+    MYSQL_REPLICATION!='classic', reason='Classic replication not active, skipping'
 )
