@@ -50,8 +50,8 @@ instances:
 
     ## @param field_names - list of strings - optional
     ## The `field_names` specifies which field_names should be used
-    ## to determine if a device is a real device. You can let it commented
-    ## out as the default values should satisfy your needs.
+    ## to determine if a device is a real device. You can leave it commented
+    ## out as the default values [ifName, dskDevice] should satisfy your needs.
     ## You can run the following query to determine your field names:
     ##       SELECT
     ##            h.hostname as hostname,
