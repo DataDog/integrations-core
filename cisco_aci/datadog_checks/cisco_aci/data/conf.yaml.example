@@ -48,7 +48,7 @@ init_config:
 #
 instances:
 
-    ## @param aci_url - string - required
+    ## @param aci_url - string - optional - default: http://localhost
     ## URL to query to gather metrics.
     #
   - aci_url: http://localhost
@@ -59,7 +59,7 @@ instances:
     #
     username: datadog
 
-    ## @param pwd - string - required
+    ## @param pwd - string - optional
     ## Authentication can use either a user auth or a certificate.
     ## If using the user auth, enter the `username` and `pwd` configuration.
     #
