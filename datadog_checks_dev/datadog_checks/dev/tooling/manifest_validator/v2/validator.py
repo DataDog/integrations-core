@@ -8,9 +8,9 @@ import jsonschema
 import requests
 
 import datadog_checks.dev.tooling.manifest_validator.common.validator as common
-from ...manifest_validator.common.validator import BaseManifestValidator
 
 from ...constants import get_root
+from ...manifest_validator.common.validator import BaseManifestValidator
 from ..constants import V2
 
 METRIC_TO_CHECK_EXCLUDE_LIST = {

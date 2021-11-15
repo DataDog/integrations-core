@@ -6,10 +6,9 @@ import time
 from contextlib import contextmanager
 
 from ...errors import SubprocessError
-from ..commands.console import echo_debug, echo_warning
-
 from ...subprocess import run_command
 from ...utils import ON_WINDOWS, file_exists, find_free_port, get_ip, path_join
+from ..commands.console import echo_debug, echo_warning
 from ..constants import REQUIREMENTS_IN, get_root
 from .agent import (
     DEFAULT_AGENT_VERSION,

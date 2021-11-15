@@ -6,11 +6,16 @@ from collections import defaultdict
 import click
 import yaml
 
-from ...annotations import annotate_error
-
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_default_config_spec, get_jmx_metrics_file, is_jmx_integration, file_exists, read_file
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ...utils import (
+    complete_valid_checks,
+    file_exists,
+    get_default_config_spec,
+    get_jmx_metrics_file,
+    is_jmx_integration,
+    read_file,
+)
+from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_info, echo_success
 
 
 @click.command('jmx-metrics', context_settings=CONTEXT_SETTINGS, short_help='Validate JMX metrics files')

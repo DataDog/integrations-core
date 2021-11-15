@@ -6,8 +6,8 @@ from genericpath import isfile
 from yaml.error import YAMLError
 from yaml.loader import SafeLoader
 
-from ....console import echo_failure
 from .....constants import get_root
+from ....console import echo_failure
 
 
 def initialize_path(directory):

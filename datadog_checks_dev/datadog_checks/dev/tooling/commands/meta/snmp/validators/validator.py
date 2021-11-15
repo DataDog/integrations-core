@@ -4,7 +4,6 @@ from posixpath import join
 import jsonschema
 
 from .....constants import get_root
-
 from .utils import find_profile_in_path, get_all_profiles_directory, get_profile
 
 

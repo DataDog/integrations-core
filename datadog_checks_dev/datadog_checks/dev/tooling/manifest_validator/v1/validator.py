@@ -5,6 +5,7 @@ import os
 import uuid
 
 import datadog_checks.dev.tooling.manifest_validator.common.validator as common
+
 from ...constants import get_root
 from ...manifest_validator.common.validator import BaseManifestValidator
 from ...manifest_validator.v1.schema import get_manifest_schema

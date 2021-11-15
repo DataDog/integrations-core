@@ -9,7 +9,6 @@ import click
 from ....fs import write_file
 from ...datastructures import JSONDict
 from ...utils import get_manifest_file, get_valid_integrations, load_manifest
-
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success
 
 # This means the value is either not present in the old manifest, or there's logic needed to compute it

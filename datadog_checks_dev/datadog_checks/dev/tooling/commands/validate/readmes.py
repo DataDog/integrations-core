@@ -11,11 +11,10 @@ from bs4 import BeautifulSoup
 from ....fs import chdir, create_file
 from ....subprocess import run_command
 from ....utils import download_file
-from ...annotations import annotate_display_queue
 from ...constants import get_root
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_readme_file, read_readme_file
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ..console import CONTEXT_SETTINGS, abort, annotate_display_queue, echo_failure, echo_info, echo_success
 
 IMAGE_EXTENSIONS = {".png", ".jpg"}
 

@@ -4,19 +4,18 @@
 import click
 import yaml
 
-from ...annotations import annotate_error
+from ....fs import basepath, file_exists, path_join, read_file, write_file
 from ...config_validator.validator import validate_config
 from ...config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
 from ...configuration import ConfigSpec
 from ...configuration.consumers import ExampleConsumer
-
-from ....fs import basepath, file_exists, path_join, read_file, write_file
 from ...manifest_utils import Manifest
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_config_files, get_data_directory, get_version_string
 from ..console import (
     CONTEXT_SETTINGS,
     abort,
+    annotate_error,
     echo_debug,
     echo_failure,
     echo_info,

@@ -11,8 +11,7 @@ import six
 
 from ...datastructures import JSONDict
 from ...git import git_show_file
-from ....utils import get_metadata_file, has_logs, is_metric_in_metadata_file, read_metadata_rows
-
+from ...utils import get_metadata_file, has_logs, is_metric_in_metadata_file, read_metadata_rows
 from ..constants import V1, V2
 
 
