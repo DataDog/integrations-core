@@ -9,11 +9,13 @@ files:
     options:
       - name: server
         description: Server to connect to.
+        enabled: true
         value:
           example: "127.0.0.1"
           type: string
       - name: port
         description: Port to use when connecting to "server".
+        enabled: true
         value:
           example: 4730
           type: integer
