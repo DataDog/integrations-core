@@ -17,6 +17,8 @@ default to the NTP servers below:
 - `2.datadog.pool.ntp.org`
 - `3.datadog.pool.ntp.org`
 
+**Note:** NTP requests do not support proxy settings.
+
 ## Setup
 
 ### Installation
