@@ -9,10 +9,9 @@ from datadog_checks.base.constants import ServiceCheck
 from . import common
 
 
-def test_service_check_broken(check, aggregator, dd_run_check):
-    from datadog_checks.gearmand import Gearman
+def test_service_check_broken(aggregator, check, dd_run_check):
 
-    check = Gearman(common.CHECK_NAME, common.BAD_INSTANCE, [{}])
+    check = check(common.BAD_INSTANCE)
 
     tags = ['server:{}'.format(common.HOST), 'port:{}'.format(common.BAD_PORT)] + common.TAGS2
 
@@ -25,7 +24,8 @@ def test_service_check_broken(check, aggregator, dd_run_check):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_version_metadata(check, aggregator, datadog_agent, dd_run_check):
+def test_version_metadata(check, instance, aggregator, datadog_agent, dd_run_check):
+    check = check(instance)
     check.check_id = 'test:123'
     dd_run_check(check)
 
