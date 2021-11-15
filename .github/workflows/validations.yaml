@@ -37,9 +37,9 @@ jobs:
       run: |
         ddev validate agent-reqs changed
 
-    - name: Run CI validation
-      run: |
-        ddev validate ci
+#    - name: Run CI validation
+#      run: |
+#        ddev validate ci
 
     - name: Run configuration validation
       run: |
@@ -88,11 +88,11 @@ jobs:
     - name: Run models validation
       run: |
         ddev validate models changed
-        
+
     - name: Run package validation
       run: |
         ddev validate package changed
-        
+
     - name: Run readmes validation
       run: |
         ddev validate readmes changed
