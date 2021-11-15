@@ -4,7 +4,7 @@
 
 import click
 
-from datadog_checks.dev.tooling.annotations import annotate_error
+from ...annotations import annotate_error
 
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_check_files

@@ -9,9 +9,9 @@ from typing import Dict
 
 import six
 
-from datadog_checks.dev.tooling.datastructures import JSONDict
-from datadog_checks.dev.tooling.git import git_show_file
-from datadog_checks.dev.tooling.utils import get_metadata_file, has_logs, is_metric_in_metadata_file, read_metadata_rows
+from ...datastructures import JSONDict
+from ...git import git_show_file
+from ....utils import get_metadata_file, has_logs, is_metric_in_metadata_file, read_metadata_rows
 
 from ..constants import V1, V2
 

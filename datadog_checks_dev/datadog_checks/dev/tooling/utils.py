@@ -14,7 +14,7 @@ import requests
 import semver
 import yaml
 
-from datadog_checks.dev.tooling.catalog_const import (
+from .catalog_const import (
     DOGWEB_JSON_DASHBOARDS,
     INTEGRATION_LOGS_NOT_POSSIBLE,
     INTEGRATION_REC_MONITORS_NOT_POSSIBLE,

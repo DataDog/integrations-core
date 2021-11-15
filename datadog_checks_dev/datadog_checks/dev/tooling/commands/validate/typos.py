@@ -6,8 +6,8 @@ import re
 
 import click
 
-from datadog_checks.dev.tooling.annotations import annotate_warning
-from datadog_checks.dev.tooling.constants import get_root
+from ...annotations import annotate_warning
+from ...constants import get_root
 
 from ....subprocess import run_command
 from ...utils import complete_valid_checks

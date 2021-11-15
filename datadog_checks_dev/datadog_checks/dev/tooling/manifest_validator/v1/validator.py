@@ -5,10 +5,10 @@ import os
 import uuid
 
 import datadog_checks.dev.tooling.manifest_validator.common.validator as common
-from datadog_checks.dev.tooling.constants import get_root
-from datadog_checks.dev.tooling.manifest_validator.common.validator import BaseManifestValidator
-from datadog_checks.dev.tooling.manifest_validator.v1.schema import get_manifest_schema
-from datadog_checks.dev.tooling.utils import has_logs, is_package, parse_version_parts
+from ...constants import get_root
+from ...manifest_validator.common.validator import BaseManifestValidator
+from ...manifest_validator.v1.schema import get_manifest_schema
+from ...utils import has_logs, is_package, parse_version_parts
 
 
 class AttributesValidator(BaseManifestValidator):

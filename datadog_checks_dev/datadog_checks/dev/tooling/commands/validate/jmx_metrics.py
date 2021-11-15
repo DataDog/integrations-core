@@ -6,11 +6,10 @@ from collections import defaultdict
 import click
 import yaml
 
-from datadog_checks.dev.tooling.annotations import annotate_error
-from datadog_checks.dev.utils import file_exists, read_file
+from ...annotations import annotate_error
 
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_default_config_spec, get_jmx_metrics_file, is_jmx_integration
+from ...utils import complete_valid_checks, get_default_config_spec, get_jmx_metrics_file, is_jmx_integration, file_exists, read_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 

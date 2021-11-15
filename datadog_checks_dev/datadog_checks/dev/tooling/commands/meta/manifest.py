@@ -6,9 +6,9 @@ import uuid
 
 import click
 
-from datadog_checks.dev.fs import write_file
-from datadog_checks.dev.tooling.datastructures import JSONDict
-from datadog_checks.dev.tooling.utils import get_manifest_file, get_valid_integrations, load_manifest
+from ....fs import write_file
+from ...datastructures import JSONDict
+from ...utils import get_manifest_file, get_valid_integrations, load_manifest
 
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success
 

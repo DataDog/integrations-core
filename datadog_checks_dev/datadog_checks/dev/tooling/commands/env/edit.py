@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from datadog_checks.dev.tooling.e2e.config import locate_config_file
+from ...e2e.config import locate_config_file
 
 from ....fs import file_exists
 from ...testing import complete_active_checks, complete_configured_envs
