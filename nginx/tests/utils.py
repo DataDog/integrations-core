@@ -56,8 +56,8 @@ def mocked_perform_request(*args, **kwargs):
     elif re.search('/[34567]/stream/zone_sync', url):
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_stream_zone_sync.json'))
         response.json.return_value = json.loads(file_contents)
-    elif re.search('/[567]/http/location_zones', url):
-        file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_v7_http_location_zones.json'))
+    elif re.search('/[56]/http/location_zones', url):
+        file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_http_location_zones.json'))
         response.json.return_value = json.loads(file_contents)
     elif re.search('/[567]/resolvers', url):
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_v7_resolvers.json'))
@@ -78,7 +78,7 @@ def mocked_perform_request(*args, **kwargs):
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_v7_http_server_zones.json'))
         response.json.return_value = json.loads(file_contents)
     elif re.search('/[7]/http/location_zones', url):
-        file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_http_location_zones.json'))
+        file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_v7_http_location_zones.json'))
         response.json.return_value = json.loads(file_contents)
 
     else:

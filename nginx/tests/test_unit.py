@@ -98,11 +98,28 @@ def test_plus_api_v7(check, instance, aggregator):
 
     total = 0
     for m in aggregator.metric_names:
-        print(m)
         total += len(aggregator.metrics(m))
 
     assert total == 1629
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+    base_tags = ['bar:bar', 'foo:foo']
+
+    # http location zones endpoint
+    location_zone_tags = base_tags + ['location_zone:swagger']
+    location_zone_code_tags = location_zone_tags + ['code:404']
+
+    aggregator.assert_metric('nginx.location_zone.requests', value=1895, tags=location_zone_tags, count=1)
+    aggregator.assert_metric('nginx.location_zone.responses.code', value=1, tags=location_zone_code_tags, count=1)
+
+    # http server zones endpoint
+    code_tags = base_tags + ['code:200', 'server_zone:hg.nginx.org']
+    aggregator.assert_metric('nginx.server_zone.responses.code', value=803845, tags:code_tags, count=1)
+
+    # http limit reqs endpoint
+    # http upstreams endpoint 
+    # resolvers endpoint
+    # stream limit conns endpoint
 
 
 def test_nest_payload(check):
