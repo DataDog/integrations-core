@@ -9,11 +9,11 @@ from datadog_checks.pgbouncer import PgBouncer
 
 
 @pytest.mark.unit
-def test_critical_service_check(instance, aggregator):
+def test_critical_service_check(instance, aggregator, dd_run_check):
     instance['port'] = '123'  # Bad port
     check = PgBouncer('pgbouncer', {}, [instance])
     with pytest.raises(Exception):
-        check.check(instance)
+        dd_run_check(check)
     aggregator.assert_service_check(PgBouncer.SERVICE_CHECK_NAME, status=PgBouncer.CRITICAL)
 
 
