@@ -196,7 +196,7 @@ def instance_invalid_var():
         'additional_status': [
             {
                 'name': "longer_query_time",
-                'metric_name': "mysql.performance.long_query_time",
+                'metric_name': "mysql.performance.longer_query_time",
                 'type': "gauge",
             },
             {
