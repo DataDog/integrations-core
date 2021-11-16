@@ -5,7 +5,7 @@ import jsonschema
 
 from datadog_checks.dev.tooling.constants import get_root
 
-from .utils import find_profile_in_path, get_all_profiles_directory, get_profile
+from .utils import find_profile_in_path, get_all_profiles_for_directories, get_profile
 
 
 class ValidationResult(object):
@@ -215,7 +215,7 @@ class SysobjectidValidator(ProfileValidator):
         sysobjectids = self.extract_sysobjectids_profile(profile)
         self.check_sysobjectids_are_duplicated(sysobjectids, profile)
         for directory in path:
-            for profile in get_all_profiles_directory(directory):
+            for profile in get_all_profiles_for_directories(directory):
                 sysobjectids = self.extract_sysobjectids_profile(profile)
                 self.check_sysobjectids_are_duplicated(sysobjectids, profile)
         self.report_errors()
