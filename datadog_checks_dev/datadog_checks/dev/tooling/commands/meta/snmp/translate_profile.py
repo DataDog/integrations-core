@@ -72,11 +72,15 @@ def translate_profile(ctx, profile_path, mib_source_url):
             fetch_mib(mib, source_url=mib_source_url)
         if 'table' in metric:
             table = metric['table']
+            if not isinstance(table, str):
+                continue
             node = mib_view_controller.mibBuilder.importSymbols(mib, table)[0]
             value = '.'.join([str(i) for i in node.getName()])
             table = {'name': table, 'OID': value}
             symbols = []
             for symbol in metric['symbols']:
+                if not isinstance(symbol, str):
+                    continue
                 node = mib_view_controller.mibBuilder.importSymbols(mib, symbol)[0]
                 value = '.'.join([str(i) for i in node.getName()])
                 symbols.append({'name': symbol, 'OID': value})
@@ -85,6 +89,8 @@ def translate_profile(ctx, profile_path, mib_source_url):
                 if 'column' in tag:
                     tag_mib = tag.get('MIB', mib)
                     key = tag['column']
+                    if not isinstance(key, str):
+                        continue
                     node = mib_view_controller.mibBuilder.importSymbols(tag_mib, key)[0]
                     value = '.'.join([str(i) for i in node.getName()])
                     tag = tag.copy()
