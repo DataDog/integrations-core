@@ -1,5 +1,9 @@
 # CHANGELOG - Aspdotnet
 
+## 1.8.1 / 2021-11-16
+
+* [Fixed] Fix config spec options. See [#10634](https://github.com/DataDog/integrations-core/pull/10634).
+
 ## 1.8.0 / 2021-11-13
 
 * [Added] Add runtime configuration validation. See [#8886](https://github.com/DataDog/integrations-core/pull/8886).

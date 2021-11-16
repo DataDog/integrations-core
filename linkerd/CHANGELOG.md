@@ -1,5 +1,9 @@
 # CHANGELOG - Linkerd
 
+## 2.11.1 / 2021-11-16
+
+* [Fixed] Validate use of legacy openmetrics config. See [#10636](https://github.com/DataDog/integrations-core/pull/10636).
+
 ## 2.11.0 / 2021-11-13
 
 * [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).

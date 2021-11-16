@@ -1,5 +1,9 @@
 # CHANGELOG - cacti
 
+## 1.9.1 / 2021-11-16
+
+* [Fixed] Add missing config option to spec and update examples to match implementation. See [#10641](https://github.com/DataDog/integrations-core/pull/10641).
+
 ## 1.9.0 / 2021-11-13
 
 * [Added] Add runtime configuration validation. See [#8889](https://github.com/DataDog/integrations-core/pull/8889).

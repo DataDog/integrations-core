@@ -1,5 +1,9 @@
 # CHANGELOG - cisco_aci
 
+## 1.17.1 / 2021-11-16
+
+* [Fixed] Fix required config option. See [#10629](https://github.com/DataDog/integrations-core/pull/10629).
+
 ## 1.17.0 / 2021-11-13
 
 * [Added] Add runtime configuration validation. See [#8894](https://github.com/DataDog/integrations-core/pull/8894).
