@@ -245,10 +245,10 @@ STATEMENT_VARS = ['dd.mysql.queries.query_rows_raw', 'dd.mysql.queries.query_row
 
 GROUP_REPLICATION_VARS = [
     'mysql.performance.gr.conflicts_detected',
-    'mysql.performance.gr.transactions.count',
+    'mysql.performance.gr.transactions',
     'mysql.performance.gr.transactions_applied',
     'mysql.performance.gr.transactions_applier_queue',
-    'mysql.performance.gr.transactions_check.count',
+    'mysql.performance.gr.transactions_check',
     'mysql.performance.gr.transactions_proposed',
     'mysql.performance.gr.transactions_rollback',
     'mysql.performance.gr.transactions_validating',

@@ -262,14 +262,14 @@ REPLICA_VARS = {
 }
 
 GROUP_REPLICATION_VARS = {
-    'Transactions_count': ('mysql.performance.gr.transactions.count', COUNT),
-    'Transactions_check': ('mysql.performance.gr.transactions_check.count', COUNT),
-    'Conflict_detected': ('mysql.performance.gr.conflicts_detected', COUNT),
-    'Transactions_row_validating': ('mysql.performance.gr.transactions_validating', COUNT),
-    'Transactions_remote_applier_queue': ('mysql.performance.gr.transactions_applier_queue', COUNT),
-    'Transactions_remote_applied': ('mysql.performance.gr.transactions_applied', COUNT),
-    'Transactions_local_proposed': ('mysql.performance.gr.transactions_proposed', COUNT),
-    'Transactions_local_rollback': ('mysql.performance.gr.transactions_rollback', COUNT),
+    'Transactions_count': ('mysql.performance.gr.transactions', GAUGE),
+    'Transactions_check': ('mysql.performance.gr.transactions_check', GAUGE),
+    'Conflict_detected': ('mysql.performance.gr.conflicts_detected', GAUGE),
+    'Transactions_row_validating': ('mysql.performance.gr.transactions_validating', GAUGE),
+    'Transactions_remote_applier_queue': ('mysql.performance.gr.transactions_applier_queue', GAUGE),
+    'Transactions_remote_applied': ('mysql.performance.gr.transactions_applied', GAUGE),
+    'Transactions_local_proposed': ('mysql.performance.gr.transactions_proposed', GAUGE),
+    'Transactions_local_rollback': ('mysql.performance.gr.transactions_rollback', GAUGE),
 }
 
 SYNTHETIC_VARS = {

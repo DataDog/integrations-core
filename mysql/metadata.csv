@@ -81,14 +81,14 @@ mysql.innodb.semaphore_waits,gauge,,,,"The number semaphore currently being wait
 mysql.innodb.semaphore_wait_time,gauge,,,,"Semaphore wait time",0,mysql,mysql innodb semaphore_wait_time
 mysql.binlog.cache_disk_use,gauge,,transaction,,"The number of transactions that used the temporary binary log cache but that exceeded the value of binlog_cache_size and used a temporary file to store statements from the transaction.",0,mysql,mysql binlog cache_disk_use
 mysql.binlog.cache_use,gauge,,transaction,,The number of transactions that used the binary log cache.,0,mysql,mysql binlog cache_use
-mysql.performance.gr.conflicts_detected,count,,transaction,,The number of transactions that have not passed the conflict detection check.,0,mysql,mysql performance gr conflict
-mysql.performance.gr.transactions.count,count,,transaction,,The number of transactions in the queue pending conflict detection checks.,0,mysql,mysql performance gr transactions
-mysql.performance.gr.transactions_applied,count,,transaction,,Number of transactions this member has received from the group and applied.,0,mysql,mysql performance gr transactions applied
-mysql.performance.gr.transactions_applier_queue,count,,transaction,,The number of transactions that this member has received from the replication group which are waiting to be applied.,0,mysql,mysql performance gr transactions queued
-mysql.performance.gr.transactions_check.count,count,,transaction,,The number of transactions that have been checked for conflicts.,0,mysql,mysql performance gr transactions checked
-mysql.performance.gr.transactions_proposed,count,,transaction,,Number of transactions which originated on this member and were sent to the group.,0,mysql,mysql performance gr transactions proposed
-mysql.performance.gr.transactions_rollback,count,,transaction,,Number of transactions which originated on this member and were rolled back by the group.,0,mysql,mysql performance gr transactions rollback
-mysql.performance.gr.transactions_validating,count,,transaction,,"Number of transaction rows which can be used for certification, but have not been garbage collected.",0,mysql,mysql performance gr transactions validating
+mysql.performance.gr.conflicts_detected,gauge,,transaction,,The number of transactions that have not passed the conflict detection check.,0,mysql,mysql performance gr conflict
+mysql.performance.gr.transactions,gauge,,transaction,,The number of transactions in the queue pending conflict detection checks.,0,mysql,mysql performance gr transactions
+mysql.performance.gr.transactions_applied,gauge,,transaction,,Number of transactions this member has received from the group and applied.,0,mysql,mysql performance gr transactions applied
+mysql.performance.gr.transactions_applier_queue,gauge,,transaction,,The number of transactions that this member has received from the replication group which are waiting to be applied.,0,mysql,mysql performance gr transactions queued
+mysql.performance.gr.transactions_check,gauge,,transaction,,The number of transactions that have been checked for conflicts.,0,mysql,mysql performance gr transactions checked
+mysql.performance.gr.transactions_proposed,gauge,,transaction,,Number of transactions which originated on this member and were sent to the group.,0,mysql,mysql performance gr transactions proposed
+mysql.performance.gr.transactions_rollback,gauge,,transaction,,Number of transactions which originated on this member and were rolled back by the group.,0,mysql,mysql performance gr transactions rollback
+mysql.performance.gr.transactions_validating,gauge,,transaction,,"Number of transaction rows which can be used for certification, but have not been garbage collected.",0,mysql,mysql performance gr transactions validating
 mysql.performance.handler_commit,gauge,,operation,second,The number of internal COMMIT statements.,0,mysql,mysql performance handler_commit
 mysql.performance.handler_delete,gauge,,operation,second,The number of internal DELETE statements.,0,mysql,mysql performance handler_delete
 mysql.performance.handler_prepare,gauge,,operation,second,The number of internal PREPARE statements.,0,mysql,mysql performance handler_prepare
