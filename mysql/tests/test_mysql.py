@@ -314,3 +314,25 @@ def test_additional_variable(aggregator, dd_run_check, instance_additional_varia
 
     aggregator.assert_metric('mysql.performance.long_query_time', metric_type=0, tags=tags.METRIC_TAGS)
     aggregator.assert_metric('mysql.performance.innodb_flush_log_at_trx_commit', metric_type=0, tags=tags.METRIC_TAGS)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_additional_variable_unknown(aggregator, dd_run_check, instance_invalid_var):
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_invalid_var])
+    dd_run_check(mysql_check)
+
+    aggregator.assert_metric('mysql.performance.long_query_time', metric_type=0, tags=tags.METRIC_TAGS, count=0)
+    aggregator.assert_metric(
+        'mysql.performance.innodb_flush_log_at_trx_commit', metric_type=0, tags=tags.METRIC_TAGS, count=1
+    )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_additional_variable_already_queried(aggregator, dd_run_check, instance_already_queried):
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_already_queried])
+    dd_run_check(mysql_check)
+
+    aggregator.assert_metric('mysql.performance.open_files_test', metric_type=0, tags=tags.METRIC_TAGS, count=1)
+    aggregator.assert_metric('mysql.performance.open_files', metric_type=0, tags=tags.METRIC_TAGS, count=0)
