@@ -336,3 +336,5 @@ def test_instance_auth_token(dd_run_check):
     check = HTTPCheck('http_check', {'ca_certs': mock_get_ca_certs_path()}, [instance])
     dd_run_check(check)
     assert expected_headers == check.http.options['headers']
+    dd_run_check(check)
+    assert expected_headers == check.http.options['headers']
