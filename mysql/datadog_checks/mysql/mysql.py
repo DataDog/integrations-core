@@ -322,17 +322,12 @@ class MySql(AgentCheck):
             results['information_schema_size'] = self._query_size_per_schema(db)
             metrics.update(SCHEMA_VARS)
 
-        if is_affirmative(self._config.options.get('replication', False)):
+        if is_affirmative(self._config.options.get('replication', self._config.dbm_enabled)):
             if self.performance_schema_enabled:
                 self.log.debug('Performance schema enabled, trying group replication.')
                 results['group_repl_status'] = self._query_group_replica_status(db)
                 self.log.warning(results['group_repl_status'])
                 metrics.update(GROUP_REPLICATION_VARS)
-            # TODO: check replication type
-            if self._is_group_replication_active(db):
-                group_repl_metrics = self._collect_group_replica_metrics(db, results)
-                self.log.warning(group_repl_metrics)
-                metrics.update(group_repl_metrics)
             else:
                 replication_metrics = self._collect_replication_metrics(db, results, above_560)
                 metrics.update(replication_metrics)
