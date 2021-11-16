@@ -106,3 +106,7 @@ def instance_timeout(field, value):
 
 def instance_use_lsblk(field, value):
     return False
+
+
+def instance_use_mount(field, value):
+    return False
