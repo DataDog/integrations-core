@@ -2,7 +2,7 @@
 
 ## 4.5.1 / 2021-11-16
 
-* [Fixed] Fix use_mount required field . See [#10657](https://github.com/DataDog/integrations-core/pull/10657).
+* [Fixed] Fix use_mount required field. See [#10657](https://github.com/DataDog/integrations-core/pull/10657).
 
 ## 4.5.0 / 2021-11-13
 
