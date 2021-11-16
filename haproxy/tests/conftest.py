@@ -99,6 +99,10 @@ def prometheus_metrics():
             if metric.startswith('haproxy_listener'):
                 metrics.pop(metric)
 
+    # metrics added in 2.5
+    if HAPROXY_VERSION < version.parse('2.5.dev14'):
+        metrics.pop('haproxy_backend_agg_server_check_status')
+
     metrics = list(metrics.values())
     return metrics
 
