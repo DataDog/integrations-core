@@ -322,7 +322,7 @@ def test_additional_variable_unknown(aggregator, dd_run_check, instance_invalid_
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_invalid_var])
     dd_run_check(mysql_check)
 
-    aggregator.assert_metric('mysql.performance.longer_query_time', metric_type=0, tags=tags.METRIC_TAGS, count=1)
+    aggregator.assert_metric('mysql.performance.longer_query_time', metric_type=0, tags=tags.METRIC_TAGS, count=0)
     aggregator.assert_metric(
         'mysql.performance.innodb_flush_log_at_trx_commit', metric_type=0, tags=tags.METRIC_TAGS, count=1
     )
