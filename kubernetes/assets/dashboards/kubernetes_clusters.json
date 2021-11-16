@@ -3243,7 +3243,7 @@
                                             "value": 0
                                         }
                                     ],
-                                    "q": "top(sum:kubernetes_state.pod.status_phase{*,$cluster,!phase:running,!phase:succeeded,$scope} by {cluster_name,kube_namespace,phase}, 100, 'last', 'desc')"
+                                    "q": "top(sum:kubernetes_state.pod.status_phase{*,$cluster,!pod_phase:running,!pod_phase:succeeded,$scope} by {cluster_name,kube_namespace,pod_phase}, 100, 'last', 'desc')"
                                 }
                             ],
                             "title": "Pods in bad phase by namespaces",
