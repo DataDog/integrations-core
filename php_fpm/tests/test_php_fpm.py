@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
+
 from datadog_checks.php_fpm.php_fpm import PHPFPMCheck
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
