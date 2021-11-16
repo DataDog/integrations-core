@@ -10,7 +10,6 @@ from contextlib import closing, contextmanager
 from typing import Any, Dict, List, Optional
 
 import pymysql
-from pymysql import cursors
 from six import PY3, iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
@@ -421,20 +420,27 @@ class MySql(AgentCheck):
                     return {}
                 status = self.OK if replica_results[1] == 'ONLINE' else self.CRITICAL
 
-                self.service_check('mysql.replication.gr_status', status=status, tags=self._service_check_tags() + ['status:{}'.format(replica_results[1]), 'role:{}'.format(replica_results[2])])
+                self.service_check(
+                    'mysql.replication.gr_status',
+                    status=status,
+                    tags=self._service_check_tags()
+                    + ['status:{}'.format(replica_results[1]), 'role:{}'.format(replica_results[2])],
+                )
 
                 cursor.execute(SQL_GROUP_REPLICATION_METRICS)
                 r = cursor.fetchone()
-                results.update({
-                    'Transactions_count': r[1],
-                    'Transactions_check': r[2],
-                    'Conflict_detected': r[3],
-                    'Transactions_row_validating': r[4],
-                    'Transactions_remote_applier_queue': r[5],
-                    'Transactions_remote_applied': r[6],
-                    'Transactions_local_proposed': r[7],
-                    'Transactions_local_rollback': r[8],
-                })
+                results.update(
+                    {
+                        'Transactions_count': r[1],
+                        'Transactions_check': r[2],
+                        'Conflict_detected': r[3],
+                        'Transactions_row_validating': r[4],
+                        'Transactions_remote_applier_queue': r[5],
+                        'Transactions_remote_applied': r[6],
+                        'Transactions_local_proposed': r[7],
+                        'Transactions_local_rollback': r[8],
+                    }
+                )
 
                 return GROUP_REPLICATION_VARS
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:

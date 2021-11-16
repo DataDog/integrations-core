@@ -53,7 +53,7 @@ FROM performance_schema.replication_group_member_stats
 WHERE channel_name='group_replication_applier' AND member_id = @@server_uuid"""
 
 SQL_GROUP_REPLICATION_PLUGIN_STATUS = """\
-SELECT plugin_status 
+SELECT plugin_status
 FROM information_schema.plugins WHERE plugin_name='group_replication'"""
 
 
