@@ -14,13 +14,12 @@ from datadog_checks.cisco_aci.api import Api, SessionWrapper
 from . import common
 
 
-def test_cisco(aggregator):
+def test_cisco(aggregator, dd_run_check):
     cisco_aci_check = CiscoACICheck(common.CHECK_NAME, {}, [common.CONFIG])
     api = Api(common.ACI_URLS, cisco_aci_check.http, common.USERNAME, password=common.PASSWORD, log=cisco_aci_check.log)
     api.wrapper_factory = common.FakeSessionWrapper
     cisco_aci_check._api_cache[hash_mutable(common.CONFIG)] = api
-
-    cisco_aci_check.check({})
+    dd_run_check(cisco_aci_check)
 
 
 @pytest.mark.parametrize(

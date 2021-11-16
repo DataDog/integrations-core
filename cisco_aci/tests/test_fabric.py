@@ -9,13 +9,13 @@ from datadog_checks.cisco_aci.api import Api
 from . import common
 
 
-def test_fabric_mocked(aggregator):
+def test_fabric_mocked(aggregator, dd_run_check):
     check = CiscoACICheck(common.CHECK_NAME, {}, [common.CONFIG_WITH_TAGS])
     api = Api(common.ACI_URLS, check.http, common.USERNAME, password=common.PASSWORD, log=check.log)
     api.wrapper_factory = common.FakeFabricSessionWrapper
     check._api_cache[hash_mutable(common.CONFIG_WITH_TAGS)] = api
 
-    check.check({})
+    dd_run_check(check)
 
     tags000 = ['cisco', 'project:cisco_aci', 'medium:broadcast', 'snmpTrapSt:enable', 'fabric_pod_id:1']
     tags101 = tags000 + ['node_id:101']
