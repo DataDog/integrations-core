@@ -64,7 +64,8 @@ def translate_profile(ctx, profile_path, mib_source_url):
         data = yaml.safe_load(f.read())
 
     output = []
-    for metric in data['metrics']:
+    metrics = data.get('metrics', [])
+    for metric in metrics:
         mib = metric['MIB']
         try:
             mib_view_controller.mibBuilder.loadModule(mib)
