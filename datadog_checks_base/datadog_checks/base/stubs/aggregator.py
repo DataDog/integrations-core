@@ -7,6 +7,7 @@ import json
 import os
 import re
 from collections import OrderedDict, defaultdict
+from copy import deepcopy
 
 from six import iteritems
 
@@ -129,6 +130,9 @@ class AggregatorStub(object):
 
     def submit_event_platform_event(self, check, check_id, raw_event, event_type):
         self._event_platform_events[event_type].append(raw_event)
+
+    def submit_network_devices_metadata_e2e(self, check, check_id, raw_event, event_type):
+        self._network_devices_metadata[event_type].append(raw_event)
 
     def submit_histogram_bucket(
         self,
@@ -474,6 +478,17 @@ class AggregatorStub(object):
 
         assert not errors, "Metadata assertion errors using metadata.csv:" + "\n\t- ".join([''] + sorted(errors))
 
+    def assert_network_devices_metadata(self, expected_metadata_events, event_type):
+        assert event_type in self._network_devices_metadata, "no events found for event type {}".format(event_type)
+        actual_events = deepcopy(self._network_devices_metadata[event_type])
+        expected_events = deepcopy(expected_metadata_events)
+        for event in actual_events + expected_events:
+            # `collect_timestamp` depend on check run time and cannot be asserted reliably,
+            # we are replacing it with `0` if present
+            if 'collect_timestamp' in event:
+                event['collect_timestamp'] = 0
+        assert expected_metadata_events == self._network_devices_metadata[event_type]
+
     def assert_no_duplicate_all(self):
         """
         Assert no duplicate metrics and service checks have been submitted.
@@ -549,6 +564,7 @@ class AggregatorStub(object):
         self._events = []
         # dict[event_type, [events]]
         self._event_platform_events = defaultdict(list)
+        self._network_devices_metadata = defaultdict(list)
         self._histogram_buckets = defaultdict(list)
 
     def all_metrics_asserted(self):

@@ -135,6 +135,15 @@ def replay_check_run(agent_collector, stub_aggregator, stub_agent):
                     data.get('device'),
                 )
 
+        network_devices_events = aggregator.get('network-devices-metadata') or []
+        for data in network_devices_events:
+            stub_aggregator.submit_network_devices_metadata_e2e(
+                check_name,
+                check_id,
+                data['UnmarshalledEvent'],
+                data['EventType'],
+            )
+
         for data in aggregator.get('service_checks', []):
             stub_aggregator.submit_service_check(
                 check_name, check_id, data['check'], data['status'], data['tags'], data['host_name'], data['message']
