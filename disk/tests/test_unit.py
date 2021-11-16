@@ -258,7 +258,12 @@ def test_min_disk_size(aggregator, gauge_metrics, rate_metrics, count_metrics, d
 @pytest.mark.skipif(not Platform.is_linux(), reason='disk labels are only available on Linux')
 @pytest.mark.usefixtures('psutil_mocks')
 def test_labels_from_blkid_cache_file(
-    aggregator, instance_blkid_cache_file, gauge_metrics, rate_metrics, count_metrics, dd_run_check,
+    aggregator,
+    instance_blkid_cache_file,
+    gauge_metrics,
+    rate_metrics,
+    count_metrics,
+    dd_run_check,
 ):
     """
     Verify that the disk labels are set when the blkid_cache_file option is set
@@ -274,7 +279,12 @@ def test_labels_from_blkid_cache_file(
 @pytest.mark.skipif(not Platform.is_linux(), reason='disk labels are only available on Linux')
 @pytest.mark.usefixtures('psutil_mocks')
 def test_blkid_cache_file_contains_no_labels(
-    aggregator, instance_blkid_cache_file_no_label, gauge_metrics, rate_metrics, count_metrics, dd_run_check,
+    aggregator,
+    instance_blkid_cache_file_no_label,
+    gauge_metrics,
+    rate_metrics,
+    count_metrics,
+    dd_run_check,
 ):
     """
     Verify that the disk labels are ignored if the cache file doesn't contain any
