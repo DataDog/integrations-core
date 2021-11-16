@@ -1,5 +1,9 @@
 # CHANGELOG - IBM WAS
 
+## 1.11.1 / 2021-11-16
+
+* [Fixed] Add dd_run_check and remove unused config options. See [#10623](https://github.com/DataDog/integrations-core/pull/10623).
+
 ## 1.11.0 / 2021-11-13
 
 * [Added] Add runtime configuration validation. See [#8936](https://github.com/DataDog/integrations-core/pull/8936).
