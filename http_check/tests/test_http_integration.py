@@ -332,7 +332,7 @@ def test_instance_auth_token(dd_run_check):
         ]
     )
 
-    instance = {'url': 'https://example.com', 'name': 'UpService', "auth_token": auth_token}
+    instance = {'url': 'https://valid.mock', 'name': 'UpService', "auth_token": auth_token}
     check = HTTPCheck('http_check', {'ca_certs': mock_get_ca_certs_path()}, [instance])
     dd_run_check(check)
     assert expected_headers == check.http.options['headers']
@@ -344,7 +344,7 @@ def test_instance_auth_token(dd_run_check):
     ["instance", "expected_headers"],
     [
         (
-            {'url': 'https://example.com', 'name': 'UpService', 'extra_headers': {'Host': 'test'}},
+            {'url': 'https://valid.mock', 'name': 'UpService', 'extra_headers': {'Host': 'test'}},
             OrderedDict(
                 [
                     ('User-Agent', 'Datadog Agent/0.0.0'),
@@ -354,7 +354,15 @@ def test_instance_auth_token(dd_run_check):
                 ]
             ),
         ),
-        ({'url': 'https://example.com', 'name': 'UpService', 'include_default_headers': False}, OrderedDict()),
+        (
+            {'url': 'https://valid.mock', 'name': 'UpService', 'headers': {'Host': 'test'}},
+            OrderedDict(
+                [
+                    ('Host', 'test'),
+                ]
+            ),
+        ),
+        ({'url': 'https://valid.mock', 'name': 'UpService', 'include_default_headers': False}, OrderedDict()),
     ],
 )
 def test_expected_headers(dd_run_check, instance, expected_headers):
