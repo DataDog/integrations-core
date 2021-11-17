@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "## SingleStore\n\nThis dashboard provides a high-level view of your SingleStore metrics and troubleshoot performance issues. For further reading on SingleStore:\n- [Datadog's SingleStore integration docs](https://github.com/DataDog/integrations-core/tree/master/singlestore)\n- [SingleStore docs](https://www.singlestore.com/)\n",
+    "description": "## SingleStore\n\nThis dashboard provides a high-level view of your SingleStore metrics and will help in troubleshooting performance issues. For further reading on SingleStore:\n- [Datadog's SingleStore integration docs](https://docs.datadoghq.com/integrations/singlestore/)\n- [SingleStore docs](https://www.singlestore.com/)\n",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -53,7 +53,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "This dashboard provides a high-level view of your SingleStore metrics and troubleshoot performance issues, including:\n- Any issues due to resource utilization\n- Spikes in connections\n- A high-level overview of query performance",
+                            "content": "This dashboard provides a high-level view of your SingleStore metrics and will help in troubleshooting performance issues, including:\n- Any issues due to resource utilization\n- Spikes in connections\n- A high-level overview of query performance",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -74,7 +74,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "For further reading on SingleStore:\n- [Datadog's SingleStore integration docs](https://github.com/DataDog/integrations-core/tree/master/singlestore)\n- [SingleStore docs](https://www.singlestore.com/)\n",
+                            "content": "For further reading on SingleStore:\n- [Datadog's SingleStore integration docs](https://docs.datadoghq.com/integrations/singlestore/)\n- [SingleStore docs](https://www.singlestore.com/)\n",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -420,7 +420,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "Monitoring both successful write queries and failed write queries can alert you if there are high failure rates. \n\nIncluding the node ID and node name when measuring the metric provides insight on which node has the high failure rate. ",
+                            "content": "Monitoring both successful write queries and failed write queries can alert you if there are high failure rates. \n\nIncluding the node ID and node name when measuring the metric provides insight on which nodes have high failure rates. ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -715,7 +715,7 @@
                     {
                         "definition": {
                             "background_color": "purple",
-                            "content": "The number of bytes received and sent per second. \n\nLooking at the bytes received and sent help understand network usage for a given workload and identify bottlenecks. This also helps to identify if any non-SingleStore DB activity is affecting a host\u2019s network",
+                            "content": "The number of bytes received and sent per second. \n\nLooking at the bytes received and sent helps understand network usage for a given workload and identify bottlenecks. This also helps to identify if any non-SingleStore DB activity is affecting a host\u2019s network",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
@@ -851,7 +851,7 @@
                     {
                         "definition": {
                             "background_color": "orange",
-                            "content": "The top 5 nodes that are using the most memory of the host ",
+                            "content": "The top nodes that are using the most memory ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
