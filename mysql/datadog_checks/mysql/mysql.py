@@ -330,7 +330,7 @@ class MySql(AgentCheck):
                 if status_name in metrics.keys():
                     collected_metric = metrics.get(status_name)[0]
                     self.log.debug(
-                        "Skipping variable %s for metric %s as it is already collected by %s",
+                        "Skipping status variable %s for metric %s as it is already collected by %s",
                         status_name,
                         status_metric,
                         collected_metric,
@@ -347,7 +347,7 @@ class MySql(AgentCheck):
                 if variable_name in metrics.keys():
                     collected_metric = metrics.get(variable_name)[0]
                     self.log.debug(
-                        "Skipping status variable %s for metric %s as it is already collected by %s",
+                        "Skipping variable %s for metric %s as it is already collected by %s",
                         variable_name,
                         variable_metric,
                         collected_metric,

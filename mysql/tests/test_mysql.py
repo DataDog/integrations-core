@@ -341,7 +341,7 @@ def test_additional_status_already_queried(aggregator, dd_run_check, instance_al
     aggregator.assert_metric('mysql.performance.open_files', metric_type=0, tags=tags.METRIC_TAGS, count=1)
 
     assert (
-        "Skipping statis variable Open_files for metric mysql.performance.open_files_test as "
+        "Skipping status variable Open_files for metric mysql.performance.open_files_test as "
         "it is already collected by mysql.performance.open_files" in caplog.text
     )
 
