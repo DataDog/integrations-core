@@ -1,12 +1,23 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from copy import deepcopy
 
 import pytest
 
 from . import common
 
 pytestmark = [pytest.mark.e2e, common.snmp_integration_only]
+
+
+def assert_network_devices_metadata(aggregator, events):
+    actual_events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
+    for event in actual_events:
+        # `collect_timestamp` depend on check run time and cannot be asserted reliably,
+        # we are replacing it with `0` if present
+        if 'collect_timestamp' in event:
+            event['collect_timestamp'] = 0
+    assert events == actual_events
 
 
 def test_e2e_core_metadata(dd_agent_check):
@@ -114,4 +125,5 @@ def test_e2e_core_metadata(dd_agent_check):
             'subnet': '',
         },
     ]
-    aggregator.assert_event_platform_events(events, "network-devices-metadata")
+    assert_network_devices_metadata(aggregator, events)
+
