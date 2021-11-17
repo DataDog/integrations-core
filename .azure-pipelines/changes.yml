@@ -4,6 +4,7 @@ pr:
   branches:
     include:
     - master
+    - alex/snmp_add_e2e_test_for_metadata
     - alex/snmp_profile_metadata_device_interface
   paths:
     exclude:
