@@ -11,3 +11,9 @@ files:
       overrides:
         prometheus_url.value.example: http://127.0.0.1:10249/metrics
         prometheus_url.display_priority: 1
+    - name: health_url
+      description: |
+        URL for the kube-proxy health endpoint.
+      value:
+        type: string
+        example: http://localhost:10256/healthz
