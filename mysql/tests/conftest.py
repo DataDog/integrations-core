@@ -185,6 +185,25 @@ def instance_already_queried():
 
 
 @pytest.fixture
+def instance_var_already_queried():
+    return {
+        'host': common.HOST,
+        'user': common.USER,
+        'pass': common.PASS,
+        'port': common.PORT,
+        'tags': tags.METRIC_TAGS,
+        'disable_generic_tags': 'true',
+        'additional_status': [
+            {
+                'name': "Key_buffer_size",
+                'metric_name': "mysql.myisam.key_buffer_size",
+                'type': "gauge",
+            },
+        ],
+    }
+
+
+@pytest.fixture
 def instance_invalid_var():
     return {
         'host': common.HOST,

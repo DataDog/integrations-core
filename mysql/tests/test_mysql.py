@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import logging
 from os import environ
 
 import pytest
@@ -330,9 +331,32 @@ def test_additional_variable_unknown(aggregator, dd_run_check, instance_invalid_
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_additional_variable_already_queried(aggregator, dd_run_check, instance_already_queried):
+def test_additional_status_already_queried(aggregator, dd_run_check, instance_already_queried, caplog):
+    caplog.clear()
+    caplog.set_level(logging.DEBUG)
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_already_queried])
     dd_run_check(mysql_check)
 
-    aggregator.assert_metric('mysql.performance.open_files_test', metric_type=0, tags=tags.METRIC_TAGS, count=1)
-    aggregator.assert_metric('mysql.performance.open_files', metric_type=0, tags=tags.METRIC_TAGS, count=0)
+    aggregator.assert_metric('mysql.performance.open_files_test', metric_type=0, tags=tags.METRIC_TAGS, count=0)
+    aggregator.assert_metric('mysql.performance.open_files', metric_type=0, tags=tags.METRIC_TAGS, count=1)
+
+    assert (
+        "Skipping statis variable Open_files for metric mysql.performance.open_files_test as "
+        "it is already collected by mysql.performance.open_files" in caplog.text
+    )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_additional_var_already_queried(aggregator, dd_run_check, instance_var_already_queried, caplog):
+    caplog.clear()
+    caplog.set_level(logging.DEBUG)
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_var_already_queried])
+    dd_run_check(mysql_check)
+
+    aggregator.assert_metric('mysql.myisam.key_buffer_size', metric_type=0, tags=tags.METRIC_TAGS, count=1)
+
+    assert (
+        "Skipping variable Key_buffer_size for metric mysql.myisam.key_buffer_size as "
+        "it is already collected by mysql.myisam.key_buffer_size" in caplog.text
+    )
