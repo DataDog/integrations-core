@@ -7,11 +7,19 @@ from collections import defaultdict
 
 import click
 
-from ...annotations import annotate_display_queue
 from ...manifest_utils import Manifest
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_metadata_file, normalize_display_name, read_metadata_rows
-from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success, echo_warning
+from ..console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_display_queue,
+    echo_debug,
+    echo_failure,
+    echo_info,
+    echo_success,
+    echo_warning,
+)
 
 REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
 
