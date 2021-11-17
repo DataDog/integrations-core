@@ -6,7 +6,7 @@ import sys
 
 import click
 
-from ...ci import running_on_gh_actions  # noqa: F401
+from ...ci import running_on_gh_actions
 from ...subprocess import run_command
 from ...tooling.constants import INTEGRATION_REPOS, set_root
 
