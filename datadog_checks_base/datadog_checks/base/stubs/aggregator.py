@@ -3,12 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
-import itertools
 import json
 import os
 import re
 from collections import OrderedDict, defaultdict
-from copy import deepcopy
 
 from six import iteritems
 
@@ -475,16 +473,6 @@ class AggregatorStub(object):
                         )
 
         assert not errors, "Metadata assertion errors using metadata.csv:" + "\n\t- ".join([''] + sorted(errors))
-
-    def assert_event_platform_events(self, events, event_type, is_json=True):
-        actual_events = self.get_event_platform_events(event_type, parse_json=is_json)
-        expected_events = deepcopy(events)
-        for event in itertools.chain(actual_events, expected_events):
-            # `collect_timestamp` depend on check run time and cannot be asserted reliably,
-            # we are replacing it with `0` if present
-            if 'collect_timestamp' in event:
-                event['collect_timestamp'] = 0
-        assert expected_events == actual_events
 
     def assert_no_duplicate_all(self):
         """
