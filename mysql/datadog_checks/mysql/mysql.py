@@ -325,13 +325,36 @@ class MySql(AgentCheck):
         if len(self._config.additional_status) > 0:
             additional_status_dict = {}
             for status_dict in self._config.additional_status:
-                additional_status_dict[status_dict["name"]] = (status_dict["metric_name"], status_dict["type"])
+                status_name = status_dict["name"]
+                status_metric = status_dict["metric_name"]
+                if status_name in metrics.keys():
+                    collected_metric = metrics.get(status_name)[0]
+                    self.log.debug(
+                        "Skipping status variable %s for metric %s as it is already collected by %s",
+                        status_name,
+                        status_metric,
+                        collected_metric,
+                    )
+                else:
+                    additional_status_dict[status_dict["name"]] = (status_dict["metric_name"], status_dict["type"])
             metrics.update(additional_status_dict)
 
         if len(self._config.additional_variable) > 0:
             additional_variable_dict = {}
             for variable_dict in self._config.additional_variable:
-                additional_variable_dict[variable_dict["name"]] = (variable_dict["metric_name"], variable_dict["type"])
+                variable_name = variable_dict["name"]
+                variable_metric = variable_dict["metric_name"]
+                if variable_name in metrics.keys():
+                    collected_metric = metrics.get(variable_name)[0]
+                    self.log.debug(
+                        "Skipping variable %s for metric %s as it is already collected by %s",
+                        variable_name,
+                        variable_metric,
+                        collected_metric,
+                    )
+                else:
+                    additional_variable_dict[variable_name] = (variable_metric, variable_dict["type"])
+
             metrics.update(additional_variable_dict)
 
         # "synthetic" metrics
