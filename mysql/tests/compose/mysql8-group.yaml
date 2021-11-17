@@ -8,6 +8,9 @@ services:
     hostname: node1
     ports:
       - "13306:3306"
+    volumes:
+      - ${MYSQL_LOGS_HOST_PATH}:${MYSQL_LOGS_PATH}
+      - ${MYSQL_CONF_PATH}:/opt/bitnami/mysql/conf/my_custom.cnf:ro
     restart: unless-stopped
     environment:
       - MYSQL_USER=dog
@@ -42,6 +45,8 @@ services:
     hostname: node2
     ports:
       - "13307:3306"
+    volumes:
+      - ${MYSQL_CONF_PATH}:/opt/bitnami/mysql/conf/my_custom.cnf:ro
     restart: unless-stopped
     environment:
       - MYSQL_USER=dog
@@ -76,14 +81,14 @@ services:
     hostname: node3
     ports:
       - "13308:3306"
+    volumes:
+      - ${MYSQL_CONF_PATH}:/opt/bitnami/mysql/conf/my_custom.cnf:ro
     restart: unless-stopped
     environment:
       - MYSQL_USER=dog
       - MYSQL_PASSWORD=dog
       - MYSQL_ROOT_PASSWORD=mypass
       - MYSQL_ROOT_HOST=%
-    volumes:
-      - ./docker.cnf:/etc/mysql/conf.d/docker.cnf
     command: ["mysqld",
       "--bind-address=0.0.0.0",
       "--server-id=1",

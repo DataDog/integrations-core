@@ -449,9 +449,7 @@ def _mysql_conf_path():
     """
     Return the path to a local MySQL configuration file suited for the current environment.
     """
-    if MYSQL_REPLICATION == 'group':
-        filename = 'mysql-group.conf'
-    elif MYSQL_FLAVOR == 'mysql':
+    if MYSQL_FLAVOR == 'mysql':
         filename = 'mysql.conf'
     elif MYSQL_FLAVOR == 'mariadb':
         filename = 'mariadb.conf'

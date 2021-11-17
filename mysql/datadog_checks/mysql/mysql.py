@@ -404,9 +404,8 @@ class MySql(AgentCheck):
     def _collect_replication_metrics(self, db, results, above_560):
         # Get replica stats
         replication_channel = self._config.options.get('replication_channel')
-        nonblocking = is_affirmative(self._config.options.get('replication_non_blocking_status', False))
-
         results.update(self._get_replica_stats(db, self.is_mariadb, replication_channel))
+        nonblocking = is_affirmative(self._config.options.get('replication_non_blocking_status', False))
         results.update(self._get_replica_status(db, above_560, nonblocking))
         return REPLICA_VARS
 
