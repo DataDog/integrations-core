@@ -487,7 +487,7 @@ class AggregatorStub(object):
             # we are replacing it with `0` if present
             if 'collect_timestamp' in event:
                 event['collect_timestamp'] = 0
-        assert expected_metadata_events == self._network_devices_metadata[event_type]
+        assert expected_events == actual_events
 
     def assert_no_duplicate_all(self):
         """
