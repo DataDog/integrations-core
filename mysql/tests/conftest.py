@@ -312,6 +312,8 @@ def init_group_replication():
         cur.execute("change master to master_user='repl' for channel 'group_replication_recovery';")
         cur.execute("START GROUP_REPLICATION;")
 
+    _init_datadog_sample_collection(conns[0])
+
 
 def _init_datadog_sample_collection(conn):
     logger.debug("initializing datadog sample collection")
