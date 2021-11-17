@@ -233,11 +233,11 @@ def instance_custom_queries():
         'disable_generic_tags': 'true',
         'custom_queries': [
             {
-                'query': "SELECT * from testdb.users where name='Alice' limit 1;",
+                'query': "SELECT name,age from testdb.users where name='Alice' limit 1;",
                 'columns': [{}, {'name': 'alice.age', 'type': 'gauge'}],
             },
             {
-                'query': "SELECT * from testdb.users where name='Bob' limit 1;",
+                'query': "SELECT name,age from testdb.users where name='Bob' limit 1;",
                 'columns': [{}, {'name': 'bob.age', 'type': 'gauge'}],
             },
         ],
