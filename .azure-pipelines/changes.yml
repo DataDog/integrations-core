@@ -4,6 +4,7 @@ pr:
   branches:
     include:
     - master
+    - alex/snmp_profile_metadata_device_interface
   paths:
     exclude:
     - datadog_checks_base/datadog_checks/*
