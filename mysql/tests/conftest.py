@@ -295,6 +295,7 @@ def init_group_replication():
     conns = [pymysql.connect(host=common.HOST, port=p, user='root', password='mypass') for p in common.PORTS_GROUP]
     _add_dog_user(conns[0])
     _add_bob_user(conns[0])
+    _init_datadog_sample_collection(conns[0])
 
     cur_primary = conns[0].cursor()
     cur_primary.execute("SET @@GLOBAL.group_replication_bootstrap_group=1;")
@@ -311,8 +312,6 @@ def init_group_replication():
         cur = c.cursor()
         cur.execute("change master to master_user='repl' for channel 'group_replication_recovery';")
         cur.execute("START GROUP_REPLICATION;")
-
-    _init_datadog_sample_collection(conns[0])
 
 
 def _init_datadog_sample_collection(conn):
