@@ -150,7 +150,7 @@ def instance_additional_variable():
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
         'disable_generic_tags': 'true',
-        'additional_status': [
+        'additional_variable': [
             {
                 'name': "long_query_time",
                 'metric_name': "mysql.performance.long_query_time",
@@ -166,7 +166,7 @@ def instance_additional_variable():
 
 
 @pytest.fixture
-def instance_already_queried():
+def instance_status_already_queried():
     return {
         'host': common.HOST,
         'user': common.USER,
@@ -193,7 +193,7 @@ def instance_var_already_queried():
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
         'disable_generic_tags': 'true',
-        'additional_status': [
+        'additional_variable': [
             {
                 'name': "Key_buffer_size",
                 'metric_name': "mysql.myisam.key_buffer_size",

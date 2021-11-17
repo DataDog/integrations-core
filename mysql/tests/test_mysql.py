@@ -331,10 +331,10 @@ def test_additional_variable_unknown(aggregator, dd_run_check, instance_invalid_
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_additional_status_already_queried(aggregator, dd_run_check, instance_already_queried, caplog):
+def test_additional_status_already_queried(aggregator, dd_run_check, instance_status_already_queried, caplog):
     caplog.clear()
     caplog.set_level(logging.DEBUG)
-    mysql_check = MySql(common.CHECK_NAME, {}, [instance_already_queried])
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_status_already_queried])
     dd_run_check(mysql_check)
 
     aggregator.assert_metric('mysql.performance.open_files_test', metric_type=0, tags=tags.METRIC_TAGS, count=0)
