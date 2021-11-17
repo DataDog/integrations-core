@@ -33,6 +33,13 @@ JMX_TO_INAPP_TYPES = {
     #       JMX histogram -> DSD histogram -> multiple in-app metrics (max, median, avg, count)
 }
 
+EVENT_PLATFORM_EVENT_TYPES = [
+    'dbm-samples',
+    'dbm-metrics',
+    'dbm-activity',
+    'network-devices-metadata',
+]
+
 
 def e2e_active():
     return (
@@ -135,14 +142,15 @@ def replay_check_run(agent_collector, stub_aggregator, stub_agent):
                     data.get('device'),
                 )
 
-        network_devices_events = aggregator.get('network-devices-metadata') or []
-        for data in network_devices_events:
-            stub_aggregator.submit_network_devices_metadata_e2e(
-                check_name,
-                check_id,
-                data['UnmarshalledEvent'],
-                data['EventType'],
-            )
+        for ep_event_type in EVENT_PLATFORM_EVENT_TYPES:
+            ep_events = aggregator.get(ep_event_type) or []
+            for event in ep_events:
+                stub_aggregator.submit_event_platform_event(
+                    check_name,
+                    check_id,
+                    json.dumps(event['UnmarshalledEvent']),
+                    event['EventType'],
+                )
 
         for data in aggregator.get('service_checks', []):
             stub_aggregator.submit_service_check(

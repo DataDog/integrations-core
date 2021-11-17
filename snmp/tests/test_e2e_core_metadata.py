@@ -114,4 +114,4 @@ def test_e2e_core_metadata(dd_agent_check):
             'subnet': '',
         },
     ]
-    aggregator.assert_network_devices_metadata(events, "network-devices-metadata")
+    aggregator.assert_event_platform_events(events, "network-devices-metadata")
