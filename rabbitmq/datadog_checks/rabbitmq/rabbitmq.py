@@ -11,7 +11,7 @@ from six import iteritems
 from six.moves.urllib.parse import quote_plus, urljoin, urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_native_string
-from datadog_checks.base.utils.tracing import traced
+from datadog_checks.base.utils.tracing import trace_class
 from ddtrace import tracer
 
 
@@ -135,6 +135,7 @@ class RabbitMQException(Exception):
     pass
 
 
+@trace_class()
 class RabbitMQ(AgentCheck):
 
     """This check is for gathering statistics from the RabbitMQ
@@ -154,7 +155,6 @@ class RabbitMQ(AgentCheck):
         self.already_alerted = []
         self.cached_vhosts = {}  # this is used to send CRITICAL rabbitmq.aliveness check if the server goes down
 
-    @traced
     def _get_config(self, instance):
         # make sure 'rabbitmq_api_url' is present and get parameters
         base_url = instance.get('rabbitmq_api_url', None)
@@ -200,7 +200,6 @@ class RabbitMQ(AgentCheck):
 
         return base_url, max_detailed, specified, custom_tags, collect_nodes
 
-    @traced
     def _collect_metadata(self, overview_response):
         version = to_native_string(overview_response['rabbitmq_version'])
         if version:
@@ -210,7 +209,6 @@ class RabbitMQ(AgentCheck):
         else:
             self.log.warning("could not retrieve rabbitmq version information")
 
-    @traced
     def _get_vhosts(self, instance, base_url):
         vhosts = instance.get('vhosts')
 
@@ -222,7 +220,6 @@ class RabbitMQ(AgentCheck):
 
         return vhosts
 
-    @traced
     def check(self, instance):
         base_url, max_detailed, specified, custom_tags, collect_node_metrics = self._get_config(instance)
         try:
@@ -291,7 +288,6 @@ class RabbitMQ(AgentCheck):
                     message="Could not contact aliveness API",
                 )
 
-    @traced
     def _get_data(self, url):
         try:
             r = self.http.get(url)
@@ -302,7 +298,6 @@ class RabbitMQ(AgentCheck):
         except ValueError as e:
             raise RabbitMQException('Cannot parse JSON response from API url: {} {}'.format(url, str(e)))
 
-    @traced
     def _filter_list(self, data, explicit_filters, regex_filters, object_type, tag_families):
         if explicit_filters or regex_filters:
             matching_lines = []
@@ -337,7 +332,6 @@ class RabbitMQ(AgentCheck):
             return matching_lines
         return data
 
-    @traced
     def _append_match_lines(self, regex_filters, name, tag_families, data_line, object_type, matching_lines):
         result = False
         object_tag_name = "queue_family"
@@ -360,7 +354,6 @@ class RabbitMQ(AgentCheck):
                 break
         return result
 
-    @traced
     def _get_tags(self, data, object_type, custom_tags):
         tags = []
         tag_list = TAGS_MAP[object_type]
@@ -371,7 +364,6 @@ class RabbitMQ(AgentCheck):
                 tags.append('{}_{}:{}'.format(TAG_PREFIX, tag_list[t], tag))
         return tags + custom_tags
 
-    @traced
     def _get_object_data(self, instance, base_url, object_type, limit_vhosts):
         """data is a list of nodes or queues:
         data = [
@@ -488,7 +480,6 @@ class RabbitMQ(AgentCheck):
             data = self._get_data(urljoin(base_url, object_type))
         return data
 
-    @traced
     def get_stats(self, instance, base_url, object_type, max_detailed, filters, limit_vhosts, custom_tags):
         """
         instance: the check instance
@@ -539,13 +530,11 @@ class RabbitMQ(AgentCheck):
         if object_type is QUEUE_TYPE:
             self._get_queue_bindings_metrics(base_url, custom_tags, data, object_type)
 
-    @traced
     def get_overview_stats(self, base_url, custom_tags):
         data = self._get_data(urljoin(base_url, "overview"))
         self._collect_metadata(data)
         self._get_metrics(data, OVERVIEW_TYPE, custom_tags)
 
-    @traced
     def _get_metrics(self, data, object_type, custom_tags):
         tags = self._get_tags(data, object_type, custom_tags)
         metrics_sent = 0
@@ -577,7 +566,6 @@ class RabbitMQ(AgentCheck):
                     )
         return metrics_sent
 
-    @traced
     def _get_queue_bindings_metrics(self, base_url, custom_tags, data, object_type):
         for item in data:
             vhost = item['vhost']
@@ -587,7 +575,6 @@ class RabbitMQ(AgentCheck):
 
             self.gauge('rabbitmq.queue.bindings.count', bindings_count, tags)
 
-    @traced
     def get_connections_stat(self, instance, base_url, object_type, vhosts, limit_vhosts, custom_tags):
         """
         Collect metrics on currently open connection per vhost.
@@ -627,7 +614,6 @@ class RabbitMQ(AgentCheck):
                 tags=['{}_conn_state:{}'.format(TAG_PREFIX, conn_state)] + custom_tags,
             )
 
-    @traced
     def alert(self, base_url, max_detailed, size, object_type, custom_tags):
         key = "{}{}".format(base_url, object_type)
         if key in self.already_alerted:
@@ -657,7 +643,6 @@ class RabbitMQ(AgentCheck):
 
         self.event(event)
 
-    @traced
     def _limit_vhosts(self, instance):
         """
         Check to see if vhosts were specified in the instance
@@ -667,7 +652,6 @@ class RabbitMQ(AgentCheck):
         vhosts = instance.get('vhosts', [])
         return len(vhosts) > 0
 
-    @traced
     def _check_aliveness(self, base_url, vhosts, custom_tags):
         """
         Check the aliveness API against all or a subset of vhosts. The API

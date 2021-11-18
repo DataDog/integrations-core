@@ -34,11 +34,6 @@ def traced(fn):
 
     @functools.wraps(fn)
     def traced_wrapper(self, *args, **kwargs):
-        if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true':
-            patch_all()
-            with tracer.trace(self.name, resource=fn.__name__):
-                return fn(self, *args, **kwargs)
-
         if datadog_agent is None:
             return fn(self, *args, **kwargs)
 
@@ -52,3 +47,25 @@ def traced(fn):
         return fn(self, *args, **kwargs)
 
     return traced_wrapper
+
+
+def tracing_method(f):
+    @functools.wraps(f)
+    def wrapper(*args, **kwargs):
+        if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true':
+            patch_all()
+            with tracer.trace(f.__name__, resource=f.__name__):
+                return f(*args, **kwargs)
+        return f(*args, **kwargs)
+
+    return wrapper
+
+def trace_class():
+    def decorate(cls):
+        for attr in cls.__dict__:
+            # TODO: fix static method
+            if callable(getattr(cls, attr)):
+                setattr(cls, attr, tracing_method(getattr(cls, attr)))
+        return cls
+
+    return decorate
