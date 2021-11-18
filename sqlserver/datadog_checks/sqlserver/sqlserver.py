@@ -81,6 +81,7 @@ class SQLServer(AgentCheck):
         self.instance_per_type_metrics = defaultdict(set)
         self.do_check = True
 
+        self.display_hostname = self.instance.get('display_hostname')
         self.autodiscovery = is_affirmative(self.instance.get('database_autodiscovery'))
         self.autodiscovery_include = self.instance.get('autodiscovery_include', ['.*'])
         self.autodiscovery_exclude = self.instance.get('autodiscovery_exclude', [])
@@ -151,7 +152,9 @@ class SQLServer(AgentCheck):
     @property
     def resolved_hostname(self):
         if self._resolved_hostname is None:
-            if self.dbm_enabled:
+            if self.display_hostname:
+                self._resolved_hostname = self.display_hostname
+            elif self.dbm_enabled:
                 host, port = self.split_sqlserver_host_port(self.instance.get('host'))
                 self._resolved_hostname = resolve_db_host(host)
             else:
