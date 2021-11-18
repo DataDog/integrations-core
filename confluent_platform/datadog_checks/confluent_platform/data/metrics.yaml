@@ -641,6 +641,15 @@ jmx_metrics:
           # The number of unassigned tasks of the connector on the worker.
           alias: confluent.$domain.worker.$attribute
           metric_type: gauge
+        status:
+          # The number mapping to status of kafka connector.
+          alias: confluent.$domain.connector-metrics.$connector.$attribute
+          metric_type: gauge
+          values:
+          - running: 0
+          - failed: 1
+          - paused: 2
+          - stopped: 3
 
   # Kafka Connect Metrics
   # https://kafka.apache.org/documentation/#connect_monitoring
