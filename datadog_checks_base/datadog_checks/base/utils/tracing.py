@@ -2,8 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import functools
+import os
 
-from ddtrace import tracer
+from ddtrace import tracer, patch_all
 
 from ..config import is_affirmative
 
@@ -33,6 +34,11 @@ def traced(fn):
 
     @functools.wraps(fn)
     def traced_wrapper(self, *args, **kwargs):
+        if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true':
+            patch_all()
+            with tracer.trace(self.name, resource=fn.__name__):
+                return fn(self, *args, **kwargs)
+
         if datadog_agent is None:
             return fn(self, *args, **kwargs)
 
@@ -40,6 +46,7 @@ def traced(fn):
         integration_tracing = is_affirmative(datadog_agent.get_config('integration_tracing'))
 
         if integration_tracing and trace_check:
+            patch_all()
             with tracer.trace(self.name, service='integrations-tracing', resource=fn.__name__):
                 return fn(self, *args, **kwargs)
         return fn(self, *args, **kwargs)
