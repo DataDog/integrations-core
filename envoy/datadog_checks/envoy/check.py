@@ -185,7 +185,7 @@ METRIC_MAP = {
     'envoy_listener_admin_downstream_pre_cx_timeout': 'listener.admin.downstream_pre_cx_timeout', # New
     'envoy_listener_admin_http_downstream_rq_completed': 'listener.admin.http.downstream_rq_completed', # New
     'envoy_listener_admin_http_downstream_rq_xx': 'listener.admin.http.downstream_rq_xx',  # Looks like tagged by 1,2,3,4 (replacing 1xx,2xx...)
-    'envoy_listener_admin_main_thread_downstream_cx_total': 'listener.admin.main_thread.downstream_cx_total', # New
+    'envoy_listener_admin_main_thread_downstream_cx_total': 'listener.admin.main_thread.downstream_cx_total', # New, admin/main_thread
     'envoy_listener_admin_no_filter_chain_match': 'listener.admin.no_filter_chain_match', # New
     'envoy_listener_downstream_cx_destroy': 'listener.downstream_cx_destroy',
     'envoy_listener_downstream_cx_overflow': 'listener.downstream_cx_overflow', # New
@@ -289,57 +289,58 @@ METRIC_MAP = {
     'envoy_http_downstream_cx_tx_bytes_buffered': 'http.downstream_cx_tx_bytes_buffered',
     'envoy_http_downstream_cx_upgrades_active': 'http.downstream_cx_upgrades_active', # New
     'envoy_http_downstream_rq_active': 'http.downstream_rq_active',
-    'envoy_listener_admin_downstream_cx_active': 'listener.downstream_cx_active',  # Admin prefix?
+    'envoy_listener_admin_downstream_cx_active': 'listener.admin.downstream_cx_active',  # Admin prefix?
+    'envoy_listener_admin_downstream_pre_cx_active': 'listener.admin.downstream_pre_cx_active',
+    'envoy_listener_admin_main_thread_downstream_cx_active': 'listener.admin.main_thread.downstream_cx_active', # Admin/main-thread
+    'envoy_listener_downstream_cx_active': 'listener.downstream_cx_active',
+    'envoy_listener_downstream_pre_cx_active': 'listener.downstream_pre_cx_active',
+    # What to do with the worker_<num>
+    # TYPE envoy_listener_worker_0_downstream_cx_active gauge
+    # TYPE envoy_listener_worker_1_downstream_cx_active gauge
+    # TYPE envoy_listener_worker_2_downstream_cx_active gauge
+    # TYPE envoy_listener_worker_3_downstream_cx_active gauge
 
+    'envoy_listener_manager_lds_control_plane_connected_state':'listener_manager.lds.control_plane.connected_state',
+    'envoy_listener_manager_lds_control_plane_pending_requests': 'listener_manager.lds.control_plane.pending_requests',
+    'envoy_listener_manager_lds_update_time': 'listener_manager.lds.update_time',
+    'envoy_listener_manager_lds_version': 'listener_manager.lds.version',
+    'envoy_listener_manager_total_filter_chains_draining': 'listener_manager.total_filter_chains_draining', # New
+    'envoy_listener_manager_total_listeners_active': 'listener_manager.total_listeners_active',
+    'envoy_listener_manager_total_listeners_draining': 'listener_manager.total_listeners_draining',
+    'envoy_listener_manager_total_listeners_warming': 'listener_manager.total_listeners_warming',
+    'envoy_listener_manager_workers_started':  'listener_manager.workers_started', # New
+    'envoy_runtime_admin_overrides_active': 'runtime.admin_overrides_active',
+    'envoy_runtime_deprecated_feature_seen_since_process_start': 'runtime.deprecated_feature_seen_since_process_start', # New
+    'envoy_runtime_num_keys': 'runtime.num_keys',
+    'envoy_runtime_num_layers': 'runtime.num_layers',
+    'envoy_server_compilation_settings_fips_mode': 'server.compilation_settings_fips_mode', # New
+    'envoy_server_concurrency': 'server.concurrency',
+    'envoy_server_days_until_first_cert_expiring': 'server.days_until_first_cert_expiring',
+    'envoy_server_hot_restart_epoch': 'server.hot_restart_epoch',
+    'envoy_server_hot_restart_generation': 'server.hot_restart_generation',
+    'envoy_server_live': 'server.live',
+    'envoy_server_memory_allocated': 'server.memory_allocated',
+    'envoy_server_memory_heap_size': 'server.memory_heap_size',
+    'envoy_server_memory_physical_size': 'server.memory_physical_size', # New
+    'envoy_server_parent_connections': 'server.parent_connections',
+    'envoy_server_seconds_until_first_ocsp_response_expiring': 'server.seconds_until_first_ocsp_response_expiring', # New
+    'envoy_server_state': 'server.state',
+    'envoy_server_stats_recent_lookups': 'server.stats_recent_lookups',
+    'envoy_server_total_connections': 'server.total_connections',
+    'envoy_server_uptime': 'server.uptime',
+    'envoy_server_version': 'server.version',
+
+    # THE FOLLOWING ARE HISTOGRAMS
+    'envoy_cluster_upstream_cx_connect_ms': 'cluster.upstream_cx_connect_ms',
+    'envoy_cluster_upstream_cx_length_ms': 'cluster.upstream_cx_length_ms',
+    'envoy_cluster_manager_cds_update_duration': 'cluster_manager.cds.update_duration', # New
+    'envoy_http_downstream_cx_length_ms': 'listener.downstream_cx_length_ms',
+    'envoy_http_downstream_rq_time': 'http.downstream_rq_time',
+    'envoy_listener_admin_downstream_cx_length_ms': 'listener.admin.downstream_cx_length_ms', # Admin is new
+    'envoy_listener_downstream_cx_length_ms': 'listener.downstream_cx_length_ms',
+    'envoy_listener_manager_lds_update_duration': 'listener_manager.lds.update_duration', # New
+    'envoy_server_initialization_time_ms': 'server.initialization_time_ms', # New
 }
-
-# TYPE  gauge
-# TYPE envoy_listener_admin_downstream_pre_cx_active gauge
-# TYPE envoy_listener_admin_main_thread_downstream_cx_active gauge
-# TYPE envoy_listener_downstream_cx_active gauge
-# TYPE envoy_listener_downstream_pre_cx_active gauge
-# TYPE envoy_listener_worker_0_downstream_cx_active gauge
-# TYPE envoy_listener_worker_1_downstream_cx_active gauge
-# TYPE envoy_listener_worker_2_downstream_cx_active gauge
-# TYPE envoy_listener_worker_3_downstream_cx_active gauge
-# TYPE envoy_listener_manager_lds_control_plane_connected_state gauge
-# TYPE envoy_listener_manager_lds_control_plane_pending_requests gauge
-# TYPE envoy_listener_manager_lds_update_time gauge
-# TYPE envoy_listener_manager_lds_version gauge
-# TYPE envoy_listener_manager_total_filter_chains_draining gauge
-# TYPE envoy_listener_manager_total_listeners_active gauge
-# TYPE envoy_listener_manager_total_listeners_draining gauge
-# TYPE envoy_listener_manager_total_listeners_warming gauge
-# TYPE envoy_listener_manager_workers_started gauge
-# TYPE envoy_runtime_admin_overrides_active gauge
-# TYPE envoy_runtime_deprecated_feature_seen_since_process_start gauge
-# TYPE envoy_runtime_num_keys gauge
-# TYPE envoy_runtime_num_layers gauge
-# TYPE envoy_server_compilation_settings_fips_mode gauge
-# TYPE envoy_server_concurrency gauge
-# TYPE envoy_server_days_until_first_cert_expiring gauge
-# TYPE envoy_server_hot_restart_epoch gauge
-# TYPE envoy_server_hot_restart_generation gauge
-# TYPE envoy_server_live gauge
-# TYPE envoy_server_memory_allocated gauge
-# TYPE envoy_server_memory_heap_size gauge
-# TYPE envoy_server_memory_physical_size gauge
-# TYPE envoy_server_parent_connections gauge
-# TYPE envoy_server_seconds_until_first_ocsp_response_expiring gauge
-# TYPE envoy_server_state gauge
-# TYPE envoy_server_stats_recent_lookups gauge
-# TYPE envoy_server_total_connections gauge
-# TYPE envoy_server_uptime gauge
-# TYPE envoy_server_version gauge
-# TYPE envoy_cluster_upstream_cx_connect_ms histogram
-# TYPE envoy_cluster_upstream_cx_length_ms histogram
-# TYPE envoy_cluster_manager_cds_update_duration histogram
-# TYPE envoy_http_downstream_cx_length_ms histogram
-# TYPE envoy_http_downstream_rq_time histogram
-# TYPE envoy_listener_admin_downstream_cx_length_ms histogram
-# TYPE envoy_listener_downstream_cx_length_ms histogram
-# TYPE envoy_listener_manager_lds_update_duration histogram
-# TYPE envoy_server_initialization_time_ms histogram
 
 LABEL_MAP = {
     'cluster_name': 'envoy_cluster',
