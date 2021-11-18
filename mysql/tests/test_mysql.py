@@ -237,6 +237,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
     [
         (True, '', 'stubbed.hostname'),
         (False, 'forced_hostname', 'forced_hostname'),
+        (True, 'forced_hostname', 'forced_hostname'),
     ],
 )
 def test_correct_hostname(dbm_enabled, display_hostname, expected_hostname, aggregator, dd_run_check, instance_basic):
