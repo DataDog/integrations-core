@@ -16,6 +16,7 @@ from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.tracing import traced_class
 
 from .common import (
     CONSUL_CAN_CONNECT,
@@ -41,6 +42,7 @@ except ImportError:
 NodeStatus = namedtuple('NodeStatus', ['node_id', 'service_name', 'service_tags_set', 'status'])
 
 
+@traced_class()
 class ConsulCheck(OpenMetricsBaseCheck):
     def __init__(self, name, init_config, instances):
         instance = instances[0]

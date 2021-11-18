@@ -11,7 +11,7 @@ from six import iteritems
 from six.moves.urllib.parse import quote_plus, urljoin, urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_native_string
-from datadog_checks.base.utils.tracing import trace_class
+from datadog_checks.base.utils.tracing import traced_class
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'rabbitmq'
 EXCHANGE_TYPE = 'exchanges'
@@ -129,11 +129,12 @@ TAGS_MAP = {
 METRIC_SUFFIX = {EXCHANGE_TYPE: "exchange", QUEUE_TYPE: "queue", NODE_TYPE: "node", OVERVIEW_TYPE: "overview"}
 
 
+@traced_class()
 class RabbitMQException(Exception):
     pass
 
 
-@trace_class()
+@traced_class()
 class RabbitMQ(AgentCheck):
 
     """This check is for gathering statistics from the RabbitMQ

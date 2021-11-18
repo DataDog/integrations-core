@@ -53,7 +53,6 @@ def tracing_method(f):
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
         if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true':
-            patch_all()
             with tracer.trace(f.__name__, resource=f.__name__):
                 return f(*args, **kwargs)
         return f(*args, **kwargs)
@@ -61,11 +60,12 @@ def tracing_method(f):
     return wrapper
 
 
-def trace_class():
+def traced_class():
+    patch_all()
     def decorate(cls):
         for attr in cls.__dict__:
             # TODO: fix static method
-            if callable(getattr(cls, attr)):
+            if callable(getattr(cls, attr)) and not isinstance(cls.__dict__[attr], staticmethod):
                 setattr(cls, attr, tracing_method(getattr(cls, attr)))
         return cls
 
