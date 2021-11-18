@@ -38,6 +38,11 @@ files:
       value:
         type: string
         display_default: postgres
+    - name: display_hostname
+      description: |
+        Override the resolved hostname.
+      value:
+        type: string
     - name: dbstrict
       description: |
         Whether to restrict the scope of the check to just the database in question.

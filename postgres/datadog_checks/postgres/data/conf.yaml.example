@@ -41,6 +41,11 @@ instances:
     #
     # dbname: <DBNAME>
 
+    ## @param display_hostname - string - optional
+    ## Override the resolved hostname.
+    #
+    # display_hostname: <DISPLAY_HOSTNAME>
+
     ## @param dbstrict - boolean - optional - default: false
     ## Whether to restrict the scope of the check to just the database in question.
     ## Set to `true` if you only want to gather metrics from the database provided in the dbname parameter.
