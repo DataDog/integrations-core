@@ -93,6 +93,7 @@ class InstanceConfig(BaseModel):
     dbm: Optional[bool]
     defaults_file: Optional[str]
     disable_generic_tags: Optional[bool]
+    display_hostname: Optional[str]
     empty_default_hostname: Optional[bool]
     host: Optional[str]
     max_custom_queries: Optional[int]

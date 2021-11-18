@@ -50,6 +50,12 @@ files:
               type: number
               example: 3306
 
+          - name: display_hostname
+            description: |
+              Override the resolved hostname.
+            value:
+              type: string
+
           - name: sock
             description: |
               Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).

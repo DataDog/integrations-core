@@ -47,6 +47,11 @@ instances:
     #
     port: 3306
 
+    ## @param display_hostname - string - optional
+    ## Override the resolved hostname.
+    #
+    # display_hostname: <DISPLAY_HOSTNAME>
+
     ## @param sock - string - optional
     ## Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).
     ## If you specify a socket you dont need to specify a host.
