@@ -28,6 +28,7 @@ resources:
 jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
+    check: rabbitmq
     job_name: Changed
     display: Linux
     ddtrace_flag: '--ddtrace'
