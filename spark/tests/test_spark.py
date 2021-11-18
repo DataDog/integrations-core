@@ -552,6 +552,8 @@ SPARK_STREAMING_STATISTICS_METRIC_VALUES = {
     'spark.streaming.statistics.num_total_completed_batches': 28,
 }
 
+SPARK_STRUCTURED_STREAMING_METRIC_TAGS = ['query_name:my_named_query'] + COMMON_TAGS
+
 SPARK_STRUCTURED_STREAMING_METRIC_VALUES = {
     'spark.structured_streaming.input_rate': 12,
     'spark.structured_streaming.latency': 12,
@@ -601,7 +603,7 @@ def test_yarn(aggregator):
 
         # Check the structured streaming metrics
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=SPARK_STRUCTURED_STREAMING_METRIC_TAGS + CUSTOM_TAGS)
 
         tags = ['url:http://localhost:8088'] + CLUSTER_TAGS + CUSTOM_TAGS
         tags.sort()
@@ -683,7 +685,7 @@ def test_mesos(aggregator):
 
         # Check the structured streaming metrics
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=SPARK_STRUCTURED_STREAMING_METRIC_TAGS + CUSTOM_TAGS)
 
         # Check the service tests
 
@@ -761,7 +763,7 @@ def test_driver_unit(aggregator):
 
         # Check the structured streaming metrics
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=SPARK_STRUCTURED_STREAMING_METRIC_TAGS + CUSTOM_TAGS)
 
         # Check the service tests
 
@@ -830,7 +832,7 @@ def test_standalone_unit(aggregator):
 
         # Check the structured streaming metrics
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=SPARK_STRUCTURED_STREAMING_METRIC_TAGS)
 
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
@@ -892,7 +894,7 @@ def test_standalone_unit_with_proxy_warning_page(aggregator):
 
         # Check the structured streaming metrics
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=SPARK_STRUCTURED_STREAMING_METRIC_TAGS)
 
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
@@ -954,7 +956,7 @@ def test_standalone_pre20(aggregator):
 
         # Check the structured streaming metrics
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=SPARK_STRUCTURED_STREAMING_METRIC_TAGS)
 
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):

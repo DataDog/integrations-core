@@ -42,7 +42,9 @@ SPARK_MASTER_APP_PATH = '/app/'
 MESOS_MASTER_APP_PATH = '/frameworks'
 
 # Extract the application name and the dd metric name from the structured streams metrics.
-STRUCTURED_STREAMS_METRICS_REGEX = re.compile(r"^[\w-]+\.driver\.spark\.streaming\.[\w-]+\.(?P<metric_name>[\w-]+)$")
+STRUCTURED_STREAMS_METRICS_REGEX = re.compile(
+    r"^[\w-]+\.driver\.spark\.streaming\.(?P<query_name>[\w-]+)\.(?P<metric_name>[\w-]+)$"
+)
 
 # Application type and states to collect
 YARN_APPLICATION_TYPES = 'SPARK'
@@ -642,10 +644,11 @@ class SparkCheck(AgentCheck):
                         continue
                     groups = match.groupdict()
                     metric_name = groups['metric_name']
+                    query_name = groups.get("query_name", '')
                     if metric_name not in SPARK_STRUCTURED_STREAMING_METRICS:
                         continue
                     metric_name, submission_type = SPARK_STRUCTURED_STREAMING_METRICS[metric_name]
-                    tags = ['app_name:%s' % str(app_name)]
+                    tags = ['app_name:%s' % str(app_name), 'query_name:%s' % str(query_name)]
                     tags.extend(addl_tags)
                     self._set_metric(metric_name, submission_type, value, tags=tags)
             except HTTPError as e:
