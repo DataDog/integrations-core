@@ -228,7 +228,7 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
 @mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 @pytest.mark.parametrize(
     'dbm_enabled, display_hostname, expected_hostname',
-    [(True, '', 'resolved.hostname'), (False, '', 'stubbed.hostname'), (False, 'forced_hostname', 'forced_hostname')]
+    [(True, '', 'resolved.hostname'), (False, '', 'stubbed.hostname'), (False, 'forced_hostname', 'forced_hostname')],
 )
 def test_correct_hostname(dbm_enabled, display_hostname, expected_hostname, aggregator, pg_instance):
     pg_instance['dbm'] = dbm_enabled
