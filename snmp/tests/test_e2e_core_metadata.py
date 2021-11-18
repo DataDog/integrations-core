@@ -52,7 +52,6 @@ def test_e2e_core_metadata(dd_agent_check):
                     u'name': u'f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
                     u'profile': u'f5-big-ip',
                     u'status': 1,
-                    u'subnet': u'',
                     u'sys_object_id': u'1.3.6.1.4.1.3375.2.1.3.4.43',
                     u'tags': [
                         u'device_namespace:default',
