@@ -50,6 +50,7 @@ class InstanceConfig(BaseModel):
     db_fragmentation_object_names: Optional[Sequence[str]]
     dbm: Optional[bool]
     disable_generic_tags: Optional[bool]
+    display_hostname: Optional[str]
     driver: Optional[str]
     dsn: Optional[str]
     empty_default_hostname: Optional[bool]

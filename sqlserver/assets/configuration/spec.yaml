@@ -45,6 +45,10 @@ files:
       value:
         type: string
         example: master
+    - name: display_hostname
+      description: Override the resolved hostname.
+      value:
+        type: string
     - name: database_autodiscovery
       description: |
         Auto-discover and monitor databases. Supported for the metrics check. 

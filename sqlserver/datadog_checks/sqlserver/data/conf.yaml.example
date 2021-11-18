@@ -56,6 +56,11 @@ instances:
     #
     # database: master
 
+    ## @param display_hostname - string - optional
+    ## Override the resolved hostname.
+    #
+    # display_hostname: <DISPLAY_HOSTNAME>
+
     ## @param database_autodiscovery - boolean - optional - default: false
     ## Auto-discover and monitor databases. Supported for the metrics check. 
     ## If `true`, overrides `database` option.
