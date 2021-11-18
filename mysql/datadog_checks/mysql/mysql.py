@@ -108,9 +108,21 @@ class MySql(AgentCheck):
 
     @property
     def resolved_hostname(self):
-        if self._resolved_hostname is None and (self._config.dbm_enabled or self.disable_generic_tags):
-            self._resolved_hostname = resolve_db_host(self._config.host)
+        if self._resolved_hostname is None:
+            if self._config.display_hostname:
+                self._resolved_hostname = self._config.display_hostname
+            elif self._config.dbm_enabled or self.disable_generic_tags:
+                self._resolved_hostname = resolve_db_host(self._config.host)
+            else:
+                self._resolved_hostname = self.agent_hostname
         return self._resolved_hostname
+
+    @property
+    def agent_hostname(self):
+        # type: () -> str
+        if self._agent_hostname is None:
+            self._agent_hostname = datadog_agent.get_hostname()
+        return self._agent_hostname
 
     def _get_debug_tags(self):
         return ['agent_hostname:{}'.format(datadog_agent.get_hostname())]

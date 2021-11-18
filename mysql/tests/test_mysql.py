@@ -232,13 +232,18 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
     )
 
 
-@pytest.mark.parametrize('dbm_enabled', (True, False))
-def test_correct_hostname(dbm_enabled, aggregator, dd_run_check, instance_basic):
+@pytest.mark.parametrize(
+    'dbm_enabled, display_hostname, expected_hostname',
+    [
+        (True, '', 'stubbed.hostname'),
+        (False, 'forced_hostname', 'forced_hostname'),
+    ],
+)
+def test_correct_hostname(dbm_enabled, display_hostname, expected_hostname, aggregator, dd_run_check, instance_basic):
     instance_basic['dbm'] = dbm_enabled
+    instance_basic['display_hostname'] = display_hostname
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
     dd_run_check(mysql_check)
-
-    expected_hostname = 'stubbed.hostname' if dbm_enabled else None
 
     aggregator.assert_service_check(
         'mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS_MIN, count=1, hostname=expected_hostname
