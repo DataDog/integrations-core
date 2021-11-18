@@ -165,9 +165,7 @@ class Oracle(AgentCheck):
             self._connection_errors += 1
             raise ConfigurationError('server needs to be in the <HOST>:<PORT> format, "%s"" provided' % self._server)
 
-        # TODO: Add a new custom DSN address config option? This would have more configurability
         dsn = f"""(DESCRIPTION=(ADDRESS=(PROTOCOL={self._protocol})(HOST={host})(PORT={port}))(CONNECT_DATA=(SERVICE_NAME={self._service})))"""
-        self.log.error(dsn)
 
         return dsn
 
