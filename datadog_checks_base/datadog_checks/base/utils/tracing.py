@@ -4,7 +4,7 @@
 import functools
 import os
 
-from ddtrace import tracer, patch_all
+from ddtrace import patch_all, tracer
 
 from ..config import is_affirmative
 
@@ -59,6 +59,7 @@ def tracing_method(f):
         return f(*args, **kwargs)
 
     return wrapper
+
 
 def trace_class():
     def decorate(cls):
