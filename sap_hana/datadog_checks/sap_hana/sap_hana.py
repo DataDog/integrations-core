@@ -38,6 +38,7 @@ class SapHanaCheck(AgentCheck):
         self._batch_size = int(self.instance.get('batch_size', 1000))
         self._tags = self.instance.get('tags', [])
         self._use_tls = self.instance.get('use_tls', False)
+        self._only_custom_queries = is_affirmative(self.instance.get('only_custom_queries', False))
 
         # Add server & port tags
         self._tags.append('server:{}'.format(self._server))
@@ -75,6 +76,26 @@ class SapHanaCheck(AgentCheck):
         self.check_initializations.append(self.parse_config)
 
     def check(self, instance):
+        default_queries = [
+            self.query_master_database,
+            self.query_database_status,
+            self.query_backup_status,
+            self.query_licenses,
+            self.query_connection_overview,
+            self.query_disk_usage,
+            self.query_service_memory,
+            self.query_service_component_memory,
+            self.query_row_store_memory,
+            self.query_service_statistics,
+            self.query_volume_io,
+            self.query_custom,
+        ]
+
+        if self._only_custom_queries:
+            query_methods = [self.query_custom]
+        else:
+            query_methods = default_queries
+
         if self._conn is None:
             connection = self.get_connection()
             if connection is None:
@@ -83,20 +104,7 @@ class SapHanaCheck(AgentCheck):
             self._conn = connection
 
         try:
-            for query_method in (
-                self.query_master_database,
-                self.query_database_status,
-                self.query_backup_status,
-                self.query_licenses,
-                self.query_connection_overview,
-                self.query_disk_usage,
-                self.query_service_memory,
-                self.query_service_component_memory,
-                self.query_row_store_memory,
-                self.query_service_statistics,
-                self.query_volume_io,
-                self.query_custom,
-            ):
+            for query_method in query_methods:
                 try:
                     query_method()
                 except QueryExecutionError as e:
