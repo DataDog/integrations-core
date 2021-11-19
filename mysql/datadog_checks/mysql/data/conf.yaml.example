@@ -47,10 +47,10 @@ instances:
     #
     port: 3306
 
-    ## @param display_hostname - string - optional
-    ## Set the hostname for this instance.
+    ## @param reported_hostname - string - optional
+    ## Set the reported hostname for this instance.
     #
-    # display_hostname: <DISPLAY_HOSTNAME>
+    # reported_hostname: <REPORTED_HOSTNAME>
 
     ## @param sock - string - optional
     ## Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).

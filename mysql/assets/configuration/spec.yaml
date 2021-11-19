@@ -50,9 +50,9 @@ files:
               type: number
               example: 3306
 
-          - name: display_hostname
+          - name: reported_hostname
             description: |
-              Set the hostname for this instance.
+              Set the reported hostname for this instance.
             value:
               type: string
 
