@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 23.3.1 / 2021-11-19
+
+* [Fixed] fix `mmh3.hash64` unicode exception with python2. See [#10685](https://github.com/DataDog/integrations-core/pull/10685).
+
 ## 23.3.0 / 2021-11-12
 
 * [Added] Add new base class for monitoring Windows performance counters. See [#10504](https://github.com/DataDog/integrations-core/pull/10504).
