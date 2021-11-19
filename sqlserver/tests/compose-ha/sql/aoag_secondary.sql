@@ -2,7 +2,7 @@
 USE [master]
 GO
 
-CREATE LOGIN bob WITH PASSWORD = 'hey-there-bob123';
+CREATE LOGIN bob WITH PASSWORD = 'Password12!';
 CREATE USER bob FOR LOGIN bob;
 GRANT CONNECT ANY DATABASE to bob;
 

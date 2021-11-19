@@ -12,4 +12,11 @@ def install_sqlserver():
     subprocess.run(["choco", "install", "sql-server-2017", "--no-progress", "--params", "'/TCPENABLED:1'"], check=True)
 
 
+@retry(wait=wait_exponential(min=2, max=60), stop=stop_after_attempt(5))
+def install_msoledbsql():
+    print("Install Microsoft OLE DB Driver for SQL Server ...")
+    subprocess.run(["choco", "install", "msoledbsql", "--no-progress", "-y"], check=True)
+
+
 install_sqlserver()
+install_msoledbsql()

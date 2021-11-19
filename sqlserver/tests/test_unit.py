@@ -199,7 +199,7 @@ def test_check_local(aggregator, dd_run_check, init_config, instance_sql):
 
 
 @windows_ci
-@pytest.mark.parametrize('adoprovider', ['SQLOLEDB', 'SQLNCLI11'])
+@pytest.mark.parametrize('adoprovider', ['SQLOLEDB', 'SQLNCLI11', 'MSOLEDBSQL'])
 def test_check_adoprovider(aggregator, dd_run_check, init_config, instance_sql, adoprovider):
     instance = copy.deepcopy(instance_sql)
     instance['adoprovider'] = adoprovider
