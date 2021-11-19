@@ -42,7 +42,7 @@ instances:
     # dbname: <DBNAME>
 
     ## @param display_hostname - string - optional
-    ## Override the resolved hostname.
+    ## Set the hostname for this instance.
     #
     # display_hostname: <DISPLAY_HOSTNAME>
 

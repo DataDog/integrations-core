@@ -40,7 +40,7 @@ files:
         display_default: postgres
     - name: display_hostname
       description: |
-        Override the resolved hostname.
+        Set the hostname for this instance.
       value:
         type: string
     - name: dbstrict
