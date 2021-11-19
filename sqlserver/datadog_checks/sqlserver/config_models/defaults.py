@@ -80,10 +80,6 @@ def instance_disable_generic_tags(field, value):
     return False
 
 
-def instance_display_hostname(field, value):
-    return get_default_field_value(field, value)
-
-
 def instance_driver(field, value):
     return 'SQL Server'
 
@@ -149,6 +145,10 @@ def instance_proc_only_if_database(field, value):
 
 
 def instance_query_metrics(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_reported_hostname(field, value):
     return get_default_field_value(field, value)
 
 

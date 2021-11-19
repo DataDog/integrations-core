@@ -45,8 +45,8 @@ files:
       value:
         type: string
         example: master
-    - name: display_hostname
-      description: Set the hostname for this instance.
+    - name: reported_hostname
+      description: Set the reported hostname for this instance.
       value:
         type: string
     - name: database_autodiscovery

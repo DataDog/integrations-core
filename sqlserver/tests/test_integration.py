@@ -338,7 +338,7 @@ def test_split_sqlserver_host(instance_docker, instance_host, split_host, split_
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
-    "dbm_enabled, instance_host, display_hostname, expected_hostname",
+    "dbm_enabled, instance_host, reported_hostname, expected_hostname",
     [
         (False, 'localhost,1433,some-typo', '', 'stubbed.hostname'),
         (True, 'localhost,1433', '', 'stubbed.hostname'),
@@ -352,9 +352,9 @@ def test_split_sqlserver_host(instance_docker, instance_host, split_host, split_
         (False, '8.8.8.8', 'forced_hostname', 'forced_hostname'),
     ],
 )
-def test_resolved_hostname(instance_docker, dbm_enabled, instance_host, display_hostname, expected_hostname):
+def test_resolved_hostname(instance_docker, dbm_enabled, instance_host, reported_hostname, expected_hostname):
     instance_docker['dbm'] = dbm_enabled
     instance_docker['host'] = instance_host
-    instance_docker['display_hostname'] = display_hostname
+    instance_docker['reported_hostname'] = reported_hostname
     sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
     assert sqlserver_check.resolved_hostname == expected_hostname

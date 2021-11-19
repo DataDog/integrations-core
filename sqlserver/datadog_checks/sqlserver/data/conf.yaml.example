@@ -56,10 +56,10 @@ instances:
     #
     # database: master
 
-    ## @param display_hostname - string - optional
-    ## Set the hostname for this instance.
+    ## @param reported_hostname - string - optional
+    ## Set the reported hostname for this instance.
     #
-    # display_hostname: <DISPLAY_HOSTNAME>
+    # reported_hostname: <REPORTED_HOSTNAME>
 
     ## @param database_autodiscovery - boolean - optional - default: false
     ## Auto-discover and monitor databases. Supported for the metrics check. 
