@@ -14,7 +14,7 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
 from .common import CHECK_NAME
-from .utils import not_windows_ci
+from .utils import not_windows_ci, windows_ci
 
 try:
     import pyodbc
@@ -36,6 +36,15 @@ def dbm_instance(instance_docker):
     # set a very small collection interval so the tests go fast
     instance_docker['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     return copy(instance_docker)
+
+
+@pytest.fixture
+def instance_sql_msoledb_dbm(instance_sql_msoledb):
+    instance_sql_msoledb['dbm'] = True
+    instance_sql_msoledb['min_collection_interval'] = 1
+    instance_sql_msoledb['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    instance_sql_msoledb['tags'] = ['optional:tag1']
+    return instance_sql_msoledb
 
 
 @not_windows_ci
@@ -86,10 +95,7 @@ def test_get_statement_metrics_query_cached(aggregator, dbm_instance, caplog):
     assert times_columns_loaded == 1, "columns should have been loaded only once"
 
 
-@not_windows_ci
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize(
+test_statement_metrics_and_plans_parameterized = (
     "database,plan_user,query,match_pattern,param_groups",
     [
         [
@@ -134,7 +140,48 @@ def test_get_statement_metrics_query_cached(aggregator, dbm_instance, caplog):
         ],
     ],
 )
+
+
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(*test_statement_metrics_and_plans_parameterized)
 def test_statement_metrics_and_plans(
+    aggregator, dd_run_check, dbm_instance, bob_conn, database, plan_user, query, param_groups, match_pattern
+):
+    _run_test_statement_metrics_and_plans(
+        aggregator, dd_run_check, dbm_instance, bob_conn, database, plan_user, query, param_groups, match_pattern
+    )
+
+
+@windows_ci
+@pytest.mark.integration
+@pytest.mark.parametrize(*test_statement_metrics_and_plans_parameterized)
+def test_statement_metrics_and_plans_windows(
+    aggregator,
+    dd_run_check,
+    instance_sql_msoledb_dbm,
+    bob_conn,
+    database,
+    plan_user,
+    query,
+    param_groups,
+    match_pattern,
+):
+    _run_test_statement_metrics_and_plans(
+        aggregator,
+        dd_run_check,
+        instance_sql_msoledb_dbm,
+        bob_conn,
+        database,
+        plan_user,
+        query,
+        param_groups,
+        match_pattern,
+    )
+
+
+def _run_test_statement_metrics_and_plans(
     aggregator, dd_run_check, dbm_instance, bob_conn, database, plan_user, query, param_groups, match_pattern
 ):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
@@ -152,6 +199,13 @@ def test_statement_metrics_and_plans(
     aggregator.reset()
     _run_test_queries()
     dd_run_check(check)
+
+    _conn_key_prefix = "dbm-"
+    with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
+        with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+            available_query_metrics_columns = check.statement_metrics._get_available_query_metrics_columns(
+                cursor, SQL_SERVER_QUERY_METRICS_COLUMNS
+            )
 
     expected_instance_tags = set(dbm_instance.get('tags', []))
     expected_instance_tags_with_db = set(dbm_instance.get('tags', [])) | {"db:{}".format(database)}
@@ -176,7 +230,7 @@ def test_statement_metrics_and_plans(
         assert row['query_signature'], "missing query signature"
         assert row['database_name'] == database, "incorrect database_name"
         assert row['user_name'] == plan_user, "incorrect user_name"
-        for column in SQL_SERVER_QUERY_METRICS_COLUMNS:
+        for column in available_query_metrics_columns:
             assert column in row, "missing required metrics column {}".format(column)
             assert type(row[column]) in (float, int), "wrong type for metrics column {}".format(column)
 
