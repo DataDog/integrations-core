@@ -13,6 +13,7 @@ from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import set_default_driver_conf
+from datadog_checks.sqlserver.metrics import SqlMasterDatabaseFileStats
 
 from .common import CHECK_NAME, LOCAL_SERVER, assert_metrics
 from .utils import windows_ci
@@ -150,6 +151,25 @@ def test_autodiscovery_exclude_override(instance_autodiscovery):
     check.autodiscover_databases(mock_cursor)
     assert check.databases == set(['tempdb'])
 
+
+def _mocked_sqlmasterdatbasefilestats():
+    return mock.MagicMock(return_value=SqlMasterDatabaseFileStats(cfg_instance={'name': 'sqlserver.database.files.size', 'table': 'sys.database_files', 'column': 'size', 'instance_name': 'master', 'tags': ['optional:tag1']}, base_name=None, report_function=mock.MagicMock(), column ='size', logger=None))
+
+@pytest.mark.parametrize('mock_rows',
+def test_fetch_metric_handle_nonetype(aggregator, dd_run_check, init_config, instance_sql_defaults):
+    Row = namedtuple('Row', ['name', 'file_id', 'type', 'physical_name', 'size', 'max_size', 'state', 'state_desc'])
+    mock_rows = [
+        Row('master', 1, 0, '/var/opt/mssql/data/master.mdf', 256, -1, 0, 'ONLINE'),
+    ]
+    mock_rows_none = [Row('master', 1, 0, '/var/opt/mssql/data/master.mdf', 256, -1, 0, 'ONLINE')]
+    mock_cols = ['name', 'file_id', 'type', 'physical_name', 'size', 'max_size', 'state', 'state_desc']
+
+    with mock.patch('datadog_checks.sqlserver.metrics.SqlMasterDatabaseFileStats.fetch_metric') as mock_fetch_metric_bad, pytest.raises(TypeError):
+        mock_fetch_metric_bad.side_effect = TypeError()
+        mock_fetch_metric_bad(mock_rows_none, mock_cols)
+    with mock.patch('datadog_checks.sqlserver.metrics.SqlMasterDatabaseFileStats.fetch_metric') as mock_fetch_metric, pytest.raises(TypeError):
+        mock_fetch_metric.return_value = {}
+        mock_fetch_metric(mock_rows, mock_cols)
 
 def _mock_database_list():
     Row = namedtuple('Row', 'name')
