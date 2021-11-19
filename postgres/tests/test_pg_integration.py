@@ -228,7 +228,12 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
 @mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 @pytest.mark.parametrize(
     'dbm_enabled, display_hostname, expected_hostname',
-    [(True, '', 'resolved.hostname'), (False, '', 'stubbed.hostname'), (False, 'forced_hostname', 'forced_hostname')],
+    [
+        (True, '', 'resolved.hostname'),
+        (False, '', 'stubbed.hostname'),
+        (False, 'forced_hostname', 'forced_hostname'),
+        (True, 'forced_hostname', 'forced_hostname'),
+    ],
 )
 def test_correct_hostname(dbm_enabled, display_hostname, expected_hostname, aggregator, pg_instance):
     pg_instance['dbm'] = dbm_enabled
@@ -241,7 +246,10 @@ def test_correct_hostname(dbm_enabled, display_hostname, expected_hostname, aggr
         'datadog_checks.postgres.PostgreSql.resolve_db_host', return_value='resolved.hostname'
     ) as resolve_db_host:
         check.check(pg_instance)
-        assert resolve_db_host.called == dbm_enabled, 'Expected resolve_db_host.called to be ' + str(dbm_enabled)
+        if display_hostname:
+            assert resolve_db_host.called is False, 'Expected resolve_db_host.called to be False'
+        else:
+            assert resolve_db_host.called == dbm_enabled, 'Expected resolve_db_host.called to be ' + str(dbm_enabled)
 
     expected_tags_no_db = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT)]
     expected_tags_with_db = expected_tags_no_db + ['db:datadog_test']
