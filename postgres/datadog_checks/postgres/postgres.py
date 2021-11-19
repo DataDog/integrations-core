@@ -157,8 +157,8 @@ class PostgreSql(AgentCheck):
     def resolved_hostname(self):
         # type: () -> str
         if self._resolved_hostname is None:
-            if self._config.display_hostname:
-                self._resolved_hostname = self._config.display_hostname
+            if self._config.reported_hostname:
+                self._resolved_hostname = self._config.reported_hostname
             elif self._config.dbm_enabled or self.disable_generic_tags:
                 self._resolved_hostname = self.resolve_db_host()
             else:

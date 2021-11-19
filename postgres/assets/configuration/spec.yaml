@@ -38,9 +38,9 @@ files:
       value:
         type: string
         display_default: postgres
-    - name: display_hostname
+    - name: reported_hostname
       description: |
-        Set the hostname for this instance.
+        Set the reported hostname for this instance.
       value:
         type: string
     - name: dbstrict

@@ -41,10 +41,10 @@ instances:
     #
     # dbname: <DBNAME>
 
-    ## @param display_hostname - string - optional
-    ## Set the hostname for this instance.
+    ## @param reported_hostname - string - optional
+    ## Set the reported hostname for this instance.
     #
-    # display_hostname: <DISPLAY_HOSTNAME>
+    # reported_hostname: <REPORTED_HOSTNAME>
 
     ## @param dbstrict - boolean - optional - default: false
     ## Whether to restrict the scope of the check to just the database in question.

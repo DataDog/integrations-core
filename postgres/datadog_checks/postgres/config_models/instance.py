@@ -79,7 +79,6 @@ class InstanceConfig(BaseModel):
     dbname: Optional[str]
     dbstrict: Optional[bool]
     disable_generic_tags: Optional[bool]
-    display_hostname: Optional[str]
     empty_default_hostname: Optional[bool]
     host: str
     ignore_databases: Optional[Sequence[str]]
@@ -94,6 +93,7 @@ class InstanceConfig(BaseModel):
     query_samples: Optional[QuerySamples]
     query_timeout: Optional[int]
     relations: Optional[Sequence[Union[str, Relation]]]
+    reported_hostname: Optional[str]
     service: Optional[str]
     ssl: Optional[str]
     ssl_cert: Optional[str]
