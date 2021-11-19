@@ -5,8 +5,9 @@ try:
     from datadog_checks.base import PDHBaseCheck
 
 except ImportError:
+
     class PDHBaseCheck:
-            pass
+        pass
 
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'aspdotnet'
