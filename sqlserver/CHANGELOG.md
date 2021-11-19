@@ -1,5 +1,8 @@
 # CHANGELOG - sqlserver
 
+## 6.1.1-beta.1 / 2021-11-19
+
+
 ## 6.1.0 / 2021-11-13
 
 * [Added] Update dependencies. See [#10580](https://github.com/DataDog/integrations-core/pull/10580).
