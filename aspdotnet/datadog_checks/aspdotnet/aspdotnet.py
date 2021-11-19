@@ -2,15 +2,11 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 try:
-    from datadog_checks.base.utils.tracing import traced_class
-
-from datadog_checks.base import PDHBaseCheck
+    from datadog_checks.base import PDHBaseCheck
 
 except ImportError:
-
-    @traced_class()
-class PDHBaseCheck:
-        pass
+    class PDHBaseCheck:
+            pass
 
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'aspdotnet'

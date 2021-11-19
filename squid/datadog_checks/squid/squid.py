@@ -8,8 +8,6 @@ import requests
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
-
-# project
 from datadog_checks.base.utils.tracing import traced_class
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'squid'
