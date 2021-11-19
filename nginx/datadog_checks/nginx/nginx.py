@@ -10,6 +10,7 @@ from six import PY3, iteritems, text_type
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
+from datadog_checks.base.utils.tracing import traced_class
 
 from .metrics import METRICS_SEND_AS_COUNT, VTS_METRIC_MAP
 
@@ -59,6 +60,7 @@ TAGGED_KEYS = {
 }
 
 
+@traced_class()
 class Nginx(AgentCheck):
     """Tracks basic nginx metrics via the status module
     * number of connections

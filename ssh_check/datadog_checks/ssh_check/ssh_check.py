@@ -7,6 +7,7 @@ import time
 import paramiko
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.tracing import traced_class
 
 # Example ssh remote version: http://supervisord.org/changes.html
 #   - SSH-2.0-OpenSSH_8.1
@@ -22,6 +23,7 @@ SSH_REMOTE_VERSION_PATTERN = re.compile(
 )
 
 
+@traced_class()
 class CheckSSH(AgentCheck):
     SSH_SERVICE_CHECK_NAME = 'ssh.can_connect'
     SFTP_SERVICE_CHECK_NAME = 'sftp.can_connect'

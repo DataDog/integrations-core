@@ -15,6 +15,7 @@ from six import iteritems
 from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.tracing import traced_class
 
 SOURCE_TYPE = 'openstack'
 
@@ -97,6 +98,7 @@ BASE_BACKOFF_SECS = 15
 MAX_BACKOFF_SECS = 300
 
 
+@traced_class()
 class OpenStackAuthFailure(Exception):
     pass
 

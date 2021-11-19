@@ -8,8 +8,10 @@ import pkg_resources
 from six import iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.utils.tracing import traced_class
 
 
+@traced_class()
 class BadResponseError(ConfigurationError):
     pass
 

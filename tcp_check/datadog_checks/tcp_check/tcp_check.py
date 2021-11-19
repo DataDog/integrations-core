@@ -7,8 +7,10 @@ from contextlib import closing
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.time import get_precise_time
+from datadog_checks.base.utils.tracing import traced_class
 
 
+@traced_class()
 class TCPCheck(AgentCheck):
 
     SOURCE_TYPE_NAME = 'system'

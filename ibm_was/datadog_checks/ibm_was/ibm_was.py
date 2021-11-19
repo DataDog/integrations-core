@@ -8,10 +8,12 @@ from lxml import etree
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
+from datadog_checks.base.utils.tracing import traced_class
 
 from . import metrics, validation
 
 
+@traced_class()
 class IbmWasCheck(AgentCheck):
 
     SERVICE_CHECK_CONNECT = "ibm_was.can_connect"

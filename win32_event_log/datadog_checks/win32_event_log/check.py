@@ -13,6 +13,7 @@ from six import PY2
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.base.utils.time import get_timestamp
+from datadog_checks.base.utils.tracing import traced_class
 
 from .filters import construct_xpath_query
 from .legacy import Win32EventLogWMI
@@ -23,6 +24,7 @@ else:
     from .config_models import ConfigMixin
 
 
+@traced_class()
 class Win32EventLogCheck(AgentCheck, ConfigMixin):
     # The lower cased version of the `API SOURCE ATTRIBUTE` column from the table located here:
     # https://docs.datadoghq.com/integrations/faq/list-of-api-source-attribute-value/

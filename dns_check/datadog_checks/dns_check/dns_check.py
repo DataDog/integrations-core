@@ -10,8 +10,10 @@ import dns.resolver
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.time import get_precise_time
+from datadog_checks.base.utils.tracing import traced_class
 
 
+@traced_class()
 class DNSCheck(AgentCheck):
     SERVICE_CHECK_NAME = 'dns.can_resolve'
     DEFAULT_TIMEOUT = 5

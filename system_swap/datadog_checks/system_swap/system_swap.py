@@ -5,10 +5,13 @@
 # 3p
 import psutil
 
-# project
 from datadog_checks.base import AgentCheck
 
+# project
+from datadog_checks.base.utils.tracing import traced_class
 
+
+@traced_class()
 class SystemSwap(AgentCheck):
     def check(self, instance):
         swap_mem = psutil.swap_memory()

@@ -62,6 +62,7 @@ def tracing_method(f):
 
 def traced_class():
     patch_all()
+
     def decorate(cls):
         for attr in cls.__dict__:
             # TODO: fix static method

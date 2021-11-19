@@ -5,11 +5,13 @@ from collections import ChainMap
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
+from datadog_checks.base.utils.tracing import traced_class
 
 from .constants import ISTIOD_NAMESPACE, MESH_NAMESPACE
 from .metrics import ISTIOD_METRICS, ISTIOD_VERSION, MESH_METRICS, construct_metrics_config
 
 
+@traced_class()
 class IstioCheckV2(OpenMetricsBaseCheckV2):
 
     DEFAULT_METRIC_LIMIT = 0

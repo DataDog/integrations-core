@@ -2,10 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import OpenMetricsBaseCheckV2
+from datadog_checks.base.utils.tracing import traced_class
 
 from .metrics import METRIC_MAP
 
 
+@traced_class()
 class KongCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'kong'
 

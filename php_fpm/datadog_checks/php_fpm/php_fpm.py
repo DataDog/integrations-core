@@ -11,6 +11,7 @@ from six import PY3, StringIO, iteritems, string_types
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.tracing import traced_class
 
 # Relax param filtering
 FCGIApp._environPrefixes.extend(('DOCUMENT_', 'SCRIPT_'))
@@ -38,6 +39,7 @@ if PY3:
 DEFAULT_TIMEOUT = 10
 
 
+@traced_class()
 class BadConfigError(Exception):
     pass
 

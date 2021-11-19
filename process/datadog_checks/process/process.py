@@ -14,6 +14,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.platform import Platform
+from datadog_checks.base.utils.tracing import traced_class
 
 from .cache import DEFAULT_SHARED_PROCESS_LIST_CACHE_DURATION, ProcessListCache
 
@@ -60,6 +61,7 @@ ATTR_TO_METRIC_RATE = {
 }
 
 
+@traced_class()
 class ProcessCheck(AgentCheck):
     # Shared process list
     process_list_cache = ProcessListCache()

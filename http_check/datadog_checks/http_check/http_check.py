@@ -14,6 +14,7 @@ from six import PY2, string_types
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ensure_unicode
+from datadog_checks.base.utils.tracing import traced_class
 
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
 from .config import DEFAULT_EXPECTED_CODE, from_instance
@@ -32,6 +33,7 @@ MESSAGE_LENGTH = 2500  # https://docs.datadoghq.com/api/v1/service-checks/
 DATA_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
 
 
+@traced_class()
 class HTTPCheck(AgentCheck):
     SOURCE_TYPE_NAME = 'system'
     SC_STATUS = 'http.can_connect'

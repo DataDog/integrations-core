@@ -5,8 +5,10 @@ import requests
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.tracing import traced_class
 
 
+@traced_class()
 class DruidCheck(AgentCheck):
     def check(self, _):
         custom_tags = self.instance.get('tags', [])

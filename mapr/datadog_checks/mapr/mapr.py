@@ -10,6 +10,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.tracing import traced_class
 
 from .common import ALLOWED_METRICS, COUNT_METRICS, GAUGE_METRICS, HISTOGRAM_METRICS, MONOTONIC_COUNTER_METRICS
 from .utils import get_fqdn, get_stream_id_for_topic
@@ -42,6 +43,7 @@ host now. To support older versions of MapR, the check should be updated to subs
 """
 
 
+@traced_class()
 class MaprCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(MaprCheck, self).__init__(name, init_config, instances)

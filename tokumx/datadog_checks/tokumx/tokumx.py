@@ -9,6 +9,7 @@ import time
 from six import PY3, iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.tracing import traced_class
 from datadog_checks.tokumx.vendor import bson
 from datadog_checks.tokumx.vendor.pymongo import MongoClient, ReadPreference, errors, uri_parser
 from datadog_checks.tokumx.vendor.pymongo import version as py_version
@@ -19,6 +20,7 @@ if PY3:
 DEFAULT_TIMEOUT = 10
 
 
+@traced_class()
 class LocalRate:
     """To be used for metrics that should be sent as rates but that we want to send as histograms"""
 

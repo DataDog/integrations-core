@@ -15,6 +15,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 from datadog_checks.base.utils.timeout import TimeoutException, timeout
+from datadog_checks.base.utils.tracing import traced_class
 
 if platform.system() == 'Windows':
     import win32wnet
@@ -33,6 +34,7 @@ else:
         return os.path.basename(device)
 
 
+@traced_class()
 class Disk(AgentCheck):
     """Collects metrics about the machine's disks."""
 

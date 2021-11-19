@@ -2,10 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import OpenMetricsBaseCheck
+from datadog_checks.base.utils.tracing import traced_class
 
 from .metrics import DEFAULT_METRICS
 
 
+@traced_class()
 class ExternalDNSCheck(OpenMetricsBaseCheck):
     """
     Collect ExternalDNS metrics from its Prometheus endpoint

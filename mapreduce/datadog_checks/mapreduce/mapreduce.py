@@ -9,6 +9,7 @@ from six import iteritems, itervalues
 from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.tracing import traced_class
 from datadog_checks.mapreduce.metrics import (
     HISTOGRAM,
     INCREMENT,
@@ -19,6 +20,7 @@ from datadog_checks.mapreduce.metrics import (
 )
 
 
+@traced_class()
 class MapReduceCheck(AgentCheck):
 
     HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}}

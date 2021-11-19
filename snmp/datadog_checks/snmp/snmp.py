@@ -18,6 +18,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.tracing import traced_class
 from datadog_checks.snmp.utils import extract_value
 
 from .commands import snmp_bulk, snmp_get, snmp_getnext
@@ -51,6 +52,7 @@ def reply_invalid(oid):
     return noSuchInstance.isSameTypeWith(oid) or noSuchObject.isSameTypeWith(oid)
 
 
+@traced_class()
 class SnmpCheck(AgentCheck):
 
     SC_STATUS = 'snmp.can_check'

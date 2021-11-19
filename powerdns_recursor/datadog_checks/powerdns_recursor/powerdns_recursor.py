@@ -4,8 +4,10 @@
 from collections import namedtuple
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.tracing import traced_class
 
 
+@traced_class()
 class PowerDNSRecursorCheck(AgentCheck):
     # See https://doc.powerdns.com/md/recursor/stats/ for metrics explanation
     GAUGE_METRICS = [

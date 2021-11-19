@@ -7,6 +7,7 @@ from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.utils.tracing import traced_class
 
 # Default settings
 DEFAULT_RM_URI = 'http://localhost:8088'
@@ -152,6 +153,7 @@ YARN_QUEUE_METRICS = {
 }
 
 
+@traced_class()
 class YarnCheck(AgentCheck):
     """
     Extract statistics from YARN's ResourceManger REST API

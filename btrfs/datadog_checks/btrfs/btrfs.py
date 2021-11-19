@@ -15,6 +15,7 @@ from six import iteritems
 from six.moves import range
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.tracing import traced_class
 
 MIXED = "mixed"
 DATA = "data"
@@ -84,6 +85,7 @@ def sized_array(count):
     return array.array("B", itertools.repeat(0, count))
 
 
+@traced_class()
 class FileDescriptor(object):
     def __init__(self, mountpoint):
         self.fd = os.open(mountpoint, os.O_DIRECTORY)

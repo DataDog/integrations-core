@@ -8,6 +8,7 @@ from six import iteritems
 
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.tracing import traced_class
 
 METRICS = {
     'apiserver_current_inflight_requests': 'current_inflight_requests',
@@ -57,6 +58,7 @@ METRICS = {
 }
 
 
+@traced_class()
 class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
     """
     Collect kubernetes apiserver metrics in the Prometheus format

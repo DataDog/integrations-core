@@ -17,6 +17,7 @@ from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials, urljoin
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.tagging import tagger
+from datadog_checks.base.utils.tracing import traced_class
 
 from .cadvisor import CadvisorScraper
 from .common import CADVISOR_DEFAULT_PORT, PodListUtils, replace_container_rt_prefix
@@ -123,6 +124,7 @@ DEFAULT_POD_LEVEL_METRICS = ['network.*']
 log = logging.getLogger('collector')
 
 
+@traced_class()
 class KubeletCheck(
     CadvisorPrometheusScraperMixin,
     OpenMetricsBaseCheck,

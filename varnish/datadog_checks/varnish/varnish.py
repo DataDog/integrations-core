@@ -13,11 +13,13 @@ from six.moves import filter
 
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
+from datadog_checks.base.utils.tracing import traced_class
 
 if PY3:
     long = int
 
 
+@traced_class()
 class BackendStatus(object):
     HEALTHY = 'healthy'
     SICK = 'sick'

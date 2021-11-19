@@ -4,11 +4,13 @@
 import requests
 
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.utils.tracing import traced_class
 
 AIRFLOW_STATUS_OK = "OK"
 AIRFLOW_STABLE_STATUS_OK = "healthy"
 
 
+@traced_class()
 class AirflowCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(AirflowCheck, self).__init__(name, init_config, instances)

@@ -9,6 +9,7 @@ from six import iteritems, itervalues
 from six.moves.urllib.parse import urljoin, urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
+from datadog_checks.base.utils.tracing import traced_class
 
 from .config import from_instance
 from .metrics import (
@@ -23,6 +24,7 @@ from .metrics import (
 )
 
 
+@traced_class()
 class AuthenticationError(requests.exceptions.HTTPError):
     """Authentication Error, unable to reach server"""
 

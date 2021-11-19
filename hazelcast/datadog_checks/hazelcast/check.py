@@ -2,10 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.tracing import traced_class
 
 from . import utils
 
 
+@traced_class()
 class HazelcastCheck(AgentCheck):
     __NAMESPACE__ = 'hazelcast'
     SERVICE_CHECK_CONNECT = 'can_connect'

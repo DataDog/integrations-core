@@ -8,6 +8,7 @@ import requests
 from six import PY2
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
+from datadog_checks.base.utils.tracing import traced_class
 
 from .errors import ApiUnreachable
 from .metrics import METRIC_MAP, METRIC_ROLLBACK_COMPAT_MAP, ROUTE_METRICS_TO_TRANSFORM
@@ -21,6 +22,7 @@ Api = namedtuple('Api', ('check_health', 'check_leader'))
 Leader = namedtuple('Leader', ('leader_addr', 'leader_cluster_addr'))
 
 
+@traced_class()
 class Vault(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
     CHECK_NAME = 'vault'

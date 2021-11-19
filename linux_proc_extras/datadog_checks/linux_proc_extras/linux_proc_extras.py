@@ -9,6 +9,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
+from datadog_checks.base.utils.tracing import traced_class
 
 try:
     import datadog_agent
@@ -29,6 +30,7 @@ PROCESS_STATES = {
 PROCESS_PRIOS = {'<': 'high', 'N': 'low', 'L': 'locked'}
 
 
+@traced_class()
 class MoreUnixCheck(AgentCheck):
     def __init__(self, *args, **kwargs):
         super(MoreUnixCheck, self).__init__(*args, **kwargs)

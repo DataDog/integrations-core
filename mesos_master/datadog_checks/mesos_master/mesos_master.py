@@ -12,8 +12,10 @@ from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.tracing import traced_class
 
 
+@traced_class()
 class MesosMaster(AgentCheck):
     GAUGE = AgentCheck.gauge
     MONOTONIC_COUNT = AgentCheck.monotonic_count

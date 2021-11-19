@@ -12,6 +12,7 @@ from typing import List, NamedTuple, Tuple
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.tracing import traced_class
 
 from . import queries
 from .config_models import ConfigMixin
@@ -19,6 +20,7 @@ from .config_models import ConfigMixin
 SystemInfo = NamedTuple('SystemInfo', [('hostname', str), ('os_version', int), ('os_release', int)])
 
 
+@traced_class()
 class IbmICheck(AgentCheck, ConfigMixin):
     SERVICE_CHECK_NAME = "ibm_i.can_connect"
 

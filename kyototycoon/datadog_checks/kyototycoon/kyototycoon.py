@@ -8,11 +8,13 @@ from collections import defaultdict
 import requests
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.tracing import traced_class
 
 db_stats = re.compile(r'^db_(\d)+$')
 whitespace = re.compile(r'\s')
 
 
+@traced_class()
 class KyotoTycoonCheck(AgentCheck):
     """Report statistics about the Kyoto Tycoon DBM-style
     database server (http://fallabs.com/kyototycoon/)

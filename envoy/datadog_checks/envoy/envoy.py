@@ -8,6 +8,7 @@ import requests
 from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.tracing import traced_class
 
 from .errors import UnknownMetric, UnknownTags
 from .parser import parse_histogram, parse_metric
@@ -15,6 +16,7 @@ from .parser import parse_histogram, parse_metric
 LEGACY_VERSION_RE = re.compile(r'/(\d\.\d\.\d)/')
 
 
+@traced_class()
 class Envoy(AgentCheck):
     HTTP_CONFIG_REMAPPER = {'verify_ssl': {'name': 'tls_verify'}}
     SERVICE_CHECK_NAME = 'envoy.can_connect'

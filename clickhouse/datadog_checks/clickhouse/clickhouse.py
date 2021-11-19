@@ -6,11 +6,13 @@ from six import raise_from
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.tracing import traced_class
 
 from . import queries
 from .utils import ErrorSanitizer
 
 
+@traced_class()
 class ClickhouseCheck(AgentCheck):
     __NAMESPACE__ = 'clickhouse'
     SERVICE_CHECK_CONNECT = 'can_connect'

@@ -8,6 +8,7 @@ import boto3
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.tracing import traced_class
 
 from .config_models import ConfigMixin
 from .metrics import METRICS_WITH_NAME_AS_LABEL, construct_jmx_metrics_config, construct_node_metrics_config
@@ -19,6 +20,7 @@ except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
 
+@traced_class()
 class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'aws.msk'
 

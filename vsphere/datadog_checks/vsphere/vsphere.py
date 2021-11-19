@@ -16,6 +16,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.checks.libs.timer import Timer
 from datadog_checks.base.utils.time import get_current_datetime
+from datadog_checks.base.utils.tracing import traced_class
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache
@@ -58,6 +59,7 @@ except ImportError:
 SERVICE_CHECK_NAME = 'can_connect'
 
 
+@traced_class()
 class VSphereCheck(AgentCheck):
     __NAMESPACE__ = 'vsphere'
 

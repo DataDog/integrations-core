@@ -7,6 +7,7 @@ import snowflake.connector as sf
 
 from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
 from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.tracing import traced_class
 
 from . import queries
 from .config import Config
@@ -25,6 +26,7 @@ METRIC_GROUPS = {
 }
 
 
+@traced_class()
 class SnowflakeCheck(AgentCheck):
     """
     Collect Snowflake account usage metrics

@@ -7,6 +7,7 @@ import simplejson as json
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ensure_unicode
+from datadog_checks.base.utils.tracing import traced_class
 
 GLOBAL_STATS = {'curr_connections'}
 
@@ -32,6 +33,7 @@ SERVER_STATS_RATES = {
 }
 
 
+@traced_class()
 class Twemproxy(AgentCheck):
     """Tracks twemproxy metrics via the stats monitoring port
 

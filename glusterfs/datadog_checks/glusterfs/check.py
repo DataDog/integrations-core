@@ -17,6 +17,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
+from datadog_checks.base.utils.tracing import traced_class
 
 from .metrics import BRICK_STATS, CLUSTER_STATS, PARSE_METRICS, VOL_SUBVOL_STATS, VOLUME_STATS
 
@@ -26,6 +27,7 @@ CLUSTER_STATUS = 'cluster_status'
 GSTATUS_PATH = '/opt/datadog-agent/embedded/sbin/gstatus'
 
 
+@traced_class()
 class GlusterfsCheck(AgentCheck):
     __NAMESPACE__ = 'glusterfs'
 

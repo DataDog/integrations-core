@@ -8,12 +8,14 @@ from six import raise_from
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.tracing import traced_class
 
 from .client import Client
 from .config import Config
 from .types import Instance
 
 
+@traced_class()
 class VoltDBCheck(AgentCheck):
     __NAMESPACE__ = 'voltdb'
 

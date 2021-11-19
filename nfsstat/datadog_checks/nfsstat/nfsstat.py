@@ -5,10 +5,12 @@ import os
 
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
+from datadog_checks.base.utils.tracing import traced_class
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'nfsstat'
 
 
+@traced_class()
 class NfsStatCheck(AgentCheck):
 
     metric_prefix = 'system.nfs.'

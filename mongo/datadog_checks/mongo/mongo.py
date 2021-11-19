@@ -10,6 +10,7 @@ import pymongo
 from six import PY3, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.tracing import traced_class
 from datadog_checks.mongo.api import MongoApi
 from datadog_checks.mongo.collectors import (
     CollStatsCollector,
@@ -34,6 +35,7 @@ if PY3:
     long = int
 
 
+@traced_class()
 class MongoDb(AgentCheck):
     """
     MongoDB agent check.

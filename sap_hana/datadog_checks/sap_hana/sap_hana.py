@@ -15,6 +15,7 @@ from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.common import total_time_to_temporal_percent
 from datadog_checks.base.utils.constants import MICROSECOND
 from datadog_checks.base.utils.containers import iter_unique
+from datadog_checks.base.utils.tracing import traced_class
 
 from . import queries
 from .connection import USING_HDBCLI, HanaConnection
@@ -22,6 +23,7 @@ from .exceptions import OperationalError, QueryExecutionError
 from .utils import compute_percent, positive
 
 
+@traced_class()
 class SapHanaCheck(AgentCheck):
     __NAMESPACE__ = 'sap_hana'
     SERVICE_CHECK_CONNECT = 'can_connect'

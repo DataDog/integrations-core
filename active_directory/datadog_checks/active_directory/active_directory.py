@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from datadog_checks.base.checks.win import PDHBaseCheck
+from datadog_checks.base.utils.tracing import traced_class
 
 DEFAULT_COUNTERS = [
     # counterset, instance of counter, counter name, metric name
@@ -117,6 +118,7 @@ DEFAULT_COUNTERS = [
 ]
 
 
+@traced_class()
 class ActiveDirectoryCheck(PDHBaseCheck):
     def __init__(self, name, init_config, instances=None):
         super(ActiveDirectoryCheck, self).__init__(

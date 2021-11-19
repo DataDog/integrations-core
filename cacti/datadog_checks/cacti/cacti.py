@@ -11,6 +11,7 @@ from fnmatch import fnmatch
 import pymysql
 
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.utils.tracing import traced_class
 
 try:
     import rrdtool
@@ -35,6 +36,7 @@ CACTI_TO_DD = {
 }
 
 
+@traced_class()
 class CactiCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(CactiCheck, self).__init__(name, init_config, instances)

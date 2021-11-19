@@ -6,11 +6,14 @@
 # stdlib
 import os
 
-# project
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
+# project
+from datadog_checks.base.utils.tracing import traced_class
 
+
+@traced_class()
 class PostfixCheck(AgentCheck):
     """
     This check provides metrics on the number of messages in a given postfix queue

@@ -10,6 +10,7 @@ from six import iteritems
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.tracing import traced_class
 
 DEFAULT_MAX_METRICS = 350
 PATH = "path"
@@ -67,6 +68,7 @@ DEFAULT_METRICS = [{PATH: "memstats/%s" % path, TYPE: GAUGE} for path in DEFAULT
 GO_EXPVAR_URL_PATH = "/debug/vars"
 
 
+@traced_class()
 class GoExpvar(AgentCheck):
     HTTP_CONFIG_REMAPPER = {
         'ssl_verify': {'name': 'tls_verify', 'default': None},

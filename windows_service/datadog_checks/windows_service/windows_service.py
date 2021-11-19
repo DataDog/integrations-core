@@ -7,10 +7,12 @@ import win32service
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.tracing import traced_class
 
 SERVICE_PATTERN_FLAGS = re.IGNORECASE
 
 
+@traced_class()
 class WindowsService(AgentCheck):
     SERVICE_CHECK_NAME = 'windows_service.state'
     # https://docs.microsoft.com/en-us/windows/desktop/api/winsvc/ns-winsvc-_service_status

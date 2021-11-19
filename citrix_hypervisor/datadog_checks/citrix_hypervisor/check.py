@@ -8,10 +8,12 @@ from six.moves import xmlrpc_client as xmlrpclib
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.ddyaml import yaml_load_force_loader
+from datadog_checks.base.utils.tracing import traced_class
 
 from .metrics import build_metric
 
 
+@traced_class()
 class CitrixHypervisorCheck(AgentCheck):
     __NAMESPACE__ = 'citrix_hypervisor'
     SERVICE_CHECK_CONNECT = 'can_connect'

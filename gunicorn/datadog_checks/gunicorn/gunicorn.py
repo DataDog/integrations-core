@@ -14,8 +14,10 @@ import psutil
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
+from datadog_checks.base.utils.tracing import traced_class
 
 
+@traced_class()
 class GUnicornCheck(AgentCheck):
 
     # Config

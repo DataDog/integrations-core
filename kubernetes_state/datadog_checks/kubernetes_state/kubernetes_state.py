@@ -13,6 +13,7 @@ from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import to_string
+from datadog_checks.base.utils.tracing import traced_class
 
 try:
     # this module is only available in agent 6
@@ -47,6 +48,7 @@ kube_labels_mapper = {
 }
 
 
+@traced_class()
 class KubernetesState(OpenMetricsBaseCheck):
     """
     Collect kube-state-metrics metrics in the Prometheus format

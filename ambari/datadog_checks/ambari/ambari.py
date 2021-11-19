@@ -7,6 +7,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.tracing import traced_class
 
 from . import common
 
@@ -23,6 +24,7 @@ SERVICE_INFO_QUERY = "?fields=ServiceInfo"
 METRICS_FIELD = "metrics"
 
 
+@traced_class()
 class AmbariCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(AmbariCheck, self).__init__(name, init_config, instances)

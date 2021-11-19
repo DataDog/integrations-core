@@ -15,6 +15,7 @@ from six import PY3, iteritems, itervalues
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host
+from datadog_checks.base.utils.tracing import traced_class
 
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
 from .config import MySQLConfig
@@ -69,6 +70,7 @@ if PY3:
     long = int
 
 
+@traced_class()
 class MySql(AgentCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
     SLAVE_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'

@@ -21,6 +21,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
+from datadog_checks.base.utils.tracing import traced_class
 
 try:
     import datadog_agent
@@ -68,6 +69,7 @@ ENA_METRIC_NAMES = [
 ]
 
 
+@traced_class()
 class Network(AgentCheck):
 
     SOURCE_TYPE_NAME = 'system'

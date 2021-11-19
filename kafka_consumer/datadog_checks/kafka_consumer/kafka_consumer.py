@@ -8,12 +8,14 @@ from kafka import KafkaAdminClient, KafkaClient
 from six import string_types
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.tracing import traced_class
 
 from .constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT
 from .legacy_0_10_2 import LegacyKafkaCheck_0_10_2
 from .new_kafka_consumer import NewKafkaConsumerCheck
 
 
+@traced_class()
 class KafkaCheck(AgentCheck):
 
     __NAMESPACE__ = 'kafka'

@@ -7,8 +7,10 @@ import ssl
 import ldap3
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.tracing import traced_class
 
 
+@traced_class()
 class OpenLDAP(AgentCheck):
     METRIC_PREFIX = 'openldap'
     SERVICE_CHECK_CONNECT = '{}.can_connect'.format(METRIC_PREFIX)

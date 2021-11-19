@@ -2,10 +2,14 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 try:
-    from datadog_checks.base import PDHBaseCheck
+    from datadog_checks.base.utils.tracing import traced_class
+
+from datadog_checks.base import PDHBaseCheck
+
 except ImportError:
 
-    class PDHBaseCheck:
+    @traced_class()
+class PDHBaseCheck:
         pass
 
 

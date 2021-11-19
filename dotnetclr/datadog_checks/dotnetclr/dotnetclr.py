@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from datadog_checks.base import PDHBaseCheck
+from datadog_checks.base.utils.tracing import traced_class
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'dotnetclr'
 
@@ -18,6 +19,7 @@ DEFAULT_COUNTERS = [
 ]
 
 
+@traced_class()
 class DotnetclrCheck(PDHBaseCheck):
     def __init__(self, name, init_config, instances=None):
         super(DotnetclrCheck, self).__init__(name, init_config, instances=instances, counter_list=DEFAULT_COUNTERS)
