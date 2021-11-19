@@ -2,7 +2,7 @@
 
 ## 6.1.1 / 2021-11-19
 
-* [Fixed] sql server ADO driver bugs on windows. See [#10637](https://github.com/DataDog/integrations-core/pull/10637).
+* [Fixed] Fix ADO driver bugs on Windows. See [#10637](https://github.com/DataDog/integrations-core/pull/10637).
 
 ## 6.1.0 / 2021-11-13
 
