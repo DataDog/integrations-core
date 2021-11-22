@@ -1,5 +1,8 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 15.3.2 / 2021-11-22
+
+
 ## 15.3.1 / 2021-11-17
 
 * [Fixed] Refactor annotations to console utility and use relative imports. See [#10645](https://github.com/DataDog/integrations-core/pull/10645).
