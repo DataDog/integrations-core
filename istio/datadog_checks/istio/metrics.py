@@ -102,7 +102,9 @@ MESH_METRICS = {
     'istio_tcp_connections_opened_total': 'tcp.connections_opened.total',
     'istio_tcp_received_bytes_total': 'tcp.received_bytes.total',
     'istio_tcp_sent_bytes_total': 'tcp.send_bytes.total',
-    'istio_agent_pilot_conflict_outbound_listener_http_over_current_tcp': 'agent.pilot.conflict.outbound_listener.http_over_current_tcp',
+    'istio_agent_pilot_conflict_outbound_listener_http_over_current_tcp': (
+        'agent.pilot.conflict.outbound_listener.http_over_current_tcp'
+    ),
     'istio_agent_go_memstats_stack_sys_bytes': 'agent.go.memstats.stack_sys_bytes',
     'istio_agent_pilot_conflict_inbound_listener': 'agent.conflict.inbound_listener',
     'istio_agent_go_memstats_sys_bytes': 'agent.go.memstats.sys_bytes',
@@ -111,7 +113,9 @@ MESH_METRICS = {
     'istio_agent_go_memstats_heap_idle_bytes': 'agent.go.memstats.heap_idle_bytes',
     'istio_agent_process_resident_memory_bytes': 'agent.process.resident_memory_bytes',
     'istio_agent_go_memstats_alloc_bytes_total': 'agent.go.memstats.alloc_bytes_total',
-    'istio_agent_pilot_conflict_outbound_listener_tcp_over_current_tcp': 'agent.conflict.outbound_listener.tcp_over_current_tcp',
+    'istio_agent_pilot_conflict_outbound_listener_tcp_over_current_tcp': (
+        'agent.conflict.outbound_listener.tcp_over_current_tcp'
+    ),
     'istio_agent_go_memstats_gc_cpu_fraction': 'agent.go.memstats.gc_cpu_fraction',
     'istio_agent_go_memstats_heap_sys_bytes': 'agent.go.memstats.heap_sys_bytes',
     'istio_agent_go_memstats_stack_inuse_bytes': 'agent.go.memstats.stack_inuse_bytes',
@@ -158,7 +162,9 @@ MESH_METRICS = {
     'istio_agent_go_memstats_lookups_total': 'agent.go.memstats.lookups_total',
     'istio_agent_outgoing_latency': 'agent.outgoing_latency',
     'istio_agent_go_memstats_mspan_sys_bytes': 'agent.go.memstats.mspan_sys_bytes',
-    'istio_agent_pilot_conflict_outbound_listener_tcp_over_current_http': 'agent.pilot.conflict.outbound_listener.tcp_over_current_http',
+    'istio_agent_pilot_conflict_outbound_listener_tcp_over_current_http': (
+        'agent.pilot.conflict.outbound_listener.tcp_over_current_http'
+    ),
 }
 
 

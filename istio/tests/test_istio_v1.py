@@ -84,3 +84,16 @@ def test_legacy_version_metadata(datadog_agent, dd_run_check):
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
+
+
+def test_legacy_istio_agent(aggregator, dd_run_check, mock_http_response):
+    """
+    Test the istiod deployment endpoint for V2 implementation
+    """
+    check = Istio('istio', {}, [common.MOCK_V2_MESH_INSTANCE])
+    with requests_mock.Mocker() as metric_request:
+        metric_request.get('http://localhost:15090/metrics', text=get_response('1.5', 'istio-merged.txt'))
+        dd_run_check(check)
+
+    for metric in common.ISTIO_AGENT_METRICS:
+        aggregator.assert_metric(metric)
