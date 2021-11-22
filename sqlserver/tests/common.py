@@ -113,7 +113,7 @@ INSTANCE_E2E = INSTANCE_DOCKER.copy()
 INSTANCE_E2E['driver'] = 'FreeTDS'
 
 INSTANCE_SQL_DEFAULTS = {
-    'host': 'localhost,143',
+    'host': LOCAL_SERVER,
     'username': 'sa',
     'password': 'Password12!',
     'disable_generic_tags': True,

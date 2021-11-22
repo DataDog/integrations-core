@@ -153,18 +153,20 @@ def test_autodiscovery_exclude_override(instance_autodiscovery):
 
 
 @pytest.mark.parametrize(
-    'col_value',
+    'col_val_row_1, col_val_row_2, col_val_row_3',
     [
-        pytest.param(256, id='Valid column value 0'),
-        pytest.param(0, id='Valid column value 1'),
-        pytest.param(512, id='Valid column value 2'),
-        pytest.param(None, id='NoneType column value'),
+        pytest.param(256, 1024, 1720, id='Valid column value 0'),
+        pytest.param(0, None, 1024, id='NoneType column value 1, should not raise error'),
+        pytest.param(512, 0, 256, id='Valid column value 2'),
+        pytest.param(None, 256, 0, id='NoneType column value 3, should not raise error'),
     ],
 )
-def test_SqlMasterDatabaseFileStats_fetch_metric(col_value):
+def test_SqlMasterDatabaseFileStats_fetch_metric(col_val_row_1, col_val_row_2, col_val_row_3):
     Row = namedtuple('Row', ['name', 'file_id', 'type', 'physical_name', 'size', 'max_size', 'state', 'state_desc'])
     mock_rows = [
-        Row('master', 1, 0, '/var/opt/mssql/data/master.mdf', col_value, -1, 0, 'ONLINE'),
+        Row('master', 1, 0, '/var/opt/mssql/data/master.mdf', col_val_row_1, -1, 0, 'ONLINE'),
+        Row('tempdb', 1, 0, '/var/opt/mssql/data/tempdb.mdf', col_val_row_2, -1, 0, 'ONLINE'),
+        Row('msdb', 1, 0, '/var/opt/mssql/data/MSDBData.mdf', col_val_row_3, -1, 0, 'ONLINE'),
     ]
     mock_cols = ['name', 'file_id', 'type', 'physical_name', 'size', 'max_size', 'state', 'state_desc']
     mock_metric_obj = SqlMasterDatabaseFileStats(
