@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 15.3.1 / 2021-11-17
+
+* [Fixed] Refactor annotations to console utility and use relative imports. See [#10645](https://github.com/DataDog/integrations-core/pull/10645).
+
 ## 15.3.0 / 2021-11-13
 
 * [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
