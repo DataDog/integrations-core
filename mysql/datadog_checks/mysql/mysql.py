@@ -414,20 +414,26 @@ class MySql(AgentCheck):
             with closing(db.cursor()) as cursor:
                 cursor.execute(SQL_GROUP_REPLICATION_MEMBER)
                 replica_results = cursor.fetchone()
+                status = self.CRITICAL
+                additional_tags = []
                 if replica_results is None:
-                    self.log.warning('Unable to get group replica status')
-                    return {}
-                status = self.OK if replica_results[1] == 'ONLINE' else self.CRITICAL
+                    self.log.warning('Unable to get group replica status, setting it as CRITICAL')
+                else:
+                    status = self.OK if replica_results[1] == 'ONLINE' else self.CRITICAL
+                    additional_tags = ['status:{}'.format(replica_results[1]), 'role:{}'.format(replica_results[2])]
 
                 self.service_check(
                     'mysql.replication.gr_status',
                     status=status,
-                    tags=self._service_check_tags()
-                    + ['status:{}'.format(replica_results[1]), 'role:{}'.format(replica_results[2])],
+                    tags=self._service_check_tags() + additional_tags,
                 )
 
                 cursor.execute(SQL_GROUP_REPLICATION_METRICS)
                 r = cursor.fetchone()
+
+                if r is None:
+                    self.log.warning('Unable to get group replication metrics')
+                    return {}
                 results.update(
                     {
                         'Transactions_count': r[1],
