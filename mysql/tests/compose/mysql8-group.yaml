@@ -10,7 +10,7 @@ services:
       - "13306:3306"
     volumes:
       - ${MYSQL_LOGS_HOST_PATH}:${MYSQL_LOGS_PATH}
-      - ${MYSQL_CONF_PATH}:/opt/bitnami/mysql/conf/my_custom.cnf:ro
+      - ${MYSQL_CONF_PATH}:/etc/mysql/my.cnf:ro
     restart: unless-stopped
     environment:
       - MYSQL_USER=dog
@@ -46,7 +46,7 @@ services:
     ports:
       - "13307:3306"
     volumes:
-      - ${MYSQL_CONF_PATH}:/opt/bitnami/mysql/conf/my_custom.cnf:ro
+      - ${MYSQL_CONF_PATH}:/etc/mysql/my.cnf:ro
     restart: unless-stopped
     environment:
       - MYSQL_USER=dog
@@ -82,7 +82,7 @@ services:
     ports:
       - "13308:3306"
     volumes:
-      - ${MYSQL_CONF_PATH}:/opt/bitnami/mysql/conf/my_custom.cnf:ro
+      - ${MYSQL_CONF_PATH}:/etc/mysql/my.cnf:ro
     restart: unless-stopped
     environment:
       - MYSQL_USER=dog
