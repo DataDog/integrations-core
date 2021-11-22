@@ -1,7 +1,7 @@
 # CHANGELOG - Datadog Checks Dev
 
 ## 15.4.0 / 2021-11-22
-
+* [Added] Support non-executable files during pipeline setup. See [#10684](https://github.com/DataDog/integrations-core/pull/10684).
 
 ## 15.3.1 / 2021-11-17
 
