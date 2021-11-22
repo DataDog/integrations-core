@@ -370,8 +370,8 @@ istio.mesh.agent.go.memstats.heap_released_bytes,gauge,,byte,,[OpenMetrics V1 an
 istio.mesh.agent.go.memstats.mspan_inuse_bytes,gauge,,byte,,[OpenMetrics V1 and V2] Number of bytes in use by mspan structures.,0,istio,
 istio.mesh.agent.go.memstats.mallocs.count,count,,byte,,[OpenMetrics V1 and V2] Number of mallocs,0,istio,mallocs count
 istio.mesh.agent.pilot.endpoint_not_ready,gauge,,,,[OpenMetrics V1 and V2] Endpoint found in unready state.,-1,istio,
-istio.mesh.agent.pilot.no_ip,gauge,,,,[OpenMetrics V1 and V2] Pods not found in the endpoint table, possibly invalid.,-1,istio,
-istio.mesh.agent.num_outgoing_requests.count,count,[OpenMetrics V1 and V2] Number of outgoing requests.,0,istio,
+istio.mesh.agent.pilot.no_ip,gauge,,,,"[OpenMetrics V1 and V2] Pods not found in the endpoint table, possibly invalid.",-1,istio,
+istio.mesh.agent.num_outgoing_requests.count,count,,,,[OpenMetrics V1 and V2] Number of outgoing requests.,0,istio,
 istio.mesh.agent.go.memstats.other_sys_bytes,gauge,,byte,,[OpenMetrics V1 and V2] Number of bytes used for other system allocations.,0,istio,
 istio.mesh.agent.pilot.xds.config_size_bytes.sum,count,,byte,,[OpenMetrics V1 and V2] Sum of pilot XDS config size.,0,istio,
 istio.mesh.agent.pilot.xds.config_size_bytes.count,count,,,,[OpenMetrics V1 and V2] Count of pilot XDS config size samples.,0,istio,
