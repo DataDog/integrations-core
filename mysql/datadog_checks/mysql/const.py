@@ -237,7 +237,9 @@ GALERA_VARS = {
     'wsrep_local_send_queue_avg': ('mysql.galera.wsrep_local_send_queue_avg', GAUGE),
     'wsrep_replicated_bytes': ('mysql.galera.wsrep_replicated_bytes', GAUGE),
     'wsrep_received_bytes': ('mysql.galera.wsrep_received_bytes', GAUGE),
-    'wsrep_local_state_comment': ('mysql.galera.wsrep_local_state_comment', GAUGE),
+    'wsrep_received': ('mysql.galera.wsrep_received', GAUGE),
+    'wsrep_local_state': ('mysql.galera.wsrep_local_state', GAUGE),
+    'wsrep_local_cert_failures': ('mysql.galera.wsrep_local_cert_failures', GAUGE),
 }
 
 PERFORMANCE_VARS = {
