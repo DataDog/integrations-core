@@ -5,6 +5,7 @@ import ipaddress
 import threading
 from collections import defaultdict
 
+import win32api
 import win32pdh
 import win32wnet
 
@@ -44,13 +45,13 @@ class NetworkResources:
 class Connection:
     network_resources = NetworkResources()
 
-    def __init__(self, config, hostname):
-        hostname = hostname.lower()
+    def __init__(self, config):
+        machine_name = win32api.GetComputerName().lower()
         self.server = config.get('server', '')
         if not isinstance(self.server, str):
             raise ConfigTypeError('Setting `server` must be a string')
         elif not self.server:
-            self.server = hostname
+            self.server = machine_name
         else:
             self.server = self.server.lower()
 
@@ -63,7 +64,7 @@ class Connection:
             raise ConfigTypeError('Setting `password` must be a string')
 
         self.network_resource = None
-        if self.server != hostname:
+        if self.server != machine_name:
             try:
                 ipaddress.IPv6Address(self.server)
             except ipaddress.AddressValueError:
