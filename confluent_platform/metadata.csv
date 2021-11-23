@@ -330,7 +330,12 @@ confluent.ksql.query_stats.messages_consumed_total,gauge,,message,,Number of mes
 confluent.ksql.query_stats.messages_produced_per_sec,gauge,,message,second,Number of messages produced per second across all queries.,0,confluent_platform,query stats messages produced
 confluent.ksql.query_stats.num_persistent_queries,gauge,,query,,Number of persistent queries that are currently executing.,0,confluent_platform,query stats num persistent queries
 confluent.ksql.query_stats.num_active_queries,gauge,,message,,Number of queries that are actively processing messages.,0,confluent_platform,query stats num active queries
-confluent.ksql.query_stats.num_idle_queries,gauge,,message,,Number of queries with no messages available to process.,0,confluent_platform,query stats num idle queries
+confluent.ksql.query_stats.running_queries,gauge,,message,,RUNNING_queries,0,confluent_platform,RUNNING_queries
+confluent.ksql.query_stats.not_running_queries,gauge,,message,,NOT_RUNNING_queries,0,confluent_platform,NOT_RUNNING_queries
+confluent.ksql.query_stats.rebalancing_queries,gauge,,message,,REBALANCING_queries,0,confluent_platform,REBALANCING_queries
+confluent.ksql.query_stats.created_queries,gauge,,message,,CREATED_queries,0,confluent_platform,CREATED_queries
+confluent.ksql.query_stats.pending_shutdown_queries,gauge,,message,,PENDING_SHUTDOWN_queries,0,confluent_platform,PENDING_SHUTDOWN_queries
+confluent.ksql.query_stats.error_queries,gauge,,message,,,0,confluent_platform,ERROR_queries
 confluent.ksql.ksql_rocksdb_aggregates.cur_size_all_mem_tables_total,gauge,,byte,,size all mem tables,0,confluent_platform,size all mem tables
 confluent.ksql.ksql_rocksdb_aggregates.cur_size_active_mem_table_total,gauge,,byte,,cur_size_active_mem_table_total,0,confluent_platform,cur_size_active_mem_table_total
 confluent.ksql.ksql_rocksdb_aggregates.mem_table_flush_pending_total,gauge,,byte,,mem_table_flush_pending_total,0,confluent_platform,mem_table_flush_pending_total
@@ -351,6 +356,26 @@ confluent.ksql.ksql_rocksdb_aggregates.num_running_flushes_total,gauge,,,,runnin
 confluent.ksql.ksql_rocksdb_aggregates.block_cache_usage_max,gauge,,byte,,block cache usage,0,confluent_platform,block cache usage
 confluent.ksql.ksql_rocksdb_aggregates.num_entries_active_mem_table_total,gauge,,,,entries all mem tables,0,confluent_platform,entries all mem tables
 confluent.ksql.ksql_rocksdb_aggregates.num_deletes_imm_mem_tables_total,gauge,,,,delete all mem tables,0,confluent_platform,delete all mem tables
+confluent.ksql.producer_metrics.total_messages,gauge,,,,total messages,0,confluent_platform,total messages
+confluent.ksql.producer_metrics.messages_per_sec,gauge,,,,messages_per_sec,0,confluent_platform,messages_per_sec
+confluent.ksql.consumer_metrics.consumer_total_messages,gauge,,,,consumer_total_messages,0,confluent_platform,consumer_total_messages
+confluent.ksql.consumer_metrics.consumer_messages_per_sec,gauge,,,,consumer_messages_per_sec,0,confluent_platform,consumer_messages_per_sec
+confluent.ksql.consumer_metrics.consumer_total_bytes,gauge,,,,consumer_total_bytes,0,confluent_platform,consumer_total_bytes
+confluent.ksql.pull_query_metrics.pull_query_requests_total,gauge,,,,pull_query_requests_total,0,confluent_platform,pull_query_requests_total
+confluent.ksql.pull_query_metrics.pull_query_requests_rate,gauge,,,,pull_query_requests_rate,0,confluent_platform,pull_query_requests_rate
+confluent.ksql.pull_query_metrics.pull_query_requests_error_total,gauge,,,,pull_query_requests_error_total,0,confluent_platform,pull_query_requests_error_total
+confluent.ksql.pull_query_metrics.pull_query_requests_error_rate,gauge,,,,pull_query_requests_error_rate,0,confluent_platform,pull_query_requests_error_rate
+confluent.ksql.pull_query_metrics.pull_query_requests_local,gauge,,,,pull_query_requests_local,0,confluent_platform,pull_query_requests_local
+confluent.ksql.pull_query_metrics.pull_query_requests_local_rate,gauge,,,,pull_query_requests_local_rate,0,confluent_platform,pull_query_requests_local_rate
+confluent.ksql.pull_query_metrics.pull_query_requests_remote,gauge,,,,pull_query_requests_remote,0,confluent_platform,pull_query_requests_remote
+confluent.ksql.pull_query_metrics.pull_query_requests_remote_rate,gauge,,,,pull_query_requests_remote_rate,0,confluent_platform,pull_query_requests_remote_rate
+confluent.ksql.pull_query_metrics.pull_query_requests_latency_latency_min,gauge,,,,pull_query_requests_latency_latency_min,0,confluent_platform,pull_query_requests_latency_latency_min
+confluent.ksql.pull_query_metrics.pull_query_requests_latency_latency_max,gauge,,,,pull_query_requests_latency_latency_max,0,confluent_platform,pull_query_requests_latency_latency_max
+confluent.ksql.pull_query_metrics.pull_query_requests_latency_latency_avg,gauge,,,,pull_query_requests_latency_latency_avg,0,confluent_platform,pull_query_requests_latency_latency_avg
+confluent.ksql.pull_query_metrics.pull_query_requests_latency_distribution_50,gauge,,,,pull_query_requests_latency_distribution_50,0,confluent_platform,pull_query_requests_latency_distribution_50
+confluent.ksql.pull_query_metrics.pull_query_requests_latency_distribution_75,gauge,,,,pull_query_requests_latency_distribution_75,0,confluent_platform,pull_query_requests_latency_distribution_75
+confluent.ksql.pull_query_metrics.pull_query_requests_latency_distribution_90,gauge,,,,pull_query_requests_latency_distribution_90,0,confluent_platform,pull_query_requests_latency_distribution_90
+confluent.ksql.pull_query_metrics.pull_query_requests_latency_distribution_99,gauge,,,,pull_query_requests_latency_distribution_99,0,confluent_platform,pull_query_requests_latency_distribution_99
 confluent.kafka.streams.stream.commit_latency_avg,gauge,,nanosecond,,The average value of commit-latency.,0,confluent_platform,stream commit latency avg
 confluent.kafka.streams.stream.commit_latency_max,gauge,,nanosecond,,The maximum value of commit-latency.,0,confluent_platform,stream commit latency max
 confluent.kafka.streams.stream.commit_rate,gauge,,commit,second,The average per-second number of commit calls,0,confluent_platform,stream commit rate

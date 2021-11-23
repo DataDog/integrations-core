@@ -1230,6 +1230,99 @@ jmx_metrics:
           # Number of queries with no messages available to process.
           alias: confluent.ksql.query_stats.$attribute
           metric_type: gauge
+        RUNNING-queries:
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        NOT_RUNNING-queries:
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        REBALANCING-queries:
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        CREATED-queries:
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        PENDING_SHUTDOWN-queries:
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        ERROR-queries:
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+  
+  - include:
+      domain: io.confluent.ksql.metrics
+      bean: io.confluent.ksql.metrics:type=producer-metrics
+      attribute:
+        total-messages:
+          alias: confluent.ksql.producer_metrics.$attribute
+          metric_type: gauge
+        messages-per-sec:
+          alias: confluent.ksql.producer_metrics.$attribute
+          metric_type: gauge
+
+  - include:
+      domain: io.confluent.ksql.metrics
+      bean: io.confluent.ksql.metrics:type=consumer-metrics
+      attribute:
+        consumer-total-messages:
+          alias: confluent.ksql.consumer_metrics.$attribute
+          metric_type: gauge
+        consumer-messages-per-sec:
+          alias: confluent.ksql.consumer_metrics.$attribute
+          metric_type: gauge
+        consumer-total-bytes:
+          alias: confluent.ksql.consumer_metrics.$attribute
+          metric_type: gauge
+
+  - include:
+      domain: io.confluent.ksql.metrics
+      bean: io.confluent.ksql.metrics:type=_confluent-ksql-pull-query
+      attribute:
+        pull-query-requests-total:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-rate:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-error-total:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-error-rate:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-local:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-local-rate:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-remote:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-remote-rate:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-latency-latency-min:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-latency-latency-max:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-latency-latency-avg:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-latency-distribution-50:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-latency-distribution-75:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-latency-distribution-90:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-latency-distribution-99:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
 
   # Components Metrics:
   # Metric summaries: https://cwiki.apache.org/confluence/display/KAFKA/KIP-607%3A+Add+Metrics+to+Kafka+Streams+to+Report+Properties+of+RocksDB
@@ -1301,6 +1394,7 @@ jmx_metrics:
         num-deletes-imm-mem-tables-total:
           alias: confluent.ksql.ksql_rocksdb_aggregates.num_deletes_imm_mem_tables_total
           metric_type: gauge
+        
 
   # Components Metrics:
   #   - Confluent Streams Thread: https://docs.confluent.io/current/streams/monitoring.html#built-in-metrics

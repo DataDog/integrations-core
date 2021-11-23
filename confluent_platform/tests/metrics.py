@@ -363,7 +363,7 @@ KSQL_QUERY_STATS = [
     'confluent.ksql.query_stats.num_persistent_queries',
 ]
 
-KSQL_ROCKSDB_OPTIONAL = [
+KSQL_OPTIONAL = [
     'confluent.ksql.ksql_rocksdb_aggregates.cur_size_all_mem_tables_total',
     'confluent.ksql.ksql_rocksdb_aggregates.cur_size_active_mem_table_total',
     'confluent.ksql.ksql_rocksdb_aggregates.mem_table_flush_pending_total',
@@ -384,6 +384,32 @@ KSQL_ROCKSDB_OPTIONAL = [
     'confluent.ksql.ksql_rocksdb_aggregates.block_cache_usage_max',
     'confluent.ksql.ksql_rocksdb_aggregates.num_entries_active_mem_table_total',
     'confluent.ksql.ksql_rocksdb_aggregates.num_deletes_imm_mem_tables_total',
+    'confluent.ksql.producer_metrics.total_messages',
+    'confluent.ksql.producer_metrics.messages_per_sec',
+    'confluent.ksql.consumer_metrics.consumer_total_messages',
+    'confluent.ksql.consumer_metrics.consumer_messages_per_sec',
+    'confluent.ksql.consumer_metrics.consumer_total_bytes',
+    'confluent.ksql.pull_query_metrics.pull_query_requests_total',
+    'confluent.ksql.pull_query_metrics.pull_query_requests_rate',
+    'confluent.ksql.pull_query_metrics.pull_query_requests_error_total',
+    'confluent.ksql.pull_query_metrics.pull_query_requests_error_rate',
+    'confluent.ksql.pull_query_metrics.pull_query_requests_local',
+    'confluent.ksql.pull_query_metrics.pull_query_requests_local_rate',
+    'confluent.ksql.pull_query_metrics.pull_query_requests_remote',
+    'confluent.ksql.pull_query_metrics.pull_query_requests_remote_rate',
+    'confluent.ksql.pull_query_metrics.pull_query_requests_latency_latency_min',
+    'confluent.ksql.pull_query_metrics.pull_query_requests_latency_latency_max',
+    'confluent.ksql.pull_query_metrics.pull_query_requests_latency_latency_avg',
+    'confluent.ksql.pull_query_metrics.pull_query_requests_latency_distribution_50',
+    'confluent.ksql.pull_query_metrics.pull_query_requests_latency_distribution_75',
+    'confluent.ksql.pull_query_metrics.pull_query_requests_latency_distribution_90',
+    'confluent.ksql.pull_query_metrics.pull_query_requests_latency_distribution_99',
+    'confluent.ksql.query_stats.running_queries',
+    'confluent.ksql.query_stats.not_running_queries',
+    'confluent.ksql.query_stats.rebalancing_queries',
+    'confluent.ksql.query_stats.created_queries',
+    'confluent.ksql.query_stats.pending_shutdown_queries',
+    'confluent.ksql.query_stats.error_queries',
 ]
 
 ALWAYS_PRESENT_METRICS = (
@@ -414,5 +440,5 @@ NOT_ALWAYS_PRESENT_METRICS = (
     + CONNECT_METRICS_OPTIONAL
     + CONSUMER_FETCH_METRICS
     + CONSUMER_FETCH_TOPIC_METRICS
-    + KSQL_ROCKSDB_OPTIONAL
+    + KSQL_OPTIONAL
 )
