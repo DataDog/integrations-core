@@ -193,27 +193,18 @@ class SqlserverActivity(DBMAsyncJob):
         :return:
         """
         start_time = time.time()
-        try:
-            # re-use the check's conn module, but set extra_key=dbm-activity- to ensure we get our own
-            # raw connection. adodbapi and pyodbc modules are thread safe, but connections are not.
-            with self.check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
-                with self.check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
-                    connections = self._get_active_connections(cursor)
-                    rows = self._get_activity(cursor)
-                    normalized_rows = self._normalize_queries_and_filter_rows(rows, MAX_PAYLOAD_BYTES)
-                    event = self._create_activity_event(normalized_rows, connections)
-                    self._check.database_monitoring_query_activity(
-                        json.dumps(event, default=default_json_event_encoding)
-                    )
-        except Exception:
-            self.log.exception('Unable to collect activity due to an error')
-            self.check.count(
-                "dd.sqlserver.activity.error",
-                1,
-                tags=self.check.debug_tags(),
-                hostname=self.check.resolved_hostname,
-            )
-            return []
+        # re-use the check's conn module, but set extra_key=dbm-activity- to ensure we get our own
+        # raw connection. adodbapi and pyodbc modules are thread safe, but connections are not.
+        with self.check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
+            with self.check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+                connections = self._get_active_connections(cursor)
+                rows = self._get_activity(cursor)
+                normalized_rows = self._normalize_queries_and_filter_rows(rows, MAX_PAYLOAD_BYTES)
+                event = self._create_activity_event(normalized_rows, connections)
+                payload = json.dumps(event, default=default_json_event_encoding)
+                self._check.database_monitoring_query_activity(
+                    payload
+                )
 
         elapsed_ms = (time.time() - start_time) * 1000
         self.check.histogram(
@@ -223,4 +214,10 @@ class SqlserverActivity(DBMAsyncJob):
             hostname=self.check.resolved_hostname,
             raw=True,
         )
-        # TODO: add metrics around payload size?
+        self.check.histogram(
+            "dd.sqlserver.activity.collect_activity.payload_size",
+            len(payload),
+            tags=self.check.debug_tags(),
+            hostname=self.check.resolved_hostname,
+            raw=True,
+        )
