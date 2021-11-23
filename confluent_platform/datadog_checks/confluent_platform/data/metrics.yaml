@@ -1027,10 +1027,6 @@ jmx_metrics:
         - kafka.rest:type=jersey-metrics
         - kafka.schema.registry:type=jersey-metrics
       attribute:
-        brokers.list.request-error-rate:
-          # The average number of requests per second that resulted in HTTP error responses
-          alias: confluent.$domain.jersey.$attribute
-          metric_type: gauge
         consumer.assign+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
           alias: confluent.$domain.jersey.$attribute
