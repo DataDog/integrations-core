@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "## SingleStore\n\nThis dashboard provides a high-level view of your SingleStore metrics and will help in troubleshooting performance issues. For further reading on SingleStore:\n- [Datadog's SingleStore integration docs](https://docs.datadoghq.com/integrations/singlestore/)\n- [SingleStore docs](https://www.singlestore.com/)\n",
+    "description": "## SingleStore\n\nThis dashboard provides a high-level view of your SingleStore metrics and can help you troubleshoot performance issues. For further reading on SingleStore:\n- [Datadog's SingleStore integration docs](https://docs.datadoghq.com/integrations/singlestore/)\n- [SingleStore docs](https://www.singlestore.com/)\n",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -53,7 +53,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "This dashboard provides a high-level view of your SingleStore metrics and will help in troubleshooting performance issues, including:\n- Any issues due to resource utilization\n- Spikes in connections\n- A high-level overview of query performance",
+                            "content": "This dashboard provides a high-level view of your SingleStore metrics and can help you troubleshoot performance issues, including:\n- Any issues due to resource utilization\n- Spikes in connections\n- A high-level overview of query performance",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -189,7 +189,7 @@
                     {
                         "definition": {
                             "background_color": "green",
-                            "content": "Returns CRITICAL if can't connect to the agent",
+                            "content": "Returns CRITICAL if SingleStore can't connect to the Agent.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
