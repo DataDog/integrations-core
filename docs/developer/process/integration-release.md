@@ -196,7 +196,7 @@ ddev release upload datadog_checks_[base|dev]
       File "/Users/<USER>/.pyenv/versions/3.9.4/lib/python3.9/site-packages/securesystemslib/schema.py", line 1004, in check_match
         raise exceptions.FormatError(
     securesystemslib.exceptions.FormatError: '[none]' did not match 'pattern /[a-fA-F0-9]+$/'
-    ```
+  ```
     
 #### Build pipeline failed
 
@@ -238,7 +238,7 @@ ddev release upload datadog_checks_[base|dev]
     in_toto.exceptions.RuleVerificationError: 'DISALLOW *' matched the following artifacts: ['/shared/integrations-core/datadog_checks_dev/datadog_checks/dev/tooling/commands/ci/setup.py']
     ```
       
-      - Verify the signature signed in `.in-toto/tag.<hash>.link`, [(see example)](https://github.com/DataDog/integrations-core/blob/9836c71f15a0cb93c63c1d2950dcdc28b49479a7/.in-toto/tag.57ce2495.link), matches what's on master for the artifact in question.
+    1. Verify the signature signed in `.in-toto/tag.<hash>.link`, [(see example)](https://github.com/DataDog/integrations-core/blob/9836c71f15a0cb93c63c1d2950dcdc28b49479a7/.in-toto/tag.57ce2495.link), matches what's on master for the artifact in question.
         
         To see the signature for the file, run the following `shasum` command (replace local file path):
         
@@ -246,27 +246,26 @@ ddev release upload datadog_checks_[base|dev]
         shasum -a 256 datadog_checks_dev/datadog_checks/dev/tooling/commands/ci/setup.py
         ```
     
-      - In order to include the changes merged after the initial release of the integration,
-
-        1. Checkout and pull the most recent version of the `master` branch.
-
-            ```
-            git checkout master
-            git pull
-            ```
-                
-       1. Release the integration again with a new version, bump the version appropriately.
+    1. Checkout and pull the most recent version of the `master` branch.
     
-            ```
-            ddev release make <INTEGRATION> --version <VERSION>
-            ```
-        
-        1. Verify that the integration files are signed and update the integration changelog to reflect the feature PR title in the following format.
+        ```
+        git checkout master
+        git pull
+        ```
             
-            ```
-            * [<Changelog label>] <PR Title>. [See #<PR Number>](<Github PR link>).
-            ```
-        1. After approval, merge PR to master for a new build to be triggered.
+    1. Release the integration again with a new version, bump the version appropriately.
+    
+        ```
+        ddev release make <INTEGRATION> --version <VERSION>
+        ```
+    
+    1. Verify that the integration files are signed and update the integration changelog to reflect the feature PR title in the following format.
+        
+        ```
+        * [<Changelog label>] <PR Title>. [See #<PR Number>](<Github PR link>).
+        ```
+       
+    1. After approval, merge PR to master for a new build to be triggered.
   
 
 ## Releasers
