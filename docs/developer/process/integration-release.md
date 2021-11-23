@@ -230,7 +230,7 @@ ddev release upload datadog_checks_[base|dev]
 
     1. Delete the branch and tag, locally and on GitHub.
     
-- If the [build pipeline](../meta/cd.md) failed due to another feature PR being merged after the release PR is opened, the merged release PR will not have updated and signed the feature PR's files.
+- If the [build pipeline](../meta/cd.md) failed due to another feature PR conflicting with and being merged after the release PR is opened, the merged release PR will not have updated and signed the feature PR's files.
   
     You may see an error like so:
     
