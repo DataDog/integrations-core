@@ -11,7 +11,7 @@ import mock
 import pytest
 from lxml import etree as ET
 
-from datadog_checks.base.utils.common import ensure_bytes, to_native_string
+from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
@@ -255,7 +255,7 @@ def _run_test_statement_metrics_and_plans(
 
     for event in plan_events:
         assert event['db']['plan']['definition'], "event plan definition missing"
-        parsed_plan = ET.fromstring(ensure_bytes(event['db']['plan']['definition']))
+        parsed_plan = ET.fromstring(event['db']['plan']['definition'])
         assert parsed_plan.tag.endswith("ShowPlanXML"), "plan does not match expected structure"
 
     fqt_events = [s for s in dbm_samples if s['dbm_type'] == "fqt"]

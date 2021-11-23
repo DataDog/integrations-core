@@ -5,7 +5,7 @@ from cachetools import TTLCache
 from lxml import etree as ET
 
 from datadog_checks.base import is_affirmative
-from datadog_checks.base.utils.common import ensure_bytes, ensure_unicode, to_native_string
+from datadog_checks.base.utils.common import ensure_unicode, to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache, default_json_event_encoding
@@ -88,7 +88,7 @@ def obfuscate_xml_plan(raw_plan):
     Obfuscates SQL text & Parameters from the provided SQL Server XML Plan
     Also strips unnecessary whitespace
     """
-    tree = ET.fromstring(ensure_bytes((raw_plan)))
+    tree = ET.fromstring(raw_plan)
     for e in tree.iter():
         if e.text:
             e.text = e.text.strip()
