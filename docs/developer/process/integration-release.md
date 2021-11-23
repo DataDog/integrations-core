@@ -187,9 +187,10 @@ ddev release upload datadog_checks_[base|dev]
 ## Troubleshooting
 
 #### Error signing with Yubikey
-    - If you encounter errors when signing with your Yubikey, ensure you ran `gpg --import <YOUR_KEY_ID>.gpg.pub`.
-    - If you receive this error when signing with your Yubikey, check if you have more than one Yubikey inserted in your computer. Try removing the Yubikey that's not used for signing and try signing again.
-    ```
+- If you encounter errors when signing with your Yubikey, ensure you ran `gpg --import <YOUR_KEY_ID>.gpg.pub`.
+- If you receive this error when signing with your Yubikey, check if you have more than one Yubikey inserted in your computer. Try removing the Yubikey that's not used for signing and try signing again.
+    
+  ```
       File "/Users/<USER>/.pyenv/versions/3.9.4/lib/python3.9/site-packages/in_toto/runlib.py", line 529, in in_toto_run
         securesystemslib.formats.KEYID_SCHEMA.check_match(gpg_keyid)
       File "/Users/<USER>/.pyenv/versions/3.9.4/lib/python3.9/site-packages/securesystemslib/schema.py", line 1004, in check_match
@@ -245,13 +246,27 @@ ddev release upload datadog_checks_[base|dev]
         shasum -a 256 datadog_checks_dev/datadog_checks/dev/tooling/commands/ci/setup.py
         ```
     
-      - Release the integration again with a new version, bump the version appropriately.
+      - In order to include the changes merged after the initial release of the integration,
+
+        1. Checkout and pull the most recent version of the `master` branch.
+
+            ```
+            git checkout master
+            git pull
+            ```
+                
+       1. Release the integration again with a new version, bump the version appropriately.
     
-        ```
-        ddev release make <INTEGRATION> --version <VERSION>
-        ```
+            ```
+            ddev release make <INTEGRATION> --version <VERSION>
+            ```
         
-        Note: You may need to manually update the changelog field to reflect the feature PR.
+        1. Verify that the integration files are signed and update the integration changelog to reflect the feature PR title in the following format.
+            
+            ```
+            * [<Changelog label>] <PR Title>. [See #<PR Number>](<Github PR link>).
+            ```
+        1. After approval, merge PR to master for a new build to be triggered.
   
 
 ## Releasers
