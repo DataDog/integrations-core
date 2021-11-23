@@ -75,10 +75,10 @@ def test_init_bad_instance(_):
 @mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "uaa_url"))
 @mock.patch.object(CloudFoundryApiCheck, "get_orgs", return_value={"org_id": "org_name"})
 @mock.patch.object(CloudFoundryApiCheck, "get_spaces", return_value={"space_id": "space_name"})
-def test_check(_, __, ___, aggregator, instance, dd_events):
+def test_check(_, __, ___, aggregator, instance, dd_events, dd_run_check):
     with mock.patch.object(CloudFoundryApiCheck, "get_events", return_value=dd_events):
         check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
-        check.check({})
+        dd_run_check(check)
 
     aggregator.assert_metric(
         "cloud_foundry_api.events.count",
