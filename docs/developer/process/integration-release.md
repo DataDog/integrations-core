@@ -246,7 +246,7 @@ ddev release upload datadog_checks_[base|dev]
         shasum -a 256 datadog_checks_dev/datadog_checks/dev/tooling/commands/ci/setup.py
         ```
     
-    1. Checkout and pull the most recent version of the `master` branch.
+    1. If any artifact mismatches, check out and pull the most recent version of the `master` branch.
     
         ```
         git checkout master
