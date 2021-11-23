@@ -237,12 +237,14 @@ ddev release upload datadog_checks_[base|dev]
       in_toto.exceptions.RuleVerificationError: 'DISALLOW *' matched the following artifacts: ['/shared/integrations-core/datadog_checks_dev/datadog_checks/dev/tooling/commands/ci/setup.py']
     ```
   
-  - Verify the signature signed in `.in_toto/tag.*.link` matches what's on master for the artifact in question.
+  - Verify the signature signed in [`.in_toto/tag.*.link`](https://github.com/DataDog/integrations-core/blob/9836c71f15a0cb93c63c1d2950dcdc28b49479a7/.in-toto/tag.57ce2495.link) matches what's on master for the artifact in question.
+
     ```shell script
         shasum -a 256 datadog_checks_dev/datadog_checks/dev/tooling/commands/ci/setup.py
     ```
 
   - Release the integration again with a new version, bump the version appropriately.
+
     ```shell script
         ddev release make <INTEGRATION> --version <VERSION>
     ```
