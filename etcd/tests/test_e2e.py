@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.etcd import Etcd
 
-from .common import STORE_METRICS, URL
+from .common import REMAPED_DEBUGGING_METRICS, STORE_METRICS, URL
 from .utils import is_leader, legacy, preview
 
 pytestmark = pytest.mark.e2e
@@ -19,6 +19,9 @@ def test_new(dd_agent_check, instance, openmetrics_metrics):
 
     for metric in openmetrics_metrics:
         aggregator.assert_metric('etcd.{}'.format(metric), tags=tags, at_least=0)
+
+    for metric in REMAPED_DEBUGGING_METRICS:
+        aggregator.assert_metric('etcd.{}'.format(metric), at_least=1)
 
     assert aggregator.metrics_asserted_pct > 79, 'Missing metrics {}'.format(aggregator.not_asserted())
 

@@ -12,7 +12,7 @@ preview = pytest.mark.skipif(not V3_PREVIEW, reason='Requires >= v3')
 
 def is_leader(url):
     if V3_PREVIEW:
-        response = requests.post('{}/v3alpha/maintenance/status'.format(url), data='{}').json()
+        response = requests.post('{}/v3beta/maintenance/status'.format(url), data='{}').json()
         leader = response.get('leader')
         member = response.get('header', {}).get('member_id')
 
