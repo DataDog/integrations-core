@@ -851,7 +851,7 @@
                     {
                         "definition": {
                             "background_color": "orange",
-                            "content": "The top nodes that are using the most memory ",
+                            "content": "The top nodes that are using the most memory. ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
