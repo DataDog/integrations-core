@@ -206,7 +206,7 @@ jmx_metrics:
       domain: kafka.log
       bean_regex:
         # Log size, only shows after segment roll
-        - kafka.log:type=Log,name=Size(?:,topic=)([-.\w]+)(?:,partition=)([0-9]+)
+        - kafka\.log:type=Log,name=Size(?:,topic=)([-.\w]+)(?:,partition=)([0-9]+)
       tags:
         topic: $0
         partition: $1
@@ -220,7 +220,7 @@ jmx_metrics:
       domain: kafka.log
       bean_regex:
         # Log flush rate and time.
-        - kafka.log:type=LogFlushStats,name=LogFlushRateAndTimeMs
+        - kafka\.log:type=LogFlushStats,name=LogFlushRateAndTimeMs
       attribute:
         Count:
           alias: confluent.$domain.$name.rate
@@ -665,7 +665,7 @@ jmx_metrics:
   - include:
       domain: kafka.connect
       bean_regex:
-        - kafka.connect:type=connect-metrics,client-id=.*
+        - kafka\.connect:type=connect-metrics,client-id=.*
       attribute:
         outgoing-byte-rate: 
           # Rate of outgoing bytes
@@ -691,7 +691,7 @@ jmx_metrics:
   - include:
       domain: kafka.connect
       bean_regex:
-        - kafka.connect:type=connector-metrics,connector=.*
+        - kafka\.connect:type=connector-metrics,connector=.*
       tags:
         connector: $0
       attribute:
@@ -1250,7 +1250,7 @@ jmx_metrics:
   - include:
       domain: io.confluent.ksql.metrics
       bean_regex: 
-        - io.confluent.ksql.metrics:type=_confluent-ksql-engine-query-stats,ksql_service_id=(.*)
+        - io\.confluent\.ksql\.metrics:type=_confluent-ksql-engine-query-stats,ksql_service_id=(.*)
       tags:
         ksql_service_id: $0
       attribute:
