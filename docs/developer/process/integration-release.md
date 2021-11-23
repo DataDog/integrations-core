@@ -186,15 +186,18 @@ ddev release upload datadog_checks_[base|dev]
 
 ## Troubleshooting
 
-- If you encounter errors when signing with your Yubikey, ensure you ran `gpg --import <YOUR_KEY_ID>.gpg.pub`.
-- If you receive this error when signing with your Yubikey, check if you have more than one Yubikey inserted in your computer. Try removing the Yubikey that's not used for signing and try signing again.
-```
-  File "/Users/<USER>/.pyenv/versions/3.9.4/lib/python3.9/site-packages/in_toto/runlib.py", line 529, in in_toto_run
-    securesystemslib.formats.KEYID_SCHEMA.check_match(gpg_keyid)
-  File "/Users/<USER>/.pyenv/versions/3.9.4/lib/python3.9/site-packages/securesystemslib/schema.py", line 1004, in check_match
-    raise exceptions.FormatError(
-securesystemslib.exceptions.FormatError: '[none]' did not match 'pattern /[a-fA-F0-9]+$/'
-```
+#### Error signing with Yubikey
+    - If you encounter errors when signing with your Yubikey, ensure you ran `gpg --import <YOUR_KEY_ID>.gpg.pub`.
+    - If you receive this error when signing with your Yubikey, check if you have more than one Yubikey inserted in your computer. Try removing the Yubikey that's not used for signing and try signing again.
+    ```
+      File "/Users/<USER>/.pyenv/versions/3.9.4/lib/python3.9/site-packages/in_toto/runlib.py", line 529, in in_toto_run
+        securesystemslib.formats.KEYID_SCHEMA.check_match(gpg_keyid)
+      File "/Users/<USER>/.pyenv/versions/3.9.4/lib/python3.9/site-packages/securesystemslib/schema.py", line 1004, in check_match
+        raise exceptions.FormatError(
+    securesystemslib.exceptions.FormatError: '[none]' did not match 'pattern /[a-fA-F0-9]+$/'
+    ```
+    
+#### Build pipeline failed
 
 - If the [build pipeline](../meta/cd.md) failed, it is likely that you modified a file in the pull request
   without re-signing. To resolve this, you'll need to bootstrap metadata for every integration:
@@ -225,6 +228,27 @@ securesystemslib.exceptions.FormatError: '[none]' did not match 'pattern /[a-fA-
         deleted tags, so any subsequent manual trigger tags will need to increment the version number.
 
     1. Delete the branch and tag, locally and on GitHub.
+    
+- If the [build pipeline](../meta/cd.md) failed due to another feature PR being merged after the release PR is opened, the merged release PR will not have updated and signed the feature PR's files.
+  
+  You may see an error like so:
+  
+    ```text
+      in_toto.exceptions.RuleVerificationError: 'DISALLOW *' matched the following artifacts: ['/shared/integrations-core/datadog_checks_dev/datadog_checks/dev/tooling/commands/ci/setup.py']
+    ```
+  
+  - Verify the signature signed in `.in_toto/tag.*.link` matches what's on master for the artifact in question.
+    ```shell script
+        shasum -a 256 datadog_checks_dev/datadog_checks/dev/tooling/commands/ci/setup.py
+    ```
+
+  - Release the integration again with a new version, bump the version appropriately.
+    ```shell script
+        ddev release make <INTEGRATION> --version <VERSION>
+    ```
+    
+    Note: You may need to manually update the changelog field to reflect the feature PR.
+  
 
 ## Releasers
 
