@@ -259,7 +259,7 @@ ddev release upload datadog_checks_[base|dev]
         ddev release make <INTEGRATION> --version <VERSION>
         ```
     
-    1. Verify that the integration files are signed and update the integration changelog to reflect the feature PR title in the following format.
+    1. Verify that the integration files are signed, and update the integration changelog to reflect the feature PR title in the following format.
         
         ```
         * [<Changelog label>] <PR Title>. [See #<PR Number>](<Github PR link>).
