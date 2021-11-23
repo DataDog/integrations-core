@@ -189,7 +189,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 obfuscated_statement = datadog_agent.obfuscate_sql(row['text'])
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
-                self.log.exception("failed to normalized queries")
                 self.log.debug("Failed to obfuscate query: %s", e)
                 continue
             row['text'] = obfuscated_statement
@@ -343,7 +342,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 try:
                     obfuscated_plan = obfuscate_xml_plan(raw_plan)
                 except Exception as e:
-                    self.log.exception("failed to obfuscate XML plan")
                     self.log.debug(
                         "failed to obfuscate XML Plan query_signature=%s query_hash=%s query_plan_hash=%s: %s",
                         row['query_signature'],
