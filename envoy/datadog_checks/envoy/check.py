@@ -221,23 +221,6 @@ METRIC_MAP = {
     'envoy_server_debug_assertion_failures': 'server.debug_assertion_failures',
     'envoy_server_dynamic_unknown_fields': 'server.dynamic_unknown_fields', # New
     'envoy_server_envoy_bug_failures': 'server.envoy_bug_failure', # New
-
-    # watchdog metrics should have label name extracted `thread_name`?
-    'envoy_main_thread_watchdog_mega_miss': 'watchdog_mega_miss',  # envoy.watchdog_mega_miss vs envoy.server.watchdog_mega_miss
-    'envoy_main_thread_watchdog_miss': 'watchdog_miss',
-    'envoy_server_main_thread_watchdog_mega_miss': 'server.watchdog_mega_miss', # thread_name:main_thread
-    'envoy_server_main_thread_watchdog_miss': 'server.watchdog_miss', # thread_name:main_thread
-    # TYPE envoy_server_worker_0_watchdog_mega_miss counter
-    # TYPE envoy_server_worker_0_watchdog_miss counter
-    # TYPE envoy_server_worker_1_watchdog_mega_miss counter
-    # TYPE envoy_server_worker_1_watchdog_miss counter
-    # TYPE envoy_server_worker_2_watchdog_mega_miss counter
-    # TYPE envoy_server_worker_2_watchdog_miss counter
-    # TYPE envoy_server_worker_3_watchdog_mega_miss counter
-    # TYPE envoy_server_worker_3_watchdog_miss counter
-    # TYPE envoy_workers_watchdog_mega_miss counter
-    # TYPE envoy_workers_watchdog_miss counter
-
     'envoy_server_static_unknown_fields': 'server.static_unknown_fields', # New
     'envoy_vhost_vcluster_upstream_rq_retry': 'vhost.vcluster.upstream_rq_retry',
     'envoy_vhost_vcluster_upstream_rq_retry_limit_exceeded': 'vhost.vcluster.upstream_rq_retry_limit_exceeded',
@@ -245,20 +228,6 @@ METRIC_MAP = {
     'envoy_vhost_vcluster_upstream_rq_retry_success': 'vhost.vcluster.upstream_rq_retry_success',
     'envoy_vhost_vcluster_upstream_rq_timeout': 'vhost.vcluster.upstream_rq_timeout',
     'envoy_vhost_vcluster_upstream_rq_total': 'vhost.vcluster.upstream_rq_total',
-
-    # cluster.circuit_breakers have no default name match or priority label, priority can be default or high?
-    # int result for stats endpoint
-    # TYPE envoy_cluster_circuit_breakers_high_cx_open gauge
-    # TYPE envoy_cluster_circuit_breakers_high_cx_pool_open gauge
-    # TYPE envoy_cluster_circuit_breakers_high_rq_open gauge
-    # TYPE envoy_cluster_circuit_breakers_high_rq_pending_open gauge
-    # TYPE envoy_cluster_circuit_breakers_high_rq_retry_open gauge
-    'envoy_cluster_circuit_breakers_default_cx_open': 'cluster.circuit_breakers.cx_open',
-    'envoy_cluster_circuit_breakers_default_cx_pool_open': 'cluster.circuit_breakers.cx_pool_open',
-    'envoy_cluster_circuit_breakers_default_rq_open':  'cluster.circuit_breakers.rq_open',
-    'envoy_cluster_circuit_breakers_default_rq_pending_open': 'cluster.circuit_breakers.rq_pending_open',
-    'envoy_cluster_circuit_breakers_default_rq_retry_open': 'cluster.circuit_breakers.rq_retry_open',
-
     'envoy_cluster_http2_pending_send_bytes': 'cluster.http2.pending_send_bytes', # New
     'envoy_cluster_http2_streams_active': 'cluster.http2.streams_active', # New
     'envoy_cluster_lb_subsets_active': 'cluster.lb_subsets_active',
@@ -291,15 +260,8 @@ METRIC_MAP = {
     'envoy_http_downstream_rq_active': 'http.downstream_rq_active',
     'envoy_listener_admin_downstream_cx_active': 'listener.admin.downstream_cx_active',  # Admin prefix?
     'envoy_listener_admin_downstream_pre_cx_active': 'listener.admin.downstream_pre_cx_active',
-    'envoy_listener_admin_main_thread_downstream_cx_active': 'listener.admin.main_thread.downstream_cx_active', # Admin/main-thread
     'envoy_listener_downstream_cx_active': 'listener.downstream_cx_active',
     'envoy_listener_downstream_pre_cx_active': 'listener.downstream_pre_cx_active',
-    # What to do with the worker_<num>
-    # TYPE envoy_listener_worker_0_downstream_cx_active gauge
-    # TYPE envoy_listener_worker_1_downstream_cx_active gauge
-    # TYPE envoy_listener_worker_2_downstream_cx_active gauge
-    # TYPE envoy_listener_worker_3_downstream_cx_active gauge
-
     'envoy_listener_manager_lds_control_plane_connected_state':'listener_manager.lds.control_plane.connected_state',
     'envoy_listener_manager_lds_control_plane_pending_requests': 'listener_manager.lds.control_plane.pending_requests',
     'envoy_listener_manager_lds_update_time': 'listener_manager.lds.update_time',
@@ -329,7 +291,19 @@ METRIC_MAP = {
     'envoy_server_total_connections': 'server.total_connections',
     'envoy_server_uptime': 'server.uptime',
     'envoy_server_version': 'server.version',
-
+    'envoy_wasm_remote_load_cache_entries': 'wasm.remote_load_cache_entries',  # New
+    'envoy_wasm_envoy_wasm_runtime_null_active': 'wasm.envoy_wasm.runtime_null_active',  # New
+    'envoy_wasm_remote_load_fetch_successes': 'wasm.remote_load_fetch_successes',  # New
+    'envoy_wasm_remote_load_fetch_failures': 'wasm.remote_load_fetch_failures',  # New
+    'envoy_wasm_remote_load_cache_negative_hits': 'wasm.remote_load_cache_negative_hits',  # New
+    'envoy_wasm_remote_load_cache_misses': 'wasm.remote_load_cache_misses',  # New
+    'envoy_wasm_remote_load_cache_hits': 'wasm.remote_load_cache_hits',  # New
+    'envoy_wasm_envoy_wasm_runtime_null_created': 'wasm.envoy_wasm.runtime_null_created',  # New
+    'envoy_metric_cache_count': 'metric_cache_count',  # New
+    'envoy_server_dropped_stat_flushes': 'server.dropped_stat_flushes',  # New
+    'envoy_cluster_upstream_rq_200': 'cluster.upstream_rq_200',  # New
+    'envoy_cluster_http2_stream_refused_errors': 'cluster.http2.stream_refused_errors',  # New
+    'envoy_cluster_internal_upstream_rq_200': 'cluster.internal.upstream_rq_200',  # New
     # THE FOLLOWING ARE HISTOGRAMS
     'envoy_cluster_upstream_cx_connect_ms': 'cluster.upstream_cx_connect_ms',
     'envoy_cluster_upstream_cx_length_ms': 'cluster.upstream_cx_length_ms',
@@ -365,3 +339,48 @@ class EnvoyCheck(OpenMetricsBaseCheckV2):
             'metrics': [METRIC_MAP],
             'rename_labels': LABEL_MAP,
         }
+
+
+# Transform to thread_name tag
+    # watchdog metrics should have label name extracted `thread_name`?
+    # 'envoy_main_thread_watchdog_mega_miss': 'watchdog_mega_miss',  # envoy.watchdog_mega_miss vs envoy.server.watchdog_mega_miss
+    # 'envoy_main_thread_watchdog_miss': 'watchdog_miss',
+    # 'envoy_server_main_thread_watchdog_mega_miss': 'server.watchdog_mega_miss', # thread_name:main_thread
+    # 'envoy_server_main_thread_watchdog_miss': 'server.watchdog_miss', # thread_name:main_thread
+    # TYPE envoy_server_worker_0_watchdog_mega_miss counter
+    # TYPE envoy_server_worker_0_watchdog_miss counter
+    # TYPE envoy_server_worker_1_watchdog_mega_miss counter
+    # TYPE envoy_server_worker_1_watchdog_miss counter
+    # TYPE envoy_server_worker_2_watchdog_mega_miss counter
+    # TYPE envoy_server_worker_2_watchdog_miss counter
+    # TYPE envoy_server_worker_3_watchdog_mega_miss counter
+    # TYPE envoy_server_worker_3_watchdog_miss counter
+    # TYPE envoy_workers_watchdog_mega_miss counter
+    # TYPE envoy_workers_watchdog_miss counter
+    # 'envoy_listener_admin_main_thread_downstream_cx_active': 'listener.admin.main_thread.downstream_cx_active', # Admin/main-thread
+    # What to do with the worker_<num>
+    # TYPE envoy_listener_worker_0_downstream_cx_active gauge
+    # TYPE envoy_listener_worker_1_downstream_cx_active gauge
+    # TYPE envoy_listener_worker_2_downstream_cx_active gauge
+    # TYPE envoy_listener_worker_3_downstream_cx_active gauge
+
+
+# Looks like cluster_name
+#     'envoy_cluster_zone_us_central1_c__upstream_rq': 'cluster.'
+#     envoy_cluster_zone_us_central1_c__upstream_rq_200
+# envoy_cluster_zone_us_central1_c__upstream_rq_completed
+
+
+    # These should be tagged by `priority`
+    # # cluster.circuit_breakers have no default name match or priority label, priority can be default or high?
+    # # int result for stats endpoint
+    # # TYPE envoy_cluster_circuit_breakers_high_cx_open gauge
+    # # TYPE envoy_cluster_circuit_breakers_high_cx_pool_open gauge
+    # # TYPE envoy_cluster_circuit_breakers_high_rq_open gauge
+    # # TYPE envoy_cluster_circuit_breakers_high_rq_pending_open gauge
+    # # TYPE envoy_cluster_circuit_breakers_high_rq_retry_open gauge
+    # 'envoy_cluster_circuit_breakers_default_cx_open': 'cluster.circuit_breakers.cx_open',
+    # 'envoy_cluster_circuit_breakers_default_cx_pool_open': 'cluster.circuit_breakers.cx_pool_open',
+    # 'envoy_cluster_circuit_breakers_default_rq_open':  'cluster.circuit_breakers.rq_open',
+    # 'envoy_cluster_circuit_breakers_default_rq_pending_open': 'cluster.circuit_breakers.rq_pending_open',
+    # 'envoy_cluster_circuit_breakers_default_rq_retry_open': 'cluster.circuit_breakers.rq_retry_open',
