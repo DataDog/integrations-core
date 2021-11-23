@@ -1,6 +1,10 @@
 # CHANGELOG - tomcat
 
-## 1.10.0 / 2021-10-04
+## 1.10.1 / 2021-11-13
+
+* [Fixed] Fix description of JMX options. See [#10454](https://github.com/DataDog/integrations-core/pull/10454).
+
+## 1.10.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
 

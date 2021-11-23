@@ -13,17 +13,52 @@ init_config:
 #
 instances:
 
-    ## @param host - string - required
+    ## @param host - string - optional - default: .
     ## ASP .NET host to connect to.
     ## Using "." means the current host. Using any other value, the Agent attempts to connect to a remote host.
     ## Note: Remote access requires additional permissions
     #
   - host: .
 
-    ## @param port - integer - required
-    ## ASP .NET port to connect to.
+    ## @param username - string - optional
+    ## The username from the credentials needed to connect to the host.
     #
-    port: 26379
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## The password from the credentials needed to connect to the host.
+    #
+    # password: <PASSWORD>
+
+    ## @param additional_metrics - list of lists - optional
+    ## The additional metrics is a list of items that represent additional counters to collect.
+    ## Each item is a list of strings, formatted as follows:
+    ##
+    ## ['<COUNTERSET_NAME>', <COUNTER_INSTANCE_NAME>, '<COUNTER_NAME>', <METRIC_NAME>, <METRIC_TYPE>]
+    ##
+    ## <COUNTERSET_NAME> is the name of the PDH counter set (the name of the counter).
+    ## <COUNTER_INSTANCE_NAME> is the specific counter instance to collect, for example
+    ##                         "Default Web Site".  Specify 'none' for all instances of
+    ##                         the counter.
+    ## <COUNTER_NAME> is the individual counter to report.
+    ## <METRIC_NAME> is the name that displays in Datadog.
+    ## <METRIC_TYPE> is from the standard choices for all Agent checks, such as gauge,
+    ##               rate, histogram, or count.
+    #
+    # additional_metrics:
+    #   - [Processor, none, '% Processor Time', processor.time, gauge]
+    #   - [Processor, none, '% User Time', processor.user.time, gauge]
+
+    ## @param counter_data_types - list of strings - optional
+    ## counter_data_types is a list of <METRIC_NAME>,<DATA_TYPE> elements that
+    ## allow the precision in which counters are queried on a per metric basis.
+    ## <METRIC_NAME>: The name of your metric
+    ## <DATA_TYPE>  : The type of your metric (int or float)
+    #
+    # counter_data_types:
+    #   - <METRIC_NAME>,<DATA_TYPE>
+    #   - processor.time,int
+    #   - processor.user.time,float
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

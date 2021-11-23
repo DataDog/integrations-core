@@ -129,6 +129,38 @@ instances:
     #     tags:
     #     - test:mysql
 
+    ## @param additional_status - list of mappings - optional
+    ## Set this parameter to collect additional MySQL status variables as metrics
+    ## from "SHOW GLOBAL STATUS"
+    ## See MySQL documentation for available variables: https://dev.mysql.com/doc/refman/8.0/en/show-status.html
+    ##
+    ## The following fields are supported:
+    ##
+    ## name : MySQL status name on "SHOW GLOBAL STATUS"
+    ## metric_name : metric name
+    ## type : gauge | rate | count | ...
+    #
+    # additional_status:
+    #   - name: innodb_rows_read
+    #     metric_name: mysql.innodb.rows_read
+    #     type: rate
+
+    ## @param additional_variable - list of mappings - optional
+    ## Set this parameter to collect additional MySQL variables as metrics
+    ## from "SHOW GLOBAL VARIABLES"
+    ## See MySQL documentation for available variables: https://dev.mysql.com/doc/refman/8.0/en/show-variables.html
+    ##
+    ## The following fields are supported:
+    ##
+    ## name : MySQL variable name on "SHOW GLOBAL VARIABLES"
+    ## metric_name : metric name
+    ## type : gauge | rate | count | ...
+    #
+    # additional_variable:
+    #   - name: long_query_time
+    #     metric_name: mysql.performance.long_query_time
+    #     type: gauge
+
     ## @param max_custom_queries - integer - optional - default: 20
     ## Set the maximum number of custom queries to execute with this integration.
     ##

@@ -16,7 +16,7 @@ def trigger_pipeline():
         "variables": {
             "RELEASE_VERSION_6": "nightly",
             "RELEASE_VERSION_7": "nightly-a7",
-            "DEB_RPM_BUCKET_BRANCH": "none",
+            "BUCKET_BRANCH": "none",
             "INTEGRATIONS_CORE_VERSION": os.environ['CI_COMMIT_REF_NAME'],
             "RUN_KITCHEN_TESTS": "false",
         }

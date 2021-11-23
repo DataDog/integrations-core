@@ -7,12 +7,19 @@ import os
 import click
 
 from ....fs import file_exists, read_file, write_file
-from ...annotations import annotate_display_queue, annotate_error
 from ...constants import get_root
 from ...manifest_utils import Manifest
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_manifest_file, parse_version_parts
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ..console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_display_queue,
+    annotate_error,
+    echo_failure,
+    echo_info,
+    echo_success,
+)
 
 REQUIRED_ATTRIBUTES = {'agent_version', 'check', 'description', 'groups', 'integration', 'name', 'statuses'}
 SERVICE_CHECK_NAMES = ['ok', 'warning', 'critical', 'unknown']

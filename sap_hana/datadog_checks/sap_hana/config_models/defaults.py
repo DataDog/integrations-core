@@ -20,6 +20,10 @@ def instance_batch_size(field, value):
     return 1000
 
 
+def instance_connection_properties(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 

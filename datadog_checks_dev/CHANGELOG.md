@@ -1,5 +1,41 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 15.4.0 / 2021-11-22
+* [Added] Support non-executable files during pipeline setup. See [#10684](https://github.com/DataDog/integrations-core/pull/10684).
+
+## 15.3.1 / 2021-11-17
+
+* [Fixed] Refactor annotations to console utility and use relative imports. See [#10645](https://github.com/DataDog/integrations-core/pull/10645).
+
+## 15.3.0 / 2021-11-13
+
+* [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
+* [Added] Document new use_process_start_time option. See [#10601](https://github.com/DataDog/integrations-core/pull/10601).
+* [Added] Add new base class for monitoring Windows performance counters. See [#10504](https://github.com/DataDog/integrations-core/pull/10504).
+* [Added] Update dependencies. See [#10580](https://github.com/DataDog/integrations-core/pull/10580).
+* [Fixed] Update annotations util with relative imports. See [#10613](https://github.com/DataDog/integrations-core/pull/10613).
+* [Fixed] Remove integration style hostname submission validation. See [#10609](https://github.com/DataDog/integrations-core/pull/10609).
+* [Fixed] Update warning message about agent signature. See [#10606](https://github.com/DataDog/integrations-core/pull/10606).
+
+## 15.2.0 / 2021-11-10
+
+* [Added] Update style dependencies. See [#10582](https://github.com/DataDog/integrations-core/pull/10582).
+* [Added] Add option to include security deps in dep command. See [#10523](https://github.com/DataDog/integrations-core/pull/10523).
+* [Added] Add some debug messages to release make command and some refactor. See [#10535](https://github.com/DataDog/integrations-core/pull/10535).
+* [Added] Adding to schema required field tags. See [#9777](https://github.com/DataDog/integrations-core/pull/9777).
+* [Added] Adding table metric tags validator. See [#9820](https://github.com/DataDog/integrations-core/pull/9820).
+* [Added] Allow passing multiple directories to the `validate-profile` SNMP command. See [#10029](https://github.com/DataDog/integrations-core/pull/10029).
+* [Added] Add --format-links flag to README validation. See [#10469](https://github.com/DataDog/integrations-core/pull/10469).
+* [Added] Add decimal bytes units to metric metadata validation. See [#10378](https://github.com/DataDog/integrations-core/pull/10378).
+* [Added] Add annotations to dep validation. See [#10286](https://github.com/DataDog/integrations-core/pull/10286).
+* [Added] Add new validation to warn on bad style. See [#10430](https://github.com/DataDog/integrations-core/pull/10430).
+* [Fixed] Fix location of config. See [#10590](https://github.com/DataDog/integrations-core/pull/10590).
+* [Fixed] Update README templates. See [#10564](https://github.com/DataDog/integrations-core/pull/10564).
+* [Fixed] Update ignored deps. See [#10516](https://github.com/DataDog/integrations-core/pull/10516).
+* [Fixed] Fix ddev dash export for manifest v2. See [#10503](https://github.com/DataDog/integrations-core/pull/10503).
+* [Fixed] Update checks that do not make sense to have logs. See [#10366](https://github.com/DataDog/integrations-core/pull/10366).
+* [Fixed] Fix description of JMX options. See [#10454](https://github.com/DataDog/integrations-core/pull/10454).
+
 ## 15.1.0 / 2021-10-15
 
 * [Added] Annotate manifest validation. See [#10022](https://github.com/DataDog/integrations-core/pull/10022).

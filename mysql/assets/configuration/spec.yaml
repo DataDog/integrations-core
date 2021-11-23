@@ -109,6 +109,45 @@ files:
                       type: gauge
                   tags:
                     - test:mysql
+          - name: additional_status
+            description: |
+              Set this parameter to collect additional MySQL status variables as metrics
+              from "SHOW GLOBAL STATUS"
+              See MySQL documentation for available variables: https://dev.mysql.com/doc/refman/8.0/en/show-status.html
+
+              The following fields are supported:
+
+              name : MySQL status name on "SHOW GLOBAL STATUS"
+              metric_name : metric name
+              type : gauge | rate | count | ...
+            value:
+              type: array
+              items:
+                type: object
+              example:
+                - name: innodb_rows_read
+                  metric_name: mysql.innodb.rows_read
+                  type: rate
+
+          - name: additional_variable
+            description: |
+              Set this parameter to collect additional MySQL variables as metrics
+              from "SHOW GLOBAL VARIABLES"
+              See MySQL documentation for available variables: https://dev.mysql.com/doc/refman/8.0/en/show-variables.html
+
+              The following fields are supported:
+
+              name : MySQL variable name on "SHOW GLOBAL VARIABLES"
+              metric_name : metric name
+              type : gauge | rate | count | ...
+            value:
+              type: array
+              items:
+                type: object
+              example:
+                - name: long_query_time
+                  metric_name: mysql.performance.long_query_time
+                  type: gauge
 
           - name: max_custom_queries
             description: |

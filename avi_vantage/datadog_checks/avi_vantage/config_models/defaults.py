@@ -120,6 +120,10 @@ def instance_ignore_tags(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_include_labels(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_kerberos_auth(field, value):
     return 'disabled'
 
@@ -262,6 +266,10 @@ def instance_use_latest_spec(field, value):
 
 def instance_use_legacy_auth_encoding(field, value):
     return True
+
+
+def instance_use_process_start_time(field, value):
+    return False
 
 
 def instance_username(field, value):

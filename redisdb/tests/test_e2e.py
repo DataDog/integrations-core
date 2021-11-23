@@ -78,6 +78,7 @@ def test_e2e_v_3_2(dd_agent_check, master_instance):
     aggregator.assert_metric('redis.clients.biggest_input_buf', count=2, tags=tags)
     aggregator.assert_metric('redis.clients.longest_output_list', count=2, tags=tags)
 
+    assert_optional_slowlog_metrics(aggregator)
     assert_all(aggregator)
 
 
@@ -98,6 +99,7 @@ def test_e2e_v_4_0(dd_agent_check, master_instance):
     aggregator.assert_metric('redis.active_defrag.key_hits', count=2, tags=tags)
     aggregator.assert_metric('redis.active_defrag.key_misses', count=2, tags=tags)
 
+    assert_optional_slowlog_metrics(aggregator)
     assert_all(aggregator)
 
 
@@ -123,12 +125,7 @@ def test_e2e_v_latest(dd_agent_check, master_instance):
     aggregator.assert_metric('redis.clients.recent_max_input_buffer', count=2, tags=tags)
     aggregator.assert_metric('redis.clients.recent_max_output_buffer', count=2, tags=tags)
 
-    # Optional slowlog metrics
-    aggregator.assert_metric('redis.slowlog.micros.95percentile', at_least=0)
-    aggregator.assert_metric('redis.slowlog.micros.avg', at_least=0)
-    aggregator.assert_metric('redis.slowlog.micros.count', at_least=0)
-    aggregator.assert_metric('redis.slowlog.micros.max', at_least=0)
-    aggregator.assert_metric('redis.slowlog.micros.median', at_least=0)
+    assert_optional_slowlog_metrics(aggregator)
 
     assert_all(aggregator)
 
@@ -137,6 +134,14 @@ def assert_non_cloud_metrics(aggregator, tags):
     """Certain metrics cannot be collected in cloud environments due to disabled commands"""
     aggregator.assert_metric('redis.net.connections', count=2, tags=tags + ['source:unknown'])
     aggregator.assert_metric('redis.net.maxclients', count=2, tags=tags)
+
+
+def assert_optional_slowlog_metrics(aggregator):
+    aggregator.assert_metric('redis.slowlog.micros.95percentile', at_least=0)
+    aggregator.assert_metric('redis.slowlog.micros.avg', at_least=0)
+    aggregator.assert_metric('redis.slowlog.micros.count', at_least=0)
+    aggregator.assert_metric('redis.slowlog.micros.max', at_least=0)
+    aggregator.assert_metric('redis.slowlog.micros.median', at_least=0)
 
 
 def assert_all(aggregator):

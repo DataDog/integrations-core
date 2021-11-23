@@ -1,6 +1,13 @@
 # CHANGELOG - CoreDNS
 
-## 1.9.0 / 2021-10-04
+## 1.10.0 / 2021-11-13
+
+* [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
+* [Added] Document new use_process_start_time option. See [#10601](https://github.com/DataDog/integrations-core/pull/10601).
+* [Added] Add runtime configuration validation. See [#8900](https://github.com/DataDog/integrations-core/pull/8900).
+* [Added] Update coredns check with v1.8.5 metrics. See [#10187](https://github.com/DataDog/integrations-core/pull/10187). Thanks [vxcodes](https://github.com/vxcodes).
+
+## 1.9.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
 * [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).

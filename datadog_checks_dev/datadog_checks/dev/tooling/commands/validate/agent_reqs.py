@@ -4,12 +4,11 @@
 import click
 
 from ....utils import read_file
-from ...annotations import annotate_error
 from ...constants import AGENT_V5_ONLY, NOT_CHECKS, get_agent_release_requirements
 from ...release import get_package_name
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_version_string, parse_agent_req_file
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
+from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_info, echo_success, echo_warning
 
 
 @click.command(

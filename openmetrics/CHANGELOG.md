@@ -1,6 +1,11 @@
 # CHANGELOG - OpenMetrics
 
-## 1.15.2 / 2021-10-15
+## 1.16.0 / 2021-11-13
+
+* [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
+* [Added] Document new use_process_start_time option. See [#10601](https://github.com/DataDog/integrations-core/pull/10601).
+
+## 1.15.2 / 2021-10-15 / Agent 7.32.0
 
 * [Fixed] [OpenMetricsV2] Allow empty namespaces. See [#10420](https://github.com/DataDog/integrations-core/pull/10420).
 

@@ -4,26 +4,30 @@
 
 import pytest
 
-from datadog_checks.gearmand import Gearman
+from datadog_checks.base.constants import ServiceCheck
 
 from . import common
 
 
-def test_service_check_broken(check, aggregator):
+def test_service_check_broken(aggregator, check, dd_run_check):
+
+    check = check(common.BAD_INSTANCE)
+
     tags = ['server:{}'.format(common.HOST), 'port:{}'.format(common.BAD_PORT)] + common.TAGS2
 
     with pytest.raises(Exception):
-        check.check(common.BAD_INSTANCE)
+        dd_run_check(check)
 
-    aggregator.assert_service_check('gearman.can_connect', status=Gearman.CRITICAL, tags=tags, count=1)
+    aggregator.assert_service_check('gearman.can_connect', status=ServiceCheck.CRITICAL, tags=tags, count=1)
     aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_version_metadata(check, aggregator, datadog_agent):
+def test_version_metadata(check, instance, aggregator, datadog_agent, dd_run_check):
+    check = check(instance)
     check.check_id = 'test:123'
-    check.check(common.INSTANCE)
+    dd_run_check(check)
 
     # hardcoded because we only support one docker image for test env
     raw_version = common.GEARMAND_VERSION

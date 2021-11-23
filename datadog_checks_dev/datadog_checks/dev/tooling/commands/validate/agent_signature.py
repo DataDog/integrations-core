@@ -6,11 +6,9 @@ import os
 
 import click
 
-from datadog_checks.dev.tooling.annotations import annotate_error
-
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, find_legacy_signature
-from ..console import CONTEXT_SETTINGS, echo_failure, echo_success
+from ..console import CONTEXT_SETTINGS, annotate_error, echo_failure, echo_success
 
 
 @click.command(

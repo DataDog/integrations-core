@@ -14,7 +14,7 @@ def get_counter_gauge(check, metric_name, modifiers, global_options):
     count_metric = f'{metric_name}.count'
 
     def counter_gauge(metric, sample_data, runtime_data):
-        has_successfully_executed = runtime_data['has_successfully_executed']
+        flush_first_value = runtime_data['flush_first_value']
 
         for sample, tags, hostname in sample_data:
             gauge_method(total_metric, sample.value, tags=tags, hostname=hostname)
@@ -23,7 +23,7 @@ def get_counter_gauge(check, metric_name, modifiers, global_options):
                 sample.value,
                 tags=tags,
                 hostname=hostname,
-                flush_first_value=has_successfully_executed,
+                flush_first_value=flush_first_value,
             )
 
     del check

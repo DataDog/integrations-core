@@ -1,6 +1,11 @@
 # CHANGELOG - ClickHouse
 
-## 2.4.1 / 2021-10-12
+## 2.5.0 / 2021-11-13
+
+* [Added] Update dependencies. See [#10580](https://github.com/DataDog/integrations-core/pull/10580).
+* [Added] Add runtime configuration validation. See [#8895](https://github.com/DataDog/integrations-core/pull/8895).
+
+## 2.4.1 / 2021-10-12 / Agent 7.32.0
 
 * [Fixed] Bump base package requirements. See [#10390](https://github.com/DataDog/integrations-core/pull/10390).
 

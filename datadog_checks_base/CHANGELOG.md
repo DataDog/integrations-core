@@ -1,6 +1,33 @@
 # CHANGELOG - datadog_checks_base
 
-## 23.1.5 / 2021-10-22
+## 23.3.2 / 2021-11-23
+
+* [Fixed] [PerfCountersBaseCheck] Improve logging when expected counters are not found. See [#10701](https://github.com/DataDog/integrations-core/pull/10701).
+* [Fixed] [PerfCountersBaseCheck] Fix default machine connection. See [#10698](https://github.com/DataDog/integrations-core/pull/10698).
+
+## 23.3.1 / 2021-11-19
+
+* [Fixed] fix `mmh3.hash64` unicode exception with python2. See [#10685](https://github.com/DataDog/integrations-core/pull/10685).
+
+## 23.3.0 / 2021-11-12
+
+* [Added] Add new base class for monitoring Windows performance counters. See [#10504](https://github.com/DataDog/integrations-core/pull/10504).
+* [Added] Update dependencies. See [#10580](https://github.com/DataDog/integrations-core/pull/10580).
+
+## 23.2.0 / 2021-11-10
+
+* [Added] Add option to collect OpenMetrics counters on first scrape. See [#10589](https://github.com/DataDog/integrations-core/pull/10589).
+* [Added] Add support for OpenMetrics include_labels option. See [#10493](https://github.com/DataDog/integrations-core/pull/10493).
+* [Added] Upgrade psycopg2 on Python 3. See [#10442](https://github.com/DataDog/integrations-core/pull/10442).
+* [Added] Add more utilities. See [#10448](https://github.com/DataDog/integrations-core/pull/10448).
+* [Added] Add support for other logical operators for multiple conditions of the same property. See [#10138](https://github.com/DataDog/integrations-core/pull/10138).
+* [Fixed] Fix unintentional limit on dbm instances from ThreadPoolExecutor's default max_workers. See [#10460](https://github.com/DataDog/integrations-core/pull/10460).
+* [Fixed] Revert "Upgrade psycopg2 on Python 3". See [#10456](https://github.com/DataDog/integrations-core/pull/10456).
+* [Fixed] Update tuf to 0.19.0 for python 3. See [#10444](https://github.com/DataDog/integrations-core/pull/10444).
+* [Fixed] [OpenMetricsV2] Allow empty namespaces. See [#10420](https://github.com/DataDog/integrations-core/pull/10420).
+* [Fixed] Add warning when no query is configured. See [#10336](https://github.com/DataDog/integrations-core/pull/10336).
+
+## 23.1.5 / 2021-10-22 / Agent 7.32.0
 
 * [Fixed] Fix unintentional limit on dbm instances from ThreadPoolExecutor's default max_workers. See [#10460](https://github.com/DataDog/integrations-core/pull/10460).
 

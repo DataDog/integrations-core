@@ -1,6 +1,6 @@
 # CHANGELOG - spark
 
-## 2.1.0 / 2021-10-04
+## 2.1.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Update dependencies. See [#10228](https://github.com/DataDog/integrations-core/pull/10228).
 * [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
