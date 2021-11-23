@@ -715,7 +715,7 @@
                     {
                         "definition": {
                             "background_color": "purple",
-                            "content": "The number of bytes received and sent per second. \n\nLooking at the bytes received and sent helps understand network usage for a given workload and identify bottlenecks. This also helps to identify if any non-SingleStore DB activity is affecting a host\u2019s network",
+                            "content": "The number of bytes received and sent per second. \n\nLooking at the bytes received and sent helps you understand network usage for a given workload and identify bottlenecks. This also helps identify if any non-SingleStore DB activity is affecting a host\u2019s network. ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
