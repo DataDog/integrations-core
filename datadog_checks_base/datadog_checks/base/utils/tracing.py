@@ -64,7 +64,7 @@ def traced_class():
 
         def decorate(cls):
             for attr in cls.__dict__:
-                # TODO: fix static method
+                # Ignoring staticmethod and classmethod because they don't need cls in args
                 if (
                     callable(getattr(cls, attr))
                     and not isinstance(cls.__dict__[attr], staticmethod)
