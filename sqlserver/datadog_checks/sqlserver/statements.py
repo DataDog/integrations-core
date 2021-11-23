@@ -1,11 +1,11 @@
 import binascii
 import time
-import xml.etree.ElementTree as ET
 
 from cachetools import TTLCache
+from lxml import etree as ET
 
 from datadog_checks.base import is_affirmative
-from datadog_checks.base.utils.common import to_native_string
+from datadog_checks.base.utils.common import ensure_bytes, ensure_unicode, to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache, default_json_event_encoding
@@ -56,7 +56,7 @@ select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid, D.name as
 """
 
 PLAN_LOOKUP_QUERY = """\
-select cast(query_plan as varchar(max)) as query_plan from sys.dm_exec_query_stats
+select cast(query_plan as nvarchar(max)) as query_plan from sys.dm_exec_query_stats
     cross apply sys.dm_exec_query_plan(plan_handle)
 where
     query_hash = CONVERT(varbinary(max), ?, 1) and query_plan_hash = CONVERT(varbinary(max), ?, 1)
@@ -88,7 +88,7 @@ def obfuscate_xml_plan(raw_plan):
     Obfuscates SQL text & Parameters from the provided SQL Server XML Plan
     Also strips unnecessary whitespace
     """
-    tree = ET.fromstring(raw_plan)
+    tree = ET.fromstring(ensure_bytes((raw_plan)))
     for e in tree.iter():
         if e.text:
             e.text = e.text.strip()
@@ -97,8 +97,8 @@ def obfuscate_xml_plan(raw_plan):
         for k in XML_PLAN_OBFUSCATION_ATTRS:
             val = e.attrib.get(k, None)
             if val:
-                e.attrib[k] = datadog_agent.obfuscate_sql(val)
-    return to_native_string(ET.tostring(tree))
+                e.attrib[k] = ensure_unicode(datadog_agent.obfuscate_sql(val))
+    return to_native_string(ET.tostring(tree, encoding="UTF-8"))
 
 
 class SqlserverStatementMetrics(DBMAsyncJob):
@@ -189,6 +189,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 obfuscated_statement = datadog_agent.obfuscate_sql(row['text'])
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
+                self.log.exception("failed to normalized queries")
                 self.log.debug("Failed to obfuscate query: %s", e)
                 continue
             row['text'] = obfuscated_statement
@@ -342,6 +343,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 try:
                     obfuscated_plan = obfuscate_xml_plan(raw_plan)
                 except Exception as e:
+                    self.log.exception("failed to obfuscate XML plan")
                     self.log.debug(
                         "failed to obfuscate XML Plan query_signature=%s query_hash=%s query_plan_hash=%s: %s",
                         row['query_signature'],
