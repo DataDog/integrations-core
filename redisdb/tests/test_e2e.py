@@ -78,6 +78,7 @@ def test_e2e_v_3_2(dd_agent_check, master_instance):
     aggregator.assert_metric('redis.clients.biggest_input_buf', count=2, tags=tags)
     aggregator.assert_metric('redis.clients.longest_output_list', count=2, tags=tags)
 
+    assert_optional_slowlog_metrics(aggregator)
     assert_all(aggregator)
 
 
