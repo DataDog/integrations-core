@@ -695,18 +695,6 @@ jmx_metrics:
       tags:
         connector: $0
       attribute:
-        connector-type:
-          # Type of connector: source|sink (string)
-          metric_type: gauge
-          alias: confluent.$domain.connector_metrics.connector_type
-        connector-class:
-          # Class of connector (string)
-          metric_type: gauge
-          alias: confluent.$domain.connector_metrics.connector_class
-        connector-version: 
-          # Version of the connector (string)
-          metric_type: gauge
-          alias: confluent.$domain.connector_metrics.connector_version
         status:
           # Status of the connector (string)
           metric_type: gauge

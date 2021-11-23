@@ -159,9 +159,6 @@ CONNECT_PER_CONNECTOR_METRICS = [
     'confluent.kafka.connect.connect_metrics.successful_authentication_rate',
     'confluent.kafka.connect.connect_metrics.failed_authentication_total',
     'confluent.kafka.connect.connect_metrics.successful_authentication_total',
-    'confluent.kafka.connect.connector_metrics.connector_type',
-    'confluent.kafka.connect.connector_metrics.connector_class',
-    'confluent.kafka.connect.connector_metrics.connector_version',
     'confluent.kafka.connect.connector_metrics.status',
 ]
 
