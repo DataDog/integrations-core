@@ -132,6 +132,9 @@ class PerfObject:
 
         for counter in self.counters:
             if counter.name not in counters:
+                self.logger.error(
+                    'Did not find expected counter `%s` of performance object `%s`', counter.name, self.name
+                )
                 counter.clear()
             else:
                 counter.refresh(unique_instance_counts)
@@ -361,6 +364,9 @@ class SingleCounter(CounterBase):
             self.counter_handle = self.counter_selector(self.connection.query_handle, self.path)
 
     def clear(self):
+        if self.counter_handle is None:
+            return
+
         try:
             # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhremovecounter
             # http://timgolden.me.uk/pywin32-docs/win32pdh__RemoveCounter_meth.html
@@ -524,6 +530,9 @@ class MultiCounter(CounterBase):
         self.instances = new_instances
 
     def clear(self):
+        if not self.instances:
+            return
+
         for instance, counter_handles in self.instances.items():
             while counter_handles:
                 counter_handle = counter_handles.pop()
