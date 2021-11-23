@@ -22,6 +22,15 @@ def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggrega
     aggregator.assert_service_check('snowflake.can_connect', SnowflakeCheck.CRITICAL)
 
 
+def test_no_schema(dd_run_check, aggregator, instance):
+    config = copy.deepcopy(instance)
+    del config['schema']
+    config['login_timeout'] = 5
+    check = SnowflakeCheck(CHECK_NAME, {}, [config])
+    dd_run_check(check)
+    aggregator.assert_service_check('snowflake.can_connect', SnowflakeCheck.CRITICAL)
+
+
 def test_storage_metrics(dd_run_check, aggregator, instance):
     # type: (Callable[[SnowflakeCheck], None], AggregatorStub, Dict[str, Any]) -> None
 

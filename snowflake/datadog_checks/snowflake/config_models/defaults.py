@@ -76,7 +76,7 @@ def instance_only_custom_queries(field, value):
     return False
 
 
-def instance_schema(field, value):
+def instance_schema_(field, value):
     return 'ACCOUNT_USAGE'
 
 
