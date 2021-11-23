@@ -238,7 +238,7 @@ ddev release upload datadog_checks_[base|dev]
     in_toto.exceptions.RuleVerificationError: 'DISALLOW *' matched the following artifacts: ['/shared/integrations-core/datadog_checks_dev/datadog_checks/dev/tooling/commands/ci/setup.py']
     ```
       
-    1. Verify the hash signed in `.in-toto/tag.<KEYID>.link`, [(see example)](https://github.com/DataDog/integrations-core/blob/9836c71f15a0cb93c63c1d2950dcdc28b49479a7/.in-toto/tag.57ce2495.link), matches what's on master for the artifact in question.
+    1. Verify whether the hash signed in `.in-toto/tag.<KEYID>.link`, [(see example)](https://github.com/DataDog/integrations-core/blob/9836c71f15a0cb93c63c1d2950dcdc28b49479a7/.in-toto/tag.57ce2495.link) matches what's on `master` for the artifact in question.
         
         To see the hash for the file, run the following `shasum` command (replace local file path):
         
