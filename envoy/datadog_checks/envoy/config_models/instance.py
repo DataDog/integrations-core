@@ -60,6 +60,7 @@ class InstanceConfig(BaseModel):
     log_requests: Optional[bool]
     min_collection_interval: Optional[float]
     ntlm_domain: Optional[str]
+    openmetrics_endpoint: Optional[str]
     parse_unknown_metrics: Optional[bool]
     password: Optional[str]
     persist_connections: Optional[bool]
@@ -68,7 +69,7 @@ class InstanceConfig(BaseModel):
     request_size: Optional[float]
     service: Optional[str]
     skip_proxy: Optional[bool]
-    stats_url: str
+    stats_url: Optional[str]
     tags: Optional[Sequence[str]]
     timeout: Optional[float]
     tls_ca_cert: Optional[str]

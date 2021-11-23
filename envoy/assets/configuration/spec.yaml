@@ -8,8 +8,14 @@ files:
     - template: init_config/default
   - template: instances
     options:
+    - name: openmetrics_endpoint
+      display_priority: 3
+      description: |
+        The Prometheus metrics endpoint.
+      value:
+        example: http://localhost:80/stats/prometheus
+        type: string
     - name: stats_url
-      required: true
       display_priority: 3
       description: |
         The admin endpoint to connect to. It must be accessible:
