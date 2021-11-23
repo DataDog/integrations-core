@@ -202,9 +202,7 @@ class SqlserverActivity(DBMAsyncJob):
                 normalized_rows = self._normalize_queries_and_filter_rows(rows, MAX_PAYLOAD_BYTES)
                 event = self._create_activity_event(normalized_rows, connections)
                 payload = json.dumps(event, default=default_json_event_encoding)
-                self._check.database_monitoring_query_activity(
-                    payload
-                )
+                self._check.database_monitoring_query_activity(payload)
 
         elapsed_ms = (time.time() - start_time) * 1000
         self.check.histogram(

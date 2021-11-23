@@ -14,7 +14,7 @@ sqlserver.buffer.page_writes,gauge,,page,,Indicates the number of physical datab
 sqlserver.stats.batch_requests,gauge,,request,second,The number of batch requests per second.,1,sql_server,batch requests
 sqlserver.stats.sql_compilations,gauge,,operation,second,The number of SQL compilations per second.,0,sql_server,sql compils
 sqlserver.stats.sql_recompilations,gauge,,operation,second,The number of SQL re-compilations per second.,-1,sql_server,sql recompils
-sqlserver.stats.connections,gauge,,connection,,"The number of user connections. If DBM is enabled, this metric is tagged with status, db and user",0,sql_server,conns
+sqlserver.stats.connections,gauge,,connection,,"The number of user connections. If DBM is enabled, this metric is tagged with status, db, and user.",0,sql_server,conns
 sqlserver.stats.lock_waits,gauge,,lock,second,The number of times per second that SQL Server is unable to retain a lock right away for a resource.,-1,sql_server,lock waits
 sqlserver.stats.procs_blocked,gauge,,process,,The number of processes blocked.,-1,sql_server,procs blocked
 sqlserver.stats.auto_param_attempts,gauge,,attempt,,Number of auto-parameterization attempts per second.,-1,sql_server,stats auto param
@@ -69,7 +69,7 @@ sqlserver.queries.reserved_threads,count,,thread,,The total sum of reserved para
 sqlserver.queries.used_threads,count,,thread,,The total sum of used parallel threads used by executions of this query per query (DBM only),0,sql_server,query used threads
 sqlserver.queries.dop,count,,,,The total sum of degree of parallelism used by executions of this query per query (DBM only),0,sql_server,query dop
 sqlserver.queries.spills,count,,,,The total number of pages spilled by execution of this query per query (DBM only),0,sql_server,query spills
-sqlserver.queries.duration.max,gauge,,nanosecond,,"The age of the longest running query per user, db and app. (DBM only)",0,sql_server,queries duration max
-sqlserver.queries.duration.sum,gauge,,nanosecond,,"The sum of the age of all running queries per user, db and app. (DBM only)",0,sql_server,queries duration sum
-sqlserver.transactions.duration.max,gauge,,nanosecond,,"The age of the longest running transaction per user, db and app. (DBM only)",0,sql_server,transactions duration max
-sqlserver.transactions.duration.sum,gauge,,nanosecond,,"The sum of the age of all running transactions per user, db and app. (DBM only)",0,sql_server,sql_server transactions duration sum
+sqlserver.queries.duration.max,gauge,,nanosecond,,"The age of the longest running query per user, db, and app. (DBM only)",0,sql_server,queries duration max
+sqlserver.queries.duration.sum,gauge,,nanosecond,,"The sum of the age of all running queries per user, db, and app. (DBM only)",0,sql_server,queries duration sum
+sqlserver.transactions.duration.max,gauge,,nanosecond,,"The age of the longest running transaction per user, db, and app. (DBM only)",0,sql_server,transactions duration max
+sqlserver.transactions.duration.sum,gauge,,nanosecond,,"The sum of the age of all running transactions per user, db, and app. (DBM only)",0,sql_server,sql_server transactions duration sum

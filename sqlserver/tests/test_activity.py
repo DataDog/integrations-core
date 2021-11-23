@@ -99,7 +99,8 @@ def _run_test_collect_activity(aggregator, instance_docker, dd_run_check, dbm_in
     # so it should come first in the payload
     first_users = [f['user_name'] for f in first['sqlserver_activity']]
     bobs_row = first['sqlserver_activity'][0]
-    assert "bob" and "fred" in first_users
+    assert "bob" in first_users
+    assert "fred" in first_users
     assert bobs_row['user_name'] == "bob"
     assert first['sqlserver_activity'][1]['user_name'] == "fred"
 
