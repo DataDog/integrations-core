@@ -949,7 +949,7 @@ jmx_metrics:
           alias: confluent.$domain.task_error.$attribute
           metric_type: gauge
         total-record-errors:
-          # The number of record processing errors in this task.
+          # The number of record processing errors in this task. 
           alias: confluent.$domain.task_error.$attribute
           metric_type: gauge
         total-record-failures:
