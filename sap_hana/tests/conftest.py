@@ -71,6 +71,7 @@ def dd_environment():
 def instance():
     return deepcopy(CONFIG)
 
+
 @pytest.fixture
 def instance_custom_queries():
     instance = deepcopy(CONFIG)

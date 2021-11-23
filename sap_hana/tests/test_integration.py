@@ -45,7 +45,7 @@ def test_custom_queries(aggregator, instance_custom_queries):
     'custom_only',
     [
         pytest.param(True, id='Test collect only custom metrics'),
-        pytest.param(False, id='Test collect custom and default metrics')
+        pytest.param(False, id='Test collect custom and default metrics'),
     ],
 )
 def test_only_custom_queries(aggregator, instance_custom_queries, custom_only):
@@ -59,7 +59,7 @@ def test_only_custom_queries(aggregator, instance_custom_queries, custom_only):
         else:
             aggregator.assert_metric(metric, at_least=1)
 
-    for db in ('SYSTEMDB', 'HXE'):
+    for _db in ('SYSTEMDB', 'HXE'):
         aggregator.assert_metric('sap_hana.data_volume.total', count=2)
 
     aggregator.assert_all_metrics_covered()
