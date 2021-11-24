@@ -77,16 +77,21 @@ class Nginx(AgentCheck):
 
     HTTP_CONFIG_REMAPPER = {'ssl_validation': {'name': 'tls_verify'}, 'user': {'name': 'username'}}
 
-    def check(self, instance):
-        if 'nginx_status_url' not in instance:
+    def __init__(self, name, init_config, instances):
+        super(Nginx, self).__init__(name, init_config, instances)
+        self.custom_tags = self.instance.get('tags', [])
+        self.url = self.instance.get('nginx_status_url')
+        self.use_plus_api = self.instance.get("use_plus_api", False)
+        self.use_plus_api_stream = self.instance.get("use_plus_api_stream", True)
+        self.plus_api_version = str(self.instance.get("plus_api_version", 2))
+        self.use_vts = self.instance.get('use_vts', False)
+
+        if 'nginx_status_url' not in self.instance:
             raise ConfigurationError('NginX instance missing "nginx_status_url" value.')
 
-        tags = instance.get('tags', [])
-
-        url, use_plus_api, use_plus_api_stream, plus_api_version = self._get_instance_params(instance)
-
-        if not use_plus_api:
-            response, content_type, version = self._get_data(instance, url)
+    def check(self, _):
+        if not self.use_plus_api:
+            response, content_type, version = self._get_data()
             # for unpaid versions
             self._set_version_metadata(version)
 
@@ -94,25 +99,23 @@ class Nginx(AgentCheck):
             self.log.debug("Nginx status `content_type`: %s", content_type)
 
             if content_type.startswith('application/json'):
-                metrics = self.parse_json(response, tags)
+                metrics = self.parse_json(response, self.custom_tags)
             else:
-                metrics = self.parse_text(response, tags)
+                metrics = self.parse_text(response, self.custom_tags)
         else:
             metrics = []
-            self._perform_service_check(instance, '{}/{}'.format(url, plus_api_version))
+            self._perform_service_check('{}/{}'.format(self.url, self.plus_api_version))
 
             # These are all the endpoints we have to call to get the same data as we did with the old API
             # since we can't get everything in one place anymore.
 
-            if use_plus_api_stream:
-                plus_api_chain_list = chain(
-                    iteritems(PLUS_API_ENDPOINTS), self._get_plus_api_stream_endpoints(plus_api_version)
-                )
+            if self.use_plus_api_stream:
+                plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS), self._get_plus_api_stream_endpoints())
             else:
                 plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS))
 
             for endpoint, nest in plus_api_chain_list:
-                response = self._get_plus_api_data(url, plus_api_version, endpoint, nest)
+                response = self._get_plus_api_data(endpoint, nest)
 
                 if endpoint == 'nginx':
                     try:
@@ -124,8 +127,8 @@ class Nginx(AgentCheck):
                     except Exception as e:
                         self.log.debug("Couldn't submit nginx version: %s", e)
 
-                self.log.debug("Nginx Plus API version %s `response`: %s", plus_api_version, response)
-                metrics.extend(self.parse_json(response, tags))
+                self.log.debug("Nginx Plus API version %s `response`: %s", self.plus_api_version, response)
+                metrics.extend(self.parse_json(response, self.custom_tags))
 
         funcs = {'gauge': self.gauge, 'rate': self.rate, 'count': self.monotonic_count}
         conn = None
@@ -136,7 +139,7 @@ class Nginx(AgentCheck):
                 name, value, tags, metric_type = row
 
                 # Translate metrics received from VTS
-                if instance.get('use_vts', False):
+                if self.use_vts:
                     # Requests per second
                     if name == 'nginx.connections.handled':
                         handled = value
@@ -163,19 +166,8 @@ class Nginx(AgentCheck):
             except Exception as e:
                 self.log.error('Could not submit metric: %s: %s', repr(row), e)
 
-    @classmethod
-    def _get_instance_params(cls, instance):
-        url = instance.get('nginx_status_url')
-
-        use_plus_api = instance.get("use_plus_api", False)
-        use_plus_api_stream = instance.get("use_plus_api_stream", True)
-        plus_api_version = str(instance.get("plus_api_version", 2))
-
-        return url, use_plus_api, use_plus_api_stream, plus_api_version
-
-    def _get_data(self, instance, url):
-        r = self._perform_service_check(instance, url)
-
+    def _get_data(self):
+        r = self._perform_service_check(self.url)
         body = r.content
         resp_headers = r.headers
         return body, resp_headers.get('content-type', 'text/plain'), resp_headers.get('server')
@@ -185,17 +177,14 @@ class Nginx(AgentCheck):
         r.raise_for_status()
         return r
 
-    def _perform_service_check(self, instance, url):
+    def _perform_service_check(self, url):
         # Submit a service check for status page availability.
         parsed_url = urlparse(url)
         nginx_host = parsed_url.hostname
         nginx_port = parsed_url.port or 80
-        custom_tags = instance.get('tags', [])
-        if custom_tags is None:
-            custom_tags = []
 
         service_check_name = 'nginx.can_connect'
-        service_check_tags = ['host:%s' % nginx_host, 'port:%s' % nginx_port] + custom_tags
+        service_check_tags = ['host:%s' % nginx_host, 'port:%s' % nginx_port] + self.custom_tags
         try:
             self.log.debug("Querying URL: %s", url)
             r = self._perform_request(url)
@@ -215,17 +204,17 @@ class Nginx(AgentCheck):
 
         return {keys[0]: self._nest_payload(keys[1:], payload)}
 
-    def _get_plus_api_stream_endpoints(self, plus_api_version):
+    def _get_plus_api_stream_endpoints(self):
         endpoints = iteritems(PLUS_API_STREAM_ENDPOINTS)
-        if int(plus_api_version) >= 3:
+        if int(self.plus_api_version) >= 3:
             endpoints = chain(endpoints, iteritems(PLUS_API_V3_STREAM_ENDPOINTS))
         return endpoints
 
-    def _get_plus_api_data(self, api_url, plus_api_version, endpoint, nest):
+    def _get_plus_api_data(self, endpoint, nest):
         # Get the data from the Plus API and reconstruct a payload similar to what the old API returned
         # so we can treat it the same way
 
-        url = "/".join([api_url, plus_api_version, endpoint])
+        url = "/".join([self.url, self.plus_api_version, endpoint])
         payload = {}
         try:
             self.log.debug("Querying URL: %s", url)
@@ -233,9 +222,7 @@ class Nginx(AgentCheck):
             payload = self._nest_payload(nest, r.json())
         except Exception as e:
             if endpoint in PLUS_API_STREAM_ENDPOINTS or endpoint in PLUS_API_V3_STREAM_ENDPOINTS:
-                self.log.warning(
-                    "Stream may not be initialized. " "Error querying %s metrics at %s: %s", endpoint, url, e
-                )
+                self.log.warning("Stream may not be initialized. Error querying %s metrics at %s: %s", endpoint, url, e)
             else:
                 self.log.exception("Error querying %s metrics at %s: %s", endpoint, url, e)
 
@@ -315,9 +302,8 @@ class Nginx(AgentCheck):
             if 'server' in val and val['server']:
                 server = 'server:%s' % val.pop('server')
                 if tags is None:
-                    tags = [server]
-                else:
-                    tags = tags + [server]
+                    tags = []
+                tags = tags + [server]
             for key, val2 in iteritems(val):
                 if key in TAGGED_KEYS:
                     metric_name = '%s.%s' % (metric_base, TAGGED_KEYS[key])
@@ -338,16 +324,15 @@ class Nginx(AgentCheck):
         elif isinstance(val, (int, float, long)):
             output.append((metric_base, val, tags, 'gauge'))
 
-        elif isinstance(val, (text_type, str)):
-            if val[-1] == "Z":
-                try:
-                    # In the new Plus API, timestamps are now formatted
-                    # strings, some include microseconds, some don't...
-                    timestamp = fromisoformat(val[:19])
-                except ValueError:
-                    pass
-                else:
-                    output.append((metric_base, int((timestamp - EPOCH).total_seconds()), tags, 'gauge'))
+        elif isinstance(val, (text_type, str)) and val[-1] == "Z":
+            try:
+                # In the new Plus API, timestamps are now formatted
+                # strings, some include microseconds, some don't...
+                timestamp = fromisoformat(val[:19])
+            except ValueError:
+                pass
+            else:
+                output.append((metric_base, int((timestamp - EPOCH).total_seconds()), tags, 'gauge'))
 
         return output
 
