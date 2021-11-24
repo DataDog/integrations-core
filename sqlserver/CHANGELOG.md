@@ -1,5 +1,11 @@
 # CHANGELOG - sqlserver
 
+## 6.2.0-beta.1 / 2021-11-24
+
+* [Added] Add active sessions monitoring support for SQLServer. See [#10610](https://github.com/DataDog/integrations-core/pull/10610).
+* [Fixed] fix broken unicode support for sqlserver. See [#10713](https://github.com/DataDog/integrations-core/pull/10713).
+* [Fixed] enable autocommit for pyodbc in sqlserver. See [#10717](https://github.com/DataDog/integrations-core/pull/10717).
+
 ## 6.1.1 / 2021-11-19
 
 * [Fixed] Fix ADO driver bugs on Windows. See [#10637](https://github.com/DataDog/integrations-core/pull/10637).
