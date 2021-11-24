@@ -110,9 +110,7 @@ class Nginx(AgentCheck):
             # since we can't get everything in one place anymore.
 
             if self.use_plus_api_stream:
-                plus_api_chain_list = chain(
-                    iteritems(PLUS_API_ENDPOINTS), self._get_plus_api_stream_endpoints()
-                )
+                plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS), self._get_plus_api_stream_endpoints())
             else:
                 plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS))
 
@@ -224,9 +222,7 @@ class Nginx(AgentCheck):
             payload = self._nest_payload(nest, r.json())
         except Exception as e:
             if endpoint in PLUS_API_STREAM_ENDPOINTS or endpoint in PLUS_API_V3_STREAM_ENDPOINTS:
-                self.log.warning(
-                    "Stream may not be initialized. Error querying %s metrics at %s: %s", endpoint, url, e
-                )
+                self.log.warning("Stream may not be initialized. Error querying %s metrics at %s: %s", endpoint, url, e)
             else:
                 self.log.exception("Error querying %s metrics at %s: %s", endpoint, url, e)
 
