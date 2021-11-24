@@ -93,13 +93,13 @@ class Nginx(AgentCheck):
 
         if self.use_plus_api_stream:
             plus_api_chain_list = chain(
-                iteritems(PLUS_API_ENDPOINTS), self._get_plus_api_stream_endpoints(self.plus_api_version)
+                iteritems(PLUS_API_ENDPOINTS), self._get_plus_api_stream_endpoints()
             )
         else:
             plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS))
 
         for endpoint, nest in plus_api_chain_list:
-            response = self._get_plus_api_data(self.url, self.plus_api_version, endpoint, nest)
+            response = self._get_plus_api_data(endpoint, nest)
 
             if endpoint == 'nginx':
                 try:
@@ -184,17 +184,17 @@ class Nginx(AgentCheck):
 
         return {keys[0]: self._nest_payload(keys[1:], payload)}
 
-    def _get_plus_api_stream_endpoints(self, plus_api_version):
+    def _get_plus_api_stream_endpoints(self):
         endpoints = iteritems(PLUS_API_STREAM_ENDPOINTS)
-        if int(plus_api_version) >= 3:
+        if int(self.plus_api_version) >= 3:
             endpoints = chain(endpoints, iteritems(PLUS_API_V3_STREAM_ENDPOINTS))
         return endpoints
 
-    def _get_plus_api_data(self, api_url, plus_api_version, endpoint, nest):
+    def _get_plus_api_data(self, endpoint, nest):
         # Get the data from the Plus API and reconstruct a payload similar to what the old API returned
         # so we can treat it the same way
 
-        url = "/".join([api_url, plus_api_version, endpoint])
+        url = "/".join([self.url, self.plus_api_version, endpoint])
         payload = {}
         try:
             self.log.debug("Querying URL: %s", url)
@@ -203,7 +203,7 @@ class Nginx(AgentCheck):
         except Exception as e:
             if endpoint in PLUS_API_STREAM_ENDPOINTS or endpoint in PLUS_API_V3_STREAM_ENDPOINTS:
                 self.log.warning(
-                    "Stream may not be initialized. " "Error querying %s metrics at %s: %s", endpoint, url, e
+                    "Stream may not be initialized. Error querying %s metrics at %s: %s", endpoint, url, e
                 )
             else:
                 self.log.exception("Error querying %s metrics at %s: %s", endpoint, url, e)
@@ -284,9 +284,8 @@ class Nginx(AgentCheck):
             if 'server' in val and val['server']:
                 server = 'server:%s' % val.pop('server')
                 if tags is None:
-                    tags = [server]
-                else:
-                    tags = tags + [server]
+                    tags = []
+                tags += [server]
             for key, val2 in iteritems(val):
                 if key in TAGGED_KEYS:
                     metric_name = '%s.%s' % (metric_base, TAGGED_KEYS[key])
@@ -307,16 +306,15 @@ class Nginx(AgentCheck):
         elif isinstance(val, (int, float, long)):
             output.append((metric_base, val, tags, 'gauge'))
 
-        elif isinstance(val, (text_type, str)):
-            if val[-1] == "Z":
-                try:
-                    # In the new Plus API, timestamps are now formatted
-                    # strings, some include microseconds, some don't...
-                    timestamp = fromisoformat(val[:19])
-                except ValueError:
-                    pass
-                else:
-                    output.append((metric_base, int((timestamp - EPOCH).total_seconds()), tags, 'gauge'))
+        elif isinstance(val, (text_type, str)) and val[-1] == "Z":
+            try:
+                # In the new Plus API, timestamps are now formatted
+                # strings, some include microseconds, some don't...
+                timestamp = fromisoformat(val[:19])
+            except ValueError:
+                pass
+            else:
+                output.append((metric_base, int((timestamp - EPOCH).total_seconds()), tags, 'gauge'))
 
         return output
 
