@@ -2,10 +2,8 @@
 
 ## 6.1.2 / 2021-11-24
 
-* [Fixed] fix broken unicode support for sqlserver. See [#10713](https://github.com/DataDog/integrations-core/pull/10713).
-* [Fixed] enable autocommit for pyodbc in sqlserver. See [#10717](https://github.com/DataDog/integrations-core/pull/10717).
-* [Fixed] sql server ADO driver bugs on windows. See [#10637](https://github.com/DataDog/integrations-core/pull/10637).
-* [Fixed] sql server ADO driver bugs on windows. See [#10637](https://github.com/DataDog/integrations-core/pull/10637).
+* [Fixed] Fix broken unicode support. See [#10713](https://github.com/DataDog/integrations-core/pull/10713).
+* [Fixed] Enable autocommit for pyodbc. See [#10717](https://github.com/DataDog/integrations-core/pull/10717).
 
 ## 6.1.1 / 2021-11-19
 
