@@ -1,5 +1,5 @@
 :: Setup SQL Server
-sqlcmd -i %~dp0\_sqlserver_setup.sql
+sqlcmd -f 65001 -i %~dp0\_sqlserver_setup.sql
 
 :: Enable port
 powershell -Command "stop-service MSSQLSERVER"
