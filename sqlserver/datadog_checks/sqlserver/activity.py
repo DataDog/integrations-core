@@ -53,7 +53,7 @@ FROM sys.dm_tran_active_transactions at
         ON c.connection_id = r.connection_id
         CROSS APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) text
     WHERE sess.session_id != @@spid
-    {extra_query_args}
+    ORDER BY at.transaction_begin_time ASC
 """,
 ).strip()
 
@@ -119,22 +119,12 @@ class SqlserverActivity(DBMAsyncJob):
 
     def _get_activity(self, cursor):
         self.log.debug("collecting sql server activity")
-        extra_query_args = self._get_extra_activity_query_args()
-        query = ACTIVITY_QUERY.format(extra_query_args=extra_query_args)
-        self.log.debug("Running query [%s]", query)
-        cursor.execute(query)
+        self.log.debug("Running query [%s]", ACTIVITY_QUERY)
+        cursor.execute(ACTIVITY_QUERY)
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
         return rows
-
-    def _get_extra_activity_query_args(self):
-        extra_query_args = (
-            " AND NOT (sess.status = 'sleeping' AND DATEDIFF(second, at.transaction_begin_time, GETDATE()) < {})"
-        ).format(self.collection_interval)
-        # order results by tx begin time to get longest running transactions first.
-        extra_query_args = extra_query_args + " ORDER BY at.transaction_begin_time ASC"
-        return extra_query_args
 
     def _normalize_queries_and_filter_rows(self, rows, max_bytes_limit):
         normalized_rows = []

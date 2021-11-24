@@ -1,6 +1,5 @@
 import json
 import os
-import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
 
@@ -75,10 +74,8 @@ def _run_test_collect_activity(aggregator, instance_docker, dd_run_check, dbm_in
         cursor.execute("USE {}".format("datadog_test"))
         cursor.execute(query)
 
-    time.sleep(2)  # wait for coll interval
     dd_run_check(check)
     fred_conn.close()  # close the open tx that belongs to fred
-    time.sleep(2)  # wait for coll interval
     dd_run_check(check)  # run check again
     expected_instance_tags = set(dbm_instance.get('tags', []))
 
