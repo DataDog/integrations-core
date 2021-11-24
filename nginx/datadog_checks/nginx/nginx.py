@@ -64,7 +64,6 @@ class Nginx(AgentCheck):
             metrics = self.collect_plus_metrics()
 
         metric_submission_funcs = {'gauge': self.gauge, 'rate': self.rate, 'count': self.monotonic_count}
-
         conn = None
         handled = None
 
@@ -92,9 +91,7 @@ class Nginx(AgentCheck):
         # since we can't get everything in one place anymore.
 
         if self.use_plus_api_stream:
-            plus_api_chain_list = chain(
-                iteritems(PLUS_API_ENDPOINTS), self._get_plus_api_stream_endpoints()
-            )
+            plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS), self._get_plus_api_stream_endpoints())
         else:
             plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS))
 

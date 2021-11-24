@@ -21,8 +21,8 @@ GO
 -- Create test database for integration tests
 -- only bob has read/write access to this database
 USE datadog_test;
-CREATE TABLE datadog_test.dbo.things (id int, name varchar(255));
-INSERT INTO datadog_test.dbo.things VALUES (1, 'foo'), (2, 'bar');
+CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
+INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
 CREATE USER bob FOR LOGIN bob;
 GO
 
