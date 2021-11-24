@@ -211,8 +211,8 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
 
     def obfuscate_sql(query, options=None):
         if query.startswith('select * from pg_stat_activity where application_name'):
-            return normalized_query
-        return query
+            return json.dumps({'query': normalized_query, 'metadata': None})
+        return json.dumps({'query': query, 'metadata': None})
 
     check = integration_check(dbm_instance)
     check._connect()
