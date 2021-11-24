@@ -303,7 +303,7 @@ class Nginx(AgentCheck):
                 server = 'server:%s' % val.pop('server')
                 if tags is None:
                     tags = []
-                tags += [server]
+                tags = tags + [server]
             for key, val2 in iteritems(val):
                 if key in TAGGED_KEYS:
                     metric_name = '%s.%s' % (metric_base, TAGGED_KEYS[key])
