@@ -49,11 +49,11 @@ class Nginx(AgentCheck):
         super(Nginx, self).__init__(name, init_config, instances)
         self.custom_tags = self.instance.get('tags', [])
         self.url = self.instance.get('nginx_status_url')
-
         self.use_plus_api = self.instance.get("use_plus_api", False)
         self.use_plus_api_stream = self.instance.get("use_plus_api_stream", True)
         self.plus_api_version = str(self.instance.get("plus_api_version", 2))
         self.use_vts = self.instance.get('use_vts', False)
+
         if 'nginx_status_url' not in self.instance:
             raise ConfigurationError('NginX instance missing "nginx_status_url" value.')
 
