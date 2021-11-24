@@ -1,12 +1,15 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 import logging
 import os
 import re
-import xml.etree.ElementTree as ET
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
 
 import mock
 import pytest
+from lxml import etree as ET
 
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
@@ -101,15 +104,15 @@ test_statement_metrics_and_plans_parameterized = (
         [
             "datadog_test",
             "dbo",
-            "SELECT * FROM things",
-            r"SELECT \* FROM things",
+            "SELECT * FROM ϑings",
+            r"SELECT \* FROM ϑings",
             ((),),
         ],
         [
             "datadog_test",
             "dbo",
-            "SELECT * FROM things where id = ?",
-            r"\(@P1 \w+\)SELECT \* FROM things where id = @P1",
+            "SELECT * FROM ϑings where id = ?",
+            r"\(@P1 \w+\)SELECT \* FROM ϑings where id = @P1",
             (
                 (1,),
                 (2,),
@@ -119,8 +122,8 @@ test_statement_metrics_and_plans_parameterized = (
         [
             "master",
             None,
-            "SELECT * FROM datadog_test.dbo.things where id = ?",
-            r"\(@P1 \w+\)SELECT \* FROM datadog_test.dbo.things where id = @P1",
+            "SELECT * FROM datadog_test.dbo.ϑings where id = ?",
+            r"\(@P1 \w+\)SELECT \* FROM datadog_test.dbo.ϑings where id = @P1",
             (
                 (1,),
                 (2,),
@@ -130,8 +133,8 @@ test_statement_metrics_and_plans_parameterized = (
         [
             "datadog_test",
             "dbo",
-            "SELECT * FROM things where id = ? and name = ?",
-            r"\(@P1 \w+,@P2 (N)?VARCHAR\(\d+\)\)SELECT \* FROM things where id = @P1 and name = @P2",
+            "SELECT * FROM ϑings where id = ? and name = ?",
+            r"\(@P1 \w+,@P2 (N)?VARCHAR\(\d+\)\)SELECT \* FROM ϑings where id = @P1 and name = @P2",
             (
                 (1, "hello"),
                 (2, "there"),
