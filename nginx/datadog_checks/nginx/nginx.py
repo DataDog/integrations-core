@@ -6,6 +6,7 @@ from datetime import datetime
 from itertools import chain
 
 import simplejson as json
+from datadog_checks.base.utils.time import get_timestamp
 from six import PY3, iteritems, text_type
 from six.moves.urllib.parse import urlparse
 
@@ -332,7 +333,7 @@ class Nginx(AgentCheck):
             except ValueError:
                 pass
             else:
-                output.append((metric_base, int((timestamp - EPOCH).total_seconds()), tags, 'gauge'))
+                output.append((metric_base, int(get_timestamp(timestamp)), tags, 'gauge'))
 
         return output
 
