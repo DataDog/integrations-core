@@ -4,7 +4,6 @@
 
 This check monitors the Kubernetes [NGINX Ingress Controller][1]. To monitor the F5 NGINX Ingress Controller, set up the [Datadog Prometheus integration][10] to monitor desired metrics from the list provided by the [NGINX Prometheus Exporter][11].
 
-https://github.com/nginxinc/nginx-prometheus-exporter#exported-metrics
 
 ## Setup
 
