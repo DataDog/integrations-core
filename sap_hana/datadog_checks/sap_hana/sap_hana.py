@@ -39,20 +39,6 @@ class SapHanaCheck(AgentCheck):
         self._tags = self.instance.get('tags', [])
         self._use_tls = self.instance.get('use_tls', False)
         self._only_custom_queries = is_affirmative(self.instance.get('only_custom_queries', False))
-        self._default_methods = [
-            self.query_master_database,
-            self.query_database_status,
-            self.query_backup_status,
-            self.query_licenses,
-            self.query_connection_overview,
-            self.query_disk_usage,
-            self.query_service_memory,
-            self.query_service_component_memory,
-            self.query_row_store_memory,
-            self.query_service_statistics,
-            self.query_volume_io,
-            self.query_custom,
-        ]
 
         # Add server & port tags
         self._tags.append('server:{}'.format(self._server))
@@ -69,6 +55,9 @@ class SapHanaCheck(AgentCheck):
 
         # Deduplicate
         self._custom_queries = list(iter_unique(custom_queries))
+
+        # Default query methods, gets defined on the first check run
+        self._default_methods = []
 
         # We'll connect on the first check run
         self._conn = None
@@ -88,6 +77,7 @@ class SapHanaCheck(AgentCheck):
         self._master_hostname = None
 
         self.check_initializations.append(self.parse_config)
+        self.check_initializations.append(self.set_default_methods)
 
     def check(self, instance):
 
@@ -128,6 +118,24 @@ class SapHanaCheck(AgentCheck):
                 except OperationalError:
                     self.log.error("Could not close connection.")
                 self._conn = None
+
+    def set_default_methods(self):
+        self._default_methods.extend(
+            [
+                self.query_master_database,
+                self.query_database_status,
+                self.query_backup_status,
+                self.query_licenses,
+                self.query_connection_overview,
+                self.query_disk_usage,
+                self.query_service_memory,
+                self.query_service_component_memory,
+                self.query_row_store_memory,
+                self.query_service_statistics,
+                self.query_volume_io,
+                self.query_custom,
+            ]
+        )
 
     def query_master_database(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20ae63aa7519101496f6b832ec86afbd.html
