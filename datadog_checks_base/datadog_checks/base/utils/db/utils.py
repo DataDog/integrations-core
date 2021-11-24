@@ -166,7 +166,7 @@ class DBRow:
     def __init__(self, row, metadata=None):
         # type: (Dict[str], Dict[str]) -> None
         self.data = row
-        self.metadata = self.Metadata(metadata)
+        self.metadata = metadata if isinstance(metadata, self.Metadata) else self.Metadata(metadata)
 
     class Metadata:
         def __init__(self, metadata):
