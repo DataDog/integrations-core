@@ -16,8 +16,10 @@ GRANT CONNECT ANY DATABASE to bob;
 CREATE DATABASE datadog_test;
 GO
 USE datadog_test;
-CREATE TABLE datadog_test.dbo.things (id int, name varchar(255));
-INSERT INTO datadog_test.dbo.things VALUES (1, 'foo'), (2, 'bar');
+-- This table is pronounced "things" except we've replaced "th" with the greek lower case "theta" to ensure we
+-- correctly support unicode throughout the integration.
+CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
+INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
 CREATE USER bob FOR LOGIN bob;
 GO
 
