@@ -163,15 +163,17 @@ class DBRow:
     DBRow is a wrapper for database rows that additionally holds metadata.
     """
 
-    def __init__(self, row, metadata):
+    def __init__(self, row, metadata=None):
         # type: (Dict[str], Dict[str]) -> None
         self.data = row
-        self.metadata = self.Metadata(metadata) if metadata else {}
+        self.metadata = self.Metadata(metadata)
 
     class Metadata:
         def __init__(self, metadata):
             # type: (Dict[str]) -> None
-            self.comments = metadata['comments']
+            if not metadata:
+                metadata = {}
+            self.comments = metadata.get('comments', None)
 
 
 class DBMAsyncJob(object):
