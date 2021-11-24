@@ -11,9 +11,9 @@ pytestmark = pytest.mark.integration
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_check(aggregator, instance):
+def test_check(aggregator, instance, dd_run_check):
     check = SapHanaCheck('sap_hana', {}, [instance])
-    check.check(instance)
+    dd_run_check(check)
 
     for metric in metrics.STANDARD:
         aggregator.assert_metric_has_tag(metric, 'server:{}'.format(instance['server']))
@@ -23,9 +23,9 @@ def test_check(aggregator, instance):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_custom_queries(aggregator, instance_custom_queries):
+def test_custom_queries(aggregator, instance_custom_queries, dd_run_check):
     check = SapHanaCheck('sap_hana', {}, [instance_custom_queries])
-    check.check(instance_custom_queries)
+    dd_run_check(check)
 
     for db in ('SYSTEMDB', 'HXE'):
         aggregator.assert_metric(
@@ -48,10 +48,10 @@ def test_custom_queries(aggregator, instance_custom_queries):
         pytest.param(False, id='Test collect custom and default metrics'),
     ],
 )
-def test_only_custom_queries(aggregator, instance_custom_queries, custom_only):
+def test_only_custom_queries(aggregator, dd_run_check, instance_custom_queries, custom_only):
     instance_custom_queries['only_custom_queries'] = custom_only
     check = SapHanaCheck('sap_hana', {}, [instance_custom_queries])
-    check.check(instance_custom_queries)
+    dd_run_check(check)
 
     for metric in metrics.STANDARD:
         if custom_only:
