@@ -14,11 +14,11 @@ from .util import _get_metrics_by_version
 pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
 
-def test_fluentd_exception(aggregator):
+def test_fluentd_exception(aggregator, dd_run_check):
     instance = {"monitor_agent_url": BAD_URL, "plugin_ids": ["plg2"], "tags": ["test"]}
     check = Fluentd(CHECK_NAME, {}, [instance])
     with pytest.raises(Exception):
-        check.check(None)
+        dd_run_check(check)
 
     sc_tags = ['fluentd_host:{}'.format(HOST), 'fluentd_port:{}'.format(BAD_PORT), 'test']
     aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=Fluentd.CRITICAL, tags=sc_tags, count=1)
@@ -26,11 +26,11 @@ def test_fluentd_exception(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_fluentd_with_tag_by_type(aggregator):
+def test_fluentd_with_tag_by_type(aggregator, dd_run_check):
     instance = copy.deepcopy(DEFAULT_INSTANCE)
     instance["tag_by"] = "type"
     check = Fluentd(CHECK_NAME, {}, [instance])
-    check.check(None)
+    dd_run_check(check)
 
     for m in _get_metrics_by_version():
         metric_name = '{0}.{1}'.format(CHECK_NAME, m)
@@ -44,12 +44,12 @@ def test_fluentd_with_tag_by_type(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_fluentd_with_tag_by_plugin_id(aggregator):
+def test_fluentd_with_tag_by_plugin_id(aggregator, dd_run_check):
     instance = copy.deepcopy(DEFAULT_INSTANCE)
     instance["tag_by"] = "plugin_id"
 
     check = Fluentd(CHECK_NAME, {}, [instance])
-    check.check(None)
+    dd_run_check(check)
 
     for m in _get_metrics_by_version():
         metric_name = '{0}.{1}'.format(CHECK_NAME, m)
@@ -62,13 +62,13 @@ def test_fluentd_with_tag_by_plugin_id(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_fluentd_with_custom_tags(aggregator):
+def test_fluentd_with_custom_tags(aggregator, dd_run_check):
     instance = copy.deepcopy(DEFAULT_INSTANCE)
     custom_tags = ['test', 'tast:tast']
     instance["tags"] = custom_tags
     check = Fluentd(CHECK_NAME, {}, [instance])
 
-    check.check(None)
+    dd_run_check(check)
 
     for m in _get_metrics_by_version():
         metric_name = '{0}.{1}'.format(CHECK_NAME, m)

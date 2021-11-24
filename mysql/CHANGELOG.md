@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 7.0.1 / 2021-11-19
+
+* [Fixed] Set correct default values and handle redundant values for additional_variable and additional_status. See [#10652](https://github.com/DataDog/integrations-core/pull/10652).
+
 ## 7.0.0 / 2021-11-13
 
 * [Added] Collect additional statuses and variables. See [#10573](https://github.com/DataDog/integrations-core/pull/10573). Thanks [notemusic110](https://github.com/notemusic110).
