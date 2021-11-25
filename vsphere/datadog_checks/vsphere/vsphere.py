@@ -56,8 +56,13 @@ REFRESH_METRICS_METADATA_INTERVAL = 30 * 60
 # is significantly lower than the size of the queryPerf response, so allow specifying a different value.
 BATCH_COLLECTOR_SIZE = 500
 
-DEFAULT_METRICS_PER_QUERY = 4000
+DEFAULT_METRICS_PER_QUERY = 5000
 DEFAULT_MAX_QUERY_METRICS = 64
+
+# Maximum number of metrics to query for vm disk.The size of the response returned by the query is larger than datastore
+# metrics query so use a lesser value to avoid ssl timeout
+MAX_VMDISK_METRICS_PER_QUERY = 32
+
 # the vcenter maxquerymetrics option
 MAX_QUERY_METRICS_OPTION = "config.vpxd.stats.maxQueryMetrics"
 
@@ -316,32 +321,33 @@ class VSphereCheck(AgentCheck):
 
     def _get_server_instance(self, instance):
         i_key = self._instance_key(instance)
-        error_config = self.error_configs.get(i_key)
-
-        service_check_tags = [
-            'vcenter_server:{0}'.format(instance.get('name')),
-            'vcenter_host:{0}'.format(instance.get('host')),
-        ]
-
-        # Check for ssl configs and generate an appropriate ssl context object
-        ssl_verify = instance.get('ssl_verify', True)
-        ssl_capath = instance.get('ssl_capath', None)
-        if not ssl_verify:
-            context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-            context.verify_mode = ssl.CERT_NONE
-        elif ssl_capath:
-            context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-            context.verify_mode = ssl.CERT_REQUIRED
-            context.load_verify_locations(capath=ssl_capath)
-
-        # If both configs are used, log a message explaining the default
-        if not ssl_verify and ssl_capath:
-            self.log.debug("Your configuration is incorrectly attempting to "
-                           "specify both a CA path, and to disable SSL "
-                           "verification. You cannot do both. Proceeding with "
-                           "disabling ssl verification.")
 
         if i_key not in self.server_instances:
+            error_config = self.error_configs.get(i_key)
+
+            service_check_tags = [
+                'vcenter_server:{0}'.format(instance.get('name')),
+                'vcenter_host:{0}'.format(instance.get('host')),
+            ]
+
+            # Check for ssl configs and generate an appropriate ssl context object
+            ssl_verify = instance.get('ssl_verify', True)
+            ssl_capath = instance.get('ssl_capath', None)
+            if not ssl_verify:
+                context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+                context.verify_mode = ssl.CERT_NONE
+            elif ssl_capath:
+                context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+                context.verify_mode = ssl.CERT_REQUIRED
+                context.load_verify_locations(capath=ssl_capath)
+
+            # If both configs are used, log a message explaining the default
+            if not ssl_verify and ssl_capath:
+                self.log.debug("Your configuration is incorrectly attempting to "
+                            "specify both a CA path, and to disable SSL "
+                            "verification. You cannot do both. Proceeding with "
+                            "disabling ssl verification.")
+
             try:
                 # Object returned by SmartConnect is a ServerInstance
                 #   https://www.vmware.com/support/developer/vc-sdk/visdk2xpubs/ReferenceGuide/vim.ServiceInstance.html
@@ -417,6 +423,10 @@ class VSphereCheck(AgentCheck):
                 raise Exception(error_msg)
 
         return self.server_instances[i_key]
+
+    def _refresh_server_instance(self,instance):
+        self._remove_server_instance(instance)
+        self._get_server_instance(instance)
 
     def get_external_host_tags(self):
         """
@@ -1461,7 +1471,7 @@ class VSphereCheck(AgentCheck):
                 #create batch of queries for vm disk metrics
                 if resource_type == vim.VirtualMachine and vm_disk_metric_ids:
                     #use max batch size of historical resources since these vm metrics use historical sampling interval
-                    max_batch_size = self.get_batch_size(vim.Datastore)
+                    max_batch_size = MAX_VMDISK_METRICS_PER_QUERY
                     for batch in self.make_batch(mors, vm_disk_metric_ids, max_batch_size):
                         vmdisk_query_specs = []
                         for mor, metrics in batch.items():
@@ -1664,7 +1674,7 @@ class VSphereCheck(AgentCheck):
 
             if pending_task_list:
                 self.log.info("Waiting for unfinished jobs to complete")
-                for pending_job in pending_task_list:
+                for pending_job in list(pending_task_list):
                     if not pending_job.wait(MAX_JOB_TIMEOUT):
                         err_msg = u"Collection operation timed out while querying perf metrics"
                         error_code = 'CollectionError'

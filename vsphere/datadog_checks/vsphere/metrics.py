@@ -112,7 +112,7 @@ VM_METRICS = dict(VM_REALTIME_METRICS)
 VM_METRICS.update(VM_STORAGE_METRICS)
 
 ALLOWED_METRICS_FOR_MOR = {
-    vim.VirtualMachine: VM_METRICS,
+    vim.VirtualMachine: VM_REALTIME_METRICS,
     vim.HostSystem: HOST_METRICS,
     vim.Datastore: DATASTORE_METRICS,
     vim.ClusterComputeResource: CLUSTER_METRICS,
