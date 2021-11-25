@@ -59,7 +59,7 @@ PLUS_API_V5_ENDPOINTS = {
 
 PLUS_API_V6_ENDPOINTS = {
     "http/limit_reqs": ["limit_reqs"],
-    "http/upstreams": ["upstreams"],
+    "http/limit_conns": ["limit_conns"],
 }
 
 TAGGED_KEYS = {
@@ -133,8 +133,8 @@ class Nginx(AgentCheck):
 
             if self.use_plus_api_stream:
                 plus_api_chain_list = chain(
-                    self._get_plus_api_endpoints(self.plus_api_version),
-                    self._get_plus_api_stream_endpoints(self.plus_api_version),
+                    self._get_plus_api_endpoints(),
+                    self._get_plus_api_stream_endpoints(),
                 )
 
             else:
@@ -230,12 +230,12 @@ class Nginx(AgentCheck):
 
         return {keys[0]: self._nest_payload(keys[1:], payload)}
 
-    def _get_plus_api_endpoints(self, plus_api_version):
+    def _get_plus_api_endpoints(self):
         endpoints = iteritems(PLUS_API_ENDPOINTS)
 
-        if int(plus_api_version) >= 5:
+        if int(self.plus_api_version) >= 5:
             endpoints = chain(endpoints, iteritems(PLUS_API_V5_ENDPOINTS))
-        if int(plus_api_version) >= 6:
+        if int(self.plus_api_version) >= 6:
             endpoints = chain(endpoints, iteritems(PLUS_API_V6_ENDPOINTS))
         return endpoints
 

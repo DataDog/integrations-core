@@ -65,8 +65,8 @@ def mocked_perform_request(*args, **kwargs):
     elif re.search('/[67]/http/limit_reqs', url):
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_v7_http_limit_reqs.json'))
         response.json.return_value = json.loads(file_contents)
-    elif re.search('/[6]/http/upstreams', url):
-        file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_v7_http_upstreams.json'))
+    elif re.search('/[67]/http/limit_conns', url):
+        file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_v7_http_limit_conns.json'))
         response.json.return_value = json.loads(file_contents)
     elif re.search('/[67]/stream/limit_conns', url):
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_v7_stream_limit_conns.json'))

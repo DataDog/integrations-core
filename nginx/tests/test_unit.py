@@ -88,6 +88,43 @@ def test_plus_api_v3(check, instance, aggregator):
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone2', count=1)
 
 
+def test_plus_api_v6(check, instance, aggregator):
+    instance = deepcopy(instance)
+    instance['use_plus_api'] = True
+    instance['use_plus_api_stream'] = True
+    instance['plus_api_version'] = 6
+    check = check(instance)
+    check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
+    check.check(instance)
+
+    total = 0
+    for m in aggregator.metric_names:
+        total += len(aggregator.metrics(m))
+    assert total == 1247
+
+    base_tags = ['bar:bar', 'foo:foo']
+
+    # same tests for v3
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone1', count=1)
+    aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone2', count=1)
+
+    # stream limit conns endpoint
+    conn_tags = base_tags + ['limit_conn:addr']
+    aggregator.assert_metric('nginx.stream.limit_conn.rejected', value=0, tags=conn_tags, count=1)
+
+    # http limit conns endpoint
+    aggregator.assert_metric('nginx.limit_conn.rejected_dry_run', value=19864, tags=conn_tags, count=1)
+
+    # http limit reqs endpoint
+    limit_req_tags = base_tags + ['limit_req:one']
+    aggregator.assert_metric('nginx.limit_req.delayed_dry_run', value=322948, tags=limit_req_tags, count=1)
+
+    # http server zones endpoint does not have code information
+    code_tags = base_tags + ['code:200', 'server_zone:hg.nginx.org']
+    aggregator.assert_metric('nginx.server_zone.responses.code', value=803845, tags=code_tags, count=0)
+
+
 def test_plus_api_v7(check, instance, aggregator):
     instance = deepcopy(instance)
     instance['use_plus_api'] = True
@@ -95,16 +132,21 @@ def test_plus_api_v7(check, instance, aggregator):
     instance['plus_api_version'] = 7
     check = check(instance)
     check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
-    check.check()
+    check.check(instance)
 
     total = 0
     for m in aggregator.metric_names:
         total += len(aggregator.metrics(m))
 
-    assert total == 1629
+    assert total == 1320
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     base_tags = ['bar:bar', 'foo:foo']
+
+    # same tests for v3
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone1', count=1)
+    aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone2', count=1)
 
     # http location zones endpoint
     location_zone_tags = base_tags + ['location_zone:swagger']
@@ -118,9 +160,29 @@ def test_plus_api_v7(check, instance, aggregator):
     aggregator.assert_metric('nginx.server_zone.responses.code', value=803845, tags=code_tags, count=1)
 
     # http limit reqs endpoint
+    limit_req_tags = base_tags + ['limit_req:one']
+    aggregator.assert_metric('nginx.limit_req.delayed_dry_run', value=322948, tags=limit_req_tags, count=1)
+
     # http upstreams endpoint
+    # TODO look into how to handle state
+    # TODO why two?
+    upstream_tags = base_tags + ['server:10.0.0.42:8084', 'upstream:demo-backend']
+    aggregator.assert_metric('nginx.upstream.peers.health_checks.unhealthy', value=0, tags=upstream_tags, count=1)
+    aggregator.assert_metric('nginx.upstream.peers.fails', value=4865455.0, tags=upstream_tags, count=1)
+
+    upstream_code_tags = base_tags + ['code:200', 'server:10.0.0.42:8084', 'upstream:demo-backend']
+    aggregator.assert_metric('nginx.upstream.peers.responses.code', value=12960954, tags=upstream_code_tags, count=1)
+
     # resolvers endpoint
+    resolvers_tags = base_tags + ['resolver:resolver-http']
+    aggregator.assert_metric('nginx.resolver.responses.noerror', value=0, tags=resolvers_tags, count=1)
+
     # stream limit conns endpoint
+    conn_tags = base_tags + ['limit_conn:addr']
+    aggregator.assert_metric('nginx.stream.limit_conn.rejected', value=0, tags=conn_tags, count=1)
+
+    # http limit conns endpoint
+    aggregator.assert_metric('nginx.limit_conn.rejected_dry_run', value=19864, tags=conn_tags, count=1)
 
 
 def test_nest_payload(check, instance):
@@ -156,7 +218,7 @@ def test_config(check, instance, test_case, extra_config, expected_http_kwargs):
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.return_value = mock.MagicMock(status_code=200, content=b'{}')
 
-        c.check()
+        c.check(instance)
 
         http_wargs = dict(
             auth=mock.ANY,

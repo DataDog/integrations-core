@@ -57,6 +57,9 @@ nginx.connections.dropped_count,count,,connection,,The total number of dropped c
 nginx.connections.idle,gauge,,connection,,The current number of idle client connections.,0,nginx,conns idle
 nginx.generation,gauge,,refresh,,The total number of configuration reloads,0,nginx,generation
 nginx.generation_count,count,,refresh,,The total number of configuration reloads (shown as count),0,nginx,generation
+nginx.limit_conn.passed,gauge,,connection,,The number of connections that were neither limited nor accounted as limited.,0,nginx,limit conn passed
+nginx.limit_conn.rejected,gauge,,connection,,The number of connections that were rejected.s,0,nginx,stream limit conn rejected
+nginx.limit_conn.rejected_dry_run,gauge,,connection,,The number of connections accounted as rejected in the dry run mode.,0,nginx,limit conn rejected dry
 nginx.limit_req.delayed_dry_run,gauge,,request,,The number of requests accounted as delayed in the dry run mode.,0,nginx,limit req delay dry
 nginx.limit_req.delayed,gauge,,request,,The number of requests that were delayed.,0,nginx,limit req delay
 nginx.limit_req.passed,gauge,,request,,The number of requests that were neither limited nor accounted as limited.,0,nginx,limit req passed
