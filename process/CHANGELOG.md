@@ -1,5 +1,9 @@
 # CHANGELOG - process
 
+## 2.1.1 / 2021-11-13
+
+* [Fixed] Lower warning to debug level. See [#10414](https://github.com/DataDog/integrations-core/pull/10414).
+
 ## 2.1.0 / 2021-09-15 / Agent 7.32.0
 
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).

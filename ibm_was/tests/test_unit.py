@@ -81,12 +81,6 @@ def test_custom_query_unit_casing(aggregator, instance, check):
     aggregator.assert_metric('ibm_was.xdpm.total_memory', metric_type=aggregator.GAUGE)
 
 
-def test_config_validation(check, dd_run_check):
-    with pytest.raises(Exception, match='Please specify a servlet_url in the configuration file'):
-        check = IbmWasCheck('ibm_was', {}, [common.MISSING_REQ_FIELD_INSTANCE])
-        dd_run_check(check, extract_message=True)
-
-
 def test_critical_service_check(instance, check, aggregator):
     instance['servlet_url'] = 'http://localhost:5678/wasPerfTool/servlet/perfservlet'
     tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
@@ -117,8 +111,6 @@ def test_right_server_tag(instance, check, aggregator):
 
 def test_right_values(instance, check, aggregator):
     del instance['custom_queries']
-    instance['collect_thread_pool_stats'] = False
-    instance['collect_servlet_session_stats'] = False
 
     with mock.patch(
         'datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('perfservlet-multiple-nodes.xml')

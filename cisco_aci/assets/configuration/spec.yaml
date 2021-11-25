@@ -15,17 +15,17 @@ files:
         It could sometimes help to add a minimum collection interval.
     options:
     - name: aci_url
-      required: true
       description: URL to query to gather metrics.
+      enabled: true
       value:
         type: string
         example: http://localhost
       display_priority: 10
     - name: pwd
-      required: true
       description: |
         Authentication can use either a user auth or a certificate.
         If using the user auth, enter the `username` and `pwd` configuration.
+      enabled: true
       value:
         type: string
     - name: tenant

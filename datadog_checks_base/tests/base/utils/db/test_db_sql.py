@@ -16,6 +16,7 @@ class TestSQL:
         when changes are made to the hashing algorithm. Changes to the hash can have
         product impact since the backend expects consistency with the APM resource hash.
         """
+        assert '6db2e4f3905c3b5b' == compute_sql_signature('select * from dÒgs')
         assert '11b755a835280e8e' == compute_sql_signature('select * from dogs')
         assert 'd2a193f97126ad67' == compute_sql_signature('update dogs set name = ? where id = ?')
 

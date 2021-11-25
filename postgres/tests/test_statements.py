@@ -750,6 +750,7 @@ def test_statement_run_explain_errors(
 
     check.check(dbm_instance)
     _, explain_err_code, err = check.statement_samples._run_explain_safe("datadog_test", query, query, query)
+    check.check(dbm_instance)
 
     assert explain_err_code == expected_explain_err_code
     assert err == expected_err
@@ -758,15 +759,22 @@ def test_statement_run_explain_errors(
         'db:{}'.format(DB_NAME),
         'port:{}'.format(PORT),
         'agent_hostname:stubbed.hostname',
-        expected_err_tag,
     ]
 
     aggregator.assert_metric(
         'dd.postgres.statement_samples.error',
         count=1,
-        tags=expected_tags,
+        tags=expected_tags + [expected_err_tag],
         hostname='stubbed.hostname',
     )
+
+    if expected_explain_err_code == DBExplainError.database_error:
+        aggregator.assert_metric(
+            'dd.postgres.collect_statement_samples.explain_errors_cache.len',
+            value=1,
+            tags=expected_tags,
+            hostname='stubbed.hostname',
+        )
 
 
 @pytest.mark.parametrize("dbstrict", [True, False])

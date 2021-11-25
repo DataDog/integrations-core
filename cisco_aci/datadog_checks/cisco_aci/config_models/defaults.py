@@ -20,6 +20,10 @@ def shared_timeout(field, value):
     return 10
 
 
+def instance_aci_url(field, value):
+    return 'http://localhost'
+
+
 def instance_aci_urls(field, value):
     return get_default_field_value(field, value)
 
@@ -137,6 +141,10 @@ def instance_persist_connections(field, value):
 
 
 def instance_proxy(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_pwd(field, value):
     return get_default_field_value(field, value)
 
 

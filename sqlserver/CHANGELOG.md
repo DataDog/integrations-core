@@ -1,5 +1,23 @@
 # CHANGELOG - sqlserver
 
+## 6.1.2 / 2021-11-24
+
+* [Fixed] Fix broken unicode support. See [#10713](https://github.com/DataDog/integrations-core/pull/10713).
+* [Fixed] Enable autocommit for pyodbc. See [#10717](https://github.com/DataDog/integrations-core/pull/10717).
+
+## 6.1.1 / 2021-11-19
+
+* [Fixed] Fix ADO driver bugs on Windows. See [#10637](https://github.com/DataDog/integrations-core/pull/10637).
+
+## 6.1.0 / 2021-11-13
+
+* [Added] Update dependencies. See [#10580](https://github.com/DataDog/integrations-core/pull/10580).
+* [Added] Add option to disable autodiscovery database service checks. See [#10491](https://github.com/DataDog/integrations-core/pull/10491).
+* [Fixed] Handle missing DBM metrics columns on older SQL Server versions. See [#10594](https://github.com/DataDog/integrations-core/pull/10594).
+* [Fixed] Fix sqlserver resolved_hostname by handling comma correctly. See [#10592](https://github.com/DataDog/integrations-core/pull/10592).
+* [Fixed] Fix memory clerks metrics for sqlserver 2019. See [#10464](https://github.com/DataDog/integrations-core/pull/10464).
+* [Fixed] Upgrade datadog checks base to 23.1.5. See [#10468](https://github.com/DataDog/integrations-core/pull/10468).
+
 ## 6.0.0 / 2021-10-13
 
 * [Fixed] Account for possible nonetype. See [#10257](https://github.com/DataDog/integrations-core/pull/10257).

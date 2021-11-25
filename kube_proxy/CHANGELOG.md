@@ -1,5 +1,11 @@
 # CHANGELOG - Kube_proxy
 
+## 3.5.0 / 2021-11-13
+
+* [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
+* [Added] Document new use_process_start_time option. See [#10601](https://github.com/DataDog/integrations-core/pull/10601).
+* [Added] Add kube_proxy config spec. See [#10510](https://github.com/DataDog/integrations-core/pull/10510).
+
 ## 3.4.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).

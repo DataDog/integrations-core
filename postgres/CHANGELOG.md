@@ -1,5 +1,14 @@
 # CHANGELOG - postgres
 
+## 11.1.0 / 2021-11-13
+
+* [Added] Add internal debug metric for explain error cache length. See [#10616](https://github.com/DataDog/integrations-core/pull/10616).
+* [Added] Add index bloat metric . See [#10431](https://github.com/DataDog/integrations-core/pull/10431).
+* [Added] Add ssl configuration options to postgres integration. See [#10429](https://github.com/DataDog/integrations-core/pull/10429).
+* [Added] Add postgres vacuumed and autoanalyzed metrics. See [#10350](https://github.com/DataDog/integrations-core/pull/10350). Thanks [jeroenj](https://github.com/jeroenj).
+* [Added] Add option to disable bloat metrics. See [#10406](https://github.com/DataDog/integrations-core/pull/10406).
+* [Fixed] Use optimized pg_stat_statements function to fetch the count of rows. See [#10507](https://github.com/DataDog/integrations-core/pull/10507).
+
 ## 11.0.0 / 2021-10-26 / Agent 7.32.0
 
 * [Fixed] Fix bug in PG activity collection interval logic. See [#10487](https://github.com/DataDog/integrations-core/pull/10487).

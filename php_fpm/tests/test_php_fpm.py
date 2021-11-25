@@ -3,24 +3,28 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
 
+from datadog_checks.php_fpm.php_fpm import PHPFPMCheck
+
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
 
 
-def test_bad_ping_reply(check, instance, aggregator, ping_url_tag):
+def test_bad_ping_reply(instance, aggregator, ping_url_tag, dd_run_check):
     instance['status_url'] = None
     instance['ping_reply'] = 'foo'
     instance['tags'] = ['expectedbroken']
     expected_tags = [ping_url_tag, 'expectedbroken']
+    check = PHPFPMCheck('php_fpm', {}, instances=[instance])
 
-    check.check(instance)
+    dd_run_check(check)
 
     aggregator.assert_service_check('php_fpm.can_ping', status=check.CRITICAL, tags=expected_tags)
     aggregator.all_metrics_asserted()
 
 
-def test_status(check, instance, aggregator, ping_url_tag):
+def test_status(instance, aggregator, ping_url_tag, dd_run_check):
     instance['tags'] = ['fpm_cluster:forums']
-    check.check(instance)
+    check = PHPFPMCheck('php_fpm', {}, instances=[instance])
+    dd_run_check(check)
 
     metrics = [
         'php_fpm.listen_queue.size',
@@ -40,9 +44,10 @@ def test_status(check, instance, aggregator, ping_url_tag):
     aggregator.assert_service_check('php_fpm.can_ping', status=check.OK, tags=expected_tags)
 
 
-def test_status_fastcgi(check, instance_fastcgi, aggregator, ping_url_tag_fastcgi):
+def test_status_fastcgi(instance_fastcgi, aggregator, ping_url_tag_fastcgi, dd_run_check):
     instance_fastcgi['tags'] = ['fpm_cluster:forums']
-    check.check(instance_fastcgi)
+    check = PHPFPMCheck('php_fpm', {}, instances=[instance_fastcgi])
+    dd_run_check(check)
 
     metrics = [
         'php_fpm.listen_queue.size',

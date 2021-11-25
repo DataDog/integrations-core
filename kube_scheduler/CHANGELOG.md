@@ -1,5 +1,10 @@
 # CHANGELOG - Kube_scheduler
 
+## 2.2.0 / 2021-11-13
+
+* [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
+* [Added] Document new use_process_start_time option. See [#10601](https://github.com/DataDog/integrations-core/pull/10601).
+
 ## 2.1.1 / 2021-10-08 / Agent 7.32.0
 
 * [Fixed] fix kube scheduler config. See [#10382](https://github.com/DataDog/integrations-core/pull/10382).

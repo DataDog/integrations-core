@@ -14,8 +14,8 @@ from .common import CHECK_NAME, FIXTURES_PATH, TAGS
 from .utils import mocked_perform_request
 
 
-def test_flatten_json(check):
-    check = check({})
+def test_flatten_json(check, instance):
+    check = check(instance)
     with open(os.path.join(FIXTURES_PATH, 'nginx_plus_in.json')) as f:
         parsed = check.parse_json(f.read())
         parsed.sort()
@@ -27,8 +27,8 @@ def test_flatten_json(check):
     assert parsed == expected
 
 
-def test_flatten_json_timestamp(check):
-    check = check({})
+def test_flatten_json_timestamp(check, instance):
+    check = check(instance)
     assert (
         check.parse_json(
             """
@@ -44,6 +44,7 @@ def test_plus_api_v2(check, instance, aggregator):
     instance['use_plus_api'] = True
     instance['use_plus_api_stream'] = True
     instance['plus_api_version'] = 2
+
     check = check(instance)
     check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
     check.check(instance)
@@ -94,7 +95,7 @@ def test_plus_api_v7(check, instance, aggregator):
     instance['plus_api_version'] = 7
     check = check(instance)
     check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
-    check.check(instance)
+    check.check()
 
     total = 0
     for m in aggregator.metric_names:
@@ -114,16 +115,16 @@ def test_plus_api_v7(check, instance, aggregator):
 
     # http server zones endpoint
     code_tags = base_tags + ['code:200', 'server_zone:hg.nginx.org']
-    aggregator.assert_metric('nginx.server_zone.responses.code', value=803845, tags:code_tags, count=1)
+    aggregator.assert_metric('nginx.server_zone.responses.code', value=803845, tags=code_tags, count=1)
 
     # http limit reqs endpoint
-    # http upstreams endpoint 
+    # http upstreams endpoint
     # resolvers endpoint
     # stream limit conns endpoint
 
 
-def test_nest_payload(check):
-    check = check({})
+def test_nest_payload(check, instance):
+    check = check(instance)
     keys = ["foo", "bar"]
     payload = {"key1": "val1", "key2": "val2"}
 
@@ -155,7 +156,7 @@ def test_config(check, instance, test_case, extra_config, expected_http_kwargs):
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.return_value = mock.MagicMock(status_code=200, content=b'{}')
 
-        c.check(instance)
+        c.check()
 
         http_wargs = dict(
             auth=mock.ANY,

@@ -2,10 +2,10 @@
 #
 init_config:
 
-    ## @param is_jmx - boolean - required
+    ## @param is_jmx - boolean - optional - default: false
     ## Whether or not this file is a configuration for a JMX integration.
     #
-    is_jmx: false
+    # is_jmx: false
 
     ## @param collect_default_metrics - boolean - optional - default: false
     ## Whether or not the check should collect all default metrics.
@@ -85,15 +85,16 @@ init_config:
 #
 instances:
 
-    ## @param host - string - required
+  -
+    ## @param host - string - optional
     ## Hazelcast or Hazelcast Management Center server with which to connect.
     #
-  - host: <HOST>
+    # host: <HOST>
 
-    ## @param port - integer - required
+    ## @param port - integer - optional - default: 1099
     ## Hazelcast or Hazelcast Management Center port with which to connect.
     #
-    port: 1099
+    # port: 1099
 
     ## @param mc_health_check_endpoint - string - optional
     ## Hazelcast Management Center health check endpoint with which

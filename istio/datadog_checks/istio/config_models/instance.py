@@ -112,6 +112,7 @@ class InstanceConfig(BaseModel):
     ignore_metrics: Optional[Sequence[str]]
     ignore_metrics_by_labels: Optional[IgnoreMetricsByLabels]
     ignore_tags: Optional[Sequence[str]]
+    include_labels: Optional[Sequence[str]]
     istio_mesh_endpoint: Optional[str]
     istiod_endpoint: Optional[str]
     kerberos_auth: Optional[str]
@@ -163,6 +164,7 @@ class InstanceConfig(BaseModel):
     use_latest_spec: Optional[bool]
     use_legacy_auth_encoding: Optional[bool]
     use_openmetrics: Optional[bool]
+    use_process_start_time: Optional[bool]
     username: Optional[str]
 
     @root_validator(pre=True)

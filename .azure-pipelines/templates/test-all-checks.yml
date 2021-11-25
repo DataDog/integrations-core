@@ -484,6 +484,9 @@ jobs:
     - checkName: win32_event_log
       displayName: Win32 Event Log
       os: windows
+    - checkName: windows_performance_counters
+      displayName: Windows performance counters
+      os: windows
     - checkName: windows_service
       displayName: Windows Service
       os: windows

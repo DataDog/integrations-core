@@ -538,6 +538,10 @@ coverage:
         target: 75
         flags:
         - windows_service
+      Windows_performance_counters:
+        target: 75
+        flags:
+        - windows_performance_counters
       Yarn:
         target: 75
         flags:
@@ -1225,6 +1229,11 @@ flags:
     paths:
     - win32_event_log/datadog_checks/win32_event_log
     - win32_event_log/tests
+  windows_performance_counters:
+    carryforward: true
+    paths:
+    - windows_performance_counters/datadog_checks/windows_performance_counters
+    - windows_performance_counters/tests
   windows_service:
     carryforward: true
     paths:

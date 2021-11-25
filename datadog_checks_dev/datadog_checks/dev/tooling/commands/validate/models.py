@@ -13,14 +13,22 @@ from ....fs import (
     read_file_lines,
     write_file_lines,
 )
-from ...annotations import annotate_display_queue, annotate_error
 from ...configuration import ConfigSpec
 from ...configuration.consumers import ModelConsumer
 from ...constants import get_root
 from ...manifest_utils import Manifest
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_license_header, get_models_location, get_version_string
-from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success
+from ..console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_display_queue,
+    annotate_error,
+    echo_debug,
+    echo_failure,
+    echo_info,
+    echo_success,
+)
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate configuration data models')
