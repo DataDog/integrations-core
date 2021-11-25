@@ -181,7 +181,7 @@ services:
   connect-replicator:
     image: confluentinc/cp-enterprise-replicator:6.2.0
     # This is a workaround for the invalid topic exception. If you allow auto-topic creation, sometimes
-    # the worker fails with Invalid topic exception, restarting fixes the issue. 
+    # the worker fails with Invalid topic exception, restarting fixes the issue.
     restart: on-failure
     container_name: connect-replicator
     depends_on:
