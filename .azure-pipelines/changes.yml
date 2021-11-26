@@ -15,15 +15,16 @@ variables:
   DD_TRACE_AGENT_PORT: 8127
 
 resources:
-  containers:
-    - container: dd_agent
-      image: gcr.io/datadoghq/agent:latest
-      ports:
-        - 8127:8126
-      env:
-        DD_API_KEY: $(DD_CI_API_KEY)
-        DD_HOSTNAME: "none"
-        DD_INSIDE_CI: "true"
+    containers:
+      - ${{ if eq(variables['System.PullRequest.IsFork'], 'False') }}:
+        - container: dd_agent
+          image: gcr.io/datadoghq/agent:latest
+          ports:
+            - 8127:8126
+          env:
+            DD_API_KEY: $(DD_CI_API_KEY)
+            DD_HOSTNAME: "none"
+            DD_INSIDE_CI: "true"
 
 jobs:
 - template: './templates/test-single-linux.yml'
