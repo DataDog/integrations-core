@@ -16,7 +16,7 @@ variables:
 
 resources:
     containers:
-      - ${{ if eq(variables['System.PullRequest.IsFork'], 'False') }}:
+      - ${{ if eq(variables['System.PullRequest.IsFork'], 'True') }}:
         - container: dd_agent
           image: gcr.io/datadoghq/agent:latest
           ports:
@@ -31,7 +31,8 @@ jobs:
   parameters:
     job_name: Changed
     display: Linux
-    ddtrace_flag: '--ddtrace'
+    ${{ if eq(variables['System.PullRequest.IsFork'], 'True') }}:
+      ddtrace_flag: '--ddtrace'
     validate: true
     validate_codeowners: false
     validate_changed: changed
@@ -46,7 +47,8 @@ jobs:
   parameters:
     job_name: Changed
     check: '--changed datadog_checks_base datadog_checks_dev active_directory aspdotnet disk dns_check dotnetclr exchange_server iis network pdh_check sqlserver tcp_check win32_event_log windows_performance_counters windows_service wmi_check'
-    ddtrace_flag: '--ddtrace'
+    ${{ if eq(variables['System.PullRequest.IsFork'], 'True') }}:
+      ddtrace_flag: '--ddtrace'
     validate_changed: changed
     display: Windows
     pip_cache_config:
