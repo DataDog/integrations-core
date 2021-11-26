@@ -65,7 +65,7 @@ class ProxysqlCheck(AgentCheck):
 
             if self.version_metadata:
             # Add the query to collect the ProxySQL version
-            manager_queries.append(VERSION_METADATA)
+                manager_queries.append(VERSION_METADATA)
 
         additional_metrics = self.instance.get("additional_metrics", [])
         for additional_group in additional_metrics:
