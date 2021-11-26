@@ -54,6 +54,15 @@ files:
         Timeout in seconds for reading data from ProxySQL. Unlimited by default.
       value:
         type: integer
+    - name: version_metadata
+      required: false
+      description: |
+        Retreive the ProxySQL version from the admin variables.
+        Set to `false` if you use a non-admin user.
+      value:
+        type: boolean
+        example: true
+      enabled: true
     - name: additional_metrics
       description: |
         List of additional metrics to collect in addition to the global ones.

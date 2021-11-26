@@ -150,6 +150,7 @@ INSTANCE_ALL_METRICS = {
     'username': PROXY_ADMIN_USER,
     'password': PROXY_ADMIN_PASS,
     'tags': ["application:test"],
+    'version_metadata': True
     'additional_metrics': [
         'command_counters_metrics',
         'connection_pool_metrics',
@@ -166,6 +167,7 @@ INSTANCE_ALL_METRICS_STATS = {
     'password': PROXY_STATS_PASS,
     'database_name': PROXY_MAIN_DATABASE,
     'tags': ["application:test"],
+    'version_metadata': True
     'additional_metrics': [
         'command_counters_metrics',
         'connection_pool_metrics',

@@ -58,8 +58,12 @@ class ProxysqlCheck(AgentCheck):
         self.tags.append("proxysql_server:{}".format(self.host))
         self.tags.append("proxysql_port:{}".format(self.port))
 
+        self.version_metadata = is_affirmative(self.instance.get('version_metadata', False))
+
         manager_queries = [STATS_MYSQL_GLOBAL]
         if self.is_metadata_collection_enabled():
+
+            if self.version_metadata:
             # Add the query to collect the ProxySQL version
             manager_queries.append(VERSION_METADATA)
 

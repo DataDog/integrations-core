@@ -35,6 +35,7 @@ class InstanceConfig(BaseModel):
     tls_validate_hostname: Optional[bool]
     tls_verify: Optional[bool]
     username: str
+    version_metadata: Optional[bool]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

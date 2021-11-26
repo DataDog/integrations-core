@@ -63,6 +63,12 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param version_metadata - boolean - optional - default: true
+    ## Retreive the ProxySQL version from the admin variables.
+    ## Set to `false` if you use a non-admin user.
+    #
+    version_metadata: true
+
     ## @param additional_metrics - list of strings - optional
     ## List of additional metrics to collect in addition to the global ones.
     ## Learn more about these metrics at:
