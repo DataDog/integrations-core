@@ -101,7 +101,7 @@ def test_plus_api_v4(check, instance, aggregator):
     for m in aggregator.metric_names:
         total += len(aggregator.metrics(m))
 
-    # should be same as v4
+    # should be same as v3
     assert total == 1189
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
@@ -222,8 +222,6 @@ def test_plus_api_v7(check, instance, aggregator):
     aggregator.assert_metric('nginx.limit_req.delayed_dry_run', value=322948, tags=limit_req_tags, count=1)
 
     # http upstreams endpoint
-    # TODO look into how to handle state
-    # TODO why two?
     upstream_tags = base_tags + ['server:10.0.0.42:8084', 'upstream:demo-backend']
     aggregator.assert_metric('nginx.upstream.peers.health_checks.unhealthy', value=0, tags=upstream_tags, count=1)
     aggregator.assert_metric('nginx.upstream.peers.fails', value=4865455.0, tags=upstream_tags, count=1)

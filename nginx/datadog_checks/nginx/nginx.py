@@ -64,8 +64,9 @@ PLUS_API_V6_ENDPOINTS = {
 
 TAGGED_KEYS = {
     'caches': 'cache',
+    'codes': 'code',
     'limit_conns': 'limit_conn',
-    'limitConns': 'limit_conns',  # VTS
+    'limitConns': 'limit_conn',  # VTS
     'limit_reqs': 'limit_req',
     'limitReqs': 'limit_req',
     'location_zones': 'location_zone',
@@ -76,8 +77,8 @@ TAGGED_KEYS = {
     'slabs': 'slab',
     'slots': 'slot',
     'upstreams': 'upstream',
+    'upstreamZones': 'upstream', #VTS
     'zones': 'zone',
-    'codes': 'code',
 }
 
 
