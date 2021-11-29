@@ -50,7 +50,7 @@ SELECT channel_name,count_transactions_in_queue,count_transactions_checked,count
 count_transactions_rows_validating,count_transactions_remote_in_applier_queue,count_transactions_remote_applied,
 count_transactions_local_proposed,count_transactions_local_rollback
 FROM performance_schema.replication_group_member_stats
-WHERE channel_name='group_replication_applier' AND member_id = @@server_uuid"""
+WHERE channel_name IN ('group_replication_applier', 'group_replication_recovery') AND member_id = @@server_uuid"""
 
 SQL_GROUP_REPLICATION_PLUGIN_STATUS = """\
 SELECT plugin_status

@@ -84,7 +84,7 @@ mysql.binlog.cache_use,gauge,,transaction,,The number of transactions that used 
 mysql.replication.group.conflicts_detected,gauge,,transaction,,The number of transactions that have not passed the conflict detection check.,0,mysql,mysql performance gr conflict
 mysql.replication.group.transactions,gauge,,transaction,,The number of transactions in the queue pending conflict detection checks.,0,mysql,mysql performance gr transactions
 mysql.replication.group.transactions_applied,gauge,,transaction,,Number of transactions this member has received from the group and applied.,0,mysql,mysql performance gr transactions applied
-mysql.replication.group.transactions_applier_queue,gauge,,transaction,,The number of transactions that this member has received from the replication group which are waiting to be applied.,0,mysql,mysql performance gr transactions queued
+mysql.replication.group.transactions_in_applier_queue,gauge,,transaction,,The number of transactions that this member has received from the replication group which are waiting to be applied.,0,mysql,mysql performance gr transactions queued
 mysql.replication.group.transactions_check,gauge,,transaction,,The number of transactions that have been checked for conflicts.,0,mysql,mysql performance gr transactions checked
 mysql.replication.group.transactions_proposed,gauge,,transaction,,Number of transactions which originated on this member and were sent to the group.,0,mysql,mysql performance gr transactions proposed
 mysql.replication.group.transactions_rollback,gauge,,transaction,,Number of transactions which originated on this member and were rolled back by the group.,0,mysql,mysql performance gr transactions rollback

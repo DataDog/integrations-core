@@ -244,12 +244,12 @@ SYNTHETIC_VARS = ['mysql.performance.qcache.utilization', 'mysql.performance.qca
 STATEMENT_VARS = ['dd.mysql.queries.query_rows_raw', 'dd.mysql.queries.query_rows_limited']
 
 GROUP_REPLICATION_VARS = [
-    'mysql.performance.gr.conflicts_detected',
-    'mysql.performance.gr.transactions',
-    'mysql.performance.gr.transactions_applied',
-    'mysql.performance.gr.transactions_applier_queue',
-    'mysql.performance.gr.transactions_check',
-    'mysql.performance.gr.transactions_proposed',
-    'mysql.performance.gr.transactions_rollback',
-    'mysql.performance.gr.transactions_validating',
+    'mysql.replication.group.conflicts_detected',
+    'mysql.replication.group.transactions',
+    'mysql.replication.group.transactions_applied',
+    'mysql.replication.group.transactions_in_applier_queue',
+    'mysql.replication.group.transactions_check',
+    'mysql.replication.group.transactions_proposed',
+    'mysql.replication.group.transactions_rollback',
+    'mysql.replication.group.transactions_validating',
 ]
