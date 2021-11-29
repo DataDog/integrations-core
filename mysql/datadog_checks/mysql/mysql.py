@@ -419,7 +419,11 @@ class MySql(AgentCheck):
                     self.log.warning('Unable to get group replica status, setting it as CRITICAL')
                 else:
                     status = self.OK if replica_results[1] == 'ONLINE' else self.CRITICAL
-                    additional_tags = ['channel_name:{}'.format(replica_results[0]), 'member_state:{}'.format(replica_results[1]), 'member_role:{}'.format(replica_results[2])]
+                    additional_tags = [
+                        'channel_name:{}'.format(replica_results[0]),
+                        'member_state:{}'.format(replica_results[1]),
+                        'member_role:{}'.format(replica_results[2]),
+                    ]
                     self.gauge('mysql.replication.group.member_status', 1, tags=additional_tags + self._config.tags)
 
                 self.service_check(
@@ -446,7 +450,9 @@ class MySql(AgentCheck):
                     'Transactions_local_rollback': r[8],
                 }
                 # Submit metrics now so it's possible to attach `channel_name` tag
-                self._submit_metrics(GROUP_REPLICATION_VARS, results, self._config.tags + ['channel_name:{}'.format(r[0])])
+                self._submit_metrics(
+                    GROUP_REPLICATION_VARS, results, self._config.tags + ['channel_name:{}'.format(r[0])]
+                )
 
                 return GROUP_REPLICATION_VARS
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
