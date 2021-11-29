@@ -416,7 +416,7 @@ vault.vault.cockroachdb.list.count,count,,,,Number of samples of vault.vault.coc
 vault.vault.cockroachdb.list.quantile,gauge,,millisecond,,Duration of a LIST operation against the CockroachDB storage backend quantile.,0,vault,
 vault.vault.cockroachdb.list.sum,gauge,,millisecond,,Total duration of a LIST operation against the CockroachDB storage backend.,0,vault,
 vault.vault.consul.put.count,count,,,,Number of samples of vault.vault.consul.put.,0,vault,
-vault.vault.consul.put.quantile,gauge,,millisecond,,Duration of a PUT operation against the Consul storage backend quantile.,0,vault
+vault.vault.consul.put.quantile,gauge,,millisecond,,Duration of a PUT operation against the Consul storage backend quantile.,0,vault,
 vault.vault.consul.put.sum,gauge,,millisecond,,Total duration of a PUT operation against the Consul storage backend.,0,vault,
 vault.vault.consul.get.count,count,,,,Number of samples of vault.vault.consul.get.,0,vault,
 vault.vault.consul.get.quantile,gauge,,millisecond,,Duration of a GET operation against the Consul storage backend quantile.,0,vault,
