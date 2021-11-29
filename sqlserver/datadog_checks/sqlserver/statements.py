@@ -189,7 +189,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 obfuscated_statement = datadog_agent.obfuscate_sql(row['text'])
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
-                self.log.debug("Failed to obfuscate query: %s", e)
+                self.log.debug("Failed to obfuscate query '%s': %s", row['query'], e)
                 continue
             row['text'] = obfuscated_statement
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
