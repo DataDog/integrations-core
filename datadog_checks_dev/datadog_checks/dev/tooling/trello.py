@@ -54,7 +54,7 @@ class TrelloClient:
             'team/intg-tools-libs': 'Tools and Libraries',
             'team/agent-security': 'Runtime-Security',
             'team/infra-integrations': 'Infra-Integrations',
-            'team/remote-config': 'Remote-Config'
+            'team/remote-config': 'Remote-Config',
         }
 
         # Maps the team to the github team
@@ -71,7 +71,7 @@ class TrelloClient:
             'team/intg-tools-libs': 'integrations-tools-and-libraries',
             'team/agent-security': 'agent-security',
             'team/infra-integrations': 'infrastructure-integrations',
-            'team/remote-config': 'remote-config'
+            'team/remote-config': 'remote-config',
         }
 
         # Maps the trello label name to trello label ID
