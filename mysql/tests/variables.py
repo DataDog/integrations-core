@@ -244,6 +244,7 @@ SYNTHETIC_VARS = ['mysql.performance.qcache.utilization', 'mysql.performance.qca
 STATEMENT_VARS = ['dd.mysql.queries.query_rows_raw', 'dd.mysql.queries.query_rows_limited']
 
 GROUP_REPLICATION_VARS = [
+    'mysql.replication.group.member_status',
     'mysql.replication.group.conflicts_detected',
     'mysql.replication.group.transactions',
     'mysql.replication.group.transactions_applied',

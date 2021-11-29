@@ -325,8 +325,8 @@ class MySql(AgentCheck):
         if is_affirmative(self._config.options.get('replication', self._config.dbm_enabled)):
             if self.performance_schema_enabled and self._is_group_replication_active(db):
                 self.log.debug('Performance schema enabled, trying group replication.')
-                results['group_repl_status'] = self._collect_group_replica_metrics(db, results)
-                metrics.update(GROUP_REPLICATION_VARS)
+                # results['group_repl_status'] = self._collect_group_replica_metrics(db, results)
+                # metrics.update(GROUP_REPLICATION_VARS)
             else:
                 replication_metrics = self._collect_replication_metrics(db, results, above_560)
                 metrics.update(replication_metrics)
@@ -420,7 +420,8 @@ class MySql(AgentCheck):
                     self.log.warning('Unable to get group replica status, setting it as CRITICAL')
                 else:
                     status = self.OK if replica_results[1] == 'ONLINE' else self.CRITICAL
-                    additional_tags = ['status:{}'.format(replica_results[1]), 'role:{}'.format(replica_results[2])]
+                    additional_tags = ['channel_name:{}'.format(replica_results[0]), 'member_state:{}'.format(replica_results[1]), 'member_role:{}'.format(replica_results[2])]
+                    self.gauge('mysql.replication.group.member_status', 1, tags=additional_tags + self._config.tags)
 
                 self.service_check(
                     self.GROUP_REPLICATION_SERVICE_CHECK_NAME,
@@ -434,18 +435,19 @@ class MySql(AgentCheck):
                 if r is None:
                     self.log.warning('Unable to get group replication metrics')
                     return {}
-                results.update(
-                    {
-                        'Transactions_count': r[1],
-                        'Transactions_check': r[2],
-                        'Conflict_detected': r[3],
-                        'Transactions_row_validating': r[4],
-                        'Transactions_remote_applier_queue': r[5],
-                        'Transactions_remote_applied': r[6],
-                        'Transactions_local_proposed': r[7],
-                        'Transactions_local_rollback': r[8],
-                    }
-                )
+
+                results = {
+                    'Transactions_count': r[1],
+                    'Transactions_check': r[2],
+                    'Conflict_detected': r[3],
+                    'Transactions_row_validating': r[4],
+                    'Transactions_remote_applier_queue': r[5],
+                    'Transactions_remote_applied': r[6],
+                    'Transactions_local_proposed': r[7],
+                    'Transactions_local_rollback': r[8],
+                }
+                # Submit metrics now so it's possible to attach `channel_name` tag
+                self._submit_metrics(GROUP_REPLICATION_VARS, results, self._config.tags + ['channel_name:{}'.format(r[0])])
 
                 return GROUP_REPLICATION_VARS
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
