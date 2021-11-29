@@ -43,11 +43,20 @@ E2E_METADATA_JDBC_CLIENT = {
     # Since we don't include Oracle instantclient to `LD_LIBRARY_PATH` env var,
     # the integration will fallback to JDBC client
     'use_jmx': True,  # Using jmx to have a ready to use java runtime
-    'docker_volumes': ['{}/scripts/install_instant_client.sh:/tmp/install_instant_client.sh'.format(HERE)],
+    'docker_volumes': [
+        '{}/scripts/install_instant_client.sh:/tmp/install_instant_client.sh'.format(HERE),
+        '{}/docker/client/client_wallet:/opt/oracle/instantclient_19_3/client_wallet'.format(HERE),
+        '{}/docker/client/sqlnet.ora:/opt/oracle/instantclient_19_3/sqlnet.ora'.format(HERE),
+        '{}/docker/client/tnsnames.ora:/opt/oracle/instantclient_19_3/tnsnames.ora'.format(HERE),
+        '{}/docker/client/listener.ora:/opt/oracle/instantclient_19_3/listener.ora'.format(HERE),
+    ],
     'start_commands': [
         'bash /tmp/install_instant_client.sh',
         'apt-get install gcc g++ -y',  # `apt-get update` already ran in install_instant_client.sh
     ],
+    'env_vars': {
+        'TNS_ADMIN': '/opt/oracle/instantclient_19_3'
+    },
 }
 
 
