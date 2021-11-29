@@ -45,6 +45,7 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool]
     disable_legacy_cluster_tag: Optional[bool]
     empty_default_hostname: Optional[bool]
+    enable_query_name_tag: Optional[bool]
     executor_level_metrics: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]
     headers: Optional[Mapping[str, Any]]
