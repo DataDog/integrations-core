@@ -74,7 +74,7 @@ nginx.location_zone.responses.3xx,gauge,,request,,The number of responses with 3
 nginx.location_zone.responses.4xx,gauge,,request,,The number of responses with 4xx status codes.,0,nginx,loc zone 4xx
 nginx.location_zone.responses.5xx,gauge,,request,,The number of responses with 5xx status codes.,0,nginx,loc zone 5xx
 nginx.location_zone.responses.code,gauge,,request,,The number of responses per each status code.,0,nginx,loc zone code
-nginx.location_zone.responses.total,gauge,,request,,The total number of responses sent to clients.,0,nginx,loc zone total
+nginx.location_zone.responses.total,count,,request,,The total number of responses sent to clients.,0,nginx,loc zone total
 nginx.location_zone.sent,gauge,,request,,The number of bytes sent to clients.,0,nginx,loc zone sent
 nginx.load_timestamp,gauge,,millisecond,,Time of the last reload of configuration (time since Epoch).,0,nginx,load timestamp
 nginx.pid,gauge,,,,The ID of the worker process that handled status request.,0,nginx,pid
@@ -228,6 +228,7 @@ nginx.stream.zone_sync.status.msgs_in,gauge,,message,,The number of messages rec
 nginx.stream.zone_sync.status.msgs_out,gauge,,message,,The number of messages sent by this node.,0,nginx,Total count of messages sent.
 nginx.stream.zone_sync.status.bytes_in,gauge,,byte,,The number of bytes received by this node.,0,nginx,Total count of bytes received.
 nginx.stream.zone_sync.status.bytes_out,gauge,,byte,,The number of bytes sent by this node.,0,nginx,Total coun tof bytes sent.
-nginx.stream.zone_sync.zone.records_total,gauge,,,,The total number of records stored in the shared memory zone.,0,nginx,Count of records in memory zone.
+nginx.stream.zone_sync.zone.records_total,gauge,,record,,The total number of records stored in the shared memory zone.,0,nginx,Count of records in memory zone.
+nginx.stream.zone_sync.zone.records_total_count,count,,record,,The total number of records stored in the shared memory zone.,0,nginx,Count of records in memory zone.
 nginx.stream.zone_sync.zone.records_pending,gauge,,,,The number of records that need to be sent to the cluster.,0,nginx, Count of records pending.
 nginx.version,gauge,,,,Version of nginx.,0,nginx,version

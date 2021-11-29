@@ -34,6 +34,8 @@ VTS_METRIC_MAP = {
     'nginx.upstream.down': 'nginx.upstream.peers.health_checks.last_passed',
 }
 
+# NGNINX Plus metrics that are sent as both a count and gauge for backwards compatibility
+# The count metrics with have _count appended to their names
 METRICS_SEND_AS_COUNT = [
     'nginx.upstream.peers.responses.1xx',
     'nginx.upstream.peers.responses.2xx',
@@ -98,6 +100,7 @@ METRICS_SEND_AS_COUNT = [
     'nginx.stream.upstream.peers.received',
     'nginx.stream.upstream.peers.sent',
     'nginx.stream.upstream.peers.unavail',
+    'nginx.stream.zone_sync.zone.records_total',
     'nginx.upstream.peers.fails',
     'nginx.upstream.peers.health_checks.checks',
     'nginx.upstream.peers.health_checks.fails',
@@ -105,4 +108,11 @@ METRICS_SEND_AS_COUNT = [
     'nginx.upstream.peers.requests',
     'nginx.upstream.peers.responses.total',
     'nginx.upstream.peers.unavail',
+]
+
+
+# NGNINX Plus metrics that are sent as only a count.
+# These metrics will not have _count appended to their names
+COUNT_METRICS = [
+    'nginx.location_zone.responses.total',
 ]

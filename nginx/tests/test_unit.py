@@ -81,11 +81,12 @@ def test_plus_api_v3(check, instance, aggregator):
     total = 0
     for m in aggregator.metric_names:
         total += len(aggregator.metrics(m))
-    assert total == 1189
+    assert total == 1191
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone1', count=1)
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone2', count=1)
+    aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total_count', 'zone:zone2', count=1)
 
 
 def test_plus_api_v4(check, instance, aggregator):
@@ -102,7 +103,7 @@ def test_plus_api_v4(check, instance, aggregator):
         total += len(aggregator.metrics(m))
 
     # should be same as v3
-    assert total == 1189
+    assert total == 1191
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
@@ -121,7 +122,7 @@ def test_plus_api_v5(check, instance, aggregator):
         total += len(aggregator.metrics(m))
 
     # should be higher than v4 w/ resolvers and http location zones data
-    assert total == 1231
+    assert total == 1233
 
     base_tags = ['bar:bar', 'foo:foo']
 
@@ -136,7 +137,21 @@ def test_plus_api_v5(check, instance, aggregator):
     location_zone_code_tags = location_zone_tags + ['code:404']
 
     aggregator.assert_metric('nginx.location_zone.requests', value=2117, tags=location_zone_tags, count=1)
-    aggregator.assert_metric('nginx.location_zone.responses.code', value=1, tags=location_zone_code_tags, count=0)
+    aggregator.assert_metric('nginx.location_zone.responses.code', value=21, tags=location_zone_code_tags, count=0)
+    aggregator.assert_metric(
+        'nginx.location_zone.responses.total',
+        value=2117,
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=location_zone_tags,
+        count=1,
+    )
+    aggregator.assert_metric(
+        'nginx.location_zone.responses.total',
+        value=2117,
+        metric_type=aggregator.GAUGE,
+        tags=location_zone_tags,
+        count=0,
+    )
 
     # no limit conns endpoint
     conn_tags = base_tags + ['limit_conn:addr']
@@ -157,7 +172,7 @@ def test_plus_api_v6(check, instance, aggregator):
         total += len(aggregator.metrics(m))
 
     # should be higher than v5 w/ http limit conns, http limit reqs, and stream limit conns
-    assert total == 1247
+    assert total == 1249
 
     base_tags = ['bar:bar', 'foo:foo']
 
@@ -196,7 +211,7 @@ def test_plus_api_v7(check, instance, aggregator):
         total += len(aggregator.metrics(m))
 
     # should be higher than v6 with codes data for http upstream, http server zones, and http location zone
-    assert total == 1320
+    assert total == 1322
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     base_tags = ['bar:bar', 'foo:foo']

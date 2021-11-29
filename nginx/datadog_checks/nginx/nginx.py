@@ -12,7 +12,7 @@ from six.moves.urllib.parse import urlparse
 from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
 from datadog_checks.base.utils.time import get_timestamp
 
-from .metrics import METRICS_SEND_AS_COUNT, VTS_METRIC_MAP
+from .metrics import COUNT_METRICS, METRICS_SEND_AS_COUNT, VTS_METRIC_MAP
 
 if PY3:
     long = int
@@ -181,11 +181,16 @@ class Nginx(AgentCheck):
                     if name is None:
                         continue
 
-                if name in METRICS_SEND_AS_COUNT:
+                if name in COUNT_METRICS:
                     func_count = funcs['count']
-                    func_count(name + "_count", value, tags)
-                func = funcs[metric_type]
-                func(name, value, tags)
+                    func_count(name, value, tags)
+                else:
+                    if name in METRICS_SEND_AS_COUNT:
+                        func_count = funcs['count']
+                        func_count(name + "_count", value, tags)
+
+                    func = funcs[metric_type]
+                    func(name, value, tags)
 
             except Exception as e:
                 self.log.error('Could not submit metric: %s: %s', repr(row), e)
