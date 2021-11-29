@@ -77,6 +77,7 @@ class MySql(AgentCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
     SLAVE_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'
     REPLICA_SERVICE_CHECK_NAME = 'mysql.replication.replica_running'
+    GROUP_REPLICATION_SERVICE_CHECK_NAME = 'mysql.replication.group.status'
     DEFAULT_MAX_CUSTOM_QUERIES = 20
 
     def __init__(self, name, init_config, instances):
@@ -423,7 +424,7 @@ class MySql(AgentCheck):
                     additional_tags = ['status:{}'.format(replica_results[1]), 'role:{}'.format(replica_results[2])]
 
                 self.service_check(
-                    'mysql.replication.gr_status',
+                    self.GROUP_REPLICATION_SERVICE_CHECK_NAME,
                     status=status,
                     tags=self._service_check_tags() + additional_tags,
                 )

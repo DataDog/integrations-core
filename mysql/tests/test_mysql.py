@@ -92,7 +92,7 @@ def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
     if MYSQL_REPLICATION == 'group':
         testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
         aggregator.assert_service_check(
-            'mysql.replication.gr_status',
+            'mysql.replication.group.status',
             status=MySql.OK,
             tags=tags.SC_TAGS + ['role:PRIMARY', 'status:ONLINE'],
             count=1,

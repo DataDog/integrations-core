@@ -49,7 +49,7 @@
     {
         "agent_version": "7.34.0",
         "integration": "MySQL",
-        "check": "mysql.replication.gr_status",
+        "check": "mysql.replication.group.status",
         "statuses": [
             "ok",
             "critical"
