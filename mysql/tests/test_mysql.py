@@ -94,7 +94,8 @@ def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
         aggregator.assert_service_check(
             'mysql.replication.group.status',
             status=MySql.OK,
-            tags=tags.SC_TAGS + ['channel_name:group_replication_applier', 'role:PRIMARY', 'status:ONLINE'],
+            tags=tags.SC_TAGS
+            + ['channel_name:group_replication_applier', 'member_role:PRIMARY', 'member_state:ONLINE'],
             count=1,
         )
 
