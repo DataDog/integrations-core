@@ -10,7 +10,6 @@ from .common import TAGS, USING_VTS
 pytestmark = pytest.mark.skipif(not USING_VTS, reason='Not using VTS')
 
 
-@pytest.mark.e2e
 @pytest.mark.usefixtures('dd_environment')
 def test_vts(check, instance_vts, aggregator):
     check = check(instance_vts)

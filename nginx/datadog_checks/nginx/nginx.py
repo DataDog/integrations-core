@@ -67,7 +67,6 @@ TAGGED_KEYS = {
     'codes': 'code',
     'limit_conns': 'limit_conn',
     'limit_reqs': 'limit_req',
-    'limitReqs': 'limit_req',
     'location_zones': 'location_zone',
     'resolvers': 'resolver',
     'server_zones': 'server_zone',
@@ -75,7 +74,7 @@ TAGGED_KEYS = {
     'slabs': 'slab',
     'slots': 'slot',
     'upstreams': 'upstream',
-    'upstreamZones': 'upstream', #VTS
+    'upstreamZones': 'upstream',  # VTS
     'zones': 'zone',
 }
 
