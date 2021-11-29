@@ -48,8 +48,8 @@ def assert_collection(aggregator, tags, runs=1):
     metrics.add('is_leader')
 
     # Summaries
-    summaries = {'go.gc.duration.seconds', 'route.read'}
-    summaries.update(metric for metric in metrics if metric.startswith('vault.'))
+    summaries = {'go.gc.duration.seconds'}
+    summaries.update(metric for metric in metrics if metric.startswith(('vault.', 'route.')))
 
     # Remove everything that either is not a summary or summaries for which we're getting all 3 as NaN
     for metric in (
@@ -62,8 +62,9 @@ def assert_collection(aggregator, tags, runs=1):
         'vault.runtime.malloc.count',
         'vault.runtime.num_goroutines',
         'vault.runtime.sys.bytes',
-        'vault.runtime.total.gc.pause_ns',
         'vault.runtime.total.gc.runs',
+        'vault.runtime.total.gc.pause_ns',
+        'vault.token.count.by_policy',
     ):
         summaries.remove(metric)
 

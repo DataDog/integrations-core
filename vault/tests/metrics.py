@@ -45,7 +45,6 @@ METRICS = {
     'vault.audit.log.response',
     'vault.audit.log.response.failure',
     'vault.barrier.get',
-    'vault.consul.put',
     'vault.core.check.token',
     'vault.core.fetch.acl_and_token',
     'vault.core.handle.request',
@@ -69,6 +68,7 @@ METRICS_OPTIONAL = {
     'vault.cache.miss',
     'vault.cache.write',
     'vault.cache.delete',
+    'vault.consul.put',
     'vault.identity.entity',
     'vault.rollback.attempt.auth.jwt',
     'vault.rollback.attempt.auth.token',
@@ -82,4 +82,5 @@ METRICS_OPTIONAL = {
     'vault.route.rollback.sys',
     'vault.runtime.gc.pause_ns',
     'vault.runtime.total.gc.pause_ns',
+    'vault.token.count.by_policy',
 }
