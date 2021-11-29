@@ -27,7 +27,7 @@ services:
 
   vault-replica:
     container_name: vault-replica
-    image: vault:1.8.5
+    image: vault:${VAULT_VERSION}
     cap_add:
       - IPC_LOCK
     environment:

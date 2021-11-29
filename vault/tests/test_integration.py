@@ -56,6 +56,7 @@ def assert_collection(aggregator, tags, runs=1):
         'vault.audit.log.request.failure',
         'vault.audit.log.response.failure',
         'vault.expire.num_leases',
+        'vault.identity.entity.creation',
         'vault.runtime.alloc.bytes',
         'vault.runtime.free.count',
         'vault.runtime.heap.objects',
@@ -65,6 +66,7 @@ def assert_collection(aggregator, tags, runs=1):
         'vault.runtime.total.gc.runs',
         'vault.runtime.total.gc.pause_ns',
         'vault.token.count.by_policy',
+        'vault.token.creation',
     ):
         summaries.remove(metric)
 
