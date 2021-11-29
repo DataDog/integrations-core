@@ -324,9 +324,8 @@ class MySql(AgentCheck):
 
         if is_affirmative(self._config.options.get('replication', self._config.dbm_enabled)):
             if self.performance_schema_enabled and self._is_group_replication_active(db):
-                self.log.debug('Performance schema enabled, trying group replication.')
-                # results['group_repl_status'] = self._collect_group_replica_metrics(db, results)
-                # metrics.update(GROUP_REPLICATION_VARS)
+                self.log.debug('Collecting group replication metrics.')
+                self._collect_group_replica_metrics(db, results)
             else:
                 replication_metrics = self._collect_replication_metrics(db, results, above_560)
                 metrics.update(replication_metrics)
