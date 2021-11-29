@@ -180,6 +180,8 @@ class SparkCheck(AgentCheck):
         self._disable_legacy_cluster_tag = is_affirmative(self.instance.get('disable_legacy_cluster_tag', False))
         self.metricsservlet_path = self.instance.get('metricsservlet_path', '/metrics/json')
 
+        self._enable_query_name_tag = is_affirmative(self.instance.get('enable_query_name_tag', False))
+
         # Get the cluster name from the instance configuration
         self.cluster_name = self.instance.get('cluster_name')
         if self.cluster_name is None:
@@ -648,8 +650,12 @@ class SparkCheck(AgentCheck):
                     if metric_name not in SPARK_STRUCTURED_STREAMING_METRICS:
                         continue
                     metric_name, submission_type = SPARK_STRUCTURED_STREAMING_METRICS[metric_name]
-                    tags = ['app_name:%s' % str(app_name), 'query_name:%s' % str(query_name)]
+                    tags = ['app_name:%s' % str(app_name)]
                     tags.extend(addl_tags)
+
+                    if self._enable_query_name_tag:
+                        tags.append('query_name:%s' % str(query_name))
+
                     self._set_metric(metric_name, submission_type, value, tags=tags)
             except HTTPError as e:
                 self.log.debug(

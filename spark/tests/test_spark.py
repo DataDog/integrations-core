@@ -552,7 +552,6 @@ SPARK_STREAMING_STATISTICS_METRIC_VALUES = {
     'spark.streaming.statistics.num_total_completed_batches': 28,
 }
 
-SPARK_STRUCTURED_STREAMING_METRIC_TAGS = ['query_name:my_named_query'] + COMMON_TAGS
 
 SPARK_STRUCTURED_STREAMING_METRIC_VALUES = {
     'spark.structured_streaming.input_rate': 12,
@@ -603,7 +602,7 @@ def test_yarn(aggregator):
 
         # Check the structured streaming metrics
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_STRUCTURED_STREAMING_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         tags = ['url:http://localhost:8088'] + CLUSTER_TAGS + CUSTOM_TAGS
         tags.sort()
@@ -685,7 +684,7 @@ def test_mesos(aggregator):
 
         # Check the structured streaming metrics
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_STRUCTURED_STREAMING_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the service tests
 
@@ -763,7 +762,7 @@ def test_driver_unit(aggregator):
 
         # Check the structured streaming metrics
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_STRUCTURED_STREAMING_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the service tests
 
@@ -832,7 +831,7 @@ def test_standalone_unit(aggregator):
 
         # Check the structured streaming metrics
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_STRUCTURED_STREAMING_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
@@ -894,7 +893,7 @@ def test_standalone_unit_with_proxy_warning_page(aggregator):
 
         # Check the structured streaming metrics
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_STRUCTURED_STREAMING_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
@@ -956,7 +955,7 @@ def test_standalone_pre20(aggregator):
 
         # Check the structured streaming metrics
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_STRUCTURED_STREAMING_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
@@ -1008,6 +1007,30 @@ def test_disable_legacy_cluster_tags(aggregator):
             assert sc.tags == ['url:http://localhost:5050', 'spark_cluster:{}'.format(CLUSTER_NAME)]
 
         assert aggregator.metrics_asserted_pct == 100.0
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "instance, requests_get_mock, base_tags",
+    [
+        (DRIVER_CONFIG, driver_requests_get_mock, COMMON_TAGS + CUSTOM_TAGS),
+        (YARN_CONFIG, yarn_requests_get_mock, COMMON_TAGS + CUSTOM_TAGS),
+        (MESOS_CONFIG, mesos_requests_get_mock, COMMON_TAGS + CUSTOM_TAGS),
+        (STANDALONE_CONFIG, standalone_requests_get_mock, COMMON_TAGS),
+        (STANDALONE_CONFIG_PRE_20, standalone_requests_pre20_get_mock, COMMON_TAGS),
+    ],
+    ids=["driver", "yarn", "mesos", "standalone", "standalone_pre_20"],
+)
+def test_enable_query_name_tag_for_structured_streaming(aggregator, instance, requests_get_mock, base_tags):
+    instance['enable_query_name_tag'] = True
+
+    with mock.patch('requests.get', requests_get_mock):
+        c = SparkCheck('spark', {}, [instance])
+        c.check(instance)
+
+        tags = ["query_name:my_named_query"] + base_tags
+        for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=tags)
 
 
 def test_do_not_crash_on_version_collection_failure():
