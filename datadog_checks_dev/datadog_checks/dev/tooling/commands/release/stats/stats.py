@@ -33,7 +33,16 @@ def parse_commit(commit):
     if commit.included_in_tag:
         next_tag = commit.included_in_tag.name
 
-    return {'sha': commit.sha, 'title': title, 'url': url, 'teams': ' & '.join(teams), 'next_tag': next_tag, 'category': category, 'regression': str(regression)}
+    return {
+        'sha': commit.sha,
+        'title': title,
+        'url': url,
+        'teams': ' & '.join(teams),
+        'next_tag': next_tag,
+        'category': category,
+        'regression': str(regression),
+    }
+
 
 def export_changes_as_csv(changes, filename):
     with open(filename, "w") as release_csv:
