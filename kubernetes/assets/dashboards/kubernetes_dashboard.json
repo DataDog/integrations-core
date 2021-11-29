@@ -898,7 +898,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.replicaset.replicas_ready{$scope,$daemonset,$service,$namespace,$deployment,$label,$cluster,$node} by {replicaset}",
+                        "q": "sum:kubernetes_state.replicaset.replicas_ready{$scope,$daemonset,$service,$namespace,$deployment,$label,$cluster,$node} by {kube_replica_set}",
                         "display_type": "area",
                         "style": {
                             "palette": "purple",
@@ -930,7 +930,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.replicaset.replicas_desired{$scope,$daemonset,$service,$namespace,$deployment,$label,$cluster,$node} by {replicaset}-sum:kubernetes_state.replicaset.replicas_ready{$scope,$daemonset,$service,$namespace,$deployment,$label,$cluster,$node} by {replicaset}",
+                        "q": "sum:kubernetes_state.replicaset.replicas_desired{$scope,$daemonset,$service,$namespace,$deployment,$label,$cluster,$node} by {kube_replica_set}-sum:kubernetes_state.replicaset.replicas_ready{$scope,$daemonset,$service,$namespace,$deployment,$label,$cluster,$node} by {kube_replica_set}",
                         "display_type": "area",
                         "style": {
                             "palette": "orange",
@@ -1245,7 +1245,7 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(sum:kubernetes_state.pod.status_phase{$scope,$cluster,$namespace,$deployment,$daemonset,!phase:running,!phase:succeeded,$label,$node,$service} by {kube_cluster_name,kube_namespace,phase}, 100, 'last', 'desc')",
+                        "q": "top(sum:kubernetes_state.pod.status_phase{$scope,$cluster,$namespace,$deployment,$daemonset,!pod_phase:running,!pod_phase:succeeded,$label,$node,$service} by {kube_cluster_name,kube_namespace,pod_phase}, 100, 'last', 'desc')",
                         "conditional_formats": [
                             {
                                 "comparator": ">",

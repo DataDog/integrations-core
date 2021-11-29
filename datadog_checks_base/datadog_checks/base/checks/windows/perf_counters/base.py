@@ -127,7 +127,7 @@ class PerfCountersBaseCheck(AgentCheck):
         self.perf_objects.extend(perf_objects)
 
     def create_connection(self):
-        self._connection = Connection(self.instance, self.hostname)
+        self._connection = Connection(self.instance)
         self.log.debug('Setting `server` to `%s`', self._connection.server)
         self._connection.connect()
 

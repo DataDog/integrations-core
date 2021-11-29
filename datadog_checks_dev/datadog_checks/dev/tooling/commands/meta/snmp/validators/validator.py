@@ -3,9 +3,8 @@ from posixpath import join
 
 import jsonschema
 
-from datadog_checks.dev.tooling.constants import get_root
-
-from .utils import find_profile_in_path, get_all_profiles_for_directories, get_profile
+from .....constants import get_root
+from .utils import find_profile_in_path, get_all_profiles_directory, get_profile
 
 
 class ValidationResult(object):

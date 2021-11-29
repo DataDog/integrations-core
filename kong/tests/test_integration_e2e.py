@@ -21,13 +21,13 @@ DATABASES = ['reachable']
 
 @pytest.fixture
 def check():
-    return Kong(common.CHECK_NAME, {}, [{}])
+    return lambda instance: Kong(common.CHECK_NAME, {}, [instance])
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_check(aggregator, check):
+def test_check(aggregator, check, dd_run_check):
     for stub in common.CONFIG_STUBS:
-        check.check(stub)
+        dd_run_check(check(stub))
 
     _assert_check(aggregator)
 
@@ -61,9 +61,9 @@ def _assert_check(aggregator):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_connection_failure(aggregator, check):
+def test_connection_failure(aggregator, check, dd_run_check):
     with pytest.raises(Exception):
-        check.check(BAD_CONFIG)
+        dd_run_check(check(BAD_CONFIG))
     aggregator.assert_service_check(
         'kong.can_connect', status=Kong.CRITICAL, tags=['kong_host:localhost', 'kong_port:1111'], count=1
     )

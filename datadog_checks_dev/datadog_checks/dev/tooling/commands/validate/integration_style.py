@@ -5,10 +5,9 @@ import re
 
 import click
 
-from ...annotations import annotate_warning
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_check_files
-from ..console import CONTEXT_SETTINGS, echo_info, echo_warning
+from ..console import CONTEXT_SETTINGS, annotate_warning, echo_info, echo_warning
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate check style for python files')

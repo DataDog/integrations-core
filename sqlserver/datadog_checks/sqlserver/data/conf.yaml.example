@@ -218,6 +218,23 @@ instances:
         #
         # collection_interval: 10
 
+    ## Configure collection of active sessions monitoring
+    #
+    query_activity:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of active sessions. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the activity collection interval in seconds. Each collection involves querying several
+        ## different DMV tables such as `dm_exec_requests`, `dm_exec_sessions`, and `dm_exec_sql_text`.
+        ## If a non-default value is chosen, then that exact same value must be used for *every* check instance.
+        ## Running different instances with different collection intervals is not supported.
+        #
+        # collection_interval: 10
+
     ## @param command_timeout - integer - optional - default: 5
     ## Timeout in seconds for the connection and each command run
     #
