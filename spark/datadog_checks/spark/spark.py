@@ -643,17 +643,19 @@ class SparkCheck(AgentCheck):
                 for gauge_name, value in iteritems(response):
                     match = STRUCTURED_STREAMS_METRICS_REGEX.match(gauge_name)
                     if not match:
+                        self.log.debug("No regex match found for gauge: '%s'", str(gauge_name))
                         continue
                     groups = match.groupdict()
                     metric_name = groups['metric_name']
-                    query_name = groups.get("query_name", '')
                     if metric_name not in SPARK_STRUCTURED_STREAMING_METRICS:
+                        self.log.debug("Unknown metric_name encountered: '%s'", str(metric_name))
                         continue
                     metric_name, submission_type = SPARK_STRUCTURED_STREAMING_METRICS[metric_name]
                     tags = ['app_name:%s' % str(app_name)]
                     tags.extend(addl_tags)
 
                     if self._enable_query_name_tag:
+                        query_name = groups['query_name']
                         tags.append('query_name:%s' % str(query_name))
 
                     self._set_metric(metric_name, submission_type, value, tags=tags)
