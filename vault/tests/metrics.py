@@ -39,7 +39,6 @@ METRICS = {
     'process.start_time.seconds',
     'process.virtual_memory.bytes',
     'process.virtual_memory.max.bytes',
-    'route.read',
     'vault.audit.log.request',
     'vault.audit.log.request.failure',
     'vault.audit.log.response',
@@ -63,6 +62,7 @@ METRICS = {
 }
 
 METRICS_OPTIONAL = {
+    'route.read',
     'vault.barrier.put',
     'vault.cache.hit',
     'vault.cache.miss',
