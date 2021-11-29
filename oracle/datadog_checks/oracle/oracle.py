@@ -29,7 +29,8 @@ class Oracle(AgentCheck):
     __NAMESPACE__ = 'oracle'
 
     ORACLE_DRIVER_CLASS = "oracle.jdbc.OracleDriver"
-    JDBC_CONNECTION_STRING = "jdbc:oracle:thin:@{}"
+    JDBC_CONNECTION_STRING = "jdbc:oracle:thin:@//{}/{}"
+    JDBC_CONNECTION_STRING_TCPS = "jdbc:oracle:thin:@{}"
 
     SERVICE_CHECK_NAME = 'can_connect'
     SERVICE_CHECK_CAN_QUERY = "can_query"
@@ -79,7 +80,7 @@ class Oracle(AgentCheck):
             prefix = query.get('metric_prefix')
             if prefix and prefix != self.__NAMESPACE__:
                 if prefix.startswith(self.__NAMESPACE__ + '.'):
-                    prefix = prefix[len(self.__NAMESPACE__) + 1:]
+                    prefix = prefix[len(self.__NAMESPACE__) + 1 :]
                 for column in query.get('columns', []):
                     if column.get('type') != 'tag':
                         column['name'] = '{}.{}'.format(prefix, column['name'])
@@ -165,12 +166,20 @@ class Oracle(AgentCheck):
             self._connection_errors += 1
             raise ConfigurationError('server needs to be in the <HOST>:<PORT> format, "%s"" provided' % self._server)
 
-        dsn = f"""(DESCRIPTION=(ADDRESS=(PROTOCOL={self._protocol})(HOST={host})(PORT={port}))(CONNECT_DATA=(SERVICE_NAME={self._service})))"""
-
-        return dsn
+        if self._protocol == 'TCPS':
+            dsn = '(DESCRIPTION=(ADDRESS=(PROTOCOL={})(HOST={})(PORT={}))(CONNECT_DATA=(SERVICE_NAME={})))'.format(
+                self._protocol, host, port, self._service
+            )
+            return dsn
+        else:
+            return cx_Oracle.makedsn(host, port, service_name=self._service)
 
     def _jdbc_connect(self):
-        connect_string = self.JDBC_CONNECTION_STRING.format(self._get_dsn())
+        if self._protocol == 'TCPS':
+            connect_string = self.JDBC_CONNECTION_STRING_TCPS.format(self._get_dsn())
+        else:
+            connect_string = self.JDBC_CONNECTION_STRING.format(self._server, self._service)
+
         try:
             if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
                 jpype.attachThreadToJVM()

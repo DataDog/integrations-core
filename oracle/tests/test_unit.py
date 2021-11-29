@@ -16,6 +16,7 @@ from datadog_checks.oracle import Oracle, queries
 from .common import CHECK_NAME, mock_bad_executor
 
 
+# TODO: TCP and TCPS
 def test__get_connection_instant_client(check, dd_run_check, aggregator):
     """
     Test the _get_connection method using the instant client
@@ -32,6 +33,7 @@ def test__get_connection_instant_client(check, dd_run_check, aggregator):
         aggregator.assert_service_check("oracle.can_query", check.OK, count=1, tags=expected_tags)
 
 
+# TODO: TCP and TCPS
 def test__get_connection_instant_client_query_fail(check, dd_run_check, aggregator):
     """
     Test the _get_connection method using the oracle client and unsuccessfully query DB
@@ -49,6 +51,7 @@ def test__get_connection_instant_client_query_fail(check, dd_run_check, aggregat
         aggregator.assert_service_check("oracle.can_query", check.CRITICAL, count=1, tags=expected_tags)
 
 
+# TODO: TCPS and TCP
 def test__get_connection_instant_client_server_incorrect_formatting(instance, dd_run_check, aggregator):
     """
     Test the _get_connection method using the instant client when the server is formatted incorrectly
@@ -65,6 +68,7 @@ def test__get_connection_instant_client_server_incorrect_formatting(instance, dd
         aggregator.assert_service_check("oracle.can_query", check.CRITICAL, count=1, tags=expected_tags)
 
 
+# TODO: TCPS and TCP
 def test__get_connection_jdbc(check, dd_run_check, aggregator):
     """
     Test the _get_connection method using the JDBC client
@@ -93,12 +97,13 @@ def test__get_connection_jdbc(check, dd_run_check, aggregator):
         assert check._cached_connection == con
 
     jdb.connect.assert_called_with(
-        'oracle.jdbc.OracleDriver', 'jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=xe)))', ['system', 'oracle'], None
+        'oracle.jdbc.OracleDriver', 'jdbc:oracle:thin:@//localhost:1521/xe', ['system', 'oracle'], None
     )
     aggregator.assert_service_check("oracle.can_connect", check.OK, count=1, tags=expected_tags)
     aggregator.assert_service_check("oracle.can_query", check.OK, count=1, tags=expected_tags)
 
 
+# TODO: TCPS and TCP
 def test__get_connection_jdbc_query_fail(check, dd_run_check, aggregator):
     """
     Test the _get_connection method using the JDBC client and unsuccessfully query DB
@@ -132,6 +137,7 @@ def test__get_connection_jdbc_query_fail(check, dd_run_check, aggregator):
     aggregator.assert_service_check("oracle.can_query", check.CRITICAL, count=1, tags=expected_tags)
 
 
+# TODO: TCPS and TCP
 def test__get_connection_failure(check, dd_run_check, aggregator):
     """
     Test the right service check is sent upon _get_connection failures
