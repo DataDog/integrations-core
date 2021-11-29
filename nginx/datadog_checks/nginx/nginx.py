@@ -66,11 +66,9 @@ TAGGED_KEYS = {
     'caches': 'cache',
     'codes': 'code',
     'limit_conns': 'limit_conn',
-    'limitConns': 'limit_conn',  # VTS
     'limit_reqs': 'limit_req',
     'limitReqs': 'limit_req',
     'location_zones': 'location_zone',
-    'locationZones': 'location_zone',  # VTS
     'resolvers': 'resolver',
     'server_zones': 'server_zone',
     'serverZones': 'server_zone',  # VTS
