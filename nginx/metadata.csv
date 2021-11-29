@@ -57,25 +57,25 @@ nginx.connections.dropped_count,count,,connection,,The total number of dropped c
 nginx.connections.idle,gauge,,connection,,The current number of idle client connections.,0,nginx,conns idle
 nginx.generation,gauge,,refresh,,The total number of configuration reloads,0,nginx,generation
 nginx.generation_count,count,,refresh,,The total number of configuration reloads (shown as count),0,nginx,generation
-nginx.limit_conn.passed,gauge,,connection,,The number of connections that were neither limited nor accounted as limited.,0,nginx,limit conn passed
-nginx.limit_conn.rejected,gauge,,connection,,The number of connections that were rejected.,0,nginx,stream limit conn rejected
-nginx.limit_conn.rejected_dry_run,gauge,,connection,,The number of connections accounted as rejected in the dry run mode.,0,nginx,limit conn rejected dry
-nginx.limit_req.delayed_dry_run,gauge,,request,,The number of requests accounted as delayed in the dry run mode.,0,nginx,limit req delay dry
-nginx.limit_req.delayed,gauge,,request,,The number of requests that were delayed.,0,nginx,limit req delay
-nginx.limit_req.passed,gauge,,request,,The number of requests that were neither limited nor accounted as limited.,0,nginx,limit req passed
-nginx.limit_req.rejected_dry_run,gauge,,request,,The number of requests accounted as rejected in the dry run mode.,0,nginx,limit req reject dry
-nginx.limit_req.rejected,gauge,,request,,The number of requests that were rejected.,0,nginx,limit req reject
-nginx.location_zone.discarded,gauge,,request,,The number of requests completed without sending a response.,0,nginx,loc zone discard
-nginx.location_zone.received,gauge,,request,,The number of bytes received from clients.,0,nginx,loc zone recieve
-nginx.location_zone.requests,gauge,,request,,The number of client requests received from clients.,0,nginx,loc zone request
-nginx.location_zone.responses.1xx,gauge,,request,,The number of responses with 1xx status codes.,0,nginx,loc zone 1xx
-nginx.location_zone.responses.2xx,gauge,,request,,The number of responses with 2xx status codes.,0,nginx,loc zone 2xx
-nginx.location_zone.responses.3xx,gauge,,request,,The number of responses with 3xx status codes.,0,nginx,loc zone 3xx
-nginx.location_zone.responses.4xx,gauge,,request,,The number of responses with 4xx status codes.,0,nginx,loc zone 4xx
-nginx.location_zone.responses.5xx,gauge,,request,,The number of responses with 5xx status codes.,0,nginx,loc zone 5xx
-nginx.location_zone.responses.code,gauge,,request,,The number of responses per each status code.,0,nginx,loc zone code
+nginx.limit_conn.passed,count,,connection,,The total number of connections that were neither limited nor accounted as limited.,0,nginx,limit conn passed
+nginx.limit_conn.rejected,count,,connection,,The total number of connections that were rejected.,0,nginx,stream limit conn rejected
+nginx.limit_conn.rejected_dry_run,count,,connection,,The total number of connections accounted as rejected in the dry run mode.,0,nginx,limit conn rejected dry
+nginx.limit_req.delayed_dry_run,count,,request,,The total number of requests accounted as delayed in the dry run mode.,0,nginx,limit req delay dry
+nginx.limit_req.delayed,count,,request,,The total number of requests that were delayed.,0,nginx,limit req delay
+nginx.limit_req.passed,count,,request,,The total number of requests that were neither limited nor accounted as limited.,0,nginx,limit req passed
+nginx.limit_req.rejected_dry_run,count,,request,,The total number of requests accounted as rejected in the dry run mode.,0,nginx,limit req reject dry
+nginx.limit_req.rejected,count,,request,,The total number of requests that were rejected.,0,nginx,limit req reject
+nginx.location_zone.discarded,count,,request,,The total number of requests completed without sending a response.,0,nginx,loc zone discard
+nginx.location_zone.received,count,,request,,The total number of bytes received from clients.,0,nginx,loc zone recieve
+nginx.location_zone.requests,count,,request,,The total number of client requests received from clients.,0,nginx,loc zone request
+nginx.location_zone.responses.1xx,count,,request,,The total number of responses with 1xx status codes.,0,nginx,loc zone 1xx
+nginx.location_zone.responses.2xx,count,,request,,The total number of responses with 2xx status codes.,0,nginx,loc zone 2xx
+nginx.location_zone.responses.3xx,count,,request,,The total number of responses with 3xx status codes.,0,nginx,loc zone 3xx
+nginx.location_zone.responses.4xx,count,,request,,The total number of responses with 4xx status codes.,0,nginx,loc zone 4xx
+nginx.location_zone.responses.5xx,count,,request,,The total number of responses with 5xx status codes.,0,nginx,loc zone 5xx
+nginx.location_zone.responses.code,count,,request,,The total number of responses per each status code.,0,nginx,loc zone code
 nginx.location_zone.responses.total,count,,request,,The total number of responses sent to clients.,0,nginx,loc zone total
-nginx.location_zone.sent,gauge,,request,,The number of bytes sent to clients.,0,nginx,loc zone sent
+nginx.location_zone.sent,count,,request,,The total number of bytes sent to clients.,0,nginx,loc zone sent
 nginx.load_timestamp,gauge,,millisecond,,Time of the last reload of configuration (time since Epoch).,0,nginx,load timestamp
 nginx.pid,gauge,,,,The ID of the worker process that handled status request.,0,nginx,pid
 nginx.ppid,gauge,,,,The ID of the master process that started the worker process,0,nginx,ppid
@@ -84,17 +84,17 @@ nginx.processes.respawned_count,count,,process,,The total number of abnormally t
 nginx.requests.current,gauge,,request,,The current number of client requests.,0,nginx,req current
 nginx.requests.total,gauge,,request,,The total number of client requests.,0,nginx,req total
 nginx.requests.total_count,count,,request,,The total number of client requests (shown as count).,0,nginx,req total
-nginx.resolver.requests.addr,gauge,,request,,The number of requests to resolve addresses to names.,0,nginx,resolve zone req addr
-nginx.resolver.requests.name,gauge,,request,,The number of requests to resolve names to addresses.,0,nginx,resolve zone req name
-nginx.resolver.requests.srv,gauge,,request,,The number of requests to resolve SRV records.,0,nginx,resolve zone req srv
-nginx.resolver.responses.formerr,gauge,,request,,The number of FORMERR (Format error) responses.,0,nginx,resolve zone req formerr
-nginx.resolver.responses.noerror,gauge,,request,,The number of successful responses.,0,nginx,resolve zone req noerror
-nginx.resolver.responses.notimp,gauge,,request,,The number of NOTIMP (Unimplemented) responses.,0,nginx,resolve zone req notimp
-nginx.resolver.responses.nxdomain,gauge,,request,,The number of NXDOMAIN (Host not found) responses.,0,nginx,resolve zone req nxdomain
-nginx.resolver.responses.refused,gauge,,request,,The number of REFUSED (Operation refused) responses.,0,nginx,resolve zone req refused
-nginx.resolver.responses.servfail,gauge,,request,,The number of SERVFAIL (Server failure) responses.,0,nginx,resolve zone req servfail
-nginx.resolver.responses.timedout,gauge,,request,,The number of timed out requests.,0,nginx,resolve zone req timedout
-nginx.resolver.responses.unknown,gauge,,request,,The number of requests completed with an unknown error.,0,nginx,resolve zone req unknown
+nginx.resolver.requests.addr,count,,request,,The total number of requests to resolve addresses to names.,0,nginx,resolve zone req addr
+nginx.resolver.requests.name,count,,request,,The total number of requests to resolve names to addresses.,0,nginx,resolve zone req name
+nginx.resolver.requests.srv,count,,request,,The total number of requests to resolve SRV records.,0,nginx,resolve zone req srv
+nginx.resolver.responses.formerr,count,,request,,The total number of FORMERR (Format error) responses.,0,nginx,resolve zone req formerr
+nginx.resolver.responses.noerror,count,,request,,The total number of successful responses.,0,nginx,resolve zone req noerror
+nginx.resolver.responses.notimp,count,,request,,The total number of NOTIMP (Unimplemented) responses.,0,nginx,resolve zone req notimp
+nginx.resolver.responses.nxdomain,count,,request,,The total number of NXDOMAIN (Host not found) responses.,0,nginx,resolve zone req nxdomain
+nginx.resolver.responses.refused,count,,request,,The total number of REFUSED (Operation refused) responses.,0,nginx,resolve zone req refused
+nginx.resolver.responses.servfail,count,,request,,The total number of SERVFAIL (Server failure) responses.,0,nginx,resolve zone req servfail
+nginx.resolver.responses.timedout,count,,request,,The total number of timed out requests.,0,nginx,resolve zone req timedout
+nginx.resolver.responses.unknown,count,,request,,The total number of requests completed with an unknown error.,0,nginx,resolve zone req unknown
 nginx.server_zone.discarded,gauge,,request,,The total number of requests completed without sending a response.,0,nginx,server zone discarded
 nginx.server_zone.discarded_count,count,,request,,The total number of requests completed without sending a response (shown as count).,0,nginx,server zone discarded
 nginx.server_zone.processing,gauge,,request,,The number of client requests that are currently being processed.,0,nginx,server zone processing
@@ -102,7 +102,7 @@ nginx.server_zone.received,gauge,,byte,,The total amount of data received from c
 nginx.server_zone.received_count,count,,byte,,The total amount of data received from clients (shown as count).,0,nginx,server zone rcvd
 nginx.server_zone.requests,gauge,,request,,The total number of client requests received from clients.,0,nginx,server zone req
 nginx.server_zone.requests_count,count,,request,,The total number of client requests received from clients (shown as count).,0,nginx,server zone req
-nginx.server_zone.responses.code,gauge,,response,,"The number of responses per each status code, tagged with status code number.",0,nginx,server zone resp code
+nginx.server_zone.responses.code,count,,response,,"The total number of responses per each status code, tagged with status code number.",0,nginx,server zone resp code
 nginx.server_zone.responses.1xx,gauge,,response,,The number of responses with 1xx status code.,0,nginx,server zone resp 1xx
 nginx.server_zone.responses.1xx_count,count,,response,,The number of responses with 1xx status code (shown as count).,0,nginx,server zone resp 1xx
 nginx.server_zone.responses.2xx,gauge,,response,,The number of responses with 2xx status code.,0,nginx,server zone resp 2xx
@@ -132,9 +132,9 @@ nginx.ssl.handshakes_failed_count,count,,,,The total number of failed SSL handsh
 nginx.ssl.session_reuses,gauge,,,,The total number of session reuses during SSL handshake.,0,nginx,ssl session reuses
 nginx.ssl.session_reuses_count,count,,,,The total number of session reuses during SSL handshake (shown as count).,0,nginx,ssl session reuses
 nginx.stream.server_zone.connections,gauge,,connection,,The total number of connections accepted from clients,0,nginx,stream server zone discarded
-nginx.stream.limit_conn.passed,gauge,,connection,,The number of connections that were neither limited nor accounted as limited.,0,nginx,stream limit conn passed
-nginx.stream.limit_conn.rejected,gauge,,connection,,The number of connections that were rejected.,0,nginx,stream limit conn rejected
-nginx.stream.limit_conn.rejected_dry_run,gauge,,connection,,The number of connections accounted as rejected in the dry run mode.,0,nginx,stream limit conn rejected dry
+nginx.stream.limit_conn.passed,count,,connection,,The total number of connections that were neither limited nor accounted as limited.,0,nginx,stream limit conn passed
+nginx.stream.limit_conn.rejected,count,,connection,,The total number of connections that were rejected.,0,nginx,stream limit conn rejected
+nginx.stream.limit_conn.rejected_dry_run,count,,connection,,The total number of connections accounted as rejected in the dry run mode.,0,nginx,stream limit conn rejected dry
 nginx.stream.server_zone.connections_count,count,,connection,,The total number of connections accepted from clients (shown as count),0,nginx,stream server zone discarded
 nginx.stream.server_zone.discarded,gauge,,request,,The total number of requests completed without sending a response.,0,nginx,stream server zone discarded
 nginx.stream.server_zone.discarded_count,count,,request,,The total number of requests completed without sending a response (shown as count).,0,nginx,stream server zone discarded
@@ -214,7 +214,7 @@ nginx.upstream.peers.responses.4xx,gauge,,response,,The number of responses with
 nginx.upstream.peers.responses.4xx_count,count,,response,,The number of responses with 4xx status code (shown as count) from this server.,0,nginx,upstr peers resp 4xx count
 nginx.upstream.peers.responses.5xx,gauge,,response,,The number of responses with 5xx status code from this server.,0,nginx,upstr peers resp 5xx
 nginx.upstream.peers.responses.5xx_count,count,,response,,The number of responses with 5xx status code (shown as count).,0,nginx,upstr peers resp 5xx count
-nginx.upstream.peers.responses.code,gauge,,response,,The number of responses from this server per each status code.,0,nginx,upstr peers resp code
+nginx.upstream.peers.responses.code,count,,response,,The total number of responses from this server per each status code.,0,nginx,upstr peers resp code
 nginx.upstream.peers.responses.total,gauge,,response,,The total number of responses obtained from this server.,0,nginx,upstr peers resp total
 nginx.upstream.peers.responses.total_count,count,,response,,The total number of responses obtained from this server (shown as count).,0,nginx,upstr peers resp total ct
 nginx.upstream.peers.selected,gauge,,millisecond,,The time (since Epoch) when the server was last selected to process a request (1.7.5).,0,nginx,upstr peers sel

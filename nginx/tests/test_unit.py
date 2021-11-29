@@ -136,8 +136,8 @@ def test_plus_api_v5(check, instance, aggregator):
     location_zone_tags = base_tags + ['location_zone:swagger']
     location_zone_code_tags = location_zone_tags + ['code:404']
 
-    aggregator.assert_metric('nginx.location_zone.requests', value=2117, tags=location_zone_tags, count=1)
-    aggregator.assert_metric('nginx.location_zone.responses.code', value=21, tags=location_zone_code_tags, count=0)
+    aggregator.assert_metric('nginx.location_zone.requests', value=2117, metric_type=aggregator.MONOTONIC_COUNT, tags=location_zone_tags, count=1)
+    aggregator.assert_metric('nginx.location_zone.responses.code', value=21, metric_type=aggregator.MONOTONIC_COUNT, tags=location_zone_code_tags, count=0)
     aggregator.assert_metric(
         'nginx.location_zone.responses.total',
         value=2117,
@@ -155,7 +155,7 @@ def test_plus_api_v5(check, instance, aggregator):
 
     # no limit conns endpoint
     conn_tags = base_tags + ['limit_conn:addr']
-    aggregator.assert_metric('nginx.stream.limit_conn.rejected', value=0, tags=conn_tags, count=0)
+    aggregator.assert_metric('nginx.stream.limit_conn.rejected', value=0, metric_type=aggregator.MONOTONIC_COUNT, tags=conn_tags, count=0)
 
 
 def test_plus_api_v6(check, instance, aggregator):
@@ -183,18 +183,18 @@ def test_plus_api_v6(check, instance, aggregator):
 
     # stream limit conns endpoint
     conn_tags = base_tags + ['limit_conn:addr']
-    aggregator.assert_metric('nginx.stream.limit_conn.rejected', value=0, tags=conn_tags, count=1)
+    aggregator.assert_metric('nginx.stream.limit_conn.rejected', value=0, metric_type=aggregator.MONOTONIC_COUNT, tags=conn_tags, count=1)
 
     # http limit conns endpoint
-    aggregator.assert_metric('nginx.limit_conn.rejected_dry_run', value=19864, tags=conn_tags, count=1)
+    aggregator.assert_metric('nginx.limit_conn.rejected_dry_run', value=19864, metric_type=aggregator.MONOTONIC_COUNT, tags=conn_tags, count=1)
 
     # http limit reqs endpoint
     limit_req_tags = base_tags + ['limit_req:one']
-    aggregator.assert_metric('nginx.limit_req.delayed_dry_run', value=322948, tags=limit_req_tags, count=1)
+    aggregator.assert_metric('nginx.limit_req.delayed_dry_run', value=322948, metric_type=aggregator.MONOTONIC_COUNT, tags=limit_req_tags, count=1)
 
     # http server zones endpoint does not have code information
     code_tags = base_tags + ['code:200', 'server_zone:hg.nginx.org']
-    aggregator.assert_metric('nginx.server_zone.responses.code', value=803845, tags=code_tags, count=0)
+    aggregator.assert_metric('nginx.server_zone.responses.code', value=803845, metric_type=aggregator.MONOTONIC_COUNT, tags=code_tags, count=0)
 
 
 def test_plus_api_v7(check, instance, aggregator):
@@ -225,35 +225,35 @@ def test_plus_api_v7(check, instance, aggregator):
     location_zone_tags = base_tags + ['location_zone:swagger']
     location_zone_code_tags = location_zone_tags + ['code:404']
 
-    aggregator.assert_metric('nginx.location_zone.requests', value=1895, tags=location_zone_tags, count=1)
-    aggregator.assert_metric('nginx.location_zone.responses.code', value=1, tags=location_zone_code_tags, count=1)
+    aggregator.assert_metric('nginx.location_zone.requests', value=1895, metric_type=aggregator.MONOTONIC_COUNT, tags=location_zone_tags, count=1)
+    aggregator.assert_metric('nginx.location_zone.responses.code', value=1, metric_type=aggregator.MONOTONIC_COUNT, tags=location_zone_code_tags, count=1)
 
     # http server zones endpoint
     code_tags = base_tags + ['code:200', 'server_zone:hg.nginx.org']
-    aggregator.assert_metric('nginx.server_zone.responses.code', value=803845, tags=code_tags, count=1)
+    aggregator.assert_metric('nginx.server_zone.responses.code', value=803845, metric_type=aggregator.MONOTONIC_COUNT, tags=code_tags, count=1)
 
     # http limit reqs endpoint
     limit_req_tags = base_tags + ['limit_req:one']
-    aggregator.assert_metric('nginx.limit_req.delayed_dry_run', value=322948, tags=limit_req_tags, count=1)
+    aggregator.assert_metric('nginx.limit_req.delayed_dry_run', value=322948, metric_type=aggregator.MONOTONIC_COUNT, tags=limit_req_tags, count=1)
 
     # http upstreams endpoint
     upstream_tags = base_tags + ['server:10.0.0.42:8084', 'upstream:demo-backend']
-    aggregator.assert_metric('nginx.upstream.peers.health_checks.unhealthy', value=0, tags=upstream_tags, count=1)
-    aggregator.assert_metric('nginx.upstream.peers.fails', value=4865455.0, tags=upstream_tags, count=1)
+    aggregator.assert_metric('nginx.upstream.peers.health_checks.unhealthy_count', value=0, metric_type=aggregator.MONOTONIC_COUNT, tags=upstream_tags, count=1)
+    aggregator.assert_metric('nginx.upstream.peers.fails_count', value=4865455.0, metric_type=aggregator.MONOTONIC_COUNT, tags=upstream_tags, count=1)
 
     upstream_code_tags = base_tags + ['code:200', 'server:10.0.0.42:8084', 'upstream:demo-backend']
-    aggregator.assert_metric('nginx.upstream.peers.responses.code', value=12960954, tags=upstream_code_tags, count=1)
+    aggregator.assert_metric('nginx.upstream.peers.responses.code', value=12960954, metric_type=aggregator.MONOTONIC_COUNT, tags=upstream_code_tags, count=1)
 
     # resolvers endpoint
     resolvers_tags = base_tags + ['resolver:resolver-http']
-    aggregator.assert_metric('nginx.resolver.responses.noerror', value=0, tags=resolvers_tags, count=1)
+    aggregator.assert_metric('nginx.resolver.responses.noerror', value=0, metric_type=aggregator.MONOTONIC_COUNT, tags=resolvers_tags, count=1)
 
     # stream limit conns endpoint
     conn_tags = base_tags + ['limit_conn:addr']
-    aggregator.assert_metric('nginx.stream.limit_conn.rejected', value=0, tags=conn_tags, count=1)
+    aggregator.assert_metric('nginx.stream.limit_conn.rejected', value=0, metric_type=aggregator.MONOTONIC_COUNT, tags=conn_tags, count=1)
 
     # http limit conns endpoint
-    aggregator.assert_metric('nginx.limit_conn.rejected_dry_run', value=19864, tags=conn_tags, count=1)
+    aggregator.assert_metric('nginx.limit_conn.rejected_dry_run', value=19864, metric_type=aggregator.MONOTONIC_COUNT, tags=conn_tags, count=1)
 
 
 def test_nest_payload(check, instance):
