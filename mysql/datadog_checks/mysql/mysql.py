@@ -449,7 +449,7 @@ class MySql(AgentCheck):
 
                 return GROUP_REPLICATION_VARS
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("Privileges error accessing the process tables (performance_schema): %s", e)
+            self.warning("Internal error happened during the group replication check: %s", e)
             return {}
 
     def _check_replication_status(self, results):
