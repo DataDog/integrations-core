@@ -562,7 +562,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                     "statement": obfuscated_statement,
                     "metadata": {
                         "comments": metadata.get('comments', None),
-                        "tables_csv": metadata.get('tables_csv', None)
+                        "tables_csv": metadata.get('tables_csv', None),
                     },
                     "query_truncated": self._get_truncation_state(row['sql_text']).value,
                 },
