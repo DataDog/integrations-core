@@ -26,6 +26,7 @@ class ObfuscatorOptions(BaseModel):
     class Config:
         allow_mutation = False
 
+    collect_comments: Optional[bool]
     replace_digits: Optional[bool]
 
 
