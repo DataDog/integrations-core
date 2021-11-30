@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 import json
 import os
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -63,7 +66,7 @@ def test_collect_activity_windows(aggregator, instance_docker, dd_run_check, ins
 
 def _run_test_collect_activity(aggregator, instance_docker, dd_run_check, dbm_instance):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    query = "select * from things"
+    query = "SELECT * FROM ϑings"
     bob_conn = _get_conn_for_user(instance_docker, "bob")
     with bob_conn.cursor() as cursor:
         cursor.execute("USE {}".format("datadog_test"))
