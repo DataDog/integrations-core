@@ -404,6 +404,7 @@ class OpenStackProjectScope(OpenStackScope):
         return cls(auth_token, auth_scope, service_catalog)
 
 
+@traced_class()
 class KeystoneCatalog(object):
     """
     A registry of services, scoped to the project, returned by the identity server
@@ -500,6 +501,7 @@ class KeystoneCatalog(object):
             raise MissingNovaEndpoint()
 
 
+@traced_class()
 class OpenStackCheck(AgentCheck):
     CACHE_TTL = {"aggregates": 300, "physical_hosts": 300, "hypervisors": 300}  # seconds
 
