@@ -5,8 +5,8 @@ import re
 from collections import defaultdict
 
 import requests
-from six.moves.urllib.parse import urljoin
 from six import PY2
+from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
