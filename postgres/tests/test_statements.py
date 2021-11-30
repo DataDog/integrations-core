@@ -500,6 +500,44 @@ def test_statement_samples_collect(
         conn.close()
 
 
+def test_statement_samples_metadata(aggregator, integration_check, dbm_instance, datadog_agent):
+    # very low collection interval for test purposes
+    dbm_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    # don't need metrics for this test
+    dbm_instance['query_metrics'] = {'enabled': False}
+
+    query = '''
+    -- Test comment
+    select * from pg_stat_activity where application_name = ANY(%s);
+    '''
+    query_signature = '381f3aaca6abf3b0'
+    normalized_query = 'select * from pg_stat_activity where application_name = ANY(array [ ? ])'
+
+    metadata = {'comments': ['-- Test comment']}
+
+    def obfuscate_sql(query, options=None):
+        if query.startswith('select * from pg_stat_activity where application_name'):
+            return json.dumps({'query': normalized_query, 'metadata': metadata})
+        return json.dumps({'query': query, 'metadata': metadata})
+
+    check = integration_check(dbm_instance)
+    check._connect()
+    cursor = check.db.cursor()
+
+    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+        cursor.execute(query, (['app1'],))
+        check.check(dbm_instance)
+
+    samples = aggregator.get_event_platform_events("dbm-samples")
+    matching = [s for s in samples if s['db']['query_signature'] == query_signature]
+    assert len(matching) == 1
+
+    sample = matching[0]
+    assert sample['db']['metadata']['comments'] == metadata['comments']
+
+
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
 @pytest.mark.parametrize(
     "user,password,dbname,query,arg,expected_out,expected_keys,expected_conn_out",
