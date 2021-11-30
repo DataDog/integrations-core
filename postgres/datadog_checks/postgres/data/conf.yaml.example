@@ -336,6 +336,14 @@ instances:
         #
         # replace_digits: false
 
+        ## @param collect_comments - boolean - optional - default: true
+        ## Set to `false` to disable the collection of SQL comments. Disabling this option can interfere with
+        ## database monitoring features working correctly.
+        ##
+        ## Note that this option only applies when `dbm` is enabled.
+        #
+        # collect_comments: true
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
