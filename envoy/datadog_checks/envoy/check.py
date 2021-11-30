@@ -338,22 +338,22 @@ METRIC_WITH_LABEL_NAME = {
     r'^envoy_server_(.+\_.+)_watchdog_miss$': {
         'label_name': 'thread_name',
         'metric_type': 'monotonic_count',
-        'new_name': 'server.watchdog_miss',
+        'new_name': 'server.watchdog_miss.count',
     },
     r'^envoy_server_(.+\_.+)_watchdog_mega_miss$': {
         'label_name': 'thread_name',
         'metric_type': 'monotonic_count',
-        'new_name': 'server.watchdog_mega_miss',
+        'new_name': 'server.watchdog_mega_miss.count',
     },
     r'^envoy_(.+\_.+)_watchdog_miss$': {
         'label_name': 'thread_name',
         'metric_type': 'monotonic_count',
-        'new_name': 'watchdog_miss',
+        'new_name': 'watchdog_miss.count',
     },
     r'^envoy_(.+\_.+)_watchdog_mega_miss$': {
         'label_name': 'thread_name',
         'metric_type': 'monotonic_count',
-        'new_name': 'watchdog_mega_miss',
+        'new_name': 'watchdog_mega_miss.count',
     },
     r'^envoy_cluster_circuit_breakers_(\w+)_cx_open$': {
         'label_name': 'priority',
@@ -393,12 +393,12 @@ METRIC_WITH_LABEL_NAME = {
     r'^envoy_listener_admin_(.+\_.+)_downstream_cx$': {
         'label_name': 'handler',
         'metric_type': 'monotonic_count',
-        'new_name': 'listener.admin.downstream_cx_total',
+        'new_name': 'listener.admin.downstream_cx.count',
     },
     r'^envoy_listener_(.+)_downstream_cx$': {
         'label_name': 'handler',
         'metric_type': 'monotonic_count',
-        'new_name': 'listener.downstream_cx_total',
+        'new_name': 'listener.downstream_cx.count',
     },
 }
 
