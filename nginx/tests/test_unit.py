@@ -55,6 +55,8 @@ def test_plus_api_v2(check, instance, aggregator):
         total += len(aggregator.metrics(m))
     assert total == 1180
 
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
 
 def test_plus_api_no_stream(check, instance, aggregator):
     instance = deepcopy(instance)
@@ -68,6 +70,8 @@ def test_plus_api_no_stream(check, instance, aggregator):
     for m in aggregator.metric_names:
         total += len(aggregator.metrics(m))
     assert total == 883
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_plus_api_v3(check, instance, aggregator):
