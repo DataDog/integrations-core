@@ -82,9 +82,13 @@ class MetricTransformer:
     def add_custom_transformer(self, name, transformer, pattern=False):
         if not pattern:
             name = '^{}$'.format(name)
-        self.metric_patterns.append((re.compile(name), {'name': "", 'type': 'gauge', '__transformer__': transformer}))
+        self.metric_patterns.append((re.compile(name), {'__transformer__': transformer}))
 
     def compile_transformer(self, config):
+        custom_transformer = config.pop('__transformer__', None)
+        if custom_transformer:
+            return None, custom_transformer
+
         metric_name = config.pop('name')
         if not isinstance(metric_name, str):
             raise TypeError('field `name` must be a string')
@@ -92,10 +96,6 @@ class MetricTransformer:
         metric_type = config.pop('type')
         if not isinstance(metric_type, str):
             raise TypeError('field `type` must be a string')
-
-        custom_transformer = config.pop('__transformer__', None)
-        if custom_transformer:
-            return metric_type, custom_transformer
 
         factory = TRANSFORMERS.get(metric_type)
         if factory is None:
