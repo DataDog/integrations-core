@@ -165,7 +165,8 @@ def test_statement_metrics(
 
 
 def _obfuscate_sql(query, options=None):
-    return re.sub(r'\s+', ' ', query or '').strip()
+    # return re.sub(r'\s+', ' ', query or '').strip()
+    return json.dumps({'query': re.sub(r'\s+', ' ', query or '').strip(), 'metadata': {}})
 
 
 @pytest.mark.integration
@@ -184,8 +185,8 @@ def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instanc
 
     def obfuscate_sql(query, options=None):
         if 'WHERE `state`' in query:
-            return normalized_query
-        return query
+            return json.dumps({'query': normalized_query, 'metadata': {}})
+        return json.dumps({'query': query, 'metadata': {}})
 
     def run_query(q):
         with mysql_check._connect() as db:
@@ -377,6 +378,42 @@ def test_statement_samples_collect(
     # we avoid closing these in a try/finally block in order to maintain the connections in case we want to
     # debug the test with --pdb
     mysql_check._statement_samples._close_db_conn()
+
+
+def test_statement_samples_metadata(aggregator, dd_run_check, dbm_instance, datadog_agent):
+    test_query = '''
+    -- Test comment
+    select * from information_schema.processlist where state in (\'starting\')
+    '''
+    query_signature = '94caeb4c54f97849'
+    normalized_query = 'SELECT * FROM `information_schema` . `processlist` where state in ( ? )'
+
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    metadata = {'comments': ['-- Test comment']}
+
+    def obfuscate_sql(query, options=None):
+        if 'WHERE `state`' in query:
+            return json.dumps({'query': normalized_query, 'metadata': metadata})
+        return json.dumps({'query': query, 'metadata': metadata})
+
+    def run_query(q):
+        with mysql_check._connect() as db:
+            with closing(db.cursor()) as cursor:
+                cursor.execute(q)
+
+    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+        run_query(test_query)
+        dd_run_check(mysql_check)
+
+    samples = aggregator.get_event_platform_events("dbm-samples")
+    matching = [s for s in samples if s['db']['query_signature'] == query_signature]
+    assert len(matching) == 1
+
+    sample = matching[0]
+    assert sample['db']['metadata']['comments'] == metadata['comments']
 
 
 @pytest.mark.integration

@@ -186,11 +186,8 @@ class MySQLStatementMetrics(DBMAsyncJob):
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
-                obfuscated_statement = (
-                    datadog_agent.obfuscate_sql(row['digest_text'], self._obfuscate_options)
-                    if row['digest_text'] is not None
-                    else None
-                )
+                statement = json.loads(datadog_agent.obfuscate_sql(row['digest_text'], self._obfuscate_options))
+                obfuscated_statement = statement['query'] if row['digest_text'] is not None else None
             except Exception as e:
                 self.log.warning("Failed to obfuscate query '%s': %s", row['digest_text'], e)
                 continue

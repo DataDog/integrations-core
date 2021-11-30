@@ -484,8 +484,8 @@ class MySQLStatementSamples(DBMAsyncJob):
         # - `query_signature` - hash computed from the digest text to match query metrics
 
         try:
-            obfuscated_statement = datadog_agent.obfuscate_sql(row['sql_text'], self._obfuscate_options)
-            obfuscated_digest_text = datadog_agent.obfuscate_sql(row['digest_text'], self._obfuscate_options)
+            statement = json.loads(datadog_agent.obfuscate_sql(row['sql_text'], self._obfuscate_options))
+            statement_digest_text = json.loads(datadog_agent.obfuscate_sql(row['digest_text'], self._obfuscate_options))
         except Exception:
             # do not log the raw sql_text to avoid leaking sensitive data into logs. digest_text is safe as parameters
             # are obfuscated by the database
@@ -497,7 +497,8 @@ class MySQLStatementSamples(DBMAsyncJob):
                 hostname=self._check.resolved_hostname,
             )
             return None
-
+        obfuscated_statement = statement['query']
+        obfuscated_digest_text = statement_digest_text['query']
         apm_resource_hash = compute_sql_signature(obfuscated_statement)
         query_signature = compute_sql_signature(obfuscated_digest_text)
 
@@ -536,6 +537,7 @@ class MySQLStatementSamples(DBMAsyncJob):
 
         query_plan_cache_key = (query_cache_key, plan_signature)
         if self._seen_samples_ratelimiter.acquire(query_plan_cache_key):
+            metadata = statement.get('metadata', {})
             return {
                 "timestamp": row["timer_end_time_s"] * 1000,
                 "host": self._check.resolved_hostname,
@@ -558,6 +560,10 @@ class MySQLStatementSamples(DBMAsyncJob):
                     "query_signature": query_signature,
                     "resource_hash": apm_resource_hash,
                     "statement": obfuscated_statement,
+                    "metadata": {
+                        "comments": metadata.get('comments', None),
+                        "tables_csv": metadata.get('tables_csv', None)
+                    },
                     "query_truncated": self._get_truncation_state(row['sql_text']).value,
                 },
                 'mysql': {k: v for k, v in row.items() if k not in EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS},
