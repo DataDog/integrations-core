@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
 METRIC_MAP = {
@@ -314,6 +315,8 @@ METRIC_MAP = {
     'envoy_listener_downstream_cx_length_ms': 'listener.downstream_cx_length_ms',
     'envoy_listener_manager_lds_update_duration': 'listener_manager.lds.update_duration', # New
     'envoy_server_initialization_time_ms': 'server.initialization_time_ms', # New
+    'envoy_workers_watchdog_miss': 'workers.watchdog_miss',
+    'envoy_workers_watchdog_mega_miss': 'workers.watchdog_mega_miss',
 }
 
 LABEL_MAP = {
@@ -332,6 +335,7 @@ class EnvoyCheck(OpenMetricsBaseCheckV2):
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
+        self.check_initializations.append(self.configure_additional_transformers)
 
 
     def get_default_config(self):
@@ -340,23 +344,53 @@ class EnvoyCheck(OpenMetricsBaseCheckV2):
             'rename_labels': LABEL_MAP,
         }
 
+    def configure_transformer_label_in_name(self, metric_pattern, new_name, label_name, metric_type):
+        method = getattr(self, metric_type)
+
+        def transform(metric, sample_data, runtime_data):
+            for sample, tags, hostname in sample_data:
+                parsed_sample_name = sample.name
+                if sample.name.endswith("_total"):
+                    parsed_sample_name = re.match("(.*)_total$", sample.name).groups()[0]
+
+                compiled_name = re.compile(metric_pattern)
+                label_value = re.match(compiled_name, parsed_sample_name).groups()[0]
+
+                tags.append('{}:{}'.format(label_name, label_value))
+                method(new_name, sample.value, tags=tags, hostname=hostname)
+        return transform
+
+    def configure_additional_transformers(self):
+        METRIC_WITH_LABEL_NAME = {
+            '^envoy_server_(.+\_.+)_watchdog_miss$': {
+                'label_name': 'thread_name',
+                'metric_type': 'gauge',
+                'new_name': 'server.watchdog_miss'
+            },
+            '^envoy_server_(.+\_.+)_watchdog_mega_miss$': {
+                'label_name': 'thread_name',
+                'metric_type': 'gauge',
+                'new_name': 'server.watchdog_mega_miss'
+            },
+            '^envoy_(.+\_.+)_watchdog_miss$': {
+                'label_name': 'thread_name',
+                'metric_type': 'gauge',
+                'new_name': 'watchdog_miss'
+            },
+            '^envoy_(.+\_.+)_watchdog_mega_miss$': {
+                'label_name': 'thread_name',
+                'metric_type': 'gauge',
+                'new_name': 'watchdog_mega_miss'
+            }
+        }
+        for metric, data in METRIC_WITH_LABEL_NAME.items():
+            self.scrapers[self.instance['openmetrics_endpoint']].metric_transformer.add_custom_transformer(metric, self.configure_transformer_label_in_name(metric, **data), pattern=True)
 
 # Transform to thread_name tag
     # watchdog metrics should have label name extracted `thread_name`?
     # 'envoy_main_thread_watchdog_mega_miss': 'watchdog_mega_miss',  # envoy.watchdog_mega_miss vs envoy.server.watchdog_mega_miss
     # 'envoy_main_thread_watchdog_miss': 'watchdog_miss',
-    # 'envoy_server_main_thread_watchdog_mega_miss': 'server.watchdog_mega_miss', # thread_name:main_thread
-    # 'envoy_server_main_thread_watchdog_miss': 'server.watchdog_miss', # thread_name:main_thread
-    # TYPE envoy_server_worker_0_watchdog_mega_miss counter
-    # TYPE envoy_server_worker_0_watchdog_miss counter
-    # TYPE envoy_server_worker_1_watchdog_mega_miss counter
-    # TYPE envoy_server_worker_1_watchdog_miss counter
-    # TYPE envoy_server_worker_2_watchdog_mega_miss counter
-    # TYPE envoy_server_worker_2_watchdog_miss counter
-    # TYPE envoy_server_worker_3_watchdog_mega_miss counter
-    # TYPE envoy_server_worker_3_watchdog_miss counter
-    # TYPE envoy_workers_watchdog_mega_miss counter
-    # TYPE envoy_workers_watchdog_miss counter
+
     # 'envoy_listener_admin_main_thread_downstream_cx_active': 'listener.admin.main_thread.downstream_cx_active', # Admin/main-thread
     # What to do with the worker_<num>
     # TYPE envoy_listener_worker_0_downstream_cx_active gauge
