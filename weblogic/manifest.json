@@ -14,9 +14,15 @@
     "mac_os",
     "windows"
   ],
+  "process_signatures": [
+    "weblogic.Server"
+  ],
   "public_title": "weblogic",
   "categories": [
-    ""
+    "log collection",
+    "web",
+    "oracle"
+
   ],
   "type": "check",
   "is_public": false,

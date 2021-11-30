@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "agent_version": "7.34.0",
+    "integration": "Weblogic",
+    "groups": [
+      "host",
+      "instance"
+    ],
+    "check": "weblogic.can_connect",
+    "statuses": [
+      "ok",
+      "critical"
+    ],
+    "name": "Can Connect",
+    "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Weblogic instance. Returns `OK` otherwise."
+  }
+]

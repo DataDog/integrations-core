@@ -33,6 +33,45 @@ def cleanup_weblogic():
     )
 
 
+@pytest.fixture(scope='session')
+def dd_environment(instance):
+    properties_dir = os.path.join(HERE, 'weblogic', 'properties')
+    compose_file = os.path.join(HERE, 'docker-compose.yml')
+    WaitFor(setup_weblogic())
+    with docker_run(
+        compose_file=compose_file,
+        env_vars={'PROPERTIES_DIR': properties_dir},
+        sleep=60,
+        build=True,
+        down=cleanup_weblogic,
+        mount_logs={
+            "logs": [
+                {
+                    "type": "file",
+                    "path": "/u01/oracle/user_projects/domains/domain1/servers/admin-server/logs/admin-server.log",
+                    "source": "weblogic",
+                    "service": "weblogic",
+                },
+                {
+                    "type": "file",
+                    "path": """/u01/oracle/user_projects/domains/domain1/servers/managed-server1/logs/
+                    managed-server1.log""",
+                    "source": "weblogic",
+                    "service": "weblogic",
+                },
+                {
+                    "type": "file",
+                    "path": """/u01/oracle/user_projects/domains/domain1/servers/managed-server2/logs/
+                    managed-server2.log""",
+                    "source": "weblogic",
+                    "service": "weblogic",
+                },
+            ]
+        },
+    ):
+        yield instance, {'use_jmx': True}
+
+
 @pytest.fixture(scope='session', autouse=True)
 @pytest.mark.usefixtures('dd_environment')
 def instance():
@@ -44,14 +83,3 @@ def instance():
     inst['instances'][0]['port'] = 9092
 
     return inst
-
-
-@pytest.fixture(scope='session')
-def dd_environment(instance):
-    properties_dir = os.path.join(HERE, 'weblogic', 'properties')
-    compose_file = os.path.join(HERE, 'docker-compose.yml')
-    WaitFor(setup_weblogic())
-    with docker_run(
-        compose_file=compose_file, env_vars={'PROPERTIES_DIR': properties_dir}, build=True, down=cleanup_weblogic
-    ):
-        yield instance, {'use_jmx': True}
