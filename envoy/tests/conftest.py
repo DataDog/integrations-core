@@ -1,13 +1,13 @@
 import os
 
 import pytest
-
-from datadog_checks.dev import docker_run
-
 from envoy.datadog_checks.envoy.check import EnvoyCheck
 from envoy.tests.legacy.common import FLAVOR, INSTANCES
 
-from .common import DOCKER_DIR, FIXTURE_DIR, ENVOY_LEGACY, DEFAULT_INSTANCE, URL
+from datadog_checks.dev import docker_run
+
+from .common import DEFAULT_INSTANCE, DOCKER_DIR, ENVOY_LEGACY, FIXTURE_DIR, URL
+
 
 @pytest.fixture(scope='session')
 def fixture_path():
