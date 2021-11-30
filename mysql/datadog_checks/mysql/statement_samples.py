@@ -560,10 +560,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                     "query_signature": query_signature,
                     "resource_hash": apm_resource_hash,
                     "statement": obfuscated_statement,
-                    "metadata": {
-                        "comments": metadata.get('comments', None),
-                        "tables_csv": metadata.get('tables_csv', None),
-                    },
+                    "metadata": {"comments": metadata.get('comments', None)},
                     "query_truncated": self._get_truncation_state(row['sql_text']).value,
                 },
                 'mysql': {k: v for k, v in row.items() if k not in EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS},
