@@ -1,3 +1,5 @@
+import pytest
+
 from datadog_checks.envoy import Envoy
 
 from .common import DEFAULT_INSTANCE, PROMETHEUS_METRICS, requires_new_environment
