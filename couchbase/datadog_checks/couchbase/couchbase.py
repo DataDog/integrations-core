@@ -16,6 +16,8 @@ from datadog_checks.couchbase.couchbase_consts import (
     BUCKET_STATS,
     COUCHBASE_STATS_PATH,
     COUCHBASE_VITALS_PATH,
+    INDEX_STATS_METRICS_PATH,
+    INDEX_STATS_SERVICE_CHECK_NAME,
     NODE_CLUSTER_SERVICE_CHECK_NAME,
     NODE_HEALTH_SERVICE_CHECK_NAME,
     NODE_HEALTH_TRANSLATION,
@@ -43,6 +45,7 @@ class Couchbase(AgentCheck):
         super(Couchbase, self).__init__(name, init_config, instances)
 
         self._sync_gateway_url = self.instance.get('sync_gateway_url', None)
+        self._index_stats_url = self.instance.get('index_stats_url', None)
         self._server = self.instance.get('server', None)
         if self._server is None:
             raise ConfigurationError("The server must be specified")
@@ -183,6 +186,8 @@ class Couchbase(AgentCheck):
         self._create_metrics(data)
         if self._sync_gateway_url:
             self._collect_sync_gateway_metrics()
+        if self._index_stats_url:
+            self._collect_index_stats_metrics()
 
     def _collect_version(self, data):
         nodes = data['stats']['nodes']
@@ -402,3 +407,48 @@ class Couchbase(AgentCheck):
             unit = 'us'
 
         return float(val) / TO_SECONDS[unit]
+
+    def _collect_index_stats_metrics(self):
+        url = '{}{}'.format(self._index_stats_url, INDEX_STATS_METRICS_PATH)
+        self.log.error(url)
+        try:
+            data = self._get_stats(url)
+        except requests.exceptions.RequestException as e:
+            msg = "Error accessing the Index Statistics endpoint:%s" % str(e) 
+            self.log.debug(e)
+            self.service_check(INDEX_STATS_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, self._tags, msg)
+            return
+
+        self.service_check(INDEX_STATS_SERVICE_CHECK_NAME, AgentCheck.OK, self._tags)
+
+        for key in data:
+            if key == "indexer":
+                for mname, mval in data.get(key).items():
+                    self._submit_index_node_metrics(mname, mval, self._tags)
+            else:
+                tag_arr = key.split(":")
+                if len(tag_arr) == 2:
+                    bucket, index_name = tag_arr
+                    scope, collection = ["default","default"]
+                    index_tags = ['bucket:{}'.format(bucket), 'scope:{}'.format(scope), 'collection:{}'.format(collection),
+                    'index_name:{}'.format(index_name)] + self._tags
+                elif len(tag_arr) == 4:
+                    bucket, scope, collection, index_name = tag_arr
+                    index_tags = ['bucket:{}'.format(bucket), 'scope:{}'.format(scope), 'collection:{}'.format(collection),
+                    'index_name:{}'.format(index_name)] + self._tags
+                self.log.debug("hello")
+                self.log.debug(index_tags)
+                for mname, mval in data.get(key).items():
+                    self._submit_per_index_stats_metrics(mname, mval, index_tags)
+    
+    def _submit_index_node_metrics(self, mname, mval, tags):
+        index_state_map= {'Active': 0, 'Pause': 1, 'Warmup': 2}
+        namespace = '.'.join(['couchbase', 'index'])
+        if mname == "indexer_state":
+            self.gauge('.'.join([namespace, mname]), index_state_map[mval], tags)
+        else:
+            self.gauge('.'.join([namespace, mname]), mval, tags)
+
+    def _submit_per_index_stats_metrics(self, mname, mval, tags):
+        namespace = '.'.join(['couchbase', 'index'])
+        self.gauge('.'.join([namespace, mname]), mval, tags)
