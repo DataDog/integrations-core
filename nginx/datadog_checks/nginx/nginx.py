@@ -28,39 +28,40 @@ else:
 
 
 PLUS_API_ENDPOINTS = {
-    "nginx": [],
-    "http/requests": ["requests"],
-    "http/server_zones": ["server_zones"],
-    "http/upstreams": ["upstreams"],
-    "http/caches": ["caches"],
-    "processes": ["processes"],
-    "connections": ["connections"],
-    "ssl": ["ssl"],
-    "slabs": ["slabs"],
+    '1': {
+        "nginx": [],
+        "http/requests": ["requests"],
+        "http/server_zones": ["server_zones"],
+        "http/upstreams": ["upstreams"],
+        "http/caches": ["caches"],
+        "processes": ["processes"],
+        "connections": ["connections"],
+        "ssl": ["ssl"],
+        "slabs": ["slabs"],
+    },
+    '5': {
+        "http/location_zones": ["location_zones"],
+        "resolvers": ["resolvers"],
+    },
+    '6': {
+        "http/limit_reqs": ["limit_reqs"],
+        "http/limit_conns": ["limit_conns"],
+    },
 }
 
 PLUS_API_STREAM_ENDPOINTS = {
-    "stream/server_zones": ["stream", "server_zones"],
-    "stream/upstreams": ["stream", "upstreams"],
+    '1': {
+        "stream/server_zones": ["stream", "server_zones"],
+        "stream/upstreams": ["stream", "upstreams"],
+    },
+    '3': {
+        "stream/zone_sync": ["stream", "zone_sync"],
+    },
+    '6': {
+        "stream/limit_conns": ["stream", "limit_conns"],
+    },
 }
 
-PLUS_API_V3_STREAM_ENDPOINTS = {
-    "stream/zone_sync": ["stream", "zone_sync"],
-}
-
-PLUS_API_V6_STREAM_ENDPOINTS = {
-    "stream/limit_conns": ["stream", "limit_conns"],
-}
-
-PLUS_API_V5_ENDPOINTS = {
-    "http/location_zones": ["location_zones"],
-    "resolvers": ["resolvers"],
-}
-
-PLUS_API_V6_ENDPOINTS = {
-    "http/limit_reqs": ["limit_reqs"],
-    "http/limit_conns": ["limit_conns"],
-}
 
 TAGGED_KEYS = {
     'caches': 'cache',
@@ -129,14 +130,7 @@ class Nginx(AgentCheck):
             # These are all the endpoints we have to call to get the same data as we did with the old API
             # since we can't get everything in one place anymore.
 
-            if self.use_plus_api_stream:
-                plus_api_chain_list = chain(
-                    self._get_plus_api_endpoints(),
-                    self._get_plus_api_stream_endpoints(),
-                )
-
-            else:
-                plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS))
+            plus_api_chain_list = self._get_all_plus_api_endpoints()
 
             for endpoint, nest in plus_api_chain_list:
                 response = self._get_plus_api_data(endpoint, nest)
@@ -233,21 +227,22 @@ class Nginx(AgentCheck):
 
         return {keys[0]: self._nest_payload(keys[1:], payload)}
 
-    def _get_plus_api_endpoints(self):
-        endpoints = iteritems(PLUS_API_ENDPOINTS)
+    def _get_plus_api_endpoints(self, use_stream=False):
+        endpoints = iteritems({})
 
-        if int(self.plus_api_version) >= 5:
-            endpoints = chain(endpoints, iteritems(PLUS_API_V5_ENDPOINTS))
-        if int(self.plus_api_version) >= 6:
-            endpoints = chain(endpoints, iteritems(PLUS_API_V6_ENDPOINTS))
+        available_plus_endpoints = PLUS_API_STREAM_ENDPOINTS if use_stream else PLUS_API_ENDPOINTS
+
+        for earliest_version, new_endpoints in available_plus_endpoints.items():
+            if int(self.plus_api_version) >= int(earliest_version):
+                endpoints = chain(endpoints, iteritems(new_endpoints))
         return endpoints
 
-    def _get_plus_api_stream_endpoints(self):
-        endpoints = iteritems(PLUS_API_STREAM_ENDPOINTS)
-        if int(self.plus_api_version) >= 3:
-            endpoints = chain(endpoints, iteritems(PLUS_API_V3_STREAM_ENDPOINTS))
-        if int(self.plus_api_version) >= 6:
-            endpoints = chain(endpoints, iteritems(PLUS_API_V6_STREAM_ENDPOINTS))
+    def _get_all_plus_api_endpoints(self):
+        endpoints = self._get_plus_api_endpoints()
+
+        if self.use_plus_api_stream:
+            endpoints = chain(endpoints, self._get_plus_api_endpoints(use_stream=True))
+
         return endpoints
 
     def _get_plus_api_data(self, endpoint, nest):
@@ -261,7 +256,7 @@ class Nginx(AgentCheck):
             r = self._perform_request(url)
             payload = self._nest_payload(nest, r.json())
         except Exception as e:
-            if endpoint in PLUS_API_STREAM_ENDPOINTS or endpoint in PLUS_API_V3_STREAM_ENDPOINTS:
+            if endpoint in PLUS_API_STREAM_ENDPOINTS.values():
                 self.log.warning("Stream may not be initialized. Error querying %s metrics at %s: %s", endpoint, url, e)
             else:
                 self.log.exception("Error querying %s metrics at %s: %s", endpoint, url, e)

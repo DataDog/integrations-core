@@ -247,7 +247,6 @@ def test_plus_api_v7(check, instance, aggregator):
 
     # should be higher than v6 with codes data for http upstream, http server zones, and http location zone
     assert total == 1322
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     base_tags = ['bar:bar', 'foo:foo']
 
