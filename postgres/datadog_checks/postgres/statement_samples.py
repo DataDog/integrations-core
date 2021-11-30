@@ -16,7 +16,7 @@ except ImportError:
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, DBRow, RateLimitingTTLCache, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, DbRow, RateLimitingTTLCache, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 
@@ -214,7 +214,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         return rows
 
     def _filter_and_normalize_statement_rows(self, rows):
-        # type: (List[Dict]) -> List[DBRow]
+        # type: (List[Dict]) -> List[DbRow]
         insufficient_privilege_count = 0
         total_count = 0
         normalized_rows = []
@@ -244,7 +244,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         return normalized_rows
 
     def _normalize_row(self, row):
-        # type: (Dict) -> List[DBRow]
+        # type: (Dict) -> List[DbRow]
         normalized_row = dict(copy.copy(row))
         obfuscated_query = None
         metadata = None
@@ -262,7 +262,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 hostname=self._check.resolved_hostname,
             )
         normalized_row['statement'] = obfuscated_query
-        return DBRow(normalized_row, metadata)
+        return DbRow(normalized_row, metadata)
 
     def _get_extra_filters_and_params(self, filter_stale_idle_conn=False):
         extra_filters = ""
@@ -487,7 +487,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             return error_response
 
     def _collect_plan_for_statement(self, row, metadata):
-        # type: (Dict, DBRow.Metadata) -> Optional[Dict]
+        # type: (Dict, DbRow.Metadata) -> Optional[Dict]
 
         # limit the rate of explains done to the database
         cache_key = (row['datname'], row['query_signature'])
@@ -566,7 +566,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         return None
 
     def _collect_plans(self, rows):
-        # type: (List[DBRow]) -> List[Dict]
+        # type: (List[DbRow]) -> List[Dict]
         events = []
         for row in rows:
             try:
@@ -588,7 +588,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         return events
 
     def _create_activity_event(self, rows, active_connections):
-        # type: (List[DBRow], List[Dict]) -> Dict
+        # type: (List[DbRow], List[Dict]) -> Dict
         self._time_since_last_activity_event = time.time()
         active_sessions = []
         for row in rows:

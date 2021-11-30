@@ -15,7 +15,7 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, DBRow, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, DbRow, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 
 from .version_utils import V9_4
@@ -281,7 +281,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             self._log.warning("Failed to query for pg_stat_statements count: %s", e)
 
     def _collect_metrics_rows(self):
-        # type: () -> List[DBRow]
+        # type: () -> List[DbRow]
         rows = self._load_pg_stat_statements()
         if rows:
             self._emit_pg_stat_statements_metrics()
@@ -300,10 +300,10 @@ class PostgresStatementMetrics(DBMAsyncJob):
             tags=self._tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
-        return [DBRow(row, query_sig_to_metadata.get(row['query_signature'])) for row in rows]
+        return [DbRow(row, query_sig_to_metadata.get(row['query_signature'])) for row in rows]
 
     def _normalize_queries(self, rows):
-        # type: (Dict) -> List[DBRow]
+        # type: (Dict) -> List[DbRow]
         normalized_rows = []
         for row in rows:
             normalized_row = dict(copy.copy(row))
@@ -317,12 +317,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
             obfuscated_query = statement['query']
             normalized_row['query'] = obfuscated_query
             normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
-            normalized_rows.append(DBRow(normalized_row, statement['metadata']))
+            normalized_rows.append(DbRow(normalized_row, statement['metadata']))
 
         return normalized_rows
 
     def _rows_to_fqt_events(self, rows):
-        # type: (List[DBRow]) -> Generator
+        # type: (List[DbRow]) -> Generator
         for row in rows:
             query_cache_key = _row_key(row.data)
             if query_cache_key in self._full_statement_text_cache:
