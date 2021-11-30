@@ -137,6 +137,14 @@ instances:
     #
     disable_legacy_cluster_tag: true
 
+    ## @param enable_query_name_tag - boolean - optional - default: false
+    ## Enable to add a `query_name` tag for Structured Streaming metrics.
+    ## This option should ONLY be enabled if the stream had a `.queryName` param supplied on `writeStream`,
+    ## otherwise the stream is given a default UUID.
+    ## See: https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#starting-streaming-queries
+    #
+    # enable_query_name_tag: true
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
