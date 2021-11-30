@@ -64,4 +64,7 @@ There are two main cases where the release manager will have to release integrat
 
 5. After the release has been made, make a PR to `master` with the updates to `CHANGELOG.md`, [agent release requirements](https://github.com/DataDog/integrations-core/blob/master/requirements-agent-release.txt), and `__about__.py` of the integrations that were released on the release branch. If the current version of `__about__.py` is higher on master than the release branch, then **only** update the `CHANGELOG.md` in this PR.
 
+    !!! important
+        Do not merge this PR unless the release tag from the previous PR has been pushed or the release pipeline will incorrectly attempt to release from `master`.
+
 6. Finally, if a patch release was performed, follow the same steps to [finalize the release](#finalize).
