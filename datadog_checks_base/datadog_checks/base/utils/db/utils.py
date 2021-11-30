@@ -158,9 +158,9 @@ def default_json_event_encoding(o):
     raise TypeError
 
 
-class DBRow:
+class DbRow:
     """
-    DBRow is a wrapper for database rows that additionally holds metadata.
+    DbRow is a wrapper for database rows that additionally holds metadata.
     """
 
     def __init__(self, row, metadata=None):
