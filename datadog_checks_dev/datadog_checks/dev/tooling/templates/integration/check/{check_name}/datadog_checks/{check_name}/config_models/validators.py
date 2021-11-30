@@ -7,3 +7,5 @@
 #         values['my_option'] = values['my_legacy_option']
 #     if values.get('my_number') > 10:
 #         raise ValueError('my_number max value is 10, got %s' % str(values.get('my_number')))
+#
+#     return values
