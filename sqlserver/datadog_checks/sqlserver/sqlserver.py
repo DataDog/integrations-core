@@ -16,6 +16,7 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host
 from datadog_checks.base.utils.tracing import traced_class
+from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 
 try:
@@ -36,6 +37,7 @@ from .const import (
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
+    DBM_MIGRATED_METRICS,
     DEFAULT_AUTODISCOVERY_INTERVAL,
     FCI_METRICS,
     INSTANCE_METRICS,
@@ -108,6 +110,8 @@ class SQLServer(AgentCheck):
         self.dbm_enabled = self.instance.get('dbm', False)
         self.statement_metrics_config = self.instance.get('query_metrics', {}) or {}
         self.statement_metrics = SqlserverStatementMetrics(self)
+        self.activity_config = self.instance.get('query_activity', {}) or {}
+        self.activity = SqlserverActivity(self)
 
         self.static_info_cache = TTLCache(
             maxsize=100,
@@ -117,6 +121,7 @@ class SQLServer(AgentCheck):
 
     def cancel(self):
         self.statement_metrics.cancel()
+        self.activity.cancel()
 
     def config_checks(self):
         if self.autodiscovery and self.instance.get('database'):
@@ -302,8 +307,12 @@ class SQLServer(AgentCheck):
         # If several check instances are querying the same server host, it can be wise to turn these off
         # to avoid sending duplicate metrics
         if is_affirmative(self.instance.get('include_instance_metrics', True)):
+            common_metrics = INSTANCE_METRICS
+            if not self.dbm_enabled:
+                common_metrics = common_metrics + DBM_MIGRATED_METRICS
+
             self._add_performance_counters(
-                chain(INSTANCE_METRICS, INSTANCE_METRICS_TOTAL), metrics_to_collect, tags, db=None
+                chain(common_metrics, INSTANCE_METRICS_TOTAL), metrics_to_collect, tags, db=None
             )
 
         # populated through autodiscovery
@@ -542,6 +551,7 @@ class SQLServer(AgentCheck):
                         self.connection.check_database_conns(db_name)
             if self.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
+                self.activity.run_job_loop(self.tags)
 
         else:
             self.log.debug("Skipping check")

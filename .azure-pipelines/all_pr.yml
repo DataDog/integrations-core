@@ -18,19 +18,21 @@ variables:
 
 resources:
   containers:
-    - container: dd_agent
-      image: gcr.io/datadoghq/agent:latest
-      ports:
-        - 8127:8126
-      env:
-        DD_API_KEY: $(DD_CI_API_KEY)
-        DD_HOSTNAME: "none"
-        DD_INSIDE_CI: "true"
+    - ${{ if eq(variables['System.PullRequest.IsFork'], 'False') }}:
+      - container: dd_agent
+        image: gcr.io/datadoghq/agent:latest
+        ports:
+          - 8127:8126
+        env:
+          DD_API_KEY: $(DD_CI_API_KEY)
+          DD_HOSTNAME: "none"
+          DD_INSIDE_CI: "true"
 
 jobs:
 - template: './templates/test-all-checks.yml'
   parameters:
-    ddtrace_flag: '--ddtrace'
+    ${{ if eq(variables['System.PullRequest.IsFork'], 'False') }}:
+      ddtrace_flag: '--ddtrace'
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
       restoreKeys: |

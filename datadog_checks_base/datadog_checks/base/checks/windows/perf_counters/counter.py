@@ -103,7 +103,7 @@ class PerfObject:
 
     def refresh(self):
         # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectitemsa
-        # http://timgolden.me.uk/pywin32-docs/win32pdh__EnumObjectItems_meth.html
+        # https://mhammond.github.io/pywin32/win32pdh__EnumObjectItems_meth.html
         counters, instances = win32pdh.EnumObjectItems(
             None, self.connection.server, self.name, win32pdh.PERF_DETAIL_WIZARD
         )
@@ -149,11 +149,11 @@ class PerfObject:
 
         if self.use_localized_counters:
             # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhaddcountera
-            # http://timgolden.me.uk/pywin32-docs/win32pdh__AddCounter_meth.html
+            # https://mhammond.github.io/pywin32/win32pdh__AddCounter_meth.html
             counter_selector = win32pdh.AddCounter
         else:
             # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhaddenglishcountera
-            # http://timgolden.me.uk/pywin32-docs/win32pdh__AddEnglishCounter_meth.html
+            # https://mhammond.github.io/pywin32/win32pdh__AddEnglishCounter_meth.html
             counter_selector = win32pdh.AddEnglishCounter
 
         if available_instances:
@@ -165,7 +165,7 @@ class PerfObject:
             )
 
             # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhvalidatepatha
-            # http://timgolden.me.uk/pywin32-docs/win32pdh__ValidatePath_meth.html
+            # https://mhammond.github.io/pywin32/win32pdh__ValidatePath_meth.html
             if win32pdh.ValidatePath(possible_path) == 0:
                 counter_type = SingleCounter
                 self.has_multiple_instances = False
@@ -319,7 +319,7 @@ class CounterBase:
         # Counter requires at least 2 data points to return a meaningful value, see:
         # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhgetformattedcountervalue#remarks
         #
-        # http://timgolden.me.uk/pywin32-docs/error.html
+        # https://mhammond.github.io/pywin32/error.html
         if error.strerror != 'The data is not valid.':
             raise
 
@@ -369,7 +369,7 @@ class SingleCounter(CounterBase):
 
         try:
             # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhremovecounter
-            # http://timgolden.me.uk/pywin32-docs/win32pdh__RemoveCounter_meth.html
+            # https://mhammond.github.io/pywin32/win32pdh__RemoveCounter_meth.html
             win32pdh.RemoveCounter(self.counter_handle)
         except Exception as e:
             self.logger.warning(
@@ -498,7 +498,7 @@ class MultiCounter(CounterBase):
 
                         try:
                             # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhremovecounter
-                            # http://timgolden.me.uk/pywin32-docs/win32pdh__RemoveCounter_meth.html
+                            # https://mhammond.github.io/pywin32/win32pdh__RemoveCounter_meth.html
                             win32pdh.RemoveCounter(counter_handle)
                         except Exception as e:
                             self.logger.warning(
@@ -538,7 +538,7 @@ class MultiCounter(CounterBase):
                 counter_handle = counter_handles.pop()
                 try:
                     # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhremovecounter
-                    # http://timgolden.me.uk/pywin32-docs/win32pdh__RemoveCounter_meth.html
+                    # https://mhammond.github.io/pywin32/win32pdh__RemoveCounter_meth.html
                     win32pdh.RemoveCounter(counter_handle)
                 except Exception as e:
                     self.logger.warning(
