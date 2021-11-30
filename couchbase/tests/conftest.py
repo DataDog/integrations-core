@@ -61,17 +61,21 @@ def dd_environment():
     """
     Spin up and initialize couchbase
     """
-
-    with docker_run(
-        compose_file=os.path.join(HERE, 'compose', 'standalone.compose'),
-        env_vars={'CB_CONTAINER_NAME': CB_CONTAINER_NAME},
-        conditions=[
+    couchdb_version = os.environ["COUCHBASE_VERSION"][0]
+    conditions=[
             WaitFor(couchbase_container),
             WaitFor(couchbase_init),
             WaitFor(couchbase_setup),
             WaitFor(node_stats),
             WaitFor(bucket_stats),
-        ],
+    ]
+    if int(couchdb_version) >= 7:
+            conditions.append(WaitFor(load_sample_bucket))
+
+    with docker_run(
+        compose_file=os.path.join(HERE, 'compose', 'standalone.compose'),
+        env_vars={'CB_CONTAINER_NAME': CB_CONTAINER_NAME},
+        conditions=conditions,
         attempts=2,
     ):
         yield DEFAULT_INSTANCE
@@ -155,7 +159,7 @@ def couchbase_init():
         '--services',
         'data,index,fts,query',
         '--cluster-ramsize',
-        '256',
+        '1024',
         '--cluster-index-ramsize',
         '256',
         '--cluster-fts-ramsize',
@@ -165,6 +169,35 @@ def couchbase_init():
 
     r = requests.get('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
     return r.status_code == requests.codes.ok
+
+
+def load_sample_bucket():
+    """
+    Load sample data bucket
+    """
+
+    # Resources used:
+    # https://docs.couchbase.com/server/current/manage/manage-settings/install-sample-buckets.html
+        
+    bucket_loader_args = [
+        'docker',
+        'exec',
+        CB_CONTAINER_NAME,
+        'cbdocloader',
+        '-c',
+        'localhost:{}'.format(PORT),
+        '-u',
+        USER,
+        '-p',
+        PASSWORD,
+        '-d',
+        '/opt/couchbase/samples/travel-sample.zip',
+        '-b',
+        'testBucket',
+        '-m',
+        '256',
+    ]
+    subprocess.check_call(bucket_loader_args)
 
 
 def node_stats():
