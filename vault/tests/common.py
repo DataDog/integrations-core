@@ -24,6 +24,8 @@ INSTANCES = {
 }
 HEALTH_ENDPOINT = '{}/sys/health'.format(INSTANCES['main']['api_url'])
 
+VAULT_VERSION = os.environ['VAULT_VERSION']
+
 AUTH_TYPE = os.environ['AUTH_TYPE']
 
 

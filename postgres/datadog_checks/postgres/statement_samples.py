@@ -58,11 +58,11 @@ PG_ACTIVE_CONNECTIONS_QUERY = re.sub(
     r'\s+',
     ' ',
     """
-    SELECT application_name, state, usename, count(*) as connections
+    SELECT application_name, state, usename, datname, count(*) as connections
     FROM {pg_stat_activity_view}
     WHERE client_port IS NOT NULL
     {extra_filters}
-    GROUP BY application_name, state, usename
+    GROUP BY application_name, state, usename, datname
 """,
 ).strip()
 

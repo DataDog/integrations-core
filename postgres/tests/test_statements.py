@@ -522,6 +522,7 @@ def test_statement_samples_collect(
                 'usename': 'bob',
                 'state': 'idle in transaction',
                 'application_name': '',
+                'datname': 'datadog_test',
                 'connections': 1,
             },
         ),
