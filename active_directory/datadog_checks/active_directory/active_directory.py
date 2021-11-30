@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from datadog_checks.base.checks.win import PDHBaseCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 DEFAULT_COUNTERS = [
     # counterset, instance of counter, counter name, metric name

@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 DEFAULT_METRICS = [
     # nginx metrics

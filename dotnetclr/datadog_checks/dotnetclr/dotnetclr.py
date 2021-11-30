@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from datadog_checks.base import PDHBaseCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'dotnetclr'
 

@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import OpenMetricsBaseCheck, is_affirmative
-from datadog_checks.base.utils.tracing import traced_class
 
 from .legacy.haproxy import HAProxyCheckLegacy
 from .metrics import METRIC_MAP

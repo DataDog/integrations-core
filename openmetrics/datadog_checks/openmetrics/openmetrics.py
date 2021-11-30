@@ -4,7 +4,6 @@
 from six import PY2
 
 from datadog_checks.base import OpenMetricsBaseCheck, OpenMetricsBaseCheckV2
-from datadog_checks.base.utils.tracing import traced_class
 
 
 class OpenMetricsCheck(OpenMetricsBaseCheck):
