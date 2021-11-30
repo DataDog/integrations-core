@@ -12,5 +12,5 @@ def get_last_error_message():  # no cov
     """
     # https://docs.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror
     # https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-formatmessage
-    # http://timgolden.me.uk/pywin32-docs/win32api__FormatMessage_meth.html
+    # https://mhammond.github.io/pywin32/win32api__FormatMessage_meth.html
     return win32api.FormatMessage(0)

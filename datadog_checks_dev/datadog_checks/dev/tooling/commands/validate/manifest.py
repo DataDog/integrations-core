@@ -7,14 +7,24 @@ import os
 import click
 
 from ....fs import file_exists, read_file, write_file
-from ...annotations import annotate_display_queue, annotate_error, annotate_warning
 from ...constants import get_root
 from ...datastructures import JSONDict
 from ...manifest_validator import get_all_validators
 from ...manifest_validator.constants import V1_STRING
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks
-from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success, echo_warning
+from ..console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_display_queue,
+    annotate_error,
+    annotate_warning,
+    echo_debug,
+    echo_failure,
+    echo_info,
+    echo_success,
+    echo_warning,
+)
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `manifest.json` files')

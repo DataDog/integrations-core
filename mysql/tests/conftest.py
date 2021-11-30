@@ -150,10 +150,72 @@ def instance_additional_variable():
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
         'disable_generic_tags': 'true',
-        'additional_status': [
+        'additional_variable': [
             {
                 'name': "long_query_time",
                 'metric_name': "mysql.performance.long_query_time",
+                'type': "gauge",
+            },
+            {
+                'name': "innodb_flush_log_at_trx_commit",
+                'metric_name': "mysql.performance.innodb_flush_log_at_trx_commit",
+                'type': "gauge",
+            },
+        ],
+    }
+
+
+@pytest.fixture
+def instance_status_already_queried():
+    return {
+        'host': common.HOST,
+        'user': common.USER,
+        'pass': common.PASS,
+        'port': common.PORT,
+        'tags': tags.METRIC_TAGS,
+        'disable_generic_tags': 'true',
+        'additional_status': [
+            {
+                'name': "Open_files",
+                'metric_name': "mysql.performance.open_files_test",
+                'type': "gauge",
+            },
+        ],
+    }
+
+
+@pytest.fixture
+def instance_var_already_queried():
+    return {
+        'host': common.HOST,
+        'user': common.USER,
+        'pass': common.PASS,
+        'port': common.PORT,
+        'tags': tags.METRIC_TAGS,
+        'disable_generic_tags': 'true',
+        'additional_variable': [
+            {
+                'name': "Key_buffer_size",
+                'metric_name': "mysql.myisam.key_buffer_size",
+                'type': "gauge",
+            },
+        ],
+    }
+
+
+@pytest.fixture
+def instance_invalid_var():
+    return {
+        'host': common.HOST,
+        'user': common.USER,
+        'pass': common.PASS,
+        'port': common.PORT,
+        'tags': tags.METRIC_TAGS,
+        'disable_generic_tags': 'true',
+        'additional_status': [
+            {
+                'name': "longer_query_time",
+                'metric_name': "mysql.performance.longer_query_time",
                 'type': "gauge",
             },
             {

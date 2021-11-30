@@ -155,7 +155,7 @@ class Connection(object):
                 rawconn = adodbapi.connect(cs, {'timeout': self.timeout, 'autocommit': True})
             else:
                 cs += self._conn_string_odbc(db_key, db_name=db_name)
-                rawconn = pyodbc.connect(cs, timeout=self.timeout)
+                rawconn = pyodbc.connect(cs, timeout=self.timeout, autocommit=True)
 
             self.service_check_handler(AgentCheck.OK, host, database, is_default=is_default)
             if conn_key not in self._conns:
@@ -347,7 +347,7 @@ class Connection(object):
         else:
             dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
 
-        conn_str = ''
+        conn_str = 'ConnectRetryCount=2;'
         if dsn:
             conn_str = 'DSN={};'.format(dsn)
 
@@ -373,7 +373,7 @@ class Connection(object):
             _, host, username, password, database, _ = self._get_access_info(db_key, db_name)
 
         provider = self._get_adoprovider()
-        conn_str = 'Provider={};Data Source={};Initial Catalog={};'.format(provider, host, database)
+        conn_str = 'ConnectRetryCount=2;Provider={};Data Source={};Initial Catalog={};'.format(provider, host, database)
 
         if username:
             conn_str += 'User ID={};'.format(username)
