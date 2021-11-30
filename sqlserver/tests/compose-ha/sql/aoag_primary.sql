@@ -10,23 +10,30 @@ GRANT CONNECT ANY DATABASE to datadog;
 GRANT VIEW ANY DEFINITION to datadog;
 
 -- test users
-CREATE LOGIN bob WITH PASSWORD = 'hey-there-bob123';
+CREATE LOGIN bob WITH PASSWORD = 'Password12!';
 CREATE USER bob FOR LOGIN bob;
 GRANT CONNECT ANY DATABASE to bob;
+GO
+
+CREATE LOGIN fred WITH PASSWORD = 'Password12!';
+CREATE USER fred FOR LOGIN fred;
+GRANT CONNECT ANY DATABASE to fred;
 GO
 
 CREATE DATABASE datadog_test;
 GO
 
 -- Create test database for integration tests
--- only bob has read/write access to this database
+-- only bob and fred have read/write access to this database
 USE datadog_test;
-CREATE TABLE datadog_test.dbo.things (id int, name varchar(255));
-INSERT INTO datadog_test.dbo.things VALUES (1, 'foo'), (2, 'bar');
+CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
+INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
 CREATE USER bob FOR LOGIN bob;
+CREATE USER fred FOR LOGIN fred;
 GO
 
 EXEC sp_addrolemember 'db_datareader', 'bob'
+EXEC sp_addrolemember 'db_datareader', 'fred'
 EXEC sp_addrolemember 'db_datawriter', 'bob'
 GO
 

@@ -51,7 +51,7 @@ class InstanceConfig(BaseModel):
     tags: Optional[Sequence[str]]
     timeout: Optional[int]
     use_lsblk: Optional[bool]
-    use_mount: bool
+    use_mount: Optional[bool]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

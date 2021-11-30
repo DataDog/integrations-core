@@ -8,6 +8,7 @@ import yaml
 from datamodel_code_generator.format import CodeFormatter, PythonVersion
 from datamodel_code_generator.parser import LiteralType
 from datamodel_code_generator.parser.openapi import OpenAPIParser
+from pydantic import BaseModel
 
 from ..constants import OPENAPI_SCHEMA_PROPERTIES
 from ..utils import sanitize_openapi_object_properties
@@ -23,7 +24,7 @@ NO_DEFAULT = object()
 
 def normalize_option_name(option_name):
     # https://github.com/koxudaxi/datamodel-code-generator/blob/0.8.3/datamodel_code_generator/model/base.py#L82-L84
-    if iskeyword(option_name):
+    if iskeyword(option_name) or hasattr(BaseModel, option_name):
         option_name += '_'
 
     return option_name.replace('-', '_')

@@ -243,7 +243,7 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
 
         try:
             # https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-lookupaccountsida
-            # http://timgolden.me.uk/pywin32-docs/win32security__LookupAccountSid_meth.html
+            # https://mhammond.github.io/pywin32/win32security__LookupAccountSid_meth.html
             user, domain, _ = win32security.LookupAccountSid(
                 None if self._session is None else event_payload['host'], value
             )
@@ -257,7 +257,7 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
 
         # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtrender
         # https://docs.microsoft.com/en-us/windows/win32/api/winevt/ne-winevt-evt_render_flags
-        # http://timgolden.me.uk/pywin32-docs/win32evtlog__EvtRender_meth.html
+        # https://mhammond.github.io/pywin32/win32evtlog__EvtRender_meth.html
         return win32evtlog.EvtRender(event, win32evtlog.EvtRenderEventValues, Context=context)
 
     def consume_events(self):
@@ -283,7 +283,7 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
             # IMPORTANT: the subscription starts immediately so you must consume before waiting for the first signal
             while True:
                 # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtnext
-                # http://timgolden.me.uk/pywin32-docs/win32evtlog__EvtNext_meth.html
+                # https://mhammond.github.io/pywin32/win32evtlog__EvtNext_meth.html
                 #
                 # An error saying EvtNext: The operation identifier is not valid happens
                 # when you call the method and there are no events to read (i.e. polling).
@@ -303,7 +303,7 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
                     yield event
 
             # https://docs.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-waitforsingleobjectex
-            # http://timgolden.me.uk/pywin32-docs/win32event__WaitForSingleObjectEx_meth.html
+            # https://mhammond.github.io/pywin32/win32event__WaitForSingleObjectEx_meth.html
             wait_signal = win32event.WaitForSingleObjectEx(self._event_handle, self.config.timeout, True)
 
             # No more events, end check run
@@ -314,11 +314,11 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
         # See https://docs.microsoft.com/en-us/windows/win32/wes/bookmarking-events
 
         # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtupdatebookmark
-        # http://timgolden.me.uk/pywin32-docs/win32evtlog__EvtUpdateBookmark_meth.html
+        # https://mhammond.github.io/pywin32/win32evtlog__EvtUpdateBookmark_meth.html
         win32evtlog.EvtUpdateBookmark(self._bookmark_handle, event)
 
         # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtrender
-        # http://timgolden.me.uk/pywin32-docs/win32evtlog__EvtRender_meth.html
+        # https://mhammond.github.io/pywin32/win32evtlog__EvtRender_meth.html
         bookmark_xml = win32evtlog.EvtRender(self._bookmark_handle, win32evtlog.EvtRenderBookmark)
 
         self.write_persistent_cache('bookmark', bookmark_xml)
@@ -355,12 +355,12 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
             return
 
         # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtopensession
-        # http://timgolden.me.uk/pywin32-docs/win32evtlog__EvtOpenSession_meth.html
+        # https://mhammond.github.io/pywin32/win32evtlog__EvtOpenSession_meth.html
         self._session = win32evtlog.EvtOpenSession(session_struct, win32evtlog.EvtRpcLogin, 0, 0)
 
     def create_subscription(self):
         # https://docs.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-createeventa
-        # http://timgolden.me.uk/pywin32-docs/win32event__CreateEvent_meth.html
+        # https://mhammond.github.io/pywin32/win32event__CreateEvent_meth.html
         self._event_handle = win32event.CreateEvent(None, 0, 0, self.check_id)
 
         bookmark = self.read_persistent_cache('bookmark')
@@ -373,11 +373,11 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
             bookmark = None
 
         # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtcreatebookmark
-        # http://timgolden.me.uk/pywin32-docs/win32evtlog__EvtCreateBookmark_meth.html
+        # https://mhammond.github.io/pywin32/win32evtlog__EvtCreateBookmark_meth.html
         self._bookmark_handle = win32evtlog.EvtCreateBookmark(bookmark)
 
         # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtsubscribe
-        # http://timgolden.me.uk/pywin32-docs/win32evtlog__EvtSubscribe_meth.html
+        # https://mhammond.github.io/pywin32/win32evtlog__EvtSubscribe_meth.html
         self._subscription = win32evtlog.EvtSubscribe(
             self.config.path,
             flags,
@@ -406,11 +406,11 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
         password = self.instance.get('password')
 
         # https://docs.microsoft.com/en-us/windows/win32/api/winevt/ns-winevt-evt_rpc_login
-        # http://timgolden.me.uk/pywin32-docs/PyEVT_RPC_LOGIN.html
+        # https://mhammond.github.io/pywin32/PyEVT_RPC_LOGIN.html
         return server, user, domain, password, self.LOGIN_FLAGS[auth_type]
 
     def log_windows_error(self, exc):
-        # http://timgolden.me.uk/pywin32-docs/error.html
+        # https://mhammond.github.io/pywin32/error.html
         #
         # Occasionally the Windows function returns some extra data after a colon which we don't need
         self.log.debug('Error code %d when calling `%s`: %s', exc.winerror, exc.funcname.split(':')[0], exc.strerror)

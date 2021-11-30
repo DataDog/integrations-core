@@ -16,11 +16,24 @@ trigger: none
 variables:
   PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
   DDEV_COLOR: 1
+  DD_TRACE_AGENT_PORT: 8127
+
+resources:
+  containers:
+    - container: dd_agent
+      image: gcr.io/datadoghq/agent:latest
+      ports:
+        - 8127:8126
+      env:
+        DD_API_KEY: $(DD_CI_API_KEY)
+        DD_HOSTNAME: "none"
+        DD_INSIDE_CI: "true"
 
 jobs:
 - template: './templates/test-all-checks.yml'
   parameters:
     run_py2_tests: false  # Handled via separate nightly
+    ddtrace_flag: '--ddtrace'
     force_base_package: true
     test_e2e: false  # e2e tests run in a docker image so the base package wont be forced
     pip_cache_config:
