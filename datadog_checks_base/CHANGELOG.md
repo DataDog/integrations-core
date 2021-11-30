@@ -2,7 +2,7 @@
 
 ## 23.4.0 / 2021-11-30
 
-* [Added] Support custom transformer. See [#10753](https://github.com/DataDog/integrations-core/pull/10753).
+* [Added] [OpenMetricsV2] Support custom transformers by regex matching metric names. See [#10753](https://github.com/DataDog/integrations-core/pull/10753).
 * [Fixed] Bump cachetools. See [#10742](https://github.com/DataDog/integrations-core/pull/10742).
 * [Fixed] Bump redis dependency. See [#9383](https://github.com/DataDog/integrations-core/pull/9383).
 
