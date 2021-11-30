@@ -7,7 +7,7 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
 
-from .common import FLAVOR, HOST
+from envoy.tests.legacy.common import FLAVOR, HOST
 
 METRICS = [
     'envoy.cluster.assignment_stale',

@@ -10,7 +10,7 @@ import requests
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-from .common import ENVOY_VERSION, FLAVOR, HOST, INSTANCES
+from envoy.tests.legacy.common import ENVOY_VERSION, FLAVOR, HOST, INSTANCES
 
 CHECK_NAME = 'envoy'
 

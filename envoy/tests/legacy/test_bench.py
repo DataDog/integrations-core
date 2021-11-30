@@ -2,7 +2,7 @@ import pytest
 
 from datadog_checks.envoy import Envoy
 
-from .common import INSTANCES
+from envoy.tests.legacy.common import INSTANCES
 
 
 @pytest.mark.usefixtures('dd_environment')

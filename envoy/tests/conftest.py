@@ -4,7 +4,7 @@ import pytest
 
 from datadog_checks.dev import docker_run
 
-from .common import DOCKER_DIR, FIXTURE_DIR, FLAVOR, INSTANCES
+from envoy.tests.legacy.common import DOCKER_DIR, FIXTURE_DIR, FLAVOR, INSTANCES
 
 
 @pytest.fixture(scope='session')
