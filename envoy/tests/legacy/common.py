@@ -1,10 +1,8 @@
 import os
-
+import pytest
 from datadog_checks.dev import get_docker_hostname, get_here
 
-HERE = get_here()
-FIXTURE_DIR = os.path.join(HERE, 'fixtures')
-DOCKER_DIR = os.path.join(HERE, 'docker')
+from envoy.tests.common import ENVOY_LEGACY
 FLAVOR = os.getenv('FLAVOR', 'api_v3')
 
 HOST = get_docker_hostname()
@@ -30,3 +28,6 @@ INSTANCES = {
     },
 }
 ENVOY_VERSION = os.getenv('ENVOY_VERSION')
+requires_legacy_environment = pytest.mark.skipif(
+    ENVOY_LEGACY != 'true', reason='Requires legacy non-prometheus environment'
+)

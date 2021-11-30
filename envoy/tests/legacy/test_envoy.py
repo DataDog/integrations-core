@@ -10,10 +10,11 @@ import requests
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-from envoy.tests.legacy.common import ENVOY_VERSION, FLAVOR, HOST, INSTANCES
+from envoy.tests.legacy.common import ENVOY_VERSION, FLAVOR, HOST, INSTANCES,requires_legacy_environment
 
 CHECK_NAME = 'envoy'
 
+pytestmark = [requires_legacy_environment]
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
