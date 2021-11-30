@@ -158,6 +158,24 @@ def default_json_event_encoding(o):
     raise TypeError
 
 
+class DbRow:
+    """
+    DbRow is a wrapper for database rows that additionally holds metadata.
+    """
+
+    def __init__(self, row, metadata=None):
+        # type: (Dict[str], Dict[str]) -> None
+        self.data = row
+        self.metadata = metadata if isinstance(metadata, self.Metadata) else self.Metadata(metadata)
+
+    class Metadata:
+        def __init__(self, metadata):
+            # type: (Dict[str]) -> None
+            if not metadata:
+                metadata = {}
+            self.comments = metadata.get('comments', None)
+
+
 class DBMAsyncJob(object):
     # Set an arbitrary high limit so that dbm async jobs (which aren't CPU bound) don't
     # get artificially limited by the default max_workers count. Note that since threads are
