@@ -414,7 +414,7 @@ class Couchbase(AgentCheck):
         try:
             data = self._get_stats(url)
         except requests.exceptions.RequestException as e:
-            msg = "Error accessing the Index Statistics endpoint:%s" % str(e) 
+            msg = "Error accessing the Index Statistics endpoint:%s" % str(e)
             self.log.debug(e)
             self.service_check(INDEX_STATS_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, self._tags, msg)
             return
@@ -429,20 +429,28 @@ class Couchbase(AgentCheck):
                 tag_arr = key.split(":")
                 if len(tag_arr) == 2:
                     bucket, index_name = tag_arr
-                    scope, collection = ["default","default"]
-                    index_tags = ['bucket:{}'.format(bucket), 'scope:{}'.format(scope), 'collection:{}'.format(collection),
-                    'index_name:{}'.format(index_name)] + self._tags
+                    scope, collection = ["default", "default"]
+                    index_tags = [
+                        'bucket:{}'.format(bucket),
+                        'scope:{}'.format(scope),
+                        'collection:{}'.format(collection),
+                        'index_name:{}'.format(index_name),
+                    ] + self._tags
                 elif len(tag_arr) == 4:
                     bucket, scope, collection, index_name = tag_arr
-                    index_tags = ['bucket:{}'.format(bucket), 'scope:{}'.format(scope), 'collection:{}'.format(collection),
-                    'index_name:{}'.format(index_name)] + self._tags
+                    index_tags = [
+                        'bucket:{}'.format(bucket),
+                        'scope:{}'.format(scope),
+                        'collection:{}'.format(collection),
+                        'index_name:{}'.format(index_name),
+                    ] + self._tags
                 self.log.debug("hello")
                 self.log.debug(index_tags)
                 for mname, mval in data.get(key).items():
                     self._submit_per_index_stats_metrics(mname, mval, index_tags)
-    
+
     def _submit_index_node_metrics(self, mname, mval, tags):
-        index_state_map= {'Active': 0, 'Pause': 1, 'Warmup': 2}
+        index_state_map = {'Active': 0, 'Pause': 1, 'Warmup': 2}
         namespace = '.'.join(['couchbase', 'index'])
         if mname == "indexer_state":
             self.gauge('.'.join([namespace, mname]), index_state_map[mval], tags)

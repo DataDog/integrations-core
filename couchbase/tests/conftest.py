@@ -62,15 +62,15 @@ def dd_environment():
     Spin up and initialize couchbase
     """
     couchdb_version = os.environ["COUCHBASE_VERSION"][0]
-    conditions=[
-            WaitFor(couchbase_container),
-            WaitFor(couchbase_init),
-            WaitFor(couchbase_setup),
-            WaitFor(node_stats),
-            WaitFor(bucket_stats),
+    conditions = [
+        WaitFor(couchbase_container),
+        WaitFor(couchbase_init),
+        WaitFor(couchbase_setup),
+        WaitFor(node_stats),
+        WaitFor(bucket_stats),
     ]
     if int(couchdb_version) >= 7:
-            conditions.append(WaitFor(load_sample_bucket))
+        conditions.append(WaitFor(load_sample_bucket))
 
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'standalone.compose'),
@@ -178,7 +178,7 @@ def load_sample_bucket():
 
     # Resources used:
     # https://docs.couchbase.com/server/current/manage/manage-settings/install-sample-buckets.html
-        
+
     bucket_loader_args = [
         'docker',
         'exec',
