@@ -290,7 +290,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
         if not rows:
             return []
 
-        query_sig_to_metadata = {row.data['query_signature']: row.metadata for row in rows}
         available_columns = set(rows[0].data.keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
         rows = self._state.compute_derivative_rows([row.data for row in rows], metric_columns, key=_row_key)
@@ -300,7 +299,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             tags=self._tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
-        return [DbRow(row, query_sig_to_metadata.get(row['query_signature'])) for row in rows]
+        return [DbRow(row) for row in rows]
 
     def _normalize_queries(self, rows):
         # type: (Dict) -> List[DbRow]
@@ -317,7 +316,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             obfuscated_query = statement['query']
             normalized_row['query'] = obfuscated_query
             normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
-            normalized_rows.append(DbRow(normalized_row, statement['metadata']))
+            normalized_rows.append(DbRow(normalized_row))
 
         return normalized_rows
 
@@ -343,9 +342,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     "instance": row.data['datname'],
                     "query_signature": row.data['query_signature'],
                     "statement": row.data['query'],
-                    "metadata": {
-                        "comments": row.metadata.comments,
-                    },
                 },
                 "postgres": {
                     "datname": row.data["datname"],
