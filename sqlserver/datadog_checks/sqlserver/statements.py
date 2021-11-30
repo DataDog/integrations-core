@@ -170,7 +170,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._statement_metrics_query = STATEMENT_METRICS_QUERY.format(
             query_metrics_columns=', '.join(available_columns),
             query_metrics_column_sums=', '.join(['sum({}) as {}'.format(c, c) for c in available_columns]),
-            collection_interval=int(math.ceil(self.collection_interval * 2)),
+            collection_interval=int(math.ceil(self.collection_interval) * 2),
         )
         return self._statement_metrics_query
 
