@@ -174,6 +174,7 @@ class DbRow:
             if not metadata:
                 metadata = {}
             self.comments = metadata.get('comments', None)
+            self.tables_csv = metadata.get('tables_csv', None)
 
 
 class DBMAsyncJob(object):
