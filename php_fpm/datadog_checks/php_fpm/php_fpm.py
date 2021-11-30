@@ -39,11 +39,11 @@ if PY3:
 DEFAULT_TIMEOUT = 10
 
 
-@traced_class()
 class BadConfigError(Exception):
     pass
 
 
+@traced_class()
 class PHPFPMCheck(AgentCheck):
     """
     Tracks basic php-fpm metrics via the status module

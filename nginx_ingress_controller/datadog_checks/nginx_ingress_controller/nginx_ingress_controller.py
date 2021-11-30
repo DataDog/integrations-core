@@ -33,7 +33,6 @@ HISTOGRAM_METRICS = [
 ]
 
 
-@traced_class()
 class NginxIngressControllerCheck(OpenMetricsBaseCheck):
     """
     Collect Nginx Ingress Controller metrics in OpenMetrics format

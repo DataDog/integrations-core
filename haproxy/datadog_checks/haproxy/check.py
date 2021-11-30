@@ -8,7 +8,6 @@ from .legacy.haproxy import HAProxyCheckLegacy
 from .metrics import METRIC_MAP
 
 
-@traced_class()
 class HAProxyCheck(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
 

@@ -19,7 +19,6 @@ if PY3:
     long = int
 
 
-@traced_class()
 class BackendStatus(object):
     HEALTHY = 'healthy'
     SICK = 'sick'
@@ -34,6 +33,7 @@ class BackendStatus(object):
         return AgentCheck.UNKNOWN
 
 
+@traced_class()
 class Varnish(AgentCheck):
     SERVICE_CHECK_NAME = 'varnish.backend_healthy'
     # Parse metrics from varnishstat.

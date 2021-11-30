@@ -6,7 +6,6 @@ from datadog_checks.base.checks.win import PDHBaseCheck
 from datadog_checks.base.utils.tracing import traced_class
 
 
-@traced_class()
 class PDHCheck(PDHBaseCheck):
     """
     PDH check.

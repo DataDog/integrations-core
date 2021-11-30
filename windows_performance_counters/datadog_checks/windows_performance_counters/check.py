@@ -7,6 +7,5 @@ from datadog_checks.base.utils.tracing import traced_class
 from .config_models import ConfigMixin
 
 
-@traced_class()
 class WindowsPerformanceCountersCheck(PerfCountersBaseCheck, ConfigMixin):
     pass

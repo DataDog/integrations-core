@@ -129,7 +129,6 @@ TAGS_MAP = {
 METRIC_SUFFIX = {EXCHANGE_TYPE: "exchange", QUEUE_TYPE: "queue", NODE_TYPE: "node", OVERVIEW_TYPE: "overview"}
 
 
-@traced_class()
 class RabbitMQException(Exception):
     pass
 

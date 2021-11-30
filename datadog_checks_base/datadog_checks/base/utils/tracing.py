@@ -4,7 +4,10 @@
 import functools
 import os
 
-from ddtrace import patch_all, tracer
+try:
+    from ddtrace import patch_all, tracer
+except ImportError:
+    tracer = None
 
 from ..config import is_affirmative
 
@@ -59,7 +62,7 @@ def tracing_method(f):
 
 
 def traced_class():
-    if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true':
+    if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true' and tracer is not None:
         patch_all()
 
         def decorate(cls):

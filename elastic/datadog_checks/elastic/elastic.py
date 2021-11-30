@@ -24,11 +24,11 @@ from .metrics import (
 )
 
 
-@traced_class()
 class AuthenticationError(requests.exceptions.HTTPError):
     """Authentication Error, unable to reach server"""
 
 
+@traced_class()
 class ESCheck(AgentCheck):
     HTTP_CONFIG_REMAPPER = {
         'aws_service': {'name': 'aws_service', 'default': 'es'},

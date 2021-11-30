@@ -5,7 +5,6 @@ from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.utils.tracing import traced_class
 
 
-@traced_class()
 class CrioCheck(OpenMetricsBaseCheck):
     """
     Collect CRI-O runtime metrics in OpenMetrics format

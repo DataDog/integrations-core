@@ -11,7 +11,6 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.tracing import traced_class
 
 
-@traced_class()
 class BadResponseError(ConfigurationError):
     pass
 
@@ -20,6 +19,7 @@ class InvalidConfigError(ConfigurationError):
     pass
 
 
+@traced_class()
 class Memcache(AgentCheck):
 
     SOURCE_TYPE_NAME = 'memcached'

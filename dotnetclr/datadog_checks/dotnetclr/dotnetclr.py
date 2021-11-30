@@ -19,7 +19,6 @@ DEFAULT_COUNTERS = [
 ]
 
 
-@traced_class()
 class DotnetclrCheck(PDHBaseCheck):
     def __init__(self, name, init_config, instances=None):
         super(DotnetclrCheck, self).__init__(name, init_config, instances=instances, counter_list=DEFAULT_COUNTERS)

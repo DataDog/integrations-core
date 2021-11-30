@@ -12,11 +12,11 @@ from datadog_checks.base.utils.tracing import traced_class
 from datadog_checks.pgbouncer.metrics import CONFIG_METRICS, DATABASES_METRICS, POOLS_METRICS, STATS_METRICS
 
 
-@traced_class()
 class ShouldRestartException(Exception):
     pass
 
 
+@traced_class()
 class PgBouncer(AgentCheck):
     """Collects metrics from pgbouncer"""
 

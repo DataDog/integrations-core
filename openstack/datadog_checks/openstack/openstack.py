@@ -98,7 +98,6 @@ BASE_BACKOFF_SECS = 15
 MAX_BACKOFF_SECS = 300
 
 
-@traced_class()
 class OpenStackAuthFailure(Exception):
     pass
 
@@ -135,6 +134,7 @@ class KeystoneUnreachable(Exception):
     pass
 
 
+@traced_class()
 class OpenStackScope(object):
     def __init__(self, auth_token):
         self.auth_token = auth_token

@@ -118,7 +118,6 @@ DEFAULT_COUNTERS = [
 ]
 
 
-@traced_class()
 class ActiveDirectoryCheck(PDHBaseCheck):
     def __init__(self, name, init_config, instances=None):
         super(ActiveDirectoryCheck, self).__init__(

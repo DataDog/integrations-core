@@ -72,7 +72,6 @@ if PY3:
     long = int
 
 
-@traced_class()
 class ZKConnectionFailure(Exception):
     """Raised when we are unable to connect or get the output of a command."""
 
@@ -93,6 +92,7 @@ class ZKMetric(tuple):
         return super(ZKMetric, cls).__new__(cls, [name, value, m_type, m_tags])
 
 
+@traced_class()
 class ZookeeperCheck(AgentCheck):
     """
     ZooKeeper AgentCheck.

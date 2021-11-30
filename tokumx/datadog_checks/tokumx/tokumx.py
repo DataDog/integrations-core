@@ -20,7 +20,6 @@ if PY3:
 DEFAULT_TIMEOUT = 10
 
 
-@traced_class()
 class LocalRate:
     """To be used for metrics that should be sent as rates but that we want to send as histograms"""
 
@@ -53,6 +52,7 @@ class LocalRate:
             self.submit_histogram()
 
 
+@traced_class()
 class TokuMX(AgentCheck):
     SERVICE_CHECK_NAME = 'tokumx.can_connect'
 
