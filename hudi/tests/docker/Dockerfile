@@ -14,8 +14,5 @@ RUN wget -O - https://github.com/sbt/sbt/releases/download/v1.4.1/sbt-1.4.1.tgz 
 
 ENV PATH /usr/local/sbt/bin:${PATH}
 
-# we have to build hudi from source because the JMX fix has not been released yet
-#RUN wget -P /opt https://repository.apache.org/content/repositories/orgapachehudi-1047/org/apache/hudi/hudi-spark-bundle_2.12/0.10.0-rc2/hudi-spark-bundle_2.12-0.10.0-rc2.jar \
-
 COPY . /usr/src/app/
 RUN cd /usr/src/app && sbt update && sbt clean assembly && sbt package
