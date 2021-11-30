@@ -19,7 +19,7 @@ services:
         "--packages", "org.apache.spark:spark-avro_2.12:${SPARK_VERSION}",
         "--conf", "spark.serializer=org.apache.spark.serializer.KryoSerializer",
         "--jars",
-        "https://repository.apache.org/content/repositories/orgapachehudi-1047/org/apache/hudi/hudi-spark3-bundle_2.12/0.10.0-rc3/hudi-spark3-bundle_2.12-0.10.0-rc3.jar",
+        "https://repository.apache.org/content/repositories/orgapachehudi-1047/org/apache/hudi/hudi-spark3-bundle_2.12/0.10.0-rc2/hudi-spark3-bundle_2.12-0.10.0-rc2.jar",
         "/usr/src/app/target/scala-2.12/app_2.12-0.1.0-SNAPSHOT.jar"
     ]
     ports:
