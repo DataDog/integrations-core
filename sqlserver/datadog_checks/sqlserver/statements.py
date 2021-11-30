@@ -1,4 +1,5 @@
 import binascii
+import math
 import time
 
 from cachetools import TTLCache
@@ -40,7 +41,7 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
 
 STATEMENT_METRICS_QUERY = """\
 with qstats as (
-    select text, query_hash, query_plan_hash,
+    select text, query_hash, query_plan_hash, last_execution_time,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'user_id') as user_id,
            {query_metrics_columns}
@@ -52,6 +53,7 @@ select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid, D.name as
     from qstats S
     left join sys.databases D on S.dbid = D.database_id
     left join sys.sysusers U on S.user_id = U.uid
+    where S.last_execution_time > dateadd(second, -{collection_interval}, getdate())
     group by text, query_hash, query_plan_hash, S.dbid, D.name, U.name
 """
 
@@ -168,6 +170,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._statement_metrics_query = STATEMENT_METRICS_QUERY.format(
             query_metrics_columns=', '.join(available_columns),
             query_metrics_column_sums=', '.join(['sum({}) as {}'.format(c, c) for c in available_columns]),
+            collection_interval=int(math.ceil(self.collection_interval * 2)),
         )
         return self._statement_metrics_query
 
