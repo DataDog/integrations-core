@@ -87,7 +87,7 @@ def _hash_to_hex(hash):
     return to_native_string(binascii.hexlify(hash))
 
 
-def obfuscate_xml_plan(raw_plan):
+def obfuscate_xml_plan(raw_plan, obfuscator_options=None):
     """
     Obfuscates SQL text & Parameters from the provided SQL Server XML Plan
     Also strips unnecessary whitespace
@@ -101,7 +101,8 @@ def obfuscate_xml_plan(raw_plan):
         for k in XML_PLAN_OBFUSCATION_ATTRS:
             val = e.attrib.get(k, None)
             if val:
-                e.attrib[k] = ensure_unicode(datadog_agent.obfuscate_sql(val))
+                statement = json.loads(datadog_agent.obfuscate_sql(val, obfuscator_options))
+                e.attrib[k] = ensure_unicode(statement['query'])
     return to_native_string(ET.tostring(tree, encoding="UTF-8"))
 
 
@@ -192,7 +193,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         normalized_rows = []
         for row in rows:
             try:
-                statement = json.loads(datadog_agent.obfuscate_sql(row['text'], self.obfuscator_options))
+                statement = json.loads(datadog_agent.obfuscate_sql(row['text'], self.check.obfuscator_options))
                 obfuscated_statement = statement['query']
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
@@ -352,7 +353,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 obfuscated_plan, collection_errors = None, None
 
                 try:
-                    obfuscated_plan = obfuscate_xml_plan(raw_plan)
+                    obfuscated_plan = obfuscate_xml_plan(raw_plan, self.check.obfuscator_options)
                 except Exception as e:
                     self.log.debug(
                         "failed to obfuscate XML Plan query_signature=%s query_hash=%s query_plan_hash=%s: %s",

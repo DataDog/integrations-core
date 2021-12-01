@@ -331,7 +331,7 @@ def _load_test_xml_plan(filename):
         return f.read()
 
 
-def _mock_sql_obfuscate(sql_string):
+def _mock_sql_obfuscate(sql_string, options=None):
     sql_string = re.sub(r"'[^']+'", r"?", sql_string)
     sql_string = re.sub(r"([^@])[0-9]+", r"\1?", sql_string)
     return json.dumps({'query': sql_string, 'metadata': {}})
