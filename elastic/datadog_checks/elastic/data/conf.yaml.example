@@ -68,6 +68,14 @@ instances:
     #
     # cluster_stats: false
 
+    ## @param detailed_index_stats - boolean - optional - default: false
+    ## This flag is to be used with `cluster_stats` and `pshard_stats` set to true and if
+    ## you want to obtain index specific stats.
+    ## Without this flag you only get stats from `_all`.
+    ## Do not use it if you are pointing to localhost.
+    #
+    # detailed_index_stats: false
+
     ## @param index_stats - boolean - optional - default: false
     ## Set "index_stats" to true to collect metrics for individual indices.
     #
