@@ -131,7 +131,8 @@ class SqlserverActivity(DBMAsyncJob):
         estimated_size = 0
         for row in rows:
             try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['text'])
+                statement = json.loads(datadog_agent.obfuscate_sql(row['text']), self.check.obfuscator_options)
+                obfuscated_statement = statement['query']
                 row['query_signature'] = compute_sql_signature(obfuscated_statement)
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging

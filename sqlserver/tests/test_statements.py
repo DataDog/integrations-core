@@ -272,7 +272,46 @@ def _run_test_statement_metrics_and_plans(
 @not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
+def test_statement_samples_metadata(aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent):
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    query = '''
+    -- Test comment
+    select * from sys.databases'''
+    query_signature = '6d1d070f9b6c5647'
+
+    def _run_query():
+        with bob_conn.cursor() as cursor:
+            cursor.execute(query)
+
+    metadata = {'comments': ['-- Test comment']}
+
+    def _obfuscate_sql(sql_query, options=None):
+        return json.dumps({'query': sql_query, 'metadata': metadata})
+
+    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        _run_query()
+        dd_run_check(check)
+        aggregator.reset()
+        _run_query()
+        dd_run_check(check)
+
+    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+    assert dbm_samples, "should have collected at least one sample"
+
+    matching = [s for s in dbm_samples if s['db']['query_signature'] == query_signature and s['dbm_type'] == 'plan']
+    assert len(matching) == 1
+
+    sample = matching[0]
+    assert sample['db']['metadata']['comments'] == metadata['comments']
+
+
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance, aggregator):
     test_query = "select * from sys.databases"
 
     # run this test query to guarantee there's at least one application query in the query plan cache

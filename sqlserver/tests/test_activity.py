@@ -164,8 +164,12 @@ def _run_test_collect_activity(aggregator, instance_docker, dd_run_check, dbm_in
 )
 def test_truncate_on_max_size_bytes(dbm_instance, datadog_agent, rows, expected_len):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    def obfuscate_sql(query, options=None):
+        return json.dumps({'query': query, 'metadata': {}})
+
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
-        mock_agent.side_effect = "something"
+        mock_agent.side_effect = obfuscate_sql
         result_rows = check.activity._normalize_queries_and_filter_rows(rows, 1000)
         assert len(result_rows) == expected_len
 
