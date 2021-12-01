@@ -172,6 +172,10 @@ def instance_ntlm_domain(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_openmetrics_endpoint(field, value):
+    return 'http://localhost:80/stats/prometheus'
+
+
 def instance_password(field, value):
     return get_default_field_value(field, value)
 
