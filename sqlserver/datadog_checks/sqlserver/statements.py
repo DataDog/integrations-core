@@ -1,6 +1,8 @@
 import binascii
 import time
+from typing import Dict, Generator, List
 
+import pyodbc
 from cachetools import TTLCache
 from lxml import etree as ET
 
@@ -8,7 +10,7 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import ensure_unicode, to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, DbRow, RateLimitingTTLCache, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 
 try:
@@ -183,10 +185,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         return rows
 
     def _normalize_queries(self, rows):
+        # type: (List[Dict]) -> List[DbRow]
         normalized_rows = []
         for row in rows:
             try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['text'], self.obfuscator_options)
+                statement = json.loads(datadog_agent.obfuscate_sql(row['text'], self.obfuscator_options))
+                obfuscated_statement = statement['query']
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
                 self.log.debug("Failed to obfuscate query: %s", e)
@@ -195,17 +199,19 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
             row['query_hash'] = _hash_to_hex(row['query_hash'])
             row['query_plan_hash'] = _hash_to_hex(row['query_plan_hash'])
-            normalized_rows.append(row)
+            normalized_rows.append(DbRow(row, statement['metadata']))
         return normalized_rows
 
     def _collect_metrics_rows(self, cursor):
+        # type: (pyodbc.Cursor) -> List[DbRow]
         rows = self._load_raw_query_metrics_rows(cursor)
         rows = self._normalize_queries(rows)
         if not rows:
             return []
-        metric_columns = [c for c in rows[0].keys() if c.startswith("total_") or c == 'execution_count']
-        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
-        return rows
+        query_sig_to_metadata = {row.data['query_signature']: row.metadata for row in rows}
+        metric_columns = [c for c in rows[0].data.keys() if c.startswith("total_") or c == 'execution_count']
+        rows = self._state.compute_derivative_rows([row.data for row in rows], metric_columns, key=_row_key)
+        return [DbRow(row, query_sig_to_metadata.get(row['query_signature'])) for row in rows]
 
     @staticmethod
     def _to_metrics_payload_row(row):
@@ -215,12 +221,13 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         return row
 
     def _to_metrics_payload(self, rows):
+        # type: (List[DbRow]) -> Dict
         return {
             'host': self.check.resolved_hostname,
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
             'tags': self.check.tags,
-            'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
+            'sqlserver_rows': [self._to_metrics_payload_row(r.data) for r in rows],
             'sqlserver_version': self.check.static_info_cache.get("version", ""),
             'ddagentversion': datadog_agent.get_version(),
         }
@@ -294,12 +301,13 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         )
 
     def _rows_to_fqt_events(self, rows):
+        # type: (List[DbRow]) -> Generator
         for row in rows:
-            query_cache_key = _row_key(row)
+            query_cache_key = _row_key(row.data)
             if query_cache_key in self._full_statement_text_cache:
                 continue
             self._full_statement_text_cache[query_cache_key] = True
-            tags = self.check.tags + ["db:{}".format(row['database_name'])]
+            tags = self.check.tags + ["db:{}".format(row.data['database_name'])]
             yield {
                 "timestamp": time.time() * 1000,
                 "host": self.check.resolved_hostname,
@@ -308,14 +316,14 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 "ddtags": ",".join(tags),
                 "dbm_type": "fqt",
                 "db": {
-                    "instance": row['database_name'],
-                    "query_signature": row['query_signature'],
-                    "user": row.get("user_name", None),
-                    "statement": row['text'],
+                    "instance": row.data['database_name'],
+                    "query_signature": row.data['query_signature'],
+                    "user": row.data.get("user_name", None),
+                    "statement": row.data['text'],
                 },
                 'sqlserver': {
-                    'query_hash': row['query_hash'],
-                    'query_plan_hash': row['query_plan_hash'],
+                    'query_hash': row.data['query_hash'],
+                    'query_plan_hash': row.data['query_plan_hash'],
                 },
             }
 
@@ -333,10 +341,11 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         return result[0][0]
 
     def _collect_plans(self, rows, cursor):
+        # type: (List[DbRow], pyodbc.Cursor) -> Generator
         for row in rows:
-            plan_key = (row['query_signature'], row['query_hash'], row['query_plan_hash'])
+            plan_key = (row.data['query_signature'], row.data['query_hash'], row.data['query_plan_hash'])
             if self._seen_plans_ratelimiter.acquire(plan_key):
-                raw_plan = self._load_plan(row['query_hash'], row['query_plan_hash'], cursor)
+                raw_plan = self._load_plan(row.data['query_hash'], row.data['query_plan_hash'], cursor)
                 obfuscated_plan, collection_errors = None, None
 
                 try:
@@ -344,14 +353,14 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 except Exception as e:
                     self.log.debug(
                         "failed to obfuscate XML Plan query_signature=%s query_hash=%s query_plan_hash=%s: %s",
-                        row['query_signature'],
-                        row['query_hash'],
-                        row['query_plan_hash'],
+                        row.data['query_signature'],
+                        row.data['query_hash'],
+                        row.data['query_plan_hash'],
                         e,
                     )
                     collection_errors = [{'code': "obfuscate_xml_plan_error", 'message': str(e)}]
 
-                tags = self.check.tags + ["db:{}".format(row['database_name'])]
+                tags = self.check.tags + ["db:{}".format(row.data['database_name'])]
                 yield {
                     "host": self._db_hostname,
                     "ddagentversion": datadog_agent.get_version(),
@@ -360,18 +369,19 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     "timestamp": time.time() * 1000,
                     "dbm_type": "plan",
                     "db": {
-                        "instance": row.get("database_name", None),
+                        "instance": row.data.get("database_name", None),
                         "plan": {
                             "definition": obfuscated_plan,
-                            "signature": row['query_plan_hash'],
+                            "signature": row.data['query_plan_hash'],
                             "collection_errors": collection_errors,
                         },
-                        "query_signature": row['query_signature'],
-                        "user": row.get("user_name", None),
-                        "statement": row['text'],
+                        "query_signature": row.data['query_signature'],
+                        "user": row.data.get("user_name", None),
+                        "statement": row.data['text'],
+                        "metadata": {"comments": row.metadata.comments},
                     },
                     'sqlserver': {
-                        'query_hash': row['query_hash'],
-                        'query_plan_hash': row['query_plan_hash'],
+                        'query_hash': row.data['query_hash'],
+                        'query_plan_hash': row.data['query_plan_hash'],
                     },
                 }

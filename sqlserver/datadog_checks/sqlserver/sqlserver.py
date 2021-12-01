@@ -113,10 +113,14 @@ class SQLServer(AgentCheck):
         self.activity_config = self.instance.get('query_activity', {}) or {}
         self.activity = SqlserverActivity(self)
         obfuscator_options_config = self.instance.get('obfuscator_options', {}) or {}
-        self.obfuscator_options = to_native_string(json.dumps({
-            'replace_digits': obfuscator_options_config.get('replace_digits', False),
-            'collect_comments': obfuscator_options_config.get('collect_comments', True)
-        }))
+        self.obfuscator_options = to_native_string(
+            json.dumps(
+                {
+                    'replace_digits': obfuscator_options_config.get('replace_digits', False),
+                    'collect_comments': obfuscator_options_config.get('collect_comments', True),
+                }
+            )
+        )
 
         self.static_info_cache = TTLCache(
             maxsize=100,

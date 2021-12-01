@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import json
 import logging
 import os
 import re
@@ -333,7 +334,7 @@ def _load_test_xml_plan(filename):
 def _mock_sql_obfuscate(sql_string):
     sql_string = re.sub(r"'[^']+'", r"?", sql_string)
     sql_string = re.sub(r"([^@])[0-9]+", r"\1?", sql_string)
-    return sql_string
+    return json.dumps({'query': sql_string, 'metadata': {}})
 
 
 @pytest.mark.parametrize(
