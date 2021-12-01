@@ -4,13 +4,11 @@
 from typing import cast
 
 from datadog_checks.base import OpenMetricsBaseCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 from .config import Config
 from .types import Instance
 
 
-@traced_class()
 class AzureIoTEdgeCheck(OpenMetricsBaseCheck):
     __NAMESPACE__ = 'azure.iot_edge'  # Child of `azure.` namespace.
 

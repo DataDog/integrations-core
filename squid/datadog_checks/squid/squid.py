@@ -7,8 +7,8 @@ import re
 import requests
 from six import iteritems
 
+# project
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'squid'
 
@@ -89,7 +89,6 @@ SQUID_VERSION_PATTERN = re.compile(
 )
 
 
-@traced_class()
 class SquidCheck(AgentCheck):
     HTTP_CONFIG_REMAPPER = {'cachemgr_username': {'name': 'username'}, 'cachemgr_password': {'name': 'password'}}
 

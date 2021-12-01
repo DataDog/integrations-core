@@ -11,7 +11,6 @@ from six import PY3, StringIO, iteritems, string_types
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative
-from datadog_checks.base.utils.tracing import traced_class
 
 # Relax param filtering
 FCGIApp._environPrefixes.extend(('DOCUMENT_', 'SCRIPT_'))
@@ -43,7 +42,6 @@ class BadConfigError(Exception):
     pass
 
 
-@traced_class()
 class PHPFPMCheck(AgentCheck):
     """
     Tracks basic php-fpm metrics via the status module

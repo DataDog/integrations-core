@@ -16,7 +16,6 @@ from vertica_python.vertica.column import timestamp_tz_parse
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.base.utils.containers import iter_unique
-from datadog_checks.base.utils.tracing import traced_class
 
 from . import views
 from .utils import kilobytes_to_bytes, node_state_to_service_check
@@ -25,7 +24,6 @@ from .utils import kilobytes_to_bytes, node_state_to_service_check
 PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)
 
 
-@traced_class()
 class VerticaCheck(AgentCheck):
     __NAMESPACE__ = 'vertica'
     SERVICE_CHECK_CONNECT = 'can_connect'

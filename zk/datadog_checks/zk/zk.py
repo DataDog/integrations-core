@@ -66,7 +66,6 @@ from distutils.version import LooseVersion  # pylint: disable=E0611,E0401
 from six import PY3, StringIO, iteritems
 
 from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode, is_affirmative
-from datadog_checks.base.utils.tracing import traced_class
 
 if PY3:
     long = int
@@ -92,7 +91,6 @@ class ZKMetric(tuple):
         return super(ZKMetric, cls).__new__(cls, [name, value, m_type, m_tags])
 
 
-@traced_class()
 class ZookeeperCheck(AgentCheck):
     """
     ZooKeeper AgentCheck.

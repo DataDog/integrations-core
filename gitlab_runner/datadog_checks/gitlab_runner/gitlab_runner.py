@@ -9,10 +9,8 @@ from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.utils.tracing import traced_class
 
 
-@traced_class()
 class GitlabRunnerCheck(OpenMetricsBaseCheck):
     """
     Collect Gitlab Runner metrics from Prometheus and validates that the connectivity with Gitlab

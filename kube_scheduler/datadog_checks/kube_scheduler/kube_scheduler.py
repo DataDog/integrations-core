@@ -12,7 +12,6 @@ from datadog_checks.base.checks.kube_leader import KubeLeaderElectionMixin
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.http import RequestsWrapper
-from datadog_checks.base.utils.tracing import traced_class
 
 DEFAULT_COUNTERS = {
     # Number of HTTP requests, partitioned by status code, method, and host.
@@ -97,7 +96,6 @@ IGNORE_METRICS = [
 ]
 
 
-@traced_class()
 class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
 

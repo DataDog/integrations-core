@@ -9,7 +9,6 @@ from collections import defaultdict
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
-from datadog_checks.base.utils.tracing import traced_class
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'cassandra_nodetool'
 DEFAULT_HOST = 'localhost'
@@ -29,7 +28,6 @@ TO_BYTES = {
 }
 
 
-@traced_class()
 class CassandraNodetoolCheck(AgentCheck):
 
     datacenter_name_re = re.compile('^Datacenter: (.*)')

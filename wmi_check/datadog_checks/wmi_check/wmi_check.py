@@ -6,10 +6,8 @@ from typing import Any, Dict, List
 from datadog_checks.base.checks.win.wmi import WinWMICheck, WMISampler
 from datadog_checks.base.checks.win.wmi.types import TagQuery, WMIFilter, WMIMetric, WMIProperties
 from datadog_checks.base.utils.timeout import TimeoutException
-from datadog_checks.base.utils.tracing import traced_class
 
 
-@traced_class()
 class WMICheck(WinWMICheck):
     """
     WMI check.

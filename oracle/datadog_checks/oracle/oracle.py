@@ -8,7 +8,6 @@ import cx_Oracle
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.db import QueryManager
-from datadog_checks.base.utils.tracing import traced_class
 
 from . import queries
 
@@ -27,7 +26,6 @@ EVENT_TYPE = SOURCE_TYPE_NAME = 'oracle'
 MAX_CUSTOM_RESULTS = 100
 
 
-@traced_class()
 class Oracle(AgentCheck):
     __NAMESPACE__ = 'oracle'
 

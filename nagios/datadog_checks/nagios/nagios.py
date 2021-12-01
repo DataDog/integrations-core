@@ -7,7 +7,6 @@ from collections import namedtuple
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.tailfile import TailFile
-from datadog_checks.base.utils.tracing import traced_class
 
 # fields order for each event type, as named tuples
 EVENT_FIELDS = {
@@ -63,7 +62,6 @@ RE_LINE_EXT = re.compile(r'^\[(\d+)\](?: \[\d+\])? ([^:]+): (.*)$')
 SOURCE_TYPE_NAME = 'Nagios'
 
 
-@traced_class()
 class NagiosCheck(AgentCheck):
 
     NAGIOS_CONF_KEYS = [

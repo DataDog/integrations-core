@@ -7,7 +7,6 @@ from copy import deepcopy
 from datadog_checks.avi_vantage import metrics
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.utils.tracing import traced_class
 
 from .config_models import ConfigMixin
 
@@ -20,7 +19,6 @@ RESOURCE_METRICS = {
 LABELS_REMAPPER = {'type': 'avi_type', 'tenant': 'avi_tenant'}
 
 
-@traced_class()
 class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = "avi_vantage"
 

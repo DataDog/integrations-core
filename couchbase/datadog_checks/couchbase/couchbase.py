@@ -12,7 +12,6 @@ import requests
 from six import string_types
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.utils.tracing import traced_class
 from datadog_checks.couchbase.couchbase_consts import (
     BUCKET_STATS,
     COUCHBASE_STATS_PATH,
@@ -32,7 +31,6 @@ from datadog_checks.couchbase.couchbase_consts import (
 )
 
 
-@traced_class()
 class Couchbase(AgentCheck):
     """
     Extracts stats from Couchbase via its REST API

@@ -9,7 +9,6 @@ import time
 from six import PY3, iteritems
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.tracing import traced_class
 from datadog_checks.tokumx.vendor import bson
 from datadog_checks.tokumx.vendor.pymongo import MongoClient, ReadPreference, errors, uri_parser
 from datadog_checks.tokumx.vendor.pymongo import version as py_version
@@ -52,7 +51,6 @@ class LocalRate:
             self.submit_histogram()
 
 
-@traced_class()
 class TokuMX(AgentCheck):
     SERVICE_CHECK_NAME = 'tokumx.can_connect'
 

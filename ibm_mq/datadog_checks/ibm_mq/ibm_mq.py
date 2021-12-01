@@ -5,7 +5,6 @@
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.tracing import traced_class
 from datadog_checks.ibm_mq.collectors.stats_collector import StatsCollector
 from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 
@@ -25,7 +24,6 @@ except ImportError as e:
     pymqi = None
 
 
-@traced_class()
 class IbmMqCheck(AgentCheck):
     SERVICE_CHECK = 'ibm_mq.can_connect'
 

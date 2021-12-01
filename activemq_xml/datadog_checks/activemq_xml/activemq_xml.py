@@ -8,7 +8,6 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import _is_affirmative
-from datadog_checks.base.utils.tracing import traced_class
 
 QUEUE_URL = "/admin/xml/queues.jsp"
 TOPIC_URL = "/admin/xml/topics.jsp"
@@ -26,7 +25,6 @@ SUBSCRIBER_TAGS = ["connectionId", "subscriptionName", "destinationName", "selec
 MAX_ELEMENTS = 300
 
 
-@traced_class()
 class ActiveMQXML(AgentCheck):
     def check(self, _):
         url = self.instance.get("url")

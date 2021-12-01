@@ -13,10 +13,8 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import _is_affirmative
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
-from datadog_checks.base.utils.tracing import traced_class
 
 
-@traced_class()
 class Ceph(AgentCheck):
     """Collect metrics and events from ceph"""
 

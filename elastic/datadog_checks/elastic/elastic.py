@@ -9,7 +9,6 @@ from six import iteritems, itervalues
 from six.moves.urllib.parse import urljoin, urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
-from datadog_checks.base.utils.tracing import traced_class
 
 from .config import from_instance
 from .metrics import (
@@ -28,7 +27,6 @@ class AuthenticationError(requests.exceptions.HTTPError):
     """Authentication Error, unable to reach server"""
 
 
-@traced_class()
 class ESCheck(AgentCheck):
     HTTP_CONFIG_REMAPPER = {
         'aws_service': {'name': 'aws_service', 'default': 'es'},

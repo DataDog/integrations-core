@@ -8,7 +8,6 @@ import pymysql
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
-from datadog_checks.base.utils.tracing import traced_class
 from datadog_checks.singlestore.config import SingleStoreConfig
 from datadog_checks.singlestore.queries import (
     AGGREGATORS,
@@ -26,7 +25,6 @@ DEFAULT_QUERIES = [MV_GLOBAL_STATUS, AGGREGATORS, LEAVES, VERSION_METADATA]
 ADDITIONAL_SYSTEM_QUERIES = [SYSINFO_CPU, SYSINFO_DISK, SYSINFO_MEM, SYSINFO_NET]
 
 
-@traced_class()
 class SinglestoreCheck(AgentCheck):
 
     SERVICE_CHECK_NAME = "can_connect"

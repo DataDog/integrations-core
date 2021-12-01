@@ -13,11 +13,9 @@ from six.moves.urllib.parse import quote, urljoin
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.base.utils.headers import headers
-from datadog_checks.base.utils.tracing import traced_class
 from datadog_checks.couch import errors
 
 
-@traced_class()
 class CouchDb(AgentCheck):
     HTTP_CONFIG_REMAPPER = {'user': {'name': 'username'}}
     TIMEOUT = 5

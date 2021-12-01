@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 # Sorted per plugin, all prometheus metrics prior to version 1.7.0 which introduced a major renaming of metrics.
 DEFAULT_METRICS = {
@@ -135,7 +134,6 @@ GO_METRICS = {
 }
 
 
-@traced_class()
 class CoreDNSCheck(OpenMetricsBaseCheck):
     """
     Collect CoreDNS metrics from its Prometheus endpoint

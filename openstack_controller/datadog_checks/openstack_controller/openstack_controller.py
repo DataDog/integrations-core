@@ -12,7 +12,7 @@ from six import iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
-from datadog_checks.base.utils.tracing import traced, traced_class
+from datadog_checks.base.utils.tracing import traced
 
 from .api import ApiFactory
 from .exceptions import (
@@ -95,7 +95,6 @@ REMOVED_STATES = ['DELETED', 'SHUTOFF']
 SERVER_FIELDS_REQ = ['server_id', 'state', 'server_name', 'hypervisor_hostname', 'tenant_id']
 
 
-@traced_class()
 class OpenStackControllerCheck(AgentCheck):
     HYPERVISOR_STATE_UP = 'up'
     HYPERVISOR_STATE_DOWN = 'down'

@@ -11,7 +11,6 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.serialization import json
-from datadog_checks.base.utils.tracing import traced_class
 
 from .config import Config
 from .utils import normalize_api_data_inplace
@@ -33,7 +32,6 @@ SEVERITY_TAGS = {
 }
 
 
-@traced_class()
 class TwistlockCheck(AgentCheck):
     NAMESPACE = 'twistlock'
 

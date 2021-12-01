@@ -4,7 +4,6 @@
 from six import iteritems
 
 from datadog_checks.base import PDHBaseCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 DEFAULT_COUNTERS = [
     ["Web Service", None, "Service Uptime", "iis.uptime", "gauge"],
@@ -43,7 +42,6 @@ DEFAULT_COUNTERS = [
 TOTAL_INSTANCE = '_Total'
 
 
-@traced_class()
 class IIS(PDHBaseCheck):
     SITE = 'site'
     APP_POOL = 'app_pool'

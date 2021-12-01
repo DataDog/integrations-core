@@ -7,10 +7,8 @@ from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.utils.tracing import traced_class
 
 
-@traced_class()
 class Apache(AgentCheck):
     """Tracks basic connection/requests/workers metrics
 

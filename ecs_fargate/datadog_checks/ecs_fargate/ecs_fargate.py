@@ -9,7 +9,6 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import round_value
-from datadog_checks.base.utils.tracing import traced_class
 
 try:
     from tagger import get_tags
@@ -68,7 +67,6 @@ NETWORK_GAUGE_METRICS = {
 NETWORK_RATE_METRICS = {'rx_bytes': 'ecs.fargate.net.bytes_rcvd', 'tx_bytes': 'ecs.fargate.net.bytes_sent'}
 
 
-@traced_class()
 class FargateCheck(AgentCheck):
 
     HTTP_CONFIG_REMAPPER = {'timeout': {'name': 'timeout', 'default': DEFAULT_TIMEOUT}}

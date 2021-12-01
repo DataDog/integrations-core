@@ -15,7 +15,6 @@ from six import iteritems
 from six.moves import range
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 MIXED = "mixed"
 DATA = "data"
@@ -102,7 +101,6 @@ class FileDescriptor(object):
         return self.fd
 
 
-@traced_class()
 class BTRFS(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(BTRFS, self).__init__(name, init_config, instances=instances)

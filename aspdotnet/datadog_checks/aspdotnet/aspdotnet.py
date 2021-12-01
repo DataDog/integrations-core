@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 try:
     from datadog_checks.base import PDHBaseCheck
-
 except ImportError:
 
     class PDHBaseCheck:

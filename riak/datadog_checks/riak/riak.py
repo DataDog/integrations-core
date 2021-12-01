@@ -8,12 +8,10 @@ from copy import copy
 import simplejson as json
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 from .keys import KEYS, SEARCH_LATENCY_KEYS, STAT_KEYS, VNODEQ_KEYS
 
 
-@traced_class()
 class Riak(AgentCheck):
     SERVICE_CHECK_NAME = 'riak.can_connect'
 

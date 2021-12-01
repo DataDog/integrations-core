@@ -6,12 +6,10 @@ import re
 from requests.exceptions import RequestException
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.utils.tracing import traced_class
 
 from .constants import CATEGORIES, NUMERIC_TYPES
 
 
-@traced_class()
 class SonarqubeCheck(AgentCheck):
     __NAMESPACE__ = 'sonarqube'
     SERVICE_CHECK_CONNECT = 'api_access'

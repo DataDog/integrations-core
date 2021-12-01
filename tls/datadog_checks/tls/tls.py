@@ -10,7 +10,6 @@ from six import text_type
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative
-from datadog_checks.base.utils.tracing import traced_class
 
 from .const import (
     DEFAULT_EXPIRE_SECONDS_CRITICAL,
@@ -25,7 +24,6 @@ from .utils import days_to_seconds, get_protocol_versions, is_ip_address, second
 PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)
 
 
-@traced_class()
 class TLSCheck(AgentCheck):
     # This remapper is used to support legacy TLS integration config values
     TLS_CONFIG_REMAPPER = {

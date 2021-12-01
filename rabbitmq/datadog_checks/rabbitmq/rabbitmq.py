@@ -133,7 +133,6 @@ class RabbitMQException(Exception):
     pass
 
 
-@traced_class()
 class RabbitMQ(AgentCheck):
 
     """This check is for gathering statistics from the RabbitMQ

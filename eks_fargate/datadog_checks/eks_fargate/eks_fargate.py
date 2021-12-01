@@ -9,7 +9,6 @@ from kubeutil import get_connection_info
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.tagging import tagger
-from datadog_checks.base.utils.tracing import traced_class
 
 KUBELET_NODE_ENV_VAR = 'DD_KUBERNETES_KUBELET_NODENAME'
 CAPACITY_ANNOTATION_KEY = 'CapacityProvisioned'
@@ -19,7 +18,6 @@ GB_TO_BYTE_CONVERSION_FACTOR = 1024 * 1024 * 1024
 log = logging.getLogger('collector')
 
 
-@traced_class()
 class EksFargateCheck(KubeletBase):
     """
     Generate heartbeat and capacity metrics for Amazon EKS on AWS Fargate workloads

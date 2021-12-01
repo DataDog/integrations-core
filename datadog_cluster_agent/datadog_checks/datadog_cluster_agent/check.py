@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datadog_checks.base import OpenMetricsBaseCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 DEFAULT_METRICS = {
     'admission_webhooks_certificate_expiry': 'admission_webhooks.certificate_expiry',
@@ -40,7 +39,6 @@ DEFAULT_METRICS = {
 }
 
 
-@traced_class()
 class DatadogClusterAgentCheck(OpenMetricsBaseCheck):
     def __init__(self, name, init_config, instances):
         super(DatadogClusterAgentCheck, self).__init__(

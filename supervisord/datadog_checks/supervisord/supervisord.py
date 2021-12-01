@@ -12,7 +12,6 @@ import supervisor.xmlrpc
 from six.moves import xmlrpc_client as xmlrpclib
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = '9001'
@@ -61,7 +60,6 @@ SUPERVISORD_VERSION_PATTERN = re.compile(
 )
 
 
-@traced_class()
 class SupervisordCheck(AgentCheck):
     def check(self, instance):
         if instance.get('user'):

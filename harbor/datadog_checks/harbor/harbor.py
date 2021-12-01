@@ -4,7 +4,6 @@
 from requests import HTTPError
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 from .api import HarborAPI
 from .common import HEALTHY, VERSION_1_5, VERSION_1_8
@@ -14,7 +13,6 @@ REGISTRY_STATUS = 'harbor.registry.status'
 STATUS = 'harbor.status'
 
 
-@traced_class()
 class HarborCheck(AgentCheck):
     def _check_health(self, api, base_tags):
         """Submits service checks for Harbor individual components."""

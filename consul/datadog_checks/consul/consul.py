@@ -42,7 +42,6 @@ except ImportError:
 NodeStatus = namedtuple('NodeStatus', ['node_id', 'service_name', 'service_tags_set', 'status'])
 
 
-@traced_class()
 class ConsulCheck(OpenMetricsBaseCheck):
     def __init__(self, name, init_config, instances):
         instance = instances[0]

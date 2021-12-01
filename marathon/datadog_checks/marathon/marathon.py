@@ -8,10 +8,8 @@ from six import iteritems
 from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 
-@traced_class()
 class Marathon(AgentCheck):
 
     DEFAULT_TIMEOUT = 5

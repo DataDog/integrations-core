@@ -13,7 +13,6 @@ from six.moves import filter
 
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
-from datadog_checks.base.utils.tracing import traced_class
 
 if PY3:
     long = int
@@ -33,7 +32,6 @@ class BackendStatus(object):
         return AgentCheck.UNKNOWN
 
 
-@traced_class()
 class Varnish(AgentCheck):
     SERVICE_CHECK_NAME = 'varnish.backend_healthy'
     # Parse metrics from varnishstat.

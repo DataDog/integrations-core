@@ -9,14 +9,12 @@ import rethinkdb
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
-from datadog_checks.base.utils.tracing import traced_class
 
 from . import queries
 from .config import Config
 from .types import Instance
 
 
-@traced_class()
 class RethinkDBCheck(AgentCheck):
     """
     Collect metrics from a RethinkDB cluster.

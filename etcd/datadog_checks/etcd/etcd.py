@@ -6,12 +6,10 @@ from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.utils.tracing import traced_class
 
 from .metrics import METRIC_MAP
 
 
-@traced_class()
 class Etcd(OpenMetricsBaseCheck):
 
     DEFAULT_TIMEOUT = 5

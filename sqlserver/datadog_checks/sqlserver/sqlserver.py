@@ -15,8 +15,6 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host
-from datadog_checks.base.utils.tracing import traced_class
-from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 
 try:
@@ -70,7 +68,6 @@ if adodbapi is None and pyodbc is None:
 set_default_driver_conf()
 
 
-@traced_class()
 class SQLServer(AgentCheck):
     __NAMESPACE__ = 'sqlserver'
 

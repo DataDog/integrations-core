@@ -12,12 +12,10 @@ from six import iteritems
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.utils.tracing import traced_class
 
 DEFAULT_MASTER_PORT = 5050
 
 
-@traced_class()
 class MesosSlave(AgentCheck):
     GAUGE = AgentCheck.gauge
     MONOTONIC_COUNT = AgentCheck.monotonic_count

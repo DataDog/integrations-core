@@ -8,7 +8,6 @@ import socket
 from six import BytesIO
 
 from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
-from datadog_checks.base.utils.tracing import traced_class
 
 SERVICE_CHECK_NAME = "statsd.can_connect"
 SERVICE_CHECK_NAME_HEALTH = "statsd.is_up"
@@ -17,7 +16,6 @@ ENDER = re.compile(b"^(END|health: up|health: down)\n$", re.MULTILINE)
 BAD_ENDER = re.compile(b"^ERROR\n$", re.MULTILINE)
 
 
-@traced_class()
 class StatsCheck(AgentCheck):
     def check(self, instance):
         host = instance.get("host", "localhost")

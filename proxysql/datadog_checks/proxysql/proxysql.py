@@ -8,7 +8,6 @@ import pymysql.cursors
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
-from datadog_checks.base.utils.tracing import traced_class
 
 from .queries import (
     STATS_COMMAND_COUNTERS,
@@ -30,7 +29,6 @@ ADDITIONAL_METRICS_MAPPING = {
 }
 
 
-@traced_class()
 class ProxysqlCheck(AgentCheck):
 
     SERVICE_CHECK_NAME = "can_connect"

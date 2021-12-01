@@ -11,13 +11,11 @@ from requests import ConnectionError
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.containers import iter_unique
-from datadog_checks.base.utils.tracing import traced_class
 
 from . import queries
 from .utils import get_version, scrub_connection_string, status_to_service_check
 
 
-@traced_class()
 class IbmDb2Check(AgentCheck):
     METRIC_PREFIX = 'ibm_db2'
     SERVICE_CHECK_CONNECT = '{}.can_connect'.format(METRIC_PREFIX)

@@ -4,12 +4,10 @@
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 from .metrics import ADDITIONAL_METRICS_MAP, INSTANCE_DEFAULT_METRICS
 
 
-@traced_class()
 class ScyllaCheck(OpenMetricsBaseCheck):
     """
     Collect Scylla metrics from Prometheus endpoint

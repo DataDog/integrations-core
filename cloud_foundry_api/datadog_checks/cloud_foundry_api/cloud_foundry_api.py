@@ -13,7 +13,6 @@ from six.moves.urllib_parse import urlparse
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.base.types import Event
-from datadog_checks.base.utils.tracing import traced_class
 
 from .constants import (
     API_SERVICE_CHECK_NAME,
@@ -30,7 +29,6 @@ from .constants import (
 from .utils import date_to_ts, get_next_url, join_url
 
 
-@traced_class()
 class CloudFoundryApiCheck(AgentCheck):
     __NAMESPACE__ = "cloud_foundry_api"
 

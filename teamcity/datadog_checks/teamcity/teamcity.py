@@ -8,10 +8,8 @@ import requests
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import _is_affirmative
-from datadog_checks.base.utils.tracing import traced_class
 
 
-@traced_class()
 class TeamCityCheck(AgentCheck):
 
     NEW_BUILD_URL = (

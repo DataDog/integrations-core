@@ -6,7 +6,6 @@ from typing import Any, Dict, Generator, List, Tuple
 from requests.exceptions import ConnectionError, HTTPError
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 from .api import MarkLogicApi
 from .config import Config
@@ -23,7 +22,6 @@ from .parsers.storage import parse_per_resource_storage_metrics, parse_summary_s
 from .utils import is_resource_included
 
 
-@traced_class()
 class MarklogicCheck(AgentCheck):
     __NAMESPACE__ = 'marklogic'
     SERVICE_CHECK_CONNECT = 'can_connect'

@@ -6,7 +6,6 @@
 from six import PY2
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 # Python 3 compatibility is a different library
 # It's a drop in replacement but has a different name
@@ -19,7 +18,6 @@ else:
 MAX_NUM_TASKS = 200
 
 
-@traced_class()
 class Gearman(AgentCheck):
     SERVICE_CHECK_NAME = 'gearman.can_connect'
     gearman_clients = {}

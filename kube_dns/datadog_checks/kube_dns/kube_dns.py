@@ -7,10 +7,8 @@ from copy import deepcopy
 from six import iteritems
 
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 
-@traced_class()
 class KubeDNSCheck(OpenMetricsBaseCheck):
     """
     Collect kube-dns metrics from Prometheus

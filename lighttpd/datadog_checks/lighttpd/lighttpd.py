@@ -7,12 +7,10 @@ import re
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 VERSION_REGEX = re.compile(r".*/((\d+).*)")
 
 
-@traced_class()
 class Lighttpd(AgentCheck):
     """Tracks basic connection/requests/workers metrics
 

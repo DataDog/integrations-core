@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import PDHBaseCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 from .metrics import DEFAULT_COUNTERS
 

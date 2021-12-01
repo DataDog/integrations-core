@@ -2,12 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 from .metrics import METRIC_MAP
 
 
-@traced_class()
 class CockroachdbCheck(OpenMetricsBaseCheck):
     def __init__(self, name, init_config, instances):
         super(CockroachdbCheck, self).__init__(

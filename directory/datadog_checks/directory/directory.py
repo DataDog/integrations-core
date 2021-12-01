@@ -8,7 +8,6 @@ from typing import Any
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.utils.tracing import traced_class
 from datadog_checks.directory.config import DirectoryConfig
 
 from .traverse import walk
@@ -16,7 +15,6 @@ from .traverse import walk
 SERVICE_DIRECTORY_EXISTS = 'system.disk.directory.exists'
 
 
-@traced_class()
 class DirectoryCheck(AgentCheck):
     """This check is for monitoring and reporting metrics on the files for a provided directory.
 

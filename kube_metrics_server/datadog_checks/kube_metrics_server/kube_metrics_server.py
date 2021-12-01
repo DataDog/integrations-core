@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datadog_checks.base import OpenMetricsBaseCheck
-from datadog_checks.base.utils.tracing import traced_class
 
 COUNTERS = {
     'authenticated_user_requests': 'authenticated_user.requests',
@@ -79,7 +78,6 @@ IGNORED_METRICS = [
 ]
 
 
-@traced_class()
 class KubeMetricsServerCheck(OpenMetricsBaseCheck):
     """
     Collect kube-metrics-server metrics from Prometheus

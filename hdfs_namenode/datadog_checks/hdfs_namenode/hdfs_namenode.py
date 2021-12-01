@@ -10,10 +10,8 @@ from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import compute_percent
-from datadog_checks.base.utils.tracing import traced_class
 
 
-@traced_class()
 class HDFSNameNode(AgentCheck):
     HTTP_CONFIG_REMAPPER = {'disable_ssl_validation': {'name': 'tls_verify', 'default': False, 'invert': True}}
 

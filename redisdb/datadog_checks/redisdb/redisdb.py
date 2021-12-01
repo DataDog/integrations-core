@@ -13,7 +13,6 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.common import round_value
-from datadog_checks.base.utils.tracing import traced_class
 
 DEFAULT_MAX_SLOW_ENTRIES = 128
 MAX_SLOW_ENTRIES_KEY = "slowlog-max-len"
@@ -24,7 +23,6 @@ LINK_DOWN_KEY = 'master_link_down_since_seconds'
 DEFAULT_CLIENT_NAME = "unknown"
 
 
-@traced_class()
 class Redis(AgentCheck):
     db_key_pattern = re.compile(r'^db\d+')
     slave_key_pattern = re.compile(r'^slave\d+')
