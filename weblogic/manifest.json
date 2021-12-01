@@ -17,7 +17,7 @@
   "process_signatures": [
     "weblogic.Server"
   ],
-  "public_title": "weblogic",
+  "public_title": "WebLogic",
   "categories": [
     "log collection",
     "web",
