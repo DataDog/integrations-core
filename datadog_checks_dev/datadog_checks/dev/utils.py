@@ -9,7 +9,6 @@ import os
 import platform
 import socket
 from contextlib import closing, contextmanager
-from six.moves.urllib.request import urlopen
 
 from .ci import running_on_ci, running_on_gh_actions, running_on_windows_ci  # noqa: F401
 
