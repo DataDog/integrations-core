@@ -6,10 +6,11 @@ from copy import deepcopy
 import mock
 import pytest
 import requests
-from .common import ENVOY_VERSION, FLAVOR, HOST, INSTANCES, requires_legacy_environment
 
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
+
+from .common import ENVOY_VERSION, FLAVOR, HOST, INSTANCES, requires_legacy_environment
 
 CHECK_NAME = 'envoy'
 

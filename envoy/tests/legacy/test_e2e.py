@@ -3,9 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-from .common import FLAVOR, HOST, requires_legacy_environment
 
 from datadog_checks.envoy import Envoy
+
+from .common import FLAVOR, HOST, requires_legacy_environment
 
 pytestmark = [requires_legacy_environment]
 
