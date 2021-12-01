@@ -11,7 +11,6 @@ from six import iteritems
 from six.moves.urllib.parse import quote_plus, urljoin, urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_native_string
-from datadog_checks.base.utils.tracing import traced_class
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'rabbitmq'
 EXCHANGE_TYPE = 'exchanges'

@@ -16,7 +16,6 @@ from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 from datadog_checks.base.utils.serialization import json
-from datadog_checks.base.utils.tracing import traced_class
 
 from .common import (
     CONSUL_CAN_CONNECT,
