@@ -1,39 +1,42 @@
-# Agent Check: weblogic
+# Agent Check: WebLogic
 
 ## Overview
 
-This check monitors Oracle [Weblogic][1] Server. 
+This check monitors Oracle [WebLogic][1] Server. 
 
 ## Setup
 
 ### Installation
 
-The Weblogic check is included in the [Datadog Agent][2] package.
+The WebLogic check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
-1. This check is JMX-based and collects metrics from the Platform MBean Server exported by the JVM, so JMX Remote Monitoring needs to be enabled on your Weblogic servers. Follow the instructions in the [Oracle documentation][8].
+1. This check is JMX-based and collects metrics from the Platform MBean Server exported by the JVM, so JMX Remote Monitoring needs to be enabled on your WebLogic servers. Follow the instructions in the [Oracle documentation][8].
 
-2. Set the system property `-Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder` to enable these metrics on the Platform MBean Server. This may be enabled in either the Weblogic Server Admin Console or in the server startup scripts:
+2. Set the system property `-Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder` to enable these metrics on the Platform MBean Server. This may be enabled in either the WebLogic Server Admin Console or in the server startup scripts:
+
 
 _Enable in the Admin Console_
 
-```
-Domain => Configuration => General => Advanced => Platform MBean Server Enabled
-```
+   ```
+   Domain => Configuration => General => Advanced => Platform MBean Server Enabled
+   ```
+
 _Enable in Server Startup Scripts_
-```yaml
--Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder
-```
+ 
+   ```yaml
+   -Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder
+   ```
+      
 
-For more information, see the [Weblogic documentation][13].
+For more information, see the [WebLogic documentation][13].
 
-3. Verify that the [`PlatformMBeanServerUsed`][9] attribute value is set to `true` in the Weblogic Administration Console (default value is `true` in Weblogic Server versions 10.3.3.0 and above). This setting can be found in the Web Server Admin Console or configured using WSLT (Weblogic Scripting Tool). 
+
+4. Verify that the [`PlatformMBeanServerUsed`][9] attribute value is set to `true` in the WebLogic Administration Console (default value is `true` in WebLogic Server versions 10.3.3.0 and above). This setting can be found in the Web Server Admin Console or configured using WSLT (WebLogic Scripting Tool). 
 
 _Enable in the Admin Console_
-
 
 _**Domain (<WEBLOGIC_SERVER>) => Configuration => General => (Advanced) => Platform MBeanServer enabled**_
-
 
 _Enable in WLST_
 
@@ -51,7 +54,7 @@ For example:
 (wlst) > exit()
 ```
 
-Activate the changes and restart the Weblogic server.
+Activate the changes and restart the WebLogic server.
 
 ### Configuration
 
@@ -130,7 +133,7 @@ See [service_checks.json][7] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][5].
 
 
-[1]: **LINK_TO_INTEGERATION_SITE**
+[1]: https://docs.datadoghq.com/integrations/weblogic/?tab=host#pagetitle
 [2]: https://github.com/DataDog/integrations-core/blob/master/weblogic/datadog_checks/weblogic/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [4]: https://docs.datadoghq.com/integrations/java/

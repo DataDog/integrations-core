@@ -482,7 +482,7 @@ jobs:
       displayName: vSphere
       os: linux
     - checkName: weblogic
-      displayName: Weblogic
+      displayName: WebLogic
       os: linux
     - checkName: win32_event_log
       displayName: Win32 Event Log
