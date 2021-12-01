@@ -6,7 +6,7 @@ import os
 
 import click
 
-from ....fs import write_file, read_file
+from ....fs import read_file, write_file
 from ...manifest_utils import Manifest
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_assets_from_manifest, get_manifest_file

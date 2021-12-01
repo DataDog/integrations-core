@@ -6,9 +6,9 @@ import re
 from contextlib import contextmanager
 from shutil import copyfile, move
 
+from ...fs import file_exists, path_join
 from ...structures import EnvVars
 from ...subprocess import run_command
-from ...fs import file_exists, path_join
 from ...utils import ON_LINUX, ON_MACOS, ON_WINDOWS
 from ..constants import REQUIREMENTS_IN, get_root
 from .agent import (

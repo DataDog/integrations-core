@@ -10,6 +10,7 @@ import platform
 import socket
 from contextlib import closing, contextmanager
 
+from .check_utils import get_metadata_metrics as cu_get_metadata_metrics
 from .ci import running_on_ci, running_on_gh_actions, running_on_windows_ci  # noqa: F401
 
 __platform = platform.system()
@@ -58,3 +59,8 @@ def get_ip():
         # doesn't even have to be reachable
         s.connect(('10.255.255.255', 1))
         return s.getsockname()[0]
+
+
+# Left for retrocompatibility
+def get_metadata_metrics():
+    return cu_get_metadata_metrics()

@@ -3,9 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import csv
 import inspect
-from io import open
 import os
+from io import open
+
 import yaml
+
 from .fs import basepath, file_exists, get_parent_dir, path_join, read_file
 
 

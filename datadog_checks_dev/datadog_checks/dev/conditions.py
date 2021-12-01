@@ -11,9 +11,9 @@ from six import string_types
 from six.moves.urllib.request import urlopen
 
 from .errors import RetryError
+from .fs import file_exists
 from .structures import LazyFunction
 from .subprocess import run_command
-from .fs import file_exists
 
 
 class WaitFor(LazyFunction):
