@@ -44,30 +44,6 @@ def dd_environment(instance):
         sleep=60,
         build=True,
         down=cleanup_weblogic,
-        mount_logs={
-            "logs": [
-                {
-                    "type": "file",
-                    "path": "/u01/oracle/user_projects/domains/domain1/servers/admin-server/logs/admin-server.log",
-                    "source": "weblogic",
-                    "service": "weblogic",
-                },
-                {
-                    "type": "file",
-                    "path": """/u01/oracle/user_projects/domains/domain1/servers/managed-server1/logs/
-                    managed-server1.log""",
-                    "source": "weblogic",
-                    "service": "weblogic",
-                },
-                {
-                    "type": "file",
-                    "path": """/u01/oracle/user_projects/domains/domain1/servers/managed-server2/logs/
-                    managed-server2.log""",
-                    "source": "weblogic",
-                    "service": "weblogic",
-                },
-            ]
-        },
     ):
         yield instance, {'use_jmx': True}
 
