@@ -151,9 +151,13 @@ class AgentCheck(object):
     DEFAULT_METRIC_LIMIT = 0
 
     # Allow tracing for classic integrations
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        return traced_class(cls)
+    def __init_subclass__(cls, *args, **kwargs):
+        try:
+            # https://github.com/python/mypy/issues/4660
+            super().__init_subclass__(*args, **kwargs)  # type: ignore
+            return traced_class(cls)
+        except Exception:
+            return cls
 
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None

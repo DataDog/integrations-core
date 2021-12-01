@@ -11,7 +11,7 @@ from datadog_checks.base.stubs import aggregator
 from datadog_checks.base.utils.tracing import traced, traced_class
 
 
-class MockAgentCheck:
+class MockAgentCheck(object):
     def __init__(self, *args, **kwargs):
         self.name = args[0]
         self.init_config = args[1]
