@@ -8,6 +8,7 @@ from six import PY2
 
 from ...errors import CheckException
 from .. import AgentCheck
+from ...utils.tracing import traced_class
 from .mixins import OpenMetricsScraperMixin
 
 STANDARD_FIELDS = [
@@ -64,6 +65,11 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         'prometheus_timeout': {'name': 'timeout'},
         'request_size': {'name': 'request_size', 'default': 10},
     }
+
+    # Allow tracing for openmetrics integrations
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        return traced_class(cls)
 
     def __init__(self, *args, **kwargs):
         """

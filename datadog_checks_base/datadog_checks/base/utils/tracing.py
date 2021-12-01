@@ -61,7 +61,7 @@ def tracing_method(f):
     return wrapper
 
 
-def traced_class():
+def traced_class(cls):
     if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true' and tracer is not None:
         patch_all()
 
@@ -81,4 +81,4 @@ def traced_class():
         def decorate(cls):
             return cls
 
-    return decorate
+    return decorate(cls)

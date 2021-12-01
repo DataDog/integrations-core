@@ -37,6 +37,7 @@ from ..utils.metadata import MetadataManager
 from ..utils.secrets import SecretsSanitizer
 from ..utils.tagging import GENERIC_TAGS
 from ..utils.tls import TlsContextWrapper
+from ..utils.tracing import traced_class
 
 try:
     import datadog_agent
@@ -75,6 +76,7 @@ if TYPE_CHECKING:
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
 
 
+@traced_class
 class AgentCheck(object):
     """
     The base class for any Agent based integration.
@@ -147,6 +149,11 @@ class AgentCheck(object):
     # be sent to the aggregator, the rest are dropped. The state is reset after each run.
     # See https://github.com/DataDog/integrations-core/pull/2093 for more information.
     DEFAULT_METRIC_LIMIT = 0
+
+    # Allow tracing for subclasses
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        return traced_class(cls)
 
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
