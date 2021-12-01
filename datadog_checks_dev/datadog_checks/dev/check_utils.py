@@ -61,9 +61,9 @@ def get_current_check_name(depth=0):
     return os.path.basename(find_check_root(depth))
 
 
-def get_metadata_metrics():
-    # Only called in tests of a check, so just go back one frame
-    root = find_check_root(depth=1)
+def get_metadata_metrics(depth=1):
+    # Only called in tests of a check, so, by default, just go back one frame
+    root = find_check_root(depth=depth)
     metadata_path = os.path.join(root, 'metadata.csv')
     metrics = {}
     with open(metadata_path) as f:

@@ -63,4 +63,4 @@ def get_ip():
 
 # Left for retrocompatibility
 def get_metadata_metrics():
-    return cu_get_metadata_metrics()
+    return cu_get_metadata_metrics(depth=2)
