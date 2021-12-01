@@ -150,7 +150,7 @@ class AgentCheck(object):
     # See https://github.com/DataDog/integrations-core/pull/2093 for more information.
     DEFAULT_METRIC_LIMIT = 0
 
-    # Allow tracing for subclasses
+    # Allow tracing for classic integrations
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         return traced_class(cls)
