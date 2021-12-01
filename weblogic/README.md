@@ -11,9 +11,47 @@ This check monitors Oracle [Weblogic][1] Server.
 The Weblogic check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
-This check is JMX-based and collects metrics from the PlatformMBeanServer exported by the JVM, so JMX Remote Monitoring needs to be enabled on your Weblogic servers. Follow the instructions in the [Oracle documentation][8].
+1. This check is JMX-based and collects metrics from the Platform MBean Server exported by the JVM, so JMX Remote Monitoring needs to be enabled on your Weblogic servers. Follow the instructions in the [Oracle documentation][8].
 
-Ensure that the [`PlatformMBeanServerUsed`][9] attribute value is set to `true` in the Weblogic Administration Console (default value is `true` in Weblogic Server versions 10.3.3.0 and above).  
+2. Set the system property `-Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder` to enable these metrics on the Platform MBean Server. This may be enabled in either the Weblogic Server Admin Console or in the server startup scripts:
+
+_Enable in the Admin Console_
+
+```
+Domain => Configuration => General => Advanced => Platform MBean Server Enabled
+```
+_Enable in Server Startup Scripts_
+```yaml
+-Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder
+```
+
+For more information, see the [Weblogic documentation][13].
+
+3. Verify that the [`PlatformMBeanServerUsed`][9] attribute value is set to `true` in the Weblogic Administration Console (default value is `true` in Weblogic Server versions 10.3.3.0 and above). This setting can be found in the Web Server Admin Console or configured using WSLT (Weblogic Scripting Tool). 
+
+_Enable in the Admin Console_
+
+
+_**Domain (<WEBLOGIC_SERVER>) => Configuration => General => (Advanced) => Platform MBeanServer enabled**_
+
+
+_Enable in WLST_
+
+Start an edit session, navigate to the JMX directory for the domain, use `cmo.setPlatformMBeanServerUsed(true)` to enable the attribute if it is set to false.
+
+For example:
+```
+# > java weblogic.WLST
+(wlst) > connect('weblogic','weblogic')
+(wlst) > edit()
+(wlst) > startEdit()
+(wlst) > cd('JMX/mydomain')
+(wlst) > set('EditMBeanServerEnabled','true')
+(wlst) > activate()
+(wlst) > exit()
+```
+
+Activate the changes and restart the Weblogic server.
 
 ### Configuration
 
@@ -104,3 +142,4 @@ Need help? Contact [Datadog support][5].
 [10]: https://github.com/DataDog/integrations-core/blob/master/weblogic/metadata.csv
 [11]: https://docs.datadoghq.com/logs/processing/#integration-pipelines 
 [12]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
+[13]: https://support.oracle.com/cloud/faces/DocumentDisplay?_afrLoop=308314682308664&_afrWindowMode=0&id=1465052.1&_adf.ctrl-state=10ue97j4er_4
