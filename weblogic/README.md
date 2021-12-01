@@ -16,45 +16,46 @@ No additional installation is needed on your server.
 2. Set the system property `-Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder` to enable these metrics on the Platform MBean Server. This may be enabled in either the WebLogic Server Admin Console or in the server startup scripts:
 
 
-_Enable in the Admin Console_
+   _**Enable in the Admin Console**_
 
    ```
    Domain => Configuration => General => Advanced => Platform MBean Server Enabled
    ```
 
-_Enable in Server Startup Scripts_
+   _**Enable in Server Startup Scripts**_
  
    ```yaml
    -Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder
    ```
       
+   For more information, see the [WebLogic documentation][13].
 
-For more information, see the [WebLogic documentation][13].
 
+3. Verify that the [`PlatformMBeanServerUsed`][9] attribute value is set to `true` in the WebLogic Administration Console (default value is `true` in WebLogic Server versions 10.3.3.0 and above). This setting can be found in the WebLogic Server Admin Console or configured using WSLT (WebLogic Scripting Tool). 
 
-4. Verify that the [`PlatformMBeanServerUsed`][9] attribute value is set to `true` in the WebLogic Administration Console (default value is `true` in WebLogic Server versions 10.3.3.0 and above). This setting can be found in the Web Server Admin Console or configured using WSLT (WebLogic Scripting Tool). 
+   _**Enable in the Admin Console**_
 
-_Enable in the Admin Console_
+   ```
+   Domain (<WEBLOGIC_SERVER>) => Configuration => General => (Advanced) => Platform MBeanServer Enabled
+   ```
+   
+   _**Enable in WLST**_
 
-_**Domain (<WEBLOGIC_SERVER>) => Configuration => General => (Advanced) => Platform MBeanServer enabled**_
+   Start an edit session, navigate to the JMX directory for the domain, use `cmo.setPlatformMBeanServerUsed(true)` to enable the attribute if it is set to false.
 
-_Enable in WLST_
+   For example:
+   ```
+   # > java weblogic.WLST
+   (wlst) > connect('weblogic','weblogic')
+   (wlst) > edit()
+   (wlst) > startEdit()
+   (wlst) > cd('JMX/mydomain')
+   (wlst) > set('EditMBeanServerEnabled','true')
+   (wlst) > activate()
+   (wlst) > exit()
+   ```
 
-Start an edit session, navigate to the JMX directory for the domain, use `cmo.setPlatformMBeanServerUsed(true)` to enable the attribute if it is set to false.
-
-For example:
-```
-# > java weblogic.WLST
-(wlst) > connect('weblogic','weblogic')
-(wlst) > edit()
-(wlst) > startEdit()
-(wlst) > cd('JMX/mydomain')
-(wlst) > set('EditMBeanServerEnabled','true')
-(wlst) > activate()
-(wlst) > exit()
-```
-
-Activate the changes and restart the WebLogic server.
+   Activate the changes and restart the WebLogic server.
 
 ### Configuration
 
@@ -81,19 +82,19 @@ See [`metadata.csv`][10] for a list of metrics provided by this integration.
 
 ### Log collection
 
-_Available for Agent versions >6.0_
-
 1. WebLogic logging services use an implementation based on the Java Logging APIs by default. Clone and edit the [integration pipeline][11] if you have a different format.
+
 2. Collecting logs is disabled by default in the Datadog Agent, enable it in your datadog.yaml file:
+3. 
    ```yaml
    logs_enabled: true
    ```
+   
 3. Uncomment and edit the logs configuration block in your weblogic.d/conf.yaml file. Change the path and service parameter values based on your environment. See the [sample weblogic.d/conf.yaml][2] for all available configuration options.
    ```yaml
     - type: file
       path: <DOMAIN_DIR>/servers/<ADMIN_SERVER_NAME>/logs/<ADMIN_SERVER_NAME>.log
       source: weblogic
-      service: <SERVER_NAME>
       log_processing_rules:
         - type: multi_line
           name: new_log_start_with_date
@@ -101,7 +102,6 @@ _Available for Agent versions >6.0_
     - type: file
       path: <DOMAIN_DIR>/servers/<SERVER_NAME>/logs/<SERVER_NAME>.log
       source: weblogic
-      service: <SERVER_NAME>
       log_processing_rules:
         - type: multi_line
           name: new_log_start_with_date
@@ -109,7 +109,6 @@ _Available for Agent versions >6.0_
     - type: file
       path: <DOMAIN_DIR>/servers/<SERVER_NAME>/logs/access.log
       source: weblogic
-      service: <SERVER_NAME>
       log_processing_rules:
         - type: multi_line
           name: new_log_start_with_date
