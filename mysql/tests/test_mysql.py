@@ -174,8 +174,6 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
 
     dd_run_check(mysql_check)
 
-    assert mysql_check._is_group_replication_active() is False
-
     # Test service check
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS_REPLICA, count=1)
 
@@ -243,6 +241,10 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), check_submission_type=True, exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
     )
+
+    # Make sure group replication is not detected
+    with mysql_check._connect() as db:
+        assert mysql_check._is_group_replication_active(db) is False
 
 
 @pytest.mark.parametrize('dbm_enabled', (True, False))
