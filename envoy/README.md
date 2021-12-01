@@ -108,39 +108,12 @@ To configure this check for an Agent running on a host:
         ## @param openmetrics_endpoint - string - required
         ## The URL exposing metrics in the OpenMetrics format.
         #
-      - openmetrics_endpoint: http://localhost:80/stats/prometheus
+      - openmetrics_endpoint: http://localhost:8001/stats/prometheus
 
     ```
 
 2. Check if the Datadog Agent can access Envoy's [admin endpoint][5].
 3. [Restart the Agent][9].
-
-###### Metric filtering
-
-Metrics can be filtered using a regular expression `metric_whitelist` or `metric_blacklist`. If both are used, then whitelist is applied first, and then blacklist is applied on the resulting set.
-
-The filtering occurs before tag extraction, so you have the option to have certain tags decide whether or not to keep or ignore metrics. An exhaustive list of all metrics and tags can be found in [metrics.py][10]. Let's walk through an example of Envoy metric tagging!
-
-```python
-...
-'cluster.grpc.success': {
-    'tags': (
-        ('<CLUSTER_NAME>', ),
-        ('<GRPC_SERVICE>', '<GRPC_METHOD>', ),
-        (),
-    ),
-    ...
-},
-...
-```
-
-Here there are `3` tag sequences: `('<CLUSTER_NAME>')`, `('<GRPC_SERVICE>', '<GRPC_METHOD>')`, and empty `()`. The number of sequences corresponds exactly to how many metric parts there are. For this metric, there are `3` parts: `cluster`, `grpc`, and `success`. Envoy separates everything with a `.`, hence the final metric name would be:
-
-`cluster.<CLUSTER_NAME>.grpc.<GRPC_SERVICE>.<GRPC_METHOD>.success`
-
-If you care only about the cluster name and grpc service, you would add this to your whitelist:
-
-`^cluster\.<CLUSTER_NAME>\.grpc\.<GRPC_SERVICE>\.`
 
 ##### Log collection
 
@@ -183,7 +156,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][11
 | -------------------- | ------------------------------------------- |
 | `<INTEGRATION_NAME>` | `envoy`                                     |
 | `<INIT_CONFIG>`      | blank or `{}`                               |
-| `<INSTANCE_CONFIG>`  | `{"stats_url": "http://%%host%%:80/stats"}` |
+| `<INSTANCE_CONFIG>`  | `{"openmetrics_endpoint": "http://%%host%%:80/stats/prometheus"}` |
 
 ##### Log collection
 

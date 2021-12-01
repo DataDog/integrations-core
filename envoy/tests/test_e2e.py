@@ -17,4 +17,4 @@ def test_e2e(dd_agent_check):
             aggregator.assert_metric(formatted_metric, at_least=0)
             continue
         aggregator.assert_metric(formatted_metric)
-    aggregator.assert_service_check('envoy.can_connect', Envoy.OK)
+    aggregator.assert_service_check('envoy.openmetrics.health', Envoy.OK)
