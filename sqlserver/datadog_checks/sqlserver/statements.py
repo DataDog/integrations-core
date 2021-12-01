@@ -186,7 +186,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         normalized_rows = []
         for row in rows:
             try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['text'])
+                obfuscated_statement = datadog_agent.obfuscate_sql(row['text'], self.obfuscator_options)
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
                 self.log.debug("Failed to obfuscate query: %s", e)

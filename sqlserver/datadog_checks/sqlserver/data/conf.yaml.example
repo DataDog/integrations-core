@@ -235,6 +235,23 @@ instances:
         #
         # collection_interval: 10
 
+    ## Configure how the SQL obfuscator behaves.
+    #
+    obfuscator_options:
+
+        ## @param replace_digits - boolean - optional - default: false
+        ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
+        ## Note that this option only applies when `dbm` is enabled.
+        #
+        # replace_digits: false
+
+        ## @param collect_comments - boolean - optional - default: true
+        ## Set to `false` to disable the collection of SQL comments. Disabling this option can interfere with
+        ## database monitoring features working correctly.
+        ## Note that this option only applies when `dbm` is enabled.
+        #
+        # collect_comments: true
+
     ## @param command_timeout - integer - optional - default: 5
     ## Timeout in seconds for the connection and each command run
     #

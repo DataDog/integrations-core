@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import json
 import re
 import time
 from collections import defaultdict
@@ -13,6 +14,7 @@ from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host
 from datadog_checks.sqlserver.activity import SqlserverActivity
@@ -110,6 +112,11 @@ class SQLServer(AgentCheck):
         self.statement_metrics = SqlserverStatementMetrics(self)
         self.activity_config = self.instance.get('query_activity', {}) or {}
         self.activity = SqlserverActivity(self)
+        obfuscator_options_config = self.instance.get('obfuscator_options', {}) or {}
+        self.obfuscator_options = to_native_string(json.dumps({
+            'replace_digits': obfuscator_options_config.get('replace_digits', False),
+            'collect_comments': obfuscator_options_config.get('collect_comments', True)
+        }))
 
         self.static_info_cache = TTLCache(
             maxsize=100,
