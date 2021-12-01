@@ -1,5 +1,5 @@
 {
-  "display_name": "Weblogic",
+  "display_name": "WebLogic",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "weblogic",
