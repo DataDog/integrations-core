@@ -11,8 +11,23 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nginx import Nginx
 from datadog_checks.nginx.metrics import COUNT_METRICS
 
-from .common import CHECK_NAME, FIXTURES_PATH, TAGS
+from .common import ALL_PLUS_METRICS, CHECK_NAME, FIXTURES_PATH, TAGS
 from .utils import mocked_perform_request
+
+
+def _assert_all_metrics_and_metadata(aggregator):
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    for metric in ALL_PLUS_METRICS:
+        aggregator.assert_metric(metric, at_least=0)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def _assert_num_metrics(aggregator, num_expected):
+    total = 0
+    for m in aggregator.metric_names:
+        total += len(aggregator.metrics(m))
+    assert total == num_expected
 
 
 def test_flatten_json(check, instance):
@@ -50,12 +65,8 @@ def test_plus_api_v2(check, instance, aggregator):
     check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
     check.check(instance)
 
-    total = 0
-    for m in aggregator.metric_names:
-        total += len(aggregator.metrics(m))
-    assert total == 1180
-
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    _assert_num_metrics(aggregator, 1199)
+    _assert_all_metrics_and_metadata(aggregator)
 
 
 def test_plus_api_no_stream(check, instance, aggregator):
@@ -66,12 +77,8 @@ def test_plus_api_no_stream(check, instance, aggregator):
     check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
     check.check(instance)
 
-    total = 0
-    for m in aggregator.metric_names:
-        total += len(aggregator.metrics(m))
-    assert total == 883
-
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    _assert_num_metrics(aggregator, 891)
+    _assert_all_metrics_and_metadata(aggregator)
 
 
 def test_plus_api_v3(check, instance, aggregator):
@@ -83,12 +90,9 @@ def test_plus_api_v3(check, instance, aggregator):
     check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
     check.check(instance)
 
-    total = 0
-    for m in aggregator.metric_names:
-        total += len(aggregator.metrics(m))
-    assert total == 1191
+    _assert_num_metrics(aggregator, 1210)
+    _assert_all_metrics_and_metadata(aggregator)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone1', count=1)
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone2', count=1)
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total_count', 'zone:zone2', count=1)
@@ -103,14 +107,9 @@ def test_plus_api_v4(check, instance, aggregator):
     check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
     check.check(instance)
 
-    total = 0
-    for m in aggregator.metric_names:
-        total += len(aggregator.metrics(m))
-
-    # should be same as v3
-    assert total == 1191
-
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    # total number of metrics should be same as v3
+    _assert_num_metrics(aggregator, 1210)
+    _assert_all_metrics_and_metadata(aggregator)
 
 
 def test_plus_api_v5(check, instance, aggregator):
@@ -122,16 +121,11 @@ def test_plus_api_v5(check, instance, aggregator):
     check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
     check.check(instance)
 
-    total = 0
-    for m in aggregator.metric_names:
-        total += len(aggregator.metrics(m))
-
-    # should be higher than v4 w/ resolvers and http location zones data
-    assert total == 1233
+    # total number of metrics should be higher than v4 w/ resolvers and http location zones data
+    _assert_num_metrics(aggregator, 1252)
+    _assert_all_metrics_and_metadata(aggregator)
 
     base_tags = ['bar:bar', 'foo:foo']
-
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
     # resolvers endpoint
     resolvers_tags = base_tags + ['resolver:resolver-http']
@@ -186,17 +180,13 @@ def test_plus_api_v6(check, instance, aggregator):
     check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
     check.check(instance)
 
-    total = 0
-    for m in aggregator.metric_names:
-        total += len(aggregator.metrics(m))
-
-    # should be higher than v5 w/ http limit conns, http limit reqs, and stream limit conns
-    assert total == 1249
+    # total number of metrics should be higher than v5 w/ http limit conns, http limit reqs, and stream limit conns
+    _assert_num_metrics(aggregator, 1268)
+    _assert_all_metrics_and_metadata(aggregator)
 
     base_tags = ['bar:bar', 'foo:foo']
 
     # same tests for v3
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone1', count=1)
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone2', count=1)
 
@@ -245,17 +235,14 @@ def test_plus_api_v7(check, instance, aggregator):
     check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
     check.check(instance)
 
-    total = 0
-    for m in aggregator.metric_names:
-        total += len(aggregator.metrics(m))
-
-    # should be higher than v6 with codes data for http upstream, http server zones, and http location zone
-    assert total == 1322
+    # total number of metrics should be higher than v6
+    # with codes data for http upstream, http server zones, and http location zone
+    _assert_num_metrics(aggregator, 1342)
+    _assert_all_metrics_and_metadata(aggregator)
 
     base_tags = ['bar:bar', 'foo:foo']
 
     # same tests for v3
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone1', count=1)
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone2', count=1)
 

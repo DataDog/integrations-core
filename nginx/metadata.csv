@@ -39,7 +39,7 @@ nginx.cache.miss.responses_written_count,count,,response,,The total number of re
 nginx.cache.revalidated.bytes,gauge,,byte,,The total number of bytes read from the cache,0,nginx,cache revalidated bytes
 nginx.cache.revalidated.bytes_count,count,,byte,,The total number of bytes read from the cache (shown as count),0,nginx,cache revalidated bytes
 nginx.cache.revalidated.responses,gauge,,response,,The total number of responses read from the cache,0,nginx,cache revalidated responses
-nginx.cache.revalidated.response_count,count,,response,,The total number of responses read from the cache (shown as count),0,nginx,cache revalidated responses
+nginx.cache.revalidated.responses_count,count,,response,,The total number of responses read from the cache (shown as count),0,nginx,cache revalidated responses
 nginx.cache.size,gauge,,response,,The current size of the cache,0,nginx,cache size
 nginx.cache.stale.bytes,gauge,,byte,,The total number of bytes read from the cache,0,nginx,cache stale bytes
 nginx.cache.stale.bytes_count,count,,byte,,The total number of bytes read from the cache (shown as count),0,nginx,cache stale bytes
@@ -161,6 +161,7 @@ nginx.stream.upstream.peers.connections,gauge,,connection,,The total number of c
 nginx.stream.upstream.peers.connections_count,count,,connection,,The total number of client connections forwarded to this server (shown as count).,0,nginx,stream upstr peers conn
 nginx.stream.upstream.peers.downstart,gauge,,millisecond,,The time (time since Epoch) when the server became "unavail" or "checking" or "unhealthy",0,nginx,stream upstr peers downstart
 nginx.stream.upstream.peers.downtime,gauge,,millisecond,,Total time the server was in the "unavail" or "checking" or "unhealthy" states.,-1,nginx,stream upstr peers downtime
+nginx.stream.upstream.peers.downtime_count,count,,millisecond,,Total time the server was in the "unavail" or "checking" or "unhealthy" states.,-1,nginx,stream upstr peers downtime ct
 nginx.stream.upstream.peers.fails,gauge,,error,,The total number of unsuccessful attempts to communicate with the server.,-1,nginx,stream upstr peers fails
 nginx.stream.upstream.peers.fails_count,count,,error,,The total number of unsuccessful attempts to communicate with the server (shown as count).,-1,nginx,stream upstr peers fails
 nginx.stream.upstream.peers.health_checks.checks,gauge,,request,,The total number of health check requests made.,0,nginx,stream upstr peers health checks
@@ -187,6 +188,7 @@ nginx.upstream.peers.active,gauge,,connection,,The current number of active conn
 nginx.upstream.peers.backup,gauge,,,,A boolean value indicating whether the server is a backup server.,0,nginx,upstr peers backup
 nginx.upstream.peers.downstart,gauge,,millisecond,,The time (since Epoch) when the server became "unavail" or "unhealthy".,0,nginx,upstr peers downstart
 nginx.upstream.peers.downtime,gauge,,millisecond,,Total time the server was in the "unavail" and "unhealthy" states.,0,nginx,upstr peers downtime
+nginx.upstream.peers.downtime_count,count,,millisecond,,Total time the server was in the "unavail" and "unhealthy" states.,0,nginx,upstr peers downtime ct
 nginx.upstream.peers.fails,gauge,,,,The total number of unsuccessful attempts to communicate with the server.,-1,nginx,upstr peers fails
 nginx.upstream.peers.fails_count,count,,,,The total number of unsuccessful attempts to communicate with the server (shown as count).,-1,nginx,upstr peers fails
 nginx.upstream.peers.header_time,gauge,,millisecond,,The total amount of time spent on receiving the response header from the upstream server.,0,nginx,upstr peers header tm
