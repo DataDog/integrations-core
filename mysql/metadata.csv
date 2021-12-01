@@ -87,9 +87,9 @@ mysql.replication.group.transactions,gauge,,transaction,,The number of transacti
 mysql.replication.group.transactions_applied,gauge,,transaction,,Number of transactions this member has received from the group and applied.,0,mysql,mysql gr transactions applied
 mysql.replication.group.transactions_in_applier_queue,gauge,,transaction,,The number of transactions that this member has received from the replication group which are waiting to be applied.,0,mysql,mysql gr transactions queued
 mysql.replication.group.transactions_check,gauge,,transaction,,The number of transactions that have been checked for conflicts.,0,mysql,mysql gr transactions checked
-mysql.replication.group.transactions_proposed,gauge,,transaction,,Number of transactions which originated on this member and were sent to the group.,0,mysql,mysql gr transactions proposed
-mysql.replication.group.transactions_rollback,gauge,,transaction,,Number of transactions which originated on this member and were rolled back by the group.,0,mysql,mysql gr transactions rollback
-mysql.replication.group.transactions_validating,gauge,,transaction,,"Number of transaction rows which can be used for certification, but have not been garbage collected.",0,mysql,mysql gr transactions validating
+mysql.replication.group.transactions_proposed,gauge,,transaction,,The number of transactions which originated on this member and were sent to the group.,0,mysql,mysql gr transactions proposed
+mysql.replication.group.transactions_rollback,gauge,,transaction,,The number of transactions which originated on this member and were rolled back by the group.,0,mysql,mysql gr transactions rollback
+mysql.replication.group.transactions_validating,gauge,,transaction,,"The number of transaction rows which can be used for certification, but have not been garbage collected.",0,mysql,mysql gr transactions validating
 mysql.performance.handler_commit,gauge,,operation,second,The number of internal COMMIT statements.,0,mysql,mysql performance handler_commit
 mysql.performance.handler_delete,gauge,,operation,second,The number of internal DELETE statements.,0,mysql,mysql performance handler_delete
 mysql.performance.handler_prepare,gauge,,operation,second,The number of internal PREPARE statements.,0,mysql,mysql performance handler_prepare

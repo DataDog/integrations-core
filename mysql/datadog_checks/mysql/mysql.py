@@ -416,7 +416,7 @@ class MySql(AgentCheck):
                 status = self.CRITICAL
                 additional_tags = []
                 if replica_results is None:
-                    self.log.warning('Unable to get group replica status, setting it as CRITICAL')
+                    self.log.warning('Unable to get group replica status, setting mysql.replication.group.status as CRITICAL')
                 else:
                     status = self.OK if replica_results[1] == 'ONLINE' else self.CRITICAL
                     additional_tags = [
@@ -551,7 +551,7 @@ class MySql(AgentCheck):
 
             # Plugin is installed
             if r is not None and r[0].lower() == 'active':
-                self.log.debug('Group replicated is detected and active')
+                self.log.debug('Group replication plugin is detected and active')
                 return True
         self.log.debug('Group replication plugin not detected')
         return False
