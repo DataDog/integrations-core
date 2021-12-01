@@ -9,10 +9,10 @@ from contextlib import contextmanager
 import psutil
 from six import PY3
 
+from ..structures import LazyFunction, TempDir
+from ..utils import ON_WINDOWS, find_free_port, get_ip
 from .conditions import WaitForPortListening
 from .env import environment_run
-from .structures import LazyFunction, TempDir
-from .utils import ON_WINDOWS, find_free_port, get_ip
 
 if PY3:
     import subprocess

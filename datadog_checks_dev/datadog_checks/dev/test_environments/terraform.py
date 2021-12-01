@@ -5,15 +5,15 @@ import getpass
 import json
 import os
 import shutil
-from contextlib import contextmanager
+from contextlib import conttests/test_conditions.pyextmanager
 
 import pytest
 from six import PY3
 
+from ..fs import chdir, copy_dir_contents, copy_path, get_here, path_join
+from ..structures import LazyFunction, TempDir
+from ..subprocess import run_command
 from .env import environment_run
-from .fs import chdir, copy_dir_contents, copy_path, get_here, path_join
-from .structures import LazyFunction, TempDir
-from .subprocess import run_command
 
 if PY3:
     from shutil import which

@@ -5,10 +5,10 @@ import os
 
 import pytest
 
-from datadog_checks.dev.docker import compose_file_active, docker_run
+from datadog_checks.dev.test_environments.docker import compose_file_active, docker_run
 from datadog_checks.dev.subprocess import run_command
 
-from .common import not_windows_ci
+from ..common import not_windows_ci
 
 pytestmark = [pytest.mark.docker, not_windows_ci]
 HERE = os.path.dirname(os.path.abspath(__file__))

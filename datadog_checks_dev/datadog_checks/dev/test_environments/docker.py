@@ -9,13 +9,13 @@ from six import string_types
 from six.moves.urllib.parse import urlparse
 from tenacity import retry, stop_after_attempt, wait_fixed
 
+from ..fs import create_file, file_exists
+from ..spec import load_spec
+from ..structures import EnvVars, LazyFunction, TempDir
+from ..subprocess import run_command
+from ..utils import find_check_root
 from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
-from .fs import create_file, file_exists
-from .spec import load_spec
-from .structures import EnvVars, LazyFunction, TempDir
-from .subprocess import run_command
-from .utils import find_check_root
 
 try:
     from contextlib import ExitStack

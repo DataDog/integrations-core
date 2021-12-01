@@ -6,11 +6,11 @@ from __future__ import absolute_import
 import os
 from contextlib import contextmanager
 
+from ..fs import chdir
+from ..structures import LazyFunction, TempDir
+from ..utils import find_free_port, get_ip
 from .env import environment_run
-from .fs import chdir
 from .ssh_tunnel import KillProcess, run_background_command
-from .structures import LazyFunction, TempDir
-from .utils import find_free_port, get_ip
 
 PID_FILE = 'kubectl.pid'
 

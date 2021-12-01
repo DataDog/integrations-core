@@ -4,7 +4,7 @@
 import time
 from contextlib import contextmanager
 
-from ._env import (
+from .._env import (
     deserialize_data,
     get_env_vars,
     get_state,
@@ -14,8 +14,8 @@ from ._env import (
     set_up_env,
     tear_down_env,
 )
+from ..structures import EnvVars
 from .conditions import CheckEndpoints
-from .structures import EnvVars
 
 try:
     from contextlib import ExitStack

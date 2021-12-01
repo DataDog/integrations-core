@@ -10,10 +10,10 @@ from typing import Callable, Dict, List, Tuple, Union
 from six import string_types
 from six.moves.urllib.request import urlopen
 
-from .errors import RetryError
-from .structures import LazyFunction
-from .subprocess import run_command
-from .utils import file_exists
+from ..errors import RetryError
+from ..structures import LazyFunction
+from ..subprocess import run_command
+from ..utils import file_exists
 
 
 class WaitFor(LazyFunction):

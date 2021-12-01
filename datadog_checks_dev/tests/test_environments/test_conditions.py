@@ -6,11 +6,11 @@ import sys
 
 import pytest
 
-from datadog_checks.dev.conditions import CheckCommandOutput, CheckDockerLogs, CheckEndpoints, WaitFor
+from datadog_checks.dev.test_environments.conditions import CheckCommandOutput, CheckDockerLogs, CheckEndpoints, WaitFor
 from datadog_checks.dev.errors import RetryError
 from datadog_checks.dev.subprocess import run_command
 
-from .common import not_windows_ci
+from ..common import not_windows_ci
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCKER_DIR = os.path.join(HERE, 'docker')
