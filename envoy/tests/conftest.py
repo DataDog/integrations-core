@@ -1,8 +1,8 @@
 import os
 
 import pytest
-from envoy.datadog_checks.envoy.check import EnvoyCheck
-from envoy.tests.legacy.common import FLAVOR, INSTANCES
+from datadog_checks.envoy import EnvoyCheck
+from .legacy.common import FLAVOR, INSTANCES
 
 from datadog_checks.dev import docker_run
 

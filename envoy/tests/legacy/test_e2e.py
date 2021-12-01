@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-from envoy.tests.legacy.common import FLAVOR, HOST, requires_legacy_environment
+from .common import FLAVOR, HOST, requires_legacy_environment
 
 from datadog_checks.envoy import Envoy
 
