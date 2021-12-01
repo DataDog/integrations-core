@@ -24,7 +24,7 @@
         "groups": [
             "endpoint"
         ],
-        "name": "Can Connect",
+        "name": "Openmetrics Can Connect",
         "description": "Returns `CRITICAL` if the agent can't connect to Envoy to collect metrics, otherwise `OK`."
     }
 ]
