@@ -51,7 +51,7 @@ instances:
   - openmetrics_endpoint: http://localhost:80/stats/prometheus
 
     ## @param stats_url - string - optional - default: http://localhost:80/stats
-    ## The check will attempt to parse the metrics from the admin /stats/ endpoint.
+    ## The check will collect and parse metrics from the admin /stats/ endpoint.
     ## It must be accessible:
     ## https://www.envoyproxy.io/docs/envoy/latest/operations/admin
     ## Add a `?usedonly` on the end if you wish to ignore

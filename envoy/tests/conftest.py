@@ -3,7 +3,7 @@ import os
 import pytest
 
 from datadog_checks.dev import docker_run
-from datadog_checks.envoy.check import EnvoyCheck
+from datadog_checks.envoy import Envoy
 
 from .common import DEFAULT_INSTANCE, DOCKER_DIR, ENVOY_LEGACY, FIXTURE_DIR, URL
 from .legacy.common import FLAVOR, INSTANCES
@@ -32,4 +32,4 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return lambda instance: EnvoyCheck('envoy', {}, [instance])
+    return lambda instance: Envoy('envoy', {}, [instance])

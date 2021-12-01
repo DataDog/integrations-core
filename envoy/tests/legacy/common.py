@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from envoy.tests.common import ENVOY_LEGACY
+from ..common import ENVOY_LEGACY
 
 from datadog_checks.dev import get_docker_hostname
 
