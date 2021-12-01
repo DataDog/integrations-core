@@ -165,6 +165,7 @@ MESH_METRICS = {
     'istio_agent_pilot_conflict_outbound_listener_tcp_over_current_http': (
         'agent.pilot.conflict.outbound_listener.tcp_over_current_http'
     ),
+    'istio_build': 'build',
 }
 
 
