@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.testing import requires_py3
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.iis import IIS
 
 from .common import DEFAULT_COUNTERS, PERFORMANCE_OBJECTS
@@ -60,6 +61,7 @@ def test_check_all(aggregator, dd_default_hostname, dd_run_check, mock_performan
             )
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_check_specific(aggregator, dd_default_hostname, dd_run_check, mock_performance_objects):
