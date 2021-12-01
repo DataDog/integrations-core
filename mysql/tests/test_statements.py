@@ -165,7 +165,6 @@ def test_statement_metrics(
 
 
 def _obfuscate_sql(query, options=None):
-    # return re.sub(r'\s+', ' ', query or '').strip()
     return json.dumps({'query': re.sub(r'\s+', ' ', query or '').strip(), 'metadata': {}})
 
 
