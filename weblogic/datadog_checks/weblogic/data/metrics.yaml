@@ -86,6 +86,7 @@ jmx_metrics:
         ConnectionsCurrentCount:
           alias: weblogic.jms_runtime.connections_current_count
         ConnectionsHighCount:
+          metric_type: monotonic_count
           alias: weblogic.jms_runtime.connections_high_count
         ConnectionsTotalCount:
           metric_type: monotonic_count
@@ -93,6 +94,7 @@ jmx_metrics:
         JMSServersCurrentCount:
           alias: weblogic.jms_runtime.jms_servers_count
         JMSServersHighCount:
+          metric_type: monotonic_count
           alias: weblogic.jms_runtime.jms_servers_high_count
         JMSServersTotalCount:
           metric_type: monotonic_count
@@ -112,7 +114,6 @@ jmx_metrics:
       bean_regex: com.bea:ServerRuntime=([-_.\w]+),Name=([\[\-_.\]\w]+),Type=ServerChannelRuntime
       attribute:
         AcceptCount:
-          metric_type: monotonic_count
           alias: weblogic.server_channel_runtime.accept_count
         ConnectionsCount:
           alias: weblogic.server_channel_runtime.connections_count
