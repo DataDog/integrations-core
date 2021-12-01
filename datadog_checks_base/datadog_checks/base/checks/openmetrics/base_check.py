@@ -7,8 +7,8 @@ import requests
 from six import PY2
 
 from ...errors import CheckException
-from .. import AgentCheck
 from ...utils.tracing import traced_class
+from .. import AgentCheck
 from .mixins import OpenMetricsScraperMixin
 
 STANDARD_FIELDS = [
