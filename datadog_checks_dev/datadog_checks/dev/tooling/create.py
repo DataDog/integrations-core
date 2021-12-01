@@ -15,7 +15,7 @@ from ..fs import (
     write_file_binary,
 )
 from .constants import integration_type_links
-from .utils import get_license_header, kebab_case_name, normalize_package_name
+from .utils import get_config_models_documentation, get_license_header, kebab_case_name, normalize_package_name
 
 TEMPLATES_DIR = path_join(os.path.dirname(os.path.abspath(__file__)), 'templates', 'integration')
 BINARY_EXTENSIONS = ('.png',)
@@ -90,6 +90,7 @@ To install the {integration_name} check on your host:
         'author': author,
         'check_class': f"{''.join(part.capitalize() for part in normalized_integration_name.split('_'))}Check",
         'check_name': check_name,
+        'documentation': get_config_models_documentation(),
         'integration_name': integration_name,
         'check_name_kebab': check_name_kebab,
         'email': email,
