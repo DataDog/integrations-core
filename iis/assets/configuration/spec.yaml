@@ -19,6 +19,13 @@ files:
         with `include` and/or `exclude` keys representing arrays of regular
         expressions strings.
       value:
+        example:
+          include:
+          - <PATTERN_1>
+          - <PATTERN_2>
+          exclude:
+          - <PATTERN_1>
+          - <PATTERN_2>
         anyOf:
         - type: array
           items:
@@ -44,6 +51,13 @@ files:
         with `include` and/or `exclude` keys representing arrays of regular
         expressions strings.
       value:
+        example:
+          include:
+          - <PATTERN_1>
+          - <PATTERN_2>
+          exclude:
+          - <PATTERN_1>
+          - <PATTERN_2>
         anyOf:
         - type: array
           items:
