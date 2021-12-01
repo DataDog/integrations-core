@@ -1,9 +1,10 @@
 import os
 
 import pytest
-from ..common import ENVOY_LEGACY
 
 from datadog_checks.dev import get_docker_hostname
+
+from ..common import ENVOY_LEGACY
 
 FLAVOR = os.getenv('FLAVOR', 'api_v3')
 
