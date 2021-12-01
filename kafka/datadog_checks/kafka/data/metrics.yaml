@@ -691,6 +691,6 @@ jmx_metrics:
         attribute:
           connection-count:
             metric_type: gauge
-            alias: kafka.server.socket_server_metrics.connection_count
+            alias: kafka.server.socket.connection_count
         tags:
           listener: $1
