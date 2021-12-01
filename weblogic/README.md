@@ -47,7 +47,7 @@ _Available for Agent versions >6.0_
    ```yaml
    logs_enabled: true
    ```
-3. Uncomment and edit the logs configuration block in your weblogic.d/conf.yaml file. Change the path and service parameter values based on your environment. See the [sample weblogic.d/conf.yaml][12] for all available configuration options.
+3. Uncomment and edit the logs configuration block in your weblogic.d/conf.yaml file. Change the path and service parameter values based on your environment. See the [sample weblogic.d/conf.yaml][2] for all available configuration options.
    ```yaml
     - type: file
       path: <DOMAIN_DIR>/servers/<ADMIN_SERVER_NAME>/logs/<ADMIN_SERVER_NAME>.log
@@ -74,10 +74,10 @@ _Available for Agent versions >6.0_
           name: new_log_start_with_date
           pattern: \####<\w{3} (0?[1-9]|[12][0-9]|3[01]), \d{4}
    ```
-4. [Restart the Agent][13]
+4. [Restart the Agent][6]
 
 ### Containerized
-For containerized environments, see the [Autodiscovery with JMX][14] guide.
+For containerized environments, see the [Autodiscovery with JMX][12] guide.
 
 ### Events
 
@@ -103,6 +103,4 @@ Need help? Contact [Datadog support][5].
 [9]: https://docs.oracle.com/en/middleware/standalone/weblogic-server/14.1.1.0/jmxcu/understandwls.html#GUID-1D2E290E-F762-44A8-99C2-EB857EB12387
 [10]: https://github.com/DataDog/integrations-core/blob/master/weblogic/metadata.csv
 [11]: https://docs.datadoghq.com/logs/processing/#integration-pipelines 
-[12]: https://github.com/DataDog/integrations-core/blob/master/weblogic/datadog_checks/weblogic/data/conf.yaml.example
-[13]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[14]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
+[12]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
