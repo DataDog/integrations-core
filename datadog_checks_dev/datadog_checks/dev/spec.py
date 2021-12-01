@@ -5,7 +5,7 @@ import json
 
 import yaml
 
-from .utils import file_exists, path_join, read_file
+from .fs import file_exists, path_join, read_file
 
 
 def load_spec(check_root):

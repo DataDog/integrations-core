@@ -15,7 +15,7 @@ from .fs import create_file, file_exists
 from .spec import load_spec
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
-from .utils import find_check_root
+from .check_utils import find_check_root
 
 try:
     from contextlib import ExitStack

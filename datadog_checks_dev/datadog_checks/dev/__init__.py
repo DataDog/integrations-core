@@ -9,4 +9,4 @@ from .errors import RetryError
 from .fs import chdir, get_here, temp_chdir, temp_dir
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
-from .utils import load_jmx_config
+from .check_utils import load_jmx_config

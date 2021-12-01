@@ -5,7 +5,7 @@ from copy import deepcopy
 
 import yaml
 
-from ...utils import file_exists, get_parent_dir, path_join, read_file
+from ...fs import file_exists, get_parent_dir, path_join, read_file
 
 TEMPLATES_DIR = path_join(get_parent_dir(get_parent_dir(__file__)), 'templates', 'configuration')
 VALID_EXTENSIONS = ('yaml', 'yml')

@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ....utils import read_file
+from ....fs import read_file
 from ...constants import AGENT_V5_ONLY, NOT_CHECKS, get_agent_release_requirements
 from ...release import get_package_name
 from ...testing import process_checks_option

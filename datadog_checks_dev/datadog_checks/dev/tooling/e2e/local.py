@@ -8,7 +8,8 @@ from shutil import copyfile, move
 
 from ...structures import EnvVars
 from ...subprocess import run_command
-from ...utils import ON_LINUX, ON_MACOS, ON_WINDOWS, file_exists, path_join
+from ...fs import file_exists, path_join
+from ...utils import ON_LINUX, ON_MACOS, ON_WINDOWS
 from ..constants import REQUIREMENTS_IN, get_root
 from .agent import (
     DEFAULT_AGENT_VERSION,

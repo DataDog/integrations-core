@@ -8,9 +8,8 @@ import click
 import markdown
 from bs4 import BeautifulSoup
 
-from ....fs import chdir, create_file
+from ....fs import chdir, create_file, download_file
 from ....subprocess import run_command
-from ....utils import download_file
 from ...constants import get_root
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_readme_file, read_readme_file
