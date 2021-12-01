@@ -413,10 +413,11 @@ class MySql(AgentCheck):
             with closing(db.cursor()) as cursor:
                 cursor.execute(SQL_GROUP_REPLICATION_MEMBER)
                 replica_results = cursor.fetchone()
-                status = self.CRITICAL
+                status = self.OK
                 additional_tags = []
-                if replica_results is None:
+                if replica_results is None or len(replica_results) < 3:
                     self.log.warning('Unable to get group replica status, setting mysql.replication.group.status as CRITICAL')
+                    status = self.CRITICAL
                 else:
                     status = self.OK if replica_results[1] == 'ONLINE' else self.CRITICAL
                     additional_tags = [
@@ -455,7 +456,7 @@ class MySql(AgentCheck):
                 )
 
                 return GROUP_REPLICATION_VARS
-        except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
+        except Exception as e:
             self.warning("Internal error happened during the group replication check: %s", e)
             return {}
 

@@ -174,6 +174,8 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
 
     dd_run_check(mysql_check)
 
+    assert mysql_check._is_group_replication_active() is False
+
     # Test service check
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS_REPLICA, count=1)
 
