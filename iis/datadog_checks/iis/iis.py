@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from six import iteritems
+from six import PY3, iteritems
 
 from datadog_checks.base import PDHBaseCheck
 
@@ -45,6 +45,14 @@ TOTAL_INSTANCE = '_Total'
 class IIS(PDHBaseCheck):
     SITE = 'site'
     APP_POOL = 'app_pool'
+
+    def __new__(cls, name, init_config, instances):
+        if PY3:
+            from .check import IISCheckV2
+
+            return IISCheckV2(name, init_config, instances)
+        else:
+            return super(IIS, cls).__new__(cls)
 
     def __init__(self, name, init_config, instances):
         super(IIS, self).__init__(name, init_config, instances, counter_list=DEFAULT_COUNTERS)
