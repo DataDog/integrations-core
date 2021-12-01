@@ -12,7 +12,7 @@ The Envoy check is included in the [Datadog Agent][2] package, so you don't need
 
 #### Istio
 
-If you are using Envoy as part of [Istio][3], configure the `openmetrics_endpoint` to the Istio proxy metrics endpoint.
+If you are using Envoy as part of [Istio][3], configure the Envoy integration to collect metrics from the Istio proxy metrics endpoint.
 
     ```yaml
     instances:
@@ -105,13 +105,11 @@ To configure this check for an Agent running on a host:
     init_config:
 
     instances:
-      ## @param stats_url - string - required
-      ## The admin endpoint to connect to. It must be accessible:
-      ## https://www.envoyproxy.io/docs/envoy/latest/operations/admin
-      ## Add a `?usedonly` on the end if you wish to ignore
-      ## unused metrics instead of reporting them as `0`.
-      #
-      - stats_url: http://localhost:80/stats
+        ## @param openmetrics_endpoint - string - required
+        ## The URL exposing metrics in the OpenMetrics format.
+        #
+      - openmetrics_endpoint: http://localhost:80/stats/prometheus
+
     ```
 
 2. Check if the Datadog Agent can access Envoy's [admin endpoint][5].
