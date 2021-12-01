@@ -416,7 +416,9 @@ class MySql(AgentCheck):
                 status = self.OK
                 additional_tags = []
                 if replica_results is None or len(replica_results) < 3:
-                    self.log.warning('Unable to get group replica status, setting mysql.replication.group.status as CRITICAL')
+                    self.log.warning(
+                        'Unable to get group replica status, setting mysql.replication.group.status as CRITICAL'
+                    )
                     status = self.CRITICAL
                 else:
                     status = self.OK if replica_results[1] == 'ONLINE' else self.CRITICAL
