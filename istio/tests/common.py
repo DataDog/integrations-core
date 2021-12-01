@@ -296,6 +296,7 @@ ISTIOD_V2_METRICS = [
 ]
 
 ISTIO_AGENT_METRICS = [
+    'istio.build',
     'istio.mesh.agent.pilot.conflict.outbound_listener.http_over_current_tcp',
     'istio.mesh.agent.go.memstats.stack_sys_bytes',
     'istio.mesh.agent.conflict.inbound_listener',

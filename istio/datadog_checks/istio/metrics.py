@@ -83,6 +83,7 @@ GALLEY_METRICS = {
 
 
 MESH_METRICS = {
+    'istio_build': 'build',
     'istio_request_messages_total': 'request.messages.total',
     'istio_response_messages_total': 'response.messages.total',
     # These metrics support Istio 1.5
@@ -165,7 +166,6 @@ MESH_METRICS = {
     'istio_agent_pilot_conflict_outbound_listener_tcp_over_current_http': (
         'agent.pilot.conflict.outbound_listener.tcp_over_current_http'
     ),
-    'istio_build': 'build',
 }
 
 
