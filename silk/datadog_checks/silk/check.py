@@ -1,10 +1,9 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.base import AgentCheck
-
 from six.moves.urllib.parse import urljoin
 
+from datadog_checks.base import AgentCheck
 
 
 class SilkCheck(AgentCheck):
@@ -13,19 +12,15 @@ class SilkCheck(AgentCheck):
     __NAMESPACE__ = 'silk'
 
     ENDPOINTS = [
-        '/host',
+        '/hosts',
         '/stats/system',
-        '/stats/volume',
-        '/volume',
+        '/stats/volumes',
+        '/volumes',
     ]
 
     STATE_ENDPOINT = '/system/state'
 
-    STATE_MAP = {
-        'online': AgentCheck.OK,
-        'offline': AgentCheck.WARNING,
-        'degraded': AgentCheck.CRITICAL
-    }
+    STATE_MAP = {'online': AgentCheck.OK, 'offline': AgentCheck.WARNING, 'degraded': AgentCheck.CRITICAL}
 
     STATE_SERVICE_CHECK = "state"
 
@@ -34,7 +29,7 @@ class SilkCheck(AgentCheck):
 
         server = self.instance.get("server")
         port = self.instance.get("port", 443)
-        self.url = "{}:{}".format(server, port)
+        self.url = "{}:{}/api/v2".format(server, port)
 
     def check(self, _):
         try:
@@ -50,6 +45,7 @@ class SilkCheck(AgentCheck):
                 self.service_check(self.STATE_SERVICE_CHECK, state)
 
         for path in self.ENDPOINTS:
+            # Need to submit an object of relevant tags
             response_json = self.get_metrics(path)
             self.parse_metrics(response_json, path)
 
@@ -69,7 +65,8 @@ class SilkCheck(AgentCheck):
         # Parse metrics at some point here. Establish a system to reuse with any path
         for item in hits:
             for key, value in item.items():
-                self.gauge(key, value, tags=['path:{}'.format(path)])
+                if isinstance(value, (int, float)):
+                    self.gauge(key, value, tags=['path:{}'.format(path)])
 
     def get_metrics(self, path):
         try:
