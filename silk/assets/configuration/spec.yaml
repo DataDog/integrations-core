@@ -8,11 +8,11 @@ files:
     - template: init_config/default
   - template: instances
     options:
-      - name: host
+      - name: server
         description: Server address of Silk instance.
         required: true
         value:
-          example: localhost
+          example: http://localhost
           type: string
       - name: port
         description: Port of Silk API connection.
