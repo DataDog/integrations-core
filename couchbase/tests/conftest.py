@@ -39,7 +39,7 @@ def instance_query():
         'server': URL,
         'user': USER,
         'password': PASSWORD,
-        'timeout': 5,
+        'timeout': 1,
         'tags': CUSTOM_TAGS,
         'query_monitoring_url': QUERY_URL,
     }
@@ -51,7 +51,7 @@ def instance_sg():
         'server': URL,
         'user': USER,
         'password': PASSWORD,
-        'timeout': 5,
+        'timeout': 1,
         'tags': CUSTOM_TAGS,
         'sync_gateway_url': SG_URL,
     }
@@ -63,7 +63,7 @@ def instance_index_stats():
         'server': URL,
         'user': USER,
         'password': PASSWORD,
-        'timeout': 5,
+        'timeout': 1,
         'tags': CUSTOM_TAGS,
         'index_stats_url': INDEX_STATS_URL,
     }

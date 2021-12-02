@@ -29,7 +29,7 @@ PASSWORD = 'password'
 
 COUCHBASE_MAJOR_VERSION = int(os.getenv('COUCHBASE_VERSION').split(".")[0])
 
-DEFAULT_INSTANCE = {'server': URL, 'user': USER, 'password': PASSWORD, 'timeout': 5, 'tags': CUSTOM_TAGS}
+DEFAULT_INSTANCE = {'server': URL, 'user': USER, 'password': PASSWORD, 'timeout': 1, 'tags': CUSTOM_TAGS}
 
 SYNC_GATEWAY_METRICS = [
     "couchbase.sync_gateway.admin_net_bytes_recv",
