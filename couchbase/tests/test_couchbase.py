@@ -35,6 +35,9 @@ NODE_STATS = [
     'vb_replica_curr_items',
 ]
 
+if COUCHBASE_MAJOR_VERSION == 7:
+    NODE_STATS += ['index_data_size', 'index_disk_size']
+
 TOTAL_STATS = [
     'hdd.free',
     'hdd.used',
@@ -63,7 +66,6 @@ def test_service_check(aggregator, instance, couchbase_container_ip):
     couchbase.check(None)
 
     NODE_HOST = '{}:{}'.format(couchbase_container_ip, PORT)
-    print(NODE_HOST)
     NODE_TAGS = ['node:{}'.format(NODE_HOST)]
 
     aggregator.assert_service_check(SERVICE_CHECK_NAME, tags=CHECK_TAGS, status=Couchbase.OK, count=1)
@@ -195,7 +197,11 @@ def _assert_bucket_metrics(aggregator, tags, device=None):
 
 def _assert_stats(aggregator, node_tags, device=None):
     for mname in NODE_STATS:
-        aggregator.assert_metric('couchbase.by_node.{}'.format(mname), tags=node_tags, count=1, device=device)
+        # These 2 metrics are available ~30 seconds post start. The integrations test won't see it, but the e2e will
+        if mname == 'index_data_size' or mname == 'index_disk_size':
+            aggregator.assert_metric('couchbase.by_node.{}'.format(mname), tags=node_tags, device=device, at_least=0)
+        else:
+            aggregator.assert_metric('couchbase.by_node.{}'.format(mname), tags=node_tags, count=1, device=device)
 
     # Assert 'couchbase.' metrics
     for mname in TOTAL_STATS:
