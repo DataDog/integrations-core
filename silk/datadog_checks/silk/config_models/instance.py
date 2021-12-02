@@ -58,7 +58,7 @@ class InstanceConfig(BaseModel):
     ntlm_domain: Optional[str]
     password: Optional[str]
     persist_connections: Optional[bool]
-    port: float
+    port: Optional[float]
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
     request_size: Optional[float]
