@@ -113,7 +113,7 @@ def _run_test_collect_activity(aggregator, instance_docker, dd_run_check, dbm_in
     assert bobs_row['transaction_begin_time'], "missing tx begin time"
 
     # assert that the tx begin time is being collected as an ISO timestamp with TZ info
-    assert parser.parse(bobs_row['transaction_begin_time']).tzinfo, "tx begin timestamp not formatted correctly"
+    assert parser.isoparse(bobs_row['transaction_begin_time']).tzinfo, "tx begin timestamp not formatted correctly"
 
     assert len(first['sqlserver_connections']) > 0
     b_conn = None
