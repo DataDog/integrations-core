@@ -242,3 +242,15 @@ SCHEMA_VARS = ['mysql.info.schema.size']
 SYNTHETIC_VARS = ['mysql.performance.qcache.utilization', 'mysql.performance.qcache.utilization.instant']
 
 STATEMENT_VARS = ['dd.mysql.queries.query_rows_raw', 'dd.mysql.queries.query_rows_limited']
+
+GROUP_REPLICATION_VARS = [
+    'mysql.replication.group.member_status',
+    'mysql.replication.group.conflicts_detected',
+    'mysql.replication.group.transactions',
+    'mysql.replication.group.transactions_applied',
+    'mysql.replication.group.transactions_in_applier_queue',
+    'mysql.replication.group.transactions_check',
+    'mysql.replication.group.transactions_proposed',
+    'mysql.replication.group.transactions_rollback',
+    'mysql.replication.group.transactions_validating',
+]
