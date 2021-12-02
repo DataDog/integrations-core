@@ -323,7 +323,7 @@ class Couchbase(AgentCheck):
         try:
             data = self._get_stats(url).get('syncgateway', {})
         except requests.exceptions.RequestException as e:
-            msg = "Error accessing the Sync Gateway monitoring endpoint %s: %s," % url, str(e)
+            msg = "Error accessing the Sync Gateway monitoring endpoint %s: %s," % (url, str(e))
             self.log.debug(msg)
             self.service_check(SG_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, msg, self._tags)
             return
@@ -423,6 +423,7 @@ class Couchbase(AgentCheck):
 
         for keyspace in data:
             if keyspace == "indexer":
+                # The indexer object provides metric about the index node
                 for mname, mval in data.get(keyspace).items():
                     self._submit_index_node_metrics(mname, mval, self._tags)
             else:
@@ -431,6 +432,10 @@ class Couchbase(AgentCheck):
                     self._submit_per_index_metrics(mname, mval, index_tags)
 
     def _extract_index_tags(self, keyspace):
+        # Index Keyspaces can come in different formats:
+        # partition, bucket:index_name, bucket:collection:index_name, bucket:scope:collection:index_name
+        # For variations missing the scope and collection, they refer to the default scope and collection respectively
+        # https://docs.couchbase.com/server/current/n1ql/n1ql-language-reference/createprimaryindex.html#keyspace-ref
         tag_arr = keyspace.split(":")
         if len(tag_arr) == 1:
             partition = tag_arr[0]

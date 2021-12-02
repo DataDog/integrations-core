@@ -35,9 +35,6 @@ NODE_STATS = [
     'vb_replica_curr_items',
 ]
 
-if COUCHBASE_MAJOR_VERSION == 7:
-    NODE_STATS += ['index_data_size', 'index_disk_size']
-
 TOTAL_STATS = [
     'hdd.free',
     'hdd.used',
@@ -210,7 +207,7 @@ def _assert_stats(aggregator, node_tags, device=None):
 @pytest.mark.usefixtures("dd_environment")
 def test_index_stats_metrics(aggregator, dd_run_check, instance_index_stats, couchbase_container_ip):
     """
-    Test Index Statistics metrics (prefixed "couchbase.index.")
+    Test Index Statistics metrics (prefixed "couchbase.index." and "couchbase.indexer.")
     """
     couchbase = Couchbase('couchbase', {}, [instance_index_stats])
     dd_run_check(couchbase)

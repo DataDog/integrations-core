@@ -95,7 +95,12 @@ def test_config(test_case, dd_run_check, extra_config, expected_http_kwargs, ins
 
 def test_extract_index_tags(instance):
     couchbase = Couchbase('couchbase', {}, [instance])
-
+    """
+    Test to ensure that tags are extracted properly from keyspaces. Takes into account the different
+    forms of the keyspace and extract the tags from them accordingly. Docs:
+    https://docs.couchbase.com/server/current/rest-api/rest-index-stats.html#responses-3
+    https://docs.couchbase.com/server/current/n1ql/n1ql-language-reference/createprimaryindex.html#keyspace-ref
+    """
     EXTRACTED_INDEX_TAGS_TEST_SAMPLES = {
         'partition': ["partition:partition"],
         'bucket:index_name': ['bucket:bucket', 'scope:default', 'collection:default', 'index_name:index_name'],
