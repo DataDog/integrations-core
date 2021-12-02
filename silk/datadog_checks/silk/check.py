@@ -32,9 +32,9 @@ class SilkCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(SilkCheck, self).__init__(name, init_config, instances)
 
-        host = self.instance.get("host")
+        server = self.instance.get("server")
         port = self.instance.get("port", 443)
-        self.url = "{}:{}".format(host, port)
+        self.url = "{}:{}".format(server, port)
 
     def check(self, _):
         try:
@@ -42,7 +42,7 @@ class SilkCheck(AgentCheck):
             response.raise_for_status()
             response_json = response.json()
         except Exception as e:
-            self.service_check("can_connect", AgentCheck.CRITICAL)
+            self.service_check("can_connect", AgentCheck.CRITICAL, message=str(e))
         else:
             if response_json:
                 data = self.parse_metrics(response_json, self.STATE_ENDPOINT, return_first=True)
@@ -53,15 +53,15 @@ class SilkCheck(AgentCheck):
             response_json = self.get_metrics(path)
             self.parse_metrics(response_json, path)
 
-    def parse_metrics(self, output, path, return_first):
+    def parse_metrics(self, output, path, return_first=False):
         """
         Parse metrics from HTTP response. return_first will return the first item in `hits` key.
         """
-        hits = output.get('hits')
-
-        if not hits:
+        if not output:
             self.log.debug("No results for path {}".format(path))
             return
+
+        hits = output.get('hits')
 
         if return_first:
             return hits[0]

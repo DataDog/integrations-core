@@ -16,7 +16,7 @@ def dd_environment():
             'http://{}:{}/stats/system'.format(common.HOST, common.PORT),
         ],
     ):
-        yield {}
+        yield common.INSTANCE
 
 
 @pytest.fixture
