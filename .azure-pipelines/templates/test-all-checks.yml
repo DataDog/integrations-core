@@ -402,6 +402,9 @@ jobs:
     - checkName: scylla
       displayName: Scylla
       os: linux
+    - checkName: silk
+      displayName: Silk
+      os: linux
     - checkName: singlestore
       displayName: SingleStore
       os: linux
