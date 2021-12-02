@@ -200,8 +200,11 @@ ddev release upload datadog_checks_[base|dev]
     
 #### Build pipeline failed
 
-- If the [build pipeline](../meta/cd.md) failed, it is likely that you modified a file in the pull request
-  without re-signing. To resolve this, you'll need to bootstrap metadata for every integration:
+After merging the release PR, the [build pipeline](../meta/cd.md) can fail under a few cases. See below for steps on diagnosing the error and the corresponding fix.
+
+- A file in the pull request was modified without re-signing. View the `Files Changed` tab in the recently merged release PR and verify the `.in-toto/tag.<KEYID>.link` exists and the integration files were signed.
+
+  To resolve this, you'll need to bootstrap metadata for every integration:
 
     1. Checkout and pull the most recent version of the `master` branch.
 
@@ -230,7 +233,14 @@ ddev release upload datadog_checks_[base|dev]
 
     1. Delete the branch and tag, locally and on GitHub.
     
-- If the [build pipeline](../meta/cd.md) failed due to another feature PR conflicting with and being merged after the release PR is opened, the merged release PR will not have updated and signed the feature PR's files.
+- If a feature PR conflicting with the release PR is merged out of order.
+
+    The following is a possible sequence of events that can result in the build pipeline failing:
+    
+        1. A release PR is opened
+        2. A feature PR is opened and merged
+        3. The release PR is merged after the feature PR.
+        4. The release PR will not have updated and signed the feature PR's files, the released wheel will also not contain the changes from the feature PR.
   
     You may see an error like so:
     
