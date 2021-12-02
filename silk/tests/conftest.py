@@ -3,10 +3,20 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.dev import docker_run
+
+from . import common
+
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield
+    with docker_run(
+        common.COMPOSE_FILE,
+        endpoints=[
+            'http://{}:{}/stats/system'.format(common.HOST, common.PORT),
+        ],
+    ):
+        yield {}
 
 
 @pytest.fixture
