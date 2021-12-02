@@ -18,6 +18,9 @@ except ImportError:
     datadog_agent = None
 
 
+EXCLUDED_MODULES = ['threading']
+
+
 def traced(fn):
     """
     Traced decorator is intended to be used on a method of AgentCheck subclasses.
@@ -72,6 +75,8 @@ def traced_class(cls):
                     callable(getattr(cls, attr))
                     and not isinstance(cls.__dict__[attr], staticmethod)
                     and not isinstance(cls.__dict__[attr], classmethod)
+                    # Get rid of SnmpCheck._thread_factory and related
+                    and getattr(getattr(cls, attr), '__module__', 'threading') not in EXCLUDED_MODULES
                 ):
                     setattr(cls, attr, tracing_method(getattr(cls, attr)))
             return cls
