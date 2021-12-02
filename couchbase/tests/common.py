@@ -155,7 +155,6 @@ INDEX_STATS_METRICS = [
     'couchbase.index.initial_build_progress',
     'couchbase.index.items_count',
     'couchbase.index.last_known_scan_time',
-    'couchbase.index.memory_used',
     'couchbase.index.num_docs_indexed',
     'couchbase.index.num_docs_pending',
     'couchbase.index.num_docs_queued',
