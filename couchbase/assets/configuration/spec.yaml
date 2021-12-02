@@ -30,7 +30,7 @@ files:
         type: string
     - name: index_stats_url
       description: |
-        Url to get Index Statistics endpoint, available since couchbase 7.0.
+        Url to get Index Statistics, available since couchbase 7.0.
         See https://docs.couchbase.com/server/current/rest-api/rest-index-stats.html
       value:
         example: http://localhost:9102
