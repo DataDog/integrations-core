@@ -33,9 +33,10 @@ NODE_STATS = [
     'ops',
     'vb_active_num_non_resident',
     'vb_replica_curr_items',
-    'index_data_size',
-    'index_disk_size',
 ]
+
+if COUCHBASE_MAJOR_VERSION == 7:
+    NODE_STATS += ['index_data_size', 'index_disk_size']
 
 TOTAL_STATS = [
     'hdd.free',

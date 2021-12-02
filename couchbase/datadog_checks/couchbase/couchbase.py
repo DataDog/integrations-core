@@ -421,33 +421,47 @@ class Couchbase(AgentCheck):
 
         self.service_check(INDEX_STATS_SERVICE_CHECK_NAME, AgentCheck.OK, self._tags)
 
-        for key in data:
-            if key == "indexer":
-                for mname, mval in data.get(key).items():
-                    self._submit_index_metrics(mname, mval, self._tags)
+        for keyspace in data:
+            if keyspace == "indexer":
+                for mname, mval in data.get(keyspace).items():
+                    self._submit_index_node_metrics(mname, mval, self._tags)
             else:
-                tag_arr = key.split(":")
-                if len(tag_arr) == 2:
-                    bucket, index_name = tag_arr
-                    scope, collection = ["default", "default"]
-                elif len(tag_arr) == 3:
-                    bucket, collection, index_name = tag_arr
-                    scope = 'default'
-                else:
-                    bucket, scope, collection, index_name = tag_arr
-                index_tags = [
-                    'bucket:{}'.format(bucket),
-                    'scope:{}'.format(scope),
-                    'collection:{}'.format(collection),
-                    'index_name:{}'.format(index_name),
-                ] + self._tags
-                for mname, mval in data.get(key).items():
-                    self._submit_index_metrics(mname, mval, index_tags)
+                index_tags = self._extract_index_tags(keyspace) + self._tags
+                for mname, mval in data.get(keyspace).items():
+                    self._submit_per_index_metrics(mname, mval, index_tags)
 
-    def _submit_index_metrics(self, mname, mval, tags):
+    def _extract_index_tags(self, keyspace):
+        tag_arr = keyspace.split(":")
+        if len(tag_arr) == 1:
+            partition = tag_arr[0]
+            formatted_tags = [
+                'partition:{}'.format(partition),
+            ]
+            return formatted_tags
+        elif len(tag_arr) == 2:
+            bucket, index_name = tag_arr
+            scope, collection = ["default", "default"]
+        elif len(tag_arr) == 3:
+            bucket, collection, index_name = tag_arr
+            scope = 'default'
+        else:
+            bucket, scope, collection, index_name = tag_arr
+        formatted_tags = [
+            'bucket:{}'.format(bucket),
+            'scope:{}'.format(scope),
+            'collection:{}'.format(collection),
+            'index_name:{}'.format(index_name),
+        ]
+        return formatted_tags
+
+    def _submit_index_node_metrics(self, mname, mval, tags):
         index_state_map = {'Active': 0, 'Pause': 1, 'Warmup': 2}
-        namespace = '.'.join(['couchbase', 'index'])
+        namespace = '.'.join(['couchbase', 'indexer'])
         if mname == "indexer_state":
             self.gauge('.'.join([namespace, mname]), index_state_map[mval], tags)
         else:
             self.gauge('.'.join([namespace, mname]), mval, tags)
+
+    def _submit_per_index_metrics(self, mname, mval, tags):
+        namespace = '.'.join(['couchbase', 'index'])
+        self.gauge('.'.join([namespace, mname]), mval, tags)

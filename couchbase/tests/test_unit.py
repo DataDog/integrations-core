@@ -91,3 +91,30 @@ def test_config(test_case, dd_run_check, extra_config, expected_http_kwargs, ins
         )
         http_wargs.update(expected_http_kwargs)
         r.get.assert_called_with('http://localhost:8091/pools/default/tasks', **http_wargs)
+
+
+def test_extract_index_tags(instance):
+    couchbase = Couchbase('couchbase', {}, [instance])
+
+    EXTRACTED_INDEX_TAGS_TEST_SAMPLES = {
+        'partition': ["partition:partition"],
+        'bucket:index_name': ['bucket:bucket', 'scope:default', 'collection:default', 'index_name:index_name'],
+        'bucket:collection:index_name': [
+            'bucket:bucket',
+            'scope:default',
+            'collection:collection',
+            'index_name:index_name',
+        ],
+        'bucket:scope:collection:index_name': [
+            'bucket:bucket',
+            'scope:scope',
+            'collection:collection',
+            'index_name:index_name',
+        ],
+    }
+
+    for test_input, expected_output in EXTRACTED_INDEX_TAGS_TEST_SAMPLES.items():
+        test_output = couchbase._extract_index_tags(test_input)
+        assert test_output == expected_output, 'Input was {}, expected output was {}, actual output was {}'.format(
+            test_input, expected_output, test_output
+        )

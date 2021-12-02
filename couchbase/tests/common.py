@@ -138,11 +138,11 @@ SYNC_GATEWAY_METRICS = [
 ]
 
 INDEX_STATS_METRICS = [
-    'couchbase.index.indexer_state',
-    'couchbase.index.memory_quota',
-    'couchbase.index.memory_total_storage',
-    'couchbase.index.memory_used',
-    'couchbase.index.total_indexer_gc_pause_ns',
+    'couchbase.indexer.indexer_state',
+    'couchbase.indexer.memory_quota',
+    'couchbase.indexer.memory_total_storage',
+    'couchbase.indexer.memory_used',
+    'couchbase.indexer.total_indexer_gc_pause_ns',
     'couchbase.index.avg_drain_rate',
     'couchbase.index.avg_item_size',
     'couchbase.index.avg_scan_latency',
