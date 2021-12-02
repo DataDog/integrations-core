@@ -32,7 +32,12 @@ ACTIVITY_QUERY = re.sub(
     ' ',
     """\
 SELECT
-    at.transaction_begin_time,
+    CONVERT(
+        NVARCHAR, TODATETIMEOFFSET(at.transaction_begin_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
+    ) as transaction_begin_time,
+    CONVERT(
+        NVARCHAR, TODATETIMEOFFSET(r.start_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
+    ) as query_start,
     at.transaction_type,
     at.transaction_state,
     sess.login_name as user_name,
@@ -69,6 +74,8 @@ dm_exec_requests_exclude_keys = {
     'status',
     # remove session_id in favor of id
     'session_id',
+    # remove start_time in favor of query_start
+    'start_time',
 }
 
 
