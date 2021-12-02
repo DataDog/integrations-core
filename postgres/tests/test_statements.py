@@ -511,13 +511,10 @@ def test_statement_samples_metadata(aggregator, integration_check, dbm_instance,
     select * from pg_stat_activity where application_name = ANY(%s);
     '''
     query_signature = '381f3aaca6abf3b0'
-    normalized_query = 'select * from pg_stat_activity where application_name = ANY(array [ ? ])'
 
     metadata = {'comments': ['-- Test comment']}
 
     def obfuscate_sql(query, options=None):
-        if query.startswith('select * from pg_stat_activity where application_name'):
-            return json.dumps({'query': normalized_query, 'metadata': metadata})
         return json.dumps({'query': query, 'metadata': metadata})
 
     check = integration_check(dbm_instance)

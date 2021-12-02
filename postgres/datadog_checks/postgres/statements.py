@@ -15,7 +15,7 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, DbRow, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 
 from .version_utils import V9_4
@@ -176,13 +176,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
             # truncate query text to the maximum length supported by metrics tags
             for row in rows:
-                row.data['query'] = row.data['query'][0:200]
+                row['query'] = row['query'][0:200]
             payload = {
                 'host': self._check.resolved_hostname,
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._metrics_collection_interval,
                 'tags': self._tags_no_db,
-                'postgres_rows': [row.data for row in rows],
+                'postgres_rows': rows,
                 'postgres_version': self._payload_pg_version(),
                 'ddagentversion': datadog_agent.get_version(),
             }
@@ -281,7 +281,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             self._log.warning("Failed to query for pg_stat_statements count: %s", e)
 
     def _collect_metrics_rows(self):
-        # type: () -> List[DbRow]
+        # type: () -> List[Dict]
         rows = self._load_pg_stat_statements()
         if rows:
             self._emit_pg_stat_statements_metrics()
@@ -290,19 +290,19 @@ class PostgresStatementMetrics(DBMAsyncJob):
         if not rows:
             return []
 
-        available_columns = set(rows[0].data.keys())
+        available_columns = set(rows[0].keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
-        rows = self._state.compute_derivative_rows([row.data for row in rows], metric_columns, key=_row_key)
+        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
         self._check.gauge(
             'dd.postgres.queries.query_rows_raw',
             len(rows),
             tags=self._tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
-        return [DbRow(row) for row in rows]
+        return rows
 
     def _normalize_queries(self, rows):
-        # type: (Dict) -> List[DbRow]
+        # type: (Dict) -> List[Dict]
         normalized_rows = []
         for row in rows:
             normalized_row = dict(copy.copy(row))
@@ -316,20 +316,20 @@ class PostgresStatementMetrics(DBMAsyncJob):
             obfuscated_query = statement['query']
             normalized_row['query'] = obfuscated_query
             normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
-            normalized_rows.append(DbRow(normalized_row))
+            normalized_rows.append(normalized_row)
 
         return normalized_rows
 
     def _rows_to_fqt_events(self, rows):
-        # type: (List[DbRow]) -> Generator
+        # type: (List[Dict]) -> Generator
         for row in rows:
-            query_cache_key = _row_key(row.data)
+            query_cache_key = _row_key(row)
             if query_cache_key in self._full_statement_text_cache:
                 continue
             self._full_statement_text_cache[query_cache_key] = True
             row_tags = self._tags_no_db + [
-                "db:{}".format(row.data['datname']),
-                "rolname:{}".format(row.data['rolname']),
+                "db:{}".format(row['datname']),
+                "rolname:{}".format(row['rolname']),
             ]
             yield {
                 "timestamp": time.time() * 1000,
@@ -339,12 +339,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",
                 "db": {
-                    "instance": row.data['datname'],
-                    "query_signature": row.data['query_signature'],
-                    "statement": row.data['query'],
+                    "instance": row['datname'],
+                    "query_signature": row['query_signature'],
+                    "statement": row['query'],
                 },
                 "postgres": {
-                    "datname": row.data["datname"],
-                    "rolname": row.data["rolname"],
+                    "datname": row["datname"],
+                    "rolname": row["rolname"],
                 },
             }
