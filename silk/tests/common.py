@@ -7,9 +7,8 @@ from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
 HOST = get_docker_hostname()
-PORT = 443
 INSTANCE_LEGACY = {
-    'host': '{}:{}'.format(HOST, PORT),
+    'host': '{}'.format(HOST),
     'tags': ['test:silk'],
 }
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
