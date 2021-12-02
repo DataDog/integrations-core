@@ -1,0 +1,18 @@
+{
+  "hits": [
+    {
+      "iops_avg": 0,
+      "iops_max": 0,
+      "latency_inner": 0.0,
+      "latency_outer": 0.0,
+      "peer_k2_name": null,
+      "resolution": 5,
+      "throughput_avg": 0,
+      "throughput_max": 0,
+      "timestamp": 1635196300,
+      "volume": "@{ref=/volumes/259}",
+      "volume_name": "Volume1"
+    }
+  ],
+  "total": 1
+}
