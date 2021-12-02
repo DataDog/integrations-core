@@ -450,6 +450,10 @@ coverage:
         target: 75
         flags:
         - scylla
+      Silk:
+        target: 75
+        flags:
+        - silk
       SingleStore:
         target: 75
         flags:
@@ -1109,6 +1113,11 @@ flags:
     paths:
     - scylla/datadog_checks/scylla
     - scylla/tests
+  silk:
+    carryforward: true
+    paths:
+    - silk/datadog_checks/silk
+    - silk/tests
   singlestore:
     carryforward: true
     paths:
