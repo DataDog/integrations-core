@@ -12,6 +12,7 @@ HOST = get_docker_hostname()
 PORT = '8091'
 QUERY_PORT = '8093'
 SG_PORT = '4985'
+INDEX_STATS_PORT = '9102'
 
 # Tags and common bucket name
 CUSTOM_TAGS = ['optional:tag1']
@@ -21,11 +22,14 @@ BUCKET_NAME = 'cb_bucket'
 URL = 'http://{}:{}'.format(HOST, PORT)
 QUERY_URL = 'http://{}:{}'.format(HOST, QUERY_PORT)
 SG_URL = 'http://{}:{}'.format(HOST, SG_PORT)
+INDEX_STATS_URL = 'http://{}:{}'.format(HOST, INDEX_STATS_PORT)
 CB_CONTAINER_NAME = 'couchbase-standalone'
 USER = 'Administrator'
 PASSWORD = 'password'
 
-DEFAULT_INSTANCE = {'server': URL, 'user': USER, 'password': PASSWORD, 'timeout': 0.5, 'tags': CUSTOM_TAGS}
+COUCHBASE_MAJOR_VERSION = int(os.getenv('COUCHBASE_VERSION').split(".")[0])
+
+DEFAULT_INSTANCE = {'server': URL, 'user': USER, 'password': PASSWORD, 'timeout': 2, 'tags': CUSTOM_TAGS}
 
 SYNC_GATEWAY_METRICS = [
     "couchbase.sync_gateway.admin_net_bytes_recv",
@@ -131,4 +135,39 @@ SYNC_GATEWAY_METRICS = [
     "couchbase.sync_gateway.shared_bucket_import.import_processing_time",
     "couchbase.sync_gateway.system_memory_total",
     "couchbase.sync_gateway.warn_count",
+]
+
+INDEX_STATS_METRICS = [
+    'couchbase.index.indexer_state',
+    'couchbase.index.memory_quota',
+    'couchbase.index.memory_total_storage',
+    'couchbase.index.memory_used',
+    'couchbase.index.total_indexer_gc_pause_ns',
+    'couchbase.index.avg_drain_rate',
+    'couchbase.index.avg_item_size',
+    'couchbase.index.avg_scan_latency',
+    'couchbase.index.cache_hit_percent',
+    'couchbase.index.cache_hits',
+    'couchbase.index.cache_misses',
+    'couchbase.index.data_size',
+    'couchbase.index.disk_size',
+    'couchbase.index.frag_percent',
+    'couchbase.index.initial_build_progress',
+    'couchbase.index.items_count',
+    'couchbase.index.last_known_scan_time',
+    'couchbase.index.memory_used',
+    'couchbase.index.num_docs_indexed',
+    'couchbase.index.num_docs_pending',
+    'couchbase.index.num_docs_queued',
+    'couchbase.index.num_items_flushed',
+    'couchbase.index.num_pending_requests',
+    'couchbase.index.num_requests',
+    'couchbase.index.num_rows_returned',
+    'couchbase.index.num_scan_errors',
+    'couchbase.index.num_scan_timeouts',
+    'couchbase.index.recs_in_mem',
+    'couchbase.index.recs_on_disk',
+    'couchbase.index.resident_percent',
+    'couchbase.index.scan_bytes_read',
+    'couchbase.index.total_scan_duration',
 ]

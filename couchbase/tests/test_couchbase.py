@@ -7,6 +7,7 @@ import pytest
 
 from datadog_checks.couchbase import Couchbase
 from datadog_checks.couchbase.couchbase_consts import (
+    INDEX_STATS_SERVICE_CHECK_NAME,
     NODE_CLUSTER_SERVICE_CHECK_NAME,
     NODE_HEALTH_SERVICE_CHECK_NAME,
     QUERY_STATS,
@@ -14,7 +15,7 @@ from datadog_checks.couchbase.couchbase_consts import (
     SG_SERVICE_CHECK_NAME,
 )
 
-from .common import BUCKET_NAME, CHECK_TAGS, PORT, SYNC_GATEWAY_METRICS
+from .common import BUCKET_NAME, CHECK_TAGS, COUCHBASE_MAJOR_VERSION, INDEX_STATS_METRICS, PORT, SYNC_GATEWAY_METRICS
 
 NODE_STATS = [
     'cmd_get',
@@ -32,6 +33,8 @@ NODE_STATS = [
     'ops',
     'vb_active_num_non_resident',
     'vb_replica_curr_items',
+    'index_data_size',
+    'index_disk_size',
 ]
 
 TOTAL_STATS = [
@@ -62,6 +65,7 @@ def test_service_check(aggregator, instance, couchbase_container_ip):
     couchbase.check(None)
 
     NODE_HOST = '{}:{}'.format(couchbase_container_ip, PORT)
+    print(NODE_HOST)
     NODE_TAGS = ['node:{}'.format(NODE_HOST)]
 
     aggregator.assert_service_check(SERVICE_CHECK_NAME, tags=CHECK_TAGS, status=Couchbase.OK, count=1)
@@ -198,3 +202,17 @@ def _assert_stats(aggregator, node_tags, device=None):
     # Assert 'couchbase.' metrics
     for mname in TOTAL_STATS:
         aggregator.assert_metric('couchbase.{}'.format(mname), tags=CHECK_TAGS, count=1)
+
+
+@pytest.mark.skipif(COUCHBASE_MAJOR_VERSION != 7, reason='Index metrics are only available for Couchbase 7+')
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_index_stats_metrics(aggregator, dd_run_check, instance_index_stats, couchbase_container_ip):
+    """
+    Test Index Statistics metrics (prefixed "couchbase.index.")
+    """
+    couchbase = Couchbase('couchbase', {}, [instance_index_stats])
+    dd_run_check(couchbase)
+    for mname in INDEX_STATS_METRICS:
+        aggregator.assert_metric(mname)
+    aggregator.assert_service_check(INDEX_STATS_SERVICE_CHECK_NAME, status=Couchbase.OK, tags=CHECK_TAGS)

@@ -18,6 +18,7 @@ from .common import (
     CUSTOM_TAGS,
     DEFAULT_INSTANCE,
     HERE,
+    INDEX_STATS_URL,
     PASSWORD,
     PORT,
     QUERY_URL,
@@ -38,7 +39,7 @@ def instance_query():
         'server': URL,
         'user': USER,
         'password': PASSWORD,
-        'timeout': 0.5,
+        'timeout': 2,
         'tags': CUSTOM_TAGS,
         'query_monitoring_url': QUERY_URL,
     }
@@ -50,9 +51,21 @@ def instance_sg():
         'server': URL,
         'user': USER,
         'password': PASSWORD,
-        'timeout': 0.5,
+        'timeout': 2,
         'tags': CUSTOM_TAGS,
         'sync_gateway_url': SG_URL,
+    }
+
+
+@pytest.fixture
+def instance_index_stats():
+    return {
+        'server': URL,
+        'user': USER,
+        'password': PASSWORD,
+        'timeout': 2,
+        'tags': CUSTOM_TAGS,
+        'index_stats_url': INDEX_STATS_URL,
     }
 
 
@@ -71,7 +84,6 @@ def dd_environment():
     ]
     if int(couchdb_version) >= 7:
         conditions.append(WaitFor(load_sample_bucket))
-
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'standalone.compose'),
         env_vars={'CB_CONTAINER_NAME': CB_CONTAINER_NAME},

@@ -444,8 +444,6 @@ class Couchbase(AgentCheck):
                         'collection:{}'.format(collection),
                         'index_name:{}'.format(index_name),
                     ] + self._tags
-                self.log.debug("hello")
-                self.log.debug(index_tags)
                 for mname, mval in data.get(key).items():
                     self._submit_per_index_stats_metrics(mname, mval, index_tags)
 
