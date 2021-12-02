@@ -45,7 +45,6 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]
     headers: Optional[Mapping[str, Any]]
-    host: str
     kerberos_auth: Optional[str]
     kerberos_cache: Optional[str]
     kerberos_delegate: Optional[bool]
@@ -62,6 +61,7 @@ class InstanceConfig(BaseModel):
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
     request_size: Optional[float]
+    server: str
     service: Optional[str]
     skip_proxy: Optional[bool]
     tags: Optional[Sequence[str]]
