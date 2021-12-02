@@ -50,10 +50,10 @@ instances:
     #
   - host: localhost
 
-    ## @param port - number - required
+    ## @param port - number - optional - default: 443
     ## Port of Silk API connection.
     #
-    port: 443
+    # port: 443
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.

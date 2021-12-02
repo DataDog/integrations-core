@@ -16,7 +16,6 @@ files:
           type: string
       - name: port
         description: Port of Silk API connection.
-        required: true
         value:
           example: 443
           type: number
