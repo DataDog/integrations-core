@@ -7,6 +7,7 @@ import requests
 from six import PY2
 
 from ...errors import CheckException
+from ...utils.tracing import traced_class
 from .. import AgentCheck
 from .mixins import OpenMetricsScraperMixin
 
@@ -64,6 +65,11 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         'prometheus_timeout': {'name': 'timeout'},
         'request_size': {'name': 'request_size', 'default': 10},
     }
+
+    # Allow tracing for openmetrics integrations
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        return traced_class(cls)
 
     def __init__(self, *args, **kwargs):
         """
