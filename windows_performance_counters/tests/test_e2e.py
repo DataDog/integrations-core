@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+import subprocess
+
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
@@ -13,8 +16,13 @@ pytestmark = pytest.mark.e2e
 def test(dd_agent_check):
     aggregator = dd_agent_check(INSTANCE, rate=True)
 
-    # Default utilized by Docker
-    num_threads = 2
+    container_name = f'dd_windows_performance_counters_{os.environ["TOX_ENV_NAME"]}'
+    python_path = r'C:\Program Files\Datadog\Datadog Agent\embedded3\python.exe'
+    num_threads = subprocess.check_output(
+        ['docker', 'exec', container_name, python_path, '-c', 'import os;print(os.cpu_count())'],
+        text=True,
+    ).strip()
+    num_threads = int(num_threads)
 
     aggregator.assert_service_check('test.windows.perf.health', ServiceCheck.OK)
     aggregator.assert_metric('test.num_cpu_threads.total', num_threads + 1)
