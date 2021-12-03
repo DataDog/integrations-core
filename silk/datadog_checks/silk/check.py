@@ -31,16 +31,15 @@ class SilkCheck(AgentCheck):
 
     def check(self, _):
         try:
-            response = self.get_metrics(self.STATE_ENDPOINT)
-            response.raise_for_status()
-            response_json = response.json()
+            response_json = self.get_metrics(self.STATE_ENDPOINT)
         except Exception as e:
+            self.log.debug("Encountered error getting Silk state: {}".format(str(e)))
             self.service_check("can_connect", AgentCheck.CRITICAL, message=str(e))
         else:
             if response_json:
                 data = self.parse_metrics(response_json, self.STATE_ENDPOINT, return_first=True)
                 state = data.get('state').lower()
-                self.service_check(self.STATE_SERVICE_CHECK, state)
+                self.service_check(self.STATE_SERVICE_CHECK, self.STATE_MAP[state])
 
         get_method = getattr
         for path, metrics_obj in METRICS.items():
@@ -48,7 +47,7 @@ class SilkCheck(AgentCheck):
             response_json = self.get_metrics(path)
             self.parse_metrics(response_json, path, metrics_obj, get_method)
 
-    def parse_metrics(self, output, path, metrics_mapping, get_method, return_first=False):
+    def parse_metrics(self, output, path, metrics_mapping=None, get_method=None, return_first=False):
         """
         Parse metrics from HTTP response. return_first will return the first item in `hits` key.
         """
