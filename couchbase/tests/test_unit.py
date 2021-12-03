@@ -106,6 +106,10 @@ def test_config(test_case, dd_run_check, extra_config, expected_http_kwargs, ins
             'bucket:scope:collection:index_name',
             ['bucket:bucket', 'scope:scope', 'collection:collection', 'index_name:index_name'],
         ),
+        (
+            'foo:baz:bar:fiz:buz',
+            [],
+        ),
     ],
 )
 def test_extract_index_tags(instance, test_input, expected_tags):
