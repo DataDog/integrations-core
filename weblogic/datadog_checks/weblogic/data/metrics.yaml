@@ -5,7 +5,7 @@ jmx_metrics:
       bean_regex: com.bea:Name=([-.\w]+),Type=ServerRuntime
       attribute:
         OpenSocketsCurrentCount:
-          alias: weblogic.server_runtime.open_sockets_count
+          alias: weblogic.server_runtime.open_sockets
   - include:
       domain: com.bea
       bean_regex: com.bea:Name=([-.\w]+),Type=Server
@@ -16,37 +16,37 @@ jmx_metrics:
         ThreadPoolPercentSocketReaders:
           alias: weblogic.server.threadpool_socket_readers_percent
         MaxOpenSockCount:
-          alias: weblogic.server.max_open_sock_count
+          alias: weblogic.server.max_open_sock
   - include:
       domain: com.bea
       bean_regex: com.bea:ServerRuntime=([-.\w]+),Name=ThreadPoolRuntime,Type=ThreadPoolRuntime
       attribute:
         CompletedRequestCount:
-          alias: weblogic.threadpool_runtime.completed_request_count
+          alias: weblogic.threadpool_runtime.completed_request
         ExecuteThreadIdleCount:
           metric_type: gauge
-          alias: weblogic.threadpool_runtime.execute_thread_idle_count
+          alias: weblogic.threadpool_runtime.execute_thread_idle
         ExecuteThreadTotalCount:
-          alias: weblogic.threadpool_runtime.execute_thread_total_count
+          alias: weblogic.threadpool_runtime.execute_thread_total
         PendingUserRequestCount:
           metric_type: gauge
-          alias: weblogic.threadpool_runtime.pending_user_request_count
+          alias: weblogic.threadpool_runtime.pending_user_request
         HoggingThreadCount:
-          alias: weblogic.threadpool_runtime.hogging_thread_count
+          alias: weblogic.threadpool_runtime.hogging_thread
         MinThreadsConstraintsCompleted:
           alias: weblogic.threadpool_runtime.min_threads_constraints_completed
         MinThreadsConstraintsPending:
           alias: weblogic.threadpool_runtime.min_threads_constraints_pending
         OverloadRejectedRequestsCount:
-          alias: weblogic.threadpool_runtime.overload_rejected_requests_count
+          alias: weblogic.threadpool_runtime.overload_rejected_requests
         QueueLength:
           alias: weblogic.threadpool_runtime.queue_length
         SharedCapacityForWorkManagers:
           alias: weblogic.threadpool_runtime.shared_capacity_for_work_managers
         StandbyThreadCount:
-          alias: weblogic.threadpool_runtime.standby_thread_count
+          alias: weblogic.threadpool_runtime.standby_thread
         StuckThreadCount:
-          alias: weblogic.threadpool_runtime.stuck_thread_count
+          alias: weblogic.threadpool_runtime.stuck_thread
         Throughput:
           alias: weblogic.threadpool_runtime.throughput
   - include:
@@ -68,12 +68,12 @@ jmx_metrics:
       attribute:
         ActiveConnectionsCurrentCount:
           metric_type: gauge
-          alias: weblogic.connector_connection_pool_runtime.active_connections_count
+          alias: weblogic.connector_connection_pool_runtime.active_connections
         ActiveConnectionsHighCount:
           metric_type: gauge
-          alias: weblogic.connector_connection_pool_runtime.active_connections_high_count
+          alias: weblogic.connector_connection_pool_runtime.active_connections_high
         FreeConnectionsCurrentCount:
-          alias: weblogic.connector_connection_pool_runtime.free_connections_count
+          alias: weblogic.connector_connection_pool_runtime.free_connections
         AverageActiveUsage:
           alias: weblogic.connector_connection_pool_runtime.average_active_usage
         ConnectionsCreatedTotalCount:
@@ -84,7 +84,7 @@ jmx_metrics:
       bean_regex: com.bea:ServerRuntime=([-.\w]+),Name=([-.\w]+),Type=JMSRuntime
       attribute:
         ConnectionsCurrentCount:
-          alias: weblogic.jms_runtime.connections_current_count
+          alias: weblogic.jms_runtime.connections_current
         ConnectionsHighCount:
           metric_type: monotonic_count
           alias: weblogic.jms_runtime.connections_high_count
@@ -92,7 +92,7 @@ jmx_metrics:
           metric_type: monotonic_count
           alias: weblogic.jms_runtime.connections_total
         JMSServersCurrentCount:
-          alias: weblogic.jms_runtime.jms_servers_count
+          alias: weblogic.jms_runtime.jms_servers
         JMSServersHighCount:
           metric_type: monotonic_count
           alias: weblogic.jms_runtime.jms_servers_high_count
@@ -108,20 +108,20 @@ jmx_metrics:
         PendingRequests:
           alias: weblogic.work_manager_runtime.pending_requests
         StuckThreadCount:
-          alias: weblogic.work_manager_runtime.stuck_thread_count
+          alias: weblogic.work_manager_runtime.stuck_thread
   - include:
       domain: com.bea
       bean_regex: com.bea:ServerRuntime=([-_.\w]+),Name=([\[\-_.\]\w]+),Type=ServerChannelRuntime
       attribute:
         AcceptCount:
-          alias: weblogic.server_channel_runtime.accept_count
+          alias: weblogic.server_channel_runtime.accept
         ConnectionsCount:
-          alias: weblogic.server_channel_runtime.connections_count
+          alias: weblogic.server_channel_runtime.connections
         BytesReceivedCount:
-          alias: weblogic.server_channel_runtime.bytes_received_count
+          alias: weblogic.server_channel_runtime.bytes_received
         BytesSentCount:
-          alias: weblogic.server_channel_runtime.bytes_sent_count
+          alias: weblogic.server_channel_runtime.bytes_sent
         MessagesReceivedCount:
-          alias: weblogic.server_channel_runtime.messages_received_count
+          alias: weblogic.server_channel_runtime.messages_received
         MessagesSentCount:
-          alias: weblogic.server_channel_runtime.messages_sent_count
+          alias: weblogic.server_channel_runtime.messages_sent

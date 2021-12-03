@@ -12,6 +12,6 @@
       "critical"
     ],
     "name": "Can Connect",
-    "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Weblogic instance. Returns `OK` otherwise."
+    "description": "Returns `OK` if the Agent is able to connect to and collect metrics from the monitored WebLogic instance. Returns `CRITICAL` otherwise."
   }
 ]

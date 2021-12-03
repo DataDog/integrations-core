@@ -93,26 +93,21 @@ See [`metadata.csv`][10] for a list of metrics provided by this integration.
 3. Uncomment and edit the logs configuration block in your weblogic.d/conf.yaml file. Change the path and service parameter values based on your environment. See the [sample weblogic.d/conf.yaml][2] for all available configuration options.
    ```yaml
     - type: file
-      path: <DOMAIN_DIR>/servers/<ADMIN_SERVER_NAME>/logs/<ADMIN_SERVER_NAME>.log
-      source: weblogic
-      log_processing_rules:
-        - type: multi_line
-          name: new_log_start_with_date
-          pattern: \####<\w{3} (0?[1-9]|[12][0-9]|3[01]), \d{4}
-    - type: file
       path: <DOMAIN_DIR>/servers/<SERVER_NAME>/logs/<SERVER_NAME>.log
       source: weblogic
+      service: <SERVICE_NAME>
       log_processing_rules:
         - type: multi_line
           name: new_log_start_with_date
-          pattern: \####<\w{3} (0?[1-9]|[12][0-9]|3[01]), \d{4}
+          pattern: (\####)?<\w{3} (0?[1-9]|[12][0-9]|3[01]), \d{4}
     - type: file
       path: <DOMAIN_DIR>/servers/<SERVER_NAME>/logs/access.log
       source: weblogic
+      service: <SERVICE_NAME>
       log_processing_rules:
         - type: multi_line
           name: new_log_start_with_date
-          pattern: \####<\w{3} (0?[1-9]|[12][0-9]|3[01]), \d{4}
+          pattern: .*\[\d{2}\/(\w{3}|\w{4})\/\d{4}:\d{2}:\d{2}:\d{2} (\+|-)\d{4}\]
    ```
 4. [Restart the Agent][6]
 
