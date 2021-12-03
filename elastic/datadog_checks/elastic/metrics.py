@@ -289,12 +289,18 @@ STATS_METRICS = {
 }
 
 ADDITIONAL_METRICS_POST_7_9_0 = {
-    'elasticsearch.indexing_pressure.memory.current.coordinating_in_bytes':
-        ('gauge', 'indexing_pressure.memory.current.coordinating_in_bytes'),
-    'elasticsearch.indexing_pressure.memory.current.primary_in_bytes':
-        ('gauge', 'indexing_pressure.memory.current.primary_in_bytes'),
-    'elasticsearch.indexing_pressure.memory.current.replica_in_bytes':
-        ('gauge', 'indexing_pressure.memory.current.replica_in_bytes'),
+    'elasticsearch.indexing_pressure.memory.current.coordinating_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.current.coordinating_in_bytes',
+    ),
+    'elasticsearch.indexing_pressure.memory.current.primary_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.current.primary_in_bytes',
+    ),
+    'elasticsearch.indexing_pressure.memory.current.replica_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.current.replica_in_bytes',
+    ),
 }
 
 ADDITIONAL_METRICS_POST_7_2_0 = {
