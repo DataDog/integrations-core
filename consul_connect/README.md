@@ -2,7 +2,7 @@
 
 ## Overview
 
-Monitor your [Consul Connect][1] Envoy sidecar proxies with the [Datadog Envoy Integration][2]. The Consul Connect integration currently only supports [Consul Connect configured with Envoy][3]. 
+Monitor your [Consul Connect][1] Envoy sidecar proxies with the [Datadog Envoy Integration][2]. The Consul Connect integration only supports [Consul Connect configured with Envoy][3]. 
 
 ## Setup
 
@@ -21,7 +21,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 To configure this check for an Agent running on a host:
 
 ##### Metric collection
-1. In Consul Connect, enable the config option [`-admin-bind`][5] to configure the port where the Envoy Admin API will be exposed.
+1. In Consul Connect, enable the config option [`-admin-bind`][5] to configure the port where the Envoy Admin API is exposed.
 
 2. Enable the [Envoy integration][6] to configure metric collection.
 

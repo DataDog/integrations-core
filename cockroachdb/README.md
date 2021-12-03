@@ -78,7 +78,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 {{< /site-region >}}
 partial -->
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][7].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker Log Collection][7].
 
 Then, set [log integrations][7] as Docker labels:
 
