@@ -233,7 +233,7 @@ Set [Autodiscovery Integrations Templates][9] as Docker labels on your applicati
 ```yaml
 LABEL "com.datadoghq.ad.check_names"='["mongo"]'
 LABEL "com.datadoghq.ad.init_configs"='[{}]'
-LABEL "com.datadoghq.ad.instances"='[{"hosts": ["%%host%%:%%port%%""], "username": "datadog", "password" : "<UNIQUEPASSWORD>", "database": "<DATABASE>"}]'
+LABEL "com.datadoghq.ad.instances"='[{"hosts": ["%%host%%:%%port%%"], "username": "datadog", "password" : "<UNIQUEPASSWORD>", "database": "<DATABASE>"}]'
 ```
 
 ##### Log collection
