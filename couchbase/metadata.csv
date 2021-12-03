@@ -33,7 +33,7 @@ couchbase.by_bucket.couch_views_fragmentation,gauge,,percent,,View fragmentation
 couchbase.by_bucket.couch_views_ops,gauge,,operation,,View operations,0,couchbase,view ops
 couchbase.by_bucket.cpu_idle_ms,gauge,,millisecond,,CPU idle milliseconds,0,couchbase,cpu idle ms
 couchbase.by_bucket.cpu_utilization_rate,gauge,,percent,,CPU utilization percentage,0,couchbase,cpu util
-couchbase.by_bucket.curr_connections,gauge,,connection,,The current bucket connections,0,couchbase,conns
+couchbase.by_bucket.curr_connections,gauge,,connection,,The current number of bucket connections,0,couchbase,conns
 couchbase.by_bucket.curr_items_tot,gauge,,item,,Total number of items,0,couchbase,total items
 couchbase.by_bucket.curr_items,gauge,,item,,Number of active items in memory,0,couchbase,mem items
 couchbase.by_bucket.decr_hits,gauge,,hit,,Decrement hits,1,couchbase,decr hits

@@ -410,7 +410,6 @@ class Couchbase(AgentCheck):
 
     def _collect_index_stats_metrics(self):
         url = '{}{}'.format(self._index_stats_url, INDEX_STATS_METRICS_PATH)
-        self.log.error(url)
         try:
             data = self._get_stats(url)
         except requests.exceptions.RequestException as e:
