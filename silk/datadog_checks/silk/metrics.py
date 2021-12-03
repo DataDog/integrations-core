@@ -4,6 +4,12 @@
 
 
 class Metric(object):
+    """
+    Metric object contains"
+        - the metric sub prefix,
+        - metrics mapping (response JSON key to metric name and metric type)
+        - tags mapping (response JSON key to tag name)
+    """
     def __init__(self, prefix, metrics, tags=None):
         self.prefix = prefix
         for key, name_method in metrics.items():
