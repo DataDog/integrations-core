@@ -18,7 +18,7 @@ def assert_network_devices_metadata(aggregator, events):
     assert events == actual_events
 
 
-def test_e2e_core_metadata(dd_agent_check):
+def test_e2e_core_metadata_f5(dd_agent_check):
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
     instance.update(
@@ -59,6 +59,13 @@ def test_e2e_core_metadata(dd_agent_check):
                         u'snmp_profile:f5-big-ip',
                     ],
                     u'vendor': u'f5',
+                    u'serial_number': '26ff4a4d-190e-12ac-d4257ed36ba6',
+                    u'version': u'15.0.1',
+                    u'product_name': u'BIG-IP',
+                    u'model': u'Z100',
+                    u'os_name': u'Linux',
+                    u'os_version': u'3.10.0-862.14.4.el7.ve.x86_64',
+                    u'os_hostname': u'f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
                 },
             ],
             u'interfaces': [
