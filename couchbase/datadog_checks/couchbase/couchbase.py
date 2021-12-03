@@ -17,6 +17,7 @@ from datadog_checks.couchbase.couchbase_consts import (
     BUCKET_STATS,
     COUCHBASE_STATS_PATH,
     COUCHBASE_VITALS_PATH,
+    INDEX_STATS_COUNT_METRICS,
     INDEX_STATS_METRICS_PATH,
     INDEX_STATS_SERVICE_CHECK_NAME,
     NODE_CLUSTER_SERVICE_CHECK_NAME,
@@ -473,4 +474,8 @@ class Couchbase(AgentCheck):
 
     def _submit_per_index_metrics(self, mname, mval, tags):
         namespace = 'couchbase.index'
-        self.gauge('.'.join([namespace, mname]), mval, tags)
+        f_mname = '.'.join([namespace, mname])
+        if mname in INDEX_STATS_COUNT_METRICS:
+            self.monotonic_count(f_mname, mval, tags)
+        else:
+            self.gauge(f_mname, mval, tags)

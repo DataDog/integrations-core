@@ -325,3 +325,15 @@ SYNC_GATEWAY_COUNT_METRICS = [
     "import_partitions",
     "import_processing_time",
 ]
+
+INDEX_STATS_COUNT_METRICS = [
+    "cache_hits",
+    "cache_misses",
+    "items_count",
+    "docs_indexed",
+    "num_requests",
+    "num_rows_returned",
+    "num_scan_errors",
+    "num_scan_timeouts",
+    "scan_bytes_read",
+]
