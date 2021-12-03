@@ -20,25 +20,41 @@ init_config:
 instances:
 
   -
-    ## @param sites - list of strings - optional
+    ## @param sites - list of strings or mapping - optional
     ## The `sites` parameter allows you to specify a list of sites you want to
     ## read metrics from. With sites specified, metrics are tagged with the
     ## site name. If you don't define any sites, the check pulls all of the
     ## sites, and tags each one with the site name.
+    ##
+    ## On Agent versions 7.34 or higher, this may also be defined as a mapping
+    ## with `include` and/or `exclude` keys representing arrays of regular
+    ## expressions strings.
     #
     # sites:
-    #   - <WEB_SITE_1>
-    #   - <WEB_SITE_2>
+    #   include:
+    #   - <PATTERN_1>
+    #   - <PATTERN_2>
+    #   exclude:
+    #   - <PATTERN_1>
+    #   - <PATTERN_2>
 
-    ## @param app_pools - list of strings - optional
+    ## @param app_pools - list of strings or mapping - optional
     ## The `app_pools` parameter allows you to specify a list of application pools you want to
     ## read metrics from. With application pools specified, metrics are tagged with the
     ## application pool name. If you don't define any application pools, the check pulls all of the
     ## application pools, and tags each one with the application pool name.
+    ##
+    ## On Agent versions 7.34 or higher, this may also be defined as a mapping
+    ## with `include` and/or `exclude` keys representing arrays of regular
+    ## expressions strings.
     #
     # app_pools:
-    #   - <APP_POOL_1>
-    #   - <APP_POOL_2>
+    #   include:
+    #   - <PATTERN_1>
+    #   - <PATTERN_2>
+    #   exclude:
+    #   - <PATTERN_1>
+    #   - <PATTERN_2>
 
     ## @param server - string - optional
     ## The server with which to connect, defaulting to the local machine.

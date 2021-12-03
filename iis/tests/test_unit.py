@@ -114,3 +114,91 @@ def test_check_specific(aggregator, dd_default_hostname, dd_run_check, mock_perf
                 )
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_check_include_patterns(aggregator, dd_default_hostname, dd_run_check, mock_performance_objects):
+    mock_performance_objects(PERFORMANCE_OBJECTS)
+    check = IIS(
+        'iis',
+        {},
+        [{'host': dd_default_hostname, 'app_pools': {'include': ['^foo']}, 'sites': {'include': ['^foo']}}],
+    )
+    check.hostname = dd_default_hostname
+    dd_run_check(check)
+
+    global_tags = ['iis_host:{}'.format(dd_default_hostname)]
+    aggregator.assert_service_check('iis.windows.perf.health', ServiceCheck.OK, count=1, tags=global_tags)
+
+    app_pool_metrics_data, site_metrics_data = get_metrics_data()
+
+    for app_pool, value in (('foo-pool', 9000),):
+        tags = ['app_pool:{}'.format(app_pool)]
+        tags.extend(global_tags)
+        aggregator.assert_service_check(
+            'iis.app_pool_up', ServiceCheck.CRITICAL if value == 0 else ServiceCheck.OK, count=1, tags=tags
+        )
+
+        for metric_name, metric_type in app_pool_metrics_data:
+            aggregator.assert_metric_has_tag(metric_name, 'app_pool:bar-pool', count=0)
+            aggregator.assert_metric(
+                metric_name, value, metric_type=getattr(aggregator, metric_type.upper()), count=1, tags=tags
+            )
+
+    for site, value in (('foo.site', 9000),):
+        tags = ['site:{}'.format(site)]
+        tags.extend(global_tags)
+        aggregator.assert_service_check(
+            'iis.site_up', ServiceCheck.CRITICAL if value == 0 else ServiceCheck.OK, count=1, tags=tags
+        )
+
+        for metric_name, metric_type in site_metrics_data:
+            aggregator.assert_metric_has_tag(metric_name, 'site:bar.site', count=0)
+            aggregator.assert_metric(
+                metric_name, value, metric_type=getattr(aggregator, metric_type.upper()), count=1, tags=tags
+            )
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_check_exclude_patterns(aggregator, dd_default_hostname, dd_run_check, mock_performance_objects):
+    mock_performance_objects(PERFORMANCE_OBJECTS)
+    check = IIS(
+        'iis',
+        {},
+        [{'host': dd_default_hostname, 'app_pools': {'exclude': ['^bar']}, 'sites': {'exclude': ['^bar']}}],
+    )
+    check.hostname = dd_default_hostname
+    dd_run_check(check)
+
+    global_tags = ['iis_host:{}'.format(dd_default_hostname)]
+    aggregator.assert_service_check('iis.windows.perf.health', ServiceCheck.OK, count=1, tags=global_tags)
+
+    app_pool_metrics_data, site_metrics_data = get_metrics_data()
+
+    for app_pool, value in (('foo-pool', 9000),):
+        tags = ['app_pool:{}'.format(app_pool)]
+        tags.extend(global_tags)
+        aggregator.assert_service_check(
+            'iis.app_pool_up', ServiceCheck.CRITICAL if value == 0 else ServiceCheck.OK, count=1, tags=tags
+        )
+
+        for metric_name, metric_type in app_pool_metrics_data:
+            aggregator.assert_metric_has_tag(metric_name, 'app_pool:bar-pool', count=0)
+            aggregator.assert_metric(
+                metric_name, value, metric_type=getattr(aggregator, metric_type.upper()), count=1, tags=tags
+            )
+
+    for site, value in (('foo.site', 9000),):
+        tags = ['site:{}'.format(site)]
+        tags.extend(global_tags)
+        aggregator.assert_service_check(
+            'iis.site_up', ServiceCheck.CRITICAL if value == 0 else ServiceCheck.OK, count=1, tags=tags
+        )
+
+        for metric_name, metric_type in site_metrics_data:
+            aggregator.assert_metric_has_tag(metric_name, 'site:bar.site', count=0)
+            aggregator.assert_metric(
+                metric_name, value, metric_type=getattr(aggregator, metric_type.upper()), count=1, tags=tags
+            )
+
+    aggregator.assert_all_metrics_covered()

@@ -16,16 +16,26 @@ class IISCheckV2(PerfCountersBaseCheckWithLegacySupport):
         for object_name, config in METRICS_CONFIG.items():
             new_config = config.copy()
 
+            instance_config = []
             include = []
+            exclude = []
             if object_name == 'APP_POOL_WAS':
                 new_config['tag_name'] = 'app_pool'
-                include.extend(self.instance.get('app_pools', []))
+                instance_config = self.instance.get('app_pools', [])
             elif object_name == 'Web Service':
                 new_config['tag_name'] = 'site'
-                include.extend(self.instance.get('sites', []))
+                instance_config = self.instance.get('sites', [])
+
+            if isinstance(instance_config, list):
+                include.extend(f'^{instance}$' for instance in instance_config)
+            elif isinstance(instance_config, dict):
+                include.extend(instance_config.get('include', []))
+                exclude.extend(instance_config.get('exclude', []))
 
             if include:
-                new_config['include'] = [f'^{instance}$' for instance in include]
+                new_config['include'] = include
+            if exclude:
+                new_config['exclude'] = exclude
 
             metrics_config[object_name] = new_config
 

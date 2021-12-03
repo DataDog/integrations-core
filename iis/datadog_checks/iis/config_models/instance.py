@@ -13,6 +13,14 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class AppPool(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class Counter(BaseModel):
     class Config:
         extra = Extra.allow
@@ -81,11 +89,19 @@ class Metrics(BaseModel):
     use_localized_counters: Optional[bool]
 
 
+class Site(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    app_pools: Optional[Sequence[str]]
+    app_pools: Optional[Union[Sequence[str], AppPool]]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     enable_health_service_check: Optional[bool]
@@ -97,7 +113,7 @@ class InstanceConfig(BaseModel):
     server: Optional[str]
     server_tag: Optional[str]
     service: Optional[str]
-    sites: Optional[Sequence[str]]
+    sites: Optional[Union[Sequence[str], Site]]
     tags: Optional[Sequence[str]]
     username: Optional[str]
 
