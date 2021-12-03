@@ -1,22 +1,19 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from copy import deepcopy
+
 from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck
+
+from .metrics import METRICS
 
 
 class SilkCheck(AgentCheck):
 
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'silk'
-
-    ENDPOINTS = [
-        '/hosts',
-        '/stats/system',
-        '/stats/volumes',
-        '/volumes',
-    ]
 
     STATE_ENDPOINT = '/system/state'
 
@@ -30,6 +27,7 @@ class SilkCheck(AgentCheck):
         server = self.instance.get("server")
         port = self.instance.get("port", 443)
         self.url = "{}:{}/api/v2".format(server, port)
+        self.tags = self.instance.get("tags", [])
 
     def check(self, _):
         try:
@@ -44,12 +42,13 @@ class SilkCheck(AgentCheck):
                 state = data.get('state').lower()
                 self.service_check(self.STATE_SERVICE_CHECK, state)
 
-        for path in self.ENDPOINTS:
+        get_method = getattr
+        for path, metrics_obj in METRICS.items():
             # Need to submit an object of relevant tags
             response_json = self.get_metrics(path)
-            self.parse_metrics(response_json, path)
+            self.parse_metrics(response_json, path, metrics_obj, get_method)
 
-    def parse_metrics(self, output, path, return_first=False):
+    def parse_metrics(self, output, path, metrics_mapping, get_method, return_first=False):
         """
         Parse metrics from HTTP response. return_first will return the first item in `hits` key.
         """
@@ -62,11 +61,18 @@ class SilkCheck(AgentCheck):
         if return_first:
             return hits[0]
 
-        # Parse metrics at some point here. Establish a system to reuse with any path
         for item in hits:
-            for key, value in item.items():
-                if isinstance(value, (int, float)):
-                    self.gauge(key, value, tags=['path:{}'.format(path)])
+            metric_tags = deepcopy(self.tags)
+            for key, tag_name in metrics_mapping.tags.items():
+                if key in item:
+                    metric_tags.append("{}:{}".format(tag_name, item.get(key)))
+
+            for key, metric in metrics_mapping.metrics.items():
+                metric_name, method = metric
+                if key in item:
+                    get_method(self, method)(
+                        "{}.{}".format(metrics_mapping.prefix, metric_name), item.get(key), tags=metric_tags
+                    )
 
     def get_metrics(self, path):
         try:
