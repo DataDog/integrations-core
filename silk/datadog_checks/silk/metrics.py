@@ -14,7 +14,7 @@ class Metric(object):
         self.prefix = prefix
         for key, name_method in metrics.items():
             if isinstance(name_method, tuple):
-                metrics[key] = name_method
+                continue
             else:
                 metrics[key] = (name_method, 'gauge')
 
