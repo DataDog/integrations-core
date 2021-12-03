@@ -18,6 +18,12 @@ INDEX_STATS_PORT = '9102'
 CUSTOM_TAGS = ['optional:tag1']
 CHECK_TAGS = CUSTOM_TAGS + ['instance:http://{}:{}'.format(HOST, PORT)]
 BUCKET_NAME = 'cb_bucket'
+INDEX_STATS_TAGS = CHECK_TAGS + [
+    'bucket:cb_bucket',
+    'collection:default',
+    'index_name:gamesim_primary',
+    'scope:default',
+]
 
 URL = 'http://{}:{}'.format(HOST, PORT)
 QUERY_URL = 'http://{}:{}'.format(HOST, QUERY_PORT)
@@ -137,12 +143,15 @@ SYNC_GATEWAY_METRICS = [
     "couchbase.sync_gateway.warn_count",
 ]
 
-INDEX_STATS_METRICS = [
+INDEX_STATS_INDEXER_METRICS = [
     'couchbase.indexer.indexer_state',
     'couchbase.indexer.memory_quota',
     'couchbase.indexer.memory_total_storage',
     'couchbase.indexer.memory_used',
     'couchbase.indexer.total_indexer_gc_pause_ns',
+]
+
+INDEX_STATS_INDEX_METRICS = [
     'couchbase.index.avg_drain_rate',
     'couchbase.index.avg_item_size',
     'couchbase.index.avg_scan_latency',

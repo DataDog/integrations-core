@@ -415,7 +415,7 @@ class Couchbase(AgentCheck):
             data = self._get_stats(url)
         except requests.exceptions.RequestException as e:
             msg = "Error accessing the Index Statistics endpoint: %s: %s" % (url, str(e))
-            self.log.debug(str(e))
+            self.log.warning(str(e))
             self.service_check(INDEX_STATS_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, self._tags, msg)
             return
 
@@ -437,20 +437,23 @@ class Couchbase(AgentCheck):
         # For variations missing the scope and collection, they refer to the default scope and collection respectively
         # https://docs.couchbase.com/server/current/n1ql/n1ql-language-reference/createprimaryindex.html#keyspace-ref
         tag_arr = keyspace.split(":")
-        if len(tag_arr) == 1:
-            partition = tag_arr[0]
-            formatted_tags = [
-                'partition:{}'.format(partition),
-            ]
-            return formatted_tags
-        elif len(tag_arr) == 2:
+        if len(tag_arr) == 2:
             bucket, index_name = tag_arr
             scope, collection = ["default", "default"]
         elif len(tag_arr) == 3:
             bucket, collection, index_name = tag_arr
             scope = 'default'
-        else:
+        elif len(tag_arr) == 4:
             bucket, scope, collection, index_name = tag_arr
+        else:
+            # Catch all incase the keyspace has either none or more than 3 separators(':')
+            # There is a documented example of partition-num being a possible keyspace:
+            # https://docs.couchbase.com/server/current/rest-api/rest-index-stats.html#_get_index_stats
+            # But we shouldn't encouter that with the current version of the check
+            formatted_tags = []
+            self.log.debug("Unable to extract tags from keyspace: %s" % keyspace)
+            return formatted_tags
+
         formatted_tags = [
             'bucket:{}'.format(bucket),
             'scope:{}'.format(scope),

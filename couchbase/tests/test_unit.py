@@ -96,7 +96,7 @@ def test_config(test_case, dd_run_check, extra_config, expected_http_kwargs, ins
 @pytest.mark.parametrize(
     'test_input, expected_tags',
     [
-        ('partition', ['partition:partition']),
+        ('partition', []),
         ('bucket:index_name', ['bucket:bucket', 'scope:default', 'collection:default', 'index_name:index_name']),
         (
             'bucket:collection:index_name',
