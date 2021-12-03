@@ -406,22 +406,20 @@ files:
                   type: integer
                   example: 300
           - name: obfuscator_options
-            description: Configure how the SQL obfuscator behaves.
+            description: |
+              Configure how the SQL obfuscator behaves.
+
+              Note that this option only applies when `dbm` is enabled.
             options:
               - name: replace_digits
                 description: |
                   Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
-
-                  Note that this option only applies when `dbm` is enabled.
                 value:
                   type: boolean
                   example: false
               - name: collect_comments
                 description: |
-                  Set to `false` to disable the collection of SQL comments. Disabling this option can interfere with
-                  database monitoring features working correctly.
-
-                  Note that this option only applies when `dbm` is enabled.
+                  Set to `false` to disable the collection of comments in your SQL statements.
                 value:
                   type: boolean
                   example: true
