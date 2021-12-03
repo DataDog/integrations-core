@@ -679,11 +679,11 @@ def test_meraki_cloud_controller(aggregator):
     common.assert_common_metrics(aggregator, common_tags)
 
     dev_metrics = ['devStatus', 'devClientCount']
-    dev_tags = ['device:Gymnasium', 'product:MR16-HW', 'network:L_NETWORK'] + common_tags
+    dev_tags = ['device:Gymnasium', 'product:MR16-HW', 'network:L_NETWORK', 'mac_address:0x02020066f57f'] + common_tags
     for metric in dev_metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=dev_tags, count=1)
 
-    if_tags = ['interface:wifi0', 'index:4'] + common_tags
+    if_tags = ['interface:wifi0', 'index:4', 'mac_address:0x02020066f500'] + common_tags
     if_metrics = ['devInterfaceSentPkts', 'devInterfaceRecvPkts', 'devInterfaceSentBytes', 'devInterfaceRecvBytes']
     for metric in if_metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
