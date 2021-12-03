@@ -452,7 +452,7 @@ class Couchbase(AgentCheck):
             # https://docs.couchbase.com/server/current/rest-api/rest-index-stats.html#_get_index_stats
             # But we shouldn't encouter that with the current version of the check
             formatted_tags = []
-            self.log.debug("Unable to extract tags from keyspace: %s" % keyspace)
+            self.log.debug("Unable to extract tags from keyspace: %s", keyspace)
             return formatted_tags
 
         formatted_tags = [
