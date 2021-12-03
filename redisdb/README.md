@@ -2,7 +2,7 @@
 
 ## Overview
 
-Whether you use Redis as a database, cache, or message queue, this integration helps you track problems with your Redis servers, your Redis Cloud service, and the parts of your infrastructure that they serve. The Datadog Agent's Redis check collects metrics related to performance, memory usage, blocked clients, slave connections, disk persistence, expired and evicted keys, and many more.
+Whether you use Redis as a database, cache, or message queue, this integration helps you track problems with your Redis servers, Redis Cloud service, and the parts of your infrastructure that they serve. The Datadog Agent's Redis check collects metrics related to performance, memory usage, blocked clients, slave connections, disk persistence, expired and evicted keys, and many more.
 
 ## Setup
 
