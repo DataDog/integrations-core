@@ -12,8 +12,8 @@ from six.moves.urllib.parse import urlparse
 from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
 from datadog_checks.base.utils.time import get_timestamp
 
-from .const import PLUS_API_ENDPOINTS, PLUS_API_STREAM_ENDPOINTS, PLUS_API_V3_STREAM_ENDPOINTS, TAGGED_KEYS
-from .metrics import METRICS_SEND_AS_COUNT, VTS_METRIC_MAP
+from .const import PLUS_API_ENDPOINTS, PLUS_API_STREAM_ENDPOINTS, TAGGED_KEYS
+from .metrics import COUNT_METRICS, METRICS_SEND_AS_COUNT, VTS_METRIC_MAP
 
 if PY3:
     long = int
@@ -75,11 +75,17 @@ class Nginx(AgentCheck):
                     name, handled, conn = self._translate_from_vts(name, value, tags, handled, conn)
                     if name is None:
                         continue
-                if name in METRICS_SEND_AS_COUNT:
+
+                if name in COUNT_METRICS:
                     func_count = metric_submission_funcs['count']
-                    func_count(name + "_count", value, tags)
-                func = metric_submission_funcs[metric_type]
-                func(name, value, tags)
+                    func_count(name, value, tags)
+                else:
+                    if name in METRICS_SEND_AS_COUNT:
+                        func_count = metric_submission_funcs['count']
+                        func_count(name + "_count", value, tags)
+
+                    func = metric_submission_funcs[metric_type]
+                    func(name, value, tags)
 
             except Exception as e:
                 self.log.error('Could not submit metric: %s: %s', repr(row), e)
@@ -91,10 +97,7 @@ class Nginx(AgentCheck):
         # These are all the endpoints we have to call to get the same data as we did with the old API
         # since we can't get everything in one place anymore.
 
-        if self.use_plus_api_stream:
-            plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS), self._get_plus_api_stream_endpoints())
-        else:
-            plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS))
+        plus_api_chain_list = self._get_all_plus_api_endpoints()
 
         for endpoint, nest in plus_api_chain_list:
             response = self._get_plus_api_data(endpoint, nest)
@@ -182,10 +185,22 @@ class Nginx(AgentCheck):
 
         return {keys[0]: self._nest_payload(keys[1:], payload)}
 
-    def _get_plus_api_stream_endpoints(self):
-        endpoints = iteritems(PLUS_API_STREAM_ENDPOINTS)
-        if int(self.plus_api_version) >= 3:
-            endpoints = chain(endpoints, iteritems(PLUS_API_V3_STREAM_ENDPOINTS))
+    def _get_plus_api_endpoints(self, use_stream=False):
+        endpoints = iteritems({})
+
+        available_plus_endpoints = PLUS_API_STREAM_ENDPOINTS if use_stream else PLUS_API_ENDPOINTS
+
+        for earliest_version, new_endpoints in available_plus_endpoints.items():
+            if int(self.plus_api_version) >= int(earliest_version):
+                endpoints = chain(endpoints, iteritems(new_endpoints))
+        return endpoints
+
+    def _get_all_plus_api_endpoints(self):
+        endpoints = self._get_plus_api_endpoints()
+
+        if self.use_plus_api_stream:
+            endpoints = chain(endpoints, self._get_plus_api_endpoints(use_stream=True))
+
         return endpoints
 
     def _get_plus_api_data(self, endpoint, nest):
@@ -199,7 +214,7 @@ class Nginx(AgentCheck):
             r = self._perform_request(url)
             payload = self._nest_payload(nest, r.json())
         except Exception as e:
-            if endpoint in PLUS_API_STREAM_ENDPOINTS or endpoint in PLUS_API_V3_STREAM_ENDPOINTS:
+            if endpoint in PLUS_API_STREAM_ENDPOINTS.values():
                 self.log.warning("Stream may not be initialized. Error querying %s metrics at %s: %s", endpoint, url, e)
             else:
                 self.log.exception("Error querying %s metrics at %s: %s", endpoint, url, e)
@@ -274,7 +289,6 @@ class Nginx(AgentCheck):
         Recursively flattens the nginx json object. Returns the following: [(metric_name, value, tags)]
         """
         output = []
-
         if isinstance(val, dict):
             # Pull out the server as a tag instead of trying to read as a metric
             if 'server' in val and val['server']:
