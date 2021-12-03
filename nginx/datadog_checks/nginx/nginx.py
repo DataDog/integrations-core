@@ -10,6 +10,7 @@ from six import PY3, iteritems, text_type
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
+from datadog_checks.base.utils.time import get_timestamp
 
 from .const import PLUS_API_ENDPOINTS, PLUS_API_STREAM_ENDPOINTS, PLUS_API_V3_STREAM_ENDPOINTS, TAGGED_KEYS
 from .metrics import METRICS_SEND_AS_COUNT, VTS_METRIC_MAP
@@ -309,8 +310,7 @@ class Nginx(AgentCheck):
             except ValueError:
                 pass
             else:
-                output.append((metric_base, int((timestamp - EPOCH).total_seconds()), tags, 'gauge'))
-
+                output.append((metric_base, int(get_timestamp(timestamp)), tags, 'gauge'))
         return output
 
     # override

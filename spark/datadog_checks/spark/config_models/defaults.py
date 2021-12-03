@@ -60,6 +60,10 @@ def instance_empty_default_hostname(field, value):
     return False
 
 
+def instance_enable_query_name_tag(field, value):
+    return False
+
+
 def instance_executor_level_metrics(field, value):
     return False
 

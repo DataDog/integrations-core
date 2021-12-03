@@ -358,6 +358,8 @@ Need help? Contact [Datadog support][22].
 - Blog post: [Key metrics for monitoring AWS Fargate][39]
 - Blog post: [How to collect metrics and logs from AWS Fargate workloads][40]
 - Blog post: [AWS Fargate monitoring with Datadog][41]
+- Blog post: [Graviton2-powered AWS Fargate deployments][42]
+- Blog post: [Monitor AWS Fargate for Windows containerized apps][43]
 
 [1]: http://docs.datadoghq.com/integrations/eks_fargate
 [2]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint.html
@@ -400,3 +402,6 @@ Need help? Contact [Datadog support][22].
 [39]: https://www.datadoghq.com/blog/aws-fargate-metrics/
 [40]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
 [41]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
+[42]: https://www.datadoghq.com/blog/aws-fargate-on-graviton2-monitoring/
+[43]: https://www.datadoghq.com/blog/aws-fargate-windows-containers-support/
+

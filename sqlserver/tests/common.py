@@ -2,7 +2,6 @@
 
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 from itertools import chain
 
 from datadog_checks.dev import get_docker_hostname, get_here
@@ -15,6 +14,7 @@ from datadog_checks.sqlserver.const import (
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
+    DBM_MIGRATED_METRICS,
     FCI_METRICS,
     INSTANCE_METRICS,
     INSTANCE_METRICS_TOTAL,
@@ -48,6 +48,7 @@ EXPECTED_DEFAULT_METRICS = [
     m[0]
     for m in chain(
         INSTANCE_METRICS,
+        DBM_MIGRATED_METRICS,
         INSTANCE_METRICS_TOTAL,
         DATABASE_METRICS,
     )
@@ -196,13 +197,17 @@ INIT_CONFIG_ALT_TABLES = {
 FULL_E2E_CONFIG = {"init_config": INIT_CONFIG, "instances": [INSTANCE_E2E]}
 
 
-def assert_metrics(aggregator, expected_tags):
+def assert_metrics(aggregator, expected_tags, dbm_enabled=False):
     """
     Boilerplate asserting all the expected metrics and service checks.
     Make sure ALL custom metric is tagged by database.
     """
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
-    for mname in EXPECTED_METRICS:
+    expected_metrics = EXPECTED_METRICS
+    if dbm_enabled:
+        dbm_excluded_metrics = [m[0] for m in DBM_MIGRATED_METRICS]
+        expected_metrics = [m for m in EXPECTED_METRICS if m not in dbm_excluded_metrics]
+    for mname in expected_metrics:
         aggregator.assert_metric(mname)
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=expected_tags)
     aggregator.assert_all_metrics_covered()

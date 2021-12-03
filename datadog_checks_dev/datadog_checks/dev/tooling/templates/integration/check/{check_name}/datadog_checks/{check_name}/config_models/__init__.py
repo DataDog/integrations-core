@@ -1,4 +1,7 @@
 {license_header}
+
+{documentation}
+
 from .instance import InstanceConfig
 from .shared import SharedConfig
 
