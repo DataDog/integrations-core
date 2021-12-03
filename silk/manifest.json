@@ -6,7 +6,7 @@
   "metric_prefix": "silk.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Monitor Silk performance.",
   "guid": "75648ebe-8ce3-4b08-bba2-2f957a7e94fa",
   "support": "core",
   "supported_os": [
