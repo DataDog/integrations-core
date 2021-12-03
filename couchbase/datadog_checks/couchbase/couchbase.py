@@ -10,6 +10,7 @@ import time
 
 import requests
 from six import string_types
+from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.couchbase.couchbase_consts import (
@@ -45,7 +46,7 @@ class Couchbase(AgentCheck):
         super(Couchbase, self).__init__(name, init_config, instances)
 
         self._sync_gateway_url = self.instance.get('sync_gateway_url', None)
-        self._index_stats_url = self.instance.get('index_stats_url', None)
+        self._index_stats_url = self.instance.get('index_stats_url')
         self._server = self.instance.get('server', None)
         if self._server is None:
             raise ConfigurationError("The server must be specified")
@@ -409,12 +410,12 @@ class Couchbase(AgentCheck):
         return float(val) / TO_SECONDS[unit]
 
     def _collect_index_stats_metrics(self):
-        url = '{}{}'.format(self._index_stats_url, INDEX_STATS_METRICS_PATH)
+        url = urljoin(self._index_stats_url, INDEX_STATS_METRICS_PATH)
         try:
             data = self._get_stats(url)
         except requests.exceptions.RequestException as e:
             msg = "Error accessing the Index Statistics endpoint: %s: %s" % (url, str(e))
-            self.log.debug(e)
+            self.log.debug(str(e))
             self.service_check(INDEX_STATS_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, self._tags, msg)
             return
 
@@ -460,12 +461,13 @@ class Couchbase(AgentCheck):
 
     def _submit_index_node_metrics(self, mname, mval, tags):
         index_state_map = {'Active': 0, 'Pause': 1, 'Warmup': 2}
-        namespace = '.'.join(['couchbase', 'indexer'])
+        namespace = 'couchbase.indexer'
+        f_mname = '.'.join([namespace, mname])
         if mname == "indexer_state":
-            self.gauge('.'.join([namespace, mname]), index_state_map[mval], tags)
+            self.gauge(f_mname, index_state_map[mval], tags)
         else:
-            self.gauge('.'.join([namespace, mname]), mval, tags)
+            self.gauge(f_mname, mval, tags)
 
     def _submit_per_index_metrics(self, mname, mval, tags):
-        namespace = '.'.join(['couchbase', 'index'])
+        namespace = 'couchbase.index'
         self.gauge('.'.join([namespace, mname]), mval, tags)
