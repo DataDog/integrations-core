@@ -13,7 +13,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mysql import MySql
 
 from . import common, tags, variables
-from .common import MYSQL_VERSION_PARSED
+from .common import MYSQL_REPLICATION, MYSQL_VERSION_PARSED
 
 
 @pytest.mark.integration
@@ -68,13 +68,14 @@ def test_e2e(dd_agent_check, instance_complex):
 def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
     # Test service check
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS, hostname=hostname, count=1)
-    aggregator.assert_service_check(
-        'mysql.replication.slave_running',
-        status=MySql.OK,
-        tags=tags.SC_TAGS + ['replication_mode:source'],
-        hostname=hostname,
-        at_least=1,
-    )
+    if MYSQL_REPLICATION == 'classic':
+        aggregator.assert_service_check(
+            'mysql.replication.slave_running',
+            status=MySql.OK,
+            tags=tags.SC_TAGS + ['replication_mode:source'],
+            hostname=hostname,
+            at_least=1,
+        )
     testable_metrics = (
         variables.STATUS_VARS
         + variables.COMPLEX_STATUS_VARS
@@ -88,6 +89,15 @@ def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
         + variables.SYNTHETIC_VARS
         + variables.STATEMENT_VARS
     )
+    if MYSQL_REPLICATION == 'group':
+        testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
+        aggregator.assert_service_check(
+            'mysql.replication.group.status',
+            status=MySql.OK,
+            tags=tags.SC_TAGS
+            + ['channel_name:group_replication_applier', 'member_role:PRIMARY', 'member_state:ONLINE'],
+            count=1,
+        )
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6'):
         testable_metrics.extend(variables.PERFORMANCE_VARS)
@@ -154,6 +164,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_error):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
+@common.requires_classic_replication
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
@@ -230,6 +241,10 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), check_submission_type=True, exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
     )
+
+    # Make sure group replication is not detected
+    with mysql_check._connect() as db:
+        assert mysql_check._is_group_replication_active(db) is False
 
 
 @pytest.mark.parametrize('dbm_enabled', (True, False))

@@ -79,3 +79,40 @@ def test_service_check_dynamic_tags(aggregator, dd_run_check, mock_http_response
 
     aggregator.assert_all_metrics_covered()
     assert len(aggregator.service_check_names) == 2
+
+
+def test_custom_transformer(aggregator, dd_run_check, mock_http_response):
+    class Check(OpenMetricsBaseCheckV2):
+        __NAMESPACE__ = 'test'
+
+        def __init__(self, name, init_config, instances):
+            super().__init__(name, init_config, instances)
+            self.check_initializations.append(self.configure_additional_transformers)
+
+        def configure_transformer_watchdog_mega_miss(self):
+            method = self.gauge
+
+            def transform(metric, sample_data, runtime_data):
+                for sample, tags, hostname in sample_data:
+                    method('server.watchdog_mega_miss', sample.value, tags=tags, hostname=hostname)
+
+            return transform
+
+        def configure_additional_transformers(self):
+            metric = r"^envoy_server_(.+)_watchdog_mega_miss$"
+            self.scrapers[self.instance['openmetrics_endpoint']].metric_transformer.add_custom_transformer(
+                metric, self.configure_transformer_watchdog_mega_miss(), pattern=True
+            )
+
+    mock_http_response(
+        """
+        # TYPE envoy_server_worker_0_watchdog_mega_miss counter
+        envoy_server_worker_0_watchdog_mega_miss{} 1
+        # TYPE envoy_server_worker_1_watchdog_mega_miss counter
+        envoy_server_worker_1_watchdog_mega_miss{} 0
+        """
+    )
+    check = Check('test', {}, [{'openmetrics_endpoint': 'test'}])
+    dd_run_check(check)
+
+    aggregator.assert_metric('test.server.watchdog_mega_miss', metric_type=aggregator.GAUGE, count=2)

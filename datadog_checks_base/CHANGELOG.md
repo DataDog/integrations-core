@@ -1,5 +1,11 @@
 # CHANGELOG - datadog_checks_base
 
+## 23.4.0 / 2021-11-30
+
+* [Added] [OpenMetricsV2] Support custom transformers by regex matching metric names. See [#10753](https://github.com/DataDog/integrations-core/pull/10753).
+* [Fixed] Bump cachetools. See [#10742](https://github.com/DataDog/integrations-core/pull/10742).
+* [Fixed] Bump redis dependency. See [#9383](https://github.com/DataDog/integrations-core/pull/9383).
+
 ## 23.3.2 / 2021-11-23
 
 * [Fixed] [PerfCountersBaseCheck] Improve logging when expected counters are not found. See [#10701](https://github.com/DataDog/integrations-core/pull/10701).

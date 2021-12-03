@@ -1,0 +1,112 @@
+version: '3.5'
+
+services:
+
+  node1:
+    image: mysql/mysql-server:${MYSQL_VERSION}
+    container_name: node1
+    hostname: node1
+    ports:
+      - "13306:3306"
+    volumes:
+      - ${MYSQL_LOGS_HOST_PATH}:${MYSQL_LOGS_PATH}
+      - ${MYSQL_CONF_PATH}:/etc/mysql/my.cnf:ro
+    restart: unless-stopped
+    environment:
+      - MYSQL_USER=dog
+      - MYSQL_PASSWORD=dog
+      - MYSQL_ROOT_PASSWORD=mypass
+      - MYSQL_ROOT_HOST=%
+    command: ["mysqld",
+      "--bind-address=0.0.0.0",
+      "--server-id=1",
+      "--log-bin=mysql-bin-1.log",
+      "--enforce-gtid-consistency=ON",
+      "--log-slave-updates=ON",
+      "--gtid-mode=ON",
+      "--transaction-write-set-extraction=XXHASH64",
+      "--binlog-checksum=NONE",
+      "--plugin-load=group_replication.so",
+      "--relay-log-recovery=ON",
+      "--loose-group-replication-start-on-boot=OFF",
+      "--loose-group-replication-group-name=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      "--loose-group-replication-local-address=node1:6606",
+      "--loose-group-replication-group-seeds=node1:6606,node2:6606,node3:6606",
+      "--loose-group-replication-single-primary-mode=ON",
+      "--loose-group-replication-enforce-update-everywhere-checks=OFF"]
+    healthcheck:
+      test: "mysqladmin ping -u root -p$${MYSQL_ROOT_PASSWORD}"
+      interval: 2s
+      retries: 20
+
+  node2:
+    image: mysql/mysql-server:${MYSQL_VERSION}
+    container_name: node2
+    hostname: node2
+    ports:
+      - "13307:3306"
+    volumes:
+      - ${MYSQL_CONF_PATH}:/etc/mysql/my.cnf:ro
+    restart: unless-stopped
+    environment:
+      - MYSQL_USER=dog
+      - MYSQL_PASSWORD=dog
+      - MYSQL_ROOT_PASSWORD=mypass
+      - MYSQL_ROOT_HOST=%
+    command: ["mysqld",
+      "--bind-address=0.0.0.0",
+      "--server-id=1",
+      "--log-bin=mysql-bin-1.log",
+      "--enforce-gtid-consistency=ON",
+      "--log-slave-updates=ON",
+      "--gtid-mode=ON",
+      "--transaction-write-set-extraction=XXHASH64",
+      "--binlog-checksum=NONE",
+      "--plugin-load=group_replication.so",
+      "--relay-log-recovery=ON",
+      "--loose-group-replication-start-on-boot=OFF",
+      "--loose-group-replication-group-name=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      "--loose-group-replication-local-address=node2:6606",
+      "--loose-group-replication-group-seeds=node1:6606,node2:6606,node3:6606",
+      "--loose-group-replication-single-primary-mode=ON",
+      "--loose-group-replication-enforce-update-everywhere-checks=OFF"]
+    healthcheck:
+      test: "mysqladmin ping -u root -p$${MYSQL_ROOT_PASSWORD}"
+      interval: 2s
+      retries: 20
+
+  node3:
+    image: mysql/mysql-server:${MYSQL_VERSION}
+    container_name: node3
+    hostname: node3
+    ports:
+      - "13308:3306"
+    volumes:
+      - ${MYSQL_CONF_PATH}:/etc/mysql/my.cnf:ro
+    restart: unless-stopped
+    environment:
+      - MYSQL_USER=dog
+      - MYSQL_PASSWORD=dog
+      - MYSQL_ROOT_PASSWORD=mypass
+      - MYSQL_ROOT_HOST=%
+    command: ["mysqld",
+      "--bind-address=0.0.0.0",
+      "--server-id=1",
+      "--log-bin=mysql-bin-1.log",
+      "--enforce-gtid-consistency=ON",
+      "--log-slave-updates=ON",
+      "--gtid-mode=ON",
+      "--transaction-write-set-extraction=XXHASH64",
+      "--binlog-checksum=NONE",
+      "--plugin-load=group_replication.so",
+      "--relay-log-recovery=ON",
+      "--loose-group-replication-start-on-boot=OFF",
+      "--loose-group-replication-group-name=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      "--loose-group-replication-local-address=node3:6606",
+      "--loose-group-replication-group-seeds=node1:6606,node2:6606,node3:6606",
+      "--loose-group-replication-single-primary-mode=ON",
+      "--loose-group-replication-enforce-update-everywhere-checks=OFF"]
+    healthcheck:
+      test: "mysqladmin ping -u root -p$${MYSQL_ROOT_PASSWORD}"
+      interval: 2s
+      retries: 20
