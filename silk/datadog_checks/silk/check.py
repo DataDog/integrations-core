@@ -34,7 +34,7 @@ class SilkCheck(AgentCheck):
         try:
             response_json = self.get_metrics(self.STATE_ENDPOINT)
         except Exception as e:
-            self.log.debug("Encountered error getting Silk state: %s" % str(e))
+            self.log.debug("Encountered error getting Silk state: %s", str(e))
             self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.CRITICAL, message=str(e), tags=self.tags)
         else:
             if response_json:
@@ -54,7 +54,7 @@ class SilkCheck(AgentCheck):
         Parse metrics from HTTP response. return_first will return the first item in `hits` key.
         """
         if not output:
-            self.log.debug("No results for path %s" % path)
+            self.log.debug("No results for path %s", path)
             return
 
         hits = output.get('hits')
@@ -82,5 +82,5 @@ class SilkCheck(AgentCheck):
             response_json = response.json()
             return response_json
         except Exception as e:
-            self.log.debug("Encountered error while getting metrics from %s: %s" % (path, str(e)))
+            self.log.debug("Encountered error while getting metrics from %s: %s", (path, str(e)))
             return None
