@@ -19,8 +19,8 @@ def test_check(aggregator, instance):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    check = SilkCheck('silk', {}, [instance])
-    dd_run_check(check)
-    aggregator.assert_service_check('silk.can_connect', SilkCheck.CRITICAL)
+# def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance):
+#     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
+#     check = SilkCheck('silk', {}, [instance])
+#     dd_run_check(check)
+#     aggregator.assert_service_check('silk.can_connect', SilkCheck.CRITICAL)
