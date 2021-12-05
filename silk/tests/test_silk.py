@@ -2,8 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.dev.utils import get_metadata_metrics
+# from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.silk import SilkCheck
 
 
