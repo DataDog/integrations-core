@@ -310,7 +310,7 @@ class ESCheck(AgentCheck):
         for metric, desc in iteritems(pshard_stats_metrics):
             pshard_tags = base_tags
             if desc[1].startswith('_all.'):
-                pshard_tags = pshard_tags + ['index:_all']
+                pshard_tags = pshard_tags + ['index_name:_all']
             self._process_metric(data, metric, *desc, tags=pshard_tags)
         # process index-level metrics
         if self._config.cluster_stats and self._config.detailed_index_stats:
@@ -324,7 +324,7 @@ class ESCheck(AgentCheck):
                             'indices.' + escaped_index + '.' + desc[1].replace('_all.', ''),
                             desc[2] if 2 < len(desc) else None,
                         )
-                        self._process_metric(data, metric, *index_desc, tags=base_tags + ['index:' + index])
+                        self._process_metric(data, metric, *index_desc, tags=base_tags + ['index_name:' + index])
 
     def _process_metric(self, data, metric, xtype, path, xform=None, tags=None, hostname=None):
         """

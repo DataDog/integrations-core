@@ -192,6 +192,28 @@ def test_pshard_metrics(dd_environment, aggregator):
 
 
 @pytest.mark.integration
+def test_detailed_index_stats(dd_environment, aggregator):
+    instance = {
+        "url": URL,
+        "cluster_stats": True,
+        "pshard_stats": True,
+        "detailed_index_stats": True,
+        "tls_verify": False,
+    }
+    elastic_check = ESCheck('elastic', {}, instances=[instance])
+    es_version = elastic_check._get_es_version()
+    elastic_check.check(None)
+    pshard_stats_metrics = pshard_stats_for_version(es_version)
+    for m_name, desc in iteritems(pshard_stats_metrics):
+        if desc[0] == 'gauge' and desc[1].startswith('_all.'):
+            aggregator.assert_metric(m_name)
+
+    aggregator.assert_metric_has_tag('elasticsearch.primaries.docs.count', tag='index_name:_all')
+    aggregator.assert_metric_has_tag('elasticsearch.primaries.docs.count', tag='index_name:testindex')
+    aggregator.assert_metric_has_tag('elasticsearch.primaries.docs.count', tag='index_name:.testindex')
+
+
+@pytest.mark.integration
 def test_index_metrics(dd_environment, aggregator, instance, cluster_tags):
     instance['index_stats'] = True
     elastic_check = ESCheck('elastic', {}, instances=[instance])
@@ -202,6 +224,7 @@ def test_index_metrics(dd_environment, aggregator, instance, cluster_tags):
     elastic_check.check(None)
     for m_name in index_stats_for_version(es_version):
         aggregator.assert_metric(m_name, tags=cluster_tags + ['index_name:testindex'])
+        aggregator.assert_metric(m_name, tags=cluster_tags + ['index_name:.testindex'])
 
 
 @pytest.mark.integration
