@@ -20,6 +20,7 @@ class SilkCheck(AgentCheck):
     STATE_MAP = {'online': AgentCheck.OK, 'offline': AgentCheck.WARNING, 'degraded': AgentCheck.CRITICAL}
 
     STATE_SERVICE_CHECK = "state"
+    CONNECT_SERVICE_CHECK = "can_connect"
 
     def __init__(self, name, init_config, instances):
         super(SilkCheck, self).__init__(name, init_config, instances)
@@ -34,25 +35,26 @@ class SilkCheck(AgentCheck):
             response_json = self.get_metrics(self.STATE_ENDPOINT)
         except Exception as e:
             self.log.debug("Encountered error getting Silk state: %s" % str(e))
-            self.service_check("can_connect", AgentCheck.CRITICAL, message=str(e))
+            self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.CRITICAL, message=str(e), tags=self.tags)
         else:
             if response_json:
                 data = self.parse_metrics(response_json, self.STATE_ENDPOINT, return_first=True)
                 state = data.get('state').lower()
-                self.service_check(self.STATE_SERVICE_CHECK, self.STATE_MAP[state])
+                self.service_check(self.STATE_SERVICE_CHECK, self.STATE_MAP[state], tags=self.tags)
 
         get_method = getattr
         for path, metrics_obj in METRICS.items():
             # Need to submit an object of relevant tags
             response_json = self.get_metrics(path)
             self.parse_metrics(response_json, path, metrics_obj, get_method)
+        self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.OK)
 
     def parse_metrics(self, output, path, metrics_mapping=None, get_method=None, return_first=False):
         """
         Parse metrics from HTTP response. return_first will return the first item in `hits` key.
         """
         if not output:
-            self.log.debug("No results for path %s"% path)
+            self.log.debug("No results for path %s" % path)
             return
 
         hits = output.get('hits')

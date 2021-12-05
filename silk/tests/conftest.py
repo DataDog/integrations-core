@@ -21,4 +21,4 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return {}
+    return common.INSTANCE

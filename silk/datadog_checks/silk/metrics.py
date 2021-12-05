@@ -10,6 +10,7 @@ class Metric(object):
         - metrics mapping (response JSON key to metric name and metric type)
         - tags mapping (response JSON key to tag name)
     """
+
     def __init__(self, prefix, metrics, tags=None):
         self.prefix = prefix
         for key, name_method in metrics.items():
@@ -79,6 +80,29 @@ METRICS = {
             'tags': {
                 'peer_k2_name': 'peer_name',
                 'volume_name': 'volume_name',
+            },
+        }
+    ),
+    '/system/capacity': Metric(
+        **{
+            'prefix': 'system.capacity',
+            'metrics': {
+                'allocated': 'allocated',
+                'allocated_snapshots_and_views': 'allocated_snapshots_and_views',
+                'allocated_volumes': 'allocated_volumes',
+                'curr_dt_chunk': 'curr_dt_chunk',
+                'free': 'free',
+                'logical': 'logical',
+                'physical': 'physical',
+                'provisioned': 'provisioned',
+                'provisioned_snapshots': 'provisioned_snapshots',
+                'provisioned_views': 'provisioned_views',
+                'provisioned_volumes': 'provisioned_volumes',
+                'reserved': 'reserved',
+                'total': 'total',
+            },
+            'tags': {
+                'state': 'capacity_state',
             },
         }
     ),
