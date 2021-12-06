@@ -210,7 +210,7 @@ def test_index_stats_metrics(aggregator, dd_run_check, instance_index_stats, cou
 
     for mname in INDEX_STATS_COUNT_METRICS:
         aggregator.assert_metric(mname, metric_type=3, tags=INDEX_STATS_TAGS)
-        
+
     aggregator.assert_service_check(INDEX_STATS_SERVICE_CHECK_NAME, status=Couchbase.OK, tags=CHECK_TAGS)
 
 
