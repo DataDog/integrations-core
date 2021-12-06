@@ -109,7 +109,7 @@ This integration works on Linux and Windows, but some metrics are OS dependent. 
  
 ### Events
 
-The Containerd check can collect events. Use `filters` to select the relevant events. Refer to the [sample containerd.d/conf.yaml][2] to have more details.
+The Containerd check can collect events. Use `filters` to select the relevant events. See the [sample containerd.d/conf.yaml][2] to have more details.
 
 ### Service Checks
 
