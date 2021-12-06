@@ -189,6 +189,35 @@ class Nginx(AgentCheck):
             except Exception as e:
                 self.log.error('Could not submit metric: %s: %s', repr(row), e)
 
+    def _get_enabled_apis(self):
+        available_endpoints = []
+
+        base_url = "/".join([self.url, self.plus_api_version])
+        http_url = "/".join([self.url, self.plus_api_version, "http"])
+        stream_url = "/".join([self.url, self.plus_api_version, "stream"])
+
+        try:
+            self.log.debug("Querying base API url: %s", base_url)
+            r = self._perform_request(base_url)
+            r.raise_for_status()
+            available_endpoints = r.json()
+            http_avail = available_endpoints.pop("http")
+            stream_avail = available_endpoints.pop("stream")
+
+            if http_avail is not None:
+                r = self._perform_request(http_url)
+                r.raise_for_status()
+
+            if self.use_plus_api_stream:
+                if stream_avail is not None:
+                    r = self._perform_request(http_url)
+                    r.raise_for_status()
+
+        except Exception as e:
+
+
+
+
     def _get_data(self):
         r = self._perform_service_check(self.url)
         body = r.content
@@ -256,10 +285,7 @@ class Nginx(AgentCheck):
             r = self._perform_request(url)
             payload = self._nest_payload(nest, r.json())
         except Exception as e:
-            if endpoint in PLUS_API_STREAM_ENDPOINTS.values():
-                self.log.warning("Stream may not be initialized. Error querying %s metrics at %s: %s", endpoint, url, e)
-            else:
-                self.log.exception("Error querying %s metrics at %s: %s", endpoint, url, e)
+            self.log.exception("Error querying %s metrics at %s: %s", endpoint, url, e)
 
         return payload
 
