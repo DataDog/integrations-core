@@ -212,21 +212,25 @@ def test_detailed_index_stats(dd_environment, aggregator):
     aggregator.assert_metric_has_tag('elasticsearch.primaries.docs.count', tag='index_name:_all')
     aggregator.assert_metric_has_tag('elasticsearch.primaries.docs.count', tag='index_name:testindex')
     aggregator.assert_metric_has_tag('elasticsearch.primaries.docs.count', tag='index_name:.testindex')
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False, exclude=[
-        "system.cpu.idle",
-        "system.load.1",
-        "system.load.15",
-        "system.load.5",
-        "system.mem.free",
-        "system.mem.total",
-        "system.mem.usable",
-        "system.mem.used",
-        "system.net.bytes_rcvd",
-        "system.net.bytes_sent",
-        "system.swap.free",
-        "system.swap.total",
-        "system.swap.used",
-    ])
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        check_metric_type=False,
+        exclude=[
+            "system.cpu.idle",
+            "system.load.1",
+            "system.load.15",
+            "system.load.5",
+            "system.mem.free",
+            "system.mem.total",
+            "system.mem.usable",
+            "system.mem.used",
+            "system.net.bytes_rcvd",
+            "system.net.bytes_sent",
+            "system.swap.free",
+            "system.swap.total",
+            "system.swap.used",
+        ],
+    )
 
 
 @pytest.mark.integration
