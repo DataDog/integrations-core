@@ -212,6 +212,8 @@ def test_detailed_index_stats(dd_environment, aggregator):
     aggregator.assert_metric_has_tag('elasticsearch.primaries.docs.count', tag='index_name:testindex')
     aggregator.assert_metric_has_tag('elasticsearch.primaries.docs.count', tag='index_name:.testindex')
 
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 @pytest.mark.integration
 def test_index_metrics(dd_environment, aggregator, instance, cluster_tags):
