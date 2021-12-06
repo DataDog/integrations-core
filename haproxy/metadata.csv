@@ -1,6 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 haproxy.backend.active.servers,gauge,,,,Current number of active servers.,0,haproxy,
-haproxy.backend.agg.server.check.status,gauge,,,,Backend's aggregated gauge of servers' state check status.,0,haproxy,
+haproxy.backend.agg.server.check.status,gauge,,,,Backend's aggregated gauge of servers' state check status (since >= 2.4).,0,haproxy,
 haproxy.backend.backup.servers,gauge,,,,Current number of backup servers.,0,haproxy,
 haproxy.backend.bytes.in.total,count,,byte,,Current total of incoming bytes. By default submitted as count if using prometheus,0,haproxy,
 haproxy.backend.bytes.out.total,count,,byte,,Current total of outgoing bytes. By default submitted as count if using prometheus,0,haproxy,
