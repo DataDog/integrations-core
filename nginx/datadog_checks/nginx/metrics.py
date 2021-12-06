@@ -35,7 +35,7 @@ VTS_METRIC_MAP = {
 }
 
 # NGNINX Plus metrics that are sent as both a count and gauge for backwards compatibility
-# The count metrics with have _count appended to their names
+# The count metrics will have _count appended to their names
 METRICS_SEND_AS_COUNT = [
     'nginx.upstream.peers.responses.1xx',
     'nginx.upstream.peers.responses.2xx',
