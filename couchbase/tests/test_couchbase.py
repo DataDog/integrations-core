@@ -203,13 +203,13 @@ def test_index_stats_metrics(aggregator, dd_run_check, instance_index_stats, cou
     couchbase = Couchbase('couchbase', {}, [instance_index_stats])
     dd_run_check(couchbase)
     for mname in INDEX_STATS_INDEXER_METRICS:
-        aggregator.assert_metric(mname, metric_type=0, tags=CHECK_TAGS)
+        aggregator.assert_metric(mname, metric_type=aggregator.GAUGE, tags=CHECK_TAGS)
 
     for mname in INDEX_STATS_GAUGE_METRICS:
-        aggregator.assert_metric(mname, metric_type=0, tags=INDEX_STATS_TAGS)
+        aggregator.assert_metric(mname, metric_type=aggregator.GAUGE, tags=INDEX_STATS_TAGS)
 
     for mname in INDEX_STATS_COUNT_METRICS:
-        aggregator.assert_metric(mname, metric_type=3, tags=INDEX_STATS_TAGS)
+        aggregator.assert_metric(mname, metric_type=aggregator.MONOTONIC_COUNT, tags=INDEX_STATS_TAGS)
 
     aggregator.assert_service_check(INDEX_STATS_SERVICE_CHECK_NAME, status=Couchbase.OK, tags=CHECK_TAGS)
 
