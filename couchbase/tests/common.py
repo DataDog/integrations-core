@@ -151,31 +151,34 @@ INDEX_STATS_INDEXER_METRICS = [
     'couchbase.indexer.total_indexer_gc_pause_ns',
 ]
 
-INDEX_STATS_INDEX_METRICS = [
+INDEX_STATS_GAUGE_METRICS = [
     'couchbase.index.avg_drain_rate',
     'couchbase.index.avg_item_size',
     'couchbase.index.avg_scan_latency',
     'couchbase.index.cache_hit_percent',
-    'couchbase.index.cache_hits',
-    'couchbase.index.cache_misses',
     'couchbase.index.data_size',
     'couchbase.index.disk_size',
     'couchbase.index.frag_percent',
     'couchbase.index.initial_build_progress',
-    'couchbase.index.items_count',
     'couchbase.index.last_known_scan_time',
-    'couchbase.index.num_docs_indexed',
     'couchbase.index.num_docs_pending',
     'couchbase.index.num_docs_queued',
-    'couchbase.index.num_items_flushed',
     'couchbase.index.num_pending_requests',
+    'couchbase.index.recs_in_mem',
+    'couchbase.index.recs_on_disk',
+    'couchbase.index.resident_percent',
+    'couchbase.index.total_scan_duration',
+]
+
+INDEX_STATS_COUNT_METRICS = [
+    'couchbase.index.cache_hits',
+    'couchbase.index.cache_misses',
+    'couchbase.index.items_count',
+    'couchbase.index.num_docs_indexed',
+    'couchbase.index.num_items_flushed',
     'couchbase.index.num_requests',
     'couchbase.index.num_rows_returned',
     'couchbase.index.num_scan_errors',
     'couchbase.index.num_scan_timeouts',
-    'couchbase.index.recs_in_mem',
-    'couchbase.index.recs_on_disk',
-    'couchbase.index.resident_percent',
     'couchbase.index.scan_bytes_read',
-    'couchbase.index.total_scan_duration',
 ]

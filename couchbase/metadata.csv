@@ -334,7 +334,7 @@ couchbase.index.last_known_scan_time,gauge,,nanosecond,,"Timestamp of the last s
 couchbase.index.num_docs_indexed,count,,document,,The number of documents indexed by the indexer since last startup,0,couchbase,
 couchbase.index.num_docs_pending,gauge,,document,,The number of documents pending to be indexed,0,couchbase,
 couchbase.index.num_docs_queued,gauge,,document,,The number of documents queued to be indexed,0,couchbase,
-couchbase.index.num_items_flushed,gauge,,item,,The number of items flushed from memory to disk storage,0,couchbase,
+couchbase.index.num_items_flushed,count,,item,,The number of items flushed from memory to disk storage,0,couchbase,
 couchbase.index.num_pending_requests,gauge,,request,,The number of requests received but not yet served by the indexer,0,couchbase,
 couchbase.index.num_requests,count,,request,,The number of requests served by the indexer since last startup,0,couchbase,
 couchbase.index.num_rows_returned,count,,row,,The total number of rows returned so far by the indexer,0,couchbase,

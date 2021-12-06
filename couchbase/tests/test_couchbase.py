@@ -21,7 +21,8 @@ from .common import (
     BUCKET_NAME,
     CHECK_TAGS,
     COUCHBASE_MAJOR_VERSION,
-    INDEX_STATS_INDEX_METRICS,
+    INDEX_STATS_COUNT_METRICS,
+    INDEX_STATS_GAUGE_METRICS,
     INDEX_STATS_INDEXER_METRICS,
     INDEX_STATS_TAGS,
     PORT,
@@ -202,23 +203,27 @@ def test_index_stats_metrics(aggregator, dd_run_check, instance_index_stats, cou
     couchbase = Couchbase('couchbase', {}, [instance_index_stats])
     dd_run_check(couchbase)
     for mname in INDEX_STATS_INDEXER_METRICS:
-        aggregator.assert_metric(mname, tags=CHECK_TAGS)
+        aggregator.assert_metric(mname, metric_type=0, tags=CHECK_TAGS)
 
-    for mname in INDEX_STATS_INDEX_METRICS:
-        aggregator.assert_metric(mname, tags=INDEX_STATS_TAGS)
+    for mname in INDEX_STATS_GAUGE_METRICS:
+        aggregator.assert_metric(mname, metric_type=0, tags=INDEX_STATS_TAGS)
+
+    for mname in INDEX_STATS_COUNT_METRICS:
+        aggregator.assert_metric(mname, metric_type=3, tags=INDEX_STATS_TAGS)
+        
     aggregator.assert_service_check(INDEX_STATS_SERVICE_CHECK_NAME, status=Couchbase.OK, tags=CHECK_TAGS)
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_metrics(aggregator, instance, couchbase_container_ip):
+def test_metrics(aggregator, dd_run_check, instance, couchbase_container_ip):
     """
     Test couchbase metrics not including 'couchbase.query.'
     """
     # Few metrics are only available after some time post launch. Sleep to ensure they're present before we validate
     time.sleep(15)
     couchbase = Couchbase('couchbase', {}, instances=[instance])
-    couchbase.check(None)
+    dd_run_check(couchbase)
 
     # Assert each type of metric (buckets, nodes, totals) except query
     _assert_bucket_metrics(aggregator, BUCKET_TAGS + ['device:{}'.format(BUCKET_NAME)])

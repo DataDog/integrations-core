@@ -15,6 +15,7 @@ from datadog_checks.dev.docker import get_container_ip
 from .common import (
     BUCKET_NAME,
     CB_CONTAINER_NAME,
+    COUCHBASE_MAJOR_VERSION,
     CUSTOM_TAGS,
     DEFAULT_INSTANCE,
     HERE,
@@ -74,7 +75,6 @@ def dd_environment():
     """
     Spin up and initialize couchbase
     """
-    couchdb_version = os.environ["COUCHBASE_VERSION"][0]
     conditions = [
         WaitFor(couchbase_container),
         WaitFor(couchbase_init),
@@ -82,7 +82,7 @@ def dd_environment():
         WaitFor(node_stats),
         WaitFor(bucket_stats),
     ]
-    if int(couchdb_version) >= 7:
+    if COUCHBASE_MAJOR_VERSION >= 7:
         conditions.append(WaitFor(load_sample_bucket))
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'standalone.compose'),
