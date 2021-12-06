@@ -45,15 +45,10 @@ init_config:
 #
 instances:
 
-    ## @param server - string - required
-    ## Server address of Silk instance.
+    ## @param host_address - string - required
+    ## Host address of Silk instance.
     #
-  - server: http://localhost
-
-    ## @param port - number - optional - default: 443
-    ## Port of Silk API connection.
-    #
-    # port: 443
+  - host_address: http://localhost:80
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.

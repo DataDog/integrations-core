@@ -24,7 +24,7 @@ class Metric(object):
 
 
 METRICS = {
-    '/hosts': Metric(
+    'hosts': Metric(
         **{
             'prefix': 'host',
             'metrics': {'views_count': 'views_count', 'volumes_count': 'volumes_count'},
@@ -33,7 +33,7 @@ METRICS = {
             },
         }
     ),
-    '/volumes': Metric(
+    'volumes': Metric(
         **{
             'prefix': 'volume',
             'metrics': {
@@ -51,7 +51,7 @@ METRICS = {
             },
         }
     ),
-    '/stats/system': Metric(
+    'stats/system': Metric(
         **{
             'prefix': 'stats.system',
             'metrics': {
@@ -65,7 +65,7 @@ METRICS = {
             },
         }
     ),
-    '/stats/volumes': Metric(
+    'stats/volumes': Metric(
         **{
             'prefix': 'stats.volume',
             'metrics': {
@@ -83,7 +83,7 @@ METRICS = {
             },
         }
     ),
-    '/system/capacity': Metric(
+    'system/capacity': Metric(
         **{
             'prefix': 'system.capacity',
             'metrics': {

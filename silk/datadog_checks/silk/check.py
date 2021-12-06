@@ -15,7 +15,7 @@ class SilkCheck(AgentCheck):
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'silk'
 
-    STATE_ENDPOINT = '/system/state'
+    STATE_ENDPOINT = 'system/state'
 
     STATE_MAP = {'online': AgentCheck.OK, 'offline': AgentCheck.WARNING, 'degraded': AgentCheck.CRITICAL}
 
@@ -25,27 +25,30 @@ class SilkCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(SilkCheck, self).__init__(name, init_config, instances)
 
-        server = self.instance.get("server")
-        port = self.instance.get("port", 443)
-        self.url = "{}:{}/api/v2".format(server, port)
+        server = self.instance.get("host_address")
+        self.url = "{}/api/v2/".format(server)
         self.tags = self.instance.get("tags", [])
 
     def check(self, _):
         try:
-            response_json = self.get_metrics(self.STATE_ENDPOINT)
+            response_json, code = self.get_metrics(self.STATE_ENDPOINT)
         except Exception as e:
             self.log.debug("Encountered error getting Silk state: %s", str(e))
             self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.CRITICAL, message=str(e), tags=self.tags)
         else:
+            msg = "Could not access system state, got response: {}".format(code)
             if response_json:
                 data = self.parse_metrics(response_json, self.STATE_ENDPOINT, return_first=True)
                 state = data.get('state').lower()
                 self.service_check(self.STATE_SERVICE_CHECK, self.STATE_MAP[state], tags=self.tags)
+            else:
+                self.service_check(self.STATE_SERVICE_CHECK, AgentCheck.UNKNOWN, msg=msg, tags=self.tags)
+                self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.CRITICAL, msg=msg, tags=self.tag)
 
         get_method = getattr
         for path, metrics_obj in METRICS.items():
             # Need to submit an object of relevant tags
-            response_json = self.get_metrics(path)
+            response_json, _ = self.get_metrics(path)
             self.parse_metrics(response_json, path, metrics_obj, get_method)
         self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.OK)
 
@@ -76,11 +79,14 @@ class SilkCheck(AgentCheck):
                     )
 
     def get_metrics(self, path):
+        url = urljoin(self.url, path)
         try:
-            response = self.http.get(urljoin(self.url, path))
+            self.log.debug("Trying to get metrics from %s", url)
+            response = self.http.get(url)
             response.raise_for_status()
             response_json = response.json()
-            return response_json
+            code = response.status_code
+            return response_json, code
         except Exception as e:
-            self.log.debug("Encountered error while getting metrics from %s: %s", (path, str(e)))
-            return None
+            self.log.debug("Encountered error while getting metrics from %s: %s", path, str(e))
+            return None, code
