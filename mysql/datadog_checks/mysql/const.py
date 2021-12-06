@@ -239,7 +239,7 @@ GALERA_VARS = {
     'wsrep_received_bytes': ('mysql.galera.wsrep_received_bytes', GAUGE),
     'wsrep_received': ('mysql.galera.wsrep_received', GAUGE),
     'wsrep_local_state': ('mysql.galera.wsrep_local_state', GAUGE),
-    'wsrep_local_cert_failures': ('mysql.galera.wsrep_local_cert_failures', GAUGE),
+    'wsrep_local_cert_failures': ('mysql.galera.wsrep_local_cert_failures', MONOTONIC),
 }
 
 PERFORMANCE_VARS = {
