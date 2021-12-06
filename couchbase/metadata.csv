@@ -320,7 +320,7 @@ couchbase.indexer.memory_total_storage,gauge,,byte,,The total size allocated in 
 couchbase.indexer.memory_used,gauge,,byte,,The amount of memory used by the Index service on this node,0,couchbase,
 couchbase.indexer.total_indexer_gc_pause_ns,gauge,,nanosecond,,The total time the indexer has spent in GC pause since the last startup,0,couchbase,
 couchbase.index.avg_drain_rate,gauge,,item,second,The average number of items flushed from memory to disk storage per second,0,couchbase,
-couchbase.index.avg_item_size,gauge,,,,The average size of the keys,0,couchbase,
+couchbase.index.avg_item_size,gauge,,byte,,The average size of the keys,0,couchbase,
 couchbase.index.avg_scan_latency,gauge,,nanosecond,,The average time to serve a scan request,0,couchbase,
 couchbase.index.cache_hit_percent,gauge,,percent,,The percentage of memory accesses that were served from the managed cache,0,couchbase,
 couchbase.index.cache_hits,count,,,,The number of accesses to this index data from RAM,0,couchbase,
