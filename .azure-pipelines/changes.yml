@@ -33,7 +33,7 @@ jobs:
     display: Linux
     ${{ if eq(variables['System.PullRequest.IsFork'], 'False') }}:
       ddtrace_flag: '--ddtrace'
-    validate: true
+    validate: false
     validate_codeowners: false
     validate_changed: changed
     pip_cache_config:
