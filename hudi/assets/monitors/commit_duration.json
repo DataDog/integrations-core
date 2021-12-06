@@ -17,7 +17,7 @@
 		"renotify_occurrences": null,
 		"renotify_statuses": null,
 		"escalation_message": "",
-		"no_data_timeframe": 60,
+		"no_data_timeframe": null,
 		"include_tags": true,
 		"thresholds": {
 			"critical": 1,
