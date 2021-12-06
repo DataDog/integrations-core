@@ -350,16 +350,3 @@ elasticsearch.index.store_size,gauge,,byte,,The store size of primary and replic
 elasticsearch.cgroup.cpu.stat.number_of_elapsed_periods,gauge,,,,The number of reporting periods that have elapsed,0,elasticsearch,cgroup cpu stat
 elasticsearch.cgroup.cpu.stat.number_of_times_throttled,gauge,,,,The number of times all tasks in the same cgroup as the Elasticsearch process have been throttled,0,elasticsearch,cpu stat throttled
 elasticsearch.process.cpu.percent,gauge,,percent,,CPU usage in percent or -1 if not known at the time the stats are computed,0,elasticsearch,process cpu percent
-system.cpu.idle,gauge,,percent,,,0,elasticsearch,
-system.load.15,gauge,,,,,0,elasticsearch,
-system.load.1,gauge,,,,,0,elasticsearch,
-system.load.5,gauge,,,,,0,elasticsearch,
-system.mem.free,gauge,,byte,,,0,elasticsearch,
-system.mem.total,gauge,,byte,,,0,elasticsearch,
-system.mem.usable,gauge,,byte,,,0,elasticsearch,
-system.mem.used,gauge,,byte,,,0,elasticsearch,
-system.net.bytes_rcvd,gauge,,byte,,,0,elasticsearch,
-system.net.bytes_sent,gauge,,byte,,,0,elasticsearch,
-system.swap.free,gauge,,byte,,,0,elasticsearch,
-system.swap.total,gauge,,byte,,,0,elasticsearch,
-system.swap.used,gauge,,byte,,,0,elasticsearch,
