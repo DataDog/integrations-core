@@ -21,10 +21,10 @@ E2E_METADATA = {
 
 @pytest.fixture(scope='session')
 def dd_environment(instance):
-    yield instance, E2E_METADATA
+    yield common.INSTANCE, E2E_METADATA
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def instance():
     return deepcopy(common.INSTANCE)
 
