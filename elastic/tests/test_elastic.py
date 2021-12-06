@@ -481,7 +481,21 @@ def test_detailed_index_stats(dd_environment, aggregator):
     for m_name in all_other_metrics:
         aggregator.assert_metric(m_name)
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False, exclude=[
+        "system.cpu.idle",
+        "system.load.1",
+        "system.load.15",
+        "system.load.5",
+        "system.mem.free",
+        "system.mem.total",
+        "system.mem.usable",
+        "system.mem.used",
+        "system.net.bytes_rcvd",
+        "system.net.bytes_sent",
+        "system.swap.free",
+        "system.swap.total",
+        "system.swap.used",
+    ])
 
 
 @pytest.mark.integration
