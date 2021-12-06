@@ -141,7 +141,7 @@ class MetricToCheckValidator(BaseManifestValidator):
     PRICING_PATH = {V1: "/pricing", V2: "/pricing"}
 
     def validate(self, check_name, decoded, _):
-        if not self.should_validate() or check_name in CHECKS_EXCLUDE_LIST:
+        if not self.should_validate() or check_name in self.CHECKS_EXCLUDE_LIST:
             return
 
         metadata_path = self.METADATA_PATH[self.version]
