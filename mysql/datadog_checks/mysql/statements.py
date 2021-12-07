@@ -172,12 +172,35 @@ class MySQLStatementMetrics(DBMAsyncJob):
         rows = []  # type: List[PyMysqlRow]
 
         try:
-            with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
-                cursor.execute(sql_statement_summary)
-
-                rows = cursor.fetchall() or []  # type: ignore
+            rows = self._execute_query(sql_statement_summary)
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
+            self._check.count(
+                "dd.mysql.statements.error",
+                1,
+                tags=self._tags + ["error:{}".format(type(e))] + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
             self.log.warning("Statement summary metrics are unavailable at this time: %s", e)
+
+        return rows
+
+    def _execute_query(self, query):
+        rows = []  # type: List[PyMysqlRow]
+        try:
+            with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
+                cursor.execute(query)
+                rows = cursor.fetchall() or []  # type: ignore
+        # InterfaceError occurs when the physical connection is closed (e.g. a database restart).
+        # To recover, close the job's connection and let a new one get lazily recreated on the next run
+        except pymysql.err.InterfaceError as e:
+            self._check.count(
+                "dd.mysql.statements.error",
+                1,
+                tags=self._tags + ["error:{}".format(type(e))] + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
+            self.log.warning("Releasing bad connection following error: %s %s", type(e).__name__, e)
+            self._close_db_conn()
 
         return rows
 
