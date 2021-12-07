@@ -31,7 +31,9 @@ See [metadata.csv][7] for a list of metrics provided by this check.
 
 ### Events
 
-The Silk integration does not include any events.
+The Silk integration includes the following events:
+
+- 
 
 ### Service Checks
 
