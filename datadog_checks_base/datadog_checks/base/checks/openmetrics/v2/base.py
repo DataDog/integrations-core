@@ -32,9 +32,14 @@ class OpenMetricsBaseCheckV2(AgentCheck):
     DEFAULT_METRIC_LIMIT = 2000
 
     # Allow tracing for openmetrics integrations
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        return traced_class(cls)
+    def __init_subclass__(cls, *args, **kwargs):
+        try:
+            # https://github.com/python/mypy/issues/4660
+            super().__init_subclass__(*args, **kwargs)  # type: ignore
+            if not PY2:
+                return traced_class(cls)
+        except Exception:
+            return cls
 
     def __init__(self, name, init_config, instances):
         """
