@@ -1,7 +1,8 @@
 import pytest
-from .common import INSTANCES, requires_legacy_environment
 
 from datadog_checks.envoy import Envoy
+
+from .common import INSTANCES, requires_legacy_environment
 
 pytestmark = [requires_legacy_environment]
 
