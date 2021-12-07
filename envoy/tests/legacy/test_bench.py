@@ -1,5 +1,5 @@
 import pytest
-from envoy.tests.legacy.common import INSTANCES, requires_legacy_environment
+from .common import INSTANCES, requires_legacy_environment
 
 from datadog_checks.envoy import Envoy
 
