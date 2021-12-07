@@ -130,7 +130,7 @@ class MetricToCheckValidator(BaseManifestValidator):
     CHECKS_EXCLUDE_LIST = {
         'agent_metrics',  # this (agent-internal) check doesn't guarantee a list of stable metrics for now
         'moogsoft',
-        'snmp'
+        'snmp',
     }
     METRIC_TO_CHECK_EXCLUDE_LIST = {
         'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.
