@@ -155,8 +155,7 @@ class AgentCheck(object):
         try:
             # https://github.com/python/mypy/issues/4660
             super().__init_subclass__(*args, **kwargs)  # type: ignore
-            if not PY2:
-                return traced_class(cls)
+            return traced_class(cls)
         except Exception:
             return cls
 
