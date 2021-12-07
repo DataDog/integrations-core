@@ -8,7 +8,7 @@ Amazon EKS on AWS Fargate is a managed Kubernetes service that automates certain
 
 ## Setup
 
-These steps cover the setup of the Datadog Agent v7.17+ in a container within Amazon EKS on AWS Fargate. Refer to the [Datadog-Amazon EKS integration documentation][2] if you are not using AWS Fargate.
+These steps cover the setup of the Datadog Agent v7.17+ in a container within Amazon EKS on AWS Fargate. See the [Datadog-Amazon EKS integration documentation][2] if you are not using AWS Fargate.
 
 AWS Fargate pods are not physical pods, which means they exclude [host-based system-checks][3], like CPU, memory, etc. In order to collect data from your AWS Fargate pods, you must run the Agent as a sidecar of your application pod with custom RBAC, which enables these features:
 
@@ -19,7 +19,7 @@ AWS Fargate pods are not physical pods, which means they exclude [host-based sys
 
 ### EC2 Node
 
-If you don't specify through [AWS Fargate Profile][5] that your pods should run on fargate, your pods can use classical EC2 machines. If it's the case refer to the [Datadog-Amazon EKS integration setup][6] in order to collect data from them. This works by running the Agent as an EC2-type workload. The Agent setup is the same as that of the [Kubernetes Agent setup][7], and all options are available. To deploy the Agent on EC2 nodes, use the [DaemonSet setup for the Datadog Agent][8].
+If you don't specify through [AWS Fargate Profile][5] that your pods should run on fargate, your pods can use classical EC2 machines. If it's the case see the [Datadog-Amazon EKS integration setup][6] in order to collect data from them. This works by running the Agent as an EC2-type workload. The Agent setup is the same as that of the [Kubernetes Agent setup][7], and all options are available. To deploy the Agent on EC2 nodes, use the [DaemonSet setup for the Datadog Agent][8].
 
 ### Installation
 
@@ -197,7 +197,7 @@ spec:
 **Notes**:
 
 - Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][14].
-- Container metrics are not available in Fargate because the `cgroups` volume from the host can't be mounted into the Agent. The [Live Containers][17] view will report 0 for CPU and Memory.
+- Container metrics are not available in Fargate because the `cgroups` volume from the host can't be mounted into the Agent. The [Live Containers][17] view reports 0 for CPU and Memory.
 
 ### DogStatsD
 
@@ -254,11 +254,11 @@ spec:
 
 **Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][14].
 
-### Live Containers
+### Live containers
 
 Datadog Agent v6.19+ supports live containers in the EKS Fargate integration. Live containers appear on the [Containers][19] page.
 
-### Live Processes
+### Live processes
 
 Datadog Agent v6.19+ supports live processes in the EKS Fargate integration. Live processes appear on the [Processes][20] page. To enable live processes, [enable shareProcessNamespace in the pod spec][21].
 
@@ -268,7 +268,7 @@ Datadog Agent v6.19+ supports live processes in the EKS Fargate integration. Liv
 
 Monitor EKS Fargate logs by using [Fluent Bit][22] to route EKS logs to CloudWatch Logs and the [Datadog Forwarder][23] to route logs to Datadog.
 
-1. To configure Fluent Bit to send logs to CloudWatch, create a Kubernetes ConfigMap that specifies CloudWatch Logs as its output. The ConfigMap will specify the log group, region, prefix string, and whether to automatically create the log group.
+1. To configure Fluent Bit to send logs to CloudWatch, create a Kubernetes ConfigMap that specifies CloudWatch Logs as its output. The ConfigMap specifies the log group, region, prefix string, and whether to automatically create the log group.
 
    ```yaml
     kind: ConfigMap
