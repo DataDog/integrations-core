@@ -82,13 +82,9 @@ def traced_class(cls):
                     ):
                         setattr(cls, attr, tracing_method(getattr(cls, attr), tracer))
                 return cls
-        except ImportError:
-            def decorate(cls):
-                return cls
 
-    else:
+            return decorate(cls)
+        except Exception:
+            pass
 
-        def decorate(cls):
-            return cls
-
-    return decorate(cls)
+    return cls
