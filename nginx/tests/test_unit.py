@@ -9,7 +9,7 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nginx import Nginx
-from datadog_checks.nginx.metrics import COUNT_METRICS
+from datadog_checks.nginx.metrics import COUNT_METRICS, METRICS_SEND_AS_HISTORGRAM
 
 from .common import ALL_PLUS_METRICS, CHECK_NAME, FIXTURES_PATH, TAGS
 from .utils import mocked_perform_request
@@ -19,7 +19,6 @@ def _assert_all_metrics_and_metadata(aggregator):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     for metric in ALL_PLUS_METRICS:
         aggregator.assert_metric(metric, at_least=0)
-
     aggregator.assert_all_metrics_covered()
 
 
@@ -65,8 +64,8 @@ def test_plus_api_v2(check, instance, aggregator):
     check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
     check.check(instance)
 
-    _assert_num_metrics(aggregator, 1199)
     _assert_all_metrics_and_metadata(aggregator)
+    _assert_num_metrics(aggregator, 1199)
 
 
 def test_plus_api_no_stream(check, instance, aggregator):
