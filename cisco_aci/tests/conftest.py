@@ -12,6 +12,7 @@ INSTANCE = {'aci_url': 'http://localhost', 'username': 'admin', 'pwd': 'admin'}
 def dd_environment():
     yield deepcopy(INSTANCE)
 
+
 @pytest.fixture
 def instance():
     return deepcopy(INSTANCE)
