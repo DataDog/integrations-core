@@ -189,8 +189,8 @@ class Nginx(AgentCheck):
             except Exception as e:
                 self.log.error('Could not submit metric: %s: %s', repr(row), e)
 
-    def _get_enabled_apis(self):
-        available_endpoints = []
+    def _get_enabled_endpoints(self):
+        available_endpoints = set()
 
         base_url = "/".join([self.url, self.plus_api_version])
         http_url = "/".join([self.url, self.plus_api_version, "http"])
@@ -200,32 +200,40 @@ class Nginx(AgentCheck):
             self.log.debug("Querying base API url: %s", base_url)
             r = self._perform_request(base_url)
             r.raise_for_status()
-            available_endpoints = r.json()
-            http_avail = available_endpoints.pop("http")
-            stream_avail = available_endpoints.pop("stream")
+            available_endpoints = set(r.json())
+            http_avail = "http" in available_endpoints
+            stream_avail = "stream" in available_endpoints
 
             if http_avail is not None:
                 r = self._perform_request(http_url)
                 r.raise_for_status()
                 endpoints = r.json()
-                http_endpoints = ["http/" + url for url in endpoints]
-                available_endpoints = available_endpoints + http_endpoints
+                http_endpoints = {"http/" + url for url in endpoints}
+                available_endpoints = available_endpoints.union(http_endpoints)
 
-            if self.use_plus_api_stream:
-                if stream_avail is not None:
-                    r = self._perform_request(http_url)
-                    r.raise_for_status()
-                    endpoints = r.json()
-                    stream_endpoints = ["stream/" + url for url in endpoints]
-                    available_endpoints = available_endpoints + stream_endpoints
+            if self.use_plus_api_stream and stream_avail is not None:
+                r = self._perform_request(stream_url)
+                r.raise_for_status()
+                endpoints = set(r.json())
+                stream_endpoints = {"stream/" + url for url in endpoints}
+                available_endpoints = available_endpoints.union(stream_endpoints)
 
-            available_endpoints 
-
+            supported_endpoints = self.get_supported_endpoints(available_endpoints)
+            self.log.info("Available endpoints are %s", supported_endpoints)
+            return supported_endpoints
         except Exception as e:
+            self.log.warning(
+                "Could not determine available endpoints from the API, "
+                "falling back to monitor all endpoints supported in nginx version %s, %s",
+                self.plus_api_version,
+                str(e),
+            )
+            return self._get_all_plus_api_endpoints()
 
-
-    def _supported_endpoints(self):
-        return *PLUS_API_ENDPOINTS.values() + *PLUS_API_STREAM_ENDPOINTS.values
+    def _supported_endpoints(self, available_endpoints):
+        return {
+            endpoint: nest for endpoint, nest in self._get_all_plus_api_endpoints() if endpoint in available_endpoints
+        }
 
     def _get_data(self):
         r = self._perform_service_check(self.url)
