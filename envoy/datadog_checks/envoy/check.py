@@ -104,16 +104,15 @@ class EnvoyCheck(OpenMetricsBaseCheckV2):
 
     def configure_transformer_label_in_name(self, metric_pattern, new_name, label_name, metric_type):
         method = getattr(self, metric_type)
-        cached_patterns = defaultdict()
-        cached_patterns[metric_pattern] = re.compile(metric_pattern)
+        cached_patterns = defaultdict(lambda: re.compile(metric_pattern))
 
         def transform(metric, sample_data, runtime_data):
             for sample, tags, hostname in sample_data:
                 parsed_sample_name = sample.name
                 if sample.name.endswith("_total"):
                     parsed_sample_name = re.match("(.*)_total$", sample.name).groups()[0]
-                compiled_name = cached_patterns[metric_pattern]
-                label_value = re.match(compiled_name, parsed_sample_name).groups()[0]
+                cached_pattern = cached_patterns[metric_pattern]
+                label_value = re.match(cached_pattern, parsed_sample_name).groups()[0]
 
                 tags.append('{}:{}'.format(label_name, label_value))
                 method(new_name, sample.value, tags=tags, hostname=hostname)
