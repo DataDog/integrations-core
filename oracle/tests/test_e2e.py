@@ -53,6 +53,3 @@ def test_check(dd_agent_check):
     for service_check in SERVICE_CHECKS:
         aggregator.assert_service_check(service_check)
     aggregator.assert_all_metrics_covered()
-
-
-# TODO: Make e2e test for TCPS

@@ -3,6 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 
+import pytest
+
+from .conftest import tcps_instance
+
 try:
     from contextlib import ExitStack
 except ImportError:
@@ -16,14 +20,35 @@ from datadog_checks.oracle import Oracle, queries
 from .common import CHECK_NAME, mock_bad_executor
 
 
-# TODO: TCP and TCPS
-def test__get_connection_instant_client(check, dd_run_check, aggregator):
+@pytest.mark.parametrize("instance, expected_tags", [
+    # TCP
+    ({
+         'server': 'localhost:1521',
+         'username': 'system',
+         'password': 'oracle',
+         'service_name': 'xe',
+         'protocol': 'TCP',
+         'tags': ['optional:tag1'],
+     },
+     ['server:localhost:1521', 'optional:tag1']),
+    # TCPS
+    ({
+         'server': 'localhost:2484',
+         'username': 'system',
+         'password': 'oracle',
+         'service_name': 'xe',
+         'protocol': 'TCPS',
+         'tags': ['optional:tag1'],
+     },
+     ['server:localhost:2484', 'optional:tag1']),
+])
+def test__get_connection_instant_client(instance, dd_run_check, aggregator, expected_tags):
     """
     Test the _get_connection method using the instant client
     """
+    check = Oracle(CHECK_NAME, {}, [instance])
     check.use_oracle_client = True
     con = mock.MagicMock()
-    expected_tags = ['server:localhost:1521', 'optional:tag1']
     with mock.patch('datadog_checks.oracle.oracle.cx_Oracle') as cx:
         cx.connect.return_value = con
         dd_run_check(check)
@@ -33,14 +58,12 @@ def test__get_connection_instant_client(check, dd_run_check, aggregator):
         aggregator.assert_service_check("oracle.can_query", check.OK, count=1, tags=expected_tags)
 
 
-# TODO: TCP and TCPS
 def test__get_connection_instant_client_query_fail(check, dd_run_check, aggregator):
     """
     Test the _get_connection method using the oracle client and unsuccessfully query DB
     """
     check.use_oracle_client = True
     con = mock.MagicMock()
-    expected_tags = ['server:localhost:1521', 'optional:tag1']
 
     check._query_manager.executor = mock_bad_executor()
 
@@ -51,7 +74,6 @@ def test__get_connection_instant_client_query_fail(check, dd_run_check, aggregat
         aggregator.assert_service_check("oracle.can_query", check.CRITICAL, count=1, tags=expected_tags)
 
 
-# TODO: TCPS and TCP
 def test__get_connection_instant_client_server_incorrect_formatting(instance, dd_run_check, aggregator):
     """
     Test the _get_connection method using the instant client when the server is formatted incorrectly
@@ -68,14 +90,39 @@ def test__get_connection_instant_client_server_incorrect_formatting(instance, dd
         aggregator.assert_service_check("oracle.can_query", check.CRITICAL, count=1, tags=expected_tags)
 
 
-# TODO: TCPS and TCP
-def test__get_connection_jdbc(check, dd_run_check, aggregator):
+@pytest.mark.parametrize("instance, expected_tags, dsn", [
+    # TCP
+    ({
+         'server': 'localhost:1521',
+         'username': 'system',
+         'password': 'oracle',
+         'service_name': 'xe',
+         'protocol': 'TCP',
+         'tags': ['optional:tag1'],
+     },
+     ['server:localhost:1521', 'optional:tag1'],
+     "//localhost:1521/xe"
+    ),
+    # TCPS
+    ({
+         'server': 'localhost:2484',
+         'username': 'system',
+         'password': 'oracle',
+         'service_name': 'xe',
+         'protocol': 'TCPS',
+         'tags': ['optional:tag1'],
+     },
+     ['server:localhost:2484', 'optional:tag1'],
+     "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCPS)(HOST=localhost)(PORT=2484))(CONNECT_DATA=(SERVICE_NAME=xe)))"
+    ),
+])
+def test__get_connection_jdbc(instance, dd_run_check, aggregator, expected_tags, dsn):
     """
     Test the _get_connection method using the JDBC client
     """
+    check = Oracle(CHECK_NAME, {}, [instance])
     check.use_oracle_client = False
     con = mock.MagicMock()
-    expected_tags = ['server:localhost:1521', 'optional:tag1']
 
     cx = mock.MagicMock(DatabaseError=RuntimeError)
     cx.clientversion.side_effect = cx.DatabaseError()
@@ -97,13 +144,12 @@ def test__get_connection_jdbc(check, dd_run_check, aggregator):
         assert check._cached_connection == con
 
     jdb.connect.assert_called_with(
-        'oracle.jdbc.OracleDriver', 'jdbc:oracle:thin:@//localhost:1521/xe', ['system', 'oracle'], None
+        'oracle.jdbc.OracleDriver', "jdbc:oracle:thin:@" + dsn, ['system', 'oracle'], None
     )
     aggregator.assert_service_check("oracle.can_connect", check.OK, count=1, tags=expected_tags)
     aggregator.assert_service_check("oracle.can_query", check.OK, count=1, tags=expected_tags)
 
 
-# TODO: TCPS and TCP
 def test__get_connection_jdbc_query_fail(check, dd_run_check, aggregator):
     """
     Test the _get_connection method using the JDBC client and unsuccessfully query DB
@@ -137,7 +183,6 @@ def test__get_connection_jdbc_query_fail(check, dd_run_check, aggregator):
     aggregator.assert_service_check("oracle.can_query", check.CRITICAL, count=1, tags=expected_tags)
 
 
-# TODO: TCPS and TCP
 def test__get_connection_failure(check, dd_run_check, aggregator):
     """
     Test the right service check is sent upon _get_connection failures
