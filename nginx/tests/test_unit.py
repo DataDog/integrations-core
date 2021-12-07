@@ -352,6 +352,46 @@ def test_nest_payload(check, instance):
     assert result == expected
 
 
+def test_plus_api_v7_no_stream(check, instance, aggregator):
+    instance = deepcopy(instance)
+    instance['use_plus_api'] = True
+    instance['use_plus_api_stream'] = False
+    instance['plus_api_version'] = 7
+    check = check(instance)
+    check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
+    check.check(instance)
+
+    # Number of metrics should be low since stream is disabled
+    _assert_num_metrics(aggregator, 1020)
+    _assert_all_metrics_and_metadata(aggregator)
+
+    base_tags = ['bar:bar', 'foo:foo']
+
+    # test that stream metrics are not emitted
+    aggregator.assert_metric('nginx.stream.zone_sync.zone.records_total', count=0)
+    aggregator.assert_metric('nginx.stream.limit_conn.rejected', count=0)
+
+    # http server zones endpoint
+    code_tags = base_tags + ['code:200', 'server_zone:hg.nginx.org']
+    aggregator.assert_metric(
+        'nginx.server_zone.responses.code',
+        value=803845,
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=code_tags,
+        count=1,
+    )
+
+    # http upstreams endpoint
+    upstream_tags = base_tags + ['server:10.0.0.42:8084', 'upstream:demo-backend']
+    aggregator.assert_metric(
+        'nginx.upstream.peers.health_checks.unhealthy_count',
+        value=0,
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=upstream_tags,
+        count=1,
+    )
+
+
 @pytest.mark.parametrize(
     'test_case, extra_config, expected_http_kwargs',
     [
