@@ -67,9 +67,11 @@ def test_plus_api_v2(check, instance_plus_v7, aggregator):
     _assert_all_metrics_and_metadata(aggregator)
 
 
-def test_plus_api_no_stream(check, instance_plus_v7_no_stream, aggregator):
+@pytest.mark.parametrize('only_query_enabled_endpoints', [(True), (False)])
+def test_plus_api_no_stream(check, instance_plus_v7_no_stream, aggregator, only_query_enabled_endpoints):
     instance = deepcopy(instance_plus_v7_no_stream)
     instance['plus_api_version'] = 2
+    instance['only_query_enabled_endpoints'] = only_query_enabled_endpoints
 
     check = check(instance)
     check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
@@ -216,10 +218,13 @@ def test_plus_api_v6(check, instance_plus_v7, aggregator):
     )
 
 
-def test_plus_api_v7(check, instance_plus_v7, aggregator):
-    check = check(instance_plus_v7)
+@pytest.mark.parametrize('only_query_enabled_endpoints', [(True), (False)])
+def test_plus_api_v7(check, instance_plus_v7, aggregator, only_query_enabled_endpoints):
+    instance = deepcopy(instance_plus_v7)
+    instance['only_query_enabled_endpoints'] = only_query_enabled_endpoints
+    check = check(instance)
     check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
-    check.check(instance_plus_v7)
+    check.check(instance)
 
     # total number of metrics should be higher than v6
     # with codes data for http upstream, http server zones, and http location zone
