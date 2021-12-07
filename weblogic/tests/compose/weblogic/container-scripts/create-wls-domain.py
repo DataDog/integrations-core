@@ -75,7 +75,8 @@ set('Name', domain_name)
 setOption('DomainName', domain_name)
 create(domain_name, 'Log')
 cd('/Log/%s' % domain_name)
-set('FileName', '%s.log' % (domain_name))
+set('FileName', 'logs/%s.log' % (domain_name))
+set('DateFormatPattern', 'MMM d, y, h:mm:ss,SSS a z')
 
 # Configure the Administration Server
 # ===================================
@@ -92,10 +93,11 @@ set('PublicAddress', t3_public_address)
 # set('ListenAddress', '%s-%s' % (domain_uid, admin_server_name_svc))
 set('ListenPort', t3_channel_port)
 
-# cd('/Servers/%s' % admin_server_name)
-# create(admin_server_name, 'Log')
-# cd('/Servers/%s/Log/%s' % (admin_server_name, admin_server_name))
-# set('FileName', '%s.log' % (admin_server_name))
+cd('/Servers/%s' % admin_server_name)
+create(admin_server_name, 'Log')
+cd('/Servers/%s/Log/%s' % (admin_server_name, admin_server_name))
+set('FileName', 'logs/%s.log' % (admin_server_name))
+set('DateFormatPattern', 'MMM d, y, h:mm:ss,SSS a z')
 
 if ssl_enabled == 'true':
     print('Enabling SSL in the Admin server...')
@@ -148,9 +150,10 @@ if cluster_type == "CONFIGURED":
             set('ListenPort', managed_server_ssl_port)
             set('Enabled', 'True')
 
-#    create(name,'Log')
-#    cd('/Servers/%s/Log/%s' % (name, name))
-#    set('FileName', '%s.log' % (name))
+        create(name,'Log')
+        cd('/Servers/%s/Log/%s' % (name, name))
+        set('FileName', 'logs/%s.log' % (name))
+        set('DateFormatPattern', 'MMM d, y, h:mm:ss,SSS a z')
 
 else:
     print('Configuring Dynamic Cluster %s' % cluster_name)
