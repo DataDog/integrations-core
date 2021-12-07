@@ -12,7 +12,7 @@ from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common, tags
-from .common import MYSQL_REPLICATION, requires_static_version
+from .common import MYSQL_REPLICATION
 
 logger = logging.getLogger(__name__)
 
@@ -249,7 +249,6 @@ def instance_error():
     return {'host': common.HOST, 'user': 'unknown', 'pass': common.PASS, 'disable_generic_tags': 'true'}
 
 
-@requires_static_version
 @pytest.fixture(scope='session')
 def version_metadata():
     parts = MYSQL_VERSION.split('-')

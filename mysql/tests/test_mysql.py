@@ -13,7 +13,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mysql import MySql
 
 from . import common, tags, variables
-from .common import MYSQL_REPLICATION, MYSQL_VERSION_PARSED
+from .common import MYSQL_REPLICATION, MYSQL_VERSION_PARSED, requires_static_version
 
 
 @pytest.mark.integration
@@ -291,6 +291,7 @@ def _test_optional_metrics(aggregator, optional_metrics):
     assert before > after
 
 
+@requires_static_version
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_version_metadata(dd_run_check, instance_basic, datadog_agent, version_metadata):
