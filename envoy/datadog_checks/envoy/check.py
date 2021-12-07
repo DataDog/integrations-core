@@ -111,8 +111,7 @@ class EnvoyCheck(OpenMetricsBaseCheckV2):
                 parsed_sample_name = sample.name
                 if sample.name.endswith("_total"):
                     parsed_sample_name = re.match("(.*)_total$", sample.name).groups()[0]
-                cached_pattern = cached_patterns[metric_pattern]
-                label_value = re.match(cached_pattern, parsed_sample_name).groups()[0]
+                label_value = cached_patterns[metric_pattern].match(parsed_sample_name).groups()[0]
 
                 tags.append('{}:{}'.format(label_name, label_value))
                 method(new_name, sample.value, tags=tags, hostname=hostname)
