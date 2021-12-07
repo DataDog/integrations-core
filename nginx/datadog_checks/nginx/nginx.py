@@ -104,6 +104,7 @@ class Nginx(AgentCheck):
         self.url = self.instance.get('nginx_status_url')
         self.use_plus_api = self.instance.get("use_plus_api", False)
         self.use_plus_api_stream = self.instance.get("use_plus_api_stream", True)
+        self.only_query_enabled_endpoints = self.instance.get("only_query_enabled_endpoints", False)
         self.plus_api_version = str(self.instance.get("plus_api_version", 2))
         self.use_vts = self.instance.get('use_vts', False)
 
