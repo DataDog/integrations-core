@@ -116,7 +116,6 @@ def dd_environment():
         conditions=[
             CheckDockerLogs(COMPOSE_FILE, ['The database is ready for use'], wait=5, attempts=120),
             WaitFor(create_user),
-            # WaitFor(start_tcps),
         ],
         env_vars={'ORACLE_DATABASE_VERSION': ORACLE_DATABASE_VERSION},
         attempts=20,
@@ -125,49 +124,7 @@ def dd_environment():
         yield instance, e2e_metadata
 
 
-def start_tcps():
-    run_docker_command_as_root(
-        [
-            'cd',
-            '-y',
-            'install',
-            'sudo',
-        ]
-    )
-
-
 def create_user():
-
-    # TODO: remove after testing
-    run_docker_command_as_root(
-        [
-            'yum',
-            '-y',
-            'install',
-            'sudo',
-        ]
-    )
-
-    run_docker_command_as_root(
-        [
-            'sudo',
-            'yum',
-            '-y',
-            'install',
-            'nano',
-        ]
-    )
-
-    run_docker_command_as_root(
-        [
-            'sudo',
-            'yum',
-            '-y',
-            'install',
-            'java-1.8.0-openjdk-devel',
-        ]
-    )
-
     output = run_docker_command(
         [
             '/u01/app/oracle/product/12.2.0/dbhome_1/bin/sqlplus',
