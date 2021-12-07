@@ -141,8 +141,3 @@ def create_user():
 def run_docker_command(command):
     cmd = ['docker', 'exec', CONTAINER_NAME] + command
     return run_command(cmd, capture=True, check=True)
-
-
-def run_docker_command_as_root(command):
-    cmd = ['docker', 'exec', '-u', '0', CONTAINER_NAME] + command
-    return run_command(cmd, capture=True, check=True)
