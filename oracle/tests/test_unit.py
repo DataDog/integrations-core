@@ -5,8 +5,6 @@ import copy
 
 import pytest
 
-from .conftest import tcps_instance
-
 try:
     from contextlib import ExitStack
 except ImportError:
@@ -20,28 +18,35 @@ from datadog_checks.oracle import Oracle, queries
 from .common import CHECK_NAME, mock_bad_executor
 
 
-@pytest.mark.parametrize("instance, expected_tags", [
-    # TCP
-    ({
-         'server': 'localhost:1521',
-         'username': 'system',
-         'password': 'oracle',
-         'service_name': 'xe',
-         'protocol': 'TCP',
-         'tags': ['optional:tag1'],
-     },
-     ['server:localhost:1521', 'optional:tag1']),
-    # TCPS
-    ({
-         'server': 'localhost:2484',
-         'username': 'system',
-         'password': 'oracle',
-         'service_name': 'xe',
-         'protocol': 'TCPS',
-         'tags': ['optional:tag1'],
-     },
-     ['server:localhost:2484', 'optional:tag1']),
-])
+@pytest.mark.parametrize(
+    "instance, expected_tags",
+    [
+        # TCP
+        (
+            {
+                'server': 'localhost:1521',
+                'username': 'system',
+                'password': 'oracle',
+                'service_name': 'xe',
+                'protocol': 'TCP',
+                'tags': ['optional:tag1'],
+            },
+            ['server:localhost:1521', 'optional:tag1'],
+        ),
+        # TCPS
+        (
+            {
+                'server': 'localhost:2484',
+                'username': 'system',
+                'password': 'oracle',
+                'service_name': 'xe',
+                'protocol': 'TCPS',
+                'tags': ['optional:tag1'],
+            },
+            ['server:localhost:2484', 'optional:tag1'],
+        ),
+    ],
+)
 def test__get_connection_instant_client(instance, dd_run_check, aggregator, expected_tags):
     """
     Test the _get_connection method using the instant client
@@ -66,6 +71,7 @@ def test__get_connection_instant_client_query_fail(check, dd_run_check, aggregat
     con = mock.MagicMock()
 
     check._query_manager.executor = mock_bad_executor()
+    expected_tags = ['server:localhost:1521', 'optional:tag1']
 
     with mock.patch('datadog_checks.oracle.oracle.cx_Oracle') as cx:
         cx.connect.return_value = con
@@ -90,32 +96,37 @@ def test__get_connection_instant_client_server_incorrect_formatting(instance, dd
         aggregator.assert_service_check("oracle.can_query", check.CRITICAL, count=1, tags=expected_tags)
 
 
-@pytest.mark.parametrize("instance, expected_tags, dsn", [
-    # TCP
-    ({
-         'server': 'localhost:1521',
-         'username': 'system',
-         'password': 'oracle',
-         'service_name': 'xe',
-         'protocol': 'TCP',
-         'tags': ['optional:tag1'],
-     },
-     ['server:localhost:1521', 'optional:tag1'],
-     "//localhost:1521/xe"
-    ),
-    # TCPS
-    ({
-         'server': 'localhost:2484',
-         'username': 'system',
-         'password': 'oracle',
-         'service_name': 'xe',
-         'protocol': 'TCPS',
-         'tags': ['optional:tag1'],
-     },
-     ['server:localhost:2484', 'optional:tag1'],
-     "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCPS)(HOST=localhost)(PORT=2484))(CONNECT_DATA=(SERVICE_NAME=xe)))"
-    ),
-])
+@pytest.mark.parametrize(
+    "instance, expected_tags, dsn",
+    [
+        # TCP
+        (
+            {
+                'server': 'localhost:1521',
+                'username': 'system',
+                'password': 'oracle',
+                'service_name': 'xe',
+                'protocol': 'TCP',
+                'tags': ['optional:tag1'],
+            },
+            ['server:localhost:1521', 'optional:tag1'],
+            "//localhost:1521/xe",
+        ),
+        # TCPS
+        (
+            {
+                'server': 'localhost:2484',
+                'username': 'system',
+                'password': 'oracle',
+                'service_name': 'xe',
+                'protocol': 'TCPS',
+                'tags': ['optional:tag1'],
+            },
+            ['server:localhost:2484', 'optional:tag1'],
+            "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCPS)(HOST=localhost)(PORT=2484))(CONNECT_DATA=(SERVICE_NAME=xe)))",
+        ),
+    ],
+)
 def test__get_connection_jdbc(instance, dd_run_check, aggregator, expected_tags, dsn):
     """
     Test the _get_connection method using the JDBC client
@@ -143,9 +154,7 @@ def test__get_connection_jdbc(instance, dd_run_check, aggregator, expected_tags,
         dd_run_check(check)
         assert check._cached_connection == con
 
-    jdb.connect.assert_called_with(
-        'oracle.jdbc.OracleDriver', "jdbc:oracle:thin:@" + dsn, ['system', 'oracle'], None
-    )
+    jdb.connect.assert_called_with('oracle.jdbc.OracleDriver', "jdbc:oracle:thin:@" + dsn, ['system', 'oracle'], None)
     aggregator.assert_service_check("oracle.can_connect", check.OK, count=1, tags=expected_tags)
     aggregator.assert_service_check("oracle.can_query", check.OK, count=1, tags=expected_tags)
 
