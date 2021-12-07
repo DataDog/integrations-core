@@ -8,6 +8,8 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.silk import SilkCheck
 
+from .common import METRICS
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
@@ -15,7 +17,7 @@ def test_check(aggregator, instance, dd_run_check):
     check = SilkCheck('silk', {}, [instance])
     dd_run_check(check)
 
-    for metric in []:
+    for metric in METRICS:
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
