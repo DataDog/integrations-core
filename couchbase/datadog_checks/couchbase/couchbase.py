@@ -452,10 +452,11 @@ class Couchbase(AgentCheck):
         elif len(tag_arr) == 4:
             bucket, scope, collection, index_name = tag_arr
         else:
-            # Catch all incase the keyspace has either none or more than 3 separators(':')
+            # Catch all incase the keyspace has either none or 3 or more separators(':')
             # There is a documented example of partition-num being a possible keyspace:
             # https://docs.couchbase.com/server/current/rest-api/rest-index-stats.html#_get_index_stats
-            # But we shouldn't encouter this since we don't query the index api with the needed params
+            # But we shouldn't encounter this since we don't query the index api with the needed params
+            # (Version 1.19.0+ of the Couchbase check)
             formatted_tags = []
             self.log.debug("Unable to extract tags from keyspace: %s", keyspace)
             return formatted_tags
