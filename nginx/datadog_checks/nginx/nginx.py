@@ -207,16 +207,25 @@ class Nginx(AgentCheck):
             if http_avail is not None:
                 r = self._perform_request(http_url)
                 r.raise_for_status()
+                endpoints = r.json()
+                http_endpoints = ["http/" + url for url in endpoints]
+                available_endpoints = available_endpoints + http_endpoints
 
             if self.use_plus_api_stream:
                 if stream_avail is not None:
                     r = self._perform_request(http_url)
                     r.raise_for_status()
+                    endpoints = r.json()
+                    stream_endpoints = ["stream/" + url for url in endpoints]
+                    available_endpoints = available_endpoints + stream_endpoints
+
+            available_endpoints 
 
         except Exception as e:
 
 
-
+    def _supported_endpoints(self):
+        return *PLUS_API_ENDPOINTS.values() + *PLUS_API_STREAM_ENDPOINTS.values
 
     def _get_data(self):
         r = self._perform_service_check(self.url)
