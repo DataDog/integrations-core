@@ -31,6 +31,7 @@ ACTIVITY_METRICS = [
     'postgresql.transactions.idle_in_transaction',
     'postgresql.active_queries',
     'postgresql.waiting_queries',
+    'postgresql.active_waiting_queries',
 ]
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
