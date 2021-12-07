@@ -88,7 +88,6 @@ def mocked_perform_request(*args, **kwargs):
         response.json.return_value = json.loads(file_contents)
     elif re.match("^.*/[234567]/stream$", url):
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'v1', 'plus_api_http.json'))
-        response.json.return_value = json.loads(file_contents)
     else:
         response.json.return_value = ''
 

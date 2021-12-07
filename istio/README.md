@@ -34,8 +34,8 @@ To monitor the `istiod` deployment and `istio-proxy` in Istio `v1.5+`, use the f
     
     instances:
       - use_openmetrics: true  # Enables Openmetrics V2 version of the integration
-      - istiod_endpoint: http://istiod.istio-system:15014/metrics
-      - istio_mesh_endpoint: http://istio-proxy.istio-system:15090/stats/prometheus
+        istiod_endpoint: http://istiod.istio-system:15014/metrics
+        istio_mesh_endpoint: http://istio-proxy.istio-system:15090/stats/prometheus
         exclude_labels:
          - source_version
          - destination_version
@@ -69,7 +69,7 @@ In OpenMetrics V2, metrics are submitted more accurately by default and behave c
 
 OpenMetrics V2 addresses performance and quality issues in OpenMetrics V1. Updates include native metric types support, improved configuration, and custom metric types.
 
-Set the `use_openmetrics` configuration option to `false` to use the OpenMetrics V1 implementation. To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][20].
+Set the `use_openmetrics` configuration option to `false` to use the OpenMetrics V1 implementation. To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][21].
 
 
 ##### Disable sidecar injection for Datadog Agent pods
@@ -149,7 +149,7 @@ Note: you must upgrade to at minimum Agent `7.31.0` and Python 3. See the [Confi
 
 ### Using the generic Openmetrics Integration in an Istio deployment
 
-If Istio proxy sidecar injection is enabled, monitoring other Prometheus metrics via the [Openmetrics integration][21] with the same metrics endpoint as `istio_mesh_endpoint` can result in high custom metrics usage and duplicated metric collection.
+If Istio proxy sidecar injection is enabled, monitoring other Prometheus metrics via the [Openmetrics integration][20] with the same metrics endpoint as `istio_mesh_endpoint` can result in high custom metrics usage and duplicated metric collection.
 
 To ensure that your Openmetrics configuration does not redundantly collect metrics, either:
 

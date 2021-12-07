@@ -64,6 +64,11 @@ def create_slm():
     response.raise_for_status()
 
 
+def index_starts_with_dot():
+    create_dot_testindex = requests.put('{}/.testindex'.format(URL), auth=(USER, PASSWORD), verify=False)
+    create_dot_testindex.raise_for_status()
+
+
 @pytest.fixture(scope='session')
 def dd_environment(instance):
     image_name = os.environ.get('ELASTIC_IMAGE')
@@ -72,7 +77,11 @@ def dd_environment(instance):
 
     with docker_run(
         compose_file=compose_file,
-        conditions=[WaitFor(ping_elastic, attempts=100), WaitFor(create_slm, attempts=5)],
+        conditions=[
+            WaitFor(ping_elastic, attempts=100),
+            WaitFor(index_starts_with_dot, attempts=100),
+            WaitFor(create_slm, attempts=5),
+        ],
         attempts=2,
         attempts_wait=10,
     ):

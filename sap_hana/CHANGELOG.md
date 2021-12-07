@@ -1,5 +1,9 @@
 # CHANGELOG - SAP HANA
 
+## 1.10.0 / 2021-11-24
+
+* [Added] Add support for only_custom_queries. See [#10695](https://github.com/DataDog/integrations-core/pull/10695).
+
 ## 1.9.0 / 2021-11-13
 
 * [Added] Support the `hdbcli` client library. See [#10595](https://github.com/DataDog/integrations-core/pull/10595).

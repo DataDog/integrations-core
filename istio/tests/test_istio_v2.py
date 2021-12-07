@@ -103,3 +103,18 @@ def test_version_metadata(datadog_agent, dd_run_check, mock_http_response):
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
+
+
+@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
+def test_istio_agent(aggregator, dd_run_check, mock_http_response):
+    """
+    Test the istiod deployment endpoint for V2 implementation
+    """
+    mock_http_response(file_path=get_fixture_path('1.5', 'istio-merged.txt'))
+    check = Istio('istio', {}, [common.MOCK_V2_MESH_INSTANCE])
+    dd_run_check(check)
+
+    for metric in common.ISTIO_AGENT_METRICS:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
