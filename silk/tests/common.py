@@ -49,4 +49,5 @@ METRICS = [
     'silk.volume.size',
     'silk.volume.snapshots_logical_capacity',
     'silk.volume.stream_average_compressed_bytes',
+    'silk.volume.compressed_ratio.avg',
 ]
