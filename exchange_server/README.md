@@ -40,9 +40,7 @@ The Exchange check is included in the [Datadog Agent][1] package, so you don't n
        path: "C:\\Program Files\\Microsoft\\Exchange Server\\V15\\TransportRoles\\Logs\\Hub\\Connectivity\\*"
        source: exchange-server
    ```
-    *Note*: Currently the only logs supported are CommonDiagnosticsLog, ThrottlingService, and Connectivity logs
-    due to Exchange Server outputting many different types of logs.
-    Please send a request for other logs to support.
+    **Note**: The only logs supported are CommonDiagnosticsLog, ThrottlingService, and Connectivity logs due to Exchange Server outputting many different types of logs. Contact [Datadog support][7] to request other logs formats.
     
    Change the `path` parameter value and configure it for your environment.
    See the [sample exchange_server.d/conf.yaml][4] for all available configuration options.
@@ -74,3 +72,4 @@ The Exchange server check does not include any service checks.
 [4]: https://github.com/DataDog/integrations-core/blob/master/exchange_server/datadog_checks/exchange_server/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/exchange_server/metadata.csv
+[7]: https://docs.datadoghq.com/help/

@@ -4,9 +4,9 @@
 
 Integration that allows to:
 
-- Visualize and monitor metrics collected via Gitlab through Prometheus
+- Visualize and monitor metrics collected with Gitlab through Prometheus
 
-See the [Gitlab documentation][1] for more information about Gitlab and its integration with Prometheus.
+See [Monitoring GitLab with Prometheus][1] for more information.
 
 ## Setup
 
@@ -27,7 +27,7 @@ To configure this check for an Agent running on a host:
 
 1. Edit the `gitlab.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to point to the Gitlab's metrics [endpoint][4]. See the [sample gitlab.d/conf.yaml][5] for all available configuration options.
 
-2. In the Gitlab settings page, ensure that the option `Enable Prometheus Metrics` is enabled. You will need to have administrator access. For more information on how to enable metric collection, see the [Gitlab documentation][6].
+2. In the Gitlab settings page, ensure that the option `Enable Prometheus Metrics` is enabled (administrator access is required). For more information on how to enable metric collection, see [GitLab Prometheus metrics][6].
 
 3. Allow access to monitoring endpoints by updating your `/etc/gitlab/gitlab.rb` to include the following line:
 
@@ -38,7 +38,7 @@ To configure this check for an Agent running on a host:
 
 4. [Restart the Agent][7].
 
-**Note**: The metrics in [gitlab/metrics.py][8] are collected by default. The `allowed_metrics` configuration option in the `init_config` collects specific legacy metrics. Some metrics may not be collected depending on your Gitlab instance version and configuration. See [Gitlab's documentation][6] for further information about its metric collection.
+**Note**: The metrics in [gitlab/metrics.py][8] are collected by default. The `allowed_metrics` configuration option in the `init_config` collects specific legacy metrics. Some metrics may not be collected depending on your Gitlab instance version and configuration. See [GitLab Prometheus metrics][6] for more information about metric collection.
 
 
 ##### Log collection
@@ -98,7 +98,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 {{< /site-region >}}
 partial -->
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][10].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][10].
 
 | Parameter      | Value                                       |
 | -------------- | ------------------------------------------- |

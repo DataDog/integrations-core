@@ -116,7 +116,7 @@ Need help? Contact [Datadog support][11].
 
 ## Further Reading
 
-To get a better idea of how (or why) to integrate Etcd with Datadog, check out our [blog post][12] about it.
+- [Monitor etcd performance to ensure consistent Docker configuration][12]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/etcd/images/etcd_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent

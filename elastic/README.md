@@ -1,6 +1,6 @@
 # Elasticsearch Integration
 
-![Elasitc search dashboard][1]
+![Elastic search dashboard][1]
 
 ## Overview
 
@@ -57,7 +57,7 @@ To configure this check for an Agent running on a host:
         ```
 
       - To use the Agent's Elasticsearch integration for the AWS Elasticsearch services, set the `url` parameter to point to your AWS Elasticsearch stats URL.
-      - All requests to the Amazon ES configuration API must be signed. See the [AWS documentation][6] for details.
+      - All requests to the Amazon ES configuration API must be signed. See the [Making and signing OpenSearch Service requests][6] for details.
       - The `aws` auth type relies on [boto3][7] to automatically gather AWS credentials from `.aws/credentials`. Use `auth_type: basic` in the `conf.yaml` and define the credentials with `username: <USERNAME>` and `password: <PASSWORD>`.
 
 2. [Restart the Agent][8].
@@ -171,7 +171,7 @@ LABEL "com.datadoghq.ad.instances"='[{"url": "http://%%host%%:9200"}]'
 partial -->
 
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][13].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker Log Collection][13].
 
 Then, set [Log Integrations][14] as Docker labels:
 
@@ -235,7 +235,7 @@ spec:
 partial -->
 
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][19].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes Log Collection][19].
 
 Then, set [Log Integrations][14] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][20].
 
@@ -301,7 +301,7 @@ Set [Autodiscovery Integrations Templates][12] as Docker labels on your applicat
 partial -->
 
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][21].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [ECS Log Collection][21].
 
 Then, set [Log Integrations][14] as Docker labels:
 
@@ -370,14 +370,15 @@ See [service_checks.json][26] for a list of service checks provided by this inte
 
 ## Further Reading
 
-To get a better idea of how (or why) to integrate your Elasticsearch cluster with Datadog, check out our [series of blog posts][28] about it.
+- [How to monitor Elasticsearch performance][28]
+
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/elastic/images/elasticsearch-dash.png
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/elastic/datadog_checks/elastic/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags?tab=noncontainerizedenvironments#file-location
-[6]: https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-ac.html#es-managedomains-signing-service-requests
+[6]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/ac.html#managedomains-signing-service-requests
 [7]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [9]: https://docs.datadoghq.com/tracing/send_traces/
