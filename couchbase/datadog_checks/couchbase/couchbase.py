@@ -55,6 +55,7 @@ class Couchbase(AgentCheck):
         self._tags.append('instance:{}'.format(self._server))
 
         self._previous_status = None
+        self._version = None
 
     def _create_metrics(self, data):
         # Get storage metrics
@@ -205,9 +206,9 @@ class Couchbase(AgentCheck):
                 build_separator = version.rindex('-')
                 version = list(version)
                 version[build_separator] = '+'
-                version = ''.join(version)
+                self._version = ''.join(version)
 
-            self.set_metadata('version', version)
+            self.set_metadata('version', self._version)
 
     def get_data(self):
         # The dictionary to be returned.
@@ -418,6 +419,10 @@ class Couchbase(AgentCheck):
             msg = "Error accessing the Index Statistics endpoint: %s: %s" % (url, str(e))
             self.log.warning(str(e))
             self.service_check(INDEX_STATS_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, self._tags, msg)
+            if int(self._version.split(".")[0]) >= 7:
+                self.log.warning(
+                    "Index Stats Metric only available in Couchbase version 7+. Detected version: %", self._version
+                )
             return
 
         self.service_check(INDEX_STATS_SERVICE_CHECK_NAME, AgentCheck.OK, self._tags)
@@ -450,7 +455,7 @@ class Couchbase(AgentCheck):
             # Catch all incase the keyspace has either none or more than 3 separators(':')
             # There is a documented example of partition-num being a possible keyspace:
             # https://docs.couchbase.com/server/current/rest-api/rest-index-stats.html#_get_index_stats
-            # But we shouldn't encouter that with the current version of the check
+            # But we shouldn't encouter this since we don't query the index api with the needed params
             formatted_tags = []
             self.log.debug("Unable to extract tags from keyspace: %s", keyspace)
             return formatted_tags
