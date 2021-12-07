@@ -209,14 +209,14 @@ class Nginx(AgentCheck):
             http_avail = "http" in available_endpoints
             stream_avail = "stream" in available_endpoints
 
-            if http_avail is not None:
+            if http_avail:
                 r = self._perform_request(http_url)
                 r.raise_for_status()
                 endpoints = r.json()
                 http_endpoints = {"http/" + url for url in endpoints}
                 available_endpoints = available_endpoints.union(http_endpoints)
 
-            if self.use_plus_api_stream and stream_avail is not None:
+            if self.use_plus_api_stream and stream_avail:
                 r = self._perform_request(stream_url)
                 r.raise_for_status()
                 endpoints = set(r.json())
@@ -307,7 +307,10 @@ class Nginx(AgentCheck):
             r = self._perform_request(url)
             payload = self._nest_payload(nest, r.json())
         except Exception as e:
-            self.log.exception("Error querying %s metrics at %s: %s", endpoint, url, e)
+            if self.only_query_enabled_endpoints and endpoint in PLUS_API_STREAM_ENDPOINTS.values():
+                self.log.warning("Stream may not be initialized. Error querying %s metrics at %s: %s", endpoint, url, e)
+            else:
+                self.log.exception("Error querying %s metrics at %s: %s", endpoint, url, e)
 
         return payload
 

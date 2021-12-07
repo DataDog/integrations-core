@@ -57,7 +57,8 @@ files:
       value:
         type: boolean
         example: true
-        display_default: true
+        display_default: false
+      enabled: true
     - name: use_vts
       description: |
         Set this option to true if you are using the nginx vhost_traffic_status module.

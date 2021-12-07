@@ -105,7 +105,7 @@ def instance_ntlm_domain(field, value):
 
 
 def instance_only_query_enabled_endpoints(field, value):
-    return True
+    return False
 
 
 def instance_password(field, value):

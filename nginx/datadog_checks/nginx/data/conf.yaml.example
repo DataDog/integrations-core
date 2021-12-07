@@ -82,11 +82,11 @@ instances:
     #
     # plus_api_version: <PLUS_API_VERSION>
 
-    ## @param only_query_enabled_endpoints - boolean - optional - default: true
+    ## @param only_query_enabled_endpoints - boolean - optional - default: false
     ## Set this option if you would like the check to determine which API endpoints
     ## to query based on your NGINX Plus configuration.
     #
-    # only_query_enabled_endpoints: true
+    only_query_enabled_endpoints: true
 
     ## @param use_vts - boolean - optional - default: false
     ## Set this option to true if you are using the nginx vhost_traffic_status module.
