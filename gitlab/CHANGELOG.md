@@ -1,6 +1,11 @@
 # CHANGELOG - gitlab
 
-## 4.6.1 / 2021-10-05
+## 4.7.0 / 2021-11-13
+
+* [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
+* [Added] Document new use_process_start_time option. See [#10601](https://github.com/DataDog/integrations-core/pull/10601).
+
+## 4.6.1 / 2021-10-05 / Agent 7.32.0
 
 * [Fixed] Fix config example. See [#10338](https://github.com/DataDog/integrations-core/pull/10338).
 

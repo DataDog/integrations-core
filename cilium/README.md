@@ -55,6 +55,12 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 Cilium contains two types of logs: `cilium-agent` and `cilium-operator`.
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [DaemonSet configuration][4]:
@@ -70,7 +76,7 @@ Cilium contains two types of logs: `cilium-agent` and `cilium-operator`.
      # (...)
    ```
 
-2. Mount the Docker socket to the Datadog Agent as done in [this manifest][6] or mount the `/var/log/pods` directory if you are not using Docker.
+2. Mount the Docker socket to the Datadog Agent through the manifest or mount the `/var/log/pods` directory if you are not using Docker. For example manifests see the [Kubernetes Installation instructions for DaemonSet][6].
 
 3. [Restart the Agent][5].
 
@@ -91,7 +97,13 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 ##### Log collection
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][7].
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][7].
 
 | Parameter      | Value                                     |
 |----------------|-------------------------------------------|
@@ -112,7 +124,7 @@ See [metadata.csv][9] for a list of all metrics provided by this integration.
 
 ### Events
 
-Cilium does not include any events.
+The Cilium integration does not include any events.
 
 ### Service Checks
 
@@ -124,10 +136,10 @@ Need help? Contact [Datadog support][11].
 
 [1]: https://cilium.io
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://docs.datadoghq.com/agent/
+[3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://github.com/DataDog/integrations-core/blob/master/cilium/datadog_checks/cilium/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#create-manifest
+[6]: https://docs.datadoghq.com/agent/kubernetes/?tab=daemonset#installation
 [7]: https://docs.datadoghq.com/agent/kubernetes/log/
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/cilium/metadata.csv

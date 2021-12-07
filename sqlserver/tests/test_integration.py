@@ -314,3 +314,47 @@ def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_
 
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
     aggregator.assert_all_metrics_covered()
+
+
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "instance_host,split_host,split_port",
+    [
+        ("localhost,1433,some-typo", "localhost", "1433"),
+        ("localhost, 1433,some-typo", "localhost", "1433"),
+        ("localhost,1433", "localhost", "1433"),
+        ("localhost", "localhost", None),
+    ],
+)
+def test_split_sqlserver_host(instance_docker, instance_host, split_host, split_port):
+    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    s_host, s_port = sqlserver_check.split_sqlserver_host_port(instance_host)
+    assert (s_host, s_port) == (split_host, split_port)
+
+
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize("dbm_enabled,", [True, False])
+@pytest.mark.parametrize(
+    "instance_host,resolved_hostname",
+    [
+        ("localhost,1433,some-typo", "stubbed.hostname"),
+        ("localhost,1433", "stubbed.hostname"),
+        ("localhost", "stubbed.hostname"),
+        ("datadoghq.com,1433", "datadoghq.com"),
+        ("datadoghq.com", "datadoghq.com"),
+        ("8.8.8.8,1433", "8.8.8.8"),
+        ("8.8.8.8", "8.8.8.8"),
+    ],
+)
+def test_resolved_hostname(instance_docker, dbm_enabled, instance_host, resolved_hostname):
+    instance_docker['dbm'] = dbm_enabled
+    instance_docker['host'] = instance_host
+    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    if dbm_enabled:
+        assert sqlserver_check.resolved_hostname == resolved_hostname
+    else:
+        assert sqlserver_check.resolved_hostname == "stubbed.hostname"

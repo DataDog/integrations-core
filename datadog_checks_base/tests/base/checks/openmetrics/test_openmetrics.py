@@ -357,10 +357,49 @@ def test_submit_gauge_with_labels_mapper(aggregator, mocked_prometheus_check, mo
     )
 
 
-def test_submit_gauge_with_exclude_labels(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
+@pytest.mark.parametrize(
+    'excluded_labels, included_labels, expected',
+    (
+        (
+            ['my_2nd_label', 'whatever_else', 'env'],
+            [],
+            ['env:dev', 'app:my_pretty_app', 'transformed_1st_label:my_1st_label_value'],
+        ),
+        (
+            [],
+            ['my_2nd_label', 'whatever_else', 'env'],
+            ['env:dev', 'app:my_pretty_app', 'my_2nd_label:my_2nd_label_value'],
+        ),
+        (
+            ['my_2nd_label', 'whatever_else', 'env'],
+            ['my_1st_label', 'whatever_else', 'env'],
+            ['env:dev', 'app:my_pretty_app', 'transformed_1st_label:my_1st_label_value'],
+        ),
+        (
+            ['my_2nd_label', 'whatever_else', 'env'],
+            ['my_1st_label', 'my_2nd_label', 'whatever_else', 'env'],
+            ['env:dev', 'app:my_pretty_app', 'transformed_1st_label:my_1st_label_value'],
+        ),
+    ),
+    ids=(
+        'Test excluded labels.',
+        'Test included labels.',
+        'Test both excluded and included labels, no override.',
+        'Test both excluded and included labels with override.',
+    ),
+)
+def test_submit_gauge_with_exclude_include_labels(
+    aggregator,
+    mocked_prometheus_check,
+    mocked_prometheus_scraper_config,
+    excluded_labels,
+    included_labels,
+    expected,
+):
     """
-    Submitting metrics when filtering with exclude_labels should end up with
-    a filtered tags list
+    Submitting metrics when filtering with exclude_labels and/or include_labels should
+    end up with a filtered tags list, where exclude_labels are excluded and
+    include_labels are included. Labels that are present in both exclude_labels and include_labels are excluded.
     """
     ref_gauge = GaugeMetricFamily(
         'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'my_2nd_label']
@@ -369,22 +408,19 @@ def test_submit_gauge_with_exclude_labels(aggregator, mocked_prometheus_check, m
 
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['labels_mapper'] = {
-        'my_1st_label': 'transformed_1st',
+        'my_1st_label': 'transformed_1st_label',
         'non_existent': 'should_not_matter',
         'env': 'dont_touch_custom_tags',
     }
     mocked_prometheus_scraper_config['custom_tags'] = ['env:dev', 'app:my_pretty_app']
-    mocked_prometheus_scraper_config['exclude_labels'] = [
-        'my_2nd_label',
-        'whatever_else',
-        'env',
-    ]  # custom tags are not filtered out
+    mocked_prometheus_scraper_config['exclude_labels'] = excluded_labels
+    mocked_prometheus_scraper_config['include_labels'] = included_labels
     metric = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
     check.submit_openmetric(metric, ref_gauge, mocked_prometheus_scraper_config)
     aggregator.assert_metric(
         'prometheus.process.vm.bytes',
         54927360.0,
-        tags=['env:dev', 'app:my_pretty_app', 'transformed_1st:my_1st_label_value'],
+        tags=expected,
         count=1,
     )
 
@@ -2814,3 +2850,141 @@ def test_ignore_tags_regex(aggregator, mocked_prometheus_check, ref_gauge):
     check.process_metric(ref_gauge, config)
 
     aggregator.assert_metric('prometheus.process.vm.bytes', tags=wanted_tags, count=1)
+
+
+test_use_process_start_time_data = """\
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 9.339544592e+09
+# HELP skydns_skydns_dns_request_duration_seconds Histogram of the time (in seconds) each request took to resolve.
+# TYPE skydns_skydns_dns_request_duration_seconds histogram
+skydns_skydns_dns_request_duration_seconds_bucket{system="auth",le="10"} 1.359194e+06
+skydns_skydns_dns_request_duration_seconds_bucket{system="auth",le="+Inf"} 1.359194e+06
+skydns_skydns_dns_request_duration_seconds_sum{system="auth"} 44.31446715499896
+skydns_skydns_dns_request_duration_seconds_count{system="auth"} 1.359194e+06
+# HELP go_gc_duration_seconds A summary of the GC invocation durations.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 0.00036825700000000004
+go_gc_duration_seconds{quantile="0.25"} 0.00041007200000000004
+go_gc_duration_seconds{quantile="0.5"} 0.00043824300000000005
+go_gc_duration_seconds{quantile="0.75"} 0.00048369000000000005
+go_gc_duration_seconds{quantile="1"} 0.0025860830000000003
+go_gc_duration_seconds_sum 1.154763349
+go_gc_duration_seconds_count 2351
+"""
+
+
+def _make_test_use_process_start_time_data(process_start_time):
+    test_data = test_use_process_start_time_data
+    if process_start_time:
+        if not test_data.endswith('\n'):
+            test_data += '\n'
+        test_data += "# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.\n"
+        test_data += "# TYPE process_start_time_seconds gauge\n"
+        for seq, pst in enumerate(process_start_time):
+            label = '{pid="%d"}' % (seq,) if len(process_start_time) > 1 else ""
+            test_data += "process_start_time_seconds%s %f\n" % (
+                label,
+                pst,
+            )
+    return test_data
+
+
+@pytest.mark.parametrize(
+    'use_process_start_time, send_distribution_buckets, expect_first_flush, agent_start_time, process_start_time',
+    [
+        (False, False, False, None, None),
+        (True, False, True, 10, [20]),
+        (True, False, False, 20, [10]),
+        (True, False, False, 10, []),
+        (True, False, True, 10, [20, 30, 40]),
+        (True, False, False, 20, [10, 30, 40]),
+        (False, True, False, None, None),
+        (True, True, True, 10, [20]),
+        (True, True, False, 20, [10]),
+        (True, True, False, 10, []),
+        (True, True, True, 10, [20, 30, 40]),
+        (True, True, False, 20, [10, 30, 40]),
+    ],
+    ids=[
+        "disabled",
+        "enabled, agent is older",
+        "enabled, agent is newer",
+        "enabled, metric n/a",
+        "enabled, many metrics, all newer",
+        "enabled, many metrics, some newer",
+        "with buckets, disabled",
+        "with buckets, enabled, agent is older",
+        "with buckets, enabled, agent is newer",
+        "with buckets, enabled, metric n/a",
+        "with buckets, enabled, many metrics, all newer",
+        "with buckets, enabled, many metrics, some newer",
+    ],
+)
+def test_use_process_start_time(
+    aggregator,
+    datadog_agent,
+    mocked_openmetrics_check_factory,
+    expect_first_flush,
+    send_distribution_buckets,
+    use_process_start_time,
+    process_start_time,
+    agent_start_time,
+):
+    """
+    Test that first sample is flushed or not depending on metric type, agent and server process start times.
+    """
+
+    instance = {
+        "prometheus_url": "xx",
+        "metrics": ["*"],
+        "namespace": "",
+        "send_distribution_counts_as_monotonic": True,
+        "send_distribution_buckets": send_distribution_buckets,
+        "use_process_start_time": use_process_start_time,
+    }
+
+    datadog_agent.set_process_start_time(agent_start_time)
+
+    check = mocked_openmetrics_check_factory(instance)
+    test_data = _make_test_use_process_start_time_data(process_start_time)
+    check.poll = mock.MagicMock(return_value=MockResponse(test_data, headers={'Content-Type': text_content_type}))
+
+    for _ in range(0, 5):
+        aggregator.reset()
+        check.check(instance)
+
+        aggregator.assert_metric(
+            'go_memstats_alloc_bytes_total',
+            metric_type=aggregator.MONOTONIC_COUNT,
+            count=1,
+            flush_first_value=expect_first_flush,
+        )
+        aggregator.assert_metric(
+            'go_gc_duration_seconds.count',
+            metric_type=aggregator.MONOTONIC_COUNT,
+            count=1,
+            flush_first_value=expect_first_flush,
+        )
+
+        if send_distribution_buckets:
+            aggregator.assert_histogram_bucket(
+                'skydns_skydns_dns_request_duration_seconds',
+                None,
+                None,
+                None,
+                True,
+                None,
+                None,
+                count=2,
+                flush_first_value=expect_first_flush,
+            )
+        else:
+            aggregator.assert_metric(
+                'skydns_skydns_dns_request_duration_seconds.count',
+                metric_type=aggregator.MONOTONIC_COUNT,
+                count=2,
+                flush_first_value=expect_first_flush,
+            )
+
+        expect_first_flush = True

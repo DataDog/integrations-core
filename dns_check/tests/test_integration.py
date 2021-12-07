@@ -11,7 +11,7 @@ pytestmark = pytest.mark.integration
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, check):
+def test_check(aggregator, check, dd_run_check):
     check.instance = deepcopy(common.INSTANCE_INTEGRATION)
-    check.check({})
+    dd_run_check(check)
     common._test_check(aggregator)

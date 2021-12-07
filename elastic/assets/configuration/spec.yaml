@@ -35,6 +35,14 @@ files:
       value:
         type: boolean
         example: false
+    - name: detailed_index_stats
+      description: |
+        If you want to obtain index-specific stats, use this flag with `cluster_stats` and `pshard_stats` set to true.
+        Without this flag you only get stats from `_all`.
+        Do not use it if you are pointing to localhost.
+      value:
+        type: boolean
+        example: false
     - name: index_stats
       description: Set "index_stats" to true to collect metrics for individual indices.
       value:

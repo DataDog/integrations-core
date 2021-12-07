@@ -20,22 +20,22 @@ In addition to metrics, the Datadog Agent also sends service checks related to A
 All steps below are needed for the Airflow integration to work properly. Before you begin, [install the Datadog Agent][3] version `>=6.17` or `>=7.17`, which includes the StatsD/DogStatsD mapping feature.
 
 ### Configuration
-There are two forms of the Airflow integration. There is the Datadog Agent integration which will make requests to a provided endpoint for Airflow to report whether it can connect and is healthy. Then there is the Airflow StatsD portion where Airflow can be configured to send metrics to the Datadog Agent, which can remap the Airflow notation to a Datadog notation.
+There are two forms of the Airflow integration. There is the Datadog Agent integration which makes requests to a provided endpoint for Airflow to report whether it can connect and is healthy. Then there is the Airflow StatsD portion where Airflow can be configured to send metrics to the Datadog Agent, which can remap the Airflow notation to a Datadog notation.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
 #### Host
 
-##### Configure Datadog Agent Airflow Integration
+##### Configure Datadog Agent Airflow integration
 
 Configure the Airflow check included in the [Datadog Agent][4] package to collect health metrics and service checks. This can be done by editing the `url` within the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory, to start collecting your Airflow service checks. See the [sample airflow.d/conf.yaml][5] for all available configuration options.
 
 ##### Connect Airflow to DogStatsD
 
 Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflow `statsd` feature to collect metrics. For more information about the metrics reported by the Airflow version used and the additional configuration options, see the Airflow documentation below:
-- [Airflow Metrics Documentation][6]
-- [Airflow Metrics Configuration Documentation][7]
+- [Airflow Metrics][6]
+- [Airflow Metrics Configuration][7]
 
 **Note**: Presence or absence of StatsD metrics reported by Airflow might vary depending on the Airflow Executor used. For example: `airflow.ti_failures/successes, airflow.operator_failures/successes, airflow.dag.task.duration` are [not reported for `KubernetesExecutor`][8]. 
 
@@ -197,6 +197,12 @@ Use the default configuration in your `airflow.d/conf.yaml` file to activate you
 
 ##### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
@@ -243,7 +249,7 @@ _Available for Agent versions >6.0_
               pattern: \[\d{4}\-\d{2}\-\d{2}
       ```
 
-      Caveat: By default Airflow uses this log file template for tasks: `log_filename_template = {{ ti.dag_id }}/{{ ti.task_id }}/{{ ts }}/{{ try_number }}.log`. The number of log files will grow quickly if not cleaned regularly. This pattern is used by Airflow UI to display logs individually for each executed task.
+      Caveat: By default Airflow uses this log file template for tasks: `log_filename_template = {{ ti.dag_id }}/{{ ti.task_id }}/{{ ts }}/{{ try_number }}.log`. The number of log files grow quickly if not cleaned regularly. This pattern is used by Airflow UI to display logs individually for each executed task.
 
       If you do not view logs in Airflow UI, Datadog recommends this configuration in `airflow.cfg`: `log_filename_template = dag_tasks.log`. Then log rotate this file and use this configuration:
 
@@ -265,7 +271,7 @@ _Available for Agent versions >6.0_
 
 #### Containerized
 
-##### Configure Datadog Agent Airflow Integration
+##### Configure Datadog Agent Airflow integration
 
 For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below.
 
@@ -278,8 +284,8 @@ For containerized environments, see the [Autodiscovery Integration Templates][8]
 ##### Connect Airflow to DogStatsD
 
 Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflow `statsd` feature to collect metrics. For more information about the metrics reported by the Airflow version used and the additional configuration options, see the Airflow documentation below:
-- [Airflow Metrics Documentation][6]
-- [Airflow Metrics Configuration Documentation][7]
+- [Airflow Metrics][6]
+- [Airflow Metrics Configuration][7]
 
 **Note**: Presence or absence of StatsD metrics reported by Airflow might vary depending on the Airflow Executor used. For example: `airflow.ti_failures/successes, airflow.operator_failures/successes, airflow.dag.task.duration` are [not reported for `KubernetesExecutor`][8]. 
 
@@ -299,7 +305,7 @@ The Airflow StatsD configuration can be enabled with the following environment v
         fieldRef:
           fieldPath: status.hostIP
   ```
-The environment variable for the host endpoint `AIRFLOW__SCHEDULER__STATSD_HOST` is supplied with the node's host IP address to route the StatsD data to the Datadog Agent pod on the same node as the Airflow pod. This setup also requires the Agent to have a `hostPort` open for this port `8125` and accepting non-local StatsD traffic. For more information, see [DogStatsD on Kubernetes Setup here][12].
+The environment variable for the host endpoint `AIRFLOW__SCHEDULER__STATSD_HOST` is supplied with the node's host IP address to route the StatsD data to the Datadog Agent pod on the same node as the Airflow pod. This setup also requires the Agent to have a `hostPort` open for this port `8125` and accepting non-local StatsD traffic. For more information, see [DogStatsD on Kubernetes Setup][12].
 
 This should direct the StatsD traffic from the Airflow container to a Datadog Agent ready to accept the incoming data. The last portion is to update the Datadog Agent with the corresponding `dogstatsd_mapper_profiles` . This can be done by copying the `dogstatsd_mapper_profiles` provided in the [Host installation][13] into your `datadog.yaml` file. Or by deploying your Datadog Agent with the equivalent JSON configuration in the environment variable `DD_DOGSTATSD_MAPPER_PROFILES`. With respect to Kubernetes the equivalent environment variable notation is:
   ```yaml
@@ -313,9 +319,15 @@ See the Datadog `integrations-core` repo for an [example setup][14].
 
 ##### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][15].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][15].
 
 | Parameter      | Value                                                 |
 |----------------|-------------------------------------------------------|

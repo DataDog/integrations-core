@@ -24,6 +24,10 @@ def instance_min_collection_interval(field, value):
     return 15
 
 
+def instance_mysql_db(field, value):
+    return 'cacti'
+
+
 def instance_mysql_password(field, value):
     return get_default_field_value(field, value)
 

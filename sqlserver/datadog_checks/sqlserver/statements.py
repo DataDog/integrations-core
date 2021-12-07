@@ -1,11 +1,12 @@
 import binascii
+import math
 import time
-import xml.etree.ElementTree as ET
 
 from cachetools import TTLCache
+from lxml import etree as ET
 
 from datadog_checks.base import is_affirmative
-from datadog_checks.base.utils.common import to_native_string
+from datadog_checks.base.utils.common import ensure_unicode, to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache, default_json_event_encoding
@@ -18,7 +19,7 @@ except ImportError:
 
 DEFAULT_COLLECTION_INTERVAL = 10
 
-SQL_SERVER_METRICS_COLUMNS = [
+SQL_SERVER_QUERY_METRICS_COLUMNS = [
     "execution_count",
     "total_worker_time",
     "total_physical_reads",
@@ -40,27 +41,27 @@ SQL_SERVER_METRICS_COLUMNS = [
 
 STATEMENT_METRICS_QUERY = """\
 with qstats as (
-    select text, query_hash, query_plan_hash,
+    select text, query_hash, query_plan_hash, last_execution_time,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'user_id') as user_id,
-           {}
+           {query_metrics_columns}
     from sys.dm_exec_query_stats
         cross apply sys.dm_exec_sql_text(sql_handle)
 )
-select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid, D.name as database_name, U.name as user_name, {}
+select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid, D.name as database_name, U.name as user_name,
+    {query_metrics_column_sums}
     from qstats S
     left join sys.databases D on S.dbid = D.database_id
     left join sys.sysusers U on S.user_id = U.uid
+    where S.last_execution_time > dateadd(second, -{collection_interval}, getdate())
     group by text, query_hash, query_plan_hash, S.dbid, D.name, U.name
-""".format(
-    ', '.join(SQL_SERVER_METRICS_COLUMNS), ', '.join(['sum({}) as {}'.format(c, c) for c in SQL_SERVER_METRICS_COLUMNS])
-)
+"""
 
 PLAN_LOOKUP_QUERY = """\
-select query_plan from sys.dm_exec_query_stats
+select cast(query_plan as nvarchar(max)) as query_plan from sys.dm_exec_query_stats
     cross apply sys.dm_exec_query_plan(plan_handle)
 where
-    query_hash = ? and query_plan_hash = ?
+    query_hash = CONVERT(varbinary(max), ?, 1) and query_plan_hash = CONVERT(varbinary(max), ?, 1)
 """
 
 
@@ -98,8 +99,8 @@ def obfuscate_xml_plan(raw_plan):
         for k in XML_PLAN_OBFUSCATION_ATTRS:
             val = e.attrib.get(k, None)
             if val:
-                e.attrib[k] = datadog_agent.obfuscate_sql(val)
-    return to_native_string(ET.tostring(tree))
+                e.attrib[k] = ensure_unicode(datadog_agent.obfuscate_sql(val))
+    return to_native_string(ET.tostring(tree, encoding="UTF-8"))
 
 
 class SqlserverStatementMetrics(DBMAsyncJob):
@@ -129,6 +130,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._state = StatementMetrics()
         self._init_caches()
         self._conn_key_prefix = "dbm-"
+        self._statement_metrics_query = None
 
     def _init_caches(self):
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -149,10 +151,34 @@ class SqlserverStatementMetrics(DBMAsyncJob):
     def _close_db_conn(self):
         pass
 
+    def _get_available_query_metrics_columns(self, cursor, all_expected_columns):
+        cursor.execute("select top 0 * from sys.dm_exec_query_stats")
+        all_columns = set([i[0] for i in cursor.description])
+        available_columns = [c for c in all_expected_columns if c in all_columns]
+        missing_columns = set(all_expected_columns) - set(available_columns)
+        if missing_columns:
+            self.log.debug(
+                "missing the following expected query metrics columns from dm_exec_query_stats: %s", missing_columns
+            )
+        self.log.debug("found available sys.dm_exec_query_stats columns: %s", available_columns)
+        return available_columns
+
+    def _get_statement_metrics_query_cached(self, cursor):
+        if self._statement_metrics_query:
+            return self._statement_metrics_query
+        available_columns = self._get_available_query_metrics_columns(cursor, SQL_SERVER_QUERY_METRICS_COLUMNS)
+        self._statement_metrics_query = STATEMENT_METRICS_QUERY.format(
+            query_metrics_columns=', '.join(available_columns),
+            query_metrics_column_sums=', '.join(['sum({}) as {}'.format(c, c) for c in available_columns]),
+            collection_interval=int(math.ceil(self.collection_interval) * 2),
+        )
+        return self._statement_metrics_query
+
     def _load_raw_query_metrics_rows(self, cursor):
         self.log.debug("collecting sql server statement metrics")
-        self.log.debug("Running query [%s]", STATEMENT_METRICS_QUERY)
-        cursor.execute(STATEMENT_METRICS_QUERY)
+        statement_metrics_query = self._get_statement_metrics_query_cached(cursor)
+        self.log.debug("Running query [%s]", statement_metrics_query)
+        cursor.execute(statement_metrics_query)
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
@@ -302,9 +328,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
     def _load_plan(self, query_hash, query_plan_hash, cursor):
         self.log.debug("collecting plan. query_hash=%s query_plan_hash=%s", query_hash, query_plan_hash)
         self.log.debug("Running query [%s] %s", PLAN_LOOKUP_QUERY, (query_hash, query_plan_hash))
-        query_hash_bytes = bytearray(binascii.unhexlify(query_hash))
-        query_plan_hash_bytes = bytearray(binascii.unhexlify(query_plan_hash))
-        cursor.execute(PLAN_LOOKUP_QUERY, query_hash_bytes, query_plan_hash_bytes)
+        cursor.execute(PLAN_LOOKUP_QUERY, ("0x" + query_hash, "0x" + query_plan_hash))
         result = cursor.fetchall()
         if not result:
             self.log.debug("failed to loan plan, it must have just been expired out of the plan cache")

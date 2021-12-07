@@ -2,11 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+from typing import Callable
 
 import pytest
 import requests
 
 from datadog_checks.azure_iot_edge import AzureIoTEdgeCheck
+from datadog_checks.azure_iot_edge.types import Instance
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -15,13 +17,13 @@ from . import common
 
 
 @pytest.mark.usefixtures("mock_server")
-def test_check(aggregator, mock_instance):
-    # type: (AggregatorStub, dict) -> None
+def test_check(aggregator, mock_instance, dd_run_check):
+    # type: (AggregatorStub, Instance, Callable) -> None
     """
     Under normal conditions, metrics and service checks are collected as expected.
     """
     check = AzureIoTEdgeCheck('azure_iot_edge', {}, [mock_instance])
-    check.check(mock_instance)
+    dd_run_check(check)
 
     for metric, metric_type in common.HUB_METRICS:
         # Don't assert exact tags since they're very complex (many cross products).
@@ -56,11 +58,11 @@ def test_check(aggregator, mock_instance):
 
 
 @pytest.mark.usefixtures("mock_server")
-def test_version_metadata(datadog_agent, mock_instance):
-    # type: (DatadogAgentStub, dict) -> None
+def test_version_metadata(datadog_agent, dd_run_check, mock_instance):
+    # type: (DatadogAgentStub, Callable, Instance) -> None
     check = AzureIoTEdgeCheck('azure_iot_edge', {}, [mock_instance])
     check.check_id = 'test:123'
-    check.run()
+    dd_run_check(check)
 
     major, minor, patch, raw = common.MOCK_EDGE_AGENT_VERSION
     version_metadata = {

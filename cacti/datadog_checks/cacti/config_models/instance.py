@@ -21,6 +21,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     field_names: Optional[Sequence[str]]
     min_collection_interval: Optional[float]
+    mysql_db: Optional[str]
     mysql_host: str
     mysql_password: Optional[str]
     mysql_port: Optional[int]

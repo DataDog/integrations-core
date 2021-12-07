@@ -15,6 +15,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host
+from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 
 try:
@@ -35,6 +36,7 @@ from .const import (
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
+    DBM_MIGRATED_METRICS,
     DEFAULT_AUTODISCOVERY_INTERVAL,
     FCI_METRICS,
     INSTANCE_METRICS,
@@ -106,6 +108,8 @@ class SQLServer(AgentCheck):
         self.dbm_enabled = self.instance.get('dbm', False)
         self.statement_metrics_config = self.instance.get('query_metrics', {}) or {}
         self.statement_metrics = SqlserverStatementMetrics(self)
+        self.activity_config = self.instance.get('query_activity', {}) or {}
+        self.activity = SqlserverActivity(self)
 
         self.static_info_cache = TTLCache(
             maxsize=100,
@@ -115,6 +119,7 @@ class SQLServer(AgentCheck):
 
     def cancel(self):
         self.statement_metrics.cancel()
+        self.activity.cancel()
 
     def config_checks(self):
         if self.autodiscovery and self.instance.get('database'):
@@ -127,10 +132,35 @@ class SQLServer(AgentCheck):
                 "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored"
             )
 
+    def split_sqlserver_host_port(self, host):
+        """
+        Splits the host & port out of the provided SQL Server host connection string, returning (host, port).
+        """
+        if not host:
+            return host, None
+        host_split = [s.strip() for s in host.split(',')]
+        if len(host_split) == 1:
+            return host_split[0], None
+        if len(host_split) == 2:
+            return host_split
+        # else len > 2
+        s_host, s_port = host_split[0:2]
+        self.log.warning(
+            "invalid sqlserver host string has more than one comma: %s. using only 1st two items: host:%s, port:%s",
+            host,
+            s_host,
+            s_port,
+        )
+        return s_host, s_port
+
     @property
     def resolved_hostname(self):
-        if self._resolved_hostname is None and self.dbm_enabled:
-            self._resolved_hostname = resolve_db_host(self.instance.get('host'))
+        if self._resolved_hostname is None:
+            if self.dbm_enabled:
+                host, port = self.split_sqlserver_host_port(self.instance.get('host'))
+                self._resolved_hostname = resolve_db_host(host)
+            else:
+                self._resolved_hostname = self.agent_hostname
         return self._resolved_hostname
 
     def load_static_information(self):
@@ -275,8 +305,12 @@ class SQLServer(AgentCheck):
         # If several check instances are querying the same server host, it can be wise to turn these off
         # to avoid sending duplicate metrics
         if is_affirmative(self.instance.get('include_instance_metrics', True)):
+            common_metrics = INSTANCE_METRICS
+            if not self.dbm_enabled:
+                common_metrics = common_metrics + DBM_MIGRATED_METRICS
+
             self._add_performance_counters(
-                chain(INSTANCE_METRICS, INSTANCE_METRICS_TOTAL), metrics_to_collect, tags, db=None
+                chain(common_metrics, INSTANCE_METRICS_TOTAL), metrics_to_collect, tags, db=None
             )
 
         # populated through autodiscovery
@@ -515,6 +549,7 @@ class SQLServer(AgentCheck):
                         self.connection.check_database_conns(db_name)
             if self.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
+                self.activity.run_job_loop(self.tags)
 
         else:
             self.log.debug("Skipping check")

@@ -34,7 +34,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    aci_url: str
+    aci_url: Optional[str]
     aci_urls: Optional[Sequence[str]]
     allow_redirects: Optional[bool]
     appcenter: Optional[bool]
@@ -65,7 +65,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str]
     persist_connections: Optional[bool]
     proxy: Optional[Proxy]
-    pwd: str
+    pwd: Optional[str]
     read_timeout: Optional[float]
     request_size: Optional[float]
     service: Optional[str]

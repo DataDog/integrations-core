@@ -1,6 +1,15 @@
 # CHANGELOG - mysql
 
-## 6.1.1 / 2021-10-26
+## 7.0.1 / 2021-11-19
+
+* [Fixed] Set correct default values and handle redundant values for additional_variable and additional_status. See [#10652](https://github.com/DataDog/integrations-core/pull/10652).
+
+## 7.0.0 / 2021-11-13
+
+* [Added] Collect additional statuses and variables. See [#10573](https://github.com/DataDog/integrations-core/pull/10573). Thanks [notemusic110](https://github.com/notemusic110).
+* [Changed] Enable `extra_status_metrics` and `replication` metrics by default when DBM is enabled. See [#10541](https://github.com/DataDog/integrations-core/pull/10541).
+
+## 6.1.1 / 2021-10-26 / Agent 7.32.0
 
 * [Fixed] Upgrade datadog checks base to 23.1.5. See [#10467](https://github.com/DataDog/integrations-core/pull/10467).
 

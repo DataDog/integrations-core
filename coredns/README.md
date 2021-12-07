@@ -34,7 +34,13 @@ LABEL "com.datadoghq.ad.instances"='[{"prometheus_url":"http://%%host%%:9153/met
 
 #### Log collection
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][3].
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker Log Collection][3].
 
 Then, set [Log Integrations][4] as Docker labels:
 
@@ -82,7 +88,13 @@ spec:
 
 #### Log collection
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][7].
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][7].
 
 Then, set [Log Integrations][8] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][9].
 
@@ -129,7 +141,13 @@ Set [Autodiscovery Integrations Templates][10] as Docker labels on your applicat
 
 ##### Log collection
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][11].
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [ECS Log Collection][11].
 
 Then, set [Log Integrations][12] as Docker labels:
 

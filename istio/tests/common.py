@@ -23,6 +23,12 @@ MOCK_V2_MESH_OVERRIDE_INSTANCE = {
 
 MOCK_LEGACY_MESH_INSTANCE = {
     'istio_mesh_endpoint': 'http://localhost:15090/metrics',
+    'use_openmetrics': False,
+}
+
+MOCK_V2_MESH_INSTANCE = {
+    'istio_mesh_endpoint': 'http://localhost:15090/metrics',
+    'use_openmetrics': True,
 }
 
 MOCK_V2_ISTIOD_INSTANCE = {
@@ -30,7 +36,10 @@ MOCK_V2_ISTIOD_INSTANCE = {
     'use_openmetrics': True,
 }
 
-MOCK_LEGACY_ISTIOD_INSTANCE = {'istiod_endpoint': 'http://localhost:8080/metrics'}
+MOCK_LEGACY_ISTIOD_INSTANCE = {
+    'istiod_endpoint': 'http://localhost:8080/metrics',
+    'use_openmetrics': False,
+}
 
 CONFIG_EXCLUDE_LABELS = [
     "source_version",
@@ -48,6 +57,7 @@ CONFIG_EXCLUDE_LABELS = [
     "request_protocol",
     "connection_security_policy",
 ]
+
 LEGACY_MESH_METRICS = [
     'istio.mesh.request.count',
     'istio.mesh.request.size.count',
@@ -61,7 +71,6 @@ LEGACY_MESH_METRICS = [
     'istio.mesh.response.size.count.total',
     'istio.mesh.response.size.sum.total',
 ]
-
 
 MESH_MERICS_1_5 = [
     'istio.mesh.request.duration.milliseconds.count',
@@ -202,6 +211,7 @@ V2_MESH_COUNTER_GAUGE = [
     'istio.mesh.tcp.received_bytes.total',
     'istio.mesh.tcp.send_bytes.total',
 ]
+
 ISTIOD_V2_METRICS = [
     'istio.citadel.server.root_cert_expiry_timestamp',
     'istio.galley.endpoint_no_pod',
@@ -283,4 +293,71 @@ ISTIOD_V2_METRICS = [
     'istio.process.virtual_memory_max_bytes',
     'istio.sidecar_injection.requests.count',
     'istio.sidecar_injection.success.count',
+]
+
+ISTIO_AGENT_METRICS = [
+    'istio.mesh.agent.pilot.conflict.outbound_listener.http_over_current_tcp',
+    'istio.mesh.agent.go.memstats.stack_sys_bytes',
+    'istio.mesh.agent.conflict.inbound_listener',
+    'istio.mesh.agent.go.memstats.sys_bytes',
+    'istio.mesh.agent.pilot.xds',
+    'istio.mesh.agent.go.memstats.alloc_bytes',
+    'istio.mesh.agent.go.memstats.heap_idle_bytes',
+    'istio.mesh.agent.process.resident_memory_bytes',
+    'istio.mesh.agent.conflict.outbound_listener.tcp_over_current_tcp',
+    'istio.mesh.agent.go.memstats.gc_cpu_fraction',
+    'istio.mesh.agent.go.memstats.heap_sys_bytes',
+    'istio.mesh.agent.go.memstats.stack_inuse_bytes',
+    'istio.mesh.agent.go.memstats.heap_released_bytes',
+    'istio.mesh.agent.go.memstats.mspan_inuse_bytes',
+    'istio.mesh.agent.go.memstats.mallocs.count',
+    'istio.mesh.agent.pilot.endpoint_not_ready',
+    'istio.mesh.agent.pilot.no_ip',
+    'istio.mesh.agent.num_outgoing_requests.count',
+    'istio.mesh.agent.go.memstats.other_sys_bytes',
+    'istio.mesh.agent.pilot.xds.config_size_bytes.sum',
+    'istio.mesh.agent.pilot.xds.config_size_bytes.count',
+    'istio.mesh.agent.pilot.xds.config_size_bytes.bucket',
+    'istio.mesh.agent.process.open_fds',
+    'istio.mesh.agent.go.goroutines',
+    'istio.mesh.agent.go.threads',
+    'istio.mesh.agent.go.info',
+    'istio.mesh.agent.go.memstats.frees.count',
+    'istio.mesh.agent.go.memstats.mcache_inuse_bytes',
+    'istio.mesh.agent.process.virtual_memory_bytes',
+    'istio.mesh.agent.endpoint_no_pod',
+    'istio.mesh.agent.go.gc_duration_seconds.sum',
+    'istio.mesh.agent.go.gc_duration_seconds.count',
+    'istio.mesh.agent.go.gc_duration_seconds.quantile',
+    'istio.mesh.agent.process.cpu_seconds.count',
+    'istio.mesh.agent.go.memstats.heap_objects',
+    'istio.mesh.agent.pilot.vservice_dup_domain',
+    'istio.mesh.agent.process.virtual_memory_max_bytes',
+    'istio.mesh.agent.go.memstats.mcache_sys_bytes',
+    'istio.mesh.agent.scrapes.count',
+    'istio.mesh.agent.pilot.duplicate_envoy_clusters',
+    'istio.mesh.agent.go.memstats.buck_hash_sys_bytes',
+    'istio.mesh.agent.pilot.xds.push_time.sum',
+    'istio.mesh.agent.pilot.xds.push_time.count',
+    'istio.mesh.agent.pilot.xds.push_time.bucket',
+    'istio.mesh.agent.wasm_cache_entries',
+    'istio.mesh.agent.pilot.eds_no_instances',
+    'istio.mesh.agent.go.memstats.heap_alloc_bytes',
+    'istio.mesh.agent.pilot.virt_services',
+    'istio.mesh.agent.go.memstats.next_gc_bytes',
+    'istio.mesh.agent.startup_duration_seconds',
+    'istio.mesh.agent.go.memstats.last_gc_time_seconds',
+    'istio.mesh.agent.pilot.xds.send_time.sum',
+    'istio.mesh.agent.pilot.xds.send_time.count',
+    'istio.mesh.agent.pilot.xds.send_time.bucket',
+    'istio.mesh.agent.go.memstats.heap_inuse_bytes',
+    'istio.mesh.agent.process.max_fds',
+    'istio.mesh.agent.go.memstats.gc_sys_bytes',
+    'istio.mesh.agent.pilot.destrule_subsets',
+    'istio.mesh.agent.pilot.xds.pushes.count',
+    'istio.mesh.agent.process.start_time_seconds',
+    'istio.mesh.agent.go.memstats.lookups.count',
+    'istio.mesh.agent.outgoing_latency.count',
+    'istio.mesh.agent.go.memstats.mspan_sys_bytes',
+    'istio.mesh.agent.pilot.conflict.outbound_listener.tcp_over_current_http',
 ]

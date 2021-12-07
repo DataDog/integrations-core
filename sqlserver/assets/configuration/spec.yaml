@@ -47,7 +47,8 @@ files:
         example: master
     - name: database_autodiscovery
       description: |
-        Auto-discover and monitor databases.  If `true`, overrides `database` option.
+        Auto-discover and monitor databases. Supported for the metrics check. 
+        If `true`, overrides `database` option.
         Can be combined with `autodiscovery_include` and `autodiscovery_exclude` options.
       value:
         type: boolean
@@ -207,7 +208,8 @@ files:
         example: "<CONNECTION_STRING>"
     - name: dbm
       description: |
-        Set to `true` to enable the Database Monitoring beta.
+        Set to `true` to enable Database Monitoring.
+        Reach out to your Customer Success Manager to request access to the beta.
       value:
         type: boolean
         example: false
@@ -226,6 +228,24 @@ files:
             Set the query metric collection interval (in seconds). Each collection involves one or more queries to
             the SQL Server Query Plan Cache. If a non-default value is chosen then that exact same value must be used
             for *every* check instance. Running different instances with different collection intervals is not supported.
+          value:
+            type: number
+            example: 10
+    - name: query_activity
+      description: Configure collection of active sessions monitoring
+      options:
+        - name: enabled
+          description: |
+            Enable collection of active sessions. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the activity collection interval in seconds. Each collection involves querying several
+            different DMV tables such as `dm_exec_requests`, `dm_exec_sessions`, and `dm_exec_sql_text`.
+            If a non-default value is chosen, then that exact same value must be used for *every* check instance.
+            Running different instances with different collection intervals is not supported.
           value:
             type: number
             example: 10

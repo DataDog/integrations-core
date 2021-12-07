@@ -58,11 +58,11 @@ PG_ACTIVE_CONNECTIONS_QUERY = re.sub(
     r'\s+',
     ' ',
     """
-    SELECT application_name, state, usename, count(*) as connections
+    SELECT application_name, state, usename, datname, count(*) as connections
     FROM {pg_stat_activity_view}
     WHERE client_port IS NOT NULL
     {extra_filters}
-    GROUP BY application_name, state, usename
+    GROUP BY application_name, state, usename, datname
 """,
 ).strip()
 
@@ -333,6 +333,12 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._check.gauge(
             "dd.postgres.collect_statement_samples.explained_statements_cache.len",
             len(self._explained_statements_ratelimiter),
+            tags=self._tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
+        self._check.gauge(
+            "dd.postgres.collect_statement_samples.explain_errors_cache.len",
+            len(self._explain_errors_cache),
             tags=self._tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )

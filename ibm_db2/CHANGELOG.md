@@ -1,10 +1,14 @@
 # CHANGELOG - IBM Db2
 
+## 1.9.0 / 2021-11-13
+
+* [Added] Add runtime configuration validation. See [#8934](https://github.com/DataDog/integrations-core/pull/8934).
+
 ## 1.8.1 / 2021-10-21
 
 * [Fixed] Modify can_connect to emit every run. See [#10455](https://github.com/DataDog/integrations-core/pull/10455).
 
-## 1.8.0 / 2021-10-04
+## 1.8.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
 

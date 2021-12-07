@@ -22,6 +22,14 @@ class CustomQuery(BaseModel):
     tags: Optional[Sequence[str]]
 
 
+class QueryActivity(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collection_interval: Optional[float]
+    enabled: Optional[bool]
+
+
 class QueryMetrics(BaseModel):
     class Config:
         allow_mutation = False
@@ -67,6 +75,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str]
     proc_only_if: Optional[str]
     proc_only_if_database: Optional[str]
+    query_activity: Optional[QueryActivity]
     query_metrics: Optional[QueryMetrics]
     service: Optional[str]
     stored_procedure: Optional[str]

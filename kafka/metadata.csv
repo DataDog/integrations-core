@@ -87,3 +87,4 @@ kafka.topic.net.bytes_in.rate,gauge,10,byte,second,Incoming byte rate by topic.,
 kafka.topic.net.bytes_rejected.rate,gauge,10,byte,second,Rejected byte rate by topic.,-1,kafka,topic bytes rejected
 kafka.session.fetch.count,gauge,10,,,Number of fetch sessions.,0,kafka,fetch sessions
 kafka.session.fetch.eviction,gauge,10,event,second,Eviction rate of fetch session.,0,kafka,eviction session rate
+kafka.server.socket.connection_count,gauge,10,connection,,Number of currently open connections to the broker.,0,kafka,open connections number

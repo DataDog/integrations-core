@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 METRIC_MAP = {
     'haproxy_backend_active_servers': 'backend.active.servers',
+    'haproxy_backend_agg_server_check_status': 'backend.agg.server.check.status',
     'haproxy_backend_backup_servers': 'backend.backup.servers',
     'haproxy_backend_bytes_in_total': 'backend.bytes.in.total',
     'haproxy_backend_bytes_out_total': 'backend.bytes.out.total',

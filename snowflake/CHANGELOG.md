@@ -1,6 +1,10 @@
 # CHANGELOG - Snowflake
 
-## 4.0.0 / 2021-10-04
+## 4.0.1 / 2021-11-23
+
+* [Fixed] Fix default field name of schema. See [#10714](https://github.com/DataDog/integrations-core/pull/10714).
+
+## 4.0.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
 * [Added] Add runtime configuration validation. See [#8983](https://github.com/DataDog/integrations-core/pull/8983).

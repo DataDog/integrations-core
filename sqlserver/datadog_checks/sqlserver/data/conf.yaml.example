@@ -57,7 +57,8 @@ instances:
     # database: master
 
     ## @param database_autodiscovery - boolean - optional - default: false
-    ## Auto-discover and monitor databases.  If `true`, overrides `database` option.
+    ## Auto-discover and monitor databases. Supported for the metrics check. 
+    ## If `true`, overrides `database` option.
     ## Can be combined with `autodiscovery_include` and `autodiscovery_exclude` options.
     #
     # database_autodiscovery: false
@@ -196,7 +197,8 @@ instances:
     # connection_string: <CONNECTION_STRING>
 
     ## @param dbm - boolean - optional - default: false
-    ## Set to `true` to enable the Database Monitoring beta.
+    ## Set to `true` to enable Database Monitoring.
+    ## Reach out to your Customer Success Manager to request access to the beta.
     #
     # dbm: false
 
@@ -213,6 +215,23 @@ instances:
         ## Set the query metric collection interval (in seconds). Each collection involves one or more queries to
         ## the SQL Server Query Plan Cache. If a non-default value is chosen then that exact same value must be used
         ## for *every* check instance. Running different instances with different collection intervals is not supported.
+        #
+        # collection_interval: 10
+
+    ## Configure collection of active sessions monitoring
+    #
+    query_activity:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of active sessions. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the activity collection interval in seconds. Each collection involves querying several
+        ## different DMV tables such as `dm_exec_requests`, `dm_exec_sessions`, and `dm_exec_sql_text`.
+        ## If a non-default value is chosen, then that exact same value must be used for *every* check instance.
+        ## Running different instances with different collection intervals is not supported.
         #
         # collection_interval: 10
 
