@@ -44,6 +44,7 @@ def traced(fn):
         if integration_tracing and trace_check:
             try:
                 from ddtrace import patch_all, tracer
+
                 patch_all()
                 with tracer.trace(self.name, service='integrations-tracing', resource=fn.__name__):
                     return fn(self, *args, **kwargs)
