@@ -13,7 +13,7 @@ def dd_environment():
     with docker_run(
         common.COMPOSE_FILE,
         endpoints=[
-            'http://{}/stats/system'.format(common.HOST),
+            'http://{}:80/api/v2/stats/system'.format(common.HOST),
         ],
     ):
         yield common.INSTANCE
