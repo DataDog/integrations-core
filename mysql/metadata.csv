@@ -201,6 +201,11 @@ mysql.galera.wsrep_flow_control_recv,count,,,,"Shows the number of times the gal
 mysql.galera.wsrep_flow_control_sent,count,,,,"Shows the number of times the galera node has sent a pausing Flow Control message to others",0,mysql,mysql galera wsrep_flow_control_sent
 mysql.galera.wsrep_cert_deps_distance,gauge,,,,"Shows the average distance between the lowest and highest sequence number, or seqno, values that the node can possibly apply in parallel.",0,mysql,mysql galera wsrep_cert_deps_distance
 mysql.galera.wsrep_local_send_queue_avg,gauge,,,,"Show an average for the send queue length since the last FLUSH STATUS query.",0,mysql,mysql galera wsrep_local_send_queue_avg
+mysql.galera.wsrep_replicated_bytes,gauge,,,,"Total size (in bytes) of writesets sent to other nodes.",0,mysql,mysql galera wsrep_replicated_bytes
+mysql.galera.wsrep_received_bytes,gauge,,,,"Total size (in bytes) of writesets received from other nodes.",0,mysql,mysql galera wsrep_received_bytes
+mysql.galera.wsrep_received,gauge,,,,"Total number of write-sets received from other nodes.",0,mysql,mysql galera wsrep_received
+mysql.galera.wsrep_local_state,gauge,,,,"Internal Galera cluster state number",0,mysql,mysql galera wsrep_local_state
+mysql.galera.wsrep_local_cert_failures,count,,,,"Total number of local transactions that failed certification test.",0,mysql,mysql galera wsrep_local_cert_failures
 mysql.performance.qcache.utilization,gauge,,fraction,,Fraction of the query cache memory currently being used.,0,mysql,mysql performance qcache utilization
 mysql.performance.digest_95th_percentile.avg_us,gauge,,microsecond,,Query response time 95th percentile per schema.,0,mysql,mysql response time 95th
 mysql.performance.query_run_time.avg,gauge,,microsecond,,Avg query response time per schema.,0,mysql,mysql response time avg
