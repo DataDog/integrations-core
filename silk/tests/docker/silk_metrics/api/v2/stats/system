@@ -1,15 +1,1 @@
-{
-  "hits": [
-    {
-      "iops_avg": 0,
-      "iops_max": 0,
-      "latency_inner": 0.0,
-      "latency_outer": 0.0,
-      "resolution": 5,
-      "throughput_avg": 0,
-      "throughput_max": 0,
-      "timestamp": 1635196465
-    }
-  ],
-  "total": 1
-}
+{"hits": [{"iops_avg": 12209, "iops_max": 13114, "latency_inner": 3.8199999999999998, "latency_outer": 0.02, "resolution": 5, "throughput_avg": 200035533, "throughput_max": 214859776, "timestamp": 1638837015}], "total": 1}
