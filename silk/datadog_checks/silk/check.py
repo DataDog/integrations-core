@@ -8,6 +8,7 @@ from six.moves.urllib.parse import urljoin
 from datadog_checks.base import AgentCheck
 
 from .metrics import METRICS
+from datadog_checks.base.utils.time import get_current_datetime
 
 
 class SilkCheck(AgentCheck):
@@ -26,6 +27,7 @@ class SilkCheck(AgentCheck):
         super(SilkCheck, self).__init__(name, init_config, instances)
 
         server = self.instance.get("host_address")
+        self.latest_event_query = get_current_datetime()
         self.url = "{}/api/v2/".format(server)
         self.tags = self.instance.get("tags", [])
 
@@ -55,13 +57,17 @@ class SilkCheck(AgentCheck):
                 return
 
         get_method = getattr
-        for path, metrics_obj in METRICS.items():
-            # Need to submit an object of relevant tags
-            try:
-                response_json, _ = self.get_metrics(path)
-                self.parse_metrics(response_json, path, metrics_obj, get_method)
-            except Exception as e:
-                self.log.debug("Encountered error getting Silk metrics for path %s: %s", path, str(e))
+
+        # Get events
+        self.collect_events()
+
+        # for path, metrics_obj in METRICS.items():
+        #     # Need to submit an object of relevant tags
+        #     try:
+        #         response_json, _ = self.get_metrics(path)
+        #         self.parse_metrics(response_json, path, metrics_obj, get_method)
+        #     except Exception as e:
+        #         self.log.debug("Encountered error getting Silk metrics for path %s: %s", path, str(e))
         self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.OK, tags=self.tags)
 
     def parse_metrics(self, output, path, metrics_mapping=None, get_method=None, return_first=False):
@@ -102,3 +108,38 @@ class SilkCheck(AgentCheck):
         except Exception as e:
             self.log.debug("Encountered error while getting metrics from %s: %s", path, str(e))
             raise
+
+    def collect_events(self):
+        self.log.debug("Starting events collection (query start time: %s).", self.latest_event_query)
+        latest_event_time = None
+        collect_start_time = get_current_datetime()
+        try:
+            # Call events endpoint here
+            new_events = self.http.get('http://localhost/api/v2/events')
+
+            new_events = []
+            for event in new_events:
+                self.log.debug(
+                    "Processing event with id:%s, type:%s: msg:%s", event.key, type(event), event.fullFormattedMessage
+                )
+                # normalized_event = SilkEvent(event, self.tags)
+
+                if event is not None:
+                    self.log.debug(
+                        "Submit event with id:%s, type:%s: msg:%s", event.key, type(event), event.fullFormattedMessage
+                    )
+                    self.event(event)
+                if latest_event_time is None or event.createdTime > latest_event_time:
+                    latest_event_time = event.createdTime
+        except Exception as e:
+            # Don't get stuck on a failure to fetch an event
+            # Ignore them for next pass
+            self.log.warning("Unable to fetch Events %s", e)
+
+        if latest_event_time is not None:
+            self.latest_event_query = latest_event_time + dt.timedelta(seconds=1)
+        else:
+            # Let's set `self.latest_event_query` to `collect_start_time` as safeguard in case no events are reported
+            # OR something bad happened (which might happen again indefinitely).
+            self.latest_event_query = collect_start_time
+
