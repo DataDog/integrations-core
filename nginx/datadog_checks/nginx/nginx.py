@@ -326,7 +326,7 @@ class Nginx(AgentCheck):
             r = self._perform_request(url)
             payload = self._nest_payload(nest, r.json())
         except Exception as e:
-            if self.only_query_enabled_endpoints and endpoint in PLUS_API_STREAM_ENDPOINTS.values():
+            if not self.only_query_enabled_endpoints and endpoint in PLUS_API_STREAM_ENDPOINTS.values():
                 self.log.warning("Stream may not be initialized. Error querying %s metrics at %s: %s", endpoint, url, e)
             else:
                 self.log.exception("Error querying %s metrics at %s: %s", endpoint, url, e)
