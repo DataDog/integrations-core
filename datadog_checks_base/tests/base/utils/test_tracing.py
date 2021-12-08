@@ -65,7 +65,7 @@ def test_traced(aggregator, agent_config, init_config, called):
     check = DummyCheck('dummy', init_config, [{}])
 
     with mock.patch('datadog_checks.base.utils.tracing.datadog_agent') as datadog_agent, mock.patch(
-        'datadog_checks.base.utils.tracing.tracer'
+        'ddtrace.tracer'
     ) as tracer:
         datadog_agent.get_config = lambda k: agent_config.get(k)
         check.check({})
@@ -80,7 +80,7 @@ def test_traced(aggregator, agent_config, init_config, called):
 @pytest.mark.parametrize('traces_enabled', [pytest.param('false'), (pytest.param('true'))])
 def test_traced_class(traces_enabled):
     with mock.patch.dict(os.environ, {'DDEV_TRACE_ENABLED': traces_enabled}, clear=True), mock.patch(
-        'datadog_checks.base.utils.tracing.tracer'
+        'ddtrace.tracer'
     ) as tracer:
         TracedDummyClass = traced_class(DummyCheck)
 
