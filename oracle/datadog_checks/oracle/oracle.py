@@ -99,11 +99,14 @@ class Oracle(AgentCheck):
             raise ConfigurationError("Protocol %s is not valid, must either be TCP or TCPS" % self._protocol)
 
         if self._jdbc_driver and (not self._jdbc_truststore_type or not self._jdbc_truststore_path):
-            raise ConfigurationError("When connecting via JDBC, `jdbc_truststore_type` and `jdbc_truststore` are "
-                                     "required")
+            raise ConfigurationError(
+                "When connecting via JDBC, `jdbc_truststore_type` and `jdbc_truststore` are " "required"
+            )
 
         if self._jdbc_truststore_type and self._jdbc_truststore_type not in VALID_TRUSTSTORE_TYPES:
-            raise ConfigurationError("Truststore type %s is not valid, must either be SSO, JKS, or PKCS12" % self._jdbc_truststore_type)
+            raise ConfigurationError(
+                "Truststore type %s is not valid, must either be SSO, JKS, or PKCS12" % self._jdbc_truststore_type
+            )
 
     def execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:

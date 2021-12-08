@@ -44,6 +44,7 @@ def test_check_misconfig_invalid_protocol(instance):
     with pytest.raises(ConfigurationError):
         check.validate_config()
 
+
 def test_check_misconfig_empty_truststore_and_type(instance):
     """
     Test if connecting via JDBC, both `jdbc_truststore` and `jdbc_truststore_type` are non-empty
@@ -55,6 +56,7 @@ def test_check_misconfig_empty_truststore_and_type(instance):
     check = Oracle(CHECK_NAME, {}, [instance])
     with pytest.raises(ConfigurationError):
         check.validate_config()
+
 
 def test_check_misconfig_invalid_truststore_type(instance):
     """
