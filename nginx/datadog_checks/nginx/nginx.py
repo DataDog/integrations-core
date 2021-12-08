@@ -195,6 +195,11 @@ class Nginx(AgentCheck):
                 self.log.error('Could not submit metric: %s: %s', repr(row), e)
 
     def _get_enabled_endpoints(self):
+        """
+        Dynamically determines which NGINX endpoints are enabled and we support getting metrics from
+        by querying the NGINX APIs that list availabled endpoints. If an error is encountered,
+        then it will fall back to query all of the known endpoints available in the given NGINX Plus version.
+        """
         available_endpoints = set()
 
         base_url = "/".join([self.url, self.plus_api_version])
@@ -236,6 +241,10 @@ class Nginx(AgentCheck):
             return self._get_all_plus_api_endpoints()
 
     def _supported_endpoints(self, available_endpoints):
+        """
+        Returns the endpoints that are both supported by this NGINX instance, and
+        that the integration supports collecting metrics from
+        """
         return {
             endpoint: nest for endpoint, nest in self._get_all_plus_api_endpoints() if endpoint in available_endpoints
         }
@@ -279,6 +288,10 @@ class Nginx(AgentCheck):
         return {keys[0]: self._nest_payload(keys[1:], payload)}
 
     def _get_plus_api_endpoints(self, use_stream=False):
+        """
+        Returns all of either stream or default endpoints that the integration supports
+        collecting metrics from based on the Plus API version
+        """
         endpoints = iteritems({})
 
         available_plus_endpoints = PLUS_API_STREAM_ENDPOINTS if use_stream else PLUS_API_ENDPOINTS
@@ -289,6 +302,9 @@ class Nginx(AgentCheck):
         return endpoints
 
     def _get_all_plus_api_endpoints(self):
+        """
+        Returns endpoints that the integration supports collecting metrics from based on the Plus API version
+        """
         endpoints = self._get_plus_api_endpoints()
 
         if self.use_plus_api_stream:

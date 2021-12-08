@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 import os
 from copy import deepcopy
 
@@ -515,12 +516,15 @@ def test_emit_non_generic_tags_when_disabled(instance):
         ),
     ],
 )
-def test_get_enabled_endpoints(check, instance_plus_v7, version, use_stream, expected_endpoints):
-
+def test_get_enabled_endpoints(check, instance_plus_v7, version, use_stream, expected_endpoints, caplog):
+    caplog.clear()
+    caplog.set_level(logging.WARNING)
     instance = deepcopy(instance_plus_v7)
     instance['use_plus_api_stream'] = use_stream
     instance['plus_api_version'] = version
     check = check(instance)
     check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
 
+    # Assert the log line is not emmitted because if it does then the method fell back to all endpoints
+    assert "Could not determine available endpoints from the API" not in caplog.text
     assert sorted(list(check._get_enabled_endpoints())) == sorted(expected_endpoints)
