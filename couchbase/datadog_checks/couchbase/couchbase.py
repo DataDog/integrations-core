@@ -4,6 +4,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from __future__ import division
+from logging import exception
 
 import re
 import time
@@ -419,10 +420,14 @@ class Couchbase(AgentCheck):
             msg = "Error accessing the Index Statistics endpoint: %s: %s" % (url, str(e))
             self.log.warning(str(e))
             self.service_check(INDEX_STATS_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, self._tags, msg)
-            if self._version or int(self._version.split(".")[0]) >= 7:
-                self.log.warning(
-                    "Index Stats Metrics are only available in Couchbase version 7+. Detected version: %", self._version
-                )
+            try:
+                # Error handling in case Couchbase changes their versioning format
+                if self._version or int(self._version.split(".")[0]) >= 7:
+                    self.log.warning(
+                        "Index Stats Metrics are only available in Couchbase version 7+. Detected version: %", self._version
+                    )
+            except Exception as e:
+                self.log.warning(str(e))
             return
 
         self.service_check(INDEX_STATS_SERVICE_CHECK_NAME, AgentCheck.OK, self._tags)
