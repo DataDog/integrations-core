@@ -63,13 +63,13 @@ class SilkCheck(AgentCheck):
         # Get events
         self.collect_events()
 
-        # for path, metrics_obj in METRICS.items():
-        #     # Need to submit an object of relevant tags
-        #     try:
-        #         response_json, _ = self.get_metrics(path)
-        #         self.parse_metrics(response_json, path, metrics_obj, get_method)
-        #     except Exception as e:
-        #         self.log.debug("Encountered error getting Silk metrics for path %s: %s", path, str(e))
+        for path, metrics_obj in METRICS.items():
+            # Need to submit an object of relevant tags
+            try:
+                response_json, _ = self.get_metrics(path)
+                self.parse_metrics(response_json, path, metrics_obj, get_method)
+            except Exception as e:
+                self.log.debug("Encountered error getting Silk metrics for path %s: %s", path, str(e))
         self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.OK, tags=self.tags)
 
     def parse_metrics(self, output, path, metrics_mapping=None, get_method=None, return_first=False):
