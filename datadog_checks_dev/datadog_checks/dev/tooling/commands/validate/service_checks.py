@@ -46,8 +46,8 @@ CHECK_TO_NAME = {
     'tcp_check': 'System',
 }
 
-SERVICE_CHECK_NAME_RE = re.compile(r"[^a-zA-Z0-9_.]+")
-SERVICE_CHECK_INVALID_SEQ_RE = re.compile(r"_{1,}\.+_*|_*\.+_{1,}")
+INVALID_CHAR_RE = re.compile(r"[^a-zA-Z0-9_.]+")
+INVALID_SEQ_RE = re.compile(r"_{1,}\.+_*|_*\.+_{1,}")
 
 
 @click.command('service-checks', context_settings=CONTEXT_SETTINGS, short_help='Validate `service_checks.json` files')
@@ -135,17 +135,17 @@ def service_checks(check, sync):
 
             # check
             check = service_check.get('check')
-            invalid_matches = SERVICE_CHECK_NAME_RE.findall(check)
-            invalid_seq = SERVICE_CHECK_INVALID_SEQ_RE.findall(check)
+            invalid_matches = INVALID_CHAR_RE.findall(check)
+            invalid_seq = INVALID_SEQ_RE.findall(check)
             if not check or not isinstance(check, str):
                 file_failed = True
                 display_queue.append((echo_failure, '  required non-null string: check'))
             elif invalid_matches or invalid_seq:
                 file_failed = True
                 if invalid_matches:
-                    display_queue.append((echo_failure, f'  {check} contains one or more invalid sequence: {invalid_matches}'))
+                    display_queue.append((echo_failure, f'  {check} contains one or more invalid characters: {invalid_matches}'))
                 if invalid_seq:
-                    display_queue.append((echo_failure, f'  {check} contains one or more invalid sequence: {invalid_seq}'))
+                    display_queue.append((echo_failure, f'  {check} contains one or more invalid sequences: {invalid_seq}'))
             else:
                 if check in unique_checks:
                     file_failed = True
