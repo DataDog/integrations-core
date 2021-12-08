@@ -421,7 +421,7 @@ class Couchbase(AgentCheck):
             self.service_check(INDEX_STATS_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, self._tags, msg)
             try:
                 # Error handling in case Couchbase changes their versioning format
-                if self._version or int(self._version.split(".")[0]) >= 7:
+                if self._version and int(self._version.split(".")[0]) < 7:
                     self.log.warning(
                         "Index Stats Metrics are only available in Couchbase version 7+. Detected version: %",
                         self._version,
