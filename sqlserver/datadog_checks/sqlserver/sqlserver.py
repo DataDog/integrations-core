@@ -571,7 +571,12 @@ class SQLServer(AgentCheck):
                         instance_results[cls] = None, None
                     else:
                         try:
-                            rows, cols = getattr(metrics, cls).fetch_all_values(cursor, list(metric_names), self.log)
+                            db_names = self.databases or [
+                                self.instance.get('database', self.connection.DEFAULT_DATABASE)
+                            ]
+                            rows, cols = getattr(metrics, cls).fetch_all_values(
+                                cursor, list(metric_names), self.log, databases=db_names
+                            )
                         except Exception as e:
                             self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
                             rows, cols = None, None
