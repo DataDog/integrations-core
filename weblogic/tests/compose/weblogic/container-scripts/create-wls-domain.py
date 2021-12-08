@@ -150,7 +150,7 @@ if cluster_type == "CONFIGURED":
             set('ListenPort', managed_server_ssl_port)
             set('Enabled', 'True')
 
-        create(name,'Log')
+        create(name, 'Log')
         cd('/Servers/%s/Log/%s' % (name, name))
         set('FileName', 'logs/%s.log' % (name))
         set('DateFormatPattern', 'MMM d, y, h:mm:ss,SSS a z')
