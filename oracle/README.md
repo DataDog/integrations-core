@@ -199,6 +199,77 @@ instances:
     only_custom_queries: true
 ```
 
+#### Connecting to Oracle via TCPS
+
+To connect to Oracle via TCPS (TCP with SSL), make sure to first uncomment out the `protocol` configuration option and select `TCPS`, and make sure that the correct `server` is  serving the TCPS server.
+
+```yaml
+init_config:
+
+instances:
+  ## @param server - string - required
+  ## The IP address or hostname of the Oracle Database Server.
+  #
+  - server: localhost:1522
+
+    ## @param service_name - string - required
+    ## The Oracle Database service name. To view the services available on your server,
+    ## run the following query:
+    ## `SELECT value FROM v$parameter WHERE name='service_names'`
+    #
+    service_name: "<SERVICE_NAME>"
+
+    ## @param user - string - required
+    ## The username for the user account.
+    #
+    user: <USER>
+
+    ## @param password - string - required
+    ## The password for the user account.
+    #
+    password: "<PASSWORD>"
+
+    ## @param protocol - string - optional - default: TCP
+    ## The protocol to connect to the Oracle Database Server. Valid protocols include TCP and TCPS.
+    ##
+    ## When connecting to Oracle Database via JDBC, `jdbc_truststore` and `jdbc_truststore_type` are required.
+    ## More information can be found from Oracle Database's whitepaper:
+    ##
+    ## https://www.oracle.com/technetwork/topics/wp-oracle-jdbc-thin-ssl-130128.pdf
+    #
+    protocol: TCPS
+```
+
+After uncommenting out the `protocol` configuration option, make sure that the `sqlnet.ora`, `listener.ora`, and `tnsnames.ora` are correctly configured to allow TCPS connections on your Oracle Database. 
+
+If you are connecting to Oracle Database using the Oracle Instant Client, you can verify that Datadog will be able to connect to your database by using the `sqlplus` command line tool using the information inputted in your configuration options:
+
+```shell
+sqlplus <USER>/<PASSWORD>@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCPS)(HOST=<HOST>)(PORT=<PORT>))(SERVICE_NAME=<SERVICE_NAME>)))
+```
+
+If you are connecting to Oracle Database using JDBC, you will need to also specify `jdbc_truststore_path`, `jdbc_truststore_type`, and optionally `jdbc_truststore_password` if there is a password on the truststore. Note that `SSO` truststores don't require passwords.
+
+```yaml
+    ...
+
+    ## @param jdbc_truststore_path - string - optional
+    ## The JDBC truststore file path.
+    #
+    jdbc_truststore_path: /path/to/truststore
+
+    ## @param jdbc_truststore_type - string - optional
+    ## The JDBC truststore file type. Supported truststore types include JKS, SSO, and PKCS12.
+    #
+    jdbc_truststore_type: SSO
+
+    ## @param jdbc_truststore_password - string - optional
+    ## The password for the truststore when connecting via JDBC.
+    #
+    # jdbc_truststore_password: <JDBC_TRUSTSTORE_PASSWORD>
+```
+
+More information regarding connecting to Oracle Database via TCPS on JDBC can be found in the official [Oracle whitepaper][17].
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
@@ -431,3 +502,4 @@ Need help? Contact [Datadog support][16].
 [14]: https://github.com/DataDog/integrations-core/blob/master/oracle/assets/service_checks.json
 [15]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html
 [16]: https://docs.datadoghq.com/help/
+[17]: https://www.oracle.com/technetwork/topics/wp-oracle-jdbc-thin-ssl-130128.pdf
