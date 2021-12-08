@@ -61,10 +61,10 @@ instances:
     #
     # jdbc_driver_path: <DRIVER_PATH>.jar
 
-    ## @param jdbc_truststore - string - optional
+    ## @param jdbc_truststore_path - string - optional
     ## The JDBC truststore file path.
     #
-    # jdbc_truststore: <JDBC_TRUSTSTORE>
+    # jdbc_truststore_path: <JDBC_TRUSTSTORE_PATH>
 
     ## @param jdbc_truststore_type - string - optional
     ## The JDBC truststore file type. Supported truststore types include JKS, SSO, and PKCS12.

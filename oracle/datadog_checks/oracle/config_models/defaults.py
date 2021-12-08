@@ -28,11 +28,11 @@ def instance_jdbc_driver_path(field, value):
     return '<DRIVER_PATH>.jar'
 
 
-def instance_jdbc_truststore(field, value):
+def instance_jdbc_truststore_password(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_jdbc_truststore_password(field, value):
+def instance_jdbc_truststore_path(field, value):
     return get_default_field_value(field, value)
 
 

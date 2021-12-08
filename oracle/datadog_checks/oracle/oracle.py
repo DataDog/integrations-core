@@ -25,6 +25,7 @@ except ImportError as e:
 EVENT_TYPE = SOURCE_TYPE_NAME = 'oracle'
 MAX_CUSTOM_RESULTS = 100
 VALID_PROTOCOLS = ['TCP', 'TCPS']
+VALID_TRUSTSTORE_TYPES = ['JKS', 'SSO', 'PKCS12']
 
 
 class Oracle(AgentCheck):
@@ -45,7 +46,7 @@ class Oracle(AgentCheck):
         self._service = self.instance.get('service_name')
         self._protocol = self.instance.get("protocol", "TCP")
         self._jdbc_driver = self.instance.get('jdbc_driver_path')
-        self._jdbc_truststore = self.instance.get('jdbc_truststore')
+        self._jdbc_truststore_path = self.instance.get('jdbc_truststore_path')
         self._jdbc_truststore_type = self.instance.get('jdbc_truststore_type')
         self._jdbc_truststore_password = self.instance.get('jdbc_truststore_password', '')
         self._tags = self.instance.get('tags') or []
@@ -96,6 +97,13 @@ class Oracle(AgentCheck):
 
         if self._protocol.upper() not in VALID_PROTOCOLS:
             raise ConfigurationError("Protocol %s is not valid, must either be TCP or TCPS" % self._protocol)
+
+        if self._jdbc_driver and (not self._jdbc_truststore_type or not self._jdbc_truststore_path):
+            raise ConfigurationError("When connecting via JDBC, `jdbc_truststore_type` and `jdbc_truststore` are "
+                                     "required")
+
+        if self._jdbc_truststore_type and self._jdbc_truststore_type not in VALID_TRUSTSTORE_TYPES:
+            raise ConfigurationError("Truststore type %s is not valid, must either be SSO, JKS, or PKCS12" % self._jdbc_truststore_type)
 
     def execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:
@@ -190,7 +198,7 @@ class Oracle(AgentCheck):
             connect_string = self.JDBC_CONNECTION_STRING_TCPS.format(self._get_dsn())
             jdbc_connect_properties['javax.net.ssl.trustStoreType'] = self._jdbc_truststore_type
             jdbc_connect_properties['javax.net.ssl.trustStorePassword'] = self._jdbc_truststore_password
-            jdbc_connect_properties['javax.net.ssl.trustStore'] = self._jdbc_truststore
+            jdbc_connect_properties['javax.net.ssl.trustStore'] = self._jdbc_truststore_path
         else:
             connect_string = self.JDBC_CONNECTION_STRING.format(self._server, self._service)
 

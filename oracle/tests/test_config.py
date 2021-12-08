@@ -43,3 +43,26 @@ def test_check_misconfig_invalid_protocol(instance):
     check = Oracle(CHECK_NAME, {}, [instance])
     with pytest.raises(ConfigurationError):
         check.validate_config()
+
+def test_check_misconfig_empty_truststore_and_type(instance):
+    """
+    Test if connecting via JDBC, both `jdbc_truststore` and `jdbc_truststore_type` are non-empty
+    """
+    instance['jdbc_driver_path'] = '/path/to/jdbc/driver'
+    instance['jdbc_truststore_path'] = ''
+    instance['jdbc_truststore_type'] = 'SSO'
+
+    check = Oracle(CHECK_NAME, {}, [instance])
+    with pytest.raises(ConfigurationError):
+        check.validate_config()
+
+def test_check_misconfig_invalid_truststore_type(instance):
+    """
+    Test truststore type is valid
+    """
+    instance['jdbc_driver_path'] = '/path/to/jdbc/driver'
+    instance['jdbc_truststore_path'] = '/path/to/jdbc/truststore'
+    instance['jdbc_truststore_type'] = 'wrong_type'
+    check = Oracle(CHECK_NAME, {}, [instance])
+    with pytest.raises(ConfigurationError):
+        check.validate_config()

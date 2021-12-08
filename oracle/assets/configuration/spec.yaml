@@ -49,7 +49,7 @@ files:
       value:
         type: string
         example: <DRIVER_PATH>.jar
-    - name: jdbc_truststore
+    - name: jdbc_truststore_path
       description: |
         The JDBC truststore file path.
       value:
