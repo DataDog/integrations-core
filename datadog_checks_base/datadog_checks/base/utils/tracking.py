@@ -4,7 +4,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-import time
+
+from datadog_checks.base.utils.time import get_timestamp
 
 required_attrs = [
     'name',
@@ -43,7 +44,7 @@ def tracked_method(agent_check_getter=None, track_result_length=False):
             if os.getenv('DD_DISABLE_TRACKED_METHOD') == "true":
                 return function(self, *args, **kwargs)
 
-            start_time = time.time()
+            start_time = get_timestamp()
 
             try:
                 check = agent_check_getter(self) if agent_check_getter else self
@@ -69,7 +70,7 @@ def tracked_method(agent_check_getter=None, track_result_length=False):
             try:
                 result = function(self, *args, **kwargs)
 
-                elapsed_ms = (time.time() - start_time) * 1000
+                elapsed_ms = (get_timestamp() - start_time) * 1000
                 check.histogram("dd.{}.operation.time".format(check_name), elapsed_ms, **stats_kwargs)
 
                 check.log.debug("[%s.%s] operation completed in %s ms", check_name, function.__name__, elapsed_ms)

@@ -27,6 +27,10 @@ class HelloCheck(AgentCheck):
 EXPECTED_RESULT = 5
 
 
+class MyException(Exception):
+    pass
+
+
 class TestJob:
     def __init__(self, check):
         self.check = check
@@ -51,7 +55,7 @@ class TestJob:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def test_tracked_exception(self):
-        raise Exception("oops")
+        raise MyException("oops")
 
 
 @pytest.mark.parametrize(
@@ -89,5 +93,5 @@ def test_tracked_method(aggregator, debug_stats_kwargs, disable_tracking):
         aggregator.assert_metric(
             "dd.hello.operation.error",
             hostname=hostname,
-            tags=tags + ["operation:test_tracked_exception", "error:<class 'Exception'>"],
+            tags=tags + ["operation:test_tracked_exception", "error:<class 'test_tracking.MyException'>"],
         )
