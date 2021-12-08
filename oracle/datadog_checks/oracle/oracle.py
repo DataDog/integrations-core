@@ -100,10 +100,10 @@ class Oracle(AgentCheck):
 
         if self._jdbc_driver and (not self._jdbc_truststore_type or not self._jdbc_truststore_path):
             raise ConfigurationError(
-                "When connecting via JDBC, `jdbc_truststore_type` and `jdbc_truststore` are " "required"
+                "When connecting via JDBC, both `jdbc_truststore_type` and `jdbc_truststore_path` are required"
             )
 
-        if self._jdbc_truststore_type and self._jdbc_truststore_type not in VALID_TRUSTSTORE_TYPES:
+        if self._jdbc_truststore_type and self._jdbc_truststore_type.upper() not in VALID_TRUSTSTORE_TYPES:
             raise ConfigurationError(
                 "Truststore type %s is not valid, must either be SSO, JKS, or PKCS12" % self._jdbc_truststore_type
             )

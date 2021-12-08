@@ -116,7 +116,7 @@ def dd_environment():
         instance['protocol'] = 'TCPS'
 
         if CLIENT_LIB == 'jdbc':
-            instance['jdbc_truststore'] = '/opt/oracle/instantclient_19_3/client_wallet/cwallet.sso'
+            instance['jdbc_truststore_path'] = '/opt/oracle/instantclient_19_3/client_wallet/cwallet.sso'
             instance['jdbc_truststore_type'] = 'SSO'
 
     with docker_run(
