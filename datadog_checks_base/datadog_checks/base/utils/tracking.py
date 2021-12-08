@@ -76,7 +76,7 @@ def tracked_method(agent_check_getter=None, track_result_length=False):
                     **stats_kwargs,
                 )
 
-                check.log.debug("[%s.%s] operation completed in %s ms", elapsed_ms)
+                check.log.debug("[%s.%s] operation completed in %s ms", check_name, function.__name__, elapsed_ms)
 
                 if track_result_length and result is not None:
                     check.log.debug("[%s.%s] received result length %s", check_name, function.__name__, len(result))
