@@ -28,6 +28,75 @@ files:
       value:
         example: http://localhost:80/stats
         type: string
+    - name: included_metrics
+      hidden: true
+      description: |
+        Includes metrics using regular expressions.
+        The filtering occurs before tag extraction, so you have the option
+        to have certain tags decide whether or not to keep or ignore metrics.
+        For an exhaustive list of all metrics and tags, see:
+        https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
+        If you surround patterns by quotes, be sure to escape backslashes with an extra backslash.
+        The example list below will include:
+          - cluster.in.0000.lb_subsets_active
+          - cluster.out.alerting-event-evaluator-test.datadog.svc.cluster.local
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - cluster\.(in|out)\..*
+    - name: excluded_metrics
+      hidden: true
+      description: |
+        Excludes metrics using regular expressions.
+        The filtering occurs before tag extraction, so you have the option
+        to have certain tags decide whether or not to keep or ignore metrics.
+        For an exhaustive list of all metrics and tags, see:
+        https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
+        If you surround patterns by quotes, be sure to escape backslashes with an extra backslash.
+        The example list below will exclude:
+          - http.admin.downstream_cx_active
+          - http.http.rds.0000.control_plane.rate_limit_enforced
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - ^http\..*
+    - name: cache_metrics
+      hidden: true
+      description: |
+        Results are cached by default to decrease CPU utilization, at
+        the expense of some memory. Disable by setting this to false.
+      value:
+        type: boolean
+        example: true
+    - name: parse_unknown_metrics
+      hidden: true
+      description: |
+        Attempt parsing of metrics that are unknown and will otherwise be skipped.
+      value:
+        type: boolean
+        example: false
+    - name: collect_server_info
+      hidden: true
+      description: |
+        Collect Envoy version by accessing the `/server_info` endpoint.
+        Disable this if this endpoint is not reachable by the agent.
+      value:
+        type: boolean
+        example: true
+    - name: disable_legacy_cluster_tag
+      hidden: true
+      description: |
+        Enable to stop submitting the tags `cluster_name` and `virtual_cluster_name`,
+        which has been renamed to `envoy_cluster` and `virtual_envoy_cluster`.
+      enabled: true
+      value:
+        type: boolean
+        display_default: false
+        example: true
   - template: logs
     example:
     - type: file

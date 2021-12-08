@@ -48,6 +48,10 @@ def instance_cache_metric_wildcards(field, value):
     return True
 
 
+def instance_cache_metrics(field, value):
+    return True
+
+
 def instance_cache_shared_labels(field, value):
     return True
 
@@ -60,11 +64,19 @@ def instance_collect_histogram_buckets(field, value):
     return True
 
 
+def instance_collect_server_info(field, value):
+    return True
+
+
 def instance_connect_timeout(field, value):
     return get_default_field_value(field, value)
 
 
 def instance_disable_generic_tags(field, value):
+    return False
+
+
+def instance_disable_legacy_cluster_tag(field, value):
     return False
 
 
@@ -85,6 +97,10 @@ def instance_exclude_metrics(field, value):
 
 
 def instance_exclude_metrics_by_labels(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_excluded_metrics(field, value):
     return get_default_field_value(field, value)
 
 
@@ -117,6 +133,10 @@ def instance_ignore_tags(field, value):
 
 
 def instance_include_labels(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_included_metrics(field, value):
     return get_default_field_value(field, value)
 
 
@@ -174,6 +194,10 @@ def instance_ntlm_domain(field, value):
 
 def instance_openmetrics_endpoint(field, value):
     return 'http://localhost:80/stats/prometheus'
+
+
+def instance_parse_unknown_metrics(field, value):
+    return False
 
 
 def instance_password(field, value):
