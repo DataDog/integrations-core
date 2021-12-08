@@ -9,13 +9,7 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.datadog_agent import datadog_agent
-from datadog_checks.base.utils.db.utils import (
-    ConstantRateLimiter,
-    DBMAsyncJob,
-    RateLimitingTTLCache,
-    dbm_tracked_method,
-    resolve_db_host,
-)
+from datadog_checks.base.utils.db.utils import ConstantRateLimiter, DBMAsyncJob, RateLimitingTTLCache, resolve_db_host
 
 
 @pytest.mark.parametrize(
@@ -102,18 +96,6 @@ class TestJob(DBMAsyncJob):
         except Exception:
             return
 
-    @dbm_tracked_method("test-dbms", parent_check_attr="_check")
-    def do_work(self):
-        return 5
-
-    @dbm_tracked_method("test-dbms", parent_check_attr="_check", track_result_length=True)
-    def do_work_return_list(self):
-        return list(range(5))
-
-    @dbm_tracked_method("test-dbms", parent_check_attr="_check")
-    def test_tracked_exception(self):
-        raise Exception("oops")
-
 
 def test_dbm_async_job():
     check = AgentCheck()
@@ -182,45 +164,3 @@ def test_dbm_async_job_inactive_stop(aggregator):
     job.run_job_loop([])
     job._job_loop_future.result()
     aggregator.assert_metric("dd.test-dbms.async_job.inactive_stop", tags=['job:test-job'])
-
-
-class TestAgentCheck(AgentCheck):
-    def __init__(self, debug_stats_kwargs):
-        self._debug_stats_kwargs = debug_stats_kwargs
-        super(TestAgentCheck, self).__init__()
-
-    def debug_stats_kwargs(self):
-        return self._debug_stats_kwargs
-
-
-@pytest.mark.parametrize(
-    "debug_stats_kwargs",
-    [
-        {},
-        {
-            "tags": ["hey:there"],
-            "hostname": "tiberius",
-        },
-    ],
-)
-def test_dbm_tracked_method(aggregator, debug_stats_kwargs):
-    check = TestAgentCheck(debug_stats_kwargs) if debug_stats_kwargs else AgentCheck()
-    job = TestJob(check, run_sync=True)
-    job.run_job_loop([])
-    assert job._job_loop_future is None
-
-    tags = debug_stats_kwargs.pop('tags', [])
-    hostname = debug_stats_kwargs.pop('hostname', None)
-
-    aggregator.assert_metric("dd.test-dbms.operation.time", hostname=hostname, tags=tags + ["operation:do_work"])
-    aggregator.assert_metric(
-        "dd.test-dbms.operation.time", hostname=hostname, tags=tags + ["operation:do_work_return_list"]
-    )
-    aggregator.assert_metric(
-        "dd.test-dbms.operation.result.length", hostname=hostname, tags=tags + ["operation:do_work_return_list"]
-    )
-    aggregator.assert_metric(
-        "dd.test-dbms.operation.error",
-        hostname=hostname,
-        tags=tags + ["operation:test_tracked_exception", "error:<class 'Exception'>"],
-    )
