@@ -419,9 +419,9 @@ class Couchbase(AgentCheck):
             msg = "Error accessing the Index Statistics endpoint: %s: %s" % (url, str(e))
             self.log.warning(str(e))
             self.service_check(INDEX_STATS_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, self._tags, msg)
-            if int(self._version.split(".")[0]) >= 7:
+            if self._version or int(self._version.split(".")[0]) >= 7:
                 self.log.warning(
-                    "Index Stats Metric only available in Couchbase version 7+. Detected version: %", self._version
+                    "Index Stats Metrics are only available in Couchbase version 7+. Detected version: %", self._version
                 )
             return
 
