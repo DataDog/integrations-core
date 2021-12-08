@@ -3,6 +3,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
 import time
 
 required_attrs = [
@@ -25,6 +26,8 @@ def tracked_method(namespace, agent_check_getter=None, track_result_length=False
     the statsd methods (i.e. histogram, count, gauge, etc). This is useful when specific tags need to be added to
     these debug metrics in a standardized way.
 
+    Sent the environment variable DD_DISABLE_TRACKED_METHOD=true to disable tracking.
+
     :param namespace: the namespace to report as (i.e. if "sqlserver" then all metrics have the "dd.sqlserver.*" prefix)
     :param agent_check_getter: a function that gets the agent check from the class. The function must receive only a
     single parameter, `self`, and it must return a reference to the agent check. If the function is not provided then
@@ -35,6 +38,9 @@ def tracked_method(namespace, agent_check_getter=None, track_result_length=False
 
     def decorator(function):
         def wrapper(self, *args, **kwargs):
+            if os.getenv('DD_DISABLE_TRACKED_METHOD') == "true":
+                return function(self, *args, **kwargs)
+
             start_time = time.time()
 
             try:
