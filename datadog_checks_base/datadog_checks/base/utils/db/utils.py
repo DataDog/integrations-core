@@ -177,6 +177,13 @@ class DbRow:
             self.commands = metadata.get('commands', None)
             self.comments = metadata.get('comments', None)
 
+        def parse_tables_csv(self):
+            """
+            Parses out tables from the CSV format.
+            e.g tables_csv = 'metrics,samples' -> ['metrics', 'samples']
+            """
+            return self.tables_csv.split(',')
+
 
 class DBMAsyncJob(object):
     # Set an arbitrary high limit so that dbm async jobs (which aren't CPU bound) don't
