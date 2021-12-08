@@ -213,19 +213,19 @@ class Nginx(AgentCheck):
                 r = self._perform_request(http_url)
                 r.raise_for_status()
                 endpoints = r.json()
-                http_endpoints = {"http/" + url for url in endpoints}
+                http_endpoints = {'http/{}'.format(endpoint) for endpoint in endpoints}
                 available_endpoints = available_endpoints.union(http_endpoints)
 
             if self.use_plus_api_stream and stream_avail:
                 r = self._perform_request(stream_url)
                 r.raise_for_status()
                 endpoints = set(r.json())
-                stream_endpoints = {"stream/" + url for url in endpoints}
+                stream_endpoints = {'stream/{}'.format(endpoint) for endpoint in endpoints}
                 available_endpoints = available_endpoints.union(stream_endpoints)
 
-            supported_endpoints = self.get_supported_endpoints(available_endpoints)
+            supported_endpoints = self._supported_endpoints(available_endpoints)
             self.log.info("Available endpoints are %s", supported_endpoints)
-            return supported_endpoints
+            return chain(iteritems(supported_endpoints))
         except Exception as e:
             self.log.warning(
                 "Could not determine available endpoints from the API, "

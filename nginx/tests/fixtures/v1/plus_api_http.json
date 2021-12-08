@@ -1,1 +1,1 @@
-["nginx","processes","connections","slabs","http","stream","ssl"]
+["requests","server_zones","caches","keyvals","upstreams"]
