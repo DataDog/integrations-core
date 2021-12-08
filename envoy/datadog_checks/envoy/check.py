@@ -4,7 +4,7 @@
 import re
 from collections import defaultdict
 
-from six.moves.urllib.parse import urljoin
+from six.moves.urllib.parse import urljoin, urlparse, urlunparse
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 
@@ -97,15 +97,15 @@ class EnvoyCheckV2(OpenMetricsBaseCheckV2):
 
     DEFAULT_METRIC_LIMIT = 0
 
-    BASE_URL_RE = r'(.+\:\d*)\/.+'
-
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
         self.check_initializations.append(self.configure_additional_transformers)
         openmetrics_endpoint = self.instance.get('openmetrics_endpoint')
         self.base_url = None
         try:
-            self.base_url = re.match(self.BASE_URL_RE, openmetrics_endpoint).groups()[0]
+            parts = urlparse(openmetrics_endpoint)
+            self.base_url = urlunparse(parts[:2] + ('', '', None, None))
+
         except Exception as e:
             self.log.debug("Unable to determine the base url for version collection: %s", str(e))
 
