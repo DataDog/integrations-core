@@ -39,7 +39,7 @@ nginx.cache.miss.responses_written_count,count,,response,,The total number of re
 nginx.cache.revalidated.bytes,gauge,,byte,,The total number of bytes read from the cache,0,nginx,cache revalidated bytes
 nginx.cache.revalidated.bytes_count,count,,byte,,The total number of bytes read from the cache (shown as count),0,nginx,cache revalidated bytes
 nginx.cache.revalidated.responses,gauge,,response,,The total number of responses read from the cache,0,nginx,cache revalidated responses
-nginx.cache.revalidated.response_count,count,,response,,The total number of responses read from the cache (shown as count),0,nginx,cache revalidated responses
+nginx.cache.revalidated.responses_count,count,,response,,The total number of responses read from the cache (shown as count),0,nginx,cache revalidated responses
 nginx.cache.size,gauge,,response,,The current size of the cache,0,nginx,cache size
 nginx.cache.stale.bytes,gauge,,byte,,The total number of bytes read from the cache,0,nginx,cache stale bytes
 nginx.cache.stale.bytes_count,count,,byte,,The total number of bytes read from the cache (shown as count),0,nginx,cache stale bytes
@@ -57,6 +57,25 @@ nginx.connections.dropped_count,count,,connection,,The total number of dropped c
 nginx.connections.idle,gauge,,connection,,The current number of idle client connections.,0,nginx,conns idle
 nginx.generation,gauge,,refresh,,The total number of configuration reloads,0,nginx,generation
 nginx.generation_count,count,,refresh,,The total number of configuration reloads (shown as count),0,nginx,generation
+nginx.limit_conn.passed,count,,connection,,The total number of connections that were neither limited nor accounted as limited.,0,nginx,limit conn passed
+nginx.limit_conn.rejected,count,,connection,,The total number of connections that were rejected.,0,nginx,stream limit conn rejected
+nginx.limit_conn.rejected_dry_run,count,,connection,,The total number of connections accounted as rejected in the dry run mode.,0,nginx,limit conn rejected dry
+nginx.limit_req.delayed_dry_run,count,,request,,The total number of requests accounted as delayed in the dry run mode.,0,nginx,limit req delay dry
+nginx.limit_req.delayed,count,,request,,The total number of requests that were delayed.,0,nginx,limit req delay
+nginx.limit_req.passed,count,,request,,The total number of requests that were neither limited nor accounted as limited.,0,nginx,limit req passed
+nginx.limit_req.rejected_dry_run,count,,request,,The total number of requests accounted as rejected in the dry run mode.,0,nginx,limit req reject dry
+nginx.limit_req.rejected,count,,request,,The total number of requests that were rejected.,0,nginx,limit req reject
+nginx.location_zone.discarded,count,,request,,The total number of requests completed without sending a response.,0,nginx,loc zone discard
+nginx.location_zone.received,count,,byte,,The total number of bytes received from clients.,0,nginx,loc zone recieve
+nginx.location_zone.requests,count,,request,,The total number of client requests received from clients.,0,nginx,loc zone request
+nginx.location_zone.responses.1xx,count,,response,,The total number of responses with 1xx status codes.,0,nginx,loc zone 1xx
+nginx.location_zone.responses.2xx,count,,response,,The total number of responses with 2xx status codes.,0,nginx,loc zone 2xx
+nginx.location_zone.responses.3xx,count,,response,,The total number of responses with 3xx status codes.,0,nginx,loc zone 3xx
+nginx.location_zone.responses.4xx,count,,response,,The total number of responses with 4xx status codes.,0,nginx,loc zone 4xx
+nginx.location_zone.responses.5xx,count,,response,,The total number of responses with 5xx status codes.,0,nginx,loc zone 5xx
+nginx.location_zone.responses.code,count,,response,,The total number of responses per each status code.,0,nginx,loc zone code
+nginx.location_zone.responses.total,count,,response,,The total number of responses sent to clients.,0,nginx,loc zone total
+nginx.location_zone.sent,count,,byte,,The total number of bytes sent to clients.,0,nginx,loc zone sent
 nginx.load_timestamp,gauge,,millisecond,,Time of the last reload of configuration (time since Epoch).,0,nginx,load timestamp
 nginx.pid,gauge,,,,The ID of the worker process that handled status request.,0,nginx,pid
 nginx.ppid,gauge,,,,The ID of the master process that started the worker process,0,nginx,ppid
@@ -65,6 +84,17 @@ nginx.processes.respawned_count,count,,process,,The total number of abnormally t
 nginx.requests.current,gauge,,request,,The current number of client requests.,0,nginx,req current
 nginx.requests.total,gauge,,request,,The total number of client requests.,0,nginx,req total
 nginx.requests.total_count,count,,request,,The total number of client requests (shown as count).,0,nginx,req total
+nginx.resolver.requests.addr,count,,request,,The total number of requests to resolve addresses to names.,0,nginx,resolve zone req addr
+nginx.resolver.requests.name,count,,request,,The total number of requests to resolve names to addresses.,0,nginx,resolve zone req name
+nginx.resolver.requests.srv,count,,request,,The total number of requests to resolve SRV records.,0,nginx,resolve zone req srv
+nginx.resolver.responses.formerr,count,,response,,The total number of FORMERR (Format error) responses.,0,nginx,resolve zone req formerr
+nginx.resolver.responses.noerror,count,,response,,The total number of successful responses.,0,nginx,resolve zone req noerror
+nginx.resolver.responses.notimp,count,,response,,The total number of NOTIMP (Unimplemented) responses.,0,nginx,resolve zone req notimp
+nginx.resolver.responses.nxdomain,count,,response,,The total number of NXDOMAIN (Host not found) responses.,0,nginx,resolve zone req nxdomain
+nginx.resolver.responses.refused,count,,response,,The total number of REFUSED (Operation refused) responses.,0,nginx,resolve zone req refused
+nginx.resolver.responses.servfail,count,,response,,The total number of SERVFAIL (Server failure) responses.,0,nginx,resolve zone req servfail
+nginx.resolver.responses.timedout,count,,request,,The total number of timed out requests.,0,nginx,resolve zone req timedout
+nginx.resolver.responses.unknown,count,,request,,The total number of requests completed with an unknown error.,0,nginx,resolve zone req unknown
 nginx.server_zone.discarded,gauge,,request,,The total number of requests completed without sending a response.,0,nginx,server zone discarded
 nginx.server_zone.discarded_count,count,,request,,The total number of requests completed without sending a response (shown as count).,0,nginx,server zone discarded
 nginx.server_zone.processing,gauge,,request,,The number of client requests that are currently being processed.,0,nginx,server zone processing
@@ -72,6 +102,7 @@ nginx.server_zone.received,gauge,,byte,,The total amount of data received from c
 nginx.server_zone.received_count,count,,byte,,The total amount of data received from clients (shown as count).,0,nginx,server zone rcvd
 nginx.server_zone.requests,gauge,,request,,The total number of client requests received from clients.,0,nginx,server zone req
 nginx.server_zone.requests_count,count,,request,,The total number of client requests received from clients (shown as count).,0,nginx,server zone req
+nginx.server_zone.responses.code,count,,response,,"The total number of responses per each status code, tagged with status code number.",0,nginx,server zone resp code
 nginx.server_zone.responses.1xx,gauge,,response,,The number of responses with 1xx status code.,0,nginx,server zone resp 1xx
 nginx.server_zone.responses.1xx_count,count,,response,,The number of responses with 1xx status code (shown as count).,0,nginx,server zone resp 1xx
 nginx.server_zone.responses.2xx,gauge,,response,,The number of responses with 2xx status code.,0,nginx,server zone resp 2xx
@@ -101,6 +132,9 @@ nginx.ssl.handshakes_failed_count,count,,,,The total number of failed SSL handsh
 nginx.ssl.session_reuses,gauge,,,,The total number of session reuses during SSL handshake.,0,nginx,ssl session reuses
 nginx.ssl.session_reuses_count,count,,,,The total number of session reuses during SSL handshake (shown as count).,0,nginx,ssl session reuses
 nginx.stream.server_zone.connections,gauge,,connection,,The total number of connections accepted from clients,0,nginx,stream server zone discarded
+nginx.stream.limit_conn.passed,count,,connection,,The total number of connections that were neither limited nor accounted as limited.,0,nginx,stream limit conn passed
+nginx.stream.limit_conn.rejected,count,,connection,,The total number of connections that were rejected.,0,nginx,stream limit conn rejected
+nginx.stream.limit_conn.rejected_dry_run,count,,connection,,The total number of connections accounted as rejected in the dry run mode.,0,nginx,stream limit conn rejected dry
 nginx.stream.server_zone.connections_count,count,,connection,,The total number of connections accepted from clients (shown as count),0,nginx,stream server zone discarded
 nginx.stream.server_zone.discarded,gauge,,request,,The total number of requests completed without sending a response.,0,nginx,stream server zone discarded
 nginx.stream.server_zone.discarded_count,count,,request,,The total number of requests completed without sending a response (shown as count).,0,nginx,stream server zone discarded
@@ -127,6 +161,7 @@ nginx.stream.upstream.peers.connections,gauge,,connection,,The total number of c
 nginx.stream.upstream.peers.connections_count,count,,connection,,The total number of client connections forwarded to this server (shown as count).,0,nginx,stream upstr peers conn
 nginx.stream.upstream.peers.downstart,gauge,,millisecond,,The time (time since Epoch) when the server became "unavail" or "checking" or "unhealthy",0,nginx,stream upstr peers downstart
 nginx.stream.upstream.peers.downtime,gauge,,millisecond,,Total time the server was in the "unavail" or "checking" or "unhealthy" states.,-1,nginx,stream upstr peers downtime
+nginx.stream.upstream.peers.downtime_count,count,,millisecond,,Total time the server was in the "unavail" or "checking" or "unhealthy" states.,-1,nginx,stream upstr peers downtime ct
 nginx.stream.upstream.peers.fails,gauge,,error,,The total number of unsuccessful attempts to communicate with the server.,-1,nginx,stream upstr peers fails
 nginx.stream.upstream.peers.fails_count,count,,error,,The total number of unsuccessful attempts to communicate with the server (shown as count).,-1,nginx,stream upstr peers fails
 nginx.stream.upstream.peers.health_checks.checks,gauge,,request,,The total number of health check requests made.,0,nginx,stream upstr peers health checks
@@ -153,6 +188,7 @@ nginx.upstream.peers.active,gauge,,connection,,The current number of active conn
 nginx.upstream.peers.backup,gauge,,,,A boolean value indicating whether the server is a backup server.,0,nginx,upstr peers backup
 nginx.upstream.peers.downstart,gauge,,millisecond,,The time (since Epoch) when the server became "unavail" or "unhealthy".,0,nginx,upstr peers downstart
 nginx.upstream.peers.downtime,gauge,,millisecond,,Total time the server was in the "unavail" and "unhealthy" states.,0,nginx,upstr peers downtime
+nginx.upstream.peers.downtime_count,count,,millisecond,,Total time the server was in the "unavail" and "unhealthy" states.,0,nginx,upstr peers downtime ct
 nginx.upstream.peers.fails,gauge,,,,The total number of unsuccessful attempts to communicate with the server.,-1,nginx,upstr peers fails
 nginx.upstream.peers.fails_count,count,,,,The total number of unsuccessful attempts to communicate with the server (shown as count).,-1,nginx,upstr peers fails
 nginx.upstream.peers.header_time,gauge,,millisecond,,The total amount of time spent on receiving the response header from the upstream server.,0,nginx,upstr peers header tm
@@ -169,30 +205,32 @@ nginx.upstream.peers.received,gauge,,byte,,The total amount of data received fro
 nginx.upstream.peers.received_count,count,,byte,,The total amount of data received from this server (shown as count).,0,nginx,upstr peers rec
 nginx.upstream.peers.requests,gauge,,request,,The total number of client requests forwarded to this server.,0,nginx,upstr peers req
 nginx.upstream.peers.requests_count,count,,request,,The total number of client requests forwarded to this server (shown as count).,0,nginx,upstr peers req
-nginx.upstream.peers.response_time,gauge,,millisecond,,The average time to receive the last byte of data.,0,nginx,upstr peers resp time
-nginx.upstream.peers.responses.1xx,gauge,,response,,The number of responses with 1xx status code.,0,nginx,upstr peers resp 1xx
-nginx.upstream.peers.responses.1xx_count,count,,response,,The number of responses with 1xx status code (shown as count).,0,nginx,upstr peers resp 1xx count
-nginx.upstream.peers.responses.2xx,gauge,,response,,The number of responses with 2xx status code.,0,nginx,upstr peers resp 2xx
-nginx.upstream.peers.responses.2xx_count,count,,response,,The number of responses with 2xx status code (shown as count).,0,nginx,upstr peers resp 2xx count
-nginx.upstream.peers.responses.3xx,gauge,,response,,The number of responses with 3xx status code.,0,nginx,upstr peers resp 3xx
-nginx.upstream.peers.responses.3xx_count,count,,response,,The number of responses with 3xx status code (shown as count).,0,nginx,upstr peers resp 3xx count
-nginx.upstream.peers.responses.4xx,gauge,,response,,The number of responses with 4xx status code.,0,nginx,upstr peers resp 4xx
-nginx.upstream.peers.responses.4xx_count,count,,response,,The number of responses with 4xx status code (shown as count).,0,nginx,upstr peers resp 4xx count
-nginx.upstream.peers.responses.5xx,gauge,,response,,The number of responses with 5xx status code.,0,nginx,upstr peers resp 5xx
+nginx.upstream.peers.response_time,gauge,,millisecond,,The average time to receive the last byte of data from this server.,0,nginx,upstr peers resp time
+nginx.upstream.peers.responses.1xx,gauge,,response,,The number of responses with 1xx status code from this server.,0,nginx,upstr peers resp 1xx
+nginx.upstream.peers.responses.1xx_count,count,,response,,The number of responses with 1xx status code (shown as count) from this server.,0,nginx,upstr peers resp 1xx count
+nginx.upstream.peers.responses.2xx,gauge,,response,,The number of responses with 2xx status code from this server.,0,nginx,upstr peers resp 2xx
+nginx.upstream.peers.responses.2xx_count,count,,response,,The number of responses with 2xx status code (shown as count) from this server.,0,nginx,upstr peers resp 2xx count
+nginx.upstream.peers.responses.3xx,gauge,,response,,The number of responses with 3xx status code from this server.,0,nginx,upstr peers resp 3xx
+nginx.upstream.peers.responses.3xx_count,count,,response,,The number of responses with 3xx status code (shown as count) from this server.,0,nginx,upstr peers resp 3xx count
+nginx.upstream.peers.responses.4xx,gauge,,response,,The number of responses with 4xx status code from this server.,0,nginx,upstr peers resp 4xx
+nginx.upstream.peers.responses.4xx_count,count,,response,,The number of responses with 4xx status code (shown as count) from this server.,0,nginx,upstr peers resp 4xx count
+nginx.upstream.peers.responses.5xx,gauge,,response,,The number of responses with 5xx status code from this server.,0,nginx,upstr peers resp 5xx
 nginx.upstream.peers.responses.5xx_count,count,,response,,The number of responses with 5xx status code (shown as count).,0,nginx,upstr peers resp 5xx count
-nginx.upstream.peers.responses.total,gauge,,response,,The total number of responses obtained from this server.,0,nginx,upstr peers resp
-nginx.upstream.peers.responses.total_count,count,,response,,The total number of responses obtained from this server (shown as count).,0,nginx,upstr peers resp
+nginx.upstream.peers.responses.code,count,,response,,The total number of responses from this server per each status code.,0,nginx,upstr peers resp code
+nginx.upstream.peers.responses.total,gauge,,response,,The total number of responses obtained from this server.,0,nginx,upstr peers resp total
+nginx.upstream.peers.responses.total_count,count,,response,,The total number of responses obtained from this server (shown as count).,0,nginx,upstr peers resp total ct
 nginx.upstream.peers.selected,gauge,,millisecond,,The time (since Epoch) when the server was last selected to process a request (1.7.5).,0,nginx,upstr peers sel
 nginx.upstream.peers.sent,gauge,,byte,,The total amount of data sent to this server.,0,nginx,upstr peers sent
 nginx.upstream.peers.sent_count,count,,byte,,The total amount of data sent to this server (shown as count).,0,nginx,upstr peers sent
 nginx.upstream.peers.unavail,gauge,,,,How many times the server became unavailable for client requests (state "unavail") due to the number of unsuccessful attempts reaching the max_fails threshold.,0,nginx,upstr peers unavail
 nginx.upstream.peers.unavail_count,count,,,,How many times the server became unavailable for client requests (state "unavail") due to the number of unsuccessful attempts reaching the max_fails threshold (shown as count).,0,nginx,upstr peers unavail
 nginx.upstream.peers.weight,gauge,,,,Weight of the server.,0,nginx,upstr peers weight
-nginx.stream.zone_sync.status.nodes_online,gauge,,,,The number of peers this node is connected to.,0,nginx,Count of nodes online.
-nginx.stream.zone_sync.status.msgs_in,gauge,,message,,The number of messages received by this node.,0,nginx,Total count of messages received.
-nginx.stream.zone_sync.status.msgs_out,gauge,,message,,The number of messages sent by this node.,0,nginx,Total count of messages sent.
-nginx.stream.zone_sync.status.bytes_in,gauge,,byte,,The number of bytes received by this node.,0,nginx,Total count of bytes received.
-nginx.stream.zone_sync.status.bytes_out,gauge,,byte,,The number of bytes sent by this node.,0,nginx,Total coun tof bytes sent.
-nginx.stream.zone_sync.zone.records_total,gauge,,,,The total number of records stored in the shared memory zone.,0,nginx,Count of records in memory zone.
-nginx.stream.zone_sync.zone.records_pending,gauge,,,,The number of records that need to be sent to the cluster.,0,nginx, Count of records pending.
+nginx.stream.zone_sync.status.nodes_online,gauge,,,,The number of peers this node is connected to.,0,nginx,Count of nodes online
+nginx.stream.zone_sync.status.msgs_in,gauge,,message,,The number of messages received by this node.,0,nginx,Total count of messages received
+nginx.stream.zone_sync.status.msgs_out,gauge,,message,,The number of messages sent by this node.,0,nginx,Total count of messages sent
+nginx.stream.zone_sync.status.bytes_in,gauge,,byte,,The number of bytes received by this node.,0,nginx,Total count of bytes received
+nginx.stream.zone_sync.status.bytes_out,gauge,,byte,,The number of bytes sent by this node.,0,nginx,Total count of bytes sent
+nginx.stream.zone_sync.zone.records_total,gauge,,record,,The number of records stored in the shared memory zone.,0,nginx,stream zone records total
+nginx.stream.zone_sync.zone.records_total_count,count,,record,,The total number of records stored in the shared memory zone.,0,nginx,stream zone records total ct
+nginx.stream.zone_sync.zone.records_pending,gauge,,record,,The number of records that need to be sent to the cluster.,0,nginx, stream zone records pending
 nginx.version,gauge,,,,Version of nginx.,0,nginx,version

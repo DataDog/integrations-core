@@ -4,6 +4,11 @@
 import pytest
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
+def dd_environment(instance):
+    yield instance
+
+
+@pytest.fixture(scope='session')
 def instance():
-    return {}
+    return {'prometheus_url': 'http://localhost:10249/metrics'}
