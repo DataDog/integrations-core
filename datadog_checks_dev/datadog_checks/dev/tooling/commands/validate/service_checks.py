@@ -135,15 +135,15 @@ def service_checks(check, sync):
 
             # check
             check = service_check.get('check')
-            invalid_matches = INVALID_CHAR_RE.findall(check)
+            invalid_chars = INVALID_CHAR_RE.findall(check)
             invalid_seq = INVALID_SEQ_RE.findall(check)
             if not check or not isinstance(check, str):
                 file_failed = True
                 display_queue.append((echo_failure, '  required non-null string: check'))
-            elif invalid_matches or invalid_seq:
+            elif invalid_chars or invalid_seq:
                 file_failed = True
-                if invalid_matches:
-                    display_queue.append((echo_failure, f'  {check} contains one or more invalid characters: {invalid_matches}'))
+                if invalid_chars:
+                    display_queue.append((echo_failure, f'  {check} contains one or more invalid characters: {invalid_chars}'))
                 if invalid_seq:
                     display_queue.append((echo_failure, f'  {check} contains one or more invalid sequences: {invalid_seq}'))
             else:
