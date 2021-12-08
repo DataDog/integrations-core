@@ -70,31 +70,19 @@ def tracked_method(agent_check_getter=None, track_result_length=False):
                 result = function(self, *args, **kwargs)
 
                 elapsed_ms = (time.time() - start_time) * 1000
-                check.histogram(
-                    "dd.{}.operation.time".format(check_name),
-                    elapsed_ms,
-                    **stats_kwargs,
-                )
+                check.histogram("dd.{}.operation.time".format(check_name), elapsed_ms, **stats_kwargs)
 
                 check.log.debug("[%s.%s] operation completed in %s ms", check_name, function.__name__, elapsed_ms)
 
                 if track_result_length and result is not None:
                     check.log.debug("[%s.%s] received result length %s", check_name, function.__name__, len(result))
-                    check.gauge(
-                        "dd.{}.operation.result.length".format(check_name),
-                        len(result),
-                        **stats_kwargs,
-                    )
+                    check.gauge("dd.{}.operation.result.length".format(check_name), len(result), **stats_kwargs)
 
                 return result
             except Exception as e:
                 check.log.exception("operation %s error", function.__name__)
                 stats_kwargs['tags'] += ["error:{}".format(type(e))]
-                check.count(
-                    "dd.{}.operation.error".format(check_name),
-                    1,
-                    **stats_kwargs,
-                )
+                check.count("dd.{}.operation.error".format(check_name), 1, **stats_kwargs)
                 raise
 
         return wrapper
