@@ -173,8 +173,9 @@ class DbRow:
             # type: (Dict[str]) -> None
             if not metadata:
                 metadata = {}
-            self.comments = metadata.get('comments', None)
             self.tables_csv = metadata.get('tables_csv', None)
+            self.commands = metadata.get('commands', None)
+            self.comments = metadata.get('comments', None)
 
 
 class DBMAsyncJob(object):

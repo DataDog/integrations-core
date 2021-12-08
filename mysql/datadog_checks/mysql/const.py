@@ -94,7 +94,7 @@ INNODB_VARS = {
 BINLOG_VARS = {'Binlog_space_usage_bytes': ('mysql.binlog.disk_use', GAUGE)}
 
 # Additional Vars found in "SHOW STATUS;"
-# Will collect if [FLAG NAME] is True
+# Will collect if [extra_status_metrics] is True
 OPTIONAL_STATUS_VARS = {
     'Binlog_cache_disk_use': ('mysql.binlog.cache_disk_use', GAUGE),
     'Binlog_cache_use': ('mysql.binlog.cache_use', GAUGE),
