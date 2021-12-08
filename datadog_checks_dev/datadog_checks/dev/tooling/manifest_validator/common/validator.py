@@ -127,6 +127,11 @@ class MetricsMetadataValidator(BaseManifestValidator):
 
 
 class MetricToCheckValidator(BaseManifestValidator):
+    CHECKS_EXCLUDE_LIST = {
+        'agent_metrics',  # this (agent-internal) check doesn't guarantee a list of stable metrics for now
+        'moogsoft',
+        'snmp',
+    }
     METRIC_TO_CHECK_EXCLUDE_LIST = {
         'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.
         'riakcs.bucket_list_pool.workers',  # RiakCS 2.1 metric, but metadata.csv lists RiakCS 2.0 metrics only.
@@ -136,7 +141,7 @@ class MetricToCheckValidator(BaseManifestValidator):
     PRICING_PATH = {V1: "/pricing", V2: "/pricing"}
 
     def validate(self, check_name, decoded, _):
-        if not self.should_validate() or check_name == 'snmp' or check_name == 'moogsoft':
+        if not self.should_validate() or check_name in self.CHECKS_EXCLUDE_LIST:
             return
 
         metadata_path = self.METADATA_PATH[self.version]
