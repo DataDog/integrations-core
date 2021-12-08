@@ -24,6 +24,7 @@ except ImportError as e:
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'oracle'
 MAX_CUSTOM_RESULTS = 100
+VALID_PROTOCOLS = ['TCP', 'TCPS']
 
 
 class Oracle(AgentCheck):
@@ -92,6 +93,9 @@ class Oracle(AgentCheck):
     def validate_config(self):
         if not self._server or not self._user:
             raise ConfigurationError("Oracle host and user are needed")
+
+        if self._protocol.upper() not in VALID_PROTOCOLS:
+            raise ConfigurationError("Protocol %s is not valid, must either be TCP or TCPS" % self._protocol)
 
     def execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:

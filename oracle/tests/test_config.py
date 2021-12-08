@@ -25,11 +25,21 @@ def test__get_config(check, instance):
     assert len(check._query_manager.queries) == 3
 
 
-def test_check_misconfig(instance):
+def test_check_misconfig_null_server(instance):
     """
-    Test bad config values
+    Test null server
     """
     instance['server'] = None
+    check = Oracle(CHECK_NAME, {}, [instance])
+    with pytest.raises(ConfigurationError):
+        check.validate_config()
+
+
+def test_check_misconfig_invalid_protocol(instance):
+    """
+    Test invalid protocol
+    """
+    instance['protocol'] = 'TCPP'
     check = Oracle(CHECK_NAME, {}, [instance])
     with pytest.raises(ConfigurationError):
         check.validate_config()
