@@ -145,11 +145,20 @@ def service_checks(check, sync):
             elif invalid_chars or invalid_seq:
                 file_failed = True
                 if invalid_chars:
-                    display_queue.append((echo_failure, f'  {check} contains one or more invalid characters: {invalid_chars}'))
+                    display_queue.append(
+                        (echo_failure, f'  {check} contains one or more invalid characters: {invalid_chars}')
+                    )
                 if invalid_seq:
-                    display_queue.append((echo_failure, f'  {check} contains one or more invalid sequences: {invalid_seq}'))
+                    display_queue.append(
+                        (echo_failure, f'  {check} contains one or more invalid sequences: {invalid_seq}')
+                    )
                 if invalid_end:
-                    display_queue.append((echo_failure, f'  {check} contains the following invalid start or end character: {invalid_end}'))
+                    display_queue.append(
+                        (
+                            echo_failure,
+                            f'  {check} contains the following invalid start or end character: {invalid_end}',
+                        )
+                    )
             else:
                 if check in unique_checks:
                     file_failed = True
