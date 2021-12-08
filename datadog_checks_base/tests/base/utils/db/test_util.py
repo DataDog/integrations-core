@@ -89,12 +89,6 @@ class TestJob(DBMAsyncJob):
 
     def run_job(self):
         self._check.count("dbm.async_job_test.run_job", 1)
-        self.do_work()
-        self.do_work_return_list()
-        try:
-            self.test_tracked_exception()
-        except Exception:
-            return
 
 
 def test_dbm_async_job():
