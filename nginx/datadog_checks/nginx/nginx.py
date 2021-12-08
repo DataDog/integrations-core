@@ -201,7 +201,6 @@ class Nginx(AgentCheck):
         then it will fall back to query all of the known endpoints available in the given NGINX Plus version.
         """
         available_endpoints = set()
-
         base_url = "/".join([self.url, self.plus_api_version])
         http_url = "/".join([self.url, self.plus_api_version, "http"])
         stream_url = "/".join([self.url, self.plus_api_version, "stream"])
@@ -215,6 +214,7 @@ class Nginx(AgentCheck):
             stream_avail = "stream" in available_endpoints
 
             if http_avail:
+                self.log.debug("Querying http API url: %s", http_url)
                 r = self._perform_request(http_url)
                 r.raise_for_status()
                 endpoints = r.json()
@@ -222,14 +222,17 @@ class Nginx(AgentCheck):
                 available_endpoints = available_endpoints.union(http_endpoints)
 
             if self.use_plus_api_stream and stream_avail:
+                self.log.debug("Querying stream API url: %s", stream_url)
                 r = self._perform_request(stream_url)
                 r.raise_for_status()
                 endpoints = set(r.json())
                 stream_endpoints = {'stream/{}'.format(endpoint) for endpoint in endpoints}
                 available_endpoints = available_endpoints.union(stream_endpoints)
 
+            self.log.debug("Available endpoints are %s", available_endpoints)
+
             supported_endpoints = self._supported_endpoints(available_endpoints)
-            self.log.info("Available endpoints are %s", supported_endpoints)
+            self.log.debug("Supported endpoints are %s", supported_endpoints)
             return chain(iteritems(supported_endpoints))
         except Exception as e:
             self.log.warning(
