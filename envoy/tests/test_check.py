@@ -3,7 +3,7 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-from .common import DEFAULT_INSTANCE, FLAKY_METRICS, PROMETHEUS_METRICS, requires_new_environment
+from .common import DEFAULT_INSTANCE, ENVOY_VERSION, FLAKY_METRICS, PROMETHEUS_METRICS, requires_new_environment
 
 pytestmark = [requires_new_environment]
 
@@ -38,3 +38,23 @@ def test_check(aggregator, dd_run_check, check):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_metadata_integration(aggregator, dd_run_check, datadog_agent, check):
+    c = check(DEFAULT_INSTANCE)
+    c.check_id = 'test:123'
+    dd_run_check(c)
+
+    major, minor, patch = ENVOY_VERSION.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': ENVOY_VERSION,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))

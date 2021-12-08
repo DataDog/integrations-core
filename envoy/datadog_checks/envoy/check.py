@@ -4,9 +4,14 @@
 import re
 from collections import defaultdict
 
-from datadog_checks.base import OpenMetricsBaseCheckV2
+from six.moves.urllib.parse import urljoin
+
+from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 
 from .metrics import PROMETHEUS_METRICS_MAP
+from .utils import _get_server_info
+
+ENVOY_VERSION = {'istio_build': {'type': 'metadata', 'label': 'tag', 'name': 'version'}}
 
 LABEL_MAP = {
     'cluster_name': 'envoy_cluster',
@@ -87,14 +92,26 @@ METRIC_WITH_LABEL_NAME = {
 }
 
 
-class EnvoyCheck(OpenMetricsBaseCheckV2):
+class EnvoyCheckV2(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'envoy'
 
     DEFAULT_METRIC_LIMIT = 0
 
+    BASE_URL_RE = r'(.+\:\d*)\/.+'
+
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
         self.check_initializations.append(self.configure_additional_transformers)
+        openmetrics_endpoint = self.instance.get('openmetrics_endpoint')
+        self.base_url = None
+        try:
+            self.base_url = re.match(self.BASE_URL_RE, openmetrics_endpoint).groups()[0]
+        except Exception as e:
+            self.log.debug("Unable to determine the base url for version collection: %s", str(e))
+
+    def check(self, _):
+        self._collect_metadata()
+        super(EnvoyCheckV2, self).check(None)
 
     def get_default_config(self):
         return {
@@ -123,3 +140,17 @@ class EnvoyCheck(OpenMetricsBaseCheckV2):
             self.scrapers[self.instance['openmetrics_endpoint']].metric_transformer.add_custom_transformer(
                 metric, self.configure_transformer_label_in_name(metric, **data), pattern=True
             )
+
+    @AgentCheck.metadata_entrypoint
+    def _collect_metadata(self):
+        # Replace in favor of built-in Openmetrics metadata when PR is available
+        # https://github.com/envoyproxy/envoy/pull/18991
+        if not self.base_url:
+            self.log.debug("Skipping server info collection due to malformed url: %s", self.base_url)
+            return
+        # From http://domain/thing/stats to http://domain/thing/server_info
+        server_info_url = urljoin(self.base_url, 'server_info')
+        raw_version = _get_server_info(server_info_url, self.log, self.http)
+
+        if raw_version:
+            self.set_metadata('version', raw_version)

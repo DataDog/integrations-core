@@ -8,6 +8,7 @@ HERE = get_here()
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 DOCKER_DIR = os.path.join(HERE, 'docker')
 ENVOY_LEGACY = os.getenv('ENVOY_LEGACY')
+ENVOY_VERSION = os.getenv('ENVOY_VERSION')
 
 HOST = get_docker_hostname()
 PORT = '8001'
