@@ -148,7 +148,7 @@ class Oracle(AgentCheck):
         if self._cached_connection is None:
             if self.can_use_oracle_client():
                 dsn = self._get_dsn()
-                self.log.debug("Connecting via Oracle Instant Client with DSN: " + dsn)
+                self.log.debug("Connecting via Oracle Instant Client with DSN: %s", dsn)
                 self._cached_connection = cx_Oracle.connect(user=self._user, password=self._password, dsn=dsn)
                 self.log.debug("Connected to Oracle DB using Oracle Instant Client")
             elif JDBC_IMPORT_ERROR:
@@ -205,7 +205,7 @@ class Oracle(AgentCheck):
         else:
             connect_string = self.JDBC_CONNECTION_STRING.format(self._server, self._service)
 
-        self.log.debug("Connecting via JDBC with connection string: " + connect_string)
+        self.log.debug("Connecting via JDBC with connection string: %s", connect_string)
         try:
             if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
                 jpype.attachThreadToJVM()
