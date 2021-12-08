@@ -97,7 +97,7 @@ class SqlserverActivity(DBMAsyncJob):
     def __init__(self, check):
         self.check = check
         self.log = check.log
-        collection_interval = float(check.activity_config.get('collect' 'ion_interval', DEFAULT_COLLECTION_INTERVAL))
+        collection_interval = float(check.activity_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL))
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
         self.collection_interval = collection_interval
