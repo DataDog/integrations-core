@@ -37,6 +37,11 @@ instances:
 
     ## @param protocol - string - optional - default: TCP
     ## The protocol to connect to the Oracle Database Server. Valid protocols include TCP and TCPS.
+    ##
+    ## When connecting to Oracle Database via JDBC, `jdbc_truststore` and `jdbc_truststore_type` are required.
+    ## More information can be found from Oracle Database's whitepaper:
+    ##
+    ## https://www.oracle.com/technetwork/topics/wp-oracle-jdbc-thin-ssl-130128.pdf
     #
     # protocol: TCP
 
@@ -62,8 +67,7 @@ instances:
     # jdbc_truststore: <JDBC_TRUSTSTORE>
 
     ## @param jdbc_truststore_type - string - optional
-    ## The JDBC truststore file type.
-    ## Supported truststore types include JKS, SSO, and PKCS12.
+    ## The JDBC truststore file type. Supported truststore types include JKS, SSO, and PKCS12.
     #
     # jdbc_truststore_type: <JDBC_TRUSTSTORE_TYPE>
 

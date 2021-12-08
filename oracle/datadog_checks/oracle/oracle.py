@@ -21,6 +21,7 @@ except ImportError as e:
     jpype = None
     JDBC_IMPORT_ERROR = e
 
+
 EVENT_TYPE = SOURCE_TYPE_NAME = 'oracle'
 MAX_CUSTOM_RESULTS = 100
 
