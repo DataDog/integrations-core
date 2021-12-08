@@ -15,10 +15,10 @@ def agent_check_getter(self):
     return self.check
 
 
-class TestAgentCheck(AgentCheck):
+class HelloCheck(AgentCheck):
     def __init__(self, debug_stats_kwargs):
         self._debug_stats_kwargs = debug_stats_kwargs
-        super(TestAgentCheck, self).__init__()
+        super(HelloCheck, self).__init__(name="hello")
 
     def debug_stats_kwargs(self):
         return self._debug_stats_kwargs
@@ -41,15 +41,15 @@ class TestJob:
 
         return result
 
-    @tracked_method("hello", agent_check_getter=agent_check_getter)
+    @tracked_method(agent_check_getter=agent_check_getter)
     def do_work(self):
         return EXPECTED_RESULT
 
-    @tracked_method("hello", agent_check_getter=agent_check_getter, track_result_length=True)
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def do_work_return_list(self):
         return list(range(5))
 
-    @tracked_method("hello", agent_check_getter=agent_check_getter)
+    @tracked_method(agent_check_getter=agent_check_getter)
     def test_tracked_exception(self):
         raise Exception("oops")
 
@@ -67,7 +67,7 @@ class TestJob:
 @pytest.mark.parametrize("disable_tracking", [True, False])
 def test_tracked_method(aggregator, debug_stats_kwargs, disable_tracking):
     os.environ['DD_DISABLE_TRACKED_METHOD'] = str(disable_tracking).lower()
-    check = TestAgentCheck(debug_stats_kwargs) if debug_stats_kwargs else AgentCheck()
+    check = HelloCheck(debug_stats_kwargs) if debug_stats_kwargs else AgentCheck(name="hello")
     job = TestJob(check)
     result = job.run_job()
     assert result == EXPECTED_RESULT
