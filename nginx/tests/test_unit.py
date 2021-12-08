@@ -12,7 +12,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nginx import Nginx
 from datadog_checks.nginx.metrics import COUNT_METRICS
 
-from .common import ALL_PLUS_METRICS, CHECK_NAME, FIXTURES_PATH, TAGS
+from .common import ALL_PLUS_METRICS, CHECK_NAME, FIXTURES_PATH, HOST, PORT, TAGS
 from .utils import mocked_perform_request
 
 
@@ -543,3 +543,41 @@ def test_get_enabled_endpoints(check, instance_plus_v7, version, use_stream, exp
 
     for log_line in LOG_LINES_TO_ASSERT:
         assert log_line in caplog.text
+
+
+@pytest.mark.parametrize("only_query_enabled_endpoints", [(True), (False)])
+def test_only_query_enabled_endpoints(check, instance_plus_v7, only_query_enabled_endpoints, caplog):
+    caplog.clear()
+    caplog.set_level(logging.DEBUG)
+    instance = deepcopy(instance_plus_v7)
+    instance['only_query_enabled_endpoints'] = only_query_enabled_endpoints
+    check = check(instance)
+    check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
+
+    with mock.patch('datadog_checks.nginx.Nginx._get_enabled_endpoints') as get_enabled_endpoints:
+        check.check(instance)
+        assert only_query_enabled_endpoints == get_enabled_endpoints.called
+
+    if only_query_enabled_endpoints:
+        # Test only_query_enabled_endpoints works when stream metrics are not available
+        # and new endpoints are added
+        def mock_get_return(*args, **kwargs):
+            response = mock.MagicMock()
+            if args[0] == "http://{}:{}/api/7".format(HOST, PORT):
+                response.json.return_value = [
+                    "nginx",
+                    "http",
+                ]
+            elif args[0] == "http://{}:{}/api/7/http".format(HOST, PORT):
+                response.json.return_value = [
+                    "requests",
+                    "location_zonesthatarenew",
+                ]
+            elif args[0] == "http://{}:{}/api/7/stream".format(HOST, PORT):
+                response.json.return_value = ["server_zones"]
+            return response
+
+        check._perform_request = mock.MagicMock(side_effect=mock_get_return)
+        endpoints = check._get_enabled_endpoints()
+        expected_endpoints = [('nginx', []), ('http/requests', ['requests'])]
+        assert sorted(expected_endpoints) == sorted(list(endpoints))
