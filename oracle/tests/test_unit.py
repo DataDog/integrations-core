@@ -97,7 +97,7 @@ def test__get_connection_instant_client_server_incorrect_formatting(instance, dd
 
 
 @pytest.mark.parametrize(
-    "instance, expected_tags, dsn",
+    "instance, expected_tags, dsn, jdbc_connect_properties",
     [
         # TCP
         (
@@ -111,6 +111,7 @@ def test__get_connection_instant_client_server_incorrect_formatting(instance, dd
             },
             ['server:localhost:1521', 'optional:tag1'],
             "//localhost:1521/xe",
+            {'user': 'system', 'password': 'oracle'},
         ),
         # TCPS
         (
@@ -124,10 +125,17 @@ def test__get_connection_instant_client_server_incorrect_formatting(instance, dd
             },
             ['server:localhost:2484', 'optional:tag1'],
             "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCPS)(HOST=localhost)(PORT=2484))(CONNECT_DATA=(SERVICE_NAME=xe)))",
+            {
+                'user': 'system',
+                'password': 'oracle',
+                'javax.net.ssl.trustStoreType': None,
+                'javax.net.ssl.trustStorePassword': '',
+                'javax.net.ssl.trustStore': None,
+            },
         ),
     ],
 )
-def test__get_connection_jdbc(instance, dd_run_check, aggregator, expected_tags, dsn):
+def test__get_connection_jdbc(instance, dd_run_check, aggregator, expected_tags, dsn, jdbc_connect_properties):
     """
     Test the _get_connection method using the JDBC client
     """
@@ -154,7 +162,9 @@ def test__get_connection_jdbc(instance, dd_run_check, aggregator, expected_tags,
         dd_run_check(check)
         assert check._cached_connection == con
 
-    jdb.connect.assert_called_with('oracle.jdbc.OracleDriver', "jdbc:oracle:thin:@" + dsn, ['system', 'oracle'], None)
+    jdb.connect.assert_called_with(
+        'oracle.jdbc.OracleDriver', "jdbc:oracle:thin:@" + dsn, jdbc_connect_properties, None
+    )
     aggregator.assert_service_check("oracle.can_connect", check.OK, count=1, tags=expected_tags)
     aggregator.assert_service_check("oracle.can_query", check.OK, count=1, tags=expected_tags)
 

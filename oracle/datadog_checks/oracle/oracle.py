@@ -21,7 +21,6 @@ except ImportError as e:
     jpype = None
     JDBC_IMPORT_ERROR = e
 
-
 EVENT_TYPE = SOURCE_TYPE_NAME = 'oracle'
 MAX_CUSTOM_RESULTS = 100
 
@@ -44,6 +43,9 @@ class Oracle(AgentCheck):
         self._service = self.instance.get('service_name')
         self._protocol = self.instance.get("protocol", "TCP")
         self._jdbc_driver = self.instance.get('jdbc_driver_path')
+        self._jdbc_truststore = self.instance.get('jdbc_truststore')
+        self._jdbc_truststore_type = self.instance.get('jdbc_truststore_type')
+        self._jdbc_truststore_password = self.instance.get('jdbc_truststore_password', '')
         self._tags = self.instance.get('tags') or []
         self._service_check_tags = ['server:{}'.format(self._server)]
         self._service_check_tags.extend(self._tags)
@@ -130,6 +132,7 @@ class Oracle(AgentCheck):
         if self._cached_connection is None:
             if self.can_use_oracle_client():
                 dsn = self._get_dsn()
+                self.log.debug("Connecting via Oracle Instant Client with DSN: " + dsn)
                 self._cached_connection = cx_Oracle.connect(user=self._user, password=self._password, dsn=dsn)
                 self.log.debug("Connected to Oracle DB using Oracle Instant Client")
             elif JDBC_IMPORT_ERROR:
@@ -176,19 +179,26 @@ class Oracle(AgentCheck):
             return cx_Oracle.makedsn(host, port, service_name=self._service)
 
     def _jdbc_connect(self):
+        jdbc_connect_properties = {'user': self._user, 'password': self._password}
+
         if self._protocol == 'TCPS':
             connect_string = self.JDBC_CONNECTION_STRING_TCPS.format(self._get_dsn())
+            jdbc_connect_properties['javax.net.ssl.trustStoreType'] = self._jdbc_truststore_type
+            jdbc_connect_properties['javax.net.ssl.trustStorePassword'] = self._jdbc_truststore_password
+            jdbc_connect_properties['javax.net.ssl.trustStore'] = self._jdbc_truststore
         else:
             connect_string = self.JDBC_CONNECTION_STRING.format(self._server, self._service)
 
+        self.log.debug("Connecting via JDBC with connection string: " + connect_string)
         try:
             if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
                 jpype.attachThreadToJVM()
                 jpype.java.lang.Thread.currentThread().setContextClassLoader(
                     jpype.java.lang.ClassLoader.getSystemClassLoader()
                 )
+
             connection = jdb.connect(
-                self.ORACLE_DRIVER_CLASS, connect_string, [self._user, self._password], self._jdbc_driver
+                self.ORACLE_DRIVER_CLASS, connect_string, jdbc_connect_properties, self._jdbc_driver
             )
             self.log.debug("Connected to Oracle DB using JDBC connector")
             return connection

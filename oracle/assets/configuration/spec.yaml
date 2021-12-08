@@ -23,7 +23,7 @@ files:
         type: string
     - name: protocol
       description: |
-        The protocol to connect to the Oracle Database Server.
+        The protocol to connect to the Oracle Database Server. Valid protocols include TCP and TCPS.
       value:
         type: string
         example: TCP
@@ -44,5 +44,20 @@ files:
       value:
         type: string
         example: <DRIVER_PATH>.jar
+    - name: jdbc_truststore
+      description: |
+        The JDBC truststore file path.
+      value:
+        type: string
+    - name: jdbc_truststore_type
+      description: |
+        The JDBC truststore file type. Supported truststore types include JKS, SSO, and PKCS12.
+      value:
+        type: string
+    - name: jdbc_truststore_password
+      description: |
+        The password for the truststore when connecting via JDBC.
+      value:
+        type: string
     - template: instances/db
     - template: instances/default

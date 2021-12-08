@@ -36,7 +36,7 @@ instances:
     service_name: <SERVICE_NAME>
 
     ## @param protocol - string - optional - default: TCP
-    ## The protocol to connect to the Oracle Database Server.
+    ## The protocol to connect to the Oracle Database Server. Valid protocols include TCP and TCPS.
     #
     # protocol: TCP
 
@@ -55,6 +55,22 @@ instances:
     ## You can also add it to your $CLASSPATH instead.
     #
     # jdbc_driver_path: <DRIVER_PATH>.jar
+
+    ## @param jdbc_truststore - string - optional
+    ## The JDBC truststore file path.
+    #
+    # jdbc_truststore: <JDBC_TRUSTSTORE>
+
+    ## @param jdbc_truststore_type - string - optional
+    ## The JDBC truststore file type.
+    ## Supported truststore types include JKS, SSO, and PKCS12.
+    #
+    # jdbc_truststore_type: <JDBC_TRUSTSTORE_TYPE>
+
+    ## @param jdbc_truststore_password - string - optional
+    ## The password for the truststore when connecting via JDBC.
+    #
+    # jdbc_truststore_password: <JDBC_TRUSTSTORE_PASSWORD>
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.

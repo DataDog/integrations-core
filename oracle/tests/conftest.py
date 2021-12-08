@@ -48,6 +48,9 @@ E2E_METADATA_JDBC_CLIENT = {
         '{}/docker/client/sqlnet.ora:/opt/oracle/instantclient_19_3/sqlnet.ora'.format(HERE),
         '{}/docker/client/tnsnames.ora:/opt/oracle/instantclient_19_3/tnsnames.ora'.format(HERE),
         '{}/docker/client/listener.ora:/opt/oracle/instantclient_19_3/listener.ora'.format(HERE),
+        '{}/docker/client/oraclepki.jar:/opt/oracle/instantclient_19_3/oraclepki.jar'.format(HERE),
+        '{}/docker/client/osdt_cert.jar:/opt/oracle/instantclient_19_3/osdt_cert.jar'.format(HERE),
+        '{}/docker/client/osdt_core.jar:/opt/oracle/instantclient_19_3/osdt_core.jar'.format(HERE),
     ],
     'start_commands': [
         'bash /tmp/install_instant_client.sh',
@@ -107,9 +110,14 @@ def dd_environment():
     else:
         e2e_metadata = E2E_METADATA_ORACLE_CLIENT
 
+    # Set additional config options for TCPS
     if ENABLE_TCPS:
         instance['server'] = '{}:{}'.format(HOST, TCPS_PORT)
         instance['protocol'] = 'TCPS'
+
+        if CLIENT_LIB == 'jdbc':
+            instance['jdbc_truststore'] = '/opt/oracle/instantclient_19_3/client_wallet/cwallet.sso'
+            instance['jdbc_truststore_type'] = 'SSO'
 
     with docker_run(
         COMPOSE_FILE,
