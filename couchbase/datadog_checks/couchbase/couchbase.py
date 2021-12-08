@@ -4,7 +4,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from __future__ import division
-from logging import exception
 
 import re
 import time
@@ -424,7 +423,8 @@ class Couchbase(AgentCheck):
                 # Error handling in case Couchbase changes their versioning format
                 if self._version or int(self._version.split(".")[0]) >= 7:
                     self.log.warning(
-                        "Index Stats Metrics are only available in Couchbase version 7+. Detected version: %", self._version
+                        "Index Stats Metrics are only available in Couchbase version 7+. Detected version: %",
+                        self._version,
                     )
             except Exception as e:
                 self.log.warning(str(e))
