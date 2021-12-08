@@ -58,6 +58,7 @@ def instance_plus_v7():
 @pytest.fixture(scope='session')
 def instance_plus_v7_no_stream():
     base_instance = copy.deepcopy(INSTANCE)
+    base_instance['nginx_status_url'] = 'http://localhost:8080/api'
     base_instance['use_plus_api'] = True
     base_instance['use_plus_api_stream'] = False
     base_instance['plus_api_version'] = 7
