@@ -543,6 +543,8 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "user": row['usename'],
                     "statement": row['statement'],
                     "metadata": {
+                        "tables_csv": metadata.tables_csv,
+                        "commands": metadata.commands,
                         "comments": metadata.comments,
                     },
                     "query_truncated": self._get_truncation_state(
