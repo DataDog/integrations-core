@@ -202,7 +202,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 self.check.count(
                     "dd.sqlserver.statements.error",
                     1,
-                    **self.check.debug_stats_kwargs(tags=["error:obfuscate-query-{}".format(type(e))]),
+                    **self.check.debug_stats_kwargs(tags=["error:obfuscate-query-{}".format(type(e))])
                 )
                 continue
             row['text'] = obfuscated_statement
@@ -263,19 +263,17 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     plans_submitted += 1
 
         self.check.count(
-            "dd.sqlserver.statements.plans_submitted.count",
-            plans_submitted,
-            **self.check.debug_stats_kwargs(),
+            "dd.sqlserver.statements.plans_submitted.count", plans_submitted, **self.check.debug_stats_kwargs()
         )
         self.check.gauge(
             "dd.sqlserver.statements.seen_plans_cache.len",
             len(self._seen_plans_ratelimiter),
-            **self.check.debug_stats_kwargs(),
+            **self.check.debug_stats_kwargs()
         )
         self.check.gauge(
             "dd.sqlserver.statements.fqt_cache.len",
             len(self._full_statement_text_cache),
-            **self.check.debug_stats_kwargs(),
+            **self.check.debug_stats_kwargs()
         )
 
     def _rows_to_fqt_events(self, rows):
@@ -340,7 +338,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     self.check.count(
                         "dd.sqlserver.statements.error",
                         1,
-                        **self.check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))]),
+                        **self.check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))])
                     )
 
                 tags = self.check.tags + ["db:{}".format(row['database_name'])]
