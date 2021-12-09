@@ -211,7 +211,7 @@ SELECT s.schemaname,
     'relation': False,
 }
 
-# The metrics we retrieve from pg_stat_activity when the postgres version >= 9.2
+# The metrics we retrieve from pg_stat_activity when the postgres version >= 9.6
 ACTIVITY_METRICS_9_6 = [
     "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
     "SUM(CASE WHEN state = 'idle in transaction' THEN 1 ELSE 0 END)",

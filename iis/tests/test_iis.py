@@ -6,8 +6,9 @@ import logging
 import re
 
 import pytest
-from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture  # noqa: F401
+from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
 
+from datadog_checks.dev.testing import requires_py2
 from datadog_checks.iis import IIS
 
 from .common import (
@@ -23,8 +24,14 @@ from .common import (
     WIN_SERVICES_MINIMAL_CONFIG,
 )
 
+pytestmark = [requires_py2, pytest.mark.usefixtures('pdh_mocks_fixture')]
 
-@pytest.mark.usefixtures('pdh_mocks_fixture')
+
+@pytest.fixture(autouse=True)
+def setup_check():
+    initialize_pdh_tests()
+
+
 def test_additional_metrics(aggregator, caplog, dd_run_check):
     instance = copy.deepcopy(MINIMAL_INSTANCE)
     instance['additional_metrics'] = [
@@ -46,7 +53,6 @@ def test_additional_metrics(aggregator, caplog, dd_run_check):
         assert 'Unknown IIS counter: HTTP Service Request Queues. Falling back to default submission' in caplog.text
 
 
-@pytest.mark.usefixtures('pdh_mocks_fixture')
 def test_basic_check(aggregator, dd_run_check):
     instance = MINIMAL_INSTANCE
     c = IIS(CHECK_NAME, {}, [instance])
@@ -68,7 +74,6 @@ def test_basic_check(aggregator, dd_run_check):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures('pdh_mocks_fixture')
 def test_check_on_specific_websites_and_app_pools(aggregator, dd_run_check):
     instance = INSTANCE
     c = IIS(CHECK_NAME, {}, [instance])
@@ -98,7 +103,6 @@ def test_check_on_specific_websites_and_app_pools(aggregator, dd_run_check):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures('pdh_mocks_fixture')
 def test_service_check_with_invalid_host(aggregator, dd_run_check):
     instance = INVALID_HOST_INSTANCE
     c = IIS(CHECK_NAME, {}, [instance])
@@ -109,7 +113,6 @@ def test_service_check_with_invalid_host(aggregator, dd_run_check):
     aggregator.assert_service_check('iis.app_pool_up', IIS.CRITICAL, tags=['app_pool:Total', iis_host])
 
 
-@pytest.mark.usefixtures('pdh_mocks_fixture')
 def test_check(aggregator, dd_run_check):
     """
     Returns the right metrics and service checks
@@ -160,7 +163,6 @@ def test_check(aggregator, dd_run_check):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures('pdh_mocks_fixture')
 def test_check_without_sites_specified(aggregator, dd_run_check):
     """
     Returns the right metrics and service checks for the `_Total` site

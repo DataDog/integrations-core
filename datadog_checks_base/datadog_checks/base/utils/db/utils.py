@@ -10,7 +10,7 @@ import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from itertools import chain
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from cachetools import TTLCache
 
@@ -164,17 +164,25 @@ class DbRow:
     """
 
     def __init__(self, row, metadata=None):
-        # type: (Dict[str], Dict[str]) -> None
+        # type: (Dict[str], Optional[Dict[str]]) -> None
         self.data = row
         self.metadata = metadata if isinstance(metadata, self.Metadata) else self.Metadata(metadata)
 
     class Metadata:
-        def __init__(self, metadata):
-            # type: (Dict[str]) -> None
+        def __init__(self, metadata=None):
+            # type: (Optional[Dict[str]]) -> None
             if not metadata:
                 metadata = {}
-            self.comments = metadata.get('comments', None)
             self.tables_csv = metadata.get('tables_csv', None)
+            self.commands = metadata.get('commands', None)
+            self.comments = metadata.get('comments', None)
+
+        def parse_tables_csv(self):
+            """
+            Parses out tables from the CSV format.
+            e.g tables_csv = 'metrics,samples' -> ['metrics', 'samples']
+            """
+            return self.tables_csv.split(',') if self.tables_csv is not None else []
 
 
 class DBMAsyncJob(object):
