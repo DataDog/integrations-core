@@ -47,11 +47,12 @@ def test_check_misconfig_invalid_protocol(instance):
 
 def test_check_misconfig_empty_truststore_and_type(instance):
     """
-    Test if connecting via JDBC, both `jdbc_truststore` and `jdbc_truststore_type` are non-empty
+    Test if connecting via JDBC with TCPS, both `jdbc_truststore` and `jdbc_truststore_type` are non-empty
     """
     instance['jdbc_driver_path'] = '/path/to/jdbc/driver'
     instance['jdbc_truststore_path'] = ''
     instance['jdbc_truststore_type'] = 'SSO'
+    instance['protocol'] = 'TCPS'
 
     check = Oracle(CHECK_NAME, {}, [instance])
     with pytest.raises(ConfigurationError):
