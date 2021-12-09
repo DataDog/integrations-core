@@ -196,9 +196,9 @@ class Nginx(AgentCheck):
 
     def _get_enabled_endpoints(self):
         """
-        Dynamically determines which NGINX endpoints are enabled and we support getting metrics from
+        Dynamically determines which NGINX endpoints are enabled and Datadog supports getting metrics from
         by querying the NGINX APIs that list availabled endpoints. If an error is encountered,
-        then it will fall back to query all of the known endpoints available in the given NGINX Plus version.
+        then it falls back to query all of the known endpoints available in the given NGINX Plus version.
         """
         available_endpoints = set()
         base_url = "/".join([self.url, self.plus_api_version])
