@@ -178,7 +178,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 # Truncate query text to the maximum length supported by metrics tags
                 row.data['query'] = row.data['query'][0:200]
                 # Inject metadata into the row. Prefix with `dd` to prevent name clashing.
-                row.data['dd_tables'] = row.metadata.tables_csv
+                row.data['dd_tables'] = row.metadata.parse_tables_csv()
                 row.data['dd_commands'] = row.metadata.commands
             payload = {
                 'host': self._check.resolved_hostname,

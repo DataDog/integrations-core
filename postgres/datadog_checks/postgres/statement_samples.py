@@ -543,7 +543,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "user": row['usename'],
                     "statement": row['statement'],
                     "metadata": {
-                        "tables_csv": metadata.tables_csv,
+                        "tables": metadata.parse_tables_csv(),
                         "commands": metadata.commands,
                         "comments": metadata.comments,
                     },

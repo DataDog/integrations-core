@@ -549,7 +549,7 @@ def test_statement_metadata(aggregator, integration_check, dbm_instance, datadog
     matching_samples = [s for s in samples if s['db']['query_signature'] == query_signature]
     assert len(matching_samples) == 1
     sample = matching_samples[0]
-    assert sample['db']['metadata']['tables_csv'] == metadata['tables_csv']
+    assert sample['db']['metadata']['tables'] == [metadata['tables_csv']]
     assert sample['db']['metadata']['commands'] == metadata['commands']
     assert sample['db']['metadata']['comments'] == metadata['comments']
 
@@ -560,7 +560,7 @@ def test_statement_metadata(aggregator, integration_check, dbm_instance, datadog
     matching_metrics = [m for m in metric['postgres_rows'] if m['query_signature'] == normalized_query_signature]
     assert len(matching_metrics) == 1
     metric = matching_metrics[0]
-    assert metric['dd_tables'] == metadata['tables_csv']
+    assert metric['dd_tables'] == [metadata['tables_csv']]
     assert metric['dd_commands'] == metadata['commands']
 
 
