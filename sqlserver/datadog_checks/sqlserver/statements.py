@@ -209,29 +209,35 @@ class SqlserverStatementMetrics(DBMAsyncJob):
     def _collect_metrics_rows(self, cursor):
         # type: (pyodbc.Cursor) -> List[DbRow]
         rows = self._load_raw_query_metrics_rows(cursor)
-        rows = self._normalize_queries(rows)
-        if not rows:
+        db_rows = self._normalize_queries(rows)
+        if not db_rows:
             return []
-        query_sig_to_metadata = {row.data['query_signature']: row.metadata for row in rows}
-        metric_columns = [c for c in rows[0].data.keys() if c.startswith("total_") or c == 'execution_count']
-        rows = self._state.compute_derivative_rows([row.data for row in rows], metric_columns, key=_row_key)
+        # When we compute the derivative, there will be less rows, so we need to remap the
+        # remaining rows' metadata back after the computation.
+        query_sig_to_metadata = {db_row.data['query_signature']: db_row.metadata for db_row in db_rows}
+        metric_columns = [c for c in db_rows[0].data.keys() if c.startswith("total_") or c == 'execution_count']
+        rows = self._state.compute_derivative_rows([db_row.data for db_row in db_rows], metric_columns, key=_row_key)
         return [DbRow(row, query_sig_to_metadata.get(row['query_signature'])) for row in rows]
 
     @staticmethod
-    def _to_metrics_payload_row(row):
+    def _to_metrics_payload_row(row, metadata):
+        # type: (Dict[str], DbRow.Metadata) -> Dict[str]
         row = {k: v for k, v in row.items()}
         # truncate query text to the maximum length supported by metrics tags
         row['text'] = row['text'][0:200]
+        # Inject metadata into the row. Prefix with `dd` to prevent name clashing.
+        row['dd_tables'] = metadata.parse_tables_csv()
+        row['dd_commands'] = metadata.commands
         return row
 
-    def _to_metrics_payload(self, rows):
+    def _to_metrics_payload(self, db_rows):
         # type: (List[DbRow]) -> Dict
         return {
             'host': self.check.resolved_hostname,
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
             'tags': self.check.tags,
-            'sqlserver_rows': [self._to_metrics_payload_row(r.data) for r in rows],
+            'sqlserver_rows': [self._to_metrics_payload_row(db_row.data, db_row.metadata) for db_row in db_rows],
             'sqlserver_version': self.check.static_info_cache.get("version", ""),
             'ddagentversion': datadog_agent.get_version(),
         }
@@ -248,18 +254,18 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             # raw connection. adodbapi and pyodbc modules are thread safe, but connections are not.
             with self.check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
                 with self.check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
-                    rows = self._collect_metrics_rows(cursor)
-                    if not rows:
+                    db_rows = self._collect_metrics_rows(cursor)
+                    if not db_rows:
                         return
-                    for event in self._rows_to_fqt_events(rows):
+                    for event in self._rows_to_fqt_events(db_rows):
                         self.check.database_monitoring_query_sample(
                             json.dumps(event, default=default_json_event_encoding)
                         )
-                    payload = self._to_metrics_payload(rows)
+                    payload = self._to_metrics_payload(db_rows)
                     self.check.database_monitoring_query_metrics(
                         json.dumps(payload, default=default_json_event_encoding)
                     )
-                    for event in self._collect_plans(rows, cursor):
+                    for event in self._collect_plans(db_rows, cursor):
                         self.check.database_monitoring_query_sample(
                             json.dumps(event, default=default_json_event_encoding)
                         )
@@ -304,14 +310,14 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             raw=True,
         )
 
-    def _rows_to_fqt_events(self, rows):
+    def _rows_to_fqt_events(self, db_rows):
         # type: (List[DbRow]) -> Generator
-        for row in rows:
-            query_cache_key = _row_key(row.data)
+        for db_row in db_rows:
+            query_cache_key = _row_key(db_row.data)
             if query_cache_key in self._full_statement_text_cache:
                 continue
             self._full_statement_text_cache[query_cache_key] = True
-            tags = self.check.tags + ["db:{}".format(row.data['database_name'])]
+            tags = self.check.tags + ["db:{}".format(db_row.data['database_name'])]
             yield {
                 "timestamp": time.time() * 1000,
                 "host": self.check.resolved_hostname,
@@ -320,14 +326,14 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 "ddtags": ",".join(tags),
                 "dbm_type": "fqt",
                 "db": {
-                    "instance": row.data['database_name'],
-                    "query_signature": row.data['query_signature'],
-                    "user": row.data.get("user_name", None),
-                    "statement": row.data['text'],
+                    "instance": db_row.data['database_name'],
+                    "query_signature": db_row.data['query_signature'],
+                    "user": db_row.data.get("user_name", None),
+                    "statement": db_row.data['text'],
                 },
                 'sqlserver': {
-                    'query_hash': row.data['query_hash'],
-                    'query_plan_hash': row.data['query_plan_hash'],
+                    'query_hash': db_row.data['query_hash'],
+                    'query_plan_hash': db_row.data['query_plan_hash'],
                 },
             }
 
@@ -344,12 +350,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             return None
         return result[0][0]
 
-    def _collect_plans(self, rows, cursor):
+    def _collect_plans(self, db_rows, cursor):
         # type: (List[DbRow], pyodbc.Cursor) -> Generator
-        for row in rows:
-            plan_key = (row.data['query_signature'], row.data['query_hash'], row.data['query_plan_hash'])
+        for db_row in db_rows:
+            plan_key = (db_row.data['query_signature'], db_row.data['query_hash'], db_row.data['query_plan_hash'])
             if self._seen_plans_ratelimiter.acquire(plan_key):
-                raw_plan = self._load_plan(row.data['query_hash'], row.data['query_plan_hash'], cursor)
+                raw_plan = self._load_plan(db_row.data['query_hash'], db_row.data['query_plan_hash'], cursor)
                 obfuscated_plan, collection_errors = None, None
 
                 try:
@@ -357,14 +363,14 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 except Exception as e:
                     self.log.debug(
                         "failed to obfuscate XML Plan query_signature=%s query_hash=%s query_plan_hash=%s: %s",
-                        row.data['query_signature'],
-                        row.data['query_hash'],
-                        row.data['query_plan_hash'],
+                        db_row.data['query_signature'],
+                        db_row.data['query_hash'],
+                        db_row.data['query_plan_hash'],
                         e,
                     )
                     collection_errors = [{'code': "obfuscate_xml_plan_error", 'message': str(e)}]
 
-                tags = self.check.tags + ["db:{}".format(row.data['database_name'])]
+                tags = self.check.tags + ["db:{}".format(db_row.data['database_name'])]
                 yield {
                     "host": self._db_hostname,
                     "ddagentversion": datadog_agent.get_version(),
@@ -373,19 +379,23 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     "timestamp": time.time() * 1000,
                     "dbm_type": "plan",
                     "db": {
-                        "instance": row.data.get("database_name", None),
+                        "instance": db_row.data.get("database_name", None),
                         "plan": {
                             "definition": obfuscated_plan,
-                            "signature": row.data['query_plan_hash'],
+                            "signature": db_row.data['query_plan_hash'],
                             "collection_errors": collection_errors,
                         },
-                        "query_signature": row.data['query_signature'],
-                        "user": row.data.get("user_name", None),
-                        "statement": row.data['text'],
-                        "metadata": {"comments": row.metadata.comments},
+                        "query_signature": db_row.data['query_signature'],
+                        "user": db_row.data.get("user_name", None),
+                        "statement": db_row.data['text'],
+                        "metadata": {
+                            "tables": db_row.metadata.parse_tables_csv(),
+                            "commands": db_row.metadata.commands,
+                            "comments": db_row.metadata.comments,
+                        },
                     },
                     'sqlserver': {
-                        'query_hash': row.data['query_hash'],
-                        'query_plan_hash': row.data['query_plan_hash'],
+                        'query_hash': db_row.data['query_hash'],
+                        'query_plan_hash': db_row.data['query_plan_hash'],
                     },
                 }
