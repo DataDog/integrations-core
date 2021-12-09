@@ -142,7 +142,7 @@ def service_checks(check, sync):
             if not check or not isinstance(check, str):
                 file_failed = True
                 display_queue.append((echo_failure, '  required non-null string: check'))
-            elif invalid_chars or invalid_seq:
+            elif invalid_chars or invalid_seq or invalid_end:
                 file_failed = True
                 if invalid_chars:
                     display_queue.append(
