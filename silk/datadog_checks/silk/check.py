@@ -4,7 +4,6 @@
 from copy import deepcopy
 
 from six.moves.urllib.parse import urljoin
-import datetime as dt
 
 from datadog_checks.base import AgentCheck
 
