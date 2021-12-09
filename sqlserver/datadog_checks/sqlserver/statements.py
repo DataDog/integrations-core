@@ -332,7 +332,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     obfuscated_plan = obfuscate_xml_plan(raw_plan)
                 except Exception as e:
                     self.log.debug(
-                        "failed to obfuscate XML Plan query_signature=%s query_hash=%s query_plan_hash=%s plan_handle=%s: %s",
+                        (
+                            "failed to obfuscate XML Plan query_signature=%s query_hash=%s "
+                            "query_plan_hash=%s plan_handle=%s: %s"
+                        ),
                         row['query_signature'],
                         row['query_hash'],
                         row['query_plan_hash'],
