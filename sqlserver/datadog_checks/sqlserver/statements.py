@@ -50,7 +50,8 @@ with qstats as (
         cross apply sys.dm_exec_sql_text(sql_handle)
     where last_execution_time > dateadd(second, -{collection_interval}, getdate())
 )
-select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid, D.name as database_name, U.name as user_name, max(plan_handle) as plan_handle,
+select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
+       D.name as database_name, U.name as user_name, max(plan_handle) as plan_handle,
     {query_metrics_column_sums}
     from qstats S
     left join sys.databases D on S.dbid = D.database_id
@@ -59,7 +60,8 @@ select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid, D.name as
 """
 
 PLAN_LOOKUP_QUERY = """\
-select cast(query_plan as nvarchar(max)) as query_plan from sys.dm_exec_query_plan(CONVERT(varbinary(max), ?, 1))
+select cast(query_plan as nvarchar(max)) as query_plan
+from sys.dm_exec_query_plan(CONVERT(varbinary(max), ?, 1))
 """
 
 
