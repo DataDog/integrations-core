@@ -8,7 +8,7 @@ from datetime import datetime
 
 from binary import BinaryUnits, convert_units
 
-from .common import METRIC_PROFILE_NAMESPACE
+from .common import METRIC_NAMESPACE_PROFILE
 
 try:
     import tracemalloc
@@ -35,7 +35,7 @@ class MemoryProfileMetric(object):
     __slots__ = ('name', 'value')
 
     def __init__(self, name, value):
-        self.name = '{}.memory.{}'.format(METRIC_PROFILE_NAMESPACE, name)
+        self.name = '{}.memory.{}'.format(METRIC_NAMESPACE_PROFILE, name)
         self.value = float(value)
 
 
