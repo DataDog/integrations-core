@@ -300,8 +300,8 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _collect_statement_samples(self):
         start_time = time.time()
         rows = self._get_new_pg_stat_activity()
-        rows = self._filter_and_normalize_statement_rows(rows)
-        event_samples = self._collect_plans(rows)
+        db_rows = self._filter_and_normalize_statement_rows(rows)
+        event_samples = self._collect_plans(db_rows)
         submitted_count = 0
         for e in event_samples:
             self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
@@ -309,7 +309,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         if self._report_activity_event():
             active_connections = self._get_active_connections()
-            activity_event = self._create_activity_event(rows, active_connections)
+            activity_event = self._create_activity_event(db_rows, active_connections)
             self._check.database_monitoring_query_activity(
                 json.dumps(activity_event, default=default_json_event_encoding)
             )
@@ -567,19 +567,19 @@ class PostgresStatementSamples(DBMAsyncJob):
             return event
         return None
 
-    def _collect_plans(self, rows):
+    def _collect_plans(self, db_rows):
         # type: (List[DbRow]) -> List[Dict]
         events = []
-        for row in rows:
+        for db_row in db_rows:
             try:
-                if row.data['statement'] is None:
+                if db_row.data['statement'] is None:
                     continue
-                event = self._collect_plan_for_statement(row.data, row.metadata)
+                event = self._collect_plan_for_statement(db_row.data, db_row.metadata)
                 if event:
                     events.append(event)
             except Exception:
                 self._log.exception(
-                    "Crashed trying to collect execution plan for statement in dbname=%s", row.data['datname']
+                    "Crashed trying to collect execution plan for statement in dbname=%s", db_row.data['datname']
                 )
                 self._check.count(
                     "dd.postgres.statement_samples.error",
@@ -589,12 +589,12 @@ class PostgresStatementSamples(DBMAsyncJob):
                 )
         return events
 
-    def _create_activity_event(self, rows, active_connections):
+    def _create_activity_event(self, db_rows, active_connections):
         # type: (List[DbRow], List[Dict]) -> Dict
         self._time_since_last_activity_event = time.time()
         active_sessions = []
-        for row in rows:
-            active_row = self._to_active_session(row.data)
+        for db_row in db_rows:
+            active_row = self._to_active_session(db_row.data)
             if active_row:
                 active_sessions.append(active_row)
         if len(active_sessions) > self._activity_max_rows:

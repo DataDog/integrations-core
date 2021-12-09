@@ -289,16 +289,16 @@ class PostgresStatementMetrics(DBMAsyncJob):
         if rows:
             self._emit_pg_stat_statements_metrics()
 
-        rows = self._normalize_queries(rows)
-        if not rows:
+        db_rows = self._normalize_queries(rows)
+        if not db_rows:
             return []
 
-        # We need to keep track of the metadata for each row because when we compute the derivative, there will be
-        # less rows, so we need to remap the remaining rows' metadata back.
-        query_sig_to_metadata = {row.data['query_signature']: row.metadata for row in rows}
-        available_columns = set(rows[0].data.keys())
+        # When we compute the derivative, there will be less rows, so we need to remap the
+        # remaining rows' metadata back after the computation.
+        query_sig_to_metadata = {db_row.data['query_signature']: db_row.metadata for db_row in db_rows}
+        available_columns = set(db_rows[0].data.keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
-        rows = self._state.compute_derivative_rows([row.data for row in rows], metric_columns, key=_row_key)
+        rows = self._state.compute_derivative_rows([db_row.data for db_row in db_rows], metric_columns, key=_row_key)
         self._check.gauge(
             'dd.postgres.queries.query_rows_raw',
             len(rows),
