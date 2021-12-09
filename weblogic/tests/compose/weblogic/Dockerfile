@@ -65,13 +65,19 @@ RUN chmod +xw /u01/oracle/*.sh && \
 
 
 COPY --chown=oracle:root properties/docker-build/domain*.properties ${PROPERTIES_FILE_DIR}/
+COPY build-archive.sh /u01/oracle/
 
 # Configuration of WLS Domain
 USER oracle
 RUN /u01/oracle/createWLSDomain.sh && \
     chmod -R g+w $DOMAIN_HOME && \
-    echo ". $DOMAIN_HOME/bin/setDomainEnv.sh" >> /u01/oracle/.bashrc && \
-    rm ${PROPERTIES_FILE_DIR}/*.properties
+    echo ". $DOMAIN_HOME/bin/setDomainEnv.sh" >> /u01/oracle/.bashrc
+
+COPY sample/* /u01/oracle/sample/
+COPY build-archive.sh /u01/oracle/
+
+RUN /u01/oracle/build-archive.sh
+RUN /u01/oracle/setEnv.sh ${PROPERTIES_FILE_DIR}/docker-build/domain.properties
 
 # Expose ports for admin, managed server, and debug
 EXPOSE $ADMIN_PORT $ADMIN_SERVER_SSL_PORT $MANAGED_SERVER_PORT $MANAGED_SERVER_SSL_PORT $DEBUG_PORT
@@ -84,7 +90,6 @@ WORKDIR $DOMAIN_HOME
 
 # Copy files and deploy sample application in WLST Offline mode
 COPY container-scripts/* /u01/oracle/
-COPY $APP_PKG_FILE /u01/oracle/
 
 RUN cd /u01/oracle & $JAVA_HOME/bin/jar xf /u01/oracle/$APP_PKG_FILE && \
     /u01/oracle/deployAppToDomain.sh
