@@ -169,23 +169,23 @@ class PostgresStatementMetrics(DBMAsyncJob):
         # all databases on the host. For metrics the "db" tag is added during ingestion based on which database
         # each query came from.
         try:
-            rows = self._collect_metrics_rows()
-            if not rows:
+            db_rows = self._collect_metrics_rows()
+            if not db_rows:
                 return
-            for event in self._rows_to_fqt_events(rows):
+            for event in self._rows_to_fqt_events(db_rows):
                 self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
-            for row in rows:
+            for db_row in db_rows:
                 # Truncate query text to the maximum length supported by metrics tags
-                row.data['query'] = row.data['query'][0:200]
+                db_row.data['query'] = db_row.data['query'][0:200]
                 # Inject metadata into the row. Prefix with `dd` to prevent name clashing.
-                row.data['dd_tables'] = row.metadata.parse_tables_csv()
-                row.data['dd_commands'] = row.metadata.commands
+                db_row.data['dd_tables'] = db_row.metadata.parse_tables_csv()
+                db_row.data['dd_commands'] = db_row.metadata.commands
             payload = {
                 'host': self._check.resolved_hostname,
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._metrics_collection_interval,
                 'tags': self._tags_no_db,
-                'postgres_rows': [row.data for row in rows],
+                'postgres_rows': [db_row.data for db_row in db_rows],
                 'postgres_version': self._payload_pg_version(),
                 'ddagentversion': datadog_agent.get_version(),
             }
@@ -326,16 +326,16 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
         return normalized_rows
 
-    def _rows_to_fqt_events(self, rows):
+    def _rows_to_fqt_events(self, db_rows):
         # type: (List[DbRow]) -> Generator
-        for row in rows:
-            query_cache_key = _row_key(row.data)
+        for db_row in db_rows:
+            query_cache_key = _row_key(db_row.data)
             if query_cache_key in self._full_statement_text_cache:
                 continue
             self._full_statement_text_cache[query_cache_key] = True
             row_tags = self._tags_no_db + [
-                "db:{}".format(row.data['datname']),
-                "rolname:{}".format(row.data['rolname']),
+                "db:{}".format(db_row.data['datname']),
+                "rolname:{}".format(db_row.data['rolname']),
             ]
             yield {
                 "timestamp": time.time() * 1000,
@@ -345,12 +345,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",
                 "db": {
-                    "instance": row.data['datname'],
-                    "query_signature": row.data['query_signature'],
-                    "statement": row.data['query'],
+                    "instance": db_row.data['datname'],
+                    "query_signature": db_row.data['query_signature'],
+                    "statement": db_row.data['query'],
                 },
                 "postgres": {
-                    "datname": row.data["datname"],
-                    "rolname": row.data["rolname"],
+                    "datname": db_row.data["datname"],
+                    "rolname": db_row.data["rolname"],
                 },
             }
