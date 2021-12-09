@@ -4,6 +4,7 @@
 
 import os
 import shutil
+import socket
 from copy import deepcopy
 
 import pytest
@@ -55,7 +56,15 @@ def dd_environment():
                 ]
             else:
                 instance_config = generate_container_instance_config([])
-                instance_config['init_config']['loader'] = 'core'
+                instance_config['init_config'].update(
+                    {
+                        'loader': 'core',
+                        'use_device_id_as_hostname': True,
+
+                        # use hostname as namespace to create different device for each user
+                        'namespace': socket.gethostname(),
+                    }
+                )
             yield instance_config, new_e2e_metadata
 
 
