@@ -21,6 +21,17 @@ files:
           example: core
           type: string
           display_default: python
+      - name: use_device_id_as_hostname
+        enabled: true
+        description: |
+            Use `device:<DEVICE_ID>` (device_id is composed of `<NAMESPACE>:<DEVICE_IP_ADDRESS>`) as `hostname`
+            for metrics and service checks (meaning that metrics and services checks will have
+            `host:device:<DEVICE_ID>` as tag).
+            This option is needed for custom tags.
+        value:
+          example: true
+          type: boolean
+          display_default: false
       - name: oid_batch_size
         description: |
             The number of OIDs handled by each batch. Increasing this number improves performance but
@@ -179,6 +190,17 @@ files:
           type: string
           example: core
           display_default: python
+      - name: use_device_id_as_hostname
+        enabled: true
+        description: |
+            Use `device:<DEVICE_ID>` (device_id is composed of `<NAMESPACE>:<DEVICE_IP_ADDRESS>`) as `hostname`
+            for metrics and service checks (meaning that metrics and services checks will have
+            `host:device:<DEVICE_ID>` as tag).
+            This option is needed for custom tags.
+        value:
+          example: true
+          type: boolean
+          display_default: false
       - name: oid_batch_size
         description: |
           The number of OIDs handled by each batch. Increasing this number improves performance but
