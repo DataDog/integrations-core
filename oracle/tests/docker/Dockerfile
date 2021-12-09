@@ -17,11 +17,3 @@ RUN chown root:root /u01/app/oracle/product/12.2.0/dbhome_1/admin/InfraDB/sqlnet
 RUN chown root:root /u01/app/oracle/product/12.2.0/dbhome_1/admin/InfraDB/server_wallet
 
 USER oracle
-
-
-
-# FROM container-registry.oracle.com/database/enterprise:19.3.0.0-slim
-
-# COPY ./script.sh /script.sh
-# RUN chmod +x /script.sh
-# ENTRYPOINT ["/script.sh"]
