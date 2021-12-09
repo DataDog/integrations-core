@@ -4,7 +4,7 @@
 import copy
 import time
 from contextlib import closing
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, Generator, List, Tuple
 
 import pymysql
 from cachetools import TTLCache
@@ -14,7 +14,7 @@ from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, DbRow, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 
 try:
@@ -110,16 +110,21 @@ class MySQLStatementMetrics(DBMAsyncJob):
 
     def collect_per_statement_metrics(self):
         try:
-            rows = self._collect_per_statement_metrics()
-            if not rows:
+            db_rows = self._collect_per_statement_metrics()
+            if not db_rows:
                 return
 
-            for event in self._rows_to_fqt_events(rows):
+            for event in self._rows_to_fqt_events(db_rows):
                 self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
 
             # truncate query text to the maximum length supported by metrics tags
-            for row in rows:
-                row['digest_text'] = row['digest_text'][0:200] if row['digest_text'] is not None else None
+            for db_row in db_rows:
+                db_row.data['digest_text'] = (
+                    db_row.data['digest_text'][0:200] if db_row.data['digest_text'] is not None else None
+                )
+                # Inject metadata into the row. Prefix with `dd` to prevent name clashing.
+                db_row.data['dd_tables'] = db_row.metadata.parse_tables_csv()
+                db_row.data['dd_commands'] = db_row.metadata.commands
 
             payload = {
                 'host': self._check.resolved_hostname,
@@ -127,18 +132,21 @@ class MySQLStatementMetrics(DBMAsyncJob):
                 'ddagentversion': datadog_agent.get_version(),
                 'min_collection_interval': self._metric_collection_interval,
                 'tags': self._tags,
-                'mysql_rows': rows,
+                'mysql_rows': [db_row.data for db_row in db_rows],
             }
             self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
         except Exception:
             self.log.exception('Unable to collect statement metrics due to an error')
 
     def _collect_per_statement_metrics(self):
-        # type: () -> List[PyMysqlRow]
+        # type: () -> List[DbRow]
         monotonic_rows = self._query_summary_per_statement()
-        monotonic_rows = self._normalize_queries(monotonic_rows)
-        rows = self._state.compute_derivative_rows(monotonic_rows, METRICS_COLUMNS, key=_row_key)
-        return rows
+        db_rows = self._normalize_queries(monotonic_rows)
+        # When we compute the derivative, there will be less rows, so we need to remap the
+        # remaining rows' metadata back after the computation.
+        query_sig_to_metadata = {db_row.data['query_signature']: db_row.metadata for db_row in db_rows}
+        rows = self._state.compute_derivative_rows([db_row.data for db_row in db_rows], METRICS_COLUMNS, key=_row_key)
+        return [DbRow(row, query_sig_to_metadata.get(row['query_signature'])) for row in rows]
 
     def _query_summary_per_statement(self):
         # type: () -> List[PyMysqlRow]
@@ -182,6 +190,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
         return rows
 
     def _normalize_queries(self, rows):
+        # type: (List[PyMysqlRow]) -> List[DbRow]
         normalized_rows = []
         for row in rows:
             normalized_row = dict(copy.copy(row))
@@ -194,17 +203,22 @@ class MySQLStatementMetrics(DBMAsyncJob):
 
             normalized_row['digest_text'] = obfuscated_statement
             normalized_row['query_signature'] = compute_sql_signature(obfuscated_statement)
-            normalized_rows.append(normalized_row)
+            normalized_rows.append(DbRow(normalized_row, statement['metadata']))
 
         return normalized_rows
 
-    def _rows_to_fqt_events(self, rows):
-        for row in rows:
-            query_cache_key = _row_key(row)
+    def _rows_to_fqt_events(self, db_rows):
+        # type: (List[DbRow]) -> Generator
+        for db_row in db_rows:
+            query_cache_key = _row_key(db_row.data)
             if query_cache_key in self._full_statement_text_cache:
                 continue
             self._full_statement_text_cache[query_cache_key] = True
-            row_tags = self._tags + ["schema:{}".format(row['schema_name'])] if row['schema_name'] else self._tags
+            row_tags = (
+                self._tags + ["schema:{}".format(db_row.data['schema_name'])]
+                if db_row.data['schema_name']
+                else self._tags
+            )
             yield {
                 "timestamp": time.time() * 1000,
                 "host": self._check.resolved_hostname,
@@ -213,9 +227,9 @@ class MySQLStatementMetrics(DBMAsyncJob):
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",
                 "db": {
-                    "instance": row['schema_name'],
-                    "query_signature": row['query_signature'],
-                    "statement": row['digest_text'],
+                    "instance": db_row.data['schema_name'],
+                    "query_signature": db_row.data['query_signature'],
+                    "statement": db_row.data['digest_text'],
                 },
-                "mysql": {"schema": row["schema_name"]},
+                "mysql": {"schema": db_row.data["schema_name"]},
             }

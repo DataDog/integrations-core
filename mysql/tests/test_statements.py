@@ -379,7 +379,7 @@ def test_statement_samples_collect(
     mysql_check._statement_samples._close_db_conn()
 
 
-def test_statement_samples_metadata(aggregator, dd_run_check, dbm_instance, datadog_agent):
+def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agent):
     test_query = '''
     -- Test comment
     select * from information_schema.processlist where state in (\'starting\')
@@ -389,7 +389,11 @@ def test_statement_samples_metadata(aggregator, dd_run_check, dbm_instance, data
 
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
-    metadata = {'comments': ['-- Test comment']}
+    metadata = {
+        'tables_csv': 'information_schema',
+        'commands': ['SELECT'],
+        'comments': ['-- Test comment'],
+    }
 
     def obfuscate_sql(query, options=None):
         if 'WHERE `state`' in query:
@@ -412,7 +416,24 @@ def test_statement_samples_metadata(aggregator, dd_run_check, dbm_instance, data
     assert len(matching) == 1
 
     sample = matching[0]
+    assert sample['db']['metadata']['tables'] == ['information_schema']
+    assert sample['db']['metadata']['commands'] == metadata['commands']
     assert sample['db']['metadata']['comments'] == metadata['comments']
+
+    # Run the query and check a second time so statement metrics are computed from the previous run
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+        run_query(test_query)
+        dd_run_check(mysql_check)
+
+    metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(metrics) == 1
+    metric = metrics[0]
+    matching_metrics = [m for m in metric['mysql_rows'] if m['query_signature'] == query_signature]
+    assert len(matching_metrics) == 1
+    metric = matching_metrics[0]
+    assert metric['dd_tables'] == ['information_schema']
+    assert metric['dd_commands'] == metadata['commands']
 
 
 @pytest.mark.integration
@@ -672,17 +693,15 @@ def test_normalize_queries(dbm_instance):
                 'lock_time': 18298000,
             }
         ]
-    ) == [
-        {
-            'digest': '44e35cee979ba420eb49a8471f852bbe15b403c89742704817dfbaace0d99dbb',
-            'schema': 'network',
-            'digest_text': 'SELECT * from table where name = ?',
-            'query_signature': u'761498b7d5f04d11',
-            'count': 41,
-            'time': 66721400,
-            'lock_time': 18298000,
-        }
-    ]
+    )[0].data == {
+        'schema': 'network',
+        'digest': '44e35cee979ba420eb49a8471f852bbe15b403c89742704817dfbaace0d99dbb',
+        'digest_text': 'SELECT * from table where name = ?',
+        'count': 41,
+        'time': 66721400,
+        'lock_time': 18298000,
+        'query_signature': u'761498b7d5f04d11',
+    }
 
     # Test the case of null values for digest, schema and digest_text (which is what the row created when the table
     # is full returns)
@@ -697,14 +716,12 @@ def test_normalize_queries(dbm_instance):
                 'lock_time': 18298000,
             }
         ]
-    ) == [
-        {
-            'digest': None,
-            'schema': None,
-            'digest_text': None,
-            'query_signature': None,
-            'count': 41,
-            'time': 66721400,
-            'lock_time': 18298000,
-        }
-    ]
+    )[0].data == {
+        'digest': None,
+        'schema': None,
+        'digest_text': None,
+        'query_signature': None,
+        'count': 41,
+        'time': 66721400,
+        'lock_time': 18298000,
+    }

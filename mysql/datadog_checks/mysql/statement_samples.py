@@ -15,7 +15,7 @@ except ImportError:
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, DbRow, RateLimitingTTLCache, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
@@ -497,18 +497,20 @@ class MySQLStatementSamples(DBMAsyncJob):
                 hostname=self._check.resolved_hostname,
             )
             return None
+
+        db_row = DbRow(row, statement['metadata'])
         obfuscated_statement = statement['query']
         obfuscated_digest_text = statement_digest_text['query']
         apm_resource_hash = compute_sql_signature(obfuscated_statement)
         query_signature = compute_sql_signature(obfuscated_digest_text)
 
-        query_cache_key = (row['current_schema'], query_signature)
+        query_cache_key = (db_row.data['current_schema'], query_signature)
         if not self._explained_statements_ratelimiter.acquire(query_cache_key):
             return None
 
         with closing(self._get_db_connection().cursor()) as cursor:
             plan, error_states = self._explain_statement(
-                cursor, row['sql_text'], row['current_schema'], obfuscated_statement, query_signature
+                cursor, db_row.data['sql_text'], db_row.data['current_schema'], obfuscated_statement, query_signature
             )
 
         collection_errors = []
@@ -537,21 +539,20 @@ class MySQLStatementSamples(DBMAsyncJob):
 
         query_plan_cache_key = (query_cache_key, plan_signature)
         if self._seen_samples_ratelimiter.acquire(query_plan_cache_key):
-            metadata = statement.get('metadata', {})
             return {
-                "timestamp": row["timer_end_time_s"] * 1000,
+                "timestamp": db_row.data["timer_end_time_s"] * 1000,
                 "host": self._check.resolved_hostname,
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "mysql",
                 "ddtags": self._tags_str,
-                "duration": row['timer_wait_ns'],
+                "duration": db_row.data['timer_wait_ns'],
                 "network": {
                     "client": {
-                        "ip": row.get('processlist_host', None),
+                        "ip": db_row.data.get('processlist_host', None),
                     }
                 },
                 "db": {
-                    "instance": row['current_schema'],
+                    "instance": db_row.data['current_schema'],
                     "plan": {
                         "definition": obfuscated_plan,
                         "signature": plan_signature,
@@ -560,10 +561,14 @@ class MySQLStatementSamples(DBMAsyncJob):
                     "query_signature": query_signature,
                     "resource_hash": apm_resource_hash,
                     "statement": obfuscated_statement,
-                    "metadata": {"comments": metadata.get('comments', None)},
-                    "query_truncated": self._get_truncation_state(row['sql_text']).value,
+                    "metadata": {
+                        "tables": db_row.metadata.parse_tables_csv(),
+                        "commands": db_row.metadata.commands,
+                        "comments": db_row.metadata.comments,
+                    },
+                    "query_truncated": self._get_truncation_state(db_row.data['sql_text']).value,
                 },
-                'mysql': {k: v for k, v in row.items() if k not in EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS},
+                'mysql': {k: v for k, v in db_row.data.items() if k not in EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS},
             }
 
     def _collect_plans_for_statements(self, rows):
