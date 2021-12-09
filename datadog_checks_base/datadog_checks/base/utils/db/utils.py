@@ -10,7 +10,7 @@ import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from itertools import chain
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from cachetools import TTLCache
 
@@ -164,13 +164,13 @@ class DbRow:
     """
 
     def __init__(self, row, metadata=None):
-        # type: (Dict[str], Dict[str]) -> None
+        # type: (Dict[str], Optional[Dict[str]]) -> None
         self.data = row
         self.metadata = metadata if isinstance(metadata, self.Metadata) else self.Metadata(metadata)
 
     class Metadata:
-        def __init__(self, metadata):
-            # type: (Dict[str]) -> None
+        def __init__(self, metadata=None):
+            # type: (Optional[Dict[str]]) -> None
             if not metadata:
                 metadata = {}
             self.tables_csv = metadata.get('tables_csv', None)
