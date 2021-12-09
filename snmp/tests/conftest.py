@@ -16,11 +16,8 @@ from datadog_checks.dev.docker import get_container_ip
 from .common import (
     COMPOSE_DIR,
     PORT,
-    SCALAR_OBJECTS,
-    SCALAR_OBJECTS_WITH_TAGS,
     SNMP_CONTAINER_NAME,
     SNMP_LISTENER_ENV,
-    TABULAR_OBJECTS,
     TOX_ENV_NAME,
     generate_container_instance_config,
 )
@@ -57,9 +54,8 @@ def dd_environment():
                     '{}:/etc/datadog-agent/datadog.yaml'.format(create_datadog_conf_file(tmp_dir))
                 ]
             else:
-                instance_config = generate_container_instance_config(
-                    SCALAR_OBJECTS + SCALAR_OBJECTS_WITH_TAGS + TABULAR_OBJECTS
-                )
+                instance_config = generate_container_instance_config([])
+                instance_config['init_config']['loader'] = 'core'
             yield instance_config, new_e2e_metadata
 
 
