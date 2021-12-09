@@ -129,8 +129,9 @@ def _run_test_collect_activity(aggregator, instance_docker, dd_run_check, dbm_in
 
     # internal debug metrics
     aggregator.assert_metric(
-        "dd.sqlserver.activity.collect_activity.time",
-        tags=['agent_hostname:stubbed.hostname'] + _expected_dbm_instance_tags(dbm_instance),
+        "dd.sqlserver.operation.time",
+        tags=['agent_hostname:stubbed.hostname', 'operation:collect_activity']
+        + _expected_dbm_instance_tags(dbm_instance),
     )
 
     # finally, on the second iteration, only bob's transaction is still open

@@ -177,6 +177,14 @@ class SQLServer(AgentCheck):
     def debug_tags(self):
         return self.tags + ['agent_hostname:{}'.format(self.agent_hostname)]
 
+    def debug_stats_kwargs(self, tags=None):
+        tags = tags if tags else []
+        return {
+            "tags": self.debug_tags() + tags,
+            "hostname": self.resolved_hostname,
+            "raw": True,
+        }
+
     @property
     def agent_hostname(self):
         # type: () -> str
