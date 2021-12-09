@@ -201,7 +201,8 @@ instances:
 
 #### Connecting to Oracle via TCPS
 
-To connect to Oracle via TCPS (TCP with SSL), make sure to first uncomment out the `protocol` configuration option and select `TCPS`, and make sure that the correct `server` is  serving the TCPS server.
+To connect to Oracle via TCPS (TCP with SSL), uncomment out the `protocol` configuration option and select `TCPS`.
+Update the `server` option to set the TCPS server to monitor.
 
 ```yaml
 init_config:
@@ -240,17 +241,24 @@ instances:
     protocol: TCPS
 ```
 
-After uncommenting out the `protocol` configuration option, make sure that the `sqlnet.ora`, `listener.ora`, and `tnsnames.ora` are correctly configured to allow TCPS connections on your Oracle Database. 
+Update the `sqlnet.ora`, `listener.ora`, and `tnsnames.ora` to allow TCPS connections on your Oracle Database. 
 
-If you are connecting to Oracle Database using the Oracle Instant Client, you can verify that Datadog will be able to connect to your database by using the `sqlplus` command line tool using the information inputted in your configuration options:
+##### TCPS via Oracle Instant Client
+
+If you are connecting to Oracle Database using the Oracle Instant Client, verify that the Datadog Agent will be able to connect to your database by using the `sqlplus` command line tool using the information inputted in your configuration options:
 
 ```shell
 sqlplus <USER>/<PASSWORD>@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCPS)(HOST=<HOST>)(PORT=<PORT>))(SERVICE_NAME=<SERVICE_NAME>)))
 ```
 
-If you are connecting to Oracle Database using JDBC, you will need to also specify `jdbc_truststore_path`, `jdbc_truststore_type`, and optionally `jdbc_truststore_password` if there is a password on the truststore. Note that `SSO` truststores don't require passwords.
+##### TCPS via JDBC
+
+If you are connecting to Oracle Database using JDBC, you will need to also specify `jdbc_truststore_path`, `jdbc_truststore_type`, and optionally `jdbc_truststore_password` if there is a password on the truststore. 
+
+Note: `SSO` truststores don't require passwords.
 
 ```yaml
+    # In the `instances:` section
     ...
 
     ## @param jdbc_truststore_path - string - optional
