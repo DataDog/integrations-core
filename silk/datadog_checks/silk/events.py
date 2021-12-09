@@ -2,15 +2,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-ALERT_TYPES = {
-    "INFO": "info",
-    "ERROR": "error",
-    # may have more?
-}
+ALERT_TYPES = {"INFO": "info", "ERROR": "error", "WARNING": "warning", "CRITICAL": "error"}
 
 
 class SilkEvent(object):
-
     def __init__(self, raw_event, tags):
         self.raw_event = raw_event
 
@@ -23,16 +18,8 @@ class SilkEvent(object):
         }
 
     def get_datadog_payload(self):
-
-        # Do any transformation here
-        self.transform()
-
         self.payload["msg_title"] = self.raw_event['name']
         self.payload['msg_text'] = self.raw_event['message']
         self.payload['tags'].append('user:%s' % self.raw_event['user'])
 
         return self.payload
-
-    # Transform eventually?
-    def transform(self):
-        pass

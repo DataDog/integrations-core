@@ -6,10 +6,12 @@ from copy import deepcopy
 from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.time import get_current_datetime
 
 from .events import SilkEvent
 from .metrics import METRICS
-from datadog_checks.base.utils.time import get_current_datetime
+
+EVENT_PATH = "events?timestamp__gte={}"
 
 
 class SilkCheck(AgentCheck):
@@ -115,12 +117,10 @@ class SilkCheck(AgentCheck):
         latest_event_time = None
         collect_events_start_time = get_current_datetime()
         try:
-            # Dummy value
-            self.latest_event_query = 1638834580
-
             # Call events endpoint here
-            response_json, code = self.get_metrics("http://localhost/api/v2/events?timestamp__gte=%s"
-                                                   % self.latest_event_query)
+            event_query = EVENT_PATH.format(self.latest_event_query)
+            response_json, code = self.get_metrics(event_query)
+
             events = response_json["hits"]
             for event in events:
                 normalized_event = SilkEvent(event, self.tags)
@@ -140,4 +140,3 @@ class SilkCheck(AgentCheck):
         else:
             # In case no events were collected
             self.latest_event_query = collect_events_start_time
-

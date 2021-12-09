@@ -7,8 +7,9 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.silk import SilkCheck
+from datadog_checks.silk.events import SilkEvent
 
-from .common import METRICS
+from .common import EXPECTED_EVENT_PAYLOAD, METRICS, SAMPLE_RAW_EVENT
 
 
 @pytest.mark.integration
@@ -33,3 +34,9 @@ def test_error_msg_response(dd_run_check, aggregator, instance):
         dd_run_check(check)
         aggregator.assert_service_check('silk.can_connect', SilkCheck.OK)
         aggregator.assert_service_check('silk.state', SilkCheck.WARNING)
+
+
+def test_events():
+    normalized_event = SilkEvent(SAMPLE_RAW_EVENT, ["test:silk"])
+    actual_payload = normalized_event.get_datadog_payload()
+    assert actual_payload == EXPECTED_EVENT_PAYLOAD
