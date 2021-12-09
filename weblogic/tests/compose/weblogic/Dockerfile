@@ -51,8 +51,17 @@ ENV APP_NAME="${APPLICATION_NAME}" \
     DEBUG_PORT="8453" \
     PATH=$PATH:/u01/oracle/oracle_common/common/bin:/u01/oracle/wlserver/common/bin:${DOMAIN_HOME}:${DOMAIN_HOME}/bin:/u01/oracle
 
-# Add files required to build this image
-COPY --chown=oracle:root container-scripts/* /u01/oracle/
+# Retrieve the files required to build this image
+
+# https://github.com/oracle/docker-images/tree/d64e2b42e81ef036057de0d03f7561e1fb5192bb/OracleWebLogic/samples/12213-deploy-application
+RUN cd /u01/oracle & curl -L https://github.com/oracle/docker-images/archive/refs/heads/main.tar.gz | tar xz --strip=4 "docker-images-main/OracleWebLogic/samples/12213-deploy-application/sample" "docker-images-main/OracleWebLogic/samples/12213-deploy-application/build-archive.sh"
+
+# https://github.com/oracle/docker-images/tree/1e26820b44c393944b20f0ae069670538a2e37ef/OracleWebLogic/samples/12213-domain-home-in-image/container-scripts
+
+RUN curl -L https://github.com/oracle/docker-images/archive/refs/heads/main.tar.gz | tar xz --strip=5 "docker-images-main/OracleWebLogic/samples/12213-domain-home-in-image/container-scripts" "docker-images-main/OracleWebLogic/samples/12213-deploy-application/container-scripts"
+
+
+COPY --chown=oracle:root create-wls-domain.py /u01/oracle/
 
 #Create directory where domain will be written to
 USER root
@@ -65,7 +74,6 @@ RUN chmod +xw /u01/oracle/*.sh && \
 
 
 COPY --chown=oracle:root properties/docker-build/domain*.properties ${PROPERTIES_FILE_DIR}/
-COPY build-archive.sh /u01/oracle/
 
 # Configuration of WLS Domain
 USER oracle
@@ -73,8 +81,6 @@ RUN /u01/oracle/createWLSDomain.sh && \
     chmod -R g+w $DOMAIN_HOME && \
     echo ". $DOMAIN_HOME/bin/setDomainEnv.sh" >> /u01/oracle/.bashrc
 
-COPY sample/* /u01/oracle/sample/
-COPY build-archive.sh /u01/oracle/
 
 RUN /u01/oracle/build-archive.sh
 RUN /u01/oracle/setEnv.sh ${PROPERTIES_FILE_DIR}/docker-build/domain.properties
@@ -89,7 +95,6 @@ FROM wls_base
 WORKDIR $DOMAIN_HOME
 
 # Copy files and deploy sample application in WLST Offline mode
-COPY container-scripts/* /u01/oracle/
 
 RUN cd /u01/oracle & $JAVA_HOME/bin/jar xf /u01/oracle/$APP_PKG_FILE && \
     /u01/oracle/deployAppToDomain.sh

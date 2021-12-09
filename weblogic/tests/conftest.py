@@ -7,8 +7,7 @@ from copy import deepcopy
 
 import pytest
 
-from datadog_checks.dev import WaitFor, docker_run
-from datadog_checks.dev.subprocess import run_command
+from datadog_checks.dev import docker_run
 from datadog_checks.dev.utils import load_jmx_config
 
 from .common import HERE
