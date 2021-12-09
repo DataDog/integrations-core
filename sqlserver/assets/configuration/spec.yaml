@@ -231,6 +231,19 @@ files:
           value:
             type: number
             example: 10
+        - name: dm_exec_query_stats_row_limit
+          description: |
+            Set the maximum number of query stats rows which can be retrieved in a single check run.
+          value:
+            type: integer
+            example: 10000
+        - name: samples_per_hour_per_query
+          description: |
+            Set the rate limit for how many query sample events will be ingested per hour per normalized execution
+            plan.
+          value:
+            type: integer
+            example: 4
     - name: query_activity
       description: Configure collection of active sessions monitoring
       options:
