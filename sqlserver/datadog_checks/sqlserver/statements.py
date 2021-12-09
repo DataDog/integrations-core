@@ -58,7 +58,7 @@ select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid, D.name as
 """
 
 PLAN_LOOKUP_QUERY = """\
-select cast(query_plan as nvarchar(max)) as query_plan from sys.dm_exec_query_stats
+select top 1 cast(query_plan as nvarchar(max)) as query_plan from sys.dm_exec_query_stats
     cross apply sys.dm_exec_query_plan(plan_handle)
 where
     query_hash = CONVERT(varbinary(max), ?, 1) and query_plan_hash = CONVERT(varbinary(max), ?, 1)
