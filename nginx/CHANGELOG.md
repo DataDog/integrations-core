@@ -1,5 +1,9 @@
 # CHANGELOG - nginx
 
+## 4.1.0 / 2021-12-08
+
+* [Added] Add support for NGINX Plus versions 4-7. See [#10750](https://github.com/DataDog/integrations-core/pull/10750).
+
 ## 4.0.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
