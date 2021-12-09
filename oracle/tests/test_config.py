@@ -65,6 +65,7 @@ def test_check_misconfig_invalid_truststore_type(instance):
     instance['jdbc_driver_path'] = '/path/to/jdbc/driver'
     instance['jdbc_truststore_path'] = '/path/to/jdbc/truststore'
     instance['jdbc_truststore_type'] = 'wrong_type'
+    instance['protocol'] = 'TCPS'
     check = Oracle(CHECK_NAME, {}, [instance])
     with pytest.raises(ConfigurationError):
         check.validate_config()
