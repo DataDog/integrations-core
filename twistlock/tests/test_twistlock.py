@@ -4,8 +4,10 @@
 
 import os
 
+import logging
 import mock
 import pytest
+import pdb
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev import get_here
@@ -101,6 +103,9 @@ def test_err_response(aggregator, instance):
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, aggregator, instance):
-    with pytest.raises(Exception):
+    # caplog.set_level(logging.DEBUG)
+    # pdb.set_trace()
+    with pytest.raises(Exception) as e:
         dd_agent_check(instance)
     aggregator.assert_service_check("twistlock.license_ok", AgentCheck.CRITICAL)
+    assert "Max retries exceeded with url: /api/v1/settings/license" in str(e.value)
