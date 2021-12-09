@@ -60,7 +60,6 @@ def dd_environment():
                     {
                         'loader': 'core',
                         'use_device_id_as_hostname': True,
-
                         # use hostname as namespace to create different device for each user
                         'namespace': socket.gethostname(),
                     }
