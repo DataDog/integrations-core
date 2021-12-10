@@ -104,7 +104,7 @@ class Oracle(AgentCheck):
         if self._jdbc_driver and self._protocol.upper() == PROTOCOL_TCPS:
             if not (self._jdbc_truststore_type and self._jdbc_truststore_path):
                 raise ConfigurationError(
-                    "TCPS connections to oracle via JDBC requires both `jdbc_truststore_type` and "
+                    "TCPS connections to Oracle via JDBC requires both `jdbc_truststore_type` and "
                     "`jdbc_truststore_path` configuration options "
                 )
 
