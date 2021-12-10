@@ -72,6 +72,10 @@ class BaseManifestValidator(object):
         self.result.failed = True
         self.result.messages['failure'].append(error_message)
 
+    def warn(self, warning_message):
+        self.result.failed = True
+        self.result.messages['warning'].append(warning_message)
+
     def fix(self, problem, solution):
         self.result.warning_msg = problem
         self.result.success_msg = solution
