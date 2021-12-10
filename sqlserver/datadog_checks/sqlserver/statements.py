@@ -41,22 +41,37 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
 ]
 
 STATEMENT_METRICS_QUERY = """\
-with qstats as (
-    select TOP {limit} text, query_hash, query_plan_hash, last_execution_time, plan_handle,
-           (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
-           (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'user_id') as user_id,
-           {query_metrics_columns}
+with qsums as (
+    select TOP {limit}
+           query_hash,
+           query_plan_hash,
+           max(plan_handle) as plan_handle,
+           max(sql_handle) as sql_handle,
+           {query_metrics_column_sums}
     from sys.dm_exec_query_stats
-        cross apply sys.dm_exec_sql_text(sql_handle)
     where last_execution_time > dateadd(second, -{collection_interval}, getdate())
+    group by query_hash, query_plan_hash, plan_handle
+),
+attrs as (
+    select
+        plan_handle,
+        (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
+        (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'user_id') as user_id
+    from qsums
 )
-select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
-       D.name as database_name, U.name as user_name, max(plan_handle) as plan_handle,
-    {query_metrics_column_sums}
-    from qstats S
-    left join sys.databases D on S.dbid = D.database_id
-    left join sys.sysusers U on S.user_id = U.uid
-    group by text, query_hash, query_plan_hash, S.dbid, D.name, U.name
+select
+    text,
+    query_hash,
+    query_plan_hash,
+    S.plan_handle as plan_handle,
+    D.name as database_name,
+    U.name as user_name,
+    {query_metrics_columns}
+from qsums S
+    left join attrs A on S.plan_handle = A.plan_handle
+    left join sys.databases D on A.dbid = D.database_id
+    left join sys.sysusers U on A.user_id = U.uid
+    cross apply sys.dm_exec_sql_text(S.sql_handle)
 """
 
 PLAN_LOOKUP_QUERY = """\
