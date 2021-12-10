@@ -1,7 +1,7 @@
 {
 	"name": "[kubernetes] Monitor Kubernetes Statefulset Replicas",
 	"type": "query alert",
-	"query": "max(last_15m):sum:kubernetes_state.statefulset.replicas_desired{*} by {kube_namespace,kube_stateful_set} - sum:kubernetes_state.statefulset.replicas_ready{*} by {kube_namespace,kube_stateful_set} >= 2",
+	"query": "max(last_15m):sum:kubernetes_state.statefulset.replicas_desired{*} by {kube_cluster_name,kube_namespace,kube_stateful_set} - sum:kubernetes_state.statefulset.replicas_ready{*} by {kube_cluster_name,kube_namespace,kube_stateful_set} >= 2",
 	"message": "More than one Statefulset Replica's pods are down in Statefulset {{kube_namespace.name}}/{{kube_stateful_set.name}}. This might present an unsafe situation for any further manual operations, such as killing other pods.",
 	"tags": [
 		"integration:kubernetes"
