@@ -349,7 +349,7 @@ class Connection(object):
 
         conn_str = 'ConnectRetryCount=2;'
         if dsn:
-            conn_str = 'DSN={};'.format(dsn)
+            conn_str += 'DSN={};'.format(dsn)
 
         if driver:
             conn_str += 'DRIVER={};'.format(driver)
