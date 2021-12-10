@@ -6,15 +6,18 @@ import os
 import mock
 import pytest
 
+from copy import deepcopy
+
+INSTANCE = {'prometheus_url': 'http://localhost:5000/metrics'}
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield
+    yield deepcopy(INSTANCE)
 
 
 @pytest.fixture
 def instance():
-    return {'prometheus_url': 'http://localhost:5000/metrics'}
+    return deepcopy(INSTANCE)
 
 
 @pytest.fixture()
