@@ -86,7 +86,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 | -------------------- | ----------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `kong`                                                |
 | `<INIT_CONFIG>`      | blank or `{}`                                         |
-| `<INSTANCE_CONFIG>`  | `{"kong_status_url": "http://%%host%%:8001/status/"}` |
+| `<INSTANCE_CONFIG>`  | `{"openmetrics_endpoint:": "http://%%host%%:8001/metrics"}` |
 
 ##### Log collection
 
