@@ -12,7 +12,6 @@ def test_e2e(aggregator, instance, dd_agent_check):
     # Prevent the integration from failing before even running the check
     instance['ticket_location'] = '.'
 
-    # with pytest.raises(Exception):
     dd_agent_check(instance, rate=True)
 
     aggregator.assert_service_check('mapr.can_connect', AgentCheck.OK, count=2)
