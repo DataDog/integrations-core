@@ -10,6 +10,7 @@ from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev import run_command
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
+from datadog_checks.cilium import CiliumCheck
 
 try:
     from contextlib import ExitStack
@@ -63,6 +64,11 @@ def dd_environment():
                     instance['use_openmetrics'] = True
 
         yield instances
+
+
+@pytest.fixture(scope="session")
+def check():
+    return lambda instance: CiliumCheck('cilium', {}, [instance])
 
 
 @pytest.fixture(scope="session")
