@@ -52,7 +52,7 @@ class CiliumCheck(OpenMetricsBaseCheck):
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
-        if 'openmetrics_endpoint' in instance:
+        if 'use_openmetrics' in instance:
             if PY2:
                 raise ConfigurationError(
                     "This version of the integration is only available when using py3. "
