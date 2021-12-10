@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+import pdb
 from typing import Any, Dict
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
@@ -66,6 +67,7 @@ def test_check(aggregator, instance, mock_metrics_endpoint):
 # Minimal E2E testing
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, aggregator, instance):
-    with pytest.raises(Exception):
+    with pytest.raises(Exception) as e:
         dd_agent_check(instance, rate=True)
     aggregator.assert_service_check("datadog.cluster_agent.prometheus.health", AgentCheck.CRITICAL)
+    assert "Max retries exceeded with url: /metrics" in str(e)
