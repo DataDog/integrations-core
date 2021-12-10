@@ -24,7 +24,10 @@ except ImportError as e:
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'oracle'
 MAX_CUSTOM_RESULTS = 100
-VALID_PROTOCOLS = ['TCP', 'TCPS']
+
+PROTOCOL_TCP = 'TCP'
+PROTOCOL_TCPS = 'TCPS'
+VALID_PROTOCOLS = [PROTOCOL_TCP, PROTOCOL_TCPS]
 VALID_TRUSTSTORE_TYPES = ['JKS', 'SSO', 'PKCS12']
 
 
@@ -44,7 +47,7 @@ class Oracle(AgentCheck):
         self._user = self.instance.get('username') or self.instance.get('user')
         self._password = self.instance.get('password')
         self._service = self.instance.get('service_name')
-        self._protocol = self.instance.get("protocol", "TCP")
+        self._protocol = self.instance.get("protocol", PROTOCOL_TCP)
         self._jdbc_driver = self.instance.get('jdbc_driver_path')
         self._jdbc_truststore_path = self.instance.get('jdbc_truststore_path')
         self._jdbc_truststore_type = self.instance.get('jdbc_truststore_type')
@@ -98,21 +101,18 @@ class Oracle(AgentCheck):
         if self._protocol.upper() not in VALID_PROTOCOLS:
             raise ConfigurationError("Protocol %s is not valid, must either be TCP or TCPS" % self._protocol)
 
-        if (
-            self._jdbc_driver
-            and self._protocol.upper() == "TCPS"
-            and not (self._jdbc_truststore_type and self._jdbc_truststore_path)
-        ):
-            raise ConfigurationError(
-                "TCPS connections to oracle via JDBC requires both `jdbc_truststore_type` and `jdbc_truststore_path` "
-                "configuration options "
-            )
+        if self._jdbc_driver and self._protocol.upper() == PROTOCOL_TCPS:
+            if not (self._jdbc_truststore_type and self._jdbc_truststore_path):
+                raise ConfigurationError(
+                    "TCPS connections to oracle via JDBC requires both `jdbc_truststore_type` and "
+                    "`jdbc_truststore_path` configuration options "
+                )
 
-        if self._jdbc_truststore_type and self._jdbc_truststore_type.upper() not in VALID_TRUSTSTORE_TYPES:
-            raise ConfigurationError(
-                "Truststore type %s is not valid, must be one of %s"
-                % (self._jdbc_truststore_type, VALID_TRUSTSTORE_TYPES)
-            )
+            if self._jdbc_truststore_type and self._jdbc_truststore_type.upper() not in VALID_TRUSTSTORE_TYPES:
+                raise ConfigurationError(
+                    "Truststore type %s is not valid, must be one of %s"
+                    % (self._jdbc_truststore_type, VALID_TRUSTSTORE_TYPES)
+                )
 
     def execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:
@@ -192,7 +192,7 @@ class Oracle(AgentCheck):
             self._connection_errors += 1
             raise ConfigurationError('server needs to be in the <HOST>:<PORT> format, "%s"" provided' % self._server)
 
-        if self._protocol == 'TCPS':
+        if self._protocol == PROTOCOL_TCPS:
             dsn = '(DESCRIPTION=(ADDRESS=(PROTOCOL={})(HOST={})(PORT={}))(CONNECT_DATA=(SERVICE_NAME={})))'.format(
                 self._protocol, host, port, self._service
             )
@@ -203,7 +203,7 @@ class Oracle(AgentCheck):
     def _jdbc_connect(self):
         jdbc_connect_properties = {'user': self._user, 'password': self._password}
 
-        if self._protocol == 'TCPS':
+        if self._protocol == PROTOCOL_TCPS:
             connect_string = self.JDBC_CONNECTION_STRING_TCPS.format(self._get_dsn())
             jdbc_connect_properties['javax.net.ssl.trustStoreType'] = self._jdbc_truststore_type
             jdbc_connect_properties['javax.net.ssl.trustStorePassword'] = self._jdbc_truststore_password

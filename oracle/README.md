@@ -201,7 +201,7 @@ instances:
 
 #### Connecting to Oracle via TCPS
 
-To connect to Oracle via TCPS (TCP with SSL), uncomment out the `protocol` configuration option and select `TCPS`.
+1. To connect to Oracle via TCPS (TCP with SSL), uncomment out the `protocol` configuration option and select `TCPS`.
 Update the `server` option to set the TCPS server to monitor.
 
 ```yaml
@@ -241,7 +241,7 @@ instances:
     protocol: TCPS
 ```
 
-Update the `sqlnet.ora`, `listener.ora`, and `tnsnames.ora` to allow TCPS connections on your Oracle Database. 
+2. Update the `sqlnet.ora`, `listener.ora`, and `tnsnames.ora` to allow TCPS connections on your Oracle Database. 
 
 ##### TCPS via Oracle Instant Client
 
