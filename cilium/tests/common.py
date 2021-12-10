@@ -3,9 +3,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+import pytest
+
 CHECK_NAME = 'cilium'
 NAMESPACE = 'cilium.'
 CILIUM_VERSION = os.getenv('CILIUM_VERSION')
+CILIUM_LEGACY = os.getenv('CILIUM_LEGACY')
+
+requires_legacy_environment = pytest.mark.skipif(
+    CILIUM_LEGACY != 'true', reason='Requires legacy Openmetrics V1 environment'
+)
 
 AGENT_DEFAULT_METRICS = [
     'cilium.agent.api_process_time.seconds.count',

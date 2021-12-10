@@ -2,10 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import ChainMap
-from datadog_checks.base import AgentCheck, ConfigurationError, OpenMetricsBaseCheckV2
+
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 
-from .metrics import AGENT_METRICS, OPERATOR_METRICS,construct_metrics_config
+from .metrics import AGENT_METRICS, OPERATOR_METRICS, construct_metrics_config
 
 CILIUM_VERSION = {'cilium_version': {'type': 'metadata', 'label': 'tag', 'name': 'version'}}
 

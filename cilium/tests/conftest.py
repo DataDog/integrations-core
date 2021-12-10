@@ -48,8 +48,14 @@ def dd_environment():
             ]
         instances = {
             'instances': [
-                {'agent_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0])},
-                {'operator_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1])},
+                {
+                    'agent_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0]),
+                    'use_openmetrics': True,
+                },
+                {
+                    'operator_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1]),
+                    'use_openmetrics': True,
+                },
             ]
         }
 
@@ -57,12 +63,12 @@ def dd_environment():
 
 
 @pytest.fixture(scope="session")
-def agent_instance():
+def agent_instance_legacy():
     return {'agent_endpoint': AGENT_URL, 'tags': ['pod_test']}
 
 
 @pytest.fixture
-def operator_instance():
+def operator_instance_legacy():
     return {'operator_endpoint': OPERATOR_URL, 'tags': ['operator_test']}
 
 

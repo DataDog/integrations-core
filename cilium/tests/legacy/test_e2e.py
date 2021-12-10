@@ -4,7 +4,9 @@
 
 import pytest
 
-from .common import AGENT_DEFAULT_METRICS, OPERATOR_METRICS
+from ..common import AGENT_DEFAULT_METRICS, OPERATOR_METRICS, requires_legacy_environment
+
+pytestmark = [requires_legacy_environment]
 
 
 @pytest.mark.e2e
