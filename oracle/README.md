@@ -205,42 +205,42 @@ instances:
 1. To connect to Oracle via TCPS (TCP with SSL), uncomment the `protocol` configuration option and select `TCPS`.
 Update the `server` option to set the TCPS server to monitor.
 
-```yaml
-init_config:
-
-instances:
-  ## @param server - string - required
-  ## The IP address or hostname of the Oracle Database Server.
-  #
-  - server: localhost:1522
-
-    ## @param service_name - string - required
-    ## The Oracle Database service name. To view the services available on your server,
-    ## run the following query:
-    ## `SELECT value FROM v$parameter WHERE name='service_names'`
-    #
-    service_name: "<SERVICE_NAME>"
-
-    ## @param user - string - required
-    ## The username for the user account.
-    #
-    user: <USER>
-
-    ## @param password - string - required
-    ## The password for the user account.
-    #
-    password: "<PASSWORD>"
-
-    ## @param protocol - string - optional - default: TCP
-    ## The protocol to connect to the Oracle Database Server. Valid protocols include TCP and TCPS.
-    ##
-    ## When connecting to Oracle Database via JDBC, `jdbc_truststore` and `jdbc_truststore_type` are required.
-    ## More information can be found from Oracle Database's whitepaper:
-    ##
-    ## https://www.oracle.com/technetwork/topics/wp-oracle-jdbc-thin-ssl-130128.pdf
-    #
-    protocol: TCPS
-```
+    ```yaml
+    init_config:
+    
+    instances:
+      ## @param server - string - required
+      ## The IP address or hostname of the Oracle Database Server.
+      #
+      - server: localhost:1522
+    
+        ## @param service_name - string - required
+        ## The Oracle Database service name. To view the services available on your server,
+        ## run the following query:
+        ## `SELECT value FROM v$parameter WHERE name='service_names'`
+        #
+        service_name: "<SERVICE_NAME>"
+    
+        ## @param user - string - required
+        ## The username for the user account.
+        #
+        user: <USER>
+    
+        ## @param password - string - required
+        ## The password for the user account.
+        #
+        password: "<PASSWORD>"
+    
+        ## @param protocol - string - optional - default: TCP
+        ## The protocol to connect to the Oracle Database Server. Valid protocols include TCP and TCPS.
+        ##
+        ## When connecting to Oracle Database via JDBC, `jdbc_truststore` and `jdbc_truststore_type` are required.
+        ## More information can be found from Oracle Database's whitepaper:
+        ##
+        ## https://www.oracle.com/technetwork/topics/wp-oracle-jdbc-thin-ssl-130128.pdf
+        #
+        protocol: TCPS
+    ```
 
 2. Update the `sqlnet.ora`, `listener.ora`, and `tnsnames.ora` to allow TCPS connections on your Oracle Database. 
 
