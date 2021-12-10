@@ -4,11 +4,6 @@
 import functools
 import os
 
-try:
-    from ddtrace import patch_all, tracer
-except ImportError:
-    tracer = None
-
 from ..config import is_affirmative
 
 try:
@@ -47,15 +42,20 @@ def traced(fn):
         integration_tracing = is_affirmative(datadog_agent.get_config('integration_tracing'))
 
         if integration_tracing and trace_check:
-            patch_all()
-            with tracer.trace(self.name, service='integrations-tracing', resource=fn.__name__):
-                return fn(self, *args, **kwargs)
+            try:
+                from ddtrace import patch_all, tracer
+
+                patch_all()
+                with tracer.trace(self.name, service='integrations-tracing', resource=fn.__name__):
+                    return fn(self, *args, **kwargs)
+            except Exception:
+                pass
         return fn(self, *args, **kwargs)
 
     return traced_wrapper
 
 
-def tracing_method(f):
+def tracing_method(f, tracer):
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
         with tracer.trace(f.__name__, resource=f.__name__):
@@ -65,25 +65,27 @@ def tracing_method(f):
 
 
 def traced_class(cls):
-    if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true' and tracer is not None:
-        patch_all()
+    if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true':
+        try:
+            from ddtrace import patch_all, tracer
 
-        def decorate(cls):
-            for attr in cls.__dict__:
-                # Ignoring staticmethod and classmethod because they don't need cls in args
-                if (
-                    callable(getattr(cls, attr))
-                    and not isinstance(cls.__dict__[attr], staticmethod)
-                    and not isinstance(cls.__dict__[attr], classmethod)
-                    # Get rid of SnmpCheck._thread_factory and related
-                    and getattr(getattr(cls, attr), '__module__', 'threading') not in EXCLUDED_MODULES
-                ):
-                    setattr(cls, attr, tracing_method(getattr(cls, attr)))
-            return cls
+            patch_all()
 
-    else:
+            def decorate(cls):
+                for attr in cls.__dict__:
+                    # Ignoring staticmethod and classmethod because they don't need cls in args
+                    if (
+                        callable(getattr(cls, attr))
+                        and not isinstance(cls.__dict__[attr], staticmethod)
+                        and not isinstance(cls.__dict__[attr], classmethod)
+                        # Get rid of SnmpCheck._thread_factory and related
+                        and getattr(getattr(cls, attr), '__module__', 'threading') not in EXCLUDED_MODULES
+                    ):
+                        setattr(cls, attr, tracing_method(getattr(cls, attr), tracer))
+                return cls
 
-        def decorate(cls):
-            return cls
+            return decorate(cls)
+        except Exception:
+            pass
 
-    return decorate(cls)
+    return cls

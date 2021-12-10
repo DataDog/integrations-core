@@ -9,6 +9,7 @@ import requests
 from six import iteritems
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.config import from_instance
 from datadog_checks.elastic.metrics import (
@@ -192,6 +193,47 @@ def test_pshard_metrics(dd_environment, aggregator):
 
 
 @pytest.mark.integration
+def test_detailed_index_stats(dd_environment, aggregator):
+    instance = {
+        "url": URL,
+        "cluster_stats": True,
+        "pshard_stats": True,
+        "detailed_index_stats": True,
+        "tls_verify": False,
+    }
+    elastic_check = ESCheck('elastic', {}, instances=[instance])
+    es_version = elastic_check._get_es_version()
+    elastic_check.check(None)
+    pshard_stats_metrics = pshard_stats_for_version(es_version)
+    for m_name, desc in iteritems(pshard_stats_metrics):
+        if desc[0] == 'gauge' and desc[1].startswith('_all.'):
+            aggregator.assert_metric(m_name)
+
+    aggregator.assert_metric_has_tag('elasticsearch.primaries.docs.count', tag='index_name:_all')
+    aggregator.assert_metric_has_tag('elasticsearch.primaries.docs.count', tag='index_name:testindex')
+    aggregator.assert_metric_has_tag('elasticsearch.primaries.docs.count', tag='index_name:.testindex')
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        check_metric_type=False,
+        exclude=[
+            "system.cpu.idle",
+            "system.load.1",
+            "system.load.15",
+            "system.load.5",
+            "system.mem.free",
+            "system.mem.total",
+            "system.mem.usable",
+            "system.mem.used",
+            "system.net.bytes_rcvd",
+            "system.net.bytes_sent",
+            "system.swap.free",
+            "system.swap.total",
+            "system.swap.used",
+        ],
+    )
+
+
+@pytest.mark.integration
 def test_index_metrics(dd_environment, aggregator, instance, cluster_tags):
     instance['index_stats'] = True
     elastic_check = ESCheck('elastic', {}, instances=[instance])
@@ -202,6 +244,7 @@ def test_index_metrics(dd_environment, aggregator, instance, cluster_tags):
     elastic_check.check(None)
     for m_name in index_stats_for_version(es_version):
         aggregator.assert_metric(m_name, tags=cluster_tags + ['index_name:testindex'])
+        aggregator.assert_metric(m_name, tags=cluster_tags + ['index_name:.testindex'])
 
 
 @pytest.mark.integration
