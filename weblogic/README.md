@@ -132,7 +132,7 @@ For containerized environments, see the [Autodiscovery with JMX][13] guide.
 
 ### Events
 
-The weblogic integration does not include any events.
+The WebLogic integration does not include any events.
 
 ### Service Checks
 
