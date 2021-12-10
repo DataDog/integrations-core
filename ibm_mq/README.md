@@ -112,7 +112,7 @@ Example of the configuration for `launchd`:
 </plist>
 ```
 
-Each time there is an agent update, these files are wiped and will need to be updated again.
+Each time there is an Agent update, these files are wiped and need to be updated again.
 
 Alternatively, if you are using Linux, after the MQ Client is installed ensure the runtime linker can find the libraries. For example, using ldconfig:
 
@@ -131,9 +131,9 @@ sudo ldconfig
 
 #### Permissions and authentication
 
-There are a number of ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions.
+There are many ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions.
 
-**Note**: "Queue Monitoring" must be enabled and set to at least "Medium". This can be done via the MQ UI or with an mqsc command:
+**Note**: "Queue Monitoring" must be enabled and set to at least "Medium". This can be done using the MQ UI or with an mqsc command:
 
 ```text
 > /opt/mqm/bin/runmqsc
@@ -163,14 +163,14 @@ To configure this check for an Agent running on a host:
 ##### Metric collection
 
 1. Edit the `ibm_mq.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your IBM MQ performance data. See the [sample ibm_mq.d/conf.yaml][5] for all available configuration options.
-   There are a number of options to configure IBM MQ, depending on how you're using it.
+   There are many options to configure IBM MQ, depending on how you're using it.
 
    - `channel`: The IBM MQ channel
    - `queue_manager`: The Queue Manager named
    - `host`: The host where IBM MQ is running
    - `port`: The port that IBM MQ has exposed
 
-    If you are using a username and password setup, you can set the `username` and `password`. If no username is set, the Agent process owner is used (e.g. `dd-agent`).
+    If you are using a username and password setup, you can set the `username` and `password`. If no username is set, the Agent process owner (`dd-agent`) is used.
 
     **Note**: The check only monitors the queues you have set with the `queues` parameter
 
@@ -239,7 +239,7 @@ partial -->
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][8].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][8].
 
 | Parameter      | Value                                                                                                                                                              |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

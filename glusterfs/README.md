@@ -78,12 +78,11 @@ partial -->
         source: glusterfs
     ```
 
-
   Change the `path` parameter value based on your environment. See the [sample conf.yaml][4] for all available configuration options.
 
   3. [Restart the Agent][6].
 
-  See [Datadog's documentation][7] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+For information on configuring the Agent for log collection in Kubernetes environments, see [Kubernetes Log Collection][7].
 
 ### Validation
 
