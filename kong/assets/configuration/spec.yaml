@@ -12,6 +12,7 @@ files:
       value:
         example: http://localhost:8001/status/
         type: string
+      hidden: true
     - template: instances/openmetrics
       overrides:
         openmetrics_endpoint.required: false

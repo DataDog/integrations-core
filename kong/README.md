@@ -21,19 +21,8 @@ To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
-1. Add this configuration block to your `kong.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start gathering your [Kong Metrics](#metrics). See the [sample kong.d/conf.yaml][3] for all available configuration options.
+1. Add this configuration block to your `kong.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start gathering your [Kong Metrics](#metrics). See the [sample kong.d/conf.yaml][3] for all available configuration options:
 
-   ```yaml
-   init_config:
-
-   instances:
-     ## @param kong_status_url - string - required
-     ## URL where Kong exposes its status.
-     #
-     - kong_status_url: http://localhost:8001/status/
-   ```
-
-   Alternatively, on Agent 7+ a more modern implementation can be used:
 
    ```yaml
    init_config:
