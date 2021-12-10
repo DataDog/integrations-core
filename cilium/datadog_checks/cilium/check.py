@@ -8,7 +8,7 @@ from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompati
 
 from .metrics import AGENT_METRICS, OPERATOR_METRICS, construct_metrics_config
 
-CILIUM_VERSION = {'cilium_version': {'type': 'metadata', 'label': 'tag', 'name': 'version'}}
+CILIUM_VERSION = {'cilium_version': {'type': 'metadata', 'label': 'version', 'name': 'version'}}
 
 
 class CiliumCheckV2(OpenMetricsBaseCheckV2):
