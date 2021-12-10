@@ -69,7 +69,7 @@ No additional installation is needed on your server.
    To learn how to customize the metrics to collect, visit the [JMX Checks documentation][5] for more detailed instructions.
    If you need to monitor more metrics, contact [Datadog support][6].
 
-3. [Restart the Agent][7]
+2. [Restart the Agent][7]
 
 ### Validation
 
