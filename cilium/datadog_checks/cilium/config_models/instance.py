@@ -135,7 +135,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str]
     persist_connections: Optional[bool]
     prometheus_metrics_prefix: Optional[str]
-    prometheus_url: str
+    prometheus_url: Optional[str]
     proxy: Optional[Proxy]
     raw_line_filters: Optional[Sequence[str]]
     raw_metric_prefix: Optional[str]
