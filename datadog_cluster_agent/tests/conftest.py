@@ -2,13 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from copy import deepcopy
 
 import mock
 import pytest
 
-from copy import deepcopy
-
 INSTANCE = {'prometheus_url': 'http://localhost:5000/metrics'}
+
 
 @pytest.fixture(scope='session')
 def dd_environment():
