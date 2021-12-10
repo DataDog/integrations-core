@@ -12,6 +12,7 @@ from six.moves.urllib.parse import urlparse
 from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
 from datadog_checks.base.utils.time import get_timestamp
 
+from .const import PLUS_API_ENDPOINTS, PLUS_API_STREAM_ENDPOINTS, TAGGED_KEYS
 from .metrics import COUNT_METRICS, METRICS_SEND_AS_COUNT, VTS_METRIC_MAP
 
 if PY3:
@@ -25,59 +26,6 @@ else:
 
     def fromisoformat(ts):
         return datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S")
-
-
-PLUS_API_ENDPOINTS = {
-    '1': {
-        "nginx": [],
-        "http/requests": ["requests"],
-        "http/server_zones": ["server_zones"],
-        "http/upstreams": ["upstreams"],
-        "http/caches": ["caches"],
-        "processes": ["processes"],
-        "connections": ["connections"],
-        "ssl": ["ssl"],
-        "slabs": ["slabs"],
-    },
-    '5': {
-        "http/location_zones": ["location_zones"],
-        "resolvers": ["resolvers"],
-    },
-    '6': {
-        "http/limit_reqs": ["limit_reqs"],
-        "http/limit_conns": ["limit_conns"],
-    },
-}
-
-PLUS_API_STREAM_ENDPOINTS = {
-    '1': {
-        "stream/server_zones": ["stream", "server_zones"],
-        "stream/upstreams": ["stream", "upstreams"],
-    },
-    '3': {
-        "stream/zone_sync": ["stream", "zone_sync"],
-    },
-    '6': {
-        "stream/limit_conns": ["stream", "limit_conns"],
-    },
-}
-
-
-TAGGED_KEYS = {
-    'caches': 'cache',
-    'codes': 'code',
-    'limit_conns': 'limit_conn',
-    'limit_reqs': 'limit_req',
-    'location_zones': 'location_zone',
-    'resolvers': 'resolver',
-    'server_zones': 'server_zone',
-    'serverZones': 'server_zone',  # VTS
-    'slabs': 'slab',
-    'slots': 'slot',
-    'upstreams': 'upstream',
-    'upstreamZones': 'upstream',  # VTS
-    'zones': 'zone',
-}
 
 
 class Nginx(AgentCheck):
@@ -112,82 +60,92 @@ class Nginx(AgentCheck):
 
     def check(self, _):
         if not self.use_plus_api:
-            response, content_type, version = self._get_data()
-            # for unpaid versions
-            self._set_version_metadata(version)
-
-            self.log.debug("Nginx status `response`: %s", response)
-            self.log.debug("Nginx status `content_type`: %s", content_type)
-
-            if content_type.startswith('application/json'):
-                metrics = self.parse_json(response, self.custom_tags)
-            else:
-                metrics = self.parse_text(response, self.custom_tags)
+            metrics = self.collect_unit_metrics()
         else:
-            metrics = []
-            self._perform_service_check('{}/{}'.format(self.url, self.plus_api_version))
+            metrics = self.collect_plus_metrics()
 
-            # These are all the endpoints we have to call to get the same data as we did with the old API
-            # since we can't get everything in one place anymore.
-
-            plus_api_chain_list = self._get_all_plus_api_endpoints()
-
-            for endpoint, nest in plus_api_chain_list:
-                response = self._get_plus_api_data(endpoint, nest)
-
-                if endpoint == 'nginx':
-                    try:
-                        if isinstance(response, dict):
-                            version_plus = response.get('version')
-                        else:
-                            version_plus = json.loads(response).get('version')
-                        self._set_version_metadata(version_plus)
-                    except Exception as e:
-                        self.log.debug("Couldn't submit nginx version: %s", e)
-
-                self.log.debug("Nginx Plus API version %s `response`: %s", self.plus_api_version, response)
-                metrics.extend(self.parse_json(response, self.custom_tags))
-
-        funcs = {'gauge': self.gauge, 'rate': self.rate, 'count': self.monotonic_count}
+        metric_submission_funcs = {'gauge': self.gauge, 'rate': self.rate, 'count': self.monotonic_count}
         conn = None
         handled = None
 
         for row in metrics:
             try:
                 name, value, tags, metric_type = row
-
-                # Translate metrics received from VTS
                 if self.use_vts:
-                    # Requests per second
-                    if name == 'nginx.connections.handled':
-                        handled = value
-                    if name == 'nginx.connections.accepted':
-                        conn = value
-                        self.rate('nginx.net.conn_opened_per_s', conn, tags)
-                    if handled is not None and conn is not None:
-                        self.rate('nginx.net.conn_dropped_per_s', conn - handled, tags)
-                        handled = None
-                        conn = None
-                    if name == 'nginx.connections.requests':
-                        self.rate('nginx.net.request_per_s', value, tags)
-
-                    name = VTS_METRIC_MAP.get(name)
+                    name, handled, conn = self._translate_from_vts(name, value, tags, handled, conn)
                     if name is None:
                         continue
 
                 if name in COUNT_METRICS:
-                    func_count = funcs['count']
+                    func_count = metric_submission_funcs['count']
                     func_count(name, value, tags)
                 else:
                     if name in METRICS_SEND_AS_COUNT:
-                        func_count = funcs['count']
+                        func_count = metric_submission_funcs['count']
                         func_count(name + "_count", value, tags)
 
-                    func = funcs[metric_type]
+                    func = metric_submission_funcs[metric_type]
                     func(name, value, tags)
 
             except Exception as e:
                 self.log.error('Could not submit metric: %s: %s', repr(row), e)
+
+    def collect_plus_metrics(self):
+        metrics = []
+        self._perform_service_check('{}/{}'.format(self.url, self.plus_api_version))
+
+        # These are all the endpoints we have to call to get the same data as we did with the old API
+        # since we can't get everything in one place anymore.
+
+        plus_api_chain_list = self._get_all_plus_api_endpoints()
+
+        for endpoint, nest in plus_api_chain_list:
+            response = self._get_plus_api_data(endpoint, nest)
+
+            if endpoint == 'nginx':
+                try:
+                    if isinstance(response, dict):
+                        version_plus = response.get('version')
+                    else:
+                        version_plus = json.loads(response).get('version')
+                    self._set_version_metadata(version_plus)
+                except Exception as e:
+                    self.log.debug("Couldn't submit nginx version: %s", e)
+
+            self.log.debug("Nginx Plus API version %s `response`: %s", self.plus_api_version, response)
+            metrics.extend(self.parse_json(response, self.custom_tags))
+        return metrics
+
+    def collect_unit_metrics(self):
+        response, content_type, version = self._get_data()
+        # for unpaid versions
+        self._set_version_metadata(version)
+
+        self.log.debug("Nginx status `response`: %s", response)
+        self.log.debug("Nginx status `content_type`: %s", content_type)
+
+        if content_type.startswith('application/json'):
+            metrics = self.parse_json(response, self.custom_tags)
+        else:
+            metrics = self.parse_text(response, self.custom_tags)
+        return metrics
+
+    def _translate_from_vts(self, name, value, tags, handled, conn):
+        # Requests per second
+        if name == 'nginx.connections.handled':
+            handled = value
+        if name == 'nginx.connections.accepted':
+            conn = value
+            self.rate('nginx.net.conn_opened_per_s', conn, tags)
+        if handled is not None and conn is not None:
+            self.rate('nginx.net.conn_dropped_per_s', conn - handled, tags)
+            handled = None
+            conn = None
+        if name == 'nginx.connections.requests':
+            self.rate('nginx.net.request_per_s', value, tags)
+
+        name = VTS_METRIC_MAP.get(name)
+        return name, handled, conn
 
     def _get_data(self):
         r = self._perform_service_check(self.url)
