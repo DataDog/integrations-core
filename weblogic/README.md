@@ -31,7 +31,7 @@ No additional installation is needed on your server.
    For more information, see the [WebLogic documentation][14].
 
 
-3. Verify that the [`PlatformMBeanServerUsed`][10] attribute value is set to `true` in the WebLogic Administration Console (default value is `true` in WebLogic Server versions 10.3.3.0 and above). This setting can be found in the WebLogic Server Admin Console or configured using WSLT (WebLogic Scripting Tool). 
+3. Verify that the [`PlatformMBeanServerUsed`][10] attribute value is set to `true` in the WebLogic Administration Console. The default value is `true` in WebLogic Server versions 10.3.3.0 and above. This setting can be found in the WebLogic Server Admin Console or configured using WebLogic Scripting Tool (WSLT). 
 
    _**Enable in the Admin Console**_
 
@@ -41,7 +41,7 @@ No additional installation is needed on your server.
    
    _**Enable in WLST**_
 
-   Start an edit session, navigate to the JMX directory for the domain, use `cmo.setPlatformMBeanServerUsed(true)` to enable the attribute if it is set to false.
+   Start an edit session. Navigate to the JMX directory for the domain and use `cmo.setPlatformMBeanServerUsed(true)` to enable the attribute if it is set to `false`.
 
    For example:
    ```
@@ -60,7 +60,7 @@ No additional installation is needed on your server.
 ### Configuration
 
 1. Edit the `weblogic.d/conf.yaml` file, in the `conf.d/` folder at the root of your
-   Agent's configuration directory to start collecting your weblogic performance data.
+   Agent's configuration directory to start collecting your Weblogic performance data.
    See the [sample weblogic.d/conf.yaml][3] for all available configuration options.
 
    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated when running the Datadog Agent [status command][4].
@@ -85,12 +85,11 @@ See [`metadata.csv`][11] for a list of metrics provided by this integration.
 1. WebLogic logging services use an implementation based on the Java Logging APIs by default. Clone and edit the [integration pipeline][12] if you have a different format.
 
 2. Collecting logs is disabled by default in the Datadog Agent, enable it in your datadog.yaml file:
-3. 
    ```yaml
    logs_enabled: true
    ```
    
-3. Uncomment and edit the logs configuration block in your weblogic.d/conf.yaml file. Change the path and service parameter values based on your environment. See the [sample weblogic.d/conf.yaml][3] for all available configuration options.
+3. Uncomment and edit the logs configuration block in your `weblogic.d/conf.yaml` file. Change the path and service parameter values based on your environment. See the [sample weblogic.d/conf.yaml][3] for all available configuration options.
    ```yaml
     - type: file
       path: <DOMAIN_DIR>/servers/<ADMIN_SERVER_NAME>/logs/<ADMIN_SERVER_NAME>.log
