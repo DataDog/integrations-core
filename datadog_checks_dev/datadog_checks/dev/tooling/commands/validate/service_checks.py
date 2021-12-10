@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+import re
 
 import click
 
@@ -44,6 +45,10 @@ CHECK_TO_NAME = {
     'system_core': 'System',
     'tcp_check': 'System',
 }
+
+INVALID_CHAR_RE = re.compile(r"[^a-zA-Z0-9_.]+")
+INVALID_SEQ_RE = re.compile(r"_{1,}\.+_*|_*\.+_{1,}|_{2,}|\.{2,}")
+INVALID_END_RE = re.compile(r"^_+|_+$")
 
 
 @click.command('service-checks', context_settings=CONTEXT_SETTINGS, short_help='Validate `service_checks.json` files')
@@ -131,9 +136,29 @@ def service_checks(check, sync):
 
             # check
             check = service_check.get('check')
+            invalid_chars = INVALID_CHAR_RE.findall(check)
+            invalid_seq = INVALID_SEQ_RE.findall(check)
+            invalid_end = INVALID_END_RE.findall(check)
             if not check or not isinstance(check, str):
                 file_failed = True
                 display_queue.append((echo_failure, '  required non-null string: check'))
+            elif invalid_chars or invalid_seq or invalid_end:
+                file_failed = True
+                if invalid_chars:
+                    display_queue.append(
+                        (echo_failure, f'  {check} contains one or more invalid characters: {invalid_chars}')
+                    )
+                if invalid_seq:
+                    display_queue.append(
+                        (echo_failure, f'  {check} contains one or more invalid sequences: {invalid_seq}')
+                    )
+                if invalid_end:
+                    display_queue.append(
+                        (
+                            echo_failure,
+                            f'  {check} contains the following invalid start or end character: {invalid_end}',
+                        )
+                    )
             else:
                 if check in unique_checks:
                     file_failed = True
