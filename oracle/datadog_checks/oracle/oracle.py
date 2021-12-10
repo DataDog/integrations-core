@@ -104,8 +104,8 @@ class Oracle(AgentCheck):
             and not (self._jdbc_truststore_type and self._jdbc_truststore_path)
         ):
             raise ConfigurationError(
-                "TCPS connections to oracle via JDBC requires both `jdbc_truststore_type` and `jdbc_truststore_path` "
-                "configuration options "
+                "TCPS connections to Oracle via JDBC requires both `jdbc_truststore_type` and `jdbc_truststore_path` "
+                "configuration options"
             )
 
         if self._jdbc_truststore_type and self._jdbc_truststore_type.upper() not in VALID_TRUSTSTORE_TYPES:
