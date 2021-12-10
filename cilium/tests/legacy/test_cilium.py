@@ -15,8 +15,8 @@ from ..common import (
 pytestmark = [requires_legacy_environment]
 
 
-def test_agent_check(aggregator, agent_instance_legacy, mock_agent_data, dd_run_check):
-    c = CiliumCheck('cilium', {}, [agent_instance_legacy])
+def test_agent_check(aggregator, agent_instance_use_openmetrics, mock_agent_data, dd_run_check):
+    c = CiliumCheck('cilium', {}, [agent_instance_use_openmetrics(False)])
 
     dd_run_check(c)
     for m in AGENT_DEFAULT_METRICS + ADDL_AGENT_METRICS:
@@ -24,8 +24,8 @@ def test_agent_check(aggregator, agent_instance_legacy, mock_agent_data, dd_run_
     aggregator.assert_all_metrics_covered()
 
 
-def test_operator_check(aggregator, operator_instance_legacy, mock_operator_data, dd_run_check):
-    c = CiliumCheck('cilium', {}, [operator_instance_legacy])
+def test_operator_check(aggregator, operator_instance_use_openmetrics, mock_operator_data, dd_run_check):
+    c = CiliumCheck('cilium', {}, [operator_instance_use_openmetrics(False)])
 
     dd_run_check(c)
     for m in OPERATOR_METRICS + OPERATOR_AWS_METRICS:
@@ -33,8 +33,8 @@ def test_operator_check(aggregator, operator_instance_legacy, mock_operator_data
     aggregator.assert_all_metrics_covered()
 
 
-def test_version_metadata(datadog_agent, agent_instance_legacy, mock_agent_data, dd_run_check):
-    check = CiliumCheck('cilium', {}, [agent_instance_legacy])
+def test_version_metadata(datadog_agent, agent_instance_use_openmetrics, mock_agent_data, dd_run_check):
+    check = CiliumCheck('cilium', {}, [agent_instance_use_openmetrics(False)])
     check.check_id = 'test:123'
     dd_run_check(check)
 

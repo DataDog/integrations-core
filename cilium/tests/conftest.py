@@ -66,13 +66,13 @@ def dd_environment():
 
 
 @pytest.fixture(scope="session")
-def agent_instance_legacy():
-    return {'agent_endpoint': AGENT_URL, 'tags': ['pod_test']}
+def agent_instance_use_openmetrics():
+    return lambda legacy: {'agent_endpoint': AGENT_URL, 'tags': ['pod_test'], 'use_openmetrics': legacy}
 
 
 @pytest.fixture
-def operator_instance_legacy():
-    return {'operator_endpoint': OPERATOR_URL, 'tags': ['operator_test']}
+def operator_instance_use_openmetrics():
+    return lambda legacy: {'operator_endpoint': OPERATOR_URL, 'tags': ['operator_test'], 'use_openmetrics': legacy}
 
 
 @pytest.fixture()
