@@ -16,6 +16,7 @@ try:
 except ImportError:
     from contextlib2 import ExitStack
 
+from .common import CILIUM_LEGACY
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
@@ -46,18 +47,20 @@ def dd_environment():
                 stack.enter_context(port_forward(kubeconfig, 'cilium', port, 'deployment', 'cilium-operator'))
                 for port in PORTS
             ]
-        instances = {
-            'instances': [
-                {
-                    'agent_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0]),
-                    'use_openmetrics': True,
-                },
-                {
-                    'operator_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1]),
-                    'use_openmetrics': True,
-                },
-            ]
-        }
+
+            instances = {
+                'instances': [
+                    {
+                        'agent_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0]),
+                    },
+                    {
+                        'operator_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1]),
+                    },
+                ]
+            }
+            if CILIUM_LEGACY == 'false':
+                for instance in instances:
+                    instance['use_openmetrics'] = True
 
         yield instances
 
