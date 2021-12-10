@@ -90,3 +90,16 @@ OPERATOR_METRICS = {
     'cilium_operator_eni_nodes': 'operator.eni.nodes.total',
     'cilium_operator_eni_resync_total': 'operator.eni.resync.total',
 }
+
+
+def construct_metrics_config(metric_map):
+    metrics = []
+    for raw_metric_name, metric_name in metric_map.items():
+        if raw_metric_name.endswith('_total'):
+            raw_metric_name = raw_metric_name[:-6]
+            metric_name = metric_name[:-6]
+
+        config = {raw_metric_name: {'name': metric_name}}
+        metrics.append(config)
+
+    return metrics
