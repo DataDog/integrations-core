@@ -11,7 +11,6 @@ pytestmark = [requires_legacy_environment]
 
 def test_agent_check(aggregator, agent_instance_use_openmetrics, mock_agent_data, dd_run_check, check):
     c = check(agent_instance_use_openmetrics(False))
-
     dd_run_check(c)
     for m in AGENT_DEFAULT_METRICS + ADDL_AGENT_METRICS:
         aggregator.assert_metric(m)

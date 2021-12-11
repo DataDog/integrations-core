@@ -13,6 +13,9 @@ CILIUM_LEGACY = os.getenv('CILIUM_LEGACY')
 requires_legacy_environment = pytest.mark.skipif(
     CILIUM_LEGACY != 'true', reason='Requires legacy Openmetrics V1 environment'
 )
+requires_new_environment = pytest.mark.skipif(
+    CILIUM_LEGACY != 'false', reason='Requires `use_openmetrics` config environment'
+)
 
 AGENT_V2_METRICS = [
     "cilium.agent.api_process_time.seconds.bucket",

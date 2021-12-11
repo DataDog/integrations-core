@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from six import PY2
 
-from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 
 from .metrics import AGENT_METRICS, OPERATOR_METRICS
 
@@ -12,6 +12,23 @@ class CiliumCheck(OpenMetricsBaseCheck):
     """
     This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
     """
+
+    def __new__(cls, name, init_config, instances):
+        instance = instances[0]
+
+        if is_affirmative(instance.get('use_openmetrics', False)):
+            if PY2:
+                raise ConfigurationError(
+                    "This version of the integration is only available when using py3. "
+                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
+                    "for more information or use the older style config."
+                )
+            # TODO: when we drop Python 2 move this import up top
+            from .check import CiliumCheckV2
+
+            return CiliumCheckV2(name, init_config, instances)
+        else:
+            return super(CiliumCheck, cls).__new__(cls)
 
     def __init__(self, name, init_config, instances):
         instance = instances[0]
@@ -35,7 +52,6 @@ class CiliumCheck(OpenMetricsBaseCheck):
             metrics = [AGENT_METRICS]
 
         metrics.extend(instance.get('metrics', []))
-
         instance.update(
             {
                 'prometheus_url': endpoint,
@@ -48,20 +64,3 @@ class CiliumCheck(OpenMetricsBaseCheck):
         )
 
         super(CiliumCheck, self).__init__(name, init_config, [instance])
-
-    def __new__(cls, name, init_config, instances):
-        instance = instances[0]
-
-        if 'use_openmetrics' in instance:
-            if PY2:
-                raise ConfigurationError(
-                    "This version of the integration is only available when using py3. "
-                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
-                    "for more information or use the older style config."
-                )
-            # TODO: when we drop Python 2 move this import up top
-            from .check import CiliumCheckV2
-
-            return CiliumCheckV2(name, init_config, instances)
-        else:
-            return super(CiliumCheck, cls).__new__(cls)
