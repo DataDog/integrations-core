@@ -126,6 +126,7 @@ class MongoApi(object):
             is_principal = replica_set_deployment.is_principal()
             is_principal_log = "" if is_principal else "not "
             self._log.debug("Detected ReplicaSetDeployment. Node is %sprincipal.", is_principal_log)
+            return replica_set_deployment
 
         self._log.debug("Detected StandaloneDeployment. Node is principal.")
         return StandaloneDeployment()
