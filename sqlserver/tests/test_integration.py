@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 from copy import copy, deepcopy
 
 import pytest
@@ -266,6 +267,34 @@ def test_autodiscovery_perf_counters_doesnt_duplicate_names_of_metrics_to_collec
     for _cls, metric_names in check.instance_per_type_metrics.items():
         expected = list(set(metric_names))
         assert sorted(metric_names) == sorted(expected)
+
+
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_autodiscovery_multiple_instances(aggregator, dd_run_check, instance_autodiscovery, caplog):
+    caplog.clear()
+    caplog.set_level(logging.DEBUG)
+
+    instance_1 = deepcopy(instance_autodiscovery)
+    instance_2 = deepcopy(instance_autodiscovery)
+
+    instance_1['autodiscovery_include'] = ['model']
+    instance_2['autodiscovery_include'] = ['msdb']
+
+    check = SQLServer(CHECK_NAME, {}, instances=[instance_1, instance_2])
+    dd_run_check(check)
+
+    check = SQLServer(CHECK_NAME, {}, instances=[instance_2, instance_1])
+    dd_run_check(check)
+
+    found_log = 0
+    for _, _, message in caplog.record_tuples:
+        # make sure model is only queried once
+        if "SqlDatabaseFileStats: changing cursor context via use statement: use [model]" in message:
+            found_log += 1
+
+    assert found_log == 1
 
 
 @not_windows_ci

@@ -10,15 +10,11 @@ from .....constants import get_root
 from ....console import echo_failure
 
 
-def initialize_path(directory):
-    path = []
-    path.append('./')
+def initialize_path(directories):
+    path = ['./']
 
-    if directory:
-        if isinstance(directory, tuple):
-            for dir in directory:
-                path.append(dir)
-        elif isinstance(directory, str):
+    if directories:
+        for directory in directories:
             path.append(directory)
     else:
         path.append(get_default_snmp_profiles_path())
@@ -73,13 +69,10 @@ def get_default_snmp_profiles_path():
     return join(get_root(), 'snmp', 'datadog_checks', 'snmp', 'data', 'profiles')
 
 
-def get_all_profiles_directory(directory):
+def get_all_profiles_for_directories(*directories):
     profiles = []
-    if isinstance(directory, tuple):
-        for dir in directory:
-            profiles.extend(glob.glob(join(dir, "*.yaml")))
-    elif isinstance(directory, str):
-        profiles = glob.glob(join(directory, "*.yaml"))
+    for directory in directories:
+        profiles.extend(glob.glob(join(directory, "*.yaml")))
     return profiles
 
 
