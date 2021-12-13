@@ -313,7 +313,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
     def _load_plan(self, plan_handle, cursor):
         self.log.debug("collecting plan. plan_handle=%s", plan_handle)
         self.log.debug("Running query [%s] %s", PLAN_LOOKUP_QUERY, (plan_handle,))
-        cursor.execute(PLAN_LOOKUP_QUERY, ("0x" + plan_handle))
+        cursor.execute(PLAN_LOOKUP_QUERY, ("0x" + plan_handle,))
         result = cursor.fetchall()
         if not result:
             self.log.debug("failed to loan plan, it must have just been expired out of the plan cache")
