@@ -13,7 +13,6 @@ class MongoApi(object):
         self._config = config
         self._log = log
         self.deployment_type = None
-        self.authenticated = False
         if self._config.server:
             # Deprecated option
             self._cli = MongoClient(
