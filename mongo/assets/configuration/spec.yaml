@@ -79,8 +79,8 @@ files:
         example: 30
     - name: refresh_role
       description: |
-        Refresh the role of this Mongo node on every check run. Enable this option when
-        leader election happens often and/or a node's role can change.
+        Refresh the role of this Mongo node on every check run. Enable this option when monitoring a replica set
+        and leader election happens often and/or a node's role can change.
       value:
         type: boolean
         example: true

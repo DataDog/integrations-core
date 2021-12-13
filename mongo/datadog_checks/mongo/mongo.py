@@ -175,11 +175,14 @@ class MongoDb(AgentCheck):
 
         return metrics_to_collect
 
+    def _refresh_replica_role(self):
+        if self._config.refresh_role and isinstance(self.api_client.deployment_type, ReplicaSetDeployment):
+            self.api_client._get_deployment_type()
+
     def check(self, _):
         try:
             self._check()
-            if self._config.refresh_role:
-                self.api_client._get_deployment_type()
+            self._refresh_replica_role()
         except pymongo.errors.ConnectionFailure:
             self._api_client = None
             raise
