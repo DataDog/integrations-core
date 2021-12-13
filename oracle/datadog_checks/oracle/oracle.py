@@ -72,7 +72,6 @@ class Oracle(AgentCheck):
             tags=self._tags,
         )
 
-        self.check_initializations.append(self.validate_config)
         self.check_initializations.append(self._query_manager.compile_queries)
 
         self._query_errors = 0
@@ -93,26 +92,6 @@ class Oracle(AgentCheck):
                 for column in query.get('columns', []):
                     if column.get('type') != 'tag':
                         column['name'] = '{}.{}'.format(prefix, column['name'])
-
-    def validate_config(self):
-        if not self._server or not self._user:
-            raise ConfigurationError("Oracle host and user are needed")
-
-        if self._protocol.upper() not in VALID_PROTOCOLS:
-            raise ConfigurationError("Protocol %s is not valid, must either be TCP or TCPS" % self._protocol)
-
-        if self._jdbc_driver and self._protocol.upper() == PROTOCOL_TCPS:
-            if not (self._jdbc_truststore_type and self._jdbc_truststore_path):
-                raise ConfigurationError(
-                    "TCPS connections to Oracle via JDBC requires both `jdbc_truststore_type` and "
-                    "`jdbc_truststore_path` configuration options "
-                )
-
-            if self._jdbc_truststore_type and self._jdbc_truststore_type.upper() not in VALID_TRUSTSTORE_TYPES:
-                raise ConfigurationError(
-                    "Truststore type %s is not valid, must be one of %s"
-                    % (self._jdbc_truststore_type, VALID_TRUSTSTORE_TYPES)
-                )
 
     def execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:

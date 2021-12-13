@@ -3,13 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
+from six import PY2
 
-from datadog_checks.base import ConfigurationError
 from datadog_checks.oracle import Oracle
 
 from .common import CHECK_NAME
 
 
+@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
 def test__get_config(check, instance):
     """
     Test the _get_config method
@@ -25,27 +26,30 @@ def test__get_config(check, instance):
     assert len(check._query_manager.queries) == 3
 
 
-def test_check_misconfig_null_server(instance):
+@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
+def test_check_misconfig_null_server(dd_run_check, instance):
     """
     Test null server
     """
     instance['server'] = None
     check = Oracle(CHECK_NAME, {}, [instance])
-    with pytest.raises(ConfigurationError):
-        check.validate_config()
+    with pytest.raises(Exception):
+        dd_run_check(check)
 
 
-def test_check_misconfig_invalid_protocol(instance):
+@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
+def test_check_misconfig_invalid_protocol(dd_run_check, instance):
     """
     Test invalid protocol
     """
     instance['protocol'] = 'TCPP'
     check = Oracle(CHECK_NAME, {}, [instance])
-    with pytest.raises(ConfigurationError):
-        check.validate_config()
+    with pytest.raises(Exception):
+        dd_run_check(check)
 
 
-def test_check_misconfig_empty_truststore_and_type(instance):
+@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
+def test_check_misconfig_empty_truststore_and_type(dd_run_check, instance):
     """
     Test if connecting via JDBC with TCPS, both `jdbc_truststore` and `jdbc_truststore_type` are non-empty
     """
@@ -55,11 +59,12 @@ def test_check_misconfig_empty_truststore_and_type(instance):
     instance['protocol'] = 'TCPS'
 
     check = Oracle(CHECK_NAME, {}, [instance])
-    with pytest.raises(ConfigurationError):
-        check.validate_config()
+    with pytest.raises(Exception):
+        dd_run_check(check)
 
 
-def test_check_misconfig_invalid_truststore_type(instance):
+@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
+def test_check_misconfig_invalid_truststore_type(dd_run_check, instance):
     """
     Test truststore type is valid
     """
@@ -68,5 +73,5 @@ def test_check_misconfig_invalid_truststore_type(instance):
     instance['jdbc_truststore_type'] = 'wrong_type'
     instance['protocol'] = 'TCPS'
     check = Oracle(CHECK_NAME, {}, [instance])
-    with pytest.raises(ConfigurationError):
-        check.validate_config()
+    with pytest.raises(Exception):
+        dd_run_check(check)
