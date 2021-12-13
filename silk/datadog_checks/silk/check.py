@@ -6,8 +6,12 @@ from copy import deepcopy
 from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.time import get_current_datetime
 
+from .events import SilkEvent
 from .metrics import METRICS
+
+EVENT_PATH = "events?timestamp__gte={}"
 
 
 class SilkCheck(AgentCheck):
@@ -26,6 +30,7 @@ class SilkCheck(AgentCheck):
         super(SilkCheck, self).__init__(name, init_config, instances)
 
         server = self.instance.get("host_address")
+        self.latest_event_query = get_current_datetime()
         self.url = "{}/api/v2/".format(server)
         self.tags = self.instance.get("tags", [])
 
@@ -55,6 +60,10 @@ class SilkCheck(AgentCheck):
                 return
 
         get_method = getattr
+
+        # Get events
+        self.collect_events()
+
         for path, metrics_obj in METRICS.items():
             # Need to submit an object of relevant tags
             try:
@@ -102,3 +111,31 @@ class SilkCheck(AgentCheck):
         except Exception as e:
             self.log.debug("Encountered error while getting metrics from %s: %s", path, str(e))
             raise
+
+    def collect_events(self):
+        self.log.debug("Starting events collection (query start time: %s).", self.latest_event_query)
+        latest_event_time = None
+        collect_events_start_time = get_current_datetime()
+        try:
+            event_query = EVENT_PATH.format(self.latest_event_query)
+            response_json, code = self.get_metrics(event_query)
+            raw_events = response_json.get("hits")
+
+            for event in raw_events:
+                normalized_event = SilkEvent(event, self.tags)
+                event_payload = normalized_event.get_datadog_payload()
+                if event_payload is not None:
+                    self.event(event_payload)
+                if latest_event_time is None or event_payload.get("timestamp") > latest_event_time:
+                    latest_event_time = event_payload.get("timestamp")
+
+        except Exception as e:
+            # Don't get stuck on a failure to fetch an event
+            # Ignore them for next pass
+            self.log.warning("Unable to fetch Events: %s", str(e))
+
+        if latest_event_time is not None:
+            self.latest_event_query = latest_event_time
+        else:
+            # In case no events were collected
+            self.latest_event_query = collect_events_start_time
