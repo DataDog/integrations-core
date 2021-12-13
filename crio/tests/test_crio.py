@@ -9,8 +9,6 @@ import pytest
 from datadog_checks.base import AgentCheck
 from datadog_checks.crio import CrioCheck
 
-instance = {'prometheus_url': 'http://localhost:10249/metrics'}
-
 CHECK_NAME = 'crio'
 NAMESPACE = 'crio'
 
