@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from ..common import CILIUM_VERSION, requires_legacy_environment
+
 # Legacy common metrics
 from .common import ADDL_AGENT_METRICS, AGENT_DEFAULT_METRICS, OPERATOR_AWS_METRICS, OPERATOR_METRICS
 

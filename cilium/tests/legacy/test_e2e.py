@@ -5,6 +5,7 @@
 import pytest
 
 from ..common import requires_legacy_environment
+
 # Legacy common metrics
 from .common import AGENT_DEFAULT_METRICS, OPERATOR_METRICS
 
