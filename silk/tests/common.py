@@ -51,24 +51,3 @@ METRICS = [
     'silk.volume.stream_average_compressed_bytes',
     'silk.volume.compressed_ratio.avg',
 ]
-
-SAMPLE_RAW_EVENT = {
-    "event_id": 11,
-    "id": 2,
-    "labels": "EVENT, ACTION",
-    "level": "INFO",
-    "message": "Event logging started",
-    "name": "EVENT_LOGGING_STARTED",
-    "timestamp": 1638831003.782305,
-    "user": "Internal",
-}
-
-EXPECTED_EVENT_PAYLOAD = {
-    "msg_title": "EVENT_LOGGING_STARTED",
-    "msg_text": "Event logging started",
-    "timestamp": 1638831003.782305,
-    "tags": ["test:silk", "user:Internal"],
-    "event_type": "EVENT, ACTION",
-    "alert_type": "info",
-    "source_type_name": "silk",
-}

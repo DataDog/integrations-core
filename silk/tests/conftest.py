@@ -3,9 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_here
 
 from . import common
+
+HERE = get_here()
 
 
 @pytest.fixture(scope='session')

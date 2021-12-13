@@ -117,18 +117,17 @@ class SilkCheck(AgentCheck):
         latest_event_time = None
         collect_events_start_time = get_current_datetime()
         try:
-            # Call events endpoint here
             event_query = EVENT_PATH.format(self.latest_event_query)
             response_json, code = self.get_metrics(event_query)
+            raw_events = response_json.get("hits")
 
-            events = response_json["hits"]
-            for event in events:
+            for event in raw_events:
                 normalized_event = SilkEvent(event, self.tags)
                 event_payload = normalized_event.get_datadog_payload()
                 if event_payload is not None:
                     self.event(event_payload)
-                if latest_event_time is None or event_payload["timestamp"] > latest_event_time:
-                    latest_event_time = event_payload["timestamp"]
+                if latest_event_time is None or event_payload.get("timestamp") > latest_event_time:
+                    latest_event_time = event_payload.get("timestamp")
 
         except Exception as e:
             # Don't get stuck on a failure to fetch an event
