@@ -546,7 +546,7 @@ def test_get_enabled_endpoints(check, instance_plus_v7, version, use_stream, exp
 
 
 @pytest.mark.parametrize("only_query_enabled_endpoints", [(True), (False)])
-def test_only_query_enabled_endpoints(check, instance_plus_v7, only_query_enabled_endpoints, caplog):
+def test_only_query_enabled_endpoints(check, dd_run_check, instance_plus_v7, only_query_enabled_endpoints, caplog):
     caplog.clear()
     caplog.set_level(logging.DEBUG)
     instance = deepcopy(instance_plus_v7)
@@ -555,7 +555,7 @@ def test_only_query_enabled_endpoints(check, instance_plus_v7, only_query_enable
     check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
 
     with mock.patch('datadog_checks.nginx.Nginx._get_enabled_endpoints') as get_enabled_endpoints:
-        check.check(instance)
+        dd_run_check(check)
         assert only_query_enabled_endpoints == get_enabled_endpoints.called
 
     if only_query_enabled_endpoints:
