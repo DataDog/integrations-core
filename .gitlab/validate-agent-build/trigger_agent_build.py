@@ -4,15 +4,19 @@ import argparse
 
 
 DATADOG_AGENT_PIPELINE_URL = os.environ['DATADOG_AGENT_PIPELINE_URL'].rstrip('/')
+LATEST_TAG = os.environ['LATEST_TAG']
 BASE_URL = os.environ['CI_API_V4_URL']
 CI_TOKEN = os.environ['CI_JOB_TOKEN']
 
 
 def trigger_pipeline():
     # TODO: Opt out of kitchen tests when the appropriate flag is implemented.
+    trigger_ref = "main"
+    if LATEST_TAG.startswith("7."):
+        trigger_ref = LATEST_TAG
     data = {
         "token": CI_TOKEN,
-        "ref": "main",
+        "ref": trigger_ref,
         "variables": {
             "RELEASE_VERSION_6": "nightly",
             "RELEASE_VERSION_7": "nightly-a7",
