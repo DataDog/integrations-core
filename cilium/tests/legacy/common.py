@@ -58,7 +58,6 @@ ADDL_AGENT_METRICS = [
     'cilium.forward_bytes.total',
     'cilium.forward_count.total',
     'cilium.errors_warning.total',
-    'cilium.endpoint.regenerations.count',
     'cilium.drop_bytes.total',
     'cilium.drop_count.total',
     'cilium.datapath.conntrack_gc.key_fallbacks.total',
