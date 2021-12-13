@@ -217,7 +217,7 @@ class MongoDb(AgentCheck):
             dbnames = api.list_database_names()
             self.gauge('mongodb.dbs', len(dbnames), tags=tags)
 
-        self.refresh_collectors(deployment_type, mongo_version, dbnames, tags)
+        self.refresh_collectors(deployment, mongo_version, dbnames, tags)
         for collector in self.collectors:
             try:
                 collector.collect(api)
