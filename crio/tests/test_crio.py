@@ -9,6 +9,8 @@ import pytest
 from datadog_checks.base import AgentCheck
 from datadog_checks.crio import CrioCheck
 
+EXPECTED_TAGS = ["endpoint:http://localhost:10249/metrics"]
+
 CHECK_NAME = 'crio'
 NAMESPACE = 'crio'
 
@@ -48,4 +50,4 @@ def test_crio(aggregator, mock_data, instance):
 def test_e2e(dd_agent_check, aggregator, instance):
     with pytest.raises(Exception):
         dd_agent_check(instance, rate=True)
-    aggregator.assert_service_check("crio.prometheus.health", AgentCheck.CRITICAL)
+    aggregator.assert_service_check("crio.prometheus.health", AgentCheck.CRITICAL, count=2, tags=EXPECTED_TAGS)
