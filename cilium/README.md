@@ -51,6 +51,9 @@ To configure this check for an Agent running on a host:
    - To collect `cilium-agent` metrics, enable the `agent_endpoint` option.
    - To collect `cilium-operator` metrics, enable the `operator_endpoint` option.
 
+    **NOTE**: Set the `use_openmetrics` configuration option to `false` to use the OpenMetrics V1 implementation. To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][12].
+    
+    You can read more about OpenMetrics V2 [here][13].
 2. [Restart the Agent][5].
 
 ##### Log collection
@@ -93,7 +96,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 |----------------------|------------------------------------------------------------|
 | `<INTEGRATION_NAME>` | `cilium`                                                   |
 | `<INIT_CONFIG>`      | blank or `{}`                                              |
-| `<INSTANCE_CONFIG>`  | `{"agent_endpoint": "http://%%host%%:9090/metrics"}`       |
+| `<INSTANCE_CONFIG>`  | `{"agent_endpoint": "http://%%host%%:9090/metrics", "use_openmetrics": True}`       |
 
 ##### Log collection
 
@@ -145,3 +148,5 @@ Need help? Contact [Datadog support][11].
 [9]: https://github.com/DataDog/integrations-core/blob/master/cilium/metadata.csv
 [10]: https://github.com/DataDog/integrations-core/blob/master/cilium/assets/service_checks.json
 [11]: https://docs.datadoghq.com/help/
+[12]: https://github.com/DataDog/integrations-core/blob/7.33.x/cilium/datadog_checks/cilium/data/conf.yaml.example
+[13]: https://datadoghq.dev/integrations-core/base/openmetrics/
