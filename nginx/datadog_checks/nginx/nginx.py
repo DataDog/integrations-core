@@ -114,7 +114,7 @@ class Nginx(AgentCheck):
                 self.log.debug("Querying http API url: %s", http_url)
                 r = self._perform_request(http_url)
                 r.raise_for_status()
-                endpoints = r.json()
+                endpoints = set(r.json())
                 http_endpoints = {'http/{}'.format(endpoint) for endpoint in endpoints}
                 available_endpoints = available_endpoints.union(http_endpoints)
 
