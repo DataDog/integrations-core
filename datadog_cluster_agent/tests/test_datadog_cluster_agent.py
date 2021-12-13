@@ -70,4 +70,3 @@ def test_e2e(dd_agent_check, aggregator, instance):
     with pytest.raises(Exception) as e:
         dd_agent_check(instance, rate=True)
     aggregator.assert_service_check("datadog.cluster_agent.prometheus.health", AgentCheck.CRITICAL)
-    assert "Max retries exceeded with url: /metrics" in str(e)
