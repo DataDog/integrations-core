@@ -31,8 +31,6 @@ CHECK_TO_NAME = {
     'cassandra_nodetool': 'Cassandra',
     'disk': 'System',
     'dns_check': 'System',
-    'hdfs_datanode': 'HDFS',
-    'hdfs_namenode': 'HDFS',
     'http_check': 'System',
     'kubelet': 'Kubernetes',
     'kubernetes_state': 'Kubernetes',
