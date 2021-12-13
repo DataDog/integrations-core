@@ -67,6 +67,6 @@ def test_check(aggregator, instance, mock_metrics_endpoint):
 # Minimal E2E testing
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, aggregator, instance):
-    with pytest.raises(Exception) as e:
+    with pytest.raises(Exception):
         dd_agent_check(instance, rate=True)
     aggregator.assert_service_check("datadog.cluster_agent.prometheus.health", AgentCheck.CRITICAL)
