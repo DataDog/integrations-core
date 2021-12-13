@@ -44,6 +44,8 @@ class MySQLConfig(object):
             'replace_digits': obfuscator_options_config.get(
                 'replace_digits', obfuscator_options_config.get('quantize_sql_tables', False)
             ),
+            'table_names': obfuscator_options_config.get('collect_tables', True),
+            'collect_commands': obfuscator_options_config.get('collect_commands', True),
             'collect_comments': obfuscator_options_config.get('collect_comments', True),
         }
         self.configuration_checks()
