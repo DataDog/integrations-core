@@ -52,7 +52,7 @@ files:
         display_default: 2
     - name: only_query_enabled_endpoints
       description: |
-        Set this option if you would like the check to determine which API endpoints
+        Enable this option if you would like the check to determine which API endpoints
         to query based on your NGINX Plus configuration.
       value:
         type: boolean
