@@ -122,8 +122,10 @@ class MongoApi(object):
         replication_options = options.get('replication', {})
         if 'replSetName' in replication_options or 'replSet' in replication_options:
             repl_set_payload = self['admin'].command("replSetGetStatus")
-            self._log.debug("Detected ReplicaSetDeployment. Node is principal.")
-            return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
+            replica_set_deployment = self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
+            is_principal = replica_set_deployment.is_principal()
+            is_principal_log = "" if is_principal else "not "
+            self._log.debug("Detected ReplicaSetDeployment. Node is %sprincipal.", is_principal_log)
 
         self._log.debug("Detected StandaloneDeployment. Node is principal.")
         return StandaloneDeployment()
