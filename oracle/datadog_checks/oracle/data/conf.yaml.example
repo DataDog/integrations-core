@@ -65,14 +65,14 @@ instances:
     ## @param jdbc_truststore_path - string - optional
     ## The JDBC truststore file path.
     ##
-    ## Note: This option is required if connecting to TCPS via JDBC.
+    ## Note: This option is required if connecting with TCPS via JDBC.
     #
     # jdbc_truststore_path: <JDBC_TRUSTSTORE_PATH>
 
     ## @param jdbc_truststore_type - string - optional
     ## The JDBC truststore file type. Supported truststore types include JKS, SSO, and PKCS12.
     ##
-    ## Note: This option is required if connecting to TCPS via JDBC.
+    ## Note: This option is required if connecting with TCPS via JDBC.
     #
     # jdbc_truststore_type: <JDBC_TRUSTSTORE_TYPE>
 
