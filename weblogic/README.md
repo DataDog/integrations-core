@@ -11,12 +11,12 @@ This check monitors Oracle [WebLogic][1] Server.
 The WebLogic check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
-1. This check is JMX-based and collects metrics from the Platform MBean Server exported by the JVM, so JMX Remote Monitoring needs to be enabled on your WebLogic servers. Follow the instructions in the [Oracle documentation][9].
+1. This check is JMX-based and collects metrics from the Platform MBean Server exported by the JVM, so your WebLogic servers must have JMX Remote Monitoring enabled. Follow the instructions in the [Oracle documentation][9].
 
-2. Set the system property `-Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder` to enable these metrics on the Platform MBean Server. This may be enabled in either the WebLogic Server Admin Console or in the server startup scripts:
+2. Set the system property `-Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder` to enable these metrics on the Platform MBean Server. This may be enabled in either the WebLogic Server Administration Console or in the server startup scripts:
 
 
-   _**Enable in the Admin Console**_
+   _**Enable in the Administration Console**_
 
    ```
    Domain => Configuration => General => Advanced => Platform MBean Server Enabled
@@ -31,9 +31,9 @@ No additional installation is needed on your server.
    For more information, see the [WebLogic documentation][14].
 
 
-3. Verify that the [`PlatformMBeanServerUsed`][10] attribute value is set to `true` in the WebLogic Administration Console. The default value is `true` in WebLogic Server versions 10.3.3.0 and above. This setting can be found in the WebLogic Server Admin Console or configured using WebLogic Scripting Tool (WSLT). 
+3. Verify that the [`PlatformMBeanServerUsed`][10] attribute value is set to `true` in the WebLogic Server Administration Console. The default value is `true` in WebLogic Server versions 10.3.3.0 and above. This setting can be found in the WebLogic Server Administration Console or configured using the WebLogic Scripting Tool (WSLT). 
 
-   _**Enable in the Admin Console**_
+   _**Enable in the Administration Console**_
 
    ```
    Domain (<WEBLOGIC_SERVER>) => Configuration => General => (Advanced) => Platform MBeanServer Enabled
@@ -49,7 +49,7 @@ No additional installation is needed on your server.
    (wlst) > connect('weblogic','weblogic')
    (wlst) > edit()
    (wlst) > startEdit()
-   (wlst) > cd('JMX/mydomain')
+   (wlst) > cd('JMX/<DOMAIN_NAME>')
    (wlst) > set('EditMBeanServerEnabled','true')
    (wlst) > activate()
    (wlst) > exit()
@@ -60,7 +60,7 @@ No additional installation is needed on your server.
 ### Configuration
 
 1. Edit the `weblogic.d/conf.yaml` file, in the `conf.d/` folder at the root of your
-   Agent's configuration directory to start collecting your Weblogic performance data.
+   Agent's configuration directory to start collecting your WebLogic performance data.
    See the [sample weblogic.d/conf.yaml][3] for all available configuration options.
 
    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated when running the Datadog Agent [status command][4].
@@ -85,7 +85,7 @@ See [`metadata.csv`][11] for a list of metrics provided by this integration.
 
 1. WebLogic logging services use an implementation based on the Java Logging APIs by default. Clone and edit the [integration pipeline][12] if you have a different format.
 
-2. Collecting logs is disabled by default in the Datadog Agent, enable it in your datadog.yaml file:
+2. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
    ```yaml
    logs_enabled: true
    ```
