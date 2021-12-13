@@ -63,6 +63,7 @@ trigger-agent-build:
     - DATADOG_AGENT_PIPELINE_URL=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.datadog-agent-pipeline-url --with-decryption --query "Parameter.Value" --out text)
     - export AGENT_REQUIREMENTS_CHANGED="false"
     - LATEST_TAG=$(git describe --tags --abbrev=0 HEAD)
+    - git fetch origin master
     - BASE_REF=$(git merge-base HEAD master $LATEST_TAG)
     - |
       if [[ "$BASE_REF" != " $(git rev-list -n 1 $LATEST_TAG) " ]]; then
