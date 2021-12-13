@@ -178,6 +178,8 @@ class MongoDb(AgentCheck):
     def check(self, _):
         try:
             self._check()
+            if not self.api_client.authenticated:
+                self._api_client = None
         except pymongo.errors.ConnectionFailure:
             self._api_client = None
             raise
@@ -215,7 +217,7 @@ class MongoDb(AgentCheck):
             dbnames = api.list_database_names()
             self.gauge('mongodb.dbs', len(dbnames), tags=tags)
 
-        self.refresh_collectors(api.deployment_type, mongo_version, dbnames, tags)
+        self.refresh_collectors(deployment_type, mongo_version, dbnames, tags)
         for collector in self.collectors:
             try:
                 collector.collect(api)
