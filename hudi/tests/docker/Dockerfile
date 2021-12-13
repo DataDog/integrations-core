@@ -2,6 +2,8 @@ FROM openjdk:8-jdk-alpine
 
 ARG SPARK_VERSION
 ARG HADOOP_VERSION
+ARG HUDI_VERSION
+
 # adapted from https://github.com/big-data-europe/docker-spark/blob/master/template/scala/Dockerfile
 RUN apk add --no-cache curl bash \
       && wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz \
