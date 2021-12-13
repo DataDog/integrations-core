@@ -10,6 +10,7 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.datadog_cluster_agent import DatadogClusterAgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
+EXPECTED_TAGS = ['endpoint:http://localhost:5000/metrics']
 NAMESPACE = 'datadog.cluster_agent'
 
 METRICS = [
@@ -69,4 +70,4 @@ def test_check(aggregator, instance, mock_metrics_endpoint):
 def test_e2e(dd_agent_check, aggregator, instance):
     with pytest.raises(Exception):
         dd_agent_check(instance, rate=True)
-    aggregator.assert_service_check("datadog.cluster_agent.prometheus.health", AgentCheck.CRITICAL)
+    aggregator.assert_service_check("datadog.cluster_agent.prometheus.health", AgentCheck.CRITICAL, count=2, tags=EXPECTED_TAGS)
