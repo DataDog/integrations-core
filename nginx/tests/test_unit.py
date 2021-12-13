@@ -546,9 +546,7 @@ def test_get_enabled_endpoints(check, instance_plus_v7, version, use_stream, exp
 
 
 @pytest.mark.parametrize("only_query_enabled_endpoints", [(True), (False)])
-def test_only_query_enabled_endpoints(check, dd_run_check, instance_plus_v7, only_query_enabled_endpoints, caplog):
-    caplog.clear()
-    caplog.set_level(logging.DEBUG)
+def test_only_query_enabled_endpoints(check, dd_run_check, instance_plus_v7, only_query_enabled_endpoints):
     instance = deepcopy(instance_plus_v7)
     instance['only_query_enabled_endpoints'] = only_query_enabled_endpoints
     check = check(instance)
