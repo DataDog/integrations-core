@@ -157,10 +157,8 @@ class Nginx(AgentCheck):
         # since we can't get everything in one place anymore.
 
         plus_api_chain_list = (
-                self._get_enabled_endpoints()
-                if self.only_query_enabled_endpoints
-                else self._get_all_plus_api_endpoints()
-            )
+            self._get_enabled_endpoints() if self.only_query_enabled_endpoints else self._get_all_plus_api_endpoints()
+        )
 
         for endpoint, nest in plus_api_chain_list:
             response = self._get_plus_api_data(endpoint, nest)
