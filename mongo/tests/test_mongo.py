@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import logging
 import time
 
@@ -245,7 +246,10 @@ def test_mongo_custom_query_with_empty_result_set(aggregator, check, instance_us
     aggregator.assert_metric('dd.custom.mongo.query_a.amount', count=0)
 
 
-def test_mongo_replset(instance_shard, aggregator, check, dd_run_check):
+@pytest.mark.parametrize("refresh_role", [(True), (False)])
+def test_mongo_replset(instance_shard, aggregator, check, dd_run_check, refresh_role):
+    instance = copy.deepcopy(instance_shard)
+    instance["refresh_role"] = refresh_role
     mongo_check = check(instance_shard)
     dd_run_check(mongo_check)
 

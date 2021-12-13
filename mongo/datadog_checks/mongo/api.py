@@ -58,7 +58,7 @@ class MongoApi(object):
 
         if not is_arbiter and self._config.do_auth:
             self._log.info("Using '%s' as the authentication database", self._config.auth_source)
-            self.authenticated = self._authenticate()
+            self._authenticate()
 
         self.deployment_type = self._get_deployment_type()
 

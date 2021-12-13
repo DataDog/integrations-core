@@ -48,6 +48,7 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float]
     options: Optional[Mapping[str, Any]]
     password: Optional[str]
+    refresh_role: Optional[bool]
     replica_check: Optional[bool]
     server: Optional[str]
     service: Optional[str]

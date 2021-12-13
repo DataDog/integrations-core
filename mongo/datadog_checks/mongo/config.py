@@ -77,6 +77,8 @@ class MongoConfig(object):
             self.do_auth = False
 
         self.replica_check = is_affirmative(instance.get('replica_check', True))
+        self.refresh_role = is_affirmative(instance.get('refresh_role', False))
+
         self.collections_indexes_stats = is_affirmative(instance.get('collections_indexes_stats'))
         self.coll_names = instance.get('collections', [])
         self.custom_queries = instance.get("custom_queries", [])

@@ -76,6 +76,12 @@ instances:
     #
     # timeout: 30
 
+    ## @param refresh_role - boolean - optional - default: false
+    ## Refresh the role of this Mongo node on every check run. Enable this option when
+    ## leader election happens often and/or a node's role can change.
+    #
+    # refresh_role: true
+
     ## @param ssl - boolean - optional - default: false
     ## If `True`, create the connection to the server using SSL.
     #

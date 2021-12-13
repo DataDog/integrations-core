@@ -178,8 +178,8 @@ class MongoDb(AgentCheck):
     def check(self, _):
         try:
             self._check()
-            if not self.api_client.authenticated:
-                self._api_client = None
+            if self._config.refresh_role:
+                self.api_client._get_deployment_type()
         except pymongo.errors.ConnectionFailure:
             self._api_client = None
             raise

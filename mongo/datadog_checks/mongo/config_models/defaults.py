@@ -52,6 +52,10 @@ def instance_password(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_refresh_role(field, value):
+    return False
+
+
 def instance_replica_check(field, value):
     return True
 
