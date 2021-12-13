@@ -32,7 +32,7 @@ SNMP_CONTAINER_NAME = 'dd-snmp'
 
 CHECK_TAGS = ['snmp_device:{}'.format(HOST)]
 
-SNMP_CONF = {'name': 'snmp_conf', 'ip_address': HOST, 'port': PORT, 'community_string': 'public'}
+SNMP_CONF = {'ip_address': HOST, 'port': PORT, 'community_string': 'public'}
 
 SNMP_V3_CONF = {
     'name': 'snmp_v3_conf',
@@ -198,8 +198,8 @@ snmp_integration_only = pytest.mark.skipif(SNMP_LISTENER_ENV != 'false', reason=
 def generate_instance_config(metrics, template=None):
     template = template if template else SNMP_CONF
     instance_config = copy.copy(template)
-    instance_config['metrics'] = metrics
-    instance_config['name'] = HOST
+    if metrics:
+        instance_config['metrics'] = metrics
     return instance_config
 
 

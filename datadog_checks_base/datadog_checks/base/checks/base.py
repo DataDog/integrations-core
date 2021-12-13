@@ -203,6 +203,11 @@ class AgentCheck(object):
         self.disable_generic_tags = (
             is_affirmative(self.instance.get('disable_generic_tags', False)) if instance else False
         )
+        self.debug_metrics = {}
+        if self.init_config is not None:
+            self.debug_metrics.update(self.init_config.get('debug_metrics', {}))
+        if self.instance is not None:
+            self.debug_metrics.update(self.instance.get('debug_metrics', {}))
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()  # type: str
@@ -1020,7 +1025,7 @@ class AgentCheck(object):
                     self.check, self.init_config, namespaces=self.check_id.split(':', 1), args=(instance,)
                 )
 
-                tags = ['check_name:{}'.format(self.name), 'check_version:{}'.format(self.check_version)]
+                tags = self.get_debug_metric_tags()
                 tags.extend(instance.get('__memory_profiling_tags', []))
                 for m in metrics:
                     self.gauge(m.name, m.value, tags=tags, raw=True)
@@ -1034,6 +1039,16 @@ class AgentCheck(object):
             result = json.dumps([{'message': message, 'traceback': tb}])
         finally:
             if self.metric_limiter:
+                if is_affirmative(self.debug_metrics.get('metric_contexts', False)):
+                    debug_metrics = self.metric_limiter.get_debug_metrics()
+
+                    # Reset so we can actually submit the metrics
+                    self.metric_limiter.reset()
+
+                    tags = self.get_debug_metric_tags()
+                    for metric_name, value in debug_metrics:
+                        self.gauge(metric_name, value, tags=tags, raw=True)
+
                 self.metric_limiter.reset()
 
         return result
@@ -1127,3 +1142,8 @@ class AgentCheck(object):
             return '{}:{}'.format(new_name, value)
         else:
             return tag
+
+    def get_debug_metric_tags(self):
+        tags = ['check_name:{}'.format(self.name), 'check_version:{}'.format(self.check_version)]
+        tags.extend(self.instance.get('tags', []))
+        return tags

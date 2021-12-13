@@ -1,628 +1,498 @@
 {
-    "author_name": "Datadog",
-    "description": "## Active Directory\n\nThis dashboard monitors key Active Directory metrics for LDAP service, and replication inbound and outbound data sizes, objects, and properties\n\n- [Active Directory Integration](https://docs.datadoghq.com/integrations/active_directory/)\n\n",
-    "layout_type": "free",
-    "template_variables": [],
-    "title": "Active Directory",
-    "widgets": [
-        {
+  "title": "Active Directory",
+  "author_name": "Datadog",
+  "description": "## Active Directory\n\nThis dashboard monitors key Active Directory metrics for LDAP service, and replication inbound and outbound data sizes, objects, and properties\n\n- [Active Directory Integration](https://docs.datadoghq.com/integrations/active_directory/)\n\n\n- [Troubleshoot Active Directory Performance](https://docs.microsoft.com/en-us/windows-server/administration/performance-tuning/role/active-directory-server/troubleshoot)\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.",
+  "widgets": [
+    {
+      "id": 5958173007320266,
+      "definition": {
+        "title": "Ldap",
+        "type": "group",
+        "background_color": "blue",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 403324098763002,
             "definition": {
-                "sizing": "zoom",
-                "type": "image",
-                "url": "/static/images/logos/active-directory_large.svg"
-            },
-            "id": 0,
-            "layout": {
-                "height": 8,
-                "width": 25,
-                "x": 1,
-                "y": 1
-            }
-        },
-        {
-            "definition": {
-                "background_color": "vivid_blue",
-                "content": "Replication",
-                "font_size": "24",
-                "show_tick": false,
-                "text_align": "center",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note"
-            },
-            "id": 1,
-            "layout": {
-                "height": 7,
-                "width": 97,
-                "x": 27,
-                "y": 41
-            }
-        },
-        {
-            "definition": {
-                "background_color": "blue",
-                "content": "Inbound",
-                "font_size": "24",
-                "show_tick": false,
-                "text_align": "center",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note"
-            },
-            "id": 2,
-            "layout": {
-                "height": 5,
-                "width": 48,
-                "x": 27,
-                "y": 65
-            }
-        },
-        {
-            "definition": {
-                "background_color": "blue",
-                "content": "Outbound",
-                "font_size": "24",
-                "show_tick": false,
-                "text_align": "center",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note"
-            },
-            "id": 3,
-            "layout": {
-                "height": 5,
-                "width": 48,
-                "x": 76,
-                "y": 65
-            }
-        },
-        {
-            "definition": {
-                "requests": [
+              "title": "Search operations per second performed by LDAP clients",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1", "alias": "Number of search operations" }],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
                     {
-                        "aggregator": "avg",
-                        "alias": "Total bytes received",
-                        "cell_display_mode": [
-                            "bar"
-                        ],
-                        "limit": 50,
-                        "order": "desc",
-                        "q": "avg:active_directory.dra.inbound.bytes.total{*} by {host}"
-                    },
-                    {
-                        "aggregator": "avg",
-                        "alias": "Bytes compressed size",
-                        "cell_display_mode": [
-                            "bar"
-                        ],
-                        "q": "avg:active_directory.dra.inbound.bytes.after_compression{*} by {host}"
-                    },
-                    {
-                        "aggregator": "avg",
-                        "alias": "Bytes uncompressed",
-                        "cell_display_mode": [
-                            "bar"
-                        ],
-                        "q": "avg:active_directory.dra.inbound.bytes.not_compressed{*} by {host}"
+                      "query": "avg:active_directory.ldap.searches_persec{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
                     }
-                ],
-                "title": "Size of inbound replication data from DSAs",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "query_table"
-            },
-            "id": 4,
-            "layout": {
-                "height": 21,
-                "width": 48,
-                "x": 27,
-                "y": 71
-            }
-        },
-        {
-            "definition": {
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "alias": "Total bytes received",
-                        "cell_display_mode": [
-                            "bar"
-                        ],
-                        "limit": 50,
-                        "order": "desc",
-                        "q": "avg:active_directory.dra.outbound.bytes.total{*} by {host}"
-                    },
-                    {
-                        "aggregator": "avg",
-                        "alias": "Bytes compressed size",
-                        "cell_display_mode": [
-                            "bar"
-                        ],
-                        "q": "avg:active_directory.dra.outbound.bytes.after_compression{*} by {host}"
-                    },
-                    {
-                        "aggregator": "avg",
-                        "alias": "Bytes uncompressed",
-                        "cell_display_mode": [
-                            "bar"
-                        ],
-                        "q": "avg:active_directory.dra.outbound.bytes.not_compressed{*} by {host}"
-                    }
-                ],
-                "title": "Size of outbound replication data to DSAs",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "query_table"
-            },
-            "id": 5,
-            "layout": {
-                "height": 21,
-                "width": 48,
-                "x": 76,
-                "y": 71
-            }
-        },
-        {
-            "definition": {
-                "background_color": "vivid_blue",
-                "content": "LDAP",
-                "font_size": "24",
-                "show_tick": false,
-                "text_align": "center",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note"
-            },
-            "id": 6,
-            "layout": {
-                "height": 7,
-                "width": 97,
-                "x": 27,
-                "y": 1
-            }
-        },
-        {
-            "definition": {
-                "requests": [
-                    {
-                        "display_type": "bars",
-                        "on_right_yaxis": false,
-                        "q": "avg:active_directory.ldap.client_sessions{*}",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "show_legend": false,
-                "title": "Number of sessions of connected LDAP clients",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
                 }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
             },
-            "id": 7,
-            "layout": {
-                "height": 15,
-                "width": 48,
-                "x": 76,
-                "y": 9
-            }
-        },
-        {
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+          },
+          {
+            "id": 6693916277956088,
             "definition": {
-                "legend_size": "0",
-                "requests": [
+              "title": "LDAP binding duration",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "display_type": "line",
-                        "on_right_yaxis": false,
-                        "q": "avg:active_directory.ldap.bind_time{*}",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
+                      "formula": "query1",
+                      "alias": "Time required for the completion of the last successful LDAP binding"
                     }
-                ],
-                "show_legend": false,
-                "title": "LDAP binding duration",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
+                  ],
+                  "queries": [
+                    {
+                      "query": "avg:active_directory.ldap.bind_time{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
                 }
-            },
-            "id": 8,
-            "layout": {
-                "height": 15,
-                "width": 48,
-                "x": 76,
-                "y": 25
-            }
-        },
-        {
-            "definition": {
-                "legend_size": "0",
-                "requests": [
-                    {
-                        "display_type": "bars",
-                        "on_right_yaxis": false,
-                        "q": "avg:active_directory.ldap.successful_binds_persec{*}",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "show_legend": false,
-                "title": "Number of successful LDAP bindings",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "id": 9,
-            "layout": {
-                "height": 15,
-                "width": 48,
-                "x": 27,
-                "y": 25
-            }
-        },
-        {
-            "definition": {
-                "legend_size": "0",
-                "requests": [
-                    {
-                        "display_type": "bars",
-                        "on_right_yaxis": false,
-                        "q": "avg:active_directory.ldap.searches_persec{*}",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "show_legend": false,
-                "title": "Search operations per second performed by LDAP clients",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "id": 10,
-            "layout": {
-                "height": 15,
-                "width": 48,
-                "x": 27,
-                "y": 9
-            }
-        },
-        {
-            "definition": {
-                "legend_size": "0",
-                "requests": [
-                    {
-                        "display_type": "bars",
-                        "on_right_yaxis": false,
-                        "q": "avg:active_directory.dra.sync_requests_made{*}",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "show_legend": false,
-                "title": "Number of sync requests to replication partner",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "id": 11,
-            "layout": {
-                "height": 15,
-                "width": 48,
-                "x": 27,
-                "y": 49
-            }
-        },
-        {
-            "definition": {
-                "legend_size": "0",
-                "requests": [
-                    {
-                        "display_type": "bars",
-                        "on_right_yaxis": false,
-                        "q": "avg:active_directory.dra.replication.pending_synchronizations{*}",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "show_legend": false,
-                "title": "Number of synchronizations queued",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "id": 12,
-            "layout": {
-                "height": 15,
-                "width": 48,
-                "x": 76,
-                "y": 49
-            }
-        },
-        {
-            "definition": {
-                "background_color": "white",
-                "content": "This dashboard monitors key Active Directory metrics for LDAP service, and replication inbound and outbound data sizes, objects, and properties\n\n- [Active Directory Integration](https://docs.datadoghq.com/integrations/active_directory/)\n\n\n- [Troubleshoot Active Directory Performance](https://docs.microsoft.com/en-us/windows-server/administration/performance-tuning/role/active-directory-server/troubleshoot)\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.",
-                "font_size": "14",
-                "show_tick": false,
-                "text_align": "left",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note"
-            },
-            "id": 13,
-            "layout": {
-                "height": 31,
-                "width": 25,
-                "x": 1,
-                "y": 9
-            }
-        },
-        {
-            "definition": {
-                "background_color": "gray",
-                "content": "LDAP bind time (in milliseconds) is the time required for the completion of the last successful LDAP binding. \n\nTypically you want to have times measured to be under 5 seconds.  Bind times that start to exceed 15 or 30 seconds may be an indication network issues are present.",
-                "font_size": "14",
-                "show_tick": true,
-                "text_align": "left",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note"
-            },
-            "id": 14,
-            "layout": {
-                "height": 24,
-                "width": 21,
-                "x": 126,
-                "y": 16
-            }
-        },
-        {
-            "definition": {
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "alias": "Applied by directory service",
-                        "cell_display_mode": [
-                            "bar"
-                        ],
-                        "limit": 50,
-                        "order": "desc",
-                        "q": "avg:active_directory.dra.inbound.objects.applied_persec{*} by {host}"
-                    },
-                    {
-                        "aggregator": "avg",
-                        "alias": "No updates to apply",
-                        "cell_display_mode": [
-                            "bar"
-                        ],
-                        "q": "avg:active_directory.dra.inbound.objects.filtered_persec{*} by {host}"
-                    },
-                    {
-                        "aggregator": "avg",
-                        "alias": "Remaining in packet",
-                        "cell_display_mode": [
-                            "bar"
-                        ],
-                        "q": "avg:active_directory.dra.inbound.objects.remaining_in_packet{*} by {host}"
-                    }
-                ],
-                "title": "Objects received from replication partners",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "query_table"
-            },
-            "id": 15,
-            "layout": {
-                "height": 21,
-                "width": 48,
-                "x": 27,
-                "y": 93
-            }
-        },
-        {
-            "definition": {
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "alias": "Objects acknowledged",
-                        "cell_display_mode": [
-                            "bar"
-                        ],
-                        "limit": 50,
-                        "order": "desc",
-                        "q": "avg:active_directory.dra.outbound.objects.filtered_persec{*} by {host}"
-                    },
-                    {
-                        "aggregator": "avg",
-                        "alias": "Objects sent",
-                        "cell_display_mode": [
-                            "bar"
-                        ],
-                        "q": "avg:active_directory.dra.outbound.objects.persec{*} by {host}"
-                    },
-                    {
-                        "aggregator": "avg",
-                        "alias": "Properties",
-                        "cell_display_mode": [
-                            "bar"
-                        ],
-                        "q": "avg:active_directory.dra.outbound.properties.persec{*} by {host}"
-                    }
-                ],
-                "title": "Object and properties sent to replication partners",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "query_table"
-            },
-            "id": 16,
-            "layout": {
-                "height": 21,
-                "width": 48,
-                "x": 76,
-                "y": 93
-            }
-        },
-        {
-            "definition": {
-                "background_color": "gray",
-                "content": "The number of directory synchronizations that are queued for this server that are not yet processed. This counter helps in determining replication backlog - the larger the number, the larger the backlog.",
-                "font_size": "14",
-                "show_tick": true,
-                "text_align": "left",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note"
-            },
-            "id": 17,
-            "layout": {
-                "height": 20,
-                "width": 21,
-                "x": 126,
-                "y": 46
-            }
-        },
-        {
-            "definition": {
-                "background_color": "gray",
-                "content": "**Applied by directory service**\n\nThis excludes changes that are received but not applied (for example, when the update is already made). This counter indicates how many replication updates are occurring on the server as a result of changes generated on other servers.\n\n** Remaining in packet**\n\nThe number of object updates received in the current directory replication update packet that have not yet been applied to the local server. This counter tells you whether the monitored server is receiving changes, but is taking a long time applying them to the database.",
-                "font_size": "14",
-                "show_tick": true,
-                "text_align": "left",
-                "tick_edge": "right",
-                "tick_pos": "50%",
-                "type": "note"
-            },
-            "id": 18,
-            "layout": {
-                "height": 32,
-                "width": 24,
-                "x": 1,
-                "y": 82
-            }
-        },
-        {
-            "definition": {
-                "background_color": "gray",
-                "content": "**Properties**\n\nThe number of properties sent per second. This counter tells you whether a source server is returning objects or not. Sometimes, the server might stop working correctly and not return objects quickly or at all.\t",
-                "font_size": "14",
-                "show_tick": true,
-                "text_align": "left",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note"
-            },
-            "id": 19,
-            "layout": {
-                "height": 21,
-                "width": 20,
-                "x": 126,
-                "y": 93
-            }
-        },
-        {
-            "definition": {
-                "columns": [
-                    "host",
-                    "service"
-                ],
-                "indexes": [],
-                "message_display": "expanded-lg",
-                "query": "source:(ruby OR active_directory)",
-                "show_date_column": true,
-                "show_message_column": true,
-                "sort": {
-                    "column": "time",
-                    "order": "desc"
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": [
+                { "label": " <15ms ", "value": "0 < y < 15", "display_type": "ok dashed" },
+                {
+                  "label": " 15ms to 30ms ",
+                  "value": "15 < y < 30",
+                  "display_type": "warning dashed"
                 },
-                "title": "Log Events",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "log_stream"
+                { "label": " >30ms ", "value": "y > 30", "display_type": "error dashed" }
+              ]
             },
-            "id": 6251269563993414,
-            "layout": {
-                "height": 48,
-                "width": 97,
-                "x": 27,
-                "y": 121
-            }
-        },
-        {
+            "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
+          },
+          {
+            "id": 3701214856126876,
             "definition": {
-                "background_color": "blue",
-                "content": "Logs",
-                "font_size": "18",
-                "show_tick": false,
-                "text_align": "center",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note"
+              "title": "Number of sessions of connected LDAP clients",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    { "formula": "query1", "alias": "Number of sessions of connected LDAP clients" }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:active_directory.ldap.client_sessions{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
             },
-            "id": 3175991996395978,
-            "layout": {
-                "height": 5,
-                "width": 97,
-                "x": 27,
-                "y": 115
-            }
-        }
-    ]
+            "layout": { "x": 0, "y": 3, "width": 6, "height": 2 }
+          },
+          {
+            "id": 6848325894216022,
+            "definition": {
+              "title": "Number of successful LDAP bindings",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Number LDAP bindings that occurred successfully"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:active_directory.ldap.successful_binds_persec{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 6, "y": 3, "width": 6, "height": 2 }
+          }
+        ]
+      }
+    },
+    {
+      "id": 6884709400295612,
+      "definition": {
+        "title": "Replication",
+        "type": "group",
+        "background_color": "purple",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3088492298017520,
+            "definition": {
+              "title": "Number of sync requests to replication partner since computer was last restarted.",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Number of synchronization requests made to replication partners"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:active_directory.dra.sync_requests_made{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+          },
+          {
+            "id": 7100183879373558,
+            "definition": {
+              "title": "Number of synchronizations queued",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Number of directory synchronizations that are queued for this server that are not yet processed"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:active_directory.dra.replication.pending_synchronizations{$env,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
+          }
+        ]
+      }
+    },
+    {
+      "id": 7940281687668280,
+      "definition": {
+        "title": "Inbound",
+        "type": "group",
+        "background_color": "green",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1137404304731852,
+            "definition": {
+              "title": "Size of inbound replication data from DSAs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "aggregator": "avg",
+                  "cell_display_mode": ["bar"],
+                  "q": "avg:active_directory.dra.inbound.bytes.total{$env,$host} by {host}",
+                  "alias": "Total bytes received",
+                  "limit": 50,
+                  "order": "desc"
+                },
+                {
+                  "q": "avg:active_directory.dra.inbound.bytes.after_compression{$env,$host} by {host}",
+                  "aggregator": "avg",
+                  "cell_display_mode": ["bar"],
+                  "alias": "Bytes compressed size"
+                },
+                {
+                  "q": "avg:active_directory.dra.inbound.bytes.not_compressed{$env,$host} by {host}",
+                  "aggregator": "avg",
+                  "cell_display_mode": ["bar"],
+                  "alias": "Bytes uncompressed"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+          },
+          {
+            "id": 5271031983458064,
+            "definition": {
+              "title": "Objects and properties received from replication partners",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "aggregator": "avg",
+                  "cell_display_mode": ["bar"],
+                  "q": "avg:active_directory.dra.inbound.objects.applied_persec{$env,$host} by {host}",
+                  "alias": "Applied by directory service",
+                  "limit": 50,
+                  "order": "desc"
+                },
+                {
+                  "q": "avg:active_directory.dra.inbound.objects.filtered_persec{$env,$host} by {host}",
+                  "alias": "No updates to apply",
+                  "cell_display_mode": ["bar"],
+                  "aggregator": "avg"
+                },
+                {
+                  "q": "avg:active_directory.dra.inbound.objects.remaining_in_packet{$env,$host} by {host}",
+                  "alias": "Remaining in packet",
+                  "cell_display_mode": ["bar"],
+                  "aggregator": "avg"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 3, "width": 6, "height": 3 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 0, "width": 6, "height": 7, "is_column_break": true }
+    },
+    {
+      "id": 6220753546683742,
+      "definition": {
+        "title": "Outbound",
+        "type": "group",
+        "background_color": "pink",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1695684267459392,
+            "definition": {
+              "title": "Size of outbound replication data to DSAs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "aggregator": "avg",
+                  "cell_display_mode": ["bar"],
+                  "q": "avg:active_directory.dra.outbound.bytes.total{$env,$host} by {host}",
+                  "alias": "Total bytes received",
+                  "limit": 50,
+                  "order": "desc"
+                },
+                {
+                  "q": "avg:active_directory.dra.outbound.bytes.after_compression{$env,$host} by {host}",
+                  "aggregator": "avg",
+                  "cell_display_mode": ["bar"],
+                  "alias": "Bytes compressed size"
+                },
+                {
+                  "q": "avg:active_directory.dra.outbound.bytes.not_compressed{$env,$host} by {host}",
+                  "aggregator": "avg",
+                  "cell_display_mode": ["bar"],
+                  "alias": "Bytes uncompressed"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+          },
+          {
+            "id": 7131306695522396,
+            "definition": {
+              "title": "Object and properties sent to replication partners",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "aggregator": "avg",
+                  "cell_display_mode": ["bar"],
+                  "q": "avg:active_directory.dra.outbound.objects.filtered_persec{$env,$host} by {host}",
+                  "alias": "Objects acknowledged",
+                  "limit": 50,
+                  "order": "desc"
+                },
+                {
+                  "q": "avg:active_directory.dra.outbound.objects.persec{$env,$host} by {host}",
+                  "aggregator": "avg",
+                  "cell_display_mode": ["bar"],
+                  "alias": "Objects sent"
+                },
+                {
+                  "q": "avg:active_directory.dra.outbound.properties.persec{$env,$host} by {host}",
+                  "aggregator": "avg",
+                  "cell_display_mode": ["bar"],
+                  "alias": "Properties"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 3, "width": 6, "height": 3 }
+          }
+        ]
+      },
+      "layout": { "x": 6, "y": 0, "width": 6, "height": 7 }
+    },
+    {
+      "id": 6407289818729342,
+      "definition": {
+        "type": "note",
+        "content": "### Applied by directory service\n\nThis excludes changes that are received but not applied (for example, when the update is already made). This counter indicates how many replication updates are occurring on the server as a result of changes generated on other servers.\n\n### Remaining in packet\n\nThe number of object updates received in the current directory replication update packet that have not yet been applied to the local server. This counter tells you whether the monitored server is receiving changes, but is taking a long time applying them to the database.\n\n### Properties\n\nThe number of properties sent per second. This counter tells you whether a source server is returning objects or not. Sometimes, the server might stop working correctly and not return objects quickly or at all.\t",
+        "background_color": "gray",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "top"
+      },
+      "layout": { "x": 0, "y": 0, "width": 12, "height": 3 }
+    },
+    {
+      "id": 8824567418075250,
+      "definition": {
+        "title": "Log Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "log_stream",
+        "indexes": [],
+        "query": "source:(active_directory)",
+        "sort": { "column": "time", "order": "desc" },
+        "columns": ["host", "service"],
+        "show_date_column": true,
+        "show_message_column": true,
+        "message_display": "expanded-lg"
+      },
+      "layout": { "x": 0, "y": 3, "width": 12, "height": 5 }
+    }
+  ],
+  "template_variables": [
+    { "name": "env", "default": "*", "prefix": "env" },
+    { "name": "host", "default": "*", "prefix": "host" }
+  ],
+  "layout_type": "ordered",
+  "is_read_only": true,
+  "notify_list": [],
+  "reflow_type": "fixed",
+  "id": 30388
 }

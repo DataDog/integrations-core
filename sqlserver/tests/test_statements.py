@@ -263,8 +263,9 @@ def _run_test_statement_metrics_and_plans(
 
     # internal debug metrics
     aggregator.assert_metric(
-        "dd.sqlserver.statements.collect_statement_metrics_and_plans.time",
-        tags=['agent_hostname:stubbed.hostname'] + _expected_dbm_instance_tags(dbm_instance),
+        "dd.sqlserver.operation.time",
+        tags=['agent_hostname:stubbed.hostname', 'operation:collect_statement_metrics_and_plans']
+        + _expected_dbm_instance_tags(dbm_instance),
     )
 
 
