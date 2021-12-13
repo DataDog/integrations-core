@@ -4,7 +4,10 @@
 
 import pytest
 
-from . import common, legacy_common
+from .. import common
+
+# Legacy common metrics
+from . import legacy_common
 
 pytestmark = [common.requires_legacy_environment]
 

@@ -2,7 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from . import common, legacy_common
+from .. import common
+from . import legacy_common
 
 pytestmark = [common.requires_legacy_environment]
 
