@@ -4,16 +4,13 @@
 
 import pytest
 
-from ..common import requires_legacy_environment
+from . import common, legacy_common
 
-# Legacy common metrics
-from .legacy_common import AGENT_DEFAULT_METRICS, OPERATOR_METRICS
-
-pytestmark = [requires_legacy_environment]
+pytestmark = [common.requires_legacy_environment]
 
 
 @pytest.mark.e2e
 def test_check_ok(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
-    for metric in AGENT_DEFAULT_METRICS + OPERATOR_METRICS:
+    for metric in legacy_common.AGENT_DEFAULT_METRICS + legacy_common.OPERATOR_METRICS:
         aggregator.assert_metric(metric)

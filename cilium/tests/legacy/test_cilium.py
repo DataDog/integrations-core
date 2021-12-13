@@ -2,18 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from ..common import CILIUM_VERSION, requires_legacy_environment
+from . import common, legacy_common
 
-# Legacy common metrics
-from .legacy_common import ADDL_AGENT_METRICS, AGENT_DEFAULT_METRICS, OPERATOR_AWS_METRICS, OPERATOR_METRICS
-
-pytestmark = [requires_legacy_environment]
+pytestmark = [common.requires_legacy_environment]
 
 
 def test_agent_check(aggregator, agent_instance_use_openmetrics, mock_agent_data, dd_run_check, check):
     c = check(agent_instance_use_openmetrics(False))
     dd_run_check(c)
-    for m in AGENT_DEFAULT_METRICS + ADDL_AGENT_METRICS:
+    for m in legacy_common.AGENT_DEFAULT_METRICS + legacy_common.ADDL_AGENT_METRICS:
         aggregator.assert_metric(m)
     aggregator.assert_all_metrics_covered()
 
@@ -22,7 +19,7 @@ def test_operator_check(aggregator, operator_instance_use_openmetrics, mock_oper
     c = check(operator_instance_use_openmetrics(False))
 
     dd_run_check(c)
-    for m in OPERATOR_METRICS + OPERATOR_AWS_METRICS:
+    for m in legacy_common.OPERATOR_METRICS + legacy_common.OPERATOR_AWS_METRICS:
         aggregator.assert_metric(m)
     aggregator.assert_all_metrics_covered()
 
@@ -32,13 +29,13 @@ def test_version_metadata(datadog_agent, agent_instance_use_openmetrics, mock_ag
     check.check_id = 'test:123'
     dd_run_check(check)
 
-    major, minor, patch = CILIUM_VERSION.split('.')
+    major, minor, patch = common.CILIUM_VERSION.split('.')
     version_metadata = {
         'version.scheme': 'semver',
         'version.major': major,
         'version.minor': minor,
         'version.patch': patch,
-        'version.raw': CILIUM_VERSION,
+        'version.raw': common.CILIUM_VERSION,
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
