@@ -20,7 +20,7 @@ E2E_METADATA = {
 
 
 @pytest.fixture(scope='session')
-def dd_environment(instance):
+def dd_environment():
     yield common.INSTANCE, E2E_METADATA
 
 
