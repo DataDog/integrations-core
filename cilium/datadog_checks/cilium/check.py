@@ -6,7 +6,7 @@ from collections import ChainMap
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 
-from .metrics import AGENT_METRICS, OPERATOR_METRICS, construct_metrics_config
+from .metrics import AGENT_V2_METRICS, OPERATOR_V2_METRICS, construct_metrics_config
 
 CILIUM_VERSION = {'cilium_version': {'type': 'metadata', 'label': 'version', 'name': 'version'}}
 
@@ -30,9 +30,9 @@ class CiliumCheckV2(OpenMetricsBaseCheckV2):
             )
 
         if agent_endpoint:
-            self.scraper_configs.append(self._generate_config(agent_endpoint, AGENT_METRICS))
+            self.scraper_configs.append(self._generate_config(agent_endpoint, AGENT_V2_METRICS))
         if operator_endpoint:
-            self.scraper_configs.append(self._generate_config(operator_endpoint, OPERATOR_METRICS))
+            self.scraper_configs.append(self._generate_config(operator_endpoint, OPERATOR_V2_METRICS))
 
     def _generate_config(self, endpoint, metrics):
         metrics = construct_metrics_config(metrics)
