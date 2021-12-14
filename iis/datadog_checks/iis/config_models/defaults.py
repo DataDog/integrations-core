@@ -12,7 +12,15 @@ def shared_use_localized_counters(field, value):
     return False
 
 
+def instance_additional_metrics(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_app_pools(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_counter_data_types(field, value):
     return get_default_field_value(field, value)
 
 
@@ -30,6 +38,10 @@ def instance_enable_health_service_check(field, value):
 
 def instance_extra_metrics(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_host(field, value):
+    return '.'
 
 
 def instance_metrics(field, value):

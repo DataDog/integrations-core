@@ -73,6 +73,8 @@ files:
             items:
               type: string
     - template: instances/perf_counters
+    - template: instances/pdh_legacy
+      hidden: true
     - template: instances/default
   - template: logs
     example:

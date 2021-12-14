@@ -85,10 +85,13 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    additional_metrics: Optional[Sequence[Sequence[str]]]
+    counter_data_types: Optional[Sequence[str]]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     enable_health_service_check: Optional[bool]
     extra_metrics: Optional[Mapping[str, ExtraMetrics]]
+    host: Optional[str]
     metrics: Optional[Mapping[str, Metrics]]
     min_collection_interval: Optional[float]
     namespace: Optional[str] = Field(None, regex='\\w*')
