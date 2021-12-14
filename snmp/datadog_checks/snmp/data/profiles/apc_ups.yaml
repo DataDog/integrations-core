@@ -3,10 +3,63 @@ extends:
   - _generic-tcp.yaml
   - _generic-udp.yaml
 
-device:
-  vendor: "apc"
-
 sysobjectid: 1.3.6.1.4.1.318.1.*
+
+metric_tags:
+  - tag: model
+    OID: 1.3.6.1.4.1.318.1.1.1.1.1.1.0  # The UPS model name (e.g. 'APC Smart-UPS 600', 'Smart-UPS RT 6000 RM XL').
+    symbol: upsBasicIdentModel
+  - tag: serial_num
+    OID: 1.3.6.1.4.1.318.1.1.1.1.2.3.0
+    symbol: upsAdvIdentSerialNumber     # An 8-character string identifying the serial number of
+                                        # the UPS internal microprocessor.  This number is set at
+                                        # the factory.  NOTE: This number does NOT correspond to
+                                        # the serial number on the rear of the UPS.
+  - tag: firmware_version
+    OID: 1.3.6.1.4.1.318.1.1.1.1.2.1.0
+    symbol: upsAdvIdentFirmwareRevision # The firmware revision of the UPS system's microprocessor.
+                                        # e.g. 452.17.W
+  - OID: 1.3.6.1.4.1.318.1.1.1.1.1.2.0  # An 8 byte ID string identifying the UPS.  This object can be set by the administrator.
+                                        # e.g. UP001
+    symbol: upsBasicIdentName
+    tag: ups_name
+
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "apc"
+      serial_number:
+        # Doc: For example, if your serial number is XX1915XXXXX, this means your product was manufactured in the year 2019 (XX1915XXXXX) in the 15th (XX1915XXXXXX) week.
+        symbol:
+          MIB: POWERNET-MIB
+          OID: 1.3.6.1.4.1.318.1.1.1.1.2.3.0
+          name: upsAdvIdentSerialNumber
+
+#      version:
+#        symbol:
+#          OID: 1.3.6.1.4.1.3375.2.1.4.2.0
+#          name: sysProductVersion # Displays BIG-IP software version information. e.g. 15.0.1
+#      product_name:
+#        symbol:
+#          OID: 1.3.6.1.4.1.3375.2.1.4.1.0
+#          name: sysProductName # The product name. e.g. BIG-IP
+#      model:
+#        symbol:
+#          OID: 1.3.6.1.4.1.3375.2.1.3.3.1.0
+#          name: sysGeneralHwName # The name of the system hardware model. e.g. Z100
+#      os_name:
+#        symbol:
+#          OID: 1.3.6.1.4.1.3375.2.1.6.1.0
+#          name: sysSystemName # The operating system name. e.g. Linux
+#      os_version:
+#        symbol:
+#          OID: 1.3.6.1.4.1.3375.2.1.6.3.0
+#          name: sysSystemRelease # The current system release level. e.g. 3.10.0-862.14.4.el7.ve.x86_64
+#      os_hostname:
+#        symbol:
+#          OID: 1.3.6.1.4.1.3375.2.1.6.2.0
+#          name: sysSystemNodeName # The host name of the system on the network.
 
 metrics:
   - MIB: POWERNET-MIB
@@ -125,17 +178,3 @@ metrics:
         column:
           OID: 1.3.6.1.4.1.318.1.1.1.12.1.2.1.2
           name: upsOutletGroupStatusName
-
-metric_tags:
-  - tag: model
-    OID: 1.3.6.1.4.1.318.1.1.1.1.1.1.0
-    symbol: upsBasicIdentModel
-  - tag: serial_num
-    OID: 1.3.6.1.4.1.318.1.1.1.1.2.3.0
-    symbol: upsAdvIdentSerialNumber
-  - tag: firmware_version
-    OID: 1.3.6.1.4.1.318.1.1.1.1.2.1.0
-    symbol: upsAdvIdentFirmwareRevision
-  - OID: 1.3.6.1.4.1.318.1.1.1.1.1.2.0
-    symbol: upsBasicIdentName
-    tag: ups_name

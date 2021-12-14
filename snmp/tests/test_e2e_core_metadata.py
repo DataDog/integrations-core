@@ -41,8 +41,8 @@ def test_e2e_core_metadata_f5(dd_agent_check):
             u'devices': [
                 {
                     u'description': u'BIG-IP Virtual Edition : Linux '
-                    u'3.10.0-862.14.4.el7.ve.x86_64 : BIG-IP software '
-                    u'release 15.0.1, build 0.0.11',
+                                    u'3.10.0-862.14.4.el7.ve.x86_64 : BIG-IP software '
+                                    u'release 15.0.1, build 0.0.11',
                     u'id': device_id,
                     u'id_tags': [
                         u'device_namespace:default',
@@ -161,10 +161,10 @@ def test_e2e_core_metadata_cisco_3850(dd_agent_check):
     actual_device = event1['devices'][0]
     device = {
         u'description': u'Cisco IOS Software, IOS-XE Software, Catalyst L3 Switch '
-        u'Software (CAT3K_CAA-UNIVERSALK9-M), Version 03.06.06E RELEASE '
-        u'SOFTWARE (fc1) Technical Support: '
-        u'http://www.cisco.com/techsupport Copyright (c) 1986-2016 by '
-        u'Cisco Systems, Inc. Compiled Sat 17-Dec-',
+                        u'Software (CAT3K_CAA-UNIVERSALK9-M), Version 03.06.06E RELEASE '
+                        u'SOFTWARE (fc1) Technical Support: '
+                        u'http://www.cisco.com/techsupport Copyright (c) 1986-2016 by '
+                        u'Cisco Systems, Inc. Compiled Sat 17-Dec-',
         u'id': u'default:' + device_ip,
         u'id_tags': [u'device_namespace:default', u'snmp_device:' + device_ip],
         u'ip_address': device_ip,
@@ -247,5 +247,51 @@ def test_e2e_core_metadata_cisco_catalyst(dd_agent_check):
         ],
         u'vendor': u'cisco',
         u'serial_number': u'SCA044001J9',
+    }
+    assert device == actual_device
+
+
+def test_e2e_core_metadata_apc_ups(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'apc_ups',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
+    assert len(events) == 1
+    event1 = events[0]
+
+    # assert device (there is only one device)
+    pprint.pprint(event1['devices'])
+    assert len(event1['devices']) == 1
+    actual_device = event1['devices'][0]
+    device = {
+        'id': 'default:172.31.0.2',
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:172.31.0.2',
+        ],
+        'ip_address': '172.31.0.2',
+        'profile': 'apc_ups',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.318.1.1.1',
+        'tags': [
+            'device_namespace:default',
+            'firmware_version:2.0.3-test',
+            'model:APC Smart-UPS 600',
+            'serial_num:test_serial',
+            'snmp_device:172.31.0.2',
+            'snmp_profile:apc_ups',
+            'ups_name:testIdentName',
+        ],
+        'vendor': 'apc'
     }
     assert device == actual_device
