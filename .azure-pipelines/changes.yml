@@ -4,6 +4,7 @@ pr:
   branches:
     include:
     - master
+    - alex/snmp_interface_ip_addr_test2
   paths:
     exclude:
     - datadog_checks_base/datadog_checks/*
