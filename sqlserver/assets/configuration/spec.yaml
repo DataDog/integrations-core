@@ -233,7 +233,7 @@ files:
             example: 10
         - name: dm_exec_query_stats_row_limit
           description: |
-            Set the maximum number of query stats rows which can be retrieved in a single check run.
+            Set the maximum number of query stats rows that can be retrieved in a single check run.
           value:
             type: integer
             example: 10000
