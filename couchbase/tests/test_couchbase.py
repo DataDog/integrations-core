@@ -193,7 +193,7 @@ def _assert_stats(aggregator, node_tags, device=None):
         aggregator.assert_metric('couchbase.{}'.format(mname), tags=CHECK_TAGS, count=1)
 
 
-@pytest.mark.skipif(COUCHBASE_MAJOR_VERSION != 7, reason='Index metrics are only available for Couchbase 7+')
+@pytest.mark.skipif(COUCHBASE_MAJOR_VERSION < 7, reason='Index metrics are only available for Couchbase 7+')
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_index_stats_metrics(aggregator, dd_run_check, instance_index_stats, couchbase_container_ip):
