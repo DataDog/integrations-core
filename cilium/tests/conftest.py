@@ -60,7 +60,7 @@ def dd_environment():
                 ]
             }
             if CILIUM_LEGACY == 'false':
-                for instance in instances:
+                for instance in instances['instances']:
                     instance['use_openmetrics'] = True
 
         yield instances
