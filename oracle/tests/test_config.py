@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-from six import PY2
 
 from datadog_checks.oracle import Oracle
 

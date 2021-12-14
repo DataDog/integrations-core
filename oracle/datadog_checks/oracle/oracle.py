@@ -5,10 +5,10 @@ import itertools
 from contextlib import closing
 
 import cx_Oracle
+from six import PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.db import QueryManager
-from six import PY2
 
 from . import queries
 
