@@ -36,6 +36,8 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][4].
 
+**Note**: The current version of the check (1.17.0+) uses [OpenMetrics][12] for metric collection, which requires Python 3. For hosts that are not able to use Python 3, or if you would like to use a legacy version of this check, please refer to the following [config][13].
+
 ##### Log collection
 
 <!-- partial
@@ -144,3 +146,5 @@ Need help? Contact [Datadog support][10].
 [9]: https://github.com/DataDog/integrations-core/blob/master/kong/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
 [11]: https://www.datadoghq.com/blog/monitor-kong-datadog
+[12]: https://docs.datadoghq.com/integrations/openmetrics/
+[13]: https://github.com/DataDog/integrations-core/blob/7.27.x/kong/datadog_checks/kong/data/conf.yaml.example

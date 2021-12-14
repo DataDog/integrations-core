@@ -1,5 +1,4 @@
 import os
-from copy import deepcopy
 
 import pytest
 
@@ -21,4 +20,4 @@ def dd_environment():
 
 @pytest.fixture
 def instance_openmetrics_v2():
-    return deepcopy(common.instance_3)
+    return common.instance_3
