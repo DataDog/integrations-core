@@ -10,7 +10,6 @@ from datadog_checks.oracle import Oracle
 from .common import CHECK_NAME
 
 
-@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
 def test__get_config(check, instance):
     """
     Test the _get_config method
@@ -26,7 +25,6 @@ def test__get_config(check, instance):
     assert len(check._query_manager.queries) == 3
 
 
-@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
 def test_check_misconfig_null_server(dd_run_check, instance):
     """
     Test null server
@@ -37,7 +35,6 @@ def test_check_misconfig_null_server(dd_run_check, instance):
         dd_run_check(check)
 
 
-@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
 def test_check_misconfig_invalid_protocol(dd_run_check, instance):
     """
     Test invalid protocol
@@ -48,7 +45,6 @@ def test_check_misconfig_invalid_protocol(dd_run_check, instance):
         dd_run_check(check)
 
 
-@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
 def test_check_misconfig_empty_truststore_and_type(dd_run_check, instance):
     """
     Test if connecting via JDBC with TCPS, both `jdbc_truststore` and `jdbc_truststore_type` are non-empty
@@ -63,7 +59,6 @@ def test_check_misconfig_empty_truststore_and_type(dd_run_check, instance):
         dd_run_check(check)
 
 
-@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
 def test_check_misconfig_invalid_truststore_type(dd_run_check, instance):
     """
     Test truststore type is valid
