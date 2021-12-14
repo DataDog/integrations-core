@@ -1,5 +1,6 @@
-import pytest
 import platform
+
+import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.kong import Kong
@@ -22,7 +23,7 @@ GAUGES = [
 EXPECTED_METRICS = [
     'kong.memory.lua.shared_dict.bytes',
     'kong.memory.lua.shared_dict.total_bytes',
-    'kong.nginx.http.current_connections'
+    'kong.nginx.http.current_connections',
 ]
 
 DATABASES = ['reachable']
@@ -92,7 +93,6 @@ def test_e2e_openmetrics_v2(dd_agent_check, instance_openmetrics_v2):
     metrics = EXPECTED_METRICS
 
     for metric in metrics:
-        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE ,tags=tags)
+        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=tags)
 
     aggregator.assert_all_metrics_covered()
-

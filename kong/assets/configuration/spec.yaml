@@ -15,7 +15,7 @@ files:
       hidden: true
     - template: instances/openmetrics
       overrides:
-        openmetrics_endpoint.required: true
+        openmetrics_endpoint.required: false
         openmetrics_endpoint.value.example: http://localhost:8001/metrics
         extra_metrics.value.example:
         - kong_memory_workers_lua_vms_bytes: memory.workers.lua.vms.bytes
