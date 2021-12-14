@@ -1,7 +1,7 @@
 ARG HAZELCAST_VERSION
 FROM hazelcast/hazelcast:${HAZELCAST_VERSION}
 
-ARG LOG4J2_VERSION=2.15.0
+ARG LOG4J2_VERSION=2.16.0
 
 RUN apk update && \
     apk add curl && \
