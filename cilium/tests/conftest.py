@@ -42,6 +42,9 @@ def setup_cilium():
 @pytest.fixture(scope='session')
 def dd_environment():
     kind_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
+    use_openmetrics = False
+    if CILIUM_LEGACY == 'false':
+        use_openmetrics = True
     with kind_run(conditions=[setup_cilium], kind_config=kind_config) as kubeconfig:
         with ExitStack() as stack:
             ip_ports = [
@@ -53,15 +56,14 @@ def dd_environment():
                 'instances': [
                     {
                         'agent_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0]),
+                        'use_openmetrics': use_openmetrics,
                     },
                     {
                         'operator_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1]),
+                        'use_openmetrics': use_openmetrics,
                     },
                 ]
             }
-            if CILIUM_LEGACY == 'false':
-                for instance in instances['instances']:
-                    instance['use_openmetrics'] = True
 
         yield instances
 
