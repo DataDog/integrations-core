@@ -45,10 +45,10 @@ init_config:
 #
 instances:
 
-    ## @param openmetrics_endpoint - string - optional - default: http://localhost:8001/metrics
+    ## @param openmetrics_endpoint - string - required
     ## The URL exposing metrics in the OpenMetrics format.
     #
-    # openmetrics_endpoint: http://localhost:8001/metrics
+    openmetrics_endpoint: http://localhost:8001/metrics
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.

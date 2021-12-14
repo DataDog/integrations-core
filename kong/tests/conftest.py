@@ -2,6 +2,7 @@ import os
 
 import pytest
 
+from copy import deepcopy
 from datadog_checks.dev import docker_run
 
 from . import common
@@ -16,3 +17,7 @@ def dd_environment():
         compose_file=os.path.join(common.HERE, 'compose', 'docker-compose.yml'), endpoints=common.STATUS_URL
     ):
         yield common.instance_1
+
+@pytest.fixture
+def instance_openmetrics_v2():
+    return deepcopy(common.instance_3)
