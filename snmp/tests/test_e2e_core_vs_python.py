@@ -24,7 +24,10 @@ ASSERT_VALUE_METRICS = [
     'datadog.snmp.submitted_metrics',
 ]
 
-SKIPPED_TAGS = ['loader']
+SKIPPED_TAGS = [
+    'loader',
+    'interface_ip_address',  # requires `index_from_oid_value` only available for corecheck
+]
 
 CORE_ONLY_TAGS = ['device_namespace:default']
 
