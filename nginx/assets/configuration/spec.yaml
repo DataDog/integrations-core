@@ -50,6 +50,15 @@ files:
       value:
         type: integer
         display_default: 2
+    - name: only_query_enabled_endpoints
+      description: |
+        Enable this option if you would like the check to determine which API endpoints
+        to query based on your NGINX Plus configuration.
+      value:
+        type: boolean
+        example: true
+        display_default: false
+      enabled: true
     - name: use_vts
       description: |
         Set this option to true if you are using the nginx vhost_traffic_status module.

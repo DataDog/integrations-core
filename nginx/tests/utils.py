@@ -80,7 +80,24 @@ def mocked_perform_request(*args, **kwargs):
     elif re.search('/[7]/http/location_zones', url):
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'v7', 'plus_api_http_location_zones.json'))
         response.json.return_value = json.loads(file_contents)
-
+    elif re.match(".*/[23456]/http/?", url):
+        file_contents = read_file(os.path.join(FIXTURES_PATH, 'v1', 'plus_api_http.json'))
+        response.json.return_value = json.loads(file_contents)
+    elif re.match(".*/[23456]/stream/?", url):
+        file_contents = read_file(os.path.join(FIXTURES_PATH, 'v1', 'plus_api_stream.json'))
+        response.json.return_value = json.loads(file_contents)
+    elif re.match(".*/[23456]/?", url):
+        file_contents = read_file(os.path.join(FIXTURES_PATH, 'v1', 'plus_api.json'))
+        response.json.return_value = json.loads(file_contents)
+    elif re.match(".*/[7]/http/?", url):
+        file_contents = read_file(os.path.join(FIXTURES_PATH, 'v7', 'plus_api_http.json'))
+        response.json.return_value = json.loads(file_contents)
+    elif re.match(".*/[7]/stream/?", url):
+        file_contents = read_file(os.path.join(FIXTURES_PATH, 'v7', 'plus_api_stream.json'))
+        response.json.return_value = json.loads(file_contents)
+    elif re.match(".*/[7]/?", url):
+        file_contents = read_file(os.path.join(FIXTURES_PATH, 'v7', 'plus_api.json'))
+        response.json.return_value = json.loads(file_contents)
     else:
         response.json.return_value = ''
 
