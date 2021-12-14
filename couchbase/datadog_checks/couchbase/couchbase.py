@@ -20,6 +20,7 @@ from datadog_checks.couchbase.couchbase_consts import (
     INDEX_STATS_COUNT_METRICS,
     INDEX_STATS_METRICS_PATH,
     INDEX_STATS_SERVICE_CHECK_NAME,
+    INDEXER_STATE_MAP,
     NODE_CLUSTER_SERVICE_CHECK_NAME,
     NODE_HEALTH_SERVICE_CHECK_NAME,
     NODE_HEALTH_TRANSLATION,
@@ -436,7 +437,7 @@ class Couchbase(AgentCheck):
             if keyspace == "indexer":
                 # The indexer object provides metric about the index node
                 for mname, mval in data.get(keyspace).items():
-                    self._submit_index_node_metrics(mname, mval, self._tags)
+                    self._submit_index_node_metrics(mname, mval)
             else:
                 index_tags = self._extract_index_tags(keyspace) + self._tags
                 for mname, mval in data.get(keyspace).items():
@@ -474,14 +475,13 @@ class Couchbase(AgentCheck):
         ]
         return formatted_tags
 
-    def _submit_index_node_metrics(self, mname, mval, tags):
-        index_state_map = {'Active': 0, 'Pause': 1, 'Warmup': 2}
+    def _submit_index_node_metrics(self, mname, mval):
         namespace = 'couchbase.indexer'
         f_mname = '.'.join([namespace, mname])
         if mname == "indexer_state":
-            self.gauge(f_mname, index_state_map[mval], tags)
+            self.gauge(f_mname, INDEXER_STATE_MAP[mval], self._tags)
         else:
-            self.gauge(f_mname, mval, tags)
+            self.gauge(f_mname, mval, self._tags)
 
     def _submit_per_index_metrics(self, mname, mval, tags):
         namespace = 'couchbase.index'

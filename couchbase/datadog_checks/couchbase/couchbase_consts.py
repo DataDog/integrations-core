@@ -338,3 +338,5 @@ INDEX_STATS_COUNT_METRICS = [
     "num_scan_timeouts",
     "scan_bytes_read",
 ]
+
+INDEXER_STATE_MAP = {'Active': 0, 'Pause': 1, 'Warmup': 2}
