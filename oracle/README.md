@@ -199,11 +199,9 @@ instances:
     only_custom_queries: true
 ```
 
-#### Connecting to Oracle via TCPS
+#### Connect to Oracle through TCPS
 
-
-1. To connect to Oracle via TCPS (TCP with SSL), uncomment the `protocol` configuration option and select `TCPS`.
-Update the `server` option to set the TCPS server to monitor.
+1. To connect to Oracle through TCPS (TCP with SSL), uncomment the `protocol` configuration option and select `TCPS`. Update the `server` option to set the TCPS server to monitor.
 
     ```yaml
     init_config:
@@ -244,17 +242,17 @@ Update the `server` option to set the TCPS server to monitor.
 
 2. Update the `sqlnet.ora`, `listener.ora`, and `tnsnames.ora` to allow TCPS connections on your Oracle Database. 
 
-##### TCPS via Oracle Instant Client
+##### TCPS through the Oracle Instant Client
 
-If you are connecting to Oracle Database using the Oracle Instant Client, verify that the Datadog Agent will be able to connect to your database by using the `sqlplus` command line tool using the information inputted in your configuration options:
+If you are connecting to Oracle Database using the Oracle Instant Client, verify that the Datadog Agent is able to connect to your database. Use the `sqlplus` command line tool with the information inputted in your configuration options:
 
 ```shell
 sqlplus <USER>/<PASSWORD>@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCPS)(HOST=<HOST>)(PORT=<PORT>))(SERVICE_NAME=<SERVICE_NAME>)))
 ```
 
-##### TCPS via JDBC
+##### TCPS through JDBC
 
-If you are connecting to Oracle Database using JDBC, you will need to also specify `jdbc_truststore_path`, `jdbc_truststore_type`, and optionally `jdbc_truststore_password` if there is a password on the truststore. 
+If you are connecting to Oracle Database using JDBC, you also need to specify `jdbc_truststore_path`, `jdbc_truststore_type`, and `jdbc_truststore_password` (optional) if there is a password on the truststore. 
 
 Note: `SSO` truststores don't require passwords.
 
@@ -278,7 +276,7 @@ Note: `SSO` truststores don't require passwords.
     # jdbc_truststore_password: <JDBC_TRUSTSTORE_PASSWORD>
 ```
 
-More information regarding connecting to Oracle Database via TCPS on JDBC can be found in the official [Oracle whitepaper][17].
+For more information about connecting to the Oracle Database through TCPS on JDBC, see the official [Oracle whitepaper][17].
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
