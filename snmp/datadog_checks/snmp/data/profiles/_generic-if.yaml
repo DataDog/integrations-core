@@ -79,7 +79,7 @@ metrics:
         OID: 1.3.6.1.2.1.4.20.1.2
         name: ipAdEntIfIndex
     table: ipAddrTable
-    tag: ip_address
+    tag: interface_ip_address
 
 - MIB: IF-MIB
   table:
@@ -110,7 +110,7 @@ metrics:
         OID: 1.3.6.1.2.1.4.20.1.2
         name: ipAdEntIfIndex
     table: ipAddrTable
-    tag: ip_address
+    tag: interface_ip_address
 
 - MIB: IF-MIB
   table:
@@ -147,7 +147,7 @@ metrics:
         OID: 1.3.6.1.2.1.4.20.1.2
         name: ipAdEntIfIndex
     table: ipAddrTable
-    tag: ip_address
+    tag: interface_ip_address
 
 - MIB: IF-MIB
   table:
@@ -176,7 +176,7 @@ metrics:
         OID: 1.3.6.1.2.1.4.20.1.2
         name: ipAdEntIfIndex
     table: ipAddrTable
-    tag: ip_address
+    tag: interface_ip_address
 
 - MIB: IF-MIB
   table:
@@ -202,4 +202,4 @@ metrics:
         OID: 1.3.6.1.2.1.4.20.1.2
         name: ipAdEntIfIndex
     table: ipAddrTable
-    tag: ip_address
+    tag: interface_ip_address

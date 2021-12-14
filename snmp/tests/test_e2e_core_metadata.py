@@ -5,7 +5,7 @@ import pprint
 
 import pytest
 
-from . import common
+from . import common, metrics
 
 pytestmark = [pytest.mark.e2e, common.snmp_integration_only]
 
@@ -21,20 +21,22 @@ def assert_network_devices_metadata(aggregator, events):
 
 
 def test_e2e_core_metadata_f5(dd_agent_check):
+    profile = 'f5-big-ip'
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
     instance.update(
         {
-            'community_string': 'f5-big-ip',
+            'community_string': profile,
             'loader': 'core',
         }
     )
 
-    aggregator = dd_agent_check(config, rate=False)
+    aggregator = dd_agent_check(config, rate=True)
 
     device_ip = instance['ip_address']
     device_id = u'default:' + device_ip
 
+    # TEST METADATA
     events = [
         {
             u'collect_timestamp': 0,
@@ -90,6 +92,7 @@ def test_e2e_core_metadata_f5(dd_agent_check):
                     u'device_id': device_id,
                     u'id_tags': [u'interface:mgmt'],
                     u'index': 32,
+                    u'ip_address': u'10.164.0.51',
                     u'mac_address': u'0x42010aa40033',
                     u'name': u'mgmt',
                     u'oper_status': 1,
@@ -132,7 +135,168 @@ def test_e2e_core_metadata_f5(dd_agent_check):
             u'subnet': u'',
         },
     ]
-    assert_network_devices_metadata(aggregator, events)
+    assert_network_devices_metadata(aggregator, events + events)
+
+    # TEST METRICS
+    gauges = [
+        'sysStatMemoryTotal',
+        'sysStatMemoryUsed',
+        'sysGlobalTmmStatMemoryTotal',
+        'sysGlobalTmmStatMemoryUsed',
+        'sysGlobalHostOtherMemoryTotal',
+        'sysGlobalHostOtherMemoryUsed',
+        'sysGlobalHostSwapTotal',
+        'sysGlobalHostSwapUsed',
+        'sysTcpStatOpen',
+        'sysTcpStatCloseWait',
+        'sysTcpStatFinWait',
+        'sysTcpStatTimeWait',
+        'sysUdpStatOpen',
+        'sysClientsslStatCurConns',
+    ]
+    counts = [
+        'sysTcpStatAccepts',
+        'sysTcpStatAcceptfails',
+        'sysTcpStatConnects',
+        'sysTcpStatConnfails',
+        'sysUdpStatAccepts',
+        'sysUdpStatAcceptfails',
+        'sysUdpStatConnects',
+        'sysUdpStatConnfails',
+        'sysClientsslStatEncryptedBytesIn',
+        'sysClientsslStatEncryptedBytesOut',
+        'sysClientsslStatDecryptedBytesIn',
+        'sysClientsslStatDecryptedBytesOut',
+        'sysClientsslStatHandshakeFailures',
+    ]
+    cpu_rates = [
+        'sysMultiHostCpuUser',
+        'sysMultiHostCpuNice',
+        'sysMultiHostCpuSystem',
+        'sysMultiHostCpuIdle',
+        'sysMultiHostCpuIrq',
+        'sysMultiHostCpuSoftirq',
+        'sysMultiHostCpuIowait',
+    ]
+
+    interfaces = [
+        # ifname, ifdesc, ip addr
+        ('1.0', 'desc2', ''),
+        ('mgmt', 'desc1', '10.164.0.51'),
+        ('/Common/internal', 'desc5', ''),
+        ('/Common/http-tunnel', 'desc3', ''),
+        ('/Common/socks-tunnel', 'desc4', ''),
+    ]
+    interfaces_with_bandwidth_usage = {
+        '1.0',
+        'mgmt',
+        '/Common/internal',
+    }
+    tags = [
+        'snmp_profile:' + profile,
+        'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
+        'device_vendor:f5',
+        'device_namespace:default',
+        'snmp_device:' + device_ip,
+    ]
+
+    common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
+
+    for metric in gauges:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
+    for metric in counts:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
+    for metric in cpu_rates:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=['cpu:0'] + tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=['cpu:1'] + tags, count=1)
+
+    for metric in metrics.IF_SCALAR_GAUGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, value=5, tags=tags, count=2)
+    for interface, desc, if_ip_address in interfaces:
+        interface_tags = [
+            'interface:{}'.format(interface),
+            'interface_alias:{}'.format(desc),
+        ] + tags
+        if if_ip_address:
+            interface_tags.append('interface_ip_address:{}'.format(if_ip_address))
+        for metric in metrics.IF_COUNTS:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=interface_tags, count=1
+            )
+        for metric in metrics.IF_RATES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=interface_tags, count=1
+            )
+        if interface in interfaces_with_bandwidth_usage:
+            for metric in metrics.IF_BANDWIDTH_USAGE:
+                aggregator.assert_metric(
+                    'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=interface_tags, count=1
+                )
+
+        for metric in metrics.IF_GAUGES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric),
+                metric_type=aggregator.GAUGE,
+                tags=interface_tags,
+                count=2,
+            )
+
+    for version in ['ipv4', 'ipv6']:
+        ip_tags = ['ipversion:{}'.format(version)] + tags
+        for metric in metrics.IP_COUNTS:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=ip_tags, count=1)
+
+    for metric in metrics.LTM_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
+
+    servers = ['server1', 'server2', 'server3']
+    for server in servers:
+        server_tags = tags + ['server:{}'.format(server)]
+        for metric in metrics.LTM_VIRTUAL_SERVER_GAUGES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=server_tags, count=2)
+        for metric in metrics.LTM_VIRTUAL_SERVER_COUNTS:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=server_tags, count=1)
+        for metric in metrics.LTM_VIRTUAL_SERVER_RATES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=server_tags, count=1)
+
+    nodes = ['node1', 'node2', 'node3']
+    for node in nodes:
+        node_tags = tags + ['node:{}'.format(node)]
+        for metric in metrics.LTM_NODES_GAUGES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=node_tags, count=2)
+        for metric in metrics.LTM_NODES_COUNTS:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=node_tags, count=1)
+        for metric in metrics.LTM_NODES_RATES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=node_tags, count=1)
+
+    pools = ['pool1', 'pool2']
+    for pool in pools:
+        pool_tags = tags + ['pool:{}'.format(pool)]
+        for metric in metrics.LTM_POOL_GAUGES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=pool_tags, count=2)
+        for metric in metrics.LTM_POOL_COUNTS:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=pool_tags, count=1)
+        for metric in metrics.LTM_POOL_RATES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=pool_tags, count=1)
+
+    pool_members = [('pool1', 'node1'), ('pool1', 'node2'), ('pool2', 'node3')]
+    for pool, node in pool_members:
+        pool_member_tags = tags + ['pool:{}'.format(pool), 'node:{}'.format(node)]
+        for metric in metrics.LTM_POOL_MEMBER_GAUGES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=pool_member_tags, count=2
+            )
+        for metric in metrics.LTM_POOL_MEMBER_COUNTS:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=pool_member_tags, count=1
+            )
+        for metric in metrics.LTM_POOL_MEMBER_RATES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=pool_member_tags, count=1
+            )
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=2)
+    aggregator.assert_all_metrics_covered()
 
 
 def test_e2e_core_metadata_cisco_3850(dd_agent_check):
