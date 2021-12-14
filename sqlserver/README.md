@@ -81,7 +81,7 @@ Extra configuration steps are required to get the SQL Server integration running
 
 1. Install an ODBC SQL Server driver, for example the [Microsoft ODBC driver][9].
 2. Copy the `odbc.ini` and `odbcinst.ini` files into the `/opt/datadog-agent/embedded/etc` folder.
-3. Configure the `conf.yaml` file to use the `odbc` connector and specify the proper driver as indicated in the `odbcinst.ini file`.
+3. Configure the `conf.yaml` file to use the `odbc` connector and specify the proper driver as indicated in the `odbcinst.ini` file.
 
 ##### Log collection
 
