@@ -11,7 +11,6 @@ BROKER_METRICS = [
     'confluent.kafka.controller.offline_partitions_count',
     'confluent.kafka.controller.unclean_leader_elections_per_sec.rate',
     'confluent.kafka.controller.preferred_replica_imbalance_count',
-    'confluent.kafka.controller.global_under_min_isr_partition_count',
     'confluent.kafka.controller.offline_partitions_count',
     'confluent.kafka.controller.global_topic_count',
     'confluent.kafka.controller.global_partition_count',
@@ -93,6 +92,10 @@ BROKER_METRICS = [
     'confluent.kafka.server.topic.total_produce_requests_per_sec.rate',
 ]
 
+BROKER_METRICS_62 = [
+    'confluent.kafka.controller.global_under_min_isr_partition_count',
+]
+
 CONNECT_METRICS = [
     'confluent.kafka.connect.worker.connector_count',
     'confluent.kafka.connect.worker.connector_startup_attempts_total',
@@ -144,6 +147,21 @@ CONNECT_TASK = [
     'confluent.kafka.connect.task_error.total_record_failures',
     'confluent.kafka.connect.task_error.total_records_skipped',
     'confluent.kafka.connect.task_error.total_retries',
+    'confluent.kafka.connect.sink_task.offset_commit_completion_rate',
+  	'confluent.kafka.connect.sink_task.offset_commit_completion_total',
+  	'confluent.kafka.connect.sink_task.offset_commit_seq_no',
+  	'confluent.kafka.connect.sink_task.offset_commit_skip_rate',
+  	'confluent.kafka.connect.sink_task.offset_commit_skip_total',
+  	'confluent.kafka.connect.sink_task.partition_count',
+  	'confluent.kafka.connect.sink_task.put_batch_avg_time_ms',
+  	'confluent.kafka.connect.sink_task.put_batch_max_time_ms',
+  	'confluent.kafka.connect.sink_task.sink_record_active_count',
+  	'confluent.kafka.connect.sink_task.sink_record_active_count_avg',
+  	'confluent.kafka.connect.sink_task.sink_record_active_count_max',
+  	'confluent.kafka.connect.sink_task.sink_record_read_rate',
+  	'confluent.kafka.connect.sink_task.sink_record_read_total',
+  	'confluent.kafka.connect.sink_task.sink_record_send_rate',
+  	'confluent.kafka.connect.sink_task.sink_record_send_total',
 ]
 
 CONNECT_PER_CONNECTOR_METRICS = [
@@ -186,21 +204,49 @@ REST_JERSEY_METRICS = [
     'confluent.kafka.rest.jersey.consumer.seek_to_offset_v2.request_error_rate',
     'confluent.kafka.rest.jersey.consumer.subscribe_v2.request_error_rate',
     'confluent.kafka.rest.jersey.consumer.subscription_v2.request_error_rate',
-    'confluent.kafka.rest.jersey.consumer.records.read_jsonschema_v2.request_error_rate',
-    'confluent.kafka.rest.jersey.consumer.records.read_protobuf_v2.request_error_rate',
     'confluent.kafka.rest.jersey.consumer.unsubscribe_v2.request_error_rate',
     'confluent.kafka.rest.jersey.partition.get_v2.request_error_rate',
     'confluent.kafka.rest.jersey.partition.produce_avro_v2.request_error_rate',
     'confluent.kafka.rest.jersey.partition.produce_binary_v2.request_error_rate',
     'confluent.kafka.rest.jersey.partition.produce_json_v2.request_error_rate',
-    'confluent.kafka.rest.jersey.partition.produce_jsonschema_v2.request_error_rate',
-    'confluent.kafka.rest.jersey.partition.produce_protobuf_v2.request_error_rate',
     'confluent.kafka.rest.jersey.partitions.list_v2.request_error_rate',
     'confluent.kafka.rest.jersey.request_error_rate',
+]
+
+REST_JERSEY_METRICS_62 = [
+    'confluent.kafka.rest.jersey.consumer.records.read_jsonschema_v2.request_error_rate',
+    'confluent.kafka.rest.jersey.consumer.records.read_protobuf_v2.request_error_rate',
+    'confluent.kafka.rest.jersey.partition.produce_jsonschema_v2.request_error_rate',
+    'confluent.kafka.rest.jersey.partition.produce_protobuf_v2.request_error_rate',
     'confluent.kafka.rest.jersey.root.get_v2.request_error_rate',
     'confluent.kafka.rest.jersey.root.post_v2.request_error_rate',
     'confluent.kafka.rest.jersey.topic.get_v2.request_error_rate',
     'confluent.kafka.rest.jersey.topics.list_v2.request_error_rate',
+]
+
+REST_JERSEY_METRICS_DEPRECATED = [
+    'confluent.kafka.rest.jersey.brokers.list.request_error_rate',
+    'confluent.kafka.rest.jersey.consumer.commit.request_error_rate',
+    'confluent.kafka.rest.jersey.consumer.create.request_error_rate',
+    'confluent.kafka.rest.jersey.consumer.delete.request_error_rate',
+    'confluent.kafka.rest.jersey.consumer.topic.read_avro.request_error_rate',
+    'confluent.kafka.rest.jersey.consumer.topic.read_binary.request_error_rate',
+    'confluent.kafka.rest.jersey.consumer.topic.read_json.request_error_rate',
+    'confluent.kafka.rest.jersey.partition.consume_avro.request_error_rate',
+    'confluent.kafka.rest.jersey.partition.consume_binary.request_error_rate',
+    'confluent.kafka.rest.jersey.partition.consume_json.request_error_rate',
+    'confluent.kafka.rest.jersey.partition.get.request_error_rate',
+    'confluent.kafka.rest.jersey.partition.produce_avro.request_error_rate',
+    'confluent.kafka.rest.jersey.partition.produce_binary.request_error_rate',
+    'confluent.kafka.rest.jersey.partition.produce_json.request_error_rate',
+    'confluent.kafka.rest.jersey.partitions.list.request_error_rate',
+    'confluent.kafka.rest.jersey.root.get.request_error_rate',
+    'confluent.kafka.rest.jersey.root.post.request_error_rate',
+    'confluent.kafka.rest.jersey.topic.get.request_error_rate',
+    'confluent.kafka.rest.jersey.topic.produce_avro.request_error_rate',
+    'confluent.kafka.rest.jersey.topic.produce_binary.request_error_rate',
+    'confluent.kafka.rest.jersey.topic.produce_json.request_error_rate',
+    'confluent.kafka.rest.jersey.topics.list.request_error_rate',
 ]
 
 SCHEMA_REGISTRY_JETTY_METRICS = [
@@ -256,6 +302,9 @@ SCHEMA_REGISTRY_JERSEY_METRICS = [
 
 SCHEMA_REGISTRY_METRICS = [
     'confluent.kafka.schema.registry.master_slave_role.master_slave_role',
+]
+
+SCHEMA_REGISTRY_METRICS_62 = [
     'confluent.kafka.schema.registry.avro_schemas_created',
     'confluent.kafka.schema.registry.json_schemas_created',
     'confluent.kafka.schema.registry.protobuf_schemas_created',
@@ -263,6 +312,10 @@ SCHEMA_REGISTRY_METRICS = [
     'confluent.kafka.schema.registry.json_schemas_deleted',
     'confluent.kafka.schema.registry.protobuf_schemas_deleted',
     'confluent.kafka.schema.registry.registered_count',
+]
+
+SCHEMA_REGISTRY_JERSEY_METRICS_DEPRECATED = [
+    'confluent.kafka.schema.registry.jersey.brokers.list.request_error_rate',
 ]
 
 BROKER_OPTIONAL_METRICS = [
@@ -441,4 +494,17 @@ NOT_ALWAYS_PRESENT_METRICS = (
     + CONSUMER_FETCH_METRICS
     + CONSUMER_FETCH_TOPIC_METRICS
     + KSQL_OPTIONAL
+)
+
+
+## Metrics below are only confirmed to be present in Confluent Platform 6.2+
+CP_62_METRICS = (
+    REST_JERSEY_METRICS_62
+    + SCHEMA_REGISTRY_METRICS_62
+    + BROKER_METRICS_62
+)
+
+DEPRECATED_METRICS = (
+    REST_JERSEY_METRICS_DEPRECATED
+    + SCHEMA_REGISTRY_JERSEY_METRICS_DEPRECATED
 )

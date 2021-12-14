@@ -12,6 +12,7 @@ from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 
 from .common import CHECK_CONFIG, HERE
 
+CONFLUENT_VERSION = os.getenv('CONFLUENT_VERSION')
 
 def create_connectors():
     # Create a dummy connector
@@ -30,7 +31,7 @@ def create_connectors():
     }
 
     data_sink = {
-        "name": "filesink-internal",
+        "name": "local-file-sink",
         "config": {
             "name": "local-file-sink",
             "connector.class": "FileStreamSink",
@@ -51,14 +52,14 @@ def dd_environment():
         compose_file,
         conditions=[
             # Kafka Broker
-            CheckDockerLogs('broker', 'Creating topic _confluent_balancer_partition_samples'),
+            CheckDockerLogs('broker', 'Finished loading offsets and group metadata from __consumer_offsets'),
             # Kafka Schema Registry
             CheckDockerLogs('schema-registry', 'Server started, listening for requests...', attempts=90),
             # Kafka Connect
             CheckDockerLogs('connect', 'Kafka Connect started', attempts=120),
             # Create connectors
             WaitFor(create_connectors),
-            CheckDockerLogs('connect', 'Source task finished initialization and start'),
+            CheckDockerLogs('connect', 'flushing 0 outstanding messages for offset commit'),
         ],
     ):
         yield CHECK_CONFIG, {'use_jmx': True}

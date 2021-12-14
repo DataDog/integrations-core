@@ -3,7 +3,7 @@
 version: '2'
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:6.2.0
+    image: confluentinc/cp-zookeeper:${CONFLUENT_VERSION}
     hostname: zookeeper
     container_name: zookeeper
     ports:
@@ -16,7 +16,7 @@ services:
       KAFKA_JMX_PORT: 31000
 
   broker:
-    image: confluentinc/cp-server:6.2.0
+    image: confluentinc/cp-server:${CONFLUENT_VERSION}
     hostname: broker
     container_name: broker
     depends_on:
@@ -44,7 +44,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
   schema-registry:
-    image: confluentinc/cp-schema-registry:6.2.0
+    image: confluentinc/cp-schema-registry:${CONFLUENT_VERSION}
     hostname: schema-registry
     container_name: schema-registry
     restart: on-failure  # Schema registry might fail to Zookeeper, restarting "fixes" the issue.
@@ -62,7 +62,8 @@ services:
       SCHEMA_REGISTRY_JMX_PORT: 31007
 
   connect:
-    image: cnfldemos/cp-server-connect-datagen:0.5.0-6.2.0
+    ### Special tag due to special image
+    image: cnfldemos/cp-server-connect-datagen:${CONFLUENT_VERSION_CONNECT}
     hostname: connect
     container_name: connect
     depends_on:
@@ -100,7 +101,8 @@ services:
       KAFKA_JMX_PORT: 31002
 
   ksql-server:
-    image: confluentinc/cp-ksqldb-server:6.2.0
+    ## Confluent ksql got renamed to ksqlDB, adjusting for both names
+    image: confluentinc/cp-${CONFLUENT_KSQLDB_NAME}-server:${CONFLUENT_VERSION}
     hostname: ksql-server
     container_name: ksql-server
     depends_on:
@@ -131,7 +133,7 @@ services:
         -Djava.rmi.server.hostname=localhost
 
   ksql-datagen:
-    image: confluentinc/ksqldb-examples:6.2.0
+    image: confluentinc/${CONFLUENT_KSQLDB_NAME}-examples:${CONFLUENT_VERSION}
     hostname: ksql-datagen
     container_name: ksql-datagen
     depends_on:
@@ -154,7 +156,7 @@ services:
       STREAMS_SCHEMA_REGISTRY_PORT: 8081
 
   rest-proxy:
-    image: confluentinc/cp-kafka-rest:6.2.0
+    image: confluentinc/cp-kafka-rest:${CONFLUENT_VERSION}
     depends_on:
       - zookeeper
       - broker
@@ -179,7 +181,7 @@ services:
         -Djava.rmi.server.hostname=localhost
 
   connect-replicator:
-    image: confluentinc/cp-enterprise-replicator:6.2.0
+    image: confluentinc/cp-enterprise-replicator:${CONFLUENT_VERSION}
     # This is a workaround for the invalid topic exception. If you allow auto-topic creation, sometimes
     # the worker fails with Invalid topic exception, restarting fixes the issue.
     restart: on-failure
@@ -215,7 +217,7 @@ services:
       KAFKA_JMX_PORT: 31008
 
   control-center:
-    image: confluentinc/cp-enterprise-control-center:6.2.0
+    image: confluentinc/cp-enterprise-control-center:${CONFLUENT_VERSION}
     hostname: control-center
     container_name: control-center
     depends_on:

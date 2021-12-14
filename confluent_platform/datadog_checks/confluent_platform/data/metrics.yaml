@@ -1035,10 +1035,6 @@ jmx_metrics:
           # The average number of requests per second that resulted in HTTP error responses
           alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
-        consumer.commit.request-error-rate:
-          # The average number of requests per second that resulted in HTTP error responses
-          alias: confluent.$domain.jersey.$attribute
-          metric_type: gauge
         consumer.assignment+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
           alias: confluent.$domain.jersey.$attribute
@@ -1047,7 +1043,19 @@ jmx_metrics:
           # The average number of requests per second that resulted in HTTP error responses
           alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
+        consumer.commit.request-error-rate:
+          # The average number of requests per second that resulted in HTTP error responses
+          alias: confluent.$domain.jersey.$attribute
+          metric_type: gauge
+        consumer.records.read-avro+v2.request-error-rate:
+          # The average number of requests per second that resulted in HTTP error responses
+          alias: confluent.$domain.jersey.$attribute
+          metric_type: gauge
         consumer.committed-offsets+v2.request-error-rate:
+          # The average number of requests per second that resulted in HTTP error responses
+          alias: confluent.$domain.jersey.$attribute
+          metric_type: gauge
+        consumer.create+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
           alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
@@ -1060,18 +1068,6 @@ jmx_metrics:
           alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.delete.request-error-rate:
-          # The average number of requests per second that resulted in HTTP error responses
-          alias: confluent.$domain.jersey.$attribute
-          metric_type: gauge
-        consumer.records.read-avro+v2.request-error-rate:
-          # The average number of requests per second that resulted in HTTP error responses
-          alias: confluent.$domain.jersey.$attribute
-          metric_type: gauge
-        consumer.create+v2.request-error-rate:
-          # The average number of requests per second that resulted in HTTP error responses
-          alias: confluent.$domain.jersey.$attribute
-          metric_type: gauge
-        consumer.delete+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
           alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
@@ -1275,6 +1271,55 @@ jmx_metrics:
         confluent-replicator-task-topic-partition-latency:
           # The average time between message production to the source cluster and message production to the destination cluster.
           alias: $domain.task.topic_partition_latency
+          metric_type: gauge
+
+  - include:
+      domain: io.confluent.ksql.metrics
+      bean: io.confluent.ksql.metrics:type=_confluent-ksql-default_ksql-engine-query-stats
+      attribute:
+        bytes-consumed-total:
+          # Number of bytes consumed across all queries.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        error-rate:
+          # Number of messages that have been consumed but not processed across all queries.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        messages-consumed-avg:
+          # Average number of messages consumed by a query per second.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        messages-consumed-per-sec:
+          # Number of messages consumed per second across all queries.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        messages-consumed-min:
+          # Number of messages consumed per second for the query with the fewest messages consumed per second.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        messages-consumed-max:
+          # Number of messages consumed per second for the query with the most messages consumed per second.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        messages-consumed-total:
+          # Number of messages consumed across all queries.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        messages-produced-per-sec:
+          # Number of messages produced per second across all queries.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        num-persistent-queries:
+          # Number of persistent queries that are currently executing.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        num-active-queries:
+          # Number of queries that are actively processing messages.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        num-idle-queries:
+          # Number of queries with no messages available to process.
+          alias: confluent.ksql.query_stats.$attribute
           metric_type: gauge
 
   # Components Metrics:
