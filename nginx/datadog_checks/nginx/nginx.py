@@ -7,7 +7,7 @@ from itertools import chain
 
 import simplejson as json
 from six import PY3, iteritems, text_type
-from six.moves.urllib.parse import urlparse
+from six.moves.urllib.parse import urljoin, urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
 from datadog_checks.base.utils.time import get_timestamp
@@ -98,9 +98,10 @@ class Nginx(AgentCheck):
         then it falls back to query all of the known endpoints available in the given NGINX Plus version.
         """
         available_endpoints = set()
-        base_url = "/".join([self.url, self.plus_api_version])
-        http_url = "/".join([self.url, self.plus_api_version, "http"])
-        stream_url = "/".join([self.url, self.plus_api_version, "stream"])
+
+        base_url = urljoin(self.url + "/", self.plus_api_version)
+        http_url = urljoin(self.url + "/", self.plus_api_version + "/http")
+        stream_url = urljoin(self.url + "/", self.plus_api_version + "/stream")
 
         try:
             self.log.debug("Querying base API url: %s", base_url)
