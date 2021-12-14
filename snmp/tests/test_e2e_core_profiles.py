@@ -20,7 +20,7 @@ def assert_network_devices_metadata(aggregator, events):
     assert events == actual_events
 
 
-def test_e2e_core_metadata_f5(dd_agent_check):
+def test_e2e_core_metrics_metadata_f5(dd_agent_check):
     profile = 'f5-big-ip'
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
