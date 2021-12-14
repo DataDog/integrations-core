@@ -32,7 +32,9 @@
     "logs": {
       "source": "hudi"
     },
-    "monitors": {},
+    "monitors": {
+      "commit_duration": "assets/monitors/commit_duration.json"
+    },
     "saved_views": {
       "hudi_error_logs": "assets/saved_views/error_logs.json",
       "hudi_overview": "assets/saved_views/hudi_overview.json",
