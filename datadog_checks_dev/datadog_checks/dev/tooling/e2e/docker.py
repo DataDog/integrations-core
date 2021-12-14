@@ -76,8 +76,8 @@ class DockerInterface(object):
                 self.agent_build = f'{self.agent_build}-py{self.python_version}'
             echo_debug("Using default agent. Agent build: {}".format(self.agent_build))
 
-        if self.agent_build and self.metadata.get('use_jmx', False):
-            self.agent_build = f'{self.agent_build}-jmx'
+        # if self.agent_build and self.metadata.get('use_jmx', False):
+        #     self.agent_build = f'{self.agent_build}-jmx'
 
     @property
     def agent_version(self):
