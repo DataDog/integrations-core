@@ -79,7 +79,7 @@ To configure this check for an Agent running on a host:
    
     **NOTE**: By default, the `use_openmetrics` option is enabled in the conf.yaml.example. Set the `use_openmetrics` configuration option to `false` to use the OpenMetrics V1 implementation. To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][12].
     
-    You can read more about OpenMetrics V2 [here][13].
+    You can read more about [OpenMetrics V2][13].
 2. [Restart the Agent][5].
 
 ##### Log collection
