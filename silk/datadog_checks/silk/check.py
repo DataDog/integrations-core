@@ -33,10 +33,9 @@ class SilkCheck(AgentCheck):
         self.latest_event_query = get_current_datetime()
         self.url = "{}/api/v2/".format(server)
         self.tags = self.instance.get("tags", [])
+        self._host_tags = []
 
     def check(self, _):
-        host_tags = self.get_host_tags()
-
         # Get system state
         self.submit_state()
 
@@ -48,23 +47,21 @@ class SilkCheck(AgentCheck):
         for path, metrics_obj in METRICS.items():
             # Need to submit an object of relevant tags
             try:
-                response_json, _ = self.get_data(path)
+                response_json, _ = self._get_data(path)
                 self.parse_metrics(response_json, path, metrics_obj, get_method)
             except Exception as e:
                 self.log.debug("Encountered error getting Silk metrics for path %s: %s", path, str(e))
         self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.OK, tags=self.tags)
 
-    def get_host_tags(self):
-
-        pass
 
     def submit_state(self):
         # Get Silk State
         try:
-            response_json, code = self.get_data(self.STATE_ENDPOINT)
+            response_json, code = self._get_data(self.STATE_ENDPOINT)
         except Exception as e:
-            self.log.debug("Encountered error getting Silk state: %s", str(e))
+            self.warning("Encountered error getting Silk state: %s", str(e))
             self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.CRITICAL, message=str(e), tags=self.tags)
+            self.service_check(self.STATE_SERVICE_CHECK, AgentCheck.UNKNOWN, message=str(e), tags=self.tags)
             raise
         else:
             if response_json:
@@ -75,11 +72,39 @@ class SilkCheck(AgentCheck):
                     return
                 data = self.parse_metrics(response_json, self.STATE_ENDPOINT, return_first=True)
                 state = data.get('state').lower()
+
+                # Assign system-wide tags and metadata
+                self._assign_host_tags(data)
+                self._submit_version_metadata(data.get('system_version'))
                 self.service_check(self.STATE_SERVICE_CHECK, self.STATE_MAP[state], tags=self.tags)
             else:
                 msg = "Could not access system state, got response: {}".format(code)
                 self.service_check(self.STATE_SERVICE_CHECK, AgentCheck.UNKNOWN, message=msg, tags=self.tags)
                 return
+
+    @AgentCheck.metadata_entrypoint
+    def _submit_version_metadata(self, version):
+        if version:
+            try:
+                # "system_version":"6.0.102.25"
+                major, minor, patch, release = version.split(".")
+
+                version_parts = {
+                    'major': str(int(major)),
+                    'minor': str(int(minor)),
+                    'patch': str(int(patch)),
+                    'release': str(int(release)),
+                }
+                self.set_metadata('version', version, scheme='parts', part_map=version_parts)
+            except Exception as e:
+                self.log.debug("Could not parse version: %", str(e))
+        else:
+            self.log.debug("Could not submit version metadata, got: %", version)
+
+    def _assign_host_tags(self, state_data):
+
+        system_name = state_data.get('system_name')
+        system_id = state_data.get('system_id')
 
     def parse_metrics(self, output, path, metrics_mapping=None, get_method=None, return_first=False):
         """
@@ -107,7 +132,7 @@ class SilkCheck(AgentCheck):
                         "{}.{}".format(metrics_mapping.prefix, metric_name), item.get(key), tags=metric_tags
                     )
 
-    def get_data(self, path):
+    def _get_data(self, path):
         url = urljoin(self.url, path)
         try:
             self.log.debug("Trying to get metrics from %s", url)
@@ -126,7 +151,7 @@ class SilkCheck(AgentCheck):
         collect_events_start_time = get_current_datetime()
         try:
             event_query = EVENT_PATH.format(self.latest_event_query)
-            response_json, code = self.get_data(event_query)
+            response_json, code = self._get_data(event_query)
             raw_events = response_json.get("hits")
 
             for event in raw_events:
