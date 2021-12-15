@@ -153,7 +153,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             # assuming ~100 bytes per entry (query & plan signature, key hash, 4 pointers (ordered dict), expiry time)
             # total size: 10k * 100 = 1 Mb
             maxsize=int(self.check.instance.get('seen_samples_cache_maxsize', 10000)),
-            ttl=60 * 60 / int(self.check.instance.get('samples_per_hour_per_query', 15)),
+            ttl=60 * 60 / int(self.check.instance.get('samples_per_hour_per_query', 4)),
         )
 
     def _close_db_conn(self):
