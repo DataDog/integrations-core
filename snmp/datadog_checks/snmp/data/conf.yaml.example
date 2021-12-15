@@ -200,6 +200,7 @@ instances:
     ## @param privProtocol - string - optional
     ## Privacy type to use when connecting to your SNMP devices.
     ## Available options are: DES, AES, AES192, AES192C, AES256, AES256C
+    ## Protocol only available for Python implementation: 3DES
     ## Defaults to DES when `privKey` is specified.
     ## SNMP v3 specific configuration.
     #
