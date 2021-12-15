@@ -36,7 +36,7 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][4].
 
-**Note**: The current version of the check (1.17.0+) uses [OpenMetrics][12] for metric collection, which requires Python 3. For hosts that are not able to use Python 3, or if you would like to use a legacy version of this check, please refer to the following [config][13].
+**Note**: The current version of the check (1.17.0+) uses [OpenMetrics][12] for metric collection, which requires Python 3. For hosts that are unable to use Python 3, or if you would like to use a legacy version of this check, refer to the following [config][13].
 
 ##### Log collection
 

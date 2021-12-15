@@ -18,10 +18,11 @@ files:
     - name: kong_status_url
       display_priority: 1
       description: |
-        The check will collect and parse metrics from the admin /status endpoint.
+        The check collects and parses metrics from the admin /status endpoint.
         For more info see:
         https://docs.konghq.com/gateway-oss/2.5.x/admin-api/
-        Note: see the configuration options specific to this option here,
+        
+        Note: See the configuration options specific to this option here,
         https://github.com/DataDog/integrations-core/blob/7.27.x/kong/datadog_checks/kong/data/conf.yaml.example
       value:
         example: http://localhost:8001/status/
