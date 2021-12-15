@@ -6,7 +6,7 @@ from copy import deepcopy
 from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.time import get_current_datetime
+from datadog_checks.base.utils.time import get_timestamp
 
 from .events import SilkEvent
 from .metrics import METRICS
@@ -30,7 +30,7 @@ class SilkCheck(AgentCheck):
         super(SilkCheck, self).__init__(name, init_config, instances)
 
         server = self.instance.get("host_address")
-        self.latest_event_query = get_current_datetime()
+        self.latest_event_query = int(get_timestamp())
         self.url = "{}/api/v2/".format(server)
         self.tags = self.instance.get("tags", [])
         self._host_tags = []
@@ -148,7 +148,7 @@ class SilkCheck(AgentCheck):
     def collect_events(self):
         self.log.debug("Starting events collection (query start time: %s).", self.latest_event_query)
         latest_event_time = None
-        collect_events_start_time = get_current_datetime()
+        collect_events_start_time = get_timestamp()
         try:
             event_query = EVENT_PATH.format(self.latest_event_query)
             response_json, code = self._get_data(event_query)
@@ -168,7 +168,7 @@ class SilkCheck(AgentCheck):
             self.log.warning("Unable to fetch Events: %s", str(e))
 
         if latest_event_time is not None:
-            self.latest_event_query = latest_event_time
+            self.latest_event_query = int(latest_event_time)
         else:
             # In case no events were collected
-            self.latest_event_query = collect_events_start_time
+            self.latest_event_query = int(collect_events_start_time)
