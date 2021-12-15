@@ -290,10 +290,7 @@ def test_metadata(check, instance, datadog_agent):
 
 
 @pytest.mark.parametrize("refresh_role, expected_count, cluster_role", [(True, 1, "TEST"), (False, 0, "shardsvr")])
-def test_refresh_role(
-    caplog, instance_shard, aggregator, check, dd_run_check, refresh_role, expected_count, cluster_role
-):
-    caplog.set_level(logging.DEBUG)
+def test_refresh_role(instance_shard, aggregator, check, dd_run_check, refresh_role, expected_count, cluster_role):
     instance = copy.deepcopy(instance_shard)
     instance["refresh_role"] = refresh_role
 
