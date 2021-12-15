@@ -94,5 +94,3 @@ def test_e2e_openmetrics_v2(dd_agent_check, instance_openmetrics_v2):
 
     for metric in metrics:
         aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=tags)
-
-    aggregator.assert_all_metrics_covered()

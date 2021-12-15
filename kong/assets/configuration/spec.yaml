@@ -19,7 +19,7 @@ files:
       display_priority: 1
       description: |
         The check will collect and parse metrics from the admin /status endpoint.
-        It must be accessible:
+        For more info see:
         https://docs.konghq.com/gateway-oss/2.5.x/admin-api/
         Note: see the configuration options specific to this option here,
         https://github.com/DataDog/integrations-core/blob/7.27.x/kong/datadog_checks/kong/data/conf.yaml.example
