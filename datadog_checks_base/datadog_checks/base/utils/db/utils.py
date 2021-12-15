@@ -164,7 +164,7 @@ class DbRow:
     """
 
     def __init__(self, row, metadata=None):
-        # type: (Dict[str], Optional[Dict[str]]) -> None
+        # type: (Dict[str], Optional[Dict[str], DbRow.Metadata]) -> None
         self.data = row
         self.metadata = metadata if isinstance(metadata, self.Metadata) else self.Metadata(metadata)
 
@@ -178,11 +178,12 @@ class DbRow:
             self.comments = metadata.get('comments', None)
 
         def parse_tables_csv(self):
+            # type: () -> Optional[List[str]]
             """
             Parses out tables from the CSV format.
             e.g tables_csv = 'metrics,samples' -> ['metrics', 'samples']
             """
-            return self.tables_csv.split(',') if self.tables_csv is not None else []
+            return self.tables_csv.split(',') if self.tables_csv is not None else None
 
 
 class DBMAsyncJob(object):
