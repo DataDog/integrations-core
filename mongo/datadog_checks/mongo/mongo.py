@@ -179,7 +179,7 @@ class MongoDb(AgentCheck):
         if (
             self._config.refresh_role
             and self._api_client
-            and isinstance(self.api_client.deployment_type, ReplicaSetDeployment)
+            and isinstance(self._api_client.deployment_type, ReplicaSetDeployment)
         ):
             self._api_client.deployment_type = self._api_client._get_deployment_type()
 
