@@ -151,17 +151,22 @@ class TestTLSContext:
         assert context.verify_mode == ssl.CERT_REQUIRED
         assert context.check_hostname is True
 
-    @pytest.mark.parametrize(
-        'instance',
-        [
-            pytest.param({'tls_verify': False, 'tls_validate_hostname': False}, id='Test verify ssl false'),
-            pytest.param({'tls_verify': False}, id='Test verify ssl false with hostname by default'),
-            pytest.param(
-                {'tls_verify': False, 'tls_validate_hostname': True}, id='Test verify ssl false with hostname'
-            ),
-        ],
-    )
-    def test_verify_ssl_false_with_hostname(self, instance):
+    def test_verify_ssl_false(self):
+        instance = {'tls_verify': False, 'tls_validate_hostname': False}
+        check = AgentCheck('test', {}, [instance])
+        context = check.get_tls_context()
+        assert context.verify_mode == ssl.CERT_NONE
+        assert context.check_hostname is False
+
+    def test_verify_ssl_false_with_hostname_by_default(self):
+        instance = {'tls_verify': False}
+        check = AgentCheck('test', {}, [instance])
+        context = check.get_tls_context()
+        assert context.verify_mode == ssl.CERT_NONE
+        assert context.check_hostname is False
+
+    def test_verify_ssl_false_with_hostname(self):
+        instance = {'tls_verify': False, 'tls_validate_hostname': True}
         check = AgentCheck('test', {}, [instance])
         context = check.get_tls_context()
         assert context.verify_mode == ssl.CERT_NONE
@@ -209,67 +214,52 @@ class TestTLSContext:
             check.get_tls_context()
             mock_path.expanduser.assert_called_with('~/foo')
 
-    @pytest.mark.parametrize(
-        'instance,key,pw',
-        [
-            pytest.param({'tls_cert': 'foo'}, None, None, id='Test client cert with no key, no pass'),
-            pytest.param(
-                {'tls_cert': 'foo', 'tls_private_key': 'bar'},
-                'bar',
-                None,
-                id='Test client cert with key, no pass',
-            ),
-            pytest.param(
-                {
-                    'tls_cert': 'foo',
-                    'tls_private_key': 'bar',
-                    'tls_private_key_password': 'pass',
-                },
-                'bar',
-                'pass',
-                id='Test client cert with key and pass',
-            ),
-        ],
-    )
-    def test_client_cert_key_pass(self, instance, key, pw):
+    def test_client_cert_no_key_no_pass(self):
+        instance = {'tls_cert': 'foo'}
         check = AgentCheck('test', {}, [instance])
         with patch('ssl.SSLContext'):
             context = check.get_tls_context()  # type: MagicMock
-            context.load_cert_chain.assert_called_with('foo', keyfile=key, password=pw)
+            context.load_cert_chain.assert_called_with('foo', keyfile=None, password=None)
 
-    @pytest.mark.parametrize(
-        'instance,key,pw',
-        [
-            pytest.param(
-                {'tls_cert': 'foo', 'tls_verify': False},
-                None,
-                None,
-                id='[tls_verify: false] Test client cert with no key, no pass',
-            ),
-            pytest.param(
-                {'tls_cert': 'foo', 'tls_private_key': 'bar', 'tls_verify': False},
-                'bar',
-                None,
-                id='[tls_verify: false] Test client cert with key, no pass',
-            ),
-            pytest.param(
-                {
-                    'tls_cert': 'foo',
-                    'tls_private_key': 'bar',
-                    'tls_private_key_password': 'pass',
-                    'tls_verify': False,
-                },
-                'bar',
-                'pass',
-                id='[tls_verify: false] Test client cert with key and pass',
-            ),
-        ],
-    )
-    def test_client_cert_key_pass_tls_verify_false(self, instance, key, pw):
+    def test_client_cert_key_no_pass(self):
+        instance = {'tls_cert': 'foo', 'tls_private_key': 'bar'}
         check = AgentCheck('test', {}, [instance])
         with patch('ssl.SSLContext'):
             context = check.get_tls_context()  # type: MagicMock
-            context.load_cert_chain.assert_called_with('foo', keyfile=key, password=pw)
+            context.load_cert_chain.assert_called_with('foo', keyfile='bar', password=None)
+
+    def test_client_cert_key_and_pass(self):
+        instance = {'tls_cert': 'foo', 'tls_private_key': 'bar', 'tls_private_key_password': 'pass'}
+        check = AgentCheck('test', {}, [instance])
+        with patch('ssl.SSLContext'):
+            context = check.get_tls_context()  # type: MagicMock
+            context.load_cert_chain.assert_called_with('foo', keyfile='bar', password='pass')
+
+    def test_client_cert_no_key_no_pass_tls_verify_false(self):
+        instance = {'tls_cert': 'foo', 'tls_verify': False}
+        check = AgentCheck('test', {}, [instance])
+        with patch('ssl.SSLContext'):
+            context = check.get_tls_context()  # type: MagicMock
+            context.load_cert_chain.assert_called_with('foo', keyfile=None, password=None)
+
+    def test_client_cert_key_no_pass_tls_verify_false(self):
+        instance = {'tls_cert': 'foo', 'tls_private_key': 'bar', 'tls_verify': False}
+        check = AgentCheck('test', {}, [instance])
+        with patch('ssl.SSLContext'):
+            context = check.get_tls_context()  # type: MagicMock
+            context.load_cert_chain.assert_called_with('foo', keyfile='bar', password=None)
+
+    def test_client_cert_key_pass_tls_verify_false(self):
+        instance = {
+            'tls_cert': 'foo',
+            'tls_private_key': 'bar',
+            'tls_private_key_password': 'pass',
+            'tls_verify': False,
+        }
+        check = AgentCheck('test', {}, [instance])
+        with patch('ssl.SSLContext'):
+            context = check.get_tls_context()  # type: MagicMock
+            context.load_cert_chain.assert_called_with('foo', keyfile='bar', password='pass')
 
     def test_client_cert_expanded(self):
         instance = {'tls_cert': '~/foo'}

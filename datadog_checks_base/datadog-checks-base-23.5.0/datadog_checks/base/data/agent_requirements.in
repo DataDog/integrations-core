@@ -1,0 +1,102 @@
+adodbapi==2.6.2.0; sys_platform == "win32"
+aerospike==4.0.0; sys_platform != "win32" and sys_platform != "darwin" and python_version < "3.0"
+aerospike==6.0.0; sys_platform != "win32" and sys_platform != "darwin" and python_version > "3.0"
+aws-requests-auth==0.4.3
+beautifulsoup4==4.9.3; python_version < "3.0"
+beautifulsoup4==4.10.0; python_version > "3.0"
+binary==1.0.0
+boto3==1.17.112; python_version < "3.0"
+boto3==1.19.12; python_version > "3.0"
+boto==2.49.0
+botocore==1.20.112; python_version < "3.0"
+botocore==1.22.12; python_version > "3.0"
+cachetools==3.1.1; python_version < "3.0"
+cachetools==4.2.4; python_version > "3.0"
+clickhouse-cityhash==1.0.2.3
+clickhouse-driver==0.2.0; python_version < "3.0"
+clickhouse-driver==0.2.2; python_version > "3.0"
+contextlib2==0.6.0; python_version < "3.0"
+cryptography==3.3.2; python_version < "3.0"
+cryptography==3.4.8; python_version > "3.0"
+cx-oracle==7.2.0
+ddtrace==0.32.2; sys_platform == "win32" and python_version < "3.0"
+ddtrace==0.53.2; sys_platform != "win32" or python_version > "3.0"
+dnspython==1.16.0
+enum34==1.1.10; python_version < "3.0"
+flup-py3==1.0.3; python_version > "3.0"
+flup==1.0.3.dev-20110405; python_version < "3.0"
+foundationdb==6.3.22; python_version > "3.0"
+futures==3.3.0; python_version < "3.0"
+gearman==2.0.2; sys_platform != "win32" and python_version < "3.0"
+immutables==0.16; python_version > "3.0"
+in-toto==1.0.1
+ipaddress==1.0.23; python_version < "3.0"
+jaydebeapi==1.2.3
+jpype1==0.7.1; python_version <= "2.7"
+jpype1==1.3.0; python_version > "3"
+kafka-python==2.0.2
+kazoo==2.8.0
+kubernetes==18.20.0
+ldap3==2.9.1
+lxml==4.6.4
+lz4==2.2.1; python_version < "3.0"
+lz4==3.1.3; python_version > "3.0"
+mmh3==2.5.1; python_version < "3.0"
+mmh3==3.0.0; python_version > "3.0"
+openstacksdk==0.39.0; python_version < "3.0"
+openstacksdk==0.59.0; python_version > "3.0"
+orjson==2.6.8; python_version > "3.0"
+paramiko==2.7.2
+ply==3.11
+prometheus-client==0.9.0
+protobuf==3.7.0
+psutil==5.7.2
+psycopg2-binary==2.8.6
+pyasn1==0.4.6
+pycryptodomex==3.10.1
+pydantic==1.8.2; python_version > "3.0"
+pyhdb==0.3.4
+pyjwt==1.7.1; python_version < "3.0"
+pyjwt==2.0.1; python_version > "3.0"
+pymongo==3.11.4
+pymqi==1.12.0; sys_platform != "win32"
+pymysql==0.9.3
+pyodbc==4.0.26
+pyro4==4.73; sys_platform == "win32"
+pysmi==0.3.4
+pysnmp-mibs==0.1.6
+pysnmp==4.4.9
+pysocks==1.7.0
+python-binary-memcached==0.26.1; sys_platform != "win32" and python_version < "3.0"
+python-binary-memcached==0.30.1; sys_platform != "win32" and python_version > "3.0"
+python-dateutil==2.8.2
+python3-gearman==0.1.0; sys_platform != "win32" and python_version > "3.0"
+pyvmomi==v7.0.2
+pywin32==228; sys_platform == "win32" and python_version < "3.0"
+pywin32==300; sys_platform == "win32" and python_version > "3.0"
+pyyaml==5.4.1
+redis==3.5.3; python_version < '3.0'
+redis==4.0.1; python_version > '3.0'
+requests-kerberos==0.12.0
+requests-unixsocket==0.2.0
+requests==2.25.0
+requests_ntlm==1.1.0
+requests_toolbelt==0.9.1
+rethinkdb==2.4.4
+scandir==1.8
+securesystemslib[crypto,pynacl]==0.20.1
+selectors34==1.2.0; sys_platform == "win32" and python_version < "3.4"
+semver==2.9.0
+serpent==1.27; sys_platform == "win32"
+service_identity[idna]==18.1.0
+simplejson==3.6.5
+six==1.16.0
+snowflake-connector-python==2.6.0; python_version > "3.0"
+supervisor==4.1.0
+tuf==0.17.0; python_version < "3.0"
+tuf==0.19.0; python_version > "3.0"
+typing==3.7.4.1; python_version < "3.0"
+uptime==3.0.1
+vertica-python==0.10.1
+win-inet-pton==1.1.0; sys_platform == "win32" and python_version < "3.0"
+wrapt==1.12.1
