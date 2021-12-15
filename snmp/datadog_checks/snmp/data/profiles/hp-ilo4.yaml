@@ -5,7 +5,7 @@
 
 extends:
   - _base.yaml
-  - _hp_base.yaml
+  - _hp-base.yaml
   - _hp-compaq-health.yaml
   - _hp-driver-stats.yaml
 
