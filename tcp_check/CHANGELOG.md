@@ -1,5 +1,8 @@
 # CHANGELOG - tcp_check
 
+## 4.2.0-beta.1 / 2021-12-15
+
+
 ## 4.1.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
