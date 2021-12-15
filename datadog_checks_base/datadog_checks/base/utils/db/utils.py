@@ -183,7 +183,7 @@ class DbRow:
             Parses out tables from the CSV format.
             e.g tables_csv = 'metrics,samples' -> ['metrics', 'samples']
             """
-            return self.tables_csv.split(',') if self.tables_csv is not None else None
+            return self.tables_csv.split(',') if self.tables_csv is not None and self.tables_csv != '' else None
 
 
 class DBMAsyncJob(object):
