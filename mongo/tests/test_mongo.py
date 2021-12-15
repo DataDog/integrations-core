@@ -11,7 +11,7 @@ from six import iteritems
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mongo import MongoDb
-from datadog_checks.mongo.coommon import ReplicaSetDeployment
+from datadog_checks.mongo.common import ReplicaSetDeployment
 
 from . import common
 
@@ -289,16 +289,19 @@ def test_metadata(check, instance, datadog_agent):
     datadog_agent.assert_metadata_count(len(version_metadata) + 2)
 
 
-def test_refresh_role(caplog, instance_shard, aggregator, check, dd_run_check):
+@pytest.mark.parametrize("refresh_role, expected_count, cluster_role", [(True, 1, "TEST"), (False, 0, "shardsvr")])
+def test_refresh_role(
+    caplog, instance_shard, aggregator, check, dd_run_check, refresh_role, expected_count, cluster_role
+):
     caplog.set_level(logging.DEBUG)
     instance = copy.deepcopy(instance_shard)
-    instance["refresh_role"] = True
-    mongo_check = check(instance)
+    instance["refresh_role"] = refresh_role
 
+    mongo_check = check(instance)
     dd_run_check(mongo_check)
-    mongo_check.check(instance)
     with mock.patch('datadog_checks.mongo.api.MongoApi._get_rs_deployment_from_status_payload') as get_deployment:
-        get_deployment.return_value = ReplicaSetDeployment("sharding01", 9, cluster_role="TEST")
+        mock_deployment_type = ReplicaSetDeployment("sharding01", 9, cluster_role="TEST")
+        get_deployment.return_value = mock_deployment_type
         dd_run_check(mongo_check)
-        get_deployment.assert_called_once()
-        assert mongo_check.api_client.deployment_type == ReplicaSetDeployment("sharding01", 9, cluster_role="TEST")
+        assert get_deployment.call_count == expected_count
+        assert mongo_check.api_client.deployment_type.cluster_role == cluster_role
