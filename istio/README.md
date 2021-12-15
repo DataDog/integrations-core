@@ -186,6 +186,20 @@ instances:
       - envoy_*
 ```
 
+### High metric count
+If you are receiving a very high number of metrics, you can use the `exclude_labels` option in your configuration to exclude any labels that are unused to reduce context explosion:
+
+```yaml
+instances:
+...
+    ## @param exclude_labels - list of strings - optional
+    ## A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
+    ## May be used in conjunction with `include_labels`.
+    ## Labels defined in `excluded labels` will take precedence in case of overlap.
+    #
+    exclude_labels: []
+```
+
 Need help? Contact [Datadog support][17].
 
 ## Further Reading
