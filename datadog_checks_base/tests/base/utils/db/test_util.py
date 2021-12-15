@@ -92,7 +92,7 @@ def test_db_row():
     assert no_metadata_row.metadata.tables_csv is None
     assert no_metadata_row.metadata.commands is None
     assert no_metadata_row.metadata.comments is None
-    assert no_metadata_row.metadata.parse_tables_csv() == []
+    assert no_metadata_row.metadata.parse_tables_csv() is None
 
     # Check to see if we can provide a DbRow.Metadata instance directly
     db_row_metadata = DbRow.Metadata(metadata)
