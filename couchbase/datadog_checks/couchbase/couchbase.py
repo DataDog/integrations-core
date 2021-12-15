@@ -422,7 +422,7 @@ class Couchbase(AgentCheck):
             data = self._get_stats(url)
         except requests.exceptions.RequestException as e:
             msg = "Error accessing the Index Statistics endpoint: %s: %s" % (url, str(e))
-            self.log.warning(str(e))
+            self.log.warning(msg)
             self.service_check(INDEX_STATS_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, self._tags, msg)
             return
 
