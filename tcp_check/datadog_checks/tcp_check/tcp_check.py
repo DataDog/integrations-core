@@ -79,14 +79,14 @@ class TCPCheck(AgentCheck):
     def addrs(self):
         if self._addrs is None or self._addrs == []:
             try:
-                self.resolve_ip()
+                self.resolve_ips()
             except Exception as e:
                 self.log.error(str(e))
                 msg = "URL: {} could not be resolved".format(self.host)
                 raise CheckException(msg)
         return self._addrs
 
-    def resolve_ip(self):
+    def resolve_ips(self):
         if self.multiple_ips:
             _, _, self._addrs = socket.gethostbyname_ex(self.host)
         else:
@@ -96,7 +96,7 @@ class TCPCheck(AgentCheck):
             raise Exception("No IPs attached to host")
         self.log.debug("%s resolved to %s", self.host, self._addrs)
 
-    def should_resolve_ip(self):
+    def should_resolve_ips(self):
         if self.ip_cache_duration is None:
             return False
         return get_precise_time() - self.ip_cache_last_ts > self.ip_cache_duration
@@ -112,8 +112,8 @@ class TCPCheck(AgentCheck):
     def check(self, _):
         start = get_precise_time()  # Avoid initialisation warning
 
-        if self.should_resolve_ip():
-            self.resolve_ip()
+        if self.should_resolve_ips():
+            self.resolve_ips()
             self.ip_cache_last_ts = start
 
         self.log.debug("Connecting to %s on port %d", self.host, self.port)

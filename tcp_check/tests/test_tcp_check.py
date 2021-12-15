@@ -35,9 +35,9 @@ def test_reattempt_resolution_on_error():
     assert check.ip_cache_duration is None
 
     # IP is not normally re-resolved after the first check run
-    with mock.patch.object(check, 'resolve_ip', wraps=check.resolve_ip) as resolve_ip:
+    with mock.patch.object(check, 'resolve_ips', wraps=check.resolve_ips) as resolve_ips:
         check.check(instance)
-        assert not resolve_ip.called
+        assert not resolve_ips.called
 
     # Upon connection failure, cached resolved IP is cleared
     with mock.patch.object(check, 'connect', wraps=check.connect) as connect:
@@ -46,9 +46,9 @@ def test_reattempt_resolution_on_error():
         assert check._addrs is None
 
     # On next check run IP is re-resolved
-    with mock.patch.object(check, 'resolve_ip', wraps=check.resolve_ip) as resolve_ip:
+    with mock.patch.object(check, 'resolve_ips', wraps=check.resolve_ips) as resolve_ips:
         check.check(instance)
-        assert resolve_ip.called
+        assert resolve_ips.called
 
 
 def test_reattempt_resolution_on_duration():
@@ -60,13 +60,13 @@ def test_reattempt_resolution_on_duration():
     assert check.ip_cache_duration is not None
 
     # ip_cache_duration = 0 means IP is re-resolved every check run
-    with mock.patch.object(check, 'resolve_ip', wraps=check.resolve_ip) as resolve_ip:
+    with mock.patch.object(check, 'resolve_ips', wraps=check.resolve_ips) as resolve_ips:
         check.check(instance)
-        assert resolve_ip.called
+        assert resolve_ips.called
         check.check(instance)
-        assert resolve_ip.called
+        assert resolve_ips.called
         check.check(instance)
-        assert resolve_ip.called
+        assert resolve_ips.called
 
 
 def test_up(aggregator, check):
