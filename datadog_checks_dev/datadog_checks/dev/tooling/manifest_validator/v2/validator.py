@@ -38,7 +38,7 @@ class DisplayOnPublicValidator(BaseManifestValidator):
                 f"{check_name}: `display_on_public_website` is disabled, set to `True` "
                 f"if you want the integration documentation to be published."
             )
-            self.warn(message)
+            self.warning(message)
 
 
 class TileDescriptionValidator(BaseManifestValidator):
