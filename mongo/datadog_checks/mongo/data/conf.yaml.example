@@ -78,7 +78,7 @@ instances:
 
     ## @param refresh_role - boolean - optional - default: false
     ## Refresh the role of this Mongo node on every check run. Enable this option when monitoring a replica set
-    ## and leader election happens often and/or a node's role can change.
+    ## and leader election happens often, or when a node's role can change.
     #
     refresh_role: true
 
