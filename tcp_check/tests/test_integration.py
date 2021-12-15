@@ -20,6 +20,6 @@ def test_check(aggregator, check, instance):
 @pytest.mark.usefixtures("dd_environment")
 def test_check_multiple(aggregator):
     check = TCPCheck(common.CHECK_NAME, {}, [common.INSTANCE_MULTIPLE])
-    check.check(ModuleNotFoundError)
+    check.check(None)
     common._test_check(aggregator, check._addrs)
     assert len(check._addrs) == 4

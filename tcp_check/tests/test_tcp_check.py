@@ -104,3 +104,32 @@ def test_response_time(aggregator):
     aggregator.assert_metric('network.tcp.response_time', tags=expected_tags)
     aggregator.assert_all_metrics_covered()
     assert len(aggregator.service_checks('tcp.can_connect')) == 1
+
+
+def test_multiple(aggregator):
+    """
+    Test when a domain is attached to 3 IPs [UP, DOWN, UP]
+    """
+    instance = deepcopy(common.INSTANCE_MULTIPLE)
+    instance['name'] = 'multiple'
+    instance['ip_cache_duration'] = 0
+    check = TCPCheck(common.CHECK_NAME, {}, [instance])
+
+    with mock.patch('socket.gethostbyname_ex', return_value=[None, None, ['ip1', 'ip2', 'ip3']]), mock.patch.object(
+        check, 'connect', wraps=check.connect
+    ) as connect:
+        connect.side_effect = [None, Exception(), None] * 2
+        expected_tags = ['foo:bar', 'target_host:datadoghq.com', 'port:80', 'instance:multiple']
+
+        # Running the check twice
+        check.check(None)
+        check.check(None)
+
+        aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags + ['address:ip1'], count=2)
+        aggregator.assert_metric('network.tcp.can_connect', value=0, tags=expected_tags + ['address:ip2'], count=2)
+        aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags + ['address:ip3'], count=2)
+        aggregator.assert_service_check('tcp.can_connect', status=check.OK, count=4)
+        aggregator.assert_service_check('tcp.can_connect', status=check.CRITICAL, count=2)
+
+    aggregator.assert_all_metrics_covered()
+    assert len(aggregator.service_checks('tcp.can_connect')) == 6
