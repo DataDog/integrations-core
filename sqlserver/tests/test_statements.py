@@ -272,7 +272,22 @@ def _run_test_statement_metrics_and_plans(
 @not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_statement_metadata(aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent):
+@pytest.mark.parametrize(
+    "metadata,expected_metadata_payload",
+    [
+        (
+            {'tables_csv': 'sys.databases', 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+            {'tables': ['sys.databases'], 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+        ),
+        (
+            {'tables_csv': '', 'commands': None, 'comments': None},
+            {'tables': None, 'commands': None, 'comments': None},
+        ),
+    ],
+)
+def test_statement_metadata(
+    aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, metadata, expected_metadata_payload
+):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     query = '''
@@ -283,12 +298,6 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, bob_conn, da
     def _run_query():
         with bob_conn.cursor() as cursor:
             cursor.execute(query)
-
-    metadata = {
-        'tables_csv': 'sys.databases',
-        'commands': ['SELECT'],
-        'comments': ['-- Test comment'],
-    }
 
     def _obfuscate_sql(sql_query, options=None):
         return json.dumps({'query': sql_query, 'metadata': metadata})
@@ -308,9 +317,9 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, bob_conn, da
     assert len(matching) == 1
 
     sample = matching[0]
-    assert sample['db']['metadata']['tables'] == ['sys.databases']
-    assert sample['db']['metadata']['commands'] == metadata['commands']
-    assert sample['db']['metadata']['comments'] == metadata['comments']
+    assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
+    assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
+    assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
 
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1
@@ -318,8 +327,8 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, bob_conn, da
     matching_metrics = [m for m in metric['sqlserver_rows'] if m['query_signature'] == query_signature]
     assert len(matching_metrics) == 1
     metric = matching_metrics[0]
-    assert metric['dd_tables'] == ['sys.databases']
-    assert metric['dd_commands'] == metadata['commands']
+    assert metric['dd_tables'] == expected_metadata_payload['tables']
+    assert metric['dd_commands'] == expected_metadata_payload['commands']
 
 
 @not_windows_ci
