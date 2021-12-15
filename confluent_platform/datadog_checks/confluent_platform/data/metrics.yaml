@@ -1269,7 +1269,7 @@ jmx_metrics:
           alias: $domain.task.topic_partition_throughput
           metric_type: gauge
         confluent-replicator-task-topic-partition-latency:
-          # The average time between message production to the source cluster and message production to the destination cluster.
+          # The average time between message production to the source cluster and message production to the destination cluster. 
           alias: $domain.task.topic_partition_latency
           metric_type: gauge
 
