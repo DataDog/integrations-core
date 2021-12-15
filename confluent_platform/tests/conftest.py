@@ -53,7 +53,7 @@ def dd_environment():
         compose_file,
         conditions=[
             # Kafka Broker
-            CheckDockerLogs('broker', 'Finished loading offsets and group metadata from __consumer_offsets'),
+            CheckDockerLogs('broker', 'Created log for partition _confluent-controlcenter'),
             # Kafka Schema Registry
             CheckDockerLogs('schema-registry', 'Server started, listening for requests...', attempts=90),
             # Kafka Connect
