@@ -85,6 +85,7 @@ files:
         type: boolean
         example: true
         display_default: false
+      enabled: true
     - name: ssl
       description: If `True`, create the connection to the server using SSL.
       value:
