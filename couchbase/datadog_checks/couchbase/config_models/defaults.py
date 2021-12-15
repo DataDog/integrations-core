@@ -64,6 +64,10 @@ def instance_headers(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_index_stats_url(field, value):
+    return 'http://localhost:9102'
+
+
 def instance_kerberos_auth(field, value):
     return 'disabled'
 
