@@ -1,8 +1,0 @@
-server {
-    server_name localhost;
-    listen unix:${UDS_PATH};
-
-    location / {
-        return 200 'Hello, World!';
-    }
-}
