@@ -72,7 +72,6 @@ class SilkCheck(AgentCheck):
                     msg = "Received error message: %s", response_json.get('error_msg')
                     self.log.warning(msg)
                     self.service_check(self.STATE_SERVICE_CHECK, AgentCheck.WARNING, message=msg, tags=self.tags)
-                    self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.OK, tags=self.tags)
                     return
                 data = self.parse_metrics(response_json, self.STATE_ENDPOINT, return_first=True)
                 state = data.get('state').lower()
@@ -80,7 +79,6 @@ class SilkCheck(AgentCheck):
             else:
                 msg = "Could not access system state, got response: {}".format(code)
                 self.service_check(self.STATE_SERVICE_CHECK, AgentCheck.UNKNOWN, message=msg, tags=self.tags)
-                self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.CRITICAL, message=msg, tags=self.tags)
                 return
 
     def parse_metrics(self, output, path, metrics_mapping=None, get_method=None, return_first=False):
