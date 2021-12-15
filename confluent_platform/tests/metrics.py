@@ -497,7 +497,8 @@ NOT_ALWAYS_PRESENT_METRICS = (
 )
 
 
-## Metrics below are only confirmed to be present in Confluent Platform 6.2+
+# Metrics below are only confirmed to be present in Confluent Platform 6.2+
 CP_62_METRICS = REST_JERSEY_METRICS_62 + SCHEMA_REGISTRY_METRICS_62 + BROKER_METRICS_62
 
+# Metrics below are deprecated in the platform
 DEPRECATED_METRICS = REST_JERSEY_METRICS_DEPRECATED + SCHEMA_REGISTRY_JERSEY_METRICS_DEPRECATED
