@@ -22,7 +22,7 @@ class ConfigSpec(object):
         self.source = source
         self.version = version
         self.templates = ConfigTemplates(template_paths)
-        self.data: dict = None
+        self.data: Union[dict, None] = None
         self.errors = []
 
     def load(self) -> None:

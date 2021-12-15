@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Union
 
 from .constants import OPENAPI_DATA_TYPES
 from .utils import default_option_example, normalize_source_name
