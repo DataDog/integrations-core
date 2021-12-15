@@ -250,6 +250,7 @@ def test_e2e_core_metadata_cisco_catalyst(dd_agent_check):
     }
     assert device == actual_device
 
+
 def test_e2e_core_metadata_hp_ilo4(dd_agent_check):
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
@@ -299,6 +300,7 @@ def test_e2e_core_metadata_hp_ilo4(dd_agent_check):
         u'serial_number': u'dXPEdPBE5yKtjW9xx3',
     }
     assert device == actual_device
+
 
 def test_e2e_core_metadata_hpe_proliant(dd_agent_check):
     config = common.generate_container_instance_config([])
