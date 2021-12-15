@@ -379,7 +379,20 @@ def test_statement_samples_collect(
     mysql_check._statement_samples._close_db_conn()
 
 
-def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agent):
+@pytest.mark.parametrize(
+    "metadata,expected_metadata_payload",
+    [
+        (
+            {'tables_csv': 'information_schema', 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+            {'tables': ['information_schema'], 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+        ),
+        (
+            {'tables_csv': '', 'commands': None, 'comments': None},
+            {'tables': None, 'commands': None, 'comments': None},
+        ),
+    ],
+)
+def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload):
     test_query = '''
     -- Test comment
     select * from information_schema.processlist where state in (\'starting\')
@@ -388,12 +401,6 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agen
     normalized_query = 'SELECT * FROM `information_schema` . `processlist` where state in ( ? )'
 
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
-
-    metadata = {
-        'tables_csv': 'information_schema',
-        'commands': ['SELECT'],
-        'comments': ['-- Test comment'],
-    }
 
     def obfuscate_sql(query, options=None):
         if 'WHERE `state`' in query:
@@ -416,9 +423,9 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agen
     assert len(matching) == 1
 
     sample = matching[0]
-    assert sample['db']['metadata']['tables'] == ['information_schema']
-    assert sample['db']['metadata']['commands'] == metadata['commands']
-    assert sample['db']['metadata']['comments'] == metadata['comments']
+    assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
+    assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
+    assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
 
     # Run the query and check a second time so statement metrics are computed from the previous run
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
@@ -432,8 +439,8 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agen
     matching_metrics = [m for m in metric['mysql_rows'] if m['query_signature'] == query_signature]
     assert len(matching_metrics) == 1
     metric = matching_metrics[0]
-    assert metric['dd_tables'] == ['information_schema']
-    assert metric['dd_commands'] == metadata['commands']
+    assert metric['dd_tables'] == expected_metadata_payload['tables']
+    assert metric['dd_commands'] == expected_metadata_payload['commands']
 
 
 @pytest.mark.integration
