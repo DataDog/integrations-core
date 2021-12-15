@@ -500,7 +500,20 @@ def test_statement_samples_collect(
         conn.close()
 
 
-def test_statement_metadata(aggregator, integration_check, dbm_instance, datadog_agent):
+@pytest.mark.parametrize(
+    "metadata,expected_metadata_payload",
+    [
+        (
+            {'tables_csv': 'persons', 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+            {'tables': ['persons'], 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+        ),
+        (
+            {'tables_csv': '', 'commands': None, 'comments': None},
+            {'tables': None, 'commands': None, 'comments': None},
+        ),
+    ],
+)
+def test_statement_metadata(aggregator, integration_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload):
     """Tests for metadata in both samples and metrics"""
     dbm_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
@@ -516,12 +529,6 @@ def test_statement_metadata(aggregator, integration_check, dbm_instance, datadog
     normalized_query = 'SELECT city FROM persons WHERE city = ?'
     # Metrics will match to the normalized query signature
     normalized_query_signature = 'ca85e8d659051b3a'
-
-    metadata = {
-        'tables_csv': 'persons',
-        'commands': ['SELECT'],
-        'comments': ['-- Test comment'],
-    }
 
     def obfuscate_sql(query, options=None):
         if query.startswith('SELECT city FROM persons WHERE city'):
@@ -549,9 +556,9 @@ def test_statement_metadata(aggregator, integration_check, dbm_instance, datadog
     matching_samples = [s for s in samples if s['db']['query_signature'] == query_signature]
     assert len(matching_samples) == 1
     sample = matching_samples[0]
-    assert sample['db']['metadata']['tables'] == [metadata['tables_csv']]
-    assert sample['db']['metadata']['commands'] == metadata['commands']
-    assert sample['db']['metadata']['comments'] == metadata['comments']
+    assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
+    assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
+    assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
 
     # Test metrics metadata, metadata in metrics are located in the rows.
     metrics = aggregator.get_event_platform_events("dbm-metrics")
@@ -560,8 +567,8 @@ def test_statement_metadata(aggregator, integration_check, dbm_instance, datadog
     matching_metrics = [m for m in metric['postgres_rows'] if m['query_signature'] == normalized_query_signature]
     assert len(matching_metrics) == 1
     metric = matching_metrics[0]
-    assert metric['dd_tables'] == [metadata['tables_csv']]
-    assert metric['dd_commands'] == metadata['commands']
+    assert metric['dd_tables'] == expected_metadata_payload['tables']
+    assert metric['dd_commands'] == expected_metadata_payload['commands']
 
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
