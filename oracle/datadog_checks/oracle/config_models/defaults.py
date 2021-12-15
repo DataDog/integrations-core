@@ -28,12 +28,28 @@ def instance_jdbc_driver_path(field, value):
     return '<DRIVER_PATH>.jar'
 
 
+def instance_jdbc_truststore_password(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_jdbc_truststore_path(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_jdbc_truststore_type(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_min_collection_interval(field, value):
     return 15
 
 
 def instance_only_custom_queries(field, value):
     return False
+
+
+def instance_protocol(field, value):
+    return 'TCP'
 
 
 def instance_service(field, value):

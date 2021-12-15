@@ -30,9 +30,13 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     jdbc_driver_path: Optional[str]
+    jdbc_truststore_password: Optional[str]
+    jdbc_truststore_path: Optional[str]
+    jdbc_truststore_type: Optional[str]
     min_collection_interval: Optional[float]
     only_custom_queries: Optional[bool]
     password: str
+    protocol: Optional[str]
     server: str
     service: Optional[str]
     service_name: str
