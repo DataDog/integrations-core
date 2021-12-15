@@ -48,7 +48,7 @@ class SilkCheck(AgentCheck):
         for path, metrics_obj in METRICS.items():
             # Need to submit an object of relevant tags
             try:
-                response_json, _ = self.get_metrics(path)
+                response_json, _ = self.get_data(path)
                 self.parse_metrics(response_json, path, metrics_obj, get_method)
             except Exception as e:
                 self.log.debug("Encountered error getting Silk metrics for path %s: %s", path, str(e))
@@ -61,7 +61,7 @@ class SilkCheck(AgentCheck):
     def submit_state(self):
         # Get Silk State
         try:
-            response_json, code = self.get_metrics(self.STATE_ENDPOINT)
+            response_json, code = self.get_data(self.STATE_ENDPOINT)
         except Exception as e:
             self.log.debug("Encountered error getting Silk state: %s", str(e))
             self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.CRITICAL, message=str(e), tags=self.tags)
@@ -107,7 +107,7 @@ class SilkCheck(AgentCheck):
                         "{}.{}".format(metrics_mapping.prefix, metric_name), item.get(key), tags=metric_tags
                     )
 
-    def get_metrics(self, path):
+    def get_data(self, path):
         url = urljoin(self.url, path)
         try:
             self.log.debug("Trying to get metrics from %s", url)
@@ -126,7 +126,7 @@ class SilkCheck(AgentCheck):
         collect_events_start_time = get_current_datetime()
         try:
             event_query = EVENT_PATH.format(self.latest_event_query)
-            response_json, code = self.get_metrics(event_query)
+            response_json, code = self.get_data(event_query)
             raw_events = response_json.get("hits")
 
             for event in raw_events:
