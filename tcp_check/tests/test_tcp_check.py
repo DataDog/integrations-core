@@ -19,7 +19,7 @@ def test_down(aggregator):
     instance['collect_response_time'] = True
     check = TCPCheck(common.CHECK_NAME, {}, [instance])
     check.check(instance)
-    expected_tags = ["instance:DownService", "target_host:127.0.0.1", "port:65530", "foo:bar"]
+    expected_tags = ["instance:DownService", "target_host:127.0.0.1", "port:65530", "foo:bar", "address:127.0.0.1"]
     aggregator.assert_service_check('tcp.can_connect', status=check.CRITICAL, tags=expected_tags)
     aggregator.assert_metric('network.tcp.can_connect', value=0, tags=expected_tags)
     aggregator.assert_metric('network.tcp.response_time', count=0)  # should not submit response time metric on failure
@@ -41,9 +41,9 @@ def test_reattempt_resolution_on_error():
 
     # Upon connection failure, cached resolved IP is cleared
     with mock.patch.object(check, 'connect', wraps=check.connect) as connect:
-        connect.side_effect = lambda self: Exception()
+        connect.side_effect = lambda self, addr: Exception()
         check.check(instance)
-        assert check._addr is None
+        assert check._addrs is None
 
     # On next check run IP is re-resolved
     with mock.patch.object(check, 'resolve_ip', wraps=check.resolve_ip) as resolve_ip:
@@ -75,6 +75,7 @@ def test_up(aggregator, check):
     """
     check.check(deepcopy(common.INSTANCE))
     expected_tags = ["instance:UpService", "target_host:datadoghq.com", "port:80", "foo:bar"]
+    expected_tags.append("address:{}".format(check._addrs[0]))
     aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
     aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
     aggregator.assert_all_metrics_covered()
@@ -93,11 +94,13 @@ def test_response_time(aggregator):
 
     # service check
     expected_tags = ['foo:bar', 'target_host:datadoghq.com', 'port:80', 'instance:instance:response_time']
+    expected_tags.append("address:{}".format(check._addrs[0]))
     aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
     aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
 
     # response time metric
     expected_tags = ['url:datadoghq.com:80', 'instance:instance:response_time', 'foo:bar']
+    expected_tags.append("address:{}".format(check._addrs[0]))
     aggregator.assert_metric('network.tcp.response_time', tags=expected_tags)
     aggregator.assert_all_metrics_covered()
     assert len(aggregator.service_checks('tcp.can_connect')) == 1
