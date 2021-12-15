@@ -26,11 +26,8 @@ class Metric(object):
 METRICS = {
     'hosts': Metric(
         **{
-            'prefix': 'host',
+            'prefix': 'system',
             'metrics': {'views_count': 'views_count', 'volumes_count': 'volumes_count'},
-            'tags': {
-                'name': 'silk_host',
-            },
         }
     ),
     'volumes': Metric(
