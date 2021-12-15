@@ -148,20 +148,20 @@ CONNECT_TASK = [
     'confluent.kafka.connect.task_error.total_records_skipped',
     'confluent.kafka.connect.task_error.total_retries',
     'confluent.kafka.connect.sink_task.offset_commit_completion_rate',
-  	'confluent.kafka.connect.sink_task.offset_commit_completion_total',
-  	'confluent.kafka.connect.sink_task.offset_commit_seq_no',
-  	'confluent.kafka.connect.sink_task.offset_commit_skip_rate',
-  	'confluent.kafka.connect.sink_task.offset_commit_skip_total',
-  	'confluent.kafka.connect.sink_task.partition_count',
-  	'confluent.kafka.connect.sink_task.put_batch_avg_time_ms',
-  	'confluent.kafka.connect.sink_task.put_batch_max_time_ms',
-  	'confluent.kafka.connect.sink_task.sink_record_active_count',
-  	'confluent.kafka.connect.sink_task.sink_record_active_count_avg',
-  	'confluent.kafka.connect.sink_task.sink_record_active_count_max',
-  	'confluent.kafka.connect.sink_task.sink_record_read_rate',
-  	'confluent.kafka.connect.sink_task.sink_record_read_total',
-  	'confluent.kafka.connect.sink_task.sink_record_send_rate',
-  	'confluent.kafka.connect.sink_task.sink_record_send_total',
+    'confluent.kafka.connect.sink_task.offset_commit_completion_total',
+    'confluent.kafka.connect.sink_task.offset_commit_seq_no',
+    'confluent.kafka.connect.sink_task.offset_commit_skip_rate',
+    'confluent.kafka.connect.sink_task.offset_commit_skip_total',
+    'confluent.kafka.connect.sink_task.partition_count',
+    'confluent.kafka.connect.sink_task.put_batch_avg_time_ms',
+    'confluent.kafka.connect.sink_task.put_batch_max_time_ms',
+    'confluent.kafka.connect.sink_task.sink_record_active_count',
+    'confluent.kafka.connect.sink_task.sink_record_active_count_avg',
+    'confluent.kafka.connect.sink_task.sink_record_active_count_max',
+    'confluent.kafka.connect.sink_task.sink_record_read_rate',
+    'confluent.kafka.connect.sink_task.sink_record_read_total',
+    'confluent.kafka.connect.sink_task.sink_record_send_rate',
+    'confluent.kafka.connect.sink_task.sink_record_send_total',
 ]
 
 CONNECT_PER_CONNECTOR_METRICS = [
@@ -498,13 +498,6 @@ NOT_ALWAYS_PRESENT_METRICS = (
 
 
 ## Metrics below are only confirmed to be present in Confluent Platform 6.2+
-CP_62_METRICS = (
-    REST_JERSEY_METRICS_62
-    + SCHEMA_REGISTRY_METRICS_62
-    + BROKER_METRICS_62
-)
+CP_62_METRICS = REST_JERSEY_METRICS_62 + SCHEMA_REGISTRY_METRICS_62 + BROKER_METRICS_62
 
-DEPRECATED_METRICS = (
-    REST_JERSEY_METRICS_DEPRECATED
-    + SCHEMA_REGISTRY_JERSEY_METRICS_DEPRECATED
-)
+DEPRECATED_METRICS = REST_JERSEY_METRICS_DEPRECATED + SCHEMA_REGISTRY_JERSEY_METRICS_DEPRECATED

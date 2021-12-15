@@ -14,6 +14,7 @@ from .common import CHECK_CONFIG, HERE
 
 CONFLUENT_VERSION = os.getenv('CONFLUENT_VERSION')
 
+
 def create_connectors():
     # Create a dummy connector
     headers = {'Content-type': 'application/json'}

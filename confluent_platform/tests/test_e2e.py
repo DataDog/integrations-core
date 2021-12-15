@@ -1,16 +1,16 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from typing import Any
 
 import pytest
-import os
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 
 from .common import CHECK_CONFIG
-from .metrics import ALWAYS_PRESENT_METRICS, NOT_ALWAYS_PRESENT_METRICS, CP_62_METRICS, DEPRECATED_METRICS
 from .conftest import CONFLUENT_VERSION
+from .metrics import ALWAYS_PRESENT_METRICS, CP_62_METRICS, DEPRECATED_METRICS, NOT_ALWAYS_PRESENT_METRICS
 
 # TODO: missing e2e coverage for following metrics. See metrics in metrics.yaml.
 #   - Kafka Connect Task Metrics
