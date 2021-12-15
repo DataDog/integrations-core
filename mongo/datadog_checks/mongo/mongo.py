@@ -176,8 +176,12 @@ class MongoDb(AgentCheck):
         return metrics_to_collect
 
     def _refresh_replica_role(self):
-        if self._config.refresh_role and isinstance(self.api_client.deployment_type, ReplicaSetDeployment):
-            self.api_client._get_deployment_type()
+        if (
+            self._config.refresh_role
+            and self._api_client
+            and isinstance(self.api_client.deployment_type, ReplicaSetDeployment)
+        ):
+            self._api_client.deployment_type = self._api_client._get_deployment_type()
 
     def check(self, _):
         try:
