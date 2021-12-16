@@ -83,13 +83,45 @@ class TestDBExcepption(BaseException):
         (
             json.dumps(
                 {
-                    "query": "SELECT * FROM datadog",
-                    "metadata": {"tables_csv": "datadog", "commands": ["SELECT"], "comments": None},
+                    'query': 'SELECT * FROM datadog',
+                    'metadata': {'tables_csv': 'datadog,', 'commands': ['SELECT'], 'comments': None},
                 }
             ),
             {
                 'query': 'SELECT * FROM datadog',
                 'metadata': {'commands': ['SELECT'], 'comments': None, 'tables': ['datadog']},
+            },
+        ),
+        (
+            json.dumps(
+                {
+                    'query': 'SELECT * FROM datadog WHERE age = (SELECT AVG(age) FROM datadog2)',
+                    'metadata': {
+                        'tables_csv': '    datadog,  datadog2      ',
+                        'commands': ['SELECT', 'SELECT'],
+                        'comments': ['-- Test comment'],
+                    },
+                }
+            ),
+            {
+                'query': 'SELECT * FROM datadog WHERE age = (SELECT AVG(age) FROM datadog2)',
+                'metadata': {
+                    'commands': ['SELECT', 'SELECT'],
+                    'comments': ['-- Test comment'],
+                    'tables': ['datadog', 'datadog2'],
+                },
+            },
+        ),
+        (
+            json.dumps(
+                {
+                    'query': 'COMMIT',
+                    'metadata': {'tables_csv': '', 'commands': ['COMMIT'], 'comments': None},
+                }
+            ),
+            {
+                'query': 'COMMIT',
+                'metadata': {'commands': ['COMMIT'], 'comments': None, 'tables': None},
             },
         ),
         (
@@ -107,7 +139,7 @@ def test_obfuscate_sql_with_metadata(obfusactor_return_value, expected_value):
 
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = _mock_obfuscate_sql
-        statement = obfuscate_sql_with_metadata('SELECT * FROM datadog')
+        statement = obfuscate_sql_with_metadata('query here does not matter')
         assert statement == expected_value
 
 
