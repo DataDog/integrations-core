@@ -6,6 +6,7 @@ import copy
 import ipaddress
 import logging
 import os
+import platform
 import socket
 
 import pytest
@@ -193,6 +194,7 @@ RESOLVED_TABULAR_OBJECTS = [
 
 snmp_listener_only = pytest.mark.skipif(SNMP_LISTENER_ENV != 'true', reason='Agent snmp lister tests only')
 snmp_integration_only = pytest.mark.skipif(SNMP_LISTENER_ENV != 'false', reason='Normal tests')
+py3_only = pytest.mark.skipif(platform.python_version() > "3", reason='Run test with Python 3+ only')
 
 
 def generate_instance_config(metrics, template=None):
