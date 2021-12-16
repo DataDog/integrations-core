@@ -56,8 +56,6 @@ class SilkCheck(AgentCheck):
                 self.parse_metrics(
                     response_json, path, metrics_mapping=metrics_obj, get_method=get_method, tags=metric_tags
                 )
-                if 'replication' in path:
-                    raise Exception(path, metrics_obj)
             except Exception as e:
                 self.log.debug("Encountered error getting Silk metrics for path %s: %s", path, str(e))
         self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.OK, tags=self._tags)
