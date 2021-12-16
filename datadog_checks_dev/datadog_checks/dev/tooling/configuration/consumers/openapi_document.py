@@ -6,7 +6,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-from datadog_checks.dev.tooling.configuration.consumers.model import ModelInfo
+from datadog_checks.dev.tooling.configuration.consumers.model.model_info import ModelInfo
 
 from ..constants import OPENAPI_SCHEMA_PROPERTIES
 from ..utils import sanitize_openapi_object_properties

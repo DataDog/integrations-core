@@ -8,8 +8,8 @@ from datamodel_code_generator.format import CodeFormatter, PythonVersion
 from datamodel_code_generator.parser import LiteralType
 from datamodel_code_generator.parser.openapi import OpenAPIParser
 
-from datadog_checks.dev.tooling.configuration.consumers.model import ModelInfo
-from datadog_checks.dev.tooling.configuration.consumers.model_file import build_model_file
+from datadog_checks.dev.tooling.configuration.consumers.model.model_info import ModelInfo
+from datadog_checks.dev.tooling.configuration.consumers.model.model_file import build_model_file
 from datadog_checks.dev.tooling.configuration.consumers.openapi_document import build_openapi_document
 
 PYTHON_VERSION = PythonVersion.PY_38

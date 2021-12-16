@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datamodel_code_generator.format import CodeFormatter
 
-from datadog_checks.dev.tooling.configuration.consumers.model import ModelInfo
+from datadog_checks.dev.tooling.configuration.consumers.model.model_info import ModelInfo
 
 
 def build_model_file(
