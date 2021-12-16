@@ -15,7 +15,6 @@ from lxml import etree as ET
 
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
-from datadog_checks.dev import WaitFor
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
@@ -204,27 +203,18 @@ def _run_test_statement_metrics_and_plans(
     caplog.set_level(logging.INFO)
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
-    with bob_conn.cursor() as cursor:
-        cursor.execute("USE {}".format(database))
-
-    def _run_test_queries():
-        for params in param_groups:
-            with bob_conn.cursor() as cursor:
-                logging.info("running query %s: %s", query, params)
-                cursor.execute(query, params)
-                cursor.fetchall()
-
     # the check must be run three times:
     # 1) set _last_stats_query_time (this needs to happen before the 1st test queries to ensure the query time
     # interval is correct)
     # 2) load the test queries into the StatementMetrics state
     # 3) emit the query metrics based on the diff of current and last state
     dd_run_check(check)
-    # Use WaitFor to retry the bob_conn test query execution because sometimes they fail due to inexplicable timeouts
-    WaitFor(_run_test_queries, wait=1, attempts=3)()
+    for params in param_groups:
+        bob_conn.execute_with_retries(query, params, database=database)
     dd_run_check(check)
     aggregator.reset()
-    WaitFor(_run_test_queries, wait=1, attempts=3)()
+    for params in param_groups:
+        bob_conn.execute_with_retries(query, params, database=database)
     dd_run_check(check)
 
     _conn_key_prefix = "dbm-"
