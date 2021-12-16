@@ -14,7 +14,7 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 
 from .version_utils import V9_4
@@ -304,14 +304,18 @@ class PostgresStatementMetrics(DBMAsyncJob):
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['query'], self._obfuscate_options)
+                statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
                 self._log.debug("Failed to obfuscate query '%s': %s", row['query'], e)
                 continue
 
-            normalized_row['query'] = obfuscated_statement
-            normalized_row['query_signature'] = compute_sql_signature(obfuscated_statement)
+            obfuscated_query = statement['query']
+            normalized_row['query'] = obfuscated_query
+            normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
+            metadata = statement['metadata']
+            normalized_row['dd_tables'] = metadata.get('tables', None)
+            normalized_row['dd_commands'] = metadata.get('commands', None)
             normalized_rows.append(normalized_row)
 
         return normalized_rows
