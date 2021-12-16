@@ -1,36 +1,34 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import List, Tuple
-
 from datamodel_code_generator.format import CodeFormatter
+
+from datadog_checks.dev.tooling.configuration.consumers.model import ModelInfo
 
 
 def build_model_file(
     parsed_document: str,
-    options_with_defaults: False,
-    deprecation_data: dict,
     model_id: str,
     section_name: str,
-    validator_data: List[Tuple[str, List[str]]],
+    model_info: ModelInfo,
     code_formatter: CodeFormatter,
 ):
     """
     :param parsed_document: OpenApi parsed document
-    :param options_with_defaults: Whether or not there are options with default values
-    :param deprecation_data:
     :param model_id: instance or shared
     :param section_name: init or instances
-    :param validator_data: List of tuples [(normalized_option_name, [# validator_references_as_a_string])]
+    :param model_info: Information to build the model file
     :param code_formatter:
     """
+    # Whether or not there are options with default values
+    options_with_defaults = len(model_info.defaults_file_lines) > 0
     model_file_lines = parsed_document.splitlines()
-    _add_imports(model_file_lines, options_with_defaults, len(deprecation_data))
+    _add_imports(model_file_lines, options_with_defaults, len(model_info.deprecation_data))
 
-    if model_id in deprecation_data:
+    if model_id in model_info.deprecation_data:
         model_file_lines += _define_deprecation_functions(model_id, section_name)
 
-    model_file_lines += _define_validator_functions(model_id, validator_data)
+    model_file_lines += _define_validator_functions(model_id, model_info.validator_data)
 
     model_file_lines.append('')
     model_file_contents = '\n'.join(model_file_lines)

@@ -109,14 +109,11 @@ class ModelConsumer:
                 model_info,
             )
 
-        options_with_defaults = len(model_info.defaults_file_lines) > 0
         model_file_contents = build_model_file(
             parsed_section,
-            options_with_defaults,
-            model_info.deprecation_data,
             model_id,
             section_name,
-            model_info.validator_data,
+            model_info,
             self.code_formatter,
         )
         # instance.py or shared.py
