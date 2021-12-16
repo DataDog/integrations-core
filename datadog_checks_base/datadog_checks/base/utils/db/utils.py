@@ -173,10 +173,7 @@ def obfuscate_sql_with_metadata(query, options=None):
     tables = metadata.pop('tables_csv', None)
     # The obfuscator will at least return an empty string. We need to check for this because we want to
     # omit None values later down the pipeline and splitting would result in [''].
-    if tables == '':
-        tables = None
-    elif tables is not None:
-        tables = tables.split(',')
+    tables = tables.split(',') if tables is not None and tables != '' else None
     statement_with_metadata['metadata']['tables'] = tables
     return statement_with_metadata
 
