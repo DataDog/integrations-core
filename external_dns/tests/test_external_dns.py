@@ -32,6 +32,6 @@ def test_external_dns(aggregator, dd_run_check, instance):
 def test_e2e(dd_agent_check, aggregator, instance):
     with pytest.raises(Exception):
         dd_agent_check(instance, rate=True)
-    tag = "endpoint:" + instance.get('prometheus_url')
-    tags = instance.get('tags').append(tag)
+    endpoint_tag = "endpoint:" + instance.get('prometheus_url')
+    tags = instance.get('tags').append(endpoint_tag)
     aggregator.assert_service_check("external_dns.prometheus.health", AgentCheck.CRITICAL, count=2, tags=tags)
