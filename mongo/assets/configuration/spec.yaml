@@ -77,14 +77,6 @@ files:
       value:
         type: integer
         example: 30
-    - name: refresh_role
-      description: |
-        Refresh the role of this Mongo node on every check run. Enable this option when monitoring a replica set
-        and leader election happens often, or when a node's role can change.
-      value:
-        type: boolean
-        example: false
-        display_default: true
     - name: ssl
       description: If `True`, create the connection to the server using SSL.
       value:

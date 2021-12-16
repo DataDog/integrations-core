@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import copy
 import logging
 import time
 
@@ -248,10 +247,7 @@ def test_mongo_custom_query_with_empty_result_set(aggregator, check, instance_us
     aggregator.assert_metric('dd.custom.mongo.query_a.amount', count=0)
 
 
-@pytest.mark.parametrize("refresh_role", [(True), (False)])
-def test_mongo_replset(instance_shard, aggregator, check, dd_run_check, refresh_role):
-    instance = copy.deepcopy(instance_shard)
-    instance["refresh_role"] = refresh_role
+def test_mongo_replset(instance_shard, aggregator, check, dd_run_check):
     mongo_check = check(instance_shard)
     dd_run_check(mongo_check)
 
@@ -289,16 +285,12 @@ def test_metadata(check, instance, datadog_agent):
     datadog_agent.assert_metadata_count(len(version_metadata) + 2)
 
 
-@pytest.mark.parametrize("refresh_role, expected_count, cluster_role", [(True, 1, "TEST"), (False, 0, "shardsvr")])
-def test_refresh_role(instance_shard, aggregator, check, dd_run_check, refresh_role, expected_count, cluster_role):
-    instance = copy.deepcopy(instance_shard)
-    instance["refresh_role"] = refresh_role
-
-    mongo_check = check(instance)
+def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
+    mongo_check = check(instance_shard)
     dd_run_check(mongo_check)
     with mock.patch('datadog_checks.mongo.api.MongoApi._get_rs_deployment_from_status_payload') as get_deployment:
         mock_deployment_type = ReplicaSetDeployment("sharding01", 9, cluster_role="TEST")
         get_deployment.return_value = mock_deployment_type
         dd_run_check(mongo_check)
-        assert get_deployment.call_count == expected_count
-        assert mongo_check.api_client.deployment_type.cluster_role == cluster_role
+        assert get_deployment.call_count == 1
+        assert mongo_check.api_client.deployment_type.cluster_role == "TEST"
