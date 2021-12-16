@@ -5,6 +5,7 @@
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 
+import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
@@ -12,10 +13,11 @@ from datadog_checks.base.stubs.datadog_agent import datadog_agent
 from datadog_checks.base.utils.db.utils import (
     ConstantRateLimiter,
     DBMAsyncJob,
-    DbRow,
     RateLimitingTTLCache,
+    obfuscate_sql_with_metadata,
     resolve_db_host,
 )
+from datadog_checks.base.utils.serialization import json
 
 
 @pytest.mark.parametrize(
@@ -75,29 +77,35 @@ class TestDBExcepption(BaseException):
     pass
 
 
-def test_db_row():
-    dummy_row = {'hostname': 'test'}
-    metadata = {'tables_csv': 'datadog,datad0g', 'commands': ['SELECT'], 'comments': ['-- Single line comment']}
-    row = DbRow(dummy_row, metadata)
+@pytest.mark.parametrize(
+    "obfusactor_return_value,expected_value",
+    [
+        (
+            json.dumps(
+                {
+                    "query": "SELECT * FROM datadog",
+                    "metadata": {"tables_csv": "datadog", "commands": ["SELECT"], "comments": None},
+                }
+            ),
+            {
+                'query': 'SELECT * FROM datadog',
+                'metadata': {'commands': ['SELECT'], 'comments': None, 'tables': ['datadog']},
+            },
+        ),
+        (
+            'SELECT * FROM datadog',
+            'SELECT * FROM datadog',
+        ),
+    ],
+)
+def test_obfuscate_sql_with_metadata(obfusactor_return_value, expected_value):
+    def _mock_obfuscate_sql(query, options=None):
+        return obfusactor_return_value
 
-    # Check to see if a metadata object is parsed properly
-    assert row.data == dummy_row
-    assert row.metadata.tables_csv == metadata['tables_csv']
-    assert row.metadata.commands == metadata['commands']
-    assert row.metadata.comments == metadata['comments']
-    assert row.metadata.parse_tables_csv() == ['datadog', 'datad0g']
-
-    # Check to see if metadata is optional and handles a None value properly
-    no_metadata_row = DbRow(dummy_row)
-    assert no_metadata_row.metadata.tables_csv is None
-    assert no_metadata_row.metadata.commands is None
-    assert no_metadata_row.metadata.comments is None
-    assert no_metadata_row.metadata.parse_tables_csv() is None
-
-    # Check to see if we can provide a DbRow.Metadata instance directly
-    db_row_metadata = DbRow.Metadata(metadata)
-    accept_metadata_instance_row = DbRow(dummy_row, db_row_metadata)
-    assert accept_metadata_instance_row.metadata == db_row_metadata
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _mock_obfuscate_sql
+        statement = obfuscate_sql_with_metadata('SELECT * FROM datadog')
+        assert statement == expected_value
 
 
 class TestJob(DBMAsyncJob):

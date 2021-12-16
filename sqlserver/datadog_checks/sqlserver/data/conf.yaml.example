@@ -189,7 +189,7 @@ instances:
 
     ## @param connection_string - string - optional
     ## Specify a custom connection string to be used
-    ## Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=True"
+    ## Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=yes"
     ## "Trusted_Connection=yes" to use Windows Authentication (note that in this case the connection will be performed
     ## with the `ddagentuser` user, you can find more information about this user
     ## in https://docs.datadoghq.com/agent/faq/windows-agent-ddagent-user/)
@@ -217,6 +217,17 @@ instances:
         ## for *every* check instance. Running different instances with different collection intervals is not supported.
         #
         # collection_interval: 10
+
+        ## @param dm_exec_query_stats_row_limit - integer - optional - default: 10000
+        ## Set the maximum number of query stats rows that can be retrieved in a single check run.
+        #
+        # dm_exec_query_stats_row_limit: 10000
+
+        ## @param samples_per_hour_per_query - integer - optional - default: 4
+        ## Set the rate limit for the number of query sample events that are ingested per hour and per normalized
+        ## execution plan.
+        #
+        # samples_per_hour_per_query: 4
 
     ## Configure collection of active sessions monitoring
     #

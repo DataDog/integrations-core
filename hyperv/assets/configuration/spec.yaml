@@ -9,4 +9,6 @@ files:
   - template: instances
     options:
     - template: instances/perf_counters
+    - template: instances/pdh_legacy
+      hidden: true
     - template: instances/default

@@ -12,7 +12,12 @@ The Envoy check is included in the [Datadog Agent][2] package, so you don't need
 
 #### Istio
 
-If you are using Envoy as part of [Istio][3], be sure to use the appropriate [Envoy admin endpoint][4] for the `stats_url`.
+If you are using Envoy as part of [Istio][3], configure the Envoy integration to collect metrics from the Istio proxy metrics endpoint.
+
+    ```yaml
+    instances:
+      - openmetrics_endpoint: localhost:15090/stats/prometheus
+    ```
 
 #### Standard
 
@@ -35,7 +40,7 @@ admin:
 
 Create a listener/vhost that routes to the [admin endpoint][5] (Envoy connecting to itself), but only has a route for `/stats`; all other routes get a static/error response. Additionally, this allows nice integration with L3 filters for auth, for example.
 
-Here's an example config (from [this gist][6]):
+Here's an example config from [envoy_secured_stats_config.json][6]:
 
 ```yaml
 admin:
@@ -100,44 +105,15 @@ To configure this check for an Agent running on a host:
     init_config:
 
     instances:
-      ## @param stats_url - string - required
-      ## The admin endpoint to connect to. It must be accessible:
-      ## https://www.envoyproxy.io/docs/envoy/latest/operations/admin
-      ## Add a `?usedonly` on the end if you wish to ignore
-      ## unused metrics instead of reporting them as `0`.
-      #
-      - stats_url: http://localhost:80/stats
+        ## @param openmetrics_endpoint - string - required
+        ## The URL exposing metrics in the OpenMetrics format.
+        #
+      - openmetrics_endpoint: http://localhost:8001/stats/prometheus
+
     ```
 
 2. Check if the Datadog Agent can access Envoy's [admin endpoint][5].
 3. [Restart the Agent][9].
-
-###### Metric filtering
-
-Metrics can be filtered using a regular expression `metric_whitelist` or `metric_blacklist`. If both are used, then whitelist is applied first, and then blacklist is applied on the resulting set.
-
-The filtering occurs before tag extraction, so you have the option to have certain tags decide whether or not to keep or ignore metrics. An exhaustive list of all metrics and tags can be found in [metrics.py][10]. Let's walk through an example of Envoy metric tagging!
-
-```python
-...
-'cluster.grpc.success': {
-    'tags': (
-        ('<CLUSTER_NAME>', ),
-        ('<GRPC_SERVICE>', '<GRPC_METHOD>', ),
-        (),
-    ),
-    ...
-},
-...
-```
-
-Here there are `3` tag sequences: `('<CLUSTER_NAME>')`, `('<GRPC_SERVICE>', '<GRPC_METHOD>')`, and empty `()`. The number of sequences corresponds exactly to how many metric parts there are. For this metric, there are `3` parts: `cluster`, `grpc`, and `success`. Envoy separates everything with a `.`, hence the final metric name would be:
-
-`cluster.<CLUSTER_NAME>.grpc.<GRPC_SERVICE>.<GRPC_METHOD>.success`
-
-If you care only about the cluster name and grpc service, you would add this to your whitelist:
-
-`^cluster\.<CLUSTER_NAME>\.grpc\.<GRPC_SERVICE>\.`
 
 ##### Log collection
 
@@ -180,7 +156,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][11
 | -------------------- | ------------------------------------------- |
 | `<INTEGRATION_NAME>` | `envoy`                                     |
 | `<INIT_CONFIG>`      | blank or `{}`                               |
-| `<INSTANCE_CONFIG>`  | `{"stats_url": "http://%%host%%:80/stats"}` |
+| `<INSTANCE_CONFIG>`  | `{"openmetrics_endpoint": "http://%%host%%:80/stats/prometheus"}` |
 
 ##### Log collection
 
@@ -192,7 +168,7 @@ partial -->
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][12].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][12].
 
 | Parameter      | Value                                              |
 | -------------- | -------------------------------------------------- |
@@ -228,7 +204,7 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 #### Endpoint `/server_info` unreachable
 - Disable the `collect_server_info` option in your Envoy configuration, if the endpoint is not available in your Envoy environment, to minimize error logs.
 
-**Note**: Envoy version data will not be collected.
+**Note**: Envoy version data is not collected.
 
 Need help? Contact [Datadog support][16].
 

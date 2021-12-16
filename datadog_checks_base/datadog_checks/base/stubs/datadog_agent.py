@@ -4,6 +4,8 @@
 import json
 import re
 
+from datadog_checks.base.utils.serialization import json
+
 
 class DatadogAgentStub(object):
     """

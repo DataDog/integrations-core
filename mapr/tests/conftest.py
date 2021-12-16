@@ -9,10 +9,19 @@ import pytest
 
 from . import common
 
+E2E_METADATA = {
+    'post_install_commands': [
+        'apt-get update',
+        'apt-get install -y gcc librdkafka-dev',
+        'pip install --global-option=build_ext --global-option="--library-dirs=/opt/mapr/lib"'
+        ' --global-option="--include-dirs=/opt/mapr/include/" mapr-streams-python',
+    ]
+}
+
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield
+    yield common.INSTANCE, E2E_METADATA
 
 
 @pytest.fixture

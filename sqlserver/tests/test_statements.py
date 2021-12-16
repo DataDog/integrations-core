@@ -45,7 +45,7 @@ def dbm_instance(instance_docker):
 def instance_sql_msoledb_dbm(instance_sql_msoledb):
     instance_sql_msoledb['dbm'] = True
     instance_sql_msoledb['min_collection_interval'] = 1
-    instance_sql_msoledb['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    instance_sql_msoledb['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 2}
     instance_sql_msoledb['tags'] = ['optional:tag1']
     return instance_sql_msoledb
 
@@ -263,8 +263,9 @@ def _run_test_statement_metrics_and_plans(
 
     # internal debug metrics
     aggregator.assert_metric(
-        "dd.sqlserver.statements.collect_statement_metrics_and_plans.time",
-        tags=['agent_hostname:stubbed.hostname'] + _expected_dbm_instance_tags(dbm_instance),
+        "dd.sqlserver.operation.time",
+        tags=['agent_hostname:stubbed.hostname', 'operation:collect_statement_metrics_and_plans']
+        + _expected_dbm_instance_tags(dbm_instance),
     )
 
 

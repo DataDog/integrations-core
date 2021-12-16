@@ -10,13 +10,14 @@ import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from itertools import chain
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Tuple
 
 from cachetools import TTLCache
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.types import Transformer
+from datadog_checks.base.utils.serialization import json
 
 try:
     import datadog_agent
@@ -158,32 +159,26 @@ def default_json_event_encoding(o):
     raise TypeError
 
 
-class DbRow:
-    """
-    DbRow is a wrapper for database rows that additionally holds metadata.
-    """
+def obfuscate_sql_with_metadata(query, options=None):
+    try:
+        statement = datadog_agent.obfuscate_sql(query, options)
+        statement_with_metadata = json.loads(statement)
+    except json.JSONDecodeError:
+        # Assume we're running against an older agent and return the obfuscated query without metadata.
+        return statement
+    except Exception as e:
+        raise e
 
-    def __init__(self, row, metadata=None):
-        # type: (Dict[str], Optional[Dict[str], DbRow.Metadata]) -> None
-        self.data = row
-        self.metadata = metadata if isinstance(metadata, self.Metadata) else self.Metadata(metadata)
-
-    class Metadata:
-        def __init__(self, metadata=None):
-            # type: (Optional[Dict[str]]) -> None
-            if not metadata:
-                metadata = {}
-            self.tables_csv = metadata.get('tables_csv', None)
-            self.commands = metadata.get('commands', None)
-            self.comments = metadata.get('comments', None)
-
-        def parse_tables_csv(self):
-            # type: () -> Optional[List[str]]
-            """
-            Parses out tables from the CSV format.
-            e.g tables_csv = 'metrics,samples' -> ['metrics', 'samples']
-            """
-            return self.tables_csv.split(',') if self.tables_csv is not None and self.tables_csv != '' else None
+    metadata = statement_with_metadata.get('metadata', {})
+    tables = metadata.pop('tables_csv', None)
+    # The obfuscator will at least return an empty string. We need to check for this because we want to
+    # omit None values later down the pipeline and splitting would result in [''].
+    if tables == '':
+        tables = None
+    elif tables is not None:
+        tables = tables.split(',')
+    statement_with_metadata['metadata']['tables'] = tables
+    return statement_with_metadata
 
 
 class DBMAsyncJob(object):
