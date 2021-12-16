@@ -5,11 +5,19 @@
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 
+import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.datadog_agent import datadog_agent
-from datadog_checks.base.utils.db.utils import ConstantRateLimiter, DBMAsyncJob, RateLimitingTTLCache, resolve_db_host
+from datadog_checks.base.utils.db.utils import (
+    ConstantRateLimiter,
+    DBMAsyncJob,
+    RateLimitingTTLCache,
+    obfuscate_sql_with_metadata,
+    resolve_db_host,
+)
+from datadog_checks.base.utils.serialization import json
 
 
 @pytest.mark.parametrize(
@@ -67,6 +75,37 @@ def test_ratelimiting_ttl_cache():
 
 class TestDBExcepption(BaseException):
     pass
+
+
+@pytest.mark.parametrize(
+    "obfusactor_return_value,expected_value",
+    [
+        (
+            json.dumps(
+                {
+                    "query": "SELECT * FROM datadog",
+                    "metadata": {"tables_csv": "datadog", "commands": ["SELECT"], "comments": None},
+                }
+            ),
+            {
+                'query': 'SELECT * FROM datadog',
+                'metadata': {'commands': ['SELECT'], 'comments': None, 'tables': ['datadog']},
+            },
+        ),
+        (
+            'SELECT * FROM datadog',
+            'SELECT * FROM datadog',
+        ),
+    ],
+)
+def test_obfuscate_sql_with_metadata(obfusactor_return_value, expected_value):
+    def _mock_obfuscate_sql(query, options=None):
+        return obfusactor_return_value
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _mock_obfuscate_sql
+        statement = obfuscate_sql_with_metadata('SELECT * FROM datadog')
+        assert statement == expected_value
 
 
 class TestJob(DBMAsyncJob):

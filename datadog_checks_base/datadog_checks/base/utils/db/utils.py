@@ -17,6 +17,7 @@ from cachetools import TTLCache
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.types import Transformer
+from datadog_checks.base.utils.serialization import json
 
 try:
     import datadog_agent
@@ -156,6 +157,27 @@ def default_json_event_encoding(o):
     if isinstance(o, (datetime.date, datetime.datetime)):
         return o.isoformat()
     raise TypeError
+
+
+def obfuscate_sql_with_metadata(query, options=None):
+    try:
+        statement = datadog_agent.obfuscate_sql(query, options)
+        statement_with_metadata = json.loads(statement)
+    except json.JSONDecodeError:
+        return statement
+    except Exception as e:
+        raise e
+
+    metadata = statement_with_metadata.get('metadata', {})
+    tables = metadata.pop('tables_csv', None)
+    # The obfuscator will at least return an empty string. We need to check for this because we want to
+    # omit None values later down the pipeline and splitting would result in [''].
+    if tables == '':
+        tables = None
+    elif tables is not None:
+        tables = tables.split(',')
+    statement_with_metadata['metadata']['tables'] = tables
+    return statement_with_metadata
 
 
 class DBMAsyncJob(object):
