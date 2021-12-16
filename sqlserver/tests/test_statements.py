@@ -365,9 +365,7 @@ def test_plan_collection_deadline(aggregator, dd_run_check, dbm_instance, slow_p
     if slow_plans:
         aggregator.assert_metric("dd.sqlserver.statements.deadline_exceeded", tags=expected_debug_tags)
     else:
-        assert "dd.sqlserver.statements.deadline_exceeded" not in aggregator.metrics(
-            "dd.sqlserver.statements.deadline_exceeded"
-        )
+        aggregator.assert_metric("dd.sqlserver.statements.deadline_exceeded", count=0)
 
 
 def _strip_whitespace(raw_plan):
