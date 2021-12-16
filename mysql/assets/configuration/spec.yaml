@@ -409,12 +409,12 @@ files:
           - name: obfuscator_options
             description: |
               Configure how the SQL obfuscator behaves.
-              NOTE: that this option only applies when `dbm` is enabled.
+              Note: This option only applies when `dbm` is enabled.
             options:
               - name: replace_digits
                 description: |
                   Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
-                  NOTE: This option also applies to extracted tables via `collect_tables`.
+                  Note: This option also applies to extracted tables using `collect_tables`.
                 value:
                   type: boolean
                   example: false
@@ -427,7 +427,7 @@ files:
               - name: collect_commands
                 description: |
                   Set to `false` to disable the collection of commands in your SQL statements.
-                  e.g. SELECT, UPDATE, DELETE, etc.
+                  Examples: SELECT, UPDATE, DELETE, etc.
                 value:
                   type: boolean
                   example: true
