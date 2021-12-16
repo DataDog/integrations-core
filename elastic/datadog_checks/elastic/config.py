@@ -23,7 +23,7 @@ ESInstanceConfig = namedtuple(
         'url',
         'pending_task_stats',
         'cat_allocation_stats',
-        'custom_queries'
+        'custom_queries',
     ],
 )
 

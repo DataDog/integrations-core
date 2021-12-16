@@ -1,9 +1,12 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from copy import deepcopy
+
 import pytest
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.config import from_instance
 
 
@@ -86,3 +89,67 @@ def test_from_instance():
     assert c.url == "https://foo.bar:9200"
     assert c.tags == ["url:https://foo.bar:9200"]
     assert c.service_check_tags == ["host:foo.bar", "port:9200"]
+
+
+@pytest.mark.parametrize(
+    'invalid_custom_queries',
+    [
+        [
+            {
+                'endpoint': '',
+                'metrics': [
+                    {
+                        'datadog_metric_name': 'elasticsearch.custom.metric',
+                        'es_metric_name': '_nodes.total',
+                    },
+                ],
+            }
+        ],
+        [
+            {
+                'endpoint': '/_nodes',
+            }
+        ],
+        [{'endpoint': '/_node', 'metrics': []}],
+        [
+            {
+                'endpoint': '/_nodes',
+                'metrics': [
+                    {
+                        'datadog_metric_name': '',
+                        'es_metric_name': '_nodes.total',
+                    },
+                ],
+            }
+        ],
+        [
+            {
+                'endpoint': '/_nodes',
+                'metrics': [
+                    {
+                        'datadog_metric_name': 'elasticsearch.custom.metric',
+                        'es_metric_name': '',
+                    },
+                ],
+            }
+        ],
+        [
+            {
+                'endpoint': '/_nodes',
+                'metrics': [
+                    {
+                        'datadog_metric_name': 'elasticsearch.custom.metric',
+                    },
+                ],
+            }
+        ],
+    ],
+)
+@pytest.mark.integration
+def test_custom_query_invalid_config(dd_run_check, instance, aggregator, invalid_custom_queries):
+    instance = deepcopy(instance)
+    instance['custom_queries'] = invalid_custom_queries
+    check = ESCheck('elastic', {}, instances=[instance])
+
+    with pytest.raises(Exception):
+        dd_run_check(check)

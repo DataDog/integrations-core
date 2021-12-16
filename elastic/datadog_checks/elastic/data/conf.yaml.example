@@ -139,7 +139,7 @@ instances:
     #
     # custom_queries:
     #   - endpoint: /_nodes
-    #     queries:
+    #     metrics:
     #     - datadog_metric_name: elasticsearch.custom.metric1
     #       es_metric_name: _nodes.total
     #       tags:
@@ -147,7 +147,7 @@ instances:
     #     - datadog_metric_name: elasticsearch.custom.metric2
     #       es_metric_name: _nodes.total
     #   - endpoint: /_nodes
-    #     queries:
+    #     metrics:
     #     - datadog_metric_name: elasticsearch.custom.metric3
     #       es_metric_name: _nodes.total
     #       tags:

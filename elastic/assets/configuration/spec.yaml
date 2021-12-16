@@ -120,7 +120,7 @@ files:
           properties: []
         example:
           - endpoint: /_nodes
-            queries:
+            metrics:
             - datadog_metric_name: elasticsearch.custom.metric1
               es_metric_name: _nodes.total
               tags:
@@ -128,7 +128,7 @@ files:
             - datadog_metric_name: elasticsearch.custom.metric2
               es_metric_name: _nodes.total
           - endpoint: /_nodes
-            queries:
+            metrics:
             - datadog_metric_name: elasticsearch.custom.metric3
               es_metric_name: _nodes.total
               tags:

@@ -22,7 +22,25 @@ COMPOSE_FILES_MAP = {
     '2-alpine': 'legacy.yaml',
 }
 
-INSTANCE = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': CUSTOM_TAGS, 'tls_verify': False}
+INSTANCE = {
+    'url': URL,
+    'username': USER,
+    'password': PASSWORD,
+    'tags': CUSTOM_TAGS,
+    'tls_verify': False,
+    'custom_queries': [
+        {
+            'endpoint': '/_nodes',
+            'metrics': [
+                {
+                    'datadog_metric_name': 'elasticsearch.custom.metric',
+                    'es_metric_name': '_nodes.total',
+                    'tags': ['custom_tag:1'],
+                },
+            ],
+        },
+    ],
+}
 
 
 def ping_elastic():

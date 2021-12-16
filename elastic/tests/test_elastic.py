@@ -85,6 +85,40 @@ def test__get_urls(instance, url_fix):
 
 
 @pytest.mark.integration
+def test_custom_queries(dd_run_check, instance, aggregator):
+    custom_queries = [
+        {
+            'endpoint': '/_nodes',
+            'metrics': [
+                {
+                    'datadog_metric_name': 'elasticsearch.custom.metric',
+                    'es_metric_name': '_nodes.total',
+                    'tags': ['custom_tag:1'],
+                },
+            ],
+        },
+        {
+            'endpoint': '/_nodes',
+            'metrics': [
+                {
+                    'datadog_metric_name': 'elasticsearch.custom.metric2',
+                    'es_metric_name': '_nodes.total',
+                    'tags': ['custom_tag:1'],
+                },
+            ],
+        },
+    ]
+    instance = deepcopy(instance)
+    instance['custom_queries'] = custom_queries
+    check = ESCheck('elastic', {}, instances=[instance])
+    dd_run_check(check)
+
+    expected_tags = ['baz', 'custom_tag:1', 'foo:bar', 'url:http://localhost:9200']
+    aggregator.assert_metric('elasticsearch.custom.metric', count=1, tags=expected_tags)
+    aggregator.assert_metric('elasticsearch.custom.metric2', count=1, tags=expected_tags)
+
+
+@pytest.mark.integration
 def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags, node_tags):
     elastic_check.check(None)
     _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
