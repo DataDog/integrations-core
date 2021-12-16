@@ -157,3 +157,16 @@ DATABASE_MASTER_FILES = [
     ('sqlserver.database.master_files.size', 'sys.master_files', 'size'),
     ('sqlserver.database.master_files.state', 'sys.master_files', 'state'),
 ]
+
+DATABASE_FILES_IO = [
+    ('sqlserver.files.reads', 'num_of_reads'),
+    ('sqlserver.files.read_bytes', 'num_of_bytes_read'),
+    ('sqlserver.files.read_io_stall', 'io_stall_read_ms'),
+    ('sqlserver.files.read_io_stall_queued', 'io_stall_queued_read_ms'),
+    ('sqlserver.files.writes', 'num_of_writes'),
+    ('sqlserver.files.written_bytes', 'num_of_bytes_written'),
+    ('sqlserver.files.write_io_stall', 'io_stall_write_ms'),
+    ('sqlserver.files.write_io_stall_queued', 'io_stall_queued_write_ms'),
+    ('sqlserver.files.io_stall', 'io_stall'),
+    ('sqlserver.files.size_on_disk', 'size_on_disk_bytes'),
+]

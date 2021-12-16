@@ -18,6 +18,7 @@ from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
+from datadog_checks.sqlserver.metrics import SqlVirtualFileIOStats
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 
 try:
@@ -34,6 +35,7 @@ from .const import (
     AUTODISCOVERY_QUERY,
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
+    DATABASE_FILES_IO,
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
@@ -350,6 +352,10 @@ class SQLServer(AgentCheck):
             for db_name in db_names:
                 cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+
+        for name, column in DATABASE_FILES_IO:
+            cfg = {'name': name, 'column': column, 'tags': tags}
+            metrics_to_collect.append(SqlVirtualFileIOStats(cfg, None, self.monotonic_count, column, self.log))
 
         # Load AlwaysOn metrics
         if is_affirmative(self.instance.get('include_ao_metrics', False)):

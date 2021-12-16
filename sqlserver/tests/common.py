@@ -11,6 +11,7 @@ from datadog_checks.sqlserver.const import (
     AO_METRICS,
     AO_METRICS_PRIMARY,
     AO_METRICS_SECONDARY,
+    DATABASE_FILES_IO,
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
@@ -58,6 +59,7 @@ EXPECTED_METRICS = (
         m[0]
         for m in chain(
             TASK_SCHEDULER_METRICS,
+            DATABASE_FILES_IO,
             DATABASE_FRAGMENTATION_METRICS,
             DATABASE_MASTER_FILES,
         )

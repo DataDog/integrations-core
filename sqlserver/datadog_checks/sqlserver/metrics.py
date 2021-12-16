@@ -561,6 +561,60 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
+class SqlVirtualFileIOStats(BaseSqlServerMetric):
+    CUSTOM_QUERIES_AVAILABLE = False
+    QUERY_BASE = """
+        SELECT
+            DB_NAME(fs.database_id) AS database_name,
+            mf.state_desc AS state_desc,
+            mf.name AS logical_name,
+            mf.physical_name AS physical_name,
+            fs.num_of_reads AS num_of_reads,
+            fs.num_of_bytes_read AS num_of_bytes_read,
+            fs.io_stall_read_ms AS io_stall_read_ms,
+            fs.io_stall_queued_read_ms AS io_stall_queued_read_ms,
+            fs.num_of_writes AS num_of_writes,
+            fs.num_of_bytes_written AS num_of_bytes_written,
+            fs.io_stall_write_ms AS io_stall_write_ms,
+            fs.io_stall_queued_write_ms AS io_stall_queued_write_ms,
+            fs.io_stall AS io_stall,
+            fs.size_on_disk_bytes AS size_on_disk_bytes
+        FROM sys.dm_io_virtual_file_stats(NULL, NULL) fs
+            LEFT JOIN sys.master_files mf
+                ON mf.database_id = fs.database_id
+                AND mf.file_id = fs.file_id;
+    """
+
+    def __init__(self, cfg_instance, base_name, report_function, column, logger):
+        super(SqlVirtualFileIOStats, self).__init__(cfg_instance, base_name, report_function, column, logger)
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+        return cls._fetch_generic_values(cursor, None, logger)
+
+    def fetch_metric(self, rows, columns):
+        db_name = columns.index('database_name')
+        state_desc = columns.index('state_desc')
+        logical_name = columns.index('logical_name')
+        physical_name = columns.index('physical_name')
+        column_val = columns.index(self.column)
+
+        for row in rows:
+            val = row[column_val]
+            if column_val is None:
+                continue
+
+            metric_tags = [
+                'database:{}'.format(row[db_name]),
+                'state:{}'.format(row[state_desc].lower()),
+                'logical_name:{}'.format(row[logical_name]),
+                'file_location:{}'.format(row[physical_name]),
+            ]
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.datadog_name)
+            self.report_function(metric_name, val, tags=metric_tags)
+
+
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-databases-transact-sql?view=sql-server-ver15
 class SqlDatabaseStats(BaseSqlServerMetric):
     CUSTOM_QUERIES_AVAILABLE = False
