@@ -176,23 +176,22 @@ class MongoDb(AgentCheck):
         return metrics_to_collect
 
     def _refresh_replica_role(self):
-        if (
-            self._config.refresh_role
-            and self._api_client
-            and isinstance(self._api_client.deployment_type, ReplicaSetDeployment)
-        ):
-            self._api_client.deployment_type = self._api_client._get_deployment_type()
+        if self._config.refresh_role:
+            if self._api_client and isinstance(self._api_client.deployment_type, ReplicaSetDeployment):
+                self._api_client.deployment_type = self._api_client._get_deployment_type()
+            else:
+                self.log.debug("Cannot refresh role on a non replica set deployment.")
 
     def check(self, _):
         try:
             self._check()
-            self._refresh_replica_role()
         except pymongo.errors.ConnectionFailure:
             self._api_client = None
             raise
 
     def _check(self):
         api = self.api_client
+        self._refresh_replica_role()
 
         try:
             mongo_version = api.server_info().get('version', '0.0')
