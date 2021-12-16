@@ -2,10 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict
-
-# Singleton allowing `None` to be a valid default value
 from typing import List
 
+# Singleton allowing `None` to be a valid default value
 NO_DEFAULT = object()
 
 
