@@ -15,7 +15,12 @@ except ImportError:
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import (
+    DBMAsyncJob,
+    RateLimitingTTLCache,
+    default_json_event_encoding,
+    obfuscate_sql_with_metadata,
+)
 from datadog_checks.base.utils.serialization import json
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
@@ -484,8 +489,8 @@ class MySQLStatementSamples(DBMAsyncJob):
         # - `query_signature` - hash computed from the digest text to match query metrics
 
         try:
-            obfuscated_statement = datadog_agent.obfuscate_sql(row['sql_text'], self._obfuscate_options)
-            obfuscated_digest_text = datadog_agent.obfuscate_sql(row['digest_text'], self._obfuscate_options)
+            statement = obfuscate_sql_with_metadata(row['sql_text'], self._obfuscate_options)
+            statement_digest_text = obfuscate_sql_with_metadata(row['digest_text'], self._obfuscate_options)
         except Exception:
             # do not log the raw sql_text to avoid leaking sensitive data into logs. digest_text is safe as parameters
             # are obfuscated by the database
@@ -498,6 +503,8 @@ class MySQLStatementSamples(DBMAsyncJob):
             )
             return None
 
+        obfuscated_statement = statement['query']
+        obfuscated_digest_text = statement_digest_text['query']
         apm_resource_hash = compute_sql_signature(obfuscated_statement)
         query_signature = compute_sql_signature(obfuscated_digest_text)
 
@@ -558,6 +565,11 @@ class MySQLStatementSamples(DBMAsyncJob):
                     "query_signature": query_signature,
                     "resource_hash": apm_resource_hash,
                     "statement": obfuscated_statement,
+                    "metadata": {
+                        "tables": statement['metadata'].get('tables', None),
+                        "commands": statement['metadata'].get('commands', None),
+                        "comments": statement['metadata'].get('comments', None),
+                    },
                     "query_truncated": self._get_truncation_state(row['sql_text']).value,
                 },
                 'mysql': {k: v for k, v in row.items() if k not in EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS},
