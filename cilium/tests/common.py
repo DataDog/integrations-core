@@ -86,7 +86,7 @@ OPERATOR_METRICS = [
     'cilium.operator.process.virtual_memory_max.bytes',
 ]
 
-OPERATOR_AWS_METRICS = [
+OPERATOR_AWS_METRICS_PRE_1_8 = [
     'cilium.operator.eni.k8s_sync.duration.seconds.count',
     'cilium.operator.eni.aws_api_duration.seconds.count',
     'cilium.operator.eni.deficit_resolver.latency.seconds.count',
@@ -113,4 +113,33 @@ OPERATOR_AWS_METRICS = [
     'cilium.operator.eni.available.ips_per_subnet',
     'cilium.operator.eni.k8s_sync.queued.total',
     'cilium.operator.eni.resync.total',
+]
+
+OPERATOR_AWS_METRICS_1_8 = [
+    'cilium.operator.ec2.api.duration.seconds.sum',
+    'cilium.operator.ec2.api.duration.seconds.count',
+    'cilium.operator_ipam.available.ips_per_subnet',
+    'cilium.operator.ipam.deficit_resolver.duration.seconds.sum',
+    'cilium.operator.ipam.deficit_resolver.duration.seconds.count',
+    'cilium.operator.ipam.deficit_resolver.folds',
+    'cilium.operator.ipam.deficit_resolver.latency_seconds.sum',
+    'cilium.operator.ipam.deficit_resolver.latency_seconds.count',
+    'cilium.operator.ipam.deficit_resolver.queued.total',
+    'cilium.operator.ipam.ips',
+    'cilium.operator.ipam.k8s_sync.duration.seconds.sum',
+    'cilium.operator.ipam.k8s_sync.duration.seconds.count',
+    'cilium.operator.ipam.k8s_sync.folds',
+    'cilium.operator.ipam.k8s_sync.latency.sum',
+    'cilium.operator.ipam.k8s_sync.latency.total',
+    'cilium.operator.ipam.k8s_sync.queued.total',
+    'cilium.operator.ipam.nodes',
+    'cilium.operator.ipam.resync.duration.seconds.sum',
+    'cilium.operator.ipam.resync.duration.seconds.count',
+    'cilium.operator.ipam.resync.folds',
+    'cilium.operator.ipam.resync.latency_seconds.sum',
+    'cilium.operator.ipam.resync.latency_seconds.count',
+    'cilium.operator.ipam.resync.queued.total',
+    'cilium.operator.ipam.resync.total',
+    'cilium.operator.num_ceps_per_ces.sum',
+    'cilium.operator.num_ceps_per_ces.count',
 ]
