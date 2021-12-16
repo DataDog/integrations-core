@@ -5,21 +5,23 @@ kube_apiserver.audit_event,gauge,,event,,Accumulated number audit events generat
 kube_apiserver.go_threads,gauge,,thread,,Number of OS threads created,0, kube_apiserver, go threads
 kube_apiserver.go_goroutines,gauge,,,,Number of goroutines that currently exist,0, kube_apiserver, go routines
 kube_apiserver.APIServiceRegistrationController_depth,gauge,,,,Current depth of workqueue: APIServiceRegistrationController,0, kube_apiserver, service registration controller depth
-kube_apiserver.etcd_object_counts,gauge,,object,,Number of stored objects at the time of last check split by kind,0, kube_apiserver, etcd object counts
-kube_apiserver.etcd.db.total_size,gauge,,byte,,The total size of the etcd database file physically allocated in bytes (Only present from Kubernetes 1.19; this metric can be removed in a future Kubernetes version since it is still in alpha),0, kube_apiserver, etcd db total size
+kube_apiserver.etcd_request_duration_seconds.sum,gauge,,second,,Etcd request latencies for each operation and object type (alpha),0,kube_apiserver,etcd latency
+kube_apiserver.etcd_request_duration_seconds.count,count,,,,Etcd request latencies count for each operation and object type (alpha),0,kube_apiserver,etcd latency
+kube_apiserver.etcd_object_counts,gauge,,object,,Number of stored objects at the time of last check split by kind (alpha; deprecated in Kubernetes 1.22),0, kube_apiserver, etcd object counts
+kube_apiserver.etcd.db.total_size,gauge,,byte,,The total size of the etcd database file physically allocated in bytes (alpha; Kubernetes 1.19+),0, kube_apiserver, etcd db total size
 kube_apiserver.rest_client_requests_total,gauge,,request,,Accumulated number of HTTP requests partitioned by status code method and host,1, kube_apiserver, accumulated rest client requests
-kube_apiserver.apiserver_request_count,gauge,,request,,Accumulated number of apiserver requests broken out for each verb API resource client and HTTP response contentType and code (deprecated since kubernetes 1.15),1, kube_apiserver, accumulated number of requests
+kube_apiserver.apiserver_request_count,gauge,,request,,Accumulated number of apiserver requests broken out for each verb API resource client and HTTP response contentType and code (deprecated in Kubernetes 1.15),1, kube_apiserver, accumulated number of requests
 kube_apiserver.apiserver_dropped_requests_total,gauge,,request,,Accumulated number of requests dropped with 'Try again later' response,1, kube_apiserver, accumulated number of dropped requests
 kube_apiserver.http_requests_total,gauge,,request,,Accumulated number of HTTP requests made,1, kube_apiserver, accumulated total number of requests
 kube_apiserver.authenticated_user_requests,gauge,,request,,Accumulated number of authenticated requests broken out by username,1, kube_apiserver, accumulated number of authenticated requests
 kube_apiserver.audit_event.count,count,,event,,Monotonic count of audit events generated and sent to the audit backend,0, kube_apiserver, count of audit events
 kube_apiserver.rest_client_requests_total.count,count,,request,,Monotonic count of HTTP requests partitioned by status code method and host,0, kube_apiserver, total count of rest client requests
-kube_apiserver.apiserver_request_count.count,count,,request,,Monotonic count of apiserver requests broken out for each verb API resource client and HTTP response contentType and code (deprecated since kubernetes 1.15),0, kube_apiserver, count of requests
+kube_apiserver.apiserver_request_count.count,count,,request,,Monotonic count of apiserver requests broken out for each verb API resource client and HTTP response contentType and code (deprecated in Kubernetes 1.15),0, kube_apiserver, count of requests
 kube_apiserver.apiserver_dropped_requests_total.count,count,,request,,Monotonic count of requests dropped with 'Try again later' response,0, kube_apiserver, count of dropped requests
 kube_apiserver.http_requests_total.count,count,,request,,Monotonic count of the number of HTTP requests made,0,kube_apiserver, total count of requests
 kube_apiserver.authenticated_user_requests.count,count,,request,,Monotonic count of authenticated requests broken out by username,0, kube_apiserver, count of authenticated requests
-kube_apiserver.apiserver_request_total,gauge,,request,,Accumulated number of apiserver requests broken out for each verb API resource client and HTTP response contentType and code (Only present from kubernetes 1.15 to replace apiserver_request_count),1, kube_apiserver, accumulated number of requests
-kube_apiserver.apiserver_request_total.count,count,,request,,Monotonic count of apiserver requests broken out for each verb API resource client and HTTP response contentType and code (Only present from kubernetes 1.15 to replace apiserver_request_count.count),0, kube_apiserver, count of requests
+kube_apiserver.apiserver_request_total,gauge,,request,,Accumulated number of apiserver requests broken out for each verb API resource client and HTTP response contentType and code (Kubernetes 1.15+; replaces apiserver_request_count),1, kube_apiserver, accumulated number of requests
+kube_apiserver.apiserver_request_total.count,count,,request,,Monotonic count of apiserver requests broken out for each verb API resource client and HTTP response contentType and code (Kubernetes 1.15+; replaces apiserver_request_count.count),0, kube_apiserver, count of requests
 kube_apiserver.rest_client_request_latency_seconds.sum,gauge,,second,,Request latency in seconds broken down by verb and URL,0,kube_apiserver,rest client request latency
 kube_apiserver.rest_client_request_latency_seconds.count,count,,,,Request latency in seconds broken down by verb and URL count,0,kube_apiserver,rest client request latency
 kube_apiserver.admission_webhook_admission_latencies_seconds.sum,gauge,,second,,Admission webhook latency identified by name and broken out for each operation and API resource and type (validate or admit),0,kube_apiserver,admission webhook admission latencies
@@ -38,8 +40,6 @@ kube_apiserver.request_duration_seconds.count,count,,,,"Response latency distrib
 kube_apiserver.registered_watchers,gauge,,object,,Number of currently registered watchers for a given resource,0,kube_apiserver,number of watchers
 kube_apiserver.process_resident_memory_bytes,gauge,,byte,,Resident memory size in bytes,0,kube_apiserver,process rss
 kube_apiserver.process_virtual_memory_bytes,gauge,,byte,,Virtual memory size in bytes,0,kube_apiserver,process virtual memory
-kube_apiserver.etcd_request_duration_seconds.sum,gauge,,second,,Etcd request latencies for each operation and object type,0,kube_apiserver,etcd latency
-kube_apiserver.etcd_request_duration_seconds.count,count,,,,Etcd request latencies count for each operation and object type,0,kube_apiserver,etcd latency
 kube_apiserver.watch_events_sizes.sum,gauge,,byte,,Watch event size distribution (Kubernetes 1.16+),0,kube_apiserver,distribution of watch event sizes
 kube_apiserver.watch_events_sizes.count,count,,,,Watch event size distribution (Kubernetes 1.16+),0,kube_apiserver,distribution of watch event sizes
 kube_apiserver.authentication_duration_seconds.sum,gauge,,second,,Authentication duration histogram broken out by result (Kubernetes 1.17+),0,kube_apiserver,authentication latencies
