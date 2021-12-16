@@ -56,6 +56,7 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float]
     nginx_status_url: str
     ntlm_domain: Optional[str]
+    only_query_enabled_endpoints: Optional[bool]
     password: Optional[str]
     persist_connections: Optional[bool]
     plus_api_version: Optional[int]
