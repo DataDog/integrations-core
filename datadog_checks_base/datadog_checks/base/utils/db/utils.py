@@ -165,7 +165,7 @@ def obfuscate_sql_with_metadata(query, options=None):
         statement_with_metadata = json.loads(statement)
     except json.JSONDecodeError:
         # Assume we're running against an older agent and return the obfuscated query without metadata.
-        return statement
+        return {'query': statement, 'metadata': {}}
     except Exception as e:
         raise e
 

@@ -94,7 +94,10 @@ class TestDBExcepption(BaseException):
         ),
         (
             'SELECT * FROM datadog',
-            'SELECT * FROM datadog',
+            {
+                'query': 'SELECT * FROM datadog',
+                'metadata': {},
+            },
         ),
     ],
 )
