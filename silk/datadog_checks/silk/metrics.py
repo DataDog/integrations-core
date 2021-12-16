@@ -44,39 +44,40 @@ METRICS = {
             'tags': {
                 'iscsi_tgt_converted_name': 'volume_name',
                 'name': 'volume_raw_name',
-                # node_id, might be context explosion
             },
         }
     ),
     'stats/system': Metric(
         **{
-            'prefix': 'stats.system',
+            'prefix': 'system',
             'metrics': {
                 'iops_avg': 'io_ops.avg',
                 'iops_max': 'io_ops.max',
                 'latency_inner': 'latency.inner',
                 'latency_outer': 'latency.outer',
-                'resolution': 'resolution',
                 'throughput_avg': 'throughput.avg',
                 'throughput_max': 'throughput.max',
             },
+            'tags': {
+                'resolution': 'resolution',
+            }
         }
     ),
     'stats/volumes': Metric(
         **{
-            'prefix': 'stats.volume',
+            'prefix': 'volume',
             'metrics': {
                 'iops_avg': ('io_ops.avg', 'gauge'),
                 'iops_max': 'io_ops.max',
                 'latency_inner': 'latency.inner',
                 'latency_outer': 'latency.outer',
-                'resolution': 'resolution',
                 'throughput_avg': 'throughput.avg',
                 'throughput_max': 'throughput.max',
             },
             'tags': {
                 'peer_k2_name': 'peer_name',
                 'volume_name': 'volume_name',
+                'resolution': 'resolution',
             },
         }
     ),
@@ -100,6 +101,36 @@ METRICS = {
             },
             'tags': {
                 'state': 'capacity_state',
+            },
+        }
+    ),
+    'replication/stats/system': Metric(
+        **{
+            'prefix': 'replication.system',
+            'metrics': {
+                 "logical_in": "logical_in",
+                 "logical_out": "logical_out",
+                 "physical_in": "physical_in",
+                 "physical_out": "physical_out",
+            },
+            'tags': {
+                'resolution': 'resolution',
+            }
+        }
+    ),
+    'replication/stats/volumes': Metric(
+        **{
+            'prefix': 'replication.volume',
+            'metrics': {
+                 "logical_in": "logical_in",
+                 "logical_out": "logical_out",
+                 "physical_in": "physical_in",
+                 "physical_out": "physical_out",
+            },
+            'tags': {
+                'peer_k2_name': 'peer_name',
+                'volume_name': 'volume_name',
+                'resolution': 'resolution',
             },
         }
     ),
