@@ -119,7 +119,7 @@ def test_obfuscate_sql_with_metadata(obfusactor_return_value, expected_value):
 
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = _mock_obfuscate_sql
-        statement = obfuscate_sql_with_metadata('SELECT * FROM datadog')
+        statement = obfuscate_sql_with_metadata('query here does not matter')
         assert statement == expected_value
 
 
