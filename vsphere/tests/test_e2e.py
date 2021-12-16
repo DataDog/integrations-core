@@ -7,5 +7,5 @@ from datadog_checks.base import AgentCheck
 def test_e2e(dd_agent_check, aggregator, realtime_instance):
     with pytest.raises(Exception):
         dd_agent_check(realtime_instance)
-    tag = ['vcenter_server:' + realtime_instance.get('host')]
-    aggregator.assert_service_check("vsphere.can_connect", AgentCheck.CRITICAL, tags=tag)
+    vcenter_tag = ['vcenter_server:' + realtime_instance.get('host')]
+    aggregator.assert_service_check("vsphere.can_connect", AgentCheck.CRITICAL, tags=vcenter_tag)
