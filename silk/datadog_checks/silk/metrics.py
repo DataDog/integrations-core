@@ -60,7 +60,7 @@ METRICS = {
             },
             'tags': {
                 'resolution': 'resolution',
-            }
+            },
         }
     ),
     'stats/volumes': Metric(
@@ -108,24 +108,24 @@ METRICS = {
         **{
             'prefix': 'replication.system',
             'metrics': {
-                 "logical_in": "logical_in",
-                 "logical_out": "logical_out",
-                 "physical_in": "physical_in",
-                 "physical_out": "physical_out",
+                "logical_in": "logical_in",
+                "logical_out": "logical_out",
+                "physical_in": "physical_in",
+                "physical_out": "physical_out",
             },
             'tags': {
                 'resolution': 'resolution',
-            }
+            },
         }
     ),
     'replication/stats/volumes': Metric(
         **{
             'prefix': 'replication.volume',
             'metrics': {
-                 "logical_in": "logical_in",
-                 "logical_out": "logical_out",
-                 "physical_in": "physical_in",
-                 "physical_out": "physical_out",
+                "logical_in": "logical_in",
+                "logical_out": "logical_out",
+                "physical_in": "physical_in",
+                "physical_out": "physical_out",
             },
             'tags': {
                 'peer_k2_name': 'peer_name',
