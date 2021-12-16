@@ -12,6 +12,10 @@
 * [Fixed] Bump cachetools. See [#10742](https://github.com/DataDog/integrations-core/pull/10742).
 * [Fixed] Bump redis dependency. See [#9383](https://github.com/DataDog/integrations-core/pull/9383).
 
+## 23.3.3 / 2021-12-16
+
+* [Fixed] Ensure TLSContextWrapper creates TLS context with the proper values. See [#10875](https://github.com/DataDog/integrations-core/pull/10875).
+
 ## 23.3.2 / 2021-11-23
 
 * [Fixed] [PerfCountersBaseCheck] Improve logging when expected counters are not found. See [#10701](https://github.com/DataDog/integrations-core/pull/10701).
