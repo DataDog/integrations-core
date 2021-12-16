@@ -110,6 +110,29 @@ files:
         display_default: false
         example: true
       enabled: true
+    - name: custom_queries
+      description: |
+        Run custom queries for Elasticsearch
+      value:
+        type: array
+        items:
+          type: object
+          properties: []
+        example:
+          - endpoint: /_nodes
+            queries:
+            - datadog_metric_name: elasticsearch.custom.metric1
+              es_metric_name: _nodes.total
+              tags:
+                - custom_tag:1
+            - datadog_metric_name: elasticsearch.custom.metric2
+              es_metric_name: _nodes.total
+          - endpoint: /_nodes
+            queries:
+            - datadog_metric_name: elasticsearch.custom.metric3
+              es_metric_name: _nodes.total
+              tags:
+                - custom_tag2
     - template: instances/default
     - template: instances/http
   - template: logs

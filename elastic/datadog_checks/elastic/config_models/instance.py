@@ -44,6 +44,7 @@ class InstanceConfig(BaseModel):
     cat_allocation_stats: Optional[bool]
     cluster_stats: Optional[bool]
     connect_timeout: Optional[float]
+    custom_queries: Optional[Sequence[Mapping[str, Any]]]
     detailed_index_stats: Optional[bool]
     disable_generic_tags: Optional[bool]
     disable_legacy_cluster_tag: Optional[bool]
