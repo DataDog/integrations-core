@@ -65,7 +65,8 @@ def read_file_binary(file):
         return f.read()
 
 
-def read_file(file: str, encoding='utf-8') -> str:
+def read_file(file, encoding='utf-8'):
+    # type: (str, str) -> str
     with open(file, 'r', encoding=encoding) as f:
         return f.read()
 
