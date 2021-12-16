@@ -14,6 +14,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.sqlserver import SQLServer
 
 from .common import CHECK_NAME
+from .conftest import DEFAULT_TIMEOUT
 from .utils import not_windows_ci, windows_ci
 
 try:
@@ -208,8 +209,8 @@ def _get_conn_for_user(instance_docker, user):
     conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
         instance_docker['driver'], instance_docker['host'], user, "Password12!"
     )
-    conn = pyodbc.connect(conn_str, timeout=30, autocommit=False)
-    conn.timeout = 30
+    conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=False)
+    conn.timeout = DEFAULT_TIMEOUT
     return conn
 
 
