@@ -204,10 +204,10 @@ def _run_test_statement_metrics_and_plans(
     caplog.set_level(logging.INFO)
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
-    def _run_test_queries():
-        with bob_conn.cursor() as cursor:
-            cursor.execute("USE {}".format(database))
+    with bob_conn.cursor() as cursor:
+        cursor.execute("USE {}".format(database))
 
+    def _run_test_queries():
         for params in param_groups:
             with bob_conn.cursor() as cursor:
                 logging.info("running query %s: %s", query, params)
