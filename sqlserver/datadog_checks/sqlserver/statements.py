@@ -48,7 +48,7 @@ with qstats as (
            {query_metrics_columns}
     from sys.dm_exec_query_stats
         cross apply sys.dm_exec_sql_text(sql_handle)
-    where last_execution_time > dateadd(second, -{collection_interval}, getdate())
+    where last_execution_time > dateadd(second, -?, getdate())
 )
 select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid, D.name as database_name, U.name as user_name,
     {query_metrics_column_sums}
@@ -139,6 +139,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._init_caches()
         self._conn_key_prefix = "dbm-"
         self._statement_metrics_query = None
+        self._last_stats_query_time = None
 
     def _init_caches(self):
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -187,8 +188,14 @@ class SqlserverStatementMetrics(DBMAsyncJob):
     def _load_raw_query_metrics_rows(self, cursor):
         self.log.debug("collecting sql server statement metrics")
         statement_metrics_query = self._get_statement_metrics_query_cached(cursor)
-        self.log.debug("Running query [%s]", statement_metrics_query)
-        cursor.execute(statement_metrics_query)
+        now = time.time()
+        query_interval = self.collection_interval
+        if self._last_stats_query_time:
+            query_interval = now - self._last_stats_query_time
+        self._last_stats_query_time = now
+        params = (math.ceil(query_interval),)
+        self.log.debug("Running query [%s] %s", statement_metrics_query, params)
+        cursor.execute(statement_metrics_query, params)
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]

@@ -156,6 +156,7 @@ class Connection(object):
             else:
                 cs += self._conn_string_odbc(db_key, db_name=db_name)
                 rawconn = pyodbc.connect(cs, timeout=self.timeout, autocommit=True)
+                rawconn.timeout = self.timeout
 
             self.service_check_handler(AgentCheck.OK, host, database, is_default=is_default)
             if conn_key not in self._conns:

@@ -68,13 +68,33 @@ def instance_docker():
     return deepcopy(INSTANCE_DOCKER)
 
 
+DEFAULT_TIMEOUT = 5
+
+
+def _common_pyodbc_connect(conn_str):
+    # all connections must have the correct timeouts set
+    # if the statement timeout is not set then the integration tests can *hang* for a very long time if, for example,
+    # a query is blocked on something.
+    conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
+    conn.timeout = DEFAULT_TIMEOUT
+
+    def _sanity_check_query():
+        with conn.cursor() as cursor:
+            cursor.execute("select 1")
+            cursor.fetchall()
+
+    WaitFor(_sanity_check_query, wait=3, attempts=10)()
+
+    return conn
+
+
 @pytest.fixture
 def datadog_conn_docker(instance_docker):
     # Make DB connection
     conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
         instance_docker['driver'], instance_docker['host'], instance_docker['username'], instance_docker['password']
     )
-    conn = pyodbc.connect(conn_str, timeout=30)
+    conn = _common_pyodbc_connect(conn_str)
     yield conn
     conn.close()
 
@@ -85,7 +105,7 @@ def bob_conn(instance_docker):
     conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
         instance_docker['driver'], instance_docker['host'], "bob", "Password12!"
     )
-    conn = pyodbc.connect(conn_str, timeout=30)
+    conn = _common_pyodbc_connect(conn_str)
     yield conn
     conn.close()
 
@@ -96,7 +116,7 @@ def sa_conn(instance_docker):
     conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
         instance_docker['driver'], instance_docker['host'], "sa", "Password123"
     )
-    conn = pyodbc.connect(conn_str, timeout=30)
+    conn = _common_pyodbc_connect(conn_str)
     yield conn
     conn.close()
 
@@ -151,7 +171,7 @@ def dd_environment():
 
     def sqlserver_can_connect():
         conn = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;'.format(get_local_driver(), DOCKER_SERVER)
-        pyodbc.connect(conn, timeout=30)
+        pyodbc.connect(conn, timeout=DEFAULT_TIMEOUT, autocommit=True)
 
     compose_file = os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml')
     conditions = [

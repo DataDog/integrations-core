@@ -2,8 +2,10 @@
 from __future__ import unicode_literals
 
 import logging
+import math
 import os
 import re
+import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
 
@@ -13,6 +15,7 @@ from lxml import etree as ET
 
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
+from datadog_checks.dev import WaitFor
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
@@ -150,10 +153,19 @@ test_statement_metrics_and_plans_parameterized = (
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(*test_statement_metrics_and_plans_parameterized)
 def test_statement_metrics_and_plans(
-    aggregator, dd_run_check, dbm_instance, bob_conn, database, plan_user, query, param_groups, match_pattern
+    aggregator, dd_run_check, dbm_instance, bob_conn, database, plan_user, query, param_groups, match_pattern, caplog
 ):
     _run_test_statement_metrics_and_plans(
-        aggregator, dd_run_check, dbm_instance, bob_conn, database, plan_user, query, param_groups, match_pattern
+        aggregator,
+        dd_run_check,
+        dbm_instance,
+        bob_conn,
+        database,
+        plan_user,
+        query,
+        param_groups,
+        match_pattern,
+        caplog,
     )
 
 
@@ -170,6 +182,7 @@ def test_statement_metrics_and_plans_windows(
     query,
     param_groups,
     match_pattern,
+    caplog,
 ):
     _run_test_statement_metrics_and_plans(
         aggregator,
@@ -181,26 +194,37 @@ def test_statement_metrics_and_plans_windows(
         query,
         param_groups,
         match_pattern,
+        caplog,
     )
 
 
 def _run_test_statement_metrics_and_plans(
-    aggregator, dd_run_check, dbm_instance, bob_conn, database, plan_user, query, param_groups, match_pattern
+    aggregator, dd_run_check, dbm_instance, bob_conn, database, plan_user, query, param_groups, match_pattern, caplog
 ):
+    caplog.set_level(logging.INFO)
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     with bob_conn.cursor() as cursor:
         cursor.execute("USE {}".format(database))
 
     def _run_test_queries():
-        with bob_conn.cursor() as cursor:
-            for params in param_groups:
+        for params in param_groups:
+            with bob_conn.cursor() as cursor:
+                logging.info("running query %s: %s", query, params)
                 cursor.execute(query, params)
+                cursor.fetchall()
 
-    _run_test_queries()
+    # the check must be run three times:
+    # 1) set _last_stats_query_time (this needs to happen before the 1st test queries to ensure the query time
+    # interval is correct)
+    # 2) load the test queries into the StatementMetrics state
+    # 3) emit the query metrics based on the diff of current and last state
+    dd_run_check(check)
+    # Use WaitFor to retry the bob_conn test query execution because sometimes they fail due to inexplicable timeouts
+    WaitFor(_run_test_queries, wait=1, attempts=3)()
     dd_run_check(check)
     aggregator.reset()
-    _run_test_queries()
+    WaitFor(_run_test_queries, wait=1, attempts=3)()
     dd_run_check(check)
 
     _conn_key_prefix = "dbm-"
@@ -273,6 +297,7 @@ def _run_test_statement_metrics_and_plans(
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
+    now = time.time()
     test_query = "select * from sys.databases"
 
     # run this test query to guarantee there's at least one application query in the query plan cache
@@ -294,8 +319,9 @@ def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
     # without the cast this is expected to fail with
     # pyodbc.ProgrammingError: ('ODBC SQL type -150 is not yet supported.  column-index=77  type=-150', 'HY106')
     with datadog_conn_docker.cursor() as cursor:
-        logging.debug("running statement_metrics_query: %s", statement_metrics_query)
-        cursor.execute(statement_metrics_query)
+        params = (math.ceil(time.time() - now),)
+        logging.debug("running statement_metrics_query [%s] %s", statement_metrics_query, params)
+        cursor.execute(statement_metrics_query, params)
 
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
