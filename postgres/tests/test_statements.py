@@ -513,7 +513,9 @@ def test_statement_samples_collect(
         ),
     ],
 )
-def test_statement_metadata(aggregator, integration_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload):
+def test_statement_metadata(
+    aggregator, integration_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload
+):
     """Tests for metadata in both samples and metrics"""
     dbm_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}

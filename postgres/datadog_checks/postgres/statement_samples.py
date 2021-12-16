@@ -16,7 +16,12 @@ except ImportError:
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, DbRow, RateLimitingTTLCache, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import (
+    DBMAsyncJob,
+    RateLimitingTTLCache,
+    default_json_event_encoding,
+    obfuscate_sql_with_metadata,
+)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 
@@ -214,7 +219,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         return rows
 
     def _filter_and_normalize_statement_rows(self, rows):
-        # type: (List[Dict]) -> List[DbRow]
+        # type: (List[Dict]) -> List[Dict]
         insufficient_privilege_count = 0
         total_count = 0
         normalized_rows = []
@@ -244,15 +249,17 @@ class PostgresStatementSamples(DBMAsyncJob):
         return normalized_rows
 
     def _normalize_row(self, row):
-        # type: (Dict) -> List[DbRow]
+        # type: (Dict) -> Dict
         normalized_row = dict(copy.copy(row))
         obfuscated_query = None
-        metadata = None
         try:
-            statement = json.loads(datadog_agent.obfuscate_sql(row['query'], self._obfuscate_options))
+            statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)
             obfuscated_query = statement['query']
             metadata = statement['metadata']
             normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
+            normalized_row['dd_tables'] = metadata.get('tables', None)
+            normalized_row['dd_commands'] = metadata.get('commands', None)
+            normalized_row['dd_comments'] = metadata.get('comments', None)
         except Exception as e:
             self._log.debug("Failed to obfuscate statement: %s", e)
             self._check.count(
@@ -262,7 +269,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 hostname=self._check.resolved_hostname,
             )
         normalized_row['statement'] = obfuscated_query
-        return DbRow(normalized_row, metadata)
+        return normalized_row
 
     def _get_extra_filters_and_params(self, filter_stale_idle_conn=False):
         extra_filters = ""
@@ -300,8 +307,8 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _collect_statement_samples(self):
         start_time = time.time()
         rows = self._get_new_pg_stat_activity()
-        db_rows = self._filter_and_normalize_statement_rows(rows)
-        event_samples = self._collect_plans(db_rows)
+        rows = self._filter_and_normalize_statement_rows(rows)
+        event_samples = self._collect_plans(rows)
         submitted_count = 0
         for e in event_samples:
             self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
@@ -309,7 +316,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         if self._report_activity_event():
             active_connections = self._get_active_connections()
-            activity_event = self._create_activity_event(db_rows, active_connections)
+            activity_event = self._create_activity_event(rows, active_connections)
             self._check.database_monitoring_query_activity(
                 json.dumps(activity_event, default=default_json_event_encoding)
             )
@@ -486,8 +493,8 @@ class PostgresStatementSamples(DBMAsyncJob):
 
             return error_response
 
-    def _collect_plan_for_statement(self, row, metadata):
-        # type: (Dict, DbRow.Metadata) -> Optional[Dict]
+    def _collect_plan_for_statement(self, row):
+        # type: (Dict) -> Optional[Dict]
 
         # limit the rate of explains done to the database
         cache_key = (row['datname'], row['query_signature'])
@@ -543,9 +550,9 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "user": row['usename'],
                     "statement": row['statement'],
                     "metadata": {
-                        "tables": metadata.parse_tables_csv(),
-                        "commands": metadata.commands,
-                        "comments": metadata.comments,
+                        "tables": row['dd_tables'],
+                        "commands": row['dd_commands'],
+                        "comments": row['dd_comments'],
                     },
                     "query_truncated": self._get_truncation_state(
                         self._get_track_activity_query_size(), row['query']
@@ -567,19 +574,19 @@ class PostgresStatementSamples(DBMAsyncJob):
             return event
         return None
 
-    def _collect_plans(self, db_rows):
-        # type: (List[DbRow]) -> List[Dict]
+    def _collect_plans(self, rows):
+        # type: (List[Dict]) -> List[Dict]
         events = []
-        for db_row in db_rows:
+        for row in rows:
             try:
-                if db_row.data['statement'] is None:
+                if row['statement'] is None:
                     continue
-                event = self._collect_plan_for_statement(db_row.data, db_row.metadata)
+                event = self._collect_plan_for_statement(row)
                 if event:
                     events.append(event)
             except Exception:
                 self._log.exception(
-                    "Crashed trying to collect execution plan for statement in dbname=%s", db_row.data['datname']
+                    "Crashed trying to collect execution plan for statement in dbname=%s", row['datname']
                 )
                 self._check.count(
                     "dd.postgres.statement_samples.error",
@@ -589,12 +596,12 @@ class PostgresStatementSamples(DBMAsyncJob):
                 )
         return events
 
-    def _create_activity_event(self, db_rows, active_connections):
-        # type: (List[DbRow], List[Dict]) -> Dict
+    def _create_activity_event(self, rows, active_connections):
+        # type: (List[Dict], List[Dict]) -> Dict
         self._time_since_last_activity_event = time.time()
         active_sessions = []
-        for db_row in db_rows:
-            active_row = self._to_active_session(db_row.data)
+        for row in rows:
+            active_row = self._to_active_session(row)
             if active_row:
                 active_sessions.append(active_row)
         if len(active_sessions) > self._activity_max_rows:

@@ -15,7 +15,7 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, DbRow, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 
 from .version_utils import V9_4
@@ -169,23 +169,20 @@ class PostgresStatementMetrics(DBMAsyncJob):
         # all databases on the host. For metrics the "db" tag is added during ingestion based on which database
         # each query came from.
         try:
-            db_rows = self._collect_metrics_rows()
-            if not db_rows:
+            rows = self._collect_metrics_rows()
+            if not rows:
                 return
-            for event in self._rows_to_fqt_events(db_rows):
+            for event in self._rows_to_fqt_events(rows):
                 self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
-            for db_row in db_rows:
+            for row in rows:
                 # Truncate query text to the maximum length supported by metrics tags
-                db_row.data['query'] = db_row.data['query'][0:200]
-                # Inject metadata into the row. Prefix with `dd` to prevent name clashing.
-                db_row.data['dd_tables'] = db_row.metadata.parse_tables_csv()
-                db_row.data['dd_commands'] = db_row.metadata.commands
+                row['query'] = row['query'][0:200]
             payload = {
                 'host': self._check.resolved_hostname,
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._metrics_collection_interval,
                 'tags': self._tags_no_db,
-                'postgres_rows': [db_row.data for db_row in db_rows],
+                'postgres_rows': rows,
                 'postgres_version': self._payload_pg_version(),
                 'ddagentversion': datadog_agent.get_version(),
             }
@@ -284,36 +281,35 @@ class PostgresStatementMetrics(DBMAsyncJob):
             self._log.warning("Failed to query for pg_stat_statements count: %s", e)
 
     def _collect_metrics_rows(self):
-        # type: () -> List[DbRow]
+        # type: () -> List[Dict]
         rows = self._load_pg_stat_statements()
         if rows:
             self._emit_pg_stat_statements_metrics()
 
-        db_rows = self._normalize_queries(rows)
-        if not db_rows:
+        rows = self._normalize_queries(rows)
+        if not rows:
             return []
 
         # When we compute the derivative, there will be less rows, so we need to remap the
         # remaining rows' metadata back after the computation.
-        query_sig_to_metadata = {db_row.data['query_signature']: db_row.metadata for db_row in db_rows}
-        available_columns = set(db_rows[0].data.keys())
+        available_columns = set(rows[0].keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
-        rows = self._state.compute_derivative_rows([db_row.data for db_row in db_rows], metric_columns, key=_row_key)
+        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
         self._check.gauge(
             'dd.postgres.queries.query_rows_raw',
             len(rows),
             tags=self._tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
-        return [DbRow(row, query_sig_to_metadata.get(row['query_signature'])) for row in rows]
+        return rows
 
     def _normalize_queries(self, rows):
-        # type: (Dict) -> List[DbRow]
+        # type: (Dict) -> List[Dict]
         normalized_rows = []
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
-                statement = json.loads(datadog_agent.obfuscate_sql(row['query'], self._obfuscate_options))
+                statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
                 self._log.debug("Failed to obfuscate query '%s': %s", row['query'], e)
@@ -322,20 +318,23 @@ class PostgresStatementMetrics(DBMAsyncJob):
             obfuscated_query = statement['query']
             normalized_row['query'] = obfuscated_query
             normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
-            normalized_rows.append(DbRow(normalized_row, statement['metadata']))
+            metadata = statement['metadata']
+            normalized_row['dd_tables'] = metadata.get('tables', None)
+            normalized_row['dd_commands'] = metadata.get('commands', None)
+            normalized_rows.append(normalized_row)
 
         return normalized_rows
 
-    def _rows_to_fqt_events(self, db_rows):
-        # type: (List[DbRow]) -> Generator
-        for db_row in db_rows:
-            query_cache_key = _row_key(db_row.data)
+    def _rows_to_fqt_events(self, rows):
+        # type: (List[Dict]) -> Generator
+        for row in rows:
+            query_cache_key = _row_key(row)
             if query_cache_key in self._full_statement_text_cache:
                 continue
             self._full_statement_text_cache[query_cache_key] = True
             row_tags = self._tags_no_db + [
-                "db:{}".format(db_row.data['datname']),
-                "rolname:{}".format(db_row.data['rolname']),
+                "db:{}".format(row['datname']),
+                "rolname:{}".format(row['rolname']),
             ]
             yield {
                 "timestamp": time.time() * 1000,
@@ -345,12 +344,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",
                 "db": {
-                    "instance": db_row.data['datname'],
-                    "query_signature": db_row.data['query_signature'],
-                    "statement": db_row.data['query'],
+                    "instance": row['datname'],
+                    "query_signature": row['query_signature'],
+                    "statement": row['query'],
                 },
                 "postgres": {
-                    "datname": db_row.data["datname"],
-                    "rolname": db_row.data["rolname"],
+                    "datname": row["datname"],
+                    "rolname": row["rolname"],
                 },
             }
