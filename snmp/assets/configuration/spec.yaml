@@ -222,7 +222,7 @@ files:
       - name: authProtocol
         description: |
           Authentication type to use when connecting to your SNMP devices.
-          Valid types: MD5, SHA, SHA224, SHA256, SHA384, SHA512.
+          Available options are: MD5, SHA, SHA224, SHA256, SHA384, SHA512
           Defaults to MD5 when `authKey` is specified.
           SNMP v3 specific configuration.
         value:
@@ -238,7 +238,8 @@ files:
       - name: privProtocol
         description: |
           Privacy type to use when connecting to your SNMP devices.
-          Valid types: DES, 3DES, AES, AES192, AES256, AES192C, AES256C.
+          Available options are: DES, AES (128 bits), AES192, AES192C, AES256, AES256C
+          Protocol only available for Python implementation: 3DES
           Defaults to DES when `privKey` is specified.
           SNMP v3 specific configuration.
         value:
