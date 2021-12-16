@@ -18,6 +18,7 @@ from ..constants import V1, V2
 class ValidationResult(object):
     def __init__(self):
         self.failed = False
+        self.warning = False
         self.fixed = False
         self.messages = {'success': [], 'warning': [], 'failure': [], 'info': []}
 
@@ -73,7 +74,7 @@ class BaseManifestValidator(object):
         self.result.messages['failure'].append(error_message)
 
     def warning(self, warning_message):
-        self.result.failed = True
+        self.result.warning = True
         self.result.messages['warning'].append(warning_message)
 
     def fix(self, problem, solution):
