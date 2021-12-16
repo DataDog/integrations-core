@@ -26,9 +26,7 @@ def test():
               description: words
               deprecation:
                 Release: 8.0.0
-                Migration: |
-                  do this
-                  and that
+                Migration: do this and that
               value:
                 type: string
           - template: instances
@@ -41,33 +39,33 @@ def test():
               description: words
               deprecation:
                 Release: 9.0.0
-                Migration: |
-                  do this
-                  and that
+                Migration: do this and that
               value:
                 type: string
         """
     )
 
     model_definitions = consumer.render()
-    assert len(model_definitions) == 1
-
     files = model_definitions['test.yaml']
     assert len(files) == 6
 
-    validators_contents, validators_errors = files['validators.py']
+    _, validators_errors = files['validators.py']
     assert not validators_errors
 
-    package_root_contents, package_root_errors = files['__init__.py']
+    _, package_root_errors = files['__init__.py']
     assert not package_root_errors
 
     deprecation_contents, deprecation_errors = files['deprecations.py']
     assert not deprecation_errors
-    assert deprecation_contents == normalize_yaml(
-        """def shared():
-            return {'deprecated': {'Release': '8.0.0', 'Migration': 'do this\nand that\n'}}
+    assert (
+        deprecation_contents
+        == """
 
-        def instance():
-            return {'deprecated': {'Release': '9.0.0', 'Migration': 'do this\nand that\n'}}
-        """
+def shared():
+    return {'deprecated': {'Release': '8.0.0', 'Migration': 'do this and that'}}
+
+
+def instance():
+    return {'deprecated': {'Release': '9.0.0', 'Migration': 'do this and that'}}
+"""
     )

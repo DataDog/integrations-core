@@ -20,10 +20,14 @@ class ModelConsumer:
         self.spec = spec
         self.code_formatter = code_formatter or self.create_code_formatter()
 
-    def render(self):
-        files = {}
+    def render(self) -> Dict[str, Dict[str, str]]:
+        """
+        Returns a dictionary containing for each spec file the list of rendered models
+        """
+        # { spec_file_name: {model_file_name: model_file_contents }
+        rendered_files = {}
 
-        for file in self.spec['files']:
+        for spec_file in self.spec['files']:
             # (<file name>, (<contents>, <errors>))
             model_files: Dict[str, Tuple[str, List[str]]] = {}
             # Contains pairs of model_id and schema_name. eg ('instance', 'InstanceConfig')
@@ -35,65 +39,20 @@ class ModelConsumer:
             defaults_file_needs_value_normalization = False
             deprecation_data = defaultdict(dict)
 
-            for section in sorted(file['options'], key=lambda s: s['name']):
-                errors: List[str] = []
-                section_name = section['name']
-                if section_name == 'init_config':
-                    model_id = 'shared'
-                    model_file_name = f'{model_id}.py'
-                    schema_name = 'SharedConfig'
-                elif section_name == 'instances':
-                    model_id = 'instance'
-                    model_file_name = f'{model_id}.py'
-                    schema_name = 'InstanceConfig'
-                    if section['multiple_instances_defined']:
-                        section = self._merge_instances(section, errors)
-                # Skip anything checks don't use directly
-                else:
-                    continue
-
-                model_data.append((model_id, schema_name))
+            # Sections are init_config and instances
+            for section in sorted(spec_file['options'], key=lambda s: s['name']):
                 (
-                    openapi_document,
-                    defaults_file_needs_value_normalization,
-                    defaults_file_needs_dynamic_values,
+                    section_model_files,
                     section_default_lines,
-                    validator_data,
-                    deprecation_data,
-                ) = build_openapi_document(section, model_id, schema_name, errors)
+                    section_defaults_file_needs_value_normalization,
+                    section_defaults_file_needs_dynamic_values,
+                    section_deprecation_data,
+                ) = self._process_section(section, model_data)
+                model_files.update(section_model_files)
                 defaults_file_lines.extend(section_default_lines)
-                try:
-                    parser = OpenAPIParser(
-                        yaml.safe_dump(openapi_document),
-                        target_python_version=PythonVersion.PY_38,
-                        enum_field_as_literal=LiteralType.All,
-                        encoding='utf-8',
-                        use_generic_container_types=True,
-                        enable_faux_immutability=True,
-                        # TODO: uncomment when the Agent upgrades Python to 3.9
-                        # use_standard_collections=True,
-                        strip_default_none=True,
-                        # https://github.com/koxudaxi/datamodel-code-generator/pull/173
-                        field_constraints=True,
-                    )
-                    parsed_document = parser.parse()
-                except Exception as e:
-                    errors.append(f'Error parsing the OpenAPI schema `{schema_name}`: {e}')
-                    model_files[model_file_name] = ('', errors)
-                    continue
-
-                options_with_defaults = len(defaults_file_lines) > 0
-                model_file_contents = build_model_file(
-                    parsed_document,
-                    options_with_defaults,
-                    deprecation_data,
-                    model_id,
-                    section_name,
-                    validator_data,
-                    self.code_formatter,
-                )
-                # instance.py or shared.py
-                model_files[model_file_name] = (model_file_contents, errors)
+                defaults_file_needs_value_normalization += section_defaults_file_needs_value_normalization
+                defaults_file_needs_dynamic_values += section_defaults_file_needs_dynamic_values
+                deprecation_data.update(section_deprecation_data)
 
             # Logs-only integrations
             if not model_files:
@@ -115,9 +74,95 @@ class ModelConsumer:
             # Custom
             model_files['validators.py'] = ('', [])
 
-            files[file['name']] = {file_name: model_files[file_name] for file_name in sorted(model_files)}
+            rendered_files[spec_file['name']] = {file_name: model_files[file_name] for file_name in sorted(model_files)}
 
-        return files
+        return rendered_files
+
+    def _process_section(self, section, model_data) -> (List[str], Dict[str, str], bool, bool, Dict[str, dict]):
+        # Values to return
+        section_default_lines = []
+        model_files = {}
+        section_defaults_file_needs_value_normalization = False
+        section_defaults_file_needs_dynamic_values = False
+        section_deprecation_data = defaultdict(dict)
+
+        errors: List[str] = []
+        section_name = section['name']
+        if section_name == 'init_config':
+            model_id = 'shared'
+            model_file_name = f'{model_id}.py'
+            schema_name = 'SharedConfig'
+        elif section_name == 'instances':
+            model_id = 'instance'
+            model_file_name = f'{model_id}.py'
+            schema_name = 'InstanceConfig'
+            if section['multiple_instances_defined']:
+                section = self._merge_instances(section, errors)
+        # Skip anything checks don't use directly
+        else:
+            return (
+                model_files,
+                section_default_lines,
+                section_defaults_file_needs_value_normalization,
+                section_defaults_file_needs_dynamic_values,
+                section_deprecation_data,
+            )
+
+        model_data.append((model_id, schema_name))
+        (
+            section_openapi_document,
+            section_defaults_file_needs_value_normalization,
+            section_defaults_file_needs_dynamic_values,
+            section_default_lines,
+            section_validator_data,
+            section_deprecation_data,
+        ) = build_openapi_document(section, model_id, schema_name, errors)
+
+        try:
+            section_parser = OpenAPIParser(
+                yaml.safe_dump(section_openapi_document),
+                target_python_version=PythonVersion.PY_38,
+                enum_field_as_literal=LiteralType.All,
+                encoding='utf-8',
+                use_generic_container_types=True,
+                enable_faux_immutability=True,
+                # TODO: uncomment when the Agent upgrades Python to 3.9
+                # use_standard_collections=True,
+                strip_default_none=True,
+                # https://github.com/koxudaxi/datamodel-code-generator/pull/173
+                field_constraints=True,
+            )
+            parsed_section = section_parser.parse()
+        except Exception as e:
+            errors.append(f'Error parsing the OpenAPI schema `{schema_name}`: {e}')
+            model_files[model_file_name] = ('', errors)
+            return (
+                model_files,
+                section_default_lines,
+                section_defaults_file_needs_value_normalization,
+                section_defaults_file_needs_dynamic_values,
+                section_deprecation_data,
+            )
+
+        options_with_defaults = len(section_default_lines) > 0
+        model_file_contents = build_model_file(
+            parsed_section,
+            options_with_defaults,
+            section_deprecation_data,
+            model_id,
+            section_name,
+            section_validator_data,
+            self.code_formatter,
+        )
+        # instance.py or shared.py
+        model_files[model_file_name] = (model_file_contents, errors)
+        return (
+            model_files,
+            section_default_lines,
+            section_defaults_file_needs_value_normalization,
+            section_defaults_file_needs_dynamic_values,
+            section_deprecation_data,
+        )
 
     def _merge_instances(self, section, errors):
         new_section = {

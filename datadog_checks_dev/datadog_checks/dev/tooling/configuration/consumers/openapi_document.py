@@ -17,12 +17,16 @@ ALLOWED_TYPE_FIELDS = OPENAPI_SCHEMA_PROPERTIES - {'default', 'description', 'ex
 NO_DEFAULT = object()
 
 
-def build_openapi_document(section: dict, model_id: str, schema_name: str, errors: List[str]):
+def build_openapi_document(
+    section: dict, model_id: str, schema_name: str, errors: List[str]
+) -> (dict, bool, bool, List[str], List, dict):
     """
     :param section: The section on a config spec: ie: init_config or instances
     :param model_id: The model id, which is either 'shared' or 'instance'
     :param schema_name: The specific model class name which is either SharedConfig or InstanceConfig
     :param errors: Array where to write error messages
+    :return: openapi_document, defaults_file_needs_value_normalization, defaults_file_needs_dynamic_values, defaults_file_lines, validator_data, deprecation_data,
+    :rtype: (dict, bool, bool, List[str], List, dict)
     """
     # We want to create something like:
     #
