@@ -459,10 +459,11 @@ class ESCheck(AgentCheck):
                 self.log.debug(metric)
                 dd_metric_name = metric.get('datadog_metric_name')
                 es_metric_name = metric.get('es_metric_name')
+                metric_type = metric.get('type', 'gauge')
                 extra_tags = metric.get('tags', [])
                 tags = base_tags + extra_tags
                 if dd_metric_name and es_metric_name:
-                    self._process_metric(data, dd_metric_name, 'gauge', es_metric_name, tags=tags)
+                    self._process_metric(data, dd_metric_name, metric_type, es_metric_name, tags=tags)
 
     def _create_event(self, status, tags=None):
         hostname = to_string(self.hostname)

@@ -93,6 +93,7 @@ def test_custom_queries(dd_run_check, instance, aggregator):
                 {
                     'datadog_metric_name': 'elasticsearch.custom.metric',
                     'es_metric_name': '_nodes.total',
+                    'type': 'monotonic_count',
                     'tags': ['custom_tag:1'],
                 },
             ],
@@ -113,9 +114,8 @@ def test_custom_queries(dd_run_check, instance, aggregator):
     check = ESCheck('elastic', {}, instances=[instance])
     dd_run_check(check)
 
-    expected_tags = ['baz', 'custom_tag:1', 'foo:bar', 'url:http://localhost:9200']
-    aggregator.assert_metric('elasticsearch.custom.metric', count=1, tags=expected_tags)
-    aggregator.assert_metric('elasticsearch.custom.metric2', count=1, tags=expected_tags)
+    aggregator.assert_metric('elasticsearch.custom.metric')
+    aggregator.assert_metric('elasticsearch.custom.metric2')
 
 
 @pytest.mark.integration

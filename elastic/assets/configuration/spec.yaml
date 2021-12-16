@@ -112,27 +112,33 @@ files:
       enabled: true
     - name: custom_queries
       description: |
-        Run custom queries for Elasticsearch
+        Run custom queries for Elasticsearch. Each custom query endpoint can collect multiple metrics and tags.
+        Note: Each custom query requires an `endpoint` and a `metrics` parameters, and each `metrics` parameter should
+        have at least one metric containing `datadog_metric_name` and `es_metric_name`. `type` is an optional parameters
+        and defaults to `gauge`.
+
+        Example:
+        - endpoint: /_nodes
+          metrics:
+          - datadog_metric_name: elasticsearch.nodes.total
+            es_metric_name: _nodes.total
+            type: gauge
+            tags:
+              - custom_tag:1
+          - datadog_metric_name: elasticsearch.nodes.successful
+            es_metric_name: _nodes.successful
+            type: monotonic_count
+        - endpoint: /_cat/allocation?v=true&format=json
+          metrics:
+          - datadog_metric_name: elasticsearch.cat.ip
+            es_metric_name: ip
+            tags:
+              - custom_tag2
       value:
         type: array
         items:
           type: object
           properties: []
-        example:
-          - endpoint: /_nodes
-            metrics:
-            - datadog_metric_name: elasticsearch.custom.metric1
-              es_metric_name: _nodes.total
-              tags:
-                - custom_tag:1
-            - datadog_metric_name: elasticsearch.custom.metric2
-              es_metric_name: _nodes.total
-          - endpoint: /_nodes
-            metrics:
-            - datadog_metric_name: elasticsearch.custom.metric3
-              es_metric_name: _nodes.total
-              tags:
-                - custom_tag2
     - template: instances/default
     - template: instances/http
   - template: logs
