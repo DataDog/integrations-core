@@ -71,7 +71,9 @@ def instance_docker():
     return deepcopy(INSTANCE_DOCKER)
 
 
-DEFAULT_TIMEOUT = 5
+# the default timeout in the integration tests is deliberately elevated beyond the default timeout in the integration
+# itself in order to reduce flakiness due to any sort of slowness in the tests
+DEFAULT_TIMEOUT = 30
 
 
 def _common_pyodbc_connect(conn_str):
