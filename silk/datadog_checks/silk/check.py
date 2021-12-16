@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
-from six.moves.urllib.parse import urljoin
+from six.moves.urllib.parse import urljoin, urlparse
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.time import get_timestamp
@@ -32,27 +32,33 @@ class SilkCheck(AgentCheck):
         server = self.instance.get("host_address")
         self.latest_event_query = int(get_timestamp())
         self.url = "{}/api/v2/".format(server)
-        self.tags = self.instance.get("tags", [])
-        self._host_tags = []
+
+        host = urlparse(server).netloc
+        self._tags = self.instance.get("tags", []) + ["silk_host:{}".format(host)]
+        # System tags are collected from the /state/endpoint
+        self._system_tags = []
 
     def check(self, _):
         # Get system state
         self.submit_state()
+        metric_tags = self._tags + self._system_tags
 
         # Get events
-        self.collect_events()
+        self.collect_events(metric_tags)
 
         # Get metrics
         get_method = getattr
+
         for path, metrics_obj in METRICS.items():
             # Need to submit an object of relevant tags
             try:
                 response_json, _ = self._get_data(path)
-                self.parse_metrics(response_json, path, metrics_obj, get_method)
+                self.parse_metrics(
+                    response_json, path, metrics_mapping=metrics_obj, get_method=get_method, tags=metric_tags
+                )
             except Exception as e:
                 self.log.debug("Encountered error getting Silk metrics for path %s: %s", path, str(e))
-        self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.OK, tags=self.tags)
-
+        self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.OK, tags=self._tags)
 
     def submit_state(self):
         # Get Silk State
@@ -60,26 +66,27 @@ class SilkCheck(AgentCheck):
             response_json, code = self._get_data(self.STATE_ENDPOINT)
         except Exception as e:
             self.warning("Encountered error getting Silk state: %s", str(e))
-            self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.CRITICAL, message=str(e), tags=self.tags)
-            self.service_check(self.STATE_SERVICE_CHECK, AgentCheck.UNKNOWN, message=str(e), tags=self.tags)
+            self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.CRITICAL, message=str(e), tags=self._tags)
+            self.service_check(self.STATE_SERVICE_CHECK, AgentCheck.UNKNOWN, message=str(e), tags=self._tags)
             raise
         else:
             if response_json:
                 if 'error_msg' in response_json:
                     msg = "Received error message: %s", response_json.get('error_msg')
                     self.log.warning(msg)
-                    self.service_check(self.STATE_SERVICE_CHECK, AgentCheck.WARNING, message=msg, tags=self.tags)
+                    self.service_check(self.STATE_SERVICE_CHECK, AgentCheck.WARNING, message=msg, tags=self._tags)
                     return
+
                 data = self.parse_metrics(response_json, self.STATE_ENDPOINT, return_first=True)
                 state = data.get('state').lower()
 
                 # Assign system-wide tags and metadata
                 self._assign_host_tags(data)
                 self._submit_version_metadata(data.get('system_version'))
-                self.service_check(self.STATE_SERVICE_CHECK, self.STATE_MAP[state], tags=self.tags)
+                self.service_check(self.STATE_SERVICE_CHECK, self.STATE_MAP[state], tags=self._tags)
             else:
                 msg = "Could not access system state, got response: {}".format(code)
-                self.service_check(self.STATE_SERVICE_CHECK, AgentCheck.UNKNOWN, message=msg, tags=self.tags)
+                self.service_check(self.STATE_SERVICE_CHECK, AgentCheck.UNKNOWN, message=msg, tags=self._tags)
                 return
 
     @AgentCheck.metadata_entrypoint
@@ -102,11 +109,11 @@ class SilkCheck(AgentCheck):
             self.log.debug("Could not submit version metadata, got: %", version)
 
     def _assign_host_tags(self, state_data):
+        self._system_tags.clear()
+        self._system_tags.append('system_name:{}'.format(state_data.get('system_name')))
+        self._system_tags.append('system_id:{}'.format(state_data.get('system_id')))
 
-        system_name = state_data.get('system_name')
-        system_id = state_data.get('system_id')
-
-    def parse_metrics(self, output, path, metrics_mapping=None, get_method=None, return_first=False):
+    def parse_metrics(self, output, path, tags=None, metrics_mapping=None, get_method=None, return_first=False):
         """
         Parse metrics from HTTP response. return_first will return the first item in `hits` key.
         """
@@ -114,13 +121,17 @@ class SilkCheck(AgentCheck):
             self.log.debug("No results for path %s", path)
             return
 
+        if not tags:
+            tags = self._tags
+
         hits = output.get('hits')
 
         if return_first:
             return hits[0]
 
         for item in hits:
-            metric_tags = deepcopy(self.tags)
+            metric_tags = deepcopy(tags)
+
             for key, tag_name in metrics_mapping.tags.items():
                 if key in item:
                     metric_tags.append("{}:{}".format(tag_name, item.get(key)))
@@ -145,7 +156,7 @@ class SilkCheck(AgentCheck):
             self.log.debug("Encountered error while getting metrics from %s: %s", path, str(e))
             raise
 
-    def collect_events(self):
+    def collect_events(self, tags):
         self.log.debug("Starting events collection (query start time: %s).", self.latest_event_query)
         latest_event_time = None
         collect_events_start_time = get_timestamp()
@@ -155,7 +166,7 @@ class SilkCheck(AgentCheck):
             raw_events = response_json.get("hits")
 
             for event in raw_events:
-                normalized_event = SilkEvent(event, self.tags)
+                normalized_event = SilkEvent(event, tags)
                 event_payload = normalized_event.get_datadog_payload()
                 if event_payload is not None:
                     self.event(event_payload)
