@@ -5,7 +5,7 @@ import time
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
@@ -148,7 +148,7 @@ class SqlserverActivity(DBMAsyncJob):
         estimated_size = 0
         for row in rows:
             try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['text'])
+                obfuscated_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)['query']
                 row['query_signature'] = compute_sql_signature(obfuscated_statement)
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging

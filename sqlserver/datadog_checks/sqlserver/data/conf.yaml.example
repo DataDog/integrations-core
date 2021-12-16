@@ -67,8 +67,8 @@ instances:
     ## Regular expression for database names to include as part of `database_autodiscovery`.
     ## Will report metrics for databases that are found in this instance, ignores databases listed but not found.
     ##
-    ## Character casing is ignored. The regular expressions start matching from the beginning, so 
-    ## to match anywhere, prepend `.*`. For exact matches append `$`. 
+    ## Character casing is ignored. The regular expressions start matching from the beginning, so
+    ## to match anywhere, prepend `.*`. For exact matches append `$`.
     ##
     ## Defaults to `.*` to include everything.
     #
@@ -245,6 +245,33 @@ instances:
         ## Running different instances with different collection intervals is not supported.
         #
         # collection_interval: 10
+
+    ## Configure how the SQL obfuscator behaves.
+    ## NOTE: that this option only applies when `dbm` is enabled.
+    #
+    obfuscator_options:
+
+        ## @param replace_digits - boolean - optional - default: false
+        ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
+        ## NOTE: This option also applies to extracted tables via `collect_tables`.
+        #
+        # replace_digits: false
+
+        ## @param collect_tables - boolean - optional - default: true
+        ## Set to `false` to disable the collection of tables in your SQL statements.
+        #
+        # collect_tables: true
+
+        ## @param collect_commands - boolean - optional - default: true
+        ## Set to `false` to disable the collection of commands in your SQL statements.
+        ## e.g. SELECT, UPDATE, DELETE, etc.
+        #
+        # collect_commands: true
+
+        ## @param collect_comments - boolean - optional - default: true
+        ## Set to `false` to disable the collection of comments in your SQL statements.
+        #
+        # collect_comments: true
 
     ## @param command_timeout - integer - optional - default: 5
     ## Timeout in seconds for the connection and each command run
