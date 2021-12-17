@@ -68,15 +68,15 @@ class SilkCheck(AgentCheck):
     def submit_system_state(self):
         # Get Silk State
         try:
-            response_json, code = self._get_data(STATE_ENDPOINT)
+            response_hits, code = self._get_data(STATE_ENDPOINT)
         except Exception as e:
             self.warning("Encountered error getting Silk state: %s", str(e))
             self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.CRITICAL, message=str(e), tags=self._tags)
             self.service_check(self.STATE_SERVICE_CHECK, AgentCheck.UNKNOWN, message=str(e), tags=self._tags)
             raise
         else:
-            if response_json:
-                data = self.parse_metrics(response_json, STATE_ENDPOINT, return_first=True)
+            if response_hits:
+                data = response_hits[0]
                 state = data.get('state').lower()
 
                 # Assign system-wide tags and metadata
@@ -90,14 +90,13 @@ class SilkCheck(AgentCheck):
     def submit_server_state(self):
         # Get Silk State
         try:
-            response_json, code = self._get_data(SERVERS_ENDPOINT)
+            server_data, code = self._get_data(SERVERS_ENDPOINT)
         except Exception as e:
             self.warning("Encountered error getting Silk state: %s", str(e))
             self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.CRITICAL, message=str(e), tags=self._tags)
             raise
         else:
-            if response_json:
-                server_data = response_json.get("hits")
+            if server_data:
                 for server in server_data:
                     tags = deepcopy(self._tags) + [
                         'server_name:{}'.format(server.get('name')),
@@ -137,7 +136,7 @@ class SilkCheck(AgentCheck):
         self._system_tags.append('system_name:{}'.format(state_data.get('system_name')))
         self._system_tags.append('system_id:{}'.format(state_data.get('system_id')))
 
-    def parse_metrics(self, output, path, tags=None, metrics_mapping=None, get_method=None, return_first=False):
+    def parse_metrics(self, output, path, tags=None, metrics_mapping=None, get_method=None):
         """
         Parse metrics from HTTP response. return_first will return the first item in `hits` key.
         """
@@ -148,12 +147,7 @@ class SilkCheck(AgentCheck):
         if not tags:
             tags = self._tags
 
-        hits = output.get('hits')
-
-        if return_first:
-            return hits[0]
-
-        for item in hits:
+        for item in output:
             metric_tags = deepcopy(tags)
 
             for key, tag_name in metrics_mapping.tags.items():
@@ -181,7 +175,7 @@ class SilkCheck(AgentCheck):
                     self.log.warning(msg)
                     self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.WARNING, message=msg, tags=self._tags)
                     return None, code
-            return response_json, code
+            return response_json.get("hits"), code
         except Exception as e:
             self.log.debug("Encountered error while getting metrics from %s: %s", path, str(e))
             raise
@@ -192,8 +186,7 @@ class SilkCheck(AgentCheck):
         collect_events_start_time = get_timestamp()
         try:
             event_query = EVENT_PATH.format(self.latest_event_query)
-            response_json, code = self._get_data(event_query)
-            raw_events = response_json.get("hits")
+            raw_events, code = self._get_data(event_query)
 
             for event in raw_events:
                 normalized_event = SilkEvent(event, tags)
