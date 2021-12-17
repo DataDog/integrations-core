@@ -48,7 +48,7 @@ metadata:
         symbol:
           OID: 1.3.6.1.2.1.1.1.0
           name: sysDescr
-          match_pattern: 'PF:(\w+)'
+          match_pattern: 'PF:(\S+)'
           match_value: '$1'
           # Examples: `MN:v3.9.2`, correspond to version in PN:apc_hw02_aos_392.bin
 
