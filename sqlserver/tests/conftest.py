@@ -1,8 +1,11 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import logging
 import os
+import sys
+import time
+import traceback
 from copy import deepcopy
 
 import pytest
@@ -68,7 +71,9 @@ def instance_docker():
     return deepcopy(INSTANCE_DOCKER)
 
 
-DEFAULT_TIMEOUT = 5
+# the default timeout in the integration tests is deliberately elevated beyond the default timeout in the integration
+# itself in order to reduce flakiness due to any sort of slowness in the tests
+DEFAULT_TIMEOUT = 30
 
 
 def _common_pyodbc_connect(conn_str):
@@ -102,12 +107,58 @@ def datadog_conn_docker(instance_docker):
 @pytest.fixture
 def bob_conn(instance_docker):
     # Make DB connection
+
     conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
         instance_docker['driver'], instance_docker['host'], "bob", "Password12!"
     )
-    conn = _common_pyodbc_connect(conn_str)
+    conn = SelfHealingConnection(conn_str)
+    conn.reconnect()
     yield conn
     conn.close()
+
+
+class SelfHealingConnection:
+    """
+    A connection that is able to retry queries after completely reinitializing the database connection.
+    Sometimes connections enter a bad state during tests which can cause cursors to fail or time out inexplicably.
+    By using this self-healing connection we enable tests to automatically recover and reduce flakiness.
+    """
+
+    def __init__(self, conn_str):
+        self.conn_str = conn_str
+        self.conn = None
+        self.reconnect()
+
+    def reconnect(self):
+        self.close()
+        self.conn = _common_pyodbc_connect(self.conn_str)
+
+    def close(self):
+        try:
+            if self.conn:
+                logging.info("recreating connection")
+                self.conn.close()
+        except Exception:
+            logging.exception("failed to close connection")
+
+    def execute_with_retries(self, query, params=(), database=None, retries=3, sleep=1, return_result=True):
+        tracebacks = []
+        for attempt in range(retries):
+            try:
+                logging.info("executing query with retries. query='%s' params=%s attempt=%s", query, params, attempt)
+                with self.conn.cursor() as cursor:
+                    if database:
+                        cursor.execute("USE {}".format(database))
+                    cursor.execute(query, params)
+                    if return_result:
+                        return cursor.fetchall()
+            except Exception:
+                tracebacks.append(",".join(traceback.format_exception(*sys.exc_info())))
+                logging.exception("failed to execute query attempt=%s", attempt)
+                time.sleep(sleep)
+                self.reconnect()
+
+        raise Exception("failed to execute query after {} retries:\n {}".format(retries, "\n".join(tracebacks)))
 
 
 @pytest.fixture
