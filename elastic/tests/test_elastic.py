@@ -85,7 +85,7 @@ def test__get_urls(instance, url_fix):
 
 
 @pytest.mark.integration
-def test_custom_queries(dd_run_check, instance, aggregator):
+def test_custom_queries(dd_environment, dd_run_check, instance, aggregator):
     custom_queries = [
         {
             'endpoint': '/_nodes',
