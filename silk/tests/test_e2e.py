@@ -16,5 +16,6 @@ def test_e2e(dd_agent_check, instance):
         aggregator.assert_metric(metric)
 
     aggregator.assert_service_check('silk.can_connect', SilkCheck.OK)
-    aggregator.assert_service_check('silk.state', SilkCheck.OK)
+    aggregator.assert_service_check('silk.system.state', SilkCheck.OK)
+    aggregator.assert_service_check('silk.server.state', SilkCheck.OK, count=2)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
