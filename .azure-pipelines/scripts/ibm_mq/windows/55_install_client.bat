@@ -2,5 +2,5 @@
 #:: * Compile pymqi image
 #:: * Run integration tests on the machine
 
-dir .
-powershell -Command .\azure-pipelines\scripts\ibm_mq\windows\install_ibm_mq.ps1 "9.2.2.0"
+dir .azure-pipelines\scripts\ibm_mq\windows
+powershell -Command .azure-pipelines\scripts\ibm_mq\windows\install_ibm_mq.ps1 "9.2.2.0"
