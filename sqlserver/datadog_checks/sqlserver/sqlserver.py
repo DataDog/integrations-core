@@ -353,9 +353,13 @@ class SQLServer(AgentCheck):
                 cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
-        for name, column in DATABASE_FILES_IO:
+        for name, column, metric_fn in DATABASE_FILES_IO:
             cfg = {'name': name, 'column': column, 'tags': tags}
-            metrics_to_collect.append(SqlVirtualFileIOStats(cfg, None, self.monotonic_count, column, self.log))
+            metrics_to_collect.append(
+                SqlVirtualFileIOStats(
+                    cfg, None, lambda *args, **kwargs: metric_fn(self, *args, **kwargs), column, self.log
+                )
+            )
 
         # Load AlwaysOn metrics
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
