@@ -169,7 +169,7 @@ class Connection(object):
                     self.log.info("Could not close adodbapi db connection\n%s", e)
 
                 self._conns[conn_key] = rawconn
-            self._new_connection_setup(rawconn)
+            self._setup_new_connection(rawconn)
         except Exception as e:
             cx = "{} - {}".format(host, database)
 
@@ -185,7 +185,7 @@ class Connection(object):
 
             raise_from(SQLConnectionError(message), None)
 
-    def _new_connection_setup(self, rawconn):
+    def _setup_new_connection(self, rawconn):
         with rawconn.cursor() as cursor:
             # ensure that by default, the agent's reads can never block updates to any tables it's reading from
             cursor.execute("SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED")
