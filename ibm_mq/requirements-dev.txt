@@ -1,1 +1,2 @@
 -e ../datadog_checks_dev
+python-dev; sys_platform == 'win32'
