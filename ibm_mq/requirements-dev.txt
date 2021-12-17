@@ -1,2 +1,1 @@
 -e ../datadog_checks_dev
-python-dev-tools==2020.9.10; sys_platform == 'win32'

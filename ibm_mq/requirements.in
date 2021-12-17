@@ -1,2 +1,1 @@
-python-dev-tools==2020.9.10; sys_platform == 'win32'
 pymqi==1.12.0
