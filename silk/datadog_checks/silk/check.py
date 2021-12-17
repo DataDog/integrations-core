@@ -132,7 +132,7 @@ class SilkCheck(AgentCheck):
             self.log.debug("Could not submit version metadata, got: %", version)
 
     def _assign_host_tags(self, state_data):
-        self._system_tags.clear()
+        self._system_tags = []
         self._system_tags.append('system_name:{}'.format(state_data.get('system_name')))
         self._system_tags.append('system_id:{}'.format(state_data.get('system_id')))
 
