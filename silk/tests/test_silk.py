@@ -39,7 +39,6 @@ def mocked_requests_get(*args, **kwargs):
 
 def test_error_msg_response(dd_run_check, aggregator, instance):
     error_response = {"error_msg": "Statistics data is unavailable while system is OFFLINE"}
-    # with mock.patch('requests.get', side_effect=mocked_requests_get(error_response, 405)):
     with mock.patch('datadog_checks.base.utils.http.requests.Response.json') as g:
         g.return_value = error_response
         check = SilkCheck('silk', {}, [instance])
