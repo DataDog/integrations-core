@@ -13,17 +13,19 @@ from .metrics import METRICS
 
 EVENT_PATH = "events?timestamp__gte={}"
 
+STATE_ENDPOINT = 'system/state'
+SERVERS_ENDPOINT = 'system/servers'
+
+STATE_MAP = {'online': AgentCheck.OK, 'offline': AgentCheck.WARNING, 'degraded': AgentCheck.CRITICAL}
+
 
 class SilkCheck(AgentCheck):
 
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'silk'
 
-    STATE_ENDPOINT = 'system/state'
-
-    STATE_MAP = {'online': AgentCheck.OK, 'offline': AgentCheck.WARNING, 'degraded': AgentCheck.CRITICAL}
-
-    STATE_SERVICE_CHECK = "state"
+    STATE_SERVICE_CHECK = "system.state"
+    SERVERS_SERVICE_CHECK = "server.state"
     CONNECT_SERVICE_CHECK = "can_connect"
 
     def __init__(self, name, init_config, instances):
@@ -39,8 +41,11 @@ class SilkCheck(AgentCheck):
         self._system_tags = []
 
     def check(self, _):
-        # Get system state
-        self.submit_state()
+        # Get system state and tags
+        self.submit_system_state()
+        # Submit service checks for each server
+        self.submit_server_state()
+
         metric_tags = self._tags + self._system_tags
 
         # Get events
@@ -60,10 +65,10 @@ class SilkCheck(AgentCheck):
                 self.log.debug("Encountered error getting Silk metrics for path %s: %s", path, str(e))
         self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.OK, tags=self._tags)
 
-    def submit_state(self):
+    def submit_system_state(self):
         # Get Silk State
         try:
-            response_json, code = self._get_data(self.STATE_ENDPOINT)
+            response_json, code = self._get_data(STATE_ENDPOINT)
         except Exception as e:
             self.warning("Encountered error getting Silk state: %s", str(e))
             self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.CRITICAL, message=str(e), tags=self._tags)
@@ -71,23 +76,42 @@ class SilkCheck(AgentCheck):
             raise
         else:
             if response_json:
-                if 'error_msg' in response_json:
-                    msg = "Received error message: %s", response_json.get('error_msg')
-                    self.log.warning(msg)
-                    self.service_check(self.STATE_SERVICE_CHECK, AgentCheck.WARNING, message=msg, tags=self._tags)
-                    return
-
-                data = self.parse_metrics(response_json, self.STATE_ENDPOINT, return_first=True)
+                data = self.parse_metrics(response_json, STATE_ENDPOINT, return_first=True)
                 state = data.get('state').lower()
 
                 # Assign system-wide tags and metadata
                 self._assign_host_tags(data)
                 self._submit_version_metadata(data.get('system_version'))
-                self.service_check(self.STATE_SERVICE_CHECK, self.STATE_MAP[state], tags=self._tags)
+                self.service_check(self.STATE_SERVICE_CHECK, STATE_MAP[state], tags=self._tags)
             else:
                 msg = "Could not access system state, got response: {}".format(code)
-                self.service_check(self.STATE_SERVICE_CHECK, AgentCheck.UNKNOWN, message=msg, tags=self._tags)
-                return
+                self.log.debug(msg)
+
+    def submit_server_state(self):
+        # Get Silk State
+        try:
+            response_json, code = self._get_data(SERVERS_ENDPOINT)
+        except Exception as e:
+            self.warning("Encountered error getting Silk state: %s", str(e))
+            self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.CRITICAL, message=str(e), tags=self._tags)
+            raise
+        else:
+            if response_json:
+                server_data = response_json.get("hits")
+                for server in server_data:
+                    tags = deepcopy(self._tags) + [
+                        'server_name:{}'.format(server.get('name')),
+                    ]
+                    state = server.get('status').lower()
+
+                    if state == 'ok':
+                        self.service_check(self.SERVERS_SERVICE_CHECK, AgentCheck.OK, tags=tags)
+                    else:
+                        # Other states are not documented
+                        self.service_check(self.SERVERS_SERVICE_CHECK, AgentCheck.UNKNOWN, tags=tags)
+            else:
+                msg = "Could not access server state, got response: {}".format(code)
+                self.log.debug(msg)
 
     @AgentCheck.metadata_entrypoint
     def _submit_version_metadata(self, version):
@@ -151,6 +175,12 @@ class SilkCheck(AgentCheck):
             response.raise_for_status()
             response_json = response.json()
             code = response.status_code
+            if response_json:
+                if 'error_msg' in response_json:
+                    msg = "Received error message: %s", response_json.get('error_msg')
+                    self.log.warning(msg)
+                    self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.WARNING, message=msg, tags=self._tags)
+                    return None, code
             return response_json, code
         except Exception as e:
             self.log.debug("Encountered error while getting metrics from %s: %s", path, str(e))
