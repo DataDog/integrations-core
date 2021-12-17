@@ -50,11 +50,10 @@ def test_event_payload():
     assert actual_payload == EXPECTED_EVENT_PAYLOAD
 
 
-@pytest.mark.usefixtures('dd_environment')
 def test_latest_event_query(aggregator, instance, dd_run_check):
     check = SilkCheck('silk', {}, [instance])
     check.latest_event_query = 123
-    check.get_data = mock.MagicMock(side_effect=mock_get_raw_events)
+    check._get_data = mock.MagicMock(side_effect=mock_get_raw_events)
     check.collect_events([])
 
     aggregator.assert_event("test_event1", count=1)
