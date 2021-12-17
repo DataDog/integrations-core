@@ -448,7 +448,6 @@ class ESCheck(AgentCheck):
         self.log.debug("Running custom queries")
 
         custom_queries = self._config.custom_queries
-        self.log.debug(custom_queries)
         for endpoints in custom_queries:
             metrics = endpoints.get('metrics', [])
             endpoint = endpoints.get('endpoint')
@@ -456,7 +455,6 @@ class ESCheck(AgentCheck):
 
             data = self._get_data(endpoint)
             for metric in metrics:
-                self.log.debug(metric)
                 dd_metric_name = metric.get('datadog_metric_name')
                 es_metric_name = metric.get('es_metric_name')
                 metric_type = metric.get('type', 'gauge')
