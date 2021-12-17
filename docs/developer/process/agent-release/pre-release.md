@@ -121,7 +121,10 @@ After the RC build is done:
 1. Manually run an [Agent Azure Pipeline](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=60) using the [release branch](#branch), and the latest RC built. Select the options to run both Python 2 and Python 3 tests. This will run all the e2e tests against the current agent docker RCs. 
 
     !!! note
-        Image for Windows-Python 2 might not be built automatically for each RC. In order to build it, trigger the [dev_branch-a6-windows](https://github.com/DataDog/datadog-agent/blob/1b99fefa1d31eef8631e6343bdd2a4cf2b11f82d/.gitlab/image_deploy/docker_windows.yml#L43-L61) job in the datadog-agent Gitlab pipeline building the RC (link shared by the release coordinator).
+        Image for Windows-Python 2 might not be built automatically for each RC. In order to build it, trigger the [dev_branch-a6-windows](https://github.com/DataDog/datadog-agent/blob/1b99fefa1d31eef8631e6343bdd2a4cf2b11f82d/.gitlab/image_deploy/docker_windows.yml#L43-L61) job in the datadog-agent Gitlab pipeline building the RC (link shared by the release coordinator). Once the job has finished running, change the `Windows Agent Docker Image for Python 2` parameter to the name of the newly built image, which is in the format: `datadog/agent-dev:<MAJOR>-<MINOR>-0-rc-<RC>-py2-win-servercore`. For example:
+    ```
+    datadog/agent-dev:7-33-0-rc-9-py2-win-servercore
+    ```
 
     !!! note
         In some cases, the CI may be broken on both the release branch and `master` during release week due to testing limits or development dependency changes and **not** code changes. Fixes for these issues will be merged to the `master` branch, and if they aren't include on the release branch the Azure pipelines will fail. If these changes are only test related (no code change), the CI fixes can be cherry-picked to the release branch and don't need a release. This will ensure that the Azure pipelines only fail on code-related errors.
