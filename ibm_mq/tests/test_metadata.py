@@ -3,10 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.dev.utils import ON_WINDOWS
+
 from .common import MQ_VERSION_RAW
 
 
 @pytest.mark.integration
+@pytest.mark.skipif(ON_WINDOWS)
 def test_metadata(get_check, instance, datadog_agent):
     check = get_check(instance)
     check.check_id = 'test:123'

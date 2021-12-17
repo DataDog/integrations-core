@@ -11,12 +11,12 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.time import ensure_aware_datetime
-from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.dev.utils import ON_WINDOWS, get_metadata_metrics
 
 from . import common
 from .common import QUEUE_METRICS, assert_all_metrics
 
-pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
+pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration, pytest.mark.skipif(ON_WINDOWS)]
 
 
 def test_no_msg_errors_are_caught(get_check, instance, caplog):
