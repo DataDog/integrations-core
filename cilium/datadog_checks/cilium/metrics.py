@@ -62,6 +62,7 @@ AGENT_METRICS = {
     'cilium_kvstore_events_queue_seconds': 'kvstore.events_queue.seconds',
 }
 
+
 OPERATOR_METRICS = {
     'cilium_operator_process_cpu_seconds_total': 'operator.process.cpu.seconds',
     'cilium_operator_process_max_fds': 'operator.process.max_fds',
@@ -73,10 +74,10 @@ OPERATOR_METRICS = {
     'cilium_operator_eni_available': 'operator.eni.available',
     'cilium_operator_eni_available_ips_per_subnet': 'operator.eni.available.ips_per_subnet',
     'cilium_operator_eni_aws_api_duration_seconds': 'operator.eni.aws_api_duration.seconds',
-    'cilium_operator_eni_deficit_resolver_duration_seconds': 'operator.eni.deficit_resolver_duration.seconds',
-    'cilium_operator_eni_deficit_resolver_folds': 'operator.eni.deficit_resolver_folds',
-    'cilium_operator_eni_deficit_resolver_latency_seconds': 'operator.eni.deficit_resolver_latency.seconds',
-    'cilium_operator_eni_deficit_resolver_queued_total': 'operator.eni.deficit_resolver_queued.total',
+    'cilium_operator_eni_deficit_resolver_duration_seconds': 'operator.eni.deficit_resolver.duration.seconds',
+    'cilium_operator_eni_deficit_resolver_folds': 'operator.eni.deficit_resolver.folds',
+    'cilium_operator_eni_deficit_resolver_latency_seconds': 'operator.eni.deficit_resolver.latency.seconds',
+    'cilium_operator_eni_deficit_resolver_queued_total': 'operator.eni.deficit_resolver.queued.total',
     'cilium_operator_eni_ec2_resync_duration_seconds': 'operator.eni.ec2_resync.duration.seconds',
     'cilium_operator_eni_ec2_resync_folds': 'operator.eni.ec2_resync.folds',
     'cilium_operator_eni_ec2_resync_latency_seconds': 'operator.eni.ec2_resync.latency.seconds',
@@ -89,32 +90,31 @@ OPERATOR_METRICS = {
     'cilium_operator_eni_k8s_sync_queued_total': 'operator.eni.k8s_sync.queued.total',
     'cilium_operator_eni_nodes': 'operator.eni.nodes.total',
     'cilium_operator_eni_resync_total': 'operator.eni.resync.total',
-    'cilium_operator_ec2_api_duration_seconds_sum': 'operator.ec2.api.duration.seconds.sum',
-    'cilium_operator_ec2_api_duration_seconds_count': 'operator.ec2.api.duration.seconds.count',
-    'cilium_operator_ipam_available_ips_per_subnet': 'operator_ipam.available.ips_per_subnet',
-    'cilium_operator_ipam_deficit_resolver_duration_seconds_sum': 'operator.ipam.deficit_resolver.duration.seconds.sum',
-    'cilium_operator_ipam_deficit_resolver_duration_seconds_count': 'operator.ipam.deficit_resolver.duration.seconds'
-    '.count',
+    'cilium_operator_ec2_api_duration_seconds': 'operator.ec2.api.duration.seconds',
+    'cilium_operator_ec2_api_rate_limit_duration_seconds': 'operator.ec2.api.rate_limit.duration.seconds',  # histogram
+    'cilium_operator_ipam_available': 'operator.ipam.available',  # gauge
+    'cilium_operator_ipam_available_ips_per_subnet': 'operator.ipam.available.ips_per_subnet',
+    'cilium_operator_ipam_deficit_resolver_duration_seconds': 'operator.ipam.deficit_resolver.duration.seconds',
     'cilium_operator_ipam_deficit_resolver_folds': 'operator.ipam.deficit_resolver.folds',
-    'cilium_operator_ipam_deficit_resolver_latency_seconds_sum': 'operator.ipam.deficit_resolver.latency_seconds.sum',
-    'cilium_operator_ipam_deficit_resolver_latency_seconds_count': 'operator.ipam.deficit_resolver.latency_seconds'
-    '.count',
+    'cilium_operator_ipam_deficit_resolver_latency_seconds': 'operator.ipam.deficit_resolver.latency.seconds',
     'cilium_operator_ipam_deficit_resolver_queued_total': 'operator.ipam.deficit_resolver.queued.total',
     'cilium_operator_ipam_ips': 'operator.ipam.ips',
-    'cilium_operator_ipam_k8s_sync_duration_seconds_sum': 'operator.ipam.k8s_sync.duration.seconds.sum',
-    'cilium_operator_ipam_k8s_sync_duration_seconds_count': 'operator.ipam.k8s_sync.duration.seconds.count',
+    'cilium_operator_ipam_allocation_ops': 'operator.ipam.allocation_ops',  # counter
+    'cilium_operator_ipam_release_ops': 'operator.ipam.release_ops',  # counter
+    'cilium_operator_ipam_interface_creation_ops': 'operator.ipam.interface_creation_ops',  # counter
+    'cilium_operator_ipam_k8s_sync_duration_seconds': 'operator.ipam.k8s_sync.duration.seconds',
     'cilium_operator_ipam_k8s_sync_folds': 'operator.ipam.k8s_sync.folds',
-    'cilium_operator_ipam_k8s_sync_latency_sum': 'operator.ipam.k8s_sync.latency.sum',
-    'cilium_operator_ipam_k8s_sync_latency_total': 'operator.ipam.k8s_sync.latency.total',
+    'cilium_operator_ipam_k8s_sync_latency_seconds': 'operator.ipam.k8s_sync.latency.seconds',
     'cilium_operator_ipam_k8s_sync_queued_total': 'operator.ipam.k8s_sync.queued.total',
     'cilium_operator_ipam_nodes': 'operator.ipam.nodes',
-    'cilium_operator_ipam_resync_duration_seconds_sum': 'operator.ipam.resync.duration.seconds.sum',
-    'cilium_operator_ipam_resync_duration_seconds_count': 'operator.ipam.resync.duration.seconds.count',
+    'cilium_operator_ipam_resync_duration_seconds': 'operator.ipam.resync.duration.seconds',
     'cilium_operator_ipam_resync_folds': 'operator.ipam.resync.folds',
-    'cilium_operator_ipam_resync_latency_seconds_sum': 'operator.ipam.resync.latency_seconds.sum',
-    'cilium_operator_ipam_resync_latency_seconds_count': 'operator.ipam.resync.latency_seconds.count',
+    'cilium_operator_ipam_resync_latency_seconds': 'operator.ipam.resync.latency.seconds',
     'cilium_operator_ipam_resync_queued_total': 'operator.ipam.resync.queued.total',
     'cilium_operator_ipam_resync_total': 'operator.ipam.resync.total',
-    'cilium_operator_num_ceps_per_ces_sum': 'operator.num_ceps_per_ces.sum',
-    'cilium_operator_num_ceps_per_ces_count': 'operator.num_ceps_per_ces.count',
+    'cilium_operator_number_of_ceps_per_ces': 'operator.num_ceps_per_ces',
+    'cilium_operator_ces_queueing_delay_seconds': 'operator.ces.queueing_delay.seconds',
+    'cilium_operator_ces_sync_errors_total': 'operator.ces.sync_errors.total',
+    'cilium_operator_identity_gc_entries': 'operator.identity_gc.entries',
+    'cilium_operator_identity_gc_runs': 'operator.identity_gc.runs',
 }

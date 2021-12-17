@@ -3,7 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.cilium import CiliumCheck
 
-from .common import ADDL_AGENT_METRICS, AGENT_DEFAULT_METRICS, CILIUM_VERSION, OPERATOR_AWS_METRICS, OPERATOR_METRICS
+from .common import (
+    ADDL_AGENT_METRICS,
+    AGENT_DEFAULT_METRICS,
+    CILIUM_VERSION,
+    OPERATOR_AWS_METRICS_1_8,
+    OPERATOR_AWS_METRICS_PRE_1_8,
+    OPERATOR_METRICS,
+)
 
 
 def test_agent_check(aggregator, agent_instance, mock_agent_data, dd_run_check):
@@ -19,7 +26,7 @@ def test_operator_check(aggregator, operator_instance, mock_operator_data, dd_ru
     c = CiliumCheck('cilium', {}, [operator_instance])
 
     dd_run_check(c)
-    for m in OPERATOR_METRICS + OPERATOR_AWS_METRICS:
+    for m in OPERATOR_METRICS + OPERATOR_AWS_METRICS_PRE_1_8 + OPERATOR_AWS_METRICS_1_8:
         aggregator.assert_metric(m)
     aggregator.assert_all_metrics_covered()
 
