@@ -1,11 +1,10 @@
 import pytest
 from mock import Mock
 
-from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.ibm_mq.collectors import QueueMetricCollector
 from datadog_checks.ibm_mq.config import IBMMQConfig
 
-pytestmark = [pytest.mark.unit, pytest.mark.skipif(ON_WINDOWS)]
+pytestmark = pytest.mark.unit
 
 
 def test_pattern_preceedes_autodiscovery(instance):

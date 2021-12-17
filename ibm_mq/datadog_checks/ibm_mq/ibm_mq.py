@@ -25,7 +25,7 @@ except ImportError as e:
 
 
 class IbmMqCheck(AgentCheck):
-    SERVICE_CHECK = 'ibm_mq.can_connect'  # TODO remove this comment
+    SERVICE_CHECK = 'ibm_mq.can_connect'
 
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None

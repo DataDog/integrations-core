@@ -4,9 +4,7 @@
 
 import pytest
 
-from datadog_checks.dev.utils import ON_WINDOWS
-
-pytestmark = [pytest.mark.unit, pytest.mark.skipif(ON_WINDOWS)]
+pytestmark = pytest.mark.unit
 
 
 @pytest.mark.parametrize(

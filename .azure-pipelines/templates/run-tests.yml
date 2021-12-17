@@ -16,7 +16,6 @@ steps:
     displayName: 'Run Unit/Integration tests'
     env:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
-    continueOnError: true
 
 - ${{ if and(eq(parameters.test, 'true'), not(eq(parameters.coverage, 'true'))) }}:
     - script: ddev test --junit ${{ parameters.ddtrace_flag }} ${{ parameters.check }}
