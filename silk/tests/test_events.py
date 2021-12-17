@@ -5,7 +5,6 @@ import json
 import os
 
 import mock
-import pytest
 
 from datadog_checks.dev.fs import read_file
 from datadog_checks.silk import SilkCheck

@@ -43,5 +43,5 @@ def test_error_msg_response(dd_run_check, aggregator, instance):
     with mock.patch('datadog_checks.base.utils.http.requests.Response.json') as g:
         g.return_value = error_response
         check = SilkCheck('silk', {}, [instance])
-        check.check(instance)
+        dd_run_check(check)
         aggregator.assert_service_check('silk.can_connect', SilkCheck.WARNING)
