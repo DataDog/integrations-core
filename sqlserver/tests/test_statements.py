@@ -39,7 +39,14 @@ def dbm_instance(instance_docker):
     instance_docker['dbm'] = True
     instance_docker['min_collection_interval'] = 1
     # set a very small collection interval so the tests go fast
-    instance_docker['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    instance_docker['query_metrics'] = {
+        'enabled': True,
+        'run_sync': True,
+        'collection_interval': 0.1,
+        # in tests sometimes things can slow down so we don't want this short deadline causing some events
+        # to fail to be collected on time
+        'enforce_collection_interval_deadline': False,
+    }
     return copy(instance_docker)
 
 
@@ -330,6 +337,35 @@ def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
 
 
 XML_PLANS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "xml_plans")
+
+
+@pytest.mark.parametrize("slow_plans", [True, False])
+@pytest.mark.skip(reason="skip to see if this test is why the tests get stuck")
+def test_plan_collection_deadline(aggregator, dd_run_check, dbm_instance, slow_plans):
+    dbm_instance['query_metrics']['enforce_collection_interval_deadline'] = True
+
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    def _mock_slow_load_plan(*_):
+        if not slow_plans:
+            check.log.debug("_mock_slow_load_plan instant return")
+            return
+        interval = dbm_instance['query_metrics']['collection_interval']
+        check.log.debug("_mock_slow_load_plan sleeping %s seconds", interval)
+        time.sleep(interval)
+
+    aggregator.reset()
+
+    with mock.patch.object(check.statement_metrics, '_load_plan', passthrough=True) as mock_obj:
+        mock_obj.side_effect = _mock_slow_load_plan
+        dd_run_check(check)
+
+    expected_debug_tags = ['agent_hostname:stubbed.hostname'] + _expected_dbm_instance_tags(dbm_instance)
+
+    if slow_plans:
+        aggregator.assert_metric("dd.sqlserver.statements.deadline_exceeded", tags=expected_debug_tags)
+    else:
+        aggregator.assert_metric("dd.sqlserver.statements.deadline_exceeded", count=0)
 
 
 def _strip_whitespace(raw_plan):

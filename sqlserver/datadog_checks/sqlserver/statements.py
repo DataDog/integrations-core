@@ -135,6 +135,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self.dm_exec_query_stats_row_limit = int(
             check.statement_metrics_config.get('dm_exec_query_stats_row_limit', 10000)
         )
+        self.enforce_collection_interval_deadline = bool(
+            check.statement_metrics_config.get('enforce_collection_interval_deadline', True)
+        )
         self._state = StatementMetrics()
         self._init_caches()
         self._conn_key_prefix = "dbm-"
@@ -257,6 +260,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         :return:
         """
         plans_submitted = 0
+        deadline = time.time() + self.collection_interval
 
         # re-use the check's conn module, but set extra_key=dbm- to ensure we get our own
         # raw connection. adodbapi and pyodbc modules are thread safe, but connections are not.
@@ -269,7 +273,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     self.check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
                 payload = self._to_metrics_payload(rows)
                 self.check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
-                for event in self._collect_plans(rows, cursor):
+                for event in self._collect_plans(rows, cursor, deadline):
                     self.check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
                     plans_submitted += 1
 
@@ -328,8 +332,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         return result[0][0]
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _collect_plans(self, rows, cursor):
+    def _collect_plans(self, rows, cursor, deadline):
         for row in rows:
+            if self.enforce_collection_interval_deadline and time.time() > deadline:
+                self.log.debug("ending plan collection early because check deadline has been exceeded")
+                self.check.count("dd.sqlserver.statements.deadline_exceeded", 1, **self.check.debug_stats_kwargs())
+                return
             plan_key = (row['query_signature'], row['query_hash'], row['query_plan_hash'])
             if self._seen_plans_ratelimiter.acquire(plan_key):
                 raw_plan = self._load_plan(row['query_hash'], row['query_plan_hash'], cursor)

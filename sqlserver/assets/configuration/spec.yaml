@@ -244,6 +244,17 @@ files:
           value:
             type: integer
             example: 4
+        - name: enforce_collection_interval_deadline
+          description: |
+            By default, plan collection stops if it is time for the next run of the query metrics & plans loop. This
+            means that some plans may not be collected. If it is necessary to collect all of the plans and in doing so
+            cause delays in collecting query metrics, then this deadline can be disabled by setting this option to
+            false.
+          value:
+            type: boolean
+            example: True
+          hidden: true
+
     - name: query_activity
       description: Configure collection of active sessions monitoring
       options:
