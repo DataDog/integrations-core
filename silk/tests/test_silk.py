@@ -26,6 +26,7 @@ def test_check(aggregator, instance, dd_run_check):
     aggregator.assert_service_check('silk.server.state', SilkCheck.OK, count=2)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
+
 def mocked_requests_get(*args, **kwargs):
     class MockResponse:
         def __init__(self, json_data, status_code):
@@ -34,6 +35,7 @@ def mocked_requests_get(*args, **kwargs):
 
         def json(self):
             return self.json_data
+
 
 def test_error_msg_response(dd_run_check, aggregator, instance):
     error_response = {"error_msg": "Statistics data is unavailable while system is OFFLINE"}
