@@ -26,10 +26,20 @@ def test_check(aggregator, instance, dd_run_check):
     aggregator.assert_service_check('silk.server.state', SilkCheck.OK, count=2)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
+def mocked_requests_get(*args, **kwargs):
+    class MockResponse:
+        def __init__(self, json_data, status_code):
+            self.json_data = json_data
+            self.status_code = status_code
+
+        def json(self):
+            return self.json_data
 
 def test_error_msg_response(dd_run_check, aggregator, instance):
     error_response = {"error_msg": "Statistics data is unavailable while system is OFFLINE"}
-    with mock.patch('datadog_checks.silk.check.SilkCheck.parse_metrics', return_value=(error_response, 200)):
+    # with mock.patch('requests.get', side_effect=mocked_requests_get(error_response, 405)):
+    with mock.patch('datadog_checks.base.utils.http.requests.Response.json') as g:
+        g.return_value = error_response
         check = SilkCheck('silk', {}, [instance])
-        check.submit_system_state()
+        check.check(instance)
         aggregator.assert_service_check('silk.can_connect', SilkCheck.WARNING)
