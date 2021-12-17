@@ -63,6 +63,21 @@ METRICS = {
             },
         }
     ),
+    'stats/system?__bs_breakdown=True': Metric(
+        **{
+            'prefix': 'system.block_size',
+            'metrics': {
+                'iops_avg': 'io_ops.avg',
+                'latency_inner': 'latency.inner',
+                'latency_outer': 'latency.outer',
+                'throughput_avg': 'throughput.avg',
+            },
+            'tags': {
+                'resolution': 'resolution',
+                'bs': 'block_size',
+            },
+        }
+    ),
     'stats/volumes': Metric(
         **{
             'prefix': 'volume',
@@ -78,6 +93,23 @@ METRICS = {
                 'peer_k2_name': 'peer_name',
                 'volume_name': 'volume_name',
                 'resolution': 'resolution',
+            },
+        }
+    ),
+    'stats/volumes?__bs_breakdown=True': Metric(
+        **{
+            'prefix': 'volume.block_size',
+            'metrics': {
+                'iops_avg': ('io_ops.avg', 'gauge'),
+                'latency_inner': 'latency.inner',
+                'latency_outer': 'latency.outer',
+                'throughput_avg': 'throughput.avg',
+            },
+            'tags': {
+                'peer_k2_name': 'peer_name',
+                'volume_name': 'volume_name',
+                'resolution': 'resolution',
+                'bs': 'block_size',
             },
         }
     ),

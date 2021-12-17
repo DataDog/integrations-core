@@ -56,4 +56,12 @@ METRICS = [
     'silk.replication.volume.logical_out',
     'silk.replication.volume.physical_in',
     'silk.replication.volume.physical_out',
+    'silk.volume.block_size.io_ops.avg',
+    'silk.volume.block_size.latency.inner',
+    'silk.volume.block_size.latency.outer',
+    'silk.volume.block_size.throughput.avg',
+    'silk.system.block_size.io_ops.avg',
+    'silk.system.block_size.latency.inner',
+    'silk.system.block_size.latency.outer',
+    'silk.system.block_size.throughput.avg',
 ]
