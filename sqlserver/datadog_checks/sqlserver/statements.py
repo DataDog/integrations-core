@@ -42,7 +42,7 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
 
 STATEMENT_METRICS_QUERY = """\
 with qstats as (
-    select TOP {limit} text, query_hash, query_plan_hash,
+    select TOP {limit} text, query_hash, query_plan_hash, last_execution_time, plan_handle,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'user_id') as user_id,
            {query_metrics_columns}
@@ -50,7 +50,8 @@ with qstats as (
         cross apply sys.dm_exec_sql_text(sql_handle)
     where last_execution_time > dateadd(second, -?, getdate())
 )
-select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid, D.name as database_name, U.name as user_name,
+select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
+       D.name as database_name, U.name as user_name, max(plan_handle) as plan_handle,
     {query_metrics_column_sums}
     from qstats S
     left join sys.databases D on S.dbid = D.database_id
@@ -59,10 +60,8 @@ select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid, D.name as
 """
 
 PLAN_LOOKUP_QUERY = """\
-select cast(query_plan as nvarchar(max)) as query_plan from sys.dm_exec_query_stats
-    cross apply sys.dm_exec_query_plan(plan_handle)
-where
-    query_hash = CONVERT(varbinary(max), ?, 1) and query_plan_hash = CONVERT(varbinary(max), ?, 1)
+select cast(query_plan as nvarchar(max)) as query_plan
+from sys.dm_exec_query_plan(CONVERT(varbinary(max), ?, 1))
 """
 
 
@@ -223,6 +222,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
             row['query_hash'] = _hash_to_hex(row['query_hash'])
             row['query_plan_hash'] = _hash_to_hex(row['query_plan_hash'])
+            row['plan_handle'] = _hash_to_hex(row['plan_handle'])
             normalized_rows.append(row)
         return normalized_rows
 
@@ -321,10 +321,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self.collect_statement_metrics_and_plans()
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _load_plan(self, query_hash, query_plan_hash, cursor):
-        self.log.debug("collecting plan. query_hash=%s query_plan_hash=%s", query_hash, query_plan_hash)
-        self.log.debug("Running query [%s] %s", PLAN_LOOKUP_QUERY, (query_hash, query_plan_hash))
-        cursor.execute(PLAN_LOOKUP_QUERY, ("0x" + query_hash, "0x" + query_plan_hash))
+    def _load_plan(self, plan_handle, cursor):
+        self.log.debug("collecting plan. plan_handle=%s", plan_handle)
+        self.log.debug("Running query [%s] %s", PLAN_LOOKUP_QUERY, (plan_handle,))
+        cursor.execute(PLAN_LOOKUP_QUERY, ("0x" + plan_handle,))
         result = cursor.fetchall()
         if not result:
             self.log.debug("failed to loan plan, it must have just been expired out of the plan cache")
@@ -340,17 +340,21 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 return
             plan_key = (row['query_signature'], row['query_hash'], row['query_plan_hash'])
             if self._seen_plans_ratelimiter.acquire(plan_key):
-                raw_plan = self._load_plan(row['query_hash'], row['query_plan_hash'], cursor)
+                raw_plan = self._load_plan(row['plan_handle'], cursor)
                 obfuscated_plan, collection_errors = None, None
 
                 try:
                     obfuscated_plan = obfuscate_xml_plan(raw_plan)
                 except Exception as e:
                     self.log.debug(
-                        "failed to obfuscate XML Plan query_signature=%s query_hash=%s query_plan_hash=%s: %s",
+                        (
+                            "failed to obfuscate XML Plan query_signature=%s query_hash=%s "
+                            "query_plan_hash=%s plan_handle=%s: %s"
+                        ),
                         row['query_signature'],
                         row['query_hash'],
                         row['query_plan_hash'],
+                        row['plan_handle'],
                         e,
                     )
                     collection_errors = [{'code': "obfuscate_xml_plan_error", 'message': str(e)}]
