@@ -10,7 +10,7 @@ from . import common
 pytestmark = [pytest.mark.e2e, common.snmp_integration_only]
 
 
-def assert_all_metadata(aggregator, events):
+def assert_metadata_events(aggregator, events):
     actual_events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
     for event in actual_events:
         # `collect_timestamp` depend on check run time and cannot be asserted reliably,
@@ -143,7 +143,7 @@ def test_e2e_core_metadata_f5(dd_agent_check):
             u'subnet': u'',
         },
     ]
-    assert_all_metadata(aggregator, events)
+    assert_metadata_events(aggregator, events)
 
 
 def test_e2e_core_metadata_cisco_3850(dd_agent_check):
