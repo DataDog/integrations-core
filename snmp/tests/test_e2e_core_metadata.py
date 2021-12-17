@@ -10,7 +10,7 @@ from . import common
 pytestmark = [pytest.mark.e2e, common.snmp_integration_only]
 
 
-def assert_network_devices_metadata(aggregator, events):
+def assert_all_metadata(aggregator, events):
     actual_events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
     for event in actual_events:
         # `collect_timestamp` depend on check run time and cannot be asserted reliably,
@@ -18,6 +18,17 @@ def assert_network_devices_metadata(aggregator, events):
         if 'collect_timestamp' in event:
             event['collect_timestamp'] = 0
     assert events == actual_events
+
+
+def assert_device_metadata(aggregator, device_metadata):
+    events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
+    assert len(events) == 1
+    event1 = events[0]
+
+    pprint.pprint(event1['devices'])
+    assert len(event1['devices']) == 1
+
+    assert device_metadata == event1['devices'][0]
 
 
 def test_e2e_core_metadata_f5(dd_agent_check):
@@ -132,7 +143,7 @@ def test_e2e_core_metadata_f5(dd_agent_check):
             u'subnet': u'',
         },
     ]
-    assert_network_devices_metadata(aggregator, events)
+    assert_all_metadata(aggregator, events)
 
 
 def test_e2e_core_metadata_cisco_3850(dd_agent_check):
@@ -219,14 +230,6 @@ def test_e2e_core_metadata_cisco_catalyst(dd_agent_check):
 
     device_ip = instance['ip_address']
 
-    events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
-    assert len(events) == 1
-    event1 = events[0]
-
-    # assert device (there is only one device)
-    pprint.pprint(event1['devices'])
-    assert len(event1['devices']) == 1
-    actual_device = event1['devices'][0]
     device = {
         u'id': u'default:' + device_ip,
         u'id_tags': [
@@ -248,7 +251,7 @@ def test_e2e_core_metadata_cisco_catalyst(dd_agent_check):
         u'vendor': u'cisco',
         u'serial_number': u'SCA044001J9',
     }
-    assert device == actual_device
+    assert_device_metadata(aggregator, device)
 
 
 def test_e2e_core_metadata_apc_ups(dd_agent_check):
@@ -265,14 +268,6 @@ def test_e2e_core_metadata_apc_ups(dd_agent_check):
 
     device_ip = instance['ip_address']
 
-    events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
-    assert len(events) == 1
-    event1 = events[0]
-
-    # assert device (there is only one device)
-    pprint.pprint(event1['devices'])
-    assert len(event1['devices']) == 1
-    actual_device = event1['devices'][0]
     device = {
         'description': 'APC Web/SNMP Management Card (MB:v3.9.2 PF:v3.9.2 '
         'PN:apc_hw02_aos_392.bin AF1:v3.7.2 AN1:apc_hw02_sumx_372.bin '
@@ -305,4 +300,4 @@ def test_e2e_core_metadata_apc_ups(dd_agent_check):
         'vendor': 'apc',
         'version': '2.0.3-test',
     }
-    assert device == actual_device
+    assert_device_metadata(aggregator, device)
