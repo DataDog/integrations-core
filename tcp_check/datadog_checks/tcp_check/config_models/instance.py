@@ -23,6 +23,7 @@ class InstanceConfig(BaseModel):
     host: str
     ip_cache_duration: Optional[float]
     min_collection_interval: Optional[float]
+    multiple_ips: Optional[bool]
     name: str
     port: int
     service: Optional[str]
