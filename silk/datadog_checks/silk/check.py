@@ -155,11 +155,19 @@ class SilkCheck(AgentCheck):
                     metric_tags.append("{}:{}".format(tag_name, item.get(key)))
 
             for key, metric in metrics_mapping.metrics.items():
-                metric_name, method = metric
+                metric_part = None
+                raw_metric_name, method = metric
+
+                if metrics_mapping.field_to_name:
+                    for field, name_map in metrics_mapping.field_to_name.items():
+                        metric_part = name_map.get(item.get(field))
                 if key in item:
-                    get_method(self, method)(
-                        "{}.{}".format(metrics_mapping.prefix, metric_name), item.get(key), tags=metric_tags
-                    )
+                    if metric_part:
+                        name = "{}.{}.{}".format(metrics_mapping.prefix, metric_part, raw_metric_name)
+                    else:
+                        name = "{}.{}".format(metrics_mapping.prefix, raw_metric_name)
+
+                    get_method(self, method)(name, item.get(key), tags=metric_tags)
 
     def _get_data(self, path):
         url = urljoin(self.url, path)

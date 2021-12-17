@@ -9,9 +9,10 @@ class Metric(object):
         - the metric sub prefix,
         - metrics mapping (response JSON key to metric name and metric type)
         - tags mapping (response JSON key to tag name)
+        - field_to_name (response JSON key to metric name)
     """
 
-    def __init__(self, prefix, metrics, tags=None):
+    def __init__(self, prefix, metrics, tags=None, field_to_name=None):
         self.prefix = prefix
         for key, name_method in metrics.items():
             if isinstance(name_method, tuple):
@@ -21,6 +22,7 @@ class Metric(object):
 
         self.metrics = metrics
         self.tags = tags if tags else {}
+        self.field_to_name = field_to_name if field_to_name else {}
 
 
 METRICS = {
@@ -78,6 +80,26 @@ METRICS = {
             },
         }
     ),
+    'stats/system?__rw_breakdown=True': Metric(
+        **{
+            'prefix': 'system',
+            'metrics': {
+                'iops_avg': 'io_ops.avg',
+                'latency_inner': 'latency.inner',
+                'latency_outer': 'latency.outer',
+                'throughput_avg': 'throughput.avg',
+            },
+            'tags': {
+                'resolution': 'resolution',
+            },
+            'field_to_name': {
+                'rw': {
+                    'r': 'read',
+                    'w': 'write',
+                }
+            },
+        }
+    ),
     'stats/volumes': Metric(
         **{
             'prefix': 'volume',
@@ -110,6 +132,28 @@ METRICS = {
                 'volume_name': 'volume_name',
                 'resolution': 'resolution',
                 'bs': 'block_size',
+            },
+        }
+    ),
+    'stats/volumes?__rw_breakdown=True': Metric(
+        **{
+            'prefix': 'volume',
+            'metrics': {
+                'iops_avg': ('io_ops.avg', 'gauge'),
+                'latency_inner': 'latency.inner',
+                'latency_outer': 'latency.outer',
+                'throughput_avg': 'throughput.avg',
+            },
+            'tags': {
+                'peer_k2_name': 'peer_name',
+                'volume_name': 'volume_name',
+                'resolution': 'resolution',
+            },
+            'field_to_name': {
+                'rw': {
+                    'r': 'read',
+                    'w': 'write',
+                }
             },
         }
     ),
