@@ -126,7 +126,7 @@ def test_custom_queries_invalid_metrics(dd_environment, dd_run_check, instance, 
             'metrics': [
                 {
                     'datadog_metric_name': 'elasticsearch.custom.metric',
-                    'es_metric_name': '_nodes.totals', # no metric here
+                    'es_metric_name': '_nodes.totals',  # no metric here
                     'type': 'monotonic_count',
                     'tags': ['custom_tag:1'],
                 },
