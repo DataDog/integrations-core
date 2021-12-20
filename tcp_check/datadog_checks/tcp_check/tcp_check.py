@@ -25,9 +25,10 @@ class TCPCheck(AgentCheck):
         self.collect_response_time = instance.get('collect_response_time', False)
         self.host = instance.get('host', None)
         self.socket_type = None
-        self._addr = None
+        self._addrs = None
         self.ip_cache_last_ts = 0
         self.ip_cache_duration = self.DEFAULT_IP_CACHE_DURATION
+        self.multiple_ips = instance.get('multiple_ips', False)
 
         ip_cache_duration = instance.get('ip_cache_duration', None)
         if ip_cache_duration is not None:
@@ -68,89 +69,108 @@ class TCPCheck(AgentCheck):
                         self.CONFIGURATION_ERROR_MSG.format(self.host, 'IPv6 address', 'valid address')
                     )
             # It's a correct IP V6 address
-            self._addr = self.host
+            self._addrs = self.host
             self.socket_type = socket.AF_INET6
         else:
             self.socket_type = socket.AF_INET
             # IP will be resolved at check time
 
     @property
-    def addr(self):
-        if self._addr is None:
+    def addrs(self):
+        if self._addrs is None or self._addrs == []:
             try:
-                self.resolve_ip()
+                self.resolve_ips()
             except Exception as e:
                 self.log.error(str(e))
                 msg = "URL: {} could not be resolved".format(self.host)
                 raise CheckException(msg)
-        return self._addr
+        return self._addrs
 
-    def resolve_ip(self):
-        self._addr = socket.gethostbyname(self.host)
-        self.log.debug("%s resolved to %s", self.host, self._addr)
+    def resolve_ips(self):
+        if self.multiple_ips:
+            _, _, self._addrs = socket.gethostbyname_ex(self.host)
+        else:
+            self._addrs = [socket.gethostbyname(self.host)]
 
-    def should_resolve_ip(self):
+        if self._addrs == []:
+            raise Exception("No IPs attached to host")
+        self.log.debug("%s resolved to %s", self.host, self._addrs)
+
+    def should_resolve_ips(self):
         if self.ip_cache_duration is None:
             return False
         return get_precise_time() - self.ip_cache_last_ts > self.ip_cache_duration
 
-    def connect(self):
+    def connect(self, addr):
         with closing(socket.socket(self.socket_type)) as sock:
             sock.settimeout(self.timeout)
             start = get_precise_time()
-            sock.connect((self.addr, self.port))
+            sock.connect((addr, self.port))
             response_time = get_precise_time() - start
             return response_time
 
     def check(self, _):
         start = get_precise_time()  # Avoid initialisation warning
 
-        if self.should_resolve_ip():
-            self.resolve_ip()
+        if self.should_resolve_ips():
+            self.resolve_ips()
             self.ip_cache_last_ts = start
 
         self.log.debug("Connecting to %s on port %d", self.host, self.port)
-        try:
-            response_time = self.connect()
-            self.log.debug("%s:%d is UP", self.host, self.port)
-            self.report_as_service_check(AgentCheck.OK, 'UP')
-            if self.collect_response_time:
-                self.gauge(
-                    'network.tcp.response_time',
-                    response_time,
-                    tags=self.tags,
-                )
-        except Exception as e:
-            length = int((get_precise_time() - start) * 1000)
-            if isinstance(e, socket.error) and "timed out" in str(e):
-                # The connection timed out because it took more time than the system tcp stack allows
-                self.log.warning(
-                    'The connection timed out because it took more time '
-                    'than the system tcp stack allows. You might want to '
-                    'change this setting to allow longer timeouts'
-                )
-                self.log.info("System tcp timeout. Assuming that the checked system is down")
-                self.report_as_service_check(
-                    AgentCheck.CRITICAL,
-                    """Socket error: {}.
-                 The connection timed out after {} ms because it took more time than the system tcp stack allows.
-                 You might want to change this setting to allow longer timeouts""".format(
-                        str(e), length
-                    ),
-                )
-            else:
-                self.log.info("%s:%d is DOWN (%s). Connection failed after %d ms", self.host, self.port, str(e), length)
-                self.report_as_service_check(
-                    AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length)
-                )
 
-            if self.socket_type == socket.AF_INET:
-                self.log.debug("Will attempt to re-resolve IP for %s:%d on next run", self.host, self.port)
-                self._addr = None
+        for addr in self.addrs:
+            try:
+                response_time = self.connect(addr)
+                self.log.debug("%s:%d is UP (%s)", self.host, self.port, addr)
+                self.report_as_service_check(AgentCheck.OK, addr, 'UP')
+                if self.collect_response_time:
+                    self.gauge(
+                        'network.tcp.response_time',
+                        response_time,
+                        tags=self.tags + ['address:{}'.format(addr)],
+                    )
+            except Exception as e:
+                length = int((get_precise_time() - start) * 1000)
+                if isinstance(e, socket.error) and "timed out" in str(e):
+                    # The connection timed out because it took more time than the system tcp stack allows
+                    self.log.warning(
+                        'The connection timed out because it took more time '
+                        'than the system tcp stack allows. You might want to '
+                        'change this setting to allow longer timeouts'
+                    )
+                    self.log.info("System tcp timeout. Assuming that the checked system is down")
+                    self.report_as_service_check(
+                        AgentCheck.CRITICAL,
+                        addr,
+                        """Socket error: {}.
+                    The connection timed out after {} ms because it took more time than the system tcp stack allows.
+                    You might want to change this setting to allow longer timeouts""".format(
+                            str(e), length
+                        ),
+                    )
+                else:
+                    self.log.info(
+                        "%s:%d is DOWN (%s) (%s). Connection failed after %d ms",
+                        self.host,
+                        self.port,
+                        addr,
+                        str(e),
+                        length,
+                    )
+                    self.report_as_service_check(
+                        AgentCheck.CRITICAL, addr, "{}. Connection failed after {} ms".format(str(e), length)
+                    )
 
-    def report_as_service_check(self, status, msg=None):
+                if self.socket_type == socket.AF_INET:
+                    self.log.debug("Will attempt to re-resolve IP for %s:%d on next run", self.host, self.port)
+                    self._addrs = None
+
+    def report_as_service_check(self, status, addr, msg=None):
         if status is AgentCheck.OK:
             msg = None
-        self.service_check(self.SERVICE_CHECK_NAME, status, tags=self.service_check_tags, message=msg)
+        extra_tags = ['address:{}'.format(addr)]
+        self.service_check(self.SERVICE_CHECK_NAME, status, tags=self.service_check_tags + extra_tags, message=msg)
         # Report as a metric as well
-        self.gauge("network.tcp.can_connect", 1 if status == AgentCheck.OK else 0, tags=self.service_check_tags)
+        self.gauge(
+            "network.tcp.can_connect", 1 if status == AgentCheck.OK else 0, tags=self.service_check_tags + extra_tags
+        )

@@ -7,7 +7,7 @@ from itertools import chain
 
 import simplejson as json
 from six import PY3, iteritems, text_type
-from six.moves.urllib.parse import urlparse
+from six.moves.urllib.parse import urljoin, urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
 from datadog_checks.base.utils.time import get_timestamp
@@ -52,6 +52,7 @@ class Nginx(AgentCheck):
         self.url = self.instance.get('nginx_status_url')
         self.use_plus_api = self.instance.get("use_plus_api", False)
         self.use_plus_api_stream = self.instance.get("use_plus_api_stream", True)
+        self.only_query_enabled_endpoints = self.instance.get("only_query_enabled_endpoints", False)
         self.plus_api_version = str(self.instance.get("plus_api_version", 2))
         self.use_vts = self.instance.get('use_vts', False)
 
@@ -90,6 +91,65 @@ class Nginx(AgentCheck):
             except Exception as e:
                 self.log.error('Could not submit metric: %s: %s', repr(row), e)
 
+    def _get_enabled_endpoints(self):
+        """
+        Dynamically determines which NGINX endpoints are enabled and Datadog supports getting metrics from
+        by querying the NGINX APIs that list availabled endpoints. If an error is encountered,
+        then it falls back to query all of the known endpoints available in the given NGINX Plus version.
+        """
+        available_endpoints = set()
+
+        base_url = urljoin(self.url + "/", self.plus_api_version)
+        http_url = urljoin(self.url + "/", self.plus_api_version + "/http")
+        stream_url = urljoin(self.url + "/", self.plus_api_version + "/stream")
+
+        try:
+            self.log.debug("Querying base API url: %s", base_url)
+            r = self._perform_request(base_url)
+            r.raise_for_status()
+            available_endpoints = set(r.json())
+            http_avail = "http" in available_endpoints
+            stream_avail = "stream" in available_endpoints
+
+            if http_avail:
+                self.log.debug("Querying http API url: %s", http_url)
+                r = self._perform_request(http_url)
+                r.raise_for_status()
+                endpoints = set(r.json())
+                http_endpoints = {'http/{}'.format(endpoint) for endpoint in endpoints}
+                available_endpoints = available_endpoints.union(http_endpoints)
+
+            if self.use_plus_api_stream and stream_avail:
+                self.log.debug("Querying stream API url: %s", stream_url)
+                r = self._perform_request(stream_url)
+                r.raise_for_status()
+                endpoints = set(r.json())
+                stream_endpoints = {'stream/{}'.format(endpoint) for endpoint in endpoints}
+                available_endpoints = available_endpoints.union(stream_endpoints)
+
+            self.log.debug("Available endpoints are %s", available_endpoints)
+
+            supported_endpoints = self._supported_endpoints(available_endpoints)
+            self.log.debug("Supported endpoints are %s", supported_endpoints)
+            return chain(iteritems(supported_endpoints))
+        except Exception as e:
+            self.log.warning(
+                "Could not determine available endpoints from the API, "
+                "falling back to monitor all endpoints supported in nginx version %s, %s",
+                self.plus_api_version,
+                str(e),
+            )
+            return self._get_all_plus_api_endpoints()
+
+    def _supported_endpoints(self, available_endpoints):
+        """
+        Returns the endpoints that are both supported by this NGINX instance, and
+        that the integration supports collecting metrics from
+        """
+        return {
+            endpoint: nest for endpoint, nest in self._get_all_plus_api_endpoints() if endpoint in available_endpoints
+        }
+
     def collect_plus_metrics(self):
         metrics = []
         self._perform_service_check('{}/{}'.format(self.url, self.plus_api_version))
@@ -97,7 +157,9 @@ class Nginx(AgentCheck):
         # These are all the endpoints we have to call to get the same data as we did with the old API
         # since we can't get everything in one place anymore.
 
-        plus_api_chain_list = self._get_all_plus_api_endpoints()
+        plus_api_chain_list = (
+            self._get_enabled_endpoints() if self.only_query_enabled_endpoints else self._get_all_plus_api_endpoints()
+        )
 
         for endpoint, nest in plus_api_chain_list:
             response = self._get_plus_api_data(endpoint, nest)
@@ -186,6 +248,10 @@ class Nginx(AgentCheck):
         return {keys[0]: self._nest_payload(keys[1:], payload)}
 
     def _get_plus_api_endpoints(self, use_stream=False):
+        """
+        Returns all of either stream or default endpoints that the integration supports
+        collecting metrics from based on the Plus API version
+        """
         endpoints = iteritems({})
 
         available_plus_endpoints = PLUS_API_STREAM_ENDPOINTS if use_stream else PLUS_API_ENDPOINTS
@@ -196,6 +262,9 @@ class Nginx(AgentCheck):
         return endpoints
 
     def _get_all_plus_api_endpoints(self):
+        """
+        Returns endpoints that the integration supports collecting metrics from based on the Plus API version
+        """
         endpoints = self._get_plus_api_endpoints()
 
         if self.use_plus_api_stream:
@@ -214,7 +283,7 @@ class Nginx(AgentCheck):
             r = self._perform_request(url)
             payload = self._nest_payload(nest, r.json())
         except Exception as e:
-            if endpoint in PLUS_API_STREAM_ENDPOINTS.values():
+            if not self.only_query_enabled_endpoints and endpoint in PLUS_API_STREAM_ENDPOINTS.values():
                 self.log.warning("Stream may not be initialized. Error querying %s metrics at %s: %s", endpoint, url, e)
             else:
                 self.log.exception("Error querying %s metrics at %s: %s", endpoint, url, e)
