@@ -57,7 +57,13 @@ trigger-agent-build:
   stage: trigger
   image: $VALIDATE_AGENT_BUILD
   # Exclude release branches
-  except: /^7.[0-9]{2}.x/
+  workflow:
+    rules:
+      - if: ($CI_COMMIT_BRANCH !~ /^7.[0-9]{2}.x/)
+        changes:
+          - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+        when: never
+      - when: on_success
   cache:
     <<: *slack-cache
   script:
