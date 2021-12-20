@@ -1441,7 +1441,7 @@ def test_hp_ilo4(aggregator):
     temperature_sensors = [1, 13, 28]
     batteries = [1, 3, 4, 5]
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile, 'device_vendor:hp']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile, 'device_vendor:hp', 'snmp_host:hp-ilo4.example']
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -1521,7 +1521,11 @@ def test_hp_ilo4(aggregator):
 def test_proliant(aggregator):
     run_profile_check('hpe-proliant')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:hpe-proliant', 'device_vendor:hp']
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:hpe-proliant',
+        'device_vendor:hp',
+        'snmp_host:hpe-proliant.example',
+    ]
 
     common.assert_common_metrics(aggregator, common_tags)
 
