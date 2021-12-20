@@ -112,9 +112,9 @@ OPERATOR_METRICS = {
     'cilium_operator_ipam_resync_latency_seconds': 'operator.ipam.resync.latency.seconds',
     'cilium_operator_ipam_resync_queued_total': 'operator.ipam.resync.queued.total',
     'cilium_operator_ipam_resync_total': 'operator.ipam.resync.total',
-    # 'cilium_operator_identity_gc_entries': 'operator.identity_gc.entries',    # v1.10
-    # 'cilium_operator_identity_gc_runs': 'operator.identity_gc.runs',          # v1.10
-    # 'cilium_operator_number_of_ceps_per_ces': 'operator.num_ceps_per_ces',    # v1.11
-    # 'cilium_operator_ces_queueing_delay_seconds': 'operator.ces.queueing_delay.seconds', #v1.11
-    # 'cilium_operator_ces_sync_errors_total': 'operator.ces.sync_errors.total',           #v1.11
+    'cilium_operator_identity_gc_entries': 'operator.identity_gc.entries',  # v1.10
+    'cilium_operator_identity_gc_runs': 'operator.identity_gc.runs',  # v1.10
+    'cilium_operator_number_of_ceps_per_ces': 'operator.num_ceps_per_ces',  # v1.11
+    'cilium_operator_ces_queueing_delay_seconds': 'operator.ces.queueing_delay.seconds',  # v1.11
+    'cilium_operator_ces_sync_errors_total': 'operator.ces.sync_errors.total',  # v1.11
 }
