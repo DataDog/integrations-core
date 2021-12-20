@@ -84,13 +84,13 @@ OPERATOR_METRICS = [
     'cilium.operator.process.start_time.seconds',
     'cilium.operator.process.virtual_memory.bytes',
     'cilium.operator.process.virtual_memory_max.bytes',
-    # 'cilium.operator.identity_gc.entries',    # v1.10
-    # 'cilium.operator.identity_gc.runs',       # v1.10
-    # 'cilium.operator.num_ceps_per_ces.sum',   # v1.11
-    # 'cilium.operator.num_ceps_per_ces.count', # v1.11
-    # 'cilium.operator.ces.queueing_delay.seconds.sum',     # v1.11
-    # 'cilium.operator.ces.queueing_delay.seconds.count',   # v1.11
-    # 'cilium.operator.ces.sync_errors.total',              # v1.11
+    'cilium.operator.identity_gc.entries',  # v1.10
+    'cilium.operator.identity_gc.runs',  # v1.10
+    'cilium.operator.num_ceps_per_ces.sum',  # v1.11
+    'cilium.operator.num_ceps_per_ces.count',  # v1.11
+    'cilium.operator.ces.queueing_delay.seconds.sum',  # v1.11
+    'cilium.operator.ces.queueing_delay.seconds.count',  # v1.11
+    'cilium.operator.ces.sync_errors.total',  # v1.11
 ]
 
 OPERATOR_AWS_METRICS_PRE_1_8 = [
@@ -150,11 +150,10 @@ OPERATOR_AWS_METRICS_1_8 = [
     'cilium.operator.ipam.resync.total',
 ]
 
-# Not currently tested
 ADDL_OPERATOR_AWS_METRICS = [
-    'cilium.operator.ec2.api.rate_limit.duration.seconds.sum',
-    'cilium.operator.ec2.api.rate_limit.duration.seconds.count',
-    'cilium.operator.ipam.allocation_ops',
-    'cilium.operator.ipam.release_ops',
-    'cilium.operator.ipam.interface_creation_ops',
+    'cilium.operator.ec2.api.rate_limit.duration.seconds.sum',  # v1.10
+    'cilium.operator.ec2.api.rate_limit.duration.seconds.count',  # v1.10
+    'cilium.operator.ipam.allocation_ops',  # v1.10
+    'cilium.operator.ipam.release_ops',  # v1.10
+    'cilium.operator.ipam.interface_creation_ops',  # v1.10
 ]
