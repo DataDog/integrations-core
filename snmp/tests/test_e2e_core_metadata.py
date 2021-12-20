@@ -7,7 +7,7 @@ import pytest
 
 from . import common
 
-pytestmark = [pytest.mark.e2e, common.snmp_integration_only]
+pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
 
 def assert_network_devices_metadata(aggregator, events):

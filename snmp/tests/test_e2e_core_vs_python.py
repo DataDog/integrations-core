@@ -10,7 +10,7 @@ from datadog_checks.base.stubs.common import MetricStub
 
 from . import common
 
-pytestmark = [pytest.mark.e2e, common.snmp_integration_only]
+pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
 SUPPORTED_METRIC_TYPES = [
     {'MIB': 'ABC', 'symbol': {'OID': "1.3.6.1.2.1.7.1.0", 'name': "IAmACounter32"}},  # Counter32
