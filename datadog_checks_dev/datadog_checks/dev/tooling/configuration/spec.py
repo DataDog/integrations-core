@@ -143,8 +143,7 @@ def options_validator(options, loader, file_name, *sections):
 
             overrides.update(option.pop('overrides', {}))
             try:
-                original_template = option.pop('template')
-                template = loader.templates.load(original_template)
+                template = loader.templates.load(option.pop('template'))
 
                 # Handle the case where a template name is overriden
                 if 'name' in option:
