@@ -60,7 +60,7 @@ def setup_cilium():
             "--set",
             "ipam.mode=kubernetes",
             "--set",
-            "global.prometheus.enabled=true"
+            "global.prometheus.enabled=true",
         ]
     )
     run_command(
