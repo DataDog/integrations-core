@@ -492,7 +492,7 @@ class ESCheck(AgentCheck):
                         break
 
                 if value is not None:
-                    dynamic_tag = "{}:{}".format(es_name, value)
+                    dynamic_tag = "{}:{}".format(dd_name, value)
                     dynamic_tags.append(dynamic_tag)
                 else:
                     self.log.debug("Dynamic tag not found: %s -> %s", tag_path, dd_name)
