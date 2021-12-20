@@ -140,11 +140,7 @@ INSTANCE_QUEUE_REGEX_TAG = {
 E2E_METADATA = {
     'docker_volumes': ['{}/agent_scripts/start_commands.sh:/tmp/start_commands.sh'.format(HERE)],
     'start_commands': ['bash /tmp/start_commands.sh'],
-    'env_vars': {
-        'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib',
-        'C_INCLUDE_PATH': '/opt/mqm/inc',
-        'MQ_FILE_PATH': 'c:\\ibm_mq',
-    },
+    'env_vars': {'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib', 'C_INCLUDE_PATH': '/opt/mqm/inc'},
 }
 
 QUEUE_METRICS = [
