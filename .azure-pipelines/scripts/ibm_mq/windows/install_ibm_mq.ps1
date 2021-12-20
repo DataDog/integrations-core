@@ -9,7 +9,7 @@ function DownloadFile{
     $ProgressPreference = 'SilentlyContinue'
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-    Write-Host -ForegroundColor Green "Downloading $SourceUrl to $TargetFile"
+    Write-Output "Downloading $SourceUrl to $TargetFile"
     (New-Object System.Net.WebClient).DownloadFile($SourceURL, $TargetFile)
 }
 
@@ -27,6 +27,7 @@ function DownloadAndExpandTo{
         md $TargetDir
     }
 
+    Write-Output "Expanding $tmpOutFile to $TargetDir"
     Start-Process "7z" -ArgumentList "x -o${TargetDir} $tmpOutFile" -Wait
     Remove-Item $tmpOutFile
 }
