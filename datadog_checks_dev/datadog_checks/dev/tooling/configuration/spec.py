@@ -144,7 +144,6 @@ def options_validator(options, loader, file_name, *sections):
             overrides.update(option.pop('overrides', {}))
             try:
                 template = loader.templates.load(option.pop('template'))
-
             except Exception as e:
                 loader.errors.append(f'{loader.source}, {file_name}, {sections_display}option #{option_index}: {e}')
                 break
