@@ -64,6 +64,13 @@ class IsPublicValidator(BaseManifestValidator):
             else:
                 self.fail(output)
 
+        if not is_public:
+            message = (
+                f"  {check_name}: `is_public` is disabled, set to `True` "
+                f"if you want the integration documentation to be published."
+            )
+            self.warning(message)
+
 
 class ManifestVersionValidator(BaseManifestValidator):
     def __init__(self, *args, **kwargs):

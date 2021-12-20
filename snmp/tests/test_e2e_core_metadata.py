@@ -7,7 +7,7 @@ import pytest
 
 from . import common
 
-pytestmark = [pytest.mark.e2e, common.snmp_integration_only]
+pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
 
 def assert_metadata_events(aggregator, events):
@@ -254,6 +254,92 @@ def test_e2e_core_metadata_cisco_catalyst(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
 
+def test_e2e_core_metadata_hp_ilo4(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'hp-ilo4',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        u'id': u'default:' + device_ip,
+        u'id_tags': [
+            u'device_namespace:default',
+            u'snmp_device:' + device_ip,
+        ],
+        u'ip_address': device_ip,
+        u'model': u'iLO4',
+        u'os_name': u'RHEL',
+        u'os_version': u'3.10.0-862.14.4.el7.ve.x86_64',
+        u'product_name': u'Integrated Lights-Out',
+        u'name': u'hp-ilo4.example',
+        u'profile': u'hp-ilo4',
+        u'status': 1,
+        u'sys_object_id': u'1.3.6.1.4.1.232.9.4.10',
+        u'version': u'A04-08/12/2018',
+        u'tags': [
+            u'device_namespace:default',
+            u'device_vendor:hp',
+            u'snmp_device:' + device_ip,
+            u'snmp_host:hp-ilo4.example',
+            u'snmp_profile:hp-ilo4',
+        ],
+        u'vendor': u'hp',
+        u'serial_number': u'dXPEdPBE5yKtjW9xx3',
+    }
+    assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_hpe_proliant(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'hpe-proliant',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        u'id': u'default:' + device_ip,
+        u'id_tags': [
+            u'device_namespace:default',
+            u'snmp_device:' + device_ip,
+        ],
+        u'ip_address': device_ip,
+        u'name': u'hpe-proliant.example',
+        u'profile': u'hpe-proliant',
+        u'status': 1,
+        u'model': u'BL35p G1',
+        u'os_name': u'RHEL',
+        u'os_version': u'3.10.0-862.15.4.el7.ve.x86_64',
+        u'product_name': u'ProLiant',
+        u'version': u'A04-08/12/2019',
+        u'sys_object_id': u'1.3.6.1.4.1.232.1.2',
+        u'tags': [
+            u'device_namespace:default',
+            u'device_vendor:hp',
+            u'snmp_device:' + device_ip,
+            u'snmp_host:hpe-proliant.example',
+            u'snmp_profile:hpe-proliant',
+        ],
+        u'vendor': u'hp',
+        u'serial_number': u'dLPEdPBE5yKtjW9xx3',
+    }
+    assert_device_metadata(aggregator, device)
+
+
 def test_e2e_core_metadata_apc_ups(dd_agent_check):
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
@@ -301,3 +387,4 @@ def test_e2e_core_metadata_apc_ups(dd_agent_check):
         'version': '2.0.3-test',
     }
     assert_device_metadata(aggregator, device)
+
