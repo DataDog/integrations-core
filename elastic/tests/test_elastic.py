@@ -95,11 +95,7 @@ def test_custom_queries_valid_metrics(dd_environment, dd_run_check, instance, ag
                     'es_name': 'total',
                     'dd_name': 'elasticsearch.custom.metric',
                 },
-                {
-                    'es_name': 'total',
-                    'dd_name': 'elasticsearch.custom.metric2',
-                    'type': 'monotonic_count'
-                },
+                {'es_name': 'total', 'dd_name': 'elasticsearch.custom.metric2', 'type': 'monotonic_count'},
             ],
         },
     ]
@@ -125,7 +121,7 @@ def test_custom_queries_valid_tags(dd_environment, dd_run_check, instance, aggre
                     'dd_name': 'elasticsearch.custom.metric',
                 },
             ],
-            'static_tags': ['custom_tag:1']
+            'static_tags': ['custom_tag:1'],
         },
     ]
 
@@ -150,7 +146,7 @@ def test_custom_queries_non_existent_metrics(caplog, dd_environment, dd_run_chec
                     'dd_name': 'elasticsearch.custom.metric',
                 },
             ],
-            'static_tags': ['custom_tag:1']
+            'static_tags': ['custom_tag:1'],
         },
     ]
     instance = deepcopy(instance)
@@ -179,10 +175,10 @@ def test_custom_queries_non_existent_tags(caplog, dd_environment, dd_run_check, 
                 {
                     'es_name': 'totals',  # nonexistent elasticsearch metric as tag
                     'dd_name': 'nonexistent_tag',
-                    'type': 'tag'
+                    'type': 'tag',
                 },
             ],
-            'static_tags': ['custom_tag:1']
+            'static_tags': ['custom_tag:1'],
         },
     ]
     instance = deepcopy(instance)
@@ -206,13 +202,9 @@ def test_custom_queries_only_tags(caplog, dd_environment, dd_run_check, instance
             'endpoint': '/_nodes',
             'path': '_nodes.',
             'columns': [
-                {
-                    'es_name': 'total',
-                    'dd_name': 'nonexistent_tag',
-                    'type': 'tag'
-                },
+                {'es_name': 'total', 'dd_name': 'nonexistent_tag', 'type': 'tag'},
             ],
-            'static_tags': ['custom_tag:1']
+            'static_tags': ['custom_tag:1'],
         },
     ]
     instance = deepcopy(instance)

@@ -33,17 +33,9 @@ INSTANCE = {
             'endpoint': '/_nodes',
             'path': '_nodes.',
             'columns': [
-                {
-                    'es_name': 'total',
-                    'dd_name': 'elasticsearch.custom.metric',
-                    'type': 'gauge'
-                },
-                {
-                    'es_name': 'total',
-                    'dd_name': 'dynamic_tag',
-                    'type': 'tag'
-                }
-            ]
+                {'es_name': 'total', 'dd_name': 'elasticsearch.custom.metric', 'type': 'gauge'},
+                {'es_name': 'total', 'dd_name': 'dynamic_tag', 'type': 'tag'},
+            ],
         },
     ],
 }

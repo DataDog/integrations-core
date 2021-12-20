@@ -105,16 +105,12 @@ def test_from_instance():
                         'dd_name': 'elasticsearch.custom.metric',
                     },
                 ],
-                'static_tags': ['custom_tag:1']
+                'static_tags': ['custom_tag:1'],
             },
         ],
         # Missing `columns`
         [
-            {
-                'endpoint': '/_nodes',
-                'path': '_nodes.',
-                'static_tags': ['custom_tag:1']
-            },
+            {'endpoint': '/_nodes', 'path': '_nodes.', 'static_tags': ['custom_tag:1']},
         ],
         # Empty `dd_name` in `columns`
         [
@@ -127,7 +123,7 @@ def test_from_instance():
                         'dd_name': '',
                     },
                 ],
-                'static_tags': ['custom_tag:1']
+                'static_tags': ['custom_tag:1'],
             },
         ],
         # Empty `es_name`
@@ -141,7 +137,7 @@ def test_from_instance():
                         'dd_name': 'elasticsearch.custom.metric',
                     },
                 ],
-                'static_tags': ['custom_tag:1']
+                'static_tags': ['custom_tag:1'],
             },
         ],
         # Missing `es_name` in `columns`
@@ -158,7 +154,7 @@ def test_from_instance():
                         'dd_name': 'elasticsearch.custom.metric',
                     },
                 ],
-                'static_tags': ['custom_tag:1']
+                'static_tags': ['custom_tag:1'],
             },
         ],
     ],
