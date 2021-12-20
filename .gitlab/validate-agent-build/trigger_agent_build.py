@@ -4,16 +4,17 @@ import argparse
 
 
 DATADOG_AGENT_PIPELINE_URL = os.environ['DATADOG_AGENT_PIPELINE_URL'].rstrip('/')
-LATEST_TAG = os.environ['LATEST_TAG']
+VERSION_TAG = os.environ['VERSION_TAG']
 BASE_URL = os.environ['CI_API_V4_URL']
 CI_TOKEN = os.environ['CI_JOB_TOKEN']
 
 
 def trigger_pipeline():
+    trigger_ref = VERSION_TAG
+    if not VERSION_TAG.startswith("7.") and VERSION_TAG != "main":
+        print(f"Tag '{VERSION_TAG}' is not recognized, falling back to main")
+        trigger_ref = "main"
     # TODO: Opt out of kitchen tests when the appropriate flag is implemented.
-    trigger_ref = "main"
-    if LATEST_TAG.startswith("7."):
-        trigger_ref = LATEST_TAG
     data = {
         "token": CI_TOKEN,
         "ref": trigger_ref,

@@ -62,18 +62,17 @@ trigger-agent-build:
     - export SLACK_CACHE_DIR="${PWD}/.slack-cache"
     - DATADOG_AGENT_PIPELINE_URL=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.datadog-agent-pipeline-url --with-decryption --query "Parameter.Value" --out text)
     - export AGENT_REQUIREMENTS_CHANGED="false"
-    - LATEST_TAG=$(git describe --tags --abbrev=0 HEAD)
     - git fetch origin master
-    - BASE_REF=$(git merge-base HEAD FETCH_HEAD $LATEST_TAG)
-    - |
-      if [[ "$BASE_REF" != " $(git rev-list -n 1 $LATEST_TAG) " ]]; then
-        LATEST_TAG=main
-      fi
+    - BASE_REF=$(git merge-base HEAD FETCH_HEAD)
     - git --no-pager diff --exit-code --name-only HEAD $BASE_REF -- datadog_checks_base/datadog_checks/base/data/agent_requirements.in || export AGENT_REQUIREMENTS_CHANGED="true" || true
     - |
       if [[ "$AGENT_REQUIREMENTS_CHANGED" = "true" ]]; then
-          echo "File agent_requirements.in has been modified, triggering an agent build pipeline on $LATEST_TAG."
-          DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL LATEST_TAG=$LATEST_TAG python -u /trigger_agent_build.py --output-file pipeline_id.txt
+          VERSION_TAG = $(git tag --points-at $BASE_REF | grep "^7." | sed 's/-.*/ /')
+          if [[ "$VERSION_TAG" = "" ]]; then
+              VERSION_TAG = main
+          fi
+          echo "File agent_requirements.in has been modified, triggering an agent build pipeline on $VERSION_TAG."
+          DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL VERSION_TAG=$VERSION_TAG python -u /trigger_agent_build.py --output-file pipeline_id.txt
 
           # Get slack user
           if [[ $GITLAB_USER_LOGIN = "gitsync" ]]; then EMAIL=$(git show -s --format="%ae" "$CI_COMMIT_SHA"); else EMAIL=$GITLAB_USER_EMAIL; fi
