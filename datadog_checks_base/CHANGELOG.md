@@ -1,6 +1,6 @@
 # CHANGELOG - datadog_checks_base
 
-## 23.4.0 / 2021-12-20
+## 23.6.0 / 2021-12-20
 
 * [Security] Bump lxml package. See [#10904](https://github.com/DataDog/integrations-core/pull/10904).
 
