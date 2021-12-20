@@ -387,4 +387,3 @@ def test_e2e_core_metadata_apc_ups(dd_agent_check):
         'version': '2.0.3-test',
     }
     assert_device_metadata(aggregator, device)
-
