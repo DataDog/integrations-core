@@ -1,3 +1,10 @@
+# Profile for APC UPS devices
+#
+# Example sysDescr for apc ups devices:
+#   - APC Web/SNMP Management Card (MB:v3.9.2 PF:v3.9.2 PN:apc_hw02_aos_392.bin AF1:v3.7.2 AN1:apc_hw02_sumx_372.bin MN:AP9619 HR:A10 SN: BAsensored MD:12/04/2007) (Embedded PowerNet SNMP Agent SW v2.2 compatible)
+#   - APC Web/SNMP Management Card (MB:v4.1.0	PF:v6.4.6	PN:apc_hw05_aos_646.bin AF1:v6.4.6 AN1:apc_hw05_rpdu2g_646.bin	MN:AP8881	HR:02	SN: 5A1827E02199	MD:07/04/2018)
+#   - APC Web/SNMP Management Card (MB:v4.1.0	PF:v6.5.0	PN:apc_hw05_aos_650.bin AF1:v6.5.0 AN1:apc_hw05_sumx_650.bin	MN:AP9630	HR:08	SN: ZA1744002099	MD:10/30/2017) (Embedded PowerNet SNMP Agent SW v2.2 compatible)
+
 extends:
   - _base.yaml
   - _generic-tcp.yaml
