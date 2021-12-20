@@ -11,6 +11,8 @@ from datadog_checks.dev import run_command
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 
+from .common import CILIUM_VERSION
+
 try:
     from contextlib import ExitStack
 except ImportError:
@@ -28,9 +30,39 @@ PORTS = [AGENT_PORT, OPERATOR_PORT]
 
 
 def setup_cilium():
-    config = os.path.join(HERE, 'kind', 'cilium.yaml')
-    run_command(["kubectl", "create", "ns", "cilium"])
-    run_command(["kubectl", "create", "-f", config])
+    run_command(["helm", "repo", "add", "cilium", "https://helm.cilium.io/"])
+    run_command(["docker", "pull", f"quay.io/cilium/cilium:v${CILIUM_VERSION}"])
+    run_command(["kind", "load", f"docker-image quay.io/cilium/cilium:v${CILIUM_VERSION}"])
+    run_command(
+        [
+            "helm",
+            "install",
+            "cilium",
+            "cilium/cilium",
+            "--version",
+            f"${CILIUM_VERSION}",
+            "--namespace",
+            "cilium",
+            "--set",
+            "kubeProxyReplacement=partial",
+            "--set",
+            "hostServices.enabled=false",
+            "--set",
+            "externalIPs.enabled=true",
+            "--set",
+            "nodePort.enabled=true",
+            "--set",
+            "hostPort.enabled=true",
+            "--set",
+            "bpf.masquerade=false",
+            "--set",
+            "image.pullPolicy=IfNotPresent",
+            "--set",
+            "ipam.mode=kubernetes",
+            "--set",
+            "global.prometheus.enabled=true"
+        ]
+    )
     run_command(
         ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "cilium", "--timeout=300s"]
     )
