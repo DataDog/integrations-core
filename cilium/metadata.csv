@@ -101,8 +101,8 @@ cilium.operator.eni.nodes.total,gauge,,node,,"Number of nodes by category",0,cil
 cilium.operator.eni.resync.total,count,,unit,,"Number of resync operations to synchronize AWS EC2 metadata",0,cilium,eni resync total
 cilium.operator.ec2.api.duration.seconds.sum,gauge,,second,,"Sum of duration of interactions with API",0,cilium,api duration sum
 cilium.operator.ec2.api.duration.seconds.count,count,,second,,"Count of duration of interactions with API",0,cilium,api duration count
-operator.ec2.api.rate_limit.duration.seconds.sum,gauge,,second,,"Sum of duration of client-side rate limiter blocking",0,cilium,api rate limit duration sum
-operator.ec2.api.rate_limit.duration.seconds.count,count,,second,,"Count of duration of client-side rate limiter blocking",0,cilium,api rate limit duration count
+cilium.operator.ec2.api.rate_limit.duration.seconds.sum,gauge,,second,,"Sum of duration of client-side rate limiter blocking",0,cilium,api rate limit duration sum
+cilium.operator.ec2.api.rate_limit.duration.seconds.count,count,,second,,"Count of duration of client-side rate limiter blocking",0,cilium,api rate limit duration count
 cilium.operator.ipam.allocation_ops,count,,operation,,"Count of IP allocation operations",0,cilium,ipam allocation ops
 cilium.operator.ipam.release_ops,count,,operation,,"Count of IP release operations",0,cilium,ipam release ops
 cilium.operator.ipam.interface_creation_ops,count,,operation,,"Count of interfaces allocated",0,cilium,ipam creation ops

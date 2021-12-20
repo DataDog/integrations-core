@@ -62,7 +62,6 @@ AGENT_METRICS = {
     'cilium_kvstore_events_queue_seconds': 'kvstore.events_queue.seconds',
 }
 
-
 OPERATOR_METRICS = {
     'cilium_operator_process_cpu_seconds_total': 'operator.process.cpu.seconds',
     'cilium_operator_process_max_fds': 'operator.process.max_fds',
