@@ -45,16 +45,20 @@ init_config:
 #
 instances:
 
-  -
-    ## @param kong_status_url - string - optional - default: http://localhost:8001/status/
-    ## URL where Kong exposes its status.
-    #
-    # kong_status_url: http://localhost:8001/status/
-
     ## @param openmetrics_endpoint - string - optional - default: http://localhost:8001/metrics
     ## The URL exposing metrics in the OpenMetrics format.
     #
-    # openmetrics_endpoint: http://localhost:8001/metrics
+  - openmetrics_endpoint: http://localhost:8001/metrics
+
+    ## @param kong_status_url - string - optional - default: http://localhost:8001/status/
+    ## The check collects and parses metrics from the admin /status endpoint.
+    ## For more info see:
+    ## https://docs.konghq.com/gateway-oss/2.5.x/admin-api/
+    ##
+    ## Note: See the configuration options specific to this option here,
+    ## https://github.com/DataDog/integrations-core/blob/7.27.x/kong/datadog_checks/kong/data/conf.yaml.example
+    #
+    # kong_status_url: http://localhost:8001/status/
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.
