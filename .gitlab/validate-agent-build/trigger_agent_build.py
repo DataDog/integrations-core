@@ -11,8 +11,8 @@ CI_TOKEN = os.environ['CI_JOB_TOKEN']
 
 def trigger_pipeline():
     trigger_ref = VERSION_TAG
-    if not VERSION_TAG.startswith("7.") and VERSION_TAG != "main":
-        print(f"Tag '{VERSION_TAG}' is not recognized, falling back to main")
+    if not VERSION_TAG.startswith("7."):
+        print(f"Tag '{VERSION_TAG}' is not a release tag, falling back to main")
         trigger_ref = "main"
     # TODO: Opt out of kitchen tests when the appropriate flag is implemented.
     data = {
