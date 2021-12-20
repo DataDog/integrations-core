@@ -73,10 +73,10 @@ trigger-agent-build:
     - git fetch origin master
     - BASE_REF=$(git merge-base HEAD FETCH_HEAD)
     - git --no-pager diff --exit-code --name-only HEAD $BASE_REF -- datadog_checks_base/datadog_checks/base/data/agent_requirements.in || export AGENT_REQUIREMENTS_CHANGED="true" || true
-    - >
+    - |
       if [[ "$AGENT_REQUIREMENTS_CHANGED" = "true" ]]; then
           VERSION_TAG=$(git tag --points-at $BASE_REF | grep "^7." | sed 's/-.*/ /')
-          echo "File agent_requirements.in has been modified, triggering an agent build pipeline on $VERSION_TAG."
+          echo "File agent_requirements.in has been modified, triggering an agent build pipeline."
           DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL VERSION_TAG=$VERSION_TAG python -u /trigger_agent_build.py --output-file pipeline_id.txt
 
           # Get slack user

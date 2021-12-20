@@ -27,7 +27,7 @@ def trigger_pipeline():
         }
     }
 
-    print("Creating child pipeline with params: %s", data['variables'])
+    print(f"Creating child pipeline with params: {data.get('variables')} branch {trigger_ref}")
     res = requests.post(f"{DATADOG_AGENT_PIPELINE_URL}/trigger/pipeline", json=data)
     res.raise_for_status()
     child_pipeline = res.json()
