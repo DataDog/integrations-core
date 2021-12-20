@@ -1,5 +1,9 @@
 # CHANGELOG - IBM WAS
 
+## 1.12.0 / 2021-12-20
+
+* [Security] Bump lxml package. See [#10904](https://github.com/DataDog/integrations-core/pull/10904).
+
 ## 1.11.1 / 2021-11-16
 
 * [Fixed] Add dd_run_check and remove unused config options. See [#10623](https://github.com/DataDog/integrations-core/pull/10623).
