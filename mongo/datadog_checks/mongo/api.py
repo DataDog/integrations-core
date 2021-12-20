@@ -101,6 +101,7 @@ class MongoApi(object):
     def _get_deployment_type(self):
         # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is
         # a mongos or mongod, if the mongod is in a shard, if it's in a replica set, etc.
+        self._log.debug("Refreshing deployment type")
         try:
             options = self['admin'].command("getCmdLineOpts")['parsed']
         except Exception as e:
@@ -112,6 +113,7 @@ class MongoApi(object):
         cluster_role = None
         if 'sharding' in options:
             if 'configDB' in options['sharding']:
+                self._log.debug("Detected MongosDeployment. Node is principal.")
                 return MongosDeployment()
             elif 'clusterRole' in options['sharding']:
                 cluster_role = options['sharding']['clusterRole']
@@ -119,8 +121,13 @@ class MongoApi(object):
         replication_options = options.get('replication', {})
         if 'replSetName' in replication_options or 'replSet' in replication_options:
             repl_set_payload = self['admin'].command("replSetGetStatus")
-            return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
+            replica_set_deployment = self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
+            is_principal = replica_set_deployment.is_principal()
+            is_principal_log = "" if is_principal else "not "
+            self._log.debug("Detected ReplicaSetDeployment. Node is %sprincipal.", is_principal_log)
+            return replica_set_deployment
 
+        self._log.debug("Detected StandaloneDeployment. Node is principal.")
         return StandaloneDeployment()
 
     def _get_alibaba_deployment_type(self):
