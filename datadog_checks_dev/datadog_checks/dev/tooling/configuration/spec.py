@@ -145,12 +145,14 @@ def options_validator(options, loader, file_name, *sections):
             try:
                 template = loader.templates.load(option.pop('template'))
 
-                # Handle the case where a template name is overriden
-                if 'name' in option:
-                    template['name'] = option['name']
             except Exception as e:
                 loader.errors.append(f'{loader.source}, {file_name}, {sections_display}option #{option_index}: {e}')
                 break
+
+            else:
+                # Handle the case where a template name is overriden
+                if 'name' in option:
+                    template['name'] = option['name']
 
             errors = loader.templates.apply_overrides(template, overrides)
             if errors:
