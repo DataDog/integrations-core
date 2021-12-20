@@ -8,4 +8,4 @@ md %target%
 powershell -command "Invoke-WebRequest -Uri %source% -OutFile %target%\%file%"
 :: Extracting IBM MQ client
 powershell -command "Expand-Archive %target%\%file% %target%"
-dir $target
+dir %target%
