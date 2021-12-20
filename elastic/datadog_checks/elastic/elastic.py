@@ -449,19 +449,55 @@ class ESCheck(AgentCheck):
 
         custom_queries = self._config.custom_queries
         for endpoints in custom_queries:
-            metrics = endpoints.get('metrics', [])
+            columns = endpoints.get('columns', [])
+            path = endpoints.get('path')
             endpoint = endpoints.get('endpoint')
+            static_tags = endpoints.get('static_tags', [])
             endpoint = self._join_url(endpoint, admin_forwarder)
 
             data = self._get_data(endpoint)
-            for metric in metrics:
-                dd_metric_name = metric.get('datadog_metric_name')
-                es_metric_name = metric.get('es_metric_name')
-                metric_type = metric.get('type', 'gauge')
-                extra_tags = metric.get('tags', [])
-                tags = base_tags + extra_tags
-                if dd_metric_name and es_metric_name:
-                    self._process_metric(data, dd_metric_name, metric_type, es_metric_name, tags=tags)
+
+            # Search for any tags in columns first before processing metrics
+            dynamic_tags = self._process_tags(data, columns, path)
+
+            tags = base_tags + static_tags + dynamic_tags
+
+            for column in columns:
+                metric_type = column.get('type', 'gauge')
+
+                if metric_type == 'tag':
+                    continue
+
+                dd_name = column.get('dd_name')
+                es_name = column.get('es_name')
+                es_metric_path = path + es_name
+
+                if dd_name and es_name:
+                    self._process_metric(data, dd_name, metric_type, es_metric_path, tags=tags)
+
+    def _process_tags(self, data, columns, path):
+        dynamic_tags = []
+        for column in columns:
+            if column.get('type') == 'tag':
+                es_name = column.get('es_name')
+                dd_name = column.get('dd_name')
+                tag_path = path + es_name
+                value = data
+
+                for key in re.split(r'(?<!\\)\.', tag_path):
+                    if value is not None:
+                        value = value.get(key.replace('\\', ''))
+                    else:
+                        self.log.debug("Dynamic tag not found: %s -> %s", tag_path, dd_name)
+                        break
+
+                if value is not None:
+                    dynamic_tag = "{}:{}".format(es_name, value)
+                    dynamic_tags.append(dynamic_tag)
+                else:
+                    self.log.debug("Dynamic tag not found: %s -> %s", tag_path, dd_name)
+
+        return dynamic_tags
 
     def _create_event(self, status, tags=None):
         hostname = to_string(self.hostname)

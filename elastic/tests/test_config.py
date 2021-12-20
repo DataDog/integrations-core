@@ -95,54 +95,71 @@ def test_from_instance():
 @pytest.mark.parametrize(
     'invalid_custom_queries',
     [
-        [
-            {
-                'endpoint': '',
-                'metrics': [
-                    {
-                        'datadog_metric_name': 'elasticsearch.custom.metric',
-                        'es_metric_name': '_nodes.total',
-                    },
-                ],
-            }
-        ],
+        # Missing `path`
         [
             {
                 'endpoint': '/_nodes',
-            }
+                'columns': [
+                    {
+                        'es_name': 'total',
+                        'dd_name': 'elasticsearch.custom.metric',
+                    },
+                ],
+                'static_tags': ['custom_tag:1']
+            },
         ],
-        [{'endpoint': '/_node', 'metrics': []}],
+        # Missing `columns`
         [
             {
                 'endpoint': '/_nodes',
-                'metrics': [
-                    {
-                        'datadog_metric_name': '',
-                        'es_metric_name': '_nodes.total',
-                    },
-                ],
-            }
+                'path': '_nodes.',
+                'static_tags': ['custom_tag:1']
+            },
         ],
+        # Empty `dd_name` in `columns`
         [
             {
                 'endpoint': '/_nodes',
-                'metrics': [
+                'path': '_nodes.',
+                'columns': [
                     {
-                        'datadog_metric_name': 'elasticsearch.custom.metric',
-                        'es_metric_name': '',
+                        'es_name': 'total',
+                        'dd_name': '',
                     },
                 ],
-            }
+                'static_tags': ['custom_tag:1']
+            },
         ],
+        # Empty `es_name`
         [
             {
                 'endpoint': '/_nodes',
-                'metrics': [
+                'path': '_nodes.',
+                'columns': [
                     {
-                        'datadog_metric_name': 'elasticsearch.custom.metric',
+                        'es_name': '',
+                        'dd_name': 'elasticsearch.custom.metric',
                     },
                 ],
-            }
+                'static_tags': ['custom_tag:1']
+            },
+        ],
+        # Missing `es_name` in `columns`
+        [
+            {
+                'endpoint': '/_nodes',
+                'path': '_nodes.',
+                'columns': [
+                    {
+                        'es_name': 'total',
+                        'dd_name': 'elasticsearch.custom.metric',
+                    },
+                    {
+                        'dd_name': 'elasticsearch.custom.metric',
+                    },
+                ],
+                'static_tags': ['custom_tag:1']
+            },
         ],
     ],
 )

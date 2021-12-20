@@ -7,14 +7,14 @@ def initialize_instance(values, **kwargs):
     if 'custom_queries' in values:
         custom_queries = values['custom_queries']
         for custom_query in custom_queries:
-            # Each custom query must have `endpoint` and `queries`
-            if not (custom_query.get('endpoint') and custom_query.get('metrics')):
-                raise ValueError('Each custom query must have an `endpoint` and `metrics` value')
+            # Each custom query must have `endpoint`, `path`, and 'columns`
+            if not (custom_query.get('endpoint') and custom_query.get('path') and custom_query.get('columns')):
+                raise ValueError('Each custom query must have an `endpoint`, `path`, and `columns` values')
 
-            metrics = custom_query.get('metrics')
-            for metric in metrics:
-                # Each query must have both `datadog_metric_name` and `es_metric_name`
-                if not (metric.get('datadog_metric_name') and metric.get('es_metric_name')):
-                    raise ValueError('Each custom query must have a `datadog_metric_name` and `es_metric_name` value')
+            columns = custom_query.get('columns')
+            for column in columns:
+                # Each query must have both `dd_name` and `es_name`
+                if not (column.get('es_name') and column.get('dd_name')):
+                    raise ValueError('Each column must have a `es_name` and `dd_name` values')
 
     return values

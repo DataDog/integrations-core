@@ -31,13 +31,19 @@ INSTANCE = {
     'custom_queries': [
         {
             'endpoint': '/_nodes',
-            'metrics': [
+            'path': '_nodes.',
+            'columns': [
                 {
-                    'datadog_metric_name': 'elasticsearch.custom.metric',
-                    'es_metric_name': '_nodes.total',
-                    'tags': ['custom_tag:1'],
+                    'es_name': 'total',
+                    'dd_name': 'elasticsearch.custom.metric',
+                    'type': 'gauge'
                 },
-            ],
+                {
+                    'es_name': 'total',
+                    'dd_name': 'dynamic_tag',
+                    'type': 'tag'
+                }
+            ]
         },
     ],
 }
