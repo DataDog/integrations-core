@@ -1,5 +1,13 @@
 # CHANGELOG - iis
 
+## 2.14.0 / 2021-12-20
+
+* [Added] Add better filtering options. See [#10775](https://github.com/DataDog/integrations-core/pull/10775).
+* [Added] Add missing metric for the number of PATCH requests per second. See [#10773](https://github.com/DataDog/integrations-core/pull/10773).
+* [Added] Support new implementation of Windows performance counters on Python 3. See [#10546](https://github.com/DataDog/integrations-core/pull/10546).
+* [Fixed] Properly hide legacy PDH config. See [#10858](https://github.com/DataDog/integrations-core/pull/10858).
+* [Fixed] Bump base package dependency. See [#10797](https://github.com/DataDog/integrations-core/pull/10797).
+
 ## 2.13.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add runtime configuration validation. See [#8938](https://github.com/DataDog/integrations-core/pull/8938).
