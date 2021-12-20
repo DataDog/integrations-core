@@ -1,7 +1,3 @@
-param (
-    [Parameter(Mandatory=$true)][string]$Version
-)
-
 $ErrorActionPreference = 'Stop'
 
 function DownloadFile{
@@ -35,6 +31,7 @@ function DownloadAndExpandTo{
     Remove-Item $tmpOutFile
 }
 
+$Version "9.2.2.0"
 $source = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/mqdev/redist/$($Version)-IBM-MQC-Redist-Win64.zip"
 $target = "c:\ibm_mq"
 
