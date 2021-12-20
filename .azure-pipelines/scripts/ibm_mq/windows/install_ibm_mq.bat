@@ -7,4 +7,5 @@ set source=https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messag
 powershell -command "Invoke-WebRequest -Uri %source% -OutFile %target%\%file%"
 dir $target
 :: Extracting IBM MQ client
-powershell -command "Expand-Archive %target%\%file% %target%\"
+powershell -command "Expand-Archive %target%\%file% %target%"
+dir $target
