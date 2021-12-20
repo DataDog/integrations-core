@@ -76,7 +76,7 @@ trigger-agent-build:
     - |
       if [[ "$AGENT_REQUIREMENTS_CHANGED" = "true" ]]; then
           export VERSION_TAG = $(git tag --points-at $BASE_REF | grep "^7." | sed 's/-.*/ /')
-          if [[ "$VERSION_TAG" = "" ]]; then
+          if [[ -z "$VERSION_TAG" ]]; then
               export VERSION_TAG = main
           fi
           echo "File agent_requirements.in has been modified, triggering an agent build pipeline on $VERSION_TAG."
