@@ -31,8 +31,8 @@ PORTS = [AGENT_PORT, OPERATOR_PORT]
 
 def setup_cilium():
     run_command(["helm", "repo", "add", "cilium", "https://helm.cilium.io/"])
-    run_command(["docker", "pull", f"quay.io/cilium/cilium:v${CILIUM_VERSION}"])
-    run_command(["kind", "load", f"docker-image quay.io/cilium/cilium:v${CILIUM_VERSION}"])
+    run_command(["docker", "pull", "quay.io/cilium/cilium:v{}".format(CILIUM_VERSION)])
+    run_command(["kind", "load", "docker-image quay.io/cilium/cilium:v{}".format(CILIUM_VERSION)])
     run_command(
         [
             "helm",
@@ -40,7 +40,7 @@ def setup_cilium():
             "cilium",
             "cilium/cilium",
             "--version",
-            f"${CILIUM_VERSION}",
+            "{}".format(CILIUM_VERSION),
             "--namespace",
             "cilium",
             "--set",

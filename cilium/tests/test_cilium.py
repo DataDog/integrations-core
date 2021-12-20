@@ -30,19 +30,3 @@ def test_operator_check(aggregator, operator_instance, mock_operator_data, dd_ru
         aggregator.assert_metric(m)
     aggregator.assert_all_metrics_covered()
 
-
-def test_version_metadata(datadog_agent, agent_instance, mock_agent_data, dd_run_check):
-    check = CiliumCheck('cilium', {}, [agent_instance])
-    check.check_id = 'test:123'
-    dd_run_check(check)
-
-    major, minor, patch = CILIUM_VERSION.split('.')
-    version_metadata = {
-        'version.scheme': 'semver',
-        'version.major': major,
-        'version.minor': minor,
-        'version.patch': patch,
-        'version.raw': CILIUM_VERSION,
-    }
-
-    datadog_agent.assert_metadata('test:123', version_metadata)
