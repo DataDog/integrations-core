@@ -1,11 +1,12 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 from .constants import OPENAPI_DATA_TYPES
 from .utils import default_option_example, normalize_source_name
 
 
-def spec_validator(spec, loader):
+def spec_validator(spec: dict, loader) -> None:
     if not isinstance(spec, dict):
         loader.errors.append(f'{loader.source}: Configuration specifications must be a mapping object')
         return
@@ -43,7 +44,7 @@ def spec_validator(spec, loader):
     files_validator(files, loader)
 
 
-def files_validator(files, loader):
+def files_validator(files, loader) -> None:
     num_files = len(files)
     file_names_origin = {}
     example_file_names_origin = {}
