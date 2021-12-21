@@ -50,6 +50,7 @@ def display_envs(check_envs):
 @click.option('--force-base-unpinned', is_flag=True, help='Force using datadog-checks-base as specified by check dep')
 @click.option('--force-base-min', is_flag=True, help='Force using lowest viable release version of datadog-checks-base')
 @click.option('--force-env-rebuild', is_flag=True, help='Force creating a new env')
+@click.option('--repo', help='Select repo. Possible options include: core, extras, and marketplace')
 @click.pass_context
 def test(
     ctx,
@@ -77,6 +78,7 @@ def test(
     force_base_unpinned,
     force_base_min,
     force_env_rebuild,
+    repo,
 ):
     """Run tests for Agent-based checks.
 
@@ -276,7 +278,7 @@ def test(
                 if not cov_keep:
                     echo_info('\n---------- Coverage report ----------\n')
 
-                    result = run_command('coverage report --rcfile=../.coveragerc')
+                    result = run_command('coverage report --rcfile=../.coveragerc --fail-under=1')
                     if result.code:
                         abort('\nFailed!', code=result.code)
 
@@ -286,7 +288,9 @@ def test(
                         abort('\nFailed!', code=result.code)
 
                     fix_coverage_report(check, 'coverage.xml')
-                    run_command(['codecov', '-X', 'gcov', '--root', root, '-F', check, '-f', 'coverage.xml'])
+
+                    if repo == 'core':
+                        run_command(['codecov', '-X', 'gcov', '--root', root, '-F', check, '-f', 'coverage.xml'])
                 else:
                     if not cov_keep:
                         remove_path('.coverage')
