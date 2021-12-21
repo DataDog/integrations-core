@@ -4,15 +4,19 @@ import argparse
 
 
 DATADOG_AGENT_PIPELINE_URL = os.environ['DATADOG_AGENT_PIPELINE_URL'].rstrip('/')
-VERSION_TAG = os.environ['VERSION_TAG']
+RELEASE_BRANCH = os.environ['RELEASE_BRANCH']
 BASE_URL = os.environ['CI_API_V4_URL']
 CI_TOKEN = os.environ['CI_JOB_TOKEN']
 
 
 def trigger_pipeline():
-    trigger_ref = VERSION_TAG
-    if not VERSION_TAG.startswith("7."):
-        print(f"Tag '{VERSION_TAG}' is not a release tag, falling back to main")
+    trigger_ref = RELEASE_BRANCH
+
+    # Search for the release branch in the datadog-agent repository
+    r = requests.get(f"https://api.github.com/repos/DataDog/datadog-agent/branches/{RELEASE_BRANCH}")
+
+    if r.status_code != 200:
+        print(f"Tag '{RELEASE_BRANCH}' is not a release tag, falling back to main")
         trigger_ref = "main"
     # TODO: Opt out of kitchen tests when the appropriate flag is implemented.
     data = {

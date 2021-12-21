@@ -75,9 +75,9 @@ trigger-agent-build:
     - git --no-pager diff --exit-code --name-only HEAD $BASE_REF -- datadog_checks_base/datadog_checks/base/data/agent_requirements.in || export AGENT_REQUIREMENTS_CHANGED="true" || true
     - |
       if [[ "$AGENT_REQUIREMENTS_CHANGED" = "true" ]]; then
-          VERSION_TAG=$(git tag -l '7\.*' --points-at $BASE_REF | cat | sed 's/-.*/ /')
+          RELEASE_BRANCH=$(git tag -l '7\.*' --points-at $BASE_REF | cat | sed 's/\..-.*/\.x/')
           echo "File agent_requirements.in has been modified, triggering an agent build pipeline."
-          DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL VERSION_TAG=$VERSION_TAG python -u /trigger_agent_build.py --output-file pipeline_id.txt
+          DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL RELEASE_BRANCH=$RELEASE_BRANCH python -u /trigger_agent_build.py --output-file pipeline_id.txt
 
           # Get slack user
           if [[ $GITLAB_USER_LOGIN = "gitsync" ]]; then EMAIL=$(git show -s --format="%ae" "$CI_COMMIT_SHA"); else EMAIL=$GITLAB_USER_EMAIL; fi
