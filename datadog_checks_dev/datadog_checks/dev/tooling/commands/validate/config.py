@@ -62,8 +62,8 @@ def config(ctx, check, sync, verbose):
             echo_debug(f"Skipping validation for check: {check}; can't process manifest")
             continue
 
-        spec_path = manifest.get_config_spec()
-        if not file_exists(spec_path):
+        spec_file_path = manifest.get_config_spec()
+        if not file_exists(spec_file_path):
             validate_config_legacy(check, check_display_queue, files_failed, files_warned, file_counter)
             if verbose:
                 check_display_queue.append(lambda: echo_warning('No spec found', indent=True))
@@ -85,26 +85,26 @@ def config(ctx, check, sync, verbose):
             source = check
             version = get_version_string(check)
 
-        spec_file = read_file(spec_path)
-        default_temp = validate_default_template(spec_file)
-        spec = ConfigSpec(spec_file, source=source, version=version)
+        spec_file_content = read_file(spec_file_path)
+        default_temp = validate_default_template(spec_file_content)
+        spec = ConfigSpec(spec_file_content, source=source, version=version)
         spec.load()
 
         if not default_temp:
             message = "Missing default template in init_config or instances section"
             check_display_queue.append(lambda **kwargs: echo_failure(message))
-            annotate_error(spec_path, message)
+            annotate_error(spec_file_path, message)
 
         if spec.errors:
-            files_failed[spec_path] = True
+            files_failed[spec_file_path] = True
             for error in spec.errors:
                 check_display_queue.append(lambda error=error, **kwargs: echo_failure(error, **kwargs))
         else:
             if spec.data['name'] != display_name:
-                files_failed[spec_path] = True
+                files_failed[spec_file_path] = True
                 message = f"Spec  name `{spec.data['name']}` should be `{display_name}`"
                 check_display_queue.append(lambda **kwargs: echo_failure(message, **kwargs))
-                annotate_error(spec_path, message)
+                annotate_error(spec_file_path, message)
 
             example_location = get_data_directory(check)
             example_consumer = ExampleConsumer(spec.data)
