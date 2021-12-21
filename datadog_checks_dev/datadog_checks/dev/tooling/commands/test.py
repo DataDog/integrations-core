@@ -278,7 +278,12 @@ def test(
                 if not cov_keep:
                     echo_info('\n---------- Coverage report ----------\n')
 
-                    result = run_command('coverage report --rcfile=../.coveragerc --fail-under=1')
+                    # Marketplace PRs should fail CI if coverage is not greater than 0
+                    if repo == 'marketplace':
+                        result = run_command('coverage report --rcfile=../.coveragerc --fail-under=1')
+                    else:
+                        result = run_command('coverage report --rcfile=../.coveragerc')
+
                     if result.code:
                         abort('\nFailed!', code=result.code)
 
