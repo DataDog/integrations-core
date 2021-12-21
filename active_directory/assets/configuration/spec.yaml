@@ -9,6 +9,12 @@ files:
   - template: instances
     options:
     - template: instances/perf_counters
+      overrides:
+        extra_metrics.value.example:
+          NTDS:
+            name: ds
+            counters:
+              - 'DS % Writes from LDAP': writes_from_ldap
     - template: instances/pdh_legacy
       hidden: true
     - template: instances/default

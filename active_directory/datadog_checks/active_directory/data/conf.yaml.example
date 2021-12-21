@@ -114,7 +114,11 @@ instances:
     ##   metric_name: This represents the full metric name in lieu of a `name` key and is not be prefixed by
     ##                the parent object's `name` key.
     #
-    # extra_metrics: {}
+    # extra_metrics:
+    #   NTDS:
+    #     name: ds
+    #     counters:
+    #     - DS % Writes from LDAP: writes_from_ldap
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
