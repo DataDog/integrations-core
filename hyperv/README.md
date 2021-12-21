@@ -16,6 +16,8 @@ The Hyper-V check is included in the [Datadog Agent][2] package. No additional i
 
 2. [Restart the Agent][4].
 
+**Note**: Versions 1.5.0 or later of this check use a new implementation for metric collection, which requires Python 3. For hosts that are unable to use Python 3, or if you would like to use a legacy version of this check, refer to the following [config][9].
+
 ### Validation
 
 [Run the Agent's status subcommand][5] and look for `hyperv` under the Checks section.
@@ -52,3 +54,4 @@ Additional helpful documentation, links, and articles:
 [6]: https://github.com/DataDog/integrations-core/blob/master/hyperv/metadata.csv
 [7]: https://docs.datadoghq.com/help/
 [8]: https://www.datadoghq.com/blog/monitor-microsoft-hyperv-with-datadog
+[9]: https://github.com/DataDog/integrations-core/blob/7.33.x/hyperv/datadog_checks/hyperv/data/conf.yaml.example

@@ -22,6 +22,8 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][6] to begin sending IIS metrics to Datadog.
 
+**Note**: Versions 2.14.0 or later of this check use a new implementation for metric collection, which requires Python 3. For hosts that are unable to use Python 3, or if you would like to use a legacy version of this check, refer to the following [config][11].
+
 ##### Log collection
 
 <!-- partial
@@ -83,3 +85,4 @@ Need help? Contact [Datadog support][10].
 [8]: https://github.com/DataDog/integrations-core/blob/master/iis/metadata.csv
 [9]: https://github.com/DataDog/integrations-core/blob/master/iis/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
+[11]: https://github.com/DataDog/integrations-core/blob/7.33.x/iis/datadog_checks/iis/data/conf.yaml.example
