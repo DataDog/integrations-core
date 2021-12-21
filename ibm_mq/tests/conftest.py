@@ -142,7 +142,7 @@ def prepare_queue_manager():
 
     if ON_WINDOWS:
         # https://developer.ibm.com/tutorials/mq-connect-app-queue-manager-windows/
-        exe_dir = os.path.join('C:', 'Program Files', 'IBM', 'MQ', 'bin')
+        exe_dir = os.path.join('C:' + os.sep, 'Program Files', 'IBM', 'MQ', 'bin')
         subprocess.check_call([os.path.join(exe_dir, 'setmqenv'), '-s'], shell=True)
         subprocess.check_call([os.path.join(exe_dir, 'crtmqm'), 'QM1'], shell=True)
         subprocess.check_call([os.path.join(exe_dir, 'strmqm'), 'QM1'], shell=True)
