@@ -18,6 +18,8 @@ The Exchange check is included in the [Datadog Agent][1] package, so you don't n
 
 2. [Restart the Agent][3].
 
+**Note**: Versions 1.11.0 or later of this check use a new implementation for metric collection, which requires Python 3. For hosts that are unable to use Python 3, or if you would like to use a legacy version of this check, refer to the following [config][8].
+
 ### Log collection
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
@@ -41,7 +43,7 @@ The Exchange check is included in the [Datadog Agent][1] package, so you don't n
        source: exchange-server
    ```
     **Note**: The only logs supported are CommonDiagnosticsLog, ThrottlingService, and Connectivity logs due to Exchange Server outputting many different types of logs. Contact [Datadog support][7] to request other logs formats.
-    
+
    Change the `path` parameter value and configure it for your environment.
    See the [sample exchange_server.d/conf.yaml][4] for all available configuration options.
 
@@ -73,3 +75,4 @@ The Exchange server check does not include any service checks.
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/exchange_server/metadata.csv
 [7]: https://docs.datadoghq.com/help/
+[8]: https://github.com/DataDog/integrations-core/blob/7.33.x/exchange_server/datadog_checks/exchange_server/data/conf.yaml.example
