@@ -35,7 +35,9 @@ def test(aggregator, dd_default_hostname, dd_run_check, mock_performance_objects
                     aggregate_only = data['aggregate'] == 'only'
                     if aggregate_only:
                         aggregator.assert_metric(
-                            'exchange.{}.{}'.format(config['name'], data['name']), tags=global_tags
+                            'exchange.{}.{}'.format(config['name'], data['name']),
+                            metric_type=aggregator.GAUGE,
+                            tags=global_tags,
                         )
                     else:
                         aggregator.assert_metric(
