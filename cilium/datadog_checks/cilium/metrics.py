@@ -16,6 +16,7 @@ AGENT_METRICS = {
     'cilium_datapath_errors_total': 'datapath.errors.total',
     'cilium_drop_bytes_total': 'drop_bytes.total',
     'cilium_drop_count_total': 'drop_count.total',
+    'cilium_endpoint': 'endpoint.count',
     'cilium_endpoint_count': 'endpoint.count',
     'cilium_endpoint_regeneration_time_stats_seconds': 'endpoint.regeneration_time_stats.seconds',
     'cilium_endpoint_regenerations': 'endpoint.regenerations.count',
@@ -25,6 +26,7 @@ AGENT_METRICS = {
     'cilium_forward_count_total': 'forward_count.total',
     'cilium_fqdn_gc_deletions_total': 'fqdn.gc_deletions.total',
     'cilium_identity_count': 'identity.count',
+    'cilium_identity': 'identity.count',
     'cilium_ip_addresses': 'ip_addresses.count',
     'cilium_ipam_events_total': 'ipam.events.total',
     'cilium_k8s_client_api_calls_counter': 'k8s_client.api_calls.count',
@@ -35,6 +37,7 @@ AGENT_METRICS = {
     'cilium_nodes_all_events_received_total': 'nodes.all_events_received.total',
     'cilium_nodes_all_num': 'nodes.managed.total',
     'cilium_policy_count': 'policy.count',
+    'cilium_policy': 'policy.count',
     'cilium_policy_endpoint_enforcement_status': 'policy.endpoint_enforcement_status',  # double check
     'cilium_policy_import_errors': 'policy.import_errors.count',
     'cilium_policy_l7_denied_total': 'policy.l7_denied.total',
@@ -111,9 +114,9 @@ OPERATOR_METRICS = {
     'cilium_operator_ipam_resync_latency_seconds': 'operator.ipam.resync.latency.seconds',
     'cilium_operator_ipam_resync_queued_total': 'operator.ipam.resync.queued.total',
     'cilium_operator_ipam_resync_total': 'operator.ipam.resync.total',
-    'cilium_operator_identity_gc_entries': 'operator.identity_gc.entries',  # v1.10
-    'cilium_operator_identity_gc_runs': 'operator.identity_gc.runs',  # v1.10
-    'cilium_operator_number_of_ceps_per_ces': 'operator.num_ceps_per_ces',  # v1.11
-    'cilium_operator_ces_queueing_delay_seconds': 'operator.ces.queueing_delay.seconds',  # v1.11
-    'cilium_operator_ces_sync_errors_total': 'operator.ces.sync_errors.total',  # v1.11
+    'cilium_operator_identity_gc_entries': 'operator.identity_gc.entries',
+    'cilium_operator_identity_gc_runs': 'operator.identity_gc.runs',
+    'cilium_operator_number_of_ceps_per_ces': 'operator.num_ceps_per_ces',
+    'cilium_operator_ces_queueing_delay_seconds': 'operator.ces.queueing_delay.seconds',
+    'cilium_operator_ces_sync_errors_total': 'operator.ces.sync_errors.total',
 }

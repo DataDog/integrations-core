@@ -15,17 +15,14 @@ AGENT_DEFAULT_METRICS = [
     'cilium.controllers.failing.count',
     'cilium.controllers.runs_duration.seconds.count',
     'cilium.controllers.runs_duration.seconds.sum',
-    'cilium.endpoint.count',
     'cilium.endpoint.regeneration_time_stats.seconds.count',
     'cilium.endpoint.regeneration_time_stats.seconds.sum',
     'cilium.endpoint.state',
     'cilium.event_timestamp',
-    'cilium.identity.count',
     'cilium.ip_addresses.count',
     'cilium.k8s_client.api_latency_time.seconds.count',
     'cilium.k8s_client.api_latency_time.seconds.sum',
     'cilium.nodes.managed.total',
-    'cilium.policy.count',
     'cilium.policy.endpoint_enforcement_status',
     'cilium.policy.max_revision',
     'cilium.policy.regeneration_time_stats.seconds.count',
@@ -42,11 +39,17 @@ AGENT_DEFAULT_METRICS = [
 ]
 
 ADDL_AGENT_METRICS = [
+    'cilium_endpoint',
+    'cilium.endpoint.count',
+    'cilium.identity.count',
+    'cilium_identity',
     'cilium.triggers_policy.update_call_duration.seconds.count',
     'cilium.triggers_policy.update_call_duration.seconds.sum',
     'cilium.triggers_policy.update.total',
     'cilium.subprocess.start.total',
     'cilium.process.cpu.seconds.total',
+    'cilium.policy.count',
+    'cilium.policy'
     'cilium.policy.regeneration.total',
     'cilium.policy.l7_denied.total',
     'cilium.policy.l7_forwarded.total',
@@ -84,6 +87,9 @@ OPERATOR_METRICS = [
     'cilium.operator.process.start_time.seconds',
     'cilium.operator.process.virtual_memory.bytes',
     'cilium.operator.process.virtual_memory_max.bytes',
+]
+
+ADDL_OPERATOR_METRICS = [
     'cilium.operator.identity_gc.entries',
     'cilium.operator.identity_gc.runs',
     'cilium.operator.num_ceps_per_ces.sum',
@@ -93,7 +99,7 @@ OPERATOR_METRICS = [
     'cilium.operator.ces.sync_errors.total',
 ]
 
-OPERATOR_AWS_METRICS_PRE_1_8 = [
+OPERATOR_AWS_METRICS = [
     'cilium.operator.eni.k8s_sync.duration.seconds.count',
     'cilium.operator.eni.aws_api_duration.seconds.count',
     'cilium.operator.eni.deficit_resolver.latency.seconds.count',
@@ -120,9 +126,6 @@ OPERATOR_AWS_METRICS_PRE_1_8 = [
     'cilium.operator.eni.available.ips_per_subnet',
     'cilium.operator.eni.k8s_sync.queued.total',
     'cilium.operator.eni.resync.total',
-]
-
-OPERATOR_AWS_METRICS_1_8 = [
     'cilium.operator.ec2.api.duration.seconds.sum',
     'cilium.operator.ec2.api.duration.seconds.count',
     'cilium.operator.ipam.available',
