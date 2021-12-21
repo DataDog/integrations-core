@@ -20,7 +20,7 @@ If installing the Datadog Agent on a domain environment, see [the installation r
 
 2. [Restart the Agent][5]
 
-**Note**: Versions 1.12.0 or later of this check use a new implementation for metric collection, which requires Python 3. For hosts that are unable to use Python 3, or if you would like to use a legacy version of this check, refer to the following [config][10].
+**Note**: Versions 1.13.0 or later of this check use a new implementation for metric collection, which requires Python 3. For hosts that are unable to use Python 3, or if you would like to use a legacy version of this check, refer to the following [config][10].
 
 #### Log collection
 
