@@ -115,7 +115,7 @@ instances:
     ##                the parent object's `name` key.
     #
     # extra_metrics:
-    #   Processor Time:
+    #   Processor:
     #     name: processor
     #     counters:
     #     - '% Processor Time': time
