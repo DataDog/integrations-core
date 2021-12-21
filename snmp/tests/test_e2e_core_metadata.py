@@ -10,7 +10,7 @@ from . import common
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
 
-def assert_network_devices_metadata(aggregator, events):
+def assert_metadata_events(aggregator, events):
     actual_events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
     for event in actual_events:
         # `collect_timestamp` depend on check run time and cannot be asserted reliably,
@@ -18,6 +18,17 @@ def assert_network_devices_metadata(aggregator, events):
         if 'collect_timestamp' in event:
             event['collect_timestamp'] = 0
     assert events == actual_events
+
+
+def assert_device_metadata(aggregator, device_metadata):
+    events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
+    assert len(events) == 1
+    event1 = events[0]
+
+    pprint.pprint(event1['devices'])
+    assert len(event1['devices']) == 1
+
+    assert device_metadata == event1['devices'][0]
 
 
 def test_e2e_core_metadata_f5(dd_agent_check):
@@ -132,7 +143,7 @@ def test_e2e_core_metadata_f5(dd_agent_check):
             u'subnet': u'',
         },
     ]
-    assert_network_devices_metadata(aggregator, events)
+    assert_metadata_events(aggregator, events)
 
 
 def test_e2e_core_metadata_cisco_3850(dd_agent_check):
@@ -219,14 +230,6 @@ def test_e2e_core_metadata_cisco_catalyst(dd_agent_check):
 
     device_ip = instance['ip_address']
 
-    events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
-    assert len(events) == 1
-    event1 = events[0]
-
-    # assert device (there is only one device)
-    pprint.pprint(event1['devices'])
-    assert len(event1['devices']) == 1
-    actual_device = event1['devices'][0]
     device = {
         u'id': u'default:' + device_ip,
         u'id_tags': [
@@ -248,7 +251,7 @@ def test_e2e_core_metadata_cisco_catalyst(dd_agent_check):
         u'vendor': u'cisco',
         u'serial_number': u'SCA044001J9',
     }
-    assert device == actual_device
+    assert_device_metadata(aggregator, device)
 
 
 def test_e2e_core_metadata_hp_ilo4(dd_agent_check):
@@ -265,14 +268,6 @@ def test_e2e_core_metadata_hp_ilo4(dd_agent_check):
 
     device_ip = instance['ip_address']
 
-    events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
-    assert len(events) == 1
-    event1 = events[0]
-
-    # assert device (there is only one device)
-    pprint.pprint(event1['devices'])
-    assert len(event1['devices']) == 1
-    actual_device = event1['devices'][0]
     device = {
         u'id': u'default:' + device_ip,
         u'id_tags': [
@@ -299,7 +294,7 @@ def test_e2e_core_metadata_hp_ilo4(dd_agent_check):
         u'vendor': u'hp',
         u'serial_number': u'dXPEdPBE5yKtjW9xx3',
     }
-    assert device == actual_device
+    assert_device_metadata(aggregator, device)
 
 
 def test_e2e_core_metadata_hpe_proliant(dd_agent_check):
@@ -316,14 +311,6 @@ def test_e2e_core_metadata_hpe_proliant(dd_agent_check):
 
     device_ip = instance['ip_address']
 
-    events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
-    assert len(events) == 1
-    event1 = events[0]
-
-    # assert device (there is only one device)
-    pprint.pprint(event1['devices'])
-    assert len(event1['devices']) == 1
-    actual_device = event1['devices'][0]
     device = {
         u'id': u'default:' + device_ip,
         u'id_tags': [
@@ -350,4 +337,53 @@ def test_e2e_core_metadata_hpe_proliant(dd_agent_check):
         u'vendor': u'hp',
         u'serial_number': u'dLPEdPBE5yKtjW9xx3',
     }
-    assert device == actual_device
+    assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_apc_ups(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'apc_ups',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'description': 'APC Web/SNMP Management Card (MB:v3.9.2 PF:v3.9.2 '
+        'PN:apc_hw02_aos_392.bin AF1:v3.7.2 AN1:apc_hw02_sumx_372.bin '
+        'MN:AP9619 HR:A10 SN: 5A1827E00000 MD:12/04/2007) (Embedded '
+        'PowerNet SNMP Agent SW v2.2 compatible)',
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'model': 'AP9619',
+        'os_name': 'AOS',
+        'os_version': 'v3.9.2',
+        'product_name': 'APC Smart-UPS 600',
+        'profile': 'apc_ups',
+        'serial_number': '5A1827E00000',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.318.1.1.1',
+        'tags': [
+            'device_namespace:default',
+            'device_vendor:apc',
+            'firmware_version:2.0.3-test',
+            'model:APC Smart-UPS 600',
+            'serial_num:test_serial',
+            'snmp_device:' + device_ip,
+            'snmp_profile:apc_ups',
+            'ups_name:testIdentName',
+        ],
+        'vendor': 'apc',
+        'version': '2.0.3-test',
+    }
+    assert_device_metadata(aggregator, device)
