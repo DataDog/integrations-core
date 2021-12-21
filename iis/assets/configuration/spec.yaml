@@ -73,6 +73,12 @@ files:
             items:
               type: string
     - template: instances/perf_counters
+      overrides:
+        extra_metrics.value.example:
+          Web Service:
+            name: httpd_request_method
+            counters:
+            - CGI Requests/sec: cgi
     - template: instances/pdh_legacy
       hidden: true
     - template: instances/default
