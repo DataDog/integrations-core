@@ -49,8 +49,7 @@ ADDL_AGENT_METRICS = [
     'cilium.subprocess.start.total',
     'cilium.process.cpu.seconds.total',
     'cilium.policy.count',
-    'cilium.policy'
-    'cilium.policy.regeneration.total',
+    'cilium.policy' 'cilium.policy.regeneration.total',
     'cilium.policy.l7_denied.total',
     'cilium.policy.l7_forwarded.total',
     'cilium.policy.l7_parse_errors.total',
