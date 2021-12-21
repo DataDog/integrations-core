@@ -39,17 +39,15 @@ AGENT_DEFAULT_METRICS = [
 ]
 
 ADDL_AGENT_METRICS = [
-    'cilium_endpoint',
     'cilium.endpoint.count',
     'cilium.identity.count',
-    'cilium_identity',
     'cilium.triggers_policy.update_call_duration.seconds.count',
     'cilium.triggers_policy.update_call_duration.seconds.sum',
     'cilium.triggers_policy.update.total',
     'cilium.subprocess.start.total',
     'cilium.process.cpu.seconds.total',
     'cilium.policy.count',
-    'cilium.policy' 'cilium.policy.regeneration.total',
+    'cilium.policy.regeneration.total',
     'cilium.policy.l7_denied.total',
     'cilium.policy.l7_forwarded.total',
     'cilium.policy.l7_parse_errors.total',
