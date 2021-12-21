@@ -9,6 +9,13 @@ files:
   - template: instances
     options:
     - template: instances/perf_counters
+      overrides:
+        extra_metrics.value.example:
+          Processor Time:
+            name: processor
+            counters:
+              - '% Processor Time': time
+              - '% User Time': user.time
     - template: instances/pdh_legacy
       hidden: true
     - template: instances/default
