@@ -5,44 +5,66 @@ kind: documentation
 
 ## Overview
 
-[Datadog Dashboards][1] enable you to efficiently monitor your infrastructure and integrations by displaying and tracking key metrics. This guide includes steps for creating an integration dashboard, and best practices to follow during the creation process.
+[Datadog Dashboards][1] enable you to efficiently monitor your infrastructure and integrations by displaying and tracking key metrics. Datadog provides a set of out-of-the-box dashboards for many features and integrations. You can access these by viewing your [Dashboard List][12].
 
-**Note**: If you have not yet created an integration, [setup of an integration][2] is required for this guide.
+If you have [created a Datadog integration][2], you may wish to create an out-of-the-box dashboard to help your integration's users more quickly find value in your integration. This guide provides steps for creating an integration dashboard and best practices to follow during the creation process.
 
-## Create a new dashboard
+To create a Datadog integration, see [Create a New Integration][2].
 
-Once setup of your integration is complete, [create a new dashboard][3] in the Datadog app. Follow the best practices below when creating your dashboard.
+
+## Create an integration dashboard
+### Create a new dashboard
+
+In Datadog, [create a new dashboard][12]. 
+
+Follow the best practices in this guide when adding elements to your dashboard.
+
+### Export your dashboard
+
+Export your dashboard to JSON using the settings cog (upper right) and choosing **Export dashboard JSON**.
+Name the file according to your dashboard title: for example, `you_integration_name_overview.json`.
+
+Save this file to your integration's `assets/dashboards` folder.  Add the asset to your `manifest.json` file. See [Integrations Assets Reference][11] for more information about your integration's file structure and manifest file.
+
+### Open a pull request
+
+Open a pull request (PR) to add your dashboard JSON file and updated manifest file to the corresponding integration folder in the [`integrations-extras` GitHub repository][13]. Datadog reviews all `integration-extras` PRs. Once approved, Datadog merges the PR and your integration dashboard is pushed to production.
+
+### Verify your dashboard in production
+
+First, ensure the relevant integration tile is `Installed` in Datadog. You must install an integration to see its associated out-of-the-box dashboards.
+
+Find your dashboard in [Dashboard Lists][12]. Ensure logos render correctly on the Dashboard Lists page and within the preset dashboard.
 
 ## Follow dashboard best practices
 
-As a best practice, an integration dashboard should contain the following information:
+An integration dashboard should contain the following information:
 
 {{< img src="integrations/guide/best-practices-for-integrations-dashboards/dashboard-example.png" alt="An example of a Dashboard" width="100%">}}
 
-- An attention-grabbing About group with a banner image, concise copy, useful links, and a good typography hierarchy
-- A brief, annotated Overview group with the most important statistics, right at the top
+- An attention-grabbing **About** group with a banner image, concise copy, useful links, and good typography hierarchy
+- A brief annotated **Overview** group with the most important statistics at the top
 - Simple graph titles and title-case group names
 - Symmetry in high density mode
-- Well formatted, concise notes
+- Well-formatted, concise notes
 - Color coordination between related groups, notes within groups, and graphs within groups
 
-Follow the guidelines below as you build your dashboard.
 
 ### General guidelines
 
 -  When creating a new dashboard, select the default dashboard type.
 
--  Dashboard titles should contain the integration name. Some examples of a good dashboard title are `Syclla` and `Cilium Overview`. **Note**: Avoid using `-` (hyphens) in the dashboard title as the dashboard URL is generated from the title.
+-  Put the integration name in your dashboard title. Some examples of a good dashboard title are `Scylla` or `Cilium Overview`. **Note**: Avoid using `-` (hyphens) in the dashboard title, as the dashboard URL is generated from the title.
 
--  Add a logo to the dashboard header. The integration logo will automatically appear in the header if the icon exists and the `integration_id` matches the icon name.
+-  Add a logo to the dashboard header. The integration logo automatically appears in the header if the icon exists and the `integration_id` matches the icon name.
 
 -  Include an About group for the integration containing a brief description and helpful links. The About section should contain content, not data. Avoid making the About section full-width.
 
-- Edit the About section and select the banner display option, then link to a banner image as follows: `/static/images/integration_dashboard/your-image.png`.
+- Edit the About section and select the banner display option. You can then link to a banner image according to the following file location: `/static/images/integration_dashboard/your-image.png`.
 
 - Include an Overview group containing a few of the most important metrics and place it at the top of the dashboard. The Overview group can contain data.
 
--  Always check a dashboard at 1280px wide and 2560px wide to see how it looks on a smaller laptop and a larger monitor. The most common screen widths for dashboards are 1920, 1680, 1440, 2560, and 1280px, making up more than half of all dashboard page views combined. If your monitor isn't large enough for high density mode, use the browser zoom controls to zoom out.
+-  Check to see how your dashboard looks at 1280px wide and 2560px wide. This is how the dashboard appears on a smaller laptop and a larger monitor, respectively. The most common screen widths for dashboards are 1920, 1680, 1440, 2560, and 1280px. If your monitor is not large enough for high density mode, use the browser zoom controls to zoom out.
 
 ### Widgets and grouping
 
@@ -90,7 +112,7 @@ Follow the guidelines below as you build your dashboard.
 
 ### Visual style
 
--  Format notes to make them fit their use case. Try the presets "caption", "annotation", or "header", or pick your own combination of styles. Avoid using the smallest font size for notes that are long or include complex formatting, like bulleted lists or code blocks.
+-  Format notes to make them fit their use case. Try the presets "caption", "annotation", or "header", or pick your own combination of styles. Avoid using the smallest font size for notes that are long or including complex formatting, like bulleted lists or code blocks.
 
 -  Use colors to highlight important relationships and to improve readability, not for style. If several groups are related, apply the same group header color to all of them. If you've applied a green header color to a group, try making its notes green as well. If two groups are related, but one is more important, try using the "vivid" color on the important group and the "light" color on the less important group. Don't be afraid to leave groups with white headers, and be careful not to overuse color. For example, don't make every group on a dashboard vivid blue. Also avoid using gray headers.
 
@@ -110,21 +132,6 @@ Follow the guidelines below as you build your dashboard.
     | Counts (e.g. Number of errors) | `bars` |
     | Multiple groups or default | `lines` |
 
-## Export your dashboard
-
-Once you've followed the best practices and finished creation of your dashboard, [export your dashboard to JSON][10] and name the file your dashboard title. For example `you_integration_name_overview.json`.
-
-If you've completed the [integration setup][2] and have run the `create` command, the assets folder will exist within your integration file structure. Add the JSON file to the `dashboards` folder. Here is an example of the correct file structure for [dashboards assets][11].
-
-## Open a pull request
-
-Open a pull request (PR) for your dashboard in the [integrations-extras repo][12]. Datadog reviews all integration-extras PR, gives feedback (if required), and approves PRs. Once approved, Datadog merges the PR and your integration is pushed to production.
-
-## Verify your dashboard
-
-First, ensure your integration tile is `Installed` in order to see the preset dashboard in the list.
-
-You can find your dashboard in [Dashboard Lists][12]. Ensure logos render correctly on the Dashboard Lists page and within the preset dashboard.
 
 [1]: /dashboards/
 [2]: /developers/integrations/new_check_howto/?tab=configurationtemplate
@@ -138,3 +145,4 @@ You can find your dashboard in [Dashboard Lists][12]. Ensure logos render correc
 [10]: /dashboards/#copy-import-or-export-dashboard-json
 [11]: /developers/integrations/check_references/#manifest-file
 [12]: https://app.datadoghq.com/dashboard/lists
+[13]: https://github.com/DataDog/integrations-extras
