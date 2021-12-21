@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 6.2.0 / 2021-12-20
+
+* [Security] Bump lxml package. See [#10904](https://github.com/DataDog/integrations-core/pull/10904).
+
 ## 6.1.2 / 2021-11-24
 
 * [Fixed] Fix broken unicode support. See [#10713](https://github.com/DataDog/integrations-core/pull/10713).
