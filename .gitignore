@@ -127,4 +127,4 @@ benchmark_*.svg
 .kube
 
 ## Helm
-*/Library
+*/Library/
