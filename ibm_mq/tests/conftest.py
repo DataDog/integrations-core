@@ -5,11 +5,13 @@ import copy
 import logging
 import os
 import re
+import subprocess
 
 import pytest
 from six.moves import range
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, environment_run
+from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 from datadog_checks.dev.utils import ON_WINDOWS
 
@@ -138,11 +140,22 @@ def consume():
 def prepare_queue_manager():
     import pymqi
 
-    conn_info = '{0}({1})'.format(common.HOST, common.PORT)
-    qm_name = common.QUEUE_MANAGER.lower()
+    if ON_WINDOWS:
+        # https://developer.ibm.com/tutorials/mq-connect-app-queue-manager-windows/
+        exe_dir = os.path.join('C:', 'Program Files', 'IBM', 'MQ', 'bin')
+        subprocess.check_call([os.path.join(exe_dir, 'setmqenv'), '-s'], shell=True)
+        subprocess.check_call([os.path.join(exe_dir, 'crtmqm'), 'QM1'], shell=True)
+        subprocess.check_call([os.path.join(exe_dir, 'strmqm'), 'QM1'], shell=True)
+        qmgr = pymqi.connect(common.QUEUE_MANAGER)
+    else:
+        conn_info = '{0}({1})'.format(common.HOST, common.PORT)
+        qm_name = common.QUEUE_MANAGER.lower()
 
-    qmgr = pymqi.QueueManager(None)
-    qmgr.connectTCPClient(common.QUEUE_MANAGER, pymqi.CD(), common.CHANNEL, conn_info, common.USERNAME, common.PASSWORD)
+        qmgr = pymqi.QueueManager(None)
+        qmgr.connectTCPClient(
+            common.QUEUE_MANAGER, pymqi.CD(), common.CHANNEL, conn_info, common.USERNAME, common.PASSWORD
+        )
+
     pcf = pymqi.PCFExecute(qmgr, response_wait_interval=5000)
 
     attrs = [
@@ -196,21 +209,24 @@ def prepare_queue_manager():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-
-    if common.MQ_VERSION == 9:
-        log_pattern = "AMQ5026I: The listener 'DEV.LISTENER.TCP' has started. ProcessId"
-    elif common.MQ_VERSION == 8:
-        log_pattern = r".*QMNAME\({}\)\s*STATUS\(Running\).*".format(common.QUEUE_MANAGER)
+    if ON_WINDOWS and running_on_ci():
+        with environment_run(up=lambda: None, down=lambda: None, conditions=[prepare_queue_manager]):
+            yield common.INSTANCE
     else:
-        raise RuntimeError('Invalid version: {}'.format(common.MQ_VERSION))
+        if common.MQ_VERSION == 9:
+            log_pattern = "AMQ5026I: The listener 'DEV.LISTENER.TCP' has started. ProcessId"
+        elif common.MQ_VERSION == 8:
+            log_pattern = r".*QMNAME\({}\)\s*STATUS\(Running\).*".format(common.QUEUE_MANAGER)
+        else:
+            raise RuntimeError('Invalid version: {}'.format(common.MQ_VERSION))
 
-    e2e_meta = copy.deepcopy(common.E2E_METADATA)
-    e2e_meta.setdefault('docker_volumes', [])
-    e2e_meta['docker_volumes'].append("{}:/opt/pki/keys".format(os.path.join(common.HERE, 'keys')))
+        e2e_meta = copy.deepcopy(common.E2E_METADATA)
+        e2e_meta.setdefault('docker_volumes', [])
+        e2e_meta['docker_volumes'].append("{}:/opt/pki/keys".format(os.path.join(common.HERE, 'keys')))
 
-    conditions = [CheckDockerLogs('ibm_mq1', log_pattern)]
-    if not ON_WINDOWS:
-        conditions.append(WaitFor(prepare_queue_manager))
+        conditions = [CheckDockerLogs('ibm_mq1', log_pattern)]
+        if not ON_WINDOWS:
+            conditions.append(WaitFor(prepare_queue_manager))
 
-    with docker_run(compose_file=common.COMPOSE_FILE_PATH, build=True, conditions=conditions, sleep=10, attempts=2):
-        yield common.INSTANCE, e2e_meta
+        with docker_run(compose_file=common.COMPOSE_FILE_PATH, build=True, conditions=conditions, sleep=10, attempts=2):
+            yield common.INSTANCE, e2e_meta

@@ -2,7 +2,7 @@ import os
 import urllib.request
 import zipfile
 
-TARGET_PATH = "/tmp/67f55o00o0oo" #"c:\\ibm_mq"
+TARGET_PATH = "c:\\ibm_mq"
 VERSION = "9.2.2.0"
 ZIP_FILE = "{}-IBM-MQC-Redist-Win64.zip".format(VERSION)
 IBM_URL = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/mqdev/redist/{}".format(ZIP_FILE)
