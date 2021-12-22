@@ -74,7 +74,6 @@ ADDL_AGENT_METRICS = [
     'cilium.policy.count',
     'cilium.policy.import_errors.count',
     'cilium.unreachable.health_endpoints',
-
 ]
 
 OPERATOR_METRICS = [
