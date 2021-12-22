@@ -1,7 +1,7 @@
 [
     {
         "agent_version": "5.2.0",
-        "integration": "Mesos Slave",
+        "integration": "Mesos",
         "check": "mesos_slave.can_connect",
         "statuses": [
             "ok",
