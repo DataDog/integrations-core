@@ -4,6 +4,7 @@
 import re
 import time
 from collections import defaultdict
+from copy import deepcopy
 
 import requests
 from six import iteritems, itervalues
@@ -23,9 +24,21 @@ from .metrics import (
     stats_for_version,
 )
 
+REGEX = r'(?<!\\)\.'  # This regex string is used to traverse through nested dictionaries for JSON responses
+
 
 class AuthenticationError(requests.exceptions.HTTPError):
     """Authentication Error, unable to reach server"""
+
+
+def get_dynamic_tags(columns):
+    dynamic_tags = []  # This is a list of (path to tag, name of tag)
+    for column in columns:
+        if column.get('type') == 'tag':
+            value_path = column.get('value_path')
+            name = column.get('name')
+            dynamic_tags.append((value_path, name))
+    return dynamic_tags
 
 
 class ESCheck(AgentCheck):
@@ -341,7 +354,7 @@ class ESCheck(AgentCheck):
         value = data
 
         # Traverse the nested dictionaries
-        for key in re.split(r'(?<!\\)\.', path):
+        for key in re.split(REGEX, path):
             if value is not None:
                 value = value.get(key.replace('\\', ''))
             else:
@@ -444,60 +457,120 @@ class ESCheck(AgentCheck):
                 desc = CAT_ALLOCATION_METRICS[metric]
                 self._process_metric(cat_allocation_dic, metric, *desc, tags=tags)
 
+    def _process_custom_metric(
+        self, value, data_path, value_path, dynamic_tags, xtype, metric_name, tags=None, hostname=None
+    ):
+        """
+        value: JSON payload to traverse
+        data_path: path to data right before metric value or right before list of metric values
+        value_path: path to data after data_path to metric value
+        dynamic_tags: list of tags and their value_paths
+        xtype: datadog type
+        metric_name: datadog metric name
+        tags: a lambda to apply to the numerical value
+        hostname: a lambda to apply to the numerical value
+        """
+
+        tags_to_submit = deepcopy(tags)
+        path = data_path + '.' + value_path
+
+        # Collect the value of tags first, and then append to tags_to_submit
+        for (dynamic_tag_path, dynamic_tag_name) in dynamic_tags:
+            # Start at where data_path left off
+            dynamic_tag_value = value
+
+            # Traverse down the tree to find the tag value
+            for key in re.split(REGEX, dynamic_tag_path):
+                if dynamic_tag_value is not None:
+                    dynamic_tag_value = dynamic_tag_value.get(key.replace('\\', ''))
+                else:
+                    self.log.debug("Dynamic tag not found: %s -> %s", path, dynamic_tag_name)
+                    break
+
+            # If tag is there, then add it to list of tags to submit
+            if dynamic_tag_value is not None:
+                dynamic_tag = '{}:{}'.format(dynamic_tag_name, dynamic_tag_value)
+                tags_to_submit.append(dynamic_tag)
+            else:
+                self.log.debug("Dynamic tag is null: %s -> %s", path, dynamic_tag_name)
+
+        # Now do the same for the actual metric
+        branch_value = value
+        for key in re.split(REGEX, value_path):
+            if branch_value is not None:
+                branch_value = branch_value.get(key.replace('\\', ''))
+            else:
+                break
+
+        if branch_value is not None:
+            if xtype == "gauge":
+                self.gauge(metric_name, branch_value, tags=tags_to_submit, hostname=hostname)
+            elif xtype == "monotonic_count":
+                self.monotonic_count(metric_name, branch_value, tags=tags_to_submit, hostname=hostname)
+            else:
+                self.rate(metric_name, branch_value, tags=tags_to_submit, hostname=hostname)
+        else:
+            self.log.debug("Metric not found: %s -> %s", path, metric_name)
+
     def _run_custom_queries(self, admin_forwarder, base_tags):
         self.log.debug("Running custom queries")
-
         custom_queries = self._config.custom_queries
+
         for endpoints in custom_queries:
             columns = endpoints.get('columns', [])
-            path = endpoints.get('path')
+            data_path = endpoints.get('data_path')
             endpoint = endpoints.get('endpoint')
-            static_tags = endpoints.get('static_tags', [])
+            static_tags = endpoints.get('tags', [])
             endpoint = self._join_url(endpoint, admin_forwarder)
-
             data = self._get_data(endpoint)
 
-            # Search for any tags in columns first before processing metrics
-            dynamic_tags = self._process_tags(data, columns, path)
-
-            tags = base_tags + static_tags + dynamic_tags
+            # If there are tags, add the tag path to list of paths to evaluate while processing metric
+            dynamic_tags = get_dynamic_tags(columns)
+            tags = base_tags + static_tags
 
             for column in columns:
                 metric_type = column.get('type', 'gauge')
 
+                # Skip tags since already processed
                 if metric_type == 'tag':
                     continue
+                name = column.get('name')
+                value_path = column.get('value_path')
+                if name and value_path:
+                    value = data
 
-                dd_name = column.get('dd_name')
-                es_name = column.get('es_name')
-                es_metric_path = path + es_name
+                    # Traverse the nested dictionaries to the data_path
+                    for key in re.split(REGEX, data_path):
+                        if value is not None:
+                            value = value.get(key.replace('\\', ''))
+                        else:
+                            break
 
-                if dd_name and es_name:
-                    self._process_metric(data, dd_name, metric_type, es_metric_path, tags=tags)
-
-    def _process_tags(self, data, columns, path):
-        dynamic_tags = []
-        for column in columns:
-            if column.get('type') == 'tag':
-                es_name = column.get('es_name')
-                dd_name = column.get('dd_name')
-                tag_path = path + es_name
-                value = data
-
-                for key in re.split(r'(?<!\\)\.', tag_path):
-                    if value is not None:
-                        value = value.get(key.replace('\\', ''))
+                    # At this point, there may be multiple branches of value_paths.
+                    # If value is a list, go through each entry
+                    if isinstance(value, list):
+                        for branch in value:
+                            self._process_custom_metric(
+                                value=branch,
+                                data_path=data_path,
+                                value_path=value_path,
+                                dynamic_tags=dynamic_tags,
+                                xtype=metric_type,
+                                metric_name=name,
+                                tags=tags,
+                                hostname=None,
+                            )
                     else:
-                        self.log.debug("Dynamic tag not found: %s -> %s", tag_path, dd_name)
-                        break
-
-                if value is not None:
-                    dynamic_tag = "{}:{}".format(dd_name, value)
-                    dynamic_tags.append(dynamic_tag)
-                else:
-                    self.log.debug("Dynamic tag not found: %s -> %s", tag_path, dd_name)
-
-        return dynamic_tags
+                        self._process_custom_metric(
+                            value=value,
+                            data_path=data_path,
+                            value_path=value_path,
+                            dynamic_tags=dynamic_tags,
+                            xtype=metric_type,
+                            metric_name=name,
+                            tags=tags,
+                            hostname=None,
+                        )
 
     def _create_event(self, status, tags=None):
         hostname = to_string(self.hostname)
