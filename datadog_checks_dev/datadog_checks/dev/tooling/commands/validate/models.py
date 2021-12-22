@@ -121,10 +121,11 @@ def models(ctx, check, sync, verbose):
             current_model_file_lines = []
             expected_model_file_lines = []
             if file_exists(model_file_path):
-                # No contents indicates a custom file
                 if not contents:
                     continue
-
+                if model_file == 'validators.py' and current_model_file_lines:
+                    # validators.py is a custom file, it should only be rendered the first time
+                    continue
                 current_model_file_lines.extend(read_file_lines(model_file_path))
 
                 for line in current_model_file_lines:
