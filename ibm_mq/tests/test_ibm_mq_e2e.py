@@ -4,14 +4,11 @@
 
 import pytest
 
-from datadog_checks.dev.utils import ON_WINDOWS, get_metadata_metrics
+from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import MQ_VERSION, assert_all_metrics
+from .common import MQ_VERSION, assert_all_metrics, skip_windows_ci
 
-pytestmark = [
-    pytest.mark.skipif(ON_WINDOWS, reason="MQ server does not run properly on windows CI machines"),
-    pytest.mark.e2e,
-]
+pytestmark = [skip_windows_ci, pytest.mark.e2e]
 
 
 def test_e2e_check_all(dd_agent_check, instance_collect_all):

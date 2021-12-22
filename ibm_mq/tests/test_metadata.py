@@ -3,12 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.dev.utils import ON_WINDOWS
-
-from .common import MQ_VERSION_RAW
+from .common import MQ_VERSION_RAW, skip_windows_ci
 
 
-@pytest.mark.skipif(ON_WINDOWS, reason="MQ server does not run properly on windows CI machines")
+@skip_windows_ci
 @pytest.mark.integration
 def test_metadata(get_check, instance, datadog_agent):
     check = get_check(instance)

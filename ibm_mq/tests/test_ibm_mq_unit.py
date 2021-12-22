@@ -6,7 +6,8 @@ import pytest
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.dev.utils import ON_WINDOWS
+
+from .common import skip_windows_ci
 
 pytestmark = pytest.mark.unit
 
@@ -183,7 +184,7 @@ def test_channel_queue_config_error(instance_config):
     assert 'channel, queue_manager are required configurations' in str(excinfo.value)
 
 
-@pytest.mark.skipif(ON_WINDOWS, reason="MQ server does not run properly on windows CI machines")
+@skip_windows_ci
 def test_ssl_connection_creation(get_check, instance):
     """
     Test that we are not getting unicode/bytes type error.
