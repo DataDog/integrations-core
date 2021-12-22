@@ -412,7 +412,7 @@ Need help? Contact [Datadog support][20].
 [14]: https://app.datadoghq.com/organization-settings/api-keys
 [15]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [16]: https://docs.datadoghq.com/integrations/#cat-autodiscovery
-[17]: https://docs.datadoghq.com/developers/dogstatsd/
+[17]: https://app.datadoghq.com/containers
 [18]: http://docs.datadoghq.com/tracing/setup
 [19]: https://app.datadoghq.com/containers
 [20]: https://app.datadoghq.com/process
