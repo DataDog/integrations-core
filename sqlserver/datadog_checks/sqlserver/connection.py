@@ -77,8 +77,10 @@ class Connection(object):
     @contextmanager
     def get_managed_cursor(self, key_prefix=None):
         cursor = self.get_cursor(self.DEFAULT_DB_KEY, key_prefix=key_prefix)
-        yield cursor
-        self.close_cursor(cursor)
+        try:
+            yield cursor
+        finally:
+            self.close_cursor(cursor)
 
     def get_cursor(self, db_key, db_name=None, key_prefix=None):
         """
@@ -129,8 +131,10 @@ class Connection(object):
     @contextmanager
     def _open_managed_db_connections(self, db_key, db_name=None, key_prefix=None):
         self.open_db_connections(db_key, db_name, key_prefix=key_prefix)
-        yield
-        self.close_db_connections(db_key, db_name, key_prefix=key_prefix)
+        try:
+            yield
+        finally:
+            self.close_db_connections(db_key, db_name, key_prefix=key_prefix)
 
     def open_db_connections(self, db_key, db_name=None, is_default=True, key_prefix=None):
         """

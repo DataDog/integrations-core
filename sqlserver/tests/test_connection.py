@@ -120,3 +120,39 @@ def _run_test_query_timeout(aggregator, dd_run_check, instance):
 
                     assert type(e) == adodbapi.apibase.DatabaseError
                     assert 'timeout' in "".join(e.args).lower(), "must be a timeout"
+
+
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_connection_cleanup(instance_docker):
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    check.initialize_connection()
+
+    # regular operation
+    with check.connection.open_managed_default_connection():
+        assert len(check.connection._conns) == 1
+        with check.connection.get_managed_cursor() as cursor:
+            cursor.execute("select 1")
+            assert len(check.connection._conns) == 1
+    assert len(check.connection._conns) == 0, "connection should have been closed"
+
+    # db exception
+    with pytest.raises(Exception) as e:
+        with check.connection.open_managed_default_connection():
+            assert len(check.connection._conns) == 1
+            with check.connection.get_managed_cursor() as cursor:
+                assert len(check.connection._conns) == 1
+                cursor.execute("gimme some data")
+    assert "incorrect syntax" in str(e).lower()
+    assert len(check.connection._conns) == 0, "connection should have been closed"
+
+    # application exception
+    with pytest.raises(Exception) as e:
+        with check.connection.open_managed_default_connection():
+            assert len(check.connection._conns) == 1
+            with check.connection.get_managed_cursor():
+                assert len(check.connection._conns) == 1
+                raise Exception("oops")
+    assert "oops" in str(e)
+    assert len(check.connection._conns) == 0, "connection should have been closed"
