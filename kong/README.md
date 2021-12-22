@@ -36,7 +36,7 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][4].
 
-**Note**: The current version of the check (1.17.0+) uses [OpenMetrics][12] for metric collection, which requires Python 3. For hosts that are unable to use Python 3, or if you would like to use a legacy version of this check, refer to the following [config][13].
+**Note**: The current version of the check (1.17.0+) uses [OpenMetrics][12] for metric collection, which requires Python 3. For hosts unable to use Python 3, or to use a legacy version of this check, see the following [config][13].
 
 ##### Log collection
 
@@ -133,7 +133,7 @@ Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-- [Monitor Kong with our new Datadog integration][11]
+- [Monitor Kong with the Datadog integration][11]
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

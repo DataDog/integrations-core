@@ -12,7 +12,7 @@ The JBoss/WildFly check is included in the [Datadog Agent][3] package so you don
 
 ### Configuration
 
-This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the collected metrics, visit the [JMX Checks documentation][4] for more detailed instructions. If you need to monitor more metrics, contact [Datadog support][5].
+This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the collected metrics, see the [JMX Checks documentation][4] for more detailed instructions. If you need to monitor more metrics, contact [Datadog support][5].
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
@@ -32,7 +32,7 @@ To configure this check for an Agent running on a host:
    - For Wildfly 9 and older: `service:jmx:http-remoting-jmx://<HOST>:<PORT> `
    - For Wildfly 10+: `service:jmx:remote+http://<HOST>:<PORT>`
 
-    Refer to the [WildFly JMX subsystem configuration page][7] for more information.
+    See the [WildFly JMX subsystem configuration page][7] for more information.
 
 2. [Restart the Agent][8].
 
@@ -83,7 +83,7 @@ partial -->
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][10].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][10].
 
 | Parameter      | Value                                                      |
 | -------------- | ---------------------------------------------------------- |

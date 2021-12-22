@@ -56,16 +56,16 @@ To monitor the `istiod` deployment and `istio-proxy` in Istio `v1.5+`, use the f
 **Note**: The `connectionID` Prometheus label is excluded. The [sample istio.d/conf.yaml][8] also has a list of suggested labels to exclude.
 
 
-   Istio mesh metrics are now only available from `istio-proxy` containers which are supported out-of-the-box via autodiscovery, see [`istio.d/auto_conf.yaml`][9].   
+   Istio mesh metrics are only available from `istio-proxy` containers which are supported out-of-the-box with Autodiscovery, see [`istio.d/auto_conf.yaml`][9].   
 
 ##### OpenMetrics V2 vs OpenMetrics V1
 <div class="alert alert-warning">
-<b>Important Note</b>: If you have multiple instances of Datadog collecting Istio metrics, make sure to use the same implementation of OpenMetrics for all of them. Otherwise, the metrics data will fluctuate in the Datadog app.
+<b>Important Note</b>: If you have multiple instances of Datadog collecting Istio metrics, make sure to use the same implementation of OpenMetrics for all of them. Otherwise, the metrics data fluctuates on the Datadog site.
 </div>
 
 When you enable the `use_openmetrics` configuration option, the Istio integration uses the OpenMetrics V2 implementation of the check. 
 
-In OpenMetrics V2, metrics are submitted more accurately by default and behave closer to Prometheus metric types. For example, Prometheus metrics ending in  `_count` and `_sum` are now submitted as `monotonic_count` by default.
+In OpenMetrics V2, metrics are submitted more accurately by default and behave closer to Prometheus metric types. For example, Prometheus metrics ending in  `_count` and `_sum` are submitted as `monotonic_count` by default.
 
 OpenMetrics V2 addresses performance and quality issues in OpenMetrics V1. Updates include native metric types support, improved configuration, and custom metric types.
 
@@ -108,7 +108,7 @@ Istio contains two types of logs. Envoy access logs that are collected with the 
 _Available for Agent versions >6.0_
 
 See the [Autodiscovery Integration Templates][4] for guidance on applying the parameters below.
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][13].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][13].
 
 | Parameter      | Value                                                |
 | -------------- | ---------------------------------------------------- |
@@ -147,9 +147,9 @@ You can use the Openmetrics V2 implementation of the Istio integration to resolv
 Note: you must upgrade to at minimum Agent `7.31.0` and Python 3. See the [Configuration](#configuration) section on enabling Openmetrics V2.
 
 
-### Using the generic Openmetrics Integration in an Istio deployment
+### Using the generic Openmetrics integration in an Istio deployment
 
-If Istio proxy sidecar injection is enabled, monitoring other Prometheus metrics via the [Openmetrics integration][20] with the same metrics endpoint as `istio_mesh_endpoint` can result in high custom metrics usage and duplicated metric collection.
+If Istio proxy sidecar injection is enabled, monitoring other Prometheus metrics using the [Openmetrics integration][20] with the same metrics endpoint as `istio_mesh_endpoint` can result in high custom metrics usage and duplicated metric collection.
 
 To ensure that your Openmetrics configuration does not redundantly collect metrics, either:
 
