@@ -40,6 +40,7 @@ AGENT_METRICS = {
     'cilium_policy': 'policy.count',
     'cilium_policy_endpoint_enforcement_status': 'policy.endpoint_enforcement_status',  # double check
     'cilium_policy_import_errors': 'policy.import_errors.count',
+    'cilium_policy_import_errors_total': 'policy.import_errors.count',
     'cilium_policy_l7_denied_total': 'policy.l7_denied.total',
     'cilium_policy_l7_forwarded_total': 'policy.l7_forwarded.total',
     'cilium_policy_l7_parse_errors_total': 'policy.l7_parse_errors.total',
