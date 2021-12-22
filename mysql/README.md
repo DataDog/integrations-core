@@ -28,20 +28,16 @@ The MySQL check is included in the [Datadog Agent][4] package. No additional ins
 On each MySQL server, create a database user for the Datadog Agent:
 
 ```shell
-mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED BY '<UNIQUEPASSWORD>';
+mysql> CREATE USER 'datadog'@'%' IDENTIFIED BY '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
 For mySQL 8.0+ create the `datadog` user with the native password hashing method:
 
 ```shell
-mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED WITH mysql_native_password by '<UNIQUEPASSWORD>';
+mysql> CREATE USER 'datadog'@'%' IDENTIFIED WITH mysql_native_password by '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
 ```
-
-**Note**: `@'localhost'` is only for local connections. For remote connections, use the hostname/IP of your Agent. For more information, see the [MySQL documentation][5].
-
-**Note**: If you encounter the following error message `(1045, u"Access denied for user 'datadog'@'127.0.0.1' (using password: YES)"))`, see the [MySQL Localhost Error documentation][6].
 
 Verify the user was created successfully using the following commands - replace `<UNIQUEPASSWORD>` with the password you created above:
 
@@ -60,17 +56,17 @@ echo -e "\033[0;31mMissing REPLICATION CLIENT grant\033[0m"
 The Agent needs a few privileges to collect metrics. Grant the user the following limited privileges ONLY:
 
 ```shell
-mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
+mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'%' WITH MAX_USER_CONNECTIONS 5;
 Query OK, 0 rows affected, 1 warning (0.00 sec)
 
-mysql> GRANT PROCESS ON *.* TO 'datadog'@'localhost';
+mysql> GRANT PROCESS ON *.* TO 'datadog'@'%';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
 For MySQL 8.0+ set `max_user_connections` with:
 
 ```shell
-mysql> ALTER USER 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
+mysql> ALTER USER 'datadog'@'%' WITH MAX_USER_CONNECTIONS 5;
 Query OK, 0 rows affected (0.00 sec)
 ```
 
@@ -85,7 +81,7 @@ mysql> show databases like 'performance_schema';
 +-------------------------------+
 1 row in set (0.00 sec)
 
-mysql> GRANT SELECT ON performance_schema.* TO 'datadog'@'localhost';
+mysql> GRANT SELECT ON performance_schema.* TO 'datadog'@'%';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
