@@ -58,7 +58,6 @@ AGENT_DEFAULT_METRICS = [
     'cilium.datapath.conntrack_gc.key_fallbacks.total',
     'cilium.controllers.runs.total',
     'cilium.bpf.map_ops.total',
-    'cilium.unreachable.nodes',
 ]
 
 ADDL_AGENT_METRICS = [
@@ -74,6 +73,7 @@ ADDL_AGENT_METRICS = [
     'cilium.policy.count',
     'cilium.policy.import_errors.count',
     'cilium.unreachable.health_endpoints',
+    'cilium.unreachable.nodes',
 ]
 
 OPERATOR_METRICS = [
