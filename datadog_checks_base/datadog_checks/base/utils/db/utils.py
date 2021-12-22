@@ -242,13 +242,14 @@ class DBMAsyncJob(object):
                     )
                     break
                 self._run_job_rate_limited()
-        except self._expected_db_exceptions as e:
-            # canceling can cause exceptions if the connection is closed the middle of the check run
-            # in this case we still want to report it as a cancellation instead of a crash
+        except Exception as e:
             if self._cancel_event.isSet():
+                # canceling can cause exceptions if the connection is closed the middle of the check run
+                # in this case we still want to report it as a cancellation instead of a crash
+                self._log.debug("[%s] Job loop error after cancel: %s", self._job_tags_str, e)
                 self._log.info("[%s] Job loop cancelled", self._job_tags_str)
                 self._check.count("dd.{}.async_job.cancel".format(self._dbms), 1, tags=self._job_tags, raw=True)
-            else:
+            elif isinstance(e, self._expected_db_exceptions):
                 self._log.warning(
                     "[%s] Job loop database error: %s",
                     self._job_tags_str,
@@ -261,10 +262,6 @@ class DBMAsyncJob(object):
                     tags=self._job_tags + ["error:database-{}".format(type(e))],
                     raw=True,
                 )
-        except Exception as e:
-            if self._cancel_event.isSet():
-                self._log.info("[%s] Job loop cancelled", self._job_tags_str)
-                self._check.count("dd.{}.async_job.cancel".format(self._dbms), 1, tags=self._job_tags, raw=True)
             else:
                 self._log.exception("[%s] Job loop crash", self._job_tags_str)
                 self._check.count(
