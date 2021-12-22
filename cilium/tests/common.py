@@ -37,11 +37,11 @@ AGENT_DEFAULT_METRICS = [
     'cilium.process.virtual_memory.bytes',
     'cilium.process.virtual_memory.max.bytes',
     'cilium.triggers_policy.update_folds',
-    'cilium.unreachable.health_endpoints',
     'cilium.unreachable.nodes',
 ]
 
 ADDL_AGENT_METRICS = [
+    'cilium.unreachable.health_endpoints',
     'cilium.triggers_policy.update_call_duration.seconds.count',
     'cilium.triggers_policy.update_call_duration.seconds.sum',
     'cilium.triggers_policy.update.total',
