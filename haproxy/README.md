@@ -34,7 +34,7 @@ The recommended way to set up this integration is by enabling the Prometheus end
 
 **Note**: This configuration strategy is provided as a reference for legacy users. If you are setting up the integration for the first time, consider using the Prometheus-based strategy described in the previous section.
 
-The Agent collects metrics via a stats endpoint:
+The Agent collects metrics using a stats endpoint:
 
 1. Configure one in your `haproxy.conf`:
 
@@ -154,7 +154,7 @@ LABEL "com.datadoghq.ad.instances"='[{"url": "https://%%host%%/admin?stats"}]'
 {{< /site-region >}}
 partial -->
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][10].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker Log Collection][10].
 
 Then, set [Log Integrations][11] as Docker labels:
 
@@ -202,7 +202,7 @@ partial -->
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][14].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][14].
 
 Then, set [Log Integrations][11] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][15].
 
@@ -253,7 +253,7 @@ partial -->
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][16].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [ECS Log Collection][16].
 
 Then, set [Log Integrations][11] as Docker labels:
 

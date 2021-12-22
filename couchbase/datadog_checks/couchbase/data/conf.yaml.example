@@ -62,6 +62,12 @@ instances:
     #
     # sync_gateway_url: http://localhost:4986
 
+    ## @param index_stats_url - string - optional - default: http://localhost:9102
+    ## The URL to get Index Statistics, available since Couchbase 7.0.
+    ## See https://docs.couchbase.com/server/current/rest-api/rest-index-stats.html
+    #
+    # index_stats_url: http://localhost:9102
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##

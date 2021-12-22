@@ -64,7 +64,7 @@ You can use the [Datadog FluentD plugin][6] to forward the logs directly from Fl
 
 ###### Add metadata to your logs
 
-Proper metadata (including hostname and source) is the key to unlocking the full potential of your logs in Datadog. By default, the hostname and timestamp fields should be properly remapped via the [remapping for reserved attributes][7].
+Proper metadata (including hostname and source) is the key to unlocking the full potential of your logs in Datadog. By default, the hostname and timestamp fields should be properly remapped with the [remapping for reserved attributes][7].
 
 ###### Source and custom tags
 
@@ -138,7 +138,7 @@ If your logs contain any of the following attributes, these attributes are autom
 - `kubernetes.pod_name`
 - `docker.container_id`
 
-While the Datadog Agent collects Docker and Kubernetes metadata automatically, FluentD requires a plugin for this. We recommend using [fluent-plugin-kubernetes_metadata_filter][12] to collect this metadata.
+While the Datadog Agent collects Docker and Kubernetes metadata automatically, FluentD requires a plugin for this. Datadog recommends using [fluent-plugin-kubernetes_metadata_filter][12] to collect this metadata.
 
 Configuration example:
 

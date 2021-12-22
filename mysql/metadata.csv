@@ -81,6 +81,15 @@ mysql.innodb.semaphore_waits,gauge,,,,"The number semaphore currently being wait
 mysql.innodb.semaphore_wait_time,gauge,,,,"Semaphore wait time",0,mysql,mysql innodb semaphore_wait_time
 mysql.binlog.cache_disk_use,gauge,,transaction,,"The number of transactions that used the temporary binary log cache but that exceeded the value of binlog_cache_size and used a temporary file to store statements from the transaction.",0,mysql,mysql binlog cache_disk_use
 mysql.binlog.cache_use,gauge,,transaction,,The number of transactions that used the binary log cache.,0,mysql,mysql binlog cache_use
+mysql.replication.group.member_status,gauge,,,,"Information about the node status in a group replication environment, always equal to 1.",0,mysql,mysql gr status
+mysql.replication.group.conflicts_detected,gauge,,transaction,,The number of transactions that have not passed the conflict detection check.,0,mysql,mysql gr conflict
+mysql.replication.group.transactions,gauge,,transaction,,The number of transactions in the queue pending conflict detection checks.,0,mysql,mysql gr transactions
+mysql.replication.group.transactions_applied,gauge,,transaction,,Number of transactions this member has received from the group and applied.,0,mysql,mysql gr transactions applied
+mysql.replication.group.transactions_in_applier_queue,gauge,,transaction,,The number of transactions that this member has received from the replication group which are waiting to be applied.,0,mysql,mysql gr transactions queued
+mysql.replication.group.transactions_check,gauge,,transaction,,The number of transactions that have been checked for conflicts.,0,mysql,mysql gr transactions checked
+mysql.replication.group.transactions_proposed,gauge,,transaction,,The number of transactions which originated on this member and were sent to the group.,0,mysql,mysql gr transactions proposed
+mysql.replication.group.transactions_rollback,gauge,,transaction,,The number of transactions which originated on this member and were rolled back by the group.,0,mysql,mysql gr transactions rollback
+mysql.replication.group.transactions_validating,gauge,,transaction,,"The number of transaction rows which can be used for certification, but have not been garbage collected.",0,mysql,mysql gr transactions validating
 mysql.performance.handler_commit,gauge,,operation,second,The number of internal COMMIT statements.,0,mysql,mysql performance handler_commit
 mysql.performance.handler_delete,gauge,,operation,second,The number of internal DELETE statements.,0,mysql,mysql performance handler_delete
 mysql.performance.handler_prepare,gauge,,operation,second,The number of internal PREPARE statements.,0,mysql,mysql performance handler_prepare
@@ -192,6 +201,11 @@ mysql.galera.wsrep_flow_control_recv,count,,,,"Shows the number of times the gal
 mysql.galera.wsrep_flow_control_sent,count,,,,"Shows the number of times the galera node has sent a pausing Flow Control message to others",0,mysql,mysql galera wsrep_flow_control_sent
 mysql.galera.wsrep_cert_deps_distance,gauge,,,,"Shows the average distance between the lowest and highest sequence number, or seqno, values that the node can possibly apply in parallel.",0,mysql,mysql galera wsrep_cert_deps_distance
 mysql.galera.wsrep_local_send_queue_avg,gauge,,,,"Show an average for the send queue length since the last FLUSH STATUS query.",0,mysql,mysql galera wsrep_local_send_queue_avg
+mysql.galera.wsrep_replicated_bytes,gauge,,,,"Total size (in bytes) of writesets sent to other nodes.",0,mysql,mysql galera wsrep_replicated_bytes
+mysql.galera.wsrep_received_bytes,gauge,,,,"Total size (in bytes) of writesets received from other nodes.",0,mysql,mysql galera wsrep_received_bytes
+mysql.galera.wsrep_received,gauge,,,,"Total number of write-sets received from other nodes.",0,mysql,mysql galera wsrep_received
+mysql.galera.wsrep_local_state,gauge,,,,"Internal Galera cluster state number",0,mysql,mysql galera wsrep_local_state
+mysql.galera.wsrep_local_cert_failures,count,,,,"Total number of local transactions that failed certification test.",0,mysql,mysql galera wsrep_local_cert_failures
 mysql.performance.qcache.utilization,gauge,,fraction,,Fraction of the query cache memory currently being used.,0,mysql,mysql performance qcache utilization
 mysql.performance.digest_95th_percentile.avg_us,gauge,,microsecond,,Query response time 95th percentile per schema.,0,mysql,mysql response time 95th
 mysql.performance.query_run_time.avg,gauge,,microsecond,,Avg query response time per schema.,0,mysql,mysql response time avg
