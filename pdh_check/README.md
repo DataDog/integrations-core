@@ -1,6 +1,7 @@
 # Windows Performance Counters Integration
 
 ## Overview
+**Note:** The usage of PDH check is discouraged, you should use [windows_performance_counter instead][8].
 
 Get metrics from Windows performance counters in real time to:
 
@@ -43,3 +44,4 @@ The PDH check does not include any service checks.
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://docs.datadoghq.com/developers/metrics/custom_metrics/
 [7]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
+[8]: https://docs.datadoghq.com/integrations/windows_performance_counters/

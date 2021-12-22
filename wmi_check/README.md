@@ -9,7 +9,7 @@ Get metrics from your Windows applications and servers with Windows Management I
 - Visualize their performance.
 - Correlate their activity with the rest of your applications.
 
-**Note:** It is recommended that the [PDH check][2] be used instead in all cases due to its significantly lower overhead and thus better scalability.
+**Note:** It is recommended that the [Windows Performance counters][2] be used instead in all cases due to its significantly lower overhead and thus better scalability.
 
 ## Setup
 
@@ -194,7 +194,7 @@ The WMI check does not include any service checks.
 Need help? Contact [Datadog support][13].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/wmi_check/images/wmimetric.png
-[2]: https://docs.datadoghq.com/integrations/pdh_check/
+[2]: https://docs.datadoghq.com/integrations/windows_performance_counters/
 [3]: https://msdn.microsoft.com/en-us/library/system.diagnostics.performancecounter(v=vs.110.aspx
 [4]: https://wmie.codeplex.com
 [5]: https://msdn.microsoft.com/en-us/powershell/scripting/getting-started/cookbooks/getting-wmi-objects--get-wmiobject-
