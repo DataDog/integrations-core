@@ -138,23 +138,21 @@ def test_connection_cleanup(instance_docker):
     assert len(check.connection._conns) == 0, "connection should have been closed"
 
     # db exception
-    try:
+    with pytest.raises(Exception) as e:
         with check.connection.open_managed_default_connection():
             assert len(check.connection._conns) == 1
             with check.connection.get_managed_cursor() as cursor:
                 assert len(check.connection._conns) == 1
                 cursor.execute("gimme some data")
-    except Exception as e:
-        assert "incorrect syntax" in str(e).lower()
-        assert len(check.connection._conns) == 0, "connection should have been closed"
+    assert "incorrect syntax" in str(e).lower()
+    assert len(check.connection._conns) == 0, "connection should have been closed"
 
     # application exception
-    try:
+    with pytest.raises(Exception) as e:
         with check.connection.open_managed_default_connection():
             assert len(check.connection._conns) == 1
             with check.connection.get_managed_cursor():
                 assert len(check.connection._conns) == 1
                 raise Exception("oops")
-    except Exception as e:
-        assert "oops" in str(e)
-        assert len(check.connection._conns) == 0, "connection should have been closed"
+    assert "oops" in str(e)
+    assert len(check.connection._conns) == 0, "connection should have been closed"
