@@ -44,7 +44,6 @@ def setup_cilium():
             "{}".format(CLUSTER_NAME),
         ]
     )
-    run_command(["/bin/bash", "sleep", "60"])
     run_command(["kubectl", "create", "ns", "cilium"])
     run_command(
         [

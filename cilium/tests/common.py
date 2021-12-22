@@ -15,14 +15,17 @@ AGENT_DEFAULT_METRICS = [
     'cilium.controllers.failing.count',
     'cilium.controllers.runs_duration.seconds.count',
     'cilium.controllers.runs_duration.seconds.sum',
+    'cilium.endpoint.count',
     'cilium.endpoint.regeneration_time_stats.seconds.count',
     'cilium.endpoint.regeneration_time_stats.seconds.sum',
     'cilium.endpoint.state',
     'cilium.event_timestamp',
+    'cilium.identity.count',
     'cilium.ip_addresses.count',
     'cilium.k8s_client.api_latency_time.seconds.count',
     'cilium.k8s_client.api_latency_time.seconds.sum',
     'cilium.nodes.managed.total',
+    'cilium.policy.count',
     'cilium.policy.endpoint_enforcement_status',
     'cilium.policy.max_revision',
     'cilium.policy.regeneration_time_stats.seconds.count',
@@ -39,14 +42,11 @@ AGENT_DEFAULT_METRICS = [
 ]
 
 ADDL_AGENT_METRICS = [
-    'cilium.endpoint.count',
-    'cilium.identity.count',
     'cilium.triggers_policy.update_call_duration.seconds.count',
     'cilium.triggers_policy.update_call_duration.seconds.sum',
     'cilium.triggers_policy.update.total',
     'cilium.subprocess.start.total',
     'cilium.process.cpu.seconds.total',
-    'cilium.policy.count',
     'cilium.policy.regeneration.total',
     'cilium.policy.l7_denied.total',
     'cilium.policy.l7_forwarded.total',
@@ -150,6 +150,7 @@ OPERATOR_AWS_METRICS = [
     'cilium.operator.ipam.resync.total',
 ]
 
+# Not available in test metric fixtures
 ADDL_OPERATOR_AWS_METRICS = [
     'cilium.operator.ec2.api.rate_limit.duration.seconds.sum',
     'cilium.operator.ec2.api.rate_limit.duration.seconds.count',
