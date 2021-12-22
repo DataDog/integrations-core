@@ -15,8 +15,6 @@ from datadog_checks.dev.tooling.configuration.consumers.openapi_document import 
 PYTHON_VERSION = PythonVersion.PY_38
 
 VALIDATORS_DOCUMENTATION = '''
-
-
 # Here you can include additional config validators or transformers
 #
 # def initialize_instance(values, **kwargs):
