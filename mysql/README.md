@@ -25,7 +25,9 @@ The MySQL check is included in the [Datadog Agent][4] package. No additional ins
 
 #### Prepare MySQL
 
-On each MySQL server, create a database user for the Datadog Agent:
+On each MySQL server, create a database user for the Datadog Agent.
+
+The following instructions grant the Agent permission to login from any host using `datadog@'%'`. You can restrict the `datadog` user to be allowed to login only from localhost by using `datadog@'localhost'`. See the [MySQL documentation][5] for more info.
 
 ```shell
 mysql> CREATE USER 'datadog'@'%' IDENTIFIED BY '<UNIQUEPASSWORD>';
