@@ -14,6 +14,18 @@ from datadog_checks.dev.tooling.configuration.consumers.openapi_document import 
 
 PYTHON_VERSION = PythonVersion.PY_38
 
+VALIDATORS_DOCUMENTATION = '''
+# Here you can include additional config validators or transformers
+#
+# def initialize_instance(values, **kwargs):
+#     if 'my_option' not in values and 'my_legacy_option' in values:
+#         values['my_option'] = values['my_legacy_option']
+#     if values.get('my_number') > 10:
+#         raise ValueError('my_number max value is 10, got %s' % str(values.get('my_number')))
+#
+#     return values
+'''
+
 
 class ModelConsumer:
     def __init__(self, spec: dict, code_formatter: CodeFormatter = None):
@@ -124,13 +136,16 @@ class ModelConsumer:
             model_info,
         )
 
-    def _build_model_files(self, model_info: ModelInfo, package_info: List[Tuple[str, str]]):
+    def _build_model_files(
+        self, model_info: ModelInfo, package_info: List[Tuple[str, str]]
+    ) -> Dict[str, Tuple[str, List]]:
         """Builds the model files others than instace.py and shared.py
         In particular it builds, if relevant:
             - defaults.py
             - deprecations.py
             - __init__.py
             - validators.py
+        Returns a Dict[ file_name, Tuple[file_contents, List[errors])]
         """
         model_files = {}
         if model_info.defaults_file_lines:
@@ -145,7 +160,7 @@ class ModelConsumer:
         model_files['__init__.py'] = ('\n'.join(package_root_lines), [])
 
         # Custom
-        model_files['validators.py'] = ('', [])
+        model_files['validators.py'] = (VALIDATORS_DOCUMENTATION, [])
         return model_files
 
     def _merge_instances(self, section: dict, errors: List[str]) -> dict:
