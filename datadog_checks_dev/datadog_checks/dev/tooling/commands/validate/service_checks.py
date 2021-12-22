@@ -35,7 +35,6 @@ CHECK_TO_NAME = {
     'kubelet': 'Kubernetes',
     'kubernetes_state': 'Kubernetes',
     'mesos_master': 'mesos',
-    'mesos_slave': 'Mesos',
     'ntp': 'System',
     'openstack_controller': 'OpenStack',
     'process': 'System',
