@@ -113,20 +113,20 @@ files:
     - name: custom_queries
       description: |
         Run custom queries for Elasticsearch. Each custom query endpoint can collect multiple metrics and tags.
-        Note: Each custom query requires an `endpoint` and a `metrics` parameter. Each `metrics` parameter should have
-        at least one metric containing `datadog_metric_name` and `es_metric_name`. The `type` parameter is optional and
-        defaults to `gauge`.
+        Note: Each custom query requires an `endpoint`, `data_path`, and `columns` parameter. Each `columns` parameter
+        should have at least one value containing `name` and `value_path`. The `type` parameter within `columns`
+        is optional and defaults to `gauge`. Possible values for `type` include `gauge`, `monotonic_count`, and `rate`.
 
         Example:
-        - endpoint: <API_ENDPOINT>
-          path: aggregations.genres.buckets
+        - endpoint: /_nodes
+          data_path: aggregations.genres.buckets
           columns:
-          - es_name: key
-            dd_name: org_id
+          - value_path: key
+            name: org_id
             type: tag
-          - es_name: doc_count
-            dd_name: metric1
-          static_tags:
+          - value_path: doc_count
+            name: metric1
+          tags:
           - custom_tag:1
       value: #TODO: Fix this
         type: array

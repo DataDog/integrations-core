@@ -336,7 +336,8 @@ Then, [instrument your application container][10] and set `DD_AGENT_HOST` to the
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
-
+### custom queries
+TODO: Fill
 ### Validation
 
 [Run the Agent's status subcommand][23] and look for `elastic` under the Checks section.

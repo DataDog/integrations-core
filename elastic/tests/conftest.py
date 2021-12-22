@@ -31,10 +31,10 @@ INSTANCE = {
     'custom_queries': [
         {
             'endpoint': '/_nodes',
-            'path': '_nodes.',
+            'data_path': '_nodes.',
             'columns': [
-                {'es_name': 'total', 'dd_name': 'elasticsearch.custom.metric', 'type': 'gauge'},
-                {'es_name': 'total', 'dd_name': 'dynamic_tag', 'type': 'tag'},
+                {'value_path': 'total', 'name': 'elasticsearch.custom.metric', 'type': 'gauge'},
+                {'value_path': 'total', 'name': 'dynamic_tag', 'type': 'tag'},
             ],
         },
     ],

@@ -89,13 +89,13 @@ def test_custom_queries_valid_metrics(dd_environment, dd_run_check, instance, ag
     custom_queries = [
         {
             'endpoint': '/_nodes',
-            'path': '_nodes.',
+            'data_path': '_nodes',
             'columns': [
                 {
-                    'es_name': 'total',
-                    'dd_name': 'elasticsearch.custom.metric',
+                    'value_path': 'total',
+                    'name': 'elasticsearch.custom.metric',
                 },
-                {'es_name': 'total', 'dd_name': 'elasticsearch.custom.metric2', 'type': 'monotonic_count'},
+                {'value_path': 'total', 'name': 'elasticsearch.custom.metric2', 'type': 'monotonic_count'},
             ],
         },
     ]
@@ -114,15 +114,15 @@ def test_custom_queries_valid_tags(dd_environment, dd_run_check, instance, aggre
     custom_queries = [
         {
             'endpoint': '/_nodes',
-            'path': '_nodes.',
+            'data_path': '_nodes',
             'columns': [
                 {
-                    'es_name': 'total',
-                    'dd_name': 'elasticsearch.custom.metric',
+                    'value_path': 'total',
+                    'name': 'elasticsearch.custom.metric',
                 },
-                {'es_name': 'total', 'dd_name': 'dynamic_tag', 'type': 'tag'},
+                {'value_path': 'total', 'na e': 'dynamic_tag', 'type': 'tag'},
             ],
-            'static_tags': ['custom_tag:1'],
+            'tags': ['custom_tag:1'],
         },
     ]
 
@@ -140,14 +140,14 @@ def test_custom_queries_non_existent_metrics(caplog, dd_environment, dd_run_chec
     custom_queries = [
         {
             'endpoint': '/_nodes',
-            'path': '_nodes.',
+            'data_path': '_nodes',
             'columns': [
                 {
-                    'es_name': 'totals',  # nonexistent elasticsearch metric
-                    'dd_name': 'elasticsearch.custom.metric',
+                    'value_path': 'totals',  # nonexistent elasticsearch metric
+                    'name': 'elasticsearch.custom.metric',
                 },
             ],
-            'static_tags': ['custom_tag:1'],
+            'tags': ['custom_tag:1'],
         },
     ]
     instance = deepcopy(instance)
@@ -167,15 +167,15 @@ def test_custom_queries_non_existent_tags(caplog, dd_environment, dd_run_check, 
     custom_queries = [
         {
             'endpoint': '/_nodes',
-            'path': '_nodes.',
+            'data_path': '_nodes',
             'columns': [
                 {
-                    'es_name': 'total',
-                    'dd_name': 'elasticsearch.custom.metric',
+                    'value_path': 'total',
+                    'name': 'elasticsearch.custom.metric',
                 },
                 {
-                    'es_name': 'totals',  # nonexistent elasticsearch metric as tag
-                    'dd_name': 'nonexistent_tag',
+                    'value_path': 'totals',  # nonexistent elasticsearch metric as tag
+                    'name': 'nonexistent_tag',
                     'type': 'tag',
                 },
             ],
@@ -191,7 +191,7 @@ def test_custom_queries_non_existent_tags(caplog, dd_environment, dd_run_check, 
 
     aggregator.assert_metric('elasticsearch.custom.metric', count=1, tags=cluster_tags)
 
-    assert 'Dynamic tag not found' in caplog.text
+    assert 'Dynamic tag is null: _nodes.total -> nonexistent_tag' in caplog.text
 
 
 @pytest.mark.integration

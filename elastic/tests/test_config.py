@@ -95,66 +95,66 @@ def test_from_instance():
 @pytest.mark.parametrize(
     'invalid_custom_queries',
     [
-        # Missing `path`
+        # Missing `data_path`
         [
             {
                 'endpoint': '/_nodes',
                 'columns': [
                     {
-                        'es_name': 'total',
-                        'dd_name': 'elasticsearch.custom.metric',
+                        'value_path': 'total',
+                        'name': 'elasticsearch.custom.metric',
                     },
                 ],
-                'static_tags': ['custom_tag:1'],
+                'tags': ['custom_tag:1'],
             },
         ],
         # Missing `columns`
         [
-            {'endpoint': '/_nodes', 'path': '_nodes.', 'static_tags': ['custom_tag:1']},
+            {'endpoint': '/_nodes', 'data_path': '_nodes.', 'tags': ['custom_tag:1']},
         ],
         # Empty `dd_name` in `columns`
         [
             {
                 'endpoint': '/_nodes',
-                'path': '_nodes.',
+                'data_path': '_nodes.',
                 'columns': [
                     {
-                        'es_name': 'total',
-                        'dd_name': '',
+                        'value_path': 'total',
+                        'name': '',
                     },
                 ],
-                'static_tags': ['custom_tag:1'],
+                'tags': ['custom_tag:1'],
             },
         ],
         # Empty `es_name`
         [
             {
                 'endpoint': '/_nodes',
-                'path': '_nodes.',
+                'data_path': '_nodes.',
                 'columns': [
                     {
-                        'es_name': '',
-                        'dd_name': 'elasticsearch.custom.metric',
+                        'value_path': '',
+                        'name': 'elasticsearch.custom.metric',
                     },
                 ],
-                'static_tags': ['custom_tag:1'],
+                'tags': ['custom_tag:1'],
             },
         ],
         # Missing `es_name` in `columns`
         [
             {
                 'endpoint': '/_nodes',
-                'path': '_nodes.',
+                'data_path': '_nodes.',
                 'columns': [
                     {
-                        'es_name': 'total',
-                        'dd_name': 'elasticsearch.custom.metric',
+                        'value_path': 'total',
+                        'name': 'elasticsearch.custom.metric',
                     },
                     {
-                        'dd_name': 'elasticsearch.custom.metric',
+                        'name': 'elasticsearch.custom.metric',
                     },
                 ],
-                'static_tags': ['custom_tag:1'],
+                'tags': ['custom_tag:1'],
             },
         ],
     ],
