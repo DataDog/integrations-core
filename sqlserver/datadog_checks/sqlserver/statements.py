@@ -11,6 +11,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.tracking import tracked_method
 
 try:
     import datadog_agent
@@ -41,27 +42,26 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
 
 STATEMENT_METRICS_QUERY = """\
 with qstats as (
-    select text, query_hash, query_plan_hash, last_execution_time,
+    select TOP {limit} text, query_hash, query_plan_hash, last_execution_time, plan_handle,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'user_id') as user_id,
            {query_metrics_columns}
     from sys.dm_exec_query_stats
         cross apply sys.dm_exec_sql_text(sql_handle)
+    where last_execution_time > dateadd(second, -?, getdate())
 )
-select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid, D.name as database_name, U.name as user_name,
+select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
+       D.name as database_name, U.name as user_name, max(plan_handle) as plan_handle,
     {query_metrics_column_sums}
     from qstats S
     left join sys.databases D on S.dbid = D.database_id
     left join sys.sysusers U on S.user_id = U.uid
-    where S.last_execution_time > dateadd(second, -{collection_interval}, getdate())
     group by text, query_hash, query_plan_hash, S.dbid, D.name, U.name
 """
 
 PLAN_LOOKUP_QUERY = """\
-select cast(query_plan as nvarchar(max)) as query_plan from sys.dm_exec_query_stats
-    cross apply sys.dm_exec_query_plan(plan_handle)
-where
-    query_hash = CONVERT(varbinary(max), ?, 1) and query_plan_hash = CONVERT(varbinary(max), ?, 1)
+select cast(query_plan as nvarchar(max)) as query_plan
+from sys.dm_exec_query_plan(CONVERT(varbinary(max), ?, 1))
 """
 
 
@@ -79,6 +79,10 @@ XML_PLAN_OBFUSCATION_ATTRS = {
     "ScalarString",
     "ParameterCompiledValue",
 }
+
+
+def agent_check_getter(self):
+    return self.check
 
 
 def _hash_to_hex(hash):
@@ -127,10 +131,17 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             job_name="query-metrics",
             shutdown_callback=self._close_db_conn,
         )
+        self.dm_exec_query_stats_row_limit = int(
+            check.statement_metrics_config.get('dm_exec_query_stats_row_limit', 10000)
+        )
+        self.enforce_collection_interval_deadline = bool(
+            check.statement_metrics_config.get('enforce_collection_interval_deadline', True)
+        )
         self._state = StatementMetrics()
         self._init_caches()
         self._conn_key_prefix = "dbm-"
         self._statement_metrics_query = None
+        self._last_stats_query_time = None
 
     def _init_caches(self):
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -145,7 +156,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             # assuming ~100 bytes per entry (query & plan signature, key hash, 4 pointers (ordered dict), expiry time)
             # total size: 10k * 100 = 1 Mb
             maxsize=int(self.check.instance.get('seen_samples_cache_maxsize', 10000)),
-            ttl=60 * 60 / int(self.check.instance.get('samples_per_hour_per_query', 15)),
+            ttl=60 * 60 / int(self.check.instance.get('samples_per_hour_per_query', 4)),
         )
 
     def _close_db_conn(self):
@@ -171,14 +182,22 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             query_metrics_columns=', '.join(available_columns),
             query_metrics_column_sums=', '.join(['sum({}) as {}'.format(c, c) for c in available_columns]),
             collection_interval=int(math.ceil(self.collection_interval) * 2),
+            limit=self.dm_exec_query_stats_row_limit,
         )
         return self._statement_metrics_query
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _load_raw_query_metrics_rows(self, cursor):
         self.log.debug("collecting sql server statement metrics")
         statement_metrics_query = self._get_statement_metrics_query_cached(cursor)
-        self.log.debug("Running query [%s]", statement_metrics_query)
-        cursor.execute(statement_metrics_query)
+        now = time.time()
+        query_interval = self.collection_interval
+        if self._last_stats_query_time:
+            query_interval = now - self._last_stats_query_time
+        self._last_stats_query_time = now
+        params = (math.ceil(query_interval),)
+        self.log.debug("Running query [%s] %s", statement_metrics_query, params)
+        cursor.execute(statement_metrics_query, params)
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
@@ -193,11 +212,17 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
                 self.log.debug("Failed to obfuscate query: %s", e)
+                self.check.count(
+                    "dd.sqlserver.statements.error",
+                    1,
+                    **self.check.debug_stats_kwargs(tags=["error:obfuscate-query-{}".format(type(e))])
+                )
                 continue
             row['text'] = obfuscated_statement
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
             row['query_hash'] = _hash_to_hex(row['query_hash'])
             row['query_plan_hash'] = _hash_to_hex(row['query_plan_hash'])
+            row['plan_handle'] = _hash_to_hex(row['plan_handle'])
             normalized_rows.append(row)
         return normalized_rows
 
@@ -228,72 +253,42 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'ddagentversion': datadog_agent.get_version(),
         }
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def collect_statement_metrics_and_plans(self):
         """
         Collects statement metrics and plans.
         :return:
         """
-        start_time = time.time()
         plans_submitted = 0
-        try:
-            # re-use the check's conn module, but set extra_key=dbm- to ensure we get our own
-            # raw connection. adodbapi and pyodbc modules are thread safe, but connections are not.
-            with self.check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
-                with self.check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
-                    rows = self._collect_metrics_rows(cursor)
-                    if not rows:
-                        return
-                    for event in self._rows_to_fqt_events(rows):
-                        self.check.database_monitoring_query_sample(
-                            json.dumps(event, default=default_json_event_encoding)
-                        )
-                    payload = self._to_metrics_payload(rows)
-                    self.check.database_monitoring_query_metrics(
-                        json.dumps(payload, default=default_json_event_encoding)
-                    )
-                    for event in self._collect_plans(rows, cursor):
-                        self.check.database_monitoring_query_sample(
-                            json.dumps(event, default=default_json_event_encoding)
-                        )
-                        plans_submitted += 1
-        except Exception:
-            self.log.exception('Unable to collect statement metrics due to an error')
-            self.check.count(
-                "dd.sqlserver.statements.error",
-                1,
-                tags=self.check.debug_tags(),
-                hostname=self.check.resolved_hostname,
-            )
-            return []
+        deadline = time.time() + self.collection_interval
 
-        elapsed_ms = (time.time() - start_time) * 1000
-        self.check.histogram(
-            "dd.sqlserver.statements.collect_statement_metrics_and_plans.time",
-            elapsed_ms,
-            tags=self.check.debug_tags(),
-            hostname=self.check.resolved_hostname,
-            raw=True,
-        )
+        # re-use the check's conn module, but set extra_key=dbm- to ensure we get our own
+        # raw connection. adodbapi and pyodbc modules are thread safe, but connections are not.
+        with self.check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
+            with self.check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+                rows = self._collect_metrics_rows(cursor)
+                if not rows:
+                    return
+                for event in self._rows_to_fqt_events(rows):
+                    self.check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
+                payload = self._to_metrics_payload(rows)
+                self.check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
+                for event in self._collect_plans(rows, cursor, deadline):
+                    self.check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
+                    plans_submitted += 1
+
         self.check.count(
-            "dd.sqlserver.statements.plans_submitted.count",
-            plans_submitted,
-            tags=self.check.tags + self.check.debug_tags(),
-            hostname=self.check.resolved_hostname,
-            raw=True,
+            "dd.sqlserver.statements.plans_submitted.count", plans_submitted, **self.check.debug_stats_kwargs()
         )
         self.check.gauge(
             "dd.sqlserver.statements.seen_plans_cache.len",
             len(self._seen_plans_ratelimiter),
-            tags=self.check.debug_tags(),
-            hostname=self.check.resolved_hostname,
-            raw=True,
+            **self.check.debug_stats_kwargs()
         )
         self.check.gauge(
             "dd.sqlserver.statements.fqt_cache.len",
             len(self._full_statement_text_cache),
-            tags=self.check.debug_tags(),
-            hostname=self.check.resolved_hostname,
-            raw=True,
+            **self.check.debug_stats_kwargs()
         )
 
     def _rows_to_fqt_events(self, rows):
@@ -325,34 +320,49 @@ class SqlserverStatementMetrics(DBMAsyncJob):
     def run_job(self):
         self.collect_statement_metrics_and_plans()
 
-    def _load_plan(self, query_hash, query_plan_hash, cursor):
-        self.log.debug("collecting plan. query_hash=%s query_plan_hash=%s", query_hash, query_plan_hash)
-        self.log.debug("Running query [%s] %s", PLAN_LOOKUP_QUERY, (query_hash, query_plan_hash))
-        cursor.execute(PLAN_LOOKUP_QUERY, ("0x" + query_hash, "0x" + query_plan_hash))
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _load_plan(self, plan_handle, cursor):
+        self.log.debug("collecting plan. plan_handle=%s", plan_handle)
+        self.log.debug("Running query [%s] %s", PLAN_LOOKUP_QUERY, (plan_handle,))
+        cursor.execute(PLAN_LOOKUP_QUERY, ("0x" + plan_handle,))
         result = cursor.fetchall()
         if not result:
             self.log.debug("failed to loan plan, it must have just been expired out of the plan cache")
             return None
         return result[0][0]
 
-    def _collect_plans(self, rows, cursor):
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _collect_plans(self, rows, cursor, deadline):
         for row in rows:
+            if self.enforce_collection_interval_deadline and time.time() > deadline:
+                self.log.debug("ending plan collection early because check deadline has been exceeded")
+                self.check.count("dd.sqlserver.statements.deadline_exceeded", 1, **self.check.debug_stats_kwargs())
+                return
             plan_key = (row['query_signature'], row['query_hash'], row['query_plan_hash'])
             if self._seen_plans_ratelimiter.acquire(plan_key):
-                raw_plan = self._load_plan(row['query_hash'], row['query_plan_hash'], cursor)
+                raw_plan = self._load_plan(row['plan_handle'], cursor)
                 obfuscated_plan, collection_errors = None, None
 
                 try:
                     obfuscated_plan = obfuscate_xml_plan(raw_plan)
                 except Exception as e:
                     self.log.debug(
-                        "failed to obfuscate XML Plan query_signature=%s query_hash=%s query_plan_hash=%s: %s",
+                        (
+                            "failed to obfuscate XML Plan query_signature=%s query_hash=%s "
+                            "query_plan_hash=%s plan_handle=%s: %s"
+                        ),
                         row['query_signature'],
                         row['query_hash'],
                         row['query_plan_hash'],
+                        row['plan_handle'],
                         e,
                     )
                     collection_errors = [{'code': "obfuscate_xml_plan_error", 'message': str(e)}]
+                    self.check.count(
+                        "dd.sqlserver.statements.error",
+                        1,
+                        **self.check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))])
+                    )
 
                 tags = self.check.tags + ["db:{}".format(row['database_name'])]
                 yield {

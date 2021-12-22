@@ -407,21 +407,46 @@ class PostgresStatementSamples(DBMAsyncJob):
         start_time = time.time()
         with self._check._get_db(dbname).cursor() as cursor:
             self._log.debug("Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement)
-            cursor.execute(
-                """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
-                    explain_function=self._explain_function, statement=statement
+            try:
+                cursor.execute(
+                    """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
+                        explain_function=self._explain_function, statement=statement
+                    )
                 )
-            )
-            result = cursor.fetchone()
-            self._check.histogram(
-                "dd.postgres.run_explain.time",
-                (time.time() - start_time) * 1000,
-                tags=self._dbtags(dbname) + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
-            )
-            if not result or len(result) < 1 or len(result[0]) < 1:
-                return None
-            return result[0][0]
+                result = cursor.fetchone()
+                self._check.histogram(
+                    "dd.postgres.run_explain.time",
+                    (time.time() - start_time) * 1000,
+                    tags=self._dbtags(dbname) + self._check._get_debug_tags(),
+                    hostname=self._check.resolved_hostname,
+                )
+                if not result or len(result) < 1 or len(result[0]) < 1:
+                    return None
+                return result[0][0]
+            except Exception as e:
+                self._check.count(
+                    "dd.postgres.run_explain.error",
+                    1,
+                    tags=self._dbtags(dbname, "error:explain-database_error-{}".format(type(e)))
+                    + self._check._get_debug_tags(),
+                    hostname=self._check.resolved_hostname,
+                )
+                raise
+
+    def _run_and_track_explain(self, dbname, statement, obfuscated_statement, query_signature):
+        plan_dict, explain_err_code, err_msg = self._run_explain_safe(
+            dbname, statement, obfuscated_statement, query_signature
+        )
+        err_tag = "error:explain-{}".format(explain_err_code.value if explain_err_code else None)
+        if err_msg:
+            err_tag = err_tag + "-" + err_msg
+        self._check.count(
+            "dd.postgres.statement_samples.error",
+            1,
+            tags=self._dbtags(dbname, err_tag) + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
+        return plan_dict, explain_err_code, err_msg
 
     def _run_explain_safe(self, dbname, statement, obfuscated_statement, query_signature):
         # type: (str, str, str, str) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[str]]
@@ -431,13 +456,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         track_activity_query_size = self._get_track_activity_query_size()
 
         if self._get_truncation_state(track_activity_query_size, statement) == StatementTruncationState.truncated:
-            self._check.count(
-                "dd.postgres.statement_samples.error",
-                1,
-                tags=self._dbtags(dbname, "error:explain-{}".format(DBExplainError.query_truncated))
-                + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
-            )
             return (
                 None,
                 DBExplainError.query_truncated,
@@ -446,12 +464,6 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         db_explain_error, err = self._get_db_explain_setup_state_cached(dbname)
         if db_explain_error is not None:
-            self._check.count(
-                "dd.postgres.statement_samples.error",
-                1,
-                tags=self._dbtags(dbname, "error:explain-{}".format(db_explain_error)) + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
-            )
             return None, db_explain_error, '{}'.format(type(err))
 
         cached_error_response = self._explain_errors_cache.get(query_signature)
@@ -462,14 +474,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             return self._run_explain(dbname, statement, obfuscated_statement), None, None
         except psycopg2.errors.DatabaseError as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
-            self._check.count(
-                "dd.postgres.statement_samples.error",
-                1,
-                tags=self._dbtags(dbname, "error:explain-{}".format(type(e))) + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
-            )
             error_response = None, DBExplainError.database_error, '{}'.format(type(e))
-
             if isinstance(e, psycopg2.errors.ProgrammingError) and not isinstance(
                 e, psycopg2.errors.InsufficientPrivilege
             ):
@@ -492,7 +497,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
         # - `resource_hash` - hash computed off the raw sql text to match apm resources
         # - `query_signature` - hash computed from the raw sql text to match query metrics
-        plan_dict, explain_err_code, err_msg = self._run_explain_safe(
+        plan_dict, explain_err_code, err_msg = self._run_and_track_explain(
             row['datname'], row['query'], row['statement'], row['query_signature']
         )
         collection_errors = None

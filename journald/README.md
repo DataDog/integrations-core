@@ -14,7 +14,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-Journal files are, by default, owned and readable by the systemd-journal system group. To start collecting your journal logs, you need to:
+Journal files, by default, are owned and readable by the systemd-journal system group. To start collecting your journal logs, you need to:
 
 1. [Install the Agent][2] on the instance running the journal.
 2. Add the `dd-agent` user to the `systemd-journal` group by running:
@@ -72,7 +72,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][4]
 partial -->
 
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][5].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][5].
 
 | Parameter      | Value                                                  |
 | -------------- | ------------------------------------------------------ |

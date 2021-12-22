@@ -10,12 +10,17 @@ import time
 
 import requests
 from six import string_types
+from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.couchbase.couchbase_consts import (
     BUCKET_STATS,
     COUCHBASE_STATS_PATH,
     COUCHBASE_VITALS_PATH,
+    INDEX_STATS_COUNT_METRICS,
+    INDEX_STATS_METRICS_PATH,
+    INDEX_STATS_SERVICE_CHECK_NAME,
+    INDEXER_STATE_MAP,
     NODE_CLUSTER_SERVICE_CHECK_NAME,
     NODE_HEALTH_SERVICE_CHECK_NAME,
     NODE_HEALTH_TRANSLATION,
@@ -43,6 +48,7 @@ class Couchbase(AgentCheck):
         super(Couchbase, self).__init__(name, init_config, instances)
 
         self._sync_gateway_url = self.instance.get('sync_gateway_url', None)
+        self._index_stats_url = self.instance.get('index_stats_url')
         self._server = self.instance.get('server', None)
         if self._server is None:
             raise ConfigurationError("The server must be specified")
@@ -50,6 +56,7 @@ class Couchbase(AgentCheck):
         self._tags.append('instance:{}'.format(self._server))
 
         self._previous_status = None
+        self._version = None
 
     def _create_metrics(self, data):
         # Get storage metrics
@@ -183,6 +190,12 @@ class Couchbase(AgentCheck):
         self._create_metrics(data)
         if self._sync_gateway_url:
             self._collect_sync_gateway_metrics()
+        try:
+            # Error handling in case Couchbase changes their versioning format
+            if self._index_stats_url and self._version and int(self._version.split(".")[0]) >= 7:
+                self._collect_index_stats_metrics()
+        except Exception as e:
+            self.log.debug(str(e))
 
     def _collect_version(self, data):
         nodes = data['stats']['nodes']
@@ -198,9 +211,9 @@ class Couchbase(AgentCheck):
                 build_separator = version.rindex('-')
                 version = list(version)
                 version[build_separator] = '+'
-                version = ''.join(version)
+                self._version = ''.join(version)
 
-            self.set_metadata('version', version)
+            self.set_metadata('version', self._version)
 
     def get_data(self):
         # The dictionary to be returned.
@@ -318,7 +331,7 @@ class Couchbase(AgentCheck):
         try:
             data = self._get_stats(url).get('syncgateway', {})
         except requests.exceptions.RequestException as e:
-            msg = "Error accessing the Sync Gateway monitoring endpoint %s: %s," % url, str(e)
+            msg = "Error accessing the Sync Gateway monitoring endpoint %s: %s," % (url, str(e))
             self.log.debug(msg)
             self.service_check(SG_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, msg, self._tags)
             return
@@ -402,3 +415,73 @@ class Couchbase(AgentCheck):
             unit = 'us'
 
         return float(val) / TO_SECONDS[unit]
+
+    def _collect_index_stats_metrics(self):
+        url = urljoin(self._index_stats_url, INDEX_STATS_METRICS_PATH)
+        try:
+            data = self._get_stats(url)
+        except requests.exceptions.RequestException as e:
+            msg = "Error accessing the Index Statistics endpoint: %s: %s" % (url, str(e))
+            self.log.warning(msg)
+            self.service_check(INDEX_STATS_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, self._tags, msg)
+            return
+
+        self.service_check(INDEX_STATS_SERVICE_CHECK_NAME, AgentCheck.OK, self._tags)
+
+        for keyspace in data:
+            if keyspace == "indexer":
+                # The indexer object provides metric about the index node
+                for mname, mval in data.get(keyspace).items():
+                    self._submit_index_node_metrics(mname, mval)
+            else:
+                index_tags = self._extract_index_tags(keyspace) + self._tags
+                for mname, mval in data.get(keyspace).items():
+                    self._submit_per_index_metrics(mname, mval, index_tags)
+
+    def _extract_index_tags(self, keyspace):
+        # Index Keyspaces can come in different formats:
+        # partition, bucket:index_name, bucket:collection:index_name, bucket:scope:collection:index_name
+        # For variations missing the scope and collection, they refer to the default scope and collection respectively
+        # https://docs.couchbase.com/server/current/n1ql/n1ql-language-reference/createprimaryindex.html#keyspace-ref
+        tag_arr = keyspace.split(":")
+        if len(tag_arr) == 2:
+            bucket, index_name = tag_arr
+            scope, collection = ["default", "default"]
+        elif len(tag_arr) == 3:
+            bucket, collection, index_name = tag_arr
+            scope = 'default'
+        elif len(tag_arr) == 4:
+            bucket, scope, collection, index_name = tag_arr
+        else:
+            # Catch all incase the keyspace has either none or 3 or more separators(':')
+            # There is a documented example of partition-num being a possible keyspace:
+            # https://docs.couchbase.com/server/current/rest-api/rest-index-stats.html#_get_index_stats
+            # But we shouldn't encounter this since we don't query the index api with the needed params
+            # (Version 1.19.0+ of the Couchbase check)
+            formatted_tags = []
+            self.log.debug("Unable to extract tags from keyspace: %s", keyspace)
+            return formatted_tags
+
+        formatted_tags = [
+            'bucket:{}'.format(bucket),
+            'scope:{}'.format(scope),
+            'collection:{}'.format(collection),
+            'index_name:{}'.format(index_name),
+        ]
+        return formatted_tags
+
+    def _submit_index_node_metrics(self, mname, mval):
+        namespace = 'couchbase.indexer'
+        f_mname = '.'.join([namespace, mname])
+        if mname == "indexer_state":
+            self.gauge(f_mname, INDEXER_STATE_MAP[mval], self._tags)
+        else:
+            self.gauge(f_mname, mval, self._tags)
+
+    def _submit_per_index_metrics(self, mname, mval, tags):
+        namespace = 'couchbase.index'
+        f_mname = '.'.join([namespace, mname])
+        if mname in INDEX_STATS_COUNT_METRICS:
+            self.monotonic_count(f_mname, mval, tags)
+        else:
+            self.gauge(f_mname, mval, tags)

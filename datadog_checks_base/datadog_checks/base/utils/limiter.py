@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from .agent.common import METRIC_NAMESPACE_METRICS
 
 
 class Limiter(object):
@@ -46,6 +47,13 @@ class Limiter(object):
         :returns: boolean, true if limit exceeded
         """
         if self.reached_limit:
+            # Keep counting so metrics about limits can be collected if desired
+            if not uid:
+                self.count += 1
+            elif uid not in self.seen:
+                self.count += 1
+                self.seen.add(uid)
+
             return True
 
         if uid:
@@ -69,4 +77,10 @@ class Limiter(object):
         """
         Returns the internal state of the limiter for unit tests
         """
-        return (self.count, self.limit, self.reached_limit)
+        return self.count, self.limit, self.reached_limit
+
+    def get_debug_metrics(self):
+        return (
+            ('{}.contexts.limit'.format(METRIC_NAMESPACE_METRICS), self.limit),
+            ('{}.contexts.total'.format(METRIC_NAMESPACE_METRICS), self.count),
+        )
