@@ -19,9 +19,6 @@ except ImportError:
 RUNNING_ON_WINDOWS_CI = ON_WINDOWS and running_on_ci()
 skip_windows_ci = pytest.mark.skipif(RUNNING_ON_WINDOWS_CI, reason='MQ server cannot be setup on Windows VMs in CI')
 
-# Test that we can at least import the library
-if RUNNING_ON_WINDOWS_CI:
-    import pymqi  # noqa: F401
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_DIR = os.path.join(HERE, 'compose')
