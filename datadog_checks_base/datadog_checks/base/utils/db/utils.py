@@ -243,26 +243,36 @@ class DBMAsyncJob(object):
                     break
                 self._run_job_rate_limited()
         except self._expected_db_exceptions as e:
-            self._log.warning(
-                "[%s] Job loop database error: %s",
-                self._job_tags_str,
-                e,
-                exc_info=self._log.getEffectiveLevel() == logging.DEBUG,
-            )
-            self._check.count(
-                "dd.{}.async_job.error".format(self._dbms),
-                1,
-                tags=self._job_tags + ["error:database-{}".format(type(e))],
-                raw=True,
-            )
+            # canceling can cause exceptions if the connection is closed the middle of the check run
+            # in this case we still want to report it as a cancellation instead of a crash
+            if self._cancel_event.isSet():
+                self._log.info("[%s] Job loop cancelled", self._job_tags_str)
+                self._check.count("dd.{}.async_job.cancel".format(self._dbms), 1, tags=self._job_tags, raw=True)
+            else:
+                self._log.warning(
+                    "[%s] Job loop database error: %s",
+                    self._job_tags_str,
+                    e,
+                    exc_info=self._log.getEffectiveLevel() == logging.DEBUG,
+                )
+                self._check.count(
+                    "dd.{}.async_job.error".format(self._dbms),
+                    1,
+                    tags=self._job_tags + ["error:database-{}".format(type(e))],
+                    raw=True,
+                )
         except Exception as e:
-            self._log.exception("[%s] Job loop crash", self._job_tags_str)
-            self._check.count(
-                "dd.{}.async_job.error".format(self._dbms),
-                1,
-                tags=self._job_tags + ["error:crash-{}".format(type(e))],
-                raw=True,
-            )
+            if self._cancel_event.isSet():
+                self._log.info("[%s] Job loop cancelled", self._job_tags_str)
+                self._check.count("dd.{}.async_job.cancel".format(self._dbms), 1, tags=self._job_tags, raw=True)
+            else:
+                self._log.exception("[%s] Job loop crash", self._job_tags_str)
+                self._check.count(
+                    "dd.{}.async_job.error".format(self._dbms),
+                    1,
+                    tags=self._job_tags + ["error:crash-{}".format(type(e))],
+                    raw=True,
+                )
         finally:
             self._log.info("[%s] Shutting down job loop", self._job_tags_str)
             if self._shutdown_callback:
