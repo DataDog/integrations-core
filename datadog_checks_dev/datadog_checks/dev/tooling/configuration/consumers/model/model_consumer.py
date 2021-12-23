@@ -4,7 +4,6 @@
 from typing import Dict, List, Tuple
 
 import yaml
-from datadog_checks.dev.tooling.utils import VALIDADORS_FILE
 from datamodel_code_generator.format import CodeFormatter, PythonVersion
 from datamodel_code_generator.parser import LiteralType
 from datamodel_code_generator.parser.openapi import OpenAPIParser
@@ -12,6 +11,7 @@ from datamodel_code_generator.parser.openapi import OpenAPIParser
 from datadog_checks.dev.tooling.configuration.consumers.model.model_file import build_model_file
 from datadog_checks.dev.tooling.configuration.consumers.model.model_info import ModelInfo
 from datadog_checks.dev.tooling.configuration.consumers.openapi_document import build_openapi_document
+from datadog_checks.dev.tooling.utils import VALIDADORS_FILE
 
 PYTHON_VERSION = PythonVersion.PY_38
 

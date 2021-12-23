@@ -18,8 +18,14 @@ from ...configuration.consumers import ModelConsumer
 from ...constants import get_root
 from ...manifest_utils import Manifest
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_license_header, get_models_location, get_version_string, \
-    get_config_models_documentation, VALIDADORS_FILE
+from ...utils import (
+    VALIDADORS_FILE,
+    complete_valid_checks,
+    get_config_models_documentation,
+    get_license_header,
+    get_models_location,
+    get_version_string,
+)
 from ..console import (
     CONTEXT_SETTINGS,
     abort,
