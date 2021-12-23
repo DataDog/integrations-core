@@ -117,9 +117,31 @@ files:
         should have at least one value containing `name` and `value_path`. The `type` parameter within `columns`
         is optional and defaults to `gauge`. Possible values for `type` include `gauge`, `monotonic_count`, and `rate`.
 
+
+        Each query must have 3 required parameters:
+
+        1. endpoint - The Elasticsearch API endpoint to query.
+
+        2. data_path - The JSON path up to, but not including, the metric. For example, if querying for size of parent
+                       circuit breaker, the full path is 'breakers.parent.estimated_size_in_bytes', which means the
+                       `data_path` is 'breakers.parent'.
+
+        3. columns - The list representing the data to be collected from the JSON query. There are two required pieces
+                     of data:
+                       a. value_path - This is the JSON path from the `data_path` to the metric. For example, if
+                                       querying for size of parent circuit breaker, the `value_path` is
+                                       `estimated_size_in_bytes`.
+                       b. name - The full metric name sent to Datadog. If `type` is `tag`, this column is considered a
+                                 tag and applied to every metric collected by this particular query.
+
         Example:
         - endpoint: /_nodes
           data_path: aggregations.genres.buckets
+          payload:
+            query:
+              match:
+                phrase:
+                  query: ""
           columns:
           - value_path: key
             name: org_id
