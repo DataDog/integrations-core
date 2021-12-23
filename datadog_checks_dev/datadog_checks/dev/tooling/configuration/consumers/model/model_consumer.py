@@ -4,6 +4,7 @@
 from typing import Dict, List, Tuple
 
 import yaml
+from datadog_checks.dev.tooling.utils import VALIDADORS_FILE
 from datamodel_code_generator.format import CodeFormatter, PythonVersion
 from datamodel_code_generator.parser import LiteralType
 from datamodel_code_generator.parser.openapi import OpenAPIParser
@@ -160,7 +161,7 @@ class ModelConsumer:
         model_files['__init__.py'] = ('\n'.join(package_root_lines), [])
 
         # Custom
-        model_files['validators.py'] = (VALIDATORS_DOCUMENTATION, [])
+        model_files[VALIDADORS_FILE] = (VALIDATORS_DOCUMENTATION, [])
         return model_files
 
     def _merge_instances(self, section: dict, errors: List[str]) -> dict:

@@ -18,7 +18,8 @@ from ...configuration.consumers import ModelConsumer
 from ...constants import get_root
 from ...manifest_utils import Manifest
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_license_header, get_models_location, get_version_string
+from ...utils import complete_valid_checks, get_license_header, get_models_location, get_version_string, \
+    get_config_models_documentation, VALIDADORS_FILE
 from ..console import (
     CONTEXT_SETTINGS,
     abort,
@@ -52,8 +53,11 @@ def models(ctx, check, sync, verbose):
     files_failed = {}
     num_files = 0
 
-    license_header_lines = get_license_header().splitlines(True)
+    license_header_lines = get_license_header().splitlines()
     license_header_lines.append('\n')
+
+    documentation_header_lines = get_config_models_documentation().splitlines()
+    documentation_header_lines.append('\n')
 
     code_formatter = ModelConsumer.create_code_formatter()
 
@@ -127,7 +131,7 @@ def models(ctx, check, sync, verbose):
 
                 current_model_file_lines = read_file_lines(model_file_path)
 
-                if model_file == 'validators.py' and (len(current_model_file_lines) + 1) > len(license_header_lines):
+                if model_file == VALIDADORS_FILE and (len(current_model_file_lines) + 1) > len(license_header_lines):
                     # validators.py is a custom file, it should only be rendered the first time
                     continue
 
@@ -141,6 +145,8 @@ def models(ctx, check, sync, verbose):
             else:
                 if not community_check:
                     expected_model_file_lines.extend(license_header_lines)
+                if model_file != VALIDADORS_FILE:
+                    expected_model_file_lines.extend(documentation_header_lines)
 
                 expected_model_file_lines.extend(model_file_lines)
 
