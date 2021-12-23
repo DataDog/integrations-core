@@ -12,7 +12,6 @@ except ImportError:
     # Integration Tracing is only available with Agent 6
     datadog_agent = None
 
-
 EXCLUDED_MODULES = ['threading']
 
 
@@ -46,7 +45,7 @@ def traced(fn):
                 from ddtrace import patch_all, tracer
 
                 patch_all()
-                with tracer.trace(self.name, service='integrations-tracing', resource=fn.__name__):
+                with tracer.trace(fn.__name__, service='{}-integration'.format(self.name), resource=fn.__name__):
                     return fn(self, *args, **kwargs)
             except Exception:
                 pass
@@ -55,10 +54,18 @@ def traced(fn):
     return traced_wrapper
 
 
+def _tracing_service_name(args):
+    if args:
+        self = args[0]
+        if hasattr(self, "name"):
+            return "{}-integration".format(self.name)
+    return None
+
+
 def tracing_method(f, tracer):
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
-        with tracer.trace(f.__name__, resource=f.__name__):
+        with tracer.trace(f.__name__, resource=f.__name__, service=_tracing_service_name(args)):
             return f(*args, **kwargs)
 
     return wrapper
