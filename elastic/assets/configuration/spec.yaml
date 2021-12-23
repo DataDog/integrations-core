@@ -150,11 +150,36 @@ files:
             name: elasticsearch.doc_count
           tags:
           - custom_tag:1
-      value: #TODO: Fix this
+      value:
         type: array
         items:
           type: object
-          properties: []
+          properties:
+            - name: endpoint
+              type: string
+            - name: data_path
+              type: string
+            - name: payload
+              type: array
+              items:
+                type: object
+                properties: []
+            - name: columns
+              type: array
+              items:
+                type: object
+                properties:
+                  - name: value_path
+                    type: string
+                  - name: name
+                    type: string
+                  - name: type
+                    type: string
+            - name: tags
+              type: array
+              items:
+                type: object
+                properties: []
     - template: instances/default
     - template: instances/http
   - template: logs
