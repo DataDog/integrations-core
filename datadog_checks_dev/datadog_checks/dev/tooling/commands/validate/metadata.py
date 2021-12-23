@@ -23,13 +23,15 @@ from ..console import (
 
 REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
 
-OPTIONAL_HEADERS = {'description', 'interval', 'unit_name', 'per_unit_name', 'short_name'}
+OPTIONAL_HEADERS = {'description', 'interval', 'unit_name', 'per_unit_name', 'short_name', 'curated_metric'}
 
 ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS
 
 VALID_METRIC_TYPE = {'count', 'gauge', 'rate'}
 
 VALID_ORIENTATION = {'0', '1', '-1'}
+
+VALID_CURATED_METRIC_TYPES = {'cpu', 'memory'}
 
 EXCLUDE_INTEGRATIONS = [
     'disk',
@@ -474,6 +476,14 @@ def metadata(check, check_duplicates, show_warnings):
                 display_queue.append(
                     (echo_failure, f"{current_check}:{line} interval should be an int, found '{row['interval']}'.")
                 )
+
+            if row['curated_metric']:
+                for curated_metric_type in row['curated_metric'].split('|'):
+                    if  curated_metric not in VALID_CURATED_METRIC_TYPES:
+                        errors = True
+                        display_queue.append(
+                            (echo_failure, f"{current_check}:{line} `{row['metric_name']}` contains invalid curated metric type.")
+                        )
 
         for header, count in empty_count.items():
             errors = True
