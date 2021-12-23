@@ -22,7 +22,7 @@
     "mac_os"
   ],
   "type": "check",
-  "integration_id": "mesos-slave",
+  "integration_id": "mesos",
   "assets": {
     "configuration": {
       "spec": "assets/configuration/spec.yaml"

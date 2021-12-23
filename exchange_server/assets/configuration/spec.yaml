@@ -4,39 +4,19 @@ files:
   options:
   - template: init_config
     options:
-      - template: init_config/default
+    - template: init_config/perf_counters
+    - template: init_config/default
   - template: instances
     options:
-    - name: host
-      required: true
-      description: |
-        Host to connect to. "." means the current host, any other value
-        have the Agent attempt to connect to a remote host.
-        Note: Remote access requires additional permissions
-      value:
-        example: .
-        type: string
-    - name: additional_metrics
-      required: false
-      description: |
-        The additional metrics is a list of additional counters to collect.  The
-        list is formatted as follows:
-        ['<COUNTERSET_NAME>', <COUNTER_INSTANCE_NAME>, '<COUNTER_NAME>', <METRIC_NAME>, <METRIC_TYPE>]
-
-        <COUNTERSET_NAME>  is the name of the PDH Counter Set (the name of the counter)
-        <COUNTER_INSTANCE_NAME> is the specific counter instance to collect, for example
-                                "Default Web Site".  Specify 'none' For all instances of the counter.
-        <COUNTER_NAME> is the individual counter to report
-        <METRIC_NAME> is the name you want to show up in Datadog
-        <METRIC_TYPE> is from the standard choices for all agent checks, such as gauge,
-                      rate, histogram or counter
-      value:
-        example:
-          - ["MSExchange Content Filter Agent", none, "Messages that Bypassed Scanning", exchange.content_filter.bypassed_messages, gauge]
-        type: array
-        compact_example: true
-        items:
-          type: string
+    - template: instances/perf_counters
+      overrides:
+        extra_metrics.value.example:
+          MSExchange Content Filter Agent:
+            name: content_filter
+            counters:
+            - Messages that Bypassed Scanning: bypassed_messages
+    - template: instances/pdh_legacy
+      hidden: true
     - template: instances/default
 
   - template: logs
