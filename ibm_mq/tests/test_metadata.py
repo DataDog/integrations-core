@@ -3,9 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from .common import MQ_VERSION_RAW
+from .common import MQ_VERSION_RAW, skip_windows_ci
 
 
+@skip_windows_ci
 @pytest.mark.integration
 def test_metadata(get_check, instance, datadog_agent):
     check = get_check(instance)

@@ -37,6 +37,7 @@ class QueryMetrics(BaseModel):
     collection_interval: Optional[float]
     dm_exec_query_stats_row_limit: Optional[int]
     enabled: Optional[bool]
+    enforce_collection_interval_deadline: Optional[bool]
     samples_per_hour_per_query: Optional[int]
 
 

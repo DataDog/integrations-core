@@ -26,7 +26,7 @@ The performance servlet is deployed exactly as any other servlet. Deploy the ser
 
 ### Modify the monitored statistic set
 
-By default, your application server is only configured for "Basic" monitoring. In order to gain complete visibility into your JVM, JDBC connections, and servlet connections, change the monitored statistic set for your application server from "Basic" to "All".
+By default, your application server is only configured for "Basic" monitoring. To gain visibility into your JVM, JDBC connections, and servlet connections, change the monitored statistic set for your application server from "Basic" to "All".
 
 From the Websphere Administration Console, you can find this setting in `Application servers > <YOUR_APP_SERVER> > Performance Monitoring Infrastructure (PMI)`.
 

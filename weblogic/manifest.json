@@ -1,0 +1,43 @@
+{
+  "display_name": "WebLogic",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "weblogic",
+  "metric_prefix": "weblogic.",
+  "metric_to_check": "weblogic.jvm_runtime.heap_size",
+  "creates_events": false,
+  "short_description": "Monitor the health and performance of WebLogic Servers.",
+  "guid": "7c48d184-c234-4366-b463-46a1faf27f84",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "process_signatures": [
+    "weblogic.Server"
+  ],
+  "public_title": "WebLogic",
+  "categories": [
+    "log collection",
+    "web",
+    "oracle"
+
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "weblogic",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "weblogic"
+    },
+    "metrics_metadata": "metadata.csv"
+  }
+}
