@@ -527,7 +527,7 @@ class ESCheck(AgentCheck):
             static_tags = endpoints.get('tags', [])
             endpoint = self._join_url(endpoint, admin_forwarder)
             payload = endpoints.get('payload', {})
-            self.log.debug("Payload: " + str(payload))
+
             data = self._get_data(endpoint, data=payload)
 
             # If there are tags, add the tag path to list of paths to evaluate while processing metric

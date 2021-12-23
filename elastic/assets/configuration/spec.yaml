@@ -135,19 +135,19 @@ files:
                                  tag and applied to every metric collected by this particular query.
 
         Example:
-        - endpoint: /_nodes
+        - endpoint: /_search
           data_path: aggregations.genres.buckets
           payload:
-            query:
-              match:
-                phrase:
-                  query: ""
+            aggs:
+              genres:
+                terms:
+                  field: "id"
           columns:
           - value_path: key
-            name: org_id
+            name: id
             type: tag
           - value_path: doc_count
-            name: metric1
+            name: elasticsearch.doc_count
           tags:
           - custom_tag:1
       value: #TODO: Fix this
