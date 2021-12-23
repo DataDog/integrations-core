@@ -9,7 +9,7 @@ Get metrics from your Windows applications and servers with Windows Management I
 - Visualize their performance.
 - Correlate their activity with the rest of your applications.
 
-**Note:** It is recommended that the [Windows Performance counters][2] be used instead in all cases due to its significantly lower overhead and thus better scalability.
+**Note:** It is recommended that the [Windows performance counters check][2] be used instead in all cases due to its significantly lower overhead and thus better scalability.
 
 ## Setup
 

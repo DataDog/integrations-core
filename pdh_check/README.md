@@ -1,7 +1,8 @@
 # Windows Performance Counters Integration
 
 ## Overview
-**Note:** The usage of PDH check is discouraged, you should use [windows_performance_counter instead][8].
+
+**Note:** The usage of PDH check is discouraged, you should use the [Windows performance counters check][8] instead.
 
 Get metrics from Windows performance counters in real time to:
 
