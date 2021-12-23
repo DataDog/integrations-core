@@ -12,7 +12,7 @@ parameters:
 
 steps:
 - ${{ if and(eq(parameters.test_e2e, 'true'), eq(parameters.repo, 'core'))}}:
-  - script: ddev env test --base --new-env --junit ${{ parameters.check }} --agent dependabot/go_modules/github.com/gosnmp/gosnmp-1.34.0
+  - script: ddev env test --base --new-env --junit ${{ parameters.check }} --agent datadog/agent-dev:dependabot-go-modules-github-com-gosnmp-gosnmp-1-34-0
     displayName: 'Run E2E tests against latest base package'
     env:
       DD_API_KEY: $(DD_API_KEY)
