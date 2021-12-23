@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.dev.tooling.configuration.consumers.model.model_consumer import VALIDATORS_DOCUMENTATION
+
 from ...utils import get_model_consumer, normalize_yaml
 
 pytestmark = [pytest.mark.conf, pytest.mark.conf_consumer, pytest.mark.conf_consumer_model]
@@ -52,7 +54,7 @@ def test():
 
     validators_contents, validators_errors = files['validators.py']
     assert not validators_errors
-    assert validators_contents == ''
+    assert validators_contents == VALIDATORS_DOCUMENTATION
 
     package_root_contents, package_root_errors = files['__init__.py']
     assert not package_root_errors
