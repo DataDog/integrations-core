@@ -46,7 +46,7 @@ jobs:
 - template: './templates/test-single-windows.yml'
   parameters:
     job_name: Changed
-    check: '--changed datadog_checks_base datadog_checks_dev active_directory aspdotnet disk dns_check dotnetclr exchange_server iis network pdh_check sqlserver tcp_check win32_event_log windows_performance_counters windows_service wmi_check'
+    check: '--changed datadog_checks_base datadog_checks_dev active_directory aspdotnet disk dns_check dotnetclr exchange_server ibm_mq iis network pdh_check sqlserver tcp_check win32_event_log windows_performance_counters windows_service wmi_check'
     ${{ if eq(variables['System.PullRequest.IsFork'], 'False') }}:
       ddtrace_flag: '--ddtrace'
     validate_changed: changed

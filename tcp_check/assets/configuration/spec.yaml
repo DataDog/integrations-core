@@ -47,4 +47,10 @@ files:
         the cache will expire only upon error.
 
         Set ip_cache_duration to `0` if the check should resolve the IP address on every check run.
+    - name: multiple_ips
+      description: Enable to run the check against all IPs attached to `host`.
+      value:
+        default: false
+        example: false
+        type: boolean
     - template: instances/default

@@ -120,12 +120,16 @@ def models(ctx, check, sync, verbose):
             model_file_lines = contents.splitlines(True)
             current_model_file_lines = []
             expected_model_file_lines = []
+
             if file_exists(model_file_path):
-                # No contents indicates a custom file
                 if not contents:
                     continue
 
-                current_model_file_lines.extend(read_file_lines(model_file_path))
+                current_model_file_lines = read_file_lines(model_file_path)
+
+                if model_file == 'validators.py' and (len(current_model_file_lines) + 1) > len(license_header_lines):
+                    # validators.py is a custom file, it should only be rendered the first time
+                    continue
 
                 for line in current_model_file_lines:
                     if not line.startswith('#'):
