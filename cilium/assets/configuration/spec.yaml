@@ -17,6 +17,7 @@ files:
       value:
         type: boolean
         example: true
+        display_default: false
     - name: agent_endpoint
       description: |
         The URL where your application metrics are exposed by Prometheus.

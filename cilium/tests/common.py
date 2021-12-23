@@ -65,7 +65,6 @@ AGENT_V2_METRICS = [
     "cilium.policy.count",
     "cilium.policy.endpoint_enforcement_status",
     "cilium.policy.import_errors.count",
-    "cilium.policy.import_errors.count",
     "cilium.policy.l7_denied.count",
     "cilium.policy.l7_forwarded.count",
     "cilium.policy.l7_parse_errors.count",
