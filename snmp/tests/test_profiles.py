@@ -298,6 +298,7 @@ def test_f5(aggregator):
         'sysMultiHostCpuIrq',
         'sysMultiHostCpuSoftirq',
         'sysMultiHostCpuIowait',
+        'sysMultiHostCpuUsageRatio',
     ]
 
     interfaces = [
