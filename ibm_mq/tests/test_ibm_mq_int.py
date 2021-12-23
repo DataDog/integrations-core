@@ -14,9 +14,9 @@ from datadog_checks.base.utils.time import ensure_aware_datetime
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
-from .common import QUEUE_METRICS, assert_all_metrics
+from .common import QUEUE_METRICS, assert_all_metrics, skip_windows_ci
 
-pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
+pytestmark = [skip_windows_ci, pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
 
 def test_no_msg_errors_are_caught(get_check, instance, caplog):

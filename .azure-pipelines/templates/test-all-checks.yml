@@ -226,8 +226,11 @@ jobs:
       displayName: IBM i
       os: linux
     - checkName: ibm_mq
-      displayName: IBM MQ
+      displayName: IBM MQ (Linux)
       os: linux
+    - checkName: ibm_mq
+      displayName: IBM MQ (Windows)
+      os: windows
     - checkName: ibm_was
       displayName: IBM WAS
       os: linux
