@@ -13,5 +13,20 @@
             "url"
         ],
         "description": "Returns CRITICAL if the Agent cannot connect to the Mesos slave metrics endpoint, otherwise OK."
+    },
+    {
+        "agent_version": "5.2.0",
+        "integration": "Mesos",
+        "check": "mesos.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Can Connect",
+        "groups": [
+            "host",
+            "url"
+        ],
+        "description": "[Deprecated] Returns status after pinging the Mesos instance url. Additional information about response status at the time of collection is included in the check message."
     }
 ]
