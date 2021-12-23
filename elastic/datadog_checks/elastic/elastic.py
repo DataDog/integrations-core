@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import json
 import re
 import time
 from collections import defaultdict
@@ -94,55 +95,55 @@ class ESCheck(AgentCheck):
         stats_url = self._join_url(stats_url, admin_forwarder)
         stats_data = self._get_data(stats_url)
 
-        if stats_data.get('cluster_name'):
-            # retrieve the cluster name from the data, and append it to the
-            # master tag list.
-            cluster_tags = ["elastic_cluster:{}".format(stats_data['cluster_name'])]
-            if not is_affirmative(self.instance.get('disable_legacy_cluster_tag', False)):
-                cluster_tags.append("cluster_name:{}".format(stats_data['cluster_name']))
-            base_tags.extend(cluster_tags)
-            service_check_tags.extend(cluster_tags)
-        self._process_stats_data(stats_data, stats_metrics, base_tags)
-
-        # Load cluster-wise data
-        # Note: this is a cluster-wide query, might TO.
-        if self._config.pshard_stats:
-            send_sc = bubble_ex = not self._config.pshard_graceful_to
-            pshard_stats_url = self._join_url(pshard_stats_url, admin_forwarder)
-            try:
-                pshard_stats_data = self._get_data(pshard_stats_url, send_sc=send_sc)
-                self._process_pshard_stats_data(pshard_stats_data, pshard_stats_metrics, base_tags)
-            except requests.ReadTimeout as e:
-                if bubble_ex:
-                    raise
-                self.log.warning("Timed out reading pshard-stats from servers (%s) - stats will be missing", e)
-
-        # Get Snapshot Lifecycle Management (SLM) policies
-        if slm_url is not None:
-            slm_url = self._join_url(slm_url, admin_forwarder)
-            policy_data = self._get_data(slm_url)
-            self._process_policy_data(policy_data, version, base_tags)
-
-        # Load the health data.
-        health_url = self._join_url(health_url, admin_forwarder)
-        health_data = self._get_data(health_url)
-        self._process_health_data(health_data, version, base_tags, service_check_tags)
-
-        if self._config.pending_task_stats:
-            # Load the pending_tasks data.
-            pending_tasks_url = self._join_url(pending_tasks_url, admin_forwarder)
-            pending_tasks_data = self._get_data(pending_tasks_url)
-            self._process_pending_tasks_data(pending_tasks_data, base_tags)
-
-        if self._config.index_stats and version >= [1, 0, 0]:
-            try:
-                self._get_index_metrics(admin_forwarder, version, base_tags)
-            except requests.ReadTimeout as e:
-                self.log.warning("Timed out reading index stats from servers (%s) - stats will be missing", e)
-
-        # Load the cat allocation data.
-        if self._config.cat_allocation_stats:
-            self._process_cat_allocation_data(admin_forwarder, version, base_tags)
+        # if stats_data.get('cluster_name'):
+        #     # retrieve the cluster name from the data, and append it to the
+        #     # master tag list.
+        #     cluster_tags = ["elastic_cluster:{}".format(stats_data['cluster_name'])]
+        #     if not is_affirmative(self.instance.get('disable_legacy_cluster_tag', False)):
+        #         cluster_tags.append("cluster_name:{}".format(stats_data['cluster_name']))
+        #     base_tags.extend(cluster_tags)
+        #     service_check_tags.extend(cluster_tags)
+        # self._process_stats_data(stats_data, stats_metrics, base_tags)
+        #
+        # # Load cluster-wise data
+        # # Note: this is a cluster-wide query, might TO.
+        # if self._config.pshard_stats:
+        #     send_sc = bubble_ex = not self._config.pshard_graceful_to
+        #     pshard_stats_url = self._join_url(pshard_stats_url, admin_forwarder)
+        #     try:
+        #         pshard_stats_data = self._get_data(pshard_stats_url, send_sc=send_sc)
+        #         self._process_pshard_stats_data(pshard_stats_data, pshard_stats_metrics, base_tags)
+        #     except requests.ReadTimeout as e:
+        #         if bubble_ex:
+        #             raise
+        #         self.log.warning("Timed out reading pshard-stats from servers (%s) - stats will be missing", e)
+        #
+        # # Get Snapshot Lifecycle Management (SLM) policies
+        # if slm_url is not None:
+        #     slm_url = self._join_url(slm_url, admin_forwarder)
+        #     policy_data = self._get_data(slm_url)
+        #     self._process_policy_data(policy_data, version, base_tags)
+        #
+        # # Load the health data.
+        # health_url = self._join_url(health_url, admin_forwarder)
+        # health_data = self._get_data(health_url)
+        # self._process_health_data(health_data, version, base_tags, service_check_tags)
+        #
+        # if self._config.pending_task_stats:
+        #     # Load the pending_tasks data.
+        #     pending_tasks_url = self._join_url(pending_tasks_url, admin_forwarder)
+        #     pending_tasks_data = self._get_data(pending_tasks_url)
+        #     self._process_pending_tasks_data(pending_tasks_data, base_tags)
+        #
+        # if self._config.index_stats and version >= [1, 0, 0]:
+        #     try:
+        #         self._get_index_metrics(admin_forwarder, version, base_tags)
+        #     except requests.ReadTimeout as e:
+        #         self.log.warning("Timed out reading index stats from servers (%s) - stats will be missing", e)
+        #
+        # # Load the cat allocation data.
+        # if self._config.cat_allocation_stats:
+        #     self._process_cat_allocation_data(admin_forwarder, version, base_tags)
 
         # Load custom queries
         if self._config.custom_queries:
@@ -253,13 +254,17 @@ class ESCheck(AgentCheck):
 
         return health_url, stats_url, pshard_stats_url, pending_tasks_url, slm_url
 
-    def _get_data(self, url, send_sc=True):
+    def _get_data(self, url, send_sc=True, data=None):
         """
         Hit a given URL and return the parsed json
         """
         resp = None
         try:
-            resp = self.http.get(url)
+            if data:
+                headers = {'content-type': 'application/json'}
+                resp = self.http.post(url, json=data, headers=headers)
+            else:
+                resp = self.http.get(url)
             resp.raise_for_status()
         except Exception as e:
             # this means we've hit a particular kind of auth error that means the config is broken
@@ -522,7 +527,9 @@ class ESCheck(AgentCheck):
             endpoint = endpoints.get('endpoint')
             static_tags = endpoints.get('tags', [])
             endpoint = self._join_url(endpoint, admin_forwarder)
-            data = self._get_data(endpoint)
+            payload = endpoints.get('payload', {})
+            self.log.debug("Payload: " + str(payload))
+            data = self._get_data(endpoint, data=payload)
 
             # If there are tags, add the tag path to list of paths to evaluate while processing metric
             dynamic_tags = get_dynamic_tags(columns)

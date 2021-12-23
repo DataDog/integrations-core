@@ -110,6 +110,44 @@ def test_custom_queries_valid_metrics(dd_environment, dd_run_check, instance, ag
 
 
 @pytest.mark.integration
+def test_custom_queries_with_payload(dd_environment, dd_run_check, instance, aggregator, cluster_tags):
+    custom_queries = [
+        {
+            'endpoint': '/_search',
+            'data_path': 'hits.total',
+            'payload': {
+                "query": {
+                    "match": {
+                        "phrase": {
+                            "query": ""
+                        }
+                    }
+                }
+            },
+            'columns': [
+                {
+                    'value_path': 'value',
+                    'name': 'elasticsearch.custom.metric',
+                },
+                {
+                    'value_path': 'relation',
+                    'name': 'dynamic_tag',
+                    'type': 'tag'
+                },
+            ],
+        },
+    ]
+
+    instance = deepcopy(instance)
+    instance['custom_queries'] = custom_queries
+    check = ESCheck('elastic', {}, instances=[instance])
+    dd_run_check(check)
+    tags = cluster_tags + ['dynamic_tag:eq']
+
+    aggregator.assert_metric('elasticsearch.custom.metric', metric_type=aggregator.GAUGE, tags=tags)
+
+
+@pytest.mark.integration
 def test_custom_queries_valid_tags(dd_environment, dd_run_check, instance, aggregator, cluster_tags):
     custom_queries = [
         {

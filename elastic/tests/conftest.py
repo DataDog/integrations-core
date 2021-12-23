@@ -30,11 +30,11 @@ INSTANCE = {
     'tls_verify': False,
     'custom_queries': [
         {
-            'endpoint': '/_nodes',
-            'data_path': '_nodes.',
+            'endpoint': '/_search',
+            'data_path': 'hits.total',
             'columns': [
-                {'value_path': 'total', 'name': 'elasticsearch.custom.metric', 'type': 'gauge'},
-                {'value_path': 'total', 'name': 'dynamic_tag', 'type': 'tag'},
+                {'value_path': 'value', 'name': 'elasticsearch.custom.metric', 'type': 'gauge'},
+                {'value_path': 'relation', 'name': 'dynamic_tag', 'type': 'tag'},
             ],
         },
     ],
