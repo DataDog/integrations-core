@@ -115,25 +115,13 @@ def test_custom_queries_with_payload(dd_environment, dd_run_check, instance, agg
         {
             'endpoint': '/_search',
             'data_path': 'hits.total',
-            'payload': {
-                "query": {
-                    "match": {
-                        "phrase": {
-                            "query": ""
-                        }
-                    }
-                }
-            },
+            'payload': {"query": {"match": {"phrase": {"query": ""}}}},
             'columns': [
                 {
                     'value_path': 'value',
                     'name': 'elasticsearch.custom.metric',
                 },
-                {
-                    'value_path': 'relation',
-                    'name': 'dynamic_tag',
-                    'type': 'tag'
-                },
+                {'value_path': 'relation', 'name': 'dynamic_tag', 'type': 'tag'},
             ],
         },
     ]
