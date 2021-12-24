@@ -10,10 +10,13 @@ from six import PY3, StringIO, iteritems, string_types
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative
+
 # Flup package does not exist anymore so what's needed is vendored
 # flup.client.fcgi_app.FCGIApp version 1.0.3
 from .vendor.fcgi_app import FCGIApp
+
 if PY3:
+
     def get_connection(self):
         if self._connect is not None:
             if isinstance(self._connect, string_types):
