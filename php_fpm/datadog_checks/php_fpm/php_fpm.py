@@ -11,11 +11,10 @@ from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative
 
-# Flup package does not exist anymore so what's needed is vendored
-# flup.client.fcgi_app.FCGIApp version 1.0.3
-from .vendor.fcgi_app import FCGIApp
-
 if PY3:
+    # Flup package does not exist anymore so what's needed is vendored
+    # flup.client.fcgi_app.FCGIApp flup-py3 version 1.0.3
+    from .vendor.fcgi_app import FCGIApp
 
     def get_connection(self):
         if self._connect is not None:
@@ -30,6 +29,9 @@ if PY3:
             return sock
 
     FCGIApp._getConnection = get_connection
+else:
+    # flup version 1.0.3.dev-20110405
+    from .vendor.fcgi_app_py2 import FCGIApp
 
 
 # Relax param filtering
