@@ -27,42 +27,42 @@ device:
 
 sysobjectid: 1.3.6.1.4.1.14823.*
 
+
+#.1.3.6.1.4.1.14823.2.2.1.1.1.1.0 = STRING: PIMTARSPIMWLC0101
+#.1.3.6.1.4.1.14823.2.2.1.1.1.2.0 = STRING: A7210
+#.1.3.6.1.4.1.14823.2.2.1.1.1.3.0 = IpAddress: 172.23.68.4
+#.1.3.6.1.4.1.14823.2.2.1.1.1.4.0 = INTEGER: 1
+#.1.3.6.1.4.1.14823.2.2.1.1.1.5.0 = IpAddress: 172.23.68.3
+#.1.3.6.1.4.1.14823.2.2.1.1.1.6.1.2.172.23.68.4 = INTEGER: 1
+#.1.3.6.1.4.1.14823.2.2.1.1.1.6.1.2.172.23.68.5 = INTEGER: 3
+#.1.3.6.1.4.1.14823.2.2.1.1.1.7.0 = INTEGER: 6
+# http://www.circitor.fr/Mibs/Html/W/WLSX-SWITCH-MIB.php
+
 metadata:
   device:
     fields:
       vendor:
         value: "aruba"
-#      serial_number:
-#        symbol:
-#          OID: 1.3.6.1.2.1.47.1.1.1.1.11.1  # entPhysicalSerialNum OID at index `1`
-#          name: entPhysicalSerialNum
-#          # Examples: `HSH16195058`
-#      version:
-#        symbol:
-#          OID: 1.3.6.1.2.1.47.1.1.1.1.8.1  # entPhysicalHardwareRev OID at index `1`
-#          name: entPhysicalHardwareRev
-#          # Examples: `12.00`
+      serial_number:
+
+
+      version:
+      # wlsxSysExtSwVersion	1.3.6.1.4.1.14823.2.2.1.2.1.28  # Software version of the switch.
+
 #      product_name:
 #        symbol:
 #          OID: 1.3.6.1.2.1.47.1.1.1.1.2.1  # entPhysicalDescr OID at index `1`
 #          name: entPhysicalDescr
 #          # Examples: `DCS-7504 Chassis`
-#      model:
-#        symbols:
-#          - OID: 1.3.6.1.2.1.47.1.1.1.1.13.1  # entPhysicalModelName OID at index `1`
-#            name: entPhysicalModelName
-#            # Examples: `Arista Networks CCS-720XP-48Y6`
-#          - OID: 1.3.6.1.2.1.1.1.0
-#            name: sysDescr
-#            match_pattern: 'running on an Arista Networks ([\w-]+)'
-#            match_value: '$1'
-#            # Examples: `Arista Networks CCS-720XP-48Y6`
-#      os_name:
-#        symbol:
-#          OID: 1.3.6.1.2.1.1.1.0
-#          name: sysDescr
-#          match_pattern: '\bArista Networks EOS\b'
-#          match_value: 'EOS'
+
+      model:
+        # wlsxModelName	1.3.6.1.4.1.14823.2.2.1.1.1.2  # Model Name of the switch.
+      os_name:
+        symbol:
+          OID: 1.3.6.1.2.1.1.1.0
+          name: sysDescr
+          match_pattern: '\bArubaOS\b'
+          match_value: 'ArubaOS'
 #      os_version:
 #        symbol:
 #          OID: 1.3.6.1.2.1.1.1.0
