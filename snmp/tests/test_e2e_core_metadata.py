@@ -411,6 +411,7 @@ def test_e2e_core_metadata_arista(dd_agent_check):
             'snmp_device:' + device_ip,
         ],
         'ip_address': device_ip,
+        'model': 'DCS-7504',
         'name': 'DCS-7504-name',
         'os_name': 'EOS',
         'os_version': '4.20.11.1M',

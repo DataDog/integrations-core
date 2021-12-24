@@ -50,12 +50,15 @@ metadata:
           name: entPhysicalDescr
           # Examples: `DCS-7504 Chassis`
       model:
-        symbol:
-          OID: 1.3.6.1.2.1.1.1.0
-          name: sysDescr
-          match_pattern: '\sArista Networks (\w+-\w+-\S+)'
-          match_value: '$1'
-          # Examples: `Arista Networks CCS-720XP-48Y6`
+        symbols:
+          - OID: 1.3.6.1.2.1.47.1.1.1.1.13.1  # entPhysicalModelName OID at index `1`
+            name: entPhysicalModelName
+            # Examples: `Arista Networks CCS-720XP-48Y6`
+          - OID: 1.3.6.1.2.1.1.1.0
+            name: sysDescr
+            match_pattern: 'running on an Arista Networks ([\w-]+)'
+            match_value: '$1'
+            # Examples: `Arista Networks CCS-720XP-48Y6`
       os_name:
         symbol:
           OID: 1.3.6.1.2.1.1.1.0
