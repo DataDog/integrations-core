@@ -29,7 +29,7 @@ ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS
 
 VALID_METRIC_TYPE = {'count', 'gauge', 'rate'}
 
-VALID_ORIENTATION = {'0', '1', '-1'}
+VALID_ORIENTATION = {'0', '1', '-1', '2'}
 
 EXCLUDE_INTEGRATIONS = [
     'disk',
