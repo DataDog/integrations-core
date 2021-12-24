@@ -1,3 +1,20 @@
+# Profile for Aruba devices
+#
+# Examples:
+#   sysObjectID                        SysDescr
+# - 1.3.6.1.4.1.14823.1.2.82           ArubaOS (MODEL: 315), Version 8.5.0.5-8.5.0.5
+# - 1.3.6.1.4.1.14823.1.1.33           ArubaOS (MODEL: Aruba7220-US), Version 6.5.4.9 (67129)
+# - 1.3.6.1.4.1.14823.1.1.32           ArubaOS (MODEL: Aruba7210-US), Version 6.5.4.9 (67129)
+# - 1.3.6.1.4.1.14823.1.6.1            ClearPass Policy Manager 6.7.0.101814, Model: C1000V, FIPS Mode: Disabled
+# - 1.3.6.1.4.1.14823.1.1.32           ArubaOS (MODEL: Aruba7210), Version 6.5.4.9 (67129)
+# - 1.3.6.1.4.1.14823.1.1.19           ArubaOS (MODEL: Aruba650-US), Version 6.4.4.17 (63295)
+# - 1.3.6.1.4.1.14823.1.1.40           ArubaOS (MODEL: Aruba7010-US), Version 6.5.1.4 (58698)
+# - 1.3.6.1.4.1.14823.1.1.39           ArubaOS (MODEL: Aruba7005-US), Version 6.5.4.8 (65873)
+# - 1.3.6.1.4.1.14823.1.1.32           ArubaOS (MODEL: Aruba7210-US), Version 6.4.4.17 (63295)
+# - 1.3.6.1.4.1.14823.1.1.32           Aruba Mobility Controller 7210
+# - 1.3.6.1.4.1.14823.1.1.32           Aruba Mobility Controller 7210
+# - 1.3.6.1.4.1.14823.1.1.17           ArubaOS (MODEL: Aruba3600-US), Version 6.4.4.17 (63295)
+
 extends:
   - _base.yaml
   - _generic-if.yaml
