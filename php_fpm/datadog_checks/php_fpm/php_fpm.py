@@ -6,20 +6,14 @@ import random
 import socket
 import time
 
-from flup.client.fcgi_app import FCGIApp
 from six import PY3, StringIO, iteritems, string_types
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative
-
-# Relax param filtering
-FCGIApp._environPrefixes.extend(('DOCUMENT_', 'SCRIPT_'))
-
-# Flup as of 1.0.3 is not fully compatible with Python 3 yet.
-# This fixes that for our use case.
-# https://hg.saddi.com/flup-py3.0/file/tip/flup/client/fcgi_app.py
+# Flup package does not exist anymore so what's needed is vendored
+# flup.client.fcgi_app.FCGIApp version 1.0.3
+from .vendor.fcgi_app import FCGIApp
 if PY3:
-
     def get_connection(self):
         if self._connect is not None:
             if isinstance(self._connect, string_types):
@@ -35,6 +29,8 @@ if PY3:
     FCGIApp._getConnection = get_connection
 
 
+# Relax param filtering
+FCGIApp._environPrefixes.extend(('DOCUMENT_', 'SCRIPT_'))
 DEFAULT_TIMEOUT = 10
 
 
