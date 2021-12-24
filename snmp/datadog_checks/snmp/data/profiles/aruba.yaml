@@ -2,18 +2,20 @@
 #
 # Examples:
 #   sysObjectID                        SysDescr
-# - 1.3.6.1.4.1.14823.1.2.82           ArubaOS (MODEL: 315), Version 8.5.0.5-8.5.0.5
-# - 1.3.6.1.4.1.14823.1.1.33           ArubaOS (MODEL: Aruba7220-US), Version 6.5.4.9 (67129)
-# - 1.3.6.1.4.1.14823.1.1.32           ArubaOS (MODEL: Aruba7210-US), Version 6.5.4.9 (67129)
-# - 1.3.6.1.4.1.14823.1.6.1            ClearPass Policy Manager 6.7.0.101814, Model: C1000V, FIPS Mode: Disabled
-# - 1.3.6.1.4.1.14823.1.1.32           ArubaOS (MODEL: Aruba7210), Version 6.5.4.9 (67129)
+# - 1.3.6.1.4.1.14823.1.1.17           ArubaOS (MODEL: Aruba3600-US), Version 6.4.4.17 (63295)
 # - 1.3.6.1.4.1.14823.1.1.19           ArubaOS (MODEL: Aruba650-US), Version 6.4.4.17 (63295)
-# - 1.3.6.1.4.1.14823.1.1.40           ArubaOS (MODEL: Aruba7010-US), Version 6.5.1.4 (58698)
-# - 1.3.6.1.4.1.14823.1.1.39           ArubaOS (MODEL: Aruba7005-US), Version 6.5.4.8 (65873)
+# - 1.3.6.1.4.1.14823.1.1.32           ArubaOS (MODEL: Aruba7210), Version 6.5.4.9 (67129)
+# - 1.3.6.1.4.1.14823.1.1.32           ArubaOS (MODEL: Aruba7210-US), Version 6.5.4.9 (67129)
 # - 1.3.6.1.4.1.14823.1.1.32           ArubaOS (MODEL: Aruba7210-US), Version 6.4.4.17 (63295)
 # - 1.3.6.1.4.1.14823.1.1.32           Aruba Mobility Controller 7210
 # - 1.3.6.1.4.1.14823.1.1.32           Aruba Mobility Controller 7210
-# - 1.3.6.1.4.1.14823.1.1.17           ArubaOS (MODEL: Aruba3600-US), Version 6.4.4.17 (63295)
+# - 1.3.6.1.4.1.14823.1.1.33           ArubaOS (MODEL: Aruba7220-US), Version 6.5.4.9 (67129)
+# - 1.3.6.1.4.1.14823.1.1.39           ArubaOS (MODEL: Aruba7005-US), Version 6.5.4.8 (65873)
+# - 1.3.6.1.4.1.14823.1.1.40           ArubaOS (MODEL: Aruba7010-US), Version 6.5.1.4 (58698)
+# - 1.3.6.1.4.1.14823.1.2.71           ArubaOS (MODEL: 205), Version 6.5.1.0-4.3.1.2
+# - 1.3.6.1.4.1.14823.1.2.80           ArubaOS (MODEL: 335), Version 6.5.4.3-6.5.4.3
+# - 1.3.6.1.4.1.14823.1.2.82           ArubaOS (MODEL: 315), Version 8.5.0.5-8.5.0.5
+# - 1.3.6.1.4.1.14823.1.6.1            ClearPass Policy Manager 6.7.0.101814, Model: C1000V, FIPS Mode: Disabled
 
 extends:
   - _base.yaml
@@ -24,6 +26,50 @@ device:
   vendor: "aruba"
 
 sysobjectid: 1.3.6.1.4.1.14823.*
+
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "aruba"
+#      serial_number:
+#        symbol:
+#          OID: 1.3.6.1.2.1.47.1.1.1.1.11.1  # entPhysicalSerialNum OID at index `1`
+#          name: entPhysicalSerialNum
+#          # Examples: `HSH16195058`
+#      version:
+#        symbol:
+#          OID: 1.3.6.1.2.1.47.1.1.1.1.8.1  # entPhysicalHardwareRev OID at index `1`
+#          name: entPhysicalHardwareRev
+#          # Examples: `12.00`
+#      product_name:
+#        symbol:
+#          OID: 1.3.6.1.2.1.47.1.1.1.1.2.1  # entPhysicalDescr OID at index `1`
+#          name: entPhysicalDescr
+#          # Examples: `DCS-7504 Chassis`
+#      model:
+#        symbols:
+#          - OID: 1.3.6.1.2.1.47.1.1.1.1.13.1  # entPhysicalModelName OID at index `1`
+#            name: entPhysicalModelName
+#            # Examples: `Arista Networks CCS-720XP-48Y6`
+#          - OID: 1.3.6.1.2.1.1.1.0
+#            name: sysDescr
+#            match_pattern: 'running on an Arista Networks ([\w-]+)'
+#            match_value: '$1'
+#            # Examples: `Arista Networks CCS-720XP-48Y6`
+#      os_name:
+#        symbol:
+#          OID: 1.3.6.1.2.1.1.1.0
+#          name: sysDescr
+#          match_pattern: '\bArista Networks EOS\b'
+#          match_value: 'EOS'
+#      os_version:
+#        symbol:
+#          OID: 1.3.6.1.2.1.1.1.0
+#          name: sysDescr
+#          match_pattern: '\sversion\s(\S+)'
+#          match_value: '$1'
+#          # Examples: `version 4.23.1F`
 
 metrics:
   ### Sensor
