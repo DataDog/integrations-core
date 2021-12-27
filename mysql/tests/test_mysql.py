@@ -14,7 +14,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mysql import MySql
 
 from . import common, tags, variables
-from .common import MYSQL_REPLICATION, MYSQL_VERSION_PARSED, requires_static_version
+from .common import HOST, MYSQL_REPLICATION, MYSQL_VERSION_PARSED, PORT, requires_static_version
 
 
 @pytest.mark.integration
