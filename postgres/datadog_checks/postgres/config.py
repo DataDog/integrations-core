@@ -35,6 +35,7 @@ class PostgresConfig:
             raise ConfigurationError('Please specify a user to connect to Postgres.')
         self.password = instance.get('password', '')
         self.dbname = instance.get('dbname', 'postgres')
+        self.reported_hostname = instance.get('reported_hostname', '')
         self.dbstrict = is_affirmative(instance.get('dbstrict', False))
         self.disable_generic_tags = is_affirmative(instance.get('disable_generic_tags', False)) if instance else False
 
