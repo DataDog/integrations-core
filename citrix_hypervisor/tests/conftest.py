@@ -11,7 +11,6 @@ from datadog_checks.dev.http import MockResponse
 
 from . import common
 
-
 @pytest.fixture(scope='session')
 def dd_environment():
     with docker_run(
