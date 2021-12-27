@@ -422,6 +422,7 @@ def test_e2e_core_metadata_aruba_switch(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.14823.1.1.32',
         'tags': [
             'device_namespace:default',
+            'device_vendor:aruba',
             'snmp_device:' + device_ip,
             'snmp_host:aruba-device-name',
             'snmp_profile:aruba-switch',
@@ -463,6 +464,7 @@ def test_e2e_core_metadata_aruba_access_point(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.14823.1.2.80',
         'tags': [
             'device_namespace:default',
+            'device_vendor:aruba',
             'snmp_device:' + device_ip,
             'snmp_host:aruba-335-name',
             'snmp_profile:aruba-access-point',
