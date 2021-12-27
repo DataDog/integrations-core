@@ -9,7 +9,7 @@ import pytest
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.http import MockResponse
 
-from . import common
+from . import common 
 
 @pytest.fixture(scope='session')
 def dd_environment():
