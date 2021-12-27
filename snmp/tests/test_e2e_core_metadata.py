@@ -447,6 +447,23 @@ def test_e2e_core_metadata_aruba_access_point(dd_agent_check):
     device_ip = instance['ip_address']
 
     device = {
+        'description': 'ArubaOS (MODEL: 335), Version 6.5.4.3-6.5.4.3',
         'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'name': 'aruba-335-name',
+        'profile': 'aruba',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.14823.1.2.80',
+        'tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+            'snmp_host:aruba-335-name',
+            'snmp_profile:aruba',
+        ],
+        'vendor': 'aruba',
     }
     assert_device_metadata(aggregator, device)
