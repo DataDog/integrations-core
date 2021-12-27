@@ -389,12 +389,32 @@ def test_e2e_core_metadata_apc_ups(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
 
-def test_e2e_core_metadata_aruba(dd_agent_check):
+def test_e2e_core_metadata_aruba_switch(dd_agent_check):
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
     instance.update(
         {
-            'community_string': 'aruba',
+            'community_string': 'aruba-switch',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'id': 'default:' + device_ip,
+    }
+    assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_aruba_access_point(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'aruba-access-point',
             'loader': 'core',
         }
     )
