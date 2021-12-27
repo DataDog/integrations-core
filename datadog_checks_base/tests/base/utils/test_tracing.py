@@ -71,7 +71,7 @@ def test_traced(aggregator, agent_config, init_config, called):
         check.check({})
 
         if called:
-            tracer.trace.assert_called_once_with('dummy', service='integrations-tracing', resource='check')
+            tracer.trace.assert_called_once_with('check', service='dummy-integration', resource='check')
         else:
             tracer.trace.assert_not_called()
         aggregator.assert_metric('dummy.metric', 10, count=1)
@@ -90,8 +90,8 @@ def test_traced_class(traces_enabled):
         if os.environ['DDEV_TRACE_ENABLED'] == 'true':
             tracer.trace.assert_has_calls(
                 [
-                    mock.call('__init__', resource='__init__'),
-                    mock.call('check', resource='check'),
+                    mock.call('__init__', resource='__init__', service='dummy-integration'),
+                    mock.call('check', resource='check', service='dummy-integration'),
                 ],
                 any_order=True,
             )

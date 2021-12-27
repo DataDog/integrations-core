@@ -54,19 +54,22 @@ def traced(fn):
     return traced_wrapper
 
 
-def _tracing_service_name(args):
-    if args:
-        self = args[0]
-        if hasattr(self, "name"):
-            return "{}-integration".format(self.name)
-    return None
-
-
 def tracing_method(f, tracer):
     @functools.wraps(f)
-    def wrapper(*args, **kwargs):
-        with tracer.trace(f.__name__, resource=f.__name__, service=_tracing_service_name(args)):
-            return f(*args, **kwargs)
+    def wrapper(self, *args, **kwargs):
+        service_name = None
+        if hasattr(self, "name"):
+            service_name = "{}-integration".format(self.name)
+        elif f.__name__ == "__init__":
+            # copy the logic that the AgentCheck init method uses to determine the check name
+            name = kwargs.get('name', '')
+            if len(args) > 0:
+                name = args[0]
+            if name:
+                service_name = "{}-integration".format(name)
+
+        with tracer.trace(f.__name__, resource=f.__name__, service=service_name):
+            return f(self, *args, **kwargs)
 
     return wrapper
 
