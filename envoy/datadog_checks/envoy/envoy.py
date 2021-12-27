@@ -5,19 +5,40 @@ import re
 from collections import defaultdict
 
 import requests
+from six import PY2
 from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
 from .errors import UnknownMetric, UnknownTags
 from .parser import parse_histogram, parse_metric
-
-LEGACY_VERSION_RE = re.compile(r'/(\d\.\d\.\d)/')
+from .utils import _get_server_info
 
 
 class Envoy(AgentCheck):
+    """
+    This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
+    """
+
     HTTP_CONFIG_REMAPPER = {'verify_ssl': {'name': 'tls_verify'}}
     SERVICE_CHECK_NAME = 'envoy.can_connect'
+
+    def __new__(cls, name, init_config, instances):
+        instance = instances[0]
+
+        if 'openmetrics_endpoint' in instance:
+            if PY2:
+                raise ConfigurationError(
+                    "This version of the integration is only available when using py3. "
+                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
+                    "for more information or use the older style config."
+                )
+            # TODO: when we drop Python 2 move this import up top
+            from .check import EnvoyCheckV2
+
+            return EnvoyCheckV2(name, init_config, instances)
+        else:
+            return super(Envoy, cls).__new__(cls)
 
     def __init__(self, name, init_config, instances):
         super(Envoy, self).__init__(name, init_config, instances)
@@ -155,47 +176,7 @@ class Envoy(AgentCheck):
             return
         # From http://domain/thing/stats to http://domain/thing/server_info
         server_info_url = urljoin(self.stats_url, 'server_info')
-        raw_version = None
-
-        try:
-            response = self.http.get(server_info_url)
-            if response.status_code != 200:
-                msg = 'Envoy endpoint `{}` responded with HTTP status code {}'.format(
-                    server_info_url, response.status_code
-                )
-                self.log.info(msg)
-                return
-            # {
-            #   "version": "222aaacccfff888/1.14.1/Clean/RELEASE/BoringSSL",
-            #   "state": "LIVE",
-            #   ...
-            # }
-            try:
-                raw_version = response.json()["version"].split('/')[1]
-            except Exception as e:
-                self.log.debug('Error decoding json for url=`%s`. Error: %s', server_info_url, str(e))
-
-            if raw_version is None:
-                # Search version in server info for Envoy version <= 1.8
-                # Example:
-                #     envoy 5d25f466c3410c0dfa735d7d4358beb76b2da507/1.8.0/Clean/RELEASE live 581130 581130 0
-                content = response.content.decode()
-                found = LEGACY_VERSION_RE.search(content)
-                self.log.debug('Looking for version in content: %s', content)
-                if found:
-                    raw_version = found.group(1)
-                else:
-                    self.log.debug('Version not matched.')
-                    return
-
-        except requests.exceptions.Timeout:
-            self.log.warning(
-                'Envoy endpoint `%s` timed out after %s seconds', server_info_url, self.http.options['timeout']
-            )
-            return
-        except Exception as e:
-            self.log.warning('Error collecting Envoy version with url=`%s`. Error: %s', server_info_url, str(e))
-            return
+        raw_version = _get_server_info(server_info_url, self.log, self.http)
 
         if raw_version:
             self.set_metadata('version', raw_version)

@@ -22,12 +22,23 @@ class CustomQuery(BaseModel):
     tags: Optional[Sequence[str]]
 
 
-class QueryMetrics(BaseModel):
+class QueryActivity(BaseModel):
     class Config:
         allow_mutation = False
 
     collection_interval: Optional[float]
     enabled: Optional[bool]
+
+
+class QueryMetrics(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collection_interval: Optional[float]
+    dm_exec_query_stats_row_limit: Optional[int]
+    enabled: Optional[bool]
+    enforce_collection_interval_deadline: Optional[bool]
+    samples_per_hour_per_query: Optional[int]
 
 
 class InstanceConfig(BaseModel):
@@ -67,7 +78,9 @@ class InstanceConfig(BaseModel):
     password: Optional[str]
     proc_only_if: Optional[str]
     proc_only_if_database: Optional[str]
+    query_activity: Optional[QueryActivity]
     query_metrics: Optional[QueryMetrics]
+    reported_hostname: Optional[str]
     service: Optional[str]
     stored_procedure: Optional[str]
     tags: Optional[Sequence[str]]

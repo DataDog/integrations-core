@@ -16,8 +16,8 @@ Configure the Spark integration to monitor your Apache Spark Cluster on Databric
 
 1. Determine the best init script below for your Databricks cluster environment. 
 
-2. Copy and run the contents into a notebook. The notebook will create an init script that will install a Datadog Agent on your clusters.
-    The notebook only needs to be run once to save the script as a global configuration. Read more about the Databricks Datadog Init scripts [here][3].
+2. Copy and run the contents into a notebook. The notebook creates an init script that installs a Datadog Agent on your clusters.
+    The notebook only needs to be run once to save the script as a global configuration. For more information about the Databricks Datadog Init scripts, see [Apache Spark Cluster Monitoring with Databricks and Datadog][3].
     - Set `<init-script-folder>` path to where you want your init scripts to be saved in.
         
 3. Configure a new Databricks cluster with the cluster-scoped init script path using the UI, Databricks CLI, or invoking the Clusters API.

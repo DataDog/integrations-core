@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 from copy import copy, deepcopy
 
 import pytest
@@ -271,6 +272,34 @@ def test_autodiscovery_perf_counters_doesnt_duplicate_names_of_metrics_to_collec
 @not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_autodiscovery_multiple_instances(aggregator, dd_run_check, instance_autodiscovery, caplog):
+    caplog.clear()
+    caplog.set_level(logging.DEBUG)
+
+    instance_1 = deepcopy(instance_autodiscovery)
+    instance_2 = deepcopy(instance_autodiscovery)
+
+    instance_1['autodiscovery_include'] = ['model']
+    instance_2['autodiscovery_include'] = ['msdb']
+
+    check = SQLServer(CHECK_NAME, {}, instances=[instance_1, instance_2])
+    dd_run_check(check)
+
+    check = SQLServer(CHECK_NAME, {}, instances=[instance_2, instance_1])
+    dd_run_check(check)
+
+    found_log = 0
+    for _, _, message in caplog.record_tuples:
+        # make sure model is only queried once
+        if "SqlDatabaseFileStats: changing cursor context via use statement: use [model]" in message:
+            found_log += 1
+
+    assert found_log == 1
+
+
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_custom_queries(aggregator, dd_run_check, instance_docker):
     instance = copy(instance_docker)
     querya = copy(CUSTOM_QUERY_A)
@@ -337,24 +366,24 @@ def test_split_sqlserver_host(instance_docker, instance_host, split_host, split_
 @not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize("dbm_enabled,", [True, False])
 @pytest.mark.parametrize(
-    "instance_host,resolved_hostname",
+    "dbm_enabled, instance_host, reported_hostname, expected_hostname",
     [
-        ("localhost,1433,some-typo", "stubbed.hostname"),
-        ("localhost,1433", "stubbed.hostname"),
-        ("localhost", "stubbed.hostname"),
-        ("datadoghq.com,1433", "datadoghq.com"),
-        ("datadoghq.com", "datadoghq.com"),
-        ("8.8.8.8,1433", "8.8.8.8"),
-        ("8.8.8.8", "8.8.8.8"),
+        (False, 'localhost,1433,some-typo', '', 'stubbed.hostname'),
+        (True, 'localhost,1433', '', 'stubbed.hostname'),
+        (False, 'localhost', '', 'stubbed.hostname'),
+        (False, '8.8.8.8', '', 'stubbed.hostname'),
+        (True, 'localhost', 'forced_hostname', 'forced_hostname'),
+        (True, 'datadoghq.com,1433', '', 'datadoghq.com'),
+        (True, 'datadoghq.com', '', 'datadoghq.com'),
+        (True, 'datadoghq.com', 'forced_hostname', 'forced_hostname'),
+        (True, '8.8.8.8,1433', '', '8.8.8.8'),
+        (False, '8.8.8.8', 'forced_hostname', 'forced_hostname'),
     ],
 )
-def test_resolved_hostname(instance_docker, dbm_enabled, instance_host, resolved_hostname):
+def test_resolved_hostname(instance_docker, dbm_enabled, instance_host, reported_hostname, expected_hostname):
     instance_docker['dbm'] = dbm_enabled
     instance_docker['host'] = instance_host
+    instance_docker['reported_hostname'] = reported_hostname
     sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    if dbm_enabled:
-        assert sqlserver_check.resolved_hostname == resolved_hostname
-    else:
-        assert sqlserver_check.resolved_hostname == "stubbed.hostname"
+    assert sqlserver_check.resolved_hostname == expected_hostname

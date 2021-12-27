@@ -1,7 +1,7 @@
 [
     {
         "agent_version": "5.3.0",
-        "integration": "HDFS",
+        "integration": "HDFS Namenode",
         "groups": [
             "host",
             "instance"

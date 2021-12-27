@@ -30,7 +30,7 @@ No additional installation is needed on your server.
 
    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated when running the Datadog Agent [status command][7].
    You can specify the metrics you are interested in by editing the [configuration][6].
-   To learn how to customize the metrics to collect visit the [JMX Checks documentation][8] for more detailed instructions.
+   To learn how to customize the metrics to collect see the [JMX Checks documentation][8] for more detailed instructions.
    If you need to monitor more metrics, contact [Datadog support][9].
 
 3. [Restart the Agent][10]

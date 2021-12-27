@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 11.1.1 / 2021-11-30
+
+* [Fixed] Add datname to connections query for postgresql.connections. See [#10748](https://github.com/DataDog/integrations-core/pull/10748).
+
 ## 11.1.0 / 2021-11-13
 
 * [Added] Add internal debug metric for explain error cache length. See [#10616](https://github.com/DataDog/integrations-core/pull/10616).

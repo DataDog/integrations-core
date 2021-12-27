@@ -9,11 +9,12 @@ HERE = get_here()
 
 CLIENT_LIB = os.environ['CLIENT_LIB']
 ORACLE_DATABASE_VERSION = os.environ['ORACLE_DATABASE_VERSION']
-
+ENABLE_TCPS = os.getenv("ENABLE_TCPS", False)
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
 HOST = get_docker_hostname()
 PORT = '1521'
+TCPS_PORT = '2484'
 USER = 'datadog'
 PASSWORD = 'Oracle123'
 
