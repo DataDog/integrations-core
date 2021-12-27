@@ -80,6 +80,7 @@ class InstanceConfig(BaseModel):
     proc_only_if_database: Optional[str]
     query_activity: Optional[QueryActivity]
     query_metrics: Optional[QueryMetrics]
+    reported_hostname: Optional[str]
     service: Optional[str]
     stored_procedure: Optional[str]
     tags: Optional[Sequence[str]]
