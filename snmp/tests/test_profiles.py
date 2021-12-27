@@ -2054,7 +2054,7 @@ def test_arista(aggregator):
 def test_aruba(aggregator):
     run_profile_check('aruba')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:aruba', 'device_vendor:aruba']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:aruba-switch', 'device_vendor:aruba']
 
     common.assert_common_metrics(aggregator, common_tags)
 

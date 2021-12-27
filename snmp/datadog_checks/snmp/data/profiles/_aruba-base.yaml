@@ -1,7 +1,3 @@
-# legacy vendor field used for metadata and metrics/service_checks tags
-device:
-  vendor: "aruba"
-
 metadata:
   device:
     fields:

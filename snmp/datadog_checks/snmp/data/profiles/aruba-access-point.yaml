@@ -16,6 +16,9 @@ extends:
 # All Access Point Products (apProducts/1.3.6.1.4.1.14823.1.2) from ARUBA-MIB
 sysobjectid: 1.3.6.1.4.1.14823.1.2.*
 
+device:
+  vendor: "aruba"
+
 metadata:
   device:
     fields:
