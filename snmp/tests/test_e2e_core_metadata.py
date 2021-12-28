@@ -411,9 +411,9 @@ def test_e2e_core_metadata_palo_alto(dd_agent_check):
             'snmp_device:' + device_ip,
         ],
         'ip_address': device_ip,
-        'model': 'PA-VM',
+        'model': 'PA-3020',
         'os_name': 'PAN-OS',
-        'os_version': '9.0.7',
+        'os_version': '9.0.5',
         'product_name': 'PA-3000 series firewall',
         'profile': 'palo-alto',
         'serial_number': '015351000009999',
@@ -426,6 +426,6 @@ def test_e2e_core_metadata_palo_alto(dd_agent_check):
             'snmp_profile:palo-alto',
         ],
         'vendor': 'paloaltonetworks',
-        'version': '9.0.7',
+        'version': '9.0.5',
     }
     assert_device_metadata(aggregator, device)
