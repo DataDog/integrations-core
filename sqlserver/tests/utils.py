@@ -34,7 +34,7 @@ class HcQueries:
     """
 
     def __init__(self, instance_docker, setup_timeout=60 * 6):
-        self.EXPECTED_ROW_COUNT = 1_000_000
+        self.EXPECTED_ROW_COUNT = 45_000
         self.columns = [
             'id',
             'guid',

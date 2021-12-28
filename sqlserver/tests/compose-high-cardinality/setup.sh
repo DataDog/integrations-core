@@ -23,9 +23,9 @@ else
 fi
 
 # Each iteration inserts roughly 25k rows.
-# Adjusting the range can break the tests. The database is expected to have at least 1,000,000 rows.
-# If you wish to lower the amount of rows inserted, you must adjust the expected count in `utils.py/AppMarketQueries`.
-for i in {1..45};
+# Adjusting the range can break the tests. If you wish to lower the amount of rows inserted, you
+# must adjust the expected count in `utils.py/HcQueries`.
+for i in {1..2};
 do
   /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d master -i dummy_data.sql -b
   if [ $? -nq 0 ]
