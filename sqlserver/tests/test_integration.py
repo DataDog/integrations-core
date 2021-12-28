@@ -11,7 +11,7 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import SQLConnectionError
 
 from .common import CHECK_NAME, CUSTOM_METRICS, CUSTOM_QUERY_A, CUSTOM_QUERY_B, EXPECTED_DEFAULT_METRICS, assert_metrics
-from .utils import HcQueries, hc_only, not_windows_ci, windows_ci
+from .utils import HighCardinalityQueries, hc_only, not_windows_ci, windows_ci
 
 try:
     import pyodbc
@@ -397,9 +397,9 @@ def test_check_against_high_cardinality(dd_run_check, instance_docker):
     instance_docker['query_metrics'] = {'enabled': True, 'run_sync': True}
     instance_docker['query_activity'] = {'enabled': True, 'run_sync': True}
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    queries = HcQueries(instance_docker)
+    queries = HighCardinalityQueries(instance_docker)
     try:
-        queries.run_hc_queries('bob', config={'hc_threads': 20, 'slow_threads': 5})
+        queries.run_queries('bob', config={'hc_threads': 20, 'slow_threads': 5, 'complex_threads': 10})
         # Allow the database to build up queries in the background before proceeding
         time.sleep(20)
 
@@ -408,5 +408,5 @@ def test_check_against_high_cardinality(dd_run_check, instance_docker):
         elapsed = time.time() - start
         assert elapsed <= 15
     finally:
-        queries.stop_queries()
+        queries.stop()
         check.cancel()

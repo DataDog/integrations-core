@@ -29,12 +29,14 @@ hc_only = pytest.mark.skipif(
 class HighCardinalityQueries:
     """
     HighCardinalityQueries is a test utility to run queries against a high-cardinality database
-    (e.g. Large number of tables, schemas, query cardinality, etc). You must be in the `hc` env to use this and the
+    (e.g. Large number of tables, schemas, query cardinality, etc). You must use the `hc` env to utilize this and the
     setup time can be long.
     """
 
-    def __init__(self, instance_docker, setup_timeout=60 * 6):
-        self.EXPECTED_ROW_COUNT = 45_000
+    TIMEOUT = 60 * 8
+
+    def __init__(self, instance_docker, setup_timeout=TIMEOUT):
+        self.EXPECTED_ROW_COUNT = 100_000
         self.columns = [
             'id',
             'guid',
@@ -71,7 +73,7 @@ class HighCardinalityQueries:
         # Ensure the test table is ready before proceeding.
         self._wait_for_table()
 
-    def run_hc_queries(self, user, config=None):
+    def run_queries(self, user, config=None):
         """
         Run a set of queries against the table `datadog_test.dbo.high_cardinality` in the background
 
@@ -81,11 +83,16 @@ class HighCardinalityQueries:
             of query and the post execution behavior.
 
         Config:
+            NOTE: Each 'thread' creates a new connection.
+
             `hc_threads`: The amount of threads to run high cardinality queries in the background.
+
             `slow_threads`: The amount of threads to run slow queries in the background.
+
+            `complex_threads`: The amount of threads to run complex queries in the background.
         """
         if not config:
-            config = {'hc_threads': 10, 'slow_threads': 10}
+            config = {'hc_threads': 10, 'slow_threads': 10, 'complex_threads': 10}
 
         self._is_running = True
 
@@ -103,12 +110,22 @@ class HighCardinalityQueries:
                     break
                 self._repeat_query(conn, self.create_slow_query(), 1)
 
+        def run_complex_query_forever():
+            conn = self._get_conn_for_user(user)
+            while True:
+                if not self._is_running:
+                    break
+                self._repeat_query(conn, self.create_complex_query(), 1)
+
         self._threads = [threading.Thread(target=run_hc_query_forever) for _ in range(config['hc_threads'])]
         self._threads.extend([threading.Thread(target=run_slow_query_forever) for _ in range(config['slow_threads'])])
+        self._threads.extend(
+            [threading.Thread(target=run_complex_query_forever) for _ in range(config['complex_threads'])]
+        )
         for t in self._threads:
             t.start()
 
-    def stop_queries(self):
+    def stop(self):
         """Stop background query executions and cleanup the thread executor."""
         self._is_running = False
         for t in self._threads:
@@ -132,12 +149,46 @@ class HighCardinalityQueries:
             )
         )
 
+    def create_complex_query(self):
+        """Creates a complex query to produce complicated execution plans."""
+        columns = copy(self.columns)
+        shuffle(columns)
+        query = """
+        SELECT
+            {col}
+        FROM
+            high_cardinality AS hc1
+            JOIN (
+                SELECT
+                    id,
+                    COUNT(*) app_priority
+                FROM
+                    high_cardinality AS hc2
+                WHERE
+                    hc2.app_version LIKE '8.%'
+                    AND hc2.loc_lat > (
+                        SELECT
+                            AVG(hc3.loc_lat)
+                        FROM
+                            high_cardinality AS hc3)
+                    GROUP BY
+                        hc2.id) AS hc4 ON hc4.id = hc1.id
+            JOIN high_cardinality AS hc5 ON hc5.id = hc1.id
+        WHERE
+            CAST(hc5.subscription_renewal AS VARCHAR)
+            IN('Once', 'Yearly', 'Weekly')
+            AND hc5.user_state IS NOT NULL
+            AND hc5.app_version NOT LIKE '0.%';
+        """
+        # Select a range of random columns and prefix to match our alias
+        return query.format(col=','.join(['hc1.' + col for col in columns[: randint(0, len(columns) - 1)]]))
+
     def _get_conn_for_user(self, user):
         conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
             self._instance_docker['driver'], self._instance_docker['host'], user, "Password12!"
         )
         # The initial startup is the slowest, this database is being loaded with high cardinality data.
-        conn = pyodbc.connect(conn_str, timeout=60 * 8, autocommit=False)
+        conn = pyodbc.connect(conn_str, timeout=HighCardinalityQueries.TIMEOUT, autocommit=False)
         conn.timeout = DEFAULT_TIMEOUT
         return conn
 
