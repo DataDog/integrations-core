@@ -403,5 +403,29 @@ def test_e2e_core_metadata_palo_alto(dd_agent_check):
 
     device_ip = instance['ip_address']
 
-    device = {'id': 'default:' + device_ip}
+    device = {
+        'description': 'Palo Alto Networks PA-3000 series firewall',
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'model': 'PA-VM',
+        'os_name': 'PAN-OS',
+        'os_version': '9.0.7',
+        'product_name': 'PA-3000 series firewall',
+        'profile': 'palo-alto',
+        'serial_number': '015351000009999',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.25461.2.3.18',
+        'tags': [
+            'device_namespace:default',
+            'device_vendor:paloaltonetworks',
+            'snmp_device:' + device_ip,
+            'snmp_profile:palo-alto',
+        ],
+        'vendor': 'paloaltonetworks',
+        'version': '9.0.7',
+    }
     assert_device_metadata(aggregator, device)

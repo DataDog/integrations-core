@@ -34,7 +34,7 @@ metadata:
   device:
     fields:
       vendor:
-        value: "f5"
+        value: "paloaltonetworks"
       serial_number:
         symbol:
           OID: 1.3.6.1.4.1.25461.2.1.2.1.3.0
