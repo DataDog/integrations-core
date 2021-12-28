@@ -27,7 +27,7 @@ fi
 # If you wish to lower the amount of rows inserted, you must adjust the expected count in `utils.py/AppMarketQueries`.
 for i in {1..45};
 do
-  /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d datadog_test -i dummy_data.sql -b
+  /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d master -i dummy_data.sql -b
   if [ $? -nq 0 ]
   then
       echo "ERROR: dummy_data.sql failed."
