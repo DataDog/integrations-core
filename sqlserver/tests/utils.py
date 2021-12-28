@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import string
-import time
 import threading
+import time
 from copy import copy
 from random import choice, randint, shuffle
 
@@ -126,8 +126,10 @@ class HcQueries:
         """Creates a slow running query by trying to match a pattern that may or may not exist."""
         columns = copy(self.columns)
         shuffle(columns)
-        return 'SELECT TOP 10 {col} FROM datadog_test.dbo.high_cardinality WHERE app_btc_addr LIKE \'%{pattern}%\''.format(
-            col={columns[0]}, pattern=self._create_rand_string()
+        return (
+            'SELECT TOP 10 {col} FROM datadog_test.dbo.high_cardinality WHERE app_btc_addr LIKE \'%{pattern}%\''.format(
+                col={columns[0]}, pattern=self._create_rand_string()
+            )
         )
 
     def _get_conn_for_user(self, user):
@@ -135,7 +137,7 @@ class HcQueries:
             self._instance_docker['driver'], self._instance_docker['host'], user, "Password12!"
         )
         # The initial startup is the slowest, this database is being loaded with high cardinality data.
-        conn = pyodbc.connect(conn_str, timeout=60*8, autocommit=False)
+        conn = pyodbc.connect(conn_str, timeout=60 * 8, autocommit=False)
         conn.timeout = DEFAULT_TIMEOUT
         return conn
 
