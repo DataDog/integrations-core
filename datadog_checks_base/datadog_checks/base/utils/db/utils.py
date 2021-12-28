@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import datetime
 import decimal
+import functools
 import logging
 import os
 import socket
@@ -38,6 +39,27 @@ SUBMISSION_METHODS = {
     # and a value and therefore must be defined as a custom transformer.
     'service_check': '__service_check',
 }
+
+
+def _traced_dbm_async_job_method(f):
+    # traces DBMAsyncJob.run_job only if tracing is enabled
+    if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true':
+        try:
+            from ddtrace import tracer
+
+            @functools.wraps(f)
+            def wrapper(self, *args, **kwargs):
+                with tracer.trace(
+                    "run",
+                    service="{}-integration".format(self._check.name),
+                    resource="{}.run_job".format(type(self).__name__),
+                ):
+                    self.run_job()
+
+            return wrapper
+        except Exception:
+            return f
+    return f
 
 
 def create_submission_transformer(submit_method):
@@ -280,8 +302,12 @@ class DBMAsyncJob(object):
             self._rate_limiter = ConstantRateLimiter(rate_limit)
 
     def _run_job_rate_limited(self):
-        self.run_job()
+        self._run_job_traced()
         self._rate_limiter.sleep()
+
+    @_traced_dbm_async_job_method
+    def _run_job_traced(self):
+        return self.run_job()
 
     def run_job(self):
         raise NotImplementedError()
