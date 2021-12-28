@@ -163,7 +163,7 @@ def obfuscate_sql_with_metadata(query, options=None):
     try:
         statement = datadog_agent.obfuscate_sql(query, options)
         statement_with_metadata = json.loads(statement)
-    except json.JSONDecodeError:
+    except ValueError:  # Backwards compatible exception between py38 and py27 for json.loads()
         # Assume we're running against an older agent and return the obfuscated query without metadata.
         return {'query': statement, 'metadata': {}}
     except Exception as e:
