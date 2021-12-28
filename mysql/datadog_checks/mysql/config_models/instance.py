@@ -105,6 +105,7 @@ class InstanceConfig(BaseModel):
     queries: Optional[Sequence[Mapping[str, Any]]]
     query_metrics: Optional[QueryMetrics]
     query_samples: Optional[QuerySamples]
+    reported_hostname: Optional[str]
     service: Optional[str]
     sock: Optional[str]
     ssl: Optional[Ssl]
