@@ -19,15 +19,6 @@ except ImportError:
     pyodbc = None
 
 
-@pytest.fixture
-def dbm_instance(instance_docker):
-    instance_docker['dbm'] = True
-    # Run everything at its default value to resemble actual use
-    instance_docker['query_metrics'] = {'enabled': True, 'run_sync': False, 'collection_interval': 10}
-    instance_docker['query_activity'] = {'enabled': True, 'run_sync': False, 'collection_interval': 10}
-    return copy(instance_docker)
-
-
 @not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
@@ -400,15 +391,17 @@ def test_resolved_hostname(instance_docker, dbm_enabled, instance_host, resolved
 
 
 @hc_only
-def test_hc_completion(dd_run_check, dbm_instance, instance_docker):
-    instance_docker['query_metrics']['run_sync'] = True
-    instance_docker['query_activity']['run_sync'] = True
-    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+@pytest.mark.integration
+def test_check_against_high_cardinality(dd_run_check, instance_docker):
+    instance_docker['dbm'] = True
+    instance_docker['query_metrics'] = {'enabled': True, 'run_sync': True}
+    instance_docker['query_activity'] = {'enabled': True, 'run_sync': True}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
     queries = HcQueries(instance_docker)
     try:
         queries.run_hc_queries('bob', config={'hc_threads': 20, 'slow_threads': 5})
-        # Allow the database to build up some queries before proceeding
-        time.sleep(60)
+        # Allow the database to build up queries in the background before proceeding
+        time.sleep(20)
 
         start = time.time()
         dd_run_check(check)

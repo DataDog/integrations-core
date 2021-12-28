@@ -120,3 +120,36 @@ def _run_test_query_timeout(aggregator, dd_run_check, instance):
 
                     assert type(e) == adodbapi.apibase.DatabaseError
                     assert 'timeout' in "".join(e.args).lower(), "must be a timeout"
+
+
+@pytest.mark.integration
+def test_connection_failure(aggregator, dd_run_check, instance_docker):
+    instance_docker['dbm'] = True
+    instance_docker['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    instance_docker['query_activity'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+
+    dd_run_check(check)
+    aggregator.assert_service_check(
+        'sqlserver.can_connect',
+        status=check.OK,
+    )
+    aggregator.reset()
+
+    try:
+        # Break the connection
+        check.connection = Connection({}, {'host': '', 'username': '', 'password': ''}, check.handle_service_check)
+        dd_run_check(check)
+    except Exception:
+        aggregator.assert_service_check(
+            'sqlserver.can_connect',
+            status=check.CRITICAL,
+        )
+        aggregator.reset()
+
+    check.initialize_connection()
+    dd_run_check(check)
+    aggregator.assert_service_check(
+        'sqlserver.can_connect',
+        status=check.OK,
+    )

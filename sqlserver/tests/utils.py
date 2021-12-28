@@ -26,11 +26,11 @@ hc_only = pytest.mark.skipif(
 )
 
 
-class HcQueries:
+class HighCardinalityQueries:
     """
-    HcQueries (high-cardinality queries) is a test utility to run queries against various loads
-    (e.g. Large number of tables, schemas, query cardinality, etc). The test env (`hc`) used to run these queries
-    can take sometime to setup.
+    HighCardinalityQueries is a test utility to run queries against a high-cardinality database
+    (e.g. Large number of tables, schemas, query cardinality, etc). You must be in the `hc` env to use this and the
+    setup time can be long.
     """
 
     def __init__(self, instance_docker, setup_timeout=60 * 6):
