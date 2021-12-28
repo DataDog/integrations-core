@@ -27,6 +27,9 @@ device:
 # All Palo Alto Networks sysObjectID start with `1.3.6.1.4.1.25461.2.3` (panMibs)
 sysobjectid: 1.3.6.1.4.1.25461.2.3.*
 
+# Note related to use of index `1` of entPhysicalTable columns:
+# Based on snmpwalks of Palo Alto Networks devices, the main/chassis hardware have the index `1`
+# Librennms is also using index `1`: https://github.com/librenms/librenms/blob/1ac60e3b1d90616119f3c4adc28213e3c35c2477/includes/definitions/discovery/arista_eos.yaml#L4
 metadata:
   device:
     fields:

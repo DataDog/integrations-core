@@ -403,7 +403,5 @@ def test_e2e_core_metadata_palo_alto(dd_agent_check):
 
     device_ip = instance['ip_address']
 
-    device = {
-        'id': 'default:' + device_ip
-    }
+    device = {'id': 'default:' + device_ip}
     assert_device_metadata(aggregator, device)
