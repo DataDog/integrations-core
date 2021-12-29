@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+import logging
 
 from datadog_checks.base.utils.serialization import json
 
@@ -76,11 +77,16 @@ class DatadogAgentStub(object):
     def read_persistent_cache(self, key):
         return self._cache.get(key, '')
 
-    # TODO: Remove `breaking_change` once the following integrations have been updated: SQLServer, Postgres, and MySQL
-    def obfuscate_sql(self, query, options=None, breaking_change=False):
-        if breaking_change:
-            # This is only whitespace cleanup, NOT obfuscation. Full obfuscation implementation is in go code.
-            return json.dumps({'query': re.sub(r'\s+', ' ', query or '').strip(), 'metadata': {}})
+    def obfuscate_sql(self, query, options=None):
+        # Full obfuscation implementation is in go code.
+        if options:
+            try:
+                # Options provided is a JSON string because the Go stub requires it whereas
+                # the python stub does not for things such as testing.
+                if json.loads(options).get('return_json_metadata', False):
+                    return json.dumps({'query': re.sub(r'\s+', ' ', query or '').strip(), 'metadata': {}})
+            except Exception as e:
+                raise e
         return re.sub(r'\s+', ' ', query or '').strip()
 
     def obfuscate_sql_exec_plan(self, plan, normalize=False):
