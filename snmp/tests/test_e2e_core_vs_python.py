@@ -102,6 +102,10 @@ def test_e2e_v3_md5_aes256_blumenthal(dd_agent_check):
 
 
 def test_e2e_v3_md5_aes256_reeder(dd_agent_check):
+    # About Reeder implementation:
+    # "Many vendors, including Cisco, use the 3DES key extension algorithm to extend the privacy keys that are
+    # too short when using AES,AES192 and AES256."
+    # source: https://github.com/gosnmp/gosnmp/blob/master/v3_usm.go#L458-L461
     config = common.generate_container_instance_config([])
     config['instances'][0].update(
         {
