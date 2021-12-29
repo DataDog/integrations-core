@@ -84,6 +84,7 @@ def assert_apc_ups_metrics(dd_agent_check, config):
     tags = profile_tags + ["snmp_device:{}".format(instance['ip_address'])]
 
     metrics = [
+        'upsAdvBatteryNumOfBattPacks',
         'upsAdvBatteryNumOfBadBattPacks',
         'upsAdvBatteryReplaceIndicator',
         'upsAdvBatteryRunTimeRemaining',
@@ -96,6 +97,16 @@ def assert_apc_ups_metrics(dd_agent_check, config):
         'upsAdvOutputLoad',
         'upsBasicBatteryTimeOnBattery',
         'upsAdvTestDiagnosticsResults',
+        'upsHighPrecExtdBatteryTemperature',
+        'upsAdvInputLineVoltage',
+        'upsAdvInputFrequency',
+        'upsAdvOutputVoltage',
+        'upsAdvOutputFrequency',
+        'upsAdvOutputCurrent',
+        'upsAdvOutputActivePower',
+        'upsAdvOutputApparentPower',
+        'upsAdvOutputEnergyUsage',
+        'uioSensorStatusTemperatureDegC',
     ]
 
     common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
