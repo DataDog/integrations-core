@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-import time
 from copy import copy, deepcopy
 
 import pytest
@@ -11,13 +10,12 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import SQLConnectionError
 
 from .common import CHECK_NAME, CUSTOM_METRICS, CUSTOM_QUERY_A, CUSTOM_QUERY_B, EXPECTED_DEFAULT_METRICS, assert_metrics
-from .utils import HighCardinalityQueries, hc_only, not_windows_ci, windows_ci
+from .utils import not_windows_ci, windows_ci
 
 try:
     import pyodbc
 except ImportError:
     pyodbc = None
-
 
 @not_windows_ci
 @pytest.mark.integration
@@ -388,25 +386,3 @@ def test_resolved_hostname(instance_docker, dbm_enabled, instance_host, resolved
         assert sqlserver_check.resolved_hostname == resolved_hostname
     else:
         assert sqlserver_check.resolved_hostname == "stubbed.hostname"
-
-
-@hc_only
-@pytest.mark.integration
-def test_check_against_high_cardinality(dd_run_check, instance_docker):
-    instance_docker['dbm'] = True
-    instance_docker['query_metrics'] = {'enabled': True, 'run_sync': True}
-    instance_docker['query_activity'] = {'enabled': True, 'run_sync': True}
-    check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    queries = HighCardinalityQueries(instance_docker)
-    try:
-        queries.run('bob', config={'hc_threads': 20, 'slow_threads': 5, 'complex_threads': 10})
-        # Allow the database to build up queries in the background before proceeding
-        time.sleep(60)
-
-        start = time.time()
-        dd_run_check(check)
-        elapsed = time.time() - start
-        assert elapsed <= 15
-    finally:
-        queries.stop()
-        check.cancel()

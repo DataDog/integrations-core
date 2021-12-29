@@ -73,7 +73,7 @@ class HighCardinalityQueries:
         # Ensure the test table is ready before proceeding.
         self._wait_for_table()
 
-    def run(self, user, config=None):
+    def start_background(self, user, config=None):
         """
         Run a set of queries against the table `datadog_test.dbo.high_cardinality` in the background
 
@@ -100,21 +100,21 @@ class HighCardinalityQueries:
             while True:
                 if not self._is_running:
                     break
-                conn.execute(self.create_high_cardinality_query())
+                self._run_query_ignore_exception(conn, self.create_high_cardinality_query())
 
         def run_slow_query_forever():
             conn = self.get_conn_for_user(user)
             while True:
                 if not self._is_running:
                     break
-                conn.execute(self.create_slow_query())
+                self._run_query_ignore_exception(conn, self.create_slow_query())
 
         def run_complex_query_forever():
             conn = self.get_conn_for_user(user)
             while True:
                 if not self._is_running:
                     break
-                conn.execute(self.create_complex_query())
+                self._run_query_ignore_exception(conn, self.create_complex_query())
 
         self._threads = [threading.Thread(target=run_hc_query_forever) for _ in range(config['hc_threads'])]
         self._threads.extend([threading.Thread(target=run_slow_query_forever) for _ in range(config['slow_threads'])])
@@ -201,6 +201,17 @@ class HighCardinalityQueries:
                 elif time.time() > timeout:
                     raise Exception("Waiting for the test tables timed out.")
                 time.sleep(5)
+
+    @staticmethod
+    def _run_query_ignore_exception(conn, query):
+        """
+        This is useful if you want to ignore query execution exceptions. For instance, if you execute a slow query
+        in the background and a test orders a cleanup, the slow executing query may throw an unwanted exception.
+        """
+        try:
+            conn.execute(query)
+        except Exception:
+            pass
 
     @staticmethod
     def _create_rand_string(length=5):
