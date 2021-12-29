@@ -2346,6 +2346,7 @@ def test_apc_ups(aggregator):
         'upsAdvOutputActivePower',
         'upsAdvOutputApparentPower',
         'upsAdvOutputEnergyUsage',
+        'uioSensorStatusTemperatureDegC',
     ]
 
     common.assert_common_metrics(aggregator, tags)
