@@ -2324,6 +2324,7 @@ def test_apc_ups(aggregator):
 
     tags = common.CHECK_TAGS + profile_tags
     metrics = [
+        'upsAdvBatteryNumOfBattPacks',
         'upsAdvBatteryNumOfBadBattPacks',
         'upsAdvBatteryReplaceIndicator',
         'upsAdvBatteryRunTimeRemaining',
@@ -2336,6 +2337,15 @@ def test_apc_ups(aggregator):
         'upsAdvOutputLoad',
         'upsBasicBatteryTimeOnBattery',
         'upsAdvTestDiagnosticsResults',
+        'upsHighPrecExtdBatteryTemperature',
+        'upsAdvInputLineVoltage',
+        'upsAdvInputFrequency',
+        'upsAdvOutputVoltage',
+        'upsAdvOutputFrequency',
+        'upsAdvOutputCurrent',
+        'upsAdvOutputActivePower',
+        'upsAdvOutputApparentPower',
+        'upsAdvOutputEnergyUsage',
     ]
 
     common.assert_common_metrics(aggregator, tags)
