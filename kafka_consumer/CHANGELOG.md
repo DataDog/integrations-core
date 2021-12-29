@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 2.12.2 / 2021-12-29
+
+* [Fixed] Call correct method when sending events. See [#10960](https://github.com/DataDog/integrations-core/pull/10960).
+
 ## 2.12.1 / 2021-10-04 / Agent 7.32.0
 
 * [Fixed] Bump minimum base package. See [#10325](https://github.com/DataDog/integrations-core/pull/10325).
