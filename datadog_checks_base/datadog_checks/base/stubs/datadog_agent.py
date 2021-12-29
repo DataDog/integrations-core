@@ -79,13 +79,10 @@ class DatadogAgentStub(object):
     def obfuscate_sql(self, query, options=None):
         # Full obfuscation implementation is in go code.
         if options:
-            try:
-                # Options provided is a JSON string because the Go stub requires it, whereas
-                # the python stub does not for things such as testing.
-                if json.loads(options).get('return_json_metadata', False):
-                    return json.dumps({'query': re.sub(r'\s+', ' ', query or '').strip(), 'metadata': {}})
-            except Exception as e:
-                raise e
+            # Options provided is a JSON string because the Go stub requires it, whereas
+            # the python stub does not for things such as testing.
+            if json.loads(options).get('return_json_metadata', False):
+                return json.dumps({'query': re.sub(r'\s+', ' ', query or '').strip(), 'metadata': {}})
         return re.sub(r'\s+', ' ', query or '').strip()
 
     def obfuscate_sql_exec_plan(self, plan, normalize=False):
