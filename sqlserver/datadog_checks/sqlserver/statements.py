@@ -59,6 +59,22 @@ select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
     group by text, query_hash, query_plan_hash, S.dbid, D.name, U.name
 """
 
+# This query is an optimized version of the statement metrics query
+# which removes the additional aggregate dimensions user and database.
+STATEMENT_METRICS_QUERY_NO_AGGREGATES = """\
+with qstats as (
+    select TOP {limit} text, query_hash, query_plan_hash, last_execution_time, plan_handle,
+           {query_metrics_columns}
+    from sys.dm_exec_query_stats
+        cross apply sys.dm_exec_sql_text(sql_handle)
+    where last_execution_time > dateadd(second, -?, getdate())
+)
+select text, query_hash, query_plan_hash, max(plan_handle) as plan_handle,
+    {query_metrics_column_sums}
+    from qstats S
+    group by text, query_hash, query_plan_hash
+"""
+
 PLAN_LOOKUP_QUERY = """\
 select cast(query_plan as nvarchar(max)) as query_plan
 from sys.dm_exec_query_plan(CONVERT(varbinary(max), ?, 1))
@@ -131,6 +147,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             job_name="query-metrics",
             shutdown_callback=self._close_db_conn,
         )
+        self.disable_query_subtags = bool(check.statement_metrics_config.get('disable_query_subtags', False))
         self.dm_exec_query_stats_row_limit = int(
             check.statement_metrics_config.get('dm_exec_query_stats_row_limit', 10000)
         )
@@ -178,7 +195,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         if self._statement_metrics_query:
             return self._statement_metrics_query
         available_columns = self._get_available_query_metrics_columns(cursor, SQL_SERVER_QUERY_METRICS_COLUMNS)
-        self._statement_metrics_query = STATEMENT_METRICS_QUERY.format(
+
+        sql = STATEMENT_METRICS_QUERY_NO_AGGREGATES if self.disable_query_subtags else STATEMENT_METRICS_QUERY
+        self._statement_metrics_query = sql.format(
             query_metrics_columns=', '.join(available_columns),
             query_metrics_column_sums=', '.join(['sum({}) as {}'.format(c, c) for c in available_columns]),
             collection_interval=int(math.ceil(self.collection_interval) * 2),
@@ -306,9 +325,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 "ddtags": ",".join(tags),
                 "dbm_type": "fqt",
                 "db": {
-                    "instance": row['database_name'],
+                    "instance": row.get('database_name', None),
                     "query_signature": row['query_signature'],
-                    "user": row.get("user_name", None),
+                    "user": row.get('user_name', None),
                     "statement": row['text'],
                 },
                 'sqlserver': {
