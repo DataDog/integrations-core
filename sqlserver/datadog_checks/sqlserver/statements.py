@@ -86,7 +86,7 @@ def _row_key(row):
     :param row: a normalized row from STATEMENT_METRICS_QUERY
     :return: a tuple uniquely identifying this row
     """
-    return row['database_name'], row['user_name'], row['query_signature'], row['query_hash'], row['query_plan_hash']
+    return row.get('database_name'), row.get('user_name'), row['query_signature'], row['query_hash'], row['query_plan_hash']
 
 
 XML_PLAN_OBFUSCATION_ATTRS = {
@@ -316,7 +316,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             if query_cache_key in self._full_statement_text_cache:
                 continue
             self._full_statement_text_cache[query_cache_key] = True
-            tags = self.check.tags + ["db:{}".format(row['database_name'])]
+            tags = list(self.check.tags)
+            if 'database_name' in row:
+                tags += ["db:{}".format(row['database_name'])]
             yield {
                 "timestamp": time.time() * 1000,
                 "host": self.check.resolved_hostname,
@@ -382,8 +384,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         1,
                         **self.check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))])
                     )
-
-                tags = self.check.tags + ["db:{}".format(row['database_name'])]
+                tags = list(self.check.tags)
+                if 'database_name' in row:
+                    tags += ["db:{}".format(row['database_name'])]
                 yield {
                     "host": self._db_hostname,
                     "ddagentversion": datadog_agent.get_version(),
