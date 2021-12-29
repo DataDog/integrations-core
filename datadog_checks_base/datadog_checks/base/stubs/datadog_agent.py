@@ -80,7 +80,7 @@ class DatadogAgentStub(object):
         # Full obfuscation implementation is in go code.
         if options:
             try:
-                # Options provided is a JSON string because the Go stub requires it whereas
+                # Options provided is a JSON string because the Go stub requires it, whereas
                 # the python stub does not for things such as testing.
                 if json.loads(options).get('return_json_metadata', False):
                     return json.dumps({'query': re.sub(r'\s+', ' ', query or '').strip(), 'metadata': {}})
