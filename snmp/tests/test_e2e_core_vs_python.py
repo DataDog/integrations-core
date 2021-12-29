@@ -84,15 +84,15 @@ def test_e2e_v3_md5_aes(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config)
 
 
-def test_e2e_v3_md5_aes256_reeder(dd_agent_check):
+def test_e2e_v3_md5_aes256_blumenthal(dd_agent_check):
     config = common.generate_container_instance_config([])
     config['instances'][0].update(
         {
-            'user': 'datadogMD5AES',
+            'user': 'datadogMD5AES256BLMT',
             'authKey': 'doggiepass',
             'authProtocol': 'MD5',
             'privKey': 'doggiePRIVkey',
-            'privProtocol': 'AES256',  # `AES256` correspond to Reeder implementation for pysnmp and gosnmp
+            'privProtocol': 'AES256',  # `AES256` correspond to Blumenthal implementation for pysnmp and gosnmp
             'snmp_version': 3,
             'context_name': 'f5-big-ip',
             'community_string': '',
@@ -101,15 +101,15 @@ def test_e2e_v3_md5_aes256_reeder(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config)
 
 
-def test_e2e_v3_md5_aes256_blumenthal(dd_agent_check):
+def test_e2e_v3_md5_aes256_reeder(dd_agent_check):
     config = common.generate_container_instance_config([])
     config['instances'][0].update(
         {
-            'user': 'datadogMD5AESBLMT',
+            'user': 'datadogMD5AES256',
             'authKey': 'doggiepass',
             'authProtocol': 'MD5',
             'privKey': 'doggiePRIVkey',
-            'privProtocol': 'AES256C',  # `AES256C` correspond to Blumenthal implementation for pysnmp and gosnmp
+            'privProtocol': 'AES256C',  # `AES256C` correspond to Reeder implementation for pysnmp and gosnmp
             'snmp_version': 3,
             'context_name': 'f5-big-ip',
             'community_string': '',
