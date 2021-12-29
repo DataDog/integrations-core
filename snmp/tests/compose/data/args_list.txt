@@ -8,3 +8,7 @@
 --v3-user=datadogSHAAES192BLMT --v3-auth-key=doggiepass --v3-priv-key=doggiePRIVkey --v3-auth-proto=SHA --v3-priv-proto=AES192BLMT
 --v3-user=datadogSHAAES256 --v3-auth-key=doggiepass --v3-priv-key=doggiePRIVkey --v3-auth-proto=SHA --v3-priv-proto=AES256
 --v3-user=datadogSHAAES256BLMT --v3-auth-key=doggiepass --v3-priv-key=doggiePRIVkey --v3-auth-proto=SHA --v3-priv-proto=AES256BLMT
+--v3-user=datadogMD5AES192 --v3-auth-key=doggiepass --v3-priv-key=doggiePRIVkey --v3-auth-proto=MD5 --v3-priv-proto=AES192
+--v3-user=datadogMD5AES192BLMT --v3-auth-key=doggiepass --v3-priv-key=doggiePRIVkey --v3-auth-proto=MD5 --v3-priv-proto=AES192BLMT
+--v3-user=datadogMD5AES256 --v3-auth-key=doggiepass --v3-priv-key=doggiePRIVkey --v3-auth-proto=MD5 --v3-priv-proto=AES256
+--v3-user=datadogMD5AES256BLMT --v3-auth-key=doggiepass --v3-priv-key=doggiePRIVkey --v3-auth-proto=MD5 --v3-priv-proto=AES256BLMT
