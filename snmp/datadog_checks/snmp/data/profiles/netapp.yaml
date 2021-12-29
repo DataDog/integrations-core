@@ -9,6 +9,41 @@ device:
 # All netapp products have netappProducts (1.3.6.1.4.1.789.2) OID as parent
 sysobjectid: 1.3.6.1.4.1.789.2.*
 
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "netapp"
+      serial_number:
+#        symbol:
+#          MIB: F5-BIGIP-SYSTEM-MIB
+#          OID: 1.3.6.1.4.1.3375.2.1.3.3.3.0
+#          name: sysGeneralChassisSerialNum # The system serial number. 26ff4a4d-190e-12ac-d4257ed36ba6
+      version:
+#        symbol:
+#          OID: 1.3.6.1.4.1.3375.2.1.4.2.0
+#          name: sysProductVersion # Displays BIG-IP software version information. e.g. 15.0.1
+      product_name:
+#        symbol:
+#          OID: 1.3.6.1.4.1.3375.2.1.4.1.0
+#          name: sysProductName # The product name. e.g. BIG-IP
+      model:
+#        symbol:
+#          OID: 1.3.6.1.4.1.3375.2.1.3.3.1.0
+#          name: sysGeneralHwName # The name of the system hardware model. e.g. Z100
+      os_name:
+#        symbol:
+#          OID: 1.3.6.1.4.1.3375.2.1.6.1.0
+#          name: sysSystemName # The operating system name. e.g. Linux
+      os_version:
+#        symbol:
+#          OID: 1.3.6.1.4.1.3375.2.1.6.3.0
+#          name: sysSystemRelease # The current system release level. e.g. 3.10.0-862.14.4.el7.ve.x86_64
+      os_hostname:
+#        symbol:
+#          OID: 1.3.6.1.4.1.3375.2.1.6.2.0
+#          name: sysSystemNodeName # The host name of the system on the network.
+
 metrics:
   - MIB: NETAPP-MIB
     OID: 1.3.6.1.4.1.789.1.2.3.8.0
