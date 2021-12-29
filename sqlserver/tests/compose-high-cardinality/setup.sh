@@ -21,16 +21,3 @@ else
     echo "ERROR: setup.sql failed."
     exit 1
 fi
-
-# Each iteration inserts roughly 25k rows.
-# Adjusting the range can break the tests. If you wish to lower the amount of rows inserted, you
-# must adjust the expected count in `utils.py/HcQueries`.
-for i in {1..5};
-do
-  /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d master -i dummy_data.sql -b
-  if [ $? -nq 0 ]
-  then
-      echo "ERROR: dummy_data.sql failed."
-      exit 1
-  fi
-done

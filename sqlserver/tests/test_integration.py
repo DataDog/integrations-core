@@ -399,9 +399,9 @@ def test_check_against_high_cardinality(dd_run_check, instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     queries = HighCardinalityQueries(instance_docker)
     try:
-        queries.run_queries('bob', config={'hc_threads': 20, 'slow_threads': 5, 'complex_threads': 10})
+        queries.run('bob', config={'hc_threads': 20, 'slow_threads': 5, 'complex_threads': 10})
         # Allow the database to build up queries in the background before proceeding
-        time.sleep(20)
+        time.sleep(60)
 
         start = time.time()
         dd_run_check(check)
