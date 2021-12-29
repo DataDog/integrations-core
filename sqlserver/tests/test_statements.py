@@ -171,7 +171,17 @@ test_statement_metrics_and_plans_parameterized = (
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(*test_statement_metrics_and_plans_parameterized)
 def test_statement_metrics_and_plans(
-    aggregator, dd_run_check, dbm_instance, bob_conn, database, plan_user, query, param_groups, disable_secondary_tags, match_pattern, caplog
+    aggregator,
+    dd_run_check,
+    dbm_instance,
+    bob_conn,
+    database,
+    plan_user,
+    query,
+    param_groups,
+    disable_secondary_tags,
+    match_pattern,
+    caplog,
 ):
     caplog.set_level(logging.INFO)
     if disable_secondary_tags:
@@ -244,7 +254,9 @@ def test_statement_metrics_and_plans(
         if disable_secondary_tags:
             assert set(event['ddtags'].split(',')) == expected_instance_tags, "wrong instance tags for plan event"
         else:
-            assert set(event['ddtags'].split(',')) == expected_instance_tags_with_db, "wrong instance tags for plan event"
+            assert (
+                set(event['ddtags'].split(',')) == expected_instance_tags_with_db
+            ), "wrong instance tags for plan event"
 
     plan_events = [s for s in dbm_samples if s['dbm_type'] == "plan"]
     assert plan_events, "should have collected some plans"
