@@ -56,15 +56,49 @@ def test_e2e_v3_explicit_version(dd_agent_check):
         {
             'user': 'datadogSHADES',
             'authKey': 'doggiepass',
-            'authProtocol': 'sha',
+            'authProtocol': 'SHA',
             'privKey': 'doggiePRIVkey',
-            'privProtocol': 'des',
+            'privProtocol': 'DES',
             'snmp_version': 3,
             'context_name': 'f5-big-ip',
             'community_string': '',
         }
     )
     assert_python_vs_core(dd_agent_check, config, expected_total_count=511 + 5)
+
+
+def test_e2e_v3_md5_aes256_reeder(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    config['instances'][0].update(
+        {
+            'user': 'datadogMD5AES',
+            'authKey': 'doggiepass',
+            'authProtocol': 'MD5',
+            'privKey': 'doggiePRIVkey',
+            'privProtocol': 'AES',
+            'snmp_version': 3,
+            'context_name': 'f5-big-ip',
+            'community_string': '',
+        }
+    )
+    assert_python_vs_core(dd_agent_check, config)
+
+
+def test_e2e_v3_md5_aes256_blumenthal(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    config['instances'][0].update(
+        {
+            'user': 'datadogMD5AESBLMT',
+            'authKey': 'doggiepass',
+            'authProtocol': 'MD5',
+            'privKey': 'doggiePRIVkey',
+            'privProtocol': 'AESC',
+            'snmp_version': 3,
+            'context_name': 'f5-big-ip',
+            'community_string': '',
+        }
+    )
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_regex_match(dd_agent_check):
