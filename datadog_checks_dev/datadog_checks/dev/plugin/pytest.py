@@ -181,6 +181,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
 
         result = run_command(check_command, capture=True)
 
+        print("check_command:", check_command)
         print("=== STDOUT START===")
         print(result.stdout)
         print("=== STDOUT END ===")
