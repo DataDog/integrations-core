@@ -181,6 +181,10 @@ def dd_agent_check(request, aggregator, datadog_agent):
 
         result = run_command(check_command, capture=True)
 
+        print("=== STDOUT START===")
+        print(result.stdout)
+        print("=== STDOUT END ===")
+
         matches = re.findall(AGENT_COLLECTOR_SEPARATOR + r'\n(.*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
 
         if not matches:
