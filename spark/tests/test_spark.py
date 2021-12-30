@@ -561,6 +561,11 @@ SPARK_STRUCTURED_STREAMING_METRIC_VALUES = {
     'spark.structured_streaming.used_bytes': 12,
 }
 
+SPARK_STRUCTURED_STREAMING_METRIC_NO_TAGS = {
+    'spark.structured_streaming.input_rate',
+    'spark.structured_streaming.latency',
+}
+
 
 @pytest.mark.unit
 def test_yarn(aggregator):
@@ -1028,8 +1033,11 @@ def test_enable_query_name_tag_for_structured_streaming(aggregator, instance, re
         c = SparkCheck('spark', {}, [instance])
         c.check(instance)
 
-        tags = ["query_name:my_named_query"] + base_tags
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
+            tags = base_tags
+            if metric not in SPARK_STRUCTURED_STREAMING_METRIC_NO_TAGS:
+                tags = base_tags + ["query_name:my_named_query"]
+
             aggregator.assert_metric(metric, value=value, tags=tags)
 
 

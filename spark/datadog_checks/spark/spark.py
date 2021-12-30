@@ -46,6 +46,10 @@ STRUCTURED_STREAMS_METRICS_REGEX = re.compile(
     r"^[\w-]+\.driver\.spark\.streaming\.(?P<query_name>[\w-]+)\.(?P<metric_name>[\w-]+)$"
 )
 
+# Tests if the query_name is a UUID to determine whether to add it as a tag
+# inspired by https://stackoverflow.com/questions/136505/searching-for-uuids-in-text-with-regex
+UUID_REGEX = re.compile(r"[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}")
+
 # Application type and states to collect
 YARN_APPLICATION_TYPES = 'SPARK'
 APPLICATION_STATES = 'RUNNING'
@@ -656,7 +660,14 @@ class SparkCheck(AgentCheck):
 
                     if self._enable_query_name_tag:
                         query_name = groups['query_name']
-                        tags.append('query_name:%s' % str(query_name))
+                        match = UUID_REGEX.match(query_name)
+                        if not match:
+                            tags.append('query_name:%s' % str(query_name))
+                        else:
+                            self.log.debug(
+                                'Cannot attach `query_name` tag. Add a query name to collect this tag for %s',
+                                query_name,
+                            )
 
                     self._set_metric(metric_name, submission_type, value, tags=tags)
             except HTTPError as e:
