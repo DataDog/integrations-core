@@ -52,10 +52,6 @@ jobs:
       run_py2_tests: ${{ parameters.run_py2_tests }}
       dd_url: ${{ parameters.dd_url }}
 
-  - template: './set-up-integrations.yml'
-    parameters:
-      check: ${{ parameters.check }}
-
   - ${{ if eq(parameters.validate, 'true') }}:
     - template: './run-validations.yml'
       parameters:
