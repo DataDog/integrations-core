@@ -404,6 +404,29 @@ def test_e2e_core_metadata_netapp(dd_agent_check):
     device_ip = instance['ip_address']
 
     device = {
-        'ip_address': device_ip,
+        'description': 'NetApp Release 9.3P7: Wed Jul 25 10:11:10 UTC 2018',
+        'id': 'default:192.168.0.2',
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:192.168.0.2',
+        ],
+        'ip_address': '192.168.0.2',
+        'location': 'France',
+        'name': 'example-datacenter.company',
+        'os_name': 'ONTAP',
+        'os_version': '9.3',
+        'profile': 'netapp',
+        'serial_number': '1-23-456789',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.789.2.5',
+        'tags': [
+            'device_namespace:default',
+            'device_vendor:netapp',
+            'snmp_device:192.168.0.2',
+            'snmp_host:example-datacenter.company',
+            'snmp_profile:netapp',
+        ],
+        'vendor': 'netapp',
+        'version': '9.3P7:',
     }
     assert_device_metadata(aggregator, device)
