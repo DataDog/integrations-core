@@ -8,7 +8,7 @@ from datadog_checks.base.stubs.common import HistogramBucketStub, MetricStub, Se
 Build similar message for better test assertion failure message.
 '''
 
-MAX_SIMILAR_TO_DISPLAY = 15
+MAX_SIMILAR_TO_DISPLAY = 500
 
 
 def build_similar_elements_msg(expected, submitted_elements):
