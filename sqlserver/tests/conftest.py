@@ -236,6 +236,11 @@ def dd_environment():
                 'Always On Availability Groups connection with primary database established for secondary database',
             )
         ]
+    if os.environ["COMPOSE_FOLDER"] == 'compose-hc':
+        # This env is a highly loaded database and is expected to take a while to setup.
+        conditions += [
+            WaitFor(sqlserver_can_connect, wait=10, attempts=50),
+        ]
     else:
         conditions += [
             CheckDockerLogs(

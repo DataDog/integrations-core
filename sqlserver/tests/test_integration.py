@@ -17,6 +17,7 @@ try:
 except ImportError:
     pyodbc = None
 
+
 @not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')

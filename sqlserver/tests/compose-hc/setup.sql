@@ -15,43 +15,38 @@ CREATE USER fred FOR LOGIN fred;
 GRANT CONNECT ANY DATABASE to fred;
 GO
 
--- Create test database for integration tests
--- Only bob and fred have read/write access to this database
+-- Create test database for integration tests.
+-- Only bob and fred have read/write access to this database.
 CREATE DATABASE datadog_test;
 GO
 USE datadog_test;
 GO
 
--- Create a large table for testing. Complex data will be inserted from `dummy_data.sql`
--- The amount of rows to insert can be controlled in `setup.sh`
-CREATE TABLE datadog_test.dbo.high_cardinality (
-	id INT NOT NULL IDENTITY,
-    guid TEXT,
-    app_name TEXT,
-    app_version TEXT,
-    app_image TEXT,
-    app_image_base64 TEXT,
-    app_ip_v6 TEXT,
-    app_btc_addr TEXT,
-    app_slogan TEXT,
-    app_priority INT,
-    app_permissions INT,
-    subscription_renewal TEXT,
-    primary_contact TEXT,
-    user_firstname TEXT,
-    user_lastname TEXT,
-    user_city TEXT,
-    user_state TEXT,
-    user_country TEXT,
-    loc_lat DECIMAL,
-    loc_long DECIMAL,
-    user_ssn TEXT,
-    user_card TEXT,
-    user_card_type TEXT,
-    created_at DATE,
-    updated_at DATE,
-	PRIMARY KEY (id)
-);
+-- This table is pronounced "things" except we've replaced "th" with the greek lower case "theta" to ensure we
+-- correctly support unicode throughout the integration.
+CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
+INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
+
+DECLARE @table_prefix VARCHAR(100) = 'CREATE TABLE datadog_test.dbo.'
+DECLARE @table_name VARCHAR(500);
+DECLARE @query VARCHAR(1000);
+DECLARE @columns VARCHAR(1000) = ' (id INT NOT NULL IDENTITY, guid TEXT, app_name TEXT, app_version TEXT, app_image TEXT, app_image_base64 TEXT, app_ip_v6 TEXT, app_btc_addr TEXT, app_slogan TEXT, app_priority INT, app_permissions INT, subscription_renewal TEXT, primary_contact TEXT, user_firstname TEXT, user_lastname TEXT, user_city TEXT, user_state TEXT, user_country TEXT, loc_lat DECIMAL, loc_long DECIMAL, user_ssn TEXT, user_card TEXT, user_card_type TEXT, created_at DATE, updated_at DATE, PRIMARY KEY (id));';
+
+-- Create a main table which contains high cardinality data for testing.
+DECLARE @main_table VARCHAR(1000) = @table_prefix + 'high_cardinality' + @columns;
+EXEC (@main_table);
+
+-- Load the database with many tables.
+DECLARE @table_count INT = 1;
+DECLARE @expected_table_count INT = 20000;
+WHILE @table_count <= @expected_table_count
+BEGIN
+    SET @table_name = 'high_cardinality_' + CAST(@table_count AS VARCHAR);
+    SET @query = @table_prefix + @table_name + @columns;
+    EXEC (@query);
+    SET @table_count = @table_count + 1;
+END;
+
 CREATE USER bob FOR LOGIN bob;
 CREATE USER fred FOR LOGIN fred;
 GO
@@ -61,7 +56,7 @@ EXEC sp_addrolemember 'db_datawriter', 'bob'
 EXEC sp_addrolemember 'db_datareader', 'fred'
 GO
 
--- Create test procedure for metrics loading feature
+-- Create test procedure for metrics loading feature.
 USE master;
 GO
 CREATE PROCEDURE pyStoredProc AS
@@ -83,9 +78,10 @@ END;
 GO
 GRANT EXECUTE on pyStoredProc to datadog;
 
--- Insert high cardinality data, each iteration is about 1k rows.
+-- Insert high cardinality data into the main table, each iteration is about 1k rows.
+-- Mock data was generated from https://www.mockaroo.com/
 DECLARE @insert_count INT = 1
-WHILE @insert_count <= 500
+WHILE @insert_count <= 100
 BEGIN;
 INSERT INTO datadog_test.dbo.high_cardinality (guid, app_name, app_version, app_image, app_image_base64, app_ip_v6, app_btc_addr, app_slogan, app_priority, app_permissions, subscription_renewal, primary_contact, user_firstname, user_lastname, user_city, user_state, user_country, loc_lat, loc_long, user_ssn, user_card, user_card_type, created_at, updated_at)
 SELECT * FROM (VALUES

@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import time
 import logging
+import time
 from copy import copy
 
 import pytest
@@ -22,7 +22,7 @@ def dbm_instance(instance_docker):
 
 
 @hc_only
-def test_metrics_against_hc(dd_run_check, dbm_instance):
+def test_complete_metrics_run(dd_run_check, dbm_instance):
     dbm_instance['query_activity']['enabled'] = False
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     queries = HighCardinalityQueries(dbm_instance)
@@ -50,34 +50,34 @@ def test_metrics_against_hc(dd_run_check, dbm_instance):
     assert total_elapsed_time <= 15
 
 
-# TODO: Skip this tests until the query is improved
 @hc_only
+@pytest.mark.skip(reason='skip until the metrics query is improved')
 @pytest.mark.parametrize('job', ['query_metrics', 'query_activity'])
 @pytest.mark.parametrize(
     'background_config',
     [
         {'hc_threads': 50, 'slow_threads': 0, 'complex_threads': 0},
         {'hc_threads': 0, 'slow_threads': 50, 'complex_threads': 0},
-        {'hc_threads': 0, 'slow_threads': 0, 'complex_threads': 50}
+        {'hc_threads': 0, 'slow_threads': 0, 'complex_threads': 50},
     ],
 )
-def test_individual_dbm_jobs_under_hc(dd_run_check, instance_docker, job, background_config):
+def test_individual_dbm_jobs(dd_run_check, instance_docker, job, background_config):
     instance_docker['dbm'] = True
     instance_docker[job] = {'enabled': True, 'run_sync': True}
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     queries = HighCardinalityQueries(instance_docker)
-    _run_check_against_high_cardinality(dd_run_check, check, queries, background_config)
+    _run_check_against_high_cardinality(dd_run_check, check, queries, config=background_config)
 
 
-# TODO: Skip this tests until the query is improved
 @hc_only
+@pytest.mark.skip(reason='skip until the metrics query is improved')
 @pytest.mark.parametrize("dbm_enabled,", [True, False])
 def test_check_against_hc(dd_run_check, dbm_instance, dbm_enabled):
     dbm_instance['dbm'] = dbm_enabled
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     queries = HighCardinalityQueries(dbm_instance)
     _run_check_against_high_cardinality(
-        dd_run_check, check, queries, {'hc_threads': 20, 'slow_threads': 5, 'complex_threads': 10}
+        dd_run_check, check, queries, config={'hc_threads': 20, 'slow_threads': 5, 'complex_threads': 10}
     )
 
 
@@ -94,8 +94,8 @@ def _run_check_against_high_cardinality(
             dd_run_check(check)
         except Exception:
             logging.error(
-                'Check threw an exception while running, this is likely due to a timeout from the metrics job'
-                + ' and could indicate a performance regression.'
+                'Check threw an exception while running, this is likely due to a timeout from the metrics job and '
+                'could indicate a performance regression.'
             )
         elapsed = time.time() - start
         assert elapsed <= expected_time, 'expected elapsed time for a single check run failed'

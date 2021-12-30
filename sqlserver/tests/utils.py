@@ -21,7 +21,7 @@ always_on = pytest.mark.skipif(
     os.environ["COMPOSE_FOLDER"] == 'compose', reason='Test can only be run on AlwaysOn SQLServer instances'
 )
 hc_only = pytest.mark.skipif(
-    os.environ["COMPOSE_FOLDER"] != 'compose-high-cardinality',
+    os.environ["COMPOSE_FOLDER"] != 'compose-hc',
     reason='Test can only be run in the high cardinality (hc) env.',
 )
 
@@ -29,14 +29,14 @@ hc_only = pytest.mark.skipif(
 class HighCardinalityQueries:
     """
     HighCardinalityQueries is a test utility to run queries against a high-cardinality database
-    (e.g. Large number of tables, schemas, query cardinality, etc). You must use the `hc` env to utilize this and the
-    setup time can be long.
+    (e.g. Large number of tables, schemas, query cardinality, etc). You must use the `hc` env to utilize this.
     """
 
     TIMEOUT = 60 * 8
 
     def __init__(self, instance_docker, setup_timeout=TIMEOUT):
-        self.EXPECTED_ROW_COUNT = 500_000
+        self.EXPECTED_TABLE_COUNT = 20_000
+        self.EXPECTED_ROW_COUNT = 100_000
         self.columns = [
             'id',
             'guid',
@@ -70,8 +70,8 @@ class HighCardinalityQueries:
         self._is_running = False
         self._threads = []
 
-        # Ensure the test table is ready before proceeding.
-        self._wait_for_table()
+        self._wait_for_tables()
+        self._wait_for_data()
 
     def start_background(self, user, config=None):
         """
@@ -190,7 +190,19 @@ class HighCardinalityQueries:
         conn.timeout = DEFAULT_TIMEOUT
         return conn
 
-    def _wait_for_table(self):
+    def _wait_for_tables(self):
+        timeout = time.time() + self._setup_timeout
+        while True:
+            with self.get_conn_for_user('bob').cursor() as cursor:
+                cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.tables')
+                count = cursor.fetchone()[0]
+                if count >= self.EXPECTED_TABLE_COUNT:
+                    break
+                elif time.time() > timeout:
+                    raise Exception('Waiting for tables timed out.')
+                time.sleep(5)
+
+    def _wait_for_data(self):
         timeout = time.time() + self._setup_timeout
         while True:
             with self.get_conn_for_user('bob').cursor() as cursor:
@@ -199,7 +211,7 @@ class HighCardinalityQueries:
                 if count >= self.EXPECTED_ROW_COUNT:
                     break
                 elif time.time() > timeout:
-                    raise Exception("Waiting for the test tables timed out.")
+                    raise Exception('Waiting for data timed out.')
                 time.sleep(5)
 
     @staticmethod
