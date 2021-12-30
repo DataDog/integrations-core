@@ -29,7 +29,7 @@ INSTANCES = [
         'host': 'localhost',
         'port': '31004',
         'max_returned_metrics': DEFAULT_MAX_RETURNED_METRICS,
-    },  # confluentinc/cp-ksqldb-server
+    },  # confluentinc/cp-ksql-server
     {
         'host': 'localhost',
         'port': '31006',

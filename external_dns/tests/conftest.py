@@ -2,14 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from copy import deepcopy
 
 import mock
 import pytest
 
 from .common import FIXTURE_DIR
-
-INSTANCE = {'prometheus_url': 'http://localhost:7979/metrics', 'tags': ['custom:tag']}
 
 
 @pytest.fixture
@@ -27,11 +24,6 @@ def mock_external_dns():
         yield
 
 
-@pytest.fixture(scope='session')
-def dd_environment():
-    yield deepcopy(INSTANCE)
-
-
 @pytest.fixture
 def instance():
-    return deepcopy(INSTANCE)
+    return {'prometheus_url': 'http://localhost:7979/metrics', 'tags': ['custom:tag']}

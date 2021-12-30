@@ -8,7 +8,6 @@
             "critical"
         ],
         "groups": [
-            "address",
             "host",
             "instance",
             "port",

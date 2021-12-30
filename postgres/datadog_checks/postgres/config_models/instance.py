@@ -93,7 +93,6 @@ class InstanceConfig(BaseModel):
     query_samples: Optional[QuerySamples]
     query_timeout: Optional[int]
     relations: Optional[Sequence[Union[str, Relation]]]
-    reported_hostname: Optional[str]
     service: Optional[str]
     ssl: Optional[str]
     ssl_cert: Optional[str]

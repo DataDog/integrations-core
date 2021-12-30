@@ -16,7 +16,7 @@
   ],
   "public_title": "Hudi",
   "type": "check",
-  "is_public": true,
+  "is_public": false,
   "integration_id": "hudi",
   "categories": [
     "log collection",
@@ -32,9 +32,7 @@
     "logs": {
       "source": "hudi"
     },
-    "monitors": {
-      "commit_duration": "assets/monitors/commit_duration.json"
-    },
+    "monitors": {},
     "saved_views": {
       "hudi_error_logs": "assets/saved_views/error_logs.json",
       "hudi_overview": "assets/saved_views/hudi_overview.json",

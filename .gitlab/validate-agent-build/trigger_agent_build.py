@@ -4,24 +4,15 @@ import argparse
 
 
 DATADOG_AGENT_PIPELINE_URL = os.environ['DATADOG_AGENT_PIPELINE_URL'].rstrip('/')
-RELEASE_BRANCH = os.environ['RELEASE_BRANCH']
 BASE_URL = os.environ['CI_API_V4_URL']
 CI_TOKEN = os.environ['CI_JOB_TOKEN']
 
 
 def trigger_pipeline():
-    trigger_ref = RELEASE_BRANCH
-
-    # Search for the release branch in the datadog-agent repository
-    r = requests.get(f"https://api.github.com/repos/DataDog/datadog-agent/branches/{RELEASE_BRANCH}")
-
-    if r.status_code != 200:
-        print(f"Tag '{RELEASE_BRANCH}' is not a release tag, falling back to main")
-        trigger_ref = "main"
     # TODO: Opt out of kitchen tests when the appropriate flag is implemented.
     data = {
         "token": CI_TOKEN,
-        "ref": trigger_ref,
+        "ref": "main",
         "variables": {
             "RELEASE_VERSION_6": "nightly",
             "RELEASE_VERSION_7": "nightly-a7",
@@ -31,7 +22,7 @@ def trigger_pipeline():
         }
     }
 
-    print(f"Creating child pipeline with params: {data.get('variables')} off branch: {trigger_ref}")
+    print("Creating child pipeline with params: %s", data['variables'])
     res = requests.post(f"{DATADOG_AGENT_PIPELINE_URL}/trigger/pipeline", json=data)
     res.raise_for_status()
     child_pipeline = res.json()

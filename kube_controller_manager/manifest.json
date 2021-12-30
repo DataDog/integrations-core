@@ -29,9 +29,6 @@
     },
     "service_checks": "assets/service_checks.json",
     "logs": {},
-    "metrics_metadata": "metadata.csv",
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    }
+    "metrics_metadata": "metadata.csv"
   }
 }

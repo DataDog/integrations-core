@@ -7,7 +7,6 @@ import mock
 import pytest
 
 from datadog_checks.base.utils.common import get_docker_hostname
-from datadog_checks.cilium import CiliumCheck
 from datadog_checks.dev import run_command
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
@@ -17,7 +16,6 @@ try:
 except ImportError:
     from contextlib2 import ExitStack
 
-from .common import CILIUM_LEGACY
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
@@ -42,51 +40,30 @@ def setup_cilium():
 @pytest.fixture(scope='session')
 def dd_environment():
     kind_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
-    use_openmetrics = CILIUM_LEGACY == 'false'
     with kind_run(conditions=[setup_cilium], kind_config=kind_config) as kubeconfig:
         with ExitStack() as stack:
             ip_ports = [
                 stack.enter_context(port_forward(kubeconfig, 'cilium', port, 'deployment', 'cilium-operator'))
                 for port in PORTS
             ]
-
-            instances = {
-                'instances': [
-                    {
-                        'agent_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0]),
-                        'use_openmetrics': use_openmetrics,
-                    },
-                    {
-                        'operator_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1]),
-                        'use_openmetrics': use_openmetrics,
-                    },
-                ]
-            }
+        instances = {
+            'instances': [
+                {'agent_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0])},
+                {'operator_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1])},
+            ]
+        }
 
         yield instances
 
 
 @pytest.fixture(scope="session")
-def check():
-    return lambda instance: CiliumCheck('cilium', {}, [instance])
-
-
-@pytest.fixture(scope="session")
-def agent_instance_use_openmetrics():
-    return lambda use_openmetrics: {
-        'agent_endpoint': AGENT_URL,
-        'tags': ['pod_test'],
-        'use_openmetrics': use_openmetrics,
-    }
+def agent_instance():
+    return {'agent_endpoint': AGENT_URL, 'tags': ['pod_test']}
 
 
 @pytest.fixture
-def operator_instance_use_openmetrics():
-    return lambda use_openmetrics: {
-        'operator_endpoint': OPERATOR_URL,
-        'tags': ['operator_test'],
-        'use_openmetrics': use_openmetrics,
-    }
+def operator_instance():
+    return {'operator_endpoint': OPERATOR_URL, 'tags': ['operator_test']}
 
 
 @pytest.fixture()

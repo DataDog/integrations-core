@@ -107,31 +107,29 @@ sudo nginx -t && sudo nginx -s reload
 <!-- xxz tab xxx -->
 <!-- xxx tab "Kubernetes" xxx -->
 
-Add the following to your configuration ConfigMaps:
+The following ConfigMap defines the integration template for NGINX containers:
 
 ```yaml
-http-snippet: |
-  server {
-    listen 18080;
-
-    location /nginx_status {
-      stub_status on;
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nginxconfig
+  namespace: default
+data:
+  nginx.conf: |+
+    worker_processes  5;
+    events {
+      worker_connections  4096;
     }
-
-    location / {
-      return 404;
+    http {
+        server {
+            location /nginx_status {
+              stub_status on;
+              access_log  /dev/stdout;
+              allow all;
+            }
+        }
     }
-  }
-```
-
-Then, in your NGINX pod, expose the `18080` endpoint:
-
-```yaml
-spec:
-  containers:
-    - name: nginx
-      ports:
-        - containerPort: 18080
 ```
 
 <!-- xxz tab xxx -->

@@ -286,28 +286,23 @@ failed_explain_test_repeat_count = 5
 @pytest.mark.parametrize(
     "query,expected_error_tag,explain_function_override,expected_fail_count",
     [
-        ("select * from fake_table", "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>", None, 1),
-        (
-            "select * from fake_schema.fake_table",
-            "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>",
-            None,
-            1,
-        ),
+        ("select * from fake_table", "error:explain-<class 'psycopg2.errors.UndefinedTable'>", None, 1),
+        ("select * from fake_schema.fake_table", "error:explain-<class 'psycopg2.errors.UndefinedTable'>", None, 1),
         (
             "select * from pg_settings where name = $1",
-            "error:explain-database_error-<class 'psycopg2.errors.UndefinedParameter'>",
+            "error:explain-<class 'psycopg2.errors.UndefinedParameter'>",
             None,
             1,
         ),
         (
             "select * from pg_settings where name = 'this query is truncated' limi",
-            "error:explain-database_error-<class 'psycopg2.errors.SyntaxError'>",
+            "error:explain-<class 'psycopg2.errors.SyntaxError'>",
             None,
             1,
         ),
         (
             "select * from persons",
-            "error:explain-database_error-<class 'psycopg2.errors.InsufficientPrivilege'>",
+            "error:explain-<class 'psycopg2.errors.InsufficientPrivilege'>",
             "datadog.explain_statement_noaccess",
             failed_explain_test_repeat_count,
         ),
@@ -339,7 +334,7 @@ def test_failed_explain_handling(
     assert err is None
 
     for _ in range(failed_explain_test_repeat_count):
-        check.statement_samples._run_and_track_explain(dbname, query, query, query)
+        check.statement_samples._run_explain_safe(dbname, query, query, query)
 
     expected_tags = dbm_instance['tags'] + [
         'db:{}'.format(DB_NAME),
@@ -349,14 +344,9 @@ def test_failed_explain_handling(
     ]
 
     aggregator.assert_metric(
+        # even though we tried to explain the query multiple times, only a single error was registered, showing
+        # that the cached error response was used
         'dd.postgres.statement_samples.error',
-        count=failed_explain_test_repeat_count,
-        tags=expected_tags,
-        hostname='stubbed.hostname',
-    )
-
-    aggregator.assert_metric(
-        'dd.postgres.run_explain.error',
         count=expected_fail_count,
         tags=expected_tags,
         hostname='stubbed.hostname',
@@ -393,7 +383,7 @@ def test_failed_explain_handling(
             "dogs_noschema",
             "SELECT * FROM kennel WHERE id = %s",
             123,
-            "error:explain-invalid_schema-<class 'psycopg2.errors.InvalidSchemaName'>",
+            "error:explain-{}".format(DBExplainError.invalid_schema),
             [{'code': 'invalid_schema', 'message': "<class 'psycopg2.errors.InvalidSchemaName'>"}],
             StatementTruncationState.not_truncated.value,
         ),
@@ -403,7 +393,7 @@ def test_failed_explain_handling(
             "dogs_nofunc",
             "SELECT * FROM kennel WHERE id = %s",
             123,
-            "error:explain-failed_function-<class 'psycopg2.errors.UndefinedFunction'>",
+            "error:explain-{}".format(DBExplainError.failed_function),
             [{'code': 'failed_function', 'message': "<class 'psycopg2.errors.UndefinedFunction'>"}],
             StatementTruncationState.not_truncated.value,
         ),
@@ -426,7 +416,7 @@ def test_failed_explain_handling(
             # Use some multi-byte characters (the euro symbol) so we can validate that the code is correctly
             # looking at the length in bytes when testing for truncated statements
             u'\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC',
-            "error:explain-query_truncated-track_activity_query_size=1024",
+            "error:explain-{}".format(DBExplainError.query_truncated),
             [{'code': 'query_truncated', 'message': 'track_activity_query_size=1024'}],
             StatementTruncationState.truncated.value,
         ),
@@ -718,13 +708,13 @@ def test_truncate_activity_rows(integration_check, dbm_instance, active_rows, ex
     [
         (
             "select * from fake_table",
-            "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>",
+            "error:explain-<class 'psycopg2.errors.UndefinedTable'>",
             DBExplainError.database_error,
             "<class 'psycopg2.errors.UndefinedTable'>",
         ),
         (
             "select * from pg_settings where name = $1",
-            "error:explain-database_error-<class 'psycopg2.errors.UndefinedParameter'>",
+            "error:explain-<class 'psycopg2.errors.UndefinedParameter'>",
             DBExplainError.database_error,
             "<class 'psycopg2.errors.UndefinedParameter'>",
         ),
@@ -741,7 +731,7 @@ def test_truncate_activity_rows(integration_check, dbm_instance, active_rows, ex
             "city as city52, city as city53, city as city54, city as city55, city as city56, city as city57, "
             "city as city58, city as city59, city as city60, city as city61 "
             "FROM persons WHERE city = 123",
-            "error:explain-query_truncated-track_activity_query_size=1024",
+            "error:explain-{}".format(DBExplainError.query_truncated),
             DBExplainError.query_truncated,
             "track_activity_query_size=1024",
         ),
@@ -760,7 +750,7 @@ def test_statement_run_explain_errors(
     check._connect()
 
     check.check(dbm_instance)
-    _, explain_err_code, err = check.statement_samples._run_and_track_explain("datadog_test", query, query, query)
+    _, explain_err_code, err = check.statement_samples._run_explain_safe("datadog_test", query, query, query)
     check.check(dbm_instance)
 
     assert explain_err_code == expected_explain_err_code

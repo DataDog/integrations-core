@@ -7,11 +7,20 @@ import os
 import mock
 import pytest
 
-from datadog_checks.base import AgentCheck
 from datadog_checks.dev import get_here
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.twistlock import TwistlockCheck
+
+customtag = "custom:tag"
+
+instance = {
+    'username': 'admin',
+    'password': 'password',
+    'url': 'http://localhost:8081',
+    'tags': [customtag],
+    'ssl_verify': False,
+}
 
 METRICS = [
     'twistlock.registry.cve.details',
@@ -30,7 +39,6 @@ METRICS = [
     'twistlock.containers.compliance.count',
 ]
 
-customtag = "custom:tag"
 HERE = get_here()
 
 
@@ -44,7 +52,7 @@ def mock_get_factory(fixture_group):
 
 
 @pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])
-def test_check(aggregator, instance, fixture_group):
+def test_check(aggregator, fixture_group):
 
     check = TwistlockCheck('twistlock', {}, [instance])
 
@@ -61,7 +69,7 @@ def test_check(aggregator, instance, fixture_group):
 
 
 @pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])
-def test_config_project(aggregator, instance, fixture_group):
+def test_config_project(aggregator, fixture_group):
 
     project = 'foo'
     project_tag = 'project:{}'.format(project)
@@ -89,7 +97,7 @@ def test_config_project(aggregator, instance, fixture_group):
         aggregator.assert_metric_has_tag(metric, project_tag)
 
 
-def test_err_response(aggregator, instance):
+def test_err_response(aggregator):
 
     check = TwistlockCheck('twistlock', {}, [instance])
 
@@ -97,11 +105,3 @@ def test_err_response(aggregator, instance):
         with mock.patch('requests.get', return_value=MockResponse('{"err": "invalid credentials"}'), autospec=True):
 
             check.check(instance)
-
-
-@pytest.mark.e2e
-def test_e2e(dd_agent_check, aggregator, instance):
-    with pytest.raises(Exception) as e:
-        dd_agent_check(instance)
-    aggregator.assert_service_check("twistlock.license_ok", AgentCheck.CRITICAL)
-    assert "Max retries exceeded with url: /api/v1/settings/license" in str(e.value)

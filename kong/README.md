@@ -21,8 +21,19 @@ To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
-1. Add this configuration block to your `kong.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start gathering your [Kong Metrics](#metrics). See the [sample kong.d/conf.yaml][3] for all available configuration options:
+1. Add this configuration block to your `kong.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start gathering your [Kong Metrics](#metrics). See the [sample kong.d/conf.yaml][3] for all available configuration options.
 
+   ```yaml
+   init_config:
+
+   instances:
+     ## @param kong_status_url - string - required
+     ## URL where Kong exposes its status.
+     #
+     - kong_status_url: http://localhost:8001/status/
+   ```
+
+   Alternatively, on Agent 7+ a more modern implementation can be used:
 
    ```yaml
    init_config:
@@ -35,8 +46,6 @@ To configure this check for an Agent running on a host:
    ```
 
 2. [Restart the Agent][4].
-
-**Note**: The current version of the check (1.17.0+) uses [OpenMetrics][12] for metric collection, which requires Python 3. For hosts unable to use Python 3, or to use a legacy version of this check, see the following [config][13].
 
 ##### Log collection
 
@@ -88,7 +97,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 | -------------------- | ----------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `kong`                                                |
 | `<INIT_CONFIG>`      | blank or `{}`                                         |
-| `<INSTANCE_CONFIG>`  | `{"openmetrics_endpoint:": "http://%%host%%:8001/metrics"}` |
+| `<INSTANCE_CONFIG>`  | `{"kong_status_url": "http://%%host%%:8001/status/"}` |
 
 ##### Log collection
 
@@ -133,7 +142,7 @@ Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-- [Monitor Kong with the Datadog integration][11]
+- [Monitor Kong with our new Datadog integration][11]
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -146,5 +155,3 @@ Need help? Contact [Datadog support][10].
 [9]: https://github.com/DataDog/integrations-core/blob/master/kong/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
 [11]: https://www.datadoghq.com/blog/monitor-kong-datadog
-[12]: https://docs.datadoghq.com/integrations/openmetrics/
-[13]: https://github.com/DataDog/integrations-core/blob/7.27.x/kong/datadog_checks/kong/data/conf.yaml.example

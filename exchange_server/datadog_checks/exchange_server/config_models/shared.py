@@ -18,7 +18,6 @@ class SharedConfig(BaseModel):
         allow_mutation = False
 
     service: Optional[str]
-    use_localized_counters: Optional[bool]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

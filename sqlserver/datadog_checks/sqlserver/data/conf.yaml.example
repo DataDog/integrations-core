@@ -56,12 +56,6 @@ instances:
     #
     # database: master
 
-    ## @param reported_hostname - string - optional
-    ## Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
-    ## and can be useful to set a custom hostname when connecting to a remote database through a proxy.
-    #
-    # reported_hostname: <REPORTED_HOSTNAME>
-
     ## @param database_autodiscovery - boolean - optional - default: false
     ## Auto-discover and monitor databases. Supported for the metrics check. 
     ## If `true`, overrides `database` option.
@@ -223,17 +217,6 @@ instances:
         ## for *every* check instance. Running different instances with different collection intervals is not supported.
         #
         # collection_interval: 10
-
-        ## @param dm_exec_query_stats_row_limit - integer - optional - default: 10000
-        ## Set the maximum number of query stats rows that can be retrieved in a single check run.
-        #
-        # dm_exec_query_stats_row_limit: 10000
-
-        ## @param samples_per_hour_per_query - integer - optional - default: 4
-        ## Set the rate limit for the number of query sample events that are ingested per hour and per normalized
-        ## execution plan.
-        #
-        # samples_per_hour_per_query: 4
 
     ## Configure collection of active sessions monitoring
     #

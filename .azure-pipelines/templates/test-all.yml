@@ -44,5 +44,5 @@ jobs:
 
       # Avoid max step limits
       ${{ if eq(check.checkName, 'datadog_checks_base') }}:
-        validate: false
+        validate: true
         validate_changed: all

@@ -1,9 +1,5 @@
 # CHANGELOG - datadog_checks_base
 
-## 23.6.0 / 2021-12-20
-
-* [Security] Bump lxml package. See [#10904](https://github.com/DataDog/integrations-core/pull/10904).
-
 ## 23.5.0 / 2021-12-08
 
 * [Added] Add decorator for tracking execution statistics of check methods. See [#10809](https://github.com/DataDog/integrations-core/pull/10809).
@@ -15,10 +11,6 @@
 * [Added] [OpenMetricsV2] Support custom transformers by regex matching metric names. See [#10753](https://github.com/DataDog/integrations-core/pull/10753).
 * [Fixed] Bump cachetools. See [#10742](https://github.com/DataDog/integrations-core/pull/10742).
 * [Fixed] Bump redis dependency. See [#9383](https://github.com/DataDog/integrations-core/pull/9383).
-
-## 23.3.3 / 2021-12-16
-
-* [Fixed] Ensure TLSContextWrapper creates TLS context with the proper values. See [#10875](https://github.com/DataDog/integrations-core/pull/10875).
 
 ## 23.3.2 / 2021-11-23
 

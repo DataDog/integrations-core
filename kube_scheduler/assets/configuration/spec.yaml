@@ -77,11 +77,9 @@ files:
         against the APIServer to retrieve metrics.
       enabled: true
       value:
-        example: tls_only
+        type: boolean
+        example: true
         default: false
-        anyOf:
-        - type: boolean
-        - type: string
     - name: bearer_token_path
       description: Used to specify the path where the service account token is located.
       value:

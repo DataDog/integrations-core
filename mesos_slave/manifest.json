@@ -6,7 +6,7 @@
     "log collection"
   ],
   "creates_events": false,
-  "display_name": "Mesos",
+  "display_name": "Mesos Slave",
   "guid": "14d0267e-9989-4d09-8362-9319958e858e",
   "is_public": true,
   "maintainer": "help@datadoghq.com",
@@ -22,15 +22,13 @@
     "mac_os"
   ],
   "type": "check",
-  "integration_id": "mesos",
+  "integration_id": "mesos-slave",
   "assets": {
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {
-      "mesos": "assets/dashboards/mesos_overview.json"
-    },
+    "dashboards": {},
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "mesos"

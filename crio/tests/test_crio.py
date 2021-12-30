@@ -6,8 +6,9 @@ import os
 import mock
 import pytest
 
-from datadog_checks.base import AgentCheck
 from datadog_checks.crio import CrioCheck
+
+instance = {'prometheus_url': 'http://localhost:10249/metrics'}
 
 CHECK_NAME = 'crio'
 NAMESPACE = 'crio'
@@ -27,7 +28,7 @@ def mock_data():
         yield
 
 
-def test_crio(aggregator, mock_data, instance):
+def test_crio(aggregator, mock_data):
     """
     Testing crio.
     """
@@ -42,11 +43,3 @@ def test_crio(aggregator, mock_data, instance):
     aggregator.assert_metric(NAMESPACE + '.mem.resident')
     aggregator.assert_metric(NAMESPACE + '.mem.virtual')
     aggregator.assert_all_metrics_covered()
-
-
-@pytest.mark.e2e
-def test_e2e(dd_agent_check, aggregator, instance):
-    with pytest.raises(Exception):
-        dd_agent_check(instance, rate=True)
-    tag = "endpoint:" + instance.get('prometheus_url')
-    aggregator.assert_service_check("crio.prometheus.health", AgentCheck.CRITICAL, count=2, tags=[tag])

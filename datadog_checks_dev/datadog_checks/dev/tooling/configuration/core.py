@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import List, Union
-
 import yaml
 
 from .spec import spec_validator
@@ -10,7 +8,7 @@ from .template import ConfigTemplates
 
 
 class ConfigSpec(object):
-    def __init__(self, contents: str, template_paths: List[str] = None, source: str = None, version: str = None):
+    def __init__(self, contents, template_paths=None, source=None, version=None):
         """
         **Parameters:**
         - **contents** (_str_) - the raw text contents of a spec
@@ -22,10 +20,10 @@ class ConfigSpec(object):
         self.source = source
         self.version = version
         self.templates = ConfigTemplates(template_paths)
-        self.data: Union[dict, None] = None
+        self.data = None
         self.errors = []
 
-    def load(self) -> None:
+    def load(self):
         """
         This function de-serializes the specification and:
         1. fills in default values
@@ -35,7 +33,7 @@ class ConfigSpec(object):
         will be the fully resolved spec object.
         """
         if self.data is not None and not self.errors:
-            return
+            return self.data
 
         try:
             self.data = yaml.safe_load(self.contents)
@@ -43,4 +41,4 @@ class ConfigSpec(object):
             self.errors.append(f'{self.source}: Unable to parse the configuration specification: {e}')
             return
 
-        spec_validator(self.data, self)
+        return spec_validator(self.data, self)

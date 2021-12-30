@@ -226,11 +226,8 @@ jobs:
       displayName: IBM i
       os: linux
     - checkName: ibm_mq
-      displayName: IBM MQ (Linux)
+      displayName: IBM MQ
       os: linux
-    - checkName: ibm_mq
-      displayName: IBM MQ (Windows)
-      os: windows
     - checkName: ibm_was
       displayName: IBM WAS
       os: linux
@@ -483,9 +480,6 @@ jobs:
       os: linux
     - checkName: vsphere
       displayName: vSphere
-      os: linux
-    - checkName: weblogic
-      displayName: WebLogic
       os: linux
     - checkName: win32_event_log
       displayName: Win32 Event Log
