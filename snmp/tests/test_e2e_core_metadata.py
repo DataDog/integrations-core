@@ -405,12 +405,12 @@ def test_e2e_core_metadata_netapp(dd_agent_check):
 
     device = {
         'description': 'NetApp Release 9.3P7: Wed Jul 25 10:11:10 UTC 2018',
-        'id': 'default:192.168.0.2',
+        'id': 'default:' + device_ip,
         'id_tags': [
             'device_namespace:default',
-            'snmp_device:192.168.0.2',
+            'snmp_device:' + device_ip,
         ],
-        'ip_address': '192.168.0.2',
+        'ip_address': device_ip,
         'location': 'France',
         'model': 'example-model',
         'name': 'example-datacenter.company',
@@ -423,7 +423,7 @@ def test_e2e_core_metadata_netapp(dd_agent_check):
         'tags': [
             'device_namespace:default',
             'device_vendor:netapp',
-            'snmp_device:192.168.0.2',
+            'snmp_device:' + device_ip,
             'snmp_host:example-datacenter.company',
             'snmp_profile:netapp',
         ],
