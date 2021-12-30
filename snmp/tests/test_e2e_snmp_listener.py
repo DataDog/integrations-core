@@ -94,6 +94,7 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         'device_vendor:apc',
     ]
     metrics = [
+        'upsAdvBatteryNumOfBattPacks',
         'upsAdvBatteryNumOfBadBattPacks',
         'upsAdvBatteryReplaceIndicator',
         'upsAdvBatteryRunTimeRemaining',
@@ -106,6 +107,16 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         'upsAdvOutputLoad',
         'upsBasicBatteryTimeOnBattery',
         'upsAdvTestDiagnosticsResults',
+        'upsHighPrecExtdBatteryTemperature',
+        'upsAdvInputLineVoltage',
+        'upsAdvInputFrequency',
+        'upsAdvOutputVoltage',
+        'upsAdvOutputFrequency',
+        'upsAdvOutputCurrent',
+        'upsAdvOutputActivePower',
+        'upsAdvOutputApparentPower',
+        'upsAdvOutputEnergyUsage',
+        'uioSensorStatusTemperatureDegC',
     ]
 
     common.assert_common_metrics(aggregator, common_tags, is_e2e=True)
