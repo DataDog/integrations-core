@@ -2,7 +2,7 @@
     {
         "agent_version": "5.1.0",
         "integration": "Lighttpd",
-        "check": "lighthttpd.can_connect",
+        "check": "lighttpd.can_connect",
         "statuses": [
             "ok",
             "critical"
