@@ -12,6 +12,7 @@ import pytest
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev.docker import using_windows_containers
 
 from .common import (
     DOCKER_SERVER,
@@ -22,6 +23,7 @@ from .common import (
     INIT_CONFIG_OBJECT_NAME,
     INSTANCE_AO_DOCKER_SECONDARY,
     INSTANCE_DOCKER,
+    INSTANCE_DOCKER_DEFAULTS,
     INSTANCE_E2E,
     INSTANCE_SQL,
     INSTANCE_SQL_DEFAULTS,
@@ -69,6 +71,11 @@ def instance_sql():
 @pytest.fixture
 def instance_docker():
     return deepcopy(INSTANCE_DOCKER)
+
+
+@pytest.fixture
+def instance_docker_defaults():
+    return deepcopy(INSTANCE_DOCKER_DEFAULTS)
 
 
 # the default timeout in the integration tests is deliberately elevated beyond the default timeout in the integration
@@ -215,6 +222,9 @@ def instance_autodiscovery():
     return deepcopy(instance)
 
 
+E2E_METADATA = {'docker_platform': 'windows' if using_windows_containers() else 'linux'}
+
+
 @pytest.fixture(scope='session')
 def dd_environment():
     if pyodbc is None:
@@ -229,20 +239,13 @@ def dd_environment():
         WaitFor(sqlserver_can_connect, wait=3, attempts=10),
     ]
 
+    completion_message = 'sqlserver setup completed'
     if os.environ["COMPOSE_FOLDER"] == 'compose-ha':
-        conditions += [
-            CheckDockerLogs(
-                compose_file,
-                'Always On Availability Groups connection with primary database established for secondary database',
-            )
-        ]
-    else:
-        conditions += [
-            CheckDockerLogs(
-                compose_file,
-                'setup.sql completed',
-            )
-        ]
+        completion_message = (
+            'Always On Availability Groups connection with primary database established ' 'for secondary database'
+        )
+
+    conditions += [CheckDockerLogs(compose_file, completion_message)]
 
     with docker_run(compose_file=compose_file, conditions=conditions, mount_logs=True, build=True, attempts=2):
-        yield FULL_E2E_CONFIG
+        yield FULL_E2E_CONFIG, E2E_METADATA
