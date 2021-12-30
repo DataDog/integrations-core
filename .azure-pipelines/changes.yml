@@ -30,7 +30,7 @@ jobs:
   - template: './templates/test-single-linux.yml'
     parameters:
       job_name: Changed_00
-      display: Linux
+      display: Linux_00
       ${{ if eq(variables['System.PullRequest.IsFork'], 'False') }}:
         ddtrace_flag: '--ddtrace'
       validate: false
@@ -46,7 +46,7 @@ jobs:
   - template: './templates/test-single-linux.yml'
     parameters:
       job_name: Changed_01
-      display: Linux
+      display: Linux_01
       ${{ if eq(variables['System.PullRequest.IsFork'], 'False') }}:
         ddtrace_flag: '--ddtrace'
       validate: false
@@ -62,7 +62,7 @@ jobs:
   - template: './templates/test-single-linux.yml'
     parameters:
       job_name: Changed_02
-      display: Linux
+      display: Linux_02
       ${{ if eq(variables['System.PullRequest.IsFork'], 'False') }}:
         ddtrace_flag: '--ddtrace'
       validate: false
@@ -78,7 +78,7 @@ jobs:
   - template: './templates/test-single-linux.yml'
     parameters:
       job_name: Changed_03
-      display: Linux
+      display: Linux_03
       ${{ if eq(variables['System.PullRequest.IsFork'], 'False') }}:
         ddtrace_flag: '--ddtrace'
       validate: false
@@ -94,7 +94,7 @@ jobs:
   - template: './templates/test-single-linux.yml'
     parameters:
       job_name: Changed_04
-      display: Linux
+      display: Linux_04
       ${{ if eq(variables['System.PullRequest.IsFork'], 'False') }}:
         ddtrace_flag: '--ddtrace'
       validate: false
@@ -110,7 +110,7 @@ jobs:
   - template: './templates/test-single-linux.yml'
     parameters:
       job_name: Changed_05
-      display: Linux
+      display: Linux_05
       ${{ if eq(variables['System.PullRequest.IsFork'], 'False') }}:
         ddtrace_flag: '--ddtrace'
       validate: false
@@ -126,7 +126,7 @@ jobs:
   - template: './templates/test-single-linux.yml'
     parameters:
       job_name: Changed_06
-      display: Linux
+      display: Linux_06
       ${{ if eq(variables['System.PullRequest.IsFork'], 'False') }}:
         ddtrace_flag: '--ddtrace'
       validate: false
@@ -142,7 +142,7 @@ jobs:
   - template: './templates/test-single-linux.yml'
     parameters:
       job_name: Changed_07
-      display: Linux
+      display: Linux_07
       ${{ if eq(variables['System.PullRequest.IsFork'], 'False') }}:
         ddtrace_flag: '--ddtrace'
       validate: false
@@ -158,7 +158,7 @@ jobs:
   - template: './templates/test-single-linux.yml'
     parameters:
       job_name: Changed_08
-      display: Linux
+      display: Linux_08
       ${{ if eq(variables['System.PullRequest.IsFork'], 'False') }}:
         ddtrace_flag: '--ddtrace'
       validate: false
@@ -174,7 +174,7 @@ jobs:
   - template: './templates/test-single-linux.yml'
     parameters:
       job_name: Changed_09
-      display: Linux
+      display: Linux_09
       ${{ if eq(variables['System.PullRequest.IsFork'], 'False') }}:
         ddtrace_flag: '--ddtrace'
       validate: false
