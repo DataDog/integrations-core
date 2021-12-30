@@ -36,6 +36,7 @@ class HighCardinalityQueries:
 
     def __init__(self, instance_docker, setup_timeout=TIMEOUT):
         self.EXPECTED_TABLE_COUNT = 20_000
+        self.EXPECTED_SCHEMA_COUNT = 20_000
         self.EXPECTED_ROW_COUNT = 100_000
         self.columns = [
             'id',
@@ -70,8 +71,11 @@ class HighCardinalityQueries:
         self._is_running = False
         self._threads = []
 
-        self._wait_for_tables()
-        self._wait_for_data()
+        self._wait_for('SELECT COUNT(*) FROM datadog_test.sys.tables', self.EXPECTED_TABLE_COUNT)
+        self._wait_for(
+            'SELECT COUNT(*) FROM datadog_test.sys.schemas WHERE name LIKE \'hc_schema_%\'', self.EXPECTED_SCHEMA_COUNT
+        )
+        self._wait_for('SELECT COUNT(*) FROM datadog_test.dbo.high_cardinality', self.EXPECTED_ROW_COUNT)
 
     def start_background(self, user, config=None):
         """
@@ -190,28 +194,16 @@ class HighCardinalityQueries:
         conn.timeout = DEFAULT_TIMEOUT
         return conn
 
-    def _wait_for_tables(self):
+    def _wait_for(self, query, expected_count):
         timeout = time.time() + self._setup_timeout
         while True:
             with self.get_conn_for_user('bob').cursor() as cursor:
-                cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.tables')
+                cursor.execute(query)
                 count = cursor.fetchone()[0]
-                if count >= self.EXPECTED_TABLE_COUNT:
+                if count >= expected_count:
                     break
                 elif time.time() > timeout:
-                    raise Exception('Waiting for tables timed out.')
-                time.sleep(5)
-
-    def _wait_for_data(self):
-        timeout = time.time() + self._setup_timeout
-        while True:
-            with self.get_conn_for_user('bob').cursor() as cursor:
-                cursor.execute('SELECT COUNT(*) FROM datadog_test.dbo.high_cardinality')
-                count = cursor.fetchone()[0]
-                if count >= self.EXPECTED_ROW_COUNT:
-                    break
-                elif time.time() > timeout:
-                    raise Exception('Waiting for data timed out.')
+                    raise Exception('Waiting for data timed out: {}'.format(query))
                 time.sleep(5)
 
     @staticmethod

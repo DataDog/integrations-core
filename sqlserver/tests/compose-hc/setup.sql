@@ -15,37 +15,34 @@ CREATE USER fred FOR LOGIN fred;
 GRANT CONNECT ANY DATABASE to fred;
 GO
 
+-- Create test procedure for metrics loading feature.
+USE master;
+GO
+CREATE PROCEDURE pyStoredProc
+    AS BEGIN
+        CREATE TABLE #Datadog
+        (
+            [metric] varchar(255) NOT NULL,
+            [type] varchar(50) NOT NULL,
+            [value] float NOT NULL,
+            [tags] varchar(255)
+        )
+        SET NOCOUNT ON;
+        INSERT INTO #Datadog (metric, type, value, tags) VALUES
+            ('sql.sp.testa', 'gauge', 100, 'foo:bar,baz:qux'),
+            ('sql.sp.testb', 'gauge', 1, 'foo:bar,baz:qux'),
+            ('sql.sp.testb', 'gauge', 2, 'foo:bar,baz:qux');
+        SELECT * FROM #Datadog;
+    END;
+GO
+GRANT EXECUTE on pyStoredProc to datadog;
+
 -- Create test database for integration tests.
 -- Only bob and fred have read/write access to this database.
 CREATE DATABASE datadog_test;
 GO
 USE datadog_test;
 GO
-
--- This table is pronounced "things" except we've replaced "th" with the greek lower case "theta" to ensure we
--- correctly support unicode throughout the integration.
-CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
-INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
-
-DECLARE @table_prefix VARCHAR(100) = 'CREATE TABLE datadog_test.dbo.'
-DECLARE @table_name VARCHAR(500);
-DECLARE @query VARCHAR(1000);
-DECLARE @columns VARCHAR(1000) = ' (id INT NOT NULL IDENTITY, guid TEXT, app_name TEXT, app_version TEXT, app_image TEXT, app_image_base64 TEXT, app_ip_v6 TEXT, app_btc_addr TEXT, app_slogan TEXT, app_priority INT, app_permissions INT, subscription_renewal TEXT, primary_contact TEXT, user_firstname TEXT, user_lastname TEXT, user_city TEXT, user_state TEXT, user_country TEXT, loc_lat DECIMAL, loc_long DECIMAL, user_ssn TEXT, user_card TEXT, user_card_type TEXT, created_at DATE, updated_at DATE, PRIMARY KEY (id));';
-
--- Create a main table which contains high cardinality data for testing.
-DECLARE @main_table VARCHAR(1000) = @table_prefix + 'high_cardinality' + @columns;
-EXEC (@main_table);
-
--- Load the database with many tables.
-DECLARE @table_count INT = 1;
-DECLARE @expected_table_count INT = 20000;
-WHILE @table_count <= @expected_table_count
-BEGIN
-    SET @table_name = 'high_cardinality_' + CAST(@table_count AS VARCHAR);
-    SET @query = @table_prefix + @table_name + @columns;
-    EXEC (@query);
-    SET @table_count = @table_count + 1;
-END;
 
 CREATE USER bob FOR LOGIN bob;
 CREATE USER fred FOR LOGIN fred;
@@ -56,27 +53,40 @@ EXEC sp_addrolemember 'db_datawriter', 'bob'
 EXEC sp_addrolemember 'db_datareader', 'fred'
 GO
 
--- Create test procedure for metrics loading feature.
-USE master;
-GO
-CREATE PROCEDURE pyStoredProc AS
+-- This table is pronounced "things" except we've replaced "th" with the greek lower case "theta" to ensure we
+-- correctly support unicode throughout the integration.
+CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
+INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
+
+DECLARE @table_prefix VARCHAR(100) = 'CREATE TABLE datadog_test.dbo.'
+DECLARE @table_columns VARCHAR(1000) = ' (id INT NOT NULL IDENTITY, guid TEXT, app_name TEXT, app_version TEXT, app_image TEXT, app_image_base64 TEXT, app_ip_v6 TEXT, app_btc_addr TEXT, app_slogan TEXT, app_priority INT, app_permissions INT, subscription_renewal TEXT, primary_contact TEXT, user_firstname TEXT, user_lastname TEXT, user_city TEXT, user_state TEXT, user_country TEXT, loc_lat DECIMAL, loc_long DECIMAL, user_ssn TEXT, user_card TEXT, user_card_type TEXT, created_at DATE, updated_at DATE, PRIMARY KEY (id));';
+
+-- Create a main table which contains high cardinality data for testing.
+DECLARE @main_table_query VARCHAR(1000) = @table_prefix + 'high_cardinality' + @table_columns;
+EXEC (@main_table_query);
+
+-- Load the database with many users, schemas, and tables.
+-- Users
+-- TODO: Figure out how to dynamically add users, the syntax is tricky...
+-- Schema
+DECLARE @schema_name VARCHAR(200);
+DECLARE @schema_query VARCHAR(1000);
+-- Table
+DECLARE @table_name VARCHAR(200);
+DECLARE @table_query VARCHAR(1000);
+
+DECLARE @count INT = 1;
+WHILE @count <= 20000
 BEGIN
-    CREATE TABLE #Datadog
-    (
-        [metric] varchar(255) not null,
-        [type] varchar(50) not null,
-        [value] float not null,
-        [tags] varchar(255)
-    )
-    SET NOCOUNT ON;
-    INSERT INTO #Datadog (metric, type, value, tags) VALUES
-                                                         ('sql.sp.testa', 'gauge', 100, 'foo:bar,baz:qux'),
-                                                         ('sql.sp.testb', 'gauge', 1, 'foo:bar,baz:qux'),
-                                                         ('sql.sp.testb', 'gauge', 2, 'foo:bar,baz:qux');
-    SELECT * FROM #Datadog;
+    SET @schema_name = 'hc_schema_' + CAST(@count AS VARCHAR);
+    SET @schema_query = 'CREATE SCHEMA ' + @schema_name;
+    EXEC (@schema_query);
+
+    SET @table_name = 'high_cardinality_' + CAST(@count AS VARCHAR);
+    SET @table_query = @table_prefix + @table_name + @table_columns;
+    EXEC (@table_query);
+    SET @count = @count + 1;
 END;
-GO
-GRANT EXECUTE on pyStoredProc to datadog;
 
 -- Insert high cardinality data into the main table, each iteration is about 1k rows.
 -- Mock data was generated from https://www.mockaroo.com/
