@@ -1,6 +1,7 @@
 trigger: none
 
 pr:
+  autoCancel: false
   branches:
     include:
     - master
