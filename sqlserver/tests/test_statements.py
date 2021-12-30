@@ -50,15 +50,6 @@ def dbm_instance(instance_docker):
     return copy(instance_docker)
 
 
-@pytest.fixture
-def instance_sql_msoledb_dbm(instance_sql_msoledb):
-    instance_sql_msoledb['dbm'] = True
-    instance_sql_msoledb['min_collection_interval'] = 1
-    instance_sql_msoledb['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 2}
-    instance_sql_msoledb['tags'] = ['optional:tag1']
-    return instance_sql_msoledb
-
-
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
