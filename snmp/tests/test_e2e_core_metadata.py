@@ -412,6 +412,7 @@ def test_e2e_core_metadata_netapp(dd_agent_check):
         ],
         'ip_address': '192.168.0.2',
         'location': 'France',
+        'model': 'example-model',
         'name': 'example-datacenter.company',
         'os_name': 'ONTAP',
         'os_version': '9.3',

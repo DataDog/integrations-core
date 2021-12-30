@@ -47,9 +47,10 @@ metadata:
         symbol:
           OID: 1.3.6.1.2.1.1.1.0
           name: sysDescr
-          match_pattern: 'NetApp Release\s+([\d.]+)'  # first part of the version composed of digits and `.` e.g `9.7`
+          match_pattern: 'NetApp Release\s+([\d.]+)'  # First part of the version composed of digits and `.`
+                                                      # Example: 9.7P14 => 9.7
           match_value: '$1'
-          # Example: 9.7P14
+
 
 metrics:
   - MIB: NETAPP-MIB
