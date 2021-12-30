@@ -12,7 +12,7 @@ parameters:
 
 steps:
 - ${{ if and(eq(parameters.test_e2e, 'true'), eq(parameters.repo, 'core'))}}:
-  - script: ddev env test --base --new-env --junit ${{ parameters.check }} --agent datadog/agent-dev:alex-testing-snmp-listener-at-dec-15-9afd1cba3-py2py3-jmx
+  - script: ddev env test --base --new-env --junit ${{ parameters.check }} --agent datadog/agent-dev:alex-testing-snmp-listener-at-dec-13-b5bed4dc6-py2py3-jmx
     displayName: 'Run E2E tests against latest base package'
     env:
       DD_API_KEY: $(DD_API_KEY)
