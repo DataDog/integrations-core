@@ -95,27 +95,27 @@ def create_datadog_conf_file(tmp_dir):
             'workers': 4,
             'discovery_interval': 10,
             'configs': [
-                {
-                    'network': '{}.0/29'.format(prefix),
-                    'port': PORT,
-                    'community': 'generic-router',
-                    'version': 2,
-                    'timeout': 1,
-                    'retries': 2,
-                    'tags': [
-                        "tag1:val1",
-                        "tag2:val2",
-                    ],
-                    'loader': 'core',
-                },
-                {
-                    'network': '{}.0/28'.format(prefix),
-                    'port': PORT,
-                    'community': 'apc_ups',
-                    'version': 2,
-                    'timeout': 1,
-                    'retries': 2,
-                },
+                # {
+                #     'network': '{}.0/29'.format(prefix),
+                #     'port': PORT,
+                #     'community': 'generic-router',
+                #     'version': 2,
+                #     'timeout': 1,
+                #     'retries': 2,
+                #     'tags': [
+                #         "tag1:val1",
+                #         "tag2:val2",
+                #     ],
+                #     'loader': 'core',
+                # },
+                # {
+                #     'network': '{}.0/28'.format(prefix),
+                #     'port': PORT,
+                #     'community': 'apc_ups',
+                #     'version': 2,
+                #     'timeout': 1,
+                #     'retries': 2,
+                # },
                 {
                     'network': '{}.0/27'.format(prefix),
                     'port': PORT,
