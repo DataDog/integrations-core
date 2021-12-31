@@ -65,13 +65,13 @@ def run_command(command, capture=None, check=False, encoding='utf-8', shell=Fals
             stdout = ''
         else:
             stdout.seek(0)
-            stdout = stdout.read().decode(encoding)
+            stdout = stdout.read().decode(encoding, "replace")
 
         if stderr is None:
             stderr = ''
         else:
             stderr.seek(0)
-            stderr = stderr.read().decode(encoding)
+            stderr = stderr.read().decode(encoding, "replace")
 
     if check and process.returncode != 0:
         raise SubprocessError(
