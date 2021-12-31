@@ -171,7 +171,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
             env,
             '--json',
             '--log-level',
-            'trace',
+            'debug',
         ]
 
         if config:
@@ -210,11 +210,6 @@ def dd_agent_check(request, aggregator, datadog_agent):
         print("=== AGENT CHECK 1 START===")
         print(result.stdout)
         print("=== AGENT CHECK 1 END ===")
-
-        agent_check2 = run_command(check_command, capture=True)
-        print("=== AGENT CHECK 2 START===")
-        print(agent_check2.stdout)
-        print("=== AGENT CHECK 2 END ===")
 
         status_result = run_command(
             [python_path, '-m', 'datadog_checks.dev', 'env', 'shell', check, env, '-c', 'agent status'], capture=True

@@ -28,7 +28,7 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
     """
     snmp_device = _build_device_ip(container_ip)
     subnet_prefix = ".".join(container_ip.split('.')[:3])
-    aggregator = dd_agent_check({'init_config': {}, 'instances': []}, rate=True)
+    aggregator = dd_agent_check({'init_config': {}, 'instances': []})
 
     # # === network profile ===
     # common_tags = [
