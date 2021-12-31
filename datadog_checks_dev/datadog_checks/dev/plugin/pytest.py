@@ -182,9 +182,9 @@ def dd_agent_check(request, aggregator, datadog_agent):
         status_result = run_command(
             [python_path, '-m', 'datadog_checks.dev', 'env', 'shell', check, env, '-c', 'agent status'], capture=True
         )
-        print("=== STATUS START===")
+        print("=== STATUS1 START===")
         print(status_result.stdout)
-        print("=== STATUS END ===")
+        print("=== STATUS1 END ===")
 
         configcheck_result = run_command(
             [python_path, '-m', 'datadog_checks.dev', 'env', 'shell', check, env, '-c' 'agent configcheck'],
@@ -199,6 +199,13 @@ def dd_agent_check(request, aggregator, datadog_agent):
         print("=== STDOUT START===")
         print(result.stdout)
         print("=== STDOUT END ===")
+
+        status_result = run_command(
+            [python_path, '-m', 'datadog_checks.dev', 'env', 'shell', check, env, '-c', 'agent status'], capture=True
+        )
+        print("=== STATUS2 START===")
+        print(status_result.stdout)
+        print("=== STATUS2 END ===")
 
         matches = re.findall(AGENT_COLLECTOR_SEPARATOR + r'\n(.*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
 
