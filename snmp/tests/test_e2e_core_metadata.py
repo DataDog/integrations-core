@@ -387,3 +387,23 @@ def test_e2e_core_metadata_apc_ups(dd_agent_check):
         'version': '2.0.3-test',
     }
     assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_checkpoint_firewall(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'checkpoint_firewall',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'id': 'default:' + device_ip,
+    }
+    assert_device_metadata(aggregator, device)
