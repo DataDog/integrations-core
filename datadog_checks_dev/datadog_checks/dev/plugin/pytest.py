@@ -179,8 +179,17 @@ def dd_agent_check(request, aggregator, datadog_agent):
                 if value is not True:
                     check_command.append(str(value))
 
-        result = run_command(check_command, capture=True)
+        status_result = run_command(['agent', 'status'], capture=True)
+        print("=== STATUS START===")
+        print(status_result.stdout)
+        print("=== STATUS END ===")
 
+        configcheck_result = run_command(['agent', 'configcheck'], capture=True)
+        print("=== CONFIGCHECK START===")
+        print(configcheck_result.stdout)
+        print("=== CONFIGCHECK END ===")
+
+        result = run_command(check_command, capture=True)
         print("check_command:", check_command)
         print("=== STDOUT START===")
         print(result.stdout)
