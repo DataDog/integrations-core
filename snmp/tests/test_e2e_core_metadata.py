@@ -394,7 +394,7 @@ def test_e2e_core_metadata_checkpoint_firewall(dd_agent_check):
     instance = config['instances'][0]
     instance.update(
         {
-            'community_string': 'checkpoint_firewall',
+            'community_string': 'checkpoint-firewall',
             'loader': 'core',
         }
     )
