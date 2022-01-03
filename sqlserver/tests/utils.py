@@ -31,9 +31,7 @@ class HighCardinalityQueries:
     (e.g. Large number of tables, schemas, query cardinality, etc). You must use the `hc` env to utilize this.
     """
 
-    TIMEOUT = 60 * 8
-
-    def __init__(self, instance_docker, setup_timeout=TIMEOUT):
+    def __init__(self, instance_docker):
         self.EXPECTED_USER_COUNT = 10_000
         self.EXPECTED_SCHEMA_COUNT = 10_000
         self.EXPECTED_TABLE_COUNT = 10_000
@@ -183,7 +181,7 @@ class HighCardinalityQueries:
         conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
             self._instance_docker['driver'], self._instance_docker['host'], user, "Password12!"
         )
-        conn = pyodbc.connect(conn_str, timeout=HighCardinalityQueries.TIMEOUT, autocommit=False)
+        conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=False)
         conn.timeout = DEFAULT_TIMEOUT
         return conn
 
