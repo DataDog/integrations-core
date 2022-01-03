@@ -105,7 +105,7 @@ Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-- [Monitor Lighttpd web server metrics with Datadog][11]
+- [Monitor Lighttpd web server metrics with Datadog][11].
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/lighttpd/images/lighttpddashboard.png
