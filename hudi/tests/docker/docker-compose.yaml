@@ -8,6 +8,7 @@ services:
       args:
           HADOOP_VERSION: ${HADOOP_VERSION}
           SPARK_VERSION: ${SPARK_VERSION}
+          HUDI_VERSION: ${HUDI_VERSION}
     tty: true
     container_name: spark-app-hudi
     # uncomment volumes if collecting logs
