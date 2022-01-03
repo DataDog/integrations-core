@@ -139,7 +139,7 @@ def models(ctx, check, sync, verbose):
                     continue
 
                 expected_model_file_lines.extend(license_header_lines)
-                if model_file != 'validators.py':
+                if model_file not in CUSTOM_FILES:
                     expected_model_file_lines.extend(documentation_header_lines)
                 expected_model_file_lines.extend(generated_model_file_lines)
             else:
