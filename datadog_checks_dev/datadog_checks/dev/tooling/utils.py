@@ -33,7 +33,9 @@ def get_license_header():
     return (
         '# (C) Datadog, Inc. {year}-present\n'
         '# All rights reserved\n'
-        '# Licensed under a 3-clause BSD style license (see LICENSE)\n'.format(year=str(datetime.now(timezone.utc).year))
+        '# Licensed under a 3-clause BSD style license (see LICENSE)\n'.format(
+            year=str(datetime.now(timezone.utc).year)
+        )
     )
 
 
