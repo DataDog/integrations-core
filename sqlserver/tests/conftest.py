@@ -231,11 +231,36 @@ def dd_environment():
         raise Exception("pyodbc is not installed!")
 
     def sqlserver_can_connect():
-        conn = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;'.format(get_local_driver(), DOCKER_SERVER)
-        pyodbc.connect(conn, timeout=DEFAULT_TIMEOUT, autocommit=True)
+        conn_str = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;'.format(
+            get_local_driver(), DOCKER_SERVER
+        )
+        pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
+
+    def hc_env_is_ready():
+        conn_str = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;'.format(
+            get_local_driver(), DOCKER_SERVER
+        )
+        conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
+        with conn.cursor() as cursor:
+            cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.database_principals WHERE name LIKE \'hc_user_%\'')
+            user_count = cursor.fetchone()[0]
+            cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.schemas WHERE name LIKE \'hc_schema_%\'')
+            schema_count = cursor.fetchone()[0]
+            cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.tables')
+            table_count = cursor.fetchone()[0]
+            cursor.execute('SELECT COUNT(*) FROM datadog_test.dbo.high_cardinality')
+            row_count = cursor.fetchone()[0]
+            expected_obj_count = 10_000
+            expected_row_count = 100_000
+            return (
+                user_count >= expected_obj_count
+                and schema_count >= expected_obj_count
+                and table_count >= expected_obj_count
+                and row_count >= expected_row_count
+            )
 
     compose_file = os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml')
-    conditions = []
+    conditions = [WaitFor(sqlserver_can_connect, wait=3, attempts=10)]
 
     completion_message = 'sqlserver setup completed'
     if os.environ["COMPOSE_FOLDER"] == 'compose-ha':
@@ -244,11 +269,9 @@ def dd_environment():
         )
     if os.environ["COMPOSE_FOLDER"] == 'compose-hc':
         # This env is a highly loaded database and is expected to take a while to setup.
-        conditions += [
-            WaitFor(sqlserver_can_connect, wait=60, attempts=10),
-        ]
-    else:
-        conditions += [WaitFor(sqlserver_can_connect, wait=3, attempts=10)]
+        # This will wait about 8 minutes before timing out.
+        completion_message = 'INFO: setup.sql completed.'
+        conditions += [WaitFor(hc_env_is_ready, wait=5, attempts=90)]
 
     conditions += [CheckDockerLogs(compose_file, completion_message)]
 

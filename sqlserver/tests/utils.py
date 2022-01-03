@@ -4,7 +4,6 @@
 import os
 import string
 import threading
-import time
 from copy import copy
 from random import choice, randint, shuffle
 
@@ -28,7 +27,7 @@ hc_only = pytest.mark.skipif(
 
 class HighCardinalityQueries:
     """
-    HighCardinalityQueries is a test utility to run queries against a high-cardinality database
+    HighCardinalityQueries is a test utility to run queries against a high cardinality database
     (e.g. Large number of tables, schemas, query cardinality, etc). You must use the `hc` env to utilize this.
     """
 
@@ -68,20 +67,8 @@ class HighCardinalityQueries:
         ]
 
         self._instance_docker = instance_docker
-        self._setup_timeout = setup_timeout
         self._is_running = False
         self._threads = []
-
-        # Wait until everything is setup before proceeding.
-        self._wait_for_count(
-            'SELECT COUNT(*) FROM datadog_test.sys.database_principals WHERE name LIKE \'hc_user_%\'',
-            self.EXPECTED_USER_COUNT,
-        )
-        self._wait_for_count(
-            'SELECT COUNT(*) FROM datadog_test.sys.schemas WHERE name LIKE \'hc_schema_%\'', self.EXPECTED_SCHEMA_COUNT
-        )
-        self._wait_for_count('SELECT COUNT(*) FROM datadog_test.sys.tables', self.EXPECTED_TABLE_COUNT)
-        self._wait_for_count('SELECT COUNT(*) FROM datadog_test.dbo.high_cardinality', self.EXPECTED_ROW_COUNT)
 
     def start_background(self, user, config=None):
         """
@@ -110,21 +97,21 @@ class HighCardinalityQueries:
             while True:
                 if not self._is_running:
                     break
-                self._run_query_ignore_exception(conn, self.create_high_cardinality_query())
+                self.run_query_and_ignore_exception(conn, self.create_high_cardinality_query())
 
         def run_slow_query_forever():
             conn = self.get_conn_for_user(user)
             while True:
                 if not self._is_running:
                     break
-                self._run_query_ignore_exception(conn, self.create_slow_query())
+                self.run_query_and_ignore_exception(conn, self.create_slow_query())
 
         def run_complex_query_forever():
             conn = self.get_conn_for_user(user)
             while True:
                 if not self._is_running:
                     break
-                self._run_query_ignore_exception(conn, self.create_complex_query())
+                self.run_query_and_ignore_exception(conn, self.create_complex_query())
 
         self._threads = [threading.Thread(target=run_hc_query_forever) for _ in range(config['hc_threads'])]
         self._threads.extend([threading.Thread(target=run_slow_query_forever) for _ in range(config['slow_threads'])])
@@ -200,20 +187,8 @@ class HighCardinalityQueries:
         conn.timeout = DEFAULT_TIMEOUT
         return conn
 
-    def _wait_for_count(self, query, expected_count):
-        timeout = time.time() + self._setup_timeout
-        while True:
-            with self.get_conn_for_user('bob').cursor() as cursor:
-                cursor.execute(query)
-                count = cursor.fetchone()[0]
-                if count >= expected_count:
-                    break
-                elif time.time() > timeout:
-                    raise Exception('Waiting for data timed out, count: {} | query: {}'.format(count, query))
-                time.sleep(5)
-
     @staticmethod
-    def _run_query_ignore_exception(conn, query):
+    def run_query_and_ignore_exception(conn, query):
         """
         This is useful if you want to ignore query execution exceptions. For instance, if you execute a slow query
         in the background and a test orders a cleanup, the slow executing query may throw an unwanted exception.
