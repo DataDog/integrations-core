@@ -388,6 +388,7 @@ def test_e2e_core_metadata_apc_ups(dd_agent_check):
     }
     assert_device_metadata(aggregator, device)
 
+
 def test_e2e_core_metadata_dell_idrac(dd_agent_check):
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
