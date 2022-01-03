@@ -405,5 +405,26 @@ def test_e2e_core_metadata_fortinet_fortigate(dd_agent_check):
 
     device = {
         'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'model': 'FGT_501E',
+        'os_name': 'FortiOS',
+        'os_version': '5.6.4',
+        'product_name': 'FortiGate-501E',
+        'profile': 'fortinet-fortigate',
+        'serial_number': 'FG5H1E5110000000',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.12356.101.1.1',
+        'tags': [
+            'device_namespace:default',
+            'device_vendor:fortinet',
+            'snmp_device:' + device_ip,
+            'snmp_profile:fortinet-fortigate',
+        ],
+        'vendor': 'fortinet',
+        'version': 'v5.6.4,build1575b1575,180425 (GA)'
     }
     assert_device_metadata(aggregator, device)
