@@ -60,7 +60,7 @@ def models(ctx, check, sync, verbose):
     num_files = 0
 
     license_header_lines = get_license_header().splitlines(True) + ['\n']
-    documentation_header_lines = ['\n'] + get_config_models_documentation().splitlines(True) + ['\n']
+    documentation_header_lines = get_config_models_documentation().splitlines(True) + ['\n']
 
     code_formatter = ModelConsumer.create_code_formatter()
 
@@ -150,7 +150,8 @@ def models(ctx, check, sync, verbose):
 
                 expected_model_file_lines.extend(generated_model_file_lines)
 
-            if current_model_file_lines != expected_model_file_lines:
+            # First line is copyright. We want to avoid changing it every new year
+            if not current_model_file_lines or current_model_file_lines[1:] != expected_model_file_lines[1:]:
                 if sync:
                     echo_info(f'Writing data model file to `{model_file_path}`')
                     ensure_parent_dir_exists(model_file_path)
