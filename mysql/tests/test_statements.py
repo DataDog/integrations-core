@@ -131,6 +131,8 @@ def test_statement_metrics(
 
     assert event['host'] == 'stubbed.hostname'
     assert event['ddagentversion'] == datadog_agent.get_version()
+    assert event['mysql_version'] == mysql_check.version.version + '+' + mysql_check.version.build
+    assert event['mysql_flavor'] == mysql_check.version.flavor
     assert event['timestamp'] > 0
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
     expected_tags = set(tags.METRIC_TAGS + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)])

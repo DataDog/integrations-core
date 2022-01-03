@@ -10,12 +10,12 @@ This check monitors [Kube_apiserver_metrics][1].
 
 The Kube_apiserver_metrics check is included in the [Datadog Agent][2] package, so you do not need to install anything else on your server.
 
-**Note**: A tile is not included in the Datadog application for this integration. Follow the configuration steps below to configure this integration.
+**Note**: A tile is not included on the Datadog site for this integration. Follow the configuration steps below to configure this integration.
 
 ### Configuration
 
 The main use case to run the kube_apiserver_metrics check is as a Cluster Level Check.
-Refer to the dedicated documentation for [Cluster Level Checks][3].
+See the documentation for [Cluster Level Checks][3].
 You can annotate the service of your apiserver with the following:
 
 ```yaml

@@ -123,6 +123,8 @@ class MySQLStatementMetrics(DBMAsyncJob):
         payload = {
             'host': self._check.resolved_hostname,
             'timestamp': time.time() * 1000,
+            'mysql_version': self._check.version.version + '+' + self._check.version.build,
+            'mysql_flavor': self._check.version.flavor,
             'ddagentversion': datadog_agent.get_version(),
             'min_collection_interval': self._metric_collection_interval,
             'tags': self._tags,

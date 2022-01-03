@@ -13,6 +13,7 @@ class MySQLConfig(object):
         self.log = get_check_logger()
         self.host = instance.get('host', instance.get('server', ''))
         self.port = int(instance.get('port', 0))
+        self.reported_hostname = instance.get('reported_hostname', '')
         self.tags = list(instance.get('tags', []))
         self.mysql_sock = instance.get('sock', '')
         self.defaults_file = instance.get('defaults_file', '')

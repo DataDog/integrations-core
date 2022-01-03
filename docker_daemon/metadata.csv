@@ -1,4 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+docker.cpu.limit,gauge,,percent,,"Limit on CPU available to the container, expressed as percentage of a core",0,docker,docker.cpu.limit
 docker.cpu.system,gauge,,percent,,"The percent of time the CPU is executing system calls on behalf of processes of this container, unnormalized",0,docker,cpu system
 docker.cpu.system.95percentile,gauge,,percent,,95th percentile of docker.cpu.system,0,docker,cpu system 95%
 docker.cpu.system.avg,gauge,,percent,,Average value of docker.cpu.system,0,docker,cpu system avg

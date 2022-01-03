@@ -248,7 +248,7 @@ class NewKafkaConsumerCheck(object):
                         "positive.".format(consumer_group, topic, partition)
                     )
                     key = "{}:{}:{}".format(consumer_group, topic, partition)
-                    self._send_event(title, message, consumer_group_tags, 'consumer_lag', key, severity="error")
+                    self.send_event(title, message, consumer_group_tags, 'consumer_lag', key, severity="error")
                     self.log.debug(message)
 
             else:
