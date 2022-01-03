@@ -52,7 +52,7 @@ partial -->
 
 3. [Restart the Agent][6].
 
-**Note**: Please ensure the `datadog-agent` user has read access to tail the log files you want to collect from. See [Permission issues tailing log files][12] for more information.
+**Note**: Ensure the `datadog-agent` user has read access to tail the log files you want to collect from. See [Permission issues tailing log files][12] for more information.
 
 
 ### Validation
