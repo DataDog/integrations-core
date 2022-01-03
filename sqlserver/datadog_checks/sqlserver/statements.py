@@ -73,12 +73,14 @@ def _row_key(row):
     return row['database_name'], row['user_name'], row['query_signature'], row['query_hash'], row['query_plan_hash']
 
 
-XML_PLAN_OBFUSCATION_ATTRS = {
-    "StatementText",
-    "ConstValue",
-    "ScalarString",
-    "ParameterCompiledValue",
-}
+XML_PLAN_OBFUSCATION_ATTRS = frozenset(
+    {
+        "StatementText",
+        "ConstValue",
+        "ScalarString",
+        "ParameterCompiledValue",
+    }
+)
 
 
 def agent_check_getter(self):
