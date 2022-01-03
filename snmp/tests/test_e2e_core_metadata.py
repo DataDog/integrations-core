@@ -425,6 +425,6 @@ def test_e2e_core_metadata_fortinet_fortigate(dd_agent_check):
             'snmp_profile:fortinet-fortigate',
         ],
         'vendor': 'fortinet',
-        'version': 'v5.6.4,build1575b1575,180425 (GA)'
+        'version': 'v5.6.4,build1575b1575,180425 (GA)',
     }
     assert_device_metadata(aggregator, device)
