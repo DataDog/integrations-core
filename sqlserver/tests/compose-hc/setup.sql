@@ -45,7 +45,9 @@ USE datadog_test;
 GO
 
 CREATE USER bob FOR LOGIN bob;
+GRANT VIEW DEFINITION TO bob;
 CREATE USER fred FOR LOGIN fred;
+GRANT VIEW DEFINITION TO fred;
 GO
 
 EXEC sp_addrolemember 'db_datareader', 'bob'
@@ -59,25 +61,33 @@ CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
 INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
 
 DECLARE @table_prefix VARCHAR(100) = 'CREATE TABLE datadog_test.dbo.'
-DECLARE @table_columns VARCHAR(1000) = ' (id INT NOT NULL IDENTITY, guid TEXT, app_name TEXT, app_version TEXT, app_image TEXT, app_image_base64 TEXT, app_ip_v6 TEXT, app_btc_addr TEXT, app_slogan TEXT, app_priority INT, app_permissions INT, subscription_renewal TEXT, primary_contact TEXT, user_firstname TEXT, user_lastname TEXT, user_city TEXT, user_state TEXT, user_country TEXT, loc_lat DECIMAL, loc_long DECIMAL, user_ssn TEXT, user_card TEXT, user_card_type TEXT, created_at DATE, updated_at DATE, PRIMARY KEY (id));';
+DECLARE @table_columns VARCHAR(500) = ' (id INT NOT NULL IDENTITY, guid TEXT, app_name TEXT, app_version TEXT, app_image TEXT, app_image_base64 TEXT, app_ip_v6 TEXT, app_btc_addr TEXT, app_slogan TEXT, app_priority INT, app_permissions INT, subscription_renewal TEXT, primary_contact TEXT, user_firstname TEXT, user_lastname TEXT, user_city TEXT, user_state TEXT, user_country TEXT, loc_lat DECIMAL, loc_long DECIMAL, user_ssn TEXT, user_card TEXT, user_card_type TEXT, created_at DATE, updated_at DATE, PRIMARY KEY (id));';
 
 -- Create a main table which contains high cardinality data for testing.
-DECLARE @main_table_query VARCHAR(1000) = @table_prefix + 'high_cardinality' + @table_columns;
+DECLARE @main_table_query VARCHAR(600) = @table_prefix + 'high_cardinality' + @table_columns;
 EXEC (@main_table_query);
 
 -- Load the database with many users, schemas, and tables.
--- Users
--- TODO: Figure out how to dynamically add users, the syntax is tricky...
+-- User
+DECLARE @user VARCHAR(50);
+DECLARE @user_login_query VARCHAR(200);
+DECLARE @user_create_query VARCHAR(200);
 -- Schema
-DECLARE @schema_name VARCHAR(200);
-DECLARE @schema_query VARCHAR(1000);
+DECLARE @schema_name VARCHAR(50);
+DECLARE @schema_query VARCHAR(200);
 -- Table
-DECLARE @table_name VARCHAR(200);
-DECLARE @table_query VARCHAR(1000);
+DECLARE @table_name VARCHAR(100);
+DECLARE @table_query VARCHAR(600);
 
 DECLARE @count INT = 1;
-WHILE @count <= 20000
+WHILE @count <= 10000
 BEGIN
+    SET @user = 'hc_user_' + CAST(@count AS VARCHAR);
+    SET @user_login_query = 'CREATE LOGIN ' + @user + ' WITH PASSWORD = ''Password12!'';';
+    SET @user_create_query = 'CREATE USER ' + @user + ' FOR LOGIN ' + @user + ';';
+    EXEC (@user_login_query);
+    EXEC (@user_create_query);
+
     SET @schema_name = 'hc_schema_' + CAST(@count AS VARCHAR);
     SET @schema_query = 'CREATE SCHEMA ' + @schema_name;
     EXEC (@schema_query);
@@ -85,6 +95,7 @@ BEGIN
     SET @table_name = 'high_cardinality_' + CAST(@count AS VARCHAR);
     SET @table_query = @table_prefix + @table_name + @table_columns;
     EXEC (@table_query);
+
     SET @count = @count + 1;
 END;
 

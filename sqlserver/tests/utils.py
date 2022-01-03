@@ -35,8 +35,9 @@ class HighCardinalityQueries:
     TIMEOUT = 60 * 8
 
     def __init__(self, instance_docker, setup_timeout=TIMEOUT):
-        self.EXPECTED_TABLE_COUNT = 20_000
-        self.EXPECTED_SCHEMA_COUNT = 20_000
+        self.EXPECTED_USER_COUNT = 10_000
+        self.EXPECTED_SCHEMA_COUNT = 10_000
+        self.EXPECTED_TABLE_COUNT = 10_000
         self.EXPECTED_ROW_COUNT = 100_000
         self.columns = [
             'id',
@@ -71,11 +72,16 @@ class HighCardinalityQueries:
         self._is_running = False
         self._threads = []
 
-        self._wait_for('SELECT COUNT(*) FROM datadog_test.sys.tables', self.EXPECTED_TABLE_COUNT)
-        self._wait_for(
+        # Wait until everything is setup before proceeding.
+        self._wait_for_count(
+            'SELECT COUNT(*) FROM datadog_test.sys.database_principals WHERE name LIKE \'hc_user_%\'',
+            self.EXPECTED_USER_COUNT,
+        )
+        self._wait_for_count(
             'SELECT COUNT(*) FROM datadog_test.sys.schemas WHERE name LIKE \'hc_schema_%\'', self.EXPECTED_SCHEMA_COUNT
         )
-        self._wait_for('SELECT COUNT(*) FROM datadog_test.dbo.high_cardinality', self.EXPECTED_ROW_COUNT)
+        self._wait_for_count('SELECT COUNT(*) FROM datadog_test.sys.tables', self.EXPECTED_TABLE_COUNT)
+        self._wait_for_count('SELECT COUNT(*) FROM datadog_test.dbo.high_cardinality', self.EXPECTED_ROW_COUNT)
 
     def start_background(self, user, config=None):
         """
@@ -194,7 +200,7 @@ class HighCardinalityQueries:
         conn.timeout = DEFAULT_TIMEOUT
         return conn
 
-    def _wait_for(self, query, expected_count):
+    def _wait_for_count(self, query, expected_count):
         timeout = time.time() + self._setup_timeout
         while True:
             with self.get_conn_for_user('bob').cursor() as cursor:
@@ -203,7 +209,7 @@ class HighCardinalityQueries:
                 if count >= expected_count:
                     break
                 elif time.time() > timeout:
-                    raise Exception('Waiting for data timed out: {}'.format(query))
+                    raise Exception('Waiting for data timed out, count: {} | query: {}'.format(count, query))
                 time.sleep(5)
 
     @staticmethod
