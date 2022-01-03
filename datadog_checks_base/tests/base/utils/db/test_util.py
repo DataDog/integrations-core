@@ -5,11 +5,19 @@
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 
+import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.datadog_agent import datadog_agent
-from datadog_checks.base.utils.db.utils import ConstantRateLimiter, DBMAsyncJob, RateLimitingTTLCache, resolve_db_host
+from datadog_checks.base.utils.db.utils import (
+    ConstantRateLimiter,
+    DBMAsyncJob,
+    RateLimitingTTLCache,
+    obfuscate_sql_with_metadata,
+    resolve_db_host,
+)
+from datadog_checks.base.utils.serialization import json
 
 
 @pytest.mark.parametrize(
@@ -67,6 +75,72 @@ def test_ratelimiting_ttl_cache():
 
 class TestDBExcepption(BaseException):
     pass
+
+
+@pytest.mark.parametrize(
+    "obfusactor_return_value,expected_value",
+    [
+        (
+            json.dumps(
+                {
+                    'query': 'SELECT * FROM datadog',
+                    'metadata': {'tables_csv': 'datadog,', 'commands': ['SELECT'], 'comments': None},
+                }
+            ),
+            {
+                'query': 'SELECT * FROM datadog',
+                'metadata': {'commands': ['SELECT'], 'comments': None, 'tables': ['datadog']},
+            },
+        ),
+        (
+            json.dumps(
+                {
+                    'query': 'SELECT * FROM datadog WHERE age = (SELECT AVG(age) FROM datadog2)',
+                    'metadata': {
+                        'tables_csv': '    datadog,  datadog2      ',
+                        'commands': ['SELECT', 'SELECT'],
+                        'comments': ['-- Test comment'],
+                    },
+                }
+            ),
+            {
+                'query': 'SELECT * FROM datadog WHERE age = (SELECT AVG(age) FROM datadog2)',
+                'metadata': {
+                    'commands': ['SELECT', 'SELECT'],
+                    'comments': ['-- Test comment'],
+                    'tables': ['datadog', 'datadog2'],
+                },
+            },
+        ),
+        (
+            json.dumps(
+                {
+                    'query': 'COMMIT',
+                    'metadata': {'tables_csv': '', 'commands': ['COMMIT'], 'comments': None},
+                }
+            ),
+            {
+                'query': 'COMMIT',
+                'metadata': {'commands': ['COMMIT'], 'comments': None, 'tables': None},
+            },
+        ),
+        (
+            'SELECT * FROM datadog',
+            {
+                'query': 'SELECT * FROM datadog',
+                'metadata': {},
+            },
+        ),
+    ],
+)
+def test_obfuscate_sql_with_metadata(obfusactor_return_value, expected_value):
+    def _mock_obfuscate_sql(query, options=None):
+        return obfusactor_return_value
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _mock_obfuscate_sql
+        statement = obfuscate_sql_with_metadata('query here does not matter')
+        assert statement == expected_value
 
 
 class TestJob(DBMAsyncJob):
