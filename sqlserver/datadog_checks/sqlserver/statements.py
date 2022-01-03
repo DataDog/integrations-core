@@ -153,7 +153,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             job_name="query-metrics",
             shutdown_callback=self._close_db_conn,
         )
-        self.disable_secondary_tags = is_affirmative(check.statement_metrics_config.get('disable_secondary_tags', False))
+        self.disable_secondary_tags = is_affirmative(
+            check.statement_metrics_config.get('disable_secondary_tags', False)
+        )
         self.dm_exec_query_stats_row_limit = int(
             check.statement_metrics_config.get('dm_exec_query_stats_row_limit', 10000)
         )
@@ -202,7 +204,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             return self._statement_metrics_query
         available_columns = self._get_available_query_metrics_columns(cursor, SQL_SERVER_QUERY_METRICS_COLUMNS)
 
-        statements_query = STATEMENT_METRICS_QUERY_NO_AGGREGATES if self.disable_secondary_tags else STATEMENT_METRICS_QUERY
+        statements_query = (
+            STATEMENT_METRICS_QUERY_NO_AGGREGATES if self.disable_secondary_tags else STATEMENT_METRICS_QUERY
+        )
         self._statement_metrics_query = statements_query.format(
             query_metrics_columns=', '.join(available_columns),
             query_metrics_column_sums=', '.join(['sum({}) as {}'.format(c, c) for c in available_columns]),
