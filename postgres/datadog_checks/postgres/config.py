@@ -98,6 +98,7 @@ class PostgresConfig:
             'table_names': obfuscator_options_config.get('collect_tables', True),
             'collect_commands': obfuscator_options_config.get('collect_commands', True),
             'collect_comments': obfuscator_options_config.get('collect_comments', True),
+            'return_json_metadata': True,
         }
 
     def _build_tags(self, custom_tags):
