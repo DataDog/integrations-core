@@ -38,9 +38,11 @@ metadata:
           # - 1.3.6.1.4.1.12356.101.4.1.1.0|4|v5.4.8,build1183,180115 (GA)
       product_name:
         symbol:
-          OID: 1.3.6.1.2.1.47.1.1.1.1.7.1  # entPhysicalName OID at index `1`
-          name: entPhysicalName
-          # Examples: `FGT_501E
+          OID: 1.3.6.1.2.1.47.1.1.1.1.10.1  # entPhysicalName OID at index `1`
+          name: entPhysicalSoftwareRev
+          match_pattern: '^(\S+)\s+'
+          match_value: '$1'
+          # Examples: `FortiGate-1500D` from `FortiGate-1500D v5.4.8,build1183b1183,180115 (GA)`
       model:
         symbol:
           OID: 1.3.6.1.2.1.47.1.1.1.1.13.1  # entPhysicalModelName OID at index `1`
