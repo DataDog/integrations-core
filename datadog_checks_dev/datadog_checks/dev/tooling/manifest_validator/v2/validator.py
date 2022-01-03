@@ -33,6 +33,13 @@ class DisplayOnPublicValidator(BaseManifestValidator):
             else:
                 self.fail(output)
 
+        if not is_public:
+            message = (
+                f"  {check_name}: `display_on_public_website` is disabled, set to `True` "
+                f"if you want the integration documentation to be published."
+            )
+            self.warning(message)
+
 
 class TileDescriptionValidator(BaseManifestValidator):
     DESCRIPTION_PATH = '/tile/description'

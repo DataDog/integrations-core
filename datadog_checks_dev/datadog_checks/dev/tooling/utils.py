@@ -33,7 +33,9 @@ def get_license_header():
     return (
         '# (C) Datadog, Inc. {year}-present\n'
         '# All rights reserved\n'
-        '# Licensed under a 3-clause BSD style license (see LICENSE)'.format(year=str(datetime.now(timezone.utc).year))
+        '# Licensed under a 3-clause BSD style license (see LICENSE)\n'.format(
+            year=str(datetime.now(timezone.utc).year)
+        )
     )
 
 
@@ -44,6 +46,9 @@ def get_config_models_documentation():
         '#     ddev -x validate config -s <INTEGRATION_NAME>\n'
         '#     ddev -x validate models -s <INTEGRATION_NAME>\n'
     )
+
+
+VALIDADORS_FILE = 'validators.py'  # This file is different than the others because it's contents are custom
 
 
 def format_commit_id(commit_id):

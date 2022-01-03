@@ -1,11 +1,11 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 from .constants import OPENAPI_DATA_TYPES
-from .utils import default_option_example, normalize_source_name
 
 
-def spec_validator(spec, loader):
+def spec_validator(spec: dict, loader) -> None:
     if not isinstance(spec, dict):
         loader.errors.append(f'{loader.source}: Configuration specifications must be a mapping object')
         return
@@ -43,7 +43,7 @@ def spec_validator(spec, loader):
     files_validator(files, loader)
 
 
-def files_validator(files, loader):
+def files_validator(files, loader) -> None:
     num_files = len(files)
     file_names_origin = {}
     example_file_names_origin = {}
@@ -147,6 +147,11 @@ def options_validator(options, loader, file_name, *sections):
             except Exception as e:
                 loader.errors.append(f'{loader.source}, {file_name}, {sections_display}option #{option_index}: {e}')
                 break
+
+            else:
+                # Handle the case where a template name is overriden
+                if 'name' in option:
+                    template['name'] = option['name']
 
             errors = loader.templates.apply_overrides(template, overrides)
             if errors:
@@ -674,3 +679,11 @@ def value_validator(value, loader, file_name, sections_display, option_name, dep
                 ' | '.join(sorted(OPENAPI_DATA_TYPES)),
             )
         )
+
+
+def default_option_example(option_name):
+    return f'<{option_name.upper()}>'
+
+
+def normalize_source_name(source_name):
+    return source_name.lower().replace(' ', '_')

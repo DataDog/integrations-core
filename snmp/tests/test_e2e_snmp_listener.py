@@ -19,7 +19,7 @@ from tests.metrics import (
 
 from . import common
 
-pytestmark = pytest.mark.e2e
+pytestmark = [pytest.mark.e2e, common.py3_plus_only]
 
 
 def _build_device_ip(container_ip, last_digit='1'):

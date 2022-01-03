@@ -1,6 +1,12 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from copy import deepcopy
+
+AGENT_V2_OVERRIDE = {
+    'cilium_endpoint_regenerations': 'endpoint.regenerations',
+    'cilium_policy_import_errors': 'policy.import_errors',
+}
 
 AGENT_METRICS = {
     'cilium_agent_api_process_time_seconds': 'agent.api_process_time.seconds',
@@ -18,7 +24,6 @@ AGENT_METRICS = {
     'cilium_drop_count_total': 'drop_count.total',
     'cilium_endpoint_count': 'endpoint.count',
     'cilium_endpoint_regeneration_time_stats_seconds': 'endpoint.regeneration_time_stats.seconds',
-    'cilium_endpoint_regenerations': 'endpoint.regenerations.count',
     'cilium_endpoint_state': 'endpoint.state',
     'cilium_errors_warnings_total': 'errors_warning.total',
     'cilium_forward_bytes_total': 'forward_bytes.total',
@@ -62,6 +67,10 @@ AGENT_METRICS = {
     'cilium_kvstore_events_queue_seconds': 'kvstore.events_queue.seconds',
 }
 
+OPERATOR_V2_OVERRIDES = {
+    'cilium_operator_process_cpu_seconds_total': 'operator.process.cpu.seconds.total',
+}
+
 OPERATOR_METRICS = {
     'cilium_operator_process_cpu_seconds_total': 'operator.process.cpu.seconds',
     'cilium_operator_process_max_fds': 'operator.process.max_fds',
@@ -90,3 +99,25 @@ OPERATOR_METRICS = {
     'cilium_operator_eni_nodes': 'operator.eni.nodes.total',
     'cilium_operator_eni_resync_total': 'operator.eni.resync.total',
 }
+
+AGENT_V2_METRICS = deepcopy(AGENT_METRICS)
+AGENT_V2_METRICS.update(AGENT_V2_OVERRIDE)
+
+OPERATOR_V2_METRICS = deepcopy(OPERATOR_METRICS)
+OPERATOR_V2_METRICS.update(OPERATOR_V2_OVERRIDES)
+
+
+def construct_metrics_config(metric_map):
+    metrics = []
+    for raw_metric_name, metric_name in metric_map.items():
+        if raw_metric_name.endswith('_total'):
+            raw_metric_name = raw_metric_name[:-6]
+            metric_name = metric_name[:-6]
+        elif raw_metric_name.endswith('_counter'):
+            raw_metric_name = raw_metric_name[:-8]
+            metric_name = metric_name[:-8]
+
+        config = {raw_metric_name: {'name': metric_name}}
+        metrics.append(config)
+
+    return metrics
