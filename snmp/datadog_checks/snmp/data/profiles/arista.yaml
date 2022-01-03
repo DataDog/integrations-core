@@ -53,7 +53,7 @@ metadata:
         symbols:
           - OID: 1.3.6.1.2.1.47.1.1.1.1.13.1  # entPhysicalModelName OID at index `1`
             name: entPhysicalModelName
-            # Examples: `Arista Networks CCS-720XP-48Y6`
+            # Examples: `DCS-7504`
           - OID: 1.3.6.1.2.1.1.1.0
             name: sysDescr
             match_pattern: 'running on an Arista Networks ([\w-]+)'
