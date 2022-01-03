@@ -99,6 +99,17 @@ def test_check_kafka(aggregator, kafka_instance, dd_run_check):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_can_send_event(aggregator, kafka_instance, dd_run_check):
+    """
+    Testing Kafka_consumer check.
+    """
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
+    kafka_consumer_check.send_event("test", "test", [], "test", "test")
+    aggregator.assert_event("test", exact_match=False, count=1)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_check_kafka_metrics_limit(aggregator, kafka_instance, dd_run_check):
     """
     Testing Kafka_consumer check.

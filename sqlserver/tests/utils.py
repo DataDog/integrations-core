@@ -18,7 +18,7 @@ from .conftest import DEFAULT_TIMEOUT
 windows_ci = pytest.mark.skipif(not running_on_windows_ci(), reason='Test can only be run on Windows CI')
 not_windows_ci = pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
 always_on = pytest.mark.skipif(
-    os.environ["COMPOSE_FOLDER"] == 'compose', reason='Test can only be run on AlwaysOn SQLServer instances'
+    os.environ["COMPOSE_FOLDER"] != 'compose-ha', reason='Test can only be run on AlwaysOn SQLServer instances'
 )
 hc_only = pytest.mark.skipif(
     os.environ["COMPOSE_FOLDER"] != 'compose-hc',

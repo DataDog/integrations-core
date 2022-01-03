@@ -7,6 +7,8 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 
+from .common import skip_windows_ci
+
 pytestmark = pytest.mark.unit
 
 
@@ -182,6 +184,7 @@ def test_channel_queue_config_error(instance_config):
     assert 'channel, queue_manager are required configurations' in str(excinfo.value)
 
 
+@skip_windows_ci
 def test_ssl_connection_creation(get_check, instance):
     """
     Test that we are not getting unicode/bytes type error.
