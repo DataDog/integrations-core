@@ -351,3 +351,159 @@ def test_e2e_core_metadata_hpe_proliant(dd_agent_check):
         u'serial_number': u'dLPEdPBE5yKtjW9xx3',
     }
     assert device == actual_device
+
+
+def test_e2e_core_metadata_juniper_ex(dd_agent_check):
+    """Test Juniper EX metadata collection"""
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'juniper-ex',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
+    assert len(events) == 1
+    event1 = events[0]
+
+    # assert device (there is only one device)
+    pprint.pprint(event1['devices'])
+    assert len(event1['devices']) == 1
+    actual_device = event1['devices'][0]
+    expected_device = {
+        u'description': u'Juniper Networks, Inc. ex2200-24t-4g internet router, kernel '
+        + u'JUNOS 10.2R1.8 #0: 2010-05-27 20:13:49 UTC',
+        u'id': u'default:' + device_ip,
+        u'id_tags': [
+            u'device_namespace:default',
+            u'snmp_device:' + device_ip,
+        ],
+        u'ip_address': device_ip,
+        u'model': u'ex2200-24t-4g',
+        u'os_name': u'JUNOS',
+        u'os_version': u'10.2R1.8',
+        u'product_name': u'EX2200 Ethernet Switch',
+        u'profile': u'juniper-ex',
+        u'status': 1,
+        u'sys_object_id': u'1.3.6.1.4.1.2636.1.1.1.2.30',
+        u'serial_number': u'dXPEdPBE5yKtjW9xx3',
+        u'tags': [
+            u'device_namespace:default',
+            u'device_vendor:juniper-networks',
+            u'snmp_device:' + device_ip,
+            u'snmp_profile:juniper-ex',
+        ],
+        u'vendor': u'juniper-networks',
+        u'version': u'version-1.0',
+    }
+    assert expected_device == actual_device
+
+
+def test_e2e_core_metadata_juniper_mx(dd_agent_check):
+    """Test Juniper MX metadata collection"""
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'juniper-mx',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
+    assert len(events) == 1
+    event1 = events[0]
+
+    # assert device (there is only one device)
+    pprint.pprint(event1['devices'])
+    assert len(event1['devices']) == 1
+    actual_device = event1['devices'][0]
+    expected_device = {
+        u'description': u'Juniper Networks, Inc. mx480 internet router, kernel JUNOS 11.2R1.10 '
+        + u'#0: 2011-07-29 07:15:34 UTC',
+        u'id': u'default:' + device_ip,
+        u'id_tags': [
+            u'device_namespace:default',
+            u'snmp_device:' + device_ip,
+        ],
+        u'ip_address': device_ip,
+        u'model': u'mx480',
+        u'os_name': u'JUNOS',
+        u'os_version': u'11.2R1.10',
+        u'product_name': u'MX480 Router',
+        u'profile': u'juniper-mx',
+        u'status': 1,
+        u'sys_object_id': u'1.3.6.1.4.1.2636.1.1.1.2.25',
+        u'serial_number': u'dXPEdPBE5yKtjW9xx4',
+        u'tags': [
+            u'device_namespace:default',
+            u'device_vendor:juniper-networks',
+            u'snmp_device:' + device_ip,
+            u'snmp_profile:juniper-mx',
+        ],
+        u'vendor': u'juniper-networks',
+        u'version': u'version-1.1',
+    }
+    assert expected_device == actual_device
+
+
+def test_e2e_core_metadata_juniper_srx(dd_agent_check):
+    """Test Juniper SRX metadata collection"""
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'juniper-srx',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
+    assert len(events) == 1
+    event1 = events[0]
+
+    # assert device (there is only one device)
+    pprint.pprint(event1['devices'])
+    assert len(event1['devices']) == 1
+    actual_device = event1['devices'][0]
+    expected_device = {
+        u'description': u'Juniper Networks, Inc. srx3400 internet router, kernel JUNOS '
+        + u'10.4R3.4 #0: 2011-03-19 22:06:23 UTC',
+        u'id': u'default:' + device_ip,
+        u'id_tags': [
+            u'device_namespace:default',
+            u'snmp_device:' + device_ip,
+        ],
+        u'ip_address': device_ip,
+        u'model': u'srx3400',
+        u'os_name': u'JUNOS',
+        u'os_version': u'10.4R3.4',
+        u'product_name': u'SRX 3400 Router',
+        u'profile': u'juniper-srx',
+        u'status': 1,
+        u'sys_object_id': u'1.3.6.1.4.1.2636.1.1.1.2.35',
+        u'serial_number': u'dXPEdPBE5yKtjW9xx5',
+        u'tags': [
+            u'device_namespace:default',
+            u'device_vendor:juniper-networks',
+            u'snmp_device:' + device_ip,
+            u'snmp_profile:juniper-srx',
+        ],
+        u'vendor': u'juniper-networks',
+        u'version': u'version-1.2',
+    }
+    assert expected_device == actual_device
