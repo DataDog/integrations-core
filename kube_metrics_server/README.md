@@ -47,7 +47,7 @@ If your endpoint is secured, additional configuration is required:
 
 2. Mount the related certificate file in the Agent pod.
 
-3. Apply your SSL configuration. Refer to the [default configuration file][6] for more information.
+3. Apply your SSL configuration. See the [default configuration file][6] for more information.
 
 ### Validation
 

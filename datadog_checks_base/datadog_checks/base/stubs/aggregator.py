@@ -40,7 +40,7 @@ def backend_normalize_metric_name(metric_name):
 
 
 def check_tag_names(metric, tags):
-    if not os.environ.get('DDEV_SKIP_GENERIC_TAGS_CHECK'):
+    if tags and not os.environ.get('DDEV_SKIP_GENERIC_TAGS_CHECK'):
         try:
             from datadog_checks.base.utils.tagging import GENERIC_TAGS
         except ImportError:

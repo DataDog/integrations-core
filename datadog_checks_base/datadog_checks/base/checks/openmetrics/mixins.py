@@ -348,12 +348,16 @@ class OpenMetricsScraperMixin(object):
         # INTERNAL FEATURE, might be removed in future versions
         config['_text_filter_blacklist'] = []
 
-        # Whether or not to use the service account bearer token for authentication
-        # if 'bearer_token_path' is not set, we use /var/run/secrets/kubernetes.io/serviceaccount/token
+        # Whether or not to use the service account bearer token for authentication.
+        # Can be explicitly set to true or false to send or not the bearer token.
+        # If set to the `tls_only` value, the bearer token will be sent only to https endpoints.
+        # If 'bearer_token_path' is not set, we use /var/run/secrets/kubernetes.io/serviceaccount/token
         # as a default path to get the token.
-        config['bearer_token_auth'] = is_affirmative(
-            instance.get('bearer_token_auth', default_instance.get('bearer_token_auth', False))
-        )
+        bearer_token_auth = _get_setting('bearer_token_auth', False)
+        if bearer_token_auth == 'tls_only':
+            config['bearer_token_auth'] = config['prometheus_url'].startswith("https://")
+        else:
+            config['bearer_token_auth'] = is_affirmative(bearer_token_auth)
 
         # Can be used to get a service account bearer token from files
         # other than /var/run/secrets/kubernetes.io/serviceaccount/token
