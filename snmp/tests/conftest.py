@@ -95,7 +95,6 @@ def create_datadog_conf_file(tmp_dir):
         # Setting check_runners to a negative number to disable check runners is a workaround,
         # Datadog Agent might not guarantee this behaviour in the future.
         'check_runners': -1,
-
         'snmp_listener': {
             'workers': 4,
             'discovery_interval': 10,
