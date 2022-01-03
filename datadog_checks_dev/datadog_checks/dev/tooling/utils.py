@@ -46,6 +46,9 @@ def get_config_models_documentation():
     )
 
 
+VALIDADORS_FILE = 'validators.py'  # This file is different than the others because it's contents are custom
+
+
 def format_commit_id(commit_id):
     if commit_id:
         if commit_id.isdigit():

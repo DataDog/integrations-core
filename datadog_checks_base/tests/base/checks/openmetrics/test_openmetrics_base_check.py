@@ -198,3 +198,19 @@ def test_bearer_token_not_found():
     }
     with pytest.raises(IOError):
         OpenMetricsBaseCheck('prometheus_check', {}, {}, [instance])
+
+
+def test_bearer_token_auto_http():
+    endpoint = "http://localhost:12345/metrics"
+    instance = {'prometheus_url': endpoint, 'namespace': 'default_namespace', 'bearer_token_auth': 'tls_only'}
+    with patch.object(OpenMetricsBaseCheck, 'KUBERNETES_TOKEN_PATH', os.path.join(FIXTURE_PATH, 'default_token')):
+        check = OpenMetricsBaseCheck('prometheus_check', {}, {}, [instance])
+        assert check.get_scraper_config(instance)['_bearer_token'] is None
+
+
+def test_bearer_token_auto_https():
+    endpoint = "https://localhost:12345/metrics"
+    instance = {'prometheus_url': endpoint, 'namespace': 'default_namespace', 'bearer_token_auth': 'tls_only'}
+    with patch.object(OpenMetricsBaseCheck, 'KUBERNETES_TOKEN_PATH', os.path.join(FIXTURE_PATH, 'default_token')):
+        check = OpenMetricsBaseCheck('prometheus_check', {}, {}, [instance])
+        assert check.get_scraper_config(instance)['_bearer_token'] == 'my default token'

@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 23.6.0 / 2021-12-20
+
+* [Security] Bump lxml package. See [#10904](https://github.com/DataDog/integrations-core/pull/10904).
+
 ## 23.5.0 / 2021-12-08
 
 * [Added] Add decorator for tracking execution statistics of check methods. See [#10809](https://github.com/DataDog/integrations-core/pull/10809).

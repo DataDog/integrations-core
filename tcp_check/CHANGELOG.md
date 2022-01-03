@@ -1,5 +1,9 @@
 # CHANGELOG - tcp_check
 
+## 4.2.0 / 2021-12-21
+
+* [Added] Add multiple_ips option and address tag. See [#10868](https://github.com/DataDog/integrations-core/pull/10868).
+
 ## 4.1.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
