@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import datetime
 import decimal
+import functools
 import logging
 import os
 import socket
@@ -38,6 +39,27 @@ SUBMISSION_METHODS = {
     # and a value and therefore must be defined as a custom transformer.
     'service_check': '__service_check',
 }
+
+
+def _traced_dbm_async_job_method(f):
+    # traces DBMAsyncJob.run_job only if tracing is enabled
+    if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true':
+        try:
+            from ddtrace import tracer
+
+            @functools.wraps(f)
+            def wrapper(self, *args, **kwargs):
+                with tracer.trace(
+                    "run",
+                    service="{}-integration".format(self._check.name),
+                    resource="{}.run_job".format(type(self).__name__),
+                ):
+                    self.run_job()
+
+            return wrapper
+        except Exception:
+            return f
+    return f
 
 
 def create_submission_transformer(submit_method):
@@ -242,27 +264,34 @@ class DBMAsyncJob(object):
                     )
                     break
                 self._run_job_rate_limited()
-        except self._expected_db_exceptions as e:
-            self._log.warning(
-                "[%s] Job loop database error: %s",
-                self._job_tags_str,
-                e,
-                exc_info=self._log.getEffectiveLevel() == logging.DEBUG,
-            )
-            self._check.count(
-                "dd.{}.async_job.error".format(self._dbms),
-                1,
-                tags=self._job_tags + ["error:database-{}".format(type(e))],
-                raw=True,
-            )
         except Exception as e:
-            self._log.exception("[%s] Job loop crash", self._job_tags_str)
-            self._check.count(
-                "dd.{}.async_job.error".format(self._dbms),
-                1,
-                tags=self._job_tags + ["error:crash-{}".format(type(e))],
-                raw=True,
-            )
+            if self._cancel_event.isSet():
+                # canceling can cause exceptions if the connection is closed the middle of the check run
+                # in this case we still want to report it as a cancellation instead of a crash
+                self._log.debug("[%s] Job loop error after cancel: %s", self._job_tags_str, e)
+                self._log.info("[%s] Job loop cancelled", self._job_tags_str)
+                self._check.count("dd.{}.async_job.cancel".format(self._dbms), 1, tags=self._job_tags, raw=True)
+            elif isinstance(e, self._expected_db_exceptions):
+                self._log.warning(
+                    "[%s] Job loop database error: %s",
+                    self._job_tags_str,
+                    e,
+                    exc_info=self._log.getEffectiveLevel() == logging.DEBUG,
+                )
+                self._check.count(
+                    "dd.{}.async_job.error".format(self._dbms),
+                    1,
+                    tags=self._job_tags + ["error:database-{}".format(type(e))],
+                    raw=True,
+                )
+            else:
+                self._log.exception("[%s] Job loop crash", self._job_tags_str)
+                self._check.count(
+                    "dd.{}.async_job.error".format(self._dbms),
+                    1,
+                    tags=self._job_tags + ["error:crash-{}".format(type(e))],
+                    raw=True,
+                )
         finally:
             self._log.info("[%s] Shutting down job loop", self._job_tags_str)
             if self._shutdown_callback:
@@ -273,8 +302,12 @@ class DBMAsyncJob(object):
             self._rate_limiter = ConstantRateLimiter(rate_limit)
 
     def _run_job_rate_limited(self):
-        self.run_job()
+        self._run_job_traced()
         self._rate_limiter.sleep()
+
+    @_traced_dbm_async_job_method
+    def _run_job_traced(self):
+        return self.run_job()
 
     def run_job(self):
         raise NotImplementedError()

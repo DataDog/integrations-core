@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  sqlserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - SQLSERVER_BASE_IMAGE=${SQLSERVER_BASE_IMAGE}
+    ports:
+      - "1433:1433"
