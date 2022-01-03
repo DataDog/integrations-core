@@ -11,6 +11,7 @@ from datamodel_code_generator.parser.openapi import OpenAPIParser
 from datadog_checks.dev.tooling.configuration.consumers.model.model_file import build_model_file
 from datadog_checks.dev.tooling.configuration.consumers.model.model_info import ModelInfo
 from datadog_checks.dev.tooling.configuration.consumers.openapi_document import build_openapi_document
+from datadog_checks.dev.tooling.utils import VALIDADORS_FILE
 
 PYTHON_VERSION = PythonVersion.PY_38
 
@@ -160,7 +161,7 @@ class ModelConsumer:
         model_files['__init__.py'] = ('\n'.join(package_root_lines), [])
 
         # Custom
-        model_files['validators.py'] = (VALIDATORS_DOCUMENTATION, [])
+        model_files[VALIDADORS_FILE] = (VALIDATORS_DOCUMENTATION, [])
         return model_files
 
     def _merge_instances(self, section: dict, errors: List[str]) -> dict:

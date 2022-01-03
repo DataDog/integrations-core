@@ -18,7 +18,14 @@ from ...configuration.consumers import ModelConsumer
 from ...constants import get_root
 from ...manifest_utils import Manifest
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_license_header, get_models_location, get_version_string
+from ...utils import (
+    VALIDADORS_FILE,
+    complete_valid_checks,
+    get_config_models_documentation,
+    get_license_header,
+    get_models_location,
+    get_version_string,
+)
 from ..console import (
     CONTEXT_SETTINGS,
     abort,
@@ -52,8 +59,8 @@ def models(ctx, check, sync, verbose):
     files_failed = {}
     num_files = 0
 
-    license_header_lines = get_license_header().splitlines(True)
-    license_header_lines.append('\n')
+    license_header_lines = get_license_header().splitlines(True) + ['\n']
+    documentation_header_lines = ['\n'] + get_config_models_documentation().splitlines(True) + ['\n']
 
     code_formatter = ModelConsumer.create_code_formatter()
 
@@ -117,7 +124,7 @@ def models(ctx, check, sync, verbose):
                     check_display_queue.append((echo_failure, error))
                 continue
 
-            model_file_lines = contents.splitlines(True)
+            generated_model_file_lines = contents.splitlines(True)
             current_model_file_lines = []
             expected_model_file_lines = []
 
@@ -127,22 +134,21 @@ def models(ctx, check, sync, verbose):
 
                 current_model_file_lines = read_file_lines(model_file_path)
 
-                if model_file == 'validators.py' and (len(current_model_file_lines) + 1) > len(license_header_lines):
+                if model_file == VALIDADORS_FILE and (len(current_model_file_lines) + 1) > len(license_header_lines):
                     # validators.py is a custom file, it should only be rendered the first time
                     continue
 
-                for line in current_model_file_lines:
-                    if not line.startswith('#'):
-                        break
-
-                    expected_model_file_lines.append(line)
-
-                expected_model_file_lines.extend(model_file_lines)
+                expected_model_file_lines.extend(license_header_lines)
+                if model_file != VALIDADORS_FILE:
+                    expected_model_file_lines.extend(documentation_header_lines)
+                expected_model_file_lines.extend(generated_model_file_lines)
             else:
                 if not community_check:
                     expected_model_file_lines.extend(license_header_lines)
+                if model_file != VALIDADORS_FILE:
+                    expected_model_file_lines.extend(documentation_header_lines)
 
-                expected_model_file_lines.extend(model_file_lines)
+                expected_model_file_lines.extend(generated_model_file_lines)
 
             if current_model_file_lines != expected_model_file_lines:
                 if sync:
