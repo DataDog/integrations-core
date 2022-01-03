@@ -10,7 +10,8 @@
         "groups": [
             "host",
             "port",
-            "db"
+            "db",
+            "server"
         ],
         "name": "Can Connect",
         "description": "Returns `CRITICAL` if the Agent is unable to connect to the monitored PGBouncer instance. Returns `OK` otherwise."
