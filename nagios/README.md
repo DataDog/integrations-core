@@ -4,7 +4,7 @@
 
 Send events from your Nagios-monitored infrastructure to Datadog for richer alerting and to help correlate Nagios events with metrics from your Datadog-monitored infrastructure.
 
-This check watches your Nagios server's logs and sends events to Datadog for:
+This check watches your Nagios server's logs and sends events to Datadog for the following:
 
 - Service flaps
 - Host state changes
