@@ -45,6 +45,12 @@ files:
       value:
         type: string
         example: master
+    - name: reported_hostname
+      description: |
+        Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
+        and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+      value:
+        type: string
     - name: database_autodiscovery
       description: |
         Auto-discover and monitor databases. Supported for the metrics check. 
@@ -223,6 +229,14 @@ files:
           value:
             type: boolean
             example: true
+        - name: disable_secondary_tags
+          description: |
+            Disable the secondary tags on query aggregate metrics, such as `user` and `database`. This is an optimization 
+            for certain database workloads which result in long metric collection times.
+          value:
+            type: boolean
+            example: false
+          hidden: true
         - name: collection_interval
           description: |
             Set the query metric collection interval (in seconds). Each collection involves one or more queries to

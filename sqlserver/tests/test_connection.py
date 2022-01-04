@@ -12,7 +12,6 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import Connection
 
 from .common import CHECK_NAME
-from .utils import not_windows_ci, windows_ci
 
 pytestmark = pytest.mark.unit
 
@@ -89,22 +88,11 @@ def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_sql_de
         connection._connection_options_validation('somekey', 'somedb')
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_query_timeout(aggregator, dd_run_check, instance_docker):
-    _run_test_query_timeout(aggregator, dd_run_check, instance_docker)
-
-
-@windows_ci
-@pytest.mark.integration
-def test_query_timeout_windows(aggregator, dd_run_check, instance_sql_msoledb):
-    _run_test_query_timeout(aggregator, dd_run_check, instance_sql_msoledb)
-
-
-def _run_test_query_timeout(aggregator, dd_run_check, instance):
-    instance['command_timeout'] = 1
-    check = SQLServer(CHECK_NAME, {}, [instance])
+def test_query_timeout(instance_docker):
+    instance_docker['command_timeout'] = 1
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
     check.initialize_connection()
     with check.connection.open_managed_default_connection():
         with check.connection.get_managed_cursor() as cursor:
@@ -122,7 +110,6 @@ def _run_test_query_timeout(aggregator, dd_run_check, instance):
                     assert 'timeout' in "".join(e.args).lower(), "must be a timeout"
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_connection_cleanup(instance_docker):

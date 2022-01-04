@@ -19,7 +19,6 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
 from .common import CHECK_NAME
-from .utils import not_windows_ci, windows_ci
 
 try:
     import pyodbc
@@ -59,7 +58,6 @@ def instance_sql_msoledb_dbm(instance_sql_msoledb):
     return instance_sql_msoledb
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
@@ -87,7 +85,6 @@ def test_get_available_query_metrics_columns(aggregator, dbm_instance, expected_
             assert result_available_columns == available_columns
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_get_statement_metrics_query_cached(aggregator, dbm_instance, caplog):
@@ -108,7 +105,7 @@ def test_get_statement_metrics_query_cached(aggregator, dbm_instance, caplog):
 
 
 test_statement_metrics_and_plans_parameterized = (
-    "database,plan_user,query,match_pattern,param_groups",
+    "database,plan_user,query,match_pattern,param_groups,disable_secondary_tags",
     [
         [
             "datadog_test",
@@ -116,6 +113,7 @@ test_statement_metrics_and_plans_parameterized = (
             "SELECT * FROM ϑings",
             r"SELECT \* FROM ϑings",
             ((),),
+            False,
         ],
         [
             "datadog_test",
@@ -127,6 +125,7 @@ test_statement_metrics_and_plans_parameterized = (
                 (2,),
                 (3,),
             ),
+            False,
         ],
         [
             "master",
@@ -138,6 +137,7 @@ test_statement_metrics_and_plans_parameterized = (
                 (2,),
                 (3,),
             ),
+            False,
         ],
         [
             "datadog_test",
@@ -149,65 +149,43 @@ test_statement_metrics_and_plans_parameterized = (
                 (2, "there"),
                 (3, "bill"),
             ),
+            False,
+        ],
+        [
+            "datadog_test",
+            "dbo",
+            "SELECT * FROM ϑings where id = ?",
+            r"\(@P1 \w+\)SELECT \* FROM ϑings where id = @P1",
+            (
+                (1,),
+                (2,),
+                (3,),
+            ),
+            True,
         ],
     ],
 )
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(*test_statement_metrics_and_plans_parameterized)
 def test_statement_metrics_and_plans(
-    aggregator, dd_run_check, dbm_instance, bob_conn, database, plan_user, query, param_groups, match_pattern, caplog
-):
-    _run_test_statement_metrics_and_plans(
-        aggregator,
-        dd_run_check,
-        dbm_instance,
-        bob_conn,
-        database,
-        plan_user,
-        query,
-        param_groups,
-        match_pattern,
-        caplog,
-    )
-
-
-@windows_ci
-@pytest.mark.integration
-@pytest.mark.parametrize(*test_statement_metrics_and_plans_parameterized)
-def test_statement_metrics_and_plans_windows(
     aggregator,
     dd_run_check,
-    instance_sql_msoledb_dbm,
+    dbm_instance,
     bob_conn,
     database,
     plan_user,
     query,
     param_groups,
+    disable_secondary_tags,
     match_pattern,
     caplog,
 ):
-    _run_test_statement_metrics_and_plans(
-        aggregator,
-        dd_run_check,
-        instance_sql_msoledb_dbm,
-        bob_conn,
-        database,
-        plan_user,
-        query,
-        param_groups,
-        match_pattern,
-        caplog,
-    )
-
-
-def _run_test_statement_metrics_and_plans(
-    aggregator, dd_run_check, dbm_instance, bob_conn, database, plan_user, query, param_groups, match_pattern, caplog
-):
     caplog.set_level(logging.INFO)
+    if disable_secondary_tags:
+        dbm_instance['query_metrics']['disable_secondary_tags'] = True
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     # the check must be run three times:
@@ -252,8 +230,12 @@ def _run_test_statement_metrics_and_plans(
     assert total_execution_count == len(param_groups), "wrong execution count"
     for row in matching_rows:
         assert row['query_signature'], "missing query signature"
-        assert row['database_name'] == database, "incorrect database_name"
-        assert row['user_name'] == plan_user, "incorrect user_name"
+        if disable_secondary_tags:
+            assert 'database_name' not in row
+            assert 'user_name' not in row
+        else:
+            assert row['database_name'] == database, "incorrect database_name"
+            assert row['user_name'] == plan_user, "incorrect user_name"
         for column in available_query_metrics_columns:
             assert column in row, "missing required metrics column {}".format(column)
             assert type(row[column]) in (float, int), "wrong type for metrics column {}".format(column)
@@ -269,7 +251,12 @@ def _run_test_statement_metrics_and_plans(
         assert event['host'] == "stubbed.hostname", "wrong hostname"
         assert event['ddsource'] == "sqlserver", "wrong source"
         assert event['ddagentversion'], "missing ddagentversion"
-        assert set(event['ddtags'].split(',')) == expected_instance_tags_with_db, "wrong instance tags for plan event"
+        if disable_secondary_tags:
+            assert set(event['ddtags'].split(',')) == expected_instance_tags, "wrong instance tags for plan event"
+        else:
+            assert (
+                set(event['ddtags'].split(',')) == expected_instance_tags_with_db
+            ), "wrong instance tags for plan event"
 
     plan_events = [s for s in dbm_samples if s['dbm_type'] == "plan"]
     assert plan_events, "should have collected some plans"
@@ -290,7 +277,6 @@ def _run_test_statement_metrics_and_plans(
     )
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
@@ -426,7 +412,6 @@ def test_async_job_enabled(dd_run_check, dbm_instance, statement_metrics_enabled
         assert check.statement_metrics._job_loop_future is None
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
@@ -441,7 +426,6 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     )
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):

@@ -5,6 +5,7 @@ import copy
 import logging
 from os import environ
 
+import mock
 import pytest
 from pkg_resources import parse_version
 
@@ -13,7 +14,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mysql import MySql
 
 from . import common, tags, variables
-from .common import MYSQL_REPLICATION, MYSQL_VERSION_PARSED, requires_static_version
+from .common import HOST, MYSQL_REPLICATION, MYSQL_VERSION_PARSED, PORT, requires_static_version
 
 
 @pytest.mark.integration
@@ -247,16 +248,31 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         assert mysql_check._is_group_replication_active(db) is False
 
 
-@pytest.mark.parametrize('dbm_enabled', (True, False))
-def test_correct_hostname(dbm_enabled, aggregator, dd_run_check, instance_basic):
+@pytest.mark.parametrize(
+    'dbm_enabled, reported_hostname, expected_hostname',
+    [
+        (True, '', 'resolved.hostname'),
+        (False, '', 'stubbed.hostname'),
+        (False, 'forced_hostname', 'forced_hostname'),
+        (True, 'forced_hostname', 'forced_hostname'),
+    ],
+)
+def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, aggregator, dd_run_check, instance_basic):
     instance_basic['dbm'] = dbm_enabled
+    instance_basic['disable_generic_tags'] = False  # This flag also affects the hostname
+    instance_basic['reported_hostname'] = reported_hostname
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
-    dd_run_check(mysql_check)
 
-    expected_hostname = 'stubbed.hostname' if dbm_enabled else None
+    with mock.patch('datadog_checks.mysql.MySql.resolve_db_host', return_value='resolved.hostname') as resolve_db_host:
+        dd_run_check(mysql_check)
+        if reported_hostname:
+            assert resolve_db_host.called is False, 'Expected resolve_db_host.called to be False'
+        else:
+            assert resolve_db_host.called == dbm_enabled, 'Expected resolve_db_host.called to be ' + str(dbm_enabled)
 
+    expected_tags = ['server:{}'.format(HOST), 'port:{}'.format(PORT)]
     aggregator.assert_service_check(
-        'mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS_MIN, count=1, hostname=expected_hostname
+        'mysql.can_connect', status=MySql.OK, tags=expected_tags, count=1, hostname=expected_hostname
     )
 
     testable_metrics = variables.STATUS_VARS + variables.VARIABLES_VARS + variables.INNODB_VARS + variables.BINLOG_VARS
