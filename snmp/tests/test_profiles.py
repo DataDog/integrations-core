@@ -2013,7 +2013,7 @@ def test_checkpoint_firewall(aggregator):
 def test_arista(aggregator):
     run_profile_check('arista')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:arista', 'device_vendor:arista']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:arista', 'device_vendor:arista', 'snmp_host:DCS-7504-name']
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -2047,6 +2047,7 @@ def test_arista(aggregator):
         aggregator.assert_metric('snmp.entPhySensorValue', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
         aggregator.assert_metric('snmp.entPhySensorOperStatus', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
 
+    aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     aggregator.assert_all_metrics_covered()
 
 
