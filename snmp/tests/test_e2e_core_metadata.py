@@ -79,7 +79,6 @@ def test_e2e_core_metadata_f5(dd_agent_check):
                     u'model': u'Z100',
                     u'os_name': u'Linux',
                     u'os_version': u'3.10.0-862.14.4.el7.ve.x86_64',
-                    u'os_hostname': u'f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
                 },
             ],
             u'interfaces': [
