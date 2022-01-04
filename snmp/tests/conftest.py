@@ -91,6 +91,10 @@ def create_datadog_conf_file(tmp_dir):
     container_ip = get_container_ip(SNMP_CONTAINER_NAME)
     prefix = ".".join(container_ip.split('.')[:3])
     datadog_conf = {
+        # Set check_runners to -1 to avoid checks being run in background when running `agent check` for e2e testing
+        # Setting check_runners to a negative number to disable check runners is a workaround,
+        # Datadog Agent might not guarantee this behaviour in the future.
+        'check_runners': -1,
         'snmp_listener': {
             'workers': 4,
             'discovery_interval': 10,
