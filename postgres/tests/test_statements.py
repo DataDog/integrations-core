@@ -510,6 +510,7 @@ def test_statement_samples_collect(
         conn.close()
 
 
+@pytest.mark.parametrize("pg_stat_statements_view", ["pg_stat_statements", "datadog.pg_stat_statements()"])
 @pytest.mark.parametrize(
     "metadata,expected_metadata_payload",
     [
@@ -524,9 +525,10 @@ def test_statement_samples_collect(
     ],
 )
 def test_statement_metadata(
-    aggregator, integration_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload
+    aggregator, integration_check, dbm_instance, datadog_agent, pg_stat_statements_view, metadata, expected_metadata_payload
 ):
     """Tests for metadata in both samples and metrics"""
+    dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     dbm_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
 
@@ -571,6 +573,11 @@ def test_statement_metadata(
     assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
     assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
     assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
+
+    if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_statements_view == "pg_stat_statements":
+        # cannot catch any queries from other users
+        # only can see own queries
+        return False
 
     # Test metrics metadata, metadata in metrics are located in the rows.
     metrics = aggregator.get_event_platform_events("dbm-metrics")
