@@ -18,7 +18,7 @@ This check also creates a service check for every executor task.
 
 ### Installation
 
-Follow the instructions in our [blog post][2] to install the Datadog Agent on each Mesos agent node via the DC/OS web UI.
+See [Installing Datadog on Mesos with DC/OS][2] to install the Datadog Agent on each Mesos agent node with the DC/OS web UI.
 
 ### Configuration
 
@@ -32,7 +32,7 @@ Follow the instructions in our [blog post][2] to install the Datadog Agent on ea
 
 #### Marathon
 
-If you are not using DC/OS, then use either the Marathon web UI or post to the API URL the following JSON to define the Datadog Agent application. You must change `<YOUR_DATADOG_API_KEY>` with your API Key and the number of instances with the number of slave nodes on your cluster. You may also need to update the docker image used to more recent tag. You can find the latest [on Docker Hub][3]
+If you are not using DC/OS, use the Marathon web UI or post to the API URL the following JSON to define the Datadog Agent. You must change `<YOUR_DATADOG_API_KEY>` with your API Key and the number of instances with the number of slave nodes on your cluster. You may also need to update the docker image used to more recent tag. You can find the latest [on Docker Hub][3]
 
 ```json
 {
@@ -137,7 +137,7 @@ partial -->
 
 3. [Restart the Agent][5].
 
-See [Datadog's documentation][6] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+To enable logs for Kubernetes environments, see [Kubernetes Log Collection][6].
 
 ### Validation
 
