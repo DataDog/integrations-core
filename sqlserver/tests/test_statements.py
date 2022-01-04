@@ -267,8 +267,7 @@ def test_statement_metadata(
     query_signature = '6d1d070f9b6c5647'
 
     def _run_query():
-        with bob_conn.cursor() as cursor:
-            cursor.execute(query)
+        bob_conn.execute_with_retries(query)
 
     def _obfuscate_sql(sql_query, options=None):
         return json.dumps({'query': sql_query, 'metadata': metadata})
@@ -302,7 +301,6 @@ def test_statement_metadata(
     assert metric['dd_commands'] == expected_metadata_payload['commands']
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
