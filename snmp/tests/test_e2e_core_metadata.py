@@ -604,3 +604,47 @@ def test_e2e_core_metadata_aruba_access_point(dd_agent_check):
         'version': '6.5.4.3-6.5.4.3',
     }
     assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_arista(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'arista',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'description': 'Arista Networks EOS version 4.20.11.1M running on an Arista Networks DCS-7504',
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'model': 'DCS-7504',
+        'name': 'DCS-7504-name',
+        'os_name': 'EOS',
+        'os_version': '4.20.11.1M',
+        'product_name': 'DCS-7504 Chassis',
+        'profile': 'arista',
+        'serial_number': 'HSH16195058',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.30065.1.3011.7504',
+        'tags': [
+            'device_namespace:default',
+            'device_vendor:arista',
+            'snmp_device:' + device_ip,
+            'snmp_host:DCS-7504-name',
+            'snmp_profile:arista',
+        ],
+        'vendor': 'arista',
+        'version': '12.00',
+    }
+    assert_device_metadata(aggregator, device)
