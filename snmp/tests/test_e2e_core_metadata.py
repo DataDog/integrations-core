@@ -413,7 +413,6 @@ def test_e2e_core_metadata_dell_idrac(dd_agent_check):
         u'profile': u'idrac',
         u'status': 1,
         u'model': u'customFooVersion',
-        u'os_hostname': u'custom.hostname',
         u'os_name': u'Ubuntu',
         u'os_version': u'18.04.3 LTS (Bionic Beaver)',
         u'product_name': u'PowerEdge',
