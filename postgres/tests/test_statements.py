@@ -525,7 +525,13 @@ def test_statement_samples_collect(
     ],
 )
 def test_statement_metadata(
-    aggregator, integration_check, dbm_instance, datadog_agent, pg_stat_statements_view, metadata, expected_metadata_payload
+    aggregator,
+    integration_check,
+    dbm_instance,
+    datadog_agent,
+    pg_stat_statements_view,
+    metadata,
+    expected_metadata_payload,
 ):
     """Tests for metadata in both samples and metrics"""
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
