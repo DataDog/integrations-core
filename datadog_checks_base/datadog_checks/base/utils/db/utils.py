@@ -192,7 +192,7 @@ def obfuscate_sql_with_metadata(query, options=None):
         raise e
     metadata = statement_with_metadata.get('metadata', {})
     tables = metadata.pop('tables_csv', None)
-    tables = [table.strip() for table in tables.split(',') if table != ''] if tables != '' else None
+    tables = [table.strip() for table in tables.split(',') if table != ''] if tables else None
     statement_with_metadata['metadata']['tables'] = tables
     return statement_with_metadata
 
