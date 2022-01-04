@@ -86,6 +86,7 @@ To install the {integration_name} check on your host:
         test_dev_dep = 'datadog-checks-dev'
         tox_base_dep = datadog_checks_base_req
         integration_links = integration_type_links.get(integration_type)
+
     config = {
         'author': author,
         'check_class': f"{''.join(part.capitalize() for part in normalized_integration_name.split('_'))}Check",
