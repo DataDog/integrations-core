@@ -19,7 +19,7 @@ from ...constants import get_root
 from ...manifest_utils import Manifest
 from ...testing import process_checks_option
 from ...utils import (
-    VALIDADORS_FILE,
+    CUSTOM_FILES,
     complete_valid_checks,
     get_config_models_documentation,
     get_license_header,
@@ -134,18 +134,18 @@ def models(ctx, check, sync, verbose):
 
                 current_model_file_lines = read_file_lines(model_file_path)
 
-                if model_file == VALIDADORS_FILE and (len(current_model_file_lines) + 1) > len(license_header_lines):
-                    # validators.py is a custom file, it should only be rendered the first time
+                if model_file in CUSTOM_FILES and (len(current_model_file_lines) + 1) > len(license_header_lines):
+                    # validators.py and deprecations.py are custom files, they should only be rendered the first time
                     continue
 
                 expected_model_file_lines.extend(license_header_lines)
-                if model_file != VALIDADORS_FILE:
+                if model_file not in CUSTOM_FILES:
                     expected_model_file_lines.extend(documentation_header_lines)
                 expected_model_file_lines.extend(generated_model_file_lines)
             else:
                 if not community_check:
                     expected_model_file_lines.extend(license_header_lines)
-                if model_file != VALIDADORS_FILE:
+                if model_file not in CUSTOM_FILES:
                     expected_model_file_lines.extend(documentation_header_lines)
 
                 expected_model_file_lines.extend(generated_model_file_lines)

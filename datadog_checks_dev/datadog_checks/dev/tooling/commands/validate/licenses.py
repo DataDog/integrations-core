@@ -115,6 +115,11 @@ VALID_LICENSES = (
 
 HEADERS = ['Component', 'Origin', 'License', 'Copyright']
 
+ADDITIONAL_LICENSES = [
+    'flup,Vendor,BSD-3-Clause,Allan Saddi\n',
+    'flup-py3,Vendor,BSD-3-Clause,Allan Saddi\n',
+]
+
 
 def format_attribution_line(package_name, license_id, package_copyright):
     package_copyright = ' | '.join(sorted(package_copyright))
@@ -315,6 +320,7 @@ def licenses(ctx, sync):
 
     extra_licenses_lines, any_errors = validate_extra_licenses()
     lines.extend(extra_licenses_lines)
+    lines.extend(ADDITIONAL_LICENSES)
     lines.sort()
     license_attribution_file = get_license_attribution_file()
     if sync:

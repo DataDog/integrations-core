@@ -85,7 +85,7 @@ db.createUser({
 
 ##### Configure the agents
 You need to configure one agent for each member. See below for configuration options.
-Note: Monitoring of arbiter nodes is not supported remotely as mentioned in [MongoDB documentation][3]. Yet, any status change of an arbiter node is reported by the agent connected to the primary.
+**Note**: Monitoring of arbiter nodes is not supported remotely as mentioned in [MongoDB documentation][3]. Yet, any status change of an arbiter node is reported by the Agent connected to the primary.
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Sharding" xxx -->
@@ -123,7 +123,7 @@ Then create the same user from a mongos proxy. This action creates the local use
 2. Configure one Agent for each member of the config servers.
 3. Configure one extra Agent to connect to the cluster through a mongos proxy. This mongos proxy can be a new one dedicated to monitoring purposes, or an existing mongos proxy.
 
-**Note**: Monitoring of arbiter nodes is not supported (see the [MongoDB documentation][3] for more details). However, any status change of an arbiter node is reported by the Agent connected to the primary.
+**Note**: Monitoring of arbiter nodes is not supported (see the [MongoDB Replica Set Arbiter][3] for more details). However, any status change of an arbiter node is reported by the Agent connected to the primary.
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -244,7 +244,7 @@ LABEL "com.datadoghq.ad.instances"='[{"hosts": ["%%host%%:%%port%%"], "username"
 {{< /site-region >}}
 partial -->
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][10].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker Log Collection][10].
 
 Then, set [Log Integrations][11] as Docker labels:
 
@@ -278,7 +278,7 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][13] as pod annotations on your application container. Aside from this, templates can also be configure via [a file, a configmap, or a key-value store][14].
+Set [Autodiscovery Integrations Templates][13] as pod annotations on your application container. Aside from this, templates can also be configure with a [file, configmap, or key-value store][14].
 
 ```yaml
 apiVersion: v1
@@ -310,7 +310,7 @@ spec:
 {{< /site-region >}}
 partial -->
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][15].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][15].
 
 Then, set [Log Integrations][11] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][16].
 
@@ -377,7 +377,7 @@ partial -->
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][19].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [ECS Log Collection][19].
 
 Then, set [Log Integrations][11] as Docker labels:
 
@@ -458,7 +458,7 @@ Need help? Contact [Datadog support][25].
 
 ## Further Reading
 
-Read our series of blog posts about collecting metrics from MongoDB with Datadog:
+Additional helpful documentation, links, and articles:
 
 - [Monitoring MongoDB performance metrics (WiredTiger)][26]
 - [Monitoring MongoDB performance metrics (MMAP)][27]

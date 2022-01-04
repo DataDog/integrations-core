@@ -106,7 +106,7 @@ def test_get_statement_metrics_query_cached(aggregator, dbm_instance, caplog):
 
 
 test_statement_metrics_and_plans_parameterized = (
-    "database,plan_user,query,match_pattern,param_groups",
+    "database,plan_user,query,match_pattern,param_groups,disable_secondary_tags",
     [
         [
             "datadog_test",
@@ -114,6 +114,7 @@ test_statement_metrics_and_plans_parameterized = (
             "SELECT * FROM ϑings",
             r"SELECT \* FROM ϑings",
             ((),),
+            False,
         ],
         [
             "datadog_test",
@@ -125,6 +126,7 @@ test_statement_metrics_and_plans_parameterized = (
                 (2,),
                 (3,),
             ),
+            False,
         ],
         [
             "master",
@@ -136,6 +138,7 @@ test_statement_metrics_and_plans_parameterized = (
                 (2,),
                 (3,),
             ),
+            False,
         ],
         [
             "datadog_test",
@@ -147,6 +150,19 @@ test_statement_metrics_and_plans_parameterized = (
                 (2, "there"),
                 (3, "bill"),
             ),
+            False,
+        ],
+        [
+            "datadog_test",
+            "dbo",
+            "SELECT * FROM ϑings where id = ?",
+            r"\(@P1 \w+\)SELECT \* FROM ϑings where id = @P1",
+            (
+                (1,),
+                (2,),
+                (3,),
+            ),
+            True,
         ],
     ],
 )
@@ -156,9 +172,21 @@ test_statement_metrics_and_plans_parameterized = (
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(*test_statement_metrics_and_plans_parameterized)
 def test_statement_metrics_and_plans(
-    aggregator, dd_run_check, dbm_instance, bob_conn, database, plan_user, query, param_groups, match_pattern, caplog
+    aggregator,
+    dd_run_check,
+    dbm_instance,
+    bob_conn,
+    database,
+    plan_user,
+    query,
+    param_groups,
+    disable_secondary_tags,
+    match_pattern,
+    caplog,
 ):
     caplog.set_level(logging.INFO)
+    if disable_secondary_tags:
+        dbm_instance['query_metrics']['disable_secondary_tags'] = True
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     # the check must be run three times:
@@ -203,8 +231,12 @@ def test_statement_metrics_and_plans(
     assert total_execution_count == len(param_groups), "wrong execution count"
     for row in matching_rows:
         assert row['query_signature'], "missing query signature"
-        assert row['database_name'] == database, "incorrect database_name"
-        assert row['user_name'] == plan_user, "incorrect user_name"
+        if disable_secondary_tags:
+            assert 'database_name' not in row
+            assert 'user_name' not in row
+        else:
+            assert row['database_name'] == database, "incorrect database_name"
+            assert row['user_name'] == plan_user, "incorrect user_name"
         for column in available_query_metrics_columns:
             assert column in row, "missing required metrics column {}".format(column)
             assert type(row[column]) in (float, int), "wrong type for metrics column {}".format(column)
@@ -220,7 +252,12 @@ def test_statement_metrics_and_plans(
         assert event['host'] == "stubbed.hostname", "wrong hostname"
         assert event['ddsource'] == "sqlserver", "wrong source"
         assert event['ddagentversion'], "missing ddagentversion"
-        assert set(event['ddtags'].split(',')) == expected_instance_tags_with_db, "wrong instance tags for plan event"
+        if disable_secondary_tags:
+            assert set(event['ddtags'].split(',')) == expected_instance_tags, "wrong instance tags for plan event"
+        else:
+            assert (
+                set(event['ddtags'].split(',')) == expected_instance_tags_with_db
+            ), "wrong instance tags for plan event"
 
     plan_events = [s for s in dbm_samples if s['dbm_type'] == "plan"]
     assert plan_events, "should have collected some plans"
