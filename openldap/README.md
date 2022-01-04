@@ -155,7 +155,7 @@ partial -->
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][5].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][5].
 
 | Parameter      | Value                                                 |
 | -------------- | ----------------------------------------------------- |
