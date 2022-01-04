@@ -5,6 +5,8 @@
 
 # Status metrics (e.g: powerSupplyStatus, temperatureProbeStatus, etc.) output one of the following: other(1), unknown(2), ok(3), nonCritical(4), critical(5), nonRecoverable(6)
 
+# PowerEdge servers should be monitored via their iDRAC interface (and with the idrac profile) when possible.
+
 extends:
   - _base.yaml
   - _intel-lan-adapters.yaml
