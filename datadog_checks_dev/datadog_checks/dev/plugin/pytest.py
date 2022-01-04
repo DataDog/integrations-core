@@ -228,7 +228,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
             )
 
         for raw_json in matches:
-            raw_json = '\n'.join(line for line in raw_json.split('\n') if not line.startswith('2021-12'))
+            raw_json = '\n'.join(line for line in raw_json.split('\n') if not line.startswith('2022-'))
             try:
                 collector = json.loads(raw_json)
             except Exception as e:
