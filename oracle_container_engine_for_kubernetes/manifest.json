@@ -29,5 +29,5 @@
     "monitors": {},
     "service_checks": {},
     "metrics_metadata": "metadata.csv"
-  },
+  }
 }
