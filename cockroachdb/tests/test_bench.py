@@ -4,13 +4,15 @@
 import pytest
 
 from datadog_checks.cockroachdb import CockroachdbCheck
+from datadog_checks.dev.testing import requires_py3
+
+pytestmark = [pytest.mark.usefixtures('dd_environment'), requires_py3]
 
 
-@pytest.mark.usefixtures('dd_environment')
-def test_run(benchmark, instance):
+def test_run(benchmark, dd_run_check, instance):
     check = CockroachdbCheck('cockroachdb', {}, [instance])
 
     # Run once to get instantiation of config out of the way.
-    check.check(instance)
+    dd_run_check(check)
 
-    benchmark(check.check, instance)
+    benchmark(dd_run_check, check)
