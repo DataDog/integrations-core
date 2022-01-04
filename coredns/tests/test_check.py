@@ -43,3 +43,17 @@ class TestCoreDNS:
 
         aggregator.assert_all_metrics_covered()
         aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
+    def test_omv2_docker(self, aggregator, dd_environment, docker_omv2_instance):
+        """
+        Testing OpenMetricsV2 metrics emitted from docker container.
+        """
+
+        check = CoreDNSCheck(CHECK_NAME, {}, [docker_omv2_instance])
+        check.check(docker_omv2_instance)
+
+        for metric in METRICS:
+            aggregator.assert_metric(metric)
+
+        aggregator.assert_all_metrics_covered()
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)

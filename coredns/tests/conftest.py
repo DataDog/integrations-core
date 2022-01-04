@@ -38,9 +38,19 @@ def dockerinstance():
     return {'prometheus_url': URL}
 
 
+@pytest.fixture
+def docker_omv2_instance():
+    return {'openmetrics_endpoint': URL}
+
+
 @pytest.fixture(scope="session")
 def instance():
     return {'prometheus_url': URL}
+
+
+@pytest.fixture(scope="session")
+def openmetrics_instance():
+    return {'openmetrics_endpoint': URL}
 
 
 @pytest.fixture
