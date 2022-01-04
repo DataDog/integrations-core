@@ -6,7 +6,7 @@
     "log collection"
   ],
   "creates_events": false,
-  "display_name": "Mesos Slave",
+  "display_name": "Mesos",
   "guid": "14d0267e-9989-4d09-8362-9319958e858e",
   "is_public": true,
   "maintainer": "help@datadoghq.com",
@@ -28,7 +28,9 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "mesos": "assets/dashboards/mesos_overview.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "mesos"

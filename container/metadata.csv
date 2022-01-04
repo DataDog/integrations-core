@@ -5,7 +5,6 @@ container.cpu.user,rate,,nanosecond,,The container userspace CPU usage,0,contain
 container.cpu.system,rate,,nanosecond,,The container system CPU usage,0,container,cpu_system
 container.cpu.throttled,rate,,nanosecond,,The total cpu throttled time,0,container,cpu_throttled
 container.cpu.throttled.periods,rate,,,,The number of periods during which the container was throttled,0,container,cpu_throttled_periods
-container.cpu.shares,gauge,,,,The number of CPU shares assigned to the container,0,container,cpu_shares
 container.cpu.limit,gauge,,nanosecond,,The maximum CPU time available to the container,0,container,cpu_limit
 container.memory.usage,gauge,,byte,,The container total memory usage,0,container,mem_usage
 container.memory.kernel,gauge,,byte,,The container kernel memory usage,0,container,mem_kernel_usage
