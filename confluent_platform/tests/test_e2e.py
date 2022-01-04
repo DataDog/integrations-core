@@ -8,7 +8,8 @@ import pytest
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 
 from .common import CHECK_CONFIG
-from .metrics import ALWAYS_PRESENT_METRICS, NOT_ALWAYS_PRESENT_METRICS
+from .conftest import CONFLUENT_VERSION
+from .metrics import ALWAYS_PRESENT_METRICS, CP_62_METRICS, DEPRECATED_METRICS, NOT_ALWAYS_PRESENT_METRICS
 
 # TODO: missing e2e coverage for following metrics. See metrics in metrics.yaml.
 #   - Kafka Connect Task Metrics
@@ -32,6 +33,14 @@ def test_e2e(dd_agent_check):
 
     for metric in ALWAYS_PRESENT_METRICS:
         aggregator.assert_metric(metric)
+
+    if CONFLUENT_VERSION == "6.2.0":
+        for metric in CP_62_METRICS:
+            aggregator.assert_metric(metric)
+
+    if CONFLUENT_VERSION == "5.4.0":
+        for metric in DEPRECATED_METRICS:
+            aggregator.assert_metric(metric, at_least=0)
 
     for metric in NOT_ALWAYS_PRESENT_METRICS:
         aggregator.assert_metric(metric, at_least=0)

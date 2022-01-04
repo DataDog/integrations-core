@@ -9,7 +9,7 @@ from datadog_checks.dev.docker import get_container_ip
 
 from . import common
 
-pytestmark = [pytest.mark.e2e, common.snmp_integration_only]
+pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
 
 def test_e2e_v1_with_apc_ups_profile(dd_agent_check):

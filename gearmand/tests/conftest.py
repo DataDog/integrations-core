@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+from copy import deepcopy
 
 import pytest
 
@@ -20,8 +21,13 @@ def dd_environment():
 
 
 @pytest.fixture
+def instance():
+    return deepcopy(INSTANCE)
+
+
+@pytest.fixture
 def check():
     # Lazily import to support E2E on Windows
     from datadog_checks.gearmand import Gearman
 
-    return Gearman(CHECK_NAME, {}, [{}])
+    return lambda instance: Gearman(CHECK_NAME, {}, [instance])

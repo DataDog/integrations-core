@@ -166,6 +166,16 @@
 - name: exclude_labels
   description: |
     A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
+    May be used in conjunction with `include_labels`.
+    Labels defined in `excluded labels` will take precedence in case of overlap.
+  value:
+    type: array
+    items:
+      type: string
+- name: include_labels
+  description: |
+    A list of labels to include. May be used in conjunction with `exclude_labels`.
+    Labels defined in `excluded labels` will take precedence in case of overlap.
   value:
     type: array
     items:
@@ -224,6 +234,15 @@
     Whether or not to also collect the observation counter metrics ending in `.sum` and `.count`
     when sending histogram buckets as Datadog distribution metrics. This implicitly enables the
     `histogram_buckets_as_distributions` option.
+  value:
+    example: false
+    type: boolean
+- name: use_process_start_time
+  description: |
+    Whether to enable a heuristic for reporting counter values on the first scrape. When true,
+    the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
+    initial value can be assumed for counters. This requires keeping metrics in memory until the entire
+    response is received.
   value:
     example: false
     type: boolean

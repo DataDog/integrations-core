@@ -1,5 +1,9 @@
 # CHANGELOG - pgbouncer
 
+## 3.2.0 / 2021-11-13
+
+* [Added] Add runtime configuration validation. See [#8968](https://github.com/DataDog/integrations-core/pull/8968).
+
 ## 3.1.0 / 2021-09-06 / Agent 7.32.0
 
 * [Added] Add max_client_conn metric. See [#10033](https://github.com/DataDog/integrations-core/pull/10033). Thanks [JordanP](https://github.com/JordanP).

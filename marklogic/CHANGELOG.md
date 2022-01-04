@@ -1,5 +1,9 @@
 # CHANGELOG - MarkLogic
 
+## 2.2.0 / 2021-11-13
+
+* [Added] Add runtime configuration validation. See [#8953](https://github.com/DataDog/integrations-core/pull/8953).
+
 ## 2.1.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).

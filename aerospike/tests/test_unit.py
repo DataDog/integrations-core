@@ -13,7 +13,7 @@ from . import common
 pytestmark = pytest.mark.unit
 
 
-def test_datacenter_metrics(aggregator):
+def test_datacenter_metrics(aggregator, dd_run_check):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
     original_get_info = check.get_info
 
@@ -34,7 +34,7 @@ def test_datacenter_metrics(aggregator):
     check.collect_info = mock.MagicMock()
     check.collect_throughput = mock.MagicMock()
     check.collect_latency = mock.MagicMock()
-    check.check(None)
+    dd_run_check(check)
     for metric in common.DATACENTER_METRICS:
         aggregator.assert_metric(metric)
 

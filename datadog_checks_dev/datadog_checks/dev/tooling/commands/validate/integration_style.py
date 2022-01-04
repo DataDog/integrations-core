@@ -5,19 +5,9 @@ import re
 
 import click
 
-from ...annotations import annotate_warning
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_check_files
-from ..console import CONTEXT_SETTINGS, echo_info, echo_warning
-
-HOSTNAME_REGEX = (
-    r"(self.rate|self.gauge|self.monotonic_count|self.service_check|self.count|self.histogram)\(((.|\n)*)hostname="
-)
-
-VALID_HOSTNAME_CHECKS = [
-    "sap_hana",
-    "vsphere",
-]
+from ..console import CONTEXT_SETTINGS, annotate_warning, echo_info, echo_warning
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate check style for python files')
@@ -38,10 +28,6 @@ def integration_style(ctx, check, verbose):
         for file in files:
             validate_check_instance(check_name, file, verbose)
 
-            # Some integrations may submit hostname for valid reasons and should not warn on it
-            if check_name not in VALID_HOSTNAME_CHECKS:
-                validate_hostname_submission(check_name, file, verbose)
-
 
 def validate_check_instance(check_name, file, verbose):
     """
@@ -53,22 +39,7 @@ def validate_check_instance(check_name, file, verbose):
         if found_match_arg and verbose:
             message = (
                 "The instance argument in the `check()` function is going to be "
-                "deprecated in Agent 6. Please use `self.instance` instead."
+                "deprecated in Agent 8. Please use `self.instance` instead."
             )
-            echo_warning(f"{check_name}: " + message)
-            annotate_warning(file, message)
-
-
-def validate_hostname_submission(check_name, file, verbose):
-    """
-    Warns when hostname parameter is submitted on metric or service check
-    """
-    with open(file, 'r', encoding='utf-8') as f:
-        read_file = f.read()
-        found_match_arg = re.search(HOSTNAME_REGEX, read_file)
-        skip_validation = re.search(r"SKIP_CHECK_VALIDATION", read_file)
-
-        if found_match_arg and verbose and not skip_validation:
-            message = f"Detected `hostname` passed with {found_match_arg.groups()[0]}"
             echo_warning(f"{check_name}: " + message)
             annotate_warning(file, message)

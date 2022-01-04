@@ -99,6 +99,8 @@ instances:
     ## @param queues_regexes - list of strings - optional
     ## Use the `queues_regexes` parameters to specify one or multiple regex to to match
     ## the queues you'd like to collect metrics on (up to 200 queues).
+    ## If you have vhosts set up, the regex pattern needs to be formatted with vhost
+    ## in the format of `<vhost>/<queue_name>`.
     ## If you have less than 200 queues, you don't have to set this parameter,
     ## the metrics are collected on all the queues by default.
     ## If you have `tag_families` enabled, the first captured group in the regex

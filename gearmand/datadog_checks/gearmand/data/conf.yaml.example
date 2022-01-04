@@ -14,10 +14,10 @@ init_config:
 instances:
 
   -
-    ## @param server - string - optional - default: localhost
+    ## @param server - string - optional - default: 127.0.0.1
     ## Server to connect to.
     #
-    # server: localhost
+    # server: 127.0.0.1
 
     ## @param port - integer - optional - default: 4730
     ## Port to use when connecting to "server".

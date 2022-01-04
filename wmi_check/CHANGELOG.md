@@ -1,5 +1,9 @@
 # CHANGELOG - wmi_check
 
+## 1.13.0 / 2021-11-13
+
+* [Added] Add support for other logical operators for multiple conditions of the same property. See [#10138](https://github.com/DataDog/integrations-core/pull/10138).
+
 ## 1.12.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).

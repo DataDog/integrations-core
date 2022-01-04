@@ -1,5 +1,9 @@
 # CHANGELOG - Aerospike
 
+## 1.13.0 / 2021-11-13
+
+* [Added] Add runtime configuration validation. See [#8881](https://github.com/DataDog/integrations-core/pull/8881).
+
 ## 1.12.0 / 2021-06-22 / Agent 7.30.0
 
 * [Added] Stop using a deprecated method to support newer versions of Aerospike. See [#9566](https://github.com/DataDog/integrations-core/pull/9566).
