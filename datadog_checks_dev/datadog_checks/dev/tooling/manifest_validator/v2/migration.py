@@ -6,10 +6,9 @@ import json
 import uuid
 
 from ....fs import write_file
+from ...commands.console import abort
 from ...datastructures import JSONDict
-from ...utils import get_manifest_file, get_valid_integrations, load_manifest
-from ...commands.console import CONTEXT_SETTINGS, abort, echo_info, echo_success
-
+from ...utils import get_manifest_file, load_manifest
 
 # This means the value is either not present in the old manifest, or there's logic needed to compute it
 SKIP_IF_FOUND = "SKIP"
@@ -187,4 +186,3 @@ def migrate_manifest(repo_name, integration, to_version):
             migrated_manifest.set_path(f"/pricing/{idx}/includes_assets", True)
 
     write_file(get_manifest_file(integration), json.dumps(migrated_manifest, indent=2))
-

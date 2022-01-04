@@ -9,9 +9,9 @@ import click
 from ...fs import resolve_path
 from ..constants import get_root
 from ..create import construct_template_fields, create_template_files, get_valid_templates
+from ..manifest_validator.v2.migration import migrate_manifest
 from ..utils import kebab_case_name, normalize_package_name
 from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_warning
-from ..manifest_validator.v2.migration import migrate_manifest, TODO_FILL_IN
 
 HYPHEN = b'\xe2\x94\x80\xe2\x94\x80'.decode('utf-8')
 PIPE = b'\xe2\x94\x82'.decode('utf-8')
