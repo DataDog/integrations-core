@@ -519,3 +519,89 @@ def test_e2e_core_metadata_juniper_srx(dd_agent_check):
         u'version': u'version-1.2',
     }
     assert_device_metadata(aggregator, expected_device)
+
+
+def test_e2e_core_metadata_aruba_switch(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'aruba-switch',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'description': 'ArubaOS (MODEL: Aruba7210), Version 8.6.0.4 (74969)',
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'model': 'A7210',
+        'name': 'aruba-device-name',
+        'os_name': 'ArubaOS',
+        'os_version': '8.6.0.4',
+        'product_name': 'Aruba7210',
+        'profile': 'aruba-switch',
+        'serial_number': 'CV0009200',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.14823.1.1.32',
+        'tags': [
+            'device_namespace:default',
+            'device_vendor:aruba',
+            'snmp_device:' + device_ip,
+            'snmp_host:aruba-device-name',
+            'snmp_profile:aruba-switch',
+        ],
+        'vendor': 'aruba',
+        'version': '8.6.0.4',
+    }
+    assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_aruba_access_point(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'aruba-access-point',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'description': 'ArubaOS (MODEL: 335), Version 6.5.4.3-6.5.4.3',
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'model': '335',
+        'os_name': 'ArubaOS',
+        'os_version': '6.5.4.3',
+        'name': 'aruba-335-name',
+        'profile': 'aruba-access-point',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.14823.1.2.80',
+        'tags': [
+            'device_namespace:default',
+            'device_vendor:aruba',
+            'snmp_device:' + device_ip,
+            'snmp_host:aruba-335-name',
+            'snmp_profile:aruba-access-point',
+        ],
+        'vendor': 'aruba',
+        'version': '6.5.4.3-6.5.4.3',
+    }
+    assert_device_metadata(aggregator, device)
