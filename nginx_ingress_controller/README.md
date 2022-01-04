@@ -17,7 +17,7 @@ The `nginx-ingress-controller` check is included in the [Datadog Agent][2] packa
 
 #### Host
 
-If your Agent is running on a host, edit the `nginx_ingress_controller.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your NGINX ingress controller metrics. See the [sample nginx_ingress_controller.d/conf.yaml][3] for all available configuration options. Then [Restart the Agent][4].
+If your Agent is running on a host, edit the `nginx_ingress_controller.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample nginx_ingress_controller.d/conf.yaml][3] for all available configuration options. Then, [restart the Agent][4].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
