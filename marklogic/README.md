@@ -25,7 +25,7 @@ If you plan to use the `enable_health_service_checks` configuration, give the Da
     curl -X POST --anyauth --user <ADMIN_USER>:<ADMIN_PASSWORD> -i -H "Content-Type: application/json" -d '{"user-name": "<USER>", "password": "<PASSWORD>", "roles": {"role": "manage-user"}}' http://<HOSTNAME>:8002/manage/v2/users
     ```
     Use the correct `<ADMIN_USER>` and `<ADMIN_PASSWORD>`, and replace `<USER>` and `<PASSWORD>` with the username and password that the Datadog Agent uses.
-    For more information about the endpoint, see the [MarkLogic documentation][6].
+    For more details, see the MarkLogic documentation: [POST /manage/v2/users][6].
 
 2. To verify the user was created with enough permissions:
     ```shell
@@ -53,7 +53,7 @@ If you plan to use the `enable_health_service_checks` configuration, give the Da
         ("http://marklogic.com/dev_modules"))
     
     ```
-   For more information about the query, see the [MarkLogic documentation][7].
+   For more details, see the MarkLogic documentation: [sec:create-user][7].
 
 4. To verify that the user was created with enough permissions, use `<USER>` and `<PASSWORD>` to authenticate at `http://<HOSTNAME>:8002` (default port).
 
@@ -99,7 +99,7 @@ _Available for Agent versions >6.0_
 
 ### Validation
 
-[Run the Agent's status subcommand][10] and look for `marklogic` under the Checks section.
+Run the [Agent's status subcommand][10] and look for `marklogic` under the Checks section.
 
 ## Data Collected
 

@@ -41,6 +41,7 @@ class QueryMetrics(BaseModel):
         allow_mutation = False
 
     collection_interval: Optional[float]
+    disable_secondary_tags: Optional[bool]
     dm_exec_query_stats_row_limit: Optional[int]
     enabled: Optional[bool]
     enforce_collection_interval_deadline: Optional[bool]
