@@ -2,6 +2,7 @@ pr:
   branches:
     include:
     - master
+    - alex/testing_snmp_listener_at_dec_14_7be08593b
   paths:
     include:
     - datadog_checks_base/datadog_checks/*
