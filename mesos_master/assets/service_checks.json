@@ -1,7 +1,7 @@
 [
     {
         "agent_version": "5.2.0",
-        "integration": "mesos",
+        "integration": "Mesos Master",
         "check": "mesos_master.can_connect",
         "statuses": [
             "ok",
