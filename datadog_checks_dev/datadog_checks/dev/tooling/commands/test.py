@@ -35,6 +35,7 @@ def display_envs(check_envs):
 @click.option('--ddtrace', is_flag=True, help='Run tests using dd-trace-py')
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
 @click.option('--cov-missing', '-cm', is_flag=True, help='Show line numbers of statements that were not executed')
+@click.option('--min-cov', 'min_cov', default=1, type=int, help='Set minimum code coverage to pass for marketplace check. Default is 1')
 @click.option('--junit', '-j', 'junit', is_flag=True, help='Generate junit reports')
 @click.option('--marker', '-m', help='Only run tests matching given marker expression')
 @click.option('--filter', '-k', 'test_filter', help='Only run tests matching given substring expression')
@@ -61,6 +62,7 @@ def test(
     e2e,
     ddtrace,
     coverage,
+    min_cov,
     junit,
     cov_missing,
     marker,
@@ -279,7 +281,7 @@ def test(
 
                     # Marketplace PRs should fail CI if coverage is not greater than 0
                     if repo == 'marketplace':
-                        result = run_command('coverage report --rcfile=../.coveragerc --fail-under=1')
+                        result = run_command(f'coverage report --rcfile=../.coveragerc --fail-under={min_cov}')
                     else:
                         result = run_command('coverage report --rcfile=../.coveragerc')
 
