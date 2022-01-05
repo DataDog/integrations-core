@@ -760,6 +760,7 @@ def test_e2e_core_metadata_checkpoint_firewall(dd_agent_check):
         'ip_address': device_ip,
         'model': 'Check Point 3200',
         'os_name': 'Gaia',
+        'os_version': '3.10.0',
         'product_name': 'SVN Foundation',
         'profile': 'checkpoint-firewall',
         'serial_number': '1711BA4008',
