@@ -5,7 +5,7 @@ from six import PY2
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
 
-from .common import DEFAULT_METRICS, GO_METRICS
+from .metrics import DEFAULT_METRICS, GO_METRICS
 
 
 class CoreDNSCheck(OpenMetricsBaseCheck):

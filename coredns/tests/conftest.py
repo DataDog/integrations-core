@@ -49,7 +49,7 @@ def instance():
 
 
 @pytest.fixture(scope="session")
-def openmetrics_instance():
+def omv2_instance():
     return {'openmetrics_endpoint': URL}
 
 

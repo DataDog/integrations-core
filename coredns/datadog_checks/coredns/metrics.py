@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 # Sorted per plugin, all prometheus metrics prior to version 1.7.0 which introduced a major renaming of metrics.
 DEFAULT_METRICS = {
     # acl: https://github.com/coredns/coredns/blob/v1.6.9/plugin/acl/
@@ -127,3 +129,22 @@ GO_METRICS = {
     'process_start_time_seconds': 'process.start_time_seconds',
     'process_virtual_memory_bytes': 'process.virtual_memory_bytes',
 }
+
+METRIC_MAP = deepcopy(DEFAULT_METRICS)
+METRIC_MAP.update(GO_METRICS)
+
+
+def construct_metrics_config(metric_map):
+    metrics = []
+    for raw_metric_name, metric_name in metric_map.items():
+        if raw_metric_name.endswith('_total'):
+            raw_metric_name = raw_metric_name[:-6]
+            metric_name = metric_name[:-6]
+        elif raw_metric_name.endswith('_counter'):
+            raw_metric_name = raw_metric_name[:-8]
+            metric_name = metric_name[:-8]
+
+        config = {raw_metric_name: {'name': metric_name}}
+        metrics.append(config)
+
+    return metrics
