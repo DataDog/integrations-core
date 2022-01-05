@@ -103,6 +103,7 @@ def create(ctx, name, integration_type, location, manifest_v2, non_interactive, 
 
     if name.islower():
         echo_warning('Make sure to use the display name. e.g. MapR, Ambari, IBM MQ, vSphere, ...')
+        click.confirm('Do you want to continue?', abort=True)
 
     repo_choice = ctx.obj['repo_choice']
     root = resolve_path(location) if location else get_root()
@@ -118,7 +119,7 @@ def create(ctx, name, integration_type, location, manifest_v2, non_interactive, 
     if repo_choice == 'marketplace':
         manifest_v2 = True
 
-    template_fields = {'manifest_version': '1.0.0' if not manifest_v2 else '2.0.0'}
+    template_fields = {'manifest_version': '1.0.0'}
     if non_interactive and repo_choice != 'core':
         abort(f'Cannot use non-interactive mode with repo_choice: {repo_choice}')
 
