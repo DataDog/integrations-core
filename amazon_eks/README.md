@@ -14,7 +14,7 @@ Additionally, [Amazon EKS Managed Node Groups][2] and [Amazon EKS on AWS Outpost
 
 ### EKS Anywhere
 
-Specific setup instructions are define in [Amazon EKS Anywhere Integration][16].
+See the [Amazon EKS Anywhere integration][16] for setup instructions.
 
 ### Metric collection
 

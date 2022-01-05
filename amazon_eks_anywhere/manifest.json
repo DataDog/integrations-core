@@ -14,7 +14,7 @@
   "metric_prefix": "aws.eks.",
   "name": "amazon_eks_anywhere",
   "public_title": "Datadog-Amazon-EKS-Anywhere Integration",
-  "short_description": "Amazon EKS Anywhere is an EKS deployment option that enables you to operate Kubernetes clusters on-premises",
+  "short_description": "An EKS deployment option for operating Kubernetes clusters on-premises",
   "support": "core",
   "supported_os": [
     "linux",
