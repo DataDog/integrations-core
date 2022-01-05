@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from .constants import OPENAPI_DATA_TYPES
-from .utils import default_option_example, normalize_source_name
 
 
 def spec_validator(spec: dict, loader) -> None:
@@ -680,3 +679,11 @@ def value_validator(value, loader, file_name, sections_display, option_name, dep
                 ' | '.join(sorted(OPENAPI_DATA_TYPES)),
             )
         )
+
+
+def default_option_example(option_name):
+    return f'<{option_name.upper()}>'
+
+
+def normalize_source_name(source_name):
+    return source_name.lower().replace(' ', '_')
