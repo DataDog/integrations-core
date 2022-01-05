@@ -274,6 +274,7 @@ def test_f5(aggregator):
         'sysTcpStatTimeWait',
         'sysUdpStatOpen',
         'sysClientsslStatCurConns',
+        'sysMultiHostCpuUsageRatio',
     ]
     counts = [
         'sysTcpStatAccepts',
@@ -298,7 +299,6 @@ def test_f5(aggregator):
         'sysMultiHostCpuIrq',
         'sysMultiHostCpuSoftirq',
         'sysMultiHostCpuIowait',
-        'sysMultiHostCpuUsageRatio',
     ]
 
     interfaces = [
