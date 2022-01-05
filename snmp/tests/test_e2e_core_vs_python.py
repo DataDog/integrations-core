@@ -47,7 +47,7 @@ def test_e2e_v3_version_autodetection(dd_agent_check):
             'community_string': '',
         }
     )
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=513 + 5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=515 + 5)
 
 
 def test_e2e_v3_explicit_version(dd_agent_check):
@@ -64,7 +64,7 @@ def test_e2e_v3_explicit_version(dd_agent_check):
             'community_string': '',
         }
     )
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=513 + 5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=515 + 5)
 
 
 def test_e2e_regex_match(dd_agent_check):
