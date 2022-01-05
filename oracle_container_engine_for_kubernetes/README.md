@@ -2,7 +2,7 @@
 
 ## Overview
 
-Oracle Cloud Infrastructure Container Engine for Kubernetes (OKE) is a fully-managed Kubernetes service for deploying and running your containerized applications on Oracle Cloud. Datadog provides you with comprehensive visibility to your Kubernetes clusters managed by OKE. Once you have enabled your Datadog integration, you can easily view your Kubernetes infrastructure, monitor live processes, and track key metrics from all your pods and containers in one place.
+Oracle Cloud Infrastructure Container Engine for Kubernetes (OKE) is a fully-managed Kubernetes service for deploying and running your containerized applications on Oracle Cloud. Datadog provides you with comprehensive visibility to your Kubernetes clusters managed by OKE. Once you have enabled your Datadog integration, you can view your Kubernetes infrastructure, monitor live processes, and track key metrics from all of your pods and containers in one place.
 
 ## Setup
 
