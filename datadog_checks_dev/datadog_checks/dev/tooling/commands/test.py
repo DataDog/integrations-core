@@ -35,7 +35,6 @@ def display_envs(check_envs):
 @click.option('--ddtrace', is_flag=True, help='Run tests using dd-trace-py')
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
 @click.option('--cov-missing', '-cm', is_flag=True, help='Show line numbers of statements that were not executed')
-@click.option('--min-cov', 'min_cov', type=int, help='Set a minimum code coverage % to pass tests.')
 @click.option('--junit', '-j', 'junit', is_flag=True, help='Generate junit reports')
 @click.option('--marker', '-m', help='Only run tests matching given marker expression')
 @click.option('--filter', '-k', 'test_filter', help='Only run tests matching given substring expression')
@@ -62,7 +61,6 @@ def test(
     e2e,
     ddtrace,
     coverage,
-    min_cov,
     junit,
     cov_missing,
     marker,
@@ -279,10 +277,7 @@ def test(
                 if not cov_keep:
                     echo_info('\n---------- Coverage report ----------\n')
 
-                    if min_cov is not None:
-                        result = run_command(f'coverage report --rcfile=../.coveragerc --fail-under={min_cov}')
-                    else:
-                        result = run_command('coverage report --rcfile=../.coveragerc')
+                    result = run_command('coverage report --rcfile=../.coveragerc')
 
                     if result.code:
                         abort('\nFailed!', code=result.code)
