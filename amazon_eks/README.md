@@ -60,4 +60,4 @@ Need help? Contact [Datadog support][11].
 [13]: https://www.datadoghq.com/blog/eks-cluster-metrics
 [14]: https://docs.datadoghq.com/integrations/amazon_eks_fargate/
 [15]: https://aws.amazon.com/eks/eks-anywhere/
-[16]: https://docs.datadoghq.com/integrations/amazon_eks_anywhere/
+[16]: https://docs.datadoghq.com/integrations/eks_anywhere/
