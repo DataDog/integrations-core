@@ -188,7 +188,7 @@ def test_e2e_custom_metrics_cases(dd_agent_check):
 
 def test_e2e_profile_apc_ups(dd_agent_check):
     config = common.generate_container_profile_config('apc_ups')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=42 + 5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=64 + 5)
 
 
 def test_e2e_profile_arista(dd_agent_check):
