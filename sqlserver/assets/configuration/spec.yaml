@@ -299,15 +299,25 @@ files:
           value:
             type: boolean
             example: false
+        - name: collect_metadata
+          description: |
+            Set to `true` to enable the collection of metadata in your SQL statements.
+            Metadata includes things such as tables, commands, and comments.
+          value:
+            type: boolean
+            example: false
         - name: collect_tables
           description: |
             Set to `false` to disable the collection of tables in your SQL statements.
+            Requires `collect_metadata: true`.
           value:
             type: boolean
             example: true
         - name: collect_commands
           description: |
             Set to `false` to disable the collection of commands in your SQL statements.
+            Requires `collect_metadata: true`.
+
             Examples: SELECT, UPDATE, DELETE, etc.
           value:
             type: boolean
@@ -315,6 +325,7 @@ files:
         - name: collect_comments
           description: |
             Set to `false` to disable the collection of comments in your SQL statements.
+            Requires `collect_metadata: true`.
           value:
             type: boolean
             example: true

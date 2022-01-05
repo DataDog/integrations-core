@@ -263,19 +263,29 @@ instances:
         #
         # replace_digits: false
 
+        ## @param collect_metadata - boolean - optional - default: false
+        ## Set to `true` to enable the collection of metadata in your SQL statements.
+        ## Metadata includes things such as tables, commands, and comments.
+        #
+        # collect_metadata: false
+
         ## @param collect_tables - boolean - optional - default: true
         ## Set to `false` to disable the collection of tables in your SQL statements.
+        ## Requires `collect_metadata: true`.
         #
         # collect_tables: true
 
         ## @param collect_commands - boolean - optional - default: true
         ## Set to `false` to disable the collection of commands in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        ##
         ## Examples: SELECT, UPDATE, DELETE, etc.
         #
         # collect_commands: true
 
         ## @param collect_comments - boolean - optional - default: true
         ## Set to `false` to disable the collection of comments in your SQL statements.
+        ## Requires `collect_metadata: true`.
         #
         # collect_comments: true
 
