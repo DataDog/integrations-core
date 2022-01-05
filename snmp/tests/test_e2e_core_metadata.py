@@ -734,3 +734,45 @@ def test_e2e_core_metadata_netapp(dd_agent_check):
         'version': '9.3P7:',
     }
     assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_checkpoint_firewall(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'checkpoint-firewall',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'description': 'Linux gw-af4bd9 3.10.0-957.21.3cpx86_64 #1 SMP Tue Jan 28 17:26:12 IST 2020 x86_64',
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'model': 'Check Point 3200',
+        'os_name': 'Gaia',
+        'os_version': '3.10.0',
+        'product_name': 'SVN Foundation',
+        'profile': 'checkpoint-firewall',
+        'serial_number': '1711BA4008',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.2620.1.1',
+        'tags': [
+            'device_namespace:default',
+            'device_vendor:checkpoint',
+            'snmp_device:' + device_ip,
+            'snmp_profile:checkpoint-firewall',
+        ],
+        'vendor': 'checkpoint',
+        'version': 'R80.10',
+    }
+    assert_device_metadata(aggregator, device)
