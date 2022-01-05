@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
+from datadog_checks.base.utils.serialization import json
+
 
 class DatadogAgentStub(object):
     """
@@ -75,7 +77,12 @@ class DatadogAgentStub(object):
         return self._cache.get(key, '')
 
     def obfuscate_sql(self, query, options=None):
-        # This is only whitespace cleanup, NOT obfuscation. Full obfuscation implementation is in go code.
+        # Full obfuscation implementation is in go code.
+        if options:
+            # Options provided is a JSON string because the Go stub requires it, whereas
+            # the python stub does not for things such as testing.
+            if json.loads(options).get('return_json_metadata', False):
+                return json.dumps({'query': re.sub(r'\s+', ' ', query or '').strip(), 'metadata': {}})
         return re.sub(r'\s+', ' ', query or '').strip()
 
     def obfuscate_sql_exec_plan(self, plan, normalize=False):

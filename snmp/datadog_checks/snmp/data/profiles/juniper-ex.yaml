@@ -16,6 +16,7 @@ extends:
   - _juniper-dcu.yaml
   - _juniper-cos.yaml
   - _juniper-firewall.yaml
+  - _juniper-junos-generic.yaml
 
 device:
   vendor: "juniper-networks"

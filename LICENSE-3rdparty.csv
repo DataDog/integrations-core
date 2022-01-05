@@ -26,8 +26,8 @@ cx-Oracle,PyPI,BSD-3-Clause,Anthony Tuininga
 ddtrace,PyPI,BSD-3-Clause,"Datadog, Inc."
 dnspython,PyPI,ISC,Bob Halley
 enum34,PyPI,BSD-3-Clause,Ethan Furman
-flup,PyPI,BSD-3-Clause,Allan Saddi
-flup-py3,PyPI,BSD-3-Clause,Allan Saddi
+flup,Vendor,BSD-3-Clause,Allan Saddi
+flup-py3,Vendor,BSD-3-Clause,Allan Saddi
 foundationdb,PyPI,Apache-2.0,FoundationDB
 futures,PyPI,PSF,Brian Quinlan
 gearman,PyPI,Apache-2.0,Matthew Tai
