@@ -58,7 +58,7 @@ To configure this check for an Agent running on a host:
      - database_url: "postgresql://datadog:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require"
    ```
 
-   **Note**: If your instance of PgBouncer does not have SSL support, replace `sslmode=require` with `sslmode=allow` to avoid server errors. For more information on SSL support, see the [Postgres documentation][4].
+   **Note**: If your instance of PgBouncer does not have SSL support, replace `sslmode=require` with `sslmode=allow` to avoid server errors. For details, see the Postgres documentation on [SSL support][4].
 
 2. [Restart the Agent][5].
 
@@ -117,7 +117,7 @@ partial -->
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][8].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][8].
 
 | Parameter      | Value                                           |
 | -------------- | ----------------------------------------------- |
