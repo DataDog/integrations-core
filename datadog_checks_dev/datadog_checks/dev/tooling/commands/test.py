@@ -278,7 +278,6 @@ def test(
                     echo_info('\n---------- Coverage report ----------\n')
 
                     result = run_command('coverage report --rcfile=../.coveragerc')
-
                     if result.code:
                         abort('\nFailed!', code=result.code)
 
