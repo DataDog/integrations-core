@@ -962,7 +962,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.io.read_bytes{$scope,$deployment,$statefulset,$replicaset,$daemonset,$label,$cluster,$node} by {host}",
+                        "q": "sum:kubernetes.io.read_bytes{$scope,$service,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$label,$cluster,$node} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "grey",
@@ -994,7 +994,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.io.write_bytes{$scope,$deployment,$statefulset,$replicaset,$daemonset,$label,$cluster,$node} by {host}",
+                        "q": "sum:kubernetes.io.write_bytes{$scope,$service,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$label,$cluster,$node} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "grey",
