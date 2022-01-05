@@ -345,6 +345,7 @@ Resources:
               enable-ecs-log-metadata: true
           MemoryReservation: 50
 ```
+
 **Note**: Use a [TaskDefinition secret][11] to avoid exposing the `apikey` in plain text.
 
 For more information on CloudFormation templating and syntax, see the [AWS CloudFormation documentation][12].
