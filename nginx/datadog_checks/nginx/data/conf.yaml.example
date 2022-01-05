@@ -78,9 +78,15 @@ instances:
     # use_plus_api_stream: false
 
     ## @param plus_api_version - integer - optional - default: 2
-    ## Specify the version of the Plus API to use. The check supports versions 1-3.
+    ## Specify the version of the Plus API to use. The check supports versions 1-7.
     #
     # plus_api_version: <PLUS_API_VERSION>
+
+    ## @param only_query_enabled_endpoints - boolean - optional - default: false
+    ## Enable this option if you would like the check to determine which API endpoints
+    ## to query based on your NGINX Plus configuration.
+    #
+    only_query_enabled_endpoints: true
 
     ## @param use_vts - boolean - optional - default: false
     ## Set this option to true if you are using the nginx vhost_traffic_status module.
@@ -356,6 +362,11 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
@@ -365,6 +376,11 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -395,13 +411,19 @@ instances:
     #
     # empty_default_hostname: false
 
+    ## @param disable_generic_tags - boolean - optional - default: false
+    ## Generic tags such as `cluster` will be replaced by <integration_name>_cluster to avoid
+    ## getting mixed with other integraton tags.
+    #
+    disable_generic_tags: true
+
 ## Log Section
 ##
 ## type - required - Type of log input source (tcp / udp / file / windows_event)
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.

@@ -54,6 +54,12 @@ configuration options.
 
 #### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -84,32 +90,26 @@ See [Datadog's documentation][9] for additional information on how to configure 
 
 ## Data Collected
 
-
-
 ### Metrics
 
 See [metadata.csv][11] for a list of metrics provided by this check.
-
-### Service Checks
-
-- `rethinkdb.can_connect`: Returns `CRITICAL` if the Agent cannot reach the configured RethinkDB server, `OK` otherwise.
-- `rethinkdb.table_status.status.ready_for_outdated_reads`: Returns `OK` if all shards of a table are ready to accept outdated read queries, `WARNING` otherwise.
-- `rethinkdb.table_status.status.ready_for_reads`: Returns `OK` if all shards of a table are ready to accept read queries, `WARNING` otherwise.
-- `rethinkdb.table_status.status.ready_for_writes`: Returns `OK` if all shards of a table are ready to accept write queries, `WARNING` otherwise.
-- `rethinkdb.table_status.status.all_replicas_ready`: Returns `OK` if all replicas are ready for reads and writes, `WARNING` otherwise (e.g. if backfills are in progress).
-
 
 ### Events
 
 RethinkDB does not include any events.
 
+### Service Checks
+
+See [service_checks.json][12] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
-Need help? Contact [Datadog support][12].
+Need help? Contact [Datadog support][13].
+
 
 [1]: https://rethinkdb.com
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://docs.datadoghq.com/agent/
+[3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://rethinkdb.com/docs/permissions-and-accounts/
 [5]: https://rethinkdb.com/docs/security/#the-admin-account
 [6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -118,4 +118,5 @@ Need help? Contact [Datadog support][12].
 [9]: https://docs.datadoghq.com/agent/kubernetes/log/
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/rethinkdb/metadata.csv
-[12]: https://docs.datadoghq.com/help/
+[12]: https://github.com/DataDog/integrations-core/blob/master/rethinkdb/assets/service_checks.json
+[13]: https://docs.datadoghq.com/help/

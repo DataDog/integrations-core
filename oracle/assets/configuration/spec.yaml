@@ -21,7 +21,19 @@ files:
       required: true
       value:
         type: string
-    - name: user
+    - name: protocol
+      description: |
+        The protocol to connect to the Oracle Database Server. Valid protocols include TCP and TCPS.
+
+        If you are using the TCPS protocol and connecting to Oracle Database through JDBC, `jdbc_truststore` and
+        `jdbc_truststore_type` are required.
+
+        More information can be found from Oracle Database's whitepaper:
+        https://www.oracle.com/technetwork/topics/wp-oracle-jdbc-thin-ssl-130128.pdf
+      value:
+        type: string
+        example: TCP
+    - name: username
       description: The username for the Datadog user account.
       required: true
       value:
@@ -38,10 +50,24 @@ files:
       value:
         type: string
         example: <DRIVER_PATH>.jar
-    - name: only_custom_queries
-      description: Set this parameter to `true` if you want to skip default system, process, and tablespace metrics checks.
+    - name: jdbc_truststore_path
+      description: |
+        The JDBC truststore file path.
+
+        Note: This option is required if connecting with TCPS through JDBC.
       value:
-        type: boolean
-        example: false
+        type: string
+    - name: jdbc_truststore_type
+      description: |
+        The JDBC truststore file type. Supported truststore types include JKS, SSO, and PKCS12.
+
+        Note: This option is required if connecting with TCPS through JDBC.
+      value:
+        type: string
+    - name: jdbc_truststore_password
+      description: |
+        The password for the truststore when connecting through JDBC.
+      value:
+        type: string
     - template: instances/db
     - template: instances/default

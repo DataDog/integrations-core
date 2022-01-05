@@ -49,7 +49,7 @@ files:
           all the processes that match the string exactly by default. Change this behavior with the
           parameter `exact_match: false`.
 
-          Note: One and only one of search_string, pid or pid_file must be specified per instance.
+          Note: Exactly one of search_string, pid or pid_file must be specified per instance.
         value:
           type: array
           items:
@@ -61,7 +61,7 @@ files:
         description: |
           A Process id to match.
 
-          Note: One and only one of search_string, pid or pid_file must be specified per instance.
+          Note: Exactly one of search_string, pid or pid_file must be specified per instance.
         value:
           type: integer
       - name: pid_file
@@ -70,7 +70,7 @@ files:
           Notes:
             * agent v6.11+ on windows runs as an unprivileged `ddagentuser`, so make sure to grant it read access to
               the PID files you specify in this option.
-            * One and only one of search_string, pid or pid_file must be specified per instance.
+            * Exactly one of search_string, pid or pid_file must be specified per instance.
         value:
           type: string
       - name: exact_match
@@ -79,7 +79,7 @@ files:
           If you want to match on a substring within proc.cmdline(), set this to false
           Regex is also supported when this flag is set to `false`.
 
-          Note: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that does not have acces to the full
+          Note: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that does not have access to the full
           command line of processes running under a different user. This option cannot be used in such cases.
           https://docs.datadoghq.com/integrations/process/#configuration
         value:

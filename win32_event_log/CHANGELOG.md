@@ -1,6 +1,16 @@
 # CHANGELOG - win32_event_log
 
-## 2.9.1 / 2021-06-01
+## 2.11.0 / 2021-10-04 / Agent 7.32.0
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 2.10.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+* [Fixed] Fix AttributeError when filters are not set. See [#9655](https://github.com/DataDog/integrations-core/pull/9655).
+* [Fixed] Document the max number of IDs that can be used for filtering per instance. See [#9749](https://github.com/DataDog/integrations-core/pull/9749).
+
+## 2.9.1 / 2021-06-01 / Agent 7.29.0
 
 * [Fixed] Bump minimum base package requirement. See [#9449](https://github.com/DataDog/integrations-core/pull/9449).
 

@@ -2,22 +2,33 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
+import os
+import threading
 from contextlib import closing
+from time import time
 
 import psycopg2
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
-from datadog_checks.postgres.relationsmanager import RELATION_METRICS, RelationsManager
+from datadog_checks.postgres.relationsmanager import INDEX_BLOAT, RELATION_METRICS, TABLE_BLOAT, RelationsManager
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .config import PostgresConfig
 from .util import CONNECTION_METRICS, FUNCTION_METRICS, REPLICATION_METRICS, fmt, get_schema_field
-from .version_utils import V9, VersionUtils
+from .version_utils import V9, V10, VersionUtils
+
+try:
+    import datadog_agent
+except ImportError:
+    from ..stubs import datadog_agent
 
 MAX_CUSTOM_RESULTS = 100
+
+PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s)"
 
 
 class PostgreSql(AgentCheck):
@@ -30,6 +41,8 @@ class PostgreSql(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self.db = None
+        self._resolved_hostname = None
+        self._agent_hostname = None
         self._version = None
         self._is_aurora = None
         self._version_utils = VersionUtils()
@@ -40,15 +53,21 @@ class PostgreSql(AgentCheck):
                 "rather than the now deprecated custom_metrics"
             )
         self._config = PostgresConfig(self.instance)
+        self.pg_settings = {}
         self.metrics_cache = PostgresMetricsCache(self._config)
-        self.statement_metrics = PostgresStatementMetrics(self, self._config)
-        self.statement_samples = PostgresStatementSamples(self, self._config)
+        self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
+        self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
         self._relations_manager = RelationsManager(self._config.relations)
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
 
+        # map[dbname -> psycopg connection]
+        self._db_pool = {}
+        self._db_pool_lock = threading.Lock()
+
     def cancel(self):
         self.statement_samples.cancel()
+        self.statement_metrics.cancel()
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
@@ -56,12 +75,69 @@ class PostgreSql(AgentCheck):
         self._is_aurora = None
         self.metrics_cache.clean_state()
 
+    def _get_debug_tags(self):
+        return ['agent_hostname:{}'.format(self.agent_hostname)]
+
+    def _get_service_check_tags(self):
+        service_check_tags = []
+        service_check_tags.extend(self._config.tags)
+        return list(service_check_tags)
+
     def _get_replication_role(self):
         cursor = self.db.cursor()
         cursor.execute('SELECT pg_is_in_recovery();')
         role = cursor.fetchone()[0]
         # value fetched for role is of <type 'bool'>
         return "standby" if role else "master"
+
+    def _collect_wal_metrics(self, instance_tags):
+        wal_file_age = self._get_wal_file_age()
+        if wal_file_age is not None:
+            self.gauge(
+                "postgresql.wal_age",
+                wal_file_age,
+                tags=[t for t in instance_tags if not t.startswith("db:")],
+                hostname=self.resolved_hostname,
+            )
+
+    def _get_wal_dir(self):
+        if self.version >= V10:
+            wal_dir = "pg_wal"
+        else:
+            wal_dir = "pg_xlog"
+
+        wal_log_dir = os.path.join(self._config.data_directory, wal_dir)
+
+        return wal_log_dir
+
+    def _get_wal_file_age(self):
+        wal_log_dir = self._get_wal_dir()
+        if not os.path.isdir(wal_log_dir):
+            self.log.warning(
+                "Cannot access WAL log directory: %s. Ensure that you are "
+                "running the agent on your local postgres database.",
+                wal_log_dir,
+            )
+            return None
+
+        all_dir_contents = os.listdir(wal_log_dir)
+        all_files = [f for f in all_dir_contents if os.path.isfile(os.path.join(wal_log_dir, f))]
+
+        # files extensions that are not valid WAL files
+        exluded_file_exts = [".backup", ".history"]
+        all_wal_files = [
+            os.path.join(wal_log_dir, file_name)
+            for file_name in all_files
+            if not any([ext for ext in exluded_file_exts if file_name.endswith(ext)])
+        ]
+        if len(all_wal_files) < 1:
+            self.log.warning("No WAL files found in directory: %s.", wal_log_dir)
+            return None
+
+        oldest_file = min(all_wal_files, key=os.path.getctime)
+        now = time()
+        oldest_file_age = now - os.path.getctime(oldest_file)
+        return oldest_file_age
 
     @property
     def version(self):
@@ -76,6 +152,28 @@ class PostgreSql(AgentCheck):
         if self._is_aurora is None:
             self._is_aurora = self._version_utils.is_aurora(self.db)
         return self._is_aurora
+
+    @property
+    def resolved_hostname(self):
+        # type: () -> str
+        if self._resolved_hostname is None:
+            if self._config.reported_hostname:
+                self._resolved_hostname = self._config.reported_hostname
+            elif self._config.dbm_enabled or self.disable_generic_tags:
+                self._resolved_hostname = self.resolve_db_host()
+            else:
+                self._resolved_hostname = self.agent_hostname
+        return self._resolved_hostname
+
+    @property
+    def agent_hostname(self):
+        # type: () -> str
+        if self._agent_hostname is None:
+            self._agent_hostname = datadog_agent.get_hostname()
+        return self._agent_hostname
+
+    def resolve_db_host(self):
+        return agent_host_resolver(self._config.host)
 
     def _run_query_scope(self, cursor, scope, is_custom_metrics, cols, descriptors):
         if scope is None:
@@ -194,7 +292,7 @@ class PostgreSql(AgentCheck):
             # Submit metrics to the Agent.
             for column, value in zip(cols, column_values):
                 name, submit_metric = scope['metrics'][column]
-                submit_metric(self, name, value, tags=set(tags))
+                submit_metric(self, name, value, tags=set(tags), hostname=self.resolved_hostname)
 
             num_results += 1
 
@@ -220,6 +318,8 @@ class PostgreSql(AgentCheck):
         # Do we need relation-specific metrics?
         if self._config.relations:
             metric_scope.extend(RELATION_METRICS)
+            if self._config.collect_bloat_metrics:
+                metric_scope.extend([INDEX_BLOAT, TABLE_BLOAT])
 
         replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
         if replication_metrics:
@@ -234,7 +334,12 @@ class PostgreSql(AgentCheck):
         cursor = self.db.cursor()
         results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False)
         if results_len is not None:
-            self.gauge("postgresql.db.count", results_len, tags=[t for t in instance_tags if not t.startswith("db:")])
+            self.gauge(
+                "postgresql.db.count",
+                results_len,
+                tags=[t for t in instance_tags if not t.startswith("db:")],
+                hostname=self.resolved_hostname,
+            )
 
         self._query_scope(cursor, bgw_instance_metrics, instance_tags, False)
         self._query_scope(cursor, archiver_instance_metrics, instance_tags, False)
@@ -272,6 +377,14 @@ class PostgreSql(AgentCheck):
                 args['port'] = self._config.port
             if self._config.query_timeout:
                 args['options'] = '-c statement_timeout=%s' % self._config.query_timeout
+            if self._config.ssl_cert:
+                args['sslcert'] = self._config.ssl_cert
+            if self._config.ssl_root_cert:
+                args['sslrootcert'] = self._config.ssl_root_cert
+            if self._config.ssl_key:
+                args['sslkey'] = self._config.ssl_key
+            if self._config.ssl_password:
+                args['sslpassword'] = self._config.ssl_password
             conn = psycopg2.connect(**args)
         # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
         conn.set_session(autocommit=True)
@@ -289,6 +402,63 @@ class PostgreSql(AgentCheck):
                 self.db.rollback()
         else:
             self.db = self._new_connection(self._config.dbname)
+
+    # Reload pg_settings on a new connection to the main db
+    def _load_pg_settings(self, db):
+        try:
+            with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
+                cursor.execute(
+                    PG_SETTINGS_QUERY,
+                    ("pg_stat_statements.max", "track_activity_query_size"),
+                )
+                rows = cursor.fetchall()
+                self.pg_settings.clear()
+                for setting in rows:
+                    name, val = setting
+                    self.pg_settings[name] = val
+        except (psycopg2.DatabaseError, psycopg2.OperationalError) as err:
+            self.log.warning("Failed to query for pg_settings: %s", repr(err))
+            self.count(
+                "dd.postgres.error",
+                1,
+                tags=self._config.tags + ["error:load-pg-settings"] + self._get_debug_tags(),
+                hostname=self.resolved_hostname,
+            )
+
+    def _get_db(self, dbname):
+        """
+        Returns a memoized psycopg2 connection to `dbname` with autocommit
+        Threadsafe as long as no transactions are used
+        :param dbname:
+        :return: a psycopg2 connection
+        """
+        # TODO: migrate the rest of this check to use a connection from this pool
+        with self._db_pool_lock:
+            db = self._db_pool.get(dbname)
+            if not db or db.closed:
+                self.log.debug("initializing connection to dbname=%s", dbname)
+                db = self._new_connection(dbname)
+                db.set_session(autocommit=True)
+                self._db_pool[dbname] = db
+                if self._config.dbname == dbname:
+                    # reload settings for the main DB only once every time the connection is reestablished
+                    self._load_pg_settings(db)
+            if db.status != psycopg2.extensions.STATUS_READY:
+                # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
+                db.rollback()
+            return db
+
+    def _close_db_pool(self):
+        # TODO: add automatic aging out of connections after some time
+        with self._db_pool_lock:
+            for dbname, db in self._db_pool.items():
+                if db and not db.closed:
+                    try:
+                        db.close()
+                    except Exception:
+                        self._log.exception("failed to close DB connection for db=%s", dbname)
+                self._db_pool[dbname] = None
 
     def _collect_custom_queries(self, tags):
         """
@@ -384,7 +554,7 @@ class PostgreSql(AgentCheck):
                     else:
                         for info in metric_info:
                             metric, value, method = info
-                            getattr(self, method)(metric, value, tags=set(query_tags))
+                            getattr(self, method)(metric, value, tags=set(query_tags), hostname=self.resolved_hostname)
 
     def check(self, _):
         tags = copy.copy(self._config.tags)
@@ -397,29 +567,33 @@ class PostgreSql(AgentCheck):
             self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
-            if self._config.deep_database_monitoring:
-                self.statement_metrics.collect_per_statement_metrics(self.db, self.version, tags)
-                self.statement_samples.run_sampler(tags)
+            if self._config.dbm_enabled:
+                self.statement_metrics.run_job_loop(tags)
+                self.statement_samples.run_job_loop(tags)
+            if self._config.collect_wal_metrics:
+                self._collect_wal_metrics(tags)
 
         except Exception as e:
-            self.log.error("Unable to collect postgres metrics.")
+            self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()
             self.db = None
             message = u'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(
                 self._config.host, self._config.port, self._config.dbname, str(e)
             )
             self.service_check(
-                self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags, message=message
+                self.SERVICE_CHECK_NAME,
+                AgentCheck.CRITICAL,
+                tags=self._get_service_check_tags(),
+                message=message,
+                hostname=self.resolved_hostname,
             )
             raise e
         else:
-            message = u'Established connection to postgres://%s:%s/%s' % (
-                self._config.host,
-                self._config.port,
-                self._config.dbname,
-            )
             self.service_check(
-                self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags, message=message
+                self.SERVICE_CHECK_NAME,
+                AgentCheck.OK,
+                tags=self._get_service_check_tags(),
+                hostname=self.resolved_hostname,
             )
             try:
                 # commit to close the current query transaction

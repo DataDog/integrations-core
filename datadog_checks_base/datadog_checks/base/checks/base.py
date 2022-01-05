@@ -35,7 +35,9 @@ from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
 from ..utils.secrets import SecretsSanitizer
+from ..utils.tagging import GENERIC_TAGS
 from ..utils.tls import TlsContextWrapper
+from ..utils.tracing import traced_class
 
 try:
     import datadog_agent
@@ -74,6 +76,7 @@ if TYPE_CHECKING:
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
 
 
+@traced_class
 class AgentCheck(object):
     """
     The base class for any Agent based integration.
@@ -147,6 +150,15 @@ class AgentCheck(object):
     # See https://github.com/DataDog/integrations-core/pull/2093 for more information.
     DEFAULT_METRIC_LIMIT = 0
 
+    # Allow tracing for classic integrations
+    def __init_subclass__(cls, *args, **kwargs):
+        try:
+            # https://github.com/python/mypy/issues/4660
+            super().__init_subclass__(*args, **kwargs)  # type: ignore
+            return traced_class(cls)
+        except Exception:
+            return cls
+
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
         """
@@ -188,6 +200,14 @@ class AgentCheck(object):
         self.instance = instance  # type: InstanceType
         self.instances = instances  # type: List[InstanceType]
         self.warnings = []  # type: List[str]
+        self.disable_generic_tags = (
+            is_affirmative(self.instance.get('disable_generic_tags', False)) if instance else False
+        )
+        self.debug_metrics = {}
+        if self.init_config is not None:
+            self.debug_metrics.update(self.init_config.get('debug_metrics', {}))
+        if self.instance is not None:
+            self.debug_metrics.update(self.instance.get('debug_metrics', {}))
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()  # type: str
@@ -238,6 +258,13 @@ class AgentCheck(object):
                     'DEPRECATION NOTICE: The `service` tag is deprecated and has been renamed to `%s`. '
                     'Set `disable_legacy_service_tag` to `true` to disable this warning. '
                     'The default will become `true` and cannot be changed in Agent version 8.'
+                ),
+            ),
+            '_config_renamed': (
+                False,
+                (
+                    'DEPRECATION NOTICE: The `%s` config option has been renamed '
+                    'to `%s` and will be removed in a future release.'
                 ),
             ),
         }  # type: Dict[str, Tuple[bool, str]]
@@ -527,6 +554,13 @@ class AgentCheck(object):
             return
 
         aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metrics")
+
+    def database_monitoring_query_activity(self, raw_event):
+        # type: (str) -> None
+        if raw_event is None:
+            return
+
+        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-activity")
 
     def _submit_metric(
         self, mtype, name, value, tags=None, hostname=None, device_name=None, raw=False, flush_first_value=False
@@ -991,7 +1025,7 @@ class AgentCheck(object):
                     self.check, self.init_config, namespaces=self.check_id.split(':', 1), args=(instance,)
                 )
 
-                tags = ['check_name:{}'.format(self.name), 'check_version:{}'.format(self.check_version)]
+                tags = self.get_debug_metric_tags()
                 tags.extend(instance.get('__memory_profiling_tags', []))
                 for m in metrics:
                     self.gauge(m.name, m.value, tags=tags, raw=True)
@@ -1005,6 +1039,16 @@ class AgentCheck(object):
             result = json.dumps([{'message': message, 'traceback': tb}])
         finally:
             if self.metric_limiter:
+                if is_affirmative(self.debug_metrics.get('metric_contexts', False)):
+                    debug_metrics = self.metric_limiter.get_debug_metrics()
+
+                    # Reset so we can actually submit the metrics
+                    self.metric_limiter.reset()
+
+                    tags = self.get_debug_metric_tags()
+                    for metric_name, value in debug_metrics:
+                        self.gauge(metric_name, value, tags=tags, raw=True)
+
                 self.metric_limiter.reset()
 
         return result
@@ -1080,13 +1124,26 @@ class AgentCheck(object):
         for tag in tags:
             if tag is None:
                 continue
-
             try:
                 tag = to_native_string(tag)
             except UnicodeError:
                 self.log.warning('Encoding error with tag `%s` for metric `%s`, ignoring tag', tag, metric_name)
                 continue
-
-            normalized_tags.append(tag)
-
+            if self.disable_generic_tags:
+                normalized_tags.append(self.degeneralise_tag(tag))
+            else:
+                normalized_tags.append(tag)
         return normalized_tags
+
+    def degeneralise_tag(self, tag):
+        tag_name, value = tag.split(':', 1)
+        if tag_name in GENERIC_TAGS:
+            new_name = '{}_{}'.format(self.name, tag_name)
+            return '{}:{}'.format(new_name, value)
+        else:
+            return tag
+
+    def get_debug_metric_tags(self):
+        tags = ['check_name:{}'.format(self.name), 'check_version:{}'.format(self.check_version)]
+        tags.extend(self.instance.get('tags', []))
+        return tags

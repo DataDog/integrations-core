@@ -1,5 +1,13 @@
 # CHANGELOG - Aspdotnet
 
+## 1.8.1 / 2021-11-16
+
+* [Fixed] Fix config spec options. See [#10634](https://github.com/DataDog/integrations-core/pull/10634).
+
+## 1.8.0 / 2021-11-13
+
+* [Added] Add runtime configuration validation. See [#8886](https://github.com/DataDog/integrations-core/pull/8886).
+
 ## 1.7.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Upgrade pywin32 on Python 3. See [#8845](https://github.com/DataDog/integrations-core/pull/8845).

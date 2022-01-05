@@ -30,6 +30,12 @@ Use the default configuration of your `presto.d/conf.yaml` file to activate the 
 
 #### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
@@ -68,12 +74,12 @@ Presto does not include any events.
 
 ### Service Checks
 
-**presto.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Presto instance, otherwise returns `OK`.
+See [service_checks.json][10] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][6].
+
 
 [1]: https://docs.datadoghq.com/integrations/presto/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -84,3 +90,4 @@ Need help? Contact [Datadog support][6].
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/presto/metadata.csv
+[10]: https://github.com/DataDog/integrations-core/blob/master/presto/assets/service_checks.json

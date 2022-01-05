@@ -1,5 +1,19 @@
 # CHANGELOG - process
 
+## 2.1.1 / 2021-11-13
+
+* [Fixed] Lower warning to debug level. See [#10414](https://github.com/DataDog/integrations-core/pull/10414).
+
+## 2.1.0 / 2021-09-15 / Agent 7.32.0
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Update logic to run sudo for `num_fds`. See [#10109](https://github.com/DataDog/integrations-core/pull/10109).
+
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Add runtime configuration validation. See [#8974](https://github.com/DataDog/integrations-core/pull/8974).
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
 ## 1.17.2 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).

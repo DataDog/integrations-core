@@ -26,28 +26,7 @@ sudo modprobe nf_conntrack_ipv6
 
 ### Configuration
 
-1. The Agent enables the network check by default, but if you want to configure the check yourself, edit file `network.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample network.d/conf.yaml][4] for all available configuration options:
-
-   ```yaml
-   init_config:
-
-   instances:
-     ## @param collect_connection_state - boolean - required
-     ## Set to true to collect connection states for your interfaces
-     ## Note: this will require either the command `ss` from system package `iproute2` or
-     ## the command `netstat` from the system package `net-tools` to be installed
-     #
-     - collect_connection_state: false
-
-     ## @param collect_connection_queues - boolean - optional
-     ## Set to true to enable connection queues collection
-     ## Note: connection queues collections require both
-     ## `collect_connection_state` and `collect_connection_queues` to be true
-     ## because it also requires the command `ss` from system package `iproute2` or
-     ## the command `netstat` from the system package `net-tools` to be installed
-     #
-     - collect_connection_queues: false
-   ```
+1. The Agent enables the network check by default, but if you want to configure the check yourself, edit file `network.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample network.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5] to effect any configuration changes.
 
@@ -85,7 +64,7 @@ The Network check does not include any service checks.
 
 ## Troubleshooting
 
-- [How to send TCP/UDP host metrics via the Datadog API][9]
+- [Send TCP/UDP host metrics with the Datadog API][9]
 
 ## Further Reading
 

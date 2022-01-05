@@ -11,29 +11,30 @@ import pytest
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.metrics import SqlMasterDatabaseFileStats
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import set_default_driver_conf
 
-from .common import CHECK_NAME, LOCAL_SERVER, assert_metrics
+from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
 from .utils import windows_ci
 
 # mark the whole module
 pytestmark = pytest.mark.unit
 
 
-def test_get_cursor(instance_sql2017):
+def test_get_cursor(instance_sql):
     """
     Ensure we don't leak connection info in case of a KeyError when the
     connection pool is empty or the params for `get_cursor` are invalid.
     """
-    check = SQLServer(CHECK_NAME, {}, [instance_sql2017])
+    check = SQLServer(CHECK_NAME, {}, [instance_sql])
     check.initialize_connection()
     with pytest.raises(SQLConnectionError):
         check.connection.get_cursor('foo')
 
 
-def test_missing_db(instance_sql2017, dd_run_check):
-    instance = copy.copy(instance_sql2017)
+def test_missing_db(instance_sql, dd_run_check):
+    instance = copy.copy(instance_sql)
     instance['ignore_missing_database'] = False
     with mock.patch('datadog_checks.sqlserver.connection.Connection.check_database', return_value=(False, 'db')):
         with pytest.raises(ConfigurationError):
@@ -50,7 +51,7 @@ def test_missing_db(instance_sql2017, dd_run_check):
 
 @mock.patch('datadog_checks.sqlserver.connection.Connection.open_managed_default_database')
 @mock.patch('datadog_checks.sqlserver.connection.Connection.get_cursor')
-def test_db_exists(get_cursor, mock_connect, instance_sql2017, dd_run_check):
+def test_db_exists(get_cursor, mock_connect, instance_sql, dd_run_check):
     Row = namedtuple('Row', 'name,collation_name')
     db_results = [
         Row('master', 'SQL_Latin1_General_CP1_CI_AS'),
@@ -66,7 +67,7 @@ def test_db_exists(get_cursor, mock_connect, instance_sql2017, dd_run_check):
     mock_results.__iter__.return_value = db_results
     get_cursor.return_value = mock_results
 
-    instance = copy.copy(instance_sql2017)
+    instance = copy.copy(instance_sql)
     # make sure check doesn't try to add metrics
     instance['stored_procedure'] = 'fake_proc'
 
@@ -151,6 +152,42 @@ def test_autodiscovery_exclude_override(instance_autodiscovery):
     assert check.databases == set(['tempdb'])
 
 
+@pytest.mark.parametrize(
+    'col_val_row_1, col_val_row_2, col_val_row_3',
+    [
+        pytest.param(256, 1024, 1720, id='Valid column value 0'),
+        pytest.param(0, None, 1024, id='NoneType column value 1, should not raise error'),
+        pytest.param(512, 0, 256, id='Valid column value 2'),
+        pytest.param(None, 256, 0, id='NoneType column value 3, should not raise error'),
+    ],
+)
+def test_SqlMasterDatabaseFileStats_fetch_metric(col_val_row_1, col_val_row_2, col_val_row_3):
+    Row = namedtuple('Row', ['name', 'file_id', 'type', 'physical_name', 'size', 'max_size', 'state', 'state_desc'])
+    mock_rows = [
+        Row('master', 1, 0, '/var/opt/mssql/data/master.mdf', col_val_row_1, -1, 0, 'ONLINE'),
+        Row('tempdb', 1, 0, '/var/opt/mssql/data/tempdb.mdf', col_val_row_2, -1, 0, 'ONLINE'),
+        Row('msdb', 1, 0, '/var/opt/mssql/data/MSDBData.mdf', col_val_row_3, -1, 0, 'ONLINE'),
+    ]
+    mock_cols = ['name', 'file_id', 'type', 'physical_name', 'size', 'max_size', 'state', 'state_desc']
+    mock_metric_obj = SqlMasterDatabaseFileStats(
+        cfg_instance=mock.MagicMock(dict),
+        base_name=None,
+        report_function=mock.MagicMock(),
+        column='size',
+        logger=None,
+    )
+    with mock.patch.object(
+        SqlMasterDatabaseFileStats, 'fetch_metric', wraps=mock_metric_obj.fetch_metric
+    ) as mock_fetch_metric:
+        errors = 0
+        try:
+            mock_fetch_metric(mock_rows, mock_cols)
+        except Exception as e:
+            errors += 1
+            raise AssertionError('{}'.format(e))
+        assert errors < 1
+
+
 def _mock_database_list():
     Row = namedtuple('Row', 'name')
     fetchall_results = [
@@ -191,20 +228,19 @@ def test_set_default_driver_conf():
 
 
 @windows_ci
-def test_check_local(aggregator, dd_run_check, init_config, instance_sql2017):
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_sql2017])
+def test_check_local(aggregator, dd_run_check, init_config, instance_docker):
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
-    expected_tags = instance_sql2017.get('tags', []) + ['host:{}'.format(LOCAL_SERVER), 'db:master']
+    expected_tags = instance_docker.get('tags', []) + ['sqlserver_host:{}'.format(DOCKER_SERVER), 'db:master']
     assert_metrics(aggregator, expected_tags)
 
 
 @windows_ci
-@pytest.mark.parametrize('adoprovider', ['SQLOLEDB', 'SQLNCLI11'])
-def test_check_adoprovider(aggregator, dd_run_check, init_config, instance_sql2017, adoprovider):
-    instance = copy.deepcopy(instance_sql2017)
-    instance['adoprovider'] = adoprovider
+@pytest.mark.parametrize('adoprovider', ['SQLOLEDB', 'SQLNCLI11', 'MSOLEDBSQL'])
+def test_check_adoprovider(aggregator, dd_run_check, init_config, instance_docker, adoprovider):
+    instance_docker['adoprovider'] = adoprovider
 
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance])
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
-    expected_tags = instance.get('tags', []) + ['host:{}'.format(LOCAL_SERVER), 'db:master']
+    expected_tags = instance_docker.get('tags', []) + ['sqlserver_host:{}'.format(DOCKER_SERVER), 'db:master']
     assert_metrics(aggregator, expected_tags)

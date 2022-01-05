@@ -4,9 +4,7 @@
 from __future__ import division
 
 from collections import defaultdict
-from time import time
 
-from kafka import KafkaClient
 from kafka import errors as kafka_errors
 from kafka.protocol.commit import GroupCoordinatorRequest, OffsetFetchRequest
 from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
@@ -14,37 +12,26 @@ from kazoo.client import KazooClient
 from kazoo.exceptions import NoNodeError
 from six import string_types
 
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base import ConfigurationError, is_affirmative
 
-from .constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT, KAFKA_INTERNAL_TOPICS
+from .constants import KAFKA_INTERNAL_TOPICS
 
 
-class LegacyKafkaCheck_0_10_2(AgentCheck):
+class LegacyKafkaCheck_0_10_2(object):
     """
     Check the offsets and lag of Kafka consumers. This check also returns broker highwater offsets.
 
     This is the legacy codepath which is used when either broker version < 0.10.2 or zk_connect_str has a value.
     """
 
-    __NAMESPACE__ = 'kafka'
+    def __init__(self, parent_check):
+        self._parent_check = parent_check
+        self._kafka_client = None
 
-    def __init__(self, name, init_config, instances):
-        super(LegacyKafkaCheck_0_10_2, self).__init__(name, init_config, instances)
-        self._context_limit = int(init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
-        self._custom_tags = self.instance.get('tags', [])
-
-        self._monitor_unlisted_consumer_groups = is_affirmative(
-            self.instance.get('monitor_unlisted_consumer_groups', False)
-        )
-        self._monitor_all_broker_highwatermarks = is_affirmative(
-            self.instance.get('monitor_all_broker_highwatermarks', False)
-        )
-        self._consumer_groups = self.instance.get('consumer_groups', {})
         # Note: We cannot skip validation if monitor_unlisted_consumer_groups is True because this legacy check only
         # supports that functionality for Zookeeper, not Kafka.
-        self._validate_explicit_consumer_groups()
+        self.validate_consumer_groups()
 
-        self._kafka_client = self._create_kafka_client()
         self._zk_hosts_ports = self.instance.get('zk_connect_str')
 
         # If we are collecting from Zookeeper, then create a long-lived zk client
@@ -60,10 +47,24 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 else:
                     raise ConfigurationError("zk_connect_str must be a string or list of strings")
 
-            self._zk_client = KazooClient(hosts=self._zk_hosts_ports, timeout=int(init_config.get('zk_timeout', 5)))
+            self._zk_client = KazooClient(
+                hosts=self._zk_hosts_ports, timeout=int(self.init_config.get('zk_timeout', 5))
+            )
             self._zk_client.start()
 
-    def check(self, instance):
+    def __getattr__(self, item):
+        try:
+            return getattr(self._parent_check, item)
+        except AttributeError:
+            raise AttributeError("LegacyKafkaCheck_0_10_2 has no attribute called {}".format(item))
+
+    @property
+    def kafka_client(self):
+        if self._kafka_client is None:
+            self._kafka_client = self._create_kafka_client()
+        return self._kafka_client
+
+    def check(self):
         """The main entrypoint of the check."""
         self.log.debug("Running legacy Kafka Consumer check.")
         self._zk_consumer_offsets = {}  # Expected format: {(consumer_group, topic, partition): offset}
@@ -89,8 +90,8 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         # Fetch consumer group offsets from Kafka
         # Support for storing offsets in Kafka not available until Kafka 0.8.2. Also, for legacy reasons, this check
         # only fetches consumer offsets from Kafka if Zookeeper is omitted or kafka_consumer_offsets is True.
-        if self._kafka_client.config.get('api_version') >= (0, 8, 2) and is_affirmative(
-            instance.get('kafka_consumer_offsets', self._zk_hosts_ports is None)
+        if self.kafka_client.config.get('api_version') >= (0, 8, 2) and is_affirmative(
+            self.instance.get('kafka_consumer_offsets', self._zk_hosts_ports is None)
         ):
             try:
                 self.log.debug('Collecting consumer offsets')
@@ -103,8 +104,8 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             self.log.debug(
                 'Identified api_version: %s, kafka_consumer_offsets: %s, zk_connection_string: %s.'
                 ' Skipping consumer offset collection',
-                str(self._kafka_client.config.get('api_version')),
-                str(instance.get('kafka_consumer_offsets')),
+                str(self.kafka_client.config.get('api_version')),
+                str(self.instance.get('kafka_consumer_offsets')),
                 str(self._zk_hosts_ports),
             )
 
@@ -135,35 +136,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         self._report_consumer_offsets_and_lag(self._zk_consumer_offsets, source='zk')
 
     def _create_kafka_client(self):
-        kafka_conn_str = self.instance.get('kafka_connect_str')
-        if not isinstance(kafka_conn_str, (string_types, list)):
-            raise ConfigurationError('kafka_connect_str should be string or list of strings')
-        kafka_version = self.instance.get('kafka_client_api_version')
-        if isinstance(kafka_version, str):
-            kafka_version = tuple(map(int, kafka_version.split(".")))
-        kafka_client = KafkaClient(
-            bootstrap_servers=kafka_conn_str,
-            client_id='dd-agent',
-            request_timeout_ms=self.init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT) * 1000,
-            # if `kafka_client_api_version` is not set, then kafka-python automatically probes the cluster for broker
-            # version during the bootstrapping process. Note that probing randomly picks a broker to probe, so in a
-            # mixed-version cluster probing returns a non-deterministic result.
-            api_version=kafka_version,
-            # While we check for SSL params, if not present they will default to the kafka-python values for plaintext
-            # connections
-            security_protocol=self.instance.get('security_protocol', 'PLAINTEXT'),
-            sasl_mechanism=self.instance.get('sasl_mechanism'),
-            sasl_plain_username=self.instance.get('sasl_plain_username'),
-            sasl_plain_password=self.instance.get('sasl_plain_password'),
-            sasl_kerberos_service_name=self.instance.get('sasl_kerberos_service_name', 'kafka'),
-            sasl_kerberos_domain_name=self.instance.get('sasl_kerberos_domain_name'),
-            ssl_cafile=self.instance.get('ssl_cafile'),
-            ssl_check_hostname=self.instance.get('ssl_check_hostname', True),
-            ssl_certfile=self.instance.get('ssl_certfile'),
-            ssl_keyfile=self.instance.get('ssl_keyfile'),
-            ssl_crlfile=self.instance.get('ssl_crlfile'),
-            ssl_password=self.instance.get('ssl_password'),
-        )
+        kafka_client = self.create_kafka_client()
         # Force initial population of the local cluster metadata cache
         kafka_client.poll(future=kafka_client.cluster.request_update())
         if kafka_client.cluster.topics(exclude_internal_topics=False) is None:
@@ -172,14 +145,14 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
     def _make_blocking_req(self, request, node_id=None):
         if node_id is None:
-            node_id = self._kafka_client.least_loaded_node()
+            node_id = self.kafka_client.least_loaded_node()
 
-        while not self._kafka_client.ready(node_id):
+        while not self.kafka_client.ready(node_id):
             # poll until the connection to broker is ready, otherwise send() will fail with NodeNotReadyError
-            self._kafka_client.poll()
+            self.kafka_client.poll()
 
-        future = self._kafka_client.send(node_id, request)
-        self._kafka_client.poll(future=future)  # block until we get response.
+        future = self.kafka_client.send(node_id, request)
+        self.kafka_client.poll(future=future)  # block until we get response.
         if future.failed():
             raise future.exception  # pylint: disable-msg=raising-bad-type
         response = future.value
@@ -207,11 +180,11 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             tps_with_consumer_offset = {(topic, partition) for (_, topic, partition) in self._kafka_consumer_offsets}
             tps_with_consumer_offset.update({(topic, partition) for (_, topic, partition) in self._zk_consumer_offsets})
 
-        for broker in self._kafka_client.cluster.brokers():
+        for broker in self.kafka_client.cluster.brokers():
             if len(self._highwater_offsets) >= contexts_limit:
                 self.warning("Context limit reached. Skipping highwater offsets collection.")
                 return
-            broker_led_partitions = self._kafka_client.cluster.partitions_for_broker(broker.nodeId)
+            broker_led_partitions = self.kafka_client.cluster.partitions_for_broker(broker.nodeId)
             if broker_led_partitions is None:
                 continue
             # Take the partitions for which this broker is the leader and group them by topic in order to construct the
@@ -258,7 +231,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                         topic,
                         partition,
                     )
-                    self._kafka_client.cluster.request_update()  # force metadata update on next poll()
+                    self.kafka_client.cluster.request_update()  # force metadata update on next poll()
                 elif error_type is kafka_errors.UnknownTopicOrPartitionError:
                     self.log.warning(
                         "Kafka broker returned %s (error_code %s) for topic: %s, partition: %s. This should only "
@@ -290,7 +263,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 consumer_group_tags.append('source:%s' % kwargs['source'])
             consumer_group_tags.extend(self._custom_tags)
 
-            partitions = self._kafka_client.cluster.partitions_for_topic(topic)
+            partitions = self.kafka_client.cluster.partitions_for_topic(topic)
             if partitions is not None and partition in partitions:
                 # report consumer offset if the partition is valid because even if leaderless the consumer offset will
                 # be valid once the leader failover completes
@@ -317,7 +290,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                         "positive.".format(consumer_group, topic, partition)
                     )
                     key = "{}:{}:{}".format(consumer_group, topic, partition)
-                    self._send_event(title, message, consumer_group_tags, 'consumer_lag', key, severity="error")
+                    self.send_event(title, message, consumer_group_tags, 'consumer_lag', key, severity="error")
                     self.log.debug(message)
 
             else:
@@ -332,7 +305,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                         "included in the cluster partitions, so skipping reporting these offsets."
                     )
                 self.log.warning(msg, consumer_group, topic, partition)
-                self._kafka_client.cluster.request_update()  # force metadata update on next poll()
+                self.kafka_client.cluster.request_update()  # force metadata update on next poll()
 
     def _get_zk_path_children(self, zk_path, name_for_error):
         """Fetch child nodes for a given Zookeeper path."""
@@ -417,7 +390,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                         # If partitions omitted, then we assume the group is consuming all partitions for the topic.
                         # Fetch consumer offsets even for unavailable partitions because those will be valid once the
                         # partition finishes leader failover.
-                        topic_partitions[topic] = self._kafka_client.cluster.partitions_for_topic(topic)
+                        topic_partitions[topic] = self.kafka_client.cluster.partitions_for_topic(topic)
 
                 coordinator_id = self._get_group_coordinator(consumer_group)
                 if coordinator_id is not None:
@@ -433,7 +406,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                             # -1, meaning there is no recorded offset for that partition... for example, if the
                             # partition doesn't exist in the cluster. So ignore it.
                             if offset == -1 or error_type is not kafka_errors.NoError:
-                                self._kafka_client.cluster.request_update()  # force metadata update on next poll()
+                                self.kafka_client.cluster.request_update()  # force metadata update on next poll()
                                 continue
                             key = (consumer_group, topic, partition)
                             self._kafka_consumer_offsets[key] = offset
@@ -453,36 +426,3 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         error_type = kafka_errors.for_code(response.error_code)
         if error_type is kafka_errors.NoError:
             return response.coordinator_id
-
-    def _validate_explicit_consumer_groups(self):
-        """Validate any explicitly specified consumer groups.
-
-        While the check does not require specifying consumer groups,
-        if they are specified this method should be used to validate them.
-
-        consumer_groups = {'consumer_group': {'topic': [0, 1]}}
-        """
-        assert isinstance(self._consumer_groups, dict)
-        for consumer_group, topics in self._consumer_groups.items():
-            assert isinstance(consumer_group, string_types)
-            assert isinstance(topics, dict) or topics is None  # topics are optional
-            if topics is not None:
-                for topic, partitions in topics.items():
-                    assert isinstance(topic, string_types)
-                    assert isinstance(partitions, (list, tuple)) or partitions is None  # partitions are optional
-                    if partitions is not None:
-                        for partition in partitions:
-                            assert isinstance(partition, int)
-
-    def _send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
-        """Emit an event to the Datadog Event Stream."""
-        event_dict = {
-            'timestamp': int(time()),
-            'msg_title': title,
-            'event_type': event_type,
-            'alert_type': severity,
-            'msg_text': text,
-            'tags': tags,
-            'aggregation_key': aggregation_key,
-        }
-        self.event(event_dict)

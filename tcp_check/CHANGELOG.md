@@ -1,6 +1,27 @@
 # CHANGELOG - tcp_check
 
-## 3.1.0 / 2021-05-28
+## 4.2.0 / 2021-12-21
+
+* [Added] Add multiple_ips option and address tag. See [#10868](https://github.com/DataDog/integrations-core/pull/10868).
+
+## 4.1.0 / 2021-10-04 / Agent 7.32.0
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 4.0.1 / 2021-08-24 / Agent 7.31.0
+
+* [Fixed] Elevate log level for failed connections. See [#9965](https://github.com/DataDog/integrations-core/pull/9965).
+
+## 4.0.0 / 2021-08-22
+
+* [Added] Re-resolve IP after a set duration. See [#9699](https://github.com/DataDog/integrations-core/pull/9699).
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 3.1.1 / 2021-07-07 / Agent 7.30.0
+
+* [Fixed] Do not resolve IP on __init__. See [#9644](https://github.com/DataDog/integrations-core/pull/9644).
+
+## 3.1.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#8994](https://github.com/DataDog/integrations-core/pull/8994).
 

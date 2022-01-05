@@ -30,7 +30,7 @@ def display_envs(check_envs):
 @click.option('--format-style', '-fs', is_flag=True, help='Run only the code style formatter')
 @click.option('--style', '-s', is_flag=True, help='Run only style checks')
 @click.option('--bench', '-b', is_flag=True, help='Run only benchmarks')
-@click.option('--latest-metrics', is_flag=True, help='Only verify support of new metrics')
+@click.option('--latest', is_flag=True, help='Only verify support of new product versions')
 @click.option('--e2e', is_flag=True, help='Run only end-to-end tests')
 @click.option('--ddtrace', is_flag=True, help='Run tests using dd-trace-py')
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
@@ -57,7 +57,7 @@ def test(
     format_style,
     style,
     bench,
-    latest_metrics,
+    latest,
     e2e,
     ddtrace,
     coverage,
@@ -146,6 +146,9 @@ def test(
         # Used for CI app product
         test_env_vars['TOX_TESTENV_PASSENV'] += ' TF_BUILD BUILD* SYSTEM*'
         test_env_vars['DD_SERVICE'] = os.getenv('DD_SERVICE', 'ddev-integrations')
+        test_env_vars['DD_ENV'] = os.getenv('DD_ENV', 'ddev-integrations')
+        test_env_vars['DDEV_TRACE_ENABLED'] = 'true'
+        test_env_vars['DD_PROFILING_ENABLED'] = 'true'
 
     org_name = ctx.obj['org']
     org = ctx.obj['orgs'].get(org_name, {})
@@ -154,7 +157,9 @@ def test(
         test_env_vars['DD_API_KEY'] = api_key
         test_env_vars['TOX_TESTENV_PASSENV'] += ' DD_API_KEY'
 
-    check_envs = get_tox_envs(checks, style=style, format_style=format_style, benchmark=bench, changed_only=changed)
+    check_envs = get_tox_envs(
+        checks, style=style, format_style=format_style, benchmark=bench, changed_only=changed, latest=latest
+    )
     tests_ran = False
 
     for check, envs in check_envs:
@@ -188,7 +193,7 @@ def test(
             enter_pdb=enter_pdb,
             debug=debug,
             bench=bench,
-            latest_metrics=latest_metrics,
+            latest=latest,
             coverage=coverage,
             junit=junit,
             marker=marker,
@@ -211,8 +216,8 @@ def test(
                 test_type_display = 'only style checks'
             elif bench:
                 test_type_display = 'only benchmarks'
-            elif latest_metrics:
-                test_type_display = 'only latest metrics validation'
+            elif latest:
+                test_type_display = 'only tests for the latest version'
             elif e2e:
                 test_type_display = 'only end-to-end tests'
             else:

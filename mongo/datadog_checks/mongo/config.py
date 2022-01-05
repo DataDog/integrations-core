@@ -1,3 +1,5 @@
+import certifi
+
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.mongo.common import DEFAULT_TIMEOUT
@@ -9,13 +11,20 @@ class MongoConfig(object):
         self.log = log
 
         # x.509 authentication
+
+        cacert_cert_dir = instance.get('ssl_ca_certs')
+        if cacert_cert_dir is None and (
+            is_affirmative(instance.get('options', {}).get("ssl")) or is_affirmative(instance.get('ssl'))
+        ):
+            cacert_cert_dir = certifi.where()
+
         self.ssl_params = exclude_undefined_keys(
             {
                 'ssl': instance.get('ssl', None),
                 'ssl_keyfile': instance.get('ssl_keyfile', None),
                 'ssl_certfile': instance.get('ssl_certfile', None),
                 'ssl_cert_reqs': instance.get('ssl_cert_reqs', None),
-                'ssl_ca_certs': instance.get('ssl_ca_certs', None),
+                'ssl_ca_certs': cacert_cert_dir,
             }
         )
 
@@ -68,6 +77,7 @@ class MongoConfig(object):
             self.do_auth = False
 
         self.replica_check = is_affirmative(instance.get('replica_check', True))
+
         self.collections_indexes_stats = is_affirmative(instance.get('collections_indexes_stats'))
         self.coll_names = instance.get('collections', [])
         self.custom_queries = instance.get("custom_queries", [])

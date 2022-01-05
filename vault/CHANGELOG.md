@@ -1,6 +1,27 @@
 # CHANGELOG - Vault
 
-## 2.13.0 / 2021-05-28
+## 2.17.0 / 2021-10-04 / Agent 7.32.0
+
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+
+## 2.16.0 / 2021-09-09
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Added] Update vault metrics. See [#9953](https://github.com/DataDog/integrations-core/pull/9953).
+
+## 2.15.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+
+## 2.14.0 / 2021-07-20
+
+* [Added] Add new vault metrics. See [#9728](https://github.com/DataDog/integrations-core/pull/9728).
+* [Added] Add Vault route metrics to be fetched from the Prometheus endpoint. See [#9612](https://github.com/DataDog/integrations-core/pull/9612). Thanks [mdgreenfield](https://github.com/mdgreenfield).
+* [Added] Add newer Hashicorp Vault metrics. See [#9641](https://github.com/DataDog/integrations-core/pull/9641). Thanks [mdgreenfield](https://github.com/mdgreenfield).
+
+## 2.13.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#9002](https://github.com/DataDog/integrations-core/pull/9002).
 

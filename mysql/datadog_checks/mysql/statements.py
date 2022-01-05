@@ -9,10 +9,12 @@ from typing import Any, Callable, Dict, List, Tuple
 import pymysql
 from cachetools import TTLCache
 
+from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
-from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 
 try:
@@ -49,64 +51,96 @@ def _row_key(row):
     return row['schema_name'], row['query_signature']
 
 
-class MySQLStatementMetrics(object):
+class MySQLStatementMetrics(DBMAsyncJob):
     """
     MySQLStatementMetrics collects database metrics per normalized MySQL statement
     """
 
-    def __init__(self, check, config):
+    def __init__(self, check, config, connection_args):
         # (MySql, MySQLConfig) -> None
-        self._check = check
+        collection_interval = float(config.statement_metrics_config.get('collection_interval', 10))
+        if collection_interval <= 0:
+            collection_interval = 10
+        super(MySQLStatementMetrics, self).__init__(
+            check,
+            rate_limit=1 / float(collection_interval),
+            run_sync=is_affirmative(config.statement_metrics_config.get('run_sync', False)),
+            enabled=is_affirmative(config.statement_metrics_config.get('enabled', True)),
+            expected_db_exceptions=(pymysql.err.DatabaseError,),
+            min_collection_interval=config.min_collection_interval,
+            config_host=config.host,
+            dbms="mysql",
+            job_name="statement-metrics",
+            shutdown_callback=self._close_db_conn,
+        )
+        self._metric_collection_interval = collection_interval
+        self._connection_args = connection_args
+        self._db = None
         self._config = config
-        self._db_hostname = None
         self.log = get_check_logger()
         self._state = StatementMetrics()
+        self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
             maxsize=self._config.full_statement_text_cache_max_size,
             ttl=60 * 60 / self._config.full_statement_text_samples_per_hour_per_query,
         )  # type: TTLCache
 
-    def _db_hostname_cached(self):
-        if self._db_hostname:
-            return self._db_hostname
-        self._db_hostname = resolve_db_host(self._config.host)
-        return self._db_hostname
+    def _get_db_connection(self):
+        """
+        lazy reconnect db
+        pymysql connections are not thread safe so we can't reuse the same connection from the main check
+        :return:
+        """
+        if not self._db:
+            self._db = pymysql.connect(**self._connection_args)
+        return self._db
 
-    def collect_per_statement_metrics(self, db, tags):
-        # type: (pymysql.connections.Connection, List[str]) -> None
-        try:
-            rows = self._collect_per_statement_metrics(db)
-            if not rows:
-                return
+    def _close_db_conn(self):
+        if self._db:
+            try:
+                self._db.close()
+            except Exception:
+                self._log.debug("Failed to close db connection", exc_info=1)
+            finally:
+                self._db = None
 
-            for event in self._rows_to_fqt_events(rows, tags):
-                self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
+    def run_job(self):
+        self.collect_per_statement_metrics()
 
-            # truncate query text to the maximum length supported by metrics tags
-            for row in rows:
-                row['digest_text'] = row['digest_text'][0:200]
+    def collect_per_statement_metrics(self):
+        rows = self._collect_per_statement_metrics()
+        if not rows:
+            return
 
-            payload = {
-                'host': self._db_hostname_cached(),
-                'timestamp': time.time() * 1000,
-                'min_collection_interval': self._config.min_collection_interval,
-                'tags': tags,
-                'mysql_rows': rows,
-            }
-            self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
-        except Exception:
-            self.log.exception('Unable to collect statement metrics due to an error')
+        for event in self._rows_to_fqt_events(rows):
+            self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
 
-    def _collect_per_statement_metrics(self, db):
-        # type: (pymysql.connections.Connection) -> List[PyMysqlRow]
-        monotonic_rows = self._query_summary_per_statement(db)
+        # truncate query text to the maximum length supported by metrics tags
+        for row in rows:
+            row['digest_text'] = row['digest_text'][0:200] if row['digest_text'] is not None else None
+
+        payload = {
+            'host': self._check.resolved_hostname,
+            'timestamp': time.time() * 1000,
+            'mysql_version': self._check.version.version + '+' + self._check.version.build,
+            'mysql_flavor': self._check.version.flavor,
+            'ddagentversion': datadog_agent.get_version(),
+            'min_collection_interval': self._metric_collection_interval,
+            'tags': self._tags,
+            'mysql_rows': rows,
+        }
+        self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
+
+    def _collect_per_statement_metrics(self):
+        # type: () -> List[PyMysqlRow]
+        monotonic_rows = self._query_summary_per_statement()
         monotonic_rows = self._normalize_queries(monotonic_rows)
         rows = self._state.compute_derivative_rows(monotonic_rows, METRICS_COLUMNS, key=_row_key)
         return rows
 
-    def _query_summary_per_statement(self, db):
-        # type: (pymysql.connections.Connection) -> List[PyMysqlRow]
+    def _query_summary_per_statement(self):
+        # type: () -> List[PyMysqlRow]
         """
         Collects per-statement metrics from performance schema. Because the statement sums are
         cumulative, the results of the previous run are stored and subtracted from the current
@@ -130,19 +164,14 @@ class MySQLStatementMetrics(object):
                    `sum_no_index_used`,
                    `sum_no_good_index_used`
             FROM performance_schema.events_statements_summary_by_digest
-            WHERE `digest_text` NOT LIKE 'EXPLAIN %'
+            WHERE `digest_text` NOT LIKE 'EXPLAIN %' OR `digest_text` IS NULL
             ORDER BY `count_star` DESC
             LIMIT 10000"""
 
-        rows = []  # type: List[PyMysqlRow]
+        with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
+            cursor.execute(sql_statement_summary)
 
-        try:
-            with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
-                cursor.execute(sql_statement_summary)
-
-                rows = cursor.fetchall() or []  # type: ignore
-        except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.log.warning("Statement summary metrics are unavailable at this time: %s", e)
+            rows = cursor.fetchall() or []  # type: ignore
 
         return rows
 
@@ -151,7 +180,11 @@ class MySQLStatementMetrics(object):
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['digest_text'])
+                obfuscated_statement = (
+                    datadog_agent.obfuscate_sql(row['digest_text'], self._obfuscate_options)
+                    if row['digest_text'] is not None
+                    else None
+                )
             except Exception as e:
                 self.log.warning("Failed to obfuscate query '%s': %s", row['digest_text'], e)
                 continue
@@ -162,16 +195,17 @@ class MySQLStatementMetrics(object):
 
         return normalized_rows
 
-    def _rows_to_fqt_events(self, rows, tags):
+    def _rows_to_fqt_events(self, rows):
         for row in rows:
             query_cache_key = _row_key(row)
             if query_cache_key in self._full_statement_text_cache:
                 continue
             self._full_statement_text_cache[query_cache_key] = True
-            row_tags = tags + ["schema:{}".format(row['schema_name'])] if row['schema_name'] else tags
+            row_tags = self._tags + ["schema:{}".format(row['schema_name'])] if row['schema_name'] else self._tags
             yield {
                 "timestamp": time.time() * 1000,
-                "host": self._db_hostname_cached(),
+                "host": self._check.resolved_hostname,
+                "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "mysql",
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",

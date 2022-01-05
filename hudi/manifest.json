@@ -1,0 +1,46 @@
+{
+  "display_name": "Hudi",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "hudi",
+  "metric_prefix": "hudi.",
+  "metric_to_check": "hudi.action.duration",
+  "creates_events": false,
+  "short_description": "Track metrics for your Hudi configuration.",
+  "guid": "abfa7624-ac5d-4601-b96c-03a2243ff7c7",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Hudi",
+  "type": "check",
+  "is_public": true,
+  "integration_id": "hudi",
+  "categories": [
+    "log collection",
+    "processing"
+  ],
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {
+      "Hudi Overview": "assets/dashboards/overview.json"
+    },
+    "logs": {
+      "source": "hudi"
+    },
+    "monitors": {
+      "commit_duration": "assets/monitors/commit_duration.json"
+    },
+    "saved_views": {
+      "hudi_error_logs": "assets/saved_views/error_logs.json",
+      "hudi_overview": "assets/saved_views/hudi_overview.json",
+      "hudi_patterns": "assets/saved_views/hudi_patterns.json"
+    },
+    "service_checks": "assets/service_checks.json",
+    "metrics_metadata": "metadata.csv"
+  }
+}

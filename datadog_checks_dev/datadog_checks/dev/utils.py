@@ -16,14 +16,14 @@ from io import open
 import yaml
 from six.moves.urllib.request import urlopen
 
-from datadog_checks.dev.fs import basepath, file_exists, get_parent_dir, path_join, read_file
-
-from .ci import running_on_ci, running_on_windows_ci  # noqa: F401
+from .ci import running_on_ci, running_on_gh_actions, running_on_windows_ci  # noqa: F401
+from .fs import basepath, file_exists, get_parent_dir, path_join, read_file
 
 __platform = platform.system()
 ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 ON_LINUX = not (ON_MACOS or ON_WINDOWS)
+GH_ANNOTATION_LEVELS = ['warning', 'error']
 
 
 def get_tox_env():

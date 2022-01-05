@@ -242,10 +242,16 @@
         "title_size": "16",
         "title_align": "center",
         "check": "ibm_mq.can_connect",
-        "grouping": "check",
-        "group": "channel:dev.admin.svrconn,host:localhost,port:1414,queue_manager:qm1,host:mq.sahni.info",
-        "group_by": [],
-        "tags": []
+        "grouping": "cluster",
+        "group_by": [
+          "mq_host",
+          "host"
+        ],
+        "tags": [
+          "$queue_manager",
+          "$channel",
+          "$host"
+        ]
       },
       "layout": {
         "x": 1,

@@ -21,7 +21,7 @@ files:
           - name: timeout
             description: Custom timeout for your check request.
             value:
-              type: integer
+              type: number
               example: 10
           - template: instances/default
       - template: logs

@@ -28,12 +28,16 @@ AUTODISCOVERY_QUERY = "select name from sys.databases"
 VALID_METRIC_TYPES = ('gauge', 'rate', 'histogram')
 
 SERVICE_CHECK_NAME = 'sqlserver.can_connect'
+DATABASE_SERVICE_CHECK_NAME = 'sqlserver.database.can_connect'
+
+DBM_MIGRATED_METRICS = [
+    ('sqlserver.stats.connections', 'User Connections', ''),  # LARGE_RAWCOUNT
+]
 
 # Default performance table metrics - Database Instance level
 # datadog metric name, counter name, instance name
 INSTANCE_METRICS = [
     # SQLServer:General Statistics
-    ('sqlserver.stats.connections', 'User Connections', ''),  # LARGE_RAWCOUNT
     ('sqlserver.stats.procs_blocked', 'Processes blocked', ''),  # LARGE_RAWCOUNT
     # SQLServer:Access Methods
     ('sqlserver.access.page_splits', 'Page Splits/sec', ''),  # BULK_COUNT
@@ -147,4 +151,9 @@ DATABASE_FRAGMENTATION_METRICS = [
         'sys.dm_db_index_physical_stats',
         'avg_fragment_size_in_pages',
     ),
+]
+
+DATABASE_MASTER_FILES = [
+    ('sqlserver.database.master_files.size', 'sys.master_files', 'size'),
+    ('sqlserver.database.master_files.state', 'sys.master_files', 'state'),
 ]

@@ -49,7 +49,7 @@ ibm_mq.queue.trigger_message_priority,gauge,,resource,,"Threshold message priori
 ibm_mq.queue.depth_current,gauge,,message,,"The number of messages currently in the queue (parameter identifier: MQIA_CURRENT_Q_DEPTH).",0,ibm_mq,messages
 ibm_mq.queue.depth_max_event,gauge,,event,,"Controls whether Queue Full events are generated (parameter identifier: MQIA_Q_DEPTH_MAX_EVENT).",0,ibm_mq,messages
 ibm_mq.queue.open_input_count,gauge,,connection,,"Number of MQOPEN calls that have the queue open for input (parameter identifier: MQIA_OPEN_INPUT_COUNT).",0,ibm_mq,open handles
-ibm_mq.queue.persistence,gauge,,resource,,"Specifies the default for message-persistence on the queue. Message persistence determines whether or not messages are preserved across restarts of the queue manager (parameter identifier: MQIA_DEF_PERSISTENCE).",0,ibm_mq,persistance
+ibm_mq.queue.persistence,gauge,,resource,,"Specifies the default for message-persistence on the queue. Message persistence determines whether or not messages are preserved across restarts of the queue manager (parameter identifier: MQIA_DEF_PERSISTENCE).",0,ibm_mq,persistence
 ibm_mq.queue.trigger_depth,gauge,,resource,,"This attribute specifies the number of messages that will initiate a trigger message to the initiation queue (parameter identifier: MQIA_TRIGGER_DEPTH). ",0,ibm_mq,queue trigger depth
 ibm_mq.queue.max_message_length,gauge,,resource,,"This attribute specifies the maximum message length that can be transmitted on the channel (parameter identifier: MQIACH_MAX_MSG_LENGTH). ",0,ibm_mq,max message length
 ibm_mq.queue.depth_high_limit,gauge,,resource,,"This attribute specifies the threshold against which the queue depth is compared before generated a queue high event (parameter identifier: MQIA_Q_DEPTH_HIGH_LIMIT).",0,ibm_mq,depth high limit
@@ -60,6 +60,8 @@ ibm_mq.queue.retention_interval,gauge,,hour,,"The number of hours for which the 
 ibm_mq.queue.open_output_count,gauge,,connection,,"Number of MQOPEN calls that have the queue open for output (parameter identifier: MQIA_OPEN_OUTPUT_COUNT).",0,ibm_mq,open output count
 ibm_mq.queue.trigger_type,gauge,,resource,,"The conditions under which trigger messages are written as a result of messages arriving on this queue (parameter identifier: MQIA_TRIGGER_TYPE).",0,ibm_mq,trigger type
 ibm_mq.queue.depth_percent,gauge,,percent,,The percent of the queue that is currently utilized.,0,ibm_mq,queue usage percentage
+ibm_mq.queue.last_get_time,gauge,,second,,The elapsed time in seconds since the last message get from a queue.,0,ibm_mq,last get time
+ibm_mq.queue.last_put_time,gauge,,second,,The elapsed time in seconds since the last message put to a queue.,0,ibm_mq,last put time
 ibm_mq.queue_manager.dist_lists,gauge,,resource,,"Specifies whether distribution-list messages can be placed on the queue (parameter identifier: MQIA_DIST_LISTS).",0,ibm_mq,dist list
 ibm_mq.queue_manager.max_msg_list,gauge,,byte,,"Specifies the maximum message length that can be transmitted on the channel. This is compared with the value for the remote channel and the actual maximum is the lowest of the two values (parameter identifier: MQIACH_MAX_MSG_LENGTH).",0,ibm_mq,max message length
 ibm_mq.queue.max_channels,gauge,,connection,,"This attribute is the maximum number of channels that can be current (parameter identifier: MQIA_MAX_CHANNELS).",0,ibm_mq,max channels

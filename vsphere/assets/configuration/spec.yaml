@@ -80,7 +80,7 @@ files:
           If `collect_events_only: true`, this option has no effect and events will be collected.
         value:
           type: boolean
-          display_default: depends on collection_type value
+          display_default: null
           example: true
       - name: use_collect_events_fallback
         description: |
@@ -147,7 +147,6 @@ files:
                   historical metrics
 
         value:
-          display_default: no filter
           example:
             - resource: vm
               property: name
@@ -202,7 +201,6 @@ files:
           Note2: 'vm' and 'host' filters are ignored when collecting historical metrics as those resources do no
                   have historical metrics. They will work only with "collection_type: realtime".
         value:
-          display_default: all metrics
           example:
             vm:
               - <VM_REGEX>                 # Only possible with "collection_type: realtime"
@@ -247,7 +245,6 @@ files:
           Note2: 'vm' and 'host' are possible only with "collection_type: realtime"
           /!\ Use with parsimony, collecting per-instance metrics might be very expensive for big environments.
         value:
-          display_default: none
           example:
             vm:
               - <VM_REGEX>                 # Only possible with "collection_type: realtime"
@@ -340,6 +337,8 @@ files:
           not available, it will fallback to the VM name.
           Use this if you install the agent in VMs so that the hosts are not duplicated
           in the web application UI.
+          Note: If VMs are duplicated in the Infrastructure List, follow these troubleshooting steps
+                https://docs.datadoghq.com/integrations/faq/troubleshooting-duplicated-hosts-with-vsphere/.
         value:
           type: boolean
           example: false

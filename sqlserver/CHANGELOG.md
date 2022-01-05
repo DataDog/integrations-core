@@ -1,6 +1,67 @@
 # CHANGELOG - sqlserver
 
-## 3.1.0 / 2021-05-28
+## 6.2.0 / 2021-12-20
+
+* [Security] Bump lxml package. See [#10904](https://github.com/DataDog/integrations-core/pull/10904).
+
+## 6.1.2 / 2021-11-24
+
+* [Fixed] Fix broken unicode support. See [#10713](https://github.com/DataDog/integrations-core/pull/10713).
+* [Fixed] Enable autocommit for pyodbc. See [#10717](https://github.com/DataDog/integrations-core/pull/10717).
+
+## 6.1.1 / 2021-11-19
+
+* [Fixed] Fix ADO driver bugs on Windows. See [#10637](https://github.com/DataDog/integrations-core/pull/10637).
+
+## 6.1.0 / 2021-11-13
+
+* [Added] Update dependencies. See [#10580](https://github.com/DataDog/integrations-core/pull/10580).
+* [Added] Add option to disable autodiscovery database service checks. See [#10491](https://github.com/DataDog/integrations-core/pull/10491).
+* [Fixed] Handle missing DBM metrics columns on older SQL Server versions. See [#10594](https://github.com/DataDog/integrations-core/pull/10594).
+* [Fixed] Fix sqlserver resolved_hostname by handling comma correctly. See [#10592](https://github.com/DataDog/integrations-core/pull/10592).
+* [Fixed] Fix memory clerks metrics for sqlserver 2019. See [#10464](https://github.com/DataDog/integrations-core/pull/10464).
+* [Fixed] Upgrade datadog checks base to 23.1.5. See [#10468](https://github.com/DataDog/integrations-core/pull/10468).
+
+## 6.0.0 / 2021-10-13
+
+* [Fixed] Account for possible nonetype. See [#10257](https://github.com/DataDog/integrations-core/pull/10257).
+* [Fixed] DBM check should use its own connection. See [#10387](https://github.com/DataDog/integrations-core/pull/10387).
+* [Fixed] Remove duplicate names from the list of sql-server metrics to collect. See [#10334](https://github.com/DataDog/integrations-core/pull/10334). Thanks [pedroreys](https://github.com/pedroreys).
+* [Changed] Stop sending FCI metrics when not available. See [#10395](https://github.com/DataDog/integrations-core/pull/10395).
+
+## 5.0.2 / 2021-10-26 / Agent 7.32.0
+
+* [Fixed] Upgrade datadog checks base to 23.1.5 in sqlserver integration. See [#10468](https://github.com/DataDog/integrations-core/pull/10468).
+
+## 5.0.1 / 2021-10-12
+
+* [Fixed] DBM check should use its own connection. See [#10387](https://github.com/DataDog/integrations-core/pull/10387).
+
+## 5.0.0 / 2021-10-04
+
+* [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
+* [Added] Collect query metrics & plans for Database Monitoring. See [#10234](https://github.com/DataDog/integrations-core/pull/10234).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Changed] Implement disable generic tags. See [#10290](https://github.com/DataDog/integrations-core/pull/10290).
+
+## 4.1.0 / 2021-08-31
+
+* [Added] Add autodiscovered database connection service check. See [#9900](https://github.com/DataDog/integrations-core/pull/9900).
+
+## 4.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 3.2.0 / 2021-08-12
+
+* [Added] Add database file metrics from sys.master_files. See [#9812](https://github.com/DataDog/integrations-core/pull/9812).
+* [Fixed] Capture value error. See [#9852](https://github.com/DataDog/integrations-core/pull/9852).
+
+## 3.1.1 / 2021-07-07 / Agent 7.30.0
+
+* [Fixed] Do not throw key errors. See [#9460](https://github.com/DataDog/integrations-core/pull/9460).
+
+## 3.1.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#8987](https://github.com/DataDog/integrations-core/pull/8987).
 * [Fixed] Fix misleading WARN message regarding adoprovider being ignored when using adodbapi connector. See [#9412](https://github.com/DataDog/integrations-core/pull/9412).

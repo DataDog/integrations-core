@@ -42,7 +42,9 @@ SPARK_MASTER_APP_PATH = '/app/'
 MESOS_MASTER_APP_PATH = '/frameworks'
 
 # Extract the application name and the dd metric name from the structured streams metrics.
-STRUCTURED_STREAMS_METRICS_REGEX = re.compile(r"^[\w-]+\.driver\.spark\.streaming\.[\w-]+\.(?P<metric_name>[\w-]+)$")
+STRUCTURED_STREAMS_METRICS_REGEX = re.compile(
+    r"^[\w-]+\.driver\.spark\.streaming\.(?P<query_name>[\w-]+)\.(?P<metric_name>[\w-]+)$"
+)
 
 # Application type and states to collect
 YARN_APPLICATION_TYPES = 'SPARK'
@@ -178,6 +180,8 @@ class SparkCheck(AgentCheck):
         self._disable_legacy_cluster_tag = is_affirmative(self.instance.get('disable_legacy_cluster_tag', False))
         self.metricsservlet_path = self.instance.get('metricsservlet_path', '/metrics/json')
 
+        self._enable_query_name_tag = is_affirmative(self.instance.get('enable_query_name_tag', False))
+
         # Get the cluster name from the instance configuration
         self.cluster_name = self.instance.get('cluster_name')
         if self.cluster_name is None:
@@ -221,7 +225,6 @@ class SparkCheck(AgentCheck):
                 SPARK_SERVICE_CHECK,
                 AgentCheck.OK,
                 tags=['url:%s' % am_address] + tags,
-                message='Connection to ApplicationMaster "%s" was successful' % am_address,
             )
 
     def _get_master_address(self):
@@ -316,7 +319,6 @@ class SparkCheck(AgentCheck):
             SPARK_DRIVER_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % self.master_address] + tags,
-            message='Connection to Spark driver "%s" was successful' % self.master_address,
         )
         self.log.info("Returning running apps %s", running_apps)
         return running_apps
@@ -365,7 +367,6 @@ class SparkCheck(AgentCheck):
             SPARK_STANDALONE_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % self.master_address] + tags,
-            message='Connection to Spark master "%s" was successful' % self.master_address,
         )
         self.log.info("Returning running apps %s", running_apps)
         return running_apps
@@ -400,7 +401,6 @@ class SparkCheck(AgentCheck):
             MESOS_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % self.master_address] + tags,
-            message='Connection to ResourceManager "%s" was successful' % self.master_address,
         )
 
         return running_apps
@@ -416,7 +416,6 @@ class SparkCheck(AgentCheck):
             YARN_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % self.master_address] + tags,
-            message='Connection to ResourceManager "%s" was successful' % self.master_address,
         )
 
         return running_apps
@@ -644,14 +643,21 @@ class SparkCheck(AgentCheck):
                 for gauge_name, value in iteritems(response):
                     match = STRUCTURED_STREAMS_METRICS_REGEX.match(gauge_name)
                     if not match:
+                        self.log.debug("No regex match found for gauge: '%s'", str(gauge_name))
                         continue
                     groups = match.groupdict()
                     metric_name = groups['metric_name']
                     if metric_name not in SPARK_STRUCTURED_STREAMING_METRICS:
+                        self.log.debug("Unknown metric_name encountered: '%s'", str(metric_name))
                         continue
                     metric_name, submission_type = SPARK_STRUCTURED_STREAMING_METRICS[metric_name]
                     tags = ['app_name:%s' % str(app_name)]
                     tags.extend(addl_tags)
+
+                    if self._enable_query_name_tag:
+                        query_name = groups['query_name']
+                        tags.append('query_name:%s' % str(query_name))
+
                     self._set_metric(metric_name, submission_type, value, tags=tags)
             except HTTPError as e:
                 self.log.debug(

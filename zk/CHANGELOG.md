@@ -1,6 +1,18 @@
 # CHANGELOG - zk
 
-## 2.10.0 / 2021-05-28
+## 3.1.1 / 2021-11-13
+
+* [Fixed] Added verbose logging for parsing 'mntr' output. See [#10531](https://github.com/DataDog/integrations-core/pull/10531). Thanks [Kyle-Neale](https://github.com/Kyle-Neale).
+
+## 3.1.0 / 2021-10-04 / Agent 7.32.0
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 3.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 2.10.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#9010](https://github.com/DataDog/integrations-core/pull/9010).
 

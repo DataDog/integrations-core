@@ -44,7 +44,7 @@ Some integrations require additional set up such as the installation of system d
 extra steps to occur when necessary, there is a [stage][azp-templates-setup] ran for every job that will detect what
 needs to be done and execute the appropriate [scripts][azp-scripts]. As integrations may need different set up on
 different platforms, all scripts live under a directory named after the platform. All scripts in the directory
-will be executed in lexicographical order.
+are executed in lexicographical order. Files in the scripts directory whose names begin with an underscore are not executed. 
 
 ## Validations
 
@@ -95,7 +95,7 @@ ddev validate config
 ```
 This verifies that the config specs for all integrations are valid by enforcing our configuration spec [schema](config-specs.md#schema). The most common failure at this validation stage is some version of `File <INTEGRATION_SPEC> needs to be synced.` To resolve this issue, you can run `ddev validate config --sync`
 
-If you see failures regarding formatting or missing parameters, see our [config spec](config-specs.md#schema) documentation for more details on how to construc configuration specs.
+If you see failures regarding formatting or missing parameters, see our [config spec](config-specs.md#schema) documentation for more details on how to construct configuration specs.
 
 ### Dashboard definition files
 

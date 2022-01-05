@@ -4,14 +4,12 @@
 
 from __future__ import unicode_literals
 
+from typing import List, Optional
+
 import dns.resolver
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.time import get_precise_time
-
-
-class BadConfException(Exception):
-    pass
 
 
 class DNSCheck(AgentCheck):
@@ -23,81 +21,89 @@ class DNSCheck(AgentCheck):
         inst.setdefault("name", "dns-check-0")
 
         super(DNSCheck, self).__init__(name, init_config, instances)
+        self.hostname = self.instance.get('hostname')  # type: str
+        if not self.hostname:
+            raise ConfigurationError('A valid "hostname" must be specified')
+        self.nameserver = self.instance.get('nameserver')  # type: Optional[str]
+        self.timeout = float(
+            self.instance.get('timeout', init_config.get('default_timeout', self.DEFAULT_TIMEOUT))
+        )  # type: float
 
-        self.default_timeout = init_config.get('default_timeout', self.DEFAULT_TIMEOUT)
+        self.record_type = self.instance.get('record_type', 'A')  # type: str
+        resolved_as = self.instance.get('resolves_as', '')
+        if resolved_as and self.record_type not in ['A', 'CNAME', 'MX']:
+            raise ConfigurationError('"resolves_as" can currently only support A, CNAME and MX records')
+        self.resolves_as_ips = (
+            [x.strip().lower() for x in resolved_as.split(',')] if resolved_as else []
+        )  # type: List[str]
 
-    def _load_conf(self, instance):
-        # Fetches the conf
-        hostname = instance.get('hostname')
-        if not hostname:
-            raise BadConfException('A valid "hostname" must be specified')
+        self.base_tags = self.instance.get('tags', []) + [
+            'resolved_hostname:{}'.format(self.hostname),
+            'instance:{}'.format(self.instance.get('name', self.hostname)),
+            'record_type:{}'.format(self.record_type),
+        ]
+        if resolved_as:
+            self.base_tags.append('resolved_as:{}'.format(resolved_as))
 
-        resolver = dns.resolver.Resolver()
+    def _get_resolver(self):
+        # type: () -> dns.resolver.Resolver
+        # Fetches the conf and creates a resolver accordingly
+        resolver = dns.resolver.Resolver()  # type: dns.resolver.Resolver
 
         # If a specific DNS server was defined use it, else use the system default
-        nameserver = instance.get('nameserver')
-        nameserver_port = instance.get('nameserver_port')
-        if nameserver is not None:
-            resolver.nameservers = [nameserver]
+        nameserver_port = self.instance.get('nameserver_port')  # type: Optional[int]
+        if self.nameserver is not None:
+            resolver.nameservers = [self.nameserver]
         if nameserver_port is not None:
             resolver.port = nameserver_port
 
-        timeout = float(instance.get('timeout', self.default_timeout))
-        resolver.lifetime = timeout
-        record_type = instance.get('record_type', 'A')
-        resolves_as = instance.get('resolves_as', None)
-        if resolves_as and record_type not in ['A', 'CNAME', 'MX']:
-            raise BadConfException('"resolves_as" can currently only support A, CNAME and MX records')
+        resolver.lifetime = self.timeout
 
-        return hostname, timeout, nameserver, record_type, resolver, resolves_as
+        return resolver
 
-    def check(self, instance):
-        hostname, timeout, nameserver, record_type, resolver, resolves_as = self._load_conf(instance)
+    def check(self, _):
+        resolver = self._get_resolver()
 
         # Perform the DNS query, and report its duration as a gauge
         t0 = get_precise_time()
 
         try:
-            self.log.debug('Querying "%s" record for hostname "%s"...', record_type, hostname)
-            if record_type == "NXDOMAIN":
+            self.log.debug('Querying "%s" record for hostname "%s"...', self.record_type, self.hostname)
+            if self.record_type == "NXDOMAIN":
                 try:
-                    resolver.query(hostname)
+                    resolver.query(self.hostname)
                 except dns.resolver.NXDOMAIN:
                     pass
                 else:
                     raise AssertionError("Expected an NXDOMAIN, got a result.")
             else:
-                answer = resolver.query(hostname, rdtype=record_type)
+                answer = resolver.query(self.hostname, rdtype=self.record_type)  # dns.resolver.Answer
                 assert answer.rrset.items[0].to_text()
-                if resolves_as:
-                    self._check_answer(answer, resolves_as)
+                if self.resolves_as_ips:
+                    self._check_answer(answer)
 
             response_time = get_precise_time() - t0
 
         except dns.exception.Timeout:
-            self.log.error('DNS resolution of %s timed out', hostname)
-            self.report_as_service_check(
-                AgentCheck.CRITICAL, instance, 'DNS resolution of {} timed out'.format(hostname)
-            )
+            self.log.error('DNS resolution of %s timed out', self.hostname)
+            self.report_as_service_check(AgentCheck.CRITICAL, 'DNS resolution of {} timed out'.format(self.hostname))
 
         except Exception:
-            self.log.exception('DNS resolution of %s has failed.', hostname)
-            self.report_as_service_check(
-                AgentCheck.CRITICAL, instance, 'DNS resolution of {} has failed'.format(hostname)
-            )
+            self.log.exception('DNS resolution of %s has failed.', self.hostname)
+            self.report_as_service_check(AgentCheck.CRITICAL, 'DNS resolution of {} has failed'.format(self.hostname))
 
         else:
-            tags = self._get_tags(instance)
+            tags = self._get_tags()
             if response_time > 0:
                 self.gauge('dns.response_time', response_time, tags=tags)
-            self.log.debug('Resolved hostname: %s', hostname)
-            self.report_as_service_check(AgentCheck.OK, instance)
+            self.log.debug('Resolved hostname: %s', self.hostname)
+            self.report_as_service_check(AgentCheck.OK)
 
-    def _check_answer(self, answer, resolves_as):
-        ips = [x.strip().lower() for x in resolves_as.split(',')]
+    def _check_answer(self, answer):
+        # type: (dns.resolver.Answer) -> None
         number_of_results = len(answer.rrset.items)
 
-        assert len(ips) == number_of_results
+        assert len(self.resolves_as_ips) == number_of_results
         result_ips = []
         for rip in answer.rrset.items:
             result = rip.to_text().lower()
@@ -105,33 +111,18 @@ class DNSCheck(AgentCheck):
                 result = result[:-1]
             result_ips.append(result)
 
-        for ip in ips:
+        for ip in self.resolves_as_ips:
             assert ip in result_ips
 
-    def _get_tags(self, instance):
-        hostname = instance.get('hostname')
-        instance_name = instance.get('name', hostname)
-        record_type = instance.get('record_type', 'A')
-        custom_tags = instance.get('tags', [])
-        resolved_as = instance.get('resolves_as')
-        tags = []
-
+    def _get_tags(self):
+        nameserver = ''
         try:
-            nameserver = instance.get('nameserver') or dns.resolver.Resolver().nameservers[0]
+            nameserver = self.nameserver or dns.resolver.Resolver().nameservers[0]
         except IndexError:
             self.log.error('No DNS server was found on this host.')
 
-        tags = custom_tags + [
-            'nameserver:{}'.format(nameserver),
-            'resolved_hostname:{}'.format(hostname),
-            'instance:{}'.format(instance_name),
-            'record_type:{}'.format(record_type),
-        ]
-        if resolved_as:
-            tags.append('resolved_as:{}'.format(resolved_as))
+        return self.base_tags + ['nameserver:{}'.format(nameserver)]
 
-        return tags
-
-    def report_as_service_check(self, status, instance, msg=None):
-        tags = self._get_tags(instance)
+    def report_as_service_check(self, status, msg=None):
+        tags = self._get_tags()
         self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=msg)

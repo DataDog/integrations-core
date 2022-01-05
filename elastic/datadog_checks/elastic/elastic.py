@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import re
 import time
 from collections import defaultdict
 
@@ -139,11 +140,17 @@ class ESCheck(AgentCheck):
         try:
             data = self._get_data(self._config.url, send_sc=False)
             raw_version = data['version']['number']
+
             self.set_metadata('version', raw_version)
             # pre-release versions of elasticearch are suffixed with -rcX etc..
             # peel that off so that the map below doesn't error out
             raw_version = raw_version.split('-')[0]
             version = [int(p) for p in raw_version.split('.')[0:3]]
+            if data['version'].get('distribution', '') == 'opensearch':
+                # Opensearch API is backwards compatible with ES 7.10.0
+                # https://opensearch.org/faq
+                self.log.debug('OpenSearch version %s detected', version)
+                version = [7, 10, 0]
         except AuthenticationError:
             raise
         except Exception as e:
@@ -194,7 +201,7 @@ class ESCheck(AgentCheck):
             for key, value in list(iteritems(index_data)):
                 if value is None:
                     del index_data[key]
-                    self.log.warning("The index %s has no metric data for %s", idx['index'], key)
+                    self.log.debug("The index %s has no metric data for %s", idx['index'], key)
 
             for metric in index_stats_metrics:
                 # metric description
@@ -301,7 +308,23 @@ class ESCheck(AgentCheck):
 
     def _process_pshard_stats_data(self, data, pshard_stats_metrics, base_tags):
         for metric, desc in iteritems(pshard_stats_metrics):
-            self._process_metric(data, metric, *desc, tags=base_tags)
+            pshard_tags = base_tags
+            if desc[1].startswith('_all.'):
+                pshard_tags = pshard_tags + ['index_name:_all']
+            self._process_metric(data, metric, *desc, tags=pshard_tags)
+        # process index-level metrics
+        if self._config.cluster_stats and self._config.detailed_index_stats:
+            for metric, desc in iteritems(pshard_stats_metrics):
+                if desc[1].startswith('_all.'):
+                    for index in data['indices']:
+                        self.log.debug("Processing index %s", index)
+                        escaped_index = index.replace('.', '\.')  # noqa: W605
+                        index_desc = (
+                            desc[0],
+                            'indices.' + escaped_index + '.' + desc[1].replace('_all.', ''),
+                            desc[2] if 2 < len(desc) else None,
+                        )
+                        self._process_metric(data, metric, *index_desc, tags=base_tags + ['index_name:' + index])
 
     def _process_metric(self, data, metric, xtype, path, xform=None, tags=None, hostname=None):
         """
@@ -313,9 +336,9 @@ class ESCheck(AgentCheck):
         value = data
 
         # Traverse the nested dictionaries
-        for key in path.split('.'):
+        for key in re.split(r'(?<!\\)\.', path):
             if value is not None:
-                value = value.get(key)
+                value = value.get(key.replace('\\', ''))
             else:
                 break
 
@@ -391,7 +414,8 @@ class ESCheck(AgentCheck):
     def _process_cat_allocation_data(self, admin_forwarder, version, base_tags):
         if version < [5, 0, 0]:
             self.log.debug(
-                "Collecting cat allocation metrics is not supported in version %s. Skipping", '.'.join(version)
+                "Collecting cat allocation metrics is not supported in version %s. Skipping",
+                '.'.join(str(int) for int in version),
             )
             return
 

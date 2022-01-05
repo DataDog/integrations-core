@@ -8,11 +8,11 @@ from datadog_checks.dev import get_here
 from datadog_checks.dev.docker import get_docker_hostname
 
 HERE = get_here()
-
 HOST = get_docker_hostname()
+FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 
 # Namenode URI
-NAMENODE_URI = 'http://{}:50070/'.format(HOST)
+NAMENODE_URI = 'http://{}:9870/'.format(HOST)
 NAMENODE_JMX_URI = NAMENODE_URI + 'jmx'
 
 # Namesystem state URL
@@ -24,7 +24,7 @@ NAME_SYSTEM_URL = NAMENODE_JMX_URI + '?qry=Hadoop:service=NameNode,name=FSNamesy
 # Namesystem metadata url
 NAME_SYSTEM_METADATA_URL = NAMENODE_JMX_URI + '?qry=Hadoop:service=NameNode,name=NameNodeInfo'
 
-CUSTOM_TAGS = ["cluster_name:hdfs_dev", "instance:level_tags"]
+CUSTOM_TAGS = ["hdfs_cluster:hdfs_dev", "instance:level_tags"]
 
 # Authentication Parameters
 TEST_USERNAME = 'Picard'
@@ -61,6 +61,7 @@ EXPECTED_METRICS = [
     'hdfs.namenode.num_stale_storages',
     'hdfs.namenode.missing_blocks',
     'hdfs.namenode.corrupt_blocks',
+    'hdfs.namenode.fs_lock_queue_length',
 ]
 
 HDFS_NAMENODE_AUTH_CONFIG = {

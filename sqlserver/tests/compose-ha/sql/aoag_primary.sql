@@ -1,24 +1,77 @@
+-----------------------------------
+-- test db setup
 
---create sample database
+-- datadog user
+CREATE LOGIN datadog WITH PASSWORD = 'Password12!';
+CREATE USER datadog FOR LOGIN datadog;
+GRANT SELECT on sys.dm_os_performance_counters to datadog;
+GRANT VIEW SERVER STATE to datadog;
+GRANT CONNECT ANY DATABASE to datadog;
+GRANT VIEW ANY DEFINITION to datadog;
+
+-- test users
+CREATE LOGIN bob WITH PASSWORD = 'Password12!';
+CREATE USER bob FOR LOGIN bob;
+GRANT CONNECT ANY DATABASE to bob;
+GO
+
+CREATE LOGIN fred WITH PASSWORD = 'Password12!';
+CREATE USER fred FOR LOGIN fred;
+GRANT CONNECT ANY DATABASE to fred;
+GO
+
+CREATE DATABASE datadog_test;
+GO
+
+-- Create test database for integration tests
+-- only bob and fred have read/write access to this database
+USE datadog_test;
+CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
+INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
+CREATE USER bob FOR LOGIN bob;
+CREATE USER fred FOR LOGIN fred;
+GO
+
+EXEC sp_addrolemember 'db_datareader', 'bob'
+EXEC sp_addrolemember 'db_datareader', 'fred'
+EXEC sp_addrolemember 'db_datawriter', 'bob'
+GO
+
+-- create test procedure for metrics loading feature
+USE master;
+GO
+CREATE PROCEDURE pyStoredProc AS
+BEGIN
+    CREATE TABLE #Datadog
+    (
+        [metric] varchar(255) not null,
+        [type] varchar(50) not null,
+        [value] float not null,
+        [tags] varchar(255)
+    )
+    SET NOCOUNT ON;
+    INSERT INTO #Datadog (metric, type, value, tags) VALUES
+                                                         ('sql.sp.testa', 'gauge', 100, 'foo:bar,baz:qux'),
+                                                         ('sql.sp.testb', 'gauge', 1, 'foo:bar,baz:qux'),
+                                                         ('sql.sp.testb', 'gauge', 2, 'foo:bar,baz:qux');
+    SELECT * FROM #Datadog;
+END;
+GO
+GRANT EXECUTE on pyStoredProc to datadog;
+
+-----------------------------------
+-- AGOG setup
+
 USE [master]
 GO
-CREATE DATABASE Sales
-GO
-USE [SALES]
-GO
-CREATE TABLE CUSTOMER([CustomerID] [int] NOT NULL, [SalesAmount] [decimal] NOT NULL)
-GO
-INSERT INTO CUSTOMER (CustomerID, SalesAmount) VALUES (1,100),(2,200),(3,300)
 
 --change recovery model and take full backup for db to meet requirements of AOAG
-ALTER DATABASE [SALES] SET RECOVERY FULL ;
+ALTER DATABASE datadog_test SET RECOVERY FULL ;
 GO
 
-BACKUP DATABASE [Sales] TO  DISK = N'/var/opt/mssql/backup/Sales.bak' WITH NOFORMAT, NOINIT,  NAME = N'Sales-Full Database Backup', SKIP, NOREWIND, NOUNLOAD,  STATS = 10
+BACKUP DATABASE datadog_test TO  DISK = N'/var/opt/mssql/backup/datadog_test.bak' WITH NOFORMAT, NOINIT,  NAME = N'datadog_test-Full Database Backup', SKIP, NOREWIND, NOUNLOAD,  STATS = 10
 GO
 
-USE [master]
-GO
 
 --create logins for aoag
 -- this password could also be originate from an environemnt variable passed in to this script through SQLCMD
@@ -100,5 +153,5 @@ USE [master]
 GO
 
 WAITFOR DELAY '00:00:10'
-ALTER AVAILABILITY GROUP [AG1] ADD DATABASE [SALES]
+ALTER AVAILABILITY GROUP [AG1] ADD DATABASE [datadog_test]
 GO

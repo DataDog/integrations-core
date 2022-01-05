@@ -29,12 +29,18 @@ To configure this check for an Agent running on a host:
 
    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
    You can specify the metrics you are interested in by editing the configuration below.
-   To learn how to customize the metrics to collect visit the [JMX Checks documentation][5] for more detailed instructions.
+   To learn how to customize the metrics to collect see the [JMX Checks documentation][5] for more information.
    If you need to monitor more metrics, contact [Datadog support][6].
 
 2. [Restart the Agent][7]
 
 ##### Log collection
+
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
 
 _Available for Agent versions >6.0_
 
@@ -75,6 +81,12 @@ To collect metrics with the Datadog-Ignite integration, see the [Autodiscovery w
 
 ##### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 _Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][10].
@@ -96,14 +108,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][12] for a list of metrics provided by this integration.
 
-### Service Checks
-
-**ignite.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Ignite instance, otherwise returns `OK`.
-
 ### Events
 
 The Ignite integration does not include any events.
+
+### Service Checks
+
+See [service_checks.json][13] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -111,7 +122,7 @@ Need help? Contact [Datadog support][4].
 
 
 [1]: https://ignite.apache.org/
-[2]: https://docs.datadoghq.com/agent/
+[2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://apacheignite.readme.io/docs/logging#section-log4j
 [4]: https://github.com/DataDog/integrations-core/blob/master/ignite/datadog_checks/ignite/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/integrations/java/
@@ -122,3 +133,4 @@ Need help? Contact [Datadog support][4].
 [10]: https://docs.datadoghq.com/agent/docker/log/
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/ignite/metadata.csv
+[13]: https://github.com/DataDog/integrations-core/blob/master/ignite/assets/service_checks.json

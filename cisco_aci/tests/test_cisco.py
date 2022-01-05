@@ -7,6 +7,7 @@ from copy import deepcopy
 import pytest
 from mock import MagicMock
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.cisco_aci import CiscoACICheck
 from datadog_checks.cisco_aci.api import Api, SessionWrapper
@@ -93,3 +94,10 @@ def test_config(aggregator, extra_config, expected_http_kwargs):
 
     actual_options = {k: v for k, v in check.http.options.items() if k in expected_http_kwargs}
     assert expected_http_kwargs == actual_options
+
+
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, aggregator, instance):
+    with pytest.raises(Exception):
+        dd_agent_check(instance)
+    aggregator.assert_service_check("cisco_aci.can_connect", AgentCheck.CRITICAL)

@@ -40,8 +40,9 @@ Optionally, you can configure the Agent to use a built in `postqueue -p` command
      postfix_user: postfix
 
    instances:
-     ## @param directory - string - required
-     ## Path to the postfix directory.
+     ## @param directory - string - optional - default: /var/spool/postfix
+     ## Path to the postfix directory. The directory option is required if `postqueue: false` is set. For more 
+     ## information see https://docs.datadoghq.com/integrations/postfix/#using-sudo.
      #
      - directory: /var/spool/postfix
 
@@ -121,6 +122,12 @@ Optionally, you can configure the Agent to use a built in `postqueue -p` command
 3. [Restart the Agent][5].
 
 #### Log collection
+
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
 
 _Available for Agent versions >6.0_
 

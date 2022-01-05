@@ -26,7 +26,7 @@ files:
               example: localhost
               display_default: null
 
-          - name: user
+          - name: username
             description: |
               Username used to connect to MySQL.
             enabled: true
@@ -35,7 +35,7 @@ files:
               example: datadog
               display_default: null
 
-          - name: pass
+          - name: password
             description: |
               Password associated to the MySQL user.
             enabled: true
@@ -49,6 +49,13 @@ files:
             value:
               type: number
               example: 3306
+
+          - name: reported_hostname
+            description: |
+              Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
+              and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+            value:
+              type: string
 
           - name: sock
             description: |
@@ -109,6 +116,45 @@ files:
                       type: gauge
                   tags:
                     - test:mysql
+          - name: additional_status
+            description: |
+              Set this parameter to collect additional MySQL status variables as metrics
+              from "SHOW GLOBAL STATUS"
+              See MySQL documentation for available variables: https://dev.mysql.com/doc/refman/8.0/en/show-status.html
+
+              The following fields are supported:
+
+              name : MySQL status name on "SHOW GLOBAL STATUS"
+              metric_name : metric name
+              type : gauge | rate | count | ...
+            value:
+              type: array
+              items:
+                type: object
+              example:
+                - name: innodb_rows_read
+                  metric_name: mysql.innodb.rows_read
+                  type: rate
+
+          - name: additional_variable
+            description: |
+              Set this parameter to collect additional MySQL variables as metrics
+              from "SHOW GLOBAL VARIABLES"
+              See MySQL documentation for available variables: https://dev.mysql.com/doc/refman/8.0/en/show-variables.html
+
+              The following fields are supported:
+
+              name : MySQL variable name on "SHOW GLOBAL VARIABLES"
+              metric_name : metric name
+              type : gauge | rate | count | ...
+            value:
+              type: array
+              items:
+                type: object
+              example:
+                - name: long_query_time
+                  metric_name: mysql.performance.long_query_time
+                  type: gauge
 
           - name: max_custom_queries
             description: |
@@ -146,7 +192,10 @@ files:
             options:
               - name: replication
                 description: |
-                  Set to `true` to collect replication metrics.
+                  Set to `true` to collect replication metrics or group replication metrics.
+                  These metrics are only collected from the specified `host`. If you want to collect replication metrics
+                  from the source or primary node and the replica or secondary nodes you need to set separate check
+                  instances to collect them.
                 value:
                   type: boolean
                   example: false
@@ -235,37 +284,51 @@ files:
                   type: boolean
                   example: false
 
-          - name: deep_database_monitoring
+          - name: dbm
             description: |
-              Set to `true` to enable the ALPHA features for Deep Database Monitoring.
-
-              If you would like to hear more about Deep Database Monitoring, please reach out to your customer
-              success manager or Datadog support.
+              Set to `true` enable Database Monitoring.
             enabled: false
             value:
               type: boolean
               example: false
               display_default: false
-          - name: statement_samples
-            description: Configure collection of statement samples
+          - name: query_metrics
+            description: Configure collection of query metrics
             options:
               - name: enabled
                 description: |
-                  Enables collection of statement samples. Requires `deep_database_monitoring: true`.
+                  Enable collection of query metrics. Requires `dbm: true`.
                 value:
                   type: boolean
-                  example: false
-              - name: collections_per_second
+                  example: true
+              - name: collection_interval
                 description: |
-                  Sets the maximum statement sample collection rate. Each collection involves a single query to one
+                  Set the query metric collection interval (in seconds). Each collection involves a single query to
+                  `pg_stat_statements`. If a non-default value is chosen then that exact same value must be used for *every*
+                  check instance. Running different instances with different collection intervals is not supported.
+                value:
+                  type: number
+                  example: 10
+          - name: query_samples
+            description: Configure collection of query samples
+            options:
+              - name: enabled
+                description: |
+                  Enables collection of query samples. Requires `dbm: true`.
+                value:
+                  type: boolean
+                  example: true
+              - name: collection_interval
+                description: |
+                  Sets the query sample collection interval (in seconds). Each collection involves a single query to one
                   of the `performance_schema.events_statements_*` tables, followed by at most one `EXPLAIN` query per
                   unique statement seen.
                 value:
                   type: number
                   example: 1
-              - name: explained_statements_per_hour_per_query
+              - name: explained_queries_per_hour_per_query
                 description: |
-                  Sets the rate limit for how many execution plans will be collected per hour per normalized statement.
+                  Sets the rate limit for how many execution plans will be collected per hour per normalized query.
                 value:
                   type: integer
                   example: 60
@@ -276,9 +339,9 @@ files:
                 value:
                   type: integer
                   example: 15
-              - name: explained_statements_cache_maxsize
+              - name: explained_queries_cache_maxsize
                 description: |
-                  Sets the max size of the cache used for the explained_statements_per_hour_per_query rate limit. This
+                  Sets the max size of the cache used for the explained_queries_per_hour_per_query rate limit. This
                   should be increased for databases with a very large number of unique normalized queries which exceed the
                   cache's limit.
                 value:
@@ -350,7 +413,24 @@ files:
                 value:
                   type: integer
                   example: 300
+          - name: obfuscator_options
+            description: Configure how the SQL obfuscator behaves.
+            options:
+              - name: replace_digits
+                description: |
+                  Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
+
+                  Note that this option only applies when `dbm` is enabled.
+                value:
+                  type: boolean
+                  example: false
           - template: instances/default
+            overrides:
+              disable_generic_tags.hidden: false
+              disable_generic_tags.enabled: true
+              disable_generic_tags.description: |
+                  Replaces generic tag such as `server` with `mysql_server` to avoid getting it mixed with
+                  other integrations tags.
 
       - template: logs
         example:

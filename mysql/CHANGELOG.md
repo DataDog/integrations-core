@@ -1,6 +1,69 @@
 # CHANGELOG - mysql
 
-## 4.0.3 / 2021-06-08
+## 7.0.1 / 2021-11-19
+
+* [Fixed] Set correct default values and handle redundant values for additional_variable and additional_status. See [#10652](https://github.com/DataDog/integrations-core/pull/10652).
+
+## 7.0.0 / 2021-11-13
+
+* [Added] Collect additional statuses and variables. See [#10573](https://github.com/DataDog/integrations-core/pull/10573). Thanks [notemusic110](https://github.com/notemusic110).
+* [Changed] Enable `extra_status_metrics` and `replication` metrics by default when DBM is enabled. See [#10541](https://github.com/DataDog/integrations-core/pull/10541).
+
+## 6.1.1 / 2021-10-26 / Agent 7.32.0
+
+* [Fixed] Upgrade datadog checks base to 23.1.5. See [#10467](https://github.com/DataDog/integrations-core/pull/10467).
+
+## 6.1.0 / 2021-10-04
+
+* [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
+* [Added] Update dependencies. See [#10228](https://github.com/DataDog/integrations-core/pull/10228).
+* [Added] disable generic tags in mysql. See [#10167](https://github.com/DataDog/integrations-core/pull/10167).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Add server as generic tag. See [#10100](https://github.com/DataDog/integrations-core/pull/10100).
+* [Fixed] Avoid re-explaining queries that cannot be explained. See [#9989](https://github.com/DataDog/integrations-core/pull/9989).
+
+## 6.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Add agent version to mysql database monitoring payloads. See [#9916](https://github.com/DataDog/integrations-core/pull/9916).
+* [Added] Add fetching of null row in events_statements_by_digest. See [#9892](https://github.com/DataDog/integrations-core/pull/9892).
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+* [Changed] Update mysql obfuscator options config. See [#9885](https://github.com/DataDog/integrations-core/pull/9885).
+* [Changed] Send the correct hostname with metrics when DBM is enabled. See [#9878](https://github.com/DataDog/integrations-core/pull/9878).
+
+## 5.0.4 / 2021-07-22 / Agent 7.30.0
+
+* [Fixed] Properly allow deprecated required config. See [#9750](https://github.com/DataDog/integrations-core/pull/9750).
+* [Fixed] Bump `datadog-checks-base` version requirement. See [#9718](https://github.com/DataDog/integrations-core/pull/9718).
+
+## 5.0.3 / 2021-07-16
+
+* [Fixed] Support old executable names. See [#9716](https://github.com/DataDog/integrations-core/pull/9716).
+
+## 5.0.2 / 2021-07-15
+
+* [Fixed] fix incorrect `min_collection_interval` on DBM metrics payload. See [#9695](https://github.com/DataDog/integrations-core/pull/9695).
+
+## 5.0.1 / 2021-07-13
+
+* [Fixed] Fix obfuscator options being converted into bytes rather than string. See [#9676](https://github.com/DataDog/integrations-core/pull/9676).
+
+## 5.0.0 / 2021-07-12
+
+* [Added] Add DBM SQL obfuscator options. See [#9639](https://github.com/DataDog/integrations-core/pull/9639).
+* [Added] Add truncated statement indicator to mysql query sample events. See [#9620](https://github.com/DataDog/integrations-core/pull/9620).
+* [Fixed] Bump base package dependency. See [#9666](https://github.com/DataDog/integrations-core/pull/9666).
+* [Changed] Change DBM `statement` config keys and metric terminology to `query`. See [#9661](https://github.com/DataDog/integrations-core/pull/9661).
+* [Changed] remove execution plan cost extraction. See [#9631](https://github.com/DataDog/integrations-core/pull/9631).
+* [Changed] decouple DBM query metrics interval from check run interval. See [#9658](https://github.com/DataDog/integrations-core/pull/9658).
+* [Changed] DBM statement_samples enabled by default, rename DBM-enabled key. See [#9619](https://github.com/DataDog/integrations-core/pull/9619).
+
+## 4.1.0 / 2021-06-30
+
+* [Added] Provide a reason for not having an execution plan (MySQL). See [#9569](https://github.com/DataDog/integrations-core/pull/9569).
+* [Fixed] Look for mariadbd process for MariaDB 10.5+. See [#9543](https://github.com/DataDog/integrations-core/pull/9543).
+* [Fixed] Fix insufficient rate limiting of statement samples . See [#9585](https://github.com/DataDog/integrations-core/pull/9585).
+
+## 4.0.3 / 2021-06-08 / Agent 7.29.0
 
 * [Fixed] Enable autocommit on all connections. See [#9476](https://github.com/DataDog/integrations-core/pull/9476).
 

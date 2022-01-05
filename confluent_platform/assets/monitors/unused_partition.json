@@ -1,0 +1,27 @@
+{
+	"name": "[Confluent Platform] Unused topic partition",
+	"type": "query alert",
+	"query": "avg(last_5m):avg:confluent.kafka.server.topic.bytes_in_per_sec.rate{*} by {topic-partition} + avg:confluent.kafka.server.topic.bytes_out_per_sec.rate{*} by {topic-partition} <= 0",
+	"message": "The partition {{topic-partition.name}} appears to be unused. \n\nVerify that this is intentional and be aware that unused partitions increase Broker overhead, reducing efficiency. \n\nDeleting unused partitions is recommended.",
+	"tags": [
+		"integration:confluent_platform"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+		"require_full_window": true,
+		"notify_no_data": false,
+		"renotify_interval": 0,
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 0
+		}
+	},
+  "recommended_monitor_metadata": {
+    "description": "Get notified if a partition has not seen bytes produced or consumed."
+  }
+}

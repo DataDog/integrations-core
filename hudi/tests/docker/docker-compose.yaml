@@ -1,0 +1,26 @@
+version: '3'
+
+# Adapted from https://github.com/big-data-europe/docker-spark/tree/master/template
+services:
+  spark-app-hudi:
+    build:
+      context: .
+      args:
+          HADOOP_VERSION: ${HADOOP_VERSION}
+          SPARK_VERSION: ${SPARK_VERSION}
+          HUDI_VERSION: ${HUDI_VERSION}
+    tty: true
+    container_name: spark-app-hudi
+    # uncomment volumes if collecting logs
+    # volumes:
+    # - ./log4j.properties:/spark/conf/log4j.properties
+    # - ${DD_LOG_1}:/var/log/hudi.log
+    entrypoint: ["/spark/bin/spark-submit"]
+    command: [
+        "--packages", "org.apache.hudi:hudi-spark3-bundle_2.12:${HUDI_VERSION},org.apache.spark:spark-avro_2.12:${SPARK_VERSION}",
+        "--conf", "spark.serializer=org.apache.spark.serializer.KryoSerializer",
+        "/usr/src/app/target/scala-2.12/app_2.12-0.1.0-SNAPSHOT.jar"
+    ]
+    ports:
+      - "4040:4040"
+      - "9999:9999"

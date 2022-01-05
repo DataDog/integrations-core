@@ -119,7 +119,9 @@ files:
         to `consul_service` and disable the associated deprecation warning.
       value:
         type: boolean
-        example: false
+        display_default: false
+        example: true
+      enabled: true
 
     - template: instances/http
     - template: instances/default

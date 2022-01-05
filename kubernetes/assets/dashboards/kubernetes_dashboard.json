@@ -132,7 +132,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_available{$scope,$deployment,$daemonset,$service,$label,$cluster,$namespace,$node} by {deployment}",
+                        "q": "sum:kubernetes_state.deployment.replicas_available{$scope,$deployment,$daemonset,$service,$label,$cluster,$namespace,$node} by {kube_deployment}",
                         "display_type": "area",
                         "style": {
                             "palette": "green",
@@ -199,7 +199,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$deployment,$daemonset,$cluster,$label,$namespace,$service,$node} by {deployment}",
+                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$deployment,$daemonset,$cluster,$label,$namespace,$service,$node} by {kube_deployment}",
                         "display_type": "area",
                         "style": {
                             "palette": "purple",
@@ -270,7 +270,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$deployment,$daemonset,$service,$label,$cluster,$namespace,$node} by {deployment}",
+                        "q": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$deployment,$daemonset,$service,$label,$cluster,$namespace,$node} by {kube_deployment}",
                         "display_type": "area",
                         "style": {
                             "palette": "orange",
@@ -739,7 +739,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.daemonset.desired{$scope,$deployment,$daemonset,$service,$namespace,$label,$cluster,$node} by {daemonset}",
+                        "q": "sum:kubernetes_state.daemonset.desired{$scope,$deployment,$daemonset,$service,$namespace,$label,$cluster,$node} by {kube_daemon_set}",
                         "display_type": "area",
                         "style": {
                             "palette": "purple",
@@ -898,7 +898,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.replicaset.replicas_ready{$scope,$daemonset,$service,$namespace,$deployment,$label,$cluster,$node} by {replicaset}",
+                        "q": "sum:kubernetes_state.replicaset.replicas_ready{$scope,$daemonset,$service,$namespace,$deployment,$label,$cluster,$node} by {kube_replica_set}",
                         "display_type": "area",
                         "style": {
                             "palette": "purple",
@@ -930,7 +930,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.replicaset.replicas_desired{$scope,$daemonset,$service,$namespace,$deployment,$label,$cluster,$node} by {replicaset}-sum:kubernetes_state.replicaset.replicas_ready{$scope,$daemonset,$service,$namespace,$deployment,$label,$cluster,$node} by {replicaset}",
+                        "q": "sum:kubernetes_state.replicaset.replicas_desired{$scope,$daemonset,$service,$namespace,$deployment,$label,$cluster,$node} by {kube_replica_set}-sum:kubernetes_state.replicaset.replicas_ready{$scope,$daemonset,$service,$namespace,$deployment,$label,$cluster,$node} by {kube_replica_set}",
                         "display_type": "area",
                         "style": {
                             "palette": "orange",
@@ -962,7 +962,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.io.read_bytes{$scope,$daemonset,$service,$namespace,$label,$cluster,$deployment,$node} by {replicaset,host}-avg:kubernetes_state.replicaset.replicas_ready{$scope,$daemonset,$service,$namespace,$label,$cluster,$deployment,$node} by {host}",
+                        "q": "sum:kubernetes.io.read_bytes{$scope,$daemonset,$service,$namespace,$label,$cluster,$deployment,$node} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "grey",
@@ -994,7 +994,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.io.write_bytes{$scope,$daemonset,$service,$namespace,$label,$cluster,$deployment,$node} by {replicaset,host}-avg:kubernetes_state.replicaset.replicas_ready{$scope,$daemonset,$service,$namespace,$label,$cluster,$deployment,$node} by {host}",
+                        "q": "sum:kubernetes.io.write_bytes{$scope,$daemonset,$service,$namespace,$label,$cluster,$deployment,$node} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "grey",
@@ -1172,7 +1172,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.daemonset.ready{$scope,$deployment,$daemonset,$service,$namespace,$label,$cluster,$node} by {daemonset}",
+                        "q": "sum:kubernetes_state.daemonset.ready{$scope,$deployment,$daemonset,$service,$namespace,$label,$cluster,$node} by {kube_daemon_set}",
                         "display_type": "area",
                         "style": {
                             "palette": "green",
@@ -1204,7 +1204,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.pods.running{$scope,$cluster,$namespace,$deployment,$daemonset,$label,$node,$service} by {cluster_name,kube_namespace}",
+                        "q": "sum:kubernetes.pods.running{$scope,$cluster,$namespace,$deployment,$daemonset,$label,$node,$service} by {kube_cluster_name,kube_namespace}",
                         "display_type": "area",
                         "style": {
                             "palette": "dog_classic",
@@ -1245,7 +1245,7 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(sum:kubernetes_state.pod.status_phase{$scope,$cluster,$namespace,$deployment,$daemonset,!phase:running,!phase:succeeded,$label,$node,$service} by {cluster_name,kube_namespace,phase}, 100, 'last', 'desc')",
+                        "q": "top(sum:kubernetes_state.pod.status_phase{$scope,$cluster,$namespace,$deployment,$daemonset,!pod_phase:running,!pod_phase:succeeded,$label,$node,$service} by {kube_cluster_name,kube_namespace,pod_phase}, 100, 'last', 'desc')",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
@@ -1321,7 +1321,7 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(sum:kubernetes.pods.running{$scope,$namespace,$deployment,$cluster,$daemonset,$label,$node,$service} by {cluster_name,kube_namespace}, 100, 'max', 'desc')",
+                        "q": "top(sum:kubernetes.pods.running{$scope,$namespace,$deployment,$cluster,$daemonset,$label,$node,$service} by {kube_cluster_name,kube_namespace}, 100, 'max', 'desc')",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
@@ -1397,7 +1397,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "count_nonzero(avg:kubernetes.pods.running{$scope,$label,$node,$service,$daemonset,$deployment,$namespace,$cluster} by {cluster_name})",
+                        "q": "count_nonzero(avg:kubernetes.pods.running{$scope,$label,$node,$service,$daemonset,$deployment,$namespace,$cluster} by {kube_cluster_name})",
                         "aggregator": "avg"
                     }
                 ],
@@ -1420,7 +1420,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "count_nonzero(avg:kubernetes.pods.running{$scope,$label,$node,$service,$daemonset,$deployment,$namespace,$cluster} by {cluster_name,kube_namespace})",
+                        "q": "count_nonzero(avg:kubernetes.pods.running{$scope,$label,$node,$service,$daemonset,$deployment,$namespace,$cluster} by {kube_cluster_name,kube_namespace})",
                         "aggregator": "avg"
                     }
                 ],
@@ -1443,7 +1443,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "count_nonzero(avg:kubernetes_state.deployment.replicas{$scope,$label,$node,$service,$daemonset,$deployment,$namespace,$cluster} by {cluster_name,kube_namespace,kube_deployment})",
+                        "q": "count_nonzero(avg:kubernetes_state.deployment.replicas{$scope,$label,$node,$service,$daemonset,$deployment,$namespace,$cluster} by {kube_cluster_name,kube_namespace,kube_deployment})",
                         "aggregator": "avg"
                     }
                 ],
@@ -1489,7 +1489,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "count_nonzero(avg:kubernetes_state.daemonset.desired{$scope,$label,$node,$service,$daemonset,$deployment,$namespace,$cluster} by {cluster_name,kube_namespace,kube_daemon_set})",
+                        "q": "count_nonzero(avg:kubernetes_state.daemonset.desired{$scope,$label,$node,$service,$daemonset,$deployment,$namespace,$cluster} by {kube_cluster_name,kube_namespace,kube_daemon_set})",
                         "aggregator": "avg"
                     }
                 ],
@@ -1638,7 +1638,7 @@
         {
             "name": "cluster",
             "default": "*",
-            "prefix": "cluster_name"
+            "prefix": "kube_cluster_name"
         },
         {
             "name": "namespace",

@@ -90,11 +90,11 @@ class CadvisorScraper(object):
 
     def _publish_raw_metrics(self, metric, dat, tags, is_pod, depth=0):
         """
-        Recusively parses and submit metrics for a given entity, until
+        Recursively parses and submit metrics for a given entity, until
         reaching self.max_depth.
         Nested metric names are flattened: memory/usage -> memory.usage
         :param: metric: parent's metric name (check namespace for root stat objects)
-        :param: dat: metric dictionnary to parse
+        :param: dat: metric dictionary to parse
         :param: tags: entity tags to use when submitting
         :param: is_pod: is the entity a pod (bool)
         :param: depth: current depth of recursion

@@ -7,6 +7,7 @@ import time
 from copy import deepcopy
 
 import pytest
+from six import StringIO
 
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev import RetryError, docker_run
@@ -89,7 +90,7 @@ def get_conn_failure_config():
         conn_failure_config = deepcopy(VALID_TLS_CONFIG_FOR_TEST)
     conn_failure_config['port'] = 2182
     conn_failure_config['expected_mode'] = 'down'
-    conn_failure_config['tags'] = []
+    conn_failure_config['tags'] = ["mytag"]
     return conn_failure_config
 
 
@@ -148,7 +149,7 @@ def dd_environment(get_instance):
     else:
         condition = [condition_non_tls]
 
-    with docker_run(compose_file, conditions=condition):
+    with docker_run(compose_file, conditions=condition, sleep=5):
         yield get_instance, {
             'docker_volumes': [
                 '{}:/conf/private_key.pem'.format(private_key),
@@ -156,3 +157,14 @@ def dd_environment(get_instance):
                 '{}:/conf/ca_cert.pem'.format(ca_cert),
             ]
         }
+
+
+@pytest.fixture()
+def mock_mntr_output():
+    buffer = StringIO()
+    f_name = os.path.join(HERE, 'fixtures', 'mntr_metrics')
+    with open(f_name) as f:
+        data = f.read()
+        buffer.write(data)
+
+    yield buffer

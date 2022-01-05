@@ -3,14 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.ibm_mq import IbmMqCheck
-
-from .common import MQ_VERSION_RAW
+from .common import MQ_VERSION_RAW, skip_windows_ci
 
 
+@skip_windows_ci
 @pytest.mark.integration
-def test_metadata(instance, datadog_agent):
-    check = IbmMqCheck('ibm_mq', {}, [instance])
+def test_metadata(get_check, instance, datadog_agent):
+    check = get_check(instance)
     check.check_id = 'test:123'
     check.check(instance)
 

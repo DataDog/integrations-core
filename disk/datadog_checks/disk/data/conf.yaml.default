@@ -39,7 +39,7 @@ init_config:
 #
 instances:
 
-    ## @param use_mount - boolean - required
+    ## @param use_mount - boolean - optional - default: false
     ## If enabled, metrics are tagged using mount points (for example `device:/`) instead of volumes
     ## (for example `device:/dev/disk1s5`).
     #
@@ -185,10 +185,17 @@ instances:
 
     ## @param blkid_cache_file - string - optional
     ## Instruct the check to read the labels from the blkid cache file instead of `blkid` executable.
-    ## This parameter is used only if `tag_by_label` is true.
+    ## This parameter is used only if `tag_by_label` is true. It is incompatible with `use_lsblk`.
     ## Works on Linux only.
     #
     # blkid_cache_file: /run/blkid/blkid.tab
+
+    ## @param use_lsblk - boolean - optional - default: false
+    ## Instruct the check to read the labels from the `lsblk` executable instead of `blkid` executable.
+    ## This parameter is used only if `tag_by_label` is true. It is incompatible with `blkid_cache_file`.
+    ## Works on Linux only.
+    #
+    # use_lsblk: false
 
     ## @param device_tag_re - mapping - optional
     ## Instruct the check to apply additional tags to matching

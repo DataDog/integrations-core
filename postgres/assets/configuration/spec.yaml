@@ -38,6 +38,12 @@ files:
       value:
         type: string
         display_default: postgres
+    - name: reported_hostname
+      description: |
+        Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
+        and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+      value:
+        type: string
     - name: dbstrict
       description: |
         Whether to restrict the scope of the check to just the database in question.
@@ -86,6 +92,43 @@ files:
         type: string
         display_default: false
         example: "false"
+    - name: ssl_root_cert
+      description: |
+        The path to the ssl root certificate.
+
+        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      value:
+        type: string
+        display_default: false
+        example: "/home/datadog/server-ca.pem"
+    - name: ssl_cert
+      description: |
+        The path to the ssl certificate.
+
+        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      value:
+        type: string
+        display_default: false
+        example: "/home/datadog/client-cert.pem"
+    - name: ssl_key
+      description: |
+        The path to the ssl client key.
+
+        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      value:
+        type: string
+        display_default: false
+        example: "/home/datadog/client-key.pem"
+    - name: ssl_password
+      description: |
+        The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
+        in encrypted form on disk.
+
+        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      value:
+        type: string
+        display_default: false
+        example: "ssl_key_password"
     - name: query_timeout
       description: |
         Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
@@ -94,8 +137,7 @@ files:
         Cancelled queries won't log any metrics.
       value:
         type: integer
-        example: 1000
-        display_default: null
+        example: 5000
     - name: relations
       description: |
         The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.
@@ -186,6 +228,26 @@ files:
       value:
         type: boolean
         example: false
+    - name: collect_bloat_metrics
+      description: Collect metrics about table bloat. Only available when `relation` metrics are enabled.
+      enabled: true
+      value: 
+        type: boolean
+        example: false
+    - name: collect_wal_metrics
+      description: |
+        Collect metrics about WAL file age.
+        NOTE: You must be running the check local to your database if you want to enable this option.
+      value:
+        type: boolean
+        example: false
+    - name: data_directory
+      description: |
+        The data directory of your postgres installation
+        Required when collecting WAL metrics.
+      value:
+        type: string
+        example: /usr/local/pgsql/data
     - name: tag_replication_role
       description: Tag metrics and checks with `replication_role:<master|standby>`.
       value:
@@ -225,12 +287,9 @@ files:
       value:
         type: string
         example: "datadog-agent"
-    - name: deep_database_monitoring
+    - name: dbm
       description: |
-        Set to `true` to enable the ALPHA features for Deep Database Monitoring.
-
-        If you would like to hear more about Deep Database Monitoring, please reach out to your customer
-        success manager or Datadog support.
+        Set to `true` to enable Database Monitoring.
       value:
         type: boolean
         example: false
@@ -243,44 +302,61 @@ files:
       value:
         type: string
         example: show_pg_stat_statements()
-    - name: statement_samples
-      description: Configure collection of statement samples
+    - name: query_metrics
+      description: Configure collection of query metrics
       options:
         - name: enabled
           description: |
-            Enable collection of statement samples. Requires `deep_database_monitoring: true`.
+            Enable collection of query metrics. Requires `dbm: true`.
           value:
             type: boolean
-            example: false
-        - name: collections_per_second
+            example: true
+        - name: collection_interval
           description: |
-            Set the maximum statement sample collection rate. Each collection involves a single query to
-            `pg_stat_activity` followed by at most one `EXPLAIN` query per unique statement seen.
+            Set the query metric collection interval (in seconds). Each collection involves a single query to
+            `pg_stat_statements`. If a non-default value is chosen then that exact same value must be used for *every*
+            check instance. Running different instances with different collection intervals is not supported.
+          value:
+            type: number
+            example: 10
+    - name: query_samples
+      description: Configure collection of query samples
+      options:
+        - name: enabled
+          description: |
+            Enable collection of query samples. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the query sample collection interval (in seconds). Each collection involves a single query to
+            `pg_stat_activity` followed by at most one `EXPLAIN` query per unique normalized query seen.
           value:
             type: number
             example: 1
         - name: explain_function
           description: |
-            Override the default function used to collect execution plans for statements.
+            Override the default function used to collect execution plans for queries.
           value:
             type: string
             example: datadog.explain_statement
-        - name: explained_statements_per_hour_per_query
+        - name: explained_queries_per_hour_per_query
           description: |
-            Set the rate limit for how many execution plans will be collected per hour per normalized statement.
+            Set the rate limit for how many execution plans will be collected per hour per normalized query.
           value:
             type: integer
             example: 60
         - name: samples_per_hour_per_query
           description: |
-            Set the rate limit for how many statement sample events will be ingested per hour per normalized execution
+            Set the rate limit for how many query sample events will be ingested per hour per normalized execution
             plan.
           value:
             type: integer
             example: 15
-        - name: explained_statements_cache_maxsize
+        - name: explained_queries_cache_maxsize
           description: |
-            Set the max size of the cache used for the explained_statements_per_hour_per_query rate limit. This should
+            Set the max size of the cache used for the explained_queries_per_hour_per_query rate limit. This should
             be increased for databases with a very large number unique normalized queries which exceed the cache's
             limit.
           value:
@@ -293,7 +369,45 @@ files:
           value:
             type: integer
             example: 10000
+    - name: query_activity
+      description: Configure collection of query activity
+      options:
+        - name: enabled
+          description: |
+            Enable collection of query activity. Requires `dbm: true`, and enabling query_samples.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the query activity collection interval (in seconds). This number cannot be smaller than
+            query_samples configured collection_interval.
+          value:
+            type: number
+            example: 10
+        - name: payload_row_limit
+          description: |
+            Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger
+            than the maximum rows set, then the top N longest running transactions will be reported.
+          value:
+            type: number
+            example: 3500
+    - name: obfuscator_options
+      description: Configure how the SQL obfuscator behaves.
+      options:
+        - name: replace_digits
+          description: |
+            Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
+
+            Note that this option only applies when `dbm` is enabled.
+          value:
+            type: boolean
+            example: false
     - template: instances/default
+      overrides:
+        disable_generic_tags.hidden: False
+        disable_generic_tags.enabled: True
+        disable_generic_tags.description: The integration will stop sending server tag as is reduntant with host tag
   - template: logs
     example:
     - type: file

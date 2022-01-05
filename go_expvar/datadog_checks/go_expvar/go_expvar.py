@@ -23,7 +23,7 @@ COUNT = "count"
 COUNTER = "counter"  # Deprecated
 MONOTONIC_COUNTER = "monotonic_counter"
 DEFAULT_TYPE = GAUGE
-
+DEFAULT_MAPPING = "memstats"
 
 SUPPORTED_TYPES = {
     GAUGE: AgentCheck.gauge,
@@ -170,7 +170,20 @@ class GoExpvar(AgentCheck):
                 try:
                     float(value)
                 except (TypeError, ValueError):
-                    self.log.warning("Unreportable value for path %s: %s", actual_path, value)
+                    if isinstance(value, dict) or isinstance(value, list):
+                        if actual_path == DEFAULT_MAPPING:
+                            self.log.debug(
+                                "Skipping configured path %s; most memstats metrics are collected by default."
+                                "Specify a more specific path to report a new value",
+                                actual_path,
+                            )
+                        else:
+                            self.log.warning(
+                                "Path %s cannot be a mapping or array; specify a more specific path to report a value",
+                                actual_path,
+                            )
+                    else:
+                        self.log.warning("Unreportable value for path %s: %s", actual_path, value)
                     continue
 
                 if count >= max_metrics:

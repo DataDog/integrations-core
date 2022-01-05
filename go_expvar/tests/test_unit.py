@@ -213,3 +213,30 @@ def test_alias_tag_path(go_expvar_mock, check, aggregator):
     shared_tags = ['expvar_url:{0}'.format(common.URL_WITH_PATH)]
     aggregator.assert_metric("array.dict.key", count=1, tags=shared_tags + ["path:array.0.key"])
     aggregator.assert_metric("array.dict.key", count=1, tags=shared_tags + ["path:array.1.key"])
+
+
+@pytest.mark.unit
+def test_debug_memstats(go_expvar_mock, caplog, check, aggregator):
+    caplog.set_level(logging.DEBUG)
+    mock_config = {
+        "expvar_url": common.URL_WITH_PATH,
+        "metrics": [{"path": "memstats"}],
+    }
+    check.check(mock_config)
+
+    assert (
+        "Skipping configured path memstats; most memstats metrics are collected by default."
+        "Specify a more specific path to report a new value"
+    ) in caplog.text
+
+
+@pytest.mark.unit
+def test_warn_path_mapping(go_expvar_mock, caplog, check, aggregator):
+    caplog.set_level(logging.WARNING)
+    mock_config = {
+        "expvar_url": common.URL_WITH_PATH,
+        "metrics": [{"path": r"array"}],
+    }
+    check.check(mock_config)
+
+    assert 'Path array cannot be a mapping or array; specify a more specific path to report a value' in caplog.text

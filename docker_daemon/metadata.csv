@@ -1,4 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+docker.cpu.limit,gauge,,percent,,"Limit on CPU available to the container, expressed as percentage of a core",0,docker,docker.cpu.limit
 docker.cpu.system,gauge,,percent,,"The percent of time the CPU is executing system calls on behalf of processes of this container, unnormalized",0,docker,cpu system
 docker.cpu.system.95percentile,gauge,,percent,,95th percentile of docker.cpu.system,0,docker,cpu system 95%
 docker.cpu.system.avg,gauge,,percent,,Average value of docker.cpu.system,0,docker,cpu system avg
@@ -118,3 +119,4 @@ docker.metadata.total,gauge,,byte,,Storage pool metadata space total,0,docker,me
 docker.metadata.percent,gauge,,percent,,The percent of storage pool metadata used,0,docker,percent of metadata space total
 docker.thread.count,gauge,,thread,,"Current thread count for the container",0,docker,thread.count
 docker.thread.limit,gauge,,thread,,"Thread count limit for the container, if set",0,docker,thread.limit
+docker.uptime,gauge,,second,,Time since the container was started,0,docker,uptime

@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from six import iteritems
+from six import PY3, iteritems
 
 from datadog_checks.base import PDHBaseCheck
 
@@ -21,6 +21,7 @@ DEFAULT_COUNTERS = [
     ["Web Service", None, "Post Requests/sec", "iis.httpd_request_method.post", "gauge"],
     ["Web Service", None, "Head Requests/sec", "iis.httpd_request_method.head", "gauge"],
     ["Web Service", None, "Put Requests/sec", "iis.httpd_request_method.put", "gauge"],
+    ["Web Service", None, "Patch Requests/sec", "iis.httpd_request_method.patch", "gauge"],
     ["Web Service", None, "Delete Requests/sec", "iis.httpd_request_method.delete", "gauge"],
     ["Web Service", None, "Options Requests/sec", "iis.httpd_request_method.options", "gauge"],
     ["Web Service", None, "Trace Requests/sec", "iis.httpd_request_method.trace", "gauge"],
@@ -46,6 +47,14 @@ class IIS(PDHBaseCheck):
     SITE = 'site'
     APP_POOL = 'app_pool'
 
+    def __new__(cls, name, init_config, instances):
+        if PY3:
+            from .check import IISCheckV2
+
+            return IISCheckV2(name, init_config, instances)
+        else:
+            return super(IIS, cls).__new__(cls)
+
     def __init__(self, name, init_config, instances):
         super(IIS, self).__init__(name, init_config, instances, counter_list=DEFAULT_COUNTERS)
         self._sites = self.instance.get('sites', [])
@@ -70,6 +79,17 @@ class IIS(PDHBaseCheck):
                     self.collect_sites(dd_name, metric_func, counter, counter_values)
                 elif counter.english_class_name == 'APP_POOL_WAS':
                     self.collect_app_pools(dd_name, metric_func, counter, counter_values)
+                else:
+                    self.log.debug(
+                        "Unknown IIS counter: %s. Falling back to default submission.", counter.english_class_name
+                    )
+                    for instance_name, val in iteritems(counter_values):
+                        tags = list(self._tags.get(self.instance_hash, []))
+
+                        if not counter.is_single_instance():
+                            tag = "instance:{}".format(instance_name)
+                            tags.append(tag)
+                        metric_func(dd_name, val, tags)
 
             except Exception as e:
                 # don't give up on all of the metrics because one failed

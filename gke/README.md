@@ -43,9 +43,6 @@ Deploy a [containerized version of the Datadog Agent][7] on your Kubernetes clus
 
 You can deploy the Agent with a [Helm chart][8] or directly with a [DaemonSet][9].
 
-[7]: https://app.datadoghq.com/account/settings#agent/kubernetes
-[8]: https://docs.datadoghq.com/agent/kubernetes/?tab=helm
-[9]: https://docs.datadoghq.com/agent/kubernetes/?tab=daemonset
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Autopilot" xxx -->
@@ -87,9 +84,8 @@ You can deploy the Agent with a [Helm chart][8] or directly with a [DaemonSet][9
       datadog/datadog
   ```
 
-  Refer to the [Datadog Helm documentation][10] for a full list of configurable values.
+  See the [Datadog helm-charts repository][10] for a full list of configurable values.
 
-[10]: https://github.com/DataDog/helm-charts/tree/master/charts/datadog#values
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -104,4 +100,8 @@ You can deploy the Agent with a [Helm chart][8] or directly with a [DaemonSet][9
 [4]: https://cloud.google.com/sdk/docs/initializing
 [5]: /integrations/google_cloud_platform/
 [6]: https://app.datadoghq.com/screen/integration/gce
+[7]: https://app.datadoghq.com/account/settings#agent/kubernetes
+[8]: https://docs.datadoghq.com/agent/kubernetes/?tab=helm
+[9]: https://docs.datadoghq.com/agent/kubernetes/?tab=daemonset
+[10]: https://github.com/DataDog/helm-charts/tree/master/charts/datadog#values
 [11]: https://www.datadoghq.com/blog/gke-autopilot-monitoring/

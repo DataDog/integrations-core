@@ -1,5 +1,18 @@
 # CHANGELOG - disk
 
+## 4.5.1 / 2021-11-16
+
+* [Fixed] Fix use_mount required field. See [#10657](https://github.com/DataDog/integrations-core/pull/10657).
+
+## 4.5.0 / 2021-11-13
+
+* [Added] Add runtime configuration validation. See [#8905](https://github.com/DataDog/integrations-core/pull/8905).
+* [Fixed] Fix `tag_by_label` when used together with `use_mount`. See [#10418](https://github.com/DataDog/integrations-core/pull/10418).
+
+## 4.4.0 / 2021-08-05 / Agent 7.31.0
+
+* [Added] Add option to use `lsblk` command for labeling. See [#9827](https://github.com/DataDog/integrations-core/pull/9827).
+
 ## 4.3.0 / 2021-03-24 / Agent 7.28.0
 
 * [Added] Log something if a disk is excluded. See [#8829](https://github.com/DataDog/integrations-core/pull/8829).

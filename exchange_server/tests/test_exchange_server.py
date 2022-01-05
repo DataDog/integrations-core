@@ -4,18 +4,25 @@
 import pytest
 from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
 
+from datadog_checks.dev.testing import requires_py2
 from datadog_checks.exchange_server import ExchangeCheck
-from datadog_checks.exchange_server.exchange_server import DEFAULT_COUNTERS
+from datadog_checks.exchange_server.metrics import DEFAULT_COUNTERS
 
 from .common import CHECK_NAME, METRIC_INSTANCES, MINIMAL_INSTANCE
 
+pytestmark = [requires_py2, pytest.mark.usefixtures('pdh_mocks_fixture')]
 
-@pytest.mark.usefixtures('pdh_mocks_fixture')
-def test_basic_check(aggregator):
+
+@pytest.fixture(autouse=True)
+def setup_check():
     initialize_pdh_tests()
+
+
+@pytest.mark.integration
+def test_basic_check(aggregator, dd_run_check):
     instance = MINIMAL_INSTANCE
     c = ExchangeCheck(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    dd_run_check(c)
 
     for metric_def in DEFAULT_COUNTERS:
         metric = metric_def[3]

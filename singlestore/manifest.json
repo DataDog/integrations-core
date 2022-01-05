@@ -1,0 +1,47 @@
+{
+  "display_name": "SingleStore",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "singlestore",
+  "process_signatures": [
+    "memsqld"
+  ],
+  "metric_prefix": "singlestore.",
+  "metric_to_check": "singlestore.bytes_received",
+  "creates_events": false,
+  "short_description": "Collect SingleStore metrics from leaves and aggregators.",
+  "guid": "d40f153d-d02d-4bcc-9a7d-04bf5ba46e7a",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "SingleStore",
+  "categories": [
+    "data store",
+    "log collection"
+  ],
+  "type": "check",
+  "is_public": true,
+  "integration_id": "singlestore",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {
+      "Singlestore Overview": "assets/dashboards/overview.json"
+    },
+    "monitors": {
+      "[SingleStore] License expiration": "assets/monitors/license_expiration.json",
+      "[SingleStore] Read failures rate": "assets/monitors/read_failures.json",
+      "[SingleStore] Write failures rate": "assets/monitors/write_failures.json"
+    },
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "singlestore"
+    },
+    "metrics_metadata": "metadata.csv"
+  }
+}

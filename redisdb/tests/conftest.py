@@ -96,6 +96,6 @@ def master_instance():
     return {'host': HOST, 'port': MASTER_PORT, 'keys': ['test_*'], 'collect_client_metrics': True}
 
 
-@pytest.fixture
-def check(redis_instance):
-    return Redis('redisdb', {}, [redis_instance])
+@pytest.fixture(scope='session')
+def check():
+    return lambda instance: Redis('redisdb', {}, [instance])

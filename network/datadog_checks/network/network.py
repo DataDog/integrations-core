@@ -357,7 +357,7 @@ class Network(AgentCheck):
                 # Try using `ss` for increased performance over `netstat`
                 ss_env = {"PROC_ROOT": net_proc_base_location}
 
-                # By providing the environment variables in ss_env, the PATH will be overriden. In CentOS,
+                # By providing the environment variables in ss_env, the PATH will be overridden. In CentOS,
                 # datadog-agent PATH is "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin", while sh PATH
                 # will be '/usr/local/bin:/usr/bin'. In CentOS, ss is located in /sbin and /usr/sbin, not
                 # in the sh PATH, which will result in network metric collection failure.
@@ -495,6 +495,20 @@ class Network(AgentCheck):
                 'ListenDrops': 'system.net.tcp.listen_drops',
                 'TCPBacklogDrop': 'system.net.tcp.backlog_drops',
                 'TCPRetransFail': 'system.net.tcp.failed_retransmits',
+                'IPReversePathFilter': 'system.net.ip.reverse_path_filter',
+                'PruneCalled': 'system.net.tcp.prune_called',
+                'RcvPruned': 'system.net.tcp.prune_rcv_drops',
+                'OfoPruned': 'system.net.tcp.prune_ofo_called',
+                'PAWSActive': 'system.net.tcp.paws_connection_drops',
+                'PAWSEstab': 'system.net.tcp.paws_established_drops',
+                'SyncookiesSent': 'system.net.tcp.syn_cookies_sent',
+                'SyncookiesRecv': 'system.net.tcp.syn_cookies_recv',
+                'SyncookiesFailed': 'system.net.tcp.syn_cookies_failed',
+                'TCPAbortOnTimeout': 'system.net.tcp.abort_on_timeout',
+                'TCPSynRetrans': 'system.net.tcp.syn_retrans',
+                'TCPFromZeroWindowAdv': 'system.net.tcp.from_zero_window',
+                'TCPToZeroWindowAdv': 'system.net.tcp.to_zero_window',
+                'TWRecycled': 'system.net.tcp.tw_reused',
             },
             'Udp': {
                 'InDatagrams': 'system.net.udp.in_datagrams',
@@ -524,7 +538,7 @@ class Network(AgentCheck):
         # Get the rest of the metric by reading the files. Metrics available since kernel 3.6
         conntrack_files_location = os.path.join(proc_location, 'sys', 'net', 'netfilter')
         # By default, only max and count are reported. However if the blacklist is set,
-        # the whitelist is loosing its default value
+        # the whitelist is losing its default value
         blacklisted_files = instance.get('blacklist_conntrack_metrics')
         whitelisted_files = instance.get('whitelist_conntrack_metrics')
         if blacklisted_files is None and whitelisted_files is None:

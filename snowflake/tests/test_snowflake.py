@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 from decimal import Decimal
-from typing import Any, Dict
+from typing import Any, Callable, Dict
 
 import mock
 
@@ -10,13 +11,28 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.db import Query
 from datadog_checks.snowflake import SnowflakeCheck, queries
 
-from .conftest import CHECK_NAME
+from .common import CHECK_NAME, EXPECTED_TAGS
 
-EXPECTED_TAGS = ['account:test_acct.us-central1.gcp']
+
+def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance):
+    config = copy.deepcopy(instance)
+    config['login_timeout'] = 5
+    check = SnowflakeCheck(CHECK_NAME, {}, [config])
+    dd_run_check(check)
+    aggregator.assert_service_check('snowflake.can_connect', SnowflakeCheck.CRITICAL)
+
+
+def test_no_schema(dd_run_check, aggregator, instance):
+    config = copy.deepcopy(instance)
+    del config['schema']
+    config['login_timeout'] = 5
+    check = SnowflakeCheck(CHECK_NAME, {}, [config])
+    dd_run_check(check)
+    aggregator.assert_service_check('snowflake.can_connect', SnowflakeCheck.CRITICAL)
 
 
 def test_storage_metrics(dd_run_check, aggregator, instance):
-    # type: (AggregatorStub, Dict[str, Any]) -> None
+    # type: (Callable[[SnowflakeCheck], None], AggregatorStub, Dict[str, Any]) -> None
 
     expected_storage = [(Decimal('0.000000'), Decimal('1206.000000'), Decimal('19.200000'))]
     with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_storage):
@@ -31,7 +47,7 @@ def test_storage_metrics(dd_run_check, aggregator, instance):
 
 
 def test_db_storage_metrics(dd_run_check, aggregator, instance):
-    # type: (AggregatorStub, Dict[str, Any]) -> None
+    # type: (Callable[[SnowflakeCheck], None], AggregatorStub, Dict[str, Any]) -> None
 
     expected_db_storage_usage = [('SNOWFLAKE_DB', Decimal('133.000000'), Decimal('9.100000'))]
     expected_tags = EXPECTED_TAGS + ['database:SNOWFLAKE_DB']
@@ -47,7 +63,7 @@ def test_db_storage_metrics(dd_run_check, aggregator, instance):
 
 
 def test_credit_usage_metrics(dd_run_check, aggregator, instance):
-    # type: (AggregatorStub, Dict[str, Any]) -> None
+    # type: (Callable[[SnowflakeCheck], None], AggregatorStub, Dict[str, Any]) -> None
 
     expected_credit_usage = [
         (
@@ -61,7 +77,7 @@ def test_credit_usage_metrics(dd_run_check, aggregator, instance):
             Decimal('1.066997500000'),
         )
     ]
-    expected_tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'service:COMPUTE_WH']
+    expected_tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'snowflake_service:COMPUTE_WH']
     with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_credit_usage):
         check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check._conn = mock.MagicMock()
@@ -77,7 +93,7 @@ def test_credit_usage_metrics(dd_run_check, aggregator, instance):
 
 
 def test_warehouse_usage_metrics(dd_run_check, aggregator, instance):
-    # type: (AggregatorStub, Dict[str, Any]) -> None
+    # type: (Callable[[SnowflakeCheck], None], AggregatorStub, Dict[str, Any]) -> None
 
     expected_wh_usage = [
         (
@@ -106,7 +122,7 @@ def test_warehouse_usage_metrics(dd_run_check, aggregator, instance):
 
 
 def test_login_metrics(dd_run_check, aggregator, instance):
-    # type: (AggregatorStub, Dict[str, Any]) -> None
+    # type: (Callable[[SnowflakeCheck], None], AggregatorStub, Dict[str, Any]) -> None
 
     expected_login_metrics = [('SNOWFLAKE_UI', 2, 6, 8), ('PYTHON_DRIVER', 0, 148, 148)]
     with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_login_metrics):
@@ -126,7 +142,7 @@ def test_login_metrics(dd_run_check, aggregator, instance):
 
 
 def test_warehouse_load(dd_run_check, aggregator, instance):
-    # type: (AggregatorStub, Dict[str, Any]) -> None
+    # type: (Callable[[SnowflakeCheck], None], AggregatorStub, Dict[str, Any]) -> None
 
     expected_wl_metrics = [
         ('COMPUTE_WH', Decimal('0.000446667'), Decimal('0E-9'), Decimal('0E-9'), Decimal('0E-9')),
@@ -144,7 +160,7 @@ def test_warehouse_load(dd_run_check, aggregator, instance):
 
 
 def test_query_metrics(dd_run_check, aggregator, instance):
-    # type: (AggregatorStub, Dict[str, Any]) -> None
+    # type: (Callable[[SnowflakeCheck], None], AggregatorStub, Dict[str, Any]) -> None
 
     expected_query_metrics = [
         (

@@ -3,30 +3,31 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+from copy import deepcopy
 
 import pytest
 
 from datadog_checks.dev import docker_run
-from datadog_checks.gearmand import Gearman
 
 from .common import CHECK_NAME, HERE, INSTANCE
 
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    """
-    Start a cluster with one master, one replica and one unhealthy replica and
-    stop it after the tests are done.
-    If there's any problem executing docker-compose, let the exception bubble
-    up.
-    """
-
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
-    with docker_run(compose_file):
+    with docker_run(compose_file, sleep=60, mount_logs=True):
         yield INSTANCE
 
 
 @pytest.fixture
+def instance():
+    return deepcopy(INSTANCE)
+
+
+@pytest.fixture
 def check():
-    return Gearman(CHECK_NAME, {}, {})
+    # Lazily import to support E2E on Windows
+    from datadog_checks.gearmand import Gearman
+
+    return lambda instance: Gearman(CHECK_NAME, {}, [instance])

@@ -1,6 +1,15 @@
 # CHANGELOG - Confluent Platform
 
-## 1.4.1 / 2021-05-28
+## 1.6.0 / 2021-11-13
+
+* [Added] Add runtime configuration validation. See [#8898](https://github.com/DataDog/integrations-core/pull/8898).
+* [Fixed] Fix description of JMX options. See [#10454](https://github.com/DataDog/integrations-core/pull/10454).
+
+## 1.5.0 / 2021-07-12 / Agent 7.30.0
+
+* [Added] Enable `new_gc_metrics` JMX config option for new installations. See [#9501](https://github.com/DataDog/integrations-core/pull/9501).
+
+## 1.4.1 / 2021-05-28 / Agent 7.29.0
 
 * [Fixed] Fix defaults for `collect_default_metrics` JMX config option. See [#9441](https://github.com/DataDog/integrations-core/pull/9441).
 * [Fixed] Fix JMX config spec. See [#9364](https://github.com/DataDog/integrations-core/pull/9364).

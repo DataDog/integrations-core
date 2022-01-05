@@ -14,43 +14,46 @@ pytestmark = pytest.mark.integration
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_bad_config(aggregator, instance):
+def test_bad_config(aggregator, instance, dd_run_check):
     instance['port'] = '60000'
     check = IbmDb2Check('ibm_db2', {}, [instance])
-    check.check(instance)
+    dd_run_check(check)
 
     aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, check.CRITICAL)
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_buffer_pool_tags(aggregator, instance):
+def test_buffer_pool_tags(aggregator, instance, dd_run_check):
     check = IbmDb2Check('ibm_db2', {}, [instance])
-    check.check(instance)
+    dd_run_check(check)
 
     for metric in metrics.BUFFERPOOL:
         aggregator.assert_metric_has_tag_prefix(metric, 'bufferpool:')
+    aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, count=1, status=check.OK)
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_table_space_tags(aggregator, instance):
+def test_table_space_tags(aggregator, instance, dd_run_check):
     check = IbmDb2Check('ibm_db2', {}, [instance])
-    check.check(instance)
+    dd_run_check(check)
 
     for metric in metrics.TABLESPACE:
         aggregator.assert_metric_has_tag_prefix(metric, 'tablespace:')
+    aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, count=1, status=check.OK)
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_table_space_state_change(aggregator, instance):
+def test_table_space_state_change(aggregator, instance, dd_run_check):
     check = IbmDb2Check('ibm_db2', {}, [instance])
     check._table_space_states['USERSPACE1'] = 'test'
-    check.check(instance)
+    dd_run_check(check)
 
     aggregator.assert_event('State of `USERSPACE1` changed from `test` to `NORMAL`.')
+    aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, count=1, status=check.OK)
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_custom_queries(aggregator, instance):
+def test_custom_queries(aggregator, instance, dd_run_check):
     instance['custom_queries'] = [
         {
             'metric_prefix': 'ibm_db2',
@@ -64,7 +67,7 @@ def test_custom_queries(aggregator, instance):
     ]
 
     check = IbmDb2Check('ibm_db2', {}, [instance])
-    check.check(instance)
+    dd_run_check(check)
 
     # There is also `SYSTOOLSPACE` but it seems that takes some time to come up
     table_spaces = ['USERSPACE1', 'TEMPSPACE1', 'SYSCATSPACE']
@@ -75,10 +78,11 @@ def test_custom_queries(aggregator, instance):
             metric_type=3,
             tags=['db:datadog', 'foo:bar', 'test:ibm_db2', 'tablespace:{}'.format(table_space)],
         )
+    aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, count=1, status=check.OK)
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_custom_queries_init_config(aggregator, instance):
+def test_custom_queries_init_config(aggregator, instance, dd_run_check):
     init_config = {
         'global_custom_queries': [
             {
@@ -94,7 +98,7 @@ def test_custom_queries_init_config(aggregator, instance):
     }
 
     check = IbmDb2Check('ibm_db2', init_config, [instance])
-    check.check(instance)
+    dd_run_check(check)
 
     # There is also `SYSTOOLSPACE` but it seems that takes some time to come up
     table_spaces = ['USERSPACE1', 'TEMPSPACE1', 'SYSCATSPACE']
@@ -105,14 +109,15 @@ def test_custom_queries_init_config(aggregator, instance):
             metric_type=3,
             tags=['db:datadog', 'foo:bar', 'test:ibm_db2', 'tablespace:{}'.format(table_space)],
         )
+    aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, count=1, status=check.OK)
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_metadata(instance, datadog_agent):
+def test_metadata(instance, datadog_agent, dd_run_check):
     check = IbmDb2Check('ibm_db2', {}, [instance])
     check.check_id = CHECK_ID
 
-    check.check(instance)
+    dd_run_check(check)
 
     # only major and minor are consistent values
     major, minor = DB2_VERSION.split('.')

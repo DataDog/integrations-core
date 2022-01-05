@@ -1,6 +1,10 @@
 # CHANGELOG - GlusterFS
 
-## 1.2.0 / 2021-05-28
+## 1.3.0 / 2021-10-04 / Agent 7.32.0
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 1.2.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#8920](https://github.com/DataDog/integrations-core/pull/8920).
 * [Fixed] Fix version parsing. See [#9423](https://github.com/DataDog/integrations-core/pull/9423).
