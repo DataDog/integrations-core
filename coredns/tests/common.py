@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2022-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
 from datadog_checks.dev import get_docker_hostname
@@ -137,9 +140,9 @@ METRICS_V1_2 = COMMON_METRICS + [
 
 METRICS_V1_2_OMV2 = COMMON_METRICS_OMV2 + [
     # Has been removed from v1.7.0
+    NAMESPACE + '.request_type.count',
     NAMESPACE + '.proxy_request.count',
     NAMESPACE + '.proxy_request_duration.seconds.bucket',
-    NAMESPACE + '.request_type.count',
     # The proxy plugin has been deprecated
     NAMESPACE + '.proxy_request_duration.seconds.sum',
     NAMESPACE + '.proxy_request_duration.seconds.count',

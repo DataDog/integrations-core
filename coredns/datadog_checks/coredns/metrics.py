@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2022-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
 # Sorted per plugin, all prometheus metrics prior to version 1.7.0 which introduced a major renaming of metrics.

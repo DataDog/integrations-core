@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2022-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import platform
 
 import pytest
@@ -16,7 +19,7 @@ def test_check_ok(dd_agent_check, instance):
 
 @pytest.mark.skipif(platform.python_version() < "3", reason='OpenMetrics V2 is only available with Python 3')
 @pytest.mark.e2e
-def test_om_check_ok(dd_agent_check, omv2_instance):
+def test_check_ok_omv2(dd_agent_check, omv2_instance):
     aggregator = dd_agent_check(omv2_instance, rate=True)
     for metric in METRICS_V2:
         aggregator.assert_metric(metric)

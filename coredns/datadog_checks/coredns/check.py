@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2022-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 
