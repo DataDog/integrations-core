@@ -29,6 +29,23 @@ class TestCoreDNS:
         for metric in metrics:
             aggregator.assert_metric(metric)
 
+    @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
+    def test_check_omv2(self, aggregator, mock_get, dd_run_check, omv2_instance):
+        """
+        Testing CoreDNS check OpenMetrics V2.
+        """
+
+        check = CoreDNSCheck(CHECK_NAME, {}, [omv2_instance])
+        dd_run_check(check)
+
+        # check that we then get the count metrics also
+        dd_run_check(check)
+
+        metrics = METRICS_V2 + [NAMESPACE + '.cache_hits.count']
+
+        for metric in metrics:
+            aggregator.assert_metric(metric)
+
     @pytest.mark.skipif(ON_WINDOWS, reason='No `dig` utility on Windows')
     def test_docker(self, aggregator, dd_environment, dd_run_check, dockerinstance):
         """
