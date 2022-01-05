@@ -270,6 +270,8 @@ def construct_metrics_config(metric_map, type_overrides):
         if raw_metric_name.endswith('_total'):
             raw_metric_name = raw_metric_name[:-6]
             metric_name = metric_name[:-6]
+        elif metric_name.endswith('.count'):
+            metric_name = metric_name[:-6]
 
         config = {raw_metric_name: {'name': metric_name}}
         if raw_metric_name in type_overrides:

@@ -145,7 +145,7 @@ EXPECTED_METRICS = []
 for raw_metric_name, metric_name in METRIC_MAP.items():
     if raw_metric_name in KNOWN_HISTOGRAMS or raw_metric_name.endswith(('_durations', '_latency', '_max', '_restarts')):
         metric_name += '.bucket'
-    elif raw_metric_name in KNOWN_COUNTERS:
+    elif raw_metric_name in KNOWN_COUNTERS and not metric_name.endswith('.count'):
         metric_name += '.count'
 
     EXPECTED_METRICS.append(metric_name)
