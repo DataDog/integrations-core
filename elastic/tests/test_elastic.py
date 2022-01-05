@@ -146,7 +146,7 @@ def test_custom_queries_valid_tags(dd_environment, dd_run_check, instance, aggre
                     'value_path': 'total',
                     'name': 'elasticsearch.custom.metric',
                 },
-                {'value_path': 'total', 'na e': 'dynamic_tag', 'type': 'tag'},
+                {'value_path': 'total', 'name': 'dynamic_tag', 'type': 'tag'},
             ],
             'tags': ['custom_tag:1'],
         },

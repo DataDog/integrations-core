@@ -160,10 +160,7 @@ files:
             - name: data_path
               type: string
             - name: payload
-              type: array
-              items:
-                type: object
-                properties: []
+              type: object
             - name: columns
               type: array
               items:
@@ -178,8 +175,7 @@ files:
             - name: tags
               type: array
               items:
-                type: object
-                properties: []
+                type: string
     - template: instances/default
     - template: instances/http
   - template: logs

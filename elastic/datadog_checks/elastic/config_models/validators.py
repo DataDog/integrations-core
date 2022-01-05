@@ -4,6 +4,7 @@
 
 # Here you can include additional config validators or transformers
 
+
 def initialize_instance(values, **kwargs):
     if 'custom_queries' in values:
         custom_queries = values['custom_queries']
