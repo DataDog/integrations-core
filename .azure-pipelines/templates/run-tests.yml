@@ -17,9 +17,9 @@ steps:
     env:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
 
-- ${{ if and(eq(parameters.test, 'true'), not(eq(parameters.coverage, 'true'))) }}:
-    - script: ddev test --junit ${{ parameters.ddtrace_flag }} ${{ parameters.check }}
-      displayName: 'Run Unit/Integration tests (no coverage)'
+- ${{ if and(eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.repo, 'marketplace')) }}:
+    - script: ddev test --cov --min-cov ${{ parameters.min_cov }} --junit ${{ parameters.ddtrace_flag }} ${{ parameters.check }}
+      displayName: 'Run Unit/Integration tests (marketplace)'
 
 # Nightly base package check
 - ${{ if and(eq(parameters.test, 'true'), eq(parameters.force_base_package, 'true')) }}:
