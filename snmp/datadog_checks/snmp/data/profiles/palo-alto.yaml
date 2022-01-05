@@ -3,6 +3,15 @@
 # https://docs.paloaltonetworks.com/pan-os/9-1/pan-os-admin/monitoring/snmp-monitoring-and-traps/supported-mibs/pan-common-mibmy.html#idaeaa4a59-0bf4-4f66-90cf-9c0096c6f8a4
 # https://docs.paloaltonetworks.com/content/dam/techdocs/en_US/pdf/pan-os/9-1/pan-os-admin/pan-os-admin.pdf
 
+# Example sysDescr:
+#  - Palo Alto Networks VM-Series firewall
+#  - Palo Alto Networks PA-220 series firewall
+#  - Palo Alto Networks PA-800 series firewall
+#  - Palo Alto Networks PA-3200 series firewall
+#  - Palo Alto Networks WildFire Appliance
+#  - Palo Alto Networks PA-800 series firewall
+#  - Palo Alto Networks PA-3000 series firewall
+
 extends:
   - _base.yaml
   - _generic-if.yaml
@@ -15,7 +24,53 @@ extends:
 device:
   vendor: "paloaltonetworks"
 
-sysobjectid: 1.3.6.1.4.1.25461.*
+# All Palo Alto Networks sysObjectID start with `1.3.6.1.4.1.25461.2.3` (panMibs)
+sysobjectid: 1.3.6.1.4.1.25461.2.3.*
+
+# Note related to use of index `1` of entPhysicalTable columns:
+# Based on snmpwalks of Palo Alto Networks devices, the main/chassis hardware have the index `1`
+# Librennms is also using index `1`: https://github.com/librenms/librenms/blob/1ac60e3b1d90616119f3c4adc28213e3c35c2477/includes/definitions/discovery/arista_eos.yaml#L4
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "paloaltonetworks"
+      serial_number:
+        symbol:
+          OID: 1.3.6.1.4.1.25461.2.1.2.1.3.0
+          name: panSysSerialNumber # The serial number of the unit. If not available, an empty string is returned.
+      version:
+        symbol:
+          OID: 1.3.6.1.4.1.25461.2.1.2.1.1.0
+          name: panSysSwVersion # Full software version. The first two components of the full version are the major
+                                # and minor versions. The third component indicates the maintenance release number
+                                # and the fourth, the build number.
+      product_name:
+        symbol:
+          OID: 1.3.6.1.2.1.1.1.0
+          name: sysDescr
+          match_pattern: 'Palo Alto Networks\s+(PA-\d+ series firewall|WildFire Appliance|VM-Series firewall)'
+          match_value: '$1'
+          # Examples:
+          #  - Palo Alto Networks VM-Series firewall
+          #  - Palo Alto Networks PA-3200 series firewall
+          #  - Palo Alto Networks WildFire Appliance
+      model:
+        symbol:
+          OID: 1.3.6.1.4.1.25461.2.1.2.2.1.0
+          name: panChassisType
+          # Examples:
+          #  - PA-3020
+      os_name:
+        # "PAN‑OS® is the software that runs all Palo Alto Networks® next-generation firewalls."
+        # Source https://docs.paloaltonetworks.com/pan-os.html
+        value: 'PAN-OS'
+      os_version:
+        symbol:
+          OID: 1.3.6.1.4.1.25461.2.1.2.1.1.0
+          name: panSysSwVersion # Full software version. The first two components of the full version are the major
+                                # and minor versions. The third component indicates the maintenance release number
+                                # and the fourth, the build number.
 
 metrics:
   #

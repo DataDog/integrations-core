@@ -648,3 +648,89 @@ def test_e2e_core_metadata_arista(dd_agent_check):
         'version': '12.00',
     }
     assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_palo_alto(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'palo-alto',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'description': 'Palo Alto Networks PA-3000 series firewall',
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'model': 'PA-3020',
+        'os_name': 'PAN-OS',
+        'os_version': '9.0.5',
+        'product_name': 'PA-3000 series firewall',
+        'profile': 'palo-alto',
+        'serial_number': '015351000009999',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.25461.2.3.18',
+        'tags': [
+            'device_namespace:default',
+            'device_vendor:paloaltonetworks',
+            'snmp_device:' + device_ip,
+            'snmp_profile:palo-alto',
+        ],
+        'vendor': 'paloaltonetworks',
+        'version': '9.0.5',
+    }
+    assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_netapp(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'netapp',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'description': 'NetApp Release 9.3P7: Wed Jul 25 10:11:10 UTC 2018',
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'location': 'France',
+        'model': 'example-model',
+        'name': 'example-datacenter.company',
+        'os_name': 'ONTAP',
+        'os_version': '9.3',
+        'profile': 'netapp',
+        'serial_number': '1-23-456789',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.789.2.5',
+        'tags': [
+            'device_namespace:default',
+            'device_vendor:netapp',
+            'snmp_device:' + device_ip,
+            'snmp_host:example-datacenter.company',
+            'snmp_profile:netapp',
+        ],
+        'vendor': 'netapp',
+        'version': '9.3P7:',
+    }
+    assert_device_metadata(aggregator, device)
