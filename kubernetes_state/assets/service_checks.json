@@ -96,7 +96,7 @@
         "description": "Returns `CRITICAL` if a cron job scheduled time is in the past. Returns `UNKNOWN` if the scheduled time is unknown. Returns `OK` otherwise."
     },
     {
-        "agent_version": "7.26.0",
+        "agent_version": "7.32.0",
         "integration": "Kubernetes",
         "check": "kubernetes_state.cronjob.last_job_complete",
         "statuses": [
