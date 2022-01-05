@@ -1,0 +1,10 @@
+name: oracle_container_engine_for_kubernetes
+files:
+- name: oracle_container_engine_for_kubernetes.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/default
