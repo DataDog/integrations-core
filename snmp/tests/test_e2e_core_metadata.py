@@ -751,12 +751,16 @@ def test_e2e_core_metadata_isilon(dd_agent_check):
     device_ip = instance['ip_address']
 
     device = {
+        'description': 'device-name-3 263829375 Isilon OneFS v8.2.0.0',
         'id': 'default:' + device_ip,
         'id_tags': [
             'device_namespace:default',
             'snmp_device:' + device_ip,
         ],
         'ip_address': device_ip,
+        'model': 'X410-4U-Dual-64GB-2x1GE-2x10GE SFP+-34TB-800GB SSD',
+        'os_name': 'OneFS',
+        'os_version': '8.2.0.0',
         'product_name': 'Isilon OneFS',
         'profile': 'isilon',
         'status': 1,
@@ -771,5 +775,6 @@ def test_e2e_core_metadata_isilon(dd_agent_check):
             'snmp_profile:isilon',
         ],
         'vendor': 'emc',
+        'version': '8.2.0.0',
     }
     assert_device_metadata(aggregator, device)
