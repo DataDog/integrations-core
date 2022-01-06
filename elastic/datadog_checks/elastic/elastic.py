@@ -260,8 +260,7 @@ class ESCheck(AgentCheck):
         resp = None
         try:
             if data:
-                headers = {'content-type': 'application/json'}
-                resp = self.http.post(url, json=data, headers=headers)
+                resp = self.http.post(url, json=data)
             else:
                 resp = self.http.get(url)
             resp.raise_for_status()
