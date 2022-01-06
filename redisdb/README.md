@@ -2,7 +2,15 @@
 
 ## Overview
 
-Whether you use Redis as a database, cache, or message queue, this integration helps you track problems with your Redis servers, Redis Cloud service, and the parts of your infrastructure that they serve. The Datadog Agent's Redis check collects metrics related to performance, memory usage, blocked clients, slave connections, disk persistence, expired and evicted keys, and many more.
+Whether you use Redis as a database, cache, or message queue, this integration tracks problems with your Redis servers, cloud service, and the parts of your infrastructure they serve. Use the Datadog Agent's Redis check to collects metrics related to:
+
+- Performance
+- Memory usage
+- Blocked clients
+- Secondary connections
+- Disk persistence
+- Expired and evicted keys
+- and many more
 
 ## Setup
 
@@ -44,7 +52,7 @@ To configure this check for an Agent running on a host:
        # password: <PASSWORD>
    ```
 
-2. If using Redis 6+ and ACLs, ensure that the user has at least `DB  Viewer` permissions at the Database level, `Cluster Viewer` permissions if operating in a cluster environment, and `+config|get +info +slowlog|get` ACL rules.  For more details, see the [documentation][4].
+2. If using Redis 6+ and ACLs, ensure that the user has at least `DB  Viewer` permissions at the Database level, `Cluster Viewer` permissions if operating in a cluster environment, and `+config|get +info +slowlog|get` ACL rules. For more details, see [Database access control][4].
 
 3. [Restart the Agent][5].
 
@@ -115,7 +123,7 @@ partial -->
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][11].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker Log Collection][11].
 
 Then, set [Log Integrations][12] as Docker labels:
 
@@ -149,7 +157,7 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][14] as pod annotations on your application container. Aside from this, templates can also be configure via [a file, a configmap, or a key-value store][15].
+Set [Autodiscovery Integrations Templates][14] as pod annotations on your application container. Aside from this, templates can also be configured using a [file, configmap, or key-value store][15].
 
 ```yaml
 apiVersion: v1
@@ -189,9 +197,9 @@ partial -->
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][16].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][16].
 
-Then, set [Log Integrations][12] as pod annotations. This can also be configure via [a file, a configmap, or a key-value store][17].
+Then, set [Log Integrations][12] as pod annotations. This can also be configure using a [file, configmap, or key-value store][17].
 
 ```yaml
 apiVersion: v1
@@ -263,7 +271,7 @@ partial -->
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][20].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [ECS Log Collection][20].
 
 Then, set [Log Integrations][12] as Docker labels:
 
@@ -351,7 +359,7 @@ Additional helpful documentation, links, and articles:
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/redisdb/datadog_checks/redisdb/data/conf.yaml.example
-[4]: https://docs.redislabs.com/latest/rs/administering/access-control/user-roles/#cluster-management-roles
+[4]: https://docs.redis.com/latest/rs/security/passwords-users-roles/
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/tracing/send_traces/
 [7]: https://docs.datadoghq.com/tracing/setup/

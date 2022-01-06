@@ -1,4 +1,8 @@
 # Profile for NetApp devices.
+# Example sysDescr:
+# - "NetApp Release 9.7P9: Fri Nov 06 01:13:45 UTC 2020"
+# - "NetApp Release 9.7P14: Thu Jun 10 22:54:31 UTC 2021"
+# - "NetApp Release 8.2.5P3 7-Mode: Tue Jul 16 01:37:24 PDT 2019"
 
 extends:
   - _base.yaml
@@ -6,7 +10,47 @@ extends:
 device:
   vendor: "netapp"
 
-sysobjectid: 1.3.6.1.4.1.789.2.5
+# All netapp products have netappProducts (1.3.6.1.4.1.789.2) OID as parent
+sysobjectid: 1.3.6.1.4.1.789.2.*
+
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "netapp"
+      serial_number:
+        symbol:
+          MIB: NETAPP-MIB
+          OID: 1.3.6.1.4.1.789.1.1.9.0
+          name: productSerialNum  # The product serial number. Returns unknown if it cannot be determined.
+      version:
+        # We can alternatively use 1.3.6.1.4.1.789.1.1.2.0/productVersion, but it seems to contain the same string as sysDescr.
+        # Choosing to use sysDescr since it's already retrieved anyway.
+        # Info about NetApp version: https://mysupport.netapp.com/site/info/version-support
+        symbol:
+          OID: 1.3.6.1.2.1.1.1.0
+          name: sysDescr
+          match_pattern: 'NetApp Release\s+(\S+)[:\s]'
+          match_value: '$1'
+      # product_name:
+      #   TODO: No suitable info found yet that can be used as product_name
+      model:
+        symbol:
+          MIB: NETAPP-MIB
+          OID: 1.3.6.1.4.1.789.1.1.5.0
+          name: productModel  # The model name of the system. Examples are FAS980 and FAS3050.
+      os_name:
+        # Data ONTAP is the operating system for all NetApp storage systems.
+        # Source: https://library.netapp.com/ecmdocs/ECMP1155684/html/GUID-C6A665D4-EB47-485E-B2C9-29405DEE4510.html
+        value: 'ONTAP'
+      os_version:
+        symbol:
+          OID: 1.3.6.1.2.1.1.1.0
+          name: sysDescr
+          match_pattern: 'NetApp Release\s+(\d+(?:\.\d+)*)'  # First part of the version composed of digits and `.`
+                                                             # Example: 9.7P14 => 9.7
+          match_value: '$1'
+
 
 metrics:
   - MIB: NETAPP-MIB

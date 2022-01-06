@@ -186,7 +186,7 @@ files:
               - test:mongodb
     - name: server
       deprecation:
-        Release: "8.0.0"
+        Agent version: "8.0.0"
         Migration: |
           Use the following options instead:
           hosts, username, password, database, options

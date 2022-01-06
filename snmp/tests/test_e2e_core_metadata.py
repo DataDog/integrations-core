@@ -648,3 +648,258 @@ def test_e2e_core_metadata_arista(dd_agent_check):
         'version': '12.00',
     }
     assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_palo_alto(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'palo-alto',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'description': 'Palo Alto Networks PA-3000 series firewall',
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'model': 'PA-3020',
+        'os_name': 'PAN-OS',
+        'os_version': '9.0.5',
+        'product_name': 'PA-3000 series firewall',
+        'profile': 'palo-alto',
+        'serial_number': '015351000009999',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.25461.2.3.18',
+        'tags': [
+            'device_namespace:default',
+            'device_vendor:paloaltonetworks',
+            'snmp_device:' + device_ip,
+            'snmp_profile:palo-alto',
+        ],
+        'vendor': 'paloaltonetworks',
+        'version': '9.0.5',
+    }
+    assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_netapp(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'netapp',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'description': 'NetApp Release 9.3P7: Wed Jul 25 10:11:10 UTC 2018',
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'location': 'France',
+        'model': 'example-model',
+        'name': 'example-datacenter.company',
+        'os_name': 'ONTAP',
+        'os_version': '9.3',
+        'profile': 'netapp',
+        'serial_number': '1-23-456789',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.789.2.5',
+        'tags': [
+            'device_namespace:default',
+            'device_vendor:netapp',
+            'snmp_device:' + device_ip,
+            'snmp_host:example-datacenter.company',
+            'snmp_profile:netapp',
+        ],
+        'vendor': 'netapp',
+        'version': '9.3P7:',
+    }
+    assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_checkpoint_firewall(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'checkpoint-firewall',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'description': 'Linux gw-af4bd9 3.10.0-957.21.3cpx86_64 #1 SMP Tue Jan 28 17:26:12 IST 2020 x86_64',
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'model': 'Check Point 3200',
+        'os_name': 'Gaia',
+        'os_version': '3.10.0',
+        'product_name': 'SVN Foundation',
+        'profile': 'checkpoint-firewall',
+        'serial_number': '1711BA4008',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.2620.1.1',
+        'tags': [
+            'device_namespace:default',
+            'device_vendor:checkpoint',
+            'snmp_device:' + device_ip,
+            'snmp_profile:checkpoint-firewall',
+        ],
+        'vendor': 'checkpoint',
+        'version': 'R80.10',
+    }
+    assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_fortinet_fortigate(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'fortinet-fortigate',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'model': 'FGT_501E',
+        'os_name': 'FortiOS',
+        'os_version': '5.6.4',
+        'product_name': 'FortiGate-501E',
+        'profile': 'fortinet-fortigate',
+        'serial_number': 'FG5H1E5110000000',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.12356.101.1.1',
+        'tags': [
+            'device_namespace:default',
+            'device_vendor:fortinet',
+            'snmp_device:' + device_ip,
+            'snmp_profile:fortinet-fortigate',
+        ],
+        'vendor': 'fortinet',
+        'version': 'v5.6.4,build1575b1575,180425 (GA)',
+    }
+    assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_dell_idrac(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'idrac',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        u'id': u'default:' + device_ip,
+        u'id_tags': [
+            u'device_namespace:default',
+            u'snmp_device:' + device_ip,
+        ],
+        u'ip_address': device_ip,
+        u'profile': u'idrac',
+        u'status': 1,
+        u'model': u'customFooVersion',
+        u'os_name': u'Ubuntu',
+        u'os_version': u'18.04.3 LTS (Bionic Beaver)',
+        u'product_name': u'PowerEdge',
+        u'version': u'2.5.4',
+        u'sys_object_id': u'1.3.6.1.4.1.674.10892.2',
+        u'tags': [
+            u'device_namespace:default',
+            u'device_vendor:dell',
+            u'snmp_device:' + device_ip,
+            u'snmp_profile:idrac',
+        ],
+        u'vendor': u'dell',
+        u'serial_number': u'acted quaintly driving',
+    }
+    assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_isilon(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'isilon',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'description': 'device-name-3 263829375 Isilon OneFS v8.2.0.0',
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'model': 'X410-4U-Dual-64GB-2x1GE-2x10GE SFP+-34TB-800GB SSD',
+        'os_name': 'OneFS',
+        'os_version': '8.2.0.0',
+        'product_name': 'Isilon OneFS',
+        'profile': 'isilon',
+        'serial_number': 'SX410-251604-0122',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.12325.1.1.2.1.1',
+        'tags': [
+            'cluster_name:testcluster1',
+            'device_namespace:default',
+            'device_vendor:dell',
+            'node_name:node1',
+            'node_type:1',
+            'snmp_device:' + device_ip,
+            'snmp_profile:isilon',
+        ],
+        'vendor': 'dell',
+        'version': '8.2.0.0',
+    }
+    assert_device_metadata(aggregator, device)
