@@ -22,8 +22,7 @@ class StatementMetrics:
     """
 
     def __init__(self):
-        self._previous_statements = {}
-        self._cache_initialized = False
+        self._previous_statements = None
 
     def compute_derivative_rows(self, rows, metrics, key):
         """
@@ -69,13 +68,14 @@ class StatementMetrics:
             # whether a metric is submitted for the row during this run or not.
             new_cache[row_key] = row
 
+            # Only generate derivative rows when the cache has already been initialized
+            if self._previous_statements is None:
+                continue
+
             metric_columns = metrics & set(row.keys())
 
             # A row missing from cache is interpreted as one with zero values for all columns
             prev = self._previous_statements.get(row_key, {k: 0 for k in metric_columns})
-            # Only generate derivative rows when the cache has already been initialized
-            if not self._cache_initialized:
-                continue
 
             # Take the diff of all metric values between the current row and the previous run's row.
             # There are a couple of edge cases to be aware of:
@@ -104,7 +104,6 @@ class StatementMetrics:
             result.append(diffed_row)
 
         self._previous_statements = new_cache
-        self._cache_initialized = True
 
         return result
 
