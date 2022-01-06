@@ -22,17 +22,17 @@ The PowerDNS Recursor check is included in the [Datadog Agent][1] package, so yo
 
 #### Prepare PowerDNS
 
-This check collects performance statistics via PowerDNS Recursor's statistics API. Versions of pdns_recursor before 4.1 do not enable the stats API by default. If you're running an older version, enable it by adding the following to your recursor config file (e.g. `/etc/powerdns/recursor.conf`):
+This check collects performance statistics using PowerDNS Recursor's statistics API. Versions of pdns_recursor before 4.1 do not enable the stats API by default. If you're running an older version, enable it by adding the following to your recursor config file, for example `/etc/powerdns/recursor.conf`:
 
 ```conf
 webserver=yes
-api-key=changeme             # only available since ver 4.0
+api-key=changeme             # only available since v4.0
 webserver-readonly=yes       # default no
 #webserver-port=8081         # default 8082
 #webserver-address=0.0.0.0   # default 127.0.0.1
 ```
 
-If you're running pdns_recursor 3.x, prepend `experimental-` to these option names, e.g. `experimental-webserver=yes`.
+If you're running pdns_recursor 3.x, prepend `experimental-` to these option names, for example: `experimental-webserver=yes`.
 
 If you're running pdns_recursor >= 4.1, just set `api-key`.
 
@@ -136,7 +136,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 {{< /site-region >}}
 partial -->
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][6].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][6].
 
 | Parameter      | Value                                     |
 |----------------|-------------------------------------------|
