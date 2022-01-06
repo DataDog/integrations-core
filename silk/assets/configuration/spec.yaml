@@ -16,3 +16,15 @@ files:
           type: string
       - template: instances/http
       - template: instances/default
+      - name: collect_blocksize_statistics
+        description: |
+          Enable this option to collect Silk stats metrics tagged by blocksize.
+        value:
+          type: boolean
+          example: false
+      - name: collect_read_write_statistics
+        description: |
+          Enable this option to collect Silk stats metrics differentiated by read and write.
+        value:
+          type: boolean
+          example: false
