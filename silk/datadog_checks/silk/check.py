@@ -9,7 +9,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.time import get_timestamp
 
 from .events import SilkEvent
-from .metrics import METRICS
+from .metrics import BLOCKSIZE_METRICS, METRICS, READ_WRITE_METRICS
 
 EVENT_PATH = "events?timestamp__gte={}"
 
@@ -27,6 +27,7 @@ class SilkCheck(AgentCheck):
     STATE_SERVICE_CHECK = "system.state"
     SERVERS_SERVICE_CHECK = "server.state"
     CONNECT_SERVICE_CHECK = "can_connect"
+    METRICS_TO_COLLECT = METRICS
 
     def __init__(self, name, init_config, instances):
         super(SilkCheck, self).__init__(name, init_config, instances)
@@ -37,6 +38,13 @@ class SilkCheck(AgentCheck):
 
         host = urlparse(server).netloc
         self._tags = self.instance.get("tags", []) + ["silk_host:{}".format(host)]
+
+        if self.instance.get("enable_read_write_statistics"):
+            self.METRICS_TO_COLLECT.update(READ_WRITE_METRICS)
+
+        if self.instance.get("enable_blocksize_statistics"):
+            self.METRICS_TO_COLLECT.update(BLOCKSIZE_METRICS)
+
         # System tags are collected from the /state/endpoint
         self._system_tags = []
 
@@ -54,7 +62,7 @@ class SilkCheck(AgentCheck):
         # Get metrics
         get_method = getattr
 
-        for path, metrics_obj in METRICS.items():
+        for path, metrics_obj in self.METRICS_TO_COLLECT.items():
             # Need to submit an object of relevant tags
             try:
                 response_json, _ = self._get_data(path)
