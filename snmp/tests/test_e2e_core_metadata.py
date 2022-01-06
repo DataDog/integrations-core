@@ -817,3 +817,44 @@ def test_e2e_core_metadata_fortinet_fortigate(dd_agent_check):
         'version': 'v5.6.4,build1575b1575,180425 (GA)',
     }
     assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_dell_idrac(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'idrac',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        u'id': u'default:' + device_ip,
+        u'id_tags': [
+            u'device_namespace:default',
+            u'snmp_device:' + device_ip,
+        ],
+        u'ip_address': device_ip,
+        u'profile': u'idrac',
+        u'status': 1,
+        u'model': u'customFooVersion',
+        u'os_name': u'Ubuntu',
+        u'os_version': u'18.04.3 LTS (Bionic Beaver)',
+        u'product_name': u'PowerEdge',
+        u'version': u'2.5.4',
+        u'sys_object_id': u'1.3.6.1.4.1.674.10892.2',
+        u'tags': [
+            u'device_namespace:default',
+            u'device_vendor:dell',
+            u'snmp_device:' + device_ip,
+            u'snmp_profile:idrac',
+        ],
+        u'vendor': u'dell',
+        u'serial_number': u'acted quaintly driving',
+    }
+    assert_device_metadata(aggregator, device)
