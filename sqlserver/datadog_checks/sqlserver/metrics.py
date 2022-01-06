@@ -623,6 +623,7 @@ class SqlVirtualFileIOStats(BaseSqlServerMetric):
         if not databases:
             # No database list; use the server-wide master files DMV
             query = cls.QUERY_MASTER_FILES
+
             cursor.execute(query)
             rows = cursor.fetchall()
             columns = [i[0] for i in cursor.description]
@@ -630,6 +631,8 @@ class SqlVirtualFileIOStats(BaseSqlServerMetric):
 
         else:
             # Query each database in the list for the files in the current database
+            query = cls.QUERY_DATABASE_FILES
+
             cursor.execute('select DB_NAME()')  # This can return None in some implementations so it cannot be chained
             data = cursor.fetchall()
             current_db = data[0][0]
@@ -640,8 +643,8 @@ class SqlVirtualFileIOStats(BaseSqlServerMetric):
                 ctx = construct_use_statement(db)
                 logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
                 cursor.execute(ctx)
-                logger.debug("%s: fetch_all executing query: %s", cls.__name__, cls.QUERY_DATABASE_FILES)
-                cursor.execute(cls.QUERY_DATABASE_FILES)
+                logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
+                cursor.execute(query)
                 data = cursor.fetchall()
 
                 columns = [i[0] for i in cursor.description]
