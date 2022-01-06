@@ -41,7 +41,7 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
     snmp_device = _build_device_ip(container_ip)
     subnet_prefix = ".".join(container_ip.split('.')[:3])
     aggregator = dd_agent_check(
-        {'init_config': {}, 'instances': []}, rate=True, discovery_check_count=5, discovery_timeout=20
+        {'init_config': {}, 'instances': []}, rate=True, discovery_retry_check_count=5, discovery_timeout=20
     )
 
     # === network profile ===
