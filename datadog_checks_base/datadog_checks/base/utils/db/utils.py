@@ -194,13 +194,10 @@ def obfuscate_sql_with_metadata(query, options=None):
             # Assume we're running against an older agent and return the obfuscated query without metadata.
             return {'query': statement, 'metadata': {}}
 
-    try:
-        obfuscated_statement = datadog_agent.obfuscate_sql(query, options)
-        if options and json.loads(options).get('return_json_metadata', False):
-            return _load_metadata(obfuscated_statement)
-        return {'query': obfuscated_statement, 'metadata': {}}
-    except Exception as e:
-        raise e
+    obfuscated_statement = datadog_agent.obfuscate_sql(query, options)
+    if options and json.loads(options).get('return_json_metadata', False):
+        return _load_metadata(obfuscated_statement)
+    return {'query': obfuscated_statement, 'metadata': {}}
 
 
 class DBMAsyncJob(object):
