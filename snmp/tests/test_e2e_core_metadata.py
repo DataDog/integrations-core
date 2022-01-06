@@ -752,5 +752,24 @@ def test_e2e_core_metadata_isilon(dd_agent_check):
 
     device = {
         'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'product_name': 'Isilon OneFS',
+        'profile': 'isilon',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.12325.1.1.2.1.1',
+        'tags': [
+            'cluster_name:testcluster1',
+            'device_namespace:default',
+            'device_vendor:emc',
+            'node_name:node1',
+            'node_type:1',
+            'snmp_device:' + device_ip,
+            'snmp_profile:isilon',
+        ],
+        'vendor': 'emc',
     }
     assert_device_metadata(aggregator, device)
