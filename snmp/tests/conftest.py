@@ -83,7 +83,7 @@ def _autodiscovery_ready():
             autodiscovery_checks.append(result_line)
 
     # assert subnets discovered by `snmp_listener` config from datadog.yaml
-    expected_autodiscovery_checks = 1
+    expected_autodiscovery_checks = 5
     assert len(autodiscovery_checks) == expected_autodiscovery_checks
 
 
@@ -99,27 +99,27 @@ def create_datadog_conf_file(tmp_dir):
             'workers': 4,
             'discovery_interval': 10,
             'configs': [
-                # {
-                #     'network': '{}.0/29'.format(prefix),
-                #     'port': PORT,
-                #     'community': 'generic-router',
-                #     'version': 2,
-                #     'timeout': 1,
-                #     'retries': 2,
-                #     'tags': [
-                #         "tag1:val1",
-                #         "tag2:val2",
-                #     ],
-                #     'loader': 'core',
-                # },
-                # {
-                #     'network': '{}.0/28'.format(prefix),
-                #     'port': PORT,
-                #     'community': 'apc_ups',
-                #     'version': 2,
-                #     'timeout': 1,
-                #     'retries': 2,
-                # },
+                {
+                    'network': '{}.0/29'.format(prefix),
+                    'port': PORT,
+                    'community': 'generic-router',
+                    'version': 2,
+                    'timeout': 1,
+                    'retries': 2,
+                    'tags': [
+                        "tag1:val1",
+                        "tag2:val2",
+                    ],
+                    'loader': 'core',
+                },
+                {
+                    'network': '{}.0/28'.format(prefix),
+                    'port': PORT,
+                    'community': 'apc_ups',
+                    'version': 2,
+                    'timeout': 1,
+                    'retries': 2,
+                },
                 {
                     'network': '{}.0/27'.format(prefix),
                     'port': PORT,
@@ -133,12 +133,10 @@ def create_datadog_conf_file(tmp_dir):
                     'privacy_protocol': 'des',
                     'context_name': 'public',
                     'ignored_ip_addresses': {'{}.2'.format(prefix): True},
-                    'loader': 'core',
                 },
             ],
         },
         'listeners': [{'name': 'snmp'}],
-        'check_runners': -1,
     }
     datadog_conf_file = os.path.join(tmp_dir, 'datadog.yaml')
     with open(datadog_conf_file, 'wb') as file:
