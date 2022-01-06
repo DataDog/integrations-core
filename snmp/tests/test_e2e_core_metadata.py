@@ -734,3 +734,23 @@ def test_e2e_core_metadata_netapp(dd_agent_check):
         'version': '9.3P7:',
     }
     assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_isilon(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'isilon',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'id': 'default:' + device_ip,
+    }
+    assert_device_metadata(aggregator, device)
