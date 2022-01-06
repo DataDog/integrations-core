@@ -893,7 +893,7 @@ def test_e2e_core_metadata_isilon(dd_agent_check):
         'tags': [
             'cluster_name:testcluster1',
             'device_namespace:default',
-            'device_vendor:emc',
+            'device_vendor:dell',
             'node_name:node1',
             'node_type:1',
             'snmp_device:' + device_ip,
