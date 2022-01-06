@@ -11,7 +11,7 @@ boto==2.49.0
 botocore==1.20.112; python_version < "3.0"
 botocore==1.23.30; python_version > "3.0"
 cachetools==3.1.1; python_version < "3.0"
-cachetools==5.0.0; python_version > "3.0"
+cachetools==4.2.4; python_version > "3.0"
 clickhouse-cityhash==1.0.2.3
 clickhouse-driver==0.2.0; python_version < "3.0"
 clickhouse-driver==0.2.2; python_version > "3.0"
