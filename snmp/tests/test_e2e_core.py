@@ -7,7 +7,7 @@ from tests.common import SNMP_CONTAINER_NAME
 
 from datadog_checks.dev.docker import get_container_ip
 
-from . import common
+from . import common, metrics
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
@@ -83,49 +83,17 @@ def assert_apc_ups_metrics(dd_agent_check, config):
     ]
     tags = profile_tags + ["snmp_device:{}".format(instance['ip_address'])]
 
-    metrics = [
-        'upsAdvBatteryNumOfBadBattPacks',
-        'upsAdvBatteryReplaceIndicator',
-        'upsAdvBatteryRunTimeRemaining',
-        'upsAdvBatteryTemperature',
-        'upsAdvBatteryCapacity',
-        'upsHighPrecInputFrequency',
-        'upsHighPrecInputLineVoltage',
-        'upsHighPrecOutputCurrent',
-        'upsAdvInputLineFailCause',
-        'upsAdvOutputLoad',
-        'upsBasicBatteryTimeOnBattery',
-        'upsAdvTestDiagnosticsResults',
-    ]
-
     common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
 
-    for metric in metrics:
+    for metric in metrics.APC_UPS_METRICS:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
     aggregator.assert_metric(
         'snmp.upsOutletGroupStatusGroupState',
         metric_type=aggregator.GAUGE,
         tags=['outlet_group_name:test_outlet'] + tags,
     )
-    aggregator.assert_metric(
-        'snmp.upsBasicStateOutputState.AVRTrimActive', 1, metric_type=aggregator.GAUGE, tags=tags, count=2
-    )
-    aggregator.assert_metric(
-        'snmp.upsBasicStateOutputState.BatteriesDischarged', 1, metric_type=aggregator.GAUGE, tags=tags, count=2
-    )
-    aggregator.assert_metric(
-        'snmp.upsBasicStateOutputState.LowBatteryOnBattery', 1, metric_type=aggregator.GAUGE, tags=tags, count=2
-    )
-    aggregator.assert_metric(
-        'snmp.upsBasicStateOutputState.NoBatteriesAttached', 1, metric_type=aggregator.GAUGE, tags=tags, count=2
-    )
-    aggregator.assert_metric(
-        'snmp.upsBasicStateOutputState.OnLine', 0, metric_type=aggregator.GAUGE, tags=tags, count=2
-    )
-    aggregator.assert_metric(
-        'snmp.upsBasicStateOutputState.ReplaceBattery', 1, metric_type=aggregator.GAUGE, tags=tags, count=2
-    )
-    aggregator.assert_metric('snmp.upsBasicStateOutputState.On', 1, metric_type=aggregator.GAUGE, tags=tags, count=2)
+    for metric, value in metrics.APC_UPS_UPS_BASIC_STATE_OUTPUT_STATE_METRICS:
+        aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=2, tags=tags)
 
     aggregator.assert_all_metrics_covered()
 

@@ -288,7 +288,7 @@ Monitor EKS Fargate logs by using [Fluent Bit][22] to route EKS logs to CloudWat
             region us-east-1
             log_group_name awslogs-https
             log_stream_prefix awslogs-firelens-example
-            auto_create_group On
+            auto_create_group true
    ```
 2. Use the [Datadog Forwarder][23] to collect logs from Cloudwatch and send them to Datadog.
 

@@ -74,7 +74,7 @@ Then, update your `policy.json` files to grant the needed permissions. `role:dat
 
 You may need to restart your Keystone, Neutron, and Nova API services to ensure that the policy changes take.
 
-**Note**: Installing the OpenStack integration could increase the number of VMs that Datadog monitors. For more information on how this may affect your billing, visit the Billing FAQ.
+**Note**: Installing the OpenStack integration could increase the number of VMs that Datadog monitors. For more information on how this may affect your billing, see the Billing FAQ.
 
 #### Agent configuration
 
@@ -141,7 +141,7 @@ partial -->
 
 ### Validation
 
-[Run the Agent's `status` subcommand][7] and look for `openstack` under the Checks section.
+Run the [Agent's status subcommand][7] and look for `openstack` under the Checks section.
 
 ## Data Collected
 
@@ -163,10 +163,9 @@ Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-To get a better idea of how (or why) to integrate your Nova OpenStack compute module with Datadog, check out Datadog's [series of blog posts][11] about it.
+Additional helpful documentation, links, and articles:
 
-See also these other Datadog blog posts:
-
+- [Monitoring OpenStack Nova][11]
 - [Install OpenStack in two commands for dev and test][12]
 - [OpenStack: host aggregates, flavors, and availability zones][13]
 

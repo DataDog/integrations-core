@@ -12,7 +12,7 @@ services:
     tty: true
     container_name: spark-app-hudi
     # uncomment volumes if collecting logs
-    # volumes: 
+    # volumes:
     # - ./log4j.properties:/spark/conf/log4j.properties
     # - ${DD_LOG_1}:/var/log/hudi.log
     entrypoint: ["/spark/bin/spark-submit"]

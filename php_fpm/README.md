@@ -10,7 +10,7 @@ The PHP-FPM check monitors the state of your FPM pool and tracks request perform
 
 ### Installation
 
-The PHP-FPM check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your servers that use PHP-FPM.
+The PHP-FPM check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
 ### Configuration
 
