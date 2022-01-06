@@ -1,7 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 mysql.info.schema.size,gauge,,mebibyte,,"Size of schemas in MiB",0,mysql,mysql schema size
 mysql.info.table.rows.read,count,,read,,"Total number of rows read per table",0,mysql,mysql table rows read
-mysql.info.table.rows.changed,count,,changed,,"Total number of rows changed per table",0,mysql,mysql table rows changed
+mysql.info.table.rows.update,count,,changed,,"Total number of rows changed per table",0,mysql,mysql table rows changed
 mysql.galera.wsrep_cluster_size,gauge,,node,,The current number of nodes in the Galera cluster.,0,mysql,galera cluster size
 mysql.innodb.buffer_pool_free,gauge,,page,,The number of free pages in the InnoDB Buffer Pool.,1,mysql,innodb buf pool free
 mysql.innodb.buffer_pool_total,gauge,,page,,The total number of pages in the InnoDB Buffer Pool.,0,mysql,innodb buf pool total
