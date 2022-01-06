@@ -15,6 +15,7 @@ from lxml import etree as ET
 
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
+from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
@@ -279,6 +280,67 @@ def test_statement_metrics_and_plans(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "metadata,expected_metadata_payload",
+    [
+        (
+            {'tables_csv': 'sys.databases', 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+            {'tables': ['sys.databases'], 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+        ),
+        (
+            {'tables_csv': '', 'commands': None, 'comments': None},
+            {'tables': None, 'commands': None, 'comments': None},
+        ),
+    ],
+)
+def test_statement_metadata(
+    aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, metadata, expected_metadata_payload
+):
+    dbm_instance['obfuscator_options'] = {'collect_metadata': True}
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    query = '''
+    -- Test comment
+    select * from sys.databases'''
+    query_signature = '6d1d070f9b6c5647'
+
+    def _run_query():
+        bob_conn.execute_with_retries(query)
+
+    def _obfuscate_sql(sql_query, options=None):
+        return json.dumps({'query': sql_query, 'metadata': metadata})
+
+    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        _run_query()
+        dd_run_check(check)
+        _run_query()
+        dd_run_check(check)
+
+    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+    assert dbm_samples, "should have collected at least one sample"
+
+    matching = [s for s in dbm_samples if s['db']['query_signature'] == query_signature and s['dbm_type'] == 'plan']
+    assert len(matching) == 1
+
+    sample = matching[0]
+    assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
+    assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
+    assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
+
+    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(dbm_metrics) == 1
+    metric = dbm_metrics[0]
+    matching_metrics = [m for m in metric['sqlserver_rows'] if m['query_signature'] == query_signature]
+    assert len(matching_metrics) == 1
+    metric = matching_metrics[0]
+    assert metric['dd_tables'] == expected_metadata_payload['tables']
+    assert metric['dd_commands'] == expected_metadata_payload['commands']
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
     now = time.time()
     test_query = "select * from sys.databases"
@@ -369,7 +431,7 @@ def _load_test_xml_plan(filename):
         return f.read()
 
 
-def _mock_sql_obfuscate(sql_string):
+def _mock_sql_obfuscate(sql_string, options=None):
     sql_string = re.sub(r"'[^']+'", r"?", sql_string)
     sql_string = re.sub(r"([^@])[0-9]+", r"\1?", sql_string)
     return sql_string
