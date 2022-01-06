@@ -87,8 +87,8 @@ COMMON_METRICS_OMV2 = [
     NAMESPACE + '.go.memstats.heap_objects',
     NAMESPACE + '.go.memstats.heap_sys_bytes',
     NAMESPACE + '.go.memstats.last_gc_time_seconds',
-    NAMESPACE + '.go.memstats.lookups.count',
-    NAMESPACE + '.go.memstats.mallocs.count',
+    NAMESPACE + '.go.memstats.lookups_total.count',
+    NAMESPACE + '.go.memstats.mallocs_total.count',
     NAMESPACE + '.go.memstats.mcache_inuse_bytes',
     NAMESPACE + '.go.memstats.mcache_sys_bytes',
     NAMESPACE + '.go.memstats.mspan_inuse_bytes',
@@ -102,16 +102,16 @@ COMMON_METRICS_OMV2 = [
     NAMESPACE + '.health_request_duration.sum',
     NAMESPACE + '.health_request_duration.bucket',
     NAMESPACE + '.panic_count.count',
-    NAMESPACE + '.process.cpu_seconds.count',
+    NAMESPACE + '.process.cpu_seconds_total.count',
     NAMESPACE + '.process.max_fds',
     NAMESPACE + '.process.open_fds',
     NAMESPACE + '.process.resident_memory_bytes',
     NAMESPACE + '.process.start_time_seconds',
     NAMESPACE + '.process.virtual_memory_bytes',
-    NAMESPACE + '.request.count',
+    NAMESPACE + '.request_count.count',
     NAMESPACE + '.cache_size.count',
-    NAMESPACE + '.cache_misses.count',
-    NAMESPACE + '.response_code.count',
+    NAMESPACE + '.cache_misses_count.count',
+    NAMESPACE + '.response_code_count.count',
     NAMESPACE + '.response_size.bytes.sum',
     NAMESPACE + '.response_size.bytes.count',
     NAMESPACE + '.response_size.bytes.bucket',
@@ -121,11 +121,11 @@ COMMON_METRICS_OMV2 = [
     NAMESPACE + '.request_duration.seconds.sum',
     NAMESPACE + '.request_duration.seconds.count',
     NAMESPACE + '.request_duration.seconds.bucket',
-    NAMESPACE + '.forward_request.count',
+    NAMESPACE + '.forward_request_count.count',
     NAMESPACE + '.forward_request_duration.seconds.sum',
     NAMESPACE + '.forward_request_duration.seconds.count',
     NAMESPACE + '.forward_request_duration.seconds.bucket',
-    NAMESPACE + '.forward_response_rcode.count',
+    NAMESPACE + '.forward_response_rcode_count.count',
 ]
 
 METRICS_V1_2 = COMMON_METRICS + [
@@ -140,8 +140,8 @@ METRICS_V1_2 = COMMON_METRICS + [
 
 METRICS_V1_2_OMV2 = COMMON_METRICS_OMV2 + [
     # Has been removed from v1.7.0
-    NAMESPACE + '.request_type.count',
-    NAMESPACE + '.proxy_request.count',
+    NAMESPACE + '.request_type_count.count',
+    NAMESPACE + '.proxy_request_count.count',
     NAMESPACE + '.proxy_request_duration.seconds.bucket',
     # The proxy plugin has been deprecated
     NAMESPACE + '.proxy_request_duration.seconds.sum',
@@ -167,11 +167,11 @@ METRICS_V1_8_OMV2 = COMMON_METRICS_OMV2 + [
     NAMESPACE + '.go.info',
     NAMESPACE + '.go.memstats.gc_cpu_fraction',
     NAMESPACE + '.go.memstats.heap_released_bytes',
-    NAMESPACE + '.cache_request.count',
+    NAMESPACE + '.cache_request_count.count',
     NAMESPACE + '.plugin_enabled',
-    NAMESPACE + '.forward_healthcheck_broken.count',
+    NAMESPACE + '.forward_healthcheck_broken_count.count',
     NAMESPACE + '.hosts.reload_timestamp',
-    NAMESPACE + '.reload.failed.count',
+    NAMESPACE + '.reload.failed_count.count',
 ]
 
 METRICS = METRICS_V1_8 if COREDNS_VERSION[:2] == [1, 8] else METRICS_V1_2

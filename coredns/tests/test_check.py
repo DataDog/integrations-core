@@ -5,7 +5,7 @@ import pytest
 from six import PY2
 
 from datadog_checks.coredns import CoreDNSCheck
-from datadog_checks.dev.utils import ON_WINDOWS
+from datadog_checks.dev.utils import ON_WINDOWS, get_metadata_metrics
 
 from .common import CHECK_NAME, METRICS, METRICS_V2, NAMESPACE
 
@@ -41,10 +41,11 @@ class TestCoreDNS:
         # check that we then get the count metrics also
         dd_run_check(check)
 
-        metrics = METRICS_V2 + [NAMESPACE + '.cache_hits.count']
+        metrics = METRICS_V2 + [NAMESPACE + '.cache_hits_count.count']
 
         for metric in metrics:
             aggregator.assert_metric(metric)
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
     @pytest.mark.skipif(ON_WINDOWS, reason='No `dig` utility on Windows')
     def test_docker(self, aggregator, dd_environment, dd_run_check, dockerinstance):
@@ -73,3 +74,4 @@ class TestCoreDNS:
             aggregator.assert_metric(metric)
 
         aggregator.assert_all_metrics_covered()
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)

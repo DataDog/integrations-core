@@ -27,12 +27,12 @@ def init_coredns():
 
 
 @pytest.fixture(scope="session")
-def dd_environment(instance):
+def dd_environment(omv2_instance):
     compose_file = os.path.join(HERE, 'docker', 'docker-compose.yml')
     env = {'COREDNS_CONFIG_FILE': CONFIG_FILE}
 
     with docker_run(compose_file, conditions=[WaitFor(init_coredns)], env_vars=env):
-        yield instance
+        yield omv2_instance
 
 
 @pytest.fixture

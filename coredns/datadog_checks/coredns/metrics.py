@@ -62,6 +62,18 @@ DEFAULT_METRICS = {
     'coredns_proxy_request_duration_seconds': 'proxy_request_duration.seconds',
 }
 
+DEFAULT_METRICS_OVERRIDE = {
+    'coredns_cache_hits_total': 'cache_hits_count',
+    'coredns_cache_misses_total': 'cache_misses_count',
+    'coredns_forward_response_rcode_count_total': 'forward_response_rcode_count',
+    'coredns_forward_request_count_total': 'forward_request_count',
+    'coredns_dns_request_count_total': 'request_count',
+    'coredns_dns_request_type_count_total': 'request_type_count',
+    'coredns_dns_response_rcode_count_total': 'response_code_count',
+    'coredns_proxy_request_count_total': 'proxy_request_count',
+    'coredns_cache_prefetch_total': 'cache_prefetch_count',
+}
+
 # Sorted per plugin, all prometheus metrics after version 1.7.0 which introduced a major renaming of metrics.
 NEW_METRICS = {
     # acl: https://github.com/coredns/coredns/blob/v1.7.0/plugin/acl/README.md
@@ -93,6 +105,16 @@ NEW_METRICS = {
     'coredns_plugin_enabled': 'plugin_enabled',
     # reload: https://github.com/coredns/coredns/tree/v1.7.0/plugin/reload
     'coredns_reload_failed_total': 'reload.failed_count',
+}
+
+NEW_METRICS_OVERRIDE = {
+    'coredns_cache_requests_total': 'cache_request_count',
+    'coredns_forward_requests_total': 'forward_request_count',
+    'coredns_forward_responses_total': 'forward_response_rcode_count',
+    'coredns_forward_healthcheck_broken_total': 'forward_healthcheck_broken_count',
+    'coredns_dns_requests_total': 'request_count',
+    'coredns_reload_failed_total': 'reload.failed_count',
+    'coredns_dns_responses_total': 'response_code_count',
 }
 
 DEFAULT_METRICS.update(NEW_METRICS)
@@ -133,21 +155,37 @@ GO_METRICS = {
     'process_virtual_memory_bytes': 'process.virtual_memory_bytes',
 }
 
+GO_METRICS_OVERRIDE = {
+    'go_memstats_lookups_total': 'go.memstats.lookups_total',
+    'go_memstats_mallocs_total': 'go.memstats.mallocs_total',
+    'process_cpu_seconds_total': 'process.cpu_seconds_total',
+}
+
 METRIC_MAP = deepcopy(DEFAULT_METRICS)
 METRIC_MAP.update(GO_METRICS)
 
+METRIC_OVERRIDE = deepcopy(DEFAULT_METRICS_OVERRIDE)
+METRIC_OVERRIDE.update(NEW_METRICS_OVERRIDE)
+METRIC_OVERRIDE.update(GO_METRICS_OVERRIDE)
 
-def construct_metrics_config(metric_map):
+
+def construct_metrics_config(metric_map, overrides):
     metrics = []
     for raw_metric_name, metric_name in metric_map.items():
         if raw_metric_name.endswith('_total'):
-            raw_metric_name = raw_metric_name[:-6]
-            metric_name = metric_name[:-6]
+            if raw_metric_name in overrides:
+                metric_name = overrides[raw_metric_name]
+                raw_metric_name = raw_metric_name[:-6]
+            else:
+                raw_metric_name = raw_metric_name[:-6]
+                metric_name = metric_name[:-6]
         elif raw_metric_name.endswith('_counter'):
-            raw_metric_name = raw_metric_name[:-8]
-            metric_name = metric_name[:-8]
-
+            if raw_metric_name in overrides:
+                metric_name = overrides[raw_metric_name]
+                raw_metric_name = raw_metric_name[:-8]
+            else:
+                raw_metric_name = raw_metric_name[:-8]
+                metric_name = metric_name[:-8]
         config = {raw_metric_name: {'name': metric_name}}
         metrics.append(config)
-
     return metrics
