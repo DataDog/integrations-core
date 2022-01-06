@@ -92,6 +92,9 @@ class PostgresConfig:
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
         self.obfuscator_options = {
+            # Valid values for this can be found at
+            # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/database.md#connection-level-attributes
+            'dbms': 'postgresql',
             'replace_digits': obfuscator_options_config.get(
                 'replace_digits', obfuscator_options_config.get('quantize_sql_tables', False)
             ),
