@@ -858,3 +858,48 @@ def test_e2e_core_metadata_dell_idrac(dd_agent_check):
         u'serial_number': u'acted quaintly driving',
     }
     assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_isilon(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'isilon',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'description': 'device-name-3 263829375 Isilon OneFS v8.2.0.0',
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'model': 'X410-4U-Dual-64GB-2x1GE-2x10GE SFP+-34TB-800GB SSD',
+        'os_name': 'OneFS',
+        'os_version': '8.2.0.0',
+        'product_name': 'Isilon OneFS',
+        'profile': 'isilon',
+        'serial_number': 'SX410-251604-0122',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.12325.1.1.2.1.1',
+        'tags': [
+            'cluster_name:testcluster1',
+            'device_namespace:default',
+            'device_vendor:dell',
+            'node_name:node1',
+            'node_type:1',
+            'snmp_device:' + device_ip,
+            'snmp_profile:isilon',
+        ],
+        'vendor': 'dell',
+        'version': '8.2.0.0',
+    }
+    assert_device_metadata(aggregator, device)
