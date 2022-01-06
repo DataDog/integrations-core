@@ -23,11 +23,12 @@ from .validate.licenses import extract_classifier_value
 IGNORED_DEPS = {
     'psycopg2-binary',  # https://github.com/DataDog/integrations-core/pull/10456
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
-    'flup',  # https://github.com/DataDog/integrations-core/pull/1997
     # https://github.com/DataDog/integrations-core/pull/10105;
     # snowflake-connector-python 2.6.0 has requirement cryptography<4.0.0,>=2.5.0
     'cryptography',
     'dnspython',
+    'kubernetes',
+    'cachetools'
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
