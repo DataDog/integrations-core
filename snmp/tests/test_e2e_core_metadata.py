@@ -847,7 +847,7 @@ def test_e2e_core_metadata_dell_idrac(dd_agent_check):
         u'os_version': u'18.04.3 LTS (Bionic Beaver)',
         u'product_name': u'PowerEdge',
         u'version': u'2.5.4',
-        u'sys_object_id': u'1.3.6.1.4.1.674.10892.2.2',
+        u'sys_object_id': u'1.3.6.1.4.1.674.10892.2',
         u'tags': [
             u'device_namespace:default',
             u'device_vendor:dell',
