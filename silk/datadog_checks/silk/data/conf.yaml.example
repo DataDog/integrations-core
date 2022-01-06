@@ -366,3 +366,13 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param collect_blocksize_statistics - boolean - optional - default: false
+    ## Enable this option to collect Silk stats metrics tagged by blocksize.
+    #
+    # collect_blocksize_statistics: false
+
+    ## @param collect_read_write_statistics - boolean - optional - default: false
+    ## Enable this option to collect Silk stats metrics differentiated by read and write.
+    #
+    # collect_read_write_statistics: false

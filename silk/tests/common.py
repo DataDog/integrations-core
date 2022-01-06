@@ -13,7 +13,6 @@ INSTANCE = {
 }
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
-
 METRICS = [
     'silk.system.views_count',
     'silk.system.volumes_count',
@@ -56,6 +55,9 @@ METRICS = [
     'silk.replication.volume.logical_out',
     'silk.replication.volume.physical_in',
     'silk.replication.volume.physical_out',
+]
+
+BLOCKSIZE_METRICS = [
     'silk.volume.block_size.io_ops.avg',
     'silk.volume.block_size.latency.inner',
     'silk.volume.block_size.latency.outer',
@@ -64,6 +66,9 @@ METRICS = [
     'silk.system.block_size.latency.inner',
     'silk.system.block_size.latency.outer',
     'silk.system.block_size.throughput.avg',
+]
+
+READ_WRITE_METRICS = [
     'silk.volume.read.io_ops.avg',
     'silk.volume.read.latency.inner',
     'silk.volume.read.latency.outer',
