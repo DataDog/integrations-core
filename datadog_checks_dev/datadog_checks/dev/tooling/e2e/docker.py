@@ -136,6 +136,9 @@ class DockerInterface(object):
         as_table=False,
         break_point=None,
         jmx_list=None,
+        discovery_timeout=None,
+        discovery_retry_interval=None,
+        discovery_check_count=None,
     ):
         # JMX check
         if jmx_list:
@@ -165,6 +168,15 @@ class DockerInterface(object):
 
             if as_table:
                 command.append('--table')
+
+            if discovery_timeout is not None:
+                command.extend(['--discovery-timeout', str(discovery_timeout)])
+
+            if discovery_retry_interval is not None:
+                command.extend(['--discovery-retry-interval', str(discovery_retry_interval)])
+
+            if discovery_check_count is not None:
+                command.extend(['--discovery-check-count', str(discovery_check_count)])
 
         if log_level is not None:
             command.extend(['--log-level', log_level])
