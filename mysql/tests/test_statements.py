@@ -167,7 +167,7 @@ def test_statement_metrics(
 
 
 def _obfuscate_sql(query, options=None):
-    return query
+    return re.sub(r'\s+', ' ', query or '').strip()
 
 
 @pytest.mark.integration
