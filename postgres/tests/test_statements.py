@@ -211,8 +211,8 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
 
     def obfuscate_sql(query, options=None):
         if query.startswith('select * from pg_stat_activity where application_name'):
-            return json.dumps({'query': normalized_query, 'metadata': {}})
-        return json.dumps({'query': query, 'metadata': {}})
+            return normalized_query
+        return query
 
     check = integration_check(dbm_instance)
     check._connect()
@@ -534,6 +534,7 @@ def test_statement_metadata(
     expected_metadata_payload,
 ):
     """Tests for metadata in both samples and metrics"""
+    dbm_instance['obfuscator_options'] = {'collect_metadata': True}
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     dbm_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
