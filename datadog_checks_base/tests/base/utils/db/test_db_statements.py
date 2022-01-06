@@ -57,6 +57,7 @@ class TestStatementMetrics:
         assert [] == sm.compute_derivative_rows(rows1, metrics, key=key)
 
         rows2 = [
+            # New query in the second execution
             {'count': 1, 'time': 1, 'errors': 1, 'query': 'SELECT CURRENT_TIME', 'db': 'puppies', 'user': 'dog'},
             add_to_dict(rows1[0], {'count': 0, 'time': 0, 'errors': 15}),
             add_to_dict(rows1[1], {'count': 1, 'time': 15, 'errors': 0}),
@@ -74,6 +75,16 @@ class TestStatementMetrics:
                 'query': 'update kennel set breed="dalmatian" where id = ?',
                 'db': 'puppies',
                 'user': 'rover',
+            },
+            # The new query is omitted in the output since its absence from the saved rows from the first run
+            # implies all counts need to be accounted for
+            {
+                'count': 1,
+                'time': 1,
+                'errors': 1,
+                'query': 'SELECT CURRENT_TIME',
+                'db': 'puppies',
+                'user': 'dog',
             },
         ]
 
