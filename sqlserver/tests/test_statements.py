@@ -296,6 +296,7 @@ def test_statement_metrics_and_plans(
 def test_statement_metadata(
     aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, metadata, expected_metadata_payload
 ):
+    dbm_instance['obfuscator_options'] = {'collect_metadata': True}
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     query = '''
@@ -433,7 +434,7 @@ def _load_test_xml_plan(filename):
 def _mock_sql_obfuscate(sql_string, options=None):
     sql_string = re.sub(r"'[^']+'", r"?", sql_string)
     sql_string = re.sub(r"([^@])[0-9]+", r"\1?", sql_string)
-    return json.dumps({'query': sql_string, 'metadata': {}})
+    return sql_string
 
 
 @pytest.mark.parametrize(
