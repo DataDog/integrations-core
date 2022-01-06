@@ -35,6 +35,7 @@ from .const import (
     RATE,
     REPLICA_VARS,
     SCHEMA_VARS,
+    TABLE_ROWS_VARS,
     STATUS_VARS,
     SYNTHETIC_VARS,
     TABLE_VARS,
@@ -384,19 +385,12 @@ class MySql(AgentCheck):
             results['information_schema_size'] = self._query_size_per_schema(db)
             metrics.update(SCHEMA_VARS)
 
-        if is_affirmative(self._config.options.get('table_size_metrics', False)):
+        if is_affirmative(self._config.options.get('table_rows_stats_metrics', False)):
             # report size of tables in MiB to Datadog
-            (table_index_size, table_data_size) = self._query_size_per_table(db)
-            results['information_table_index_size'] = table_index_size
-            results['information_table_data_size'] = table_data_size
-            metrics.update(TABLE_VARS)
-
-        if is_affirmative(self._config.options.get('system_table_size_metrics', False)):
-            # report size of tables in MiB to Datadog
-            (table_index_size, table_data_size) = self._query_size_per_table(db, system_tables=True)
-            results['information_table_index_size'] = table_index_size
-            results['information_table_data_size'] = table_data_size
-            metrics.update(TABLE_VARS)
+            (rows_read_total, rows_changed_total) = self._query_rows_stats_per_table(db)
+            results['information_table_rows_read_total'] = rows_read_total
+            results['information_table_rows_changed_total'] = rows_changed_total
+            metrics.update(TABLE_ROWS_VARS)
 
         if is_affirmative(self._config.options.get('replication', self._config.dbm_enabled)):
             if self.performance_schema_enabled and self._is_group_replication_active(db):
@@ -1040,6 +1034,32 @@ class MySql(AgentCheck):
                 return schema_size
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             self.warning("Avg exec time performance metrics unavailable at this time: %s", e)
+
+        return {}
+
+    def _query_rows_stats_per_table(self, db):
+        try:
+            with closing(db.cursor()) as cursor:
+                cursor.execute(SQL_QUERY_TABLE_ROWS_STATS)
+
+                if cursor.rowcount < 1:
+                    self.warning("Failed to fetch records from the tables rows stats 'tables' table.")
+                    return None
+
+                table_rows_read_total = {}
+                table_rows_changed_total = {}
+                for row in cursor.fetchall():
+                    table_name = str(row[0])
+                    rows_read_total = long(row[1])
+                    rows_changed_total = long(row[2])
+
+                    # set the tag as the dictionary key
+                    table_rows_read_total["schema:{0}".format(table_name)] = rows_read_total
+                    table_rows_changed_total["schema:{0}".format(table_name)] = rows_changed_total
+
+                return table_rows_read_total, table_rows_changed_total
+        except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
+            self.warning("Tables rows stats metrics unavailable at this time: %s", e)
 
         return {}
 
