@@ -79,7 +79,7 @@ COMMON_METRICS_OMV2 = [
     NAMESPACE + '.go.goroutines',
     NAMESPACE + '.go.memstats.alloc_bytes',
     NAMESPACE + '.go.memstats.buck_hash_sys_bytes',
-    NAMESPACE + '.go.memstats.frees.count',
+    NAMESPACE + '.go.memstats.frees_total.count',
     NAMESPACE + '.go.memstats.gc_sys_bytes',
     NAMESPACE + '.go.memstats.heap_alloc_bytes',
     NAMESPACE + '.go.memstats.heap_idle_bytes',
@@ -163,7 +163,7 @@ METRICS_V1_8 = COMMON_METRICS + [
 ]
 
 METRICS_V1_8_OMV2 = COMMON_METRICS_OMV2 + [
-    NAMESPACE + '.forward_max_concurrent_r.count',
+    NAMESPACE + '.forward_max_concurrent_rejects.count',
     NAMESPACE + '.go.info',
     NAMESPACE + '.go.memstats.gc_cpu_fraction',
     NAMESPACE + '.go.memstats.heap_released_bytes',

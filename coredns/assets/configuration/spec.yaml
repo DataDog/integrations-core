@@ -20,6 +20,10 @@ files:
           - coredns_template_matches_total: template_matches_count
           - coredns_template_template_failures_total: template_templating_failures_count
           - coredns_template_rr_failures_total: template_resource_record_failures_count
+    - template: instances/openmetrics_legacy_base
+        hidden: true
+        overrides:
+          prometheus_url.required: false
 - name: auto_conf.yaml
   options:
   - template: ad_identifiers
