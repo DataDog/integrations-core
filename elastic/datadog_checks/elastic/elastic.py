@@ -462,21 +462,27 @@ class ESCheck(AgentCheck):
                 self._process_metric(cat_allocation_dic, metric, *desc, tags=tags)
 
     def _process_custom_metric(
-        self, value, data_path, value_path, dynamic_tags, xtype, metric_name, tags=None, hostname=None
+        self,
+        value,
+        data_path,
+        value_path,
+        dynamic_tags,
+        xtype,
+        metric_name,
+        tags=None,
     ):
         """
         value: JSON payload to traverse
         data_path: path to data right before metric value or right before list of metric values
         value_path: path to data after data_path to metric value
-        dynamic_tags: list of tags and their value_paths
-        xtype: datadog type
+        dynamic_tags: list of dynamic tags and their value_paths
+        xtype: datadog metric type, default to gauge
         metric_name: datadog metric name
-        tags: a lambda to apply to the numerical value
-        hostname: a lambda to apply to the numerical value
+        tags: list of tags that should be included with each metric submitted
         """
 
         tags_to_submit = deepcopy(tags)
-        path = data_path + '.' + value_path
+        path = '{}.{}'.format(data_path, value_path)
 
         # Collect the value of tags first, and then append to tags_to_submit
         for (dynamic_tag_path, dynamic_tag_name) in dynamic_tags:
@@ -508,11 +514,16 @@ class ESCheck(AgentCheck):
 
         if branch_value is not None:
             if xtype == "gauge":
-                self.gauge(metric_name, branch_value, tags=tags_to_submit, hostname=hostname)
+                self.log.debug("Submitting as gauge")
+                self.gauge(metric_name, branch_value, tags=tags_to_submit)
             elif xtype == "monotonic_count":
-                self.monotonic_count(metric_name, branch_value, tags=tags_to_submit, hostname=hostname)
+                self.monotonic_count(metric_name, branch_value, tags=tags_to_submit)
+            elif xtype == "rate":
+                self.rate(metric_name, branch_value, tags=tags_to_submit)
             else:
-                self.rate(metric_name, branch_value, tags=tags_to_submit, hostname=hostname)
+                self.log.warning(
+                    "Metric type of %s is not gauge, monotonic_count, or rate; skipping this metric", metric_name
+                )
         else:
             self.log.debug("Metric not found: %s -> %s", path, metric_name)
 
@@ -520,14 +531,14 @@ class ESCheck(AgentCheck):
         self.log.debug("Running custom queries")
         custom_queries = self._config.custom_queries
 
-        for endpoints in custom_queries:
-            columns = endpoints.get('columns', [])
-            data_path = endpoints.get('data_path')
-            endpoint = endpoints.get('endpoint')
-            static_tags = endpoints.get('tags', [])
-            endpoint = self._join_url(endpoint, admin_forwarder)
-            payload = endpoints.get('payload', {})
+        for query_endpoint in custom_queries:
+            columns = query_endpoint.get('columns', [])
+            data_path = query_endpoint.get('data_path')
+            raw_endpoint = query_endpoint.get('endpoint')
+            static_tags = query_endpoint.get('tags', [])
+            payload = query_endpoint.get('payload', {})
 
+            endpoint = self._join_url(raw_endpoint, admin_forwarder)
             data = self._get_data(endpoint, data=payload)
 
             # If there are tags, add the tag path to list of paths to evaluate while processing metric
@@ -555,27 +566,19 @@ class ESCheck(AgentCheck):
                     # At this point, there may be multiple branches of value_paths.
                     # If value is a list, go through each entry
                     if isinstance(value, list):
-                        for branch in value:
-                            self._process_custom_metric(
-                                value=branch,
-                                data_path=data_path,
-                                value_path=value_path,
-                                dynamic_tags=dynamic_tags,
-                                xtype=metric_type,
-                                metric_name=name,
-                                tags=tags,
-                                hostname=None,
-                            )
+                        value = value
                     else:
+                        value = [value]
+
+                    for branch in value:
                         self._process_custom_metric(
-                            value=value,
+                            value=branch,
                             data_path=data_path,
                             value_path=value_path,
                             dynamic_tags=dynamic_tags,
                             xtype=metric_type,
                             metric_name=name,
                             tags=tags,
-                            hostname=None,
                         )
 
     def _create_event(self, status, tags=None):
