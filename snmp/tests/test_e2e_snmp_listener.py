@@ -28,7 +28,7 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
     """
     snmp_device = _build_device_ip(container_ip)
     subnet_prefix = ".".join(container_ip.split('.')[:3])
-    aggregator = dd_agent_check({'init_config': {}, 'instances': []})
+    aggregator = dd_agent_check({'init_config': {}, 'instances': []}, rate=True)
 
     # # === network profile ===
     # common_tags = [
@@ -131,7 +131,7 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
     common.assert_common_metrics(aggregator, common_tags, is_e2e=True, loader='core')
     # aggregator.assert_metric('snmp.sysUpTimeInstance', tags=common_tags)
     for metric in IF_SCALAR_GAUGE:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
 
     # # test ignored IPs
     # tags = [
