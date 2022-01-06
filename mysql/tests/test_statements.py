@@ -167,7 +167,7 @@ def test_statement_metrics(
 
 
 def _obfuscate_sql(query, options=None):
-    return json.dumps({'query': re.sub(r'\s+', ' ', query or '').strip(), 'metadata': {}})
+    return query
 
 
 @pytest.mark.integration
@@ -186,8 +186,8 @@ def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instanc
 
     def obfuscate_sql(query, options=None):
         if 'WHERE `state`' in query:
-            return json.dumps({'query': normalized_query, 'metadata': {}})
-        return json.dumps({'query': query, 'metadata': {}})
+            return normalized_query
+        return query
 
     def run_query(q):
         with mysql_check._connect() as db:
@@ -395,14 +395,15 @@ def test_statement_samples_collect(
     ],
 )
 def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload):
+    dbm_instance['obfuscator_options'] = {'collect_metadata': True}
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
     test_query = '''
     -- Test comment
     select * from information_schema.processlist where state in (\'starting\')
     '''
     query_signature = '94caeb4c54f97849'
     normalized_query = 'SELECT * FROM `information_schema` . `processlist` where state in ( ? )'
-
-    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     def obfuscate_sql(query, options=None):
         if 'WHERE `state`' in query:
