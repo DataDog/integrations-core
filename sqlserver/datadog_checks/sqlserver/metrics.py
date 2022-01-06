@@ -563,7 +563,31 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
 
 class SqlVirtualFileIOStats(BaseSqlServerMetric):
     CUSTOM_QUERIES_AVAILABLE = False
-    QUERY_BASE = """
+
+    # Default base query works for server-wide view of all master files
+    QUERY_MASTER_FILES = """
+        SELECT
+            DB_NAME() AS database_name,
+            df.state_desc AS state_desc,
+            df.name AS logical_name,
+            df.physical_name AS physical_name,
+            fs.num_of_reads AS num_of_reads,
+            fs.num_of_bytes_read AS num_of_bytes_read,
+            fs.io_stall_read_ms AS io_stall_read_ms,
+            fs.io_stall_queued_read_ms AS io_stall_queued_read_ms,
+            fs.num_of_writes AS num_of_writes,
+            fs.num_of_bytes_written AS num_of_bytes_written,
+            fs.io_stall_write_ms AS io_stall_write_ms,
+            fs.io_stall_queued_write_ms AS io_stall_queued_write_ms,
+            fs.io_stall AS io_stall,
+            fs.size_on_disk_bytes AS size_on_disk_bytes
+        FROM sys.dm_io_virtual_file_stats(NULL, NULL) fs
+            LEFT JOIN sys.database_files df
+                AND df.file_id = fs.file_id;
+    """
+
+    # Per-database query
+    QUERY_DATABASE_FILES = """
         SELECT
             DB_NAME(fs.database_id) AS database_name,
             mf.state_desc AS state_desc,
@@ -590,7 +614,51 @@ class SqlVirtualFileIOStats(BaseSqlServerMetric):
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
-        return cls._fetch_generic_values(cursor, None, logger)
+        rows = []
+        columns = []
+
+        # Exclude the master database because sys.database_files is not available there
+        databases = [d for d in databases if d != 'master']
+
+        if not databases:
+            # No database list; use the server-wide master files DMV
+            query = cls.QUERY_MASTER_FILES
+            cursor.execute(query)
+            rows = cursor.fetchall()
+            columns = [i[0] for i in cursor.description]
+            logger.debug("%s: received %d rows and %d columns", cls.__name__, len(rows), len(columns))
+
+        else:
+            # Query each database in the list for the files in the current database
+            cursor.execute('select DB_NAME()')  # This can return None in some implementations so it cannot be chained
+            data = cursor.fetchall()
+            current_db = data[0][0]
+            logger.debug("%s: current db is %s", cls.__name__, current_db)
+
+            for db in databases:
+                # use statements need to be executed separate from select queries
+                ctx = construct_use_statement(db)
+                try:
+                    logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
+                    cursor.execute(ctx)
+                    logger.debug("%s: fetch_all executing query: %s", cls.__name__, cls.QUERY_DATABASE_FILES)
+                    cursor.execute(cls.QUERY_DATABASE_FILES)
+                    data = cursor.fetchall()
+                except Exception as e:
+                    logger.error("Error when trying to query db %s - skipping.  Error: %s", db, e)
+                    continue
+
+                columns = [i[0] for i in cursor.description]
+                for r in data:
+                    rows.append(r)
+
+                logger.debug("%s: received %d rows and %d columns for db %s", cls.__name__, len(data), len(columns), db)
+
+            # reset back to previous db
+            logger.debug("%s: reverting cursor context via use statement to %s", cls.__name__, current_db)
+            cursor.execute(construct_use_statement(current_db))
+
+        return rows, columns
 
     def fetch_metric(self, rows, columns):
         db_name = columns.index('database_name')
