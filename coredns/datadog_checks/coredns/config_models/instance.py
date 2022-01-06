@@ -36,6 +36,29 @@ class ExtraMetric(BaseModel):
     type: Optional[str]
 
 
+class IgnoreMetricsByLabels(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    target_label_key: Optional[str]
+    target_label_value_list: Optional[Sequence[str]]
+
+
+class TargetMetric(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    label_to_match: Optional[str]
+    labels_to_get: Optional[Sequence[str]]
+
+
+class LabelJoins(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    target_metric: Optional[TargetMetric]
+
+
 class Metric(BaseModel):
     class Config:
         extra = Extra.allow
@@ -72,6 +95,8 @@ class InstanceConfig(BaseModel):
     aws_host: Optional[str]
     aws_region: Optional[str]
     aws_service: Optional[str]
+    bearer_token_auth: Optional[bool]
+    bearer_token_path: Optional[str]
     cache_metric_wildcards: Optional[bool]
     cache_shared_labels: Optional[bool]
     collect_counters_with_distributions: Optional[bool]
@@ -86,9 +111,12 @@ class InstanceConfig(BaseModel):
     extra_headers: Optional[Mapping[str, Any]]
     extra_metrics: Optional[Sequence[Union[str, Mapping[str, Union[str, ExtraMetric]]]]]
     headers: Optional[Mapping[str, Any]]
+    health_service_check: Optional[bool]
     histogram_buckets_as_distributions: Optional[bool]
     hostname_format: Optional[str]
     hostname_label: Optional[str]
+    ignore_metrics: Optional[Sequence[str]]
+    ignore_metrics_by_labels: Optional[IgnoreMetricsByLabels]
     ignore_tags: Optional[Sequence[str]]
     include_labels: Optional[Sequence[str]]
     kerberos_auth: Optional[str]
@@ -98,6 +126,9 @@ class InstanceConfig(BaseModel):
     kerberos_hostname: Optional[str]
     kerberos_keytab: Optional[str]
     kerberos_principal: Optional[str]
+    label_joins: Optional[LabelJoins]
+    label_to_hostname: Optional[str]
+    labels_mapper: Optional[Mapping[str, Any]]
     log_requests: Optional[bool]
     metrics: Optional[Sequence[Union[str, Mapping[str, Union[str, Metric]]]]]
     min_collection_interval: Optional[float]
@@ -107,12 +138,20 @@ class InstanceConfig(BaseModel):
     openmetrics_endpoint: Optional[str]
     password: Optional[str]
     persist_connections: Optional[bool]
+    prometheus_metrics_prefix: Optional[str]
+    prometheus_url: Optional[str]
     proxy: Optional[Proxy]
     raw_line_filters: Optional[Sequence[str]]
     raw_metric_prefix: Optional[str]
     read_timeout: Optional[float]
     rename_labels: Optional[Mapping[str, Any]]
     request_size: Optional[float]
+    send_distribution_buckets: Optional[bool]
+    send_distribution_counts_as_monotonic: Optional[bool]
+    send_distribution_sums_as_monotonic: Optional[bool]
+    send_histograms_buckets: Optional[bool]
+    send_monotonic_counter: Optional[bool]
+    send_monotonic_with_gauge: Optional[bool]
     service: Optional[str]
     share_labels: Optional[Mapping[str, Union[bool, ShareLabel]]]
     skip_proxy: Optional[bool]
@@ -125,6 +164,7 @@ class InstanceConfig(BaseModel):
     tls_private_key: Optional[str]
     tls_use_host_header: Optional[bool]
     tls_verify: Optional[bool]
+    type_overrides: Optional[Mapping[str, Any]]
     use_latest_spec: Optional[bool]
     use_legacy_auth_encoding: Optional[bool]
     use_process_start_time: Optional[bool]

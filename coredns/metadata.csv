@@ -117,4 +117,4 @@ coredns.template.matches_count.count,count,,,,"[OpenMetrics V2] The total number
 coredns.template.failures_count,count,,error,,"[OpenMetrics V1] The number of times the Go templating failed.",0,coredns,template failure
 coredns.template.failures_count.count,count,,error,,"[OpenMetrics V2] The number of times the Go templating failed.",0,coredns,template failure
 coredns.template.rr_failures_count,count,,error,,"[OpenMetrics V1] The number of times the templated resource record was invalid and could not be parsed.",0,coredns,template resource failure
-coredns.template.rr_failures_count,count,,error,,"[OpenMetrics V2] The number of times the templated resource record was invalid and could not be parsed.",0,coredns,template resource failure
+coredns.template.rr_failures_count.count,count,,error,,"[OpenMetrics V2] The number of times the templated resource record was invalid and could not be parsed.",0,coredns,template resource failure

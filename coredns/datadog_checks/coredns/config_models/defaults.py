@@ -50,6 +50,14 @@ def instance_aws_service(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_bearer_token_auth(field, value):
+    return False
+
+
+def instance_bearer_token_path(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_cache_metric_wildcards(field, value):
     return True
 
@@ -106,6 +114,10 @@ def instance_headers(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_health_service_check(field, value):
+    return True
+
+
 def instance_histogram_buckets_as_distributions(field, value):
     return False
 
@@ -115,6 +127,14 @@ def instance_hostname_format(field, value):
 
 
 def instance_hostname_label(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_ignore_metrics(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_ignore_metrics_by_labels(field, value):
     return get_default_field_value(field, value)
 
 
@@ -154,6 +174,18 @@ def instance_kerberos_principal(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_label_joins(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_label_to_hostname(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_labels_mapper(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_log_requests(field, value):
     return False
 
@@ -190,6 +222,14 @@ def instance_persist_connections(field, value):
     return False
 
 
+def instance_prometheus_metrics_prefix(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_prometheus_url(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_proxy(field, value):
     return get_default_field_value(field, value)
 
@@ -212,6 +252,30 @@ def instance_rename_labels(field, value):
 
 def instance_request_size(field, value):
     return 16
+
+
+def instance_send_distribution_buckets(field, value):
+    return False
+
+
+def instance_send_distribution_counts_as_monotonic(field, value):
+    return False
+
+
+def instance_send_distribution_sums_as_monotonic(field, value):
+    return False
+
+
+def instance_send_histograms_buckets(field, value):
+    return True
+
+
+def instance_send_monotonic_counter(field, value):
+    return True
+
+
+def instance_send_monotonic_with_gauge(field, value):
+    return False
 
 
 def instance_service(field, value):
@@ -260,6 +324,10 @@ def instance_tls_use_host_header(field, value):
 
 def instance_tls_verify(field, value):
     return True
+
+
+def instance_type_overrides(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_use_latest_spec(field, value):
