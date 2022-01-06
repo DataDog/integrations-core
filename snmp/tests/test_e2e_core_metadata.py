@@ -887,6 +887,7 @@ def test_e2e_core_metadata_isilon(dd_agent_check):
         'os_version': '8.2.0.0',
         'product_name': 'Isilon OneFS',
         'profile': 'isilon',
+        'serial_number': 'SX410-251604-0122',
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.12325.1.1.2.1.1',
         'tags': [
@@ -898,7 +899,7 @@ def test_e2e_core_metadata_isilon(dd_agent_check):
             'snmp_device:' + device_ip,
             'snmp_profile:isilon',
         ],
-        'vendor': 'emc',
+        'vendor': 'dell',
         'version': '8.2.0.0',
     }
     assert_device_metadata(aggregator, device)
