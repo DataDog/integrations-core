@@ -274,7 +274,6 @@ def test_f5(aggregator):
         'sysTcpStatTimeWait',
         'sysUdpStatOpen',
         'sysClientsslStatCurConns',
-        'sysMultiHostCpuUsageRatio',
     ]
     counts = [
         'sysTcpStatAccepts',
