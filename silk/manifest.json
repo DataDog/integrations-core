@@ -28,7 +28,9 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "dashboards": {},
-    "monitors": {},
+    "monitors": {
+      "Latency high": "assets/recommended_monitors/latency_high.json"
+    },
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
     "logs": {},
