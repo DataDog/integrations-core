@@ -25,7 +25,7 @@ pysocks==1.7.1
 python-dateutil==2.8.2
 pywin32==228; sys_platform == 'win32' and python_version < '3.0'
 pywin32==303; sys_platform == "win32" and python_version > "3.0"
-pyyaml==6.0
+pyyaml==5.4.1
 requests==2.27.1
 requests-kerberos==0.14.0
 requests_ntlm==1.1.0
