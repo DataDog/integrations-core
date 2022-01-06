@@ -74,17 +74,19 @@ def autodiscovery_ready():
 
 def _autodiscovery_ready():
     result = run_command(
-        ['docker', 'exec', 'dd_snmp_{}'.format(TOX_ENV_NAME), 'agent', 'configcheck'], capture=True, check=True
+        ['docker', 'exec', 'dd_snmp_{}'.format(TOX_ENV_NAME), 'agent', 'check', 'snmp', '--table'],
+        capture=True,
+        check=True,
     )
 
-    autodiscovery_checks = []
+    check_run_count = 0
     for result_line in result.stdout.splitlines():
-        if 'autodiscovery_subnet' in result_line:
-            autodiscovery_checks.append(result_line)
+        if 'snmp.devices_monitored' in result_line:
+            check_run_count += 1
 
     # assert subnets discovered by `snmp_listener` config from datadog.yaml
     expected_autodiscovery_checks = 5
-    assert len(autodiscovery_checks) == expected_autodiscovery_checks
+    assert check_run_count == expected_autodiscovery_checks
 
 
 def create_datadog_conf_file(tmp_dir):
