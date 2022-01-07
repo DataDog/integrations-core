@@ -62,9 +62,6 @@ DEFAULT_METRICS = {
     'coredns_proxy_request_duration_seconds': 'proxy_request_duration.seconds',
 }
 
-DEFAULT_METRICS_OVERRIDE = {
-    'coredns_panic_count_total': 'panic_count',
-}
 
 # Sorted per plugin, all prometheus metrics after version 1.7.0 which introduced a major renaming of metrics.
 NEW_METRICS = {
@@ -99,9 +96,6 @@ NEW_METRICS = {
     'coredns_reload_failed_total': 'reload.failed_count',
 }
 
-NEW_METRICS_OVERRIDE = {
-    'coredns_panics_total': 'panic_count',
-}
 
 DEFAULT_METRICS.update(NEW_METRICS)
 
@@ -144,21 +138,18 @@ GO_METRICS = {
 METRIC_MAP = deepcopy(DEFAULT_METRICS)
 METRIC_MAP.update(GO_METRICS)
 
-METRIC_OVERRIDE = deepcopy(DEFAULT_METRICS_OVERRIDE)
-METRIC_OVERRIDE.update(NEW_METRICS_OVERRIDE)
 
-
-def construct_metrics_config(metric_map, metric_overrides):
+def construct_metrics_config(metric_map):
     metrics = []
     for raw_metric_name, metric_name in metric_map.items():
         if raw_metric_name.endswith('_total'):
-            if raw_metric_name in metric_overrides:
-                metric_name = metric_overrides[raw_metric_name]
+            if metric_name.endswith('.count'):
+                metric_name = metric_name[:-6]
             raw_metric_name = raw_metric_name[:-6]
-        elif raw_metric_name.endswith('_counter'):
-            if raw_metric_name in metric_overrides:
-                metric_name = metric_overrides[raw_metric_name]
-            raw_metric_name = raw_metric_name[:-8]
+        elif raw_metric_name.endswith('_count'):
+            if metric_name.endswith('.count'):
+                metric_name = metric_name[:-6]
+            raw_metric_name = raw_metric_name[:-6]
         config = {raw_metric_name: {'name': metric_name}}
         metrics.append(config)
     return metrics

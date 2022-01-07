@@ -6,7 +6,7 @@ coredns.acl.blocked_requests.count,count,,request,,"[OpenMetrics V2] Counter of 
 coredns.autopath.success_count,count,,request,,"[OpenMetrics V1] Counter of requests that did autopath.",0,coredns,autopath success
 coredns.autopath.success_count.count,count,,request,,"[OpenMetrics V2] Counter of requests that did autopath.",0,coredns,autopath success
 coredns.build_info,gauge,,,,"[OpenMetrics V1 and V2] A metric with a constant '1' value labeled by version, revision, and goversion from which CoreDNS was built.",0,coredns,build info
-coredns.response_code_count,count,,,,[OpenMetrics V1 and V2] number of responses per zone and rcode,1,coredns,response code
+coredns.response_code_count,count,,,,[OpenMetrics V1] number of responses per zone and rcode,1,coredns,response code
 coredns.response_code_count.count,count,,,,[OpenMetrics V2] number of responses per zone and rcode,1,coredns,response code
 coredns.cache_drops_count,count,,response,,"[OpenMetrics V1] Counter of responses excluded from the cache due to request/response question name mismatch.",0,coredns,cache drop
 coredns.cache_drops_count.count,count,,response,,"[OpenMetrics V2] Counter of responses excluded from the cache due to request/response question name mismatch.",0,coredns,cache drop
@@ -14,7 +14,7 @@ coredns.cache_hits_count,count,,hit,,[OpenMetrics V1] Counter of cache hits by c
 coredns.cache_hits_count.count,count,,hit,,[OpenMetrics V2] Counter of cache hits by cache type,1,coredns,cache hit
 coredns.cache_misses_count,count,,miss,,[OpenMetrics V1] Counter of cache misses.,1,coredns,cache miss
 coredns.cache_misses_count.count,count,,miss,,[OpenMetrics V2] Counter of cache misses.,1,coredns,cache miss
-coredns.cache_request_count,count,,request,,[OpenMetrics V1 and V2] Counter of cache requests.,1,coredns,cache request count
+coredns.cache_request_count,count,,request,,[OpenMetrics V1] Counter of cache requests.,1,coredns,cache request count
 coredns.cache_request_count.count,count,,request,,[OpenMetrics V2] Counter of cache requests.,1,coredns,cache request count
 coredns.cache_prefetch_count,count,,,,"[OpenMetrics V1] The number of time the cache has prefetched a cached item.",1,coredns,cache prefetch
 coredns.cache_prefetch_count.count,count,,,,"[OpenMetrics V2] The number of time the cache has prefetched a cached item.",1,coredns,cache prefetch
@@ -25,14 +25,14 @@ coredns.dnssec.cache_hits,count,,hit,,"[OpenMetrics V1] Counter of cache hits.",
 coredns.dnssec.cache_hits.count,count,,hit,,"[OpenMetrics V2] Counter of cache hits.",0,coredns,dnssec cache hit
 coredns.dnssec.cache_misses,count,,miss,,"[OpenMetrics V1] Counter of cache misses.",0,coredns,dnssec cache miss
 coredns.dnssec.cache_misses.count,count,,miss,,"[OpenMetrics V2] Counter of cache misses.",0,coredns,dnssec cache miss
-coredns.request_count,count,,request,,[OpenMetrics V1 and V2] total query count.,1,coredns,request count
+coredns.request_count,count,,request,,[OpenMetrics V1] total query count.,1,coredns,request count
 coredns.request_count.count,count,,request,,[OpenMetrics V2] total query count.,1,coredns,request count
-coredns.request_type_count,count,,,,[OpenMetrics V1 and V2] counter of queries per zone and type,1,coredns,request type
+coredns.request_type_count,count,,,,[OpenMetrics V1] counter of queries per zone and type,1,coredns,request type
 coredns.request_type_count.count,count,,,,[OpenMetrics V2] counter of queries per zone and type,1,coredns,request type
 coredns.request_duration.seconds.sum,count,,second,,[OpenMetrics V1 and V2] duration to process each query,-1,coredns,request duration
 coredns.request_duration.seconds.count,count,,second,,[OpenMetrics V1 and V2] duration to process each query,-1,coredns,request duration
 coredns.request_duration.seconds.bucket,count,,second,,[OpenMetrics V2] sample duration to process each query,-1,coredns,request duration
-coredns.proxy_request_count,count,,request,,[OpenMetrics V1 and V2] query count per upstream.,1,coredns,proxy request count
+coredns.proxy_request_count,count,,request,,[OpenMetrics V1] query count per upstream.,1,coredns,proxy request count
 coredns.proxy_request_count.count,count,,request,,[OpenMetrics V2] query count per upstream.,1,coredns,proxy request count
 coredns.proxy_request_duration.seconds.sum,count,,second,,[OpenMetrics V1 and V2] duration per upstream interaction,-1,coredns,proxy request duration
 coredns.proxy_request_duration.seconds.count,count,,second,,[OpenMetrics V1 and V2] duration per upstream interaction,-1,coredns,proxy request duration
@@ -40,11 +40,11 @@ coredns.proxy_request_duration.seconds.bucket,count,,second,,[OpenMetrics V2] sa
 coredns.forward_request_duration.seconds.sum,count,,second,,[OpenMetrics V1 and V2] duration per upstream interaction,-1,coredns,forward request duration
 coredns.forward_request_duration.seconds.count,count,,second,,[OpenMetrics V1 and V2] duration per upstream interaction,-1,coredns,forward request duration
 coredns.forward_request_duration.seconds.bucket,count,,second,,[OpenMetrics V2] duration per upstream interaction,-1,coredns,forward request duration
-coredns.forward_request_count,count,,request,,[OpenMetrics V1 and V2] query count per upstream,1,coredns,forward request count
+coredns.forward_request_count,count,,request,,[OpenMetrics V1] query count per upstream,1,coredns,forward request count
 coredns.forward_request_count.count,count,,request,,[OpenMetrics V2] query count per upstream,1,coredns,forward request count
 coredns.forward_response_rcode_count,count,,response,,[OpenMetrics V1] count of RCODEs per upstream,0,coredns,forward rcodes
 coredns.forward_response_rcode_count.count,count,,response,,[OpenMetrics V2] count of RCODEs per upstream,0,coredns,forward rcodes
-coredns.forward_healthcheck_failure_count,gauge,,entry,,[OpenMetrics V1] number of failed health checks per upstream,-1,coredns,forward failed healthchecks
+coredns.forward_healthcheck_failure_count,count,,entry,,[OpenMetrics V1] number of failed health checks per upstream,-1,coredns,forward failed healthchecks
 coredns.forward_healthcheck_failure_count.count,count,,entry,,[OpenMetrics V2] number of failed health checks per upstream,-1,coredns,forward failed healthchecks
 coredns.forward_healthcheck_broken_count,count,,entry,,[OpenMetrics V1] counter of when all upstreams are unhealthy,-1,coredns,forward all healthchecks broken
 coredns.forward_healthcheck_broken_count.count,count,,entry,,[OpenMetrics V2] counter of when all upstreams are unhealthy,-1,coredns,forward all healthchecks broken
@@ -58,9 +58,9 @@ coredns.grpc.response_rcode_count.count,count,,,,"[OpenMetrics V2] Count of RCOD
 coredns.health_request_duration.count,count,,,,"[OpenMetrics V1 and V2] Count for the histogram of the time (in seconds) each request took.",-1,coredns,health req duration count
 coredns.health_request_duration.sum,count,,,,"[OpenMetrics V1 and V2] Sum for the histogram of the time (in seconds) each request took.",-1,coredns,health req duration count
 coredns.health_request_duration.bucket,count,,,,"[OpenMetrics V2] Sample for the histogram of the time (in seconds) each request took.",-1,coredns,health req duration count
-coredns.hosts.entries_count,gauge,,,,"[OpenMetrics V1] The combined number of entries in hosts and Corefile.",0,coredns,host entry
+coredns.hosts.entries_count,gauge,,,,"[OpenMetrics V1 and V2] The combined number of entries in hosts and Corefile.",0,coredns,host entry
 coredns.hosts.reload_timestamp,gauge,,second,,"[OpenMetrics V1 and V2] The timestamp of the last reload of hosts file.",0,coredns,host reload ts
-coredns.reload.failed_count,count,,,,"[OpenMetrics V1 and V2] Counts the number of failed reload attempts.",0,coredns,reload failed count
+coredns.reload.failed_count,count,,,,"[OpenMetrics V1] Counts the number of failed reload attempts.",0,coredns,reload failed count
 coredns.reload.failed_count.count,count,,,,"[OpenMetrics V2] Counts the number of failed reload attempts.",0,coredns,reload failed count
 coredns.request_size.bytes.sum,count,,byte,,[OpenMetrics V1 and V2] size of the request in bytes,0,coredns,request size
 coredns.request_size.bytes.count,count,,byte,,[OpenMetrics V1 and V2] size of the request in bytes,0,coredns,request size

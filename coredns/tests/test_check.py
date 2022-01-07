@@ -24,6 +24,8 @@ class TestCoreDNS:
         # check that we then get the count metrics also
         dd_run_check(check)
 
+        # `.cache_hits_count` metric is only tested against the metrics fixtures file
+        # because the metric is not available in docker/e2e.
         metrics = METRICS + [NAMESPACE + '.cache_hits_count']
 
         for metric in metrics:
@@ -41,6 +43,8 @@ class TestCoreDNS:
         # check that we then get the count metrics also
         dd_run_check(check)
 
+        # `.cache_hits_count.count` metric is only tested against the metrics fixtures file
+        # because the metric is not available in docker/e2e.
         metrics = METRICS_V2 + [NAMESPACE + '.cache_hits_count.count']
 
         for metric in metrics:
