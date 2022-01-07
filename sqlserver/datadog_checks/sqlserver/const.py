@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.base import AgentCheck
-
 # Constant for SQLServer cntr_type
 PERF_LARGE_RAW_BASE = 1073939712
 PERF_RAW_LARGE_FRACTION = 537003264
@@ -161,14 +159,14 @@ DATABASE_MASTER_FILES = [
 ]
 
 DATABASE_FILES_IO = [
-    ('sqlserver.files.size_on_disk', 'size_on_disk_bytes', AgentCheck.gauge),
-    ('sqlserver.files.reads', 'num_of_reads', AgentCheck.monotonic_count),
-    ('sqlserver.files.read_bytes', 'num_of_bytes_read', AgentCheck.monotonic_count),
-    ('sqlserver.files.read_io_stall', 'io_stall_read_ms', AgentCheck.monotonic_count),
-    ('sqlserver.files.read_io_stall_queued', 'io_stall_queued_read_ms', AgentCheck.monotonic_count),
-    ('sqlserver.files.writes', 'num_of_writes', AgentCheck.monotonic_count),
-    ('sqlserver.files.written_bytes', 'num_of_bytes_written', AgentCheck.monotonic_count),
-    ('sqlserver.files.write_io_stall', 'io_stall_write_ms', AgentCheck.monotonic_count),
-    ('sqlserver.files.write_io_stall_queued', 'io_stall_queued_write_ms', AgentCheck.monotonic_count),
-    ('sqlserver.files.io_stall', 'io_stall', AgentCheck.monotonic_count),
+    ('sqlserver.files.size_on_disk', 'size_on_disk_bytes', 'gauge'),
+    ('sqlserver.files.reads', 'num_of_reads', 'monotonic_count'),
+    ('sqlserver.files.read_bytes', 'num_of_bytes_read', 'monotonic_count'),
+    ('sqlserver.files.read_io_stall', 'io_stall_read_ms', 'monotonic_count'),
+    ('sqlserver.files.read_io_stall_queued', 'io_stall_queued_read_ms', 'monotonic_count'),
+    ('sqlserver.files.writes', 'num_of_writes', 'monotonic_count'),
+    ('sqlserver.files.written_bytes', 'num_of_bytes_written', 'monotonic_count'),
+    ('sqlserver.files.write_io_stall', 'io_stall_write_ms', 'monotonic_count'),
+    ('sqlserver.files.write_io_stall_queued', 'io_stall_queued_write_ms', 'monotonic_count'),
+    ('sqlserver.files.io_stall', 'io_stall', 'monotonic_count'),
 ]
