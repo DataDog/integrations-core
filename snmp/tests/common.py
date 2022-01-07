@@ -322,7 +322,7 @@ def filter_tags(tags, exclude_tag_keys):
 def dd_agent_check_wrapper(dd_agent_check, *args, **kwargs):
     """
     dd_agent_check_wrapper is a wrapper around dd_agent_check that will return an aggregator.
-    The wrapper will modify tags by excluding EXCLUDED_E2E_TAGS.
+    The wrapper will modify tags by excluding EXCLUDED_E2E_TAG_KEYS.
     """
     aggregator = dd_agent_check(*args, **kwargs)
     new_agg_metrics = defaultdict(list)
