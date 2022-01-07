@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
 import pytest
 from tests.common import SNMP_CONTAINER_NAME
 
@@ -70,7 +69,7 @@ def test_e2e_v1_with_apc_ups_profile_batch_size_1(dd_agent_check):
 def assert_apc_ups_metrics(dd_agent_check, config):
     config['init_config']['loader'] = 'core'
     instance = config['instances'][0]
-    aggregator = dd_agent_check(config, rate=True)
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     profile_tags = [
         'snmp_profile:apc_ups',
@@ -101,7 +100,7 @@ def assert_apc_ups_metrics(dd_agent_check, config):
 def test_e2e_core_discovery(dd_agent_check):
     config = common.generate_container_profile_config_with_ad('apc_ups')
     config['init_config']['loader'] = 'core'
-    aggregator = dd_agent_check(config, rate=False, times=5)
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=False, times=5)
 
     network = config['instances'][0]['network_address']
     ip_address = get_container_ip(SNMP_CONTAINER_NAME)
@@ -188,9 +187,8 @@ def test_e2e_regex_match(dd_agent_check):
             },
         },
     ]
-    aggregator = dd_agent_check(config, rate=True)
     config['init_config']['loader'] = 'core'
-    aggregator = dd_agent_check(config, rate=True)
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     # raw sysName: 41ba948911b9
     aggregator.assert_metric(
