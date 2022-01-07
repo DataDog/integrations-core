@@ -40,19 +40,19 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
     '--discovery-timeout',
     'discovery_timeout',
     type=click.INT,
-    help='max retry duration until Autodiscovery resolves the check template (in seconds)',
+    help='Max retry duration until Autodiscovery resolves the check template (in seconds)',
 )
 @click.option(
     '--discovery-retry-interval',
     'discovery_retry_interval',
     type=click.INT,
-    help='duration between retries until Autodiscovery resolves the check template (in seconds)',
+    help='Duration between retries until Autodiscovery resolves the check template (in seconds)',
 )
 @click.option(
     '--discovery-min-instances',
     'discovery_min_instances',
     type=click.INT,
-    help='number of checks to wait, retry until the specified number of checks is reached',
+    help='Number of checks to wait, retry until the specified number of checks is reached',
 )
 def check_run(
     check,
