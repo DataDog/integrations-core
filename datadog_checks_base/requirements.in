@@ -30,7 +30,7 @@ requests==2.25.0
 requests-kerberos==0.12.0
 requests_ntlm==1.1.0
 requests_toolbelt==0.9.1
-requests-unixsocket==0.3.0
+requests-unixsocket==0.2.0
 simplejson==3.6.5
 six==1.16.0
 typing==3.7.4.1; python_version < '3.0'
