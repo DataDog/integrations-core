@@ -610,7 +610,7 @@ class SqlFileStats(BaseSqlServerMetric):
     """
 
     def __init__(self, cfg_instance, base_name, report_function, column, logger):
-        super(SqlVirtualFileIOStats, self).__init__(cfg_instance, base_name, report_function, column, logger)
+        super(SqlFileStats, self).__init__(cfg_instance, base_name, report_function, column, logger)
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
