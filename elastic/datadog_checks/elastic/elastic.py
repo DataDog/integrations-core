@@ -506,7 +506,6 @@ class ESCheck(AgentCheck):
 
         if branch_value is not None:
             if xtype == "gauge":
-                self.log.debug("Submitting as gauge")
                 self.gauge(metric_name, branch_value, tags=tags_to_submit)
             elif xtype == "monotonic_count":
                 self.monotonic_count(metric_name, branch_value, tags=tags_to_submit)
