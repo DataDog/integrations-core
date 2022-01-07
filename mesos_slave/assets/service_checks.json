@@ -22,7 +22,7 @@
             "ok",
             "critical"
         ],
-        "name": "Can Connect",
+        "name": "Can Connect [Deprecated]",
         "groups": [
             "host",
             "url"

@@ -13,8 +13,10 @@ from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host
+from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 
@@ -111,6 +113,21 @@ class SQLServer(AgentCheck):
         self.statement_metrics = SqlserverStatementMetrics(self)
         self.activity_config = self.instance.get('query_activity', {}) or {}
         self.activity = SqlserverActivity(self)
+        obfuscator_options_config = self.instance.get('obfuscator_options', {}) or {}
+        self.obfuscator_options = to_native_string(
+            json.dumps(
+                {
+                    # Valid values for this can be found at
+                    # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/database.md#connection-level-attributes
+                    'dbms': 'mssql',
+                    'replace_digits': obfuscator_options_config.get('replace_digits', False),
+                    'return_json_metadata': obfuscator_options_config.get('collect_metadata', False),
+                    'table_names': obfuscator_options_config.get('collect_tables', True),
+                    'collect_commands': obfuscator_options_config.get('collect_commands', True),
+                    'collect_comments': obfuscator_options_config.get('collect_comments', True),
+                }
+            )
+        )
 
         self.static_info_cache = TTLCache(
             maxsize=100,
