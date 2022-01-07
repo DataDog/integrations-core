@@ -299,3 +299,14 @@ def assert_common_device_metrics(
     aggregator.assert_metric(
         'snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=tags, count=count, value=devices_monitored_value
     )
+
+
+def filter_tags(tags, exclude_tag_keys):
+    new_tags = []
+    for tag in tags:
+        for tag_key in exclude_tag_keys:
+            if tag.startswith(tag_key + ':'):
+                break
+        else:
+            new_tags.append(tag)
+    return new_tags

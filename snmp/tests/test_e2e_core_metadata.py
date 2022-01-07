@@ -10,18 +10,25 @@ from . import common
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
 
-def assert_metadata_events(aggregator, events):
-    actual_events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
-    for event in actual_events:
+def get_events(aggregator):
+    events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
+    for event in events:
         # `collect_timestamp` depend on check run time and cannot be asserted reliably,
         # we are replacing it with `0` if present
         if 'collect_timestamp' in event:
             event['collect_timestamp'] = 0
-    assert events == actual_events
+        for device in event['devices']:
+            device['tags'] = common.filter_tags(device['tags'], ['agent_version'])
+    return events
+
+
+def assert_metadata_events(aggregator, events):
+    assert events == get_events(aggregator)
 
 
 def assert_device_metadata(aggregator, device_metadata):
-    events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
+    events = get_events(aggregator)
+
     assert len(events) == 1
     event1 = events[0]
 
@@ -891,7 +898,6 @@ def test_e2e_core_metadata_isilon(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.12325.1.1.2.1.1',
         'tags': [
-            'abc',
             'cluster_name:testcluster1',
             'device_namespace:default',
             'device_vendor:dell',
