@@ -2,7 +2,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import functools
+import inspect
 import os
+
+from six import PY2, PY3
 
 from ..config import is_affirmative
 
@@ -55,21 +58,39 @@ def traced(fn):
 
 
 def tracing_method(f, tracer):
-    @functools.wraps(f)
-    def wrapper(self, *args, **kwargs):
-        service_name = None
-        if hasattr(self, "name"):
-            service_name = "{}-integration".format(self.name)
-        elif f.__name__ == "__init__":
-            # copy the logic that the AgentCheck init method uses to determine the check name
-            name = kwargs.get('name', '')
-            if len(args) > 0:
-                name = args[0]
-            if name:
-                service_name = "{}-integration".format(name)
+    if (PY2 and 'self' in inspect.getargspec(f).args) or (PY3 and inspect.signature(f).parameters.get('self')):
 
-        with tracer.trace(f.__name__, resource=f.__name__, service=service_name):
-            return f(self, *args, **kwargs)
+        @functools.wraps(f)
+        def wrapper(self, *args, **kwargs):
+            service_name = None
+            if hasattr(self, "name"):
+                service_name = "{}-integration".format(self.name)
+            elif f.__name__ == "__init__":
+                # copy the logic that the AgentCheck init method uses to determine the check name
+                name = kwargs.get('name', '')
+                if len(args) > 0:
+                    name = args[0]
+                if name:
+                    service_name = "{}-integration".format(name)
+
+            with tracer.trace(f.__name__, resource=f.__name__, service=service_name):
+                return f(self, *args, **kwargs)
+
+    else:
+
+        @functools.wraps(f)
+        def wrapper(*args, **kwargs):
+            service_name = None
+            if f.__name__ == "__init__":
+                # copy the logic that the AgentCheck init method uses to determine the check name
+                name = kwargs.get('name', '')
+                if len(args) > 0:
+                    name = args[0]
+                if name:
+                    service_name = "{}-integration".format(name)
+
+            with tracer.trace(f.__name__, resource=f.__name__, service=service_name):
+                return f(*args, **kwargs)
 
     return wrapper
 

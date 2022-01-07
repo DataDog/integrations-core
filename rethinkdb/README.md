@@ -23,7 +23,7 @@ The RethinkDB check is included in the [Datadog Agent][3] package. No additional
 ### Configuration
 
 1. If using RethinkDB 2.4+, add a `datadog-agent` user with read-only permissions on the `rethinkdb`
-database. You can use the following ReQL commands, and refer to [Permissions and user accounts][4] for
+database. You can use the following ReQL commands, and see [Permissions and user accounts][4] for
 details:
 
     ```python
@@ -82,7 +82,7 @@ partial -->
 
 3. [Restart the Agent][8].
 
-See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+To enable logs for Kubernetes environments, see [Kubernetes Log Collection][9].
 
 ### Validation
 

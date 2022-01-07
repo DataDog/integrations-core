@@ -78,7 +78,7 @@ class TestDBExcepption(BaseException):
 
 
 @pytest.mark.parametrize(
-    "obfusactor_return_value,expected_value",
+    "obfuscator_return_value,expected_value,return_json_metadata",
     [
         (
             json.dumps(
@@ -91,6 +91,7 @@ class TestDBExcepption(BaseException):
                 'query': 'SELECT * FROM datadog',
                 'metadata': {'commands': ['SELECT'], 'comments': None, 'tables': ['datadog']},
             },
+            True,
         ),
         (
             json.dumps(
@@ -111,6 +112,7 @@ class TestDBExcepption(BaseException):
                     'tables': ['datadog', 'datadog2'],
                 },
             },
+            True,
         ),
         (
             json.dumps(
@@ -123,6 +125,7 @@ class TestDBExcepption(BaseException):
                 'query': 'COMMIT',
                 'metadata': {'commands': ['COMMIT'], 'comments': None, 'tables': None},
             },
+            True,
         ),
         (
             'SELECT * FROM datadog',
@@ -130,16 +133,30 @@ class TestDBExcepption(BaseException):
                 'query': 'SELECT * FROM datadog',
                 'metadata': {},
             },
+            # This test ensures that we handle the failed json decoder when requesting for metadata.
+            # This scenario could happen when newer integrations run against older agents which might not have the
+            # metadata API.
+            True,
+        ),
+        (
+            'SELECT * FROM datadog',
+            {
+                'query': 'SELECT * FROM datadog',
+                'metadata': {},
+            },
+            False,
         ),
     ],
 )
-def test_obfuscate_sql_with_metadata(obfusactor_return_value, expected_value):
+def test_obfuscate_sql_with_metadata(obfuscator_return_value, expected_value, return_json_metadata):
     def _mock_obfuscate_sql(query, options=None):
-        return obfusactor_return_value
+        return obfuscator_return_value
 
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = _mock_obfuscate_sql
-        statement = obfuscate_sql_with_metadata('query here does not matter')
+        statement = obfuscate_sql_with_metadata(
+            'query here does not matter', json.dumps({'return_json_metadata': return_json_metadata})
+        )
         assert statement == expected_value
 
 

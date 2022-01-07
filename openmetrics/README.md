@@ -22,7 +22,7 @@ For each instance the following parameters are required:
 
 | Parameter        | Description                                                                                                                                                                                                                                                              |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `openmetrics_endpoint` | The URL where your application metrics are exposed by Prometheus (must be unique).                                                                                                                         |
+| `openmetrics_endpoint` | The URL where your application metrics are exposed by OpenMetrics (must be unique).                                                                                                                         |
 | `namespace`      | The namespace to prepend to all metrics.                                                                                                                                                                                                                                 |
 | `metrics`        | A list of metrics to retrieve as custom metrics. Add each metric to the list as `metric_name` or `metric_name: renamed` to rename it. The metrics are interpreted as regular expressions. Use `.*` as a wildcard (`metric.*`) to fetch all matching metrics. **Note**: Regular expressions can potentially send a lot of custom metrics. |
 

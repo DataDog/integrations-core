@@ -38,7 +38,7 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
 
 ##### Granting privileges
 
-1. Run the following command to create a monitoring role (we'll call it `DD_MONITOR` for these examples):
+1. Run the following command to create a monitoring role (named `DD_MONITOR` for these examples):
 
    ```shell
    CREATE ROLE DD_MONITOR;
@@ -98,7 +98,7 @@ The installation must be performed manually for licensing reasons.
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `sap_hana` under the Checks section.
+Run the [Agent's status subcommand][6] and look for `sap_hana` under the Checks section.
 
 ## Data Collected
 

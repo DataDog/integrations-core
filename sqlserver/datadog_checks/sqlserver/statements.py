@@ -9,7 +9,12 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import ensure_unicode, to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import (
+    DBMAsyncJob,
+    RateLimitingTTLCache,
+    default_json_event_encoding,
+    obfuscate_sql_with_metadata,
+)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
@@ -113,7 +118,7 @@ def _hash_to_hex(hash):
     return to_native_string(binascii.hexlify(hash))
 
 
-def obfuscate_xml_plan(raw_plan):
+def obfuscate_xml_plan(raw_plan, obfuscator_options=None):
     """
     Obfuscates SQL text & Parameters from the provided SQL Server XML Plan
     Also strips unnecessary whitespace
@@ -127,7 +132,8 @@ def obfuscate_xml_plan(raw_plan):
         for k in XML_PLAN_OBFUSCATION_ATTRS:
             val = e.attrib.get(k, None)
             if val:
-                e.attrib[k] = ensure_unicode(datadog_agent.obfuscate_sql(val))
+                statement = obfuscate_sql_with_metadata(val, obfuscator_options)
+                e.attrib[k] = ensure_unicode(statement['query'])
     return to_native_string(ET.tostring(tree, encoding="UTF-8"))
 
 
@@ -239,7 +245,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         normalized_rows = []
         for row in rows:
             try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['text'])
+                statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
                 self.log.debug("Failed to obfuscate query: %s", e)
@@ -249,11 +255,16 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     **self.check.debug_stats_kwargs(tags=["error:obfuscate-query-{}".format(type(e))])
                 )
                 continue
+            obfuscated_statement = statement['query']
             row['text'] = obfuscated_statement
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
             row['query_hash'] = _hash_to_hex(row['query_hash'])
             row['query_plan_hash'] = _hash_to_hex(row['query_plan_hash'])
             row['plan_handle'] = _hash_to_hex(row['plan_handle'])
+            metadata = statement['metadata']
+            row['dd_tables'] = metadata.get('tables', None)
+            row['dd_commands'] = metadata.get('commands', None)
+            row['dd_comments'] = metadata.get('comments', None)
             normalized_rows.append(row)
         return normalized_rows
 
@@ -269,6 +280,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
     @staticmethod
     def _to_metrics_payload_row(row):
         row = {k: v for k, v in row.items()}
+        if 'dd_comments' in row:
+            del row['dd_comments']
         # truncate query text to the maximum length supported by metrics tags
         row['text'] = row['text'][0:200]
         return row
@@ -377,7 +390,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 obfuscated_plan, collection_errors = None, None
 
                 try:
-                    obfuscated_plan = obfuscate_xml_plan(raw_plan)
+                    obfuscated_plan = obfuscate_xml_plan(raw_plan, self.check.obfuscator_options)
                 except Exception as e:
                     self.log.debug(
                         (
@@ -416,6 +429,11 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         "query_signature": row['query_signature'],
                         "user": row.get("user_name", None),
                         "statement": row['text'],
+                        "metadata": {
+                            "tables": row['dd_tables'],
+                            "commands": row['dd_commands'],
+                            "comments": row['dd_comments'],
+                        },
                     },
                     'sqlserver': {
                         'query_hash': row['query_hash'],

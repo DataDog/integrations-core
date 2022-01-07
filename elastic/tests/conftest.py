@@ -22,7 +22,32 @@ COMPOSE_FILES_MAP = {
     '2-alpine': 'legacy.yaml',
 }
 
-INSTANCE = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': CUSTOM_TAGS, 'tls_verify': False}
+INSTANCE = {
+    'url': URL,
+    'username': USER,
+    'password': PASSWORD,
+    'tags': CUSTOM_TAGS,
+    'tls_verify': False,
+    'custom_queries': [
+        {
+            'endpoint': '/_search',
+            'data_path': 'hits.total',
+            'columns': [
+                {'value_path': 'value', 'name': 'elasticsearch.custom.metric', 'type': 'gauge'},
+                {'value_path': 'relation', 'name': 'dynamic_tag', 'type': 'tag'},
+            ],
+        },
+    ],
+}
+
+
+BENCHMARK_INSTANCE = {
+    'url': URL,
+    'username': USER,
+    'password': PASSWORD,
+    'tags': CUSTOM_TAGS,
+    'tls_verify': False,
+}
 
 
 def ping_elastic():
@@ -96,6 +121,16 @@ def elastic_check():
 @pytest.fixture(scope='session')
 def instance():
     return copy.deepcopy(INSTANCE)
+
+
+@pytest.fixture
+def benchmark_elastic_check():
+    return ESCheck('elastic', {}, instances=[BENCHMARK_INSTANCE])
+
+
+@pytest.fixture(scope='session')
+def benchmark_instance():
+    return copy.deepcopy(BENCHMARK_INSTANCE)
 
 
 @pytest.fixture(scope='session')

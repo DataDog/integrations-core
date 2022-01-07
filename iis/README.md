@@ -52,6 +52,9 @@ partial -->
 
 3. [Restart the Agent][6].
 
+**Note**: Ensure the `datadog-agent` user has read access to tail the log files you want to collect from. See [Permission issues tailing log files][12] for more information.
+
+
 ### Validation
 
 [Run the Agent's status subcommand][7] and look for `iis` under the Checks section.
@@ -86,3 +89,4 @@ Need help? Contact [Datadog support][10].
 [9]: https://github.com/DataDog/integrations-core/blob/master/iis/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
 [11]: https://github.com/DataDog/integrations-core/blob/7.33.x/iis/datadog_checks/iis/data/conf.yaml.example
+[12]: https://docs.datadoghq.com/logs/guide/log-collection-troubleshooting-guide/#permission-issues-tailing-log-files

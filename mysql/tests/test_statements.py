@@ -381,6 +381,71 @@ def test_statement_samples_collect(
     mysql_check._statement_samples._close_db_conn()
 
 
+@pytest.mark.parametrize(
+    "metadata,expected_metadata_payload",
+    [
+        (
+            {'tables_csv': 'information_schema', 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+            {'tables': ['information_schema'], 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+        ),
+        (
+            {'tables_csv': '', 'commands': None, 'comments': None},
+            {'tables': None, 'commands': None, 'comments': None},
+        ),
+    ],
+)
+def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload):
+    dbm_instance['obfuscator_options'] = {'collect_metadata': True}
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    test_query = '''
+    -- Test comment
+    select * from information_schema.processlist where state in (\'starting\')
+    '''
+    query_signature = '94caeb4c54f97849'
+    normalized_query = 'SELECT * FROM `information_schema` . `processlist` where state in ( ? )'
+
+    def obfuscate_sql(query, options=None):
+        if 'WHERE `state`' in query:
+            return json.dumps({'query': normalized_query, 'metadata': metadata})
+        return json.dumps({'query': query, 'metadata': metadata})
+
+    def run_query(q):
+        with mysql_check._connect() as db:
+            with closing(db.cursor()) as cursor:
+                cursor.execute(q)
+
+    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+        run_query(test_query)
+        dd_run_check(mysql_check)
+
+    samples = aggregator.get_event_platform_events("dbm-samples")
+    matching = [s for s in samples if s['db']['query_signature'] == query_signature]
+    assert len(matching) == 1
+
+    sample = matching[0]
+    assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
+    assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
+    assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
+
+    # Run the query and check a second time so statement metrics are computed from the previous run
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+        run_query(test_query)
+        dd_run_check(mysql_check)
+
+    metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(metrics) == 1
+    metric = metrics[0]
+    matching_metrics = [m for m in metric['mysql_rows'] if m['query_signature'] == query_signature]
+    assert len(matching_metrics) == 1
+    metric = matching_metrics[0]
+    assert metric['dd_tables'] == expected_metadata_payload['tables']
+    assert metric['dd_commands'] == expected_metadata_payload['commands']
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
@@ -644,6 +709,8 @@ def test_normalize_queries(dbm_instance):
             'schema': 'network',
             'digest_text': 'SELECT * from table where name = ?',
             'query_signature': u'761498b7d5f04d11',
+            'dd_commands': None,
+            'dd_tables': None,
             'count': 41,
             'time': 66721400,
             'lock_time': 18298000,
@@ -669,6 +736,8 @@ def test_normalize_queries(dbm_instance):
             'schema': None,
             'digest_text': None,
             'query_signature': None,
+            'dd_commands': None,
+            'dd_tables': None,
             'count': 41,
             'time': 66721400,
             'lock_time': 18298000,

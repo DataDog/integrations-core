@@ -262,14 +262,7 @@ class Network(AgentCheck):
         metric_tags = [] if tags is None else tags[:]
         metric_tags.append('device:{}'.format(iface))
 
-        expected_metrics = [
-            'bytes_rcvd',
-            'bytes_sent',
-            'packets_in.count',
-            'packets_in.error',
-            'packets_out.count',
-            'packets_out.error',
-        ]
+        expected_metrics = self._get_expected_metrics()
         for m in expected_metrics:
             assert m in vals_by_metric
         assert len(vals_by_metric) == len(expected_metrics)
@@ -279,6 +272,24 @@ class Network(AgentCheck):
             self.rate('system.net.%s' % metric, val, tags=metric_tags)
             count += 1
         self.log.debug("tracked %s network metrics for interface %s", count, iface)
+
+    def _get_expected_metrics(self):
+        expected_metrics = [
+            'bytes_rcvd',
+            'bytes_sent',
+            'packets_in.count',
+            'packets_in.error',
+            'packets_out.count',
+            'packets_out.error',
+        ]
+        if Platform.is_linux() or Platform.is_windows():
+            expected_metrics.extend(
+                [
+                    'packets_in.drop',
+                    'packets_out.drop',
+                ]
+            )
+        return expected_metrics
 
     def _submit_ena_metrics(self, iface, vals_by_metric, tags):
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
@@ -450,8 +461,10 @@ class Network(AgentCheck):
                     'bytes_rcvd': self._parse_value(x[0]),
                     'bytes_sent': self._parse_value(x[8]),
                     'packets_in.count': self._parse_value(x[1]),
+                    'packets_in.drop': self._parse_value(x[3]),
                     'packets_in.error': self._parse_value(x[2]) + self._parse_value(x[3]),
                     'packets_out.count': self._parse_value(x[9]),
+                    'packets_out.drop': self._parse_value(x[11]),
                     'packets_out.error': self._parse_value(x[10]) + self._parse_value(x[11]),
                 }
                 self._submit_devicemetrics(iface, metrics, custom_tags)
@@ -930,8 +943,10 @@ class Network(AgentCheck):
                 'bytes_rcvd': counters.bytes_recv,
                 'bytes_sent': counters.bytes_sent,
                 'packets_in.count': counters.packets_recv,
+                'packets_in.drop': counters.dropin,
                 'packets_in.error': counters.errin,
                 'packets_out.count': counters.packets_sent,
+                'packets_out.drop': counters.dropout,
                 'packets_out.error': counters.errout,
             }
             self._submit_devicemetrics(iface, metrics, tags)

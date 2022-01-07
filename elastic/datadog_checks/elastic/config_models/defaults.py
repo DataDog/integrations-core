@@ -66,6 +66,10 @@ def instance_connect_timeout(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_custom_queries(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_detailed_index_stats(field, value):
     return False
 

@@ -25,7 +25,7 @@ def test():
             - name: deprecated
               description: words
               deprecation:
-                Release: 8.0.0
+                Agent version: 8.0.0
                 Migration: do this and that
               value:
                 type: string
@@ -38,7 +38,7 @@ def test():
             - name: deprecated
               description: words
               deprecation:
-                Release: 9.0.0
+                Agent version: 9.0.0
                 Migration: do this and that
               value:
                 type: string
@@ -62,10 +62,10 @@ def test():
         == """
 
 def shared():
-    return {'deprecated': {'Release': '8.0.0', 'Migration': 'do this and that'}}
+    return {'deprecated': {'Agent version': '8.0.0', 'Migration': 'do this and that'}}
 
 
 def instance():
-    return {'deprecated': {'Release': '9.0.0', 'Migration': 'do this and that'}}
+    return {'deprecated': {'Agent version': '9.0.0', 'Migration': 'do this and that'}}
 """
     )

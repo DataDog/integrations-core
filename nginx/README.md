@@ -107,24 +107,29 @@ sudo nginx -t && sudo nginx -s reload
 <!-- xxz tab xxx -->
 <!-- xxx tab "Kubernetes" xxx -->
 
-Add the following to your configuration ConfigMaps:
+Add the following snippet to your configuration ConfigMaps to expose the metrics endpoint in a different port:
 
 ```yaml
-http-snippet: |
-  server {
-    listen 18080;
+kind: ConfigMap
+metadata:
+  name: nginx-conf
+data:
+[...]
+  status.conf: |
+    server {
+      listen 18080;
 
-    location /nginx_status {
-      stub_status on;
-    }
+      location /nginx_status {
+        stub_status on;
+      }
 
-    location / {
-      return 404;
+      location / {
+        return 404;
+      }
     }
-  }
 ```
 
-Then, in your NGINX pod, expose the `18080` endpoint:
+Then, in your NGINX pod, expose the `18080` endpoint and mount that file in the NGINX configuration folder:
 
 ```yaml
 spec:
@@ -132,6 +137,30 @@ spec:
     - name: nginx
       ports:
         - containerPort: 18080
+      volumeMounts:
+        - mountPath: /etc/nginx/conf.d/status.conf
+          subPath: status.conf
+          readOnly: true
+          name: "config"
+  volumes:
+    - name: "config"
+      configMap:
+          name: "nginx-conf"
+```
+
+Finally, expose that port in your NGINX service:
+
+```yaml
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+    name: default
+  - port: 81
+    protocol: TCP
+    targetPort: 18080
+    name: status
 ```
 
 <!-- xxz tab xxx -->
@@ -277,13 +306,6 @@ metadata:
       ]
   labels:
     name: nginx
-spec:
-  containers:
-    - name: nginx
-  volumes:
-        - name: "config"
-          configMap:
-            name: "nginxconfig"
 ```
 
 **Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
