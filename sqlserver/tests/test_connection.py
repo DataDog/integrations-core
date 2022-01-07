@@ -4,14 +4,10 @@
 import re
 
 import mock
-import pyodbc
 import pytest
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import Connection
-
-from .common import CHECK_NAME
 
 pytestmark = pytest.mark.unit
 
@@ -86,60 +82,3 @@ def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_sql_de
 
     with pytest.raises(ConfigurationError, match=re.escape(match)):
         connection._connection_options_validation('somekey', 'somedb')
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_query_timeout(instance_docker):
-    instance_docker['command_timeout'] = 1
-    check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    check.initialize_connection()
-    with check.connection.open_managed_default_connection():
-        with check.connection.get_managed_cursor() as cursor:
-            # should complete quickly
-            cursor.execute("select 1")
-            assert cursor.fetchall(), "should have a result here"
-            with pytest.raises(Exception) as e:
-                cursor.execute("waitfor delay '00:00:02'")
-                if isinstance(e, pyodbc.OperationalError):
-                    assert 'timeout' in "".join(e.args).lower(), "must be a timeout"
-                else:
-                    import adodbapi
-
-                    assert type(e) == adodbapi.apibase.DatabaseError
-                    assert 'timeout' in "".join(e.args).lower(), "must be a timeout"
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_connection_cleanup(instance_docker):
-    check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    check.initialize_connection()
-
-    # regular operation
-    with check.connection.open_managed_default_connection():
-        assert len(check.connection._conns) == 1
-        with check.connection.get_managed_cursor() as cursor:
-            cursor.execute("select 1")
-            assert len(check.connection._conns) == 1
-    assert len(check.connection._conns) == 0, "connection should have been closed"
-
-    # db exception
-    with pytest.raises(Exception) as e:
-        with check.connection.open_managed_default_connection():
-            assert len(check.connection._conns) == 1
-            with check.connection.get_managed_cursor() as cursor:
-                assert len(check.connection._conns) == 1
-                cursor.execute("gimme some data")
-    assert "incorrect syntax" in str(e).lower()
-    assert len(check.connection._conns) == 0, "connection should have been closed"
-
-    # application exception
-    with pytest.raises(Exception) as e:
-        with check.connection.open_managed_default_connection():
-            assert len(check.connection._conns) == 1
-            with check.connection.get_managed_cursor():
-                assert len(check.connection._conns) == 1
-                raise Exception("oops")
-    assert "oops" in str(e)
-    assert len(check.connection._conns) == 0, "connection should have been closed"
