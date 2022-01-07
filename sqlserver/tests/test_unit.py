@@ -14,7 +14,7 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import set_default_driver_conf
 
-from .common import CHECK_NAME, LOCAL_SERVER, assert_metrics
+from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
 from .utils import windows_ci
 
 # mark the whole module
@@ -191,20 +191,19 @@ def test_set_default_driver_conf():
 
 
 @windows_ci
-def test_check_local(aggregator, dd_run_check, init_config, instance_sql):
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_sql])
+def test_check_local(aggregator, dd_run_check, init_config, instance_docker):
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
-    expected_tags = instance_sql.get('tags', []) + ['sqlserver_host:{}'.format(LOCAL_SERVER), 'db:master']
+    expected_tags = instance_docker.get('tags', []) + ['sqlserver_host:{}'.format(DOCKER_SERVER), 'db:master']
     assert_metrics(aggregator, expected_tags)
 
 
 @windows_ci
 @pytest.mark.parametrize('adoprovider', ['SQLOLEDB', 'SQLNCLI11', 'MSOLEDBSQL'])
-def test_check_adoprovider(aggregator, dd_run_check, init_config, instance_sql, adoprovider):
-    instance = copy.deepcopy(instance_sql)
-    instance['adoprovider'] = adoprovider
+def test_check_adoprovider(aggregator, dd_run_check, init_config, instance_docker, adoprovider):
+    instance_docker['adoprovider'] = adoprovider
 
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance])
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
-    expected_tags = instance.get('tags', []) + ['sqlserver_host:{}'.format(LOCAL_SERVER), 'db:master']
+    expected_tags = instance_docker.get('tags', []) + ['sqlserver_host:{}'.format(DOCKER_SERVER), 'db:master']
     assert_metrics(aggregator, expected_tags)

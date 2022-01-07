@@ -39,7 +39,6 @@ def get_local_driver():
 HOST = get_docker_hostname()
 PORT = 1433
 DOCKER_SERVER = '{},{}'.format(HOST, PORT)
-LOCAL_SERVER = 'localhost,{}'.format(PORT)
 HERE = get_here()
 CHECK_NAME = "sqlserver"
 
@@ -71,20 +70,27 @@ EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in AO_METRICS_PRIMARY]
 EXPECTED_AO_METRICS_SECONDARY = [m[0] for m in AO_METRICS_SECONDARY]
 EXPECTED_AO_METRICS_COMMON = [m[0] for m in AO_METRICS]
 
-INSTANCE_DOCKER = {
+INSTANCE_DOCKER_DEFAULTS = {
     'host': '{},1433'.format(HOST),
     'connector': 'odbc',
     'driver': get_local_driver(),
     'username': 'datadog',
     'password': 'Password12!',
-    'tags': ['optional:tag1'],
-    'include_task_scheduler_metrics': True,
-    'include_db_fragmentation_metrics': True,
-    'include_fci_metrics': True,
-    'include_ao_metrics': False,
-    'include_master_files_metrics': True,
     'disable_generic_tags': True,
+    'tags': ['optional:tag1'],
 }
+
+INSTANCE_DOCKER = INSTANCE_DOCKER_DEFAULTS.copy()
+INSTANCE_DOCKER.update(
+    {
+        'include_task_scheduler_metrics': True,
+        'include_db_fragmentation_metrics': True,
+        'include_fci_metrics': True,
+        'include_ao_metrics': False,
+        'include_master_files_metrics': True,
+        'disable_generic_tags': True,
+    }
+)
 
 INSTANCE_AO_DOCKER_SECONDARY = {
     'host': '{},1434'.format(HOST),
@@ -113,7 +119,7 @@ INSTANCE_E2E = INSTANCE_DOCKER.copy()
 INSTANCE_E2E['driver'] = 'FreeTDS'
 
 INSTANCE_SQL_DEFAULTS = {
-    'host': LOCAL_SERVER,
+    'host': DOCKER_SERVER,
     'username': 'sa',
     'password': 'Password12!',
     'disable_generic_tags': True,
@@ -185,9 +191,9 @@ INIT_CONFIG_ALT_TABLES = {
             'columns': ['num_of_reads', 'num_of_writes'],
         },
         {
-            'name': 'sqlserver.MEMORYCLERK_BITMAP',
+            'name': 'sqlserver.MEMORYCLERK_SQLGENERAL',
             'table': 'sys.dm_os_memory_clerks',
-            'counter_name': 'MEMORYCLERK_BITMAP',
+            'counter_name': 'MEMORYCLERK_SQLGENERAL',
             'columns': ['virtual_memory_reserved_kb', 'virtual_memory_committed_kb'],
         },
     ]
