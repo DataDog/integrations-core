@@ -3,7 +3,7 @@
 ## 23.7.1 / 2022-01-07
 
 * [Fixed] Fix tracing_method using self argument. See [#11042](https://github.com/DataDog/integrations-core/pull/11042).
-* [Fixed] datadog_checks_base: Fix obfuscate_sql_with_metadata wrapper not handling json.loads() edge case. See [#11038](https://github.com/DataDog/integrations-core/pull/11038).
+* [Fixed] Fix obfuscate_sql_with_metadata wrapper not handling json.loads() edge case. See [#11038](https://github.com/DataDog/integrations-core/pull/11038).
 
 ## 23.7.0 / 2022-01-04
 
