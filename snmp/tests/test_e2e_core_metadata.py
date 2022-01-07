@@ -18,7 +18,7 @@ def get_events(aggregator):
         if 'collect_timestamp' in event:
             event['collect_timestamp'] = 0
         for device in event.get('devices', []):
-            device['tags'] = common.filter_tags(device['tags'], common.EXCLUDED_E2E_TAG_KEYS)
+            device['tags'] = common.remove_tags(device['tags'], common.EXCLUDED_E2E_TAG_KEYS)
     return events
 
 

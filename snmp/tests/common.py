@@ -305,13 +305,13 @@ def assert_common_device_metrics(
     )
 
 
-def filter_tags(tags, exclude_tag_keys):
+def remove_tags(tags, tags_keys_to_remove):
     """
-    Filter tags by excluding tags with specific keys.
+    Remove tags by excluding tags with specific keys.
     """
     new_tags = []
     for tag in tags:
-        for tag_key in exclude_tag_keys:
+        for tag_key in tags_keys_to_remove:
             if tag.startswith(tag_key + ':'):
                 break
         else:
@@ -330,7 +330,7 @@ def dd_agent_check_wrapper(dd_agent_check, *args, **kwargs):
         new_metrics = []
         for metric in metric_list:
             # metric is a Namedtuple, to modify namedtuple fields we need to use `._replace()`
-            new_metric = metric._replace(tags=filter_tags(metric.tags, EXCLUDED_E2E_TAG_KEYS))
+            new_metric = metric._replace(tags=remove_tags(metric.tags, EXCLUDED_E2E_TAG_KEYS))
             new_metrics.append(new_metric)
         new_agg_metrics[metric_name] = new_metrics
 
