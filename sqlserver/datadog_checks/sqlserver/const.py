@@ -161,6 +161,7 @@ DATABASE_MASTER_FILES = [
 ]
 
 DATABASE_FILES_IO = [
+    ('sqlserver.files.size_on_disk', 'size_on_disk_bytes', AgentCheck.gauge),
     ('sqlserver.files.reads', 'num_of_reads', AgentCheck.monotonic_count),
     ('sqlserver.files.read_bytes', 'num_of_bytes_read', AgentCheck.monotonic_count),
     ('sqlserver.files.read_io_stall', 'io_stall_read_ms', AgentCheck.monotonic_count),
@@ -170,5 +171,4 @@ DATABASE_FILES_IO = [
     ('sqlserver.files.write_io_stall', 'io_stall_write_ms', AgentCheck.monotonic_count),
     ('sqlserver.files.write_io_stall_queued', 'io_stall_queued_write_ms', AgentCheck.monotonic_count),
     ('sqlserver.files.io_stall', 'io_stall', AgentCheck.monotonic_count),
-    ('sqlserver.files.size_on_disk', 'size_on_disk_bytes', AgentCheck.gauge),
 ]
