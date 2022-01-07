@@ -51,6 +51,7 @@ EXPECTED_DEFAULT_METRICS = [
         DBM_MIGRATED_METRICS,
         INSTANCE_METRICS_TOTAL,
         DATABASE_METRICS,
+        DATABASE_FILES_IO,
     )
 ]
 EXPECTED_METRICS = (
@@ -59,7 +60,6 @@ EXPECTED_METRICS = (
         m[0]
         for m in chain(
             TASK_SCHEDULER_METRICS,
-            DATABASE_FILES_IO,
             DATABASE_FRAGMENTATION_METRICS,
             DATABASE_MASTER_FILES,
         )
