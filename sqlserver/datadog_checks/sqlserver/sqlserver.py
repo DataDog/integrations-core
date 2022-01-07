@@ -354,10 +354,10 @@ class SQLServer(AgentCheck):
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load database files
-        for name, column, metric_name in DATABASE_FILES_IO:
+        for name, column, metric_type in DATABASE_FILES_IO:
             cfg = {'name': name, 'column': column, 'tags': tags}
 
-            metrics_to_collect.append(SqlVirtualFileIOStats(cfg, None, getattr(self, metric_name), column, self.log))
+            metrics_to_collect.append(SqlVirtualFileIOStats(cfg, None, getattr(self, metric_type), column, self.log))
 
         # Load AlwaysOn metrics
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
