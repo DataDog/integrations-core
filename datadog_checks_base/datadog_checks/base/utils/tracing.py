@@ -5,6 +5,8 @@ import functools
 import inspect
 import os
 
+from six import PY2, PY3
+
 from ..config import is_affirmative
 
 try:
@@ -56,8 +58,8 @@ def traced(fn):
 
 
 def tracing_method(f, tracer):
-    signature = inspect.signature(f)
-    if signature.parameters.get('self'):
+    if (PY2 and 'self' in inspect.getargspec(f).args) or (PY3 and inspect.signature(f).parameters.get('self')):
+
         @functools.wraps(f)
         def wrapper(self, *args, **kwargs):
             service_name = None
@@ -70,11 +72,12 @@ def tracing_method(f, tracer):
                     name = args[0]
                 if name:
                     service_name = "{}-integration".format(name)
-            
+
             with tracer.trace(f.__name__, resource=f.__name__, service=service_name):
                 return f(self, *args, **kwargs)
 
     else:
+
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
             service_name = None
