@@ -12,9 +12,9 @@ from urllib3.util import ssl_
 # `ssl_match_hostname` package has moved locations from `urllib3.packages.ssl_match_hostname`
 # to `urllib3.util.ssl_match_hostname` in urllib3 >= 1.26.8
 try:
-    from urllib3.packages.ssl_match_hostname import match_hostname
-except ImportError:
     from urllib3.util.ssl_match_hostname import match_hostname
+except ImportError:
+    from urllib3.packages.ssl_match_hostname import match_hostname
 
 
 class WeakCiphersHTTPSConnection(urllib3.connection.VerifiedHTTPSConnection):
