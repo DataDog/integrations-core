@@ -561,7 +561,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
-class SqlVirtualFileIOStats(BaseSqlServerMetric):
+class SqlFileStats(BaseSqlServerMetric):
     CUSTOM_QUERIES_AVAILABLE = False
 
     # Default base query works for server-wide view of all master files

@@ -18,7 +18,7 @@ from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
-from datadog_checks.sqlserver.metrics import SqlVirtualFileIOStats
+from datadog_checks.sqlserver.metrics import SqlFileStats
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 
 try:
@@ -357,7 +357,7 @@ class SQLServer(AgentCheck):
         for name, column, metric_type in DATABASE_FILES_IO:
             cfg = {'name': name, 'column': column, 'tags': tags}
 
-            metrics_to_collect.append(SqlVirtualFileIOStats(cfg, None, getattr(self, metric_type), column, self.log))
+            metrics_to_collect.append(SqlFileStats(cfg, None, getattr(self, metric_type), column, self.log))
 
         # Load AlwaysOn metrics
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
