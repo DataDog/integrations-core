@@ -354,7 +354,6 @@ class SQLServer(AgentCheck):
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load database files
-        # TODO: if self.dbm_enabled
         for name, column, metric_fn in DATABASE_FILES_IO:
             cfg = {'name': name, 'column': column, 'tags': tags}
 
