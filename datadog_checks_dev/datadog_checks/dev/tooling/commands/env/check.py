@@ -49,8 +49,8 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
     help='duration between retries until Autodiscovery resolves the check template (in seconds)',
 )
 @click.option(
-    '--discovery-check-count',
-    'discovery_check_count',
+    '--discovery-min-instances',
+    'discovery_min_instances',
     type=click.INT,
     help='number of checks to wait, retry until the specified number of checks is reached',
 )
@@ -69,7 +69,7 @@ def check_run(
     jmx_list,
     discovery_timeout,
     discovery_retry_interval,
-    discovery_check_count,
+    discovery_min_instances,
 ):
     """Run an Agent check."""
     envs = get_configured_envs(check)
@@ -104,7 +104,7 @@ def check_run(
         jmx_list=jmx_list,
         discovery_timeout=discovery_timeout,
         discovery_retry_interval=discovery_retry_interval,
-        discovery_check_count=discovery_check_count,
+        discovery_min_instances=discovery_min_instances,
     )
 
     if config_file:

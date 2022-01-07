@@ -151,7 +151,7 @@ class LocalAgentInterface(object):
         jmx_list=None,
         discovery_timeout=None,
         discovery_retry_interval=None,
-        discovery_check_count=None,
+        discovery_min_instances=None,
     ):
         # JMX check
         if jmx_list:
@@ -188,8 +188,8 @@ class LocalAgentInterface(object):
             if discovery_retry_interval is not None:
                 command += f'--discovery-retry-interval {discovery_retry_interval}'
 
-            if discovery_check_count is not None:
-                command += f'--discovery-check-count {discovery_check_count}'
+            if discovery_min_instances is not None:
+                command += f'--discovery-min-instances {discovery_min_instances}'
 
         if log_level is not None:
             command += f' --log-level {log_level}'
