@@ -305,13 +305,13 @@ def assert_common_device_metrics(
     )
 
 
-def remove_tags(tags, tags_keys_to_remove):
+def remove_tags(tags, tag_keys_to_remove):
     """
     Remove tags by excluding tags with specific keys.
     """
     new_tags = []
     for tag in tags:
-        for tag_key in tags_keys_to_remove:
+        for tag_key in tag_keys_to_remove:
             if tag.startswith(tag_key + ':'):
                 break
         else:
