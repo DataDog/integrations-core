@@ -10,18 +10,25 @@ from . import common
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
 
-def assert_metadata_events(aggregator, events):
-    actual_events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
-    for event in actual_events:
+def get_events(aggregator):
+    events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
+    for event in events:
         # `collect_timestamp` depend on check run time and cannot be asserted reliably,
         # we are replacing it with `0` if present
         if 'collect_timestamp' in event:
             event['collect_timestamp'] = 0
-    assert events == actual_events
+        for device in event.get('devices', []):
+            device['tags'] = common.remove_tags(device['tags'], common.EXCLUDED_E2E_TAG_KEYS)
+    return events
+
+
+def assert_metadata_events(aggregator, events):
+    assert events == get_events(aggregator)
 
 
 def assert_device_metadata(aggregator, device_metadata):
-    events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
+    events = get_events(aggregator)
+
     assert len(events) == 1
     event1 = events[0]
 
@@ -159,7 +166,7 @@ def test_e2e_core_metadata_cisco_3850(dd_agent_check):
 
     device_ip = instance['ip_address']
 
-    events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
+    events = get_events(aggregator)
 
     # since there are >100 resources (device+interfaces), the interfaces are split into 2 events
     assert len(events) == 2
