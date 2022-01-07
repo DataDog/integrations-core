@@ -93,6 +93,20 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.20.47.0
       name: sysGlobalHostSwapUsed
+  # CPU
+  - MIB: F5-BIGIP-SYSTEM-MIB
+    table:
+      OID: 1.3.6.1.4.1.3375.2.1.7.5.2
+      name: sysMultiHostCpuTable
+    forced_type: gauge
+    symbols:
+      - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.11
+        name: sysMultiHostCpuUsageRatio
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.3
+          name: sysMultiHostCpuId
+        tag: cpu
   - MIB: F5-BIGIP-SYSTEM-MIB
     table:
       OID: 1.3.6.1.4.1.3375.2.1.7.5.2
