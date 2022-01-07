@@ -63,11 +63,10 @@ To configure this check for an Agent running on a host:
 2. [Restart the Agent][8].
 
 ###### Custom Queries
-The Elasticsearch integration supports collecting custom metrics via custom queries. This can be configured using the `custom_queries` configuration option. 
 
-The custom query will be sent as a `GET` request unless an optional `payload` parameter is used, in which case the request is sent as a `POST` request. 
+The ElasticSearch integration allows you to collect custom metrics through custom queries by using the `custom_queries` configuration option. 
 
-**Note:** Use a readonly account when running custom queries to make sure no changes are made to the Elasticsearch instance.
+**Note:** When running custom queries, use a read only account to ensure that the ElasticSearch instance does not change.
 
 ```yaml
 custom_queries:
@@ -87,6 +86,7 @@ custom_queries:
    tags:
    - custom_tag:1
 ```
+The custom query sends as a `GET` request. If you use an optional `payload` parameter, the request sends as a `POST` request. 
 
 ##### Trace collection
 
