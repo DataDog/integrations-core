@@ -357,9 +357,14 @@ class SQLServer(AgentCheck):
         # TODO: if self.dbm_enabled
         for name, column, metric_fn in DATABASE_FILES_IO:
             cfg = {'name': name, 'column': column, 'tags': tags}
+
+            # A wrapper around the metric function is required because `metric_fn` is mutable on each loop
+            def make_metric_function(metric_fn):
+                return lambda *args, **kwargs: metric_fn(self, *args, **kwargs)
+
             metrics_to_collect.append(
                 SqlVirtualFileIOStats(
-                    cfg, None, lambda *args, **kwargs: metric_fn(self, *args, **kwargs), column, self.log
+                    cfg, None, make_metric_function(metric_fn), column, self.log
                 )
             )
 
