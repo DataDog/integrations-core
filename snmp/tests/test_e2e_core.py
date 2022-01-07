@@ -1,8 +1,11 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from collections import defaultdict
 
 import pytest
+from six import iteritems
+
 from tests.common import SNMP_CONTAINER_NAME
 
 from datadog_checks.dev.docker import get_container_ip
@@ -10,6 +13,21 @@ from datadog_checks.dev.docker import get_container_ip
 from . import common, metrics
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
+
+
+def dd_agent_check_wrapper(dd_agent_check, *args, **kwargs):
+    aggregator = dd_agent_check(*args, **kwargs)
+    new_agg_metrics = defaultdict(list)
+    for metric_name, metric_list in iteritems(aggregator._metrics):
+        new_metrics = []
+        for metric in metric_list:
+            # metric is a Namedtuple, to modify namedtuple fields we need to use `._replace()`
+            new_metric = metric._replace(tags=common.filter_tags(metric.tags, ['agent_version']))
+            new_metrics.append(new_metric)
+        new_agg_metrics[metric_name] = new_metrics
+
+    aggregator._metrics = new_agg_metrics
+    return aggregator
 
 
 def test_e2e_v1_with_apc_ups_profile(dd_agent_check):
@@ -70,7 +88,7 @@ def test_e2e_v1_with_apc_ups_profile_batch_size_1(dd_agent_check):
 def assert_apc_ups_metrics(dd_agent_check, config):
     config['init_config']['loader'] = 'core'
     instance = config['instances'][0]
-    aggregator = dd_agent_check(config, rate=True)
+    aggregator = dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     profile_tags = [
         'snmp_profile:apc_ups',
