@@ -5,7 +5,6 @@ from collections import defaultdict
 
 import pytest
 from six import iteritems
-
 from tests.common import SNMP_CONTAINER_NAME
 
 from datadog_checks.dev.docker import get_container_ip
