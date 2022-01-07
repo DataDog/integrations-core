@@ -10,6 +10,8 @@ Get metrics from CoreDNS in real time to visualize and monitor DNS failures and 
 
 The CoreDNS check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.
 
+**Note**: The current version of the check (1.11.0+) uses [OpenMetrics][17] for metric collection, which requires Python 3. For hosts unable to use Python 3, or to use a legacy version of this check, see the following [config][18].
+
 ### Configuration
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Docker" xxx -->
@@ -24,7 +26,7 @@ Set [Autodiscovery Integration Templates][2] as Docker labels on your applicatio
 ```yaml
 LABEL "com.datadoghq.ad.check_names"='["coredns"]'
 LABEL "com.datadoghq.ad.init_configs"='[{}]'
-LABEL "com.datadoghq.ad.instances"='[{"prometheus_url":"http://%%host%%:9153/metrics", "tags":["dns-pod:%%host%%"]}]'
+LABEL "com.datadoghq.ad.instances"='[{"openmetrics_endpoint":"http://%%host%%:9153/metrics", "tags":["dns-pod:%%host%%"]}]'
 ```
 
 **Notes**:
@@ -70,7 +72,7 @@ metadata:
     ad.datadoghq.com/coredns.instances: |
       [
         {
-          "prometheus_url": "http://%%host%%:9153/metrics", 
+          "openmetrics_endpoint": "http://%%host%%:9153/metrics", 
           "tags": ["dns-pod:%%host%%"]
         }
       ]
@@ -128,7 +130,7 @@ Set [Autodiscovery Integrations Templates][10] as Docker labels on your applicat
     "dockerLabels": {
       "com.datadoghq.ad.check_names": "[\"coredns\"]",
       "com.datadoghq.ad.init_configs": "[{}]",
-      "com.datadoghq.ad.instances": "[{\"prometheus_url\":\"http://%%host%%:9153/metrics\", \"tags\":[\"dns-pod:%%host%%\"]}]"
+      "com.datadoghq.ad.instances": "[{\"openmetrics_endpoint\":\"http://%%host%%:9153/metrics\", \"tags\":[\"dns-pod:%%host%%\"]}]"
     }
   }]
 }
@@ -204,3 +206,5 @@ Need help? Contact [Datadog support][16].
 [14]: https://github.com/DataDog/integrations-core/blob/master/coredns/metadata.csv
 [15]: https://github.com/DataDog/integrations-core/blob/master/coredns/assets/service_checks.json
 [16]: http://docs.datadoghq.com/help
+[17]: https://docs.datadoghq.com/integrations/openmetrics
+[18]: https://github.com/DataDog/integrations-core/blob/7.32.x/coredns/datadog_checks/coredns/data/conf.yaml.example
