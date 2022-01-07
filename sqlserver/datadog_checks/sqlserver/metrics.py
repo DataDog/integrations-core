@@ -672,7 +672,7 @@ class SqlVirtualFileIOStats(BaseSqlServerMetric):
                 continue
 
             metric_tags = [
-                'database:{}'.format(row[db_name]),
+                'db:{}'.format(row[db_name]),
                 'state:{}'.format(row[state_desc]),
                 'logical_name:{}'.format(row[logical_name]),
                 'file_location:{}'.format(row[physical_name]),
