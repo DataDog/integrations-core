@@ -132,4 +132,48 @@ OPERATOR_V2_METRICS = [
     "cilium.operator.process.start_time.seconds",
     "cilium.operator.process.virtual_memory.bytes",
     "cilium.operator.process.virtual_memory_max.bytes",
+    'cilium.operator.ec2.api.duration.seconds.sum',
+    'cilium.operator.ec2.api.duration.seconds.count',
+    'cilium.operator.ipam.available',
+    'cilium.operator.ipam.available.ips_per_subnet',
+    'cilium.operator.ipam.deficit_resolver.duration.seconds.sum',
+    'cilium.operator.ipam.deficit_resolver.duration.seconds.count',
+    'cilium.operator.ipam.deficit_resolver.folds',
+    'cilium.operator.ipam.deficit_resolver.latency.seconds.sum',
+    'cilium.operator.ipam.deficit_resolver.latency.seconds.count',
+    'cilium.operator.ipam.deficit_resolver.queued.total',
+    'cilium.operator.ipam.ips',
+    'cilium.operator.ipam.k8s_sync.duration.seconds.sum',
+    'cilium.operator.ipam.k8s_sync.duration.seconds.count',
+    'cilium.operator.ipam.k8s_sync.folds',
+    'cilium.operator.ipam.k8s_sync.latency.seconds.sum',
+    'cilium.operator.ipam.k8s_sync.latency.seconds.count',
+    'cilium.operator.ipam.k8s_sync.queued.total',
+    'cilium.operator.ipam.nodes',
+    'cilium.operator.ipam.resync.duration.seconds.sum',
+    'cilium.operator.ipam.resync.duration.seconds.count',
+    'cilium.operator.ipam.resync.folds',
+    'cilium.operator.ipam.resync.latency.seconds.sum',
+    'cilium.operator.ipam.resync.latency.seconds.count',
+    'cilium.operator.ipam.resync.queued.total',
+    'cilium.operator.ipam.resync.total',
+]
+
+# Not available in test metric fixtures
+ADDL_OPERATOR_AWS_METRICS = [
+    'cilium.operator.ec2.api.rate_limit.duration.seconds.sum',
+    'cilium.operator.ec2.api.rate_limit.duration.seconds.count',
+    'cilium.operator.ipam.allocation_ops',
+    'cilium.operator.ipam.release_ops',
+    'cilium.operator.ipam.interface_creation_ops',
+]
+
+ADDL_OPERATOR_METRICS = [
+    'cilium.operator.identity_gc.entries',
+    'cilium.operator.identity_gc.runs',
+    'cilium.operator.num_ceps_per_ces.sum',
+    'cilium.operator.num_ceps_per_ces.count',
+    'cilium.operator.ces.queueing_delay.seconds.sum',
+    'cilium.operator.ces.queueing_delay.seconds.count',
+    'cilium.operator.ces.sync_errors.total',
 ]

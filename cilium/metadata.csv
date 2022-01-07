@@ -147,3 +147,34 @@ cilium.operator.eni.k8s_sync.queued.count,count,,unit,,"[OpenMetrics V2] Number 
 cilium.operator.eni.nodes.total,gauge,,node,,"[OpenMetrics V1] Number of nodes by category",0,cilium,eni node
 cilium.operator.eni.resync.total,count,,unit,,"[OpenMetrics V1] Number of resync operations to synchronize AWS EC2 metadata",0,cilium,eni resync total
 cilium.operator.eni.resync.count,count,,unit,,"[OpenMetrics V2] Number of resync operations to synchronize AWS EC2 metadata",0,cilium,eni resync total
+cilium.operator.eni.resync.total,count,,unit,,"Number of resync operations to synchronize AWS EC2 metadata",0,cilium,eni resync total
+cilium.operator.ec2.api.duration.seconds.sum,gauge,,second,,"Sum of duration of interactions with API",0,cilium,api duration sum
+cilium.operator.ec2.api.duration.seconds.count,count,,second,,"Count of duration of interactions with API",0,cilium,api duration count
+cilium.operator.ec2.api.rate_limit.duration.seconds.sum,gauge,,second,,"Sum of duration of client-side rate limiter blocking",0,cilium,api rate limit duration sum
+cilium.operator.ec2.api.rate_limit.duration.seconds.count,count,,second,,"Count of duration of client-side rate limiter blocking",0,cilium,api rate limit duration count
+cilium.operator.ipam.allocation_ops,count,,operation,,"Count of IP allocation operations",0,cilium,ipam allocation ops
+cilium.operator.ipam.release_ops,count,,operation,,"Count of IP release operations",0,cilium,ipam release ops
+cilium.operator.ipam.interface_creation_ops,count,,operation,,"Count of interfaces allocated",0,cilium,ipam creation ops
+cilium.operator.ipam.available,gauge,,unit,,"Number of interfaces with addresses available",0,cilium,available ips
+cilium.operator.ipam.available.ips_per_subnet,gauge,,unit,,"Number of available IPs per subnet ID",0,cilium,available ips/subnet
+cilium.operator.ipam.deficit_resolver.duration.seconds.sum,gauge,,second,,"Sum of duration of deficit resolver trigger runs",0,cilium,deficit resolver duration sum
+cilium.operator.ipam.deficit_resolver.duration.seconds.count,count,,second,,"Count of duration of deficit resolver trigger runs",0,cilium,deficit resolver duration count
+cilium.operator.ipam.deficit_resolver.folds,gauge,,unit,,"Current level of deficit resolver folding",0,cilium,deficit resolver fold
+cilium.operator.ipam.deficit_resolver.latency.seconds.sum,gauge,,second,,"Sum of deficit resolver latency between queue and trigger run",0,cilium,deficit resolver latency sum
+cilium.operator.ipam.deficit_resolver.latency.seconds.count,count,,second,,"Count of deficit resolver latency between queue and trigger run",0,cilium,deficit resolver latency count
+cilium.operator.ipam.deficit_resolver.queued.total,count,,unit,,"Count of deficit resolver queued triggers",0,cilium,deficit resolver trigger count
+cilium.operator.ipam.ips,gauge,,unit,,"Number of IPs allocated",0,cilium,ipam ips
+cilium.operator.ipam.k8s_sync.duration.seconds.sum,gauge,,second,,"Sum of duration of K8s sync trigger runs",0,cilium,k8s sync duration sum
+cilium.operator.ipam.k8s_sync.duration.seconds.count,count,,second,,"Count of duration of K8s sync trigger runs",0,cilium,k8s sync duration count
+cilium.operator.ipam.k8s_sync.folds,gauge,,unit,,"Current level of K8s sync folding",0,cilium,k8s sync fold
+cilium.operator.ipam.k8s_sync.latency.seconds.sum,gauge,,second,,"Sum of K8s sync latency between queue and trigger run",0,cilium,k8s sync latency sum
+cilium.operator.ipam.k8s_sync.latency.seconds.count,count,,second,,"Count of K8s sync latency between queue and trigger run",0,cilium,k8s sync latency count
+cilium.operator.ipam.k8s_sync.queued.total,count,,unit,,"Count of K8s sync queued triggers",0,cilium,k8s sync queued
+cilium.operator.ipam.nodes,gauge,,node,,"Number of nodes by category",0,cilium,ipam nodes
+cilium.operator.ipam.resync.duration.seconds.sum,gauge,,second,,"Sum of duration of resync trigger runs",0,cilium,resync duration sum
+cilium.operator.ipam.resync.duration.seconds.count,count,,second,,"Count of duration of resync trigger runs",0,cilium,resync duration count
+cilium.operator.ipam.resync.folds,gauge,,unit,,"Current level of resync folding",0,cilium,resync fold
+cilium.operator.ipam.resync.latency.seconds.sum,gauge,,second,,"Sum of resync latency between queue and trigger run",0,cilium,resync latency sum
+cilium.operator.ipam.resync.latency.seconds.count,count,,second,,"Count of resync latency between queue and trigger run",0,cilium,resync latency count
+cilium.operator.ipam.resync.queued.total,count,,unit,,"Count of queued resync triggers",0,cilium,resync queued count
+cilium.operator.ipam.resync.total,count,,unit,,"Count of resync operations to synchronize and resolve IP deficit of nodes",0,cilium,resync total count
