@@ -8,14 +8,14 @@ from datadog_checks.elastic import ESCheck
 from .common import PASSWORD, URL, USER
 
 
-def test_check(benchmark, dd_environment, elastic_check, instance):
+def test_check(benchmark, benchmark_elastic_check, benchmark_instance, dd_run_check, dd_environment):
     for _ in range(3):
         try:
-            elastic_check.check(instance)
+            dd_run_check(benchmark_elastic_check)
         except Exception:
             time.sleep(1)
 
-    benchmark(elastic_check.check, instance)
+    benchmark(benchmark_elastic_check.check, benchmark_instance)
 
 
 def test_pshard_metrics(benchmark, dd_environment):

@@ -41,6 +41,15 @@ INSTANCE = {
 }
 
 
+BENCHMARK_INSTANCE = {
+    'url': URL,
+    'username': USER,
+    'password': PASSWORD,
+    'tags': CUSTOM_TAGS,
+    'tls_verify': False,
+}
+
+
 def ping_elastic():
     """
     The PUT request we use to ping the server will create an index named `testindex`
@@ -112,6 +121,16 @@ def elastic_check():
 @pytest.fixture(scope='session')
 def instance():
     return copy.deepcopy(INSTANCE)
+
+
+@pytest.fixture
+def benchmark_elastic_check():
+    return ESCheck('elastic', {}, instances=[BENCHMARK_INSTANCE])
+
+
+@pytest.fixture(scope='session')
+def benchmark_instance():
+    return copy.deepcopy(BENCHMARK_INSTANCE)
 
 
 @pytest.fixture(scope='session')
