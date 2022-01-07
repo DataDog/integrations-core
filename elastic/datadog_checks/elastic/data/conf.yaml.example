@@ -137,11 +137,9 @@ instances:
     ## @param custom_queries - list of mappings - optional
     ## Run custom queries for Elasticsearch. Each custom query endpoint can collect multiple metrics and tags.
     ## Note: Each custom query requires an `endpoint`, `data_path`, and `columns` parameter. Each `columns` parameter
-    ## should have at least one value containing `name` and `value_path`. The `type` parameter within `columns`
-    ## is optional and defaults to `gauge`. Possible values for `type` include `gauge`, `monotonic_count`, and `rate`.
+    ## should have at least one value containing `name` and `value_path`.
     ##
-    ##
-    ## Each query must have 3 required parameters:
+    ## Each query can have the following parameters:
     ##
     ## 1. endpoint - The Elasticsearch API endpoint to query.
     ##
@@ -156,6 +154,14 @@ instances:
     ##                                `estimated_size_in_bytes`.
     ##                b. name - The full metric name sent to Datadog. If `type` is `tag`, this column is considered a
     ##                          tag and applied to every metric collected by this particular query.
+    ##
+    ##                c. type (optional) - An optional parameter to designates the type of data sent. Possible values
+    ##                                     for `type` include `gauge`, `monotonic_count`, `rate`, and `tag`, with
+    ##                                     `gauge` being the default.
+    ##
+    ## 4. payload (optional) - An optional payload can be included when querying the endpoint. This turns the GET
+    ##                         request into a POST request, so a read-only user should be used when writing
+    ##                         custom queries with a payload. Use YAML formatting when including a payload.
     ##
     ## Example:
     ## - endpoint: /_search

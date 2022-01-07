@@ -41,6 +41,19 @@ def get_dynamic_tags(columns):
     return dynamic_tags
 
 
+def get_value_from_path(value, path):
+    result = value
+
+    # Traverse the nested dictionaries
+    for key in re.split(REGEX, path):
+        if result is not None:
+            result = result.get(key.replace('\\', ''))
+        else:
+            break
+
+    return result
+
+
 class ESCheck(AgentCheck):
     HTTP_CONFIG_REMAPPER = {
         'aws_service': {'name': 'aws_service', 'default': 'es'},
@@ -354,14 +367,7 @@ class ESCheck(AgentCheck):
         path: corresponding path in data, flattened, e.g. thread_pool.bulk.queue
         xform: a lambda to apply to the numerical value
         """
-        value = data
-
-        # Traverse the nested dictionaries
-        for key in re.split(REGEX, path):
-            if value is not None:
-                value = value.get(key.replace('\\', ''))
-            else:
-                break
+        value = get_value_from_path(data, path)
 
         if value is not None:
             if xform:
@@ -485,16 +491,8 @@ class ESCheck(AgentCheck):
 
         # Collect the value of tags first, and then append to tags_to_submit
         for (dynamic_tag_path, dynamic_tag_name) in dynamic_tags:
-            # Start at where data_path left off
-            dynamic_tag_value = value
-
             # Traverse down the tree to find the tag value
-            for key in re.split(REGEX, dynamic_tag_path):
-                if dynamic_tag_value is not None:
-                    dynamic_tag_value = dynamic_tag_value.get(key.replace('\\', ''))
-                else:
-                    self.log.debug("Dynamic tag not found: %s -> %s", path, dynamic_tag_name)
-                    break
+            dynamic_tag_value = get_value_from_path(value, dynamic_tag_path)
 
             # If tag is there, then add it to list of tags to submit
             if dynamic_tag_value is not None:
@@ -504,12 +502,7 @@ class ESCheck(AgentCheck):
                 self.log.debug("Dynamic tag is null: %s -> %s", path, dynamic_tag_name)
 
         # Now do the same for the actual metric
-        branch_value = value
-        for key in re.split(REGEX, value_path):
-            if branch_value is not None:
-                branch_value = branch_value.get(key.replace('\\', ''))
-            else:
-                break
+        branch_value = get_value_from_path(value, value_path)
 
         if branch_value is not None:
             if xtype == "gauge":
@@ -544,6 +537,9 @@ class ESCheck(AgentCheck):
             dynamic_tags = get_dynamic_tags(columns)
             tags = base_tags + static_tags
 
+            # Traverse the nested dictionaries to the data_path and get the remainder JSON response
+            value = get_value_from_path(data, data_path)
+
             for column in columns:
                 metric_type = column.get('type', 'gauge')
 
@@ -553,15 +549,6 @@ class ESCheck(AgentCheck):
                 name = column.get('name')
                 value_path = column.get('value_path')
                 if name and value_path:
-                    value = data
-
-                    # Traverse the nested dictionaries to the data_path
-                    for key in re.split(REGEX, data_path):
-                        if value is not None:
-                            value = value.get(key.replace('\\', ''))
-                        else:
-                            break
-
                     # At this point, there may be multiple branches of value_paths.
                     # If value is a list, go through each entry
                     if isinstance(value, list):
