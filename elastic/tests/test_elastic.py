@@ -85,6 +85,142 @@ def test__get_urls(instance, url_fix):
 
 
 @pytest.mark.integration
+def test_custom_queries_valid_metrics(dd_environment, dd_run_check, instance, aggregator):
+    custom_queries = [
+        {
+            'endpoint': '/_nodes',
+            'data_path': '_nodes',
+            'columns': [
+                {
+                    'value_path': 'total',
+                    'name': 'elasticsearch.custom.metric',
+                },
+                {'value_path': 'total', 'name': 'elasticsearch.custom.metric2', 'type': 'monotonic_count'},
+            ],
+        },
+    ]
+
+    instance = deepcopy(instance)
+    instance['custom_queries'] = custom_queries
+    check = ESCheck('elastic', {}, instances=[instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('elasticsearch.custom.metric2', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('elasticsearch.custom.metric', metric_type=aggregator.GAUGE)
+
+
+@pytest.mark.integration
+def test_custom_queries_with_payload(dd_environment, dd_run_check, instance, aggregator, cluster_tags):
+    custom_queries = [
+        {
+            'endpoint': '/_search',
+            'data_path': 'hits.total',
+            'payload': {"query": {"match": {"phrase": {"query": ""}}}},
+            'columns': [
+                {
+                    'value_path': 'value',
+                    'name': 'elasticsearch.custom.metric',
+                },
+                {'value_path': 'relation', 'name': 'dynamic_tag', 'type': 'tag'},
+            ],
+        },
+    ]
+
+    instance = deepcopy(instance)
+    instance['custom_queries'] = custom_queries
+    check = ESCheck('elastic', {}, instances=[instance])
+    dd_run_check(check)
+    tags = cluster_tags + ['dynamic_tag:eq']
+
+    aggregator.assert_metric('elasticsearch.custom.metric', metric_type=aggregator.GAUGE, tags=tags)
+
+
+@pytest.mark.integration
+def test_custom_queries_valid_tags(dd_environment, dd_run_check, instance, aggregator, cluster_tags):
+    custom_queries = [
+        {
+            'endpoint': '/_nodes',
+            'data_path': '_nodes',
+            'columns': [
+                {
+                    'value_path': 'total',
+                    'name': 'elasticsearch.custom.metric',
+                },
+                {'value_path': 'total', 'name': 'dynamic_tag', 'type': 'tag'},
+            ],
+            'tags': ['custom_tag:1'],
+        },
+    ]
+
+    instance = deepcopy(instance)
+    instance['custom_queries'] = custom_queries
+    check = ESCheck('elastic', {}, instances=[instance])
+    dd_run_check(check)
+    tags = cluster_tags + ['custom_tag:1'] + ['dynamic_tag:1']
+
+    aggregator.assert_metric('elasticsearch.custom.metric', metric_type=aggregator.GAUGE, tags=tags)
+
+
+@pytest.mark.integration
+def test_custom_queries_non_existent_metrics(caplog, dd_environment, dd_run_check, instance, aggregator):
+    custom_queries = [
+        {
+            'endpoint': '/_nodes',
+            'data_path': '_nodes',
+            'columns': [
+                {
+                    'value_path': 'totals',  # nonexistent elasticsearch metric
+                    'name': 'elasticsearch.custom.metric',
+                },
+            ],
+            'tags': ['custom_tag:1'],
+        },
+    ]
+    instance = deepcopy(instance)
+    instance['custom_queries'] = custom_queries
+    check = ESCheck('elastic', {}, instances=[instance])
+    caplog.clear()
+
+    with caplog.at_level(logging.DEBUG):
+        dd_run_check(check)
+
+    aggregator.assert_metric('elasticsearch.custom.metric', count=0)
+    assert 'Metric not found: _nodes.totals -> elasticsearch.custom.metric' in caplog.text
+
+
+@pytest.mark.integration
+def test_custom_queries_non_existent_tags(caplog, dd_environment, dd_run_check, instance, aggregator, cluster_tags):
+    custom_queries = [
+        {
+            'endpoint': '/_nodes',
+            'data_path': '_nodes',
+            'columns': [
+                {
+                    'value_path': 'total',
+                    'name': 'elasticsearch.custom.metric',
+                },
+                {
+                    'value_path': 'totals',  # nonexistent elasticsearch metric as tag
+                    'name': 'nonexistent_tag',
+                    'type': 'tag',
+                },
+            ],
+        },
+    ]
+    instance = deepcopy(instance)
+    instance['custom_queries'] = custom_queries
+    check = ESCheck('elastic', {}, instances=[instance])
+    caplog.clear()
+
+    with caplog.at_level(logging.DEBUG):
+        dd_run_check(check)
+
+    aggregator.assert_metric('elasticsearch.custom.metric', count=1, tags=cluster_tags)
+
+    assert 'Dynamic tag is null: _nodes.total -> nonexistent_tag' in caplog.text
+
+
+@pytest.mark.integration
 def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags, node_tags):
     elastic_check.check(None)
     _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)

@@ -62,6 +62,32 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][8].
 
+###### Custom Queries
+
+The ElasticSearch integration allows you to collect custom metrics through custom queries by using the `custom_queries` configuration option. 
+
+**Note:** When running custom queries, use a read only account to ensure that the ElasticSearch instance does not change.
+
+```yaml
+custom_queries:
+ - endpoint: /_search
+   data_path: aggregations.genres.buckets
+   payload:
+     aggs:
+       genres:
+         terms:
+           field: "id"
+   columns:
+   - value_path: key
+     name: id
+     type: tag
+   - value_path: doc_count
+     name: elasticsearch.doc_count
+   tags:
+   - custom_tag:1
+```
+The custom query sends as a `GET` request. If you use an optional `payload` parameter, the request sends as a `POST` request. 
+
 ##### Trace collection
 
 Datadog APM integrates with Elasticsearch to see the traces across your distributed system. Trace collection is enabled by default in the Datadog Agent v6+. To start collecting traces:

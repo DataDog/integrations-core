@@ -23,6 +23,7 @@ ESInstanceConfig = namedtuple(
         'url',
         'pending_task_stats',
         'cat_allocation_stats',
+        'custom_queries',
     ],
 )
 
@@ -60,6 +61,8 @@ def from_instance(instance):
     service_check_tags = ['host:{}'.format(host), 'port:{}'.format(port)]
     service_check_tags.extend(custom_tags)
 
+    custom_queries = instance.get('custom_queries', [])
+
     # Tag by URL so we can differentiate the metrics
     # from multiple instances
     tags = ['url:{}'.format(url)]
@@ -79,5 +82,6 @@ def from_instance(instance):
         url=url,
         pending_task_stats=pending_task_stats,
         cat_allocation_stats=cat_allocation_stats,
+        custom_queries=custom_queries,
     )
     return config
