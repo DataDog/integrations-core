@@ -891,6 +891,7 @@ def test_e2e_core_metadata_isilon(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.12325.1.1.2.1.1',
         'tags': [
+            'abc',
             'cluster_name:testcluster1',
             'device_namespace:default',
             'device_vendor:dell',
