@@ -362,9 +362,7 @@ class SQLServer(AgentCheck):
                 return lambda *args, **kwargs: metric_fn(self, *args, **kwargs)
 
             metrics_to_collect.append(
-                SqlVirtualFileIOStats(
-                    cfg, None, make_metric_function(metric_fn), column, self.log
-                )
+                SqlVirtualFileIOStats(cfg, None, make_metric_function(metric_fn), column, self.log)
             )
 
         # Load AlwaysOn metrics
