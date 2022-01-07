@@ -267,7 +267,7 @@ def dd_environment():
         completion_message = (
             'Always On Availability Groups connection with primary database established ' 'for secondary database'
         )
-    if os.environ["COMPOSE_FOLDER"] == 'compose-hc':
+    if os.environ["COMPOSE_FOLDER"] == 'compose-high-cardinality':
         # This env is a highly loaded database and is expected to take a while to setup.
         # This will wait about 8 minutes before timing out.
         completion_message = 'INFO: setup.sql completed.'

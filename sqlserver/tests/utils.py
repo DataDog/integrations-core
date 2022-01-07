@@ -20,7 +20,7 @@ always_on = pytest.mark.skipif(
     os.environ["COMPOSE_FOLDER"] != 'compose-ha', reason='Test can only be run on AlwaysOn SQLServer instances'
 )
 hc_only = pytest.mark.skipif(
-    os.environ["COMPOSE_FOLDER"] != 'compose-hc',
+    os.environ["COMPOSE_FOLDER"] != 'compose-high-cardinality',
     reason='Test can only be run in the high cardinality (hc) env.',
 )
 
@@ -120,7 +120,7 @@ class HighCardinalityQueries:
             t.start()
 
     def stop(self):
-        """Stop background query executions and cleanup the thread executor."""
+        """Stop background query executions."""
         self._is_running = False
         for t in self._threads:
             t.join()
