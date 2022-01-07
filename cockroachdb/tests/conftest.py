@@ -20,14 +20,19 @@ def dd_environment(instance):
     with docker_run(
         os.path.join(DOCKER_DIR, 'docker-compose.yaml'),
         env_vars=env_vars,
-        endpoints=instance['prometheus_url'],
+        endpoints=instance['openmetrics_endpoint'],
     ):
         yield instance
 
 
 @pytest.fixture(scope='session')
-def instance():
+def instance_legacy():
     return {'prometheus_url': 'http://{}:{}/_status/vars'.format(HOST, PORT)}
+
+
+@pytest.fixture(scope='session')
+def instance():
+    return {'openmetrics_endpoint': 'http://{}:{}/_status/vars'.format(HOST, PORT)}
 
 
 def _get_start_command():
