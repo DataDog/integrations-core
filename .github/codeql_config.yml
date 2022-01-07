@@ -1,9 +1,4 @@
 name: "CodeQL config"
 
 paths-ignore: 
-  - avi_vantage/tests
-  - datadog_checks_base/tests
-  - envoy/tests
-  - voltdb/tests
-  - tls/tests
-  - spark/tests
+  - **/tests
