@@ -424,7 +424,7 @@ def assert_python_vs_core(
 
     # building core metrics (core)
     aggregator.reset()
-    aggregator = dd_agent_check(core_config, rate=rate, pause=pause, times=times)
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, core_config, rate=rate, pause=pause, times=times)
     aggregator_metrics = aggregator._metrics
     aggregator._metrics = defaultdict(list)
     for metric_name in aggregator_metrics:

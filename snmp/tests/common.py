@@ -8,8 +8,10 @@ import logging
 import os
 import socket
 import sys
+from collections import defaultdict
 
 import pytest
+from six import iteritems
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.common import get_docker_hostname, to_native_string
@@ -310,3 +312,18 @@ def filter_tags(tags, exclude_tag_keys):
         else:
             new_tags.append(tag)
     return new_tags
+
+
+def dd_agent_check_wrapper(dd_agent_check, *args, **kwargs):
+    aggregator = dd_agent_check(*args, **kwargs)
+    new_agg_metrics = defaultdict(list)
+    for metric_name, metric_list in iteritems(aggregator._metrics):
+        new_metrics = []
+        for metric in metric_list:
+            # metric is a Namedtuple, to modify namedtuple fields we need to use `._replace()`
+            new_metric = metric._replace(tags=filter_tags(metric.tags, ['agent_version']))
+            new_metrics.append(new_metric)
+        new_agg_metrics[metric_name] = new_metrics
+
+    aggregator._metrics = new_agg_metrics
+    return aggregator
