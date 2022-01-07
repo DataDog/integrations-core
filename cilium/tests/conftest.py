@@ -11,6 +11,9 @@ from datadog_checks.cilium import CiliumCheck
 from datadog_checks.dev import run_command
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
+from datadog_checks.dev.utils import get_tox_env
+
+from .common import CILIUM_VERSION
 
 try:
     from contextlib import ExitStack
@@ -27,12 +30,55 @@ AGENT_URL = "http://{}:{}/metrics".format(HOST, AGENT_PORT)
 OPERATOR_URL = "http://{}:{}/metrics".format(HOST, OPERATOR_PORT)
 
 PORTS = [AGENT_PORT, OPERATOR_PORT]
+CLUSTER_NAME = 'cluster-{}-{}'.format('cilium', get_tox_env())
 
 
 def setup_cilium():
-    config = os.path.join(HERE, 'kind', 'cilium.yaml')
+    run_command(["helm", "repo", "add", "cilium", "https://helm.cilium.io/"])
+    run_command(["docker", "pull", "quay.io/cilium/cilium:v{}".format(CILIUM_VERSION)])
+    run_command(
+        [
+            "kind",
+            "load",
+            "docker-image",
+            "quay.io/cilium/cilium:v{}".format(CILIUM_VERSION),
+            "--name",
+            "{}".format(CLUSTER_NAME),
+        ]
+    )
     run_command(["kubectl", "create", "ns", "cilium"])
-    run_command(["kubectl", "create", "-f", config])
+    run_command(
+        [
+            "helm",
+            "install",
+            "cilium",
+            "cilium/cilium",
+            "--version",
+            "{}".format(CILIUM_VERSION),
+            "--namespace",
+            "cilium",
+            "--set",
+            "kubeProxyReplacement=partial",
+            "--set",
+            "hostServices.enabled=false",
+            "--set",
+            "externalIPs.enabled=true",
+            "--set",
+            "nodePort.enabled=true",
+            "--set",
+            "hostPort.enabled=true",
+            "--set",
+            "bpf.masquerade=false",
+            "--set",
+            "image.pullPolicy=IfNotPresent",
+            "--set",
+            "ipam.mode=kubernetes",
+            "--set",
+            "prometheus.enabled=true",
+            "--set",
+            "operator.prometheus.enabled=true",
+        ]
+    )
     run_command(
         ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "cilium", "--timeout=300s"]
     )
