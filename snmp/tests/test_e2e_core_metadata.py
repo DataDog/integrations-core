@@ -17,7 +17,7 @@ def get_events(aggregator):
         # we are replacing it with `0` if present
         if 'collect_timestamp' in event:
             event['collect_timestamp'] = 0
-        for device in event['devices']:
+        for device in event.get('devices', []):
             device['tags'] = common.filter_tags(device['tags'], ['agent_version'])
     return events
 
@@ -166,7 +166,7 @@ def test_e2e_core_metadata_cisco_3850(dd_agent_check):
 
     device_ip = instance['ip_address']
 
-    events = aggregator.get_event_platform_events("network-devices-metadata", parse_json=True)
+    events = get_events(aggregator)
 
     # since there are >100 resources (device+interfaces), the interfaces are split into 2 events
     assert len(events) == 2
