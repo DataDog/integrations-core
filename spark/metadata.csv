@@ -85,4 +85,3 @@ spark.structured_streaming.latency,gauge,,millisecond,,Average latency for the s
 spark.structured_streaming.processing_rate,gauge,,row,second,Number of received streaming records per second,0,spark,num received records,
 spark.structured_streaming.rows_count,gauge,,row,,Count of rows.,0,spark,num received records,
 spark.structured_streaming.used_bytes,gauge,,byte,,Number of bytes used in memory.,0,spark,num received records,
-""
