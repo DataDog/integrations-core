@@ -24,7 +24,6 @@
 * [Fixed] Fix broken unicode support for sqlserver. See [#10713](https://github.com/DataDog/integrations-core/pull/10713).
 * [Fixed] Enable autocommit for pyodbc in sqlserver. See [#10717](https://github.com/DataDog/integrations-core/pull/10717).
 * [Fixed] Fix SQLServer ADO driver bugs on windows. See [#10637](https://github.com/DataDog/integrations-core/pull/10637).
-* [Security] Bump lxml package. See [#10904](https://github.com/DataDog/integrations-core/pull/10904).
 * [Changed] Add `server` default group for all monitor special cases. See [#10976](https://github.com/DataDog/integrations-core/pull/10976).
 * [Changed] use read uncommitted isolation level to remove blocking risk. See [#10870](https://github.com/DataDog/integrations-core/pull/10870).
 * [Changed] Use dynamic query stats interval and set common request timeout . See [#10848](https://github.com/DataDog/integrations-core/pull/10848).
