@@ -1,5 +1,9 @@
 # CHANGELOG - tokumx
 
+## 3.0.0 / 2022-01-08
+
+* [Changed] Add `server` default group for all monitor special cases. See [#10976](https://github.com/DataDog/integrations-core/pull/10976).
+
 ## 2.3.3 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
