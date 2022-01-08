@@ -122,8 +122,8 @@ datadog-riakcs==2.7.1
 datadog-sap-hana==1.10.1
 datadog-scylla==1.6.1
 datadog-sidekiq==1.2.1
-datadog-singlestore==1.1.0
-datadog-snmp==5.4.2
+datadog-singlestore==1.1.1
+datadog-snmp==5.5.0
 datadog-snowflake==4.0.1
 datadog-solr==1.10.1
 datadog-sonarqube==1.5.1
