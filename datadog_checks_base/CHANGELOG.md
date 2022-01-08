@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 23.7.2 / 2022-01-08
+
+* [Fixed] Add urllib3 as dependency. See [#11069](https://github.com/DataDog/integrations-core/pull/11069).
+
 ## 23.7.1 / 2022-01-07
 
 * [Fixed] Fix tracing_method using self argument. See [#11042](https://github.com/DataDog/integrations-core/pull/11042).
