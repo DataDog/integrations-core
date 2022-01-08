@@ -1,5 +1,9 @@
 # CHANGELOG - kubelet
 
+## 7.1.1 / 2022-01-08
+
+* [Fixed] Do not drop the first kubelet eviction event. See [#11032](https://github.com/DataDog/integrations-core/pull/11032).
+
 ## 7.1.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
