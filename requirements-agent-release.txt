@@ -107,7 +107,7 @@ datadog-pan-firewall==1.0.1
 datadog-pdh-check==1.14.1; sys_platform == 'win32'
 datadog-pgbouncer==4.0.0; sys_platform != 'win32'
 datadog-php-fpm==1.13.1
-datadog-postfix==1.10.1; sys_platform != 'win32'
+datadog-postfix==1.10.2; sys_platform != 'win32'
 datadog-postgres==11.1.1
 datadog-powerdns-recursor==1.10.0
 datadog-presto==2.5.1
