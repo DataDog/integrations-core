@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 15.6.0 / 2022-01-08
+
+* [Added] Add discovery options to `ddev env check` command. See [#11044](https://github.com/DataDog/integrations-core/pull/11044).
+
 ## 15.5.0 / 2022-01-06
 
 * [Added] Set coverage report to only core checks. See [#10922](https://github.com/DataDog/integrations-core/pull/10922).
