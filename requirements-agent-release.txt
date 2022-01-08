@@ -1,4 +1,4 @@
-datadog-active-directory==1.12.0; sys_platform == 'win32'
+datadog-active-directory==1.13.0; sys_platform == 'win32'
 datadog-activemq-xml==1.12.0
 datadog-activemq==2.2.1
 datadog-aerospike==1.13.0; sys_platform == 'linux2'
@@ -150,8 +150,8 @@ datadog-voltdb==1.4.0
 datadog-vsphere==5.12.0
 datadog-weblogic==1.0.0
 datadog-win32-event-log==2.11.0; sys_platform == 'win32'
+datadog-windows-performance-counters==1.0.0; sys_platform == 'win32'
 datadog-windows-service==3.3.0; sys_platform == 'win32'
 datadog-wmi-check==1.13.0; sys_platform == 'win32'
-datadog-windows-performance-counters==1.0.0; sys_platform == 'win32'
 datadog-yarn==2.1.0
 datadog-zk==3.1.1; sys_platform != 'win32'
