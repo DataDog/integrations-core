@@ -90,7 +90,7 @@ datadog-marathon==1.19.1; sys_platform != 'win32'
 datadog-marklogic==2.2.1
 datadog-mcache==3.0.0; sys_platform != 'win32'
 datadog-mesos-master==2.1.1; sys_platform != 'win32'
-datadog-mesos-slave==2.11.0; sys_platform != 'win32'
+datadog-mesos-slave==2.11.1; sys_platform != 'win32'
 datadog-mongo==2.7.1
 datadog-mysql==7.0.1
 datadog-nagios==1.9.0
