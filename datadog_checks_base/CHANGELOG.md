@@ -2,7 +2,7 @@
 
 ## 23.7.2 / 2022-01-08
 
-* [Fixed] Backport (#11069) to rc14. See [#11071](https://github.com/DataDog/integrations-core/pull/11071).
+* [Fixed] Add urllib3 as a dependency. See [#11071](https://github.com/DataDog/integrations-core/pull/11071).
 
 ## 23.6.0 / 2021-12-20
 
