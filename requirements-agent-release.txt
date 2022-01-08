@@ -84,7 +84,7 @@ datadog-kyototycoon==1.13.1
 datadog-lighttpd==2.0.0
 datadog-linkerd==2.11.2
 datadog-linux-proc-extras==2.1.1; sys_platform == 'linux2'
-datadog-mapr==1.7.0; sys_platform == 'linux2'
+datadog-mapr==1.7.1; sys_platform == 'linux2'
 datadog-mapreduce==2.1.0
 datadog-marathon==1.19.0; sys_platform != 'win32'
 datadog-marklogic==2.2.0
