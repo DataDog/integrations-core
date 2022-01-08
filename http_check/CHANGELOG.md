@@ -1,5 +1,9 @@
 # CHANGELOG - http_check
 
+## 6.1.2 / 2022-01-08
+
+* [Fixed] Add urllib3 as a dependency. See [#11071](https://github.com/DataDog/integrations-core/pull/11071).
+
 ## 6.1.1 / 2021-10-18
 
 * [Fixed] Avoid resetting auth token on headers. See [#10388](https://github.com/DataDog/integrations-core/pull/10388).

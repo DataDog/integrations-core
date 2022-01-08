@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 23.7.2 / 2022-01-08
+
+* [Fixed] Add urllib3 as a dependency. See [#11071](https://github.com/DataDog/integrations-core/pull/11071).
+
 ## 23.6.0 / 2021-12-20
 
 * [Security] Bump lxml package. See [#10904](https://github.com/DataDog/integrations-core/pull/10904).
