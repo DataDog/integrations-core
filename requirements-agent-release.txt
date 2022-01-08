@@ -149,7 +149,7 @@ datadog-vertica==3.1.1
 datadog-voltdb==1.4.1
 datadog-vsphere==5.12.1
 datadog-weblogic==1.0.0
-datadog-win32-event-log==2.11.0; sys_platform == 'win32'
+datadog-win32-event-log==2.11.1; sys_platform == 'win32'
 datadog-windows-performance-counters==1.0.0; sys_platform == 'win32'
 datadog-windows-service==3.3.0; sys_platform == 'win32'
 datadog-wmi-check==1.13.0; sys_platform == 'win32'
