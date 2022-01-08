@@ -87,7 +87,7 @@ datadog-linux-proc-extras==2.1.1; sys_platform == 'linux2'
 datadog-mapr==1.7.1; sys_platform == 'linux2'
 datadog-mapreduce==2.1.1
 datadog-marathon==1.19.1; sys_platform != 'win32'
-datadog-marklogic==2.2.0
+datadog-marklogic==2.2.1
 datadog-mcache==2.1.1; sys_platform != 'win32'
 datadog-mesos-master==2.1.0; sys_platform != 'win32'
 datadog-mesos-slave==2.11.0; sys_platform != 'win32'
