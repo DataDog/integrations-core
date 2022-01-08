@@ -62,7 +62,7 @@ datadog-hudi==2.0.0
 datadog-hyperv==1.4.0; sys_platform == 'win32'
 datadog-ibm-db2==1.9.0
 datadog-ibm-i==1.1.0
-datadog-ibm-mq==3.16.1; sys_platform != 'win32'
+datadog-ibm-mq==3.16.1
 datadog-ibm-was==1.12.0
 datadog-ignite==2.1.1
 datadog-iis==2.14.0; sys_platform == 'win32'
@@ -151,5 +151,6 @@ datadog-vsphere==5.12.0
 datadog-win32-event-log==2.11.0; sys_platform == 'win32'
 datadog-windows-service==3.3.0; sys_platform == 'win32'
 datadog-wmi-check==1.13.0; sys_platform == 'win32'
+datadog-windows-performance-counters==1.0.0; sys_platform == 'win32'
 datadog-yarn==2.1.0
 datadog-zk==3.1.1; sys_platform != 'win32'
