@@ -1,5 +1,9 @@
 # CHANGELOG - Kube_proxy
 
+## 4.0.0 / 2022-01-08
+
+* [Changed] Improve kube_proxy metrics. See [#11052](https://github.com/DataDog/integrations-core/pull/11052).
+
 ## 3.5.0 / 2021-11-13
 
 * [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
