@@ -1,6 +1,6 @@
 {
   "title": "NGINX - Overview",
-  "description": "This dashboard provides a high-level overview of your NGINX infrastructure, so you can see aggregated throughput and activity metrics from all your servers and spot issues quickly. Further reading on NGINX monitoring:\n\n- [Datadog's guide to key NGINX metrics](https://www.datadoghq.com/blog/how-to-monitor-nginx/)\n\n- [How to collect NGINX metrics using built-in tools](https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/)\n\n- [How to monitor NGINX with Datadog](https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/)\n\n- [Datadog's NGINX integration docs](https://docs.datadoghq.com/integrations/nginx/)\n\nClone this template dashboard to make changes and add your own graph widgets. (cloned) (cloned)\n\ndatadog_demo_keep:true",
+  "description": "This dashboard provides a high-level overview of your NGINX infrastructure, so you can see aggregated throughput and activity metrics from all your servers and spot issues quickly. Further reading on NGINX monitoring:\n\n- [Datadog's guide to key NGINX metrics](https://www.datadoghq.com/blog/how-to-monitor-nginx/)\n\n- [How to collect NGINX metrics using built-in tools](https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/)\n\n- [How to monitor NGINX with Datadog](https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/)\n\n- [Datadog's NGINX integration docs](https://docs.datadoghq.com/integrations/nginx/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
   "widgets": [
     {
       "id": 5246207281015974,
@@ -36,7 +36,7 @@
             "id": 5476438101081174,
             "definition": {
               "type": "note",
-              "content": "#### Further reading on the NGINX integration:\n- [Datadog's guide to  key NGINX metrics](https://www.datadoghq.com/blog/how-to-monitor-nginx/)\n- [Collecting metrics with NGINX monitoring tool](https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/)\n- [How to monitor NGINX with Datadog](https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/)\n- [Datadog's NGINX integration docs](https://docs.datadoghq.com/integrations/nginx/?tab=host#)\n[If you're using NGINX plus, check out our docs here](https://docs.datadoghq.com/integrations/nginx/?tab=host#nginx-plus)\n",
+              "content": "#### Further reading on the NGINX integration:\n- [Datadog's guide to  key NGINX metrics](https://www.datadoghq.com/blog/how-to-monitor-nginx/)\n- [Collecting metrics with NGINX monitoring tool](https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/)\n- [How to monitor NGINX with Datadog](https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/)\n- [Datadog's NGINX integration docs](https://docs.datadoghq.com/integrations/nginx/?tab=host#)\n[If you're using NGINX Plus, check out our docs here](https://docs.datadoghq.com/integrations/nginx/?tab=host#nginx-plus)\n",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -72,7 +72,7 @@
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 8,
+            "id": 2550775938226891,
             "definition": {
               "title": "Dropped connections, last 15m",
               "title_size": "16",
@@ -124,8 +124,8 @@
               "title_align": "left",
               "type": "check_status",
               "check": "nginx.can_connect",
-              "grouping": "check",
-              "group": "docker_image:auto-process_nginx:latest,host:fse-ldmx-f7-18,image_name:auto-process_nginx,image_tag:latest,port:80,server:172.20.0.14,short_image:auto-process_nginx",
+              "grouping": "cluster",
+              "group": "$cluster",
               "group_by": [],
               "tags": [
                 "*"
@@ -142,7 +142,7 @@
             "id": 4071809555103542,
             "definition": {
               "type": "note",
-              "content": "The number of connections that have been dropped is equal to the difference between accepts and handled.\n",
+              "content": "The number of connections that have been dropped is equal to the difference between accepted and handled connections.\n",
               "background_color": "orange",
               "font_size": "14",
               "text_align": "left",
@@ -289,7 +289,7 @@
               "title_align": "left",
               "type": "log_stream",
               "indexes": [],
-              "query": "source:nginx service:fse-auto-process @http.status_code:(404 OR 500)",
+              "query": "source:nginx @http.status_code:(404 OR 500)",
               "sort": {
                 "column": "time",
                 "order": "asc"
@@ -378,7 +378,7 @@
             }
           },
           {
-            "id": 3,
+            "id": 3441805486544433,
             "definition": {
               "title": "Requests per second by host",
               "title_size": "16",
@@ -429,7 +429,7 @@
             "id": 183855449379928,
             "definition": {
               "type": "note",
-              "content": "Sampling your request data with a fixed time interval provides you with the number of requests you’re receiving per unit of time—often minutes or seconds.\n\nMonitoring this metric can alert you to spikes in incoming web traffic, whether legitimate or nefarious, or sudden drops, which are usually indicative of problems",
+              "content": "Sampling your request data with a fixed time interval provides you with the number of requests you’re receiving per unit of time—often minutes or seconds.\n\nMonitoring this metric can alert you to spikes in incoming web traffic, whether legitimate or nefarious, or sudden drops in traffic, which are usually indicative of problems",
               "background_color": "blue",
               "font_size": "14",
               "text_align": "left",
@@ -447,7 +447,7 @@
             }
           },
           {
-            "id": 5,
+            "id": 183855449379929,
             "definition": {
               "title": "Requests: reading, writing, waiting",
               "title_size": "16",
@@ -550,7 +550,7 @@
             }
           },
           {
-            "id": 2,
+            "id": 4851971395880803,
             "definition": {
               "title": "Change in overall requests per second",
               "title_size": "16",
@@ -617,7 +617,7 @@
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 1,
+            "id": 1344580655093671,
             "definition": {
               "title": "Dropped connections per second",
               "title_size": "16",
@@ -682,7 +682,7 @@
             }
           },
           {
-            "id": 4,
+            "id": 1344580655093671,
             "definition": {
               "title": "Active connections per second",
               "title_size": "16",
@@ -776,17 +776,12 @@
     {
       "name": "Host",
       "default": "*",
-      "prefix": "host",
-      "available_values": [
-        "fse-ldmx-f7-18",
-        "nginx",
-        "nginx01"
-      ]
+      "prefix": "host"
     }
   ],
   "layout_type": "ordered",
-  "is_read_only": false,
+  "is_read_only": true,
   "notify_list": [],
   "reflow_type": "fixed",
-  "id": "bve-zvs-p6t"
+  "id": 21
 }
