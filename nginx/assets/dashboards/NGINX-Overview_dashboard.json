@@ -682,7 +682,7 @@
             }
           },
           {
-            "id": 1344580655093671,
+            "id": 1344580655093672,
             "definition": {
               "title": "Active connections per second",
               "title_size": "16",
@@ -781,7 +781,5 @@
   ],
   "layout_type": "ordered",
   "is_read_only": true,
-  "notify_list": [],
-  "reflow_type": "fixed",
   "id": 21
 }
