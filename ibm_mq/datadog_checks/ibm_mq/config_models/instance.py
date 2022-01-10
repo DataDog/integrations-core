@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -50,6 +50,7 @@ class InstanceConfig(BaseModel):
     ssl_key_repository_location: Optional[str]
     tags: Optional[Sequence[str]]
     timeout: Optional[float]
+    try_normal_ssl: Optional[bool]
     username: Optional[str]
 
     @root_validator(pre=True)
