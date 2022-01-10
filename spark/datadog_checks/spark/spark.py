@@ -7,7 +7,7 @@ from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
 from six import iteritems, itervalues
 from six.moves.urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
-from spark.datadog_checks.spark.const import (
+from .constants import (
     APPLICATION_STATES,
     COUNT,
     DEPRECATED_MASTER_ADDRESS,
