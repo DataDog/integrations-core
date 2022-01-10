@@ -15,7 +15,7 @@ The ProxySQL integration is included in the [Datadog Agent][3] package, so you d
 ### Configuration
 
 #### Enabling SSL
-To connect to ProxySQL using full SSL/TLS validation, enable the `tls_verify` option in `conf.yaml`. Include certificates and passwords needed to connect via SSL/TLS.
+To connect to ProxySQL using full SSL/TLS validation, enable the `tls_verify` option in `conf.yaml`. Include certificates and passwords needed to connect with SSL/TLS.
 
 ```yaml
     tls_verify: true
@@ -97,7 +97,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 {{< /site-region >}}
 partial -->
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][7].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][7].
 
 | Parameter      | Value                                     |
 |----------------|-------------------------------------------|

@@ -44,8 +44,10 @@ system.net.conntrack.tcp_timeout,gauge,,second,,,0,system,timeout
 system.net.conntrack.tcp_timeout_stream,gauge,,second,,,0,system,timeout stream
 system.net.conntrack.timestamp,gauge,,unit,,Boolean to enable connection tracking flow timestamping.,0,system,timestamp
 system.net.packets_in.count,gauge,,packet,second,The number of packets of data received by the interface.,0,system,packets in
+system.net.packets_in.drop,gauge,,packet,second,The number of packet receive drops detected by the device driver.,-1,system,pkts in drop
 system.net.packets_in.error,gauge,,error,second,The number of packet receive errors detected by the device driver.,-1,system,pkts in err
 system.net.packets_out.count,gauge,,packet,second,The number of packets of data transmitted by the interface.,0,system,packets out
+system.net.packets_out.drop,gauge,,packet,second,The number of packet transmit drops detected by the device driver.,-1,system,pkts out drop
 system.net.packets_out.error,gauge,,error,second,The number of packet transmit errors detected by the device driver.,-1,system,pkts out err
 system.net.tcp.failed_retransmits,gauge,,packet,,Number of TCP packets that failed to be retransmitted (Linux only),0,system,failed retransmit
 system.net.tcp.failed_retransmits.count,count,,packet,,Number of TCP packets that failed to be retransmitted (Linux only),0,system,failed retransmit monotonic count
@@ -64,6 +66,34 @@ system.net.tcp.listen_drops,gauge,,,,The number of times connections have droppe
 system.net.tcp.listen_drops.count,count,,,,Total number of times connections have dropped out of listen (Linux only).,-1,system,tcp listen drops
 system.net.tcp.backlog_drops,gauge,,packet,,The number of packets dropped because there wasn't room in the TCP backlog (Linux only). Available since Agent v5.14.0.,-1,system,tcp backlog drops
 system.net.tcp.backlog_drops.count,count,,packet,,Total number of packets dropped because there wasn't room in the TCP backlog (Linux only).,-1,system,tcp backlog drops
+system.net.tcp.prune_called,gauge,,,,The number of times TCP prune was called (Linux only).,-1,system,tcp prune called
+system.net.tcp.prune_called.count,count,,,,Total number of times TCP prune was called (Linux only).,-1,system,tcp prune called
+system.net.tcp.prune_rcv_drops,gauge,,packet,second,The number of received packets dropped after an unsuccessful prune (Linux only).,-1,system,tcp prune rcv drops
+system.net.tcp.prune_rcv_drops.count,count,,packet,,Total number of received packets dropped after an unsuccessful prune (Linux only).,-1,system,tcp prune rcv drops
+system.net.tcp.prune_ofo_called,gauge,,,,The number of times the out-of-order queues were pruned (Linux only).,-1,system,tcp prune ofo called
+system.net.tcp.prune_ofo_called.count,count,,,,Total number of times the out-of-order queues were pruned (Linux only).,-1,system,tcp prune ofo called
+system.net.tcp.paws_connection_drop,gauge,,packet,second,The number of SYN-ACK packets dropped by PAWS (Linux only).,-1,system,paws connection drop
+system.net.tcp.paws_connection_drop.count,count,,,,Total number of SYN-ACK packets dropped by PAWS (Linux only).,-1,system,paws connection drop
+system.net.tcp.paws_established_drop,gauge,,packet,second,The number of packets dropped by PAWS in an established connection (Linux only).,-1,system,paws established drop
+system.net.tcp.paws_established_drop.count,count,,,,Total number of packets dropped by PAWS in an established connection (Linux only).,-1,system,paws established drop
+system.net.tcp.syn_cookies_sent,gauge,,packet,second,The number of SYN cookie packets sent (Linux only).,-1,system,syn cookies sent
+system.net.tcp.syn_cookies_sent.count,count,,,,Total number of SYN cookie packets sent (Linux only).,-1,system,syn cookies sent
+system.net.tcp.syn_cookies_recv,gauge,,packet,second,The number of SYN cookie packets received (Linux only).,-1,system,syn cookies received
+system.net.tcp.syn_cookies_recv.count,count,,,,Total number of SYN cookie packets received (Linux only).,-1,system,syn cookies received
+system.net.tcp.syn_cookies_failed,gauge,,packet,second,The number of failed SYN cookie packets received (Linux only).,-1,system,syn cookies failed
+system.net.tcp.syn_cookies_failed.count,count,,,,Total number of failed SYN cookie packets received (Linux only).,-1,system,syn cookies failed
+system.net.tcp.abort_on_timeout,gauge,,,,The number of sockets closed due to timeout (maximum retransmission reached or tcp keepalive timeout) (Linux only).,-1,system,tcp abort timeout
+system.net.tcp.abort_on_timeout.count,count,,,,Total number of sockets closed due to timeout (maximum retransmission reached or tcp keepalive timeout) (Linux only).,-1,system,tcp abort timeout
+system.net.tcp.syn_retrans,gauge,,packet,second,The number of SYN packets retransmitted (Linux only).,-1,system,tcp syn retrans
+system.net.tcp.syn_retrans.count,count,,,,Total number of SYN packets retransmitted (Linux only).,-1,system,tcp syn retrans
+system.net.tcp.from_zero_window_adv,gauge,,,,The number of sockets exiting a zero window state (Linux only).,-1,system,tcp from 0win
+system.net.tcp.from_zero_window_adv.count,count,,,,Total number of sockets exiting a zero window state (Linux only).,-1,system,tcp from 0win
+system.net.tcp.to_zero_window_adv,gauge,,,,The number of sockets entering a zero window state (Linux only).,-1,system,tcp to 0win
+system.net.tcp.to_zero_window_adv.count,count,,,,Total number of sockets entering a zero window state (Linux only).,-1,system,tcp to 0win
+system.net.tcp.tw_reused,gauge,,,,The number of time wait sockets reused (Linux only).,-1,system,tw reused
+system.net.tcp.tw_reused.count,count,,,,Total number of time wait sockets reused (Linux only).,-1,system,tw reused
+system.net.ip.reverse_path_filter,gauge,,packet,second,The number of martian packets dropped by the reverse path filter (Linux only).,-1,system,reverse path filter drops
+system.net.ip.reverse_path_filter.count,count,,packet,,Total number of martian packets dropped by the reverse path filter (Linux only).,-1,system,reverse path filter drops
 system.net.tcp.recv_q.95percentile,gauge,,byte,,The 95th percentile of the size of the TCP receive queue.,0,system,recv-q 95th
 system.net.tcp.recv_q.avg,gauge,,byte,,The average TCP receive queue size.,0,system,recv-q avg
 system.net.tcp.recv_q.count,rate,,connection,second,The rate of connections.,0,system,recv-q count

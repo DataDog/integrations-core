@@ -14,7 +14,7 @@ The NFSstat check is included in the [Datadog Agent][2] package, so you don't ne
 
 ### Configuration
 
-Edit the `nfsstat.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to point to your nfsiostat binary script, or use the one included with the binary installer. See the [sample nfsstat.d/conf.yaml][4] for all available configuration options.
+Edit the `nfsstat.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. Point to your nfsiostat binary script, or use the one included with the binary installer. See the [sample nfsstat.d/conf.yaml][4] for all available configuration options.
 
 ### Log collection
 
@@ -48,7 +48,7 @@ Edit the `nfsstat.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 See [metadata.csv][7] for a list of metrics provided by this check.
 
 ### Events
-The Nfststat check does not include any events.
+The Nfsstat check does not include any events.
 
 ### Service Checks
 The Nfsstat check does not include any service checks.
@@ -58,7 +58,7 @@ Need help? Contact [Datadog support][8].
 
 ## Further Reading
 
-* [Built a network monitor on an http check][9]
+- [Built a network monitor on an http check][9]
 
 [1]: http://man7.org/linux/man-pages/man8/nfsiostat.8.html
 [2]: https://app.datadoghq.com/account/settings#agent

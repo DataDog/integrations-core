@@ -211,6 +211,7 @@ files:
           Before version 7.30 the default value is 60 and from version 7.30 its value is 5.
         value:
           type: integer
+          display_default: 5
           example: 10
       - name: user
         description: |

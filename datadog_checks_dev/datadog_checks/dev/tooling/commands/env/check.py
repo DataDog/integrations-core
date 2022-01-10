@@ -36,7 +36,41 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 )
 @click.option('--config', 'config_file', help='Path to a JSON check configuration to use')
 @click.option('--jmx-list', 'jmx_list', help='JMX metrics listing method')
-def check_run(check, env, rate, times, pause, delay, log_level, as_json, as_table, break_point, config_file, jmx_list):
+@click.option(
+    '--discovery-timeout',
+    'discovery_timeout',
+    type=click.INT,
+    help='Max retry duration until Autodiscovery resolves the check template (in seconds)',
+)
+@click.option(
+    '--discovery-retry-interval',
+    'discovery_retry_interval',
+    type=click.INT,
+    help='Duration between retries until Autodiscovery resolves the check template (in seconds)',
+)
+@click.option(
+    '--discovery-min-instances',
+    'discovery_min_instances',
+    type=click.INT,
+    help='Number of checks to wait, retry until the specified number of checks is reached',
+)
+def check_run(
+    check,
+    env,
+    rate,
+    times,
+    pause,
+    delay,
+    log_level,
+    as_json,
+    as_table,
+    break_point,
+    config_file,
+    jmx_list,
+    discovery_timeout,
+    discovery_retry_interval,
+    discovery_min_instances,
+):
     """Run an Agent check."""
     envs = get_configured_envs(check)
     if not envs:
@@ -68,6 +102,9 @@ def check_run(check, env, rate, times, pause, delay, log_level, as_json, as_tabl
         as_table=as_table,
         break_point=break_point,
         jmx_list=jmx_list,
+        discovery_timeout=discovery_timeout,
+        discovery_retry_interval=discovery_retry_interval,
+        discovery_min_instances=discovery_min_instances,
     )
 
     if config_file:

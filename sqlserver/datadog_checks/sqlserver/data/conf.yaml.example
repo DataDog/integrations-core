@@ -73,8 +73,8 @@ instances:
     ## Regular expression for database names to include as part of `database_autodiscovery`.
     ## Will report metrics for databases that are found in this instance, ignores databases listed but not found.
     ##
-    ## Character casing is ignored. The regular expressions start matching from the beginning, so 
-    ## to match anywhere, prepend `.*`. For exact matches append `$`. 
+    ## Character casing is ignored. The regular expressions start matching from the beginning, so
+    ## to match anywhere, prepend `.*`. For exact matches append `$`.
     ##
     ## Defaults to `.*` to include everything.
     #
@@ -251,6 +251,43 @@ instances:
         ## Running different instances with different collection intervals is not supported.
         #
         # collection_interval: 10
+
+    ## Configure how the SQL obfuscator behaves.
+    ## Note: This option only applies when `dbm` is enabled.
+    #
+    obfuscator_options:
+
+        ## @param replace_digits - boolean - optional - default: false
+        ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
+        ## Note: This option also applies to extracted tables using `collect_tables`.
+        #
+        # replace_digits: false
+
+        ## @param collect_metadata - boolean - optional - default: false
+        ## Set to `true` to enable the collection of metadata in your SQL statements.
+        ## Metadata includes things such as tables, commands, and comments.
+        #
+        # collect_metadata: false
+
+        ## @param collect_tables - boolean - optional - default: true
+        ## Set to `false` to disable the collection of tables in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        #
+        # collect_tables: true
+
+        ## @param collect_commands - boolean - optional - default: true
+        ## Set to `false` to disable the collection of commands in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        ##
+        ## Examples: SELECT, UPDATE, DELETE, etc.
+        #
+        # collect_commands: true
+
+        ## @param collect_comments - boolean - optional - default: true
+        ## Set to `false` to disable the collection of comments in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        #
+        # collect_comments: true
 
     ## @param command_timeout - integer - optional - default: 5
     ## Timeout in seconds for the connection and each command run

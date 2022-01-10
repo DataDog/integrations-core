@@ -75,7 +75,7 @@ trigger-agent-build:
     - git --no-pager diff --exit-code --name-only HEAD $BASE_REF -- datadog_checks_base/datadog_checks/base/data/agent_requirements.in || export AGENT_REQUIREMENTS_CHANGED="true" || true
     - |
       if [[ "$AGENT_REQUIREMENTS_CHANGED" = "true" ]]; then
-          RELEASE_BRANCH=$(git tag -l '7\.*' --points-at $BASE_REF | cat | sed 's/\..-.*/\.x/')
+          export RELEASE_BRANCH=$(git tag -l '7\.*' --points-at $BASE_REF | cat | sed 's/\..-.*/\.x/')
           echo "File agent_requirements.in has been modified, triggering an agent build pipeline."
           DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL RELEASE_BRANCH=$RELEASE_BRANCH python -u /trigger_agent_build.py --output-file pipeline_id.txt
 

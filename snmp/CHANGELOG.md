@@ -1,5 +1,33 @@
 # CHANGELOG - snmp
 
+## 5.5.0 / 2022-01-08
+
+* [Added] Add `sysMultiHostCpuUsageRatio` to BIG-IP profile. See [#10924](https://github.com/DataDog/integrations-core/pull/10924). Thanks [kei6u](https://github.com/kei6u).
+* [Added] Add profile metadata for Isilon. See [#11022](https://github.com/DataDog/integrations-core/pull/11022).
+* [Added] Add metadata to Dell iDRAC profile. See [#11004](https://github.com/DataDog/integrations-core/pull/11004).
+* [Added] Add profile metadata for fortinet-fortigate. See [#11002](https://github.com/DataDog/integrations-core/pull/11002).
+* [Added] Add profile metadata for checkpoint_firewall. See [#10998](https://github.com/DataDog/integrations-core/pull/10998).
+* [Added] Add profile metadata for netapp. See [#10968](https://github.com/DataDog/integrations-core/pull/10968).
+* [Added] Add metrics to apc_ups profile. See [#10967](https://github.com/DataDog/integrations-core/pull/10967).
+* [Added] Add profile metadata for palo alto. See [#10956](https://github.com/DataDog/integrations-core/pull/10956).
+* [Added] Add profile metadata for arista. See [#10944](https://github.com/DataDog/integrations-core/pull/10944).
+* [Added] Add profile metadata for aruba. See [#10952](https://github.com/DataDog/integrations-core/pull/10952).
+* [Added] Add profile metadata for Juniper. See [#11005](https://github.com/DataDog/integrations-core/pull/11005).
+* [Added] Add apc_ups profile metadata. See [#10857](https://github.com/DataDog/integrations-core/pull/10857).
+* [Added] Add metadata to HP profiles. See [#10867](https://github.com/DataDog/integrations-core/pull/10867).
+* [Added] Add location to _base.yaml. See [#10822](https://github.com/DataDog/integrations-core/pull/10822).
+* [Added] Add use_device_id_as_hostname config. See [#10812](https://github.com/DataDog/integrations-core/pull/10812).
+* [Added] Add profile metadata for Cisco Catalyst and 3850. See [#10767](https://github.com/DataDog/integrations-core/pull/10767).
+* [Added] Add mac address as tag for meraki-cloud-controller  profile. See [#10779](https://github.com/DataDog/integrations-core/pull/10779).
+* [Added] Add profile metadata for f5. See [#10667](https://github.com/DataDog/integrations-core/pull/10667).
+* [Added] Add profile metadata for device and interface. See [#10666](https://github.com/DataDog/integrations-core/pull/10666).
+* [Fixed] Fix more SNMP illegal tabs. See [#11063](https://github.com/DataDog/integrations-core/pull/11063).
+* [Fixed] Fix SNMP illegal tab character. See [#11062](https://github.com/DataDog/integrations-core/pull/11062).
+* [Fixed] Fix default value for instance level oid_batch_size. See [#11018](https://github.com/DataDog/integrations-core/pull/11018).
+* [Fixed] Add .0 to juniper metadata OIDs. See [#11019](https://github.com/DataDog/integrations-core/pull/11019).
+* [Fixed] Fix netapp profile metrics. See [#10981](https://github.com/DataDog/integrations-core/pull/10981).
+* [Fixed] Update auth and priv protocols. See [#10866](https://github.com/DataDog/integrations-core/pull/10866).
+
 ## 5.4.2 / 2021-10-07 / Agent 7.32.0
 
 * [Fixed] Hide collect_device_metadata by default. See [#10349](https://github.com/DataDog/integrations-core/pull/10349).

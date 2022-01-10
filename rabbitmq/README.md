@@ -22,7 +22,7 @@ The RabbitMQ check is included in the [Datadog Agent][3] package. No additional 
 
 #### Prepare RabbitMQ
 
-Enable the RabbitMQ management plugin. See [RabbitMQ's documentation][4] to enable it. The Agent user then needs at least the `monitoring` tag and these required permissions:
+Enable the [RabbitMQ Management Plugin][4]. The Agent user then needs at least the `monitoring` tag and these required permissions:
 
 | Permission | Command            |
 | ---------- | ------------------ |
@@ -119,7 +119,7 @@ partial -->
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][10].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][10].
 
 | Parameter      | Value                                                                                                                                               |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
