@@ -490,7 +490,10 @@ def metadata(check, check_duplicates, show_warnings):
                 if curated_metric_type not in VALID_CURATED_METRIC_TYPES:
                     errors = True
                     display_queue.append(
-                        (echo_failure, f"{current_check}:{line} `{row['metric_name']}` contains invalid curated metric type.")
+                        (
+                            echo_failure,
+                            f"{current_check}:{line} `{row['metric_name']}` contains invalid curated metric type."
+                        )
                     )
 
         for prefix, count in metric_prefix_count.items():
