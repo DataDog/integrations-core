@@ -21,9 +21,13 @@ from ..console import (
     echo_warning,
 )
 
-REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
+REQUIRED_VALUE_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
 
-OPTIONAL_HEADERS = {'description', 'interval', 'unit_name', 'per_unit_name', 'short_name', 'curated_metric'}
+OPTIONAL_VALUE_HEADERS = {'description', 'interval', 'unit_name', 'per_unit_name', 'short_name'}
+
+REQUIRED_HEADERS = REQUIRED_VALUE_HEADERS | OPTIONAL_VALUE_HEADERS
+
+OPTIONAL_HEADERS = {'curated_metric'}
 
 ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS
 
@@ -349,7 +353,7 @@ def metadata(check, check_duplicates, show_warnings):
                     errors = True
                     display_queue.append((echo_failure, f'{current_check}:{line} Invalid column {invalid_headers}'))
 
-                missing_headers = ALL_HEADERS.difference(all_keys)
+                missing_headers = REQUIRED_HEADERS.difference(all_keys)
                 if missing_headers:
                     errors = True
                     display_queue.append(echo_failure(f'{current_check}:{line} Missing columns {missing_headers}'))
