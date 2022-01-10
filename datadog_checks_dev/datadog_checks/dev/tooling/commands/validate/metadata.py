@@ -492,7 +492,7 @@ def metadata(check, check_duplicates, show_warnings):
                     display_queue.append(
                         (
                             echo_failure,
-                            f"{current_check}:{line} `{row['metric_name']}` contains invalid curated metric type."
+                            f"{current_check}:{line} `{row['metric_name']}` contains invalid curated metric type.",
                         )
                     )
 
