@@ -191,3 +191,9 @@ def test_check_without_sites_specified(aggregator, dd_run_check):
             )
 
     aggregator.assert_all_metrics_covered()
+    
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, aggregator, instance):
+    with pytest.raises(Exception):
+        dd_agent_check(instance, rate=True)
+    aggregator.assert_service_check("iis.can_connect", AgentCheck.CRITICAL)
