@@ -446,7 +446,7 @@ def metadata(check, check_duplicates, show_warnings):
                 )
 
             # empty required fields
-            for header in REQUIRED_HEADERS:
+            for header in REQUIRED_VALUE_HEADERS:
                 if not row[header]:
                     empty_count[header] += 1
 
