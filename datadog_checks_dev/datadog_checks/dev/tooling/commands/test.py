@@ -6,13 +6,15 @@ import sys
 
 import click
 
-from ..._env import E2E_PARENT_PYTHON, SKIP_ENVIRONMENT
+from ..._env import DDTRACE_OPTIONS_LIST, E2E_PARENT_PYTHON, SKIP_ENVIRONMENT
+from ...ci import get_ci_env_vars, running_on_ci
+from ...fs import chdir, file_exists, remove_path
 from ...subprocess import run_command
-from ...utils import chdir, file_exists, get_ci_env_vars, get_next, remove_path, running_on_ci
+from ...utils import ON_WINDOWS, get_next
 from ..constants import get_root
 from ..dependencies import read_check_base_dependencies
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
-from ..utils import complete_testable_checks
+from ..utils import code_coverage_enabled, complete_testable_checks
 from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_success, echo_waiting, echo_warning
 
 
@@ -28,8 +30,9 @@ def display_envs(check_envs):
 @click.option('--format-style', '-fs', is_flag=True, help='Run only the code style formatter')
 @click.option('--style', '-s', is_flag=True, help='Run only style checks')
 @click.option('--bench', '-b', is_flag=True, help='Run only benchmarks')
-@click.option('--latest-metrics', is_flag=True, help='Only verify support of new metrics')
+@click.option('--latest', is_flag=True, help='Only verify support of new product versions')
 @click.option('--e2e', is_flag=True, help='Run only end-to-end tests')
+@click.option('--ddtrace', is_flag=True, help='Run tests using dd-trace-py')
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
 @click.option('--cov-missing', '-cm', is_flag=True, help='Show line numbers of statements that were not executed')
 @click.option('--junit', '-j', 'junit', is_flag=True, help='Generate junit reports')
@@ -54,8 +57,9 @@ def test(
     format_style,
     style,
     bench,
-    latest_metrics,
+    latest,
     e2e,
+    ddtrace,
     coverage,
     junit,
     cov_missing,
@@ -92,6 +96,7 @@ def test(
     root = get_root()
     testing_on_ci = running_on_ci()
     color = ctx.obj['color']
+    repo = ctx.obj['repo_name']
 
     # Implicitly track coverage
     if cov_missing:
@@ -106,7 +111,8 @@ def test(
         # Environment variables we need tox to pass down
         'TOX_TESTENV_PASSENV': (
             # Used in .coveragerc for whether or not to show missing line numbers for coverage
-            'DDEV_COV_MISSING '
+            # or for generic tag checking
+            'DDEV_* '
             # Necessary for compilation on Windows: PROGRAMDATA, PROGRAMFILES, PROGRAMFILES(X86)
             'PROGRAM* '
             # Necessary for getting the user on Windows https://docs.python.org/3/library/getpass.html#getpass.getuser
@@ -135,6 +141,16 @@ def test(
         test_env_vars[E2E_PARENT_PYTHON] = sys.executable
         test_env_vars['TOX_TESTENV_PASSENV'] += f' {E2E_PARENT_PYTHON}'
 
+    if ddtrace:
+        for env in DDTRACE_OPTIONS_LIST:
+            test_env_vars['TOX_TESTENV_PASSENV'] += f' {env}'
+        # Used for CI app product
+        test_env_vars['TOX_TESTENV_PASSENV'] += ' TF_BUILD BUILD* SYSTEM*'
+        test_env_vars['DD_SERVICE'] = os.getenv('DD_SERVICE', 'ddev-integrations')
+        test_env_vars['DD_ENV'] = os.getenv('DD_ENV', 'ddev-integrations')
+        test_env_vars['DDEV_TRACE_ENABLED'] = 'true'
+        test_env_vars['DD_PROFILING_ENABLED'] = 'true'
+
     org_name = ctx.obj['org']
     org = ctx.obj['orgs'].get(org_name, {})
     api_key = org.get('api_key') or ctx.obj['dd_api_key'] or os.getenv('DD_API_KEY')
@@ -142,7 +158,9 @@ def test(
         test_env_vars['DD_API_KEY'] = api_key
         test_env_vars['TOX_TESTENV_PASSENV'] += ' DD_API_KEY'
 
-    check_envs = get_tox_envs(checks, style=style, format_style=format_style, benchmark=bench, changed_only=changed)
+    check_envs = get_tox_envs(
+        checks, style=style, format_style=format_style, benchmark=bench, changed_only=changed, latest=latest
+    )
     tests_ran = False
 
     for check, envs in check_envs:
@@ -150,6 +168,15 @@ def test(
         if not envs:
             echo_debug(f"No envs found for: `{check}`")
             continue
+
+        ddtrace_check = ddtrace
+        if ddtrace and ON_WINDOWS and any('py2' in env for env in envs):
+            # The pytest flag --ddtrace is not available for windows-py2 env.
+            # Removing it so it does not fail.
+            echo_warning(
+                'ddtrace flag is not available for windows-py2 environments ; disabling the flag for this check.'
+            )
+            ddtrace_check = False
 
         # This is for ensuring proper spacing between output of multiple checks' tests.
         # Basically this avoids printing a new line before the first check's tests.
@@ -167,13 +194,14 @@ def test(
             enter_pdb=enter_pdb,
             debug=debug,
             bench=bench,
-            latest_metrics=latest_metrics,
+            latest=latest,
             coverage=coverage,
             junit=junit,
             marker=marker,
             test_filter=test_filter,
             pytest_args=pytest_args,
             e2e=e2e,
+            ddtrace=ddtrace_check,
         )
         if coverage:
             pytest_options = pytest_options.format(pytest_coverage_sources(check))
@@ -189,8 +217,8 @@ def test(
                 test_type_display = 'only style checks'
             elif bench:
                 test_type_display = 'only benchmarks'
-            elif latest_metrics:
-                test_type_display = 'only latest metrics validation'
+            elif latest:
+                test_type_display = 'only tests for the latest version'
             elif e2e:
                 test_type_display = 'only end-to-end tests'
             else:
@@ -212,7 +240,8 @@ def test(
 
             env = os.environ.copy()
 
-            if force_base_min:
+            base_or_dev = check.startswith('datadog_checks_')
+            if force_base_min and not base_or_dev:
                 check_base_dependencies, errors = read_check_base_dependencies(check)
                 if errors:
                     abort(f'\nError collecting base package dependencies: {errors}')
@@ -225,8 +254,10 @@ def test(
 
                 version = spec.version
                 env['TOX_FORCE_INSTALL'] = f"datadog_checks_base[deps]=={version}"
-            elif force_base_unpinned:
+            elif force_base_unpinned and not base_or_dev:
                 env['TOX_FORCE_UNPINNED'] = "datadog_checks_base"
+            elif (force_base_min or force_base_unpinned) and base_or_dev:
+                echo_info(f'Skipping forcing base dependency for check {check}')
 
             if force_env_rebuild:
                 command.append('--recreate')
@@ -242,7 +273,7 @@ def test(
             if result.code:
                 abort('\nFailed!', code=result.code)
 
-            if coverage and file_exists('.coverage'):
+            if coverage and file_exists('.coverage') and code_coverage_enabled(check):
                 if not cov_keep:
                     echo_info('\n---------- Coverage report ----------\n')
 
@@ -256,7 +287,9 @@ def test(
                         abort('\nFailed!', code=result.code)
 
                     fix_coverage_report(check, 'coverage.xml')
-                    run_command(['codecov', '-X', 'gcov', '--root', root, '-F', check, '-f', 'coverage.xml'])
+
+                    if repo == 'core':
+                        run_command(['codecov', '-X', 'gcov', '--root', root, '-F', check, '-f', 'coverage.xml'])
                 else:
                     if not cov_keep:
                         remove_path('.coverage')

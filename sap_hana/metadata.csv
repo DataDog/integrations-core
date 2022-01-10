@@ -3,6 +3,8 @@ sap_hana.backup.latest,gauge,,second,,The time elapsed since the latest database
 sap_hana.connection.idle,gauge,,connection,,The current number of idle connections.,0,sap_hana,
 sap_hana.connection.open,gauge,,connection,,The current number of connections.,0,sap_hana,
 sap_hana.connection.running,gauge,,connection,,The current number of running connections.,0,sap_hana,
+sap_hana.connection.queuing,gauge,,connection,,The current number of queued connections.,0,sap_hana,
+sap_hana.connection.empty,gauge,,connection,,Historic connections that are removed after a period of time.,0,sap_hana,
 sap_hana.cpu.service.utilized,gauge,,percent,,The CPU utilization of services as a percentage.,0,sap_hana,
 sap_hana.disk.free,gauge,,byte,,The total free size of the disk in bytes.,1,sap_hana,
 sap_hana.disk.size,gauge,,byte,,The total size of the disk in bytes.,0,sap_hana,

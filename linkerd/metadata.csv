@@ -20,7 +20,7 @@ linkerd.jvm.gc.ParNew.msec,gauge,,millisecond,,"A gauge for ParNew of the total 
 linkerd.jvm.mem.current.Par_Eden_Space.used,gauge,,byte,,"A gauge of the of the current memory used, in bytes, for Par_Eden_Space memory pool (Linkerd v1 only).",-1,linkerd,
 linkerd.jvm.mem.current.Par_Survivor_Space.used,gauge,,byte,,"A gauge of the of the current memory used, in bytes, for Par_Survivor_Space memory pool (Linkerd v1 only).",-1,linkerd,
 linkerd.jvm.mem.current.CMS_Old_Gen.used,gauge,,byte,,"A gauge of the of the current memory used, in bytes, for CMS_Old_Gen memory pool (Linkerd v1 only).",-1,linkerd,
-linkerd.jvm.gc.eden.pause_msec.quantile,gauge,,millisecond,,"Stats of the durations, in millseconds, of the eden collection pauses (Linkerd v1 only).",-1,linkerd,
+linkerd.jvm.gc.eden.pause_msec.quantile,gauge,,millisecond,,"Stats of the durations, in milliseconds, of the eden collection pauses (Linkerd v1 only).",-1,linkerd,
 linkerd.rt.client.requests_s,rate,,,,Number of requests by second received by the client (Linkerd v1 only).,0,linkerd,client req/s
 linkerd.rt.client.success_s,rate,,,,Number of success per second for the client (Linkerd v1 only).,1,linkerd,client success/s
 linkerd.rt.client.connections,rate,,connection,,Number of active connections for the client (Linkerd v1 only).,0,linkerd,client active connections

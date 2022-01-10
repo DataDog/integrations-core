@@ -1,8 +1,8 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-flink.jobmanager.Status.JVM.CPU.load,gauge,,percent,,The recent CPU usage of the JVM in the jobmanager,0,flink,jobmanager cpu load
-flink.jobmanager.Status.JVM.CPU.time,gauge,,second,,The CPU time used by the JVM in the jobmanager,0,flink,jobmanager cpu time
-flink.taskmanager.Status.JVM.CPU.load,gauge,,percent,,The recent CPU usage of the JVM in the taskmanager,0,flink,taskmanager cpu load
-flink.taskmanager.Status.JVM.CPU.time,gauge,,second,,The CPU time used by the JVM in the taskmanager,0,flink,taskmanager cpu time
+flink.jobmanager.Status.JVM.CPU.Load,gauge,,percent,,The recent CPU usage of the JVM in the jobmanager,0,flink,jobmanager cpu load
+flink.jobmanager.Status.JVM.CPU.Time,gauge,,second,,The CPU time used by the JVM in the jobmanager,0,flink,jobmanager cpu time
+flink.taskmanager.Status.JVM.CPU.Load,gauge,,percent,,The recent CPU usage of the JVM in the taskmanager,0,flink,taskmanager cpu load
+flink.taskmanager.Status.JVM.CPU.Time,gauge,,second,,The CPU time used by the JVM in the taskmanager,0,flink,taskmanager cpu time
 flink.jobmanager.Status.JVM.Memory.Heap.Used,gauge,,byte,,The amount of heap memory currently used in the jobmanager,0,flink,jobmanager heap used
 flink.jobmanager.Status.JVM.Memory.Heap.Committed,gauge,,byte,,The amount of heap memory guaranteed to be available to the JVM in the jobmanager,0,flink,jobmanager heap committed
 flink.jobmanager.Status.JVM.Memory.Heap.Max,gauge,,byte,,The maximum amount of heap memory that can be used for memory management in the jobmanager,0,flink,jobmanager heap max
@@ -83,7 +83,7 @@ flink.operator.currentInputWatermark,gauge,,millisecond,,The last watermark this
 flink.operator.currentInput1Watermark,gauge,,millisecond,,The last watermark this operator has received in its first input. Only for operators with 2 inputs,0,flink,operator input1 watermark
 flink.operator.currentInput2Watermark,gauge,,millisecond,,The last watermark this operator has received in its second input. Only for operators with 2 inputs,0,flink,operator input2 watermark
 flink.operator.currentOutputWatermark,gauge,,millisecond,,The last watermark this operator has emitted,0,flink,operator output watermark
-flink.operator.numSplitsProcessed,count,,,,The total number of InputSplits this data source has processed (if the operator is a data source),0,flink,operator splits proccessed
+flink.operator.numSplitsProcessed,count,,,,The total number of InputSplits this data source has processed (if the operator is a data source),0,flink,operator splits processed
 flink.operator.commitsSucceeded,count,,commit,,The total number of successful offset commits to Kafka if offset committing is turned on and checkpointing is enabled,1,flink,operator commits succeeded
 flink.operator.commitsFailed,count,,commit,,The total number of offset commit failures to Kafka if offset committing is turned on and checkpointing is enabled. Note that committing offsets back to Kafka is only a means to expose consumer progress so a commit failure does not affect the integrity of Flink's checkpointed partition offsets,-1,flink,operator commits failed
 

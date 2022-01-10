@@ -56,6 +56,18 @@ instances:
     #
     # query_monitoring_url: http://localhost:8093
 
+    ## @param sync_gateway_url - string - optional - default: http://localhost:4986
+    ## Url to get Sync Gateway stats.
+    ## See https://docs.couchbase.com/sync-gateway/current/stats-monitoring.html
+    #
+    # sync_gateway_url: http://localhost:4986
+
+    ## @param index_stats_url - string - optional - default: http://localhost:9102
+    ## The URL to get Index Statistics, available since Couchbase 7.0.
+    ## See https://docs.couchbase.com/server/current/rest-api/rest-index-stats.html
+    #
+    # index_stats_url: http://localhost:9102
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
@@ -324,6 +336,11 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
@@ -333,6 +350,11 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -369,7 +391,7 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
@@ -380,5 +402,5 @@ instances:
 #
 # logs:
 #   - type: file
-#     path: /opt/couchbase/var/lib/couchbase/logs/*.log
+#     path: /opt/couchbase/var/lib/couchbase/logs/couchdb.log
 #     source: couchbase

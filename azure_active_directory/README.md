@@ -1,4 +1,4 @@
-# Agent Check: azure_active_directory
+# azure_active_directory
 
 ## Overview
 
@@ -42,13 +42,19 @@ For more details on the setup, see the [Azure tutorial][3].
 
 ## Data Collected
 
-### Logs
+#### Log collection
+
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
 
 This integration allows you to setup log ingestion for Azure Active Directory activity logs.
 
 This includes the following:
 
-   - Sign-ins – Provides information about the usage of managed applications and user sign-in activities.
+   - Sign-ins - Provides information about the usage of managed applications and user sign-in activities.
 
    - Audit logs - Provides traceability through logs for all changes done by various features within Azure AD.  
 

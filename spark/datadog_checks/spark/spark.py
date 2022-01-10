@@ -4,7 +4,7 @@
 import re
 
 from bs4 import BeautifulSoup
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, RequestException, Timeout
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
 from six import iteritems, itervalues
 from six.moves.urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
@@ -42,7 +42,13 @@ SPARK_MASTER_APP_PATH = '/app/'
 MESOS_MASTER_APP_PATH = '/frameworks'
 
 # Extract the application name and the dd metric name from the structured streams metrics.
-STRUCTURED_STREAMS_METRICS_REGEX = re.compile(r"^[\w-]+\.driver\.spark\.streaming\.[\w-]+\.(?P<metric_name>[\w-]+)$")
+STRUCTURED_STREAMS_METRICS_REGEX = re.compile(
+    r"^[\w-]+\.driver\.spark\.streaming\.(?P<query_name>[\w-]+)\.(?P<metric_name>[\w-]+)$"
+)
+
+# Tests if the query_name is a UUID to determine whether to add it as a tag
+# inspired by https://stackoverflow.com/questions/136505/searching-for-uuids-in-text-with-regex
+UUID_REGEX = re.compile(r"[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}")
 
 # Application type and states to collect
 YARN_APPLICATION_TYPES = 'SPARK'
@@ -175,8 +181,10 @@ class SparkCheck(AgentCheck):
                 SPARK_YARN_MODE,
             )
             self.cluster_mode = SPARK_YARN_MODE
-
+        self._disable_legacy_cluster_tag = is_affirmative(self.instance.get('disable_legacy_cluster_tag', False))
         self.metricsservlet_path = self.instance.get('metricsservlet_path', '/metrics/json')
+
+        self._enable_query_name_tag = is_affirmative(self.instance.get('enable_query_name_tag', False))
 
         # Get the cluster name from the instance configuration
         self.cluster_name = self.instance.get('cluster_name')
@@ -187,7 +195,10 @@ class SparkCheck(AgentCheck):
 
     def check(self, _):
         tags = list(self.tags)
-        tags.append('cluster_name:%s' % self.cluster_name)
+
+        tags.append('spark_cluster:%s' % self.cluster_name)
+        if not self._disable_legacy_cluster_tag:
+            tags.append('cluster_name:%s' % self.cluster_name)
 
         spark_apps = self._get_running_apps()
 
@@ -218,7 +229,6 @@ class SparkCheck(AgentCheck):
                 SPARK_SERVICE_CHECK,
                 AgentCheck.OK,
                 tags=['url:%s' % am_address] + tags,
-                message='Connection to ApplicationMaster "%s" was successful' % am_address,
             )
 
     def _get_master_address(self):
@@ -259,7 +269,10 @@ class SparkCheck(AgentCheck):
         Determine what mode was specified
         """
         tags = list(self.tags)
-        tags.append('cluster_name:%s' % self.cluster_name)
+
+        tags.append('spark_cluster:%s' % self.cluster_name)
+        if not self._disable_legacy_cluster_tag:
+            tags.append('cluster_name:%s' % self.cluster_name)
 
         if self.cluster_mode == SPARK_STANDALONE_MODE:
             # check for PRE-20
@@ -310,7 +323,6 @@ class SparkCheck(AgentCheck):
             SPARK_DRIVER_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % self.master_address] + tags,
-            message='Connection to Spark driver "%s" was successful' % self.master_address,
         )
         self.log.info("Returning running apps %s", running_apps)
         return running_apps
@@ -359,7 +371,6 @@ class SparkCheck(AgentCheck):
             SPARK_STANDALONE_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % self.master_address] + tags,
-            message='Connection to Spark master "%s" was successful' % self.master_address,
         )
         self.log.info("Returning running apps %s", running_apps)
         return running_apps
@@ -394,7 +405,6 @@ class SparkCheck(AgentCheck):
             MESOS_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % self.master_address] + tags,
-            message='Connection to ResourceManager "%s" was successful' % self.master_address,
         )
 
         return running_apps
@@ -410,7 +420,6 @@ class SparkCheck(AgentCheck):
             YARN_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % self.master_address] + tags,
-            message='Connection to ResourceManager "%s" was successful' % self.master_address,
         )
 
         return running_apps
@@ -475,7 +484,7 @@ class SparkCheck(AgentCheck):
                 if not version_set:
                     version_set = self._collect_version(tracking_url, tags)
                 response = self._rest_request_to_json(tracking_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, tags)
-            except RequestException as e:
+            except Exception as e:
                 self.log.warning("Exception happened when fetching app ids for %s: %s", tracking_url, e)
                 continue
 
@@ -638,14 +647,28 @@ class SparkCheck(AgentCheck):
                 for gauge_name, value in iteritems(response):
                     match = STRUCTURED_STREAMS_METRICS_REGEX.match(gauge_name)
                     if not match:
+                        self.log.debug("No regex match found for gauge: '%s'", str(gauge_name))
                         continue
                     groups = match.groupdict()
                     metric_name = groups['metric_name']
                     if metric_name not in SPARK_STRUCTURED_STREAMING_METRICS:
+                        self.log.debug("Unknown metric_name encountered: '%s'", str(metric_name))
                         continue
                     metric_name, submission_type = SPARK_STRUCTURED_STREAMING_METRICS[metric_name]
                     tags = ['app_name:%s' % str(app_name)]
                     tags.extend(addl_tags)
+
+                    if self._enable_query_name_tag:
+                        query_name = groups['query_name']
+                        match = UUID_REGEX.match(query_name)
+                        if not match:
+                            tags.append('query_name:%s' % str(query_name))
+                        else:
+                            self.log.debug(
+                                'Cannot attach `query_name` tag. Add a query name to collect this tag for %s',
+                                query_name,
+                            )
+
                     self._set_metric(metric_name, submission_type, value, tags=tags)
             except HTTPError as e:
                 self.log.debug(

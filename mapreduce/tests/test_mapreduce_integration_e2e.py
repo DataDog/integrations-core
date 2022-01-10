@@ -12,10 +12,10 @@ pytestmark = pytest.mark.integration
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_integration_metrics(aggregator, check, instance, datadog_agent):
+def test_integration_metrics(aggregator, check, dd_run_check, instance, datadog_agent):
     check = check(instance)
     with common.mock_local_mapreduce_dns():
-        check.check(instance)
+        dd_run_check(check)
 
     for metric in common.ELAPSED_TIME_METRICS:
         aggregator.assert_metric(metric)
@@ -25,11 +25,11 @@ def test_integration_metrics(aggregator, check, instance, datadog_agent):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_metadata(aggregator, check, instance, datadog_agent):
+def test_metadata(aggregator, check, dd_run_check, instance, datadog_agent):
     check = check(instance)
     check.check_id = 'test:123'
     with common.mock_local_mapreduce_dns():
-        check.check(instance)
+        dd_run_check(check)
 
     version_metadata = {
         'version.raw': '3.2.1',

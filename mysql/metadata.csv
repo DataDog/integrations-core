@@ -36,12 +36,16 @@ mysql.performance.qcache_hits,gauge,,hit,second,The rate of query cache hits.,0,
 mysql.performance.questions,gauge,,query,second,The rate of statements executed by the server.,0,mysql,questions
 mysql.performance.slow_queries,gauge,,query,second,The rate of slow queries.,-1,mysql,slow queries
 mysql.performance.table_locks_waited,gauge,,,,The total number of times that a request for a table lock could not be granted immediately and a wait was needed.,-1,mysql,table locks waited
+mysql.performance.table_locks_waited.rate,gauge,,,,"The rate of times that a request for a table lock could not be granted immediately and a wait was needed.",0,mysql,table locks waited rate
 mysql.performance.threads_connected,gauge,,connection,,The number of currently open connections.,0,mysql,threads connected
 mysql.performance.threads_running,gauge,,thread,,The number of threads that are not sleeping.,0,mysql,threads running
+mysql.performance.cpu_time,gauge,,percent,,Percentage of CPU time spent by MySQL.,-1,mysql,cpu
 mysql.performance.user_time,gauge,,percent,,Percentage of CPU time spent in user space by MySQL.,-1,mysql,cpu user
 mysql.replication.seconds_behind_master,gauge,,second,,The lag in seconds between the master and the slave.,-1,mysql,replication lag
-mysql.replication.slave_running,gauge,,,,A boolean showing if this server is a replication slave / master that is running.,0,mysql,slave running
-mysql.replication.slaves_connected,gauge,,,,Number of slaves connected to a replication master.,0,mysql,slaves connected
+mysql.replication.seconds_behind_source,gauge,,second,,The lag in seconds between the source and the replica.,-1,mysql,replication lag
+mysql.replication.slave_running,gauge,,,,Deprecated. Use service check mysql.replication.replica_running instead. A boolean showing if this server is a replication slave / master that is running.,0,mysql,slave running
+mysql.replication.slaves_connected,gauge,,,,Deprecated. Use mysql.replication.replicas_connected instead. Number of slaves connected to a replication master.,0,mysql,slaves connected
+mysql.replication.replicas_connected,gauge,,,,Number of replicas connected to a replication source.,0,mysql,replicas connected
 mysql.performance.queries,gauge,,query,second,The rate of queries.,0,mysql,queries
 mysql.performance.com_replace,gauge,,query,second,The rate of replace statements.,0,mysql,mysql performance com_replace
 mysql.performance.com_load,gauge,,query,second,The rate of load statements.,0,mysql,mysql performance com_load
@@ -59,12 +63,33 @@ mysql.myisam.key_buffer_size,gauge,,byte,,"Size of the buffer used for index blo
 mysql.performance.qcache_size,gauge,,byte,,"The amount of memory allocated for caching query results.",0,mysql,mysql performance qcache_size
 mysql.performance.table_open_cache,gauge,,,,"The number of open tables for all threads. Increasing this value increases the number of file descriptors that mysqld requires.",0,mysql,mysql performance table_open_cache
 mysql.performance.thread_cache_size,gauge,,byte,,"How many threads the server should cache for reuse. When a client disconnects, the client's threads are put in the cache if there are fewer than thread_cache_size threads there.",0,mysql,mysql performance thread_cache_size
-mysql.innodb.row_lock_current_waits,gauge,,,,"The number of row locks currently being waited for by operations on InnoDB tables.",0,mysql,mysql innodb row_lock_current_waits
+mysql.innodb.active_transactions,gauge,,operation,,"The number of active transactions on InnoDB tables.",0,mysql,mysql innodb active_transactions
 mysql.innodb.buffer_pool_dirty,gauge,,byte,,"The total current number of bytes held in dirty pages in the InnoDB buffer pool.",0,mysql,mysql innodb buffer_pool_dirty
 mysql.innodb.buffer_pool_read_requests,gauge,,read,second,The number of logical read requests.,0,mysql,mysql innodb buffer_pool_read_requests
 mysql.innodb.buffer_pool_reads,gauge,,read,second,"The number of logical reads that InnoDB could not satisfy from the buffer pool, and had to read directly from disk.",0,mysql,mysql innodb buffer_pool_reads
+mysql.innodb.ibuf_merged_delete_marks,gauge,,operation,,"Insert buffer and adaptative hash index merged delete marks",0,mysql,mysql innodb merged delete marks
+mysql.innodb.ibuf_merged_deletes,gauge,,operation,,"Insert buffer and adaptative hash index merged delete",0,mysql,mysql innodb merged deleted
+mysql.innodb.ibuf_merged_inserts,gauge,,operation,,"Insert buffer and adaptative hash index merged inserts",0,mysql,mysql innodb merged inserts
+mysql.innodb.ibuf_merged,gauge,,operation,,"Insert buffer and adaptative hash index merged",0,mysql,mysql innodb merged
+mysql.innodb.ibuf_merges,gauge,,operation,,"Insert buffer and adaptative hash index merges",0,mysql,mysql innodb merges
+mysql.innodb.lock_structs,gauge,,operation,,"Lock structs",0,mysql,mysql innodb lock structs
+mysql.innodb.os_file_fsyncs,gauge,,operation,,"(Delta) The total number of fsync() operations performed by InnoDB.",0,mysql,mysql innodb os file fsyncs
+mysql.innodb.os_file_reads,gauge,,operation,,"(Delta) The total number of files reads performed by read threads within InnoDB.",0,mysql,mysql innodb os file reads
+mysql.innodb.os_file_writes,gauge,,operation,,"(Delta) The total number of file writes performed by write threads within InnoDB.",0,mysql,mysql innodb os file writes
+mysql.innodb.row_lock_current_waits,gauge,,,,"The number of row locks currently being waited for by operations on InnoDB tables.",0,mysql,mysql innodb row_lock_current_waits
+mysql.innodb.semaphore_waits,gauge,,,,"The number semaphore currently being waited for by operations on InnoDB tables.",0,mysql,mysql innodb semaphore_waits
+mysql.innodb.semaphore_wait_time,gauge,,,,"Semaphore wait time",0,mysql,mysql innodb semaphore_wait_time
 mysql.binlog.cache_disk_use,gauge,,transaction,,"The number of transactions that used the temporary binary log cache but that exceeded the value of binlog_cache_size and used a temporary file to store statements from the transaction.",0,mysql,mysql binlog cache_disk_use
 mysql.binlog.cache_use,gauge,,transaction,,The number of transactions that used the binary log cache.,0,mysql,mysql binlog cache_use
+mysql.replication.group.member_status,gauge,,,,"Information about the node status in a group replication environment, always equal to 1.",0,mysql,mysql gr status
+mysql.replication.group.conflicts_detected,gauge,,transaction,,The number of transactions that have not passed the conflict detection check.,0,mysql,mysql gr conflict
+mysql.replication.group.transactions,gauge,,transaction,,The number of transactions in the queue pending conflict detection checks.,0,mysql,mysql gr transactions
+mysql.replication.group.transactions_applied,gauge,,transaction,,Number of transactions this member has received from the group and applied.,0,mysql,mysql gr transactions applied
+mysql.replication.group.transactions_in_applier_queue,gauge,,transaction,,The number of transactions that this member has received from the replication group which are waiting to be applied.,0,mysql,mysql gr transactions queued
+mysql.replication.group.transactions_check,gauge,,transaction,,The number of transactions that have been checked for conflicts.,0,mysql,mysql gr transactions checked
+mysql.replication.group.transactions_proposed,gauge,,transaction,,The number of transactions which originated on this member and were sent to the group.,0,mysql,mysql gr transactions proposed
+mysql.replication.group.transactions_rollback,gauge,,transaction,,The number of transactions which originated on this member and were rolled back by the group.,0,mysql,mysql gr transactions rollback
+mysql.replication.group.transactions_validating,gauge,,transaction,,"The number of transaction rows which can be used for certification, but have not been garbage collected.",0,mysql,mysql gr transactions validating
 mysql.performance.handler_commit,gauge,,operation,second,The number of internal COMMIT statements.,0,mysql,mysql performance handler_commit
 mysql.performance.handler_delete,gauge,,operation,second,The number of internal DELETE statements.,0,mysql,mysql performance handler_delete
 mysql.performance.handler_prepare,gauge,,operation,second,The number of internal PREPARE statements.,0,mysql,mysql performance handler_prepare
@@ -93,6 +118,7 @@ mysql.performance.sort_range,gauge,,operation,second,"The number of sorts that w
 mysql.performance.sort_rows,gauge,,operation,second,"The number of sorted rows.",0,mysql,mysql performance sort_rows
 mysql.performance.sort_scan,gauge,,operation,second,"The number of sorts that were done by scanning the table.",0,mysql,mysql performance sort_scan
 mysql.performance.table_locks_immediate,gauge,,,,"The number of times that a request for a table lock could be granted immediately.",0,mysql,mysql performance table_locks_immediate
+mysql.performance.table_locks_immediate.rate,gauge,,,,"The rate of times that a request for a table lock could be granted immediately.",0,mysql,mysql performance table_locks_immediate rate
 mysql.performance.threads_cached,gauge,,thread,,"The number of threads in the thread cache.",0,mysql,mysql performance threads_cached
 mysql.performance.threads_created,count,,thread,,"The number of threads created to handle connections. If Threads_created is big, you may want to increase the thread_cache_size value.",0,mysql,mysql performance threads_created
 mysql.performance.table_cache_hits,gauge,,hit,second,"The number of hits for open tables cache lookups.",0,mysql,mysql performance table_cache_hits
@@ -175,18 +201,23 @@ mysql.galera.wsrep_flow_control_recv,count,,,,"Shows the number of times the gal
 mysql.galera.wsrep_flow_control_sent,count,,,,"Shows the number of times the galera node has sent a pausing Flow Control message to others",0,mysql,mysql galera wsrep_flow_control_sent
 mysql.galera.wsrep_cert_deps_distance,gauge,,,,"Shows the average distance between the lowest and highest sequence number, or seqno, values that the node can possibly apply in parallel.",0,mysql,mysql galera wsrep_cert_deps_distance
 mysql.galera.wsrep_local_send_queue_avg,gauge,,,,"Show an average for the send queue length since the last FLUSH STATUS query.",0,mysql,mysql galera wsrep_local_send_queue_avg
+mysql.galera.wsrep_replicated_bytes,gauge,,,,"Total size (in bytes) of writesets sent to other nodes.",0,mysql,mysql galera wsrep_replicated_bytes
+mysql.galera.wsrep_received_bytes,gauge,,,,"Total size (in bytes) of writesets received from other nodes.",0,mysql,mysql galera wsrep_received_bytes
+mysql.galera.wsrep_received,gauge,,,,"Total number of write-sets received from other nodes.",0,mysql,mysql galera wsrep_received
+mysql.galera.wsrep_local_state,gauge,,,,"Internal Galera cluster state number",0,mysql,mysql galera wsrep_local_state
+mysql.galera.wsrep_local_cert_failures,count,,,,"Total number of local transactions that failed certification test.",0,mysql,mysql galera wsrep_local_cert_failures
 mysql.performance.qcache.utilization,gauge,,fraction,,Fraction of the query cache memory currently being used.,0,mysql,mysql performance qcache utilization
 mysql.performance.digest_95th_percentile.avg_us,gauge,,microsecond,,Query response time 95th percentile per schema.,0,mysql,mysql response time 95th
 mysql.performance.query_run_time.avg,gauge,,microsecond,,Avg query response time per schema.,0,mysql,mysql response time avg
 mysql.binlog.disk_use,gauge,,byte,,Total binary log file size.,0,mysql,mysql binlog disk
-mysql.queries.count,count,,query,,The total count of executed queries per query per schema. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,mysql,mysql queries count
-mysql.queries.errors,count,,error,,The total count of queries run with an error per query per schema. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,mysql,mysql query errors
-mysql.queries.time,count,,nanosecond,,The total query execution time per query per schema. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,mysql,mysql queries total time
-mysql.queries.select_scan,count,,,,The total count of full table scans on the first table per query per schema. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,mysql,mysql queries select scan
-mysql.queries.select_full_join,count,,,,The total count of full table scans on a joined table per query per schema. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,mysql,mysql queries select full join
-mysql.queries.no_index_used,count,,query,,The total count of queries which do not use an index per query per schema. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,mysql,mysql queries no index used
-mysql.queries.no_good_index_used,count,,query,,The total count of queries which used a sub-optimal index per query per schema. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,mysql,mysql queries no good index used
-mysql.queries.lock_time,count,,nanosecond,,The total time spent waiting on locks per query per schema. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,mysql,mysql queries lock time
-mysql.queries.rows_affected,count,,row,,The number of rows mutated per query per schema. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,mysql,mysql queries rows affected
-mysql.queries.rows_sent,count,,row,,The number of rows sent per query per schema. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,mysql,mysql queries rows sent
-mysql.queries.rows_examined,count,,row,,The number of rows examined per query per schema. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,mysql,mysql queries rows examined
+mysql.queries.count,count,,query,,The total count of executed queries per normalized query and schema. (DBM only),0,mysql,mysql queries count
+mysql.queries.errors,count,,error,,The total count of queries run with an error per normalized query and schema. (DBM only),0,mysql,mysql query errors
+mysql.queries.time,count,,nanosecond,,The total query execution time per normalized query and schema. (DBM only),0,mysql,mysql queries total time
+mysql.queries.select_scan,count,,,,The total count of full table scans on the first table per normalized query and schema. (DBM only),0,mysql,mysql queries select scan
+mysql.queries.select_full_join,count,,,,The total count of full table scans on a joined table per normalized query and schema. (DBM only),0,mysql,mysql queries select full join
+mysql.queries.no_index_used,count,,query,,The total count of queries which do not use an index per normalized query and schema. (DBM only),0,mysql,mysql queries no index used
+mysql.queries.no_good_index_used,count,,query,,The total count of queries which used a sub-optimal index per normalized query and schema. (DBM only),0,mysql,mysql queries no good index used
+mysql.queries.lock_time,count,,nanosecond,,The total time spent waiting on locks per normalized query and schema. (DBM only),0,mysql,mysql queries lock time
+mysql.queries.rows_affected,count,,row,,The number of rows mutated per normalized query and schema. (DBM only),0,mysql,mysql queries rows affected
+mysql.queries.rows_sent,count,,row,,The number of rows sent per normalized query and schema. (DBM only),0,mysql,mysql queries rows sent
+mysql.queries.rows_examined,count,,row,,The number of rows examined per normalized query and schema. (DBM only),0,mysql,mysql queries rows examined

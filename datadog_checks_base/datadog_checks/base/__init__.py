@@ -20,6 +20,12 @@ try:
 except ImportError:
     PDHBaseCheck = None
 
+# Windows-only and Python 3+
+try:
+    from .checks.windows.perf_counters import PerfCountersBaseCheck
+except Exception:
+    PerfCountersBaseCheck = None
+
 # Kubernetes dep will not always be installed
 try:
     from .checks.kube_leader import KubeLeaderElectionBaseCheck
@@ -33,6 +39,7 @@ __all__ = [
     'OpenMetricsBaseCheck',
     'OpenMetricsBaseCheckV2',
     'PDHBaseCheck',
+    'PerfCountersBaseCheck',
     'ConfigurationError',
     'ensure_bytes',
     'ensure_unicode',

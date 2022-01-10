@@ -47,14 +47,14 @@ instances:
 
   -
     ## @param use_prometheus - boolean - optional - default: false
-    ## Enable to preview the new version of the check which supports HAProxy version 2+ 
+    ## Enable to preview the new version of the check which supports HAProxy version 2+
     ## or environments using the HAProxy exporter.
     ##
     ## Prometheus-related options take effect only when this is set to `true`.
     #
     # use_prometheus: false
 
-    ## @param url - string - required
+    ## @param url - string - optional
     ## Haproxy URL to connect to gather metrics.
     ## Set the according <USERNAME> and <PASSWORD> or use directly a unix stats
     ## or admin socket: unix:///var/run/haproxy.sock
@@ -64,7 +64,7 @@ instances:
     url: http://localhost/admin?stats
 
     ## @param status_check - boolean - optional - default: false
-    ## This paramater instructs the check to send events on status changes in the backend.
+    ## This parameter instructs the check to send events on status changes in the backend.
     ## This is DEPRECATED in favor of the creation of a monitor on the service check status
     ## and will be removed in a future version.
     ##
@@ -72,7 +72,7 @@ instances:
     #
     # status_check: false
 
-    ## @param collect_aggregates_only - boolean - optional - default: true
+    ## @param collect_aggregates_only - boolean or string - optional - default: true
     ## This parameter instructs the check to collect metrics only from the aggregate frontend/backend
     ## status lines from the stats output instead of for each backend. With this parameter set to false the agent
     ## collects data for each backend but ignores the aggregated data for backends. Because some metrics are only
@@ -192,10 +192,10 @@ instances:
     #
     # startup_grace_seconds: 0
 
-    ## @param prometheus_url - string - required
+    ## @param prometheus_url - string - optional
     ## The URL where your application metrics are exposed by Prometheus.
     #
-    prometheus_url: <PROMETHEUS_URL>
+    # prometheus_url: <PROMETHEUS_URL>
 
     ## @param prometheus_metrics_prefix - string - optional
     ## Removes a given <PREFIX> from exposed Prometheus metrics.
@@ -265,11 +265,26 @@ instances:
     #
     # send_distribution_sums_as_monotonic: false
 
+    ## @param use_process_start_time - boolean - optional - default: false
+    ## Whether to enable a heuristic for reporting counter values on the first scrape. When true,
+    ## the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
+    ## initial value can be assumed for counters. This requires keeping metrics in memory until the entire
+    ## response is received.
+    #
+    # use_process_start_time: false
+
     ## @param exclude_labels - list of strings - optional
-    ## A list of labels to be excluded
+    ## A list of labels to be excluded. May be used in conjunction with `include_labels`.
+    ## Labels defined in `excluded labels` will take precedence in case of overlap.
     #
     # exclude_labels:
     #   - timestamp
+
+    ## @param include_labels - list of strings - optional
+    ## A list of labels to include. May be used in conjunction with `exclude_labels`.
+    ## Labels defined in `excluded labels` will take precedence in case of overlap.
+    #
+    # include_labels: []
 
     ## @param bearer_token_auth - boolean - optional - default: false
     ## If set to true, adds a bearer token authentication header.
@@ -284,14 +299,13 @@ instances:
     # bearer_token_path: <TOKEN_PATH>
 
     ## @param ignore_metrics - list of strings - optional
-    ## A list of metrics to ignore, use the "*" wildcard can be used to match multiple metric names.
+    ## A list of metrics to ignore, the "*" wildcard can be used to match multiple metric names.
+    ## The wildcard matching is done via fnmatch, it locates a match anywhere in the string.
     #
     # ignore_metrics:
     #   - <IGNORED_METRIC_NAME>
-    #   - <PREFIX_*>
-    #   - <*_SUFFIX>
-    #   - <PREFIX_*_SUFFIX>
-    #   - <*_SUBSTRING_*>
+    #   - <SUBSTRING_*>
+    #   - <*_SUBSTRING>
 
     ## @param ignore_metrics_by_labels - mapping - optional
     ## A mapping of labels where metrics with matching label key and values are ignored.
@@ -303,6 +317,14 @@ instances:
     #   - <LABEL_2>
     #   <KEY_2>:
     #   - '*'
+
+    ## @param ignore_tags - list of strings - optional
+    ## A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
+    #
+    # ignore_tags:
+    #   - <FULL:TAG>
+    #   - <TAG_PREFIX:.*>
+    #   - <TAG_SUFFIX$>
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
@@ -572,6 +594,11 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 10
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 10
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
@@ -581,6 +608,11 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -617,7 +649,7 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.

@@ -21,7 +21,7 @@
     "sshd",
     "sshd:"
   ],
-  "public_title": "Datadog-SSH Check Integration",
+  "public_title": "SSH Integration",
   "short_description": "Monitor SSH connectivity and SFTP latency.",
   "support": "core",
   "supported_os": [

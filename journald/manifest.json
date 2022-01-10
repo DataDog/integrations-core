@@ -1,0 +1,35 @@
+{
+  "display_name": "journald",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "journald",
+  "metric_prefix": "journald.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "Monitor your systemd-journald logs with Datadog.",
+  "guid": "845431ef-9092-4254-a188-138fc9273fa5",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "journald",
+  "categories": [
+    "log collection"
+  ],
+  "type": "check",
+  "is_public": true,
+  "integration_id": "journald",
+  "assets": {
+    "configuration": {
+      "spec":"assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "saved_views": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}

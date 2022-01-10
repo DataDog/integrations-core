@@ -1,6 +1,7 @@
 {
   "categories": [
-    "cloud"
+    "cloud",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "OpenStack",
@@ -14,7 +15,7 @@
   "process_signatures": [
     "stack.sh"
   ],
-  "public_title": "Datadog-OpenStack Integration",
+  "public_title": "OpenStack (legacy)",
   "short_description": "Track hypervisor and VM-level resource usage, plus Neutron metrics.",
   "support": "core",
   "supported_os": [
@@ -25,12 +26,20 @@
   "type": "check",
   "integration_id": "openstack",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
-      "OpenStack Controller Overview": "assets/dashboards/openstack-controller.json"
+      "openstack": "assets/dashboards/openstack_dashboard.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "logs": {
+      "source": "openstack"
+    },
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "openstack_processes": "assets/saved_views/openstack_processes.json"
+    }
   }
 }

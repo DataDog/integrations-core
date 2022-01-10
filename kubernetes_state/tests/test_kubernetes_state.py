@@ -26,6 +26,7 @@ METRICS = [
     NAMESPACE + '.node.gpu.cards_capacity',
     NAMESPACE + '.node.gpu.cards_allocatable',
     NAMESPACE + '.nodes.by_condition',
+    NAMESPACE + '.node.by_condition',
     # deployments
     NAMESPACE + '.deployment.replicas',
     NAMESPACE + '.deployment.replicas_available',
@@ -132,6 +133,15 @@ TAGS = {
         'status:unknown',
     ],
     NAMESPACE
+    + '.node.by_condition': [
+        'condition:memorypressure',
+        'condition:diskpressure',
+        'condition:outofdisk',
+        'condition:ready',
+        'status:true',
+        'status:false',
+    ],
+    NAMESPACE
     + '.pod.status_phase': [
         'phase:pending',
         'phase:running',
@@ -154,8 +164,8 @@ TAGS = {
     ],
     NAMESPACE + '.container.status_report.count.terminated': ['pod:pod2'],
     NAMESPACE + '.persistentvolumeclaim.request_storage': ['storageclass:manual'],
-    NAMESPACE + '.job.failed': ['job:hello', 'job_name:hello2'],
-    NAMESPACE + '.job.succeeded': ['job:hello', 'job_name:hello2'],
+    NAMESPACE + '.job.failed': ['job:hello', 'job_name:hello2', 'kube_job:hello2'],
+    NAMESPACE + '.job.succeeded': ['job:hello', 'job_name:hello2', 'kube_job:hello2'],
     NAMESPACE + '.hpa.condition': ['namespace:default', 'hpa:myhpa', 'condition:true', 'status:abletoscale'],
 }
 
@@ -267,7 +277,7 @@ def assert_not_all_zeroes(aggregator, metric_name):
 
 
 def resourcequota_was_collected(aggregator):
-    """ The metric name is created dynamically so we just check some exist. """
+    """The metric name is created dynamically so we just check some exist."""
     for m in aggregator.metric_names:
         if '.resourcequota.' in m:
             return True
@@ -431,6 +441,18 @@ def test_update_kube_state_metrics(aggregator, instance, check):
         value=2,
     )
 
+    # statefulset count
+    aggregator.assert_metric(
+        NAMESPACE + '.statefulset.count',
+        tags=['namespace:default', 'optional:tag1'],
+        value=2,
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.statefulset.count',
+        tags=['namespace:kube-system', 'optional:tag1'],
+        value=2,
+    )
+
     for metric in METRICS:
         aggregator.assert_metric(metric, hostname=HOSTNAMES.get(metric, None))
         for tag in TAGS.get(metric, []):
@@ -580,6 +602,7 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
         NAMESPACE + '.statefulset.replicas_ready',
         tags=[
             'statefulset:web',
+            'kube_stateful_set:web',
             'kube_namespace:default',
             'namespace:default',
             'optional:tag1',
@@ -595,6 +618,7 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
         NAMESPACE + '.job.succeeded',
         tags=[
             'job_name:curl-job',
+            'kube_job:curl-job',
             'kube_namespace:default',
             'namespace:default',
             'optional:tag1',
@@ -610,6 +634,7 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
         NAMESPACE + '.job.succeeded',
         tags=[
             'job_name:curl-cron-job',
+            'kube_job:curl-cron-job',
             'kube_namespace:default',
             'namespace:default',
             'optional:tag1',
@@ -710,12 +735,12 @@ def test_job_counts(aggregator, instance):
     # Test jobs
     aggregator.assert_metric(
         NAMESPACE + '.job.failed',
-        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'kube_job:test', 'optional:tag1'],
         value=0,
     )
     aggregator.assert_metric(
         NAMESPACE + '.job.succeeded',
-        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'kube_job:test', 'optional:tag1'],
         value=1,
     )
 
@@ -737,12 +762,12 @@ def test_job_counts(aggregator, instance):
     # Test jobs
     aggregator.assert_metric(
         NAMESPACE + '.job.failed',
-        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'kube_job:test', 'optional:tag1'],
         value=0,
     )
     aggregator.assert_metric(
         NAMESPACE + '.job.succeeded',
-        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'kube_job:test', 'optional:tag1'],
         value=1,
     )
 
@@ -789,7 +814,7 @@ def test_job_counts(aggregator, instance):
     # Test if we now have two as the value for the same job
     aggregator.assert_metric(
         NAMESPACE + '.job.succeeded',
-        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'kube_job:test', 'optional:tag1'],
         value=2,
     )
 
@@ -861,9 +886,9 @@ def test_telemetry(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=93895.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=994.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1326.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=94412.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=1002.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1334.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=332.0)
     aggregator.assert_metric(

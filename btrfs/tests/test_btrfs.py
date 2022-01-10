@@ -33,12 +33,12 @@ def get_mock_devices():
 
 @mock.patch('datadog_checks.btrfs.btrfs.psutil.disk_partitions', return_value=get_mock_devices())
 @mock.patch('datadog_checks.btrfs.btrfs.BTRFS.get_usage', return_value=mock_get_usage())
-def test_check(mock_get_usage, mock_device_list, aggregator):
+def test_check(mock_get_usage, mock_device_list, aggregator, dd_run_check):
     """
     Testing Btrfs check.
     """
     with mock.patch.object(btrfs_check, 'get_unallocated_space', return_value=None):
-        btrfs_check.check({})
+        dd_run_check(btrfs_check)
 
     aggregator.assert_metric('system.disk.btrfs.unallocated', count=0)
 

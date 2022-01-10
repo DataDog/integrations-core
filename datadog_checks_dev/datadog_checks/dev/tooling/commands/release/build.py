@@ -5,7 +5,7 @@ import os
 
 import click
 
-from ....utils import basepath, dir_exists, remove_path, resolve_path
+from ....fs import basepath, dir_exists, remove_path, resolve_path
 from ...constants import get_root
 from ...release import build_package
 from ...utils import complete_testable_checks, get_valid_checks

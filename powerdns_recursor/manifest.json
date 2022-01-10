@@ -36,11 +36,16 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "powerdns": "assets/dashboards/powerdns_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "powerdns"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "powerdns_processes": "assets/saved_views/powerdns_processes.json"
+    }
   }
 }

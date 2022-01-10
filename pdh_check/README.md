@@ -26,7 +26,7 @@ Run the [Agent's status subcommand][5] and look for `pdh_check` under the Checks
 
 ### Metrics
 
-All metrics collected by the PHD check are forwarded to Datadog as [custom metrics][6], which may impact your [billing][7].
+All metrics collected by the PDH check are forwarded to Datadog as [custom metrics][6], which may impact your [billing][7].
 
 ### Events
 

@@ -6,7 +6,8 @@ from datadog_checks.dev import get_docker_hostname, get_here, load_jmx_config
 HERE = get_here()
 HOST = get_docker_hostname()
 PROJECT = 'org.sonarqube:sonarqube-scanner'
-SERVER_INSTANCE = {'host': HOST, 'port': 10443, 'is_jmx': True}
+JMX_WEB_INSTANCE = {'host': HOST, 'port': 10443, 'is_jmx': True}
+JMX_CE_INSTANCE = {'host': HOST, 'port': 10444, 'is_jmx': True}
 WEB_INSTANCE = {
     'web_endpoint': 'http://{}:9000'.format(HOST),
     'components': {PROJECT: {'tag': 'project'}},
@@ -14,4 +15,4 @@ WEB_INSTANCE = {
 }
 
 CHECK_CONFIG = load_jmx_config()
-CHECK_CONFIG['instances'] = [SERVER_INSTANCE, WEB_INSTANCE]
+CHECK_CONFIG['instances'] = [JMX_WEB_INSTANCE, JMX_CE_INSTANCE, WEB_INSTANCE]

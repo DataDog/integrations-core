@@ -21,7 +21,12 @@ def test_connection_with_defaults_file():
     }
     check = MySql(common.CHECK_NAME, {}, [file_instance])
     connection_args = check._get_connection_args()
-    assert connection_args == {'ssl': None, 'connect_timeout': 10, 'read_default_file': '/foo/bar'}
+    assert connection_args == {
+        'autocommit': True,
+        'ssl': None,
+        'connect_timeout': 10,
+        'read_default_file': '/foo/bar',
+    }
     assert 'host' not in connection_args
 
 
@@ -36,6 +41,7 @@ def test_connection_with_sock():
     check = MySql(common.CHECK_NAME, {}, [file_instance])
     connection_args = check._get_connection_args()
     assert connection_args == {
+        'autocommit': True,
         'ssl': None,
         'connect_timeout': 10,
         'unix_socket': '/foo/bar',
@@ -53,7 +59,14 @@ def test_connection_with_host():
     }
     check = MySql(common.CHECK_NAME, {}, [file_instance])
     connection_args = check._get_connection_args()
-    assert connection_args == {'ssl': None, 'connect_timeout': 10, 'user': 'ddog', 'passwd': 'pwd', 'host': 'localhost'}
+    assert connection_args == {
+        'autocommit': True,
+        'ssl': None,
+        'connect_timeout': 10,
+        'user': 'ddog',
+        'passwd': 'pwd',
+        'host': 'localhost',
+    }
 
 
 def test_connection_with_host_and_port():
@@ -61,6 +74,7 @@ def test_connection_with_host_and_port():
     check = MySql(common.CHECK_NAME, {}, [file_instance])
     connection_args = check._get_connection_args()
     assert connection_args == {
+        'autocommit': True,
         'ssl': None,
         'connect_timeout': 10,
         'user': 'ddog',
@@ -77,6 +91,7 @@ def test_connection_with_charset(instance_basic):
 
     connection_args = check._get_connection_args()
     assert connection_args == {
+        'autocommit': True,
         'host': common.HOST,
         'user': common.USER,
         'passwd': common.PASS,

@@ -14,7 +14,7 @@ sqlserver.buffer.page_writes,gauge,,page,,Indicates the number of physical datab
 sqlserver.stats.batch_requests,gauge,,request,second,The number of batch requests per second.,1,sql_server,batch requests
 sqlserver.stats.sql_compilations,gauge,,operation,second,The number of SQL compilations per second.,0,sql_server,sql compils
 sqlserver.stats.sql_recompilations,gauge,,operation,second,The number of SQL re-compilations per second.,-1,sql_server,sql recompils
-sqlserver.stats.connections,gauge,,connection,,The number of user connections.,0,sql_server,conns
+sqlserver.stats.connections,gauge,,connection,,"The number of user connections. If DBM is enabled, this metric is tagged with status, db, and user.",0,sql_server,conns
 sqlserver.stats.lock_waits,gauge,,lock,second,The number of times per second that SQL Server is unable to retain a lock right away for a resource.,-1,sql_server,lock waits
 sqlserver.stats.procs_blocked,gauge,,process,,The number of processes blocked.,-1,sql_server,procs blocked
 sqlserver.stats.auto_param_attempts,gauge,,attempt,,Number of auto-parameterization attempts per second.,-1,sql_server,stats auto param
@@ -30,13 +30,25 @@ sqlserver.database.transactions,gauge,,transaction,,Number of transactions start
 sqlserver.database.write_transactions,gauge,,transaction,,"Number of transactions that wrote to all databases on the SQL Server instance and committed, in the last second.",0,sql_server,database trans write
 sqlserver.database.state,gauge,,,,"Database state: 0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending, 4 = Suspect, 5 = Emergency, 6 = Offline, 7 = Copying, 10 = Offline_Secondary",0,sql_server,database state
 sqlserver.database.files.size,gauge,,kibibyte,,Current size of the database file,0,sql_server,database file size
-sqlserver.database.files.state,gauge,,,,"Database state: 0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending, 4 = Suspect, 5 = Unknown, 6 = Offline, 7 = Defunct",0,sql_server,database file status
+sqlserver.database.files.state,gauge,,,,"Database file state: 0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending, 4 = Suspect, 5 = Unknown, 6 = Offline, 7 = Defunct",0,sql_server,database file status
+sqlserver.database.master_files.size,gauge,,kibibyte,,"Current size of the database file. For a database snapshot, size reflects the maximum space that the snapshot can ever use for the file. **Note**: Use `sqlserver.database.files.size` for the actual size of FILESTREAM containers.",0,sql_server,database master file size
+sqlserver.database.master_files.state,gauge,,,,"Database file state: 0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending, 4 = Suspect, 5 = Unknown, 6 = Offline, 7 = Defunct",0,sql_server,database master file status
 sqlserver.database.active_transactions,gauge,,transaction,,Number of active transactions across all databases on the SQL Server instance.,0,sql_server,database trans active
 sqlserver.database.avg_fragment_size_in_pages,gauge,,,,"The average number of pages in one fragment on the leaf level of an IN_ROW_DATA allocation unit.",0,sql_server,avg fragment size in pages
 sqlserver.database.avg_fragmentation_in_percent,gauge,,,,"Logical fragmentation for indexes, or extent fragmentation for heaps in the IN_ROW_DATA allocation unit.",0,sql_server,avg fragmentation percent
 sqlserver.database.backup_count,gauge,,,,"The total count of successful backups made for a database.",0,sql_server,backup count
 sqlserver.database.fragment_count,gauge,,,,"The number of fragments in the leaf level of an IN_ROW_DATA allocation unit.",0,sql_server,fragment count
 sqlserver.database.is_sync_with_backup,gauge,,,,"Whether or not the database is marked for replication synchronization with backup. 0 = Not marked for replication sync, 1 = Marked for replication sync.",0,sql_server,is sync with backup
+sqlserver.files.reads,count,,read,second,"Number of reads issued on the file. Tags: `logical_name`, `file_location`, `db`, `state`",0,sql_server,reads on database file
+sqlserver.files.read_bytes,count,,byte,second,"Bytes read from the file. Tags: `logical_name`, `file_location`, `db`, `state`",0,sql_server,bytes read from database file
+sqlserver.files.read_io_stall,count,,millisecond,,"Total time that users waited for reads on the file. Tags: `logical_name`, `file_location`, `db`, `state`",-1,sql_server,read wait time on database file
+sqlserver.files.read_io_stall_queued,count,,millisecond,,"Total latency from IO governance pools for reads on the file. Tags: `logical_name`, `file_location`, `db`, `state`",-1,sql_server,read io queue time on database file
+sqlserver.files.writes,count,,write,second,"Number of writes issued on the file. Tags: `logical_name`, `file_location`, `db`, `state`",0,sql_server,writes on database file
+sqlserver.files.written_bytes,count,,byte,second,"Bytes written to the file. Tags: `logical_name`, `file_location`, `db`, `state`",0,sql_server,bytes written to the database file
+sqlserver.files.write_io_stall,count,,millisecond,,"Total time that users waited for writes on the file. Tags: `logical_name`, `file_location`, `db`, `state`",-1,sql_server,write wait time on database file
+sqlserver.files.write_io_stall_queued,count,,millisecond,,"Total latency from IO governance pools for writes on the file. Tags: `logical_name`, `file_location`, `db`, `state`",-1,sql_server,write io queue time on database file
+sqlserver.files.io_stall,count,,millisecond,,"Total time that users waited for I/O to complete on the file. Tags: `logical_name`, `file_location`, `db`, `state`",-1,sql_server,io wait time on database file
+sqlserver.files.size_on_disk,gauge,,byte,,"Number of bytes used on the disk for this file. Tags: `logical_name`, `file_location`, `db`, `state`",0,sql_server,bytes used for database file
 sqlserver.memory.memory_grants_pending,gauge,,,,Specifies the total number of processes waiting for a workspace memory grant,0,sql_server,memory grant pending
 sqlserver.memory.total_server_memory,gauge,,kibibyte,,Specifies the amount of memory the server has committed using the memory manager.,0,sql_server,memory total
 sqlserver.scheduler.current_tasks_count,gauge,,task,,Number of current tasks that are associated with this scheduler.,0,sql_server,task count
@@ -48,5 +60,26 @@ sqlserver.task.context_switches_count,gauge,,unit,,Number of scheduler context s
 sqlserver.task.pending_io_count,gauge,,unit,,Number of physical I/Os that are performed by this task.,0,sql_server,task io pending
 sqlserver.task.pending_io_byte_count,gauge,,byte,,Total byte count of I/Os that are performed by this task.,0,sql_server,task io byte
 sqlserver.task.pending_io_byte_average,gauge,,byte,,Average byte count of I/Os that are performed by this task.,0,sql_server,task avg io byte
-sqlserver.fci.status,gauge,,,,Status of the node in a SQL Server failover custer instance,0,sql_server,fci status
+sqlserver.fci.status,gauge,,,,Status of the node in a SQL Server failover cluster instance,0,sql_server,fci status
 sqlserver.fci.is_current_owner,gauge,,,,Whether or not this node is the current owner of the SQL Server FCI ,0,sql_server,fci current owner
+sqlserver.queries.count,count,,query,,Total count of executed queries per query (DBM only),0,sql_server,query count
+sqlserver.queries.time,count,,nanosecond,,Total elapsed time for executed queries per query (DBM only),0,sql_server,query time
+sqlserver.queries.clr_time,count,,nanosecond,,Total time consumed inside Microsoft .NET Framework common language runtime (CLR) objects for executed queries per query (DBM only),0,sql_server,query clr time
+sqlserver.queries.worker_time,count,,nanosecond,,Total CPU time consumed by executed queries per query (DBM only),0,sql_server,query worker time
+sqlserver.queries.rows,count,,row,,Total number of rows returned by executed queries per query (DBM only),0,sql_server,query rows
+sqlserver.queries.physical_reads,count,,read,,Total number of physical reads performed by executed queries per query (DBM only),0,sql_server,query physical reads
+sqlserver.queries.logical_reads,count,,read,,Total number of logical reads performed by executed queries per query (DBM only),0,sql_server,query logical reads
+sqlserver.queries.logical_writes,count,,write,,Total number of logical writes performed by executed queries per query (DBM only),0,sql_server,query logical writes
+sqlserver.queries.columnstore_segment_reads,count,,segment,,Total columnstore segments read by executed queries per query (DBM only),0,sql_server,query columnstore segment reads
+sqlserver.queries.columnstore_segment_skips,count,,segment,,Total columnstore segments skipped by executed queries per query (DBM only),0,sql_server,query columnstore segment skips
+sqlserver.queries.memory_grant,count,,byte,,The total amount of reserved memory received by executions of this query per query. It will always be 0 for querying a memory-optimized table (DBM only).,0,sql_server,query grant kb
+sqlserver.queries.used_memory_grant,count,,byte,,The total amount of reserved memory used by executions of this query per query. It will always be 0 for querying a memory-optimized table (DBM only).,0,sql_server,query used grant kb
+sqlserver.queries.ideal_memory_grant,count,,byte,,The total amount of ideal memory grant estimated by executions of this query per query (DBM only),0,sql_server,query ideal grant kb
+sqlserver.queries.reserved_threads,count,,thread,,The total sum of reserved parallel threads used by executions of this query per query (DBM only),0,sql_server,query reserved threads
+sqlserver.queries.used_threads,count,,thread,,The total sum of used parallel threads used by executions of this query per query (DBM only),0,sql_server,query used threads
+sqlserver.queries.dop,count,,,,The total sum of degree of parallelism used by executions of this query per query (DBM only),0,sql_server,query dop
+sqlserver.queries.spills,count,,,,The total number of pages spilled by execution of this query per query (DBM only),0,sql_server,query spills
+sqlserver.queries.duration.max,gauge,,nanosecond,,"The age of the longest running query per user, db, and app. (DBM only)",0,sql_server,queries duration max
+sqlserver.queries.duration.sum,gauge,,nanosecond,,"The sum of the age of all running queries per user, db, and app. (DBM only)",0,sql_server,queries duration sum
+sqlserver.transactions.duration.max,gauge,,nanosecond,,"The age of the longest running transaction per user, db, and app. (DBM only)",0,sql_server,transactions duration max
+sqlserver.transactions.duration.sum,gauge,,nanosecond,,"The sum of the age of all running transactions per user, db, and app. (DBM only)",0,sql_server,sql_server transactions duration sum

@@ -57,7 +57,7 @@ Every option has 10 possible attributes:
 
     ```yaml
     deprecation:
-      Release: 8.0.0
+      Agent version: 8.0.0
       Migration: |
         do this
         and that
@@ -65,7 +65,8 @@ Every option has 10 possible attributes:
 
 - `multiple` - Whether or not options may be selected multiple times like `instances` or just once
   like `init_config`
-- `metadata_tags` - A list of tags (like `docs:foo`) that can serve for unexpected use cases in the future
+- `multiple_instances_defined` - Whether or not we separate the definition into multiple instances or just one
+- `metadata_tags` - A list of tags (like `docs:foo`) that can be used for unexpected use cases
 - `options` - Nested options, indicating that this is a section like `instances` or `logs`
 - `value` - The expected type data
 
@@ -104,7 +105,7 @@ The template format looks like `path/to/template_file` where `path/to` must poin
 to a template directory and `template_file` must have the file extension `.yaml` or `.yml`.
 
 You can use custom templates that will take precedence over the pre-defined templates by using the `template_paths`
-parameter of the [ConfigSpec](#datadog_checks.dev.tooling.specs.configuration.core.ConfigSpec) class.
+parameter of the [ConfigSpec](#datadog_checks.dev.tooling.configuration.core.ConfigSpec) class.
 
 ### Override
 
@@ -127,20 +128,37 @@ It respects a few extra [option](#options)-level attributes:
 
 - `example` - A complete example of an option in lieu of a strictly typed `value` attribute
 - `enabled` - Whether or not to un-comment the option, overriding the behavior of `required`
+- `display_priority` - This is an integer affecting the order in which options are displayed, with higher values indicating higher priority.
+  The default is `0`.
 
 It also respects a few extra fields under the `value` attribute of each option:
 
-- `default` - This is the default value that will be shown in the header of each option, useful if it differs from the `example`.
+- `display_default` - This is the default value that will be shown in the header of each option, useful if it differs from the `example`.
   You may set it to `null` explicitly to disable showing this part of the header.
 - `compact_example` - Whether or not to display complex types like arrays in their most compact representation. It defaults to `false`.
 
 ### Usage
 
-Use the `--sync` flag of the [config validation command](../ddev/cli.md#config_1) to render the example configuration files.
+Use the `--sync` flag of the [config validation command](../ddev/cli.md#ddev-validate-config) to render the example configuration files.
+
+## Data model consumer
+
+The [model consumer][config-spec-model-consumer] uses each spec to render the [pydantic](https://github.com/samuelcolvin/pydantic) models
+that checks use to validate and interface with configuration. The models are shipped with every Agent and individual Integration release.
+
+It respects an extra field under the `value` attribute of each option:
+
+- `default` - This is the default value that options will be set to, taking precedence over the `example`.
+- `validators` - This refers to an array of pre-defined field validators to use. Every entry will refer to a relative import path to a
+  field validator under `datadog_checks.base.utils.models.validation` and will be executed in the defined order.
+
+### Usage
+
+Use the `--sync` flag of the [model validation command](../ddev/cli.md#ddev-validate-models) to render the data model files.
 
 ## API
 
-::: datadog_checks.dev.tooling.specs.configuration.ConfigSpec
+::: datadog_checks.dev.tooling.configuration.ConfigSpec
     rendering:
       heading_level: 3
     selection:

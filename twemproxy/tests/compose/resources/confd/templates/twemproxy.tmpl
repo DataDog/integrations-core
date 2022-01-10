@@ -1,0 +1,11 @@
+situ:
+  listen: 0.0.0.0:{{ .services_twemproxy_port }}
+  hash: fnv1a_64
+  hash_tag: "P:"
+  distribution: ketama
+  auto_eject_hosts: false
+  timeout: 1000
+  redis: true
+  servers:
+  {{ range $server := .services_redis }}  - {{$server.Value}}:1
+  {{ end }}

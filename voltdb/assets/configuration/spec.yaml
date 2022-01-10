@@ -26,6 +26,45 @@ files:
               type: boolean
               example: false
 
+          - name: statistics_components
+            description: |
+              List VoltDB components to collect metrics. A subset of components are collected by default.
+              See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php
+              The following components are supported:
+               - COMMANDLOG
+               - CPU
+               - EXPORT
+               - GC
+               - IDLETIME
+               - IMPORT
+               - INDEX
+               - IOSTATS
+               - LATENCY
+               - MEMORY
+               - PROCEDURE
+               - PROCEDUREOUTPUT
+               - PROCEDUREPROFILE
+               - QUEUE
+               - SNAPSHOTSTATUS
+               - TABLE
+            display_priority: 1
+            required: false
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - COMMANDLOG
+                - CPU
+                - GC
+                - INDEX
+                - IOSTATS
+                - LATENCY
+                - MEMORY
+                - PROCEDURE
+                - SNAPSHOTSTATUS
+                - TABLE
+
           - template: instances/http
             overrides:
               username.display_priority: 2

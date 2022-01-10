@@ -1,7 +1,7 @@
 version: '3'
 services:
   postgres:
-    image: "postgres:${POSTGRES_VERSION}-alpine"
+    image: "postgres:${POSTGRES_IMAGE}"
     ports:
       - 5432:5432
     healthcheck:

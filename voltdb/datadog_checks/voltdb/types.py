@@ -10,6 +10,7 @@ Instance = TypedDict(
         'username': str,
         'password': str,
         'password_hashed': bool,
+        'statistics_components': List[str],
         'tls_verify': bool,
         'tls_cert': str,
         'tls_ca_cert': str,

@@ -1,0 +1,39 @@
+name: Avi Vantage
+
+files:
+- name: avi_vantage.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - name: avi_controller_url
+      required: true
+      description: The Controller base API URL
+      value:
+        example: https://<AVI_CONTROLLER_HOSTNAME>/
+        type: string
+    - name: entities
+      required: false
+      description: |
+        List of entity types to collect metrics from. Valid options are
+        `controller`, `pool`, `serviceengine` and `virtualservice`. By default all types
+        are monitored.
+      value:
+        type: array
+        example: &avi_entities
+        - controller
+        - pool
+        - serviceengine
+        - virtualservice
+        default: *avi_entities
+        items:
+          type: string
+          enum: *avi_entities
+    - template: instances/openmetrics
+      overrides:
+        persist_connections.hidden: true
+        persist_connections.default: true
+        openmetrics_endpoint.hidden: true
+        openmetrics_endpoint.required: false

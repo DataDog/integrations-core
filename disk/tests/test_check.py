@@ -6,14 +6,14 @@ from itertools import chain
 from datadog_checks.disk import Disk
 
 
-def test_check(aggregator, instance_basic_volume, gauge_metrics, rate_metrics):
+def test_check(aggregator, instance_basic_volume, gauge_metrics, rate_metrics, count_metrics, dd_run_check):
     """
     Basic check to see if all metrics are there
     """
     c = Disk('disk', {}, [instance_basic_volume])
-    c.check(instance_basic_volume)
+    dd_run_check(c)
 
-    for name in chain(gauge_metrics, rate_metrics):
+    for name in chain(gauge_metrics, rate_metrics, count_metrics):
         aggregator.assert_metric(name)
 
     aggregator.assert_all_metrics_covered()

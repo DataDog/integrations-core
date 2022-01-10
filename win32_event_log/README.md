@@ -19,9 +19,13 @@ The Windows Event Log check is included in the [Datadog Agent][1] package. There
 
 2. [Restart the Agent][4] to start sending Windows events to Datadog.
 
+**Note**: Events and logs are configured separately. Logs are not configured within each instance. See [log collection](#log-collection), below, for configuring log collection.
+
 ### Log collection
 
-To collect logs from specific Windows events, add the channels to the `conf.d/win32_event_log.d/conf.yaml` file manually, or via the Datadog Agent Manager.
+First ensure that you have set `logs_enabled: true` in your `datadog.yaml` file.
+
+To collect logs from specific Windows events, add the channels to the `conf.d/win32_event_log.d/conf.yaml` file manually, or use the Datadog Agent Manager.
 
 To see the channel list, run the following command in a PowerShell:
 
@@ -50,23 +54,23 @@ Then add the channels in your `win32_event_log.d/conf.yaml` configuration file:
 logs:
   - type: windows_event
     channel_path: "<CHANNEL_1>"
-    source: "<CHANNEL_1>"
+    source: "windows.events"
     service: myservice
 
   - type: windows_event
     channel_path: "<CHANNEL_2>"
-    source: "<CHANNEL_2>"
+    source: "windows.events"
     service: myservice
 ```
 
 Edit the `<CHANNEL_X>` parameters with the Windows channel name you want to collect events from.
-Set the corresponding `source` parameter to the same channel name to benefit from the [integration automatic processing pipeline][5].
+Set the corresponding `source` parameter to `windows.events` to benefit from the [integration automatic processing pipeline][5].
 
 Finally, [restart the Agent][4].
 
 **Note**: For the Security logs channel, add your Datadog Agent user to the `Event Log Readers` user group.
 
-### Filtering Events
+### Filtering events
 
 Use the Windows Event Viewer GUI to list all the event logs available for capture with this integration.
 
@@ -76,7 +80,7 @@ To determine the exact values, set your filters to use the following PowerShell 
 Get-WmiObject -Class Win32_NTLogEvent
 ```
 
-For instance, to see the latest event logged in the `Security` LogFile, use:
+For example, to see the latest event logged in the `Security` log file, use:
 
 ```text
 Get-WmiObject -Class Win32_NTLogEvent -Filter "LogFile='Security'" | select -First 1
@@ -125,7 +129,7 @@ Double-check your filters' values with <code>Get-WmiObject</code> if the integra
          - System
    ```
 
-2. [Restart the Agent][4] using the Agent Manager (or restart the service)
+2. [Restart the Agent][4] using the Agent Manager (or restart the service).
 
 ### Validation
 
@@ -151,7 +155,7 @@ The Win32 Event log check does not include any metrics.
 
 ### Events
 
-All Windows Event are forwarded to your Datadog application.
+All Windows events are forwarded to your Datadog application.
 
 ### Service Checks
 

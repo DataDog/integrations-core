@@ -16,6 +16,14 @@ LEGACY_INSTANCE = {'url': URL, 'use_preview': False}
 
 ETCD_VERSION = os.getenv('ETCD_VERSION')
 
+REMAPED_DEBUGGING_METRICS = [
+    'debugging.mvcc.db.total.size.in_bytes',
+    'debugging.mvcc.delete.total',
+    'debugging.mvcc.put.total',
+    'debugging.mvcc.range.total',
+    'debugging.mvcc.txn.total',
+]
+
 STORE_METRICS = [
     'compareanddelete.fail',
     'compareanddelete.success',

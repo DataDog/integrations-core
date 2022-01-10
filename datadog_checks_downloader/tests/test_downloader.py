@@ -23,6 +23,11 @@ from datadog_checks.downloader.download import REPOSITORY_URL_PREFIX
 log = logging.getLogger('test_downloader')
 IntegrationMetadata = namedtuple("IntegrationMetadata", ["version", "root_layout_type"])
 
+# Integrations released for the last time by a revoked developper but not shipped anymore.
+EXCLUDED_INTEGRATIONS = [
+    "datadog-docker-daemon",
+]
+
 
 def delete_files(files):
     for f in files:
@@ -115,6 +120,8 @@ def get_all_integrations_metadata():
             # An html file, safe to ignore
             continue
         integration_name, version = match.groups()
+        if integration_name in EXCLUDED_INTEGRATIONS:
+            continue
         root_layout_type = metadata['custom']['root-layout-type']
         assert root_layout_type in ('core', 'extras')
         known_version = results[integration_name].version
@@ -141,6 +148,8 @@ def test_downloader():
             if not match:
                 continue
             integration_name = match.group(1)
+            if integration_name in EXCLUDED_INTEGRATIONS:
+                continue
             if integration_name not in integrations_metadata:
                 raise Exception(
                     "Integration '{}' is in the simple index but does not have tuf metadata.".format(integration_name)

@@ -30,7 +30,7 @@ class GUnicornCheck(AgentCheck):
     # Worker state tags.
     IDLE_TAGS = ["state:idle"]
     WORKING_TAGS = ["state:working"]
-    SVC_NAME = "gunicorn.is_running"
+    IS_RUNNING_SVC = "gunicorn.is_running"
 
     def __init__(self, name, init_config, instances):
         AgentCheck.__init__(self, name, init_config, instances)
@@ -41,7 +41,7 @@ class GUnicornCheck(AgentCheck):
         return {"psutil": psutil.__version__}
 
     def check(self, instance):
-        """ Collect metrics for the given gunicorn instance. """
+        """Collect metrics for the given gunicorn instance."""
         self.log.debug("Running instance: %s", instance)
         custom_tags = instance.get('tags', [])
 
@@ -51,7 +51,7 @@ class GUnicornCheck(AgentCheck):
 
         # Load the gunicorn master procedure.
         proc_name = instance.get(self.PROC_NAME)
-        master_procs = self._get_master_proc_by_name(proc_name, custom_tags)
+        master_procs = self._get_master_proc_by_name(proc_name)
 
         if master_procs:
             # Fetch the worker procs and count their states.
@@ -60,17 +60,29 @@ class GUnicornCheck(AgentCheck):
 
             # if no workers are running, alert CRITICAL, otherwise OK
             msg = "%s working and %s idle workers for %s" % (working, idle, proc_name)
-            status = AgentCheck.CRITICAL if working == 0 and idle == 0 else AgentCheck.OK
             tags = ['app:' + proc_name] + custom_tags
+            if working == 0 and idle == 0:
+                status = AgentCheck.CRITICAL
+            else:
+                status = AgentCheck.OK
+                msg = None
 
-            self.service_check(self.SVC_NAME, status, tags=tags, message=msg)
+            self.service_check(self.IS_RUNNING_SVC, status, tags=tags, message=msg)
 
             # Submit the data.
             self.log.debug("instance %s procs - working:%s idle:%s", proc_name, working, idle)
             self.gauge("gunicorn.workers", working, tags + self.WORKING_TAGS)
             self.gauge("gunicorn.workers", idle, tags + self.IDLE_TAGS)
         else:
-            self.log.debug("No master process(es), skipping worker metrics")
+            # process not found, it's dead.
+            msg = "No gunicorn process with name %s found, skipping worker metrics" % proc_name
+            self.service_check(
+                self.IS_RUNNING_SVC,
+                AgentCheck.CRITICAL,
+                tags=['app:' + proc_name] + custom_tags,
+                message=msg,
+            )
+            self.warning(msg)
 
         self._collect_metadata()
 
@@ -120,8 +132,8 @@ class GUnicornCheck(AgentCheck):
 
         return working, idle
 
-    def _get_master_proc_by_name(self, name, tags):
-        """ Return a psutil process for the master gunicorn process with the given name. """
+    def _get_master_proc_by_name(self, name):
+        """Return a psutil process for the master gunicorn process with the given name."""
         master_name = GUnicornCheck._get_master_proc_name(name)
         master_procs = []
         for p in psutil.process_iter():
@@ -130,22 +142,12 @@ class GUnicornCheck(AgentCheck):
                     master_procs.append(p)
             except (IndexError, psutil.Error) as e:
                 self.log.debug("Cannot read information from process %s: %s", p.name(), e, exc_info=True)
-        if len(master_procs) == 0:
-            # process not found, it's dead.
-            msg = "No gunicorn process with name %s found" % name
-            self.service_check(
-                self.SVC_NAME,
-                AgentCheck.CRITICAL,
-                tags=['app:' + name] + tags,
-                message=msg,
-            )
-            self.warning(msg)
-        self.log.debug("There exist %s master process(es) with the name %s", len(master_procs), name)
+        self.log.debug("There are %s master process(es) with the name %s", len(master_procs), name)
         return master_procs
 
     @staticmethod
     def _get_master_proc_name(name):
-        """ Return the name of the master gunicorn process for the given proc name. """
+        """Return the name of the master gunicorn process for the given proc name."""
         # Here's an example of a process list for a gunicorn box with name web1
         # root     22976  0.1  0.1  60364 13424 ?        Ss   19:30   0:00 gunicorn: master [web1]
         # web      22984 20.7  2.3 521924 176136 ?       Sl   19:30   1:58 gunicorn: worker [web1]
@@ -161,7 +163,7 @@ class GUnicornCheck(AgentCheck):
             self.set_metadata('version', raw_version)
 
     def _get_version(self):
-        """ Get version from `gunicorn --version` """
+        """Get version from `gunicorn --version`"""
         cmd = '{} --version'.format(self.gunicorn_cmd)
         try:
             pc_out, pc_err, _ = get_subprocess_output(cmd, self.log, False)

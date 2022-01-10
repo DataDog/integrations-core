@@ -121,7 +121,7 @@ The work needed to migrate a pure Python check to wheels is not that much, see
 the ntp check for an example:
 https://github.com/DataDog/integrations-core/tree/massi/whl-poc/ntp
 
-The ability of the agent to progammatically import and run a single Python
+The ability of the agent to programmatically import and run a single Python
 module from a well known path in the filesystem will be preserved, so that
 we don't break any custom check in the wild.
 

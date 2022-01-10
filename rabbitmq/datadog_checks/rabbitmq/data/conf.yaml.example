@@ -47,7 +47,7 @@ instances:
 
     ## @param rabbitmq_api_url - string - required
     ## For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
-    ## url of the RabbitMQ Managment Plugin (http://www.rabbitmq.com/management.html).
+    ## url of the RabbitMQ Management Plugin (http://www.rabbitmq.com/management.html).
     #
   - rabbitmq_api_url: http://localhost:15672/api/
 
@@ -99,6 +99,8 @@ instances:
     ## @param queues_regexes - list of strings - optional
     ## Use the `queues_regexes` parameters to specify one or multiple regex to to match
     ## the queues you'd like to collect metrics on (up to 200 queues).
+    ## If you have vhosts set up, the regex pattern needs to be formatted with vhost
+    ## in the format of `<vhost>/<queue_name>`.
     ## If you have less than 200 queues, you don't have to set this parameter,
     ## the metrics are collected on all the queues by default.
     ## If you have `tag_families` enabled, the first captured group in the regex
@@ -202,10 +204,10 @@ instances:
     #
     # auth_type: basic
 
-    ## @param use_legacy_auth_encoding - boolean - optional - default: true
+    ## @param use_legacy_auth_encoding - boolean - optional - default: false
     ## When `auth_type` is set to `basic`, this determines whether to encode as `latin1` rather than `utf-8`.
     #
-    # use_legacy_auth_encoding: true
+    # use_legacy_auth_encoding: false
 
     ## @param username - string - optional
     ## The username to use if services are behind basic or digest auth.
@@ -408,6 +410,11 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
@@ -417,6 +424,11 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -453,7 +465,7 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.

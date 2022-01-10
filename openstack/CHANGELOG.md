@@ -1,5 +1,18 @@
 # CHANGELOG - openstack
 
+## 1.11.1 / 2021-10-04 / Agent 7.32.0
+
+* [Fixed] Add server as generic tag. See [#10100](https://github.com/DataDog/integrations-core/pull/10100).
+
+## 1.11.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Openstack log support. See [#9116](https://github.com/DataDog/integrations-core/pull/9116).
+* [Fixed] Include missing default config templates. See [#9150](https://github.com/DataDog/integrations-core/pull/9150).
+
+## 1.10.3 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.10.2 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).

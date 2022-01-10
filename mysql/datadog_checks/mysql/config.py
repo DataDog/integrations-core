@@ -13,11 +13,12 @@ class MySQLConfig(object):
         self.log = get_check_logger()
         self.host = instance.get('host', instance.get('server', ''))
         self.port = int(instance.get('port', 0))
+        self.reported_hostname = instance.get('reported_hostname', '')
         self.tags = list(instance.get('tags', []))
         self.mysql_sock = instance.get('sock', '')
         self.defaults_file = instance.get('defaults_file', '')
-        self.user = instance.get('user', '')
-        self.password = str(instance.get('pass', ''))
+        self.user = instance.get('username', instance.get('user', ''))
+        self.password = str(instance.get('password', instance.get('pass', '')))
         self.tags = self._build_tags(instance.get('tags', []))
         self.options = instance.get('options', {}) or {}  # options could be None if empty in the YAML
         replication_channel = self.options.get('replication_channel')
@@ -25,10 +26,33 @@ class MySQLConfig(object):
             self.tags.append("channel:{0}".format(replication_channel))
         self.queries = instance.get('queries', [])
         self.ssl = instance.get('ssl', {})
+        self.additional_status = instance.get('additional_status', [])
+        self.additional_variable = instance.get('additional_variable', [])
         self.connect_timeout = instance.get('connect_timeout', 10)
         self.max_custom_queries = instance.get('max_custom_queries', DEFAULT_MAX_CUSTOM_QUERIES)
         self.charset = instance.get('charset')
-        self.deep_database_monitoring = is_affirmative(instance.get('deep_database_monitoring', False))
+        self.dbm_enabled = is_affirmative(instance.get('dbm', instance.get('deep_database_monitoring', False)))
+        self.statement_metrics_limits = instance.get('statement_metrics_limits', None)
+        self.full_statement_text_cache_max_size = instance.get('full_statement_text_cache_max_size', 10000)
+        self.full_statement_text_samples_per_hour_per_query = instance.get(
+            'full_statement_text_samples_per_hour_per_query', 1
+        )
+        self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
+        self.statement_metrics_config = instance.get('query_metrics', {}) or {}
+        self.min_collection_interval = instance.get('min_collection_interval', 15)
+        obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
+        self.obfuscator_options = {
+            # Valid values for this can be found at
+            # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/database.md#connection-level-attributes
+            'dbms': 'mysql',
+            'replace_digits': obfuscator_options_config.get(
+                'replace_digits', obfuscator_options_config.get('quantize_sql_tables', False)
+            ),
+            'return_json_metadata': obfuscator_options_config.get('collect_metadata', False),
+            'table_names': obfuscator_options_config.get('collect_tables', True),
+            'collect_commands': obfuscator_options_config.get('collect_commands', True),
+            'collect_comments': obfuscator_options_config.get('collect_comments', True),
+        }
         self.configuration_checks()
 
     def _build_tags(self, custom_tags):

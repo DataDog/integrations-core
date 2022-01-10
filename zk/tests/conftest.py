@@ -7,6 +7,7 @@ import time
 from copy import deepcopy
 
 import pytest
+from six import StringIO
 
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev import RetryError, docker_run
@@ -89,7 +90,7 @@ def get_conn_failure_config():
         conn_failure_config = deepcopy(VALID_TLS_CONFIG_FOR_TEST)
     conn_failure_config['port'] = 2182
     conn_failure_config['expected_mode'] = 'down'
-    conn_failure_config['tags'] = []
+    conn_failure_config['tags'] = ["mytag"]
     return conn_failure_config
 
 
@@ -126,33 +127,29 @@ def dd_environment(get_instance):
             raise RetryError("Zookeeper failed to boot!")
         sys.stderr.write("ZK boot complete.\n")
 
+    is_tls = get_tls()
     compose_file = os.path.join(HERE, 'compose', 'zk.yaml')
     if [3, 5, 0] <= get_version() < [3, 6, 0]:
         compose_file = os.path.join(HERE, 'compose', 'zk35.yaml')
-        if get_tls():
+        if is_tls:
             compose_file = os.path.join(HERE, 'compose', 'zk35_ssl.yaml')
     elif get_version() >= [3, 6, 0]:
         compose_file = os.path.join(HERE, 'compose', 'zk36plus.yaml')
-        if get_tls():
+        if is_tls:
             compose_file = os.path.join(HERE, 'compose', 'zk36plus_ssl.yaml')
 
     private_key = os.path.join(HERE, 'compose/client', 'private_key.pem')
     cert = os.path.join(HERE, 'compose/client', 'cert.pem')
     ca_cert = os.path.join(HERE, 'compose/client', 'ca_cert.pem')
 
-    condition_tls = [
-        CheckDockerLogs(
-            compose_file,
-            'Starting server',
-        )
-    ]
-
-    if get_tls():
-        condition = condition_tls
+    if is_tls:
+        condition = [
+            CheckDockerLogs(compose_file, patterns=['Starting server', 'Started AdminServer', 'bound to port'])
+        ]
     else:
         condition = [condition_non_tls]
 
-    with docker_run(compose_file, conditions=condition):
+    with docker_run(compose_file, conditions=condition, sleep=5):
         yield get_instance, {
             'docker_volumes': [
                 '{}:/conf/private_key.pem'.format(private_key),
@@ -160,3 +157,14 @@ def dd_environment(get_instance):
                 '{}:/conf/ca_cert.pem'.format(ca_cert),
             ]
         }
+
+
+@pytest.fixture()
+def mock_mntr_output():
+    buffer = StringIO()
+    f_name = os.path.join(HERE, 'fixtures', 'mntr_metrics')
+    with open(f_name) as f:
+        data = f.read()
+        buffer.write(data)
+
+    yield buffer

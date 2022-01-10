@@ -7,6 +7,7 @@ from itertools import chain
 from time import time as timestamp
 
 import ibm_db
+from requests import ConnectionError
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.containers import iter_unique
@@ -51,22 +52,40 @@ class IbmDb2Check(AgentCheck):
 
         # Deduplicate
         self._custom_queries = list(iter_unique(custom_queries))
+        self._query_methods = (
+            self.query_instance,
+            self.query_database,
+            self.query_buffer_pool,
+            self.query_table_space,
+            self.query_transaction_log,
+            self.query_custom,
+        )
 
     def check(self, instance):
         if self._conn is None:
             connection = self.get_connection()
             if connection is None:
+                self.service_check(
+                    self.SERVICE_CHECK_CONNECT,
+                    self.CRITICAL,
+                    tags=self._tags,
+                    message="Unable to create new connection to database: {}".format(self._db),
+                )
                 return
 
             self._conn = connection
 
-        self.query_instance()
-        self.query_database()
-        self.query_buffer_pool()
-        self.query_table_space()
-        self.query_transaction_log()
-        self.query_custom()
+        self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
         self.collect_metadata()
+
+        for query_method in self._query_methods:
+            try:
+                query_method()
+            except ConnectionError:
+                raise
+            except Exception as e:
+                self.log.warning('Encountered error running `%s`: %s', query_method.__name__, str(e))
+                continue
 
     def collect_metadata(self):
         try:
@@ -548,9 +567,7 @@ class IbmDb2Check(AgentCheck):
                 self.log.error('Unable to connect with `%s`: %s', scrub_connection_string(target), e)
             else:  # no cov
                 self.log.error('Unable to connect to database `%s` as user `%s`: %s', target, username, e)
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags)
         else:
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             return connection
 
     @classmethod

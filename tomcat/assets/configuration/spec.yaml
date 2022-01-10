@@ -9,6 +9,7 @@ files:
     options:
     - template: instances/jmx
       overrides:
+        is_jmx.value.default: true
         host.value.example: localhost
         host.description: Tomcat JMX hostname to connect to.
         port.value.example: 9012

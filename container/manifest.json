@@ -1,0 +1,30 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "container.",
+  "metric_to_check": "container.uptime",
+  "name": "container",
+  "short_description": "Track your container metrics with Datadog",
+  "guid": "39d40858-0d56-4623-bd1d-864790d0c894",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "windows"
+  ],
+  "public_title": "Datadog-Container Integration",
+  "categories": [
+    "containers"
+  ],
+  "type": "check",
+  "is_public": false,
+  "display_name": "Container",
+  "creates_events": true,
+  "integration_id": "container",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}

@@ -1,5 +1,28 @@
 # CHANGELOG - Kube_controller_manager
 
+## 3.0.0 / 2022-01-08
+
+* [Added] Add kube_controller_manager config spec. See [#10505](https://github.com/DataDog/integrations-core/pull/10505).
+* [Fixed] Sync configuration spec. See [#10938](https://github.com/DataDog/integrations-core/pull/10938).
+* [Changed] Update the default value of the `bearer_token` parameter to send the bearer token only to secure https endpoints by default. See [#10708](https://github.com/DataDog/integrations-core/pull/10708).
+
+## 2.0.1 / 2021-08-25 / Agent 7.31.0
+
+* [Fixed] Correctly use SSL options for health checks. See [#9977](https://github.com/DataDog/integrations-core/pull/9977).
+
+## 2.0.0 / 2021-08-22
+
+* [Changed] Add service check for K8s API Server components. See [#9773](https://github.com/DataDog/integrations-core/pull/9773).
+
+## 1.9.0 / 2021-07-12 / Agent 7.30.0
+
+* [Added] Fix auto-discovery for latest versions on Kubernetes. See [#9575](https://github.com/DataDog/integrations-core/pull/9575).
+
+## 1.8.0 / 2021-03-07 / Agent 7.27.0
+
+* [Added] Add support for Kubernetes leader election based on Lease objects. See [#8535](https://github.com/DataDog/integrations-core/pull/8535).
+* [Fixed] Bump minimum base package version. See [#8770](https://github.com/DataDog/integrations-core/pull/8770) and [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.7.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
@@ -34,4 +57,3 @@
 
 * [Added] Track leader election status. See [#3101](https://github.com/DataDog/integrations-core/pull/3101).
 * [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
-

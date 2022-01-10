@@ -498,6 +498,18 @@ def test_parse_resources():
             'relations': {
                 'relation-group': [
                     {
+                        'typeref': 'clusters',
+                        'relation-count': {'units': 'quantity', 'value': 1},
+                        'relation': [
+                            {
+                                'roleref': 'foreign',
+                                'uriref': '/manage/v2/clusters/test-cluster',
+                                'idref': '123255818103205892753',
+                                'nameref': 'test-cluster',
+                            },
+                        ],
+                    },
+                    {
                         'typeref': 'databases',
                         'relation-count': {'units': 'quantity', 'value': 2},
                         'relation': [
@@ -547,6 +559,7 @@ def test_parse_resources():
     }
 
     EXPECTED_RESULT = [
+        {'id': '123255818103205892753', 'type': 'cluster', 'name': 'test-cluster', 'uri': '/clusters/test-cluster'},
         {'id': '255818103205892753', 'type': 'database', 'name': 'App-Services', 'uri': "/databases/App-Services"},
         {'id': '5004266825873163057', 'type': 'database', 'name': 'Documents', 'uri': "/databases/Documents"},
         {'id': '16024526243775340149', 'type': 'forest', 'name': 'Modules', 'uri': "/forests/Modules"},

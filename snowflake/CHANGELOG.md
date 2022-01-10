@@ -1,6 +1,32 @@
 # CHANGELOG - Snowflake
 
-## 3.0.1 / 2021-01-14
+## 4.0.1 / 2021-11-23
+
+* [Fixed] Fix default field name of schema. See [#10714](https://github.com/DataDog/integrations-core/pull/10714).
+
+## 4.0.0 / 2021-10-04 / Agent 7.32.0
+
+* [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
+* [Added] Add runtime configuration validation. See [#8983](https://github.com/DataDog/integrations-core/pull/8983).
+* [Added] Disable generic tags. See [#9854](https://github.com/DataDog/integrations-core/pull/9854).
+* [Fixed] Bump snowflake_connector_python and requests for Py3. See [#10060](https://github.com/DataDog/integrations-core/pull/10060).
+* [Changed] Add test for critical service check and fix namespace. See [#10062](https://github.com/DataDog/integrations-core/pull/10062).
+* [Removed] Drop support for Python 2 and bump requests. See [#10105](https://github.com/DataDog/integrations-core/pull/10105).
+
+## 3.1.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Pin snowflake-connector and requests. See [#9905](https://github.com/DataDog/integrations-core/pull/9905).
+* [Fixed] Revert request bump. See [#9912](https://github.com/DataDog/integrations-core/pull/9912).
+
+## 3.0.3 / 2021-07-12 / Agent 7.30.0
+
+* [Fixed] Bump base package dependency. See [#9666](https://github.com/DataDog/integrations-core/pull/9666).
+
+## 3.0.2 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+
+## 3.0.1 / 2021-01-14 / Agent 7.26.0
 
 * [Fixed] Do not throw configuration error for missing password when using OAuth. See [#8363](https://github.com/DataDog/integrations-core/pull/8363).
 

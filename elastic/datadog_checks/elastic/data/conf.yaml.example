@@ -68,6 +68,13 @@ instances:
     #
     # cluster_stats: false
 
+    ## @param detailed_index_stats - boolean - optional - default: false
+    ## If you want to obtain index-specific stats, use this flag with `cluster_stats` and `pshard_stats` set to true.
+    ## Without this flag you only get stats from `_all`.
+    ## Do not use it if you are pointing to localhost.
+    #
+    # detailed_index_stats: false
+
     ## @param index_stats - boolean - optional - default: false
     ## Set "index_stats" to true to collect metrics for individual indices.
     #
@@ -84,6 +91,12 @@ instances:
     #
     # pshard_stats: false
 
+    ## @param slm_stats - boolean - optional - default: false
+    ## Set "slm_stats" to true to collect statistics about Snapshot Lifcycle Management.
+    ## The user must have `manage_slm` cluster privilege to get these metrics.
+    #
+    # slm_stats: false
+
     ## @param pshard_graceful_timeout - boolean - optional - default: false
     ## Continue gracefully if pshard stats TO
     #
@@ -97,6 +110,12 @@ instances:
     #
     # pending_task_stats: true
 
+    ## @param cat_allocation_stats - boolean - optional - default: false
+    ## Enable to collect Elastic Cat Allocation metrics. Available only for Elasticsearch 5.0 or higher.
+    ## Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-allocation.html.
+    #
+    # cat_allocation_stats: false
+
     ## @param admin_forwarder - boolean - optional - default: false
     ## It is used to signify a URL that includes a context root
     ## needed for a forwarder application to access Elasticsearch REST services for example
@@ -109,6 +128,59 @@ instances:
     ## Note: Only for ES versions 0.9.10 or higher.
     #
     # gc_collectors_as_rate: false
+
+    ## @param disable_legacy_cluster_tag - boolean - optional - default: false
+    ## Enable to stop submitting the tag `cluster_name`, which has been renamed to `elastic_cluster`.
+    #
+    disable_legacy_cluster_tag: true
+
+    ## @param custom_queries - list of mappings - optional
+    ## Run custom queries for Elasticsearch. Each custom query endpoint can collect multiple metrics and tags.
+    ## Note: Each custom query requires an `endpoint`, `data_path`, and `columns` parameter. Each `columns` parameter
+    ## should have at least one value containing `name` and `value_path`.
+    ##
+    ## Each query can have the following parameters:
+    ##
+    ## 1. endpoint - The Elasticsearch API endpoint to query.
+    ##
+    ## 2. data_path - The JSON path up to, but not including, the metric. For example, if querying for size of parent
+    ##                circuit breaker, the full path is 'breakers.parent.estimated_size_in_bytes', which means the
+    ##                `data_path` is 'breakers.parent'.
+    ##
+    ## 3. columns - The list representing the data to be collected from the JSON query. There are two required pieces
+    ##              of data:
+    ##                a. value_path - This is the JSON path from the `data_path` to the metric. For example, if
+    ##                                querying for size of parent circuit breaker, the `value_path` is
+    ##                                `estimated_size_in_bytes`.
+    ##                b. name - The full metric name sent to Datadog. If `type` is `tag`, this column is considered a
+    ##                          tag and applied to every metric collected by this particular query.
+    ##
+    ##                c. type (optional) - An optional parameter to designates the type of data sent. Possible values
+    ##                                     for `type` include `gauge`, `monotonic_count`, `rate`, and `tag`, with
+    ##                                     `gauge` being the default.
+    ##
+    ## 4. payload (optional) - An optional payload can be included when querying the endpoint. This turns the GET
+    ##                         request into a POST request, so a read-only user should be used when writing
+    ##                         custom queries with a payload. Use YAML formatting when including a payload.
+    ##
+    ## Example:
+    ## - endpoint: /_search
+    ##   data_path: aggregations.genres.buckets
+    ##   payload:
+    ##     aggs:
+    ##       genres:
+    ##         terms:
+    ##           field: "id"
+    ##   columns:
+    ##   - value_path: key
+    ##     name: id
+    ##     type: tag
+    ##   - value_path: doc_count
+    ##     name: elasticsearch.doc_count
+    ##   tags:
+    ##   - custom_tag:1
+    #
+    # custom_queries: []
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -407,6 +479,11 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
@@ -417,13 +494,18 @@ instances:
     #
     # persist_connections: false
 
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
+
 ## Log Section
 ##
 ## type - required - Type of log input source (tcp / udp / file / windows_event)
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.

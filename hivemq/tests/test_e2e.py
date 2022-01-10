@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.dev.jmx import JVM_E2E_METRICS
+from datadog_checks.dev.jmx import JVM_E2E_METRICS_NEW
 
 pytestmark = [pytest.mark.e2e]
 
@@ -208,7 +208,7 @@ METRICS = [
     'hivemq.topic_alias.count.total',
     'hivemq.topic_alias.memory.usage',
 ]
-METRICS.extend(JVM_E2E_METRICS)
+METRICS.extend(JVM_E2E_METRICS_NEW)
 
 
 def test(dd_agent_check):

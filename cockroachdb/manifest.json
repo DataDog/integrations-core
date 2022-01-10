@@ -18,7 +18,8 @@
   "categories": [
     "cloud",
     "data store",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "type": "check",
   "is_public": true,
@@ -32,7 +33,9 @@
       "CockroachDB Overview": "assets/dashboards/overview.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "cockroachdb"
+    },
     "metrics_metadata": "metadata.csv"
   }
 }

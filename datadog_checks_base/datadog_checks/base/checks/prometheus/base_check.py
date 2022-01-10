@@ -142,7 +142,7 @@ class GenericPrometheusCheck(AgentCheck):
         scraper.NAMESPACE = namespace
         # Metrics are preprocessed if no mapping
         metrics_mapper = {}
-        # We merge list and dictionnaries from optional defaults & instance settings
+        # We merge list and dictionaries from optional defaults & instance settings
         metrics = default_instance.get("metrics", []) + instance.get("metrics", [])
         for metric in metrics:
             if isinstance(metric, string_types):

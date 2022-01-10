@@ -8,7 +8,7 @@ from io import StringIO
 import click
 from six import iteritems
 
-from ....utils import read_file_lines, write_file
+from ....fs import read_file_lines, write_file
 from ...constants import get_integration_changelog
 from ...testing import complete_active_checks
 from ...utils import get_valid_checks

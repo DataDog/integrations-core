@@ -2,13 +2,10 @@
 
 ## Download the IBM MQ Client
 
-```bash
-curl https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/mqdev/mactoolkit/9.1.5.0-IBM-MQ-Toolkit-MacX64.tar.gz \
-    -o /tmp/9.1.5.0-IBM-MQ-Toolkit-MacX64.tar.gz
+You can find it here: 
+https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/mqdev/mactoolkit/9.2.2.0-IBM-MQ-Toolkit-MacX64.pkg
 
-sudo mkdir /opt/mqm
-sudo tar -C /opt/mqm -xf /tmp/*-IBM-MQ-Toolkit-MacX64.tar.gz
-```
+Follow the instructions in the installation guide to update your PATH.
 
 ## Verify it works
 

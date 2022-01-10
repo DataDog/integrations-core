@@ -27,7 +27,7 @@ def get_dependencies():
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog-checks-base>=11.0.0'
+CHECKS_BASE_REQ = 'datadog-checks-base>=22.0.0'
 
 setup(
     name='datadog-consul',
@@ -52,6 +52,8 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.8',
     ],
     packages=['datadog_checks.consul'],
     # Run-time dependencies

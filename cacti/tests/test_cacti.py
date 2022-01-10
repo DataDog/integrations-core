@@ -115,12 +115,12 @@ def check():
 pytestmark = pytest.mark.unit
 
 
-def test_check(aggregator, check):
+def test_check(aggregator, check, dd_run_check):
     mocks = _setup_mocks()
 
     # Run the check twice to set the timestamps and capture metrics on the second run
-    check.check(CACTI_CONFIG)
-    check.check(CACTI_CONFIG)
+    dd_run_check(check)
+    dd_run_check(check)
 
     for mock_func in mocks:
         mock_func.stop()
@@ -135,7 +135,7 @@ def test_check(aggregator, check):
     aggregator.assert_all_metrics_covered()
 
 
-def test_whitelist(aggregator):
+def test_whitelist(aggregator, dd_run_check):
     config = deepcopy(CACTI_CONFIG)
     config['rrd_whitelist'] = os.path.join(HERE, 'whitelist.txt')
     check = CactiCheck('cacti', {}, [config])
@@ -143,8 +143,8 @@ def test_whitelist(aggregator):
     mocks = _setup_mocks()
 
     # Run the check twice to set the timestamps and capture metrics on the second run
-    check.check(config)
-    check.check(config)
+    dd_run_check(check)
+    dd_run_check(check)
 
     for mock_func in mocks:
         mock_func.stop()

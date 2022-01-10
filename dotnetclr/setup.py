@@ -25,7 +25,7 @@ def get_dependencies():
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog-checks-base>=11.4.0'
+CHECKS_BASE_REQ = 'datadog-checks-base>=23.3.2'
 
 setup(
     name='datadog-dotnetclr',
@@ -50,6 +50,8 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.8',
     ],
     # The package we're going to ship
     packages=['datadog_checks.dotnetclr'],

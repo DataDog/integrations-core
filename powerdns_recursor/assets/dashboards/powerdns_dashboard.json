@@ -1,0 +1,196 @@
+{
+    "title": "PowerDNS Recursor - Overview",
+    "description": "",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:powerdns.recursor.questions{*}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Question rate",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 12,
+                "y": 16,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:powerdns.recursor.answers_slow{*}, avg:powerdns.recursor.answers100_1000{*}, avg:powerdns.recursor.answers10_100{*}, avg:powerdns.recursor.answers1_10{*}, avg:powerdns.recursor.answers0_1{*}",
+                        "display_type": "area"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Slow answers",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 61,
+                "y": 16,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:powerdns.recursor.cache_hits{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:powerdns.recursor.cache_misses{*}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Cache hits and misses",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 110,
+                "y": 16,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:powerdns.recursor.servfail_answers{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:powerdns.recursor.noerror_answers{*}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Answers",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 61,
+                "y": 0,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:powerdns.recursor.all_outqueries{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:powerdns.recursor.tcp_outqueries{*}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Outqueries",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 110,
+                "y": 0,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "toplist",
+                "requests": [
+                    {
+                        "q": "powerdns.recursor.questions{*} by {host}"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Question rate by host top list",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                }
+            },
+            "layout": {
+                "x": 12,
+                "y": 0,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 6,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/logos/powerdns_large.svg",
+                "sizing": "fit"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 11,
+                "height": 12
+            }
+        }
+    ],
+    "template_variables": [],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 97
+}

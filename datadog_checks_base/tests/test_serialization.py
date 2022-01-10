@@ -19,12 +19,5 @@ def load_serialization_module(caplog):
 
 
 @pytest.mark.skipif(PY2, reason='Dependency orjson does not support Python 2')
-def test_fast_json(caplog):
+def test_fast_json():
     assert serialization.json.__name__ == 'orjson'
-
-    expected_message = 'Using JSON implementation from orjson'
-    for record in caplog.get_records('setup'):
-        if record.levelno == logging.DEBUG and record.message == expected_message:
-            break
-    else:
-        raise AssertionError('Expected DEBUG log with message `{}`'.format(expected_message))

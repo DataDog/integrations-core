@@ -2,15 +2,16 @@
 #
 instances:
 
-    ## @param host - string - required
+  -
+    ## @param host - string - optional - default: localhost
     ## Aerospike host to connect to.
     #
-  - host: localhost
+    # host: localhost
 
-    ## @param port - integer - required
+    ## @param port - integer - optional - default: 3000
     ## Aerospike port to connect to.
     #
-    port: 3000
+    # port: 3000
 
     ## @param username - string - optional
     ## The database user to authenticate as.
@@ -65,14 +66,17 @@ instances:
     #   - migrate_tx_objs
 
     ## @param namespaces - list of strings - optional
-    ## all namespaces are collected by default. If you want to collect specific namespaces specify them here.
+    ## All namespaces are collected by default. If you want to collect specific namespaces specify them here.
     #
     # namespaces:
     #   - example_namespace
     #   - another_example_namespace
 
     ## @param datacenters - list of strings - optional
-    ## all datacenters are collected by default. If you want to collect specific datacenters specify them here.
+    ## For Aerospike v4 or lower, all datacenters are collected by default.
+    ## If you want to collect specific datacenters specify them here.
+    ##
+    ## Aerospike v5 or higher, you must specify a list of datacenters to monitor XDR metrics.
     #
     # datacenters:
     #   - example_datacenter
@@ -139,7 +143,7 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
@@ -157,9 +161,9 @@ instances:
 #
 init_config:
 
-    ## @param mappings - list of strings - required
+    ## @param mappings - list of strings - optional
     ## Rate mappings. DO NOT EDIT unless you know what you're doing.
-    ## See https://github.com/aerospike/aerospike-collectd/blob/develop/aerospike_schema.yaml
+    ## See https://github.com/aerospike-community/aerospike-collectd/blob/master/aerospike_schema.yaml
     ## for the definitive list
     #
     mappings:

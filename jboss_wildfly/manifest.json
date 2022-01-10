@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "jboss_wildfly",
   "metric_prefix": "jboss.",
-  "metric_to_check": "",
+  "metric_to_check": "jboss.jdbc_connections.count",
   "creates_events": false,
   "short_description": "Gathers various JMX metrics from JBoss and WildFly Applications",
   "guid": "ff99b3d2-9c14-4cdf-b869-7b8b1cbf0716",

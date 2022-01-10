@@ -10,10 +10,13 @@ from datadog_checks.zk import ZookeeperCheck
 ZK_VERSION = os.environ['ZK_VERSION']
 
 
-STAT_METRICS = [
+LATENCY_METRICS = [
     'zookeeper.latency.min',
     'zookeeper.latency.avg',
     'zookeeper.latency.max',
+]
+
+STAT_METRICS = [
     'zookeeper.bytes_received',
     'zookeeper.bytes_sent',
     'zookeeper.connections',
@@ -372,6 +375,11 @@ def assert_service_checks_ok(aggregator):
 def assert_stat_metrics(aggregator):
     for mname in STAT_METRICS:
         aggregator.assert_metric(mname, tags=["mode:standalone", "mytag"])
+
+
+def assert_latency_metrics(aggregator):
+    for mname in LATENCY_METRICS:
+        aggregator.assert_metric(mname, tags=["mode:standalone", "mytag"], at_least=0)
 
 
 def assert_mntr_metrics_by_version(aggregator, skip=None):

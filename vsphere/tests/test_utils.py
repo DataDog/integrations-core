@@ -46,6 +46,7 @@ def test_should_collect_per_instance_values(metric_name, resource_type, expect_m
             'password': 'baz',
             'collect_per_instance_filters': {'vm': [r'cpu\..*\.sum']},
         },
+        {},
         None,
     )
 

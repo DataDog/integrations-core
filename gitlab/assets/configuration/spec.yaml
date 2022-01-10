@@ -5,7 +5,6 @@ files:
   - template: instances
     options:
     - name: gitlab_url
-      required: true
       description: |
         The master URL to probe for service health status
         If you are using gitlab CE and not EE, use this URL with

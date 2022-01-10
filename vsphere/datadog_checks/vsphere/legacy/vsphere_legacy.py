@@ -479,7 +479,7 @@ class VSphereLegacyCheck(AgentCheck):
         """
         Explore vCenter infrastructure to discover hosts, virtual machines, etc.
         and compute their associated tags.
-        Start at the vCenter `rootFolder`, so as to collect every objet.
+        Start at the vCenter `rootFolder`, so as to collect every object.
 
         Example topology:
             ```
@@ -1010,7 +1010,7 @@ class VSphereLegacyCheck(AgentCheck):
             if self.exception_printed > 0:
                 self.log.error("One thread in the pool crashed, check the logs")
         except Exception as e:
-            self.log.error("An exception occured while collecting vSphere metrics: %s", e)
+            self.log.error("An exception occurred while collecting vSphere metrics: %s", e)
             if self.pool:
                 self.terminate_pool()
             raise

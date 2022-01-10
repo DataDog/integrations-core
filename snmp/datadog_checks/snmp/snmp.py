@@ -8,15 +8,17 @@ import ipaddress
 import json
 import re
 import threading
+import time
 import weakref
 from collections import defaultdict
 from concurrent import futures
-from typing import Any, DefaultDict, Dict, List, Optional, Tuple
+from typing import Any, DefaultDict, Dict, List, Optional, Pattern, Tuple
 
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
+from datadog_checks.snmp.utils import extract_value
 
 from .commands import snmp_bulk, snmp_get, snmp_getnext
 from .compat import read_persistent_cache, write_persistent_cache
@@ -39,6 +41,7 @@ from .utils import (
 )
 
 DEFAULT_OID_BATCH_SIZE = 10
+LOADER_TAG = 'loader:python'
 
 _MAX_FETCH_NUMBER = 10 ** 6
 
@@ -81,6 +84,8 @@ class SnmpCheck(AgentCheck):
         self._config = self._build_config(self.instance)
 
         self._last_fetch_number = 0
+
+        self._submitted_metrics = 0
 
     def _get_next_fetch_id(self):
         # type: () -> str
@@ -213,10 +218,15 @@ class SnmpCheck(AgentCheck):
         )
         for oid in config.oid_config.bulk_oids:
             try:
-                self.log.debug('[%s] Running SNMP command getBulk on OID %s', fetch_id, oid)
+                oid_object_type = oid.as_object_type()
+                self.log.debug(
+                    '[%s] Running SNMP command getBulk on OID %s',
+                    fetch_id,
+                    OIDPrinter((oid_object_type,), with_values=False),
+                )
                 binds = snmp_bulk(
                     config,
-                    oid.as_object_type(),
+                    oid_object_type,
                     self._NON_REPEATERS,
                     self._MAX_REPETITIONS,
                     enforce_constraints,
@@ -362,7 +372,10 @@ class SnmpCheck(AgentCheck):
 
     def check(self, instance):
         # type: (Dict[str, Any]) -> None
+        start_time = time.time()
+        self._submitted_metrics = 0
         config = self._config
+
         if config.ip_network:
             if self._thread is None:
                 self._start_discovery()
@@ -378,16 +391,30 @@ class SnmpCheck(AgentCheck):
                 future.add_done_callback(functools.partial(self._on_check_device_done, host))
             futures.wait(sent)
 
-            tags = ['network:{}'.format(config.ip_network)]
+            tags = ['network:{}'.format(config.ip_network), 'autodiscovery_subnet:{}'.format(config.ip_network)]
             tags.extend(config.tags)
             self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
         else:
-            self._check_device(config)
+            _, tags = self._check_device(config)
+
+        self.submit_telemetry_metrics(start_time, tags)
+
+    def submit_telemetry_metrics(self, start_time, tags):
+        # type: (float, List[str]) -> None
+        telemetry_tags = tags + [LOADER_TAG]
+        # Performance Metrics
+        # - for single device, tags contain device specific tags
+        # - for network, tags contain network tags, but won't contain individual device tags
+        check_duration = time.time() - start_time
+        self.monotonic_count('datadog.snmp.check_interval', time.time(), tags=telemetry_tags)
+        self.gauge('datadog.snmp.check_duration', check_duration, tags=telemetry_tags)
+        self.gauge('datadog.snmp.submitted_metrics', self._submitted_metrics, tags=telemetry_tags)
 
     def _on_check_device_done(self, host, future):
         # type: (str, futures.Future) -> None
         config = self._config
-        if future.result():
+        error, _ = future.result()
+        if error:
             config.failing_instances[host] += 1
             if config.failing_instances[host] >= config.allowed_failures:
                 # Remove it from discovered instances, we'll re-discover it later if it reappears
@@ -399,7 +426,7 @@ class SnmpCheck(AgentCheck):
             config.failing_instances.pop(host, None)
 
     def _check_device(self, config):
-        # type: (InstanceConfig) -> Optional[str]
+        # type: (InstanceConfig) -> Tuple[Optional[str], List[str]]
         # Reset errors
         if config.device is None:
             raise RuntimeError('No device set')  # pragma: no cover
@@ -437,7 +464,7 @@ class SnmpCheck(AgentCheck):
 
             # Sending `snmp.devices_monitored` with value 1 will allow users to count devices
             # by using `sum by {X}` queries in UI. X being a tag like `autodiscovery_subnet`, `snmp_profile`, etc
-            self.gauge('snmp.devices_monitored', 1, tags=tags)
+            self.gauge('snmp.devices_monitored', 1, tags=tags + [LOADER_TAG])
 
             # Report service checks
             status = self.OK
@@ -446,7 +473,7 @@ class SnmpCheck(AgentCheck):
                 if results:
                     status = self.WARNING
             self.service_check(self.SC_STATUS, status, tags=tags, message=error)
-        return error
+        return error, tags
 
     def extract_metric_tags(self, metric_tags, results):
         # type: (List[SymbolTag], Dict[str, dict]) -> List[str]
@@ -488,7 +515,9 @@ class SnmpCheck(AgentCheck):
             if isinstance(metric, ParsedTableMetric):
                 for index, val in iteritems(results[name]):
                     metric_tags = tags + self.get_index_tags(index, results, metric.index_tags, metric.column_tags)
-                    self.submit_metric(name, val, metric.forced_type, metric_tags, metric.options)
+                    self.submit_metric(
+                        name, val, metric.forced_type, metric_tags, metric.options, metric.extract_value_pattern
+                    )
                     self.try_submit_bandwidth_usage_metric_if_bandwidth_metric(name, index, results, metric_tags)
             else:
                 result = list(results[name].items())
@@ -499,7 +528,9 @@ class SnmpCheck(AgentCheck):
                         continue
                 val = result[0][1]
                 metric_tags = tags + metric.tags
-                self.submit_metric(name, val, metric.forced_type, metric_tags, metric.options)
+                self.submit_metric(
+                    name, val, metric.forced_type, metric_tags, metric.options, metric.extract_value_pattern
+                )
 
     BANDWIDTH_METRIC_NAME_TO_BANDWIDTH_USAGE_METRIC_NAME_MAPPING = {
         'ifHCInOctets': 'ifBandwidthInUsage',
@@ -602,6 +633,7 @@ class SnmpCheck(AgentCheck):
             bandwidth_usage_value,
             tags,
         )
+        self._submitted_metrics += 1
 
     def get_index_tags(
         self,
@@ -619,7 +651,7 @@ class SnmpCheck(AgentCheck):
            index of the value we want to extract from the index tuple.
            cf. 1 for ipVersion in the IP-MIB::ipSystemStatsTable for example
          - Those specified in column_tags contain the name of a column, which
-           could be a potential result, to use as a tage
+           could be a potential result, to use as a tag
            cf. ifDescr in the IF-MIB::ifTable for example
         """
         tags = []  # type: List[str]
@@ -661,30 +693,30 @@ class SnmpCheck(AgentCheck):
 
     def monotonic_count_and_rate(self, metric, value, tags):
         # type: (str, Any, List[str]) -> None
-        """Specific submission method which sends a metric both as a monotonic cound and a rate."""
+        """Specific submission method which sends a metric both as a monotonic count and a rate."""
         self.monotonic_count(metric, value, tags=tags)
         self.rate("{}.rate".format(metric), value, tags=tags)
 
-    def submit_metric(self, name, snmp_value, forced_type, tags, options):
-        # type: (str, Any, Optional[str], List[str], dict) -> None
+    def submit_metric(self, name, snmp_value, forced_type, tags, options, extract_value_pattern):
+        # type: (str, Any, Optional[str], List[str], dict, Optional[Pattern]) -> None
         """
         Convert the values reported as pysnmp-Managed Objects to values and
         report them to the aggregator.
         """
         try:
-            self._do_submit_metric(name, snmp_value, forced_type, tags, options)
+            self._do_submit_metric(name, snmp_value, forced_type, tags, options, extract_value_pattern)
         except Exception as e:
             msg = (
                 'Unable to submit metric `{}` with '
-                'value=`{}` ({}), forced_type=`{}`, tags=`{}`, options=`{}`: {}'.format(
-                    name, snmp_value, type(snmp_value), forced_type, tags, options, e
+                'value=`{}` ({}), forced_type=`{}`, tags=`{}`, options=`{}`, extract_value_pattern=`{}`: {}'.format(
+                    name, snmp_value, type(snmp_value), forced_type, tags, options, extract_value_pattern, e
                 )
             )
             self.log.warning(msg)
             self.log.debug(msg, exc_info=True)
 
-    def _do_submit_metric(self, name, snmp_value, forced_type, tags, options):
-        # type: (str, Any, Optional[str], List[str], dict) -> None
+    def _do_submit_metric(self, name, snmp_value, forced_type, tags, options, extract_value_pattern):
+        # type: (str, Any, Optional[str], List[str], dict, Optional[Pattern]) -> None
 
         if reply_invalid(snmp_value):
             # Metrics not present in the queried object
@@ -696,6 +728,9 @@ class SnmpCheck(AgentCheck):
         else:
             metric_name = self.normalize(name, prefix='snmp')
 
+        if extract_value_pattern:
+            snmp_value = extract_value(extract_value_pattern, snmp_value.prettyPrint())
+
         if forced_type is not None:
             metric = as_metric_with_forced_type(snmp_value, forced_type, options)
         else:
@@ -706,3 +741,7 @@ class SnmpCheck(AgentCheck):
 
         submit_func = getattr(self, metric['type'])
         submit_func(metric_name, metric['value'], tags=tags)
+
+        if metric['type'] == 'monotonic_count_and_rate':
+            self._submitted_metrics += 1
+        self._submitted_metrics += 1

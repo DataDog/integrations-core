@@ -1,0 +1,78 @@
+name: test
+files:
+- name: test.yaml
+  options:
+  - template: init_config
+    options:
+    - name: timeout
+      description: words
+      value:
+        type: number
+    - name: deprecated
+      description: words
+      deprecation:
+        Agent_Version: 8.0.0
+        Migration: |
+          do this
+          and that
+      value:
+        type: string
+  - template: instances
+    options:
+    - name: text
+      description: words
+      value:
+        type: string
+    - name: flag
+      description: words
+      value:
+        type: boolean
+        example: false
+    - name: timeout
+      description: words
+      value:
+        type: number
+    - name: pid
+      description: words
+      value:
+        type: integer
+    - name: array
+      description: words
+      value:
+        type: array
+        items:
+          type: string
+    - name: mapping
+      description: words
+      value:
+        type: object
+    - name: obj
+      description: words
+      value:
+        type: object
+        required:
+        - foo
+        properties:
+        - name: foo
+          type: boolean
+        - name: bar
+          type: array
+          items:
+            type: string
+    - name: deprecated
+      description: words
+      deprecation:
+        Agent version: 9.0.0
+        Migration: |
+          do this
+          and that
+      value:
+        type: string
+    - name: pass
+      description: words
+      value:
+        type: string
+    - name: hyphenated-name
+      description: words
+      value:
+        type: string

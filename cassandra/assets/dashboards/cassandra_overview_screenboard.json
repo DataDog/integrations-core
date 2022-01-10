@@ -1,0 +1,1046 @@
+{
+    "author_name": "Datadog",
+    "description": "Using this dashboard, you can get a high-level view of your Cassandra metrics related to performance, resource utilization, and nodetool. You can use it as a jumping-off point for troubleshooting with our more specialized dashboards covering the [read path](https://app.datadoghq.com/dash/integration/24/cassandra---read-path), [write path](https://app.datadoghq.com/dash/integration/25/cassandra---write-path), and [SSTable management](https://app.datadoghq.com/dash/integration/234/cassandra---sstable-management). Further reading on Cassandra monitoring:\n\n- [Datadog's blog post describing our suite of Cassandra dashboards](https://www.datadoghq.com/blog/tlp-cassandra-dashboards/)\n\n- [Our guide to key metrics for Cassandra monitoring](https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics/)\n\n- [How to collect Cassandra metrics using built-in Cassandra and JDK tools](https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics/)\n\n- [How to monitor Cassandra using Datadog](https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog/)\n\n- [Datadog's integration docs for Cassandra](https://docs.datadoghq.com/integrations/cassandra/)\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.",
+    "layout_type": "free",
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "environment",
+            "prefix": "environment"
+        },
+        {
+            "default": "*",
+            "name": "datacenter",
+            "prefix": "datacenter"
+        },
+        {
+            "default": "*",
+            "name": "host",
+            "prefix": "host"
+        }
+    ],
+    "title": "Cassandra Overview",
+    "widgets": [
+        {
+            "definition": {
+                "sizing": "fit",
+                "type": "image",
+                "url": "/static/images/logos/cassandra_large.svg"
+            },
+            "id": 0,
+            "layout": {
+                "height": 13,
+                "width": 27,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Garbage Collection",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 1,
+            "layout": {
+                "height": 5,
+                "width": 51,
+                "x": 82,
+                "y": 59
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [
+                    {
+                        "display_type": "error dashed",
+                        "label": "\u00a075 %\u00a0",
+                        "value": "y = 75"
+                    }
+                ],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:system.cpu.idle{$environment,$datacenter,$host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "line",
+                        "q": "avg:system.cpu.user{$environment,$datacenter,$host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "line",
+                        "q": "avg:system.cpu.guest{$environment,$datacenter,$host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "line",
+                        "q": "avg:system.cpu.iowait{$environment,$datacenter,$host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "line",
+                        "q": "avg:system.cpu.stolen{$environment,$datacenter,$host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "line",
+                        "q": "avg:system.cpu.system{$environment,$datacenter,$host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "CPU Usage",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 2,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 29,
+                "y": 43
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "System Resource Utilization",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 3,
+            "layout": {
+                "height": 5,
+                "width": 51,
+                "x": 29,
+                "y": 37
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "area",
+                        "on_right_yaxis": false,
+                        "q": "avg:system.mem.total{$environment,$datacenter,$host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "area",
+                        "on_right_yaxis": false,
+                        "q": "avg:system.mem.total{$environment,$datacenter,$host}, avg:system.mem.usable{$environment,$datacenter,$host}, avg:system.mem.total{$environment,$datacenter,$host}-avg:system.mem.usable{$environment,$datacenter,$host}",
+                        "style": {
+                            "line_type": "dashed",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Memory Usage",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 4,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 55,
+                "y": 43
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [
+                    {
+                        "display_type": "error dashed",
+                        "label": "That many dropped messages is definitely an issue!",
+                        "value": "y = 50"
+                    },
+                    {
+                        "display_type": "warning solid",
+                        "label": "It happens that some messages get dropped...",
+                        "value": "y = 10"
+                    }
+                ],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:cassandra.dropped.one_minute_rate{$environment,$datacenter,$host} by {host,droppedmessage,datacenter}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Latency",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 5,
+            "layout": {
+                "height": 14,
+                "width": 33,
+                "x": 47,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [
+                    {
+                        "display_type": "error dashed",
+                        "label": "15% of the time spent in Garbage Collection (STW GC)",
+                        "value": "y = 150"
+                    }
+                ],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:jmx.gc.minor_collection_time{$environment,$datacenter,$host} by {datacenter,host}+avg:jmx.gc.major_collection_count{$environment,$datacenter,$host} by {datacenter,host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Stop the world GC average per datacenter (Minor + Major GC)",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 7,
+            "layout": {
+                "height": 14,
+                "width": 51,
+                "x": 82,
+                "y": 65
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "avg:cassandra.nodetool.status.load{$environment,$datacenter,$host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Data without Snapshot Content",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 9,
+            "layout": {
+                "height": 14,
+                "width": 33,
+                "x": 47,
+                "y": 65
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "SSTable",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 10,
+            "layout": {
+                "height": 5,
+                "width": 51,
+                "x": 82,
+                "y": 37
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "max:cassandra.live_ss_table_count{$environment,$datacenter,$host} by {host,datacenter}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "SSTable count",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 12,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 108,
+                "y": 43
+            }
+        },
+        {
+            "definition": {
+                "check": "cassandra.can_connect",
+                "group_by": [],
+                "grouping": "cluster",
+                "tags": [
+                    "*"
+                ],
+                "title": "Can Connect",
+                "title_align": "center",
+                "title_size": "16",
+                "type": "check_status"
+            },
+            "id": 14,
+            "layout": {
+                "height": 10,
+                "width": 17,
+                "x": 29,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "columns": [
+                    "host",
+                    "service"
+                ],
+                "indexes": [],
+                "message_display": "expanded-md",
+                "query": "source:(cassandra OR cassandra_nodetool) $environment $datacenter $host",
+                "show_date_column": true,
+                "show_message_column": true,
+                "sort": {
+                    "column": "time",
+                    "order": "desc"
+                },
+                "title": "Log Events",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "log_stream"
+            },
+            "id": 15,
+            "layout": {
+                "height": 73,
+                "width": 47,
+                "x": 158,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Logs",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 16,
+            "layout": {
+                "height": 5,
+                "width": 47,
+                "x": 158,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "content": "Using this dashboard, you can get a high-level view of your Cassandra metrics related to performance, resource utilization, and nodetool. You can use it as a jumping-off point for troubleshooting with our more specialized dashboards covering the [read path](https://app.datadoghq.com/dash/integration/24/cassandra---read-path), [write path](https://app.datadoghq.com/dash/integration/25/cassandra---write-path), and [SSTable management](https://app.datadoghq.com/dash/integration/234/cassandra---sstable-management). Further reading on Cassandra monitoring:\n\n- [Datadog's blog post describing our suite of Cassandra dashboards](https://www.datadoghq.com/blog/tlp-cassandra-dashboards/)\n\n- [Our guide to key metrics for Cassandra monitoring](https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics/)\n\n- [How to collect Cassandra metrics using built-in Cassandra and JDK tools](https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics/)\n\n- [How to monitor Cassandra using Datadog](https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog/)\n\n- [Datadog's integration docs for Cassandra](https://docs.datadoghq.com/integrations/cassandra/)\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 17,
+            "layout": {
+                "height": 47,
+                "width": 27,
+                "x": 0,
+                "y": 14
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Status",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 18,
+            "layout": {
+                "height": 5,
+                "width": 51,
+                "x": 29,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "sum:cassandra.latency.one_minute_rate{$environment,$datacenter,$host,clientrequest:read} by {datacenter,clientrequest}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Read requests counts",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 19,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 29,
+                "y": 21
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Performance",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 20,
+            "layout": {
+                "height": 5,
+                "width": 51,
+                "x": 82,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:cassandra.latency.75th_percentile{type:clientrequest,clientrequest:read,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "line",
+                        "q": "avg:cassandra.latency.95th_percentile{type:clientrequest,clientrequest:read,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "style": {
+                            "line_type": "dotted",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Read Latencies",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 21,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 82,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "area",
+                        "on_right_yaxis": false,
+                        "q": "avg:cassandra.write_latency.75th_percentile{$environment,$datacenter,$host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "area",
+                        "on_right_yaxis": false,
+                        "q": "avg:cassandra.write_latency.95th_percentile{$environment,$datacenter,$host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "area",
+                        "on_right_yaxis": false,
+                        "q": "avg:cassandra.write_latency.99th_percentile{$environment,$datacenter,$host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Write Latencies",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 22,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 108,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "sum:cassandra.latency.one_minute_rate{$environment,$datacenter,$host,clientrequest:write} by {datacenter,clientrequest}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Write request counts",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 24,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 55,
+                "y": 21
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Cassandra Nodetool",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 8320430180073902,
+            "layout": {
+                "height": 5,
+                "width": 51,
+                "x": 29,
+                "y": 59
+            }
+        },
+        {
+            "definition": {
+                "check": "cassandra.nodetool.node_up",
+                "group_by": [],
+                "grouping": "cluster",
+                "tags": [
+                    "*"
+                ],
+                "title": "Node Up",
+                "title_align": "center",
+                "title_size": "16",
+                "type": "check_status"
+            },
+            "id": 1905386439327938,
+            "layout": {
+                "height": 10,
+                "width": 17,
+                "x": 29,
+                "y": 65
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:cassandra.nodetool.status.replication_availability{$environment,$datacenter,$host}"
+                    }
+                ],
+                "title": "Replication availability",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 7615827435866368,
+            "layout": {
+                "height": 10,
+                "width": 17,
+                "x": 29,
+                "y": 76
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Cassandra nodetool is a command line interface for managing a cluster. These metrics are collected by the `cassandra_nodetool` integration. To view these metrics, follow the [setup instructions](https://docs.datadoghq.com/integrations/cassandra/?tab=host#agent-check-cassandra-nodetool) to install `cassandra_nodetool`. ",
+                "font_size": "14",
+                "has_padding": true,
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note",
+                "vertical_align": "top"
+            },
+            "id": 8147633481670464,
+            "layout": {
+                "height": 24,
+                "width": 18,
+                "x": 9,
+                "y": 63
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:cassandra.latency.75th_percentile{type:clientrequest,clientrequest:casread,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "line",
+                        "q": "avg:cassandra.latency.75th_percentile{type:clientrequest,clientrequest:caswrite,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "line",
+                        "q": "avg:cassandra.latency.75th_percentile{type:clientrequest,clientrequest:rangeslice,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "line",
+                        "q": "avg:cassandra.latency.75th_percentile{type:clientrequest,clientrequest:viewwrite,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "line",
+                        "q": "avg:cassandra.latency.95th_percentile{type:clientrequest,clientrequest:casread,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "style": {
+                            "line_type": "dotted",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "line",
+                        "q": "avg:cassandra.latency.95th_percentile{type:clientrequest,clientrequest:caswrite,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "style": {
+                            "line_type": "dotted",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "line",
+                        "q": "avg:cassandra.latency.95th_percentile{type:clientrequest,clientrequest:rangeslice,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "style": {
+                            "line_type": "dotted",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "line",
+                        "q": "avg:cassandra.latency.95th_percentile{type:clientrequest,clientrequest:viewwrite,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "style": {
+                            "line_type": "dotted",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Other operations latencies",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 680141858861650,
+            "layout": {
+                "height": 14,
+                "width": 51,
+                "x": 82,
+                "y": 21
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [
+                    {
+                        "display_type": "warning dashed",
+                        "label": "Some pending compactions are not an issue...",
+                        "value": "y = 10"
+                    },
+                    {
+                        "display_type": "error solid",
+                        "label": "This is too many pending compactions!",
+                        "value": "y = 100"
+                    }
+                ],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "max:cassandra.pending_compactions{$environment,$datacenter,$host} by {environment,host,datacenter}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Compactions pending per host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 2909104882964128,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 82,
+                "y": 43
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "The Cassandra metric **write latency** measures the number of microseconds required to fulfill a write request, whereas **read latency** measures the same for read requests. Understanding what to look for in these metrics requires a bit of background on how Cassandra handles requests.\n\n",
+                "font_size": "14",
+                "has_padding": true,
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note",
+                "vertical_align": "top"
+            },
+            "id": 3330350748924378,
+            "layout": {
+                "height": 21,
+                "width": 21,
+                "x": 135,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "SSTables are the immutable data files that Cassandra uses for persisting data on disk.\n\nAs SSTables are flushed to disk from Memtables or are streamed from other nodes, Cassandra triggers compactions which combine multiple SSTables into one. Once the new SSTable has been written, the old SSTables can be removed.",
+                "font_size": "14",
+                "has_padding": true,
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note",
+                "vertical_align": "top"
+            },
+            "id": 7548686117407538,
+            "layout": {
+                "height": 24,
+                "width": 21,
+                "x": 135,
+                "y": 37
+            }
+        }
+    ]
+}

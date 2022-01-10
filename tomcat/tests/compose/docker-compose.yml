@@ -2,7 +2,7 @@ version: "2"
 
 services:
   tomcat:
-    image: 'bitnami/tomcat:9.0'
+    image: 'bitnami/tomcat:9.0.50'
     ports:
       - 8080:8080
       - 9012:9012 # JMX

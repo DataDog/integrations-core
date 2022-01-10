@@ -9,7 +9,7 @@ from io import StringIO
 import click
 from semver import parse_version_info
 
-from ....utils import stream_file_lines, write_file
+from ....fs import stream_file_lines, write_file
 from ...constants import CHANGELOG_TYPE_NONE, CHANGELOG_TYPES_ORDERED, get_root
 from ...git import get_commits_since
 from ...github import from_contributor, get_changelog_types, get_pr, parse_pr_numbers
@@ -31,9 +31,21 @@ ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, autho
 @click.option('--output-file', '-o', default='CHANGELOG.md', show_default=True)
 @click.option('--tag-prefix', '-tp', default='v', show_default=True)
 @click.option('--no-semver', '-ns', default=False, is_flag=True)
+@click.option('--exclude-branch', default=None, help="Exclude changes comming from a specific branch")
 @click.pass_context
 def changelog(
-    ctx, check, version, old_version, initial, quiet, dry_run, output_file, tag_prefix, no_semver, organization
+    ctx,
+    check,
+    version,
+    old_version,
+    initial,
+    quiet,
+    dry_run,
+    output_file,
+    tag_prefix,
+    no_semver,
+    organization,
+    exclude_branch,
 ):
     """Perform the operations needed to update the changelog.
 
@@ -62,7 +74,7 @@ def changelog(
     target_tag = get_release_tag_string(check, cur_version)
 
     # get the diff from HEAD
-    diff_lines = get_commits_since(check, None if initial else target_tag)
+    diff_lines = get_commits_since(check, None if initial else target_tag, exclude_branch=exclude_branch)
 
     # for each PR get the title, we'll use it to populate the changelog
     pr_numbers = parse_pr_numbers(diff_lines)
@@ -121,7 +133,8 @@ def changelog(
             thanks_note = ''
             if entry.from_contributor:
                 thanks_note = f' Thanks [{entry.author}]({entry.author_url}).'
-            new_entry.write(f'* {entry.title}. See [#{entry.number}]({entry.url}).{thanks_note}\n')
+            title_period = "." if not entry.title.endswith(".") else ""
+            new_entry.write(f'* {entry.title}{title_period} See [#{entry.number}]({entry.url}).{thanks_note}\n')
     new_entry.write('\n')
 
     # read the old contents

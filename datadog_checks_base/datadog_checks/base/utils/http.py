@@ -4,6 +4,7 @@
 import logging
 import os
 import re
+import ssl
 from contextlib import contextmanager
 from copy import deepcopy
 from io import open
@@ -11,15 +12,22 @@ from ipaddress import ip_address, ip_network
 
 import requests
 import requests_unixsocket
+from binary import KIBIBYTE
+from cryptography.x509 import load_der_x509_certificate
+from cryptography.x509.extensions import ExtensionNotFound
+from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
 from requests import auth as requests_auth
+from requests.exceptions import SSLError
 from requests_toolbelt.adapters import host_header_ssl
 from six import PY2, iteritems, string_types
 from six.moves.urllib.parse import quote, urlparse, urlunparse
+from wrapt import ObjectProxy
 
 from ..config import is_affirmative
 from ..errors import ConfigurationError
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
+from .network import CertAdapter, closing, create_socket_connection
 from .time import get_timestamp
 
 try:
@@ -47,7 +55,12 @@ LOGGER = logging.getLogger(__file__)
 # https://tools.ietf.org/html/rfc2988
 DEFAULT_TIMEOUT = 10
 
+# 16 KiB seems optimal, and is also the standard chunk size of the Bittorrent protocol:
+# https://www.bittorrent.org/beps/bep_0003.html
+DEFAULT_CHUNK_SIZE = 16
+
 STANDARD_FIELDS = {
+    'allow_redirects': True,
     'auth_token': None,
     'auth_type': 'basic',
     'aws_host': None,
@@ -69,6 +82,7 @@ STANDARD_FIELDS = {
     'persist_connections': False,
     'proxy': None,
     'read_timeout': None,
+    'request_size': DEFAULT_CHUNK_SIZE,
     'skip_proxy': False,
     'tls_ca_cert': None,
     'tls_cert': None,
@@ -100,6 +114,29 @@ KERBEROS_STRATEGIES = {}
 UDS_SCHEME = 'unix'
 
 
+class ResponseWrapper(ObjectProxy):
+    def __init__(self, response, default_chunk_size):
+        super(ResponseWrapper, self).__init__(response)
+
+        # See https://github.com/psf/requests/pull/5942
+        self.__default_chunk_size = default_chunk_size
+
+    def iter_content(self, chunk_size=None, decode_unicode=False):
+        if chunk_size is None:
+            chunk_size = self.__default_chunk_size
+
+        return self.__wrapped__.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
+
+    def iter_lines(self, chunk_size=None, decode_unicode=False, delimiter=None):
+        if chunk_size is None:
+            chunk_size = self.__default_chunk_size
+
+        return self.__wrapped__.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter)
+
+    def __enter__(self):
+        return self
+
+
 class RequestsWrapper(object):
     __slots__ = (
         '_session',
@@ -112,6 +149,7 @@ class RequestsWrapper(object):
         'persist_connections',
         'request_hooks',
         'auth_token_handler',
+        'request_size',
     )
 
     def __init__(self, instance, init_config, remapper=None, logger=None):
@@ -211,6 +249,8 @@ class RequestsWrapper(object):
 
         auth = AUTH_TYPES[auth_type](config)
 
+        allow_redirects = is_affirmative(config['allow_redirects'])
+
         # http://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
         verify = True
         if isinstance(config['tls_ca_cert'], string_types):
@@ -262,6 +302,7 @@ class RequestsWrapper(object):
             'proxies': proxies,
             'timeout': (connect_timeout, read_timeout),
             'verify': verify,
+            'allow_redirects': allow_redirects,
         }
 
         # For manual parsing until `requests` properly handles `no_proxy`
@@ -269,6 +310,8 @@ class RequestsWrapper(object):
 
         # Ignore warnings for lack of SSL validation
         self.ignore_tls_warning = is_affirmative(config['tls_ignore_warning'])
+
+        self.request_size = int(float(config['request_size']) * KIBIBYTE)
 
         # For connection and cookie persistence, if desired. See:
         # https://en.wikipedia.org/wiki/HTTP_persistent_connection#Advantages
@@ -345,7 +388,6 @@ class RequestsWrapper(object):
         with ExitStack() as stack:
             for hook in self.request_hooks:
                 stack.enter_context(hook())
-
             if persist:
                 request_method = getattr(self.session, method)
             else:
@@ -353,16 +395,39 @@ class RequestsWrapper(object):
 
             if self.auth_token_handler:
                 try:
-                    response = request_method(url, **new_options)
+                    response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
                     response.raise_for_status()
                 except Exception as e:
                     self.logger.debug(u'Renewing auth token, as an error occurred: %s', e)
                     self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
-                    response = request_method(url, **new_options)
+                    response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
             else:
-                response = request_method(url, **new_options)
+                response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
 
-            return response
+            return ResponseWrapper(response, self.request_size)
+
+    def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
+        try:
+            response = request_method(url, **new_options)
+        except SSLError as e:
+            # fetch the intermediate certs
+            parsed_url = urlparse(url)
+            hostname = parsed_url.hostname
+            certs = self.fetch_intermediate_certs(hostname)
+            if not certs:
+                raise e
+            # retry the connection via session object
+            certadapter = CertAdapter(certs=certs)
+            if not persist:
+                session = requests.Session()
+                for option, value in iteritems(self.options):
+                    setattr(session, option, value)
+            else:
+                session = self.session
+            request_method = getattr(session, method)
+            session.mount(url, certadapter)
+            response = request_method(url, **new_options)
+        return response
 
     def populate_options(self, options):
         # Avoid needless dictionary update if there are no options
@@ -375,6 +440,68 @@ class RequestsWrapper(object):
 
         return options
 
+    def fetch_intermediate_certs(self, hostname):
+        # TODO: prefer stdlib implementation when available, see https://bugs.python.org/issue18617
+        certs = []
+
+        try:
+            sock = create_socket_connection(hostname)
+        except Exception as e:
+            self.logger.error('Error occurred while connecting to socket to discover intermediate certificates: %s', e)
+            return certs
+
+        with closing(sock):
+            try:
+                context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
+                context.verify_mode = ssl.CERT_NONE
+
+                with closing(context.wrap_socket(sock, server_hostname=hostname)) as secure_sock:
+                    der_cert = secure_sock.getpeercert(binary_form=True)
+            except Exception as e:
+                self.logger.error('Error occurred while getting cert to discover intermediate certificates:', e)
+                return certs
+
+        self.load_intermediate_certs(der_cert, certs)
+        return certs
+
+    def load_intermediate_certs(self, der_cert, certs):
+        # https://tools.ietf.org/html/rfc3280#section-4.2.2.1
+        # https://tools.ietf.org/html/rfc5280#section-5.2.7
+        try:
+            cert = load_der_x509_certificate(der_cert)
+        except Exception as e:
+            self.logger.error('Error while deserializing peer certificate to discover intermediate certificates: %s', e)
+            return
+
+        try:
+            authority_information_access = cert.extensions.get_extension_for_oid(
+                ExtensionOID.AUTHORITY_INFORMATION_ACCESS
+            )
+        except ExtensionNotFound:
+            self.logger.debug(
+                'No Authority Information Access extension found, skipping discovery of intermediate certificates'
+            )
+            return
+
+        for access_description in authority_information_access.value:
+            if access_description.access_method != AuthorityInformationAccessOID.CA_ISSUERS:
+                continue
+
+            uri = access_description.access_location.value
+
+            # Assume HTTP for now
+            try:
+                response = requests.get(uri)  # SKIP_HTTP_VALIDATION
+            except Exception as e:
+                self.logger.error('Error fetching intermediate certificate from `%s`: %s', uri, e)
+                continue
+            else:
+                intermediate_cert = response.content
+
+            certs.append(intermediate_cert)
+            self.load_intermediate_certs(intermediate_cert, certs)
+        return certs
+
     @property
     def session(self):
         if self._session is None:
@@ -384,7 +511,6 @@ class RequestsWrapper(object):
             # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
             if self.tls_use_host_header:
                 self._session.mount('https://', host_header_ssl.HostHeaderSSLAdapter())
-
             # Enable Unix Domain Socket (UDS) support.
             # See: https://github.com/msabramo/requests-unixsocket
             self._session.mount('{}://'.format(UDS_SCHEME), requests_unixsocket.UnixAdapter())

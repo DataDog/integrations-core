@@ -1,0 +1,32 @@
+{
+  "display_name": "terraform",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "terraform",
+  "metric_prefix": "",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "Manage your Datadog account using Terraform",
+  "guid": "d743cca9-e03e-481a-86d1-3ea15aa915cf",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "terraform",
+  "categories": [
+    "orchestration"
+  ],
+  "type": "crawler",
+  "is_public": true,
+  "integration_id": "terraform",
+  "assets": {
+    "dashboards": {},
+    "saved_views": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}

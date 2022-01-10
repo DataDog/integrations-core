@@ -8,7 +8,7 @@ files:
   - template: instances
     options:
     - name: hosts
-      required: true
+      enabled: true
       description: |
         The host (and optional port number) where the mongod instance (or mongos instances for
         a sharded cluster) is running. You can specify a hostname, IP address, or UNIX domain
@@ -18,16 +18,20 @@ files:
           - For a replica set, specify the hostname of a mongod instance as listed in
             the replica set configuration. You need one check instance per mongod instance
             in order to collect replication metrics and events.
-          - For a sharded cluster, specify the hostname(s) of the mongos instance(s).
+          - For a sharded cluster, you need one check instance for each mongod instance in
+            each shard (including the configsvr shard) as well as one additional check instance
+            that connects to one (or more) mongos node.
 
         If the port number is not specified, the default port 27017 is used.
 
         Even if the host is an arbiter node, you still need to provide authentication credentials
         as the check will create an additional connection to the primary in this specific case.
+
+        Do not specify more than one host here unless you are connecting to a mongos instance
+        and you want to balance requests performed by the agent to multiple mongos instances.
       value:
         example:
-        - <HOST_1>
-        - <HOST_2>:<PORT_2>
+        - <HOST>:<PORT>
         type: array
         items:
           type: string
@@ -59,12 +63,6 @@ files:
       value:
         type: object
         properties: []
-    - name: connection_scheme
-      description: |
-        A prefix indicating the connection string format e.g. mongodb+srv.
-      value:
-        example: mongodb
-        type: string
     - name: replica_check
       description: |
         Whether or not to read from available replicas.
@@ -160,16 +158,18 @@ files:
             - name: database
               type: string
             - name: query
-              type: string
-            - name: fields
               type: object
-              properties:
-                - name: field_name
-                  type: string
-                - name: name
-                  type: string
-                - name: type
-                  type: string
+            - name: fields
+              type: array
+              items:
+                type: object
+                properties:
+                  - name: field_name
+                    type: string
+                  - name: name
+                    type: string
+                  - name: type
+                    type: string
             - name: tags
               type: array
               items:
@@ -186,16 +186,16 @@ files:
               - test:mongodb
     - name: server
       deprecation:
-        Release: "8.0.0"
+        Agent version: "8.0.0"
         Migration: |
           Use the following options instead:
-          hosts, username, password, database, options, connection_scheme
+          hosts, username, password, database, options
       description: |
         Specify the MongoDB URI, with database to use for reporting (defaults to "admin")
         E.g. mongodb://datadog:LnCbkX4uhpuLHSUrcayEoAZA@localhost:27016/admin
       value:
         example: mongodb://<USER>:<PASSWORD>@<HOST>:<PORT>/<DB_NAME>
-        default: null
+        display_default: null
         type: string
     - template: instances/default
   - template: logs

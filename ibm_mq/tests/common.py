@@ -4,8 +4,21 @@
 
 import os
 
+import pytest
+
 from datadog_checks.dev import get_docker_hostname
-from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
+from datadog_checks.dev.ci import running_on_ci
+from datadog_checks.dev.utils import ON_WINDOWS
+
+# Ignore missing library to not require it for e2e
+try:
+    from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
+except ImportError:
+    COUNT = GAUGE = ''
+
+RUNNING_ON_WINDOWS_CI = ON_WINDOWS and running_on_ci()
+skip_windows_ci = pytest.mark.skipif(RUNNING_ON_WINDOWS_CI, reason='MQ server cannot be setup on Windows VMs in CI')
+
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_DIR = os.path.join(HERE, 'compose')
@@ -27,7 +40,7 @@ QUEUE = 'DEV.QUEUE.1'
 BAD_CHANNEL = 'DEV.NOTHERE.SVRCONN'
 
 MQ_VERSION = int(os.environ.get('IBM_MQ_VERSION', '9'))
-MQ_COMPOSE_VERSION = os.environ['IBM_MQ_COMPOSE_VERSION']
+MQ_COMPOSE_VERSION = os.environ.get('IBM_MQ_COMPOSE_VERSION', '')
 MQ_VERSION_RAW = os.environ.get('IBM_MQ_VERSION_RAW', '9.1.1.0')
 
 IS_CLUSTER = 'cluster' in MQ_COMPOSE_VERSION
@@ -175,7 +188,10 @@ QUEUE_METRICS = [
 ]
 
 QUEUE_STATUS_METRICS = [
+    ('ibm_mq.queue.oldest_message_age', GAUGE),
     ('ibm_mq.queue.uncommitted_msgs', GAUGE),
+    ('ibm_mq.queue.last_get_time', GAUGE),
+    ('ibm_mq.queue.last_put_time', GAUGE),
 ]
 
 CHANNEL_METRICS = [

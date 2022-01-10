@@ -31,7 +31,7 @@ class PostfixCheck(AgentCheck):
     [Using postqueue]
     Optionally we can configure the agent to use a built in `postqueue -p` command
     to get a count of messages in the `active`, `hold`, and `deferred` mail queues.
-    `postqueue` is exectued with set-group ID privileges without the need for sudo.
+    `postqueue` is executed with set-group ID privileges without the need for sudo.
 
     YAML config options:
         "config_directory" - the value of 'postconf -h queue_directory'
@@ -42,7 +42,7 @@ class PostfixCheck(AgentCheck):
     - deferred
 
     Unlike using the "sudo" method, the "incoming" queue will not be monitored. Postqueue does
-    not report on the "incomming" mail queue.
+    not report on the "incoming" mail queue.
 
     http://www.postfix.org/postqueue.1.html
 
@@ -143,14 +143,17 @@ class PostfixCheck(AgentCheck):
 
         -- 1 Kbytes in 2 Requests.
         '''
-        for line in output.splitlines():
-            if '*' in line:
-                active_count += 1
-            elif '!' in line:
-                hold_count += 1
-            # Check the line starts with an ID
-            elif line[0:1].isalnum():
-                deferred_count += 1
+        lines = output.splitlines()
+        # Check output
+        if len(lines) > 1 and not output.startswith('Mail queue is empty'):
+            for line in lines:
+                if '*' in line:
+                    active_count += 1
+                elif '!' in line:
+                    hold_count += 1
+                # Check the line starts with an ID
+                elif line[0:1].isalnum():
+                    deferred_count += 1
 
         self.gauge(
             'postfix.queue.size', active_count, tags=tags + ['queue:active', 'instance:{}'.format(postfix_config_dir)]

@@ -5,6 +5,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import sys
+from collections import OrderedDict
 
 import mock
 import pytest
@@ -17,12 +18,14 @@ from .common import (
     CONFIG_DATA_METHOD,
     CONFIG_DONT_CHECK_EXP,
     CONFIG_EXPIRED_SSL,
-    CONFIG_HTTP_REDIRECTS,
+    CONFIG_HTTP_ALLOW_REDIRECTS,
+    CONFIG_HTTP_NO_REDIRECTS,
     CONFIG_SSL_ONLY,
     CONFIG_UNORMALIZED_INSTANCE_NAME,
     FAKE_CERT,
     HERE,
 )
+from .conftest import mock_get_ca_certs_path
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -120,7 +123,7 @@ def test_check_ssl(aggregator, http_check):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check_tsl_ca_cert(aggregator):
+def test_check_tsl_ca_cert(aggregator, dd_run_check):
     instance = {
         'name': 'good_cert',
         'url': 'https://valid.mock:443',
@@ -138,17 +141,17 @@ def test_check_tsl_ca_cert(aggregator):
     ):
         check = HTTPCheck('http_check', {}, [instance])
 
-    check.check(instance)
+    dd_run_check(check)
     good_cert_tags = ['url:https://valid.mock:443', 'instance:good_cert']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=good_cert_tags, count=1)
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check_ssl_expire_error(aggregator, http_check):
+def test_check_ssl_expire_error(aggregator, dd_run_check):
     with mock.patch('ssl.SSLSocket.getpeercert', side_effect=Exception()):
         # Run the check for the one instance configured with days left
         http_check = HTTPCheck('', {}, [CONFIG_EXPIRED_SSL['instances'][0]])
-        http_check.check(CONFIG_EXPIRED_SSL['instances'][0])
+        dd_run_check(http_check)
 
     expired_cert_tags = ['url:https://valid.mock', 'instance:expired_cert']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=expired_cert_tags, count=1)
@@ -185,13 +188,19 @@ def test_check_hostname_override(aggregator, http_check):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check_allow_redirects(aggregator, http_check):
+def test_check_allow_redirects(aggregator):
+    with mock.patch('datadog_checks.http_check.http_check.get_ca_certs_path', new=mock_get_ca_certs_path):
+        http_check = HTTPCheck('http_check', {}, CONFIG_HTTP_NO_REDIRECTS["instances"])
+        # Run the check for the one instance
+        http_check.check(CONFIG_HTTP_NO_REDIRECTS['instances'][0])
+        redirect_service_tags = ['url:https://valid.mock/301', 'instance:no_allow_redirect_service']
+        aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=redirect_service_tags, count=1)
 
-    # Run the check for the one instance
-    http_check.check(CONFIG_HTTP_REDIRECTS['instances'][0])
-
-    redirect_service_tags = ['url:https://valid.mock/301', 'instance:redirect_service']
-    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=redirect_service_tags, count=1)
+        redirect_service_tags = ['url:https://valid.mock/301', 'instance:allow_redirect_service']
+        http_check.check(CONFIG_HTTP_ALLOW_REDIRECTS['instances'][0])
+        aggregator.assert_service_check(
+            HTTPCheck.SC_STATUS, status=HTTPCheck.CRITICAL, tags=redirect_service_tags, count=1
+        )
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -283,7 +292,7 @@ def test_data_methods(aggregator, http_check):
         aggregator.reset()
 
 
-def test_unexisting_ca_cert_should_throw_error(aggregator):
+def test_unexisting_ca_cert_should_throw_error(aggregator, dd_run_check):
     instance = {
         'name': 'Test Web VM HTTPS SSL',
         'url': 'https://foo.bar.net/',
@@ -297,6 +306,70 @@ def test_unexisting_ca_cert_should_throw_error(aggregator):
 
     check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
 
-    check.check(instance)
+    dd_run_check(check)
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=AgentCheck.CRITICAL)
     assert 'invalid path: /tmp/unexisting.crt' in aggregator._service_checks[HTTPCheck.SC_STATUS][0].message
+
+
+def test_instance_auth_token(dd_run_check):
+    token_path = os.path.join(HERE, 'fixtures', 'token.txt')
+    with open(token_path, 'r') as t:
+        data = t.read()
+    auth_token = {
+        "reader": {
+            "type": "file",
+            "path": token_path,
+        },
+        "writer": {"type": "header", "name": "Authorization"},
+    }
+
+    expected_headers = OrderedDict(
+        [
+            ('User-Agent', 'Datadog Agent/0.0.0'),
+            ('Accept', '*/*'),
+            ('Accept-Encoding', 'gzip, deflate'),
+            ('Authorization', str(data)),
+        ]
+    )
+
+    instance = {'url': 'https://valid.mock', 'name': 'UpService', "auth_token": auth_token}
+    check = HTTPCheck('http_check', {'ca_certs': mock_get_ca_certs_path()}, [instance])
+    dd_run_check(check)
+    assert expected_headers == check.http.options['headers']
+    dd_run_check(check)
+    assert expected_headers == check.http.options['headers']
+
+
+@pytest.mark.parametrize(
+    ["instance", "expected_headers"],
+    [
+        (
+            {'url': 'https://valid.mock', 'name': 'UpService', 'extra_headers': {'Host': 'test'}},
+            OrderedDict(
+                [
+                    ('User-Agent', 'Datadog Agent/0.0.0'),
+                    ('Accept', '*/*'),
+                    ('Accept-Encoding', 'gzip, deflate'),
+                    ('Host', 'test'),
+                ]
+            ),
+        ),
+        (
+            {'url': 'https://valid.mock', 'name': 'UpService', 'headers': {'Host': 'test'}},
+            OrderedDict(
+                [
+                    ('Host', 'test'),
+                ]
+            ),
+        ),
+        ({'url': 'https://valid.mock', 'name': 'UpService', 'include_default_headers': False}, OrderedDict()),
+    ],
+)
+def test_expected_headers(dd_run_check, instance, expected_headers):
+
+    check = HTTPCheck('http_check', {'ca_certs': mock_get_ca_certs_path()}, [instance])
+    dd_run_check(check)
+    assert expected_headers == check.http.options['headers']
+
+    dd_run_check(check)
+    assert expected_headers == check.http.options['headers']

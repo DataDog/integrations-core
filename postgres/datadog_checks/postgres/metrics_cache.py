@@ -17,6 +17,7 @@ from .util import (
     COMMON_METRICS,
     COUNT_METRICS,
     DATABASE_SIZE_METRICS,
+    DBM_MIGRATED_METRICS,
     NEWER_91_BGW_METRICS,
     NEWER_92_BGW_METRICS,
     NEWER_92_METRICS,
@@ -31,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 class PostgresMetricsCache:
-    """ Mantains a cache of metrics to collect """
+    """Maintains a cache of metrics to collect"""
 
     def __init__(self, config):
         self.config = config
@@ -65,11 +66,15 @@ class PostgresMetricsCache:
         """
         metrics = self.instance_metrics
         if metrics is None:
+            # if DBM enabled, do not collect postgresql.connections metric in the main check
+            c_metrics = COMMON_METRICS
+            if not self.config.dbm_enabled:
+                c_metrics = dict(c_metrics, **DBM_MIGRATED_METRICS)
             # select the right set of metrics to collect depending on postgres version
             if version >= V9_2:
-                self.instance_metrics = dict(COMMON_METRICS, **NEWER_92_METRICS)
+                self.instance_metrics = dict(c_metrics, **NEWER_92_METRICS)
             else:
-                self.instance_metrics = dict(COMMON_METRICS)
+                self.instance_metrics = dict(c_metrics)
 
             # add size metrics if needed
             if self.config.collect_database_size_metrics:
@@ -82,15 +87,16 @@ class PostgresMetricsCache:
             'metrics': metrics,
             'query': "SELECT psd.datname, {metrics_columns} "
             "FROM pg_stat_database psd "
-            "JOIN pg_database pd ON psd.datname = pd.datname "
-            "WHERE psd.datname not ilike 'template%%' "
-            "  AND psd.datname not ilike 'rdsadmin' "
-            "  AND psd.datname not ilike 'azure_maintenance' ",
+            "JOIN pg_database pd ON psd.datname = pd.datname",
             'relation': False,
         }
 
-        if not self.config.collect_default_db:
-            res["query"] += "  AND psd.datname not ilike 'postgres'"
+        res["query"] += " WHERE " + " AND ".join(
+            "psd.datname not ilike '{}'".format(db) for db in self.config.ignore_databases
+        )
+
+        if self.config.dbstrict:
+            res["query"] += " AND psd.datname in('{}')".format(self.config.dbname)
 
         return res
 
@@ -152,22 +158,21 @@ class PostgresMetricsCache:
         """Use either REPLICATION_METRICS_10, REPLICATION_METRICS_9_1, or
         REPLICATION_METRICS_9_1 + REPLICATION_METRICS_9_2, depending on the
         postgres version.
-        Uses a dictionary to save the result for each instance
+        Caches the result on a dictionary
         """
-        metrics = self.replication_metrics
-        if version >= V10 and metrics is None:
+        if self.replication_metrics is not None:
+            return self.replication_metrics
+
+        if is_aurora:
+            logger.debug("Detected Aurora %s. Won't collect replication metrics", version)
+            self.replication_metrics = {}
+        elif version >= V10:
             self.replication_metrics = dict(REPLICATION_METRICS_10)
-            metrics = self.replication_metrics
-        elif version >= V9_1 and metrics is None:
-            if is_aurora:
-                logger.debug("Detected Aurora {}. Won't collect replication metrics", version)
-                self.replication_metrics = {}
-            else:
-                self.replication_metrics = dict(REPLICATION_METRICS_9_1)
-                if version >= V9_2:
-                    self.replication_metrics.update(REPLICATION_METRICS_9_2)
-            metrics = self.replication_metrics
-        return metrics
+        elif version >= V9_1:
+            self.replication_metrics = dict(REPLICATION_METRICS_9_1)
+            if version >= V9_2:
+                self.replication_metrics.update(REPLICATION_METRICS_9_2)
+        return self.replication_metrics
 
     def get_replication_stats_metrics(self, version):
         if version >= V10 and self.replication_stats_metrics is None:
@@ -177,7 +182,7 @@ class PostgresMetricsCache:
     def get_activity_metrics(self, version):
         """Use ACTIVITY_METRICS_LT_8_3 or ACTIVITY_METRICS_8_3 or ACTIVITY_METRICS_9_2
         depending on the postgres version in conjunction with ACTIVITY_QUERY_10 or ACTIVITY_QUERY_LT_10.
-        Uses a dictionnary to save the result for each instance
+        Uses a dictionary to save the result for each instance
         """
         metrics_data = self.activity_metrics
 

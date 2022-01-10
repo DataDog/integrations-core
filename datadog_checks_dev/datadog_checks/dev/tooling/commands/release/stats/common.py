@@ -159,6 +159,12 @@ class Release:
             tag for tag in Tag.list_from_github(ctx, repo) if version_re.match(tag.name) or tag.name == release_version
         ]
 
+        # Exclude any tags with "-dbm-beta-" in the name. DB APM recently have used
+        # similar tags (e.g. `7.28.0-rc.1-dbm-beta-0.1`) for beta builds for clients
+        # and for deploying to classic that need to be filtered out, otherwise the
+        # dependent scripts get confused about what constitutes an "rc" tag.
+        rc_tags = [tag for tag in rc_tags if '-dbm-beta-' not in tag.name]
+
         for rc_tag in rc_tags:
             # we are forced to reload tags as the github does not return the tag's commit's SHA
             # when we are using the tag list API

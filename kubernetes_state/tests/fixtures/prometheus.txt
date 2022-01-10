@@ -31,6 +31,12 @@ kube_cronjob_status_active{cronjob="hello",namespace="default"} 0
 # HELP kube_cronjob_status_last_schedule_time LastScheduleTime keeps information of when was the last time the job was successfully scheduled.
 # TYPE kube_cronjob_status_last_schedule_time gauge
 kube_cronjob_status_last_schedule_time{cronjob="hello",namespace="default"} 1.50999846e+09
+# HELP kube_statefulset_status_observed_generation The generation observed by the StatefulSet controller.
+# TYPE kube_statefulset_status_observed_generation gauge
+kube_statefulset_status_observed_generation{namespace="default",statefulset="web"} 1
+kube_statefulset_status_observed_generation{namespace="default",statefulset="nginx"} 4
+kube_statefulset_status_observed_generation{namespace="kube-system",statefulset="mysql"} 1
+kube_statefulset_status_observed_generation{namespace="kube-system",statefulset="redis"} 2
 # HELP kube_statefulset_status_replicas The number of replicas per StatefulSet.
 # TYPE kube_statefulset_status_replicas gauge
 kube_statefulset_status_replicas{namespace="ns3",statefulset="statefulset3"} 7

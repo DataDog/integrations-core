@@ -1,5 +1,5 @@
 # Peer
-# This table contains one entry per neightbor (BGP peer) and information about the connections with BGP peers.
+# This table contains one entry per neighbor (BGP peer) and information about the connections with BGP peers.
 metrics:
   - MIB: BGP4-MIB
     table:

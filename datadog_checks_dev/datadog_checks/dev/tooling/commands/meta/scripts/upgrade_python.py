@@ -5,7 +5,7 @@ import re
 
 import click
 
-from .....utils import file_exists, path_join, read_file_binary, resolve_dir_contents, write_file_binary
+from .....fs import file_exists, path_join, read_file_binary, resolve_dir_contents, write_file_binary
 from ....constants import get_root
 from ...console import CONTEXT_SETTINGS, echo_success
 

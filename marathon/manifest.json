@@ -31,11 +31,16 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "marathon-overview": "assets/dashboards/marathon-overview_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "marathon"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "marathon_processes": "assets/saved_views/marathon_processes.json"
+    }
   }
 }

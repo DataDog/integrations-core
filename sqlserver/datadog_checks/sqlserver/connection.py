@@ -6,7 +6,8 @@ from contextlib import contextmanager
 
 from six import raise_from
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.log import get_check_logger
 
 try:
     import adodbapi
@@ -39,10 +40,10 @@ class Connection(object):
     valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL', 'SQLNCLI11']
     default_adoprovider = 'SQLOLEDB'
 
-    def __init__(self, init_config, instance_config, service_check_handler, logger):
+    def __init__(self, init_config, instance_config, service_check_handler):
         self.instance = instance_config
         self.service_check_handler = service_check_handler
-        self.log = logger
+        self.log = get_check_logger()
 
         # mapping of raw connections based on conn_key to different databases
         self._conns = {}
@@ -57,10 +58,12 @@ class Connection(object):
         if pyodbc is not None:
             self.valid_connectors.append('odbc')
 
-        self.connector = init_config.get('connector', 'adodbapi')
-        if self.connector.lower() not in self.valid_connectors:
-            self.log.error("Invalid database connector %s, defaulting to adodbapi", self.connector)
-            self.connector = 'adodbapi'
+        self.default_connector = init_config.get('connector', 'adodbapi')
+        if self.default_connector.lower() not in self.valid_connectors:
+            self.log.error("Invalid database connector %s, defaulting to adodbapi", self.default_connector)
+            self.default_connector = 'adodbapi'
+
+        self.connector = self.get_connector()
 
         self.adoprovider = init_config.get('adoprovider', self.default_adoprovider)
         if self.adoprovider.upper() not in self.valid_adoproviders:
@@ -72,17 +75,19 @@ class Connection(object):
         self.log.debug('Connection initialized.')
 
     @contextmanager
-    def get_managed_cursor(self):
-        cursor = self.get_cursor(self.DEFAULT_DB_KEY)
-        yield cursor
-        self.close_cursor(cursor)
+    def get_managed_cursor(self, key_prefix=None):
+        cursor = self.get_cursor(self.DEFAULT_DB_KEY, key_prefix=key_prefix)
+        try:
+            yield cursor
+        finally:
+            self.close_cursor(cursor)
 
-    def get_cursor(self, db_key, db_name=None):
+    def get_cursor(self, db_key, db_name=None, key_prefix=None):
         """
         Return a cursor to execute query against the db
         Cursor are cached in the self.connections dict
         """
-        conn_key = self._conn_key(db_key, db_name)
+        conn_key = self._conn_key(db_key, db_name, key_prefix)
         try:
             conn = self._conns[conn_key]
         except KeyError:
@@ -109,50 +114,55 @@ class Connection(object):
 
         return db_exists, context
 
+    def check_database_conns(self, db_name):
+        self.open_db_connections(None, db_name=db_name, is_default=False)
+        self.close_db_connections(None, db_name)
+
     @contextmanager
     def open_managed_default_database(self):
         with self._open_managed_db_connections(None, db_name=self.DEFAULT_DATABASE):
             yield
 
     @contextmanager
-    def open_managed_default_connection(self):
-        with self._open_managed_db_connections(self.DEFAULT_DB_KEY):
+    def open_managed_default_connection(self, key_prefix=None):
+        with self._open_managed_db_connections(self.DEFAULT_DB_KEY, key_prefix=key_prefix):
             yield
 
     @contextmanager
-    def _open_managed_db_connections(self, db_key, db_name=None):
-        self.open_db_connections(db_key, db_name)
-        yield
-        self.close_db_connections(db_key, db_name)
+    def _open_managed_db_connections(self, db_key, db_name=None, key_prefix=None):
+        self.open_db_connections(db_key, db_name, key_prefix=key_prefix)
+        try:
+            yield
+        finally:
+            self.close_db_connections(db_key, db_name, key_prefix=key_prefix)
 
-    def open_db_connections(self, db_key, db_name=None):
+    def open_db_connections(self, db_key, db_name=None, is_default=True, key_prefix=None):
         """
         We open the db connections explicitly, so we can ensure they are open
         before we use them, and are closable, once we are finished. Open db
         connections keep locks on the db, presenting issues such as the SQL
         Server Agent being unable to stop.
         """
+        conn_key = self._conn_key(db_key, db_name, key_prefix)
 
-        conn_key = self._conn_key(db_key, db_name)
-
-        _, host, username, password, database, _ = self._get_access_info(db_key, db_name)
+        _, host, _, _, database, _ = self._get_access_info(db_key, db_name)
 
         cs = self.instance.get('connection_string', '')
-        if 'Trusted_Connection=yes' in cs and (username or password):
-            self.log.warning("Username and password are ignored when using Windows authentication")
         cs += ';' if cs != '' else ''
 
+        self._connection_options_validation(db_key, db_name)
+
         try:
-            if self.get_connector() == 'adodbapi':
+            if self.connector == 'adodbapi':
                 cs += self._conn_string_adodbapi(db_key, db_name=db_name)
                 # autocommit: true disables implicit transaction
                 rawconn = adodbapi.connect(cs, {'timeout': self.timeout, 'autocommit': True})
             else:
                 cs += self._conn_string_odbc(db_key, db_name=db_name)
-                rawconn = pyodbc.connect(cs, timeout=self.timeout)
+                rawconn = pyodbc.connect(cs, timeout=self.timeout, autocommit=True)
+                rawconn.timeout = self.timeout
 
-            self.service_check_handler(AgentCheck.OK, host, database)
-
+            self.service_check_handler(AgentCheck.OK, host, database, is_default=is_default)
             if conn_key not in self._conns:
                 self._conns[conn_key] = rawconn
             else:
@@ -163,25 +173,34 @@ class Connection(object):
                     self.log.info("Could not close adodbapi db connection\n%s", e)
 
                 self._conns[conn_key] = rawconn
+            self._setup_new_connection(rawconn)
         except Exception as e:
             cx = "{} - {}".format(host, database)
-            message = "Unable to connect to SQL Server for instance {}: {}".format(cx, repr(e))
 
+            if is_default:
+                message = "Unable to connect to SQL Server for instance {}: {}".format(cx, repr(e))
+            else:
+                message = "Unable to connect to Database: {} for instance {}: {}".format(database, host, repr(e))
             password = self.instance.get('password')
             if password is not None:
                 message = message.replace(password, "*" * 6)
 
-            self.service_check_handler(AgentCheck.CRITICAL, host, database, message)
+            self.service_check_handler(AgentCheck.CRITICAL, host, database, message, is_default=is_default)
 
             raise_from(SQLConnectionError(message), None)
 
-    def close_db_connections(self, db_key, db_name=None):
+    def _setup_new_connection(self, rawconn):
+        with rawconn.cursor() as cursor:
+            # ensure that by default, the agent's reads can never block updates to any tables it's reading from
+            cursor.execute("SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED")
+
+    def close_db_connections(self, db_key, db_name=None, key_prefix=None):
         """
         We close the db connections explicitly b/c when we don't they keep
         locks on the db. This presents as issues such as the SQL Server Agent
         being unable to stop.
         """
-        conn_key = self._conn_key(db_key, db_name)
+        conn_key = self._conn_key(db_key, db_name, key_prefix)
         if conn_key not in self._conns:
             return
 
@@ -230,11 +249,11 @@ class Connection(object):
         return exists, context
 
     def get_connector(self):
-        connector = self.instance.get('connector', self.connector)
-        if connector != self.connector:
+        connector = self.instance.get('connector', self.default_connector)
+        if connector != self.default_connector:
             if connector.lower() not in self.valid_connectors:
-                self.log.warning("Invalid database connector %s using default %s", connector, self.connector)
-                connector = self.connector
+                self.log.warning("Invalid database connector %s using default %s", connector, self.default_connector)
+                connector = self.default_connector
             else:
                 self.log.debug("Overriding default connector for %s with %s", self.instance['host'], connector)
         return connector
@@ -266,10 +285,71 @@ class Connection(object):
                 driver = self.DEFAULT_DRIVER
         return dsn, host, username, password, database, driver
 
-    def _conn_key(self, db_key, db_name=None):
+    def _conn_key(self, db_key, db_name=None, key_prefix=None):
         """Return a key to use for the connection cache"""
         dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
-        return '{}:{}:{}:{}:{}:{}'.format(dsn, host, username, password, database, driver)
+        if not key_prefix:
+            key_prefix = ""
+        return '{}{}:{}:{}:{}:{}:{}'.format(key_prefix, dsn, host, username, password, database, driver)
+
+    def _connection_options_validation(self, db_key, db_name):
+        cs = self.instance.get('connection_string')
+        username = self.instance.get('username')
+        password = self.instance.get('password')
+
+        adodbapi_options = {
+            'PROVIDER': 'adoprovider',
+            'Data Source': 'host',
+            'Initial Catalog': db_name or db_key,
+            'User ID': 'username',
+            'Password': 'password',
+        }
+        odbc_options = {
+            'DSN': 'dsn',
+            'DRIVER': 'driver',
+            'SERVER': 'host',
+            'DATABASE': db_name or db_key,
+            'UID': 'username',
+            'PWD': 'password',
+        }
+
+        if self.connector == 'adodbapi':
+            other_connector = 'odbc'
+            connector_options = adodbapi_options
+            other_connector_options = odbc_options
+
+        else:
+            other_connector = 'adodbapi'
+            connector_options = odbc_options
+            other_connector_options = adodbapi_options
+
+        for option in {
+            value
+            for key, value in other_connector_options.items()
+            if value not in connector_options.values() and self.instance.get(value) is not None
+        }:
+            self.log.warning("%s option will be ignored since %s connection is used", option, self.connector)
+
+        if cs is None:
+            return
+
+        if 'Trusted_Connection=yes' in cs and (username or password):
+            self.log.warning("Username and password are ignored when using Windows authentication")
+        cs = cs.upper()
+
+        for key, value in connector_options.items():
+            if key.upper() in cs and self.instance.get(value) is not None:
+                raise ConfigurationError(
+                    "%s has been provided both in the connection string and as a "
+                    "configuration option (%s), please specify it only once" % (key, value)
+                )
+        for key in other_connector_options.keys():
+            if key.upper() in cs:
+                raise ConfigurationError(
+                    "%s has been provided in the connection string. "
+                    "This option is only available for %s connections,"
+                    " however %s has been selected" % (key, other_connector, self.connector)
+                )
 
     def _conn_string_odbc(self, db_key, conn_key=None, db_name=None):
         """Return a connection string to use with odbc"""
@@ -278,9 +358,9 @@ class Connection(object):
         else:
             dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
 
-        conn_str = ''
+        conn_str = 'ConnectRetryCount=2;'
         if dsn:
-            conn_str = 'DSN={};'.format(dsn)
+            conn_str += 'DSN={};'.format(dsn)
 
         if driver:
             conn_str += 'DRIVER={};'.format(driver)
@@ -304,7 +384,7 @@ class Connection(object):
             _, host, username, password, database, _ = self._get_access_info(db_key, db_name)
 
         provider = self._get_adoprovider()
-        conn_str = 'Provider={};Data Source={};Initial Catalog={};'.format(provider, host, database)
+        conn_str = 'ConnectRetryCount=2;Provider={};Data Source={};Initial Catalog={};'.format(provider, host, database)
 
         if username:
             conn_str += 'User ID={};'.format(username)

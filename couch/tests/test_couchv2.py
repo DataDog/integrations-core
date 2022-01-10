@@ -15,6 +15,7 @@ import requests
 from six import PY2
 
 from datadog_checks.couch import CouchDb
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
 
@@ -72,10 +73,10 @@ def gauges():
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_check(aggregator, gauges):
+def test_check(aggregator, gauges, dd_run_check):
     for config in deepcopy(INSTANCES):
         check = CouchDb(common.CHECK_NAME, {}, [config])
-        check.check(config)
+        dd_run_check(check)
     _assert_check(aggregator, gauges)
 
 
@@ -120,7 +121,11 @@ def _assert_check(aggregator, gauges):
     for gauge in gauges["replication_tasks_gauges"]:
         aggregator.assert_metric(gauge)
 
+    for gauge in gauges["indexing_tasks_gauges"]:
+        aggregator.assert_metric(gauge, at_least=0)
+
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -192,11 +197,15 @@ def test_check_without_names(aggregator, gauges):
         for gauge in gauges["cluster_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags)
 
-        for gauge in gauges["erlang_gauges"]:
-            aggregator.assert_metric(gauge)
+    for gauge in gauges["erlang_gauges"]:
+        aggregator.assert_metric(gauge)
 
-        for gauge in gauges["replication_tasks_gauges"]:
-            aggregator.assert_metric(gauge)
+    for gauge in gauges["replication_tasks_gauges"]:
+        aggregator.assert_metric(gauge)
+
+    # Optional indexing metrics
+    for gauge in gauges["indexing_tasks_gauges"]:
+        aggregator.assert_metric(gauge, at_least=0)
 
     for db, dd in {"kennel": "dummy"}.items():
         expected_tags = ["design_document:{}".format(dd), "language:javascript", "db:{}".format(db)]
@@ -218,6 +227,7 @@ def test_check_without_names(aggregator, gauges):
         aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.usefixtures('dd_environment')

@@ -24,9 +24,13 @@ files:
             value:
               type: string
           - name: mysql_password
-            required: true
             description: Password to use to connect to MySQL in order to gather metrics.
             value:
+              type: string
+          - name: mysql_db
+            description: The MySQL database to connect to
+            value:
+              example: cacti
               type: string
           - name: rrd_path
             required: true
@@ -43,8 +47,8 @@ files:
           - name: field_names
             description: |
               The `field_names` specifies which field_names should be used
-              to determine if a device is a real device. You can let it commented
-              out as the default values should satisfy your needs.
+              to determine if a device is a real device. You can leave it commented
+              out as the default values [ifName, dskDevice] should satisfy your needs.
               You can run the following query to determine your field names:
                     SELECT
                          h.hostname as hostname,
@@ -62,7 +66,6 @@ files:
               example:
                 - ifName
                 - dskDevice
-                - ifIndex
               type: array
               items:
                 type: string

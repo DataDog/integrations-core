@@ -1,0 +1,39 @@
+- name: server
+  description: |
+    The server with which to connect, defaulting to the local machine.
+  value:
+    type: string
+- name: username
+  description: |
+    The username used to connect to the `server`.
+  value:
+    type: string
+- name: password
+  description: |
+    The password of `username`.
+  value:
+    type: string
+- name: enable_health_service_check
+  description: |
+    Whether or not to send a service check named `<NAMESPACE>.windows.perf.health`, which reports
+    the health of the `server`.
+  value:
+    example: true
+    type: boolean
+- name: server_tag
+  description: |
+    The name used for tagging `server`. The value defined here replaces the `server:` tag key.
+  value:
+    type: string
+- name: namespace  # Only shown for the `windows_performance_counters` provider integration
+  hidden: true
+  description: |
+    The namespace to be prepended to all metrics and service checks.
+  value:
+    type: string
+    pattern: '\w*'
+- template: common/perf_counters.metrics  # Only shown for the `windows_performance_counters` provider integration
+  overrides:
+    hidden: true
+- template: common/perf_counters.metrics
+  name: extra_metrics  # Hidden for the `windows_performance_counters` provider integration

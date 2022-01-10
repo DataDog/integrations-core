@@ -1,0 +1,30 @@
+{
+  "name": "[HAProxy] High number of backend denied responses for host: {{host.name}}",
+  "type": "query alert",
+  "query": "avg(last_4h):anomalies(avg:haproxy.backend.denied.resp_rate{*} by {host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
+  "message": "The number of backend denied responses due to security restrictions for host: {{host.name}} is above normal.\n\nA malicious attacker or misconfigured application could be to blame. More information on designing ACLs for HAProxy can be found in the [Introduction to HAProxy ACLs blog post](https://www.haproxy.com/blog/introduction-to-haproxy-acls/).",
+  "tags": ["integration:haproxy"],
+  "options": {
+    "notify_audit": false,
+    "locked": false,
+    "timeout_h": 0,
+    "new_host_delay": 300,
+    "require_full_window": true,
+    "notify_no_data": false,
+    "renotify_interval": 0,
+    "escalation_message": "",
+    "no_data_timeframe": null,
+    "include_tags": true,
+    "thresholds": {
+      "critical": 1,
+      "critical_recovery": 0
+    },
+    "threshold_windows": {
+      "trigger_window": "last_15m",
+      "recovery_window": "last_15m"
+    }
+  },
+  "recommended_monitor_metadata": {
+    "description": "Notifies when HAProxy denined backend responses are higher than usual for a specific host."
+  }
+}

@@ -1,12 +1,9 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-import datetime
-
 from six import iteritems
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import _is_affirmative
 from datadog_checks.base.utils.containers import hash_mutable
 
@@ -35,33 +32,31 @@ class CiscoACICheck(AgentCheck):
         self.check_tags = ['cisco']
         self.tagger = CiscoTags(log=self.log)
 
-    def check(self, instance):
-        self.log.info("Starting Cisco Check")
-        start = datetime.datetime.utcnow()
-        aci_url = instance.get('aci_url')
-        aci_urls = instance.get('aci_urls', [])
+    def check(self, _):
+        aci_url = self.instance.get('aci_url')
+        aci_urls = self.instance.get('aci_urls', [])
         if aci_url:
             aci_urls.append(aci_url)
 
         if not aci_urls:
-            raise Exception("The Cisco ACI check requires at least one url")
+            raise ConfigurationError("The Cisco ACI check requires at least one url")
 
-        username = instance['username']
-        pwd = instance.get('pwd')
-        instance_hash = hash_mutable(instance)
+        username = self.instance['username']
+        pwd = self.instance.get('pwd')
+        instance_hash = hash_mutable(self.instance)
 
-        appcenter = _is_affirmative(instance.get('appcenter'))
+        appcenter = _is_affirmative(self.instance.get('appcenter'))
 
-        cert_key = instance.get('cert_key')
-        if not cert_key and instance.get('cert_key_path'):
-            with open(instance.get('cert_key_path'), 'rb') as f:
+        cert_key = self.instance.get('cert_key')
+        if not cert_key and self.instance.get('cert_key_path'):
+            with open(self.instance.get('cert_key_path'), 'rb') as f:
                 cert_key = f.read()
 
-        cert_name = instance.get('cert_name')
+        cert_name = self.instance.get('cert_name')
         if not cert_name:
             cert_name = username
 
-        cert_key_password = instance.get('cert_key_password')
+        cert_key_password = self.instance.get('cert_key_password')
 
         if instance_hash in self._api_cache:
             api = self._api_cache.get(instance_hash)
@@ -83,7 +78,7 @@ class CiscoACICheck(AgentCheck):
         for url in aci_urls:
             service_check_tags.append("url:{}".format(url))
         service_check_tags.extend(self.check_tags)
-        service_check_tags.extend(instance.get('tags', []))
+        service_check_tags.extend(self.instance.get('tags', []))
 
         try:
             api.login()
@@ -100,7 +95,7 @@ class CiscoACICheck(AgentCheck):
         self.tagger.api = api
 
         try:
-            tenant = Tenant(self, api, instance, instance_hash)
+            tenant = Tenant(self, api, self.instance, instance_hash)
             tenant.collect()
         except Exception as e:
             self.log.error('tenant collection failed: %s', e)
@@ -114,7 +109,7 @@ class CiscoACICheck(AgentCheck):
             raise
 
         try:
-            fabric = Fabric(self, api, instance)
+            fabric = Fabric(self, api, self.instance)
             fabric.collect()
         except Exception as e:
             self.log.error('fabric collection failed: %s', e)
@@ -128,7 +123,7 @@ class CiscoACICheck(AgentCheck):
             raise
 
         try:
-            capacity = Capacity(api, instance, check_tags=self.check_tags, gauge=self.gauge, log=self.log)
+            capacity = Capacity(api, self.instance, check_tags=self.check_tags, gauge=self.gauge, log=self.log)
             capacity.collect()
         except Exception as e:
             self.log.error('capacity collection failed: %s', e)
@@ -146,11 +141,6 @@ class CiscoACICheck(AgentCheck):
         self.set_external_tags(self.get_external_host_tags())
 
         api.close()
-        end = datetime.datetime.utcnow()
-        log_line = "finished running Cisco Check"
-        if _is_affirmative(instance.get('report_timing', False)):
-            log_line += ", took {}".format(end - start)
-        self.log.info(log_line)
 
     def submit_metrics(self, metrics, tags, instance=None, obj_type="gauge", hostname=None):
         if instance is None:

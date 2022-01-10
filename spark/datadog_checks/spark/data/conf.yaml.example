@@ -132,6 +132,19 @@ instances:
     #
     # executor_level_metrics: false
 
+    ## @param disable_legacy_cluster_tag - boolean - optional - default: false
+    ## Enable to stop submitting the tag `cluster_name`, which has been renamed to `spark_cluster`.
+    #
+    disable_legacy_cluster_tag: true
+
+    ## @param enable_query_name_tag - boolean - optional - default: false
+    ## Enable to add a `query_name` tag for Structured Streaming metrics.
+    ## This option should ONLY be enabled if the stream had a `.queryName` param supplied on `writeStream`,
+    ## otherwise the stream is given a default UUID.
+    ## See: https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#starting-streaming-queries
+    #
+    # enable_query_name_tag: true
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
@@ -406,6 +419,11 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
@@ -415,6 +433,11 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -451,7 +474,7 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.

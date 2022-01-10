@@ -9,7 +9,7 @@ pytestmark = pytest.mark.e2e
 
 
 def test_status(dd_agent_check, instance, ping_url_tag):
-    instance['tags'] = ['cluster:forums']
+    instance['tags'] = ['fpm_cluster:forums']
 
     aggregator = dd_agent_check(instance, rate=True)
 
@@ -23,16 +23,16 @@ def test_status(dd_agent_check, instance, ping_url_tag):
         'php_fpm.processes.max_reached',
     ]
 
-    expected_tags = ['cluster:forums', 'pool:www']
+    expected_tags = ['fpm_cluster:forums', 'pool:www']
     for metric in metrics:
         aggregator.assert_metric(metric, tags=expected_tags)
 
-    expected_tags = [ping_url_tag, 'cluster:forums']
+    expected_tags = [ping_url_tag, 'fpm_cluster:forums']
     aggregator.assert_service_check('php_fpm.can_ping', status=ServiceCheck.OK, tags=expected_tags)
 
 
 def test_status_fastcgi(dd_agent_check, instance_fastcgi, ping_url_tag_fastcgi):
-    instance_fastcgi['tags'] = ['cluster:forums']
+    instance_fastcgi['tags'] = ['fpm_cluster:forums']
 
     aggregator = dd_agent_check(instance_fastcgi, rate=True)
 
@@ -46,9 +46,9 @@ def test_status_fastcgi(dd_agent_check, instance_fastcgi, ping_url_tag_fastcgi):
         'php_fpm.processes.max_reached',
     ]
 
-    expected_tags = ['cluster:forums', 'pool:www']
+    expected_tags = ['fpm_cluster:forums', 'pool:www']
     for metric in metrics:
         aggregator.assert_metric(metric, tags=expected_tags)
 
-    expected_tags = [ping_url_tag_fastcgi, 'cluster:forums']
+    expected_tags = [ping_url_tag_fastcgi, 'fpm_cluster:forums']
     aggregator.assert_service_check('php_fpm.can_ping', status=ServiceCheck.OK, tags=expected_tags)

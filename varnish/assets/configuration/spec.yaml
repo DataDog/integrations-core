@@ -53,7 +53,7 @@ files:
             value:
               type: string
               example: /usr/bin/varnishadm
-              default: None
+              display_default: null
           - name: secretfile
             description: The path to the varnish secretfile used in the varnishadm command, if enabled.
             value:

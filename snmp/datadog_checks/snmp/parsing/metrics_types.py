@@ -10,7 +10,7 @@ from typing import Dict, List, TypedDict, Union
 
 # Symbols.
 
-Symbol = TypedDict('Symbol', {'OID': str, 'name': str})
+Symbol = TypedDict('Symbol', {'OID': str, 'name': str, 'extract_value': str})
 
 
 # Table metric tags.

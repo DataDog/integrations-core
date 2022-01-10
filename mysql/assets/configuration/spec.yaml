@@ -24,18 +24,18 @@ files:
             value:
               type: string
               example: localhost
-              default: null
+              display_default: null
 
-          - name: user
+          - name: username
             description: |
               Username used to connect to MySQL.
             enabled: true
             value:
               type: string
               example: datadog
-              default: null
+              display_default: null
 
-          - name: pass
+          - name: password
             description: |
               Password associated to the MySQL user.
             enabled: true
@@ -50,6 +50,13 @@ files:
               type: number
               example: 3306
 
+          - name: reported_hostname
+            description: |
+              Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
+              and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+            value:
+              type: string
+
           - name: sock
             description: |
               Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).
@@ -61,7 +68,7 @@ files:
             value:
               type: string
               example: utf8
-              default: None
+              display_default: null
           - name: defaults_file
             description: |
               Path to an alternative configuration mechanism file.
@@ -109,6 +116,45 @@ files:
                       type: gauge
                   tags:
                     - test:mysql
+          - name: additional_status
+            description: |
+              Set this parameter to collect additional MySQL status variables as metrics
+              from "SHOW GLOBAL STATUS"
+              See MySQL documentation for available variables: https://dev.mysql.com/doc/refman/8.0/en/show-status.html
+
+              The following fields are supported:
+
+              name : MySQL status name on "SHOW GLOBAL STATUS"
+              metric_name : metric name
+              type : gauge | rate | count | ...
+            value:
+              type: array
+              items:
+                type: object
+              example:
+                - name: innodb_rows_read
+                  metric_name: mysql.innodb.rows_read
+                  type: rate
+
+          - name: additional_variable
+            description: |
+              Set this parameter to collect additional MySQL variables as metrics
+              from "SHOW GLOBAL VARIABLES"
+              See MySQL documentation for available variables: https://dev.mysql.com/doc/refman/8.0/en/show-variables.html
+
+              The following fields are supported:
+
+              name : MySQL variable name on "SHOW GLOBAL VARIABLES"
+              metric_name : metric name
+              type : gauge | rate | count | ...
+            value:
+              type: array
+              items:
+                type: object
+              example:
+                - name: long_query_time
+                  metric_name: mysql.performance.long_query_time
+                  type: gauge
 
           - name: max_custom_queries
             description: |
@@ -146,7 +192,10 @@ files:
             options:
               - name: replication
                 description: |
-                  Set to `true` to collect replication metrics.
+                  Set to `true` to collect replication metrics or group replication metrics.
+                  These metrics are only collected from the specified `host`. If you want to collect replication metrics
+                  from the source or primary node and the replica or secondary nodes you need to set separate check
+                  instances to collect them.
                 value:
                   type: boolean
                   example: false
@@ -235,19 +284,184 @@ files:
                   type: boolean
                   example: false
 
-          - name: deep_database_monitoring
+          - name: dbm
             description: |
-              Set to `true` to enable the ALPHA features for Deep Database Monitoring.
-
-              If you would like to hear more about Deep Database Monitoring, please reach out to your customer
-              success manager or Datadog support.
+              Set to `true` enable Database Monitoring.
             enabled: false
             value:
               type: boolean
-              example: true
-              default: false
+              example: false
+              display_default: false
+          - name: query_metrics
+            description: Configure collection of query metrics
+            options:
+              - name: enabled
+                description: |
+                  Enable collection of query metrics. Requires `dbm: true`.
+                value:
+                  type: boolean
+                  example: true
+              - name: collection_interval
+                description: |
+                  Set the query metric collection interval (in seconds). Each collection involves a single query to
+                  `pg_stat_statements`. If a non-default value is chosen then that exact same value must be used for *every*
+                  check instance. Running different instances with different collection intervals is not supported.
+                value:
+                  type: number
+                  example: 10
+          - name: query_samples
+            description: Configure collection of query samples
+            options:
+              - name: enabled
+                description: |
+                  Enables collection of query samples. Requires `dbm: true`.
+                value:
+                  type: boolean
+                  example: true
+              - name: collection_interval
+                description: |
+                  Sets the query sample collection interval (in seconds). Each collection involves a single query to one
+                  of the `performance_schema.events_statements_*` tables, followed by at most one `EXPLAIN` query per
+                  unique statement seen.
+                value:
+                  type: number
+                  example: 1
+              - name: explained_queries_per_hour_per_query
+                description: |
+                  Sets the rate limit for how many execution plans will be collected per hour per normalized query.
+                value:
+                  type: integer
+                  example: 60
+              - name: samples_per_hour_per_query
+                description: |
+                  Sets the rate limit for how many statement sample events will be ingested per hour per normalized
+                  execution plan.
+                value:
+                  type: integer
+                  example: 15
+              - name: explained_queries_cache_maxsize
+                description: |
+                  Sets the max size of the cache used for the explained_queries_per_hour_per_query rate limit. This
+                  should be increased for databases with a very large number of unique normalized queries which exceed the
+                  cache's limit.
+                value:
+                  type: integer
+                  example: 5000
+              - name: seen_samples_cache_maxsize
+                description: |
+                  Sets the max size of the cache used for the samples_per_hour_per_query rate limit. This should be
+                  increased for databases with a very large number of unique normalized execution plans which exceed the
+                  cache's limit.
+                value:
+                  type: integer
+                  example: 10000
+              - name: events_statements_row_limit
+                description: |
+                  Sets the maximum number of rows to read out from a `performance_schema.events_statements_*` table during
+                  a single collection.
+                value:
+                  type: integer
+                  example: 5000
+              - name: events_statements_table
+                description: |
+                  Forces a specific events statements table. Must be one of events_statements_current,
+                  events_statements_history, events_statements_history_long. If not set then the agent will choose
+                  the best available table that is enabled and not empty.
+                value:
+                  type: string
+                  example: events_statements_history_long
+                  display_default: null
+              - name: explain_procedure
+                description: |
+                  Overrides the default procedure used for collecting execution plans. The agent will use this
+                  procedure in each schema where it exists: `{schema}.explain_statement({statement})`.
+                value:
+                  type: string
+                  example: explain_statement
+              - name: fully_qualified_explain_procedure
+                description: |
+                  Overrides the default fully qualified explain procedure used for collecting execution plans for
+                  statements sent from connections that do not have a default schema configured.
+                value:
+                  type: string
+                  example: datadog.explain_statement
+              - name: events_statements_enable_procedure
+                description: |
+                  Overrides the default procedure used for enabling events statements consumers.
+                value:
+                  type: string
+                  example: datadog.enable_events_statements_consumers
+              - name: events_statements_temp_table_name
+                description: |
+                  Overrides the default fully qualified name for the temp table the agent creates while collecting
+                  samples.
+                value:
+                  type: string
+                  example: datadog.temp_events
+              - name: collection_strategy_cache_maxsize
+                description: |
+                  Sets the max size of the cache used for caching collection strategies. This value should be increased
+                  to be at least as many as the number of unique schemas that are being monitored.
+                value:
+                  type: integer
+                  example: 1000
+              - name: collection_strategy_cache_ttl
+                description: |
+                  Sets how long to cache collection strategies. This should only be decreased if the set of enabled
+                  `events_statements_*` tables changes frequently enough to cause stale strategies to return empty
+                  results for an extended period of time.
+                value:
+                  type: integer
+                  example: 300
+          - name: obfuscator_options
+            description: |
+              Configure how the SQL obfuscator behaves.
+              Note: This option only applies when `dbm` is enabled.
+            options:
+              - name: replace_digits
+                description: |
+                  Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
+                  Note: This option also applies to extracted tables using `collect_tables`.
+                value:
+                  type: boolean
+                  example: false
+              - name: collect_metadata
+                description: |
+                  Set to `true` to enable the collection of metadata in your SQL statements.
+                  Metadata includes things such as tables, commands, and comments.
+                value:
+                  type: boolean
+                  example: false
+              - name: collect_tables
+                description: |
+                  Set to `false` to disable the collection of tables in your SQL statements.
+                  Requires `collect_metadata: true`.
+                value:
+                  type: boolean
+                  example: true
+              - name: collect_commands
+                description: |
+                  Set to `false` to disable the collection of commands in your SQL statements.
+                  Requires `collect_metadata: true`.
 
+                  Examples: SELECT, UPDATE, DELETE, etc.
+                value:
+                  type: boolean
+                  example: true
+              - name: collect_comments
+                description: |
+                  Set to `false` to disable the collection of comments in your SQL statements.
+                  Requires `collect_metadata: true`.
+                value:
+                  type: boolean
+                  example: true
           - template: instances/default
+            overrides:
+              disable_generic_tags.hidden: false
+              disable_generic_tags.enabled: true
+              disable_generic_tags.description: |
+                  Replaces generic tag such as `server` with `mysql_server` to avoid getting it mixed with
+                  other integrations tags.
 
       - template: logs
         example:

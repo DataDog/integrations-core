@@ -6,7 +6,7 @@ from io import StringIO
 
 import click
 
-from ....utils import write_file
+from ....fs import write_file
 from ...constants import get_agent_integrations_file, get_agent_release_requirements
 from ...git import git_show_file
 from ...utils import parse_agent_req_file

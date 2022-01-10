@@ -12,7 +12,7 @@ files:
       required: true
       description: |
         For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
-        url of the RabbitMQ Managment Plugin (http://www.rabbitmq.com/management.html).
+        url of the RabbitMQ Management Plugin (http://www.rabbitmq.com/management.html).
       value:
         type: string
         example: http://localhost:15672/api/
@@ -74,6 +74,8 @@ files:
       description: |
         Use the `queues_regexes` parameters to specify one or multiple regex to to match
         the queues you'd like to collect metrics on (up to 200 queues).
+        If you have vhosts set up, the regex pattern needs to be formatted with vhost
+        in the format of `<vhost>/<queue_name>`.
         If you have less than 200 queues, you don't have to set this parameter,
         the metrics are collected on all the queues by default.
         If you have `tag_families` enabled, the first captured group in the regex
@@ -127,6 +129,8 @@ files:
           - <VHOST_NAME_1>
           - <VHOST_NAME_2>
     - template: instances/http
+      overrides:
+        use_legacy_auth_encoding.value.example: false
     - template: instances/default
   - template: logs
     example:

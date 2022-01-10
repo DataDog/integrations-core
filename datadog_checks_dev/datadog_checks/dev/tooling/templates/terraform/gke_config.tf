@@ -25,22 +25,3 @@ resource "random_string" "suffix" {
   special = false
   upper = false
 }
-
-resource "local_file" "kubeconfig" {
-  content = "${data.template_file.kubeconfig.rendered}"
-  filename = "${path.module}/kubeconfig"
-}
-
-data "template_file" "kubeconfig" {
-  template = file("${path.module}/kubeconfig-template.yaml")
-
-  vars = {
-    cluster_name = google_container_cluster.gke_cluster.name
-    user_name = google_container_cluster.gke_cluster.master_auth.0.username
-    user_password = google_container_cluster.gke_cluster.master_auth.0.password
-    endpoint = google_container_cluster.gke_cluster.endpoint
-    cluster_ca = google_container_cluster.gke_cluster.master_auth.0.cluster_ca_certificate
-    client_cert = google_container_cluster.gke_cluster.master_auth.0.client_certificate
-    client_cert_key = google_container_cluster.gke_cluster.master_auth.0.client_key
-  }
-}

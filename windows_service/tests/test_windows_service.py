@@ -84,10 +84,16 @@ def test_basic_e2e(dd_agent_check, check, instance_basic):
     aggregator = dd_agent_check(instance_basic)
 
     aggregator.assert_service_check(
-        WindowsService.SERVICE_CHECK_NAME, status=WindowsService.OK, tags=['service:EventLog', 'optional:tag1'], count=1
+        WindowsService.SERVICE_CHECK_NAME,
+        status=WindowsService.OK,
+        tags=['service:EventLog', 'windows_service:EventLog', 'optional:tag1'],
+        count=1,
     )
     aggregator.assert_service_check(
-        WindowsService.SERVICE_CHECK_NAME, status=WindowsService.OK, tags=['service:Dnscache', 'optional:tag1'], count=1
+        WindowsService.SERVICE_CHECK_NAME,
+        status=WindowsService.OK,
+        tags=['service:Dnscache', 'windows_service:Dnscache', 'optional:tag1'],
+        count=1,
     )
     aggregator.assert_service_check(
         WindowsService.SERVICE_CHECK_NAME,

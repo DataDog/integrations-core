@@ -27,7 +27,10 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "[CoreDNS] Cache hits count low": "assets/monitors/coredns_cache_hits_low.json",
+      "[CoreDNS] Request duration high": "assets/monitors/coredns_request_duration_high.json"
+    },
     "dashboards": {
       "CoreDNS": "assets/dashboards/coredns.json"
     },

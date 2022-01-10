@@ -122,7 +122,7 @@ class LegacyIstioCheck_1_4(OpenMetricsBaseCheck):
                 'namespace': MESH_NAMESPACE,
                 'prometheus_url': endpoint,
                 'label_to_hostname': endpoint,
-                'metrics': [MESH_METRICS],
+                'metrics': [MESH_METRICS] + instance.get('metrics', []),
                 # Defaults that were set when istio was based on PrometheusCheck
                 'send_monotonic_counter': instance.get('send_monotonic_counter', False),
                 'health_service_check': instance.get('health_service_check', False),
@@ -148,7 +148,7 @@ class LegacyIstioCheck_1_4(OpenMetricsBaseCheck):
             {
                 'namespace': MIXER_NAMESPACE,
                 'prometheus_url': endpoint,
-                'metrics': [MIXER_METRICS],
+                'metrics': [MIXER_METRICS] + instance.get('metrics', []),
                 # Defaults that were set when istio was based on PrometheusCheck
                 'send_monotonic_counter': instance.get('send_monotonic_counter', False),
                 'health_service_check': instance.get('health_service_check', False),
@@ -166,7 +166,11 @@ class LegacyIstioCheck_1_4(OpenMetricsBaseCheck):
         process_pilot_instance = deepcopy(instance)
         PILOT_METRICS.update(GENERIC_METRICS)
         process_pilot_instance.update(
-            {'namespace': PILOT_NAMESPACE, 'prometheus_url': endpoint, 'metrics': [PILOT_METRICS]}
+            {
+                'namespace': PILOT_NAMESPACE,
+                'prometheus_url': endpoint,
+                'metrics': [PILOT_METRICS] + instance.get('metrics', []),
+            }
         )
         return process_pilot_instance
 
@@ -183,7 +187,7 @@ class LegacyIstioCheck_1_4(OpenMetricsBaseCheck):
             {
                 'namespace': GALLEY_NAMESPACE,
                 'prometheus_url': endpoint,
-                'metrics': [GALLEY_METRICS],
+                'metrics': [GALLEY_METRICS] + instance.get('metrics', []),
                 # The following metrics have been blakclisted due to high cardinality of tags
                 'ignore_metrics': ['galley_mcp_source_message_size_bytes', 'galley_mcp_source_request_acks_total'],
             }
@@ -201,6 +205,10 @@ class LegacyIstioCheck_1_4(OpenMetricsBaseCheck):
         process_citadel_instance = deepcopy(instance)
         CITADEL_METRICS.update(GENERIC_METRICS)
         process_citadel_instance.update(
-            {'namespace': CITADEL_NAMESPACE, 'prometheus_url': endpoint, 'metrics': [CITADEL_METRICS]}
+            {
+                'namespace': CITADEL_NAMESPACE,
+                'prometheus_url': endpoint,
+                'metrics': [CITADEL_METRICS] + instance.get('metrics', []),
+            }
         )
         return process_citadel_instance

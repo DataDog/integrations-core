@@ -10,7 +10,7 @@ from fnmatch import fnmatch
 
 import pymysql
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 
 try:
     import rrdtool
@@ -40,7 +40,7 @@ class CactiCheck(AgentCheck):
         super(CactiCheck, self).__init__(name, init_config, instances)
         self.last_ts = {}
         # Load the instance config
-        self.config = self._get_config(instances[0])
+        self._config = self._get_config()
 
     @staticmethod
     def get_library_versions():
@@ -48,33 +48,33 @@ class CactiCheck(AgentCheck):
             return {"rrdtool": rrdtool.__version__}
         return {"rrdtool": "Not Found"}
 
-    def check(self, instance):
+    def check(self, _):
         if rrdtool is None:
-            raise Exception("Unable to import python rrdtool module")
+            raise ConfigurationError("Unable to import python rrdtool module")
 
         connection = self._get_connection()
 
         self.log.debug("Connected to MySQL to fetch Cacti metadata")
 
         # Get whitelist patterns, if available
-        patterns = self._get_whitelist_patterns(self.config.whitelist)
+        patterns = self._get_whitelist_patterns(self._config.whitelist)
 
         # Fetch the RRD metadata from MySQL
         rrd_meta = self._fetch_rrd_meta(
-            connection, self.config.rrd_path, patterns, self.config.field_names, self.config.tags
+            connection, self._config.rrd_path, patterns, self._config.field_names, self._config.tags
         )
 
         # Load the metrics from each RRD, tracking the count as we go
         metric_count = 0
         for hostname, device_name, rrd_path in rrd_meta:
-            m_count = self._read_rrd(rrd_path, hostname, device_name, self.config.tags)
+            m_count = self._read_rrd(rrd_path, hostname, device_name, self._config.tags)
             metric_count += m_count
 
-        self.gauge('cacti.metrics.count', metric_count, tags=self.config.tags)
+        self.gauge('cacti.metrics.count', metric_count, tags=self._config.tags)
 
     def _get_connection(self):
         return pymysql.connect(
-            self.config.host, self.config.user, self.config.password, self.config.db, self.config.port
+            self._config.host, self._config.user, self._config.password, self._config.db, self._config.port
         )
 
     def _get_whitelist_patterns(self, whitelist=None):
@@ -91,22 +91,21 @@ class CactiCheck(AgentCheck):
 
         return patterns
 
-    @classmethod
-    def _get_config(cls, instance):
+    def _get_config(self):
         required = ['mysql_host', 'mysql_user', 'rrd_path']
         for param in required:
-            if not instance.get(param):
-                raise Exception("Cacti instance missing %s. Skipping." % (param))
+            if not self.instance.get(param):
+                raise ConfigurationError("Cacti instance missing %s. Skipping." % param)
 
-        host = instance.get('mysql_host')
-        user = instance.get('mysql_user')
-        password = instance.get('mysql_password', '') or ''
-        db = instance.get('mysql_db', 'cacti')
-        port = instance.get('mysql_port')
-        rrd_path = instance.get('rrd_path')
-        whitelist = instance.get('rrd_whitelist')
-        field_names = instance.get('field_names', ['ifName', 'dskDevice'])
-        tags = instance.get('tags', [])
+        host = self.instance.get('mysql_host')
+        user = self.instance.get('mysql_user')
+        password = self.instance.get('mysql_password', '') or ''
+        db = self.instance.get('mysql_db', 'cacti')
+        port = self.instance.get('mysql_port')
+        rrd_path = self.instance.get('rrd_path')
+        whitelist = self.instance.get('rrd_whitelist')
+        field_names = self.instance.get('field_names', ['ifName', 'dskDevice'])
+        tags = self.instance.get('tags', [])
 
         Config = namedtuple(
             'Config', ['host', 'user', 'password', 'db', 'port', 'rrd_path', 'whitelist', 'field_names', 'tags']
@@ -123,7 +122,7 @@ class CactiCheck(AgentCheck):
         return rrdtool.fetch(rrd_path, c, '--start', str(start))
 
     def _read_rrd(self, rrd_path, hostname, device_name, tags):
-        """ Main metric fetching method."""
+        """Main metric fetching method."""
         metric_count = 0
 
         try:
@@ -228,7 +227,7 @@ class CactiCheck(AgentCheck):
 
     @staticmethod
     def _format_metric_name(m_name, cfunc):
-        """ Format a cacti metric name into a Datadog-friendly name. """
+        """Format a cacti metric name into a Datadog-friendly name."""
         try:
             aggr = CFUNC_TO_AGGR[cfunc]
         except KeyError:
@@ -244,7 +243,7 @@ class CactiCheck(AgentCheck):
 
     @staticmethod
     def _transform_metric(m_name, val):
-        """ Add any special case transformations here. """
+        """Add any special case transformations here."""
         # Report memory in MB
         if m_name[0:11] in ('system.mem.', 'system.disk'):
             return val / 1024

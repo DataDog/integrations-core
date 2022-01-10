@@ -15,7 +15,7 @@ exchange.network.tcpv4.conns_reset,count,,connection,,Shows the number of times 
 exchange.network.tcpv6.conns_reset,count,,connection,,Shows the number of times TCP connections have made a direct transition to the CLOSED state from either the ESTABLISHED state or the CLOSE-WAIT state.,-1,exchange_server,tcp6 resets
 exchange.netlogon.semaphore_waiters,gauge,,thread,,The number of threads that are waiting to obtain the semaphore.,-1,exchange_server,sem waiters
 exchange.netlogon.semaphore_holders,gauge,,thread,,The number of threads that are holding the semaphore.,-1,exchange_server,sem holders
-exchange.netlogon.semaphore_acquires,count,,,,"The total number of times that the semaphore has been obtained over the lifetime of the security channel connection, or since system startup for _Total.",-1,exchange_server,sem aquires
+exchange.netlogon.semaphore_acquires,count,,,,"The total number of times that the semaphore has been obtained over the lifetime of the security channel connection, or since system startup for _Total.",-1,exchange_server,sem acquires
 exchange.netlogon.semaphore_timeouts,count,,timeout,,"The total number of times that a thread has timed out while it waited for the semaphore over the lifetime of the security channel connection, or since system startup for _Total.",-1,exchange_server,sem timeouts
 exchange.netlogon.semaphore_hold_time,gauge,,second,,The average time (in seconds) that the semaphore is held over the last sample.,-1,exchange_server,sem hold time
 exchange.database.io_reads_avg_latency,gauge,,millisecond,,"Shows the average length of time, in milliseconds (ms), per database read operation.",-1,exchange_server,db read latency

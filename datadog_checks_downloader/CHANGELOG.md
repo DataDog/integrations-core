@@ -1,5 +1,17 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 3.4.1 / 2021-10-19 / Agent 7.32.0
+
+* [Fixed] Update tuf to 0.19.0 for python 3. See [#10444](https://github.com/DataDog/integrations-core/pull/10444).
+
+## 3.4.0 / 2021-07-09 / Agent 7.30.0
+
+* [Added] Upgrade downloader after ceremony. See [#9556](https://github.com/DataDog/integrations-core/pull/9556).
+
+## 3.3.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Better error message if the integration doesn't have the expected type. See [#9403](https://github.com/DataDog/integrations-core/pull/9403).
+
 ## 3.2.0 / 2020-10-31 / Agent 7.24.0
 
 * [Security] Update TUF, in-toto and securesystemslib. See [#7844](https://github.com/DataDog/integrations-core/pull/7844).

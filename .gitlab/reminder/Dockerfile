@@ -1,4 +1,4 @@
-FROM python:3.7-alpine3.9 AS reqs
+FROM registry.ddbuild.io/images/mirror/python:3.7.2-alpine3.9 AS reqs
 
 WORKDIR /
 
@@ -9,7 +9,7 @@ RUN pip install pip-tools
 RUN pip-compile --quiet --generate-hashes --output-file requirements.txt requirements.in
 
 # Our actual image
-FROM python:3.7-alpine3.9
+FROM registry.ddbuild.io/images/mirror/python:3.7.2-alpine3.9
 
 RUN apk add --update --no-cache bash
 

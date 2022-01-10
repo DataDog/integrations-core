@@ -1,5 +1,5 @@
 ---
-title: Integration assets reference
+title: Integration Assets Reference
 kind: documentation
 ---
 
@@ -25,7 +25,7 @@ Configuration blocks follow a few guidelines:
 - All optional parameters are commented by default.
 - If a placeholder has a default value for an integration (like the status endpoint of an integration), it can be used instead of a generic placeholder.
 
-### @param specification
+### `@param` specification
 
 Practically speaking, the only command is `@param`, which is used to describe configuration blocks—primarily for documentation purposes. `@param` is implemented using one of the following forms:
 
@@ -37,7 +37,7 @@ Practically speaking, the only command is `@param`, which is used to describe co
 
 Arguments:
 
-- `name`: the name of the parameter, e.g. `search_string` (mandatory).
+- `name`: the name of the parameter, such as `search_string` (mandatory).
 - `type`: the data type for the parameter value (mandatory). Possible values:
   - _boolean_
   - _string_
@@ -76,15 +76,15 @@ The complete list of mandatory and optional attributes for the `manifest.json` f
 | Attribute                   | Type            | Mandatory/Optional | Description                                                                                                                                                                                                              |
 | --------------------------- | --------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `integration_id`            | String          | Mandatory          | The unique identifying name of this integration. Usually kebab case of the Display Name                                                                                                                                  |
-| `categories`                | Array of String | Mandatory          | Integration categories used on the [public documentation integrations page][4].                                                                                                                                          |
+| `categories`                | Array of String | Mandatory          | Integration categories used on the public documentation [Integrations][4] page.                                                                                                                                          |
 | `creates_events`            | Boolean         | Mandatory          | If the integration should be able to create events. If this is set to `false`, attempting to create an event from the integration results in an error.                                                                   |
-| `display_name`              | String          | Mandatory          | Title displayed on the corresponding integration tile in the Datadog application and on the [public documentation integrations page][4]                                                                                  |
+| `display_name`              | String          | Mandatory          | The title displayed on the corresponding integration tile on the Datadog site and the [Integrations page][4].                                                                                  |
 | `guid`                      | String          | Mandatory          | Unique ID for the integration. [Generate a UUID][5]                                                                                                                                                                      |
-| `is_public`                 | Boolean         | Mandatory          | If set to `false` the integration `README.md` content is not indexed by bots in the Datadog public documentation.                                                                                                        |
+| `is_public`                 | Boolean         | Mandatory          | If set to `false` the integration `README.md` content is not included in the Datadog public documentation.                                                                                                              |
 | `maintainer`                | String          | Mandatory          | Email of the owner of the integration.                                                                                                                                                                                   |
 | `manifest_version`          | String          | Mandatory          | Version of the current manifest.                                                                                                                                                                                         |
 | `name`                      | String          | Mandatory          | Unique name for the integration. Use the folder name for this parameter.                                                                                                                                                 |
-| `public_title`              | String          | Mandatory          | Title of the integration displayed on the documentation. Should follow the following format: `Datadog-<INTEGRATION_NAME> integration`.                                                                                   |
+| `public_title`              | String          | Mandatory          | Title of the integration displayed on the documentation. Should follow the following format: `<INTEGRATION_NAME>`.                                                                                   |
 | `short_description`         | String          | Mandatory          | This text appears at the top of the integration tile as well as the integration's rollover text on the integrations page. Maximum 80 characters.                                                                         |
 | `support`                   | String          | Mandatory          | Owner of the integration.                                                                                                                                                                                                |
 | `supported_os`              | Array of String | Mandatory          | List of supported OSs. Choose among `linux`,`mac_os`, and `windows`.                                                                                                                                                     |
@@ -92,8 +92,8 @@ The complete list of mandatory and optional attributes for the `manifest.json` f
 | `aliases`                   | Array of String | Optional           | A list of URL aliases for the Datadog documentation.                                                                                                                                                                     |
 | `description`               | String          | Optional           | This text appears when sharing an integration documentation link.                                                                                                                                                        |
 | `is_beta`                   | Boolean         | Optional           | Default `false`. If set to `true` the integration `README.md` content is not displayed in the Datadog public documentation.                                                                                              |
-| `metric_to_check`           | String          | Optional           | The presence of this metric determines if this integration is working properly. If this metric is not being reported when this integration is installed, the integration is marked as broken in the Datadog application. |
-| `metric_prefix`             | String          | Optional           | The namespace for this integration's metrics. Every metric reported by this integration will be prepended with this value.                                                                                               |
+| `metric_to_check`           | String          | Optional           | The presence of this metric determines if this integration is working properly. If this metric is not being reported when this integration is installed, the integration is marked as broken on the Datadog site. |
+| `metric_prefix`             | String          | Optional           | The namespace for this integration's metrics. Every metric reported by this integration is prepended with this value.                                                                                               |
 | `process_signatures`        | Array of String | Optional           | A list of signatures that matches the command line of this integration.                                                                                                                                                  |
 | `assets`                    | Dictionary      | Mandatory          | Relative location of where certain asset files live and their respective names.                                                                                                                                          |
 | `assets`-> `dashboards`     | Dictionary      | Mandatory          | Dictionary where the key is the name of the dashboard (must be globally unique across integrations) and the value is the relative file path where the dashboard definition lives.                                        |
@@ -115,7 +115,7 @@ Descriptions of each column of the `metadata.csv` file:
 | `per_unit_name` | Optional           | If there is a unit sub-division, i.e `request per second`                                                                                                                                                                                                                                                                               |
 | `description`   | Optional           | Description of the metric.                                                                                                                                                                                                                                                                                                              |
 | `orientation`   | Mandatory          | Set to `1` if the metric should go up, i.e `myapp.turnover`. Set to `0` if the metric variations are irrelevant. Set to `-1` if the metric should go down, i.e `myapp.latency`.                                                                                                                                                         |
-| `integration`   | Mandatory          | Name of the integration that emits the metric. Must be the normalized version of the `display_name` from the `manifest.json` file. Any character besides letters, underscores, dashes and numbers are converted to underscores. E.g. `Openstack Controller` -> `openstack_controller`and `ASP.NET` -> `asp_net` and `CRI-o` -> `cri-o`. |
+| `integration`   | Mandatory          | The name of the integration that emits the metric. Must be the normalized version of the `display_name` from the `manifest.json` file. Any character besides letters, underscores, dashes, and numbers are converted to underscores, for example: `Openstack Controller` -> `openstack_controller`and `ASP.NET` -> `asp_net` and `CRI-o` -> `cri-o`. |
 | `short_name`    | Mandatory          | Explicit Unique ID for the metric.                                                                                                                                                                                                                                                                                                      |
 
 ## Service check file

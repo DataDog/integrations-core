@@ -32,7 +32,7 @@ init_config:
 #
 instances:
 
-    ## @param kafka_connect_str - list of strings - required
+    ## @param kafka_connect_str - string or list of strings - required
     ## Kafka endpoints and port to connect to.
     ##
     ## In a production environment, it's often useful to specify multiple
@@ -40,9 +40,18 @@ instances:
     ## only generate a single check process, but if one host goes down,
     ## KafkaClient tries contacting the next host.
     ## Details: https://github.com/DataDog/dd-agent/issues/2943
+    ##
+    ## You may specify a single server like:
+    ##
+    ##   kafka_connect_str: server:9092
+    ##
+    ## or multiple servers like:
+    ##
+    ##   kafka_connect_str:
+    ##   - server1:9092
+    ##   - server2:9092
     #
-  - kafka_connect_str:
-      - localhost:9092
+  - kafka_connect_str: <KAFKA_CONNECT_STR>
 
     ## @param kafka_client_api_version - string - optional
     ## Specify the highest client protocol version supported by all brokers in the cluster.
@@ -96,35 +105,6 @@ instances:
     #
     # monitor_all_broker_highwatermarks: false
 
-    ## @param tags - list of strings - optional
-    ## A list of tags to attach to every metric and service check emitted by this instance.
-    ##
-    ## Learn more about tagging at https://docs.datadoghq.com/tagging
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
-
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Overrides any `service` defined in the `init_config` section.
-    #
-    # service: <SERVICE>
-
-    ## @param min_collection_interval - number - optional - default: 15
-    ## This changes the collection interval of the check. For more information, see:
-    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
-    #
-    # min_collection_interval: 15
-
-    ## @param empty_default_hostname - boolean - optional - default: false
-    ## This forces the check to send metrics with no hostname.
-    ##
-    ## This is useful for cluster-level checks.
-    #
-    # empty_default_hostname: false
-
     ## @param security_protocol - string - optional - default: PLAINTEXT
     ## Protocol used to communicate with brokers.
     ## Valid values are: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL.
@@ -158,80 +138,129 @@ instances:
     #
     # sasl_kerberos_domain_name: localhost
 
-    ## @param ssl_context - string - optional
-    ## Pre-configured SSLContext for wrapping socket connections.
-    ## If provided, all other ssl_* configurations are ignored.
+    ## @param tls_verify - boolean - optional - default: true
+    ## Instructs the check to validate the TLS certificate(s) of the service(s).
     #
-    # ssl_context: <SSL_CONTEXT>
+    # tls_verify: true
 
-    ## @param ssl_check_hostname - boolean - optional - default: true
-    ## Flag to configure whether SSL handshake should verify that the
-    ## certificate matches the broker’s hostname.
+    ## @param tls_ca_cert - string - optional
+    ## The path to a file of concatenated CA certificates in PEM format or a directory
+    ## containing several CA certificates in PEM format. If a directory, the directory
+    ## must have been processed using the c_rehash utility supplied with OpenSSL. See:
+    ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+    ##
+    ## Setting this implicitly sets `tls_verify` to true.
     #
-    # ssl_check_hostname: true
+    # tls_ca_cert: <CA_CERT_PATH>
 
-    ## @param ssl_cafile - string - optional
-    ## Filename of CA file path to use in certificate verification.
+    ## @param tls_cert - string - optional
+    ## The path to a single file in PEM format containing a certificate as well as any
+    ## number of CA certificates needed to establish the certificate's authenticity for
+    ## use when connecting to services. It may also contain an unencrypted private key to use.
+    ##
+    ## Setting this implicitly sets `tls_verify` to true.
     #
-    # ssl_cafile: <CA_FILE_PATH>
+    # tls_cert: <CERT_PATH>
 
-    ## @param ssl_certfile - string - optional
-    ## Filename path of file in PEM format containing the client certificate,
-    ## as well as any CA certificates needed to establish the certificate’s authenticity.
+    ## @param tls_private_key - string - optional
+    ## The unencrypted private key to use for `tls_cert` when connecting to services. This is
+    ## required if `tls_cert` is set and it does not already contain a private key.
+    ##
+    ## Setting this implicitly sets `tls_verify` to true.
     #
-    # ssl_certfile: <CERT_FILE_PATH>
+    # tls_private_key: <PRIVATE_KEY_PATH>
 
-    ## @param ssl_keyfile - string - optional
-    ## Optional filename containing the client private key.
+    ## @param tls_private_key_password - string - optional
+    ## Optional password to decrypt tls_private_key.
+    ##
+    ## Setting this implicitly sets `tls_verify` to true.
     #
-    # ssl_keyfile: <KEY_FILE_PATH>
+    # tls_private_key_password: <PRIVATE_KEY_PASSWORD>
 
-    ## @param ssl_password - string - optional
-    ## Password to be used when loading the certificate chain.
+    ## @param tls_validate_hostname - boolean - optional - default: true
+    ## Verifies that the server's cert hostname matches the one requested.
     #
-    # ssl_password: <PASSWORD>
+    # tls_validate_hostname: true
 
-    ## @param ssl_crlfile - string - optional
+    ## @param tls_crlfile - string - optional
     ## Filename path containing the CRL to check for certificate expiration.
     ## By default, no CRL check is done. When providing a file, only the leaf certificate
-    ## will be checked against this CRL. The CRL can only be checked with Python 3.4+ or 2.7.9+.
+    ## will be checked against this CRL.
     #
-    # ssl_crlfile: <SSL_FILE_PATH>
+    # tls_crlfile: <SSL_FILE_PATH>
 
     ## @param broker_requests_batch_size - integer - optional - default: 30
     ## The OffsetRequests sent to each broker are batched by the kafka_consumer check in groups of 30 by default.
-    ## If the batch size is too big, you may see KafkaTimeoutError exceptions in the logs while 
+    ## If the batch size is too big, you may see KafkaTimeoutError exceptions in the logs while
     ## running the wakeup calls.
     ## If the batch size is too small, the check will take longer to run.
     #
     # broker_requests_batch_size: 30
 
-    ## @param zk_connect_str - list of mappings - optional
-    ## DEPRECATION NOTICE: This option is only used for fetching consumer offsets 
-    ## from Zookeeper and is deprecated.  
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
+
+    ## @param zk_connect_str - string or list of strings - optional
+    ## DEPRECATION NOTICE: This option is only used for fetching consumer offsets
+    ## from Zookeeper and is deprecated.
     ## Zookeeper endpoints and port to connect to.
     ## In a production environment, it's often useful to specify multiple
     ## Zookeeper nodes for a single check instance. This way you
     ## only generate a single check process, but if one host goes down,
     ## KafkaClient / KazooClient tries contacting the next host.
     ## Details: https://github.com/DataDog/dd-agent/issues/2943
+    ##
+    ## You may specify a single server like:
+    ##
+    ##   zk_connect_str: localhost:2181
+    ##
+    ## or multiple servers like:
+    ##
+    ##   zk_connect_str:
+    ##   - server1:2181
+    ##   - server2:2181
     #
-    # zk_connect_str:
-    #   - localhost:2181
-    #   - <ZOOKEEPER_ENDPOINT>:2181
+    # zk_connect_str: <ZK_CONNECT_STR>
 
     ## @param zk_prefix - string - optional
-    ## DEPRECATION NOTICE: This option is only used for fetching consumer offsets 
-    ## from Zookeeper and is deprecated. 
+    ## DEPRECATION NOTICE: This option is only used for fetching consumer offsets
+    ## from Zookeeper and is deprecated.
     ## Zookeeper chroot prefix under which kafka data is living in zookeeper.
     ## If kafka is connecting to `my-zookeeper:2181/kafka` then the `zk_prefix` is `/kafka`.
     #
     # zk_prefix: <ZK_PREFIX>
 
     ## @param kafka_consumer_offsets - boolean - optional - default: false
-    ## DEPRECATION NOTICE: This option is only used for fetching consumer offsets 
-    ## from Zookeeper and is deprecated. 
-    ## This setting only applies if zk_connect_str is set
+    ## DEPRECATION NOTICE: This option is only used for fetching consumer offsets
+    ## from Zookeeper and is deprecated.
+    ## This setting only applies if `zk_connect_str` is set and cannot work with
+    ## `monitor_unlisted_consumer_groups` since the generated list comes from Zookeeper.
     ## Set to true to fetch consumer offsets from both Zookeeper and Kafka
     ## Set to false to fetch consumer offsets only from Zookeeper.
     #

@@ -2,12 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import time
 
+import mock
 import pytest
 from six import iteritems
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mongo import MongoDb
+from datadog_checks.mongo.common import ReplicaSetDeployment
 
 from . import common
 
@@ -47,7 +50,7 @@ METRIC_VAL_CHECKS_OLD = {
 }
 
 
-pytestmark = pytest.mark.usefixtures('dd_environment')
+pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration]
 
 
 @pytest.mark.parametrize(
@@ -58,9 +61,9 @@ pytestmark = pytest.mark.usefixtures('dd_environment')
         pytest.param(common.INSTANCE_AUTHDB_LEGACY_CONFIG, id='legacy'),
     ],
 )
-def test_mongo(aggregator, check, instance_authdb):
+def test_mongo(aggregator, check, instance_authdb, dd_run_check):
     check = check(instance_authdb)
-    check.check(instance_authdb)
+    dd_run_check(check)
 
     metric_names = aggregator.metric_names
     assert metric_names
@@ -76,9 +79,9 @@ def test_mongo(aggregator, check, instance_authdb):
     'instance_user',
     [pytest.param(common.INSTANCE_USER, id='standard'), pytest.param(common.INSTANCE_USER_LEGACY_CONFIG, id='legacy')],
 )
-def test_mongo2(aggregator, check, instance_user):
+def test_mongo2(aggregator, check, instance_user, dd_run_check):
     check = check(instance_user)
-    check.check(instance_user)
+    dd_run_check(check)
 
     tags = ['host:{}'.format(common.HOST), 'port:{}'.format(common.PORT1), 'db:test']
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK, tags=tags)
@@ -93,9 +96,9 @@ def test_mongo2(aggregator, check, instance_user):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
-def test_mongo_arbiter(aggregator, check, instance_arbiter):
+def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
     check = check(instance_arbiter)
-    check.check(instance_arbiter)
+    dd_run_check(check)
 
     tags = ['host:{}'.format(common.HOST), 'port:{}'.format(common.PORT_ARBITER), 'db:admin']
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK, tags=tags)
@@ -125,9 +128,9 @@ def test_mongo_arbiter(aggregator, check, instance_arbiter):
         aggregator.assert_metric(metric, value, expected_tags, count=1)
 
 
-def test_mongo_old_config(aggregator, check, instance):
+def test_mongo_old_config(aggregator, check, instance, dd_run_check):
     check = check(instance)
-    check.check(instance)
+    dd_run_check(check)
 
     metric_names = aggregator.metric_names
     assert metric_names
@@ -139,9 +142,9 @@ def test_mongo_old_config(aggregator, check, instance):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
-def test_mongo_old_config_2(aggregator, check, instance):
+def test_mongo_old_config_2(aggregator, check, instance, dd_run_check):
     check = check(instance)
-    check.check(instance)
+    dd_run_check(check)
 
     metric_names = aggregator.metric_names
     assert metric_names
@@ -153,20 +156,22 @@ def test_mongo_old_config_2(aggregator, check, instance):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
-def test_mongo_1valid_and_1invalid_custom_queries(aggregator, check, instance_1valid_and_1invalid_custom_queries):
+def test_mongo_1valid_and_1invalid_custom_queries(
+    aggregator, check, instance_1valid_and_1invalid_custom_queries, dd_run_check
+):
     check = check(instance_1valid_and_1invalid_custom_queries)
     # Run the check against our running server
-    check.check(instance_1valid_and_1invalid_custom_queries)
+    dd_run_check(check)
 
     # The invalid query is skipped, but are logged
     aggregator.assert_metric("dd.custom.mongo.count", count=1)
     aggregator.assert_metric("dd.custom.mongo.query_a.amount", count=0)
 
 
-def test_mongo_custom_queries(aggregator, check, instance_custom_queries):
+def test_mongo_custom_queries(aggregator, check, instance_custom_queries, dd_run_check):
     # Run the check against our running server
     check = check(instance_custom_queries)
-    check.check(instance_custom_queries)
+    dd_run_check(check)
 
     aggregator.assert_metric("dd.custom.mongo.count", value=70, count=1, metric_type=aggregator.GAUGE)
     aggregator.assert_metric_has_tag("dd.custom.mongo.count", 'collection:foo', count=1)
@@ -197,8 +202,27 @@ def test_mongo_custom_queries(aggregator, check, instance_custom_queries):
     aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag1:val1', count=2)
     aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag2:val2', count=2)
 
+    # Try repeatedly because the only collection-agnostic aggregation at time of
+    # writing is $currentOp and the results may be flaky depending on machine specs
+    retries = 120
+    for i in range(retries):
+        try:
+            dd_run_check(check)
 
-def test_mongo_custom_query_with_empty_result_set(aggregator, check, instance_user, caplog):
+            aggregator.assert_metric(
+                'dd.mongodb.custom.queries_slower_than_60sec.secs_running', metric_type=aggregator.GAUGE
+            )
+        except Exception:
+            if i == retries - 1:
+                raise
+
+            time.sleep(1)
+            continue
+        else:
+            break
+
+
+def test_mongo_custom_query_with_empty_result_set(aggregator, check, instance_user, caplog, dd_run_check):
     instance_user['custom_queries'] = [
         {
             'metric_prefix': 'dd.custom.mongo.query_a',
@@ -215,7 +239,7 @@ def test_mongo_custom_query_with_empty_result_set(aggregator, check, instance_us
     check = check(instance_user)
 
     with caplog.at_level(logging.DEBUG):
-        check.check(None)
+        dd_run_check(check)
 
     assert 'Errors while collecting custom metrics with prefix dd.custom.mongo.query_a' in caplog.text
     assert 'Exception: Custom query returned an empty result set.' in caplog.text
@@ -223,9 +247,9 @@ def test_mongo_custom_query_with_empty_result_set(aggregator, check, instance_us
     aggregator.assert_metric('dd.custom.mongo.query_a.amount', count=0)
 
 
-def test_mongo_replset(instance_shard, aggregator, check):
+def test_mongo_replset(instance_shard, aggregator, check, dd_run_check):
     mongo_check = check(instance_shard)
-    mongo_check.check(None)
+    dd_run_check(mongo_check)
 
     replset_metrics = [
         'mongodb.replset.health',
@@ -259,3 +283,14 @@ def test_metadata(check, instance, datadog_agent):
     check.check(instance)
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(len(version_metadata) + 2)
+
+
+def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
+    mongo_check = check(instance_shard)
+    dd_run_check(mongo_check)
+    with mock.patch('datadog_checks.mongo.api.MongoApi._get_rs_deployment_from_status_payload') as get_deployment:
+        mock_deployment_type = ReplicaSetDeployment("sharding01", 9, cluster_role="TEST")
+        get_deployment.return_value = mock_deployment_type
+        dd_run_check(mongo_check)
+        assert get_deployment.call_count == 1
+        assert mongo_check.api_client.deployment_type.cluster_role == "TEST"

@@ -40,6 +40,19 @@ instances:
     #
     # collect_response_time: false
 
+    ## @param ip_cache_duration - number - optional
+    ## Time in seconds to cache the IP address of the given host. If duration is not set,
+    ## the cache will expire only upon error.
+    ##
+    ## Set ip_cache_duration to `0` if the check should resolve the IP address on every check run.
+    #
+    # ip_cache_duration: 120
+
+    ## @param multiple_ips - boolean - optional - default: false
+    ## Enable to run the check against all IPs attached to `host`.
+    #
+    # multiple_ips: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

@@ -9,12 +9,13 @@ import pytest
 import requests
 
 from datadog_checks.dev import LazyFunction, TempDir, docker_run, run_command
+from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.dev.conditions import WaitFor
-from datadog_checks.dev.utils import ON_WINDOWS, create_file, running_on_ci
+from datadog_checks.dev.fs import create_file
+from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.vault import Vault
 
-from .common import COMPOSE_FILE, HEALTH_ENDPOINT, INSTANCES, get_vault_server_config_file
-from .utils import get_client_token_path, set_client_token_path
+from .common import COMPOSE_FILE, HEALTH_ENDPOINT, INSTANCES, VAULT_VERSION, get_vault_server_config_file
 
 
 @pytest.fixture(scope='session')
@@ -30,10 +31,10 @@ def global_tags():
 
 
 @pytest.fixture(scope='session')
-def instance():
+def instance(dd_get_state):
     def get_instance():
         inst = INSTANCES['main'].copy()
-        inst['client_token_path'] = get_client_token_path()
+        inst['client_token_path'] = dd_get_state('client_token_path')
         return inst
 
     return get_instance
@@ -54,7 +55,7 @@ def e2e_instance():
 
 
 @pytest.fixture(scope='session')
-def dd_environment(e2e_instance):
+def dd_environment(e2e_instance, dd_save_state):
     with TempDir('vault-jwt') as jwt_dir, TempDir('vault-sink') as sink_dir:
         token_file = os.path.join(sink_dir, 'token')
 
@@ -65,12 +66,17 @@ def dd_environment(e2e_instance):
 
         with docker_run(
             COMPOSE_FILE,
-            env_vars={'JWT_DIR': jwt_dir, 'SINK_DIR': sink_dir, 'SERVER_CONFIG_FILE': get_vault_server_config_file()},
+            env_vars={
+                'JWT_DIR': jwt_dir,
+                'SINK_DIR': sink_dir,
+                'SERVER_CONFIG_FILE': get_vault_server_config_file(),
+                'VAULT_VERSION': VAULT_VERSION,
+            },
             conditions=[WaitAndUnsealVault(HEALTH_ENDPOINT), ApplyPermissions(token_file)],
             sleep=10,
             mount_logs=True,
         ):
-            set_client_token_path(token_file)
+            dd_save_state('client_token_path', token_file)
 
             yield e2e_instance, {'docker_volumes': ['{}:/home/vault-sink'.format(sink_dir)]}
 

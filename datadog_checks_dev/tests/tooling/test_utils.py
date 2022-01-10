@@ -12,6 +12,7 @@ from datadog_checks.dev.tooling.utils import (
     get_check_files,
     get_version_string,
     initialize_root,
+    is_logs_only,
     parse_agent_req_file,
 )
 
@@ -29,6 +30,12 @@ def test_get_version_string():
     with mock.patch('datadog_checks.dev.tooling.utils.read_version_file') as read:
         read.return_value = '__version__ = "2.0.0"'
         assert get_version_string('foo_check') == '2.0.0'
+
+
+@mock.patch('datadog_checks.dev.tooling.utils.get_root')
+def test_is_logs_only(get_root):
+    get_root.return_value = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../..'))
+    assert is_logs_only('flink')
 
 
 @mock.patch('datadog_checks.dev.tooling.utils.get_root')

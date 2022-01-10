@@ -142,7 +142,7 @@ class CassandraNodetoolCheck(AgentCheck):
         nodes = []
         datacenter_name = ""
         for line in output.splitlines():
-            # Ouput of nodetool
+            # Output of nodetool
             # Datacenter: dc1
             # ===============
             # Status=Up/Down

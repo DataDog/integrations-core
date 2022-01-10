@@ -14,7 +14,7 @@ system.net.conntrack.drop,count,,unit,,The number of drop in the conntrack table
 system.net.conntrack.early_drop,count,,unit,,The number of early drop in the conntrack table.,0,system,early drop
 system.net.conntrack.error,count,,unit,,The number of error in the conntrack table.,0,system,err
 system.net.conntrack.events,count,,unit,,Boolean to enable the connection tracking code will provide userspace with connection tracking events via ctnetlink.,0,system,evts
-system.net.conntrack.events_retry_timeout,gauge,,unit,,,0,system,evts retry tiemout
+system.net.conntrack.events_retry_timeout,gauge,,unit,,,0,system,evts retry timeout
 system.net.conntrack.expect_max,gauge,,unit,,Maximum size of expectation table.,0,system,expect max
 system.net.conntrack.found,count,,unit,,The number of currently allocated flow entries.,0,system,connt found
 system.net.conntrack.generic_timeout,gauge,,unit,,Default for generic timeout. This refers to layer 4 unknown/unsupported protocols.,0,system,generic timeout
@@ -44,9 +44,13 @@ system.net.conntrack.tcp_timeout,gauge,,second,,,0,system,timeout
 system.net.conntrack.tcp_timeout_stream,gauge,,second,,,0,system,timeout stream
 system.net.conntrack.timestamp,gauge,,unit,,Boolean to enable connection tracking flow timestamping.,0,system,timestamp
 system.net.packets_in.count,gauge,,packet,second,The number of packets of data received by the interface.,0,system,packets in
+system.net.packets_in.drop,gauge,,packet,second,The number of packet receive drops detected by the device driver.,-1,system,pkts in drop
 system.net.packets_in.error,gauge,,error,second,The number of packet receive errors detected by the device driver.,-1,system,pkts in err
 system.net.packets_out.count,gauge,,packet,second,The number of packets of data transmitted by the interface.,0,system,packets out
+system.net.packets_out.drop,gauge,,packet,second,The number of packet transmit drops detected by the device driver.,-1,system,pkts out drop
 system.net.packets_out.error,gauge,,error,second,The number of packet transmit errors detected by the device driver.,-1,system,pkts out err
+system.net.tcp.failed_retransmits,gauge,,packet,,Number of TCP packets that failed to be retransmitted (Linux only),0,system,failed retransmit
+system.net.tcp.failed_retransmits.count,count,,packet,,Number of TCP packets that failed to be retransmitted (Linux only),0,system,failed retransmit monotonic count
 system.net.tcp.in_segs,gauge,,segment,second,The number of TCP segments received (Linux or Solaris only).,0,system,segs in
 system.net.tcp.in_segs.count,count,,segment,,Total number of received TCP segments (Linux or Solaris only).,0,system,segs in
 system.net.tcp.out_segs,gauge,,segment,second,The number of TCP segments transmitted (Linux or Solaris only).,0,system,segs out
@@ -62,7 +66,34 @@ system.net.tcp.listen_drops,gauge,,,,The number of times connections have droppe
 system.net.tcp.listen_drops.count,count,,,,Total number of times connections have dropped out of listen (Linux only).,-1,system,tcp listen drops
 system.net.tcp.backlog_drops,gauge,,packet,,The number of packets dropped because there wasn't room in the TCP backlog (Linux only). Available since Agent v5.14.0.,-1,system,tcp backlog drops
 system.net.tcp.backlog_drops.count,count,,packet,,Total number of packets dropped because there wasn't room in the TCP backlog (Linux only).,-1,system,tcp backlog drops
-system.net.tcp.failed_retransmits.count,count,,packet,,Total number of packets that failed to be retransmitted (Linux only).,-1,system,tcp failed retrans
+system.net.tcp.prune_called,gauge,,,,The number of times TCP prune was called (Linux only).,-1,system,tcp prune called
+system.net.tcp.prune_called.count,count,,,,Total number of times TCP prune was called (Linux only).,-1,system,tcp prune called
+system.net.tcp.prune_rcv_drops,gauge,,packet,second,The number of received packets dropped after an unsuccessful prune (Linux only).,-1,system,tcp prune rcv drops
+system.net.tcp.prune_rcv_drops.count,count,,packet,,Total number of received packets dropped after an unsuccessful prune (Linux only).,-1,system,tcp prune rcv drops
+system.net.tcp.prune_ofo_called,gauge,,,,The number of times the out-of-order queues were pruned (Linux only).,-1,system,tcp prune ofo called
+system.net.tcp.prune_ofo_called.count,count,,,,Total number of times the out-of-order queues were pruned (Linux only).,-1,system,tcp prune ofo called
+system.net.tcp.paws_connection_drop,gauge,,packet,second,The number of SYN-ACK packets dropped by PAWS (Linux only).,-1,system,paws connection drop
+system.net.tcp.paws_connection_drop.count,count,,,,Total number of SYN-ACK packets dropped by PAWS (Linux only).,-1,system,paws connection drop
+system.net.tcp.paws_established_drop,gauge,,packet,second,The number of packets dropped by PAWS in an established connection (Linux only).,-1,system,paws established drop
+system.net.tcp.paws_established_drop.count,count,,,,Total number of packets dropped by PAWS in an established connection (Linux only).,-1,system,paws established drop
+system.net.tcp.syn_cookies_sent,gauge,,packet,second,The number of SYN cookie packets sent (Linux only).,-1,system,syn cookies sent
+system.net.tcp.syn_cookies_sent.count,count,,,,Total number of SYN cookie packets sent (Linux only).,-1,system,syn cookies sent
+system.net.tcp.syn_cookies_recv,gauge,,packet,second,The number of SYN cookie packets received (Linux only).,-1,system,syn cookies received
+system.net.tcp.syn_cookies_recv.count,count,,,,Total number of SYN cookie packets received (Linux only).,-1,system,syn cookies received
+system.net.tcp.syn_cookies_failed,gauge,,packet,second,The number of failed SYN cookie packets received (Linux only).,-1,system,syn cookies failed
+system.net.tcp.syn_cookies_failed.count,count,,,,Total number of failed SYN cookie packets received (Linux only).,-1,system,syn cookies failed
+system.net.tcp.abort_on_timeout,gauge,,,,The number of sockets closed due to timeout (maximum retransmission reached or tcp keepalive timeout) (Linux only).,-1,system,tcp abort timeout
+system.net.tcp.abort_on_timeout.count,count,,,,Total number of sockets closed due to timeout (maximum retransmission reached or tcp keepalive timeout) (Linux only).,-1,system,tcp abort timeout
+system.net.tcp.syn_retrans,gauge,,packet,second,The number of SYN packets retransmitted (Linux only).,-1,system,tcp syn retrans
+system.net.tcp.syn_retrans.count,count,,,,Total number of SYN packets retransmitted (Linux only).,-1,system,tcp syn retrans
+system.net.tcp.from_zero_window_adv,gauge,,,,The number of sockets exiting a zero window state (Linux only).,-1,system,tcp from 0win
+system.net.tcp.from_zero_window_adv.count,count,,,,Total number of sockets exiting a zero window state (Linux only).,-1,system,tcp from 0win
+system.net.tcp.to_zero_window_adv,gauge,,,,The number of sockets entering a zero window state (Linux only).,-1,system,tcp to 0win
+system.net.tcp.to_zero_window_adv.count,count,,,,Total number of sockets entering a zero window state (Linux only).,-1,system,tcp to 0win
+system.net.tcp.tw_reused,gauge,,,,The number of time wait sockets reused (Linux only).,-1,system,tw reused
+system.net.tcp.tw_reused.count,count,,,,Total number of time wait sockets reused (Linux only).,-1,system,tw reused
+system.net.ip.reverse_path_filter,gauge,,packet,second,The number of martian packets dropped by the reverse path filter (Linux only).,-1,system,reverse path filter drops
+system.net.ip.reverse_path_filter.count,count,,packet,,Total number of martian packets dropped by the reverse path filter (Linux only).,-1,system,reverse path filter drops
 system.net.tcp.recv_q.95percentile,gauge,,byte,,The 95th percentile of the size of the TCP receive queue.,0,system,recv-q 95th
 system.net.tcp.recv_q.avg,gauge,,byte,,The average TCP receive queue size.,0,system,recv-q avg
 system.net.tcp.recv_q.count,rate,,connection,second,The rate of connections.,0,system,recv-q count
@@ -73,14 +104,34 @@ system.net.tcp.send_q.avg,gauge,,byte,,The average TCP send queue size.,0,system
 system.net.tcp.send_q.count,rate,,connection,second,The rate of connections.,0,system,send-q count
 system.net.tcp.send_q.max,gauge,,byte,,The maximum TCP send queue size.,0,system,send-q max
 system.net.tcp.send_q.median,gauge,,byte,,The median TCP send queue size.,0,system,send-q median
+system.net.tcp4.close,gauge,,connection,,The number of closed TCP IPv4 connections.,0,system,tcp4 close
+system.net.tcp4.close_wait,gauge,,connection,,The number of TCP IPv4 connections waiting for termination.,0,system,tcp4 close_wait
 system.net.tcp4.closing,gauge,,connection,second,The number of TCP IPv4 closing connections. ,0,system,tcp4 closing
+system.net.tcp4.estab,gauge,,connection,,The number of open TCP IPv4 connections.,0,system,tcp4 estab
 system.net.tcp4.established,gauge,,connection,second,The number of TCP IPv4 established connections. ,0,system,tcp4 established
+system.net.tcp4.fin_wait_1,gauge,,connection,,The number of TCP IPv4 connections waiting for a connection termination request or an ack of a connection termination request sent previously.,0,system,tcp4 fin_wait_1
+system.net.tcp4.fin_wait_2,gauge,,connection,,The number of TCP IPv4 connections waiting for a connection termination request.,0,system,tcp4 fin_wait_2
+system.net.tcp4.listen,gauge,,connection,,The number of TCP IPv4 listening connections.,0,system,tcp4 listen
 system.net.tcp4.listening,gauge,,connection,second,The number of TCP IPv4 listening connections. ,0,system,tcp4 listening
 system.net.tcp4.opening,gauge,,connection,second,The number of TCP IPv4 opening connections. ,0,system,tcp4 opening
+system.net.tcp4.syn_recv,gauge,,connection,,The number of TCP IPv4 connections waiting for confirming connection request.,0,system,tcp4 syn_recv
+system.net.tcp4.syn_sent,gauge,,connection,,The number of TCP IPv4 connections waiting for matching connection request.,0,system,tcp4 syn_sent
+system.net.tcp4.time_wait,gauge,,connection,,The number of TCP IPv4 closed connections waiting for delayed packets.,0,system,tcp4 time_wait
+system.net.tcp4.unconn,gauge,,connection,,The number of TCP IPv4 connections in unconnected state.,0,system,tcp4 unconn
+system.net.tcp6.close,gauge,,connection,,The number of closed TCP IPv6 connections.,0,system,tcp6 close
+system.net.tcp6.close_wait,gauge,,connection,,The number of TCP IPv6 connections waiting for termination.,0,system,tcp6 close_wait
 system.net.tcp6.closing,gauge,,connection,second,The number of TCP IPv6 closing connections. ,0,system,tcp6 closing
+system.net.tcp6.estab,gauge,,connection,,The number of open TCP IPv6 connections.,0,system,tcp6 estab
 system.net.tcp6.established,gauge,,connection,second,The number of TCP IPv6 established connections. ,0,system,tcp6 established
+system.net.tcp6.fin_wait_1,gauge,,connection,,The number of TCP IPv6 connections waiting for a connection termination request or an ack of a connection termination request sent previously.,0,system,tcp6 fin_wait_1
+system.net.tcp6.fin_wait_2,gauge,,connection,,The number of TCP IPv6 connections waiting for a connection termination request.,0,system,tcp6 fin_wait_2
+system.net.tcp6.listen,gauge,,connection,,The number of TCP IPv6 listening connections.,0,system,tcp6 listen
 system.net.tcp6.listening,gauge,,connection,second,The number of TCP IPv6 listening connections. ,0,system,tcp6 listening
 system.net.tcp6.opening,gauge,,connection,second,The number of TCP IPv6 opening connections. ,0,system,tcp6 opening
+system.net.tcp6.syn_recv,gauge,,connection,,The number of TCP IPv6 connections waiting for confirming connection request.,0,system,tcp6 syn_recv
+system.net.tcp6.syn_sent,gauge,,connection,,The number of TCP IPv6 connections waiting for matching connection request.,0,system,tcp6 syn_sent
+system.net.tcp6.time_wait,gauge,,connection,,The number of TCP IPv6 closed connections waiting for delayed packets.,0,system,tcp6 time_wait
+system.net.tcp6.unconn,gauge,,connection,,The number of TCP IPv6 connections in unconnected state.,0,system,tcp6 unconn
 system.net.udp.in_datagrams,gauge,,datagram,second,The rate of UDP datagrams delivered to UDP users (Linux only).,0,system,udp in datagrams
 system.net.udp.in_datagrams.count,count,,datagram,,Total number of UDP datagrams delivered to UDP users (Linux only).,0,system,udp in datagrams
 system.net.udp.in_errors,gauge,,datagram,second,The rate of received UDP datagrams that could not be delivered for reasons other than the lack of an application at the destination port (Linux only).,-1,system,udp in errors
@@ -94,3 +145,5 @@ system.net.udp.rcv_buf_errors.count,count,,error,,Total number of UDP datagrams 
 system.net.udp.snd_buf_errors,gauge,,error,second,The rate of UDP datagrams lost because there was no room in the send buffer (Linux only).,-1,system,udp snd buf errs
 system.net.udp.snd_buf_errors.count,count,,error,,Total number of UDP datagrams lost because there was no room in the send buffer (Linux only).,-1,system,udp snd buf errs
 system.net.udp.in_csum_errors.count,count,,error,,Total number of UDP datagrams that failed checksum verification (Linux only).,-1,system,udp in csum errors
+system.net.udp4.connections,gauge,,connection,,The number of UDP IPv4 sockets currently opened.,0,system,udp4 connections
+system.net.udp6.connections,gauge,,connection,,The number of UDP IPv6 sockets currently opened.,0,system,udp6 connections

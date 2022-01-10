@@ -7,6 +7,7 @@ from datadog_checks.base import OpenMetricsBaseCheck
 COUNTERS = {
     'authenticated_user_requests': 'authenticated_user.requests',
     'metrics_server_kubelet_summary_scrapes_total': 'kubelet_summary_scrapes_total',
+    'metrics_server_kubelet_request_total': 'kubelet_summary_scrapes_total',
 }
 
 HISTOGRAMS = {
@@ -14,10 +15,14 @@ HISTOGRAMS = {
     'metrics_server_scraper_duration_seconds': 'scraper_duration',
 }
 
-SUMMARIES = {'metrics_server_kubelet_summary_request_duration_seconds': 'kubelet_summary_request_duration'}
+SUMMARIES = {
+    'metrics_server_kubelet_summary_request_duration_seconds': 'kubelet_summary_request_duration',
+    'metrics_server_kubelet_request_duration_seconds': 'kubelet_summary_request_duration',
+}
 
 GAUGES = {
     'metrics_server_scraper_last_time_seconds': 'scraper_last_time',
+    'metrics_server_kubelet_last_request_time_seconds': 'scraper_last_time',
     'process_max_fds': 'process.max_fds',
     'process_open_fds': 'process.open_fds',
 }

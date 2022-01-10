@@ -95,7 +95,7 @@ class MesosSlave(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(MesosSlave, self).__init__(name, init_config, instances)
-        self.cluster_name = None
+        self.cluster_name = self.instance.get('cluster_name', None)
         self.version = []
 
         url = self.instance.get('url', '')
@@ -165,12 +165,12 @@ class MesosSlave(AgentCheck):
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=stats_tags)
             raise
 
-    def _get_state_metrics(self, url, tags):
+    def _get_state_metrics(self, url, tags, suffix=''):
         # Mesos version >= 0.25
         endpoint = url + '/state'
         try:
-            state_metrics = self._get_json(endpoint)
-            tags.append("url:{}".format(endpoint))
+            state_metrics = self._get_json(endpoint + suffix)
+            tags.append("url:{}".format(endpoint + suffix))
         except Exception:
             # Mesos version < 0.25
             old_endpoint = endpoint + '.json'
@@ -205,13 +205,13 @@ class MesosSlave(AgentCheck):
             self.set_metadata('version', version)
 
     def _set_cluster_name(self, url, master_port, state_metrics, tags):
-        if 'master_hostname' in state_metrics:
+        if 'master_hostname' in state_metrics and not self.cluster_name:
             master_url = '{}://{}:{}'.format(urlparse(url).scheme, state_metrics['master_hostname'], master_port)
-            master_state = self._get_state_metrics(master_url, [])
+            master_state = self._get_state_metrics(master_url, [], "-summary")
             if master_state:
                 self.cluster_name = master_state.get('cluster')
-                if self.cluster_name:
-                    tags.append('mesos_cluster:{}'.format(self.cluster_name))
+        if self.cluster_name:
+            tags.append('mesos_cluster:{}'.format(self.cluster_name))
 
     def _process_tasks(self, tasks, state_metrics, tags):
         for task in tasks:

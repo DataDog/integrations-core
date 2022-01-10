@@ -4,11 +4,11 @@
 import pytest
 from six import PY2
 
-from datadog_checks.dev.tooling.specs.configuration.consumers.example import DESCRIPTION_LINE_LENGTH_LIMIT
+from datadog_checks.dev.tooling.configuration.consumers.example import DESCRIPTION_LINE_LENGTH_LIMIT
 
 from ..utils import get_example_consumer, normalize_yaml
 
-pytestmark = [pytest.mark.conf, pytest.mark.conf_consumer]
+pytestmark = [pytest.mark.conf, pytest.mark.conf_consumer, pytest.mark.conf_consumer_example]
 
 
 def test_option_no_section():
@@ -318,7 +318,7 @@ def test_section_example_indent():
         ## port / path / channel_path - required - Set port if type is tcp or udp.
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
-        ## source  - required - Attribute that defines which Integration sent the logs.
+        ## source  - required - Attribute that defines which integration sent the logs.
         ## encoding - optional - For file specifies the file encoding, default is utf-8, other
         ##                       possible values are utf-16-le and utf-16-be.
         ## service - optional - The name of the service that generates the log.
@@ -382,7 +382,7 @@ def test_section_example_indent_required():
         ## port / path / channel_path - required - Set port if type is tcp or udp.
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
-        ## source  - required - Attribute that defines which Integration sent the logs.
+        ## source  - required - Attribute that defines which integration sent the logs.
         ## encoding - optional - For file specifies the file encoding, default is utf-8, other
         ##                       possible values are utf-16-le and utf-16-be.
         ## service - optional - The name of the service that generates the log.
@@ -809,7 +809,7 @@ def test_option_string_type_not_default_example_default_value_none():
             value:
               type: string
               example: something
-              default: None
+              display_default: null
         """
     )
 
@@ -840,7 +840,7 @@ def test_option_string_type_not_default_example_default_value_null():
             value:
               type: string
               example: something
-              default: null
+              display_default: null
         """
     )
 
@@ -955,7 +955,7 @@ def test_deprecation():
             - name: foo
               description: foo words
               deprecation:
-                Release: 8.0.0
+                Agent version: 8.0.0
                 Migration: |
                   do this
                   and that
@@ -978,7 +978,7 @@ def test_deprecation():
             ##
             ## <<< DEPRECATED >>>
             ##
-            ## Release: 8.0.0
+            ## Agent version: 8.0.0
             ## Migration: do this
             ##            and that
             #
@@ -1294,7 +1294,7 @@ def test_option_default_example_override_null():
             value:
               type: string
               example: something
-              default: null
+              display_default: null
         """
     )
 
@@ -1325,7 +1325,7 @@ def test_option_default_example_override_string():
             value:
               type: string
               example: something
-              default: bar
+              display_default: bar
         """
     )
 
@@ -1356,7 +1356,7 @@ def test_option_default_example_override_non_string():
             value:
               type: string
               example: something
-              default:
+              display_default:
                 foo: [bar, baz]
         """
     )
@@ -1443,7 +1443,7 @@ def test_option_multiple_types():
             - name: foo
               description: words
               value:
-                oneOf:
+                anyOf:
                 - type: string
                 - type: array
                   items:
@@ -1483,13 +1483,16 @@ def test_option_multiple_types_nested():
             - name: foo
               description: words
               value:
-                oneOf:
+                anyOf:
                 - type: string
                 - type: array
                   items:
-                    oneOf:
+                    anyOf:
                     - type: string
                     - type: object
+                      properties:
+                      - name: foo
+                        type: string
                       required:
                       - foo
         """
@@ -1509,5 +1512,64 @@ def test_option_multiple_types_nested():
             ## words
             #
             # foo: <FOO>
+        """
+    )
+
+
+def test_option_multiple_instances_defined():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: instances
+            multiple_instances_defined: true
+            options:
+            - name: instance_1
+              description: Description of the first instance
+              options:
+              - name: foo
+                description: words
+                value:
+                  type: string
+            - name: instance_2
+              description: |
+                Description of the second instance
+                Multiple lines
+              options:
+              - name: bar
+                description: description
+                value:
+                  type: string
+
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## Every instance is scheduled independent of the others.
+        #
+        instances:
+
+            ## Description of the first instance
+          -
+            ## @param foo - string - optional
+            ## words
+            #
+            # foo: <FOO>
+
+            ## Description of the second instance
+            ## Multiple lines
+          -
+            ## @param bar - string - optional
+            ## description
+            #
+            # bar: <BAR>
         """
     )

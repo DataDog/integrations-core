@@ -7,6 +7,14 @@ from base64 import urlsafe_b64decode, urlsafe_b64encode
 
 from six import iteritems
 
+DDTRACE_OPTIONS_LIST = [
+    'DD_TAGS',
+    'DD_TRACE*',
+    'DD_PROFILING*',
+    'DD_SERVICE',
+    'DD_AGENT_HOST',
+    'DD_ENV',
+]
 E2E_PREFIX = 'DDEV_E2E'
 E2E_ENV_VAR_PREFIX = '{}_ENV_'.format(E2E_PREFIX)
 E2E_SET_UP = '{}_UP'.format(E2E_PREFIX)
@@ -26,9 +34,21 @@ JMX_TO_INAPP_TYPES = {
     #       JMX histogram -> DSD histogram -> multiple in-app metrics (max, median, avg, count)
 }
 
+EVENT_PLATFORM_EVENT_TYPES = [
+    'dbm-samples',
+    'dbm-metrics',
+    'dbm-activity',
+    'network-devices-metadata',
+]
+
 
 def e2e_active():
-    return any(ev.startswith(E2E_PREFIX) for ev in os.environ)
+    return (
+        E2E_SET_UP in os.environ
+        or E2E_TEAR_DOWN in os.environ
+        or E2E_PARENT_PYTHON in os.environ
+        or any(ev.startswith(E2E_ENV_VAR_PREFIX) for ev in os.environ)
+    )
 
 
 def e2e_testing():
@@ -121,6 +141,16 @@ def replay_check_run(agent_collector, stub_aggregator, stub_agent):
                     data['tags'],
                     data['host'],
                     data.get('device'),
+                )
+
+        for ep_event_type in EVENT_PLATFORM_EVENT_TYPES:
+            ep_events = aggregator.get(ep_event_type) or []
+            for event in ep_events:
+                stub_aggregator.submit_event_platform_event(
+                    check_name,
+                    check_id,
+                    json.dumps(event['UnmarshalledEvent']),
+                    event['EventType'],
                 )
 
         for data in aggregator.get('service_checks', []):

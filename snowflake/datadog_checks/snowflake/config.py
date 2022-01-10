@@ -26,7 +26,7 @@ class Config(object):
             instance = {}
 
         account = instance.get('account')
-        user = instance.get('user')
+        user = instance.get('user') or instance.get('username')
         password = instance.get('password')
         role = instance.get('role')
         database = instance.get('database', 'SNOWFLAKE')

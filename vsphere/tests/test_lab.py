@@ -43,6 +43,9 @@ def test_lab(aggregator):
         'ssl_verify': False,
         'collect_tags': True,
         'collect_attributes': True,
+        'rest_api_options': {
+            'timeout': '5',
+        },
     }
     check = VSphereCheck('vsphere', {}, [instance])
     check.initiate_api_connection()
@@ -50,6 +53,7 @@ def test_lab(aggregator):
 
     # Basic assert
     aggregator.assert_metric('vsphere.cpu.coreUtilization.avg')
+    aggregator.assert_metric_has_tag('vsphere.cpu.usage.avg', 'MyCategoryFoo:MyTagFoo')  # verify collect_tags works
     print("TOTAL metrics: {}".format(len(aggregator._metrics)))
 
     # Write all metrics to a file

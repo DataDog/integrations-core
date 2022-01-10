@@ -12,7 +12,7 @@ The Cisco ACI Integration lets you:
 
 ### Installation
 
-The Cisco ACI check is packaged with the Agent, so simply [install the Agent][2] on a server within your network.
+The Cisco ACI check is packaged with the Agent, so simply [install the Agent][1] on a server within your network.
 
 ### Configuration
 
@@ -23,42 +23,51 @@ The Cisco ACI check is packaged with the Agent, so simply [install the Agent][2]
 
 To configure this check for an Agent running on a host:
 
-1. Edit the `cisco_aci.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample cisco_aci.d/conf.yaml][4] for all available configuration options:
+1. Edit the `cisco_aci.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample cisco_aci.d/conf.yaml][3] for all available configuration options:
 
    ```yaml
    init_config:
 
    instances:
-     ## @param aci_url - string - required
-     ## Url to query to gather metrics.
-     #
-     - aci_url: localhost
-
-       ## @param username - string - required
-       ## Authentication can use either a user auth or a certificate.
-       ## If using the user auth, enter in this parameter the associated username.
-       #
-       username: datadog
-
-       ## @param pwd - string - required
-       ## Authentication can use either a user auth or a certificate.
-       ## If using the user auth, enter in this parameter the associated password.
-       #
-       pwd: datadog
+        ## @param aci_url - string - required
+        ## URL to query to gather metrics.
+        #
+      - aci_url: http://localhost
+    
+        ## @param username - string - required
+        ## Authentication can use either a user auth or a certificate.
+        ## If using the user auth, enter the `username` and `pwd` configuration.
+        #
+        username: datadog
+    
+        ## @param pwd - string - required
+        ## Authentication can use either a user auth or a certificate.
+        ## If using the user auth, enter the `username` and `pwd` configuration.
+        #
+        pwd: <PWD>
+    
+        ## @param tenant - list of strings - optional
+        ## List of tenants to collect metrics data from.
+        #
+        # tenant:
+        #   - <TENANT_1>
+        #   - <TENANT_2>
    ```
+   
+   *NOTE*: Be sure to specify any tenants for the integration to collect metrics on applications, EPG, etc.
 
-2. [Restart the Agent][5] to begin sending Cisco ACI metrics to Datadog.
+2. [Restart the Agent][4] to begin sending Cisco ACI metrics to Datadog.
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][5] for guidance on applying the parameters below.
 
 | Parameter            | Value                                                                  |
 | -------------------- | ---------------------------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `teamcity`                                                             |
+| `<INTEGRATION_NAME>` | `cisco_aci`                                                            |
 | `<INIT_CONFIG>`      | blank or `{}`                                                          |
 | `<INSTANCE_CONFIG>`  | `{"aci_url":"%%host%%", "username":"<USERNAME>", "pwd": "<PASSWORD>"}` |
 
@@ -81,18 +90,18 @@ The Cisco ACI check sends tenant faults as events.
 
 ### Service Checks
 
-**cisco_aci.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to the Cisco ACI API to collect metrics, otherwise `OK`.
+See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
 
-[1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[4]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/datadog_checks/cisco_aci/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[3]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/datadog_checks/cisco_aci/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/metadata.csv
-[8]: https://docs.datadoghq.com/help/
+[8]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/assets/service_checks.json
+[9]: https://docs.datadoghq.com/help/

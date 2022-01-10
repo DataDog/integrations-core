@@ -1,6 +1,6 @@
 {
-  "title": "Datacenter Overview",
-  "description": "## Datacenter Overview Dashboard\n\nKeep track of all of your monitored on-premise appliances monitored with SNMP all in one place. At a glance, see all of the devices currently responding metrics, top interfaces reporting bandwidth and forecasted performance.\nRead more about: \n\nRead more about:\n\n*  [Monitoring datacenters and network devices with Datadog](https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/)\n* [Monitoring network devices with SNMP](https://www.datadoghq.com/blog/monitor-snmp-with-datadog/)\n* Learn more about the data collected in our [docs](https://docs.datadoghq.com/network_performance_monitoring/devices) ",
+  "title": "Network Device Monitoring",
+  "description": "## Network Device Monitoring Dashboard\n\nKeep track of all of your monitored on-premise appliances monitored with SNMP all in one place. At a glance, see all of the devices currently responding metrics, top interfaces reporting bandwidth and forecasted performance.\nRead more about: \n\nRead more about:\n\n*  [Monitoring datacenters and network devices with Datadog](https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/)\n* [Monitoring network devices with SNMP](https://www.datadoghq.com/blog/monitor-snmp-with-datadog/)\n* Learn more about the data collected in our [docs](https://docs.datadoghq.com/network_performance_monitoring/devices) ",
   "widgets": [
     {
       "id": 7507125964146004,

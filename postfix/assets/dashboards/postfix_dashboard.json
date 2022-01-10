@@ -1,0 +1,25 @@
+{
+    "title": "Postfix - Metrics",
+    "description": "An overview of your Postfix metrics",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": null,
+            "name": "scope"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:postfix.queue.size{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Postfix queue size"
+            }
+        }
+    ]
+}

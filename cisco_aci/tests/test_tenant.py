@@ -63,12 +63,12 @@ def test_no_tenant(aggregator):
 
 
 def test_tenant_mocked(aggregator):
-    check = CiscoACICheck(common.CHECK_NAME, {}, {})
+    check = CiscoACICheck(common.CHECK_NAME, {}, [common.CONFIG_WITH_TAGS])
     api = Api(common.ACI_URLS, check.http, common.USERNAME, password=common.PASSWORD, log=check.log)
     api.wrapper_factory = common.FakeTenantSessionWrapper
     check._api_cache[hash_mutable(common.CONFIG_WITH_TAGS)] = api
 
-    check.check(common.CONFIG_WITH_TAGS)
+    check.check({})
 
     tags = ['project:cisco_aci', 'tenant:DataDog']
     metric_name = 'cisco_aci.tenant.ingress_bytes.multicast.rate'

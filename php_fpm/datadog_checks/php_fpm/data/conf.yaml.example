@@ -45,7 +45,8 @@ init_config:
 #
 instances:
 
-    ## @param status_url - string - required
+  -
+    ## @param status_url - string - optional - default: http://localhost/status
     ## Get metrics from your FPM pool with this URL
     ## The status URLs should follow the options from your FPM pool
     ## See http://php.net/manual/en/install.fpm.configuration.php
@@ -55,9 +56,9 @@ instances:
     ## you want to monitor (FPM `listen` directive in the config, usually
     ## a UNIX socket or TCP socket.
     #
-  - status_url: http://localhost/status
+    # status_url: http://localhost/status
 
-    ## @param ping_url - string - required
+    ## @param ping_url - string - optional - default: http://localhost/ping
     ## Get a reliable service check of your FPM pool with `ping_url` parameter
     ## The ping URLs should follow the options from your FPM pool
     ## See http://php.net/manual/en/install.fpm.configuration.php
@@ -67,17 +68,17 @@ instances:
     ## you want to monitor (FPM `listen` directive in the config, usually
     ## a UNIX socket or TCP socket.
     #
-    ping_url: http://localhost/ping
+    # ping_url: http://localhost/ping
 
-    ## @param ping_reply - string - required
+    ## @param ping_reply - string - optional - default: pong
     ## Set the expected reply to the ping.
     #
-    ping_reply: pong
+    # ping_reply: pong
 
-    ## @param use_fastcgi - boolean - required
+    ## @param use_fastcgi - boolean - optional - default: false
     ## Communicate directly with PHP-FPM using FastCGI
     #
-    use_fastcgi: false
+    # use_fastcgi: false
 
     ## @param http_host - string - optional
     ## If your FPM pool is only accessible via a specific HTTP vhost, you can
@@ -353,6 +354,11 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
@@ -362,6 +368,11 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

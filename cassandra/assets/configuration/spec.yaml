@@ -17,6 +17,7 @@ files:
         example: true
     - template: instances/jmx
       overrides:
+        is_jmx.value.default: true
         host.value.example: localhost
         host.display_priority: 1
         port.value.example: 7199

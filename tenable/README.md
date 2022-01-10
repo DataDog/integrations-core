@@ -20,6 +20,12 @@ The Agent tails the Tenable Nessus `webserver` and `backend` logs to collect dat
 
 #### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -49,12 +55,10 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][4].
 
-
-#### Log Data collected
+#### Log data collected
 
 1. Nessus backend logs collect data on scan names, start time, stop time, durations, target(s)
 2. Nessus webserver logs collect data on access logs for neesus webserver including Client IPs, User agents, login attempt/success/failure.
-
 
 ### Metrics
 

@@ -7,7 +7,7 @@ import os
 import yaml
 
 from ..._env import format_config
-from ...utils import dir_exists, ensure_dir_exists, file_exists, path_join, read_file, remove_path, write_file
+from ...fs import dir_exists, ensure_dir_exists, file_exists, path_join, read_file, remove_path, write_file
 from ..config import APP_DIR
 
 ENV_DIR = path_join(APP_DIR, 'envs')

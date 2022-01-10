@@ -12,14 +12,12 @@ files:
       required: true
       value:
         type: string
-        default: null
         example: <TCP_CHECK_INSTANCE_NAME>
     - name: host
       description: Host to connect to.
       required: true
       value:
         type: string
-        default: null
         example: <TCP_HOST_TO_CONNECT_TO>
     - name: port
       description: Port of the host to connect to.
@@ -39,4 +37,20 @@ files:
       value:
         type: boolean
         example: false
+    - name: ip_cache_duration
+      value:
+        display_default: null
+        example: 120
+        type: number
+      description: |
+        Time in seconds to cache the IP address of the given host. If duration is not set,
+        the cache will expire only upon error.
+
+        Set ip_cache_duration to `0` if the check should resolve the IP address on every check run.
+    - name: multiple_ips
+      description: Enable to run the check against all IPs attached to `host`.
+      value:
+        default: false
+        example: false
+        type: boolean
     - template: instances/default

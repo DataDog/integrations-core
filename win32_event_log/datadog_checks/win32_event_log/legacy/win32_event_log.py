@@ -90,7 +90,7 @@ class Win32EventLogWMI(WinWMICheck):
 
         # Store the last timestamp by instance
         if instance_key not in self.last_ts:
-            # If system boot was withing 600s of dd agent start then use boottime as last_ts
+            # If system boot was within 600s of dd agent start then use boottime as last_ts
             if uptime() <= 600:
                 self.last_ts[instance_key] = datetime.utcnow() - timedelta(seconds=uptime())
             else:
@@ -291,7 +291,7 @@ class LogEvent(object):
         return event_dict
 
     def is_after(self, ts):
-        ''' Compare this event's timestamp to a give timestamp. '''
+        '''Compare this event's timestamp to a give timestamp.'''
         if self.timestamp >= int(calendar.timegm(ts.timetuple())):
             return True
         return False

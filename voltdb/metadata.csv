@@ -56,5 +56,48 @@ voltdb.table.tuple_allocated_memory,gauge,,kibibyte,,Total size of memory alloca
 voltdb.table.tuple_data_memory,gauge,,kibibyte,,Total memory used for storing inline data associated with this table and this partition.,0,voltdb,table_mem_data
 voltdb.table.string_data_memory,gauge,,kibibyte,,Total memory used for storing non-inline variable length data associated with this table in this partition.,0,voltdb,table_mem_string
 voltdb.table.percent_full,gauge,,percent,,Percentage of the row limit currently in use by table rows in this partition. If no row limit is set this is zero.,0,voltdb,table_pct_full
+voltdb.table.tuple_limit,gauge,,row,,"The row limit for this table. Row limits are optional and are defined in the schema as a maximum number of rows that any partition can contain. If no row limit is set, this value is null.",0,voltdb,table tuple limit
 voltdb.index.entry_count,gauge,,,,Number of index entries currently in the partition.,0,voltdb,index_entry_cnt
 voltdb.index.memory_estimate,gauge,,kibibyte,,Estimated amount of memory consumed by the current index entries.,0,voltdb,index_memory
+voltdb.export.latency.avg,gauge,,millisecond,,"The average time between when records are inserted and when they are acknowledged by the target.",0,voltdb,export avg latency
+voltdb.export.latency.max,gauge,,millisecond,,"The maximum time between when a record was inserted and when it was acknowledged by the target.",0,voltdb,export max latency
+voltdb.export.queue_gap,gauge,,,,"The number of records missing from the queue for the current stream and partition.",0,voltdb,export queue gap
+voltdb.export.records_pending,gauge,,,,"The number of records out of TUPLE_COUNT still waiting to be written to or acknowledged by the target.",0,voltdb,export tuple pending
+voltdb.export.records_queued,count,,,,"The number of records queued to the export target.",0,voltdb,export tuple count
+voltdb.export.time_since_last_acked,gauge,,second,,"Time since the last tuple was acknowledged as received by the target.",0,voltdb,export last acked
+voltdb.export.time_since_last_queued,gauge,,second,,"Time since the most recent tuple was added to the export queue for this partition.",0,voltdb,export last queued
+voltdb.idletime.avg_wait,gauge,,microsecond,,"The average amount of time the execution site had to wait for a new task (in microseconds).",0,voltdb,idletime avg
+voltdb.idletime.max_wait,gauge,,microsecond,,"The maximum amount of time the execution site had to wait for a new task (in nanoseconds).",0,voltdb,idletime max
+voltdb.idletime.min_wait,gauge,,microsecond,,"The minimum amount of time the execution site had to wait for a new task (in nanoseconds).",0,voltdb,idletime min
+voltdb.idletime.stddev,gauge,,microsecond,,"The standard deviation of the waiting time (in microseconds).",0,voltdb,idletime stddev
+voltdb.idletime.wait.count,count,,,,"The number of times the execution site had to wait for a new task (that is, the queue was empty).",0,voltdb,idletime count
+voltdb.idletime.wait.pct,gauge,,,,"The percentage of time the execution site was waiting for a new task (that is, the site was idle).",0,voltdb,idletime percent
+voltdb.idletime.wait.total,gauge,,,,"The cumulative number of times the execution site had to wait for a new task (that is, the queue was empty).",0,voltdb,idletime count
+voltdb.import.failures.count,count,,,,"The number of import transactions that failed.",0,voltdb,import failures
+voltdb.import.failures.total,gauge,,,,"The cumulative number of import transactions that failed.",0,voltdb,import failures
+voltdb.import.outstanding_requests,gauge,,record,,"The number of records read from the import stream and waiting to be inserted into the database.",0,voltdb,import outstanding requests
+voltdb.import.retries.count,count,,,,"The number of attempts to replay failed transactions.",0,voltdb,import retries
+voltdb.import.retries.total,gauge,,,,"The cumulative number of attempts to replay failed transactions.",0,voltdb,import retries
+voltdb.import.successes.count,count,,,,"The number of import transactions that succeeded.",0,voltdb,import success
+voltdb.import.successes.total,gauge,,,,"The cumulative number of import transactions that succeeded.",0,voltdb,import success
+voltdb.procedureoutput.avg_result_size,gauge,,byte,,"The average result set size in bytes.",0,voltdb,procedureoutput avg result
+voltdb.procedureoutput.invocations.count,count,,,,"The number of invocations of this procedure.",0,voltdb,procedureoutput invocation
+voltdb.procedureoutput.invocations.total,gauge,,,,"The cumulative number of invocations of this procedure.",0,voltdb,procedureoutput avg invocation
+voltdb.procedureoutput.max_result_size,gauge,,byte,,"The maximum result set size in bytes.",0,voltdb,procedureoutput max result
+voltdb.procedureoutput.min_result_size,gauge,,byte,,"The minimum result set size in bytes.",0,voltdb,procedureoutput min result
+voltdb.procedureoutput.total_result_size,gauge,,mebibyte,,"The total output returned by all invocations of this stored procedure measured in megabytes.",0,voltdb,procedureoutput total result
+voltdb.procedureoutput.weighted_perc,gauge,,,,"A weighted average expressed as a percentage of the result set size returned by invocations of this stored procedure compared to all stored procedure invocations.",0,voltdb,procedureoutput weighted result
+voltdb.procedureprofile.aborts.count,count,,,,"The number of times the procedure was aborted.",0,voltdb,procedureprofile aborts count
+voltdb.procedureprofile.aborts.total,gauge,,,,"The cumulative number of times the procedure was aborted.",0,voltdb,procedureprofile aborts count
+voltdb.procedureprofile.avg_time,gauge,,nanosecond,,"The average length of time (in nanoseconds) it took to execute the stored procedure.",0,voltdb,procedureprofile time avg
+voltdb.procedureprofile.failures.count,count,,,,"The number of times the procedure failed unexpectedly (as opposed to user aborts or expected errors, such as constraint violations).",0,voltdb,procedureprofile failures count
+voltdb.procedureprofile.failures.total,gauge,,,,"The number of times the procedure failed unexpectedly (as opposed to user aborts or expected errors, such as constraint violations).",0,voltdb,procedureprofile failures count
+voltdb.procedureprofile.invocations.count,count,,,,"The number of invocations of this procedure.",0,voltdb,procedureprofile invocations count
+voltdb.procedureprofile.invocations.total,gauge,,,,"The total number of invocations of this procedure.",0,voltdb,procedureprofile invocations count
+voltdb.procedureprofile.max_time,gauge,,nanosecond,,"The maximum length of time (in nanoseconds) it took to execute the stored procedure.",0,voltdb,procedureprofile time max
+voltdb.procedureprofile.min_time,gauge,,nanosecond,,"The minimum length of time (in nanoseconds) it took to execute the stored procedure.",0,voltdb,procedureprofile time min
+voltdb.procedureprofile.weighted_perc,gauge,,,,"A weighted average expressed as a percentage of the execution time for this stored procedure compared to all stored procedure invocations.",0,voltdb,procedureprofile weighted
+voltdb.queue.avg_wait,gauge,,microsecond,,"The average length of time (in microseconds) tasks were waiting in the queue in the last five seconds.",0,voltdb,queue wait avg
+voltdb.queue.current_depth,gauge,,task,,"The number of tasks currently in the queue.",0,voltdb,queue tasks depth
+voltdb.queue.max_wait,gauge,,microsecond,,"The maximum length of time (in microseconds) tasks were waiting in the queue in the last five seconds.",0,voltdb,queue wait max
+voltdb.queue.poll_count_per_sec,gauge,,task,second,"The number of tasks that left the queue",0,voltdb,queue task per sec

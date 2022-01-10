@@ -1,1 +1,1 @@
-pymqi==1.12.0; sys_platform != 'win32'
+pymqi==1.12.0

@@ -94,7 +94,7 @@ INNODB_VARS = {
 BINLOG_VARS = {'Binlog_space_usage_bytes': ('mysql.binlog.disk_use', GAUGE)}
 
 # Additional Vars found in "SHOW STATUS;"
-# Will collect if [FLAG NAME] is True
+# Will collect if [extra_status_metrics] is True
 OPTIONAL_STATUS_VARS = {
     'Binlog_cache_disk_use': ('mysql.binlog.cache_disk_use', GAUGE),
     'Binlog_cache_use': ('mysql.binlog.cache_use', GAUGE),
@@ -235,6 +235,11 @@ GALERA_VARS = {
     'wsrep_flow_control_sent': ('mysql.galera.wsrep_flow_control_sent', MONOTONIC),
     'wsrep_cert_deps_distance': ('mysql.galera.wsrep_cert_deps_distance', GAUGE),
     'wsrep_local_send_queue_avg': ('mysql.galera.wsrep_local_send_queue_avg', GAUGE),
+    'wsrep_replicated_bytes': ('mysql.galera.wsrep_replicated_bytes', GAUGE),
+    'wsrep_received_bytes': ('mysql.galera.wsrep_received_bytes', GAUGE),
+    'wsrep_received': ('mysql.galera.wsrep_received', GAUGE),
+    'wsrep_local_state': ('mysql.galera.wsrep_local_state', GAUGE),
+    'wsrep_local_cert_failures': ('mysql.galera.wsrep_local_cert_failures', MONOTONIC),
 }
 
 PERFORMANCE_VARS = {
@@ -244,9 +249,32 @@ PERFORMANCE_VARS = {
 
 SCHEMA_VARS = {'information_schema_size': ('mysql.info.schema.size', GAUGE)}
 
+
+# Vars found in "show slave status" or "show replication status" (depending on mysql version)
 REPLICA_VARS = {
-    'Seconds_Behind_Master': ('mysql.replication.seconds_behind_master', GAUGE),
-    'Slaves_connected': ('mysql.replication.slaves_connected', GAUGE),
+    'Seconds_Behind_Source': [  # for 8 onwards
+        ('mysql.replication.seconds_behind_source', GAUGE),
+        ('mysql.replication.seconds_behind_master', GAUGE),  # for retrocompatibility
+    ],
+    'Seconds_Behind_Master': [  # before 8
+        ('mysql.replication.seconds_behind_source', GAUGE),
+        ('mysql.replication.seconds_behind_master', GAUGE),
+    ],
+    'Replicas_connected': [
+        ('mysql.replication.slaves_connected', GAUGE),
+        ('mysql.replication.replicas_connected', GAUGE),
+    ],
+}
+
+GROUP_REPLICATION_VARS = {
+    'Transactions_count': ('mysql.replication.group.transactions', GAUGE),
+    'Transactions_check': ('mysql.replication.group.transactions_check', GAUGE),
+    'Conflict_detected': ('mysql.replication.group.conflicts_detected', GAUGE),
+    'Transactions_row_validating': ('mysql.replication.group.transactions_validating', GAUGE),
+    'Transactions_remote_applier_queue': ('mysql.replication.group.transactions_in_applier_queue', GAUGE),
+    'Transactions_remote_applied': ('mysql.replication.group.transactions_applied', GAUGE),
+    'Transactions_local_proposed': ('mysql.replication.group.transactions_proposed', GAUGE),
+    'Transactions_local_rollback': ('mysql.replication.group.transactions_rollback', GAUGE),
 }
 
 SYNTHETIC_VARS = {

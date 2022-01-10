@@ -1,0 +1,30 @@
+{
+  "name": "Teamcity",
+  "type": "process",
+  "page": "process_overview",
+  "query": "Filter by: integration:teamcity",
+  "options": {
+    "sort": {
+      "order": "DESC",
+      "key": "memory"
+    },
+    "graph_options": {},
+    "view_options": [
+      "normalizeCPU",
+      "showArguments"
+    ],
+    "filter": {
+      "query_filter": "integration:teamcity",
+      "groups": []
+    },
+    "selected_top_graph": "scatterplot",
+    "enabled_columns": [
+      "cpu",
+      "host",
+      "mem",
+      "proc",
+      "start",
+      "user"
+    ]
+  }
+}

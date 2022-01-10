@@ -33,7 +33,9 @@ files:
         request with the data parameter.
         SOAP requests are supported if you use the POST method and supply an XML string as the data parameter.
       value:
-        type: object
+        anyOf:
+        - type: object
+        - type: string
         enabled: false
         example:
           <KEY>: <VALUE>
@@ -54,7 +56,6 @@ files:
       value:
         type: string
         example: '<REGEX>'
-        default: None
     - name: reverse_content_match
       description: |
         The reverse_content_match parameter will allow the content_match
@@ -142,11 +143,6 @@ files:
         override the hostname to match with ssl_server_name.
       value:
         type: string
-    - name: allow_redirects
-      description: The allow_redirects parameter can enable redirection for the HTTP check.
-      value:
-        type: boolean
-        example: true
     - name: stream
       description: |
         The stream parameter can be used to check the status code and/or
@@ -164,3 +160,5 @@ files:
         example: true
     - template: instances/default
     - template: instances/http
+      overrides:
+        tls_verify.value.example: false

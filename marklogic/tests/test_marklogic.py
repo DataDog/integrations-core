@@ -212,7 +212,7 @@ def test_submit_health_service_checks(aggregator, caplog):
             'marklogic.database.health',
             MarklogicCheck.OK,
             tags=['foo:bar', 'database_name:Security'],
-            message='HEALTH-DATABASE-NO-BACKUP (info): Database has never been backed up.',
+            message=None,
             count=1,
         )
         aggregator.assert_service_check(

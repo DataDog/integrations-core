@@ -66,7 +66,7 @@ If the `cn=Monitor` backend is not configured on your server, follow these steps
 
 #### Configure the OpenLDAP integration
 
-#<!-- xxx tabs xxx -->
+<!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
 #### Host
@@ -102,6 +102,12 @@ To configure this check for an Agent running on a host:
 
 ###### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
@@ -124,7 +130,7 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][3].
 
-#<!-- xxz tab xxx -->
+<!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
@@ -141,9 +147,15 @@ For containerized environments, see the [Autodiscovery Integration Templates][4]
 
 ###### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][5].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][5].
 
 | Parameter      | Value                                                 |
 | -------------- | ----------------------------------------------------- |
@@ -172,12 +184,12 @@ The openldap check does not include any events.
 
 ### Service Checks
 
-**openldap.can_connect**:<br>
-Returns `CRITICAL` if the integration cannot bind to the monitored OpenLDAP server, otherwise returns `OK`.
+See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
+
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/openldap/datadog_checks/openldap/data/conf.yaml.example
@@ -186,4 +198,5 @@ Need help? Contact [Datadog support][8].
 [5]: https://docs.datadoghq.com/agent/kubernetes/log/
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/openldap/metadata.csv
-[8]: https://docs.datadoghq.com/help/
+[8]: https://github.com/DataDog/integrations-core/blob/master/openldap/assets/service_checks.json
+[9]: https://docs.datadoghq.com/help/

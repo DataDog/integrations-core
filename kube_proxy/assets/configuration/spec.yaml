@@ -1,0 +1,13 @@
+name: Kube Proxy
+files:
+- name: kube_proxy.yaml
+  options:
+  - template: init_config
+    options:
+      - template: init_config/openmetrics_legacy
+  - template: instances
+    options:
+    - template: instances/openmetrics_legacy
+      overrides:
+        prometheus_url.value.example: http://127.0.0.1:10249/metrics
+        prometheus_url.display_priority: 1

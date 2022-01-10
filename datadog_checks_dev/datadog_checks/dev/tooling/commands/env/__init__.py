@@ -5,6 +5,7 @@ import click
 
 from ..console import CONTEXT_SETTINGS
 from .check import check_run
+from .edit import edit
 from .ls import ls
 from .prune import prune
 from .reload import reload_env
@@ -13,7 +14,7 @@ from .start import start
 from .stop import stop
 from .test import test
 
-ALL_COMMANDS = (check_run, ls, prune, reload_env, shell, start, stop, test)
+ALL_COMMANDS = (check_run, edit, ls, prune, reload_env, shell, start, stop, test)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage environments')

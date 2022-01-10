@@ -5,6 +5,7 @@ import requests
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
+from datadog_checks.base.errors import CheckException
 
 from .metrics import METRIC_MAP
 
@@ -100,12 +101,12 @@ class Etcd(OpenMetricsBaseCheck):
             default_namespace='etcd',
         )
 
-    def check(self, instance):
-        if is_affirmative(instance.get('use_preview', True)):
-            self.check_post_v3(instance)
+    def check(self, _):
+        if is_affirmative(self.instance.get('use_preview', True)):
+            self.check_post_v3()
         else:
             self.warning('In the future etcd check will only support ETCD v3+.')
-            self.check_pre_v3(instance)
+            self.check_pre_v3()
 
     def access_api(self, scraper_config, path, data='{}'):
         url = urlparse(scraper_config['prometheus_url'])
@@ -136,8 +137,8 @@ class Etcd(OpenMetricsBaseCheck):
         if is_leader is not None:
             tags.append('is_leader:{}'.format('true' if is_leader else 'false'))
 
-    def check_post_v3(self, instance):
-        scraper_config = self.get_scraper_config(instance)
+    def check_post_v3(self):
+        scraper_config = self.get_scraper_config(self.instance)
 
         if 'prometheus_url' not in scraper_config:
             raise ConfigurationError('You have to define at least one `prometheus_url`.')
@@ -151,7 +152,7 @@ class Etcd(OpenMetricsBaseCheck):
 
         tags = []
 
-        if is_affirmative(instance.get('leader_tag', True)):
+        if is_affirmative(self.instance.get('leader_tag', True)):
             self.add_leader_state_tag(scraper_config, tags)
 
         scraper_config['_metric_tags'][:] = tags
@@ -164,13 +165,13 @@ class Etcd(OpenMetricsBaseCheck):
         # Needed for backward compatibility, we continue to submit `etcd.server.version` metric
         self.submit_openmetric('server.version', metric, scraper_config)
 
-    def check_pre_v3(self, instance):
-        if 'url' not in instance:
-            raise Exception('etcd instance missing "url" value.')
+    def check_pre_v3(self):
+        if 'url' not in self.instance:
+            raise ConfigurationError('etcd instance missing "url" value.')
 
         # Load values from the instance config
-        url = instance['url']
-        instance_tags = instance.get('tags', [])
+        url = self.instance['url']
+        instance_tags = self.instance.get('tags', [])
 
         # Get a copy of tags for the CRIT statuses
         critical_tags = list(instance_tags)
@@ -178,12 +179,11 @@ class Etcd(OpenMetricsBaseCheck):
         # Append the instance's URL in case there are more than one, that
         # way they can tell the difference!
         instance_tags.append('url:{}'.format(url))
-        timeout = float(instance.get('timeout', self.DEFAULT_TIMEOUT))
         is_leader = False
 
         # Gather self health status
         sc_state = self.UNKNOWN
-        health_status = self._get_health_status(url, timeout)
+        health_status = self._get_health_status(url)
         if health_status is not None:
             sc_state = self.OK if self._is_healthy(health_status) else self.CRITICAL
         self.service_check(self.HEALTH_SERVICE_CHECK_NAME, sc_state, tags=instance_tags)
@@ -254,7 +254,7 @@ class Etcd(OpenMetricsBaseCheck):
 
         self._collect_metadata(url, critical_tags)
 
-    def _get_health_status(self, url, timeout):
+    def _get_health_status(self, url):
         """
         Don't send the "can connect" service check if we have troubles getting
         the health status
@@ -305,7 +305,7 @@ class Etcd(OpenMetricsBaseCheck):
                 message='Got {} when hitting {}'.format(r.status_code, url),
                 tags=tags + ['url:{}'.format(url)],
             )
-            raise Exception('Http status code {} on url {}'.format(r.status_code, url))
+            raise CheckException('Http status code {} on url {}'.format(r.status_code, url))
 
         return r.json()
 

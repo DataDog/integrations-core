@@ -14,7 +14,6 @@ files:
           If the password contains special characters, be sure to escape them using percent encoding.
 
           See: https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING
-        required: true
         value:
           example: postgresql://<USERNAME>:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require
           type: string
@@ -38,7 +37,6 @@ files:
       - name: use_cached
         description: Cache and re-use PostgreSQL connection or create a new one at each check run.
         value:
-          default: true
           example: true
           type: boolean
       - template: instances/default

@@ -9,7 +9,7 @@ from datadog_checks.snmp.parsing import parse_metrics
 
 from . import common
 
-pytestmark = common.python_autodiscovery_only
+pytestmark = common.snmp_integration_only
 
 logger = logging.getLogger(__name__)
 

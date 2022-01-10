@@ -37,7 +37,15 @@ IF_COUNTS = [
     'ifHCOutMulticastPkts',
     'ifHCOutBroadcastPkts',
 ]
-IF_RATES = ['ifHCInOctets.rate', 'ifHCOutOctets.rate']
+IF_RATES = [
+    'ifHCInOctets.rate',
+    'ifHCOutOctets.rate',
+    'ifInErrors.rate',
+    'ifInDiscards.rate',
+    'ifOutErrors.rate',
+    'ifOutDiscards.rate',
+]
+IF_SCALAR_GAUGE = ['ifNumber']
 IF_GAUGES = ['ifAdminStatus', 'ifOperStatus', 'ifSpeed', 'ifHighSpeed']
 IF_BANDWIDTH_USAGE = ['ifBandwidthInUsage.rate', 'ifBandwidthOutUsage.rate']
 
@@ -107,7 +115,7 @@ IP_IF_COUNTS = [
 ]
 
 # IDRAC profile metrics
-# idrac.yaml
+# _idrac.yaml
 ADAPTER_IF_COUNTS = [
     'adapterRxPackets',
     'adapterTxPackets',
@@ -120,7 +128,7 @@ ADAPTER_IF_COUNTS = [
     'adapterRxMulticast',
     'adapterCollisions',
 ]
-SYSTEM_STATUS_GAUGES = [
+IDRAC_SYSTEM_STATUS_GAUGES = [
     'systemStateChassisStatus',
     'systemStatePowerUnitStatusRedundancy',
     'systemStatePowerSupplyStatusCombined',
@@ -152,6 +160,23 @@ DRS_GAUGES = [
     'drsPowerCurrStatus',
     'drsRedCurrStatus',
     'drsGlobalSystemStatus',
+]
+
+# Dell Poweredge
+# dell-poweredge.yaml
+POWEREDGE_SYSTEM_STATUS_GAUGES = [
+    'systemStateChassisStatus',
+    'systemStatePowerUnitStatusRedundancy',
+    'systemStatePowerSupplyStatusCombined',
+    'systemStateAmperageStatusCombined',
+    'systemStateCoolingUnitStatusRedundancy',
+    'systemStateCoolingDeviceStatusCombined',
+    'systemStateTemperatureStatusCombined',
+    'systemStateMemoryDeviceStatusCombined',
+    'systemStateChassisIntrusionStatusCombined',
+    'systemStatePowerUnitStatusCombined',
+    'systemStateCoolingUnitStatusCombined',
+    'systemStateProcessorDeviceStatusCombined',
 ]
 
 # Base profile metrics for Cisco devices
@@ -410,3 +435,40 @@ USER_FIREWALL = ['jnxUserFwLDAPTotalQuery', 'jnxUserFwLDAPFailedQuery']
 DCU_COUNTS = ['jnxDcuStatsPackets', 'jnxDcuStatsBytes']
 
 SCU_COUNTS = ['jnxScuStatsPackets', 'jnxScuStatsBytes']
+
+APC_UPS_METRICS = [
+    'upsAdvBatteryNumOfBattPacks',
+    'upsAdvBatteryNumOfBadBattPacks',
+    'upsAdvBatteryReplaceIndicator',
+    'upsAdvBatteryRunTimeRemaining',
+    'upsAdvBatteryTemperature',
+    'upsAdvBatteryCapacity',
+    'upsHighPrecInputFrequency',
+    'upsHighPrecInputLineVoltage',
+    'upsHighPrecOutputCurrent',
+    'upsAdvInputLineFailCause',
+    'upsAdvOutputLoad',
+    'upsBasicBatteryTimeOnBattery',
+    'upsAdvTestDiagnosticsResults',
+    'upsHighPrecExtdBatteryTemperature',
+    'upsAdvInputLineVoltage',
+    'upsAdvInputFrequency',
+    'upsAdvOutputVoltage',
+    'upsAdvOutputFrequency',
+    'upsAdvOutputCurrent',
+    'upsAdvOutputActivePower',
+    'upsAdvOutputApparentPower',
+    'upsAdvOutputEnergyUsage',
+    'uioSensorStatusTemperatureDegC',
+]
+
+APC_UPS_UPS_BASIC_STATE_OUTPUT_STATE_METRICS = [
+    # metric, value
+    ('snmp.upsBasicStateOutputState.AVRTrimActive', 1),
+    ('snmp.upsBasicStateOutputState.BatteriesDischarged', 1),
+    ('snmp.upsBasicStateOutputState.LowBatteryOnBattery', 1),
+    ('snmp.upsBasicStateOutputState.NoBatteriesAttached', 1),
+    ('snmp.upsBasicStateOutputState.On', 1),
+    ('snmp.upsBasicStateOutputState.OnLine', 0),
+    ('snmp.upsBasicStateOutputState.ReplaceBattery', 1),
+]

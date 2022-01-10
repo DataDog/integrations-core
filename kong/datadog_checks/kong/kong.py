@@ -2,12 +2,16 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import simplejson as json
+from six import PY2
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 
 
 class Kong(AgentCheck):
+    """
+    This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
+    """
 
     METRIC_PREFIX = 'kong.'
 
@@ -15,8 +19,25 @@ class Kong(AgentCheck):
 
     """ collects metrics for Kong """
 
-    def check(self, instance):
-        metrics = self._fetch_data(instance)
+    def __new__(cls, name, init_config, instances):
+        instance = instances[0]
+
+        if 'openmetrics_endpoint' in instance:
+            if PY2:
+                raise ConfigurationError(
+                    "This version of the integration is only available when using py3. "
+                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
+                    "for more information or use the older style config."
+                )
+            # TODO: when we drop Python 2 move this import up top
+            from .check import KongCheck
+
+            return KongCheck(name, init_config, instances)
+        else:
+            return super(Kong, cls).__new__(cls)
+
+    def check(self, _):
+        metrics = self._fetch_data()
         for row in metrics:
             try:
                 name, value, tags = row
@@ -24,11 +45,11 @@ class Kong(AgentCheck):
             except Exception:
                 self.log.error(u'Could not submit metric: %s', row)
 
-    def _fetch_data(self, instance):
-        if 'kong_status_url' not in instance:
+    def _fetch_data(self):
+        if 'kong_status_url' not in self.instance:
             raise Exception('missing "kong_status_url" value')
-        tags = instance.get('tags', [])
-        url = instance.get('kong_status_url')
+        tags = self.instance.get('tags', [])
+        url = self.instance.get('kong_status_url')
 
         parsed_url = urlparse(url)
         host = parsed_url.hostname

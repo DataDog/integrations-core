@@ -17,7 +17,15 @@ from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.haproxy import HAProxyCheck
 from datadog_checks.haproxy.metrics import METRIC_MAP
 
-from .common import ENDPOINT_PROMETHEUS, HAPROXY_LEGACY, HAPROXY_VERSION, HAPROXY_VERSION_RAW, HERE, INSTANCE
+from .common import (
+    ENDPOINT_PROMETHEUS,
+    HAPROXY_LEGACY,
+    HAPROXY_VERSION,
+    HAPROXY_VERSION_RAW,
+    HERE,
+    INSTANCE,
+    requires_static_version,
+)
 from .legacy.common import (
     CHECK_CONFIG,
     CHECK_CONFIG_OPEN,
@@ -45,13 +53,52 @@ def dd_environment():
 @pytest.fixture(scope='session')
 def prometheus_metrics():
     metrics = deepcopy(METRIC_MAP)
+
+    # metrics added in 2.2
+    if HAPROXY_VERSION < version.parse('2.2'):
+        metrics.pop('haproxy_frontend_internal_errors_total')
+        metrics.pop('haproxy_backend_internal_errors_total')
+        metrics.pop('haproxy_server_internal_errors_total')
+
+    # metrics added in 2.3
+    if HAPROXY_VERSION < version.parse('2.3'):
+        metrics.pop('haproxy_process_bytes_out_rate')
+        metrics.pop('haproxy_process_bytes_out_total')
+        metrics.pop('haproxy_process_failed_resolutions')
+        metrics.pop('haproxy_process_spliced_bytes_out_total')
+        metrics.pop('haproxy_server_used_connections_current')
+        metrics.pop('haproxy_server_need_connections_current')
+        metrics.pop('haproxy_server_safe_idle_connections_current')
+        metrics.pop('haproxy_server_unsafe_idle_connections_current')
+
+    # renamed in >= v2.3
     if HAPROXY_VERSION >= version.parse('2.3'):
-        # the two following metrics were renamed in >= v2.3
         metrics.pop('haproxy_server_server_idle_connections_current')
         metrics.pop('haproxy_server_server_idle_connections_limit')
     else:
         metrics.pop('haproxy_server_idle_connections_current')
         metrics.pop('haproxy_server_idle_connections_limit')
+
+    if HAPROXY_VERSION >= version.parse('2.4'):
+        # default NaN starting from 2.4 if not configured
+        metrics.pop('haproxy_server_current_throttle')
+        # zlib is no longer the default since >= 2.4
+        metrics.pop('haproxy_process_current_zlib_memory')
+        metrics.pop('haproxy_process_max_zlib_memory')
+
+    # metrics added in 2.4
+    if HAPROXY_VERSION < version.parse('2.4'):
+        metrics.pop('haproxy_backend_uweight')
+        metrics.pop('haproxy_server_uweight')
+        metrics.pop('haproxy_process_recv_logs_total')
+        metrics.pop('haproxy_process_uptime_seconds')
+        metrics.pop('haproxy_sticktable_size')
+        metrics.pop('haproxy_sticktable_used')
+        metrics.pop('haproxy_backend_agg_server_check_status')
+        metrics_cpy = metrics.copy()
+        for metric in metrics_cpy:
+            if metric.startswith('haproxy_listener'):
+                metrics.pop(metric)
 
     metrics = list(metrics.values())
     return metrics
@@ -162,6 +209,7 @@ def haproxy_mock_enterprise_version_info():
         yield p
 
 
+@requires_static_version
 @pytest.fixture(scope="session")
 def version_metadata():
     # some version has release info

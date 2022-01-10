@@ -1,0 +1,843 @@
+{
+    "author_name": "Datadog",
+    "description": null,
+    "layout_type": "ordered",
+    "template_variables": [],
+    "title": "SonarQube Overview",
+    "widgets": [
+        {
+            "definition": {
+                "background_color": "white",
+                "content": "[SonarQube](https://www.datadoghq.com/blog/datadog-sonarqube-integration) is an open-source tool for static code analysis that integrates with your existing CI pipeline to run regular code checks on your codebase.\n\nThis integration collects metrics and logs from SonarQube\u2019s reports in order to provide insight into your codebase quality. You can monitor for code issues and security violations as they're reported by the scanner, visualize changes in code complexity, and collect logs from the SonarQube instance itself for unusual activity. For more information, check out the Datadog [documentation](https://docs.datadoghq.com/integrations/sonarqube/).",
+                "font_size": "12",
+                "has_padding": true,
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note",
+                "vertical_align": "center"
+            },
+            "id": 4764073356999656,
+            "layout": {
+                "height": 2,
+                "width": 12,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "banner_img": "https://imgix.datadoghq.com/img/blog/datadog-sonarqube-integration/sonarqube-hero.png",
+                "layout_type": "ordered",
+                "show_title": false,
+                "title": "About Sonarqube",
+                "title_align": "center",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "transparent",
+                            "content": "This dashboard displays metrics and logs from SonarQube\u2019s reports in order to provide insight into your codebase quality. You can monitor for code issues and security violations as they're reported by the scanner, visualize changes in code complexity, and collect logs from the SonarQube instance itself for unusual activity.\n\n##### [**Datadog Sonarqube integration docs&nbsp;\u2197**](https://docs.datadoghq.com/integrations/sonarqube/)",
+                            "font_size": "18",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note"
+                        },
+                        "id": 5862980161951240,
+                        "layout": {
+                            "height": 3,
+                            "width": 7,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "transparent",
+                            "content": "**Elasticsearch monitoring guides**\n\n[Datadog guide to key Elasticsearch metrics&nbsp;\u2197](https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics/)\n\n[How to monitor Elasticsearch with Datadog&nbsp;\u2197](https://www.datadoghq.com/blog/monitor-elasticsearch-datadog/)\n\n[Collect metrics with native and open source tools&nbsp;\u2197](https://www.datadoghq.com/blog/collect-elasticsearch-metrics/)\n\n[Solve 5 performance and scaling problems&nbsp;\u2197](https://www.datadoghq.com/blog/elasticsearch-performance-scaling-problems/)\n\n[Resolve unassigned shards&nbsp;\u2197](https://www.datadoghq.com/blog/elasticsearch-unassigned-shards/)",
+                            "font_size": "12",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note"
+                        },
+                        "id": 3508707908453426,
+                        "layout": {
+                            "height": 3,
+                            "width": 5,
+                            "x": 7,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 1376544769619172,
+            "layout": {
+                "height": 6,
+                "width": 12,
+                "x": 0,
+                "y": 2
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "title": "Code Checks",
+                "title_align": "left",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "aggregator": "avg",
+                                    "q": "avg:sonarqube.maintainability.sqale_rating{*}"
+                                }
+                            ],
+                            "title": "Maintainability rating",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 8000981528629554,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "aggregator": "last",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "q": "avg:sonarqube.issues.critical_violations{*}"
+                                }
+                            ],
+                            "title": "Critical violations",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 8516574324342556,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "aggregator": "last",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "palette": "white_on_red",
+                                            "value": 1
+                                        },
+                                        {
+                                            "comparator": "<",
+                                            "palette": "white_on_green",
+                                            "value": 1
+                                        }
+                                    ],
+                                    "q": "avg:sonarqube.issues.major_violations{*}"
+                                }
+                            ],
+                            "title": "Major violations",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 3511057862143030,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 8,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "Results from regular code checks will appear here. SonarQube assigns a maintainability score for every check. Datadog monitors can help you stay on top of any code violations found by the scanner.  \n",
+                            "font_size": "12",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "top",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 4774296109733750,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "aggregator": "last",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "palette": "white_on_yellow",
+                                            "value": 5
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "q": "avg:sonarqube.issues.minor_violations{*}"
+                                }
+                            ],
+                            "title": "Minor violations",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 3993053512490240,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 4,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "To understand changes in code quality, SonarQube calculates metrics on complexity and maintainability. Plotting these over time can give insight into trends and potential issues.",
+                            "font_size": "12",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "bottom",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 1530146854722140,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 8,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "on_right_yaxis": false,
+                                    "q": "avg:sonarqube.maintainability.code_smells{*}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "on_right_yaxis": false,
+                                    "q": "avg:sonarqube.complexity.complexity{*}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "on_right_yaxis": false,
+                                    "q": "avg:sonarqube.complexity.cognitive_complexity{*}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "on_right_yaxis": false,
+                                    "q": "avg:sonarqube.issues.info_violations{*}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "on_right_yaxis": false,
+                                    "q": "avg:sonarqube.issues.major_violations{*}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "on_right_yaxis": false,
+                                    "q": "avg:sonarqube.issues.minor_violations{*}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Code checks",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": false
+                            }
+                        },
+                        "id": 7957097198944054,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "aggregator": "last",
+                                    "alias": "Uncovered lines",
+                                    "cell_display_mode": [
+                                        "number"
+                                    ],
+                                    "limit": 10,
+                                    "order": "asc",
+                                    "q": "avg:sonarqube.coverage.uncovered_lines{*}"
+                                },
+                                {
+                                    "aggregator": "last",
+                                    "alias": "Lines",
+                                    "cell_display_mode": [
+                                        "number"
+                                    ],
+                                    "q": "avg:sonarqube.size.lines{*}"
+                                },
+                                {
+                                    "aggregator": "last",
+                                    "alias": "Comment lines",
+                                    "cell_display_mode": [
+                                        "number"
+                                    ],
+                                    "q": "avg:sonarqube.size.comment_lines{*}"
+                                },
+                                {
+                                    "aggregator": "last",
+                                    "alias": "Statements",
+                                    "cell_display_mode": [
+                                        "number"
+                                    ],
+                                    "q": "avg:sonarqube.size.statements{*}"
+                                }
+                            ],
+                            "title": "Code base coverage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 1733991700971436,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 7
+                        }
+                    }
+                ]
+            },
+            "id": 3862125221719092,
+            "layout": {
+                "height": 11,
+                "width": 12,
+                "x": 0,
+                "y": 8
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "title": "Codebase Security",
+                "title_align": "left",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "aggregator": "last",
+                                    "q": "avg:sonarqube.security.vulnerabilities{*}"
+                                }
+                            ],
+                            "title": "Vulnerabilities",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 5022064288708540,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "aggregator": "last",
+                                    "q": "avg:sonarqube.security.security_rating{*}"
+                                }
+                            ],
+                            "title": "Security rating",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 2495534388583216,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "SonarQube's security metrics find code vulnerabilities according to the [OWASP, SANS, and CWE](https://docs.sonarqube.org/latest/user-guide/security-reports/) standards. A final security grade from 1-5 represents a summary of the report.\n",
+                            "font_size": "12",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "right",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 3812575502254034,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 8,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "q": "avg:sonarqube.security.vulnerabilities{*}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Security metrics",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 8894350283435710,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 5423172190266024,
+            "layout": {
+                "height": 6,
+                "width": 12,
+                "x": 0,
+                "y": 19
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_green",
+                "layout_type": "ordered",
+                "title": "Server Status",
+                "title_align": "left",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "aggregator": "avg",
+                                    "q": "avg:sonarqube.server.compute_engine_tasks.error_count{*}.as_count()"
+                                }
+                            ],
+                            "title": "Compute Engine errors",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 6564013590780622,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "on_right_yaxis": false,
+                                    "q": "avg:sonarqube.server.compute_engine_tasks.success_count{*}.as_count()",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                },
+                                {
+                                    "display_type": "bars",
+                                    "on_right_yaxis": false,
+                                    "q": "avg:sonarqube.server.compute_engine_tasks.error_count{*}.as_count()",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                },
+                                {
+                                    "display_type": "bars",
+                                    "on_right_yaxis": false,
+                                    "q": "avg:sonarqube.server.compute_engine_tasks.pending_count{*}.as_count()",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Tasks since start",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 6457284228079942,
+                        "layout": {
+                            "height": 2,
+                            "width": 9,
+                            "x": 3,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "on_right_yaxis": false,
+                                    "q": "(avg:sonarqube.server.compute_engine_tasks.error_count{*}.as_count()+avg:sonarqube.server.compute_engine_tasks.success_count{*}.as_count())/avg:sonarqube.server.compute_engine_tasks.processing_time{*}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "purple"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Avg task processing time",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 7525388284306974,
+                        "layout": {
+                            "height": 2,
+                            "width": 8,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "Monitoring your SonarQube server is key to ensuring any hiccups don\u2019t interfere with the rest of your CI pipeline. Database connections and compute engine tasks are indicators of performance load.",
+                            "font_size": "12",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "right",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 8094861398821912,
+                        "layout": {
+                            "height": 4,
+                            "width": 4,
+                            "x": 8,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "metadata": [
+                                        {
+                                            "alias_name": "Max Active Connections",
+                                            "expression": "avg:sonarqube.server.database.pool_max_active_connections{*}"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "q": "avg:sonarqube.server.database.pool_max_active_connections{*}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "metadata": [
+                                        {
+                                            "alias_name": "Current Active Connections",
+                                            "expression": "avg:sonarqube.server.database.pool_active_connections{*}"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "q": "avg:sonarqube.server.database.pool_active_connections{*}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Active Server Database Connections",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 5613285247883332,
+                        "layout": {
+                            "height": 2,
+                            "width": 8,
+                            "x": 0,
+                            "y": 4
+                        }
+                    }
+                ]
+            },
+            "id": 1326175071153698,
+            "layout": {
+                "height": 7,
+                "is_column_break": true,
+                "width": 12,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_orange",
+                "layout_type": "ordered",
+                "title": "Logs",
+                "title_align": "left",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "Datadog collects all logs from 4 levels SonarQube, including the main app process, the WebServer running the scanner's endpoint, the ComputeEngineServer, and the Elastisearch server. These can indicate problems in performance or security issues, and provide helpful context when troubleshooting.",
+                            "font_size": "12",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "top",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 4516408868674640,
+                        "layout": {
+                            "height": 2,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "columns": [
+                                "host",
+                                "service"
+                            ],
+                            "indexes": [],
+                            "message_display": "expanded-md",
+                            "query": "service:sonarqube",
+                            "show_date_column": true,
+                            "show_message_column": true,
+                            "sort": {
+                                "column": "time",
+                                "order": "desc"
+                            },
+                            "title": "",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "log_stream"
+                        },
+                        "id": 8374048697602174,
+                        "layout": {
+                            "height": 9,
+                            "width": 12,
+                            "x": 0,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 7649000180006982,
+            "layout": {
+                "height": 12,
+                "width": 12,
+                "x": 0,
+                "y": 7
+            }
+        }
+    ]
+}

@@ -155,8 +155,9 @@ def test_get_nodes_with_service_critical(aggregator):
     aggregator.assert_metric('consul.catalog.services_count', value=1, tags=expected_tags)
 
 
-def test_consul_request(aggregator, instance):
+def test_consul_request(aggregator, instance, mocker):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
+    mocker.patch("datadog_checks.base.utils.serialization.json.loads")
     with mock.patch("datadog_checks.consul.consul.requests.get") as mock_requests_get:
         consul_check.consul_request("foo")
         url = "{}/{}".format(instance["url"], "foo")
@@ -176,7 +177,7 @@ def test_consul_request(aggregator, instance):
 
 
 def test_service_checks(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_DISABLE_SERVICE_TAG])
     my_mocks = consul_mocks._get_consul_mocks()
     my_mocks['consul_request'] = consul_mocks.mock_get_health_check
     consul_mocks.mock_check(consul_check, my_mocks)
@@ -186,7 +187,6 @@ def test_service_checks(aggregator):
         "consul_datacenter:dc1",
         "check:server-loadbalancer",
         "consul_service_id:server-loadbalancer",
-        "service:server-loadbalancer",
         "consul_service:server-loadbalancer",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.CRITICAL, tags=expected_tags, count=1)
@@ -195,7 +195,6 @@ def test_service_checks(aggregator):
         "consul_datacenter:dc1",
         "check:server-api",
         "consul_service_id:server-loadbalancer",
-        "service:server-loadbalancer",
         "consul_service:server-loadbalancer",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
@@ -203,7 +202,6 @@ def test_service_checks(aggregator):
     expected_tags = [
         "consul_datacenter:dc1",
         "check:server-api",
-        "service:server-loadbalancer",
         "consul_service:server-loadbalancer",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
@@ -215,7 +213,6 @@ def test_service_checks(aggregator):
         "consul_datacenter:dc1",
         "check:server-status-empty",
         "consul_service_id:server-empty",
-        "service:server-empty",
         "consul_service:server-empty",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.UNKNOWN, tags=expected_tags, count=1)
@@ -274,51 +271,77 @@ def test_cull_services_list():
     # Max services parameter (from consul.yaml) set to be bigger than MAX_SERVICES and smaller than total of services
     max_services = num_services - 10
 
-    # Big whitelist
+    # Big include list
     services = consul_mocks.mock_get_n_services_in_cluster(num_services)
-    consul_check.service_whitelist = ['service_{}'.format(k) for k in range(num_services)]
+    consul_check.services_include = ['service_{}'.format(k) for k in range(num_services)]
     assert len(consul_check._cull_services_list(services)) == MAX_SERVICES
 
-    # Big whitelist with max_services
+    # Big include list with max_services
     consul_check.max_services = max_services
     assert len(consul_check._cull_services_list(services)) == max_services
 
-    # Whitelist < MAX_SERVICES should spit out the whitelist
-    consul_check.service_whitelist = ['service_{}'.format(k) for k in range(MAX_SERVICES - 1)]
-    assert set(consul_check._cull_services_list(services)) == set(consul_check.service_whitelist)
+    # include list < MAX_SERVICES should spit out the include list
+    consul_check.services_include = ['service_{}'.format(k) for k in range(MAX_SERVICES - 1)]
+    assert set(consul_check._cull_services_list(services)) == set(consul_check.services_include)
 
-    # Whitelist < max_services param should spit out the whitelist
-    consul_check.service_whitelist = ['service_{}'.format(k) for k in range(max_services - 1)]
-    assert set(consul_check._cull_services_list(services)) == set(consul_check.service_whitelist)
+    # include list < max_services param should spit out the include list
+    consul_check.services_include = ['service_{}'.format(k) for k in range(max_services - 1)]
+    assert set(consul_check._cull_services_list(services)) == set(consul_check.services_include)
 
-    # No whitelist, still triggers truncation
-    consul_check.service_whitelist = []
+    # No include list, still triggers truncation
+    consul_check.services_include = []
     consul_check.max_services = MAX_SERVICES
     assert len(consul_check._cull_services_list(services)) == MAX_SERVICES
 
-    # No whitelist with max_services set, also triggers truncation
-    consul_check.service_whitelist = []
+    # No include list with max_services set, also triggers truncation
+    consul_check.services_include = []
     consul_check.max_services = max_services
     assert len(consul_check._cull_services_list(services)) == max_services
 
-    # Num. services < MAX_SERVICES should be no-op in absence of whitelist
+    # Num. services < MAX_SERVICES should be no-op in absence of include list
     num_services = MAX_SERVICES - 1
     services = consul_mocks.mock_get_n_services_in_cluster(num_services)
     assert len(consul_check._cull_services_list(services)) == num_services
 
-    # Num. services < MAX_SERVICES should spit out only the whitelist when one is defined
-    consul_check.service_whitelist = ['service_1', 'service_2', 'service_3']
-    assert set(consul_check._cull_services_list(services)) == set(consul_check.service_whitelist)
+    # Num. services < MAX_SERVICES should spit out only the include list when one is defined
+    consul_check.services_include = ['service_1', 'service_2', 'service_3']
+    assert set(consul_check._cull_services_list(services)) == set(consul_check.services_include)
 
-    # Num. services < max_services (from consul.yaml) should be no-op in absence of whitelist
+    # Num. services < max_services (from consul.yaml) should be no-op in absence of include list
     num_services = max_services - 1
-    consul_check.service_whitelist = []
+    consul_check.services_include = []
     services = consul_mocks.mock_get_n_services_in_cluster(num_services)
     assert len(consul_check._cull_services_list(services)) == num_services
 
-    # Num. services < max_services should spit out only the whitelist when one is defined
-    consul_check.service_whitelist = ['service_1', 'service_2', 'service_3']
-    assert set(consul_check._cull_services_list(services)) == set(consul_check.service_whitelist)
+    # Num. services < max_services should spit out only the include list when one is defined
+    consul_check.services_include = ['service_1', 'service_2', 'service_3']
+    assert set(consul_check._cull_services_list(services)) == set(consul_check.services_include)
+
+    # Excluded services will not be in final service list
+    consul_check.services_exclude = ['service_1', 'service_2', 'service_3']
+    assert set(consul_check.services_exclude) not in set(consul_check._cull_services_list(services))
+
+    # Excluded services will be prioritized over include list services
+    consul_check.services_exclude = ['service_1', 'service_2', 'service_3']
+    consul_check.services_include = ['service_4', 'service_5', 'service_6']
+    test_include_length = len(consul_check.services_include)
+    test_service_list_length = len(set(consul_check._cull_services_list(services)))
+    assert (
+        set(consul_check.services_exclude) not in set(consul_check._cull_services_list(services))
+        and test_service_list_length > test_include_length
+    )
+
+    # Use of services exclude will still trigger truncation logic
+    services = consul_mocks.mock_get_n_services_in_cluster(num_services)
+    consul_check.services_exclude = ['service_1', 'service_2', 'service_3']
+    consul_check.max_services = MAX_SERVICES
+    assert len(consul_check._cull_services_list(services)) == consul_check.max_services
+
+    # Num. services < MAX_SERVICES (from consul.yaml) should be no-op in absence of services exclude
+    num_services = MAX_SERVICES + 1
+    consul_check.services_exclude = []
+    services = consul_mocks.mock_get_n_services_in_cluster(num_services)
+    assert len(consul_check._cull_services_list(services)) == MAX_SERVICES
 
 
 def test_new_leader_event(aggregator):
@@ -463,9 +486,10 @@ def test_network_latency_checks(aggregator):
         ),
     ],
 )
-def test_config(test_case, extra_config, expected_http_kwargs):
+def test_config(test_case, extra_config, expected_http_kwargs, mocker):
     instance = extra_config
     check = ConsulCheck(common.CHECK_NAME, {}, instances=[instance])
+    mocker.patch("datadog_checks.base.utils.serialization.json.loads")
 
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.return_value = mock.MagicMock(status_code=200)
@@ -473,7 +497,13 @@ def test_config(test_case, extra_config, expected_http_kwargs):
         check.check(None)
 
         http_wargs = dict(
-            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+            auth=mock.ANY,
+            cert=mock.ANY,
+            headers=mock.ANY,
+            proxies=mock.ANY,
+            timeout=mock.ANY,
+            verify=mock.ANY,
+            allow_redirects=mock.ANY,
         )
         http_wargs.update(expected_http_kwargs)
         r.get.assert_called_with('/v1/status/leader', **http_wargs)

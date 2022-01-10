@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-MINIMAL_INSTANCE = {'host': '.'}
+from datadog_checks.dotnetclr.metrics import METRICS_CONFIG
 
-CHECK_NAME = 'active_directory'
+MINIMAL_INSTANCE = {'host': '.'}
 
 INSTANCES = [
     '_Global_',
@@ -39,3 +39,10 @@ INSTANCES = [
     'hostcontrollerservice',
     'Microsoft.ActiveDirectory.WebServices',
 ]
+
+PERFORMANCE_OBJECTS = {}
+for object_name, instances in (('.NET CLR Exceptions', INSTANCES), ('.NET CLR Memory', INSTANCES)):
+    PERFORMANCE_OBJECTS[object_name] = (
+        instances,
+        {counter: [9000] * len(instances) for counter in METRICS_CONFIG[object_name]['counters'][0]},
+    )

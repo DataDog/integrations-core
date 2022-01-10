@@ -1,4 +1,5 @@
 # https://docs.sonarqube.org/latest/instance-administration/monitoring/
+# If `is_jmx: true` is not defined in any instance, this file can be safely renamed or removed to reduce log chattiness
 jmx_metrics:
   - include:
       domain: SonarQube
@@ -43,12 +44,12 @@ jmx_metrics:
         InProgressCount:
           alias: sonarqube.server.compute_engine_tasks.in_progress_count
           metric_type: gauge
+        LongestTimePending:
+          alias: sonarqube.server.compute_engine_tasks.longest_pending_time
+          metric_type: gauge
         PendingCount:
           alias: sonarqube.server.compute_engine_tasks.pending_count
           metric_type: monotonic_count
-        PendingTime:
-          alias: sonarqube.server.compute_engine_tasks.pending_time
-          metric_type: gauge
         ProcessingTime:
           alias: sonarqube.server.compute_engine_tasks.processing_time
           metric_type: gauge
@@ -57,6 +58,9 @@ jmx_metrics:
           metric_type: monotonic_count
         WorkerCount:
           alias: sonarqube.server.compute_engine_tasks.worker_count
+          metric_type: gauge
+        WorkerMaxCount:
+          alias: sonarqube.server.compute_engine_tasks.worker_max_count
           metric_type: gauge
 
   - include:

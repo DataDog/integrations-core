@@ -8,7 +8,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "top(sum:kubernetes_state.nodes.by_condition{$cluster,status:true,$host,!condition:ready} by {status,condition,cluster_name}, 10, 'last', 'desc')",
+                        "q": "top(sum:kubernetes_state.nodes.by_condition{$cluster,status:true,$host,!condition:ready} by {status,condition,kube_cluster_name}, 10, 'last', 'desc')",
                         "display_type": "line",
                         "style": {
                             "palette": "warm",
@@ -555,13 +555,26 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}, avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}*100",
-                        "display_type": "line",
+                        "formulas": [
+                            {
+                                "alias": "mem used pct",
+                                "formula": "1 - query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:system.mem.pct_usable{$cluster,$host} by {host}"
+                            }
+                        ],
+                        "response_format": "timeseries",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
                             "line_width": "normal"
-                        }
+                        },
+                        "display_type": "line"
                     }
                 ],
                 "custom_links": [],
@@ -570,7 +583,7 @@
                 },
                 "markers": [
                     {
-                        "value": "y = 100",
+                        "value": "y = 1",
                         "display_type": "error dashed"
                     }
                 ],
@@ -827,7 +840,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.nodes.by_condition{$cluster,$host,condition:ready,status:true} by {condition,status,cluster_name}",
+                        "q": "sum:kubernetes_state.nodes.by_condition{$cluster,$host,condition:ready,status:true} by {condition,status,kube_cluster_name}",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -931,7 +944,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kubernetes.memory.usage_pct{$cluster,$host} by {cluster_name}, avg:kubernetes.memory.usage_pct{$cluster,$host} by {cluster_name}*100",
+                        "q": "avg:kubernetes.memory.usage_pct{$cluster,$host} by {kube_cluster_name}, avg:kubernetes.memory.usage_pct{$cluster,$host} by {kube_cluster_name}*100",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -978,7 +991,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.filesystem.usage_pct{$cluster,$host} by {cluster_name}, sum:kubernetes.filesystem.usage_pct{$cluster,$host} by {cluster_name}*100",
+                        "q": "sum:kubernetes.filesystem.usage_pct{$cluster,$host} by {kube_cluster_name}, sum:kubernetes.filesystem.usage_pct{$cluster,$host} by {kube_cluster_name}*100",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -1019,7 +1032,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.cpu.requests{$cluster,$host} by {cluster_name}/sum:kubernetes.cpu.capacity{$cluster,$host} by {cluster_name}*100",
+                        "q": "sum:kubernetes.cpu.requests{$cluster,$host} by {kube_cluster_name}/sum:kubernetes.cpu.capacity{$cluster,$host} by {kube_cluster_name}*100",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -1159,7 +1172,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "100-avg:system.cpu.idle{$host,$cluster} by {cluster_name}",
+                        "q": "100-avg:system.cpu.idle{$host,$cluster} by {kube_cluster_name}",
                         "display_type": "line",
                         "style": {
                             "palette": "warm",
@@ -1399,13 +1412,26 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}, avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}*100",
-                        "display_type": "line",
+                        "formulas": [
+                            {
+                                "alias": "mem used pct",
+                                "formula": "1 - query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:system.mem.pct_usable{$cluster,$host} by {host}"
+                            }
+                        ],
+                        "response_format": "timeseries",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
                             "line_width": "normal"
-                        }
+                        },
+                        "display_type": "line"
                     }
                 ],
                 "custom_links": [],
@@ -1414,14 +1440,14 @@
                 },
                 "markers": [
                     {
-                        "value": "y = 100",
-                        "display_type": "error dashed",
-                        "label": "y = 100"
+                        "label": "y = 1",
+                        "value": "y = 1",
+                        "display_type": "error dashed"
                     },
                     {
-                        "value": "y = 80",
-                        "display_type": "warning dashed",
-                        "label": "y = 80"
+                        "label": "y = 0.8",
+                        "value": "y = 0.8",
+                        "display_type": "warning dashed"
                     }
                 ],
                 "title": "Memory utilization % per node",
@@ -1477,7 +1503,7 @@
         {
             "name": "cluster",
             "default": "*",
-            "prefix": "cluster_name"
+            "prefix": "kube_cluster_name"
         },
         {
             "name": "host",

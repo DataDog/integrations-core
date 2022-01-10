@@ -25,11 +25,11 @@ def assert_basic_case(aggregator):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_basic_case_integration(aggregator):
+def test_basic_case_integration(aggregator, dd_run_check):
     instance = copy.deepcopy(INSTANCE_WITH_PLUGIN)
     check = Fluentd(CHECK_NAME, {}, [instance])
-    check.check(None)
-    check.check(None)
+    dd_run_check(check)
+    dd_run_check(check)
 
     assert_basic_case(aggregator)
 

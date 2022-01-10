@@ -10,7 +10,7 @@ import pytest
 from datadog_checks.base import ensure_unicode
 from datadog_checks.dev import LazyFunction, TempDir
 from datadog_checks.dev.env import environment_run, serialize_data, set_env_vars
-from datadog_checks.dev.utils import create_file
+from datadog_checks.dev.fs import create_file
 
 from .common import get_e2e_instance, get_e2e_metadata
 

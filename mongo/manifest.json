@@ -43,7 +43,8 @@
       "operations_by_type_overview": "assets/saved_views/operations_by_type_overview.json",
       "queries": "assets/saved_views/queries.json",
       "queries_by_type_overview": "assets/saved_views/queries_by_type_overview.json",
-      "slow_queries": "assets/saved_views/slow_queries.json"
+      "slow_queries": "assets/saved_views/slow_queries.json",
+      "mongodb_processes": "assets/saved_views/mongodb_processes.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {

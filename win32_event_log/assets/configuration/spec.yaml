@@ -23,6 +23,9 @@ files:
       value:
         type: string
         example: normal
+        enum:
+        - normal
+        - low
     - name: interpret_messages
       description: |
         Whether or not to interpret event messages for unknown sources or sources that have not been registered
@@ -44,13 +47,15 @@ files:
         example: normal
     - template: init_config/default
   - template: instances
+    overrides:
+      description: |
+        Every instance is scheduled independent of the others.
+        Everything under this section is sent as events.
     options:
     - name: path
       description: |
-        The check will subscribe to the path for events. It can be one of the following:
-
-          - the name of an Admin or Operational channel (you cannot subscribe to Analytic or Debug channels)
-          - the full path to a log file, usually ending in .evt, .evtx, or .etl
+        The check will subscribe to the path for events. It must be the name of an Admin or Operational
+        channel (you cannot subscribe to Analytic or Debug channels).
 
         The path is required if `legacy_mode` is set to `false`.
       value:
@@ -70,6 +75,9 @@ files:
       value:
         type: string
         example: now
+        enum:
+        - now
+        - oldest
     - name: query
       description: |
         A raw XPath or structured XML query used to filter events.
@@ -99,11 +107,35 @@ files:
           - type > https://docs.microsoft.com/en-us/windows/win32/eventlog/event-types
           - id > https://docs.microsoft.com/en-us/windows/win32/eventlog/event-identifiers
 
+          /\ WARNING /\
+          Due to a limitation in the Windows events API, the maximum filtering on event IDs is 20 IDs per instance.
+          Because of this, you may need to split the ID filtering into multiple instances.
+          
         For advanced and more granular filtering, define a `query`.
 
         If `filters` nor `query` is specified, then all events from the subscribed `path` will be collected.
       value:
         type: object
+        properties:
+        - name: source
+          type: array
+          items:
+            type: string
+        - name: type
+          type: array
+          items:
+            type: string
+            enum:
+            - success
+            - error
+            - warning
+            - information
+            - success audit
+            - failure audit
+        - name: id
+          type: array
+          items:
+            type: integer
         example:
           source:
            - Microsoft-Windows-Ntfs
@@ -111,6 +143,9 @@ files:
           type:
            - Error
            - Warning
+           - Information
+           - Success Audit
+           - Failure Audit
           id:
            - 9000
     - name: included_messages
@@ -168,6 +203,9 @@ files:
       value:
         type: string
         example: normal
+        enum:
+        - normal
+        - low
     - name: auth_type
       description: |
         The type of authentication to use. The available types are:
@@ -182,6 +220,11 @@ files:
       value:
         type: string
         example: default
+        enum:
+        - default
+        - negotiate
+        - kerberos
+        - ntlm
     - name: server
       description: |
         The name of the remote computer to connect to.
@@ -236,7 +279,7 @@ files:
         This is useful for preventing duplicate events being sent as a consequence of Agent restarts.
       value:
         type: integer
-        default: <PAYLOAD_SIZE>
+        display_default: <PAYLOAD_SIZE>
     - name: legacy_mode
       description: |
         Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
@@ -248,7 +291,7 @@ files:
       enabled: true
       value:
         type: boolean
-        default: true
+        display_default: true
         example: false
     - name: host
       description: |
@@ -259,8 +302,8 @@ files:
         Note: This is only used when `legacy_mode` is set to `true`.
       value:
         type: string
-        example: <REMOTE_HOSNAME>
-        default: localhost
+        example: <REMOTE_HOSTNAME>
+        display_default: localhost
     - name: log_file
       description: |
         The `log_file` filter instructs the check to only capture events
@@ -293,9 +336,10 @@ files:
         type: array
         items:
           type: string
+        display_default:
+          - information
         example:
           - information
-        default: information
     - name: event_id
       description: |
         The `event_id` filter instructs the check to only capture events
@@ -336,7 +380,8 @@ files:
         type: array
         items:
           type: string
-        default: Message
+        display_default:
+          - Message
         example:
           - Message
     - template: instances/default
@@ -344,7 +389,7 @@ files:
     example:
       - type: windows_event
         channel_path: <CHANNEL_1>
-        source: <CHANNEL_1>
+        source: windows.events
       - type: windows_event
         channel_path: <CHANNEL_2>
-        source: <CHANNEL_2>
+        source: windows.events

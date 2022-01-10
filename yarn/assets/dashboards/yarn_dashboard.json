@@ -1,0 +1,332 @@
+{
+    "title": "Yarn - Overview",
+    "description": "This dashboard provides a high-level overview of YARN app activity, node count and status, and resource utilization. For a bigger-picture view, you can monitor YARN metrics on the [Hadoop overview dashboard](https://app.datadoghq.com/screen/integration/90/hadoop---overview). Further reading on monitoring Hadoop:\n\n- [An architectural overview of Hadoop](https://www.datadoghq.com/blog/hadoop-architecture-overview/)\n\n- [Datadog's guide to key metrics for Hadoop monitoring](https://www.datadoghq.com/blog/monitor-hadoop-metrics/)\n\n- [How to collect Hadoop metrics](https://www.datadoghq.com/blog/collecting-hadoop-metrics/)\n\n- [How to monitor Hadoop with Datadog](https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog/)\n\n- [Datadog's blog post announcing Hadoop monitoring support](https://www.datadoghq.com/blog/monitoring-spark/)\n\n- [Docs for Datadog's YARN integration](https://docs.datadoghq.com/integrations/yarn/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "max:yarn.metrics.total_nodes{*}",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 1,
+                                "palette": "white_on_red"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Total Nodes",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1m"
+                },
+                "autoscale": true,
+                "precision": 0,
+                "text_align": "left"
+            },
+            "layout": {
+                "x": 52,
+                "y": 4,
+                "width": 20,
+                "height": 8
+            }
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "max:yarn.metrics.active_nodes{*}",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 1,
+                                "palette": "white_on_red"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Active Nodes",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1m"
+                },
+                "autoscale": true,
+                "precision": 0,
+                "text_align": "left"
+            },
+            "layout": {
+                "x": 52,
+                "y": 13,
+                "width": 20,
+                "height": 8
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "max:yarn.metrics.decommissioned_nodes{*}",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 1,
+                                "palette": "white_on_red"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Decommissioned Nodes",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1m"
+                },
+                "autoscale": true,
+                "precision": 0,
+                "text_align": "left"
+            },
+            "layout": {
+                "x": 52,
+                "y": 22,
+                "width": 20,
+                "height": 8
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:yarn.metrics.apps_submitted{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:yarn.metrics.apps_completed{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:yarn.metrics.apps_running{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:yarn.metrics.apps_pending{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:yarn.metrics.apps_killed{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:yarn.metrics.apps_failed{*}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "App Status",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 4,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:yarn.metrics.reserved_mb{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:yarn.metrics.available_mb{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:yarn.metrics.allocated_mb{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:yarn.metrics.total_mb{*}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Memory Utilization",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 19,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:yarn.metrics.reserved_virtual_cores{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:yarn.metrics.available_virtual_cores{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:yarn.metrics.allocated_virtual_cores{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:yarn.metrics.total_virtual_cores{*}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "CPU Utilization",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 34,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 6,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:yarn.metrics.available_virtual_cores{*}",
+                        "aggregator": "avg"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Virtual Cores",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "5m"
+                },
+                "autoscale": true,
+                "precision": 2,
+                "text_align": "left"
+            },
+            "layout": {
+                "x": 52,
+                "y": 31,
+                "width": 20,
+                "height": 8
+            }
+        },
+        {
+            "id": 7,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "max:yarn.metrics.total_mb{*}",
+                        "aggregator": "avg"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Memory",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "5m"
+                },
+                "autoscale": true,
+                "precision": 2,
+                "text_align": "left"
+            },
+            "layout": {
+                "x": 52,
+                "y": 40,
+                "width": 20,
+                "height": 8
+            }
+        },
+        {
+            "id": 8,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:yarn.metrics.containers_allocated{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:yarn.metrics.containers_pending{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:yarn.metrics.containers_reserved{*}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Container Utilization",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 49,
+                "width": 47,
+                "height": 15
+            }
+        }
+    ],
+    "template_variables": [],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 89
+}

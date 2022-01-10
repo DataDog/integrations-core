@@ -54,6 +54,11 @@ class HTTPCheck(AgentCheck):
         if not self.ca_certs:
             self.ca_certs = get_ca_certs_path()
 
+        if not self.instance.get('include_default_headers', True) and 'headers' not in self.instance:
+            headers = self.http.options['headers']
+            headers.clear()
+            headers.update(self.instance.get('extra_headers', {}))
+
     def check(self, instance):
         (
             addr,
@@ -72,13 +77,10 @@ class HTTPCheck(AgentCheck):
             instance_ca_certs,
             weakcipher,
             check_hostname,
-            allow_redirects,
             stream,
         ) = from_instance(instance, self.ca_certs)
         timeout = self.http.options['timeout'][0]
         start = time.time()
-        # allows default headers to be included based on `include_default_headers` flag
-        self.http.options['headers'] = headers
 
         def send_status_up(logMsg):
             # TODO: A6 log needs bytes and cannot handle unicode
@@ -123,7 +125,6 @@ class HTTPCheck(AgentCheck):
             r = getattr(self.http, http_method)(
                 addr,
                 persist=True,
-                allow_redirects=allow_redirects,
                 stream=stream,
                 json=data if method.upper() in DATA_METHODS and isinstance(data, dict) else None,
                 data=data if method.upper() in DATA_METHODS and isinstance(data, string_types) else None,
@@ -247,6 +248,9 @@ class HTTPCheck(AgentCheck):
 
         for status in service_checks:
             sc_name, status, msg = status
+
+            if status is AgentCheck.OK:
+                msg = None
             self.report_as_service_check(sc_name, status, service_checks_tags, msg)
 
     def _get_service_checks_tags(self, instance):

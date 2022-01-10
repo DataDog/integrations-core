@@ -10,6 +10,13 @@ from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
 
+DEFAULT_IGNORE_DATABASES = [
+    'template%',
+    'rdsadmin',
+    'azure_maintenance',
+    'postgres',
+]
+
 
 class PostgresConfig:
     RATE = AgentCheck.rate
@@ -28,12 +35,15 @@ class PostgresConfig:
             raise ConfigurationError('Please specify a user to connect to Postgres.')
         self.password = instance.get('password', '')
         self.dbname = instance.get('dbname', 'postgres')
+        self.reported_hostname = instance.get('reported_hostname', '')
+        self.dbstrict = is_affirmative(instance.get('dbstrict', False))
+        self.disable_generic_tags = is_affirmative(instance.get('disable_generic_tags', False)) if instance else False
 
         self.application_name = instance.get('application_name', 'datadog-agent')
         if not self.isascii(self.application_name):
             raise ConfigurationError("Application name can include only ASCII characters: %s", self.application_name)
 
-        self.query_timeout = instance.get('query_timeout')
+        self.query_timeout = int(instance.get('query_timeout', 5000))
         self.relations = instance.get('relations', [])
         if self.relations and not self.dbname:
             raise ConfigurationError('"dbname" parameter must be set when using the "relations" parameter.')
@@ -46,23 +56,53 @@ class PostgresConfig:
         else:
             self.ssl_mode = 'require' if is_affirmative(ssl) else 'disable'
 
+        self.ssl_cert = instance.get('ssl_cert', None)
+        self.ssl_root_cert = instance.get('ssl_root_cert', None)
+        self.ssl_key = instance.get('ssl_key', None)
+        self.ssl_password = instance.get('ssl_password', None)
         self.table_count_limit = instance.get('table_count_limit', TABLE_COUNT_LIMIT)
         self.collect_function_metrics = is_affirmative(instance.get('collect_function_metrics', False))
         # Default value for `count_metrics` is True for backward compatibility
         self.collect_count_metrics = is_affirmative(instance.get('collect_count_metrics', True))
         self.collect_activity_metrics = is_affirmative(instance.get('collect_activity_metrics', False))
         self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
-        self.collect_default_db = is_affirmative(instance.get('collect_default_database', False))
+        self.collect_wal_metrics = is_affirmative(instance.get('collect_wal_metrics', False))
+        self.collect_bloat_metrics = is_affirmative(instance.get('collect_bloat_metrics', False))
+        self.data_directory = instance.get('data_directory', None)
+        self.ignore_databases = instance.get('ignore_databases', DEFAULT_IGNORE_DATABASES)
+        if is_affirmative(instance.get('collect_default_database', False)):
+            self.ignore_databases = [d for d in self.ignore_databases if d != 'postgres']
         self.custom_queries = instance.get('custom_queries', [])
         self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', False))
-        self.service_check_tags = self._get_service_check_tags()
         self.custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
         self.max_relations = int(instance.get('max_relations', 300))
-
-        # Deep Database monitoring adds additional telemetry for statement metrics
-        self.deep_database_monitoring = is_affirmative(instance.get('deep_database_monitoring', False))
+        self.min_collection_interval = instance.get('min_collection_interval', 15)
+        # database monitoring adds additional telemetry for query metrics & samples
+        self.dbm_enabled = is_affirmative(instance.get('dbm', instance.get('deep_database_monitoring', False)))
+        self.full_statement_text_cache_max_size = instance.get('full_statement_text_cache_max_size', 10000)
+        self.full_statement_text_samples_per_hour_per_query = instance.get(
+            'full_statement_text_samples_per_hour_per_query', 1
+        )
         # Support a custom view when datadog user has insufficient privilege to see queries
         self.pg_stat_statements_view = instance.get('pg_stat_statements_view', 'pg_stat_statements')
+        # statement samples & execution plans
+        self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
+        self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
+        self.statement_activity_config = instance.get('query_activity', {}) or {}
+        self.statement_metrics_config = instance.get('query_metrics', {}) or {}
+        obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
+        self.obfuscator_options = {
+            # Valid values for this can be found at
+            # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/database.md#connection-level-attributes
+            'dbms': 'postgresql',
+            'replace_digits': obfuscator_options_config.get(
+                'replace_digits', obfuscator_options_config.get('quantize_sql_tables', False)
+            ),
+            'return_json_metadata': obfuscator_options_config.get('collect_metadata', False),
+            'table_names': obfuscator_options_config.get('collect_tables', True),
+            'collect_commands': obfuscator_options_config.get('collect_commands', True),
+            'collect_comments': obfuscator_options_config.get('collect_comments', True),
+        }
 
     def _build_tags(self, custom_tags):
         # Clean up tags in case there was a None entry in the instance
@@ -73,7 +113,8 @@ class PostgresConfig:
             tags = list(set(custom_tags))
 
         # preset tags to host
-        tags.append('server:{}'.format(self.host))
+        if not self.disable_generic_tags:
+            tags.append('server:{}'.format(self.host))
         if self.port:
             tags.append('port:{}'.format(self.port))
         else:
@@ -86,12 +127,6 @@ class PostgresConfig:
         if rds_tags:
             tags.extend(rds_tags)
         return tags
-
-    def _get_service_check_tags(self):
-        service_check_tags = ["host:%s" % self.host]
-        service_check_tags.extend(self.tags)
-        service_check_tags = list(set(service_check_tags))
-        return service_check_tags
 
     @staticmethod
     def _get_custom_metrics(custom_metrics):

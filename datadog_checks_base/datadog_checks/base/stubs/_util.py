@@ -28,6 +28,9 @@ def subprocess_output(command, raise_on_empty_output, env=None):
         output = stdout_f.read()
 
     if not output and raise_on_empty_output:
-        raise SubprocessOutputEmptyError("get_subprocess_output expected output but had none.")
+        msg = "expected subprocess output but had none."
+        if err:
+            msg += " Error: {}".format(str(err))
+        raise SubprocessOutputEmptyError(msg)
 
     return output, err, proc.returncode

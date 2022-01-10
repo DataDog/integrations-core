@@ -3,6 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
+from fnmatch import fnmatch
+
 from datadog_checks.base.utils.tagging import tagger
 
 from .common import replace_container_rt_prefix, tags_for_docker, tags_for_pod
@@ -30,12 +32,22 @@ class SummaryScraperMixin(object):
                 self.log.warning("Got incomplete results from '/stats/summary', missing data for POD: %s", pod)
                 continue
 
-            self._report_pod_stats(pod_namespace, pod_name, pod_uid, pod, instance_tags, main_stats_source)
+            self._report_pod_stats(
+                pod_namespace, pod_name, pod_uid, pod, pod_list_utils, instance_tags, main_stats_source
+            )
             self._report_container_stats(
                 pod_namespace, pod_name, pod.get('containers', []), pod_list_utils, instance_tags, main_stats_source
             )
 
-    def _report_pod_stats(self, pod_namespace, pod_name, pod_uid, pod, instance_tags, main_stats_source):
+    def _report_pod_stats(
+        self, pod_namespace, pod_name, pod_uid, pod, pod_list_utils, instance_tags, main_stats_source
+    ):
+        # avoid calling the tagger for pods that aren't running, as these are
+        # never stored
+        pod_phase = pod_list_utils.pods.get(pod_uid, {}).get('status', {}).get('phase', None)
+        if pod_phase != 'Running':
+            return
+
         pod_tags = tags_for_pod(pod_uid, tagger.ORCHESTRATOR)
         if not pod_tags:
             self.log.debug("Tags not found for pod: %s/%s - no metrics will be sent", pod_namespace, pod_name)
@@ -49,13 +61,16 @@ class SummaryScraperMixin(object):
         # Metrics below should already be gathered by another mean (cadvisor endpoints)
         if not main_stats_source:
             return
-
-        rx_bytes = pod.get('network', {}).get('rxBytes')
-        if rx_bytes:
-            self.rate(self.NAMESPACE + '.network.rx_bytes', rx_bytes, pod_tags)
-        tx_bytes = pod.get('network', {}).get('txBytes')
-        if tx_bytes:
-            self.rate(self.NAMESPACE + '.network.tx_bytes', tx_bytes, pod_tags)
+        # Processing summary based network level metrics
+        net_pod_metrics = {'rxBytes': 'kubernetes.network.rx_bytes', 'txBytes': 'kubernetes.network.tx_bytes'}
+        for k, v in net_pod_metrics.items():
+            # ensure we can filter out metrics per the configuration.
+            pod_level_match = any([fnmatch(v, p) for p in self.pod_level_metrics])
+            enabled_rate = any([fnmatch(v, p) for p in self.enabled_rates])
+            if pod_level_match and enabled_rate:
+                net_bytes = pod.get('network', {}).get(k)
+                if net_bytes:
+                    self.rate(v, net_bytes, pod_tags)
 
     def _report_container_stats(
         self, pod_namespace, pod_name, containers, pod_list_utils, instance_tags, main_stats_source

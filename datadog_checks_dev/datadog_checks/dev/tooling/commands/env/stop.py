@@ -5,7 +5,7 @@ import time
 
 import click
 
-from ....utils import running_on_ci
+from ....ci import running_on_ci
 from ...e2e import create_interface, get_configured_checks, get_configured_envs, stop_environment
 from ...e2e.agent import DEFAULT_SAMPLING_WAIT_TIME
 from ...testing import complete_active_checks, complete_configured_envs

@@ -4,6 +4,7 @@
 import pytest
 from six import iteritems
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mapr import MaprCheck
 from datadog_checks.mapr.common import ALLOWED_METRICS, COUNT_METRICS, GAUGE_METRICS, MONOTONIC_COUNTER_METRICS
 from datadog_checks.mapr.utils import get_stream_id_for_topic
@@ -55,9 +56,9 @@ def test_submit_gauge(instance, aggregator):
         'mapr.process.context_switch_involuntary',
         value=6308,
         tags=[
-            'clustername:demo',
+            'mapr_cluster:demo',
             'process_name:apiserver',
-            'clusterid:7616098736519857348',
+            'mapr_cluster_id:7616098736519857348',
             'fqdn:mapr-lab-2-ghs6.c.datadog-integrations-lab.internal',
         ],
     )
@@ -73,9 +74,9 @@ def test_submit_gauge_additional_tags(instance, aggregator):
     aggregator.assert_metric(
         'mapr.process.context_switch_involuntary',
         tags=[
-            'clustername:demo',
+            'mapr_cluster:demo',
             'process_name:apiserver',
-            'clusterid:7616098736519857348',
+            'mapr_cluster_id:7616098736519857348',
             'fqdn:mapr-lab-2-ghs6.c.datadog-integrations-lab.internal',
             'foo:bar',
             'baz:biz',
@@ -89,16 +90,16 @@ def test_submit_bucket(instance, aggregator):
     check = MaprCheck('mapr', {}, [instance])
     check.submit_metric(DISTRIBUTION_METRIC)
     expected_tags = [
-        "clusterid:7616098736519857348",
-        "clustername:demo",
+        "mapr_cluster_id:7616098736519857348",
+        "mapr_cluster:demo",
         "fqdn:mapr-lab-2-dhk4.c.datadog-integrations-lab.internal",
         "noindex://primary",
         "rpc_type:put",
         "table_fid:2070.42.262546",
         "table_path:/var/mapr/mapr.monitoring/tsdb-meta",
     ]
-    aggregator.assert_histogram_bucket('mapr.db.table.latency', 21, 2, 5, True, 'stubbed.hostname', expected_tags)
-    aggregator.assert_histogram_bucket('mapr.db.table.latency', 11, 5, 10, True, 'stubbed.hostname', expected_tags)
+    aggregator.assert_histogram_bucket('mapr.db.table.latency', 21, 2, 5, False, 'stubbed.hostname', expected_tags)
+    aggregator.assert_histogram_bucket('mapr.db.table.latency', 11, 5, 10, False, 'stubbed.hostname', expected_tags)
     aggregator.assert_all_metrics_covered()  # No metrics submitted
 
 
@@ -111,3 +112,4 @@ def test_check(aggregator, instance):
     for m in METRICS_IN_FIXTURE:
         aggregator.assert_metric(m)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

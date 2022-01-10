@@ -58,12 +58,16 @@ instances:
 
     ## @param queues - list of strings - optional
     ## The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
+    ## This will be in addition to any queues discovered using `auto_discover_queues`, `queue_regex` or
+    ## `queue_patterns`.
     #
     # queues:
     #   - <QUEUE_NAME>
 
     ## @param queue_patterns - list of strings - optional
     ## Collect from queues that match a MQ pattern
+    ## Note: Do not use in conjunction with `auto_discover_queues` or `queue_regex` as it may lead to
+    ## unexpected results.
     #
     # queue_patterns:
     #   - DEV.*
@@ -71,6 +75,8 @@ instances:
 
     ## @param queue_regex - list of strings - optional
     ## Collect from queues that match a regex
+    ## Note: Do not use in conjunction with `auto_discover_queues` or `queue_patterns` as it may lead to
+    ## unexpected results.
     #
     # queue_regex:
     #   - ^DEV\..*$
@@ -103,8 +109,10 @@ instances:
     #   initializing: warning
 
     ## @param auto_discover_queues - boolean - optional - default: false
-    ## Autodiscover the queues to monitor
-    ## Warning: this will lead to some warnings in your logs
+    ## Autodiscover the queues to monitor. This will discover all available queues. If you have dynamic queues
+    ## it will discover and monitor them all which can drive CPU usage up. If you want to be more specific about the
+    ## queues to monitor use `queue_patterns` or `queue_regex` instead.
+    ## Warning: this can lead to some warnings in your logs
     #
     # auto_discover_queues: false
 
@@ -121,13 +129,33 @@ instances:
     #
     # mqcd_version: 6
 
+    ## @param convert_endianness - boolean - optional - default: false
+    ## If you are monitoring IBM MQ remotely and if the Agent and the server are using different endianness,
+    ## set this field to true.
+    #
+    # convert_endianness: false
+
+    ## @param queue_manager_timezone - string - optional - default: Etc/UTC
+    ## Time zone of the queue manager in IANA/Olson timezone format, if it differs from Etc/UTC. Canonical IANA
+    ## time zone names must be used for accurate time calculations during daylight saving time periods.
+    ## E.g. `America/New_York` instead of `EST`.
+    ## https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+    ## Used to calculate `ibm_mq.queue.last_put_time` and `ibm_mq.queue.last_get_time` metrics.
+    #
+    # queue_manager_timezone: Etc/UTC
+
+    ## @param timeout - number - optional - default: 5
+    ## The number of seconds to wait for IBM MQ to respond.
+    #
+    # timeout: 5
+
     ## @param ssl_auth - boolean - optional - default: false
     ## Whether or not to use SSL auth while connecting to the channel.
     #
     # ssl_auth: false
 
     ## @param ssl_cipher_spec - string - optional - default: TLS_RSA_WITH_AES_256_CBC_SHA
-    ## The ssl cipher to use.
+    ## The ssl cipher to use. It should match the value of the channels SSLCIPH attribute.
     #
     # ssl_cipher_spec: TLS_RSA_WITH_AES_256_CBC_SHA
 
@@ -193,7 +221,7 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.

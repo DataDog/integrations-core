@@ -9,9 +9,25 @@
         ],
         "groups": [
             "host",
-            "db"
+            "db",
+            "server"
         ],
         "name": "Can Connect",
         "description": "Returns `CRITICAL` if the Agent is unable to connect to the monitored SQL Server instance. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.31.0",
+        "integration": "SQL Server",
+        "check": "sqlserver.database.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "db"
+        ],
+        "name": "Database Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the autodiscovered SQL Server Database. Returns `OK` otherwise."
     }
 ]

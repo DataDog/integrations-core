@@ -52,14 +52,20 @@ files:
           type: string
         description: <PASSWORD> of the IBMMQ Channel to connect to.
       - name: queues
-        description: The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
+        description: |
+          The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
+          This will be in addition to any queues discovered using `auto_discover_queues`, `queue_regex` or
+          `queue_patterns`.
         value:
           example: ['<QUEUE_NAME>']
           type: array
           items:
             type: string
       - name: queue_patterns
-        description: Collect from queues that match a MQ pattern
+        description: |
+          Collect from queues that match a MQ pattern
+          Note: Do not use in conjunction with `auto_discover_queues` or `queue_regex` as it may lead to
+          unexpected results.
         value:
           example:
             - 'DEV.*'          # match queues starting with "DEV."
@@ -68,7 +74,10 @@ files:
           items:
             type: string
       - name: queue_regex
-        description: Collect from queues that match a regex
+        description: |
+          Collect from queues that match a regex
+          Note: Do not use in conjunction with `auto_discover_queues` or `queue_patterns` as it may lead to
+          unexpected results.
         value:
           example:
             - '^DEV\..*$'          # match queues starting with "DEV."
@@ -107,8 +116,10 @@ files:
           properties: []
       - name: auto_discover_queues
         description: |
-          Autodiscover the queues to monitor
-          Warning: this will lead to some warnings in your logs
+          Autodiscover the queues to monitor. This will discover all available queues. If you have dynamic queues
+          it will discover and monitor them all which can drive CPU usage up. If you want to be more specific about the
+          queues to monitor use `queue_patterns` or `queue_regex` instead.
+          Warning: this can lead to some warnings in your logs
         value:
           example: false
           type: boolean
@@ -127,6 +138,29 @@ files:
         value:
           example: 6
           type: number
+      - name: convert_endianness
+        description: |
+          If you are monitoring IBM MQ remotely and if the Agent and the server are using different endianness,
+          set this field to true.
+        value:
+          example: false
+          type: boolean
+      - name: queue_manager_timezone
+        description: |
+          Time zone of the queue manager in IANA/Olson timezone format, if it differs from Etc/UTC. Canonical IANA
+          time zone names must be used for accurate time calculations during daylight saving time periods.
+          E.g. `America/New_York` instead of `EST`.
+          https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+          Used to calculate `ibm_mq.queue.last_put_time` and `ibm_mq.queue.last_get_time` metrics.
+        value:
+          example: Etc/UTC
+          type: string
+      - name: timeout
+        description: |
+          The number of seconds to wait for IBM MQ to respond.
+        value:
+          example: 5
+          type: number
       - name: ssl_auth
         description: Whether or not to use SSL auth while connecting to the channel.
         value:
@@ -134,7 +168,7 @@ files:
           type: boolean
       - name: ssl_cipher_spec
         type: string
-        description: The ssl cipher to use.
+        description: The ssl cipher to use. It should match the value of the channels SSLCIPH attribute.
         value:
           example: 'TLS_RSA_WITH_AES_256_CBC_SHA'
           type: string

@@ -13,17 +13,18 @@ init_config:
 #
 instances:
 
-    ## @param host - string - required
+  -
+    ## @param host - string - optional - default: localhost
     ## Host to collect StatsD data from.
     #
-  - host: localhost
+    # host: localhost
 
-    ## @param port - integer - required
+    ## @param port - integer - optional - default: 8126
     ## Port to use to collect StatsD data.
     #
-    port: 8126
+    # port: 8126
 
-    ## @param timeout - integer - optional - default: 10
+    ## @param timeout - number - optional - default: 10
     ## Custom timeout for your check request.
     #
     # timeout: 10
@@ -63,7 +64,7 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.

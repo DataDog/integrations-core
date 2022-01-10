@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Hazelcast][1].
+This check monitors [Hazelcast][1] v4.0+.
 
 ## Setup
 
@@ -28,12 +28,18 @@ To configure this check for an Agent running on a host:
 
    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
    You can specify the metrics you are interested in by editing the configuration below.
-   To learn how to customize the metrics to collect, visit the [JMX Checks documentation][4] for more detailed instructions.
+   To learn how to customize the metrics to collect, see the [JMX Checks documentation][4] for more detailed instructions.
    If you need to monitor more metrics, contact [Datadog support][5].
 
 2. [Restart the Agent][6].
 
 ##### Log collection
+
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
 
 1. Hazelcast supports many different [logging adapters][7]. Here is an example of a `log4j2.properties` file:
 
@@ -113,6 +119,12 @@ For containerized environments, see the [Autodiscovery with JMX][10] guide.
 
 ##### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][11].
 
 | Parameter      | Value                                              |
@@ -158,12 +170,17 @@ Represents the state of the Hazelcast Management Center as indicated by its heal
 
 Hazelcast does not include any events.
 
+### Service Checks
+
+See [service_checks.json][14] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][5].
 
+
 [1]: https://hazelcast.org
-[2]: https://docs.datadoghq.com/agent/
+[2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/hazelcast/datadog_checks/hazelcast/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/integrations/java/
 [5]: https://docs.datadoghq.com/help/
@@ -175,3 +192,4 @@ Need help? Contact [Datadog support][5].
 [11]: https://docs.datadoghq.com/agent/docker/log/
 [12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [13]: https://github.com/DataDog/integrations-core/blob/master/hazelcast/metadata.csv
+[14]: https://github.com/DataDog/integrations-core/blob/master/hazelcast/assets/service_checks.json

@@ -24,7 +24,7 @@ files:
       value:
         type: integer
         example: 9000
-    - name: user
+    - name: username
       description: The database user to authenticate as.
       value:
           type: string
@@ -37,7 +37,7 @@ files:
       description: The database to connect to.
       value:
         type: string
-        default: default
+        display_default: default
     - name: connect_timeout
       description: The timeout for connecting to the `server`.
       value:

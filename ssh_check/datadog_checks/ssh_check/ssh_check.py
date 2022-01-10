@@ -60,7 +60,7 @@ class CheckSSH(AgentCheck):
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.load_system_host_keys()
 
-        exception_message = "No errors occured"
+        exception_message = "No errors occurred"
         try:
             # Try to connect to check status of SSH
             try:
@@ -72,9 +72,7 @@ class CheckSSH(AgentCheck):
                     client.connect(
                         self.host, port=self.port, username=self.username, passphrase=self.password, pkey=private_key
                     )
-                self.service_check(
-                    self.SSH_SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.base_tags, message=exception_message
-                )
+                self.service_check(self.SSH_SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.base_tags)
 
             except Exception as e:
                 exception_message = str(e)
@@ -104,8 +102,8 @@ class CheckSSH(AgentCheck):
                     exception_message = str(e)
                     status = AgentCheck.CRITICAL
 
-                if exception_message is None:
-                    exception_message = "No errors occured"
+                if status is AgentCheck.OK:
+                    exception_message = None
 
                 self.service_check(self.SFTP_SERVICE_CHECK_NAME, status, tags=self.base_tags, message=exception_message)
         finally:

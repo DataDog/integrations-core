@@ -1,0 +1,35 @@
+{
+	"name": "[SingleStore] Write queries failure rate is higher than before",
+	"type": "query alert",
+	"query": "avg(last_4h):anomalies(avg:singlestore.successful_write_queries{*} by {singlestore_node_id,singlestore_node_name} / ( avg:singlestore.successful_write_queries{*} by {singlestore_node_id,singlestore_node_name} + avg:singlestore.failed_write_queries{*} by {singlestore_node_id,singlestore_node_name} ), 'agile', 5, direction='below', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
+	"message": "SingleStore write queries are failing more often on node {{singlestore_node_name.name}}.\n",
+	"tags": [
+		"integration:singlestore"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_group_delay": 60,
+		"require_full_window": false,
+		"notify_no_data": false,
+		"renotify_interval": "0",
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 1,
+			"warning": 0.5,
+			"critical_recovery": 0
+		},
+		"threshold_windows": {
+			"trigger_window": "last_15m",
+			"recovery_window": "last_15m"
+		}
+	},
+	"priority": null,
+	"restricted_roles": null,
+    "recommended_monitor_metadata": {
+        "description": "Notify your team when SingleStore write queries are suddenly failing more than before."
+    }
+}

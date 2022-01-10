@@ -1,13 +1,19 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+import os
 from typing import Optional
 
 import pytest
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.voltdb.check import VoltDBCheck
 from datadog_checks.voltdb.config import Config
 from datadog_checks.voltdb.types import Instance
+
+from . import common
 
 
 @pytest.mark.parametrize(
@@ -65,3 +71,18 @@ def test_default_port(url, netloc):
     # type: (str, tuple) -> None
     config = Config({'url': url, 'username': 'doggo', 'password': 'doggopass'})
     assert config.netloc == netloc
+
+
+def test_metrics_with_fixtures(mock_results, aggregator, dd_run_check, instance_all):
+    check = VoltDBCheck('voltdb', {}, [instance_all])
+    dd_run_check(check)
+
+    with open(os.path.join(common.HERE, 'fixtures', 'expected_metrics.json'), 'r') as f:
+        metrics = json.load(f)
+
+    for m in metrics:
+        aggregator.assert_metric(m['name'], tags=m['tags'], metric_type=m['type'])
+
+    aggregator.assert_all_metrics_covered()
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

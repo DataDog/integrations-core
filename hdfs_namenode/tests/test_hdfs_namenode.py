@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import mock
 import pytest
 from six import iteritems
 
@@ -22,12 +23,12 @@ pytestmark = pytest.mark.unit
 CHECK_ID = 'test:123'
 
 
-def test_check(aggregator, mocked_request):
+def test_check(aggregator, dd_run_check, mocked_request):
     instance = HDFS_NAMENODE_CONFIG['instances'][0]
     hdfs_namenode = HDFSNameNode('hdfs_namenode', {}, [instance])
 
     # Run the check once
-    hdfs_namenode.check(instance)
+    dd_run_check(hdfs_namenode)
 
     aggregator.assert_service_check(
         HDFSNameNode.JMX_SERVICE_CHECK, HDFSNameNode.OK, tags=HDFS_NAMESYSTEM_METRIC_TAGS + CUSTOM_TAGS, count=1
@@ -45,13 +46,13 @@ def test_check(aggregator, mocked_request):
     aggregator.assert_all_metrics_covered()
 
 
-def test_metadata(aggregator, mocked_request, datadog_agent):
+def test_metadata(aggregator, dd_run_check, mocked_request, datadog_agent):
     instance = HDFS_NAMENODE_CONFIG['instances'][0]
     hdfs_namenode = HDFSNameNode('hdfs_namenode', {}, [instance])
 
     # Run the check once
     hdfs_namenode.check_id = CHECK_ID
-    hdfs_namenode.check(instance)
+    dd_run_check(hdfs_namenode)
 
     aggregator.assert_service_check(
         HDFSNameNode.JMX_SERVICE_CHECK, HDFSNameNode.OK, tags=HDFS_NAMESYSTEM_METRIC_TAGS + CUSTOM_TAGS, count=1
@@ -60,23 +61,24 @@ def test_metadata(aggregator, mocked_request, datadog_agent):
     major, minor, patch = HDFS_RAW_VERSION.split('.')
 
     version_metadata = {
-        'version.raw': HDFS_RAW_VERSION,
+        'version.raw': mock.ANY,
         'version.scheme': 'semver',
         'version.major': major,
         'version.minor': minor,
         'version.patch': patch,
+        'version.build': mock.ANY,
     }
 
     datadog_agent.assert_metadata(CHECK_ID, version_metadata)
-    datadog_agent.assert_metadata_count(5)
+    datadog_agent.assert_metadata_count(6)
 
 
-def test_auth(aggregator, mocked_auth_request):
+def test_auth(aggregator, dd_run_check, mocked_auth_request):
     instance = HDFS_NAMENODE_AUTH_CONFIG['instances'][0]
     hdfs_namenode = HDFSNameNode('hdfs_namenode', {}, [instance])
 
     # Run the check once
-    hdfs_namenode.check(instance)
+    dd_run_check(hdfs_namenode)
 
     aggregator.assert_service_check(
         HDFSNameNode.JMX_SERVICE_CHECK, HDFSNameNode.OK, tags=HDFS_NAMESYSTEM_METRIC_TAGS + CUSTOM_TAGS, count=1

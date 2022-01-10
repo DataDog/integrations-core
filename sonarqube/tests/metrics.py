@@ -1,12 +1,19 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.dev.jmx import JVM_E2E_METRICS
+from datadog_checks.dev.jmx import JVM_E2E_METRICS_NEW
 
 JMX_METRICS = [
     'sonarqube.server.async_execution.largest_worker_count',
     'sonarqube.server.async_execution.queue_size',
     'sonarqube.server.async_execution.worker_count',
+    'sonarqube.server.compute_engine_tasks.error_count',
+    'sonarqube.server.compute_engine_tasks.in_progress_count',
+    'sonarqube.server.compute_engine_tasks.pending_count',
+    'sonarqube.server.compute_engine_tasks.processing_time',
+    'sonarqube.server.compute_engine_tasks.success_count',
+    'sonarqube.server.compute_engine_tasks.worker_count',
+    'sonarqube.server.compute_engine_tasks.worker_max_count',
     'sonarqube.server.database.pool_active_connections',
     'sonarqube.server.database.pool_idle_connections',
     'sonarqube.server.database.pool_initial_size',
@@ -16,7 +23,7 @@ JMX_METRICS = [
     'sonarqube.server.database.pool_max_wait_millis',
     'sonarqube.server.database.pool_remove_abandoned_timeout_seconds',
 ]
-JMX_METRICS.extend(JVM_E2E_METRICS)
+JMX_METRICS.extend(JVM_E2E_METRICS_NEW)
 
 WEB_METRICS = [
     'sonarqube.complexity.cognitive_complexity',

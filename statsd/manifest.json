@@ -1,7 +1,8 @@
 {
   "categories": [
     "monitoring",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "StatsD",

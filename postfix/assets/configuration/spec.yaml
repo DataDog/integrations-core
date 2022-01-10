@@ -5,7 +5,6 @@ files:
   - template: init_config
     options:
     - name: postfix_user
-      required: true
       description: |
         The user running dd-agent must have passwordless sudo access for the find
         command to run the postfix check.
@@ -16,7 +15,7 @@ files:
           Defaults:dd-agent !requiretty
       value:
         type: string
-        example: postfix
+        example: root
     - name: postqueue
       description: |
         Set `postqueue: true` to gather mail queue counts using `postqueue -p` without the use of sudo.
@@ -37,15 +36,19 @@ files:
   - template: instances
     options:
     - name: directory
-      required: true
-      description: Path to the postfix directory.
+      description: |
+        Path to the postfix directory. The directory option is required if `postqueue: false` is set. For more 
+        information see https://docs.datadoghq.com/integrations/postfix/#using-sudo.
+      enabled: true
       value:
+        display_default: null
         example: /var/spool/postfix
         type: string
     - name: queues
-      required: true
       description: List of queues to monitor.
+      enabled: true
       value:
+        display_default: null
         type: array
         items:
           type: string

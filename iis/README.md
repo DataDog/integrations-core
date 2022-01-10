@@ -12,9 +12,6 @@ Collect IIS metrics aggregated across all of your sites, or on a per-site basis.
 
 The IIS check is packaged with the Agent. To start gathering your IIS metrics and logs, [install the Agent][2] on your IIS servers.
 
-<!-- xxx tabs xxx -->	
-<!-- xxx tab "Host" xxx -->	
-
 #### Host
 
 To configure this check for an Agent running on a host:
@@ -25,7 +22,15 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][6] to begin sending IIS metrics to Datadog.
 
+**Note**: Versions 2.14.0 or later of this check use a new implementation for metric collection, which requires Python 3. For hosts that are unable to use Python 3, or if you would like to use a legacy version of this check, refer to the following [config][11].
+
 ##### Log collection
+
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -47,41 +52,18 @@ To configure this check for an Agent running on a host:
 
 3. [Restart the Agent][6].
 
-<!-- xxz tab xxx -->
-<!-- xxx tab "Containerized" xxx -->
+**Note**: Ensure the `datadog-agent` user has read access to tail the log files you want to collect from. See [Permission issues tailing log files][12] for more information.
 
-#### Containerized
-
-For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
-
-##### Metric collection
-
-| Parameter            | Value                  |
-| -------------------- | ---------------------- |
-| `<INTEGRATION_NAME>` | `iis`                  |
-| `<INIT_CONFIG>`      | blank or `{}`          |
-| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%"}` |
-
-##### Log collection
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][8].
-
-| Parameter      | Value                                            |
-| -------------- | ------------------------------------------------ |
-| `<LOG_CONFIG>` | `{"source": "iis", "service": "<SERVICE_NAME>"}` |
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 ### Validation
 
-[Run the Agent's status subcommand][9] and look for `iis` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `iis` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][10] for a list of metrics provided by this integration.
+See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -89,12 +71,12 @@ The IIS check does not include any events.
 
 ### Service Checks
 
-**iis.site_up**:<br>
-The Agent submits this service check for each configured site in `iis.yaml`. It returns `CRITICAL` if the site's uptime is zero, otherwise returns `OK`.
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][10].
+
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/iis/images/iisgraph.png
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -102,8 +84,9 @@ Need help? Contact [Datadog support][11].
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/iis/datadog_checks/iis/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[8]: https://docs.datadoghq.com/agent/kubernetes/log/
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[10]: https://github.com/DataDog/integrations-core/blob/master/iis/metadata.csv
-[11]: https://docs.datadoghq.com/help/
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/iis/metadata.csv
+[9]: https://github.com/DataDog/integrations-core/blob/master/iis/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/
+[11]: https://github.com/DataDog/integrations-core/blob/7.33.x/iis/datadog_checks/iis/data/conf.yaml.example
+[12]: https://docs.datadoghq.com/logs/guide/log-collection-troubleshooting-guide/#permission-issues-tailing-log-files

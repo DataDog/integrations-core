@@ -82,6 +82,10 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.admission_step_admission_latencies_seconds_summary.quantile',
         NAMESPACE + '.admission_controller_admission_duration_seconds.sum',
         NAMESPACE + '.admission_controller_admission_duration_seconds.count',
+        NAMESPACE + '.request_latencies.sum',
+        NAMESPACE + '.request_latencies.count',
+        NAMESPACE + '.process_resident_memory_bytes',
+        NAMESPACE + '.process_virtual_memory_bytes',
     ]
     COUNT_METRICS = [
         NAMESPACE + '.audit_event.count',
@@ -92,16 +96,16 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.authenticated_user_requests.count',
     ]
 
-    def test_check(self, aggregator, mock_get):
+    def test_check(self, dd_run_check, aggregator, mock_get):
         """
         Testing kube_apiserver_metrics metrics collection.
         """
 
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [instance])
-        check.check(instance)
+        dd_run_check(check)
 
         # check that we then get the count metrics also
-        check.check(instance)
+        dd_run_check(check)
 
         for metric in self.METRICS + self.COUNT_METRICS:
             aggregator.assert_metric(metric)
@@ -125,14 +129,14 @@ class TestKubeAPIServerMetrics:
         os.remove(temp_bearer_file)
         assert configured_instance["_bearer_token"] == APISERVER_INSTANCE_BEARER_TOKEN
 
-    def test_default_config(self, aggregator, mock_read_bearer_token):
+    def test_default_config(self, dd_run_check, aggregator, mock_read_bearer_token):
         """
         Testing the default configuration.
         """
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [minimal_instance])
 
         check.process = mock.MagicMock()
-        check.check(minimal_instance)
+        dd_run_check(check)
 
         apiserver_instance = check.kube_apiserver_config
 
@@ -140,13 +144,13 @@ class TestKubeAPIServerMetrics:
         assert apiserver_instance["bearer_token_auth"]
         assert apiserver_instance["prometheus_url"] == "https://localhost:443/metrics"
 
-    def test_default_config_legacy(self, aggregator, mock_read_bearer_token):
+    def test_default_config_legacy(self, dd_run_check, aggregator, mock_read_bearer_token):
         """
         Testing the default legacy configuration.
         """
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [minimal_instance_legacy])
         check.process = mock.MagicMock()
-        check.check(minimal_instance_legacy)
+        dd_run_check(check)
 
         apiserver_instance = check.kube_apiserver_config
 

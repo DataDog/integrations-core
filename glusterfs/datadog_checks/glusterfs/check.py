@@ -4,13 +4,13 @@
 import json
 
 try:
-    from json import JSONDecodeError
+    from json.decoder import JSONDecodeError
 except ImportError:
     from simplejson import JSONDecodeError
 
 import os
 import shlex
-from typing import Any
+from typing import Dict, List
 
 from six import iteritems
 
@@ -34,7 +34,7 @@ class GlusterfsCheck(AgentCheck):
     BRICK_SC = "brick.health"
 
     def __init__(self, name, init_config, instances):
-        # type: (*Any, **Any) -> None
+        # type: (str, Dict, List[Dict]) -> None
         super(GlusterfsCheck, self).__init__(name, init_config, instances)
         self._tags = self.instance.get('tags', [])
 
@@ -102,29 +102,35 @@ class GlusterfsCheck(AgentCheck):
 
     @AgentCheck.metadata_entrypoint
     def submit_version_metadata(self, data):
-        try:
-            raw_version = data[GLUSTER_VERSION]
-        except KeyError as e:
-            self.log.debug("Could not retrieve GlusterFS version: %s", str(e))
-
-        if raw_version:
-            major, minor = self.parse_version(raw_version)
-            version_parts = {'major': str(int(major)), 'minor': str(int(minor))}
-            self.set_metadata('version', raw_version, scheme='parts', part_map=version_parts)
-            self.log.debug('Found GlusterFS version: %s', raw_version)
-        else:
+        raw_version = data.get(GLUSTER_VERSION)
+        if not raw_version:
             self.log.warning('Could not retrieve GlusterFS version info: %s', raw_version)
+            return
+
+        self.log.debug('Found GlusterFS version: %s', raw_version)
+        try:
+            major, minor, patch = self.parse_version(raw_version)
+            version_parts = {'major': str(int(major)), 'minor': str(int(minor))}
+            if patch:
+                version_parts['patch'] = str(int(patch))
+            self.set_metadata('version', raw_version, scheme='parts', part_map=version_parts)
+        except Exception as e:
+            self.log.debug("Could not handle GlusterFS version: %s", str(e))
 
     def parse_version(self, version):
+        # type (str) -> str, str, str
         """
         GlusterFS versions are in format <major>.<minor>
         """
+        major, minor, patch = None, None, None
         try:
-            major, minor = version.split('.')
+            split_version = version.split('.')
+            major, minor = split_version[0:2]
+            if len(split_version) > 2:
+                patch = split_version[2]
         except ValueError as e:
-            self.log.debug("Unable to parse GlusterFS version: %s", str(e))
-        else:
-            return major, minor
+            self.log.debug("Unable to parse GlusterFS version %s: %s", str(version), str(e))
+        return major, minor, patch
 
     def parse_volume_summary(self, output):
         for volume in output:

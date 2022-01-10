@@ -76,7 +76,7 @@ varnish.LCK.backend.dbg_busy,gauge,,lock,second,Contended lock operations. This 
 varnish.LCK.backend.dbg_try_fail,gauge,,lock,second,Contended trylock operations. This metric is only available from >=6.x.,0,varnish,backend dbg try fail
 varnish.LCK.backend.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,backend destroy
 varnish.LCK.backend.locks,gauge,,lock,second,Lock operations.,0,varnish,backend locks
-varnish.LCK.backend_tcp.creat,gauge,,lock,second,Created locks LCK. This metric is only provided by varnish <= 5.x,0,varnish,backend tcp creat
+varnish.LCK.backend_tcp.creat,gauge,,lock,second,Created locks LCK. This metric is only provided by varnish <= 5.x,0,varnish,backend tcp create
 varnish.LCK.backend_tcp.destroy,gauge,,lock,second,Destroyed locks LCK. This metric is only provided by varnish <=5.x.,0,varnish, backend_tcp destroy
 varnish.LCK.backend_tcp.locks,gauge,,lock,second,Lock Operations LCK.This metric is only provided by varnish <=5.x.,0,varnish, backend_tcp locks
 varnish.LCK.ban.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,ban colls
@@ -140,7 +140,7 @@ varnish.LCK.objhdr.dbg_busy,gauge,,lock,second,Contended lock operations. This m
 varnish.LCK.objhdr.dbg_try_fail,gauge,,lock,second,Contended trylock operations. This metric is only available from >=6.x.,0,varnish,objhdr try fail
 varnish.LCK.objhdr.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,objhdr destroy
 varnish.LCK.objhdr.locks,gauge,,lock,second,Lock operations.,0,varnish,objhdr locks
-varnish.LCK.perpool.creat,gauge,,lock,second,Created locks. This metric is only available from >=6.x.,0,varnish,perpool creat
+varnish.LCK.perpool.creat,gauge,,lock,second,Created locks. This metric is only available from >=6.x.,0,varnish,perpool create
 varnish.LCK.perpool.dbg_busy,gauge,,lock,second,Contended lock operations. This metric is only available from >=6.x.,0,varnish,perpool dbg busy
 varnish.LCK.perpool.dbg_try_fail,gauge,,lock,second,Contended trylock operations. This metric is only available from >=6.x.,0,varnish,perpool try fail
 varnish.LCK.perpool.destroy,gauge,,lock,second,Destroyed locks. This metric is only available from >=6.x.,0,varnish,perpool destroy
@@ -151,7 +151,7 @@ varnish.LCK.pipestat.dbg_try_fail,gauge,,lock,second,Contended trylock operation
 varnish.LCK.pipestat.destroy,gauge,,lock,second,Destroyed locks. This metric is only provided by varnish >=4.x.,0,varnish,pipestat destroy
 varnish.LCK.pipestat.locks,gauge,,lock,second,Lock operations. This metric is only provided by varnish >=4.x.,0,varnish,pipestat locks
 varnish.LCK.probe.locks,gauge,,lock,second,Created locks. This metric is only available from >=6.x.,0,varnish,pipestat locks
-varnish.LCK.probe.creat,gauge,,lock,second,Created locks. This metric is only available from >=6.x.,0,varnish,probe creat
+varnish.LCK.probe.creat,gauge,,lock,second,Created locks. This metric is only available from >=6.x.,0,varnish,probe create
 varnish.LCK.probe.dbg_busy,gauge,,lock,second,Contended lock operations. This metric is only available from >=6.x.,0,varnish,probe dbg busy
 varnish.LCK.probe.dbg_try_fail,gauge,,lock,second,Contended trylock operations. This metric is only available from >=6.x.,0,varnish,probe try fail
 varnish.LCK.probe.destroy,gauge,,lock,second,Destroyed locks. This metric is only available from >=6.x.,0,varnish,probe destroy
@@ -186,7 +186,7 @@ varnish.LCK.stat.colls,gauge,,lock,second,Collisions. This metric is only provid
 varnish.LCK.stat.creat,gauge,,lock,second,Created locks. This metric is only provided by varnish 3.x.,0,varnish,stat create
 varnish.LCK.stat.destroy,gauge,,lock,second,Destroyed locks. This metric is only provided by varnish 3.x.,0,varnish,stat destroy
 varnish.LCK.stat.locks,gauge,,lock,second,Lock operations. This metric is only provided by varnish 3.x.,0,varnish,stat locks
-varnish.LCK.tcp_pool.creat,gauge,,lock,second,Created locks,0,varnish,tcp_pool creat
+varnish.LCK.tcp_pool.creat,gauge,,lock,second,Created locks,0,varnish,tcp_pool create
 varnish.LCK.tcp_pool.dbg_busy,gauge,,lock,second,Contended lock operations. This metric is only available from >=6.x.,0,varnish,tcp_pool dbg busy
 varnish.LCK.tcp_pool.dbg_try_fail,gauge,,lock,second,Contended trylock operations. This metric is only available from >=6.x.,0,varnish,tcp_pool try fail
 varnish.LCK.tcp_pool.destroy,gauge,,lock,second,Destroyed locks. This metric is only available from >=6.x.,0,varnish,tcp_pool destroy

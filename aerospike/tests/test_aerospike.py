@@ -9,22 +9,31 @@ import pytest
 from datadog_checks.aerospike import AerospikeCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import LAZY_METRICS, NAMESPACE_METRICS, SET_METRICS, STATS_METRICS
+from .common import (
+    LATENCIES_METRICS,
+    LAZY_METRICS,
+    LEGACY_SET_METRICS,
+    NAMESPACE_METRICS,
+    SET_METRICS,
+    STATS_METRICS,
+    TPS_METRICS,
+    VERSION,
+)
 
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_check(aggregator, instance):
+def test_check(aggregator, instance, dd_run_check):
     check = AerospikeCheck('aerospike', {}, [instance])
     # sleep to make sure client is available
     time.sleep(30)
     for _ in range(10):
-        check.check(None)
+        dd_run_check(check)
         time.sleep(1)
     _test_check(aggregator)
 
 
-def test_version_metadata(aggregator, instance, datadog_agent):
+def test_version_metadata(aggregator, instance, datadog_agent, dd_run_check):
 
     check = AerospikeCheck('aerospike', {}, [instance])
     check.check_id = 'test:123'
@@ -32,7 +41,7 @@ def test_version_metadata(aggregator, instance, datadog_agent):
     # sleep to make sure client is available
     time.sleep(30)
     for _ in range(10):
-        check.check(None)
+        dd_run_check(check)
         time.sleep(1)
 
     raw_version = check.get_info("build")[0]
@@ -58,18 +67,32 @@ def test_e2e(dd_agent_check, instance):
 
 
 def _test_check(aggregator):
+    version_parts = [int(p) for p in VERSION.split('.')]
 
     for metric in NAMESPACE_METRICS:
         aggregator.assert_metric("aerospike.namespace.{}".format(metric))
 
+    if version_parts >= [5, 3]:
+        for metric in LATENCIES_METRICS:
+            aggregator.assert_metric(metric)
+        aggregator.assert_metric('aerospike.set.device_data_bytes')
+
+    else:
+        for metric in TPS_METRICS:
+            aggregator.assert_metric("aerospike.namespace.{}".format(metric))
+
+        for metric in LAZY_METRICS:
+            aggregator.assert_metric(metric)
+
     for metric in STATS_METRICS:
         aggregator.assert_metric("aerospike.{}".format(metric))
 
-    for metric in SET_METRICS:
-        aggregator.assert_metric("aerospike.set.{}".format(metric))
-
-    for metric in LAZY_METRICS:
-        aggregator.assert_metric(metric)
+    if version_parts >= [5, 6]:
+        for metric in SET_METRICS:
+            aggregator.assert_metric("aerospike.set.{}".format(metric))
+    else:
+        for metric in LEGACY_SET_METRICS:
+            aggregator.assert_metric("aerospike.set.{}".format(metric))
 
     aggregator.assert_all_metrics_covered()
 

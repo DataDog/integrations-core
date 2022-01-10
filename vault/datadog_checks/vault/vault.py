@@ -5,11 +5,12 @@ import time
 from collections import namedtuple
 
 import requests
+from six import PY2
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 
 from .errors import ApiUnreachable
-from .metrics import METRIC_MAP
+from .metrics import METRIC_MAP, METRIC_ROLLBACK_COMPAT_MAP, ROUTE_METRICS_TO_TRANSFORM
 
 try:
     from json import JSONDecodeError
@@ -56,7 +57,9 @@ class Vault(OpenMetricsBaseCheck):
             name,
             init_config,
             instances,
-            default_instances={self.CHECK_NAME: {'namespace': self.CHECK_NAME, 'metrics': [METRIC_MAP]}},
+            default_instances={
+                self.CHECK_NAME: {'namespace': self.CHECK_NAME, 'metrics': [METRIC_MAP] + ROUTE_METRICS_TO_TRANSFORM},
+            },
             default_namespace=self.CHECK_NAME,
         )
 
@@ -66,6 +69,7 @@ class Vault(OpenMetricsBaseCheck):
         self._no_token = is_affirmative(self.instance.get('no_token', False))
         self._tags = list(self.instance.get('tags', []))
         self._tags.append('api_url:{}'.format(self._api_url))
+        self._disable_legacy_cluster_tag = is_affirmative(self.instance.get('disable_legacy_cluster_tag', False))
 
         # Keep track of the previous cluster leader to detect changes
         self._previous_leader = None
@@ -88,6 +92,14 @@ class Vault(OpenMetricsBaseCheck):
         # potential configuration errors as part of the check run phase.
         self.check_initializations.append(self.parse_config)
 
+        self._metric_transformers = {
+            'vault_route_create_*': self.transform_route_metrics,
+            'vault_route_delete_*': self.transform_route_metrics,
+            'vault_route_list_*': self.transform_route_metrics,
+            'vault_route_read_*': self.transform_route_metrics,
+            'vault_route_rollback_*': self.transform_route_metrics,
+        }
+
     def check(self, _):
         submission_queue = []
         dynamic_tags = []
@@ -106,7 +118,7 @@ class Vault(OpenMetricsBaseCheck):
         if (self._client_token or self._no_token) and not self._replication_dr_secondary_mode:
             self._scraper_config['_metric_tags'] = dynamic_tags
             try:
-                self.process(self._scraper_config)
+                self.process(self._scraper_config, self._metric_transformers)
             except Exception as e:
                 error = str(e)
                 if self._client_token_path and error.startswith('403 Client Error: Forbidden for url'):
@@ -196,7 +208,9 @@ class Vault(OpenMetricsBaseCheck):
         health_data = self.access_api(url, ignore_status_codes=self.SYS_HEALTH_DEFAULT_CODES)
         cluster_name = health_data.get('cluster_name')
         if cluster_name:
-            dynamic_tags.append('cluster_name:{}'.format(cluster_name))
+            dynamic_tags.append('vault_cluster:{}'.format(cluster_name))
+            if not self._disable_legacy_cluster_tag:
+                dynamic_tags.append('cluster_name:{}'.format(cluster_name))
 
         replication_mode = health_data.get('replication_dr_mode', '').lower()
         if replication_mode == 'secondary':
@@ -254,7 +268,7 @@ class Vault(OpenMetricsBaseCheck):
         return json_data
 
     def parse_config(self):
-        if not self._api_url:
+        if PY2 and not self._api_url:
             raise ConfigurationError('Vault setting `api_url` is required')
 
         api_version = self._api_url[-1]
@@ -321,3 +335,21 @@ class Vault(OpenMetricsBaseCheck):
     def get_scraper_config(self, instance):
         # This validation is called during `__init__` but we don't need it
         pass
+
+    def transform_route_metrics(self, metric, scraper_config, transformerkey):
+        # Backward compatibility: submit old metric
+        if metric.name in METRIC_ROLLBACK_COMPAT_MAP:
+            self.submit_openmetric(METRIC_ROLLBACK_COMPAT_MAP[metric.name], metric, scraper_config)
+
+        metric_name = metric.name.replace('_', '.').rstrip('.')
+
+        # Remove extra vault prefix
+        if metric_name.startswith('vault.'):
+            metric_name = metric_name[len('vault.') :]
+
+        metric_tag = metric.name[len(transformerkey) - 1 : -1]
+        for i in metric.samples:
+            i.labels['mountpoint'] = metric_tag
+
+        normalized_metric_name = metric_name.replace('.' + metric_tag, '')
+        self.submit_openmetric(normalized_metric_name, metric, scraper_config)

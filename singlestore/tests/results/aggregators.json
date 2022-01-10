@@ -1,0 +1,68 @@
+[
+    {
+        "name": "singlestore.aggregators.opened_connections",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_role:Leader"
+        ],
+        "value": 5.0
+    },
+    {
+        "name": "singlestore.aggregators.opened_connections",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_role:Follower"
+        ],
+        "value": 5.0
+    },
+    {
+        "name": "singlestore.aggregators.opened_connections",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_role:Follower"
+        ],
+        "value": 4.0
+    },
+    {
+        "name": "singlestore.aggregators.average_roundtrip_latency",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_role:Leader"
+        ],
+        "value": 0.0
+    },
+    {
+        "name": "singlestore.aggregators.average_roundtrip_latency",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_role:Follower"
+        ],
+        "value": 0.511
+    },
+    {
+        "name": "singlestore.aggregators.average_roundtrip_latency",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_role:Follower"
+        ],
+        "value": 0.496
+    }
+]

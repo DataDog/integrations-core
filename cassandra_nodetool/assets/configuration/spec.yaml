@@ -13,10 +13,9 @@ files:
           The nodetool installation also sets some environment variables (for example, `CASSANDRA_HOME`
           and `DSCINSTALLDIR`), but sets them as variables only for the user doing the nodetool installation.
           You should set those environment variables as system-wide variables.
-        required: true
         value:
           type: string
-          example: nodetool
+          example: /usr/bin/nodetool
       - template: init_config/default
   - template: instances
     options:
@@ -58,4 +57,17 @@ files:
       value:
         type: boolean
         example: false
+    - name: nodetool
+      description: |
+        The command or path to nodetool (for example, /usr/bin/nodetool or docker exec container nodetool)
+        can be overwritten on an instance.
+        Note: Agent v6.11+ on Windows runs as an unprivileged user (`ddagentuser`). That user needs to be granted
+        access to the nodetool installation directory for the check to work.
+        The nodetool installation also sets some environment variables (for example, `CASSANDRA_HOME`
+        and `DSCINSTALLDIR`), but sets them as variables only for the user doing the nodetool installation.
+        You should set those environment variables as system-wide variables.
+
+        This overrides `nodetool` defined in `init_config`.
+      value:
+        type: string
     - template: instances/default

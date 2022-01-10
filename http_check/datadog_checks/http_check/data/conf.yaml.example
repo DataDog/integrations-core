@@ -61,7 +61,7 @@ instances:
     #
     # method: get
 
-    ## @param data - mapping - optional
+    ## @param data - mapping or string - optional
     ## If any one of the POST, PUT, DELETE, or PATCH method is specified, you can choose to send data in the body of the
     ## request with the data parameter.
     ## SOAP requests are supported if you use the POST method and supply an XML string as the data parameter.
@@ -168,11 +168,6 @@ instances:
     ## override the hostname to match with ssl_server_name.
     #
     # ssl_server_name: <SSL_SERVER_NAME>
-
-    ## @param allow_redirects - boolean - optional - default: true
-    ## The allow_redirects parameter can enable redirection for the HTTP check.
-    #
-    # allow_redirects: true
 
     ## @param stream - boolean - optional - default: false
     ## The stream parameter can be used to check the status code and/or
@@ -408,10 +403,10 @@ instances:
     #
     # aws_service: <AWS_SERVICE>
 
-    ## @param tls_verify - boolean - optional - default: true
+    ## @param tls_verify - boolean - optional - default: false
     ## Instructs the check to validate the TLS certificate of services.
     #
-    # tls_verify: true
+    # tls_verify: false
 
     ## @param tls_use_host_header - boolean - optional - default: false
     ## If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).
@@ -484,6 +479,11 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
@@ -493,3 +493,8 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true

@@ -9,6 +9,7 @@ files:
     options:
     - template: instances/jmx
       overrides:
+        is_jmx.value.default: true
         host.description: Kafka host to connect to.
         host.value.example: localhost
         port.value.example: 9999

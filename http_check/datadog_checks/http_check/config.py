@@ -28,7 +28,6 @@ Config = namedtuple(
         'instance_ca_certs',
         'weakcipher',
         'check_hostname',
-        'allow_redirects',
         'stream',
     ],
 )
@@ -68,7 +67,6 @@ def from_instance(instance, default_ca_certs=None):
     instance_ca_certs = instance.get('tls_ca_cert', instance.get('ca_certs', default_ca_certs))
     weakcipher = is_affirmative(instance.get('weakciphers', False))
     check_hostname = is_affirmative(instance.get('check_hostname', True))
-    allow_redirects = is_affirmative(instance.get('allow_redirects', True))
     stream = is_affirmative(instance.get('stream', False))
 
     return Config(
@@ -88,6 +86,5 @@ def from_instance(instance, default_ca_certs=None):
         instance_ca_certs,
         weakcipher,
         check_hostname,
-        allow_redirects,
         stream,
     )

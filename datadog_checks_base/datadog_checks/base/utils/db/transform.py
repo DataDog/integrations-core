@@ -4,7 +4,12 @@
 from __future__ import division
 
 import re
+import time
 from datetime import datetime
+from typing import Any, Callable, Dict, List, Tuple
+
+from datadog_checks.base.types import ServiceCheckStatus
+from datadog_checks.base.utils.db.types import Transformer, TransformerFactory
 
 from ... import is_affirmative
 from ...constants import ServiceCheck
@@ -27,6 +32,7 @@ SOURCE_PATTERN = r'(?<!"|\')({})(?!"|\')'
 
 
 def get_tag(transformers, column_name, **modifiers):
+    # type: (Dict[str, Transformer], str, Any) -> Transformer
     """
     Convert a column to a tag that will be used in every subsequent submission.
 
@@ -41,6 +47,7 @@ def get_tag(transformers, column_name, **modifiers):
     boolean = is_affirmative(modifiers.pop('boolean', None))
 
     def tag(_, value, **kwargs):
+        # type: (List, str, Dict[str, Any]) -> str
         if boolean:
             value = str(is_affirmative(value)).lower()
 
@@ -50,6 +57,7 @@ def get_tag(transformers, column_name, **modifiers):
 
 
 def get_tag_list(transformers, column_name, **modifiers):
+    # type: (Dict[str, Transformer], str, Any) -> Transformer
     """
     Convert a column to a list of tags that will be used in every submission.
 
@@ -62,6 +70,7 @@ def get_tag_list(transformers, column_name, **modifiers):
     template = '%s:{}' % column_name
 
     def tag_list(_, value, **kwargs):
+        # type: (List, str, Dict[str, Any]) -> List[str]
         if isinstance(value, str):
             value = [v.strip() for v in value.split(',')]
 
@@ -71,13 +80,17 @@ def get_tag_list(transformers, column_name, **modifiers):
 
 
 def get_monotonic_gauge(transformers, column_name, **modifiers):
+    # type: (Dict[str, Transformer], str, Any) -> Transformer
     """
     Send the result as both a `gauge` suffixed by `.total` and a `monotonic_count` suffixed by `.count`.
     """
-    gauge = transformers['gauge'](transformers, '{}.total'.format(column_name), **modifiers)
-    monotonic_count = transformers['monotonic_count'](transformers, '{}.count'.format(column_name), **modifiers)
+    gauge = transformers['gauge'](transformers, '{}.total'.format(column_name), **modifiers)  # type: Callable
+    monotonic_count = transformers['monotonic_count'](
+        transformers, '{}.count'.format(column_name), **modifiers
+    )  # type: Callable
 
     def monotonic_gauge(_, value, **kwargs):
+        # type: (List, str, Dict[str, Any]) -> None
         gauge(_, value, **kwargs)
         monotonic_count(_, value, **kwargs)
 
@@ -85,6 +98,7 @@ def get_monotonic_gauge(transformers, column_name, **modifiers):
 
 
 def get_temporal_percent(transformers, column_name, **modifiers):
+    # type: (Dict[str, Transformer], str, Any) -> Transformer
     """
     Send the result as percentage of time since the last check run as a `rate`.
 
@@ -118,15 +132,17 @@ def get_temporal_percent(transformers, column_name, **modifiers):
             'the `scale` parameter must be an integer representing parts of a second e.g. 1000 for millisecond'
         )
 
-    rate = transformers['rate'](transformers, column_name, **modifiers)
+    rate = transformers['rate'](transformers, column_name, **modifiers)  # type: Callable
 
     def temporal_percent(_, value, **kwargs):
+        # type: (List, str, Dict[str, Any]) -> None
         rate(_, total_time_to_temporal_percent(float(value), scale=scale), **kwargs)
 
     return temporal_percent
 
 
 def get_match(transformers, column_name, **modifiers):
+    # type: (Dict[str, Transformer], str, Any) -> Transformer
     """
     This is used for querying unstructured data.
 
@@ -200,17 +216,19 @@ def get_match(transformers, column_name, **modifiers):
     - `baz` - nothing since it was not defined as a match item
     """
     # Do work in a separate function to avoid having to `del` a bunch of variables
-    compiled_items = _compile_match_items(transformers, modifiers)
+    compiled_items = _compile_match_items(transformers, modifiers)  # type: Dict[str, Tuple[str, Transformer]]
 
     def match(sources, value, **kwargs):
+        # type: (Dict[str, Any], str, Dict[str, Any]) -> None
         if value in compiled_items:
-            source, transformer = compiled_items[value]
+            source, transformer = compiled_items[value]  # type: str, Transformer
             transformer(sources, sources[source], **kwargs)
 
     return match
 
 
 def get_service_check(transformers, column_name, **modifiers):
+    # type: (Dict[str, Transformer], str, Any) -> Transformer
     """
     Submit a service check.
 
@@ -226,15 +244,17 @@ def get_service_check(transformers, column_name, **modifiers):
     # Do work in a separate function to avoid having to `del` a bunch of variables
     status_map = _compile_service_check_statuses(modifiers)
 
-    service_check_method = transformers['__service_check'](transformers, column_name, **modifiers)
+    service_check_method = transformers['__service_check'](transformers, column_name, **modifiers)  # type: Callable
 
     def service_check(_, value, **kwargs):
+        # type: (List, str, Dict[str, Any]) -> None
         service_check_method(_, status_map.get(value, ServiceCheck.UNKNOWN), **kwargs)
 
     return service_check
 
 
 def get_time_elapsed(transformers, column_name, **modifiers):
+    # type: (Dict[str, Transformer], str, Any) -> Transformer
     """
     Send the number of seconds elapsed from a time in the past as a `gauge`.
 
@@ -243,10 +263,27 @@ def get_time_elapsed(transformers, column_name, **modifiers):
     then this would submit with a value of `5`.
 
     The optional modifier `format` indicates what format the result is in. By default it is `native`, assuming the
-    underlying library provides timestamps as `datetime` objects. If it does not and passes them through directly as
-    strings, you must provide the expected timestamp format using the
+    underlying library provides timestamps as `datetime` objects.
+
+    If the value is a UNIX timestamp you can set the `format` modifier to `unix_time`.
+
+    If the value is a string representation of a date, you must provide the expected timestamp format using the
     [supported codes](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes).
 
+    Example:
+
+    ```yaml
+        columns:
+      - name: time_since_x
+        type: time_elapsed
+        format: native  # default value and can be omitted
+      - name: time_since_y
+        type: time_elapsed
+        format: unix_time
+      - name: time_since_z
+        type: time_elapsed
+        format: "%d/%m/%Y %H:%M:%S"
+    ```
     !!! note
         The code `%z` (lower case) is not supported on Windows.
     """
@@ -259,12 +296,19 @@ def get_time_elapsed(transformers, column_name, **modifiers):
     if time_format == 'native':
 
         def time_elapsed(_, value, **kwargs):
+            # type: (List, str, Dict[str, Any]) -> None
             value = ensure_aware_datetime(value)
             gauge(_, (datetime.now(value.tzinfo) - value).total_seconds(), **kwargs)
+
+    elif time_format == 'unix_time':
+
+        def time_elapsed(_, value, **kwargs):
+            gauge(_, time.time() - value, **kwargs)
 
     else:
 
         def time_elapsed(_, value, **kwargs):
+            # type: (List, str, Dict[str, Any]) -> None
             value = ensure_aware_datetime(datetime.strptime(value, time_format))
             gauge(_, (datetime.now(value.tzinfo) - value).total_seconds(), **kwargs)
 
@@ -272,6 +316,7 @@ def get_time_elapsed(transformers, column_name, **modifiers):
 
 
 def get_expression(transformers, name, **modifiers):
+    # type: (Dict[str, Transformer], str, Dict[str, Any]) -> Transformer
     """
     This allows the evaluation of a limited subset of Python syntax and built-in functions.
 
@@ -359,23 +404,26 @@ def get_expression(transformers, name, **modifiers):
         if modifiers['submit_type'] not in transformers:
             raise ValueError('unknown submit_type `{}`'.format(modifiers['submit_type']))
 
-        submit_method = transformers[modifiers.pop('submit_type')](transformers, name, **modifiers)
-        submit_method = create_extra_transformer(submit_method)
+        submit_method = transformers[modifiers.pop('submit_type')](transformers, name, **modifiers)  # type: Transformer
+        submit_method = create_extra_transformer(submit_method)  # type: Callable
 
         def execute_expression(sources, **kwargs):
-            result = eval(expression, ALLOWED_GLOBALS, {'SOURCES': sources})
+            # type: (Dict[str, Any], Dict[str, Any]) -> float
+            result = eval(expression, ALLOWED_GLOBALS, {'SOURCES': sources})  # type: float
             submit_method(sources, result, **kwargs)
             return result
 
     else:
 
         def execute_expression(sources, **kwargs):
+            # type: (Dict[str, Any], Dict[str, Any]) -> Any
             return eval(expression, ALLOWED_GLOBALS, {'SOURCES': sources})
 
     return execute_expression
 
 
 def get_percent(transformers, name, **modifiers):
+    # type: (Dict[str, Callable], str, Any) -> Transformer
     """
     Send a percentage based on 2 sources as a `gauge`.
 
@@ -436,12 +484,13 @@ COLUMN_TRANSFORMERS = {
     'match': get_match,
     'service_check': get_service_check,
     'time_elapsed': get_time_elapsed,
-}
+}  # type: Dict[str, Transformer]
 
-EXTRA_TRANSFORMERS = {'expression': get_expression, 'percent': get_percent}
+EXTRA_TRANSFORMERS = {'expression': get_expression, 'percent': get_percent}  # type: Dict[str, TransformerFactory]
 
 
 def _compile_service_check_statuses(modifiers):
+    # type: (Dict[str, Any]) -> Dict[str, ServiceCheckStatus]
     status_map = modifiers.pop('status_map', None)
     if status_map is None:
         raise ValueError('the `status_map` parameter is required')
@@ -468,6 +517,7 @@ def _compile_service_check_statuses(modifiers):
 
 
 def _compile_match_items(transformers, modifiers):
+    # type: (Dict[str, Transformer], Dict[str, Any]) -> Dict[str, Tuple[str, Transformer]]
     items = modifiers.pop('items', None)
     if items is None:
         raise ValueError('the `items` parameter is required')

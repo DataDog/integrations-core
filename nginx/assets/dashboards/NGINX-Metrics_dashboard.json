@@ -1,0 +1,75 @@
+{
+    "title": "NGINX - Metrics",
+    "description": "This dashboard breaks down a handful of valuable metrics for monitoring your NGINX servers, so you can track NGINX activity and identify serious issues like [dropped connections](https://www.datadoghq.com/blog/how-to-monitor-nginx/#basic-activity-metrics) or [5xx server errors](https://www.datadoghq.com/blog/how-to-monitor-nginx/#error-metrics). Further reading on NGINX monitoring:\n\n- [Datadog's guide to key NGINX metrics](https://www.datadoghq.com/blog/how-to-monitor-nginx/)\n\n- [How to collect NGINX metrics using built-in tools](https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/)\n\n- [How to monitor NGINX with Datadog](https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/)\n\n- [Datadog's NGINX integration docs](https://docs.datadoghq.com/integrations/nginx/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": null,
+            "name": "scope"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:nginx.net.conn_dropped_per_s{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Dropped connections per second"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:nginx.server_zone.responses.5xx{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "5xx per second (only available for NGINX Plus)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:nginx.net.request_per_s{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Requests per second"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:nginx.net.connections{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Active connections per second"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:nginx.net.reading{$scope}"
+                    },
+                    {
+                        "q": "sum:nginx.net.writing{$scope}"
+                    },
+                    {
+                        "q": "sum:nginx.net.waiting{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Connections: reading,writing,waiting"
+            }
+        }
+    ]
+}

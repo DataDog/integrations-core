@@ -76,6 +76,39 @@ instances:
     #
     # password_hashed: false
 
+    ## @param statistics_components - list of strings - optional
+    ## List VoltDB components to collect metrics. A subset of components are collected by default.
+    ## See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php
+    ## The following components are supported:
+    ##  - COMMANDLOG
+    ##  - CPU
+    ##  - EXPORT
+    ##  - GC
+    ##  - IDLETIME
+    ##  - IMPORT
+    ##  - INDEX
+    ##  - IOSTATS
+    ##  - LATENCY
+    ##  - MEMORY
+    ##  - PROCEDURE
+    ##  - PROCEDUREOUTPUT
+    ##  - PROCEDUREPROFILE
+    ##  - QUEUE
+    ##  - SNAPSHOTSTATUS
+    ##  - TABLE
+    #
+    # statistics_components:
+    #   - COMMANDLOG
+    #   - CPU
+    #   - GC
+    #   - INDEX
+    #   - IOSTATS
+    #   - LATENCY
+    #   - MEMORY
+    #   - PROCEDURE
+    #   - SNAPSHOTSTATUS
+    #   - TABLE
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
@@ -188,6 +221,11 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
@@ -197,6 +235,17 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
+
+    ## @param only_custom_queries - boolean - optional - default: false
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
+    #
+    # only_custom_queries: false
 
     ## @param use_global_custom_queries - string - optional - default: true
     ## How `global_custom_queries` should be used for this instance. There are 3 options:
@@ -273,7 +322,7 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.

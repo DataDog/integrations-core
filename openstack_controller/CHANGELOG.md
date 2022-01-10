@@ -1,5 +1,28 @@
 # CHANGELOG - Openstack_controller
 
+## 1.13.0 / 2021-10-04 / Agent 7.32.0
+
+* [Added] Update dependencies. See [#10258](https://github.com/DataDog/integrations-core/pull/10258).
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+
+## 1.12.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Bump openstacksdk and add missing metrics. See [#9861](https://github.com/DataDog/integrations-core/pull/9861).
+* [Fixed] Do not leak password on logs. See [#9637](https://github.com/DataDog/integrations-core/pull/9637).
+
+## 1.11.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Openstack controller log support. See [#9115](https://github.com/DataDog/integrations-core/pull/9115).
+* [Fixed] Fix refactored imports. See [#9136](https://github.com/DataDog/integrations-core/pull/9136).
+* [Fixed] Add config spec for Openstack Controller. See [#9092](https://github.com/DataDog/integrations-core/pull/9092).
+
+## 1.10.3 / 2021-02-11 / Agent 7.27.0
+
+* [Fixed] Remove SimpleApi cache. See [#8583](https://github.com/DataDog/integrations-core/pull/8583).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.10.2 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
@@ -82,4 +105,3 @@
 ## 1.0.0 / 2019-02-04
 
 * [Added] OpenStack Controller. See [#2496](https://github.com/DataDog/integrations-core/pull/2496).
-

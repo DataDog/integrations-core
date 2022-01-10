@@ -1,750 +1,1323 @@
 {
   "title": "Memcached - Overview",
-  "description": "",
+  "description": "Using this dashboard, you can get a high-level view of your Memcached systems and monitor performance, memory usage, and system information.\n\n**For more information on setup and use-cases, check out the following**\n\n- [Memcached integration docs](https://docs.datadoghq.com/integrations/mcache/?tab=host)\n- [Speed up your web applications with Memcached monitoring](https://www.datadoghq.com/blog/speed-up-web-applications-memcached/)\n- [Instrument Memcached performance metrics with DogStatsD](https://www.datadoghq.com/blog/instrument-memcached-performance-metrics-dogstatsd/)",
   "widgets": [
     {
-      "id": 8997793236805436,
-      "layout": {
-        "x": 1,
-        "y": 1,
-        "width": 27,
-        "height": 15
-      },
+      "id": 2022561600050362,
       "definition": {
-        "type": "image",
-        "url": "/static/images/logos/memcached_large.svg",
-        "sizing": "zoom"
+        "title": "About Memcached",
+        "title_align": "center",
+        "type": "group",
+        "banner_img": "/static/images/integration_dashboard/memcached_hero_1.png",
+        "show_title": false,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1659252303420480,
+            "definition": {
+              "type": "note",
+              "content": "Using this dashboard, you can get a high-level view of your Memcached systems and monitor performance, memory usage, and system information.",
+              "background_color": "transparent",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 3523062610572682,
+            "definition": {
+              "type": "note",
+              "content": "**For more information on setup and use-cases, check out the following**\n\n- [Memcached integration docs](https://docs.datadoghq.com/integrations/mcache/?tab=host)\n- [Speed up your web applications with Memcached monitoring](https://www.datadoghq.com/blog/speed-up-web-applications-memcached/)\n- [Instrument Memcached performance metrics with DogStatsD](https://www.datadoghq.com/blog/instrument-memcached-performance-metrics-dogstatsd/)",
+              "background_color": "transparent",
+              "font_size": "12",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": false
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 5
       }
     },
     {
-      "id": 1454134902381054,
-      "layout": {
-        "x": 1,
-        "y": 18,
-        "width": 27,
-        "height": 33
-      },
+      "id": 7165395235515384,
       "definition": {
-        "type": "note",
-        "content": "Using this dashboard, you can get a high-level view of your Memcached systems and monitor performance, memory usage, and system information.\n\nFor more information on setup and use-cases, check out the following:\n\n- [Memcached integration docs](https://docs.datadoghq.com/integrations/mcache/?tab=host)\n- [Speed up your web applications with Memcached monitoring](https://www.datadoghq.com/blog/speed-up-web-applications-memcached/)\n- [Instrument Memcached performance metrics with DogStatsD](https://www.datadoghq.com/blog/instrument-memcached-performance-metrics-dogstatsd/)\n\nClone this template dashboard to make changes and add your own graph widgets.\n\n",
+        "title": "Summary",
+        "title_align": "center",
+        "type": "group",
         "background_color": "white",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left"
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4939650538215046,
+            "definition": {
+              "title": "Threads",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_green",
+                      "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:memcache.threads{*}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 3892853430904442,
+            "definition": {
+              "title": "Items stored by server",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_green",
+                      "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:memcache.curr_items{*}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "precision": 2
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 5648589449005440,
+            "definition": {
+              "title": "Connections",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Open Connections"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:memcache.curr_connections{*}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "grey",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Allocated connection structures"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:memcache.connection_structures{*}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 5102295089973500,
+            "definition": {
+              "title": "Memcached Uptime",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:memcache.uptime{*}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 3,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 5
       }
     },
     {
-      "id": 6756431177067764,
-      "layout": {
-        "x": 30,
-        "y": 1,
-        "width": 70,
-        "height": 5
-      },
+      "id": 1590388308774124,
       "definition": {
-        "type": "note",
-        "content": "Summary",
+        "title": "Performance",
+        "type": "group",
         "background_color": "vivid_green",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 7126847674195886,
-      "layout": {
-        "x": 30,
-        "y": 40,
-        "width": 70,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Performance",
-        "background_color": "green",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 3045000293843950,
-      "layout": {
-        "x": 102,
-        "y": 1,
-        "width": 70,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Memory",
-        "background_color": "vivid_green",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 3254045659785866,
-      "layout": {
-        "x": 102,
-        "y": 35,
-        "width": 70,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "System Information",
-        "background_color": "green",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 5424462545558764,
-      "layout": {
-        "x": 30,
-        "y": 7,
-        "width": 22,
-        "height": 15
-      },
-      "definition": {
-        "title": "Num items stored by server",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {},
-        "type": "query_value",
-        "requests": [
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
           {
-            "q": "avg:memcache.curr_items{*}",
-            "aggregator": "avg",
-            "conditional_formats": [
-              {
-                "comparator": ">",
-                "palette": "white_on_green",
-                "value": 0
-              }
-            ]
-          }
-        ],
-        "precision": 2
-      }
-    },
-    {
-      "id": 3099741560251310,
-      "layout": {
-        "x": 53,
-        "y": 7,
-        "width": 47,
-        "height": 15
-      },
-      "definition": {
-        "title": "Number of Connections",
-        "show_legend": false,
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:memcache.curr_connections{*}",
-            "on_right_yaxis": false,
-            "style": {
-              "palette": "grey",
-              "line_type": "solid",
-              "line_width": "normal"
+            "id": 3936391184493468,
+            "definition": {
+              "title": "Reads and Writes per second",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Write rate"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:memcache.bytes_written_rate{$scope,$host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Read rate"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:memcache.bytes_read_rate{$scope,$host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
             },
-            "display_type": "line"
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
           },
           {
-            "q": "avg:memcache.connection_structures{*}",
-            "on_right_yaxis": false,
-            "style": {
-              "palette": "purple",
-              "line_type": "solid",
-              "line_width": "normal"
+            "id": 1725216066041534,
+            "definition": {
+              "title": "Gets and Sets per second",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Get rate"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:memcache.cmd_get_rate{$scope,$host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Set rate"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:memcache.cmd_set_rate{$scope,$host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
             },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        },
-        "markers": []
-      }
-    },
-    {
-      "id": 7833569142443940,
-      "layout": {
-        "x": 30,
-        "y": 46,
-        "width": 34,
-        "height": 15
-      },
-      "definition": {
-        "title": "Reads and Writes per second",
-        "show_legend": false,
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:memcache.bytes_read_rate{*}",
-            "on_right_yaxis": false,
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
           },
           {
-            "q": "avg:memcache.bytes_written_rate{*}",
-            "on_right_yaxis": false,
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+            "id": 6127061413107786,
+            "definition": {
+              "title": "Hits and Misses per second",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Hit rate"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:memcache.get_hits_rate{$scope,$host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Miss rate"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:memcache.get_misses_rate{$scope,$host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
             },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        },
-        "markers": []
-      }
-    },
-    {
-      "id": 8315075390903840,
-      "layout": {
-        "x": 66,
-        "y": 46,
-        "width": 34,
-        "height": 15
-      },
-      "definition": {
-        "title": "Gets and Sets per second",
-        "show_legend": false,
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:memcache.cmd_set_rate{*}",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            }
           },
           {
-            "q": "avg:memcache.cmd_get_rate{*}",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+            "id": 1818176379888228,
+            "definition": {
+              "title": "Eviction Rate",
+              "show_legend": false,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Eviction rate"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:memcache.evictions_rate{$scope,$host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
             },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        },
-        "markers": []
-      }
-    },
-    {
-      "id": 414921588446328,
-      "layout": {
-        "x": 30,
-        "y": 62,
-        "width": 34,
-        "height": 15
-      },
-      "definition": {
-        "title": "Hits and Misses per second",
-        "show_legend": false,
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:memcache.get_hits_rate{*}",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            }
           },
           {
-            "q": "avg:memcache.get_misses_rate{*}",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+            "id": 7270454976408116,
+            "definition": {
+              "type": "note",
+              "content": "In general, you want to have significantly more cache hits than misses in order for your cache to be effective. Keep an eye on the two metrics, and the ratio between the number of hits and misses; if any of the three start to fall, something is likely wrong.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "top",
+              "has_padding": true
             },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        },
-        "markers": []
-      }
-    },
-    {
-      "id": 8165733220452742,
-      "layout": {
-        "x": 30,
-        "y": 23,
-        "width": 22,
-        "height": 15
-      },
-      "definition": {
-        "title": "Number of Threads",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {},
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "avg:memcache.threads{*}",
-            "aggregator": "avg",
-            "conditional_formats": [
-              {
-                "comparator": ">",
-                "palette": "white_on_green",
-                "value": 0
-              }
-            ]
-          }
-        ],
-        "precision": 2
-      }
-    },
-    {
-      "id": 3411484152036996,
-      "layout": {
-        "x": 53,
-        "y": 23,
-        "width": 47,
-        "height": 15
-      },
-      "definition": {
-        "title": "Memcached Uptime",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:memcache.uptime{*}",
-            "on_right_yaxis": false,
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "bars"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        },
-        "markers": []
-      }
-    },
-    {
-      "id": 4789863337280618,
-      "layout": {
-        "x": 102,
-        "y": 7,
-        "width": 34,
-        "height": 15
-      },
-      "definition": {
-        "title": "Memcached Load",
-        "show_legend": false,
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:memcache.rusage_system_rate{*}",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 2
+            }
           },
           {
-            "q": "avg:memcache.rusage_user_rate{*}",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+            "id": 7353250499557204,
+            "definition": {
+              "type": "note",
+              "content": "Due to the way that Memcached assigns memory pages into slabs, it is possible for cache evictions to take place even when the cache is not 100% full. This is why it’s also important to keep an eye on the the eviction rate metric, which is also indicative of the amount of free space in the cache; if the frequency of evictions suddenly increases while fill percent is below 100%, a single slab class may be full.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "top",
+              "has_padding": true
             },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        },
-        "markers": []
-      }
-    },
-    {
-      "id": 3895279602199162,
-      "layout": {
-        "x": 138,
-        "y": 7,
-        "width": 34,
-        "height": 15
-      },
-      "definition": {
-        "title": "Filling Percentage",
-        "show_legend": false,
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:memcache.fill_percent{*}",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        },
-        "markers": []
-      }
-    },
-    {
-      "id": 7475724452297216,
-      "layout": {
-        "x": 66,
-        "y": 62,
-        "width": 34,
-        "height": 15
-      },
-      "definition": {
-        "title": "Eviction Rate",
-        "show_legend": false,
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:memcache.evictions_rate{*}",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        },
-        "markers": []
-      }
-    },
-    {
-      "id": 4397153477191926,
-      "layout": {
-        "x": 102,
-        "y": 41,
-        "width": 34,
-        "height": 15
-      },
-      "definition": {
-        "title": "System load",
-        "show_legend": false,
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:system.load.1{*}"
-          },
-          {
-            "q": "avg:system.load.5{*}"
-          },
-          {
-            "q": "avg:system.load.15{*}"
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 2
+            }
           }
         ]
       }
     },
     {
-      "id": 4098251300897184,
-      "layout": {
-        "x": 138,
-        "y": 41,
-        "width": 34,
-        "height": 15
-      },
+      "id": 8669786481501690,
       "definition": {
-        "title": "CPU usage (%)",
-        "show_legend": false,
-        "type": "timeseries",
-        "requests": [
+        "title": "Logs",
+        "title_align": "center",
+        "type": "group",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
           {
-            "q": "avg:system.cpu.idle{*}, avg:system.cpu.system{*}, avg:system.cpu.iowait{*}, avg:system.cpu.user{*}, avg:system.cpu.stolen{*}, avg:system.cpu.guest{*}"
-          }
-        ]
-      }
-    },
-    {
-      "id": 7569874058800330,
-      "layout": {
-        "x": 102,
-        "y": 57,
-        "width": 34,
-        "height": 15
-      },
-      "definition": {
-        "title": "I/O wait (%)",
-        "show_legend": false,
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "max:system.cpu.iowait{*}"
-          }
-        ]
-      }
-    },
-    {
-      "id": 8980428682493288,
-      "layout": {
-        "x": 138,
-        "y": 57,
-        "width": 34,
-        "height": 15
-      },
-      "definition": {
-        "title": "System memory",
-        "show_legend": false,
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:system.mem.usable{*}, sum:system.mem.total{*}-sum:system.mem.usable{*}"
-          }
-        ]
-      }
-    },
-    {
-      "id": 3167487980972054,
-      "layout": {
-        "x": 102,
-        "y": 73,
-        "width": 70,
-        "height": 15
-      },
-      "definition": {
-        "title": "Network traffic (per sec)",
-        "show_legend": false,
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:system.net.bytes_rcvd{*}"
+            "id": 8655902106215148,
+            "definition": {
+              "title": "",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "log_stream",
+              "indexes": [],
+              "query": "service:memcache",
+              "sort": {
+                "column": "time",
+                "order": "desc"
+              },
+              "columns": [
+                "core_host",
+                "core_service"
+              ],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "expanded-md"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
           },
           {
-            "q": "sum:system.net.bytes_sent{*}"
+            "id": 2104915955367054,
+            "definition": {
+              "title": "",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "log_stream",
+              "indexes": [],
+              "query": "service:memcache status:error",
+              "sort": {
+                "column": "time",
+                "order": "desc"
+              },
+              "columns": [
+                "core_host",
+                "core_service"
+              ],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "expanded-md"
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
           }
         ]
       }
     },
     {
-      "id": 2842734603002726,
-      "layout": {
-        "x": 138,
-        "y": 24,
-        "width": 34,
-        "height": 9
-      },
+      "id": 2858322151826854,
       "definition": {
-        "type": "note",
-        "content": "Memcached will cap memory usage at 64 MB by default, but you’ll likely want to change this setting by using the -m option when starting the server. ",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "top"
+        "title": "Memory",
+        "title_align": "center",
+        "type": "group",
+        "background_color": "vivid_blue",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 833489139158334,
+            "definition": {
+              "title": "Load",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "System rate"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:memcache.rusage_system_rate{$scope,$host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "User rate"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:memcache.rusage_user_rate{$scope,$host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 8033867896247660,
+            "definition": {
+              "title": "Filling Percentage",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Fill"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:memcache.fill_percent{$scope,$host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 7495159148627890,
+            "definition": {
+              "type": "note",
+              "content": "If your cache is constantly full, you may want to increase the size of your cache, reduce the time-to-live for some records, or store less data. ",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "id": 2640030122116396,
+            "definition": {
+              "type": "note",
+              "content": "Memcached will cap memory usage at 64 MB by default, but you’ll likely want to change this setting by using the -m option when starting the server. ",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 1
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 16,
+        "width": 12,
+        "height": 4,
+        "is_column_break": true
       }
     },
     {
-      "id": 144436719783744,
-      "layout": {
-        "x": 174,
-        "y": 53,
-        "width": 18,
-        "height": 24
-      },
+      "id": 1647063339129730,
       "definition": {
-        "type": "note",
-        "content": "It’s important to note that Memcached will not immediately claim the amount of memory that you’ve configured; it will instead allocate and reserve physical memory as more items are stored, using the value of the flag as the upper bound for memory usage. ",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "left"
-      }
-    },
-    {
-      "id": 7962674670355124,
-      "layout": {
-        "x": 102,
-        "y": 24,
-        "width": 34,
-        "height": 9
-      },
-      "definition": {
-        "type": "note",
-        "content": "If your cache is constantly full, you may want to increase the size of your cache, reduce the time-to-live for some records, or store less data. ",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "top"
-      }
-    },
-    {
-      "id": 6114764549509416,
-      "layout": {
-        "x": 66,
-        "y": 79,
-        "width": 34,
-        "height": 16
-      },
-      "definition": {
-        "type": "note",
-        "content": "Due to the way that Memcached assigns memory pages into slabs, it is possible for cache evictions to take place even when the cache is not 100% full. This is why it’s also important to keep an eye on the the eviction rate metric, which is also indicative of the amount of free space in the cache; if the frequency of evictions suddenly increases while fill percent is below 100%, a single slab class may be full.",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "top"
-      }
-    },
-    {
-      "id": 641803855037284,
-      "layout": {
-        "x": 1,
-        "y": 61,
-        "width": 26,
-        "height": 16
-      },
-      "definition": {
-        "type": "note",
-        "content": "In general, you want to have significantly more cache hits than misses in order for your cache to be effective. Keep an eye on the two metrics, and the ratio between the number of hits and misses; if any of the three start to fall, something is likely wrong.",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "right"
-      }
-    },
-    {
-      "id": 3420643587887408,
-      "layout": {
-        "x": 174,
-        "y": 7,
-        "width": 47,
-        "height": 36
-      },
-      "definition": {
-        "title": "",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "log_stream",
-        "indexes": [],
-        "query": "service:memcache",
-        "sort": {
-          "column": "time",
-          "order": "desc"
-        },
-        "columns": [
-          "core_host",
-          "core_service"
-        ],
-        "show_date_column": true,
-        "show_message_column": true,
-        "message_display": "expanded-md"
-      }
-    },
-    {
-      "id": 6334176357160004,
-      "layout": {
-        "x": 174,
-        "y": 1,
-        "width": 47,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Logs",
-        "background_color": "green",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
+        "title": "System Information",
+        "type": "group",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6702184697431440,
+            "definition": {
+              "title": "System load",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Over 1 minute"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:system.load.1{$scope,$env}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Over 5 minutes"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:system.load.5{$scope,$env}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Over 15 minutes"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:system.load.15{$scope,$env}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 5518011204972140,
+            "definition": {
+              "title": "I/O wait (%)",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "I/O wait"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "max:system.cpu.iowait{$scope,$env}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 1466121383887416,
+            "definition": {
+              "title": "Network traffic (per sec)",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Received"
+                    },
+                    {
+                      "formula": "-query2",
+                      "alias": "Sent"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:system.net.bytes_rcvd{$scope,$env}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:system.net.bytes_sent{$scope,$env}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 2405299616737952,
+            "definition": {
+              "title": "CPU usage (%)",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Idle"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "System"
+                    },
+                    {
+                      "formula": "query3",
+                      "alias": "I/O Wait"
+                    },
+                    {
+                      "formula": "query4",
+                      "alias": "User"
+                    },
+                    {
+                      "formula": "query5",
+                      "alias": "Stolen"
+                    },
+                    {
+                      "formula": "query6",
+                      "alias": "Guest"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "avg:system.cpu.idle{$scope,$env}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:system.cpu.system{$scope,$env}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "avg:system.cpu.iowait{$scope,$env}",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    },
+                    {
+                      "query": "avg:system.cpu.user{$scope,$env}",
+                      "data_source": "metrics",
+                      "name": "query4"
+                    },
+                    {
+                      "query": "avg:system.cpu.stolen{$scope,$env}",
+                      "data_source": "metrics",
+                      "name": "query5"
+                    },
+                    {
+                      "query": "avg:system.cpu.guest{$scope,$env}",
+                      "data_source": "metrics",
+                      "name": "query6"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 3692039642562184,
+            "definition": {
+              "title": "System memory",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Allocated"
+                    },
+                    {
+                      "formula": "query2 - query1",
+                      "alias": "Used"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:system.mem.usable{$scope,$env}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:system.mem.total{$scope,$env}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 4748546744818266,
+            "definition": {
+              "type": "note",
+              "content": "It’s important to note that Memcached will not immediately claim the amount of memory that you’ve configured; it will instead allocate and reserve physical memory as more items are stored, using the value of the flag as the upper bound for memory usage. ",
+              "background_color": "purple",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
       }
     }
   ],
-  "template_variables": [],
-  "layout_type": "free",
-  "is_read_only": false,
+  "template_variables": [
+    {
+      "name": "scope",
+      "default": "*"
+    },
+    {
+      "name": "host",
+      "default": "*"
+    },
+    {
+      "name": "env",
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "is_read_only": true,
   "notify_list": [],
-  "id": "ra6-i3i-mum"
+  "reflow_type": "fixed",
+  "id": "2rq-rd7-afk"
 }

@@ -1,5 +1,29 @@
 # CHANGELOG - kubernetes_state
 
+## 6.0.1 / 2021-11-13
+
+* [Fixed] Fix clustername for invalid RFC1123 cases. See [#10262](https://github.com/DataDog/integrations-core/pull/10262).
+
+## 6.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Add `kubernetes_state.statefulset.count` metric. See [#9813](https://github.com/DataDog/integrations-core/pull/9813).
+* [Fixed] [ksm] Fix statefulset tag. See [#9832](https://github.com/DataDog/integrations-core/pull/9832).
+* [Fixed] Add kube_job tag to job metrics. See [#9775](https://github.com/DataDog/integrations-core/pull/9775).
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 5.7.1 / 2021-06-03 / Agent 7.29.0
+
+* [Fixed] Fix `node.by_condition` metric. See [#9467](https://github.com/DataDog/integrations-core/pull/9467).
+
+## 5.7.0 / 2021-05-28
+
+* [Added] KSM: add `node.by_condition` to have the conditions of individual nodes. See [#9311](https://github.com/DataDog/integrations-core/pull/9311).
+* [Added] Update `auto_conf.yaml` with valid example configuration. See [#7414](https://github.com/DataDog/integrations-core/pull/7414). Thanks [jfmyers9](https://github.com/jfmyers9).
+
+## 5.6.4 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 5.6.3 / 2020-12-23 / Agent 7.25.0
 
 * [Fixed] Fix deployment count metric. See [#8247](https://github.com/DataDog/integrations-core/pull/8247).

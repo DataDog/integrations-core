@@ -13,7 +13,7 @@ init_config:
 #
 instances:
 
-    ## @param hosts - list of strings - required
+    ## @param hosts - list of strings - optional
     ## The host (and optional port number) where the mongod instance (or mongos instances for
     ## a sharded cluster) is running. You can specify a hostname, IP address, or UNIX domain
     ## socket. Specify as many hosts as appropriate for your deployment topology:
@@ -22,16 +22,20 @@ instances:
     ##   - For a replica set, specify the hostname of a mongod instance as listed in
     ##     the replica set configuration. You need one check instance per mongod instance
     ##     in order to collect replication metrics and events.
-    ##   - For a sharded cluster, specify the hostname(s) of the mongos instance(s).
+    ##   - For a sharded cluster, you need one check instance for each mongod instance in
+    ##     each shard (including the configsvr shard) as well as one additional check instance
+    ##     that connects to one (or more) mongos node.
     ##
     ## If the port number is not specified, the default port 27017 is used.
     ##
     ## Even if the host is an arbiter node, you still need to provide authentication credentials
     ## as the check will create an additional connection to the primary in this specific case.
+    ##
+    ## Do not specify more than one host here unless you are connecting to a mongos instance
+    ## and you want to balance requests performed by the agent to multiple mongos instances.
     #
   - hosts:
-      - <HOST_1>
-      - <HOST_2>:<PORT_2>
+      - <HOST>:<PORT>
 
     ## @param username - string - optional
     ## The username to use for authentication.
@@ -59,11 +63,6 @@ instances:
     ## connect to the same host. Instead configure one check instance for each node.
     #
     # options: {}
-
-    ## @param connection_scheme - string - optional - default: mongodb
-    ## A prefix indicating the connection string format e.g. mongodb+srv.
-    #
-    # connection_scheme: mongodb
 
     ## @param replica_check - boolean - optional - default: true
     ## Whether or not to read from available replicas.
@@ -165,9 +164,9 @@ instances:
     ##
     ## <<< DEPRECATED >>>
     ##
-    ## Release: 8.0.0
+    ## Agent version: 8.0.0
     ## Migration: Use the following options instead:
-    ##            hosts, username, password, database, options, connection_scheme
+    ##            hosts, username, password, database, options
     #
     # server: mongodb://<USER>:<PASSWORD>@<HOST>:<PORT>/<DB_NAME>
 
@@ -206,7 +205,7 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.

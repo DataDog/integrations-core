@@ -54,6 +54,10 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.http_requests_total',
         NAMESPACE + '.authenticated_user_requests',
         NAMESPACE + '.apiserver_request_total',
+        NAMESPACE + '.grpc_client_handled_total',
+        NAMESPACE + '.grpc_client_msg_received_total',
+        NAMESPACE + '.grpc_client_msg_sent_total',
+        NAMESPACE + '.grpc_client_started_total',
         NAMESPACE + '.rest_client_request_latency_seconds.sum',
         NAMESPACE + '.rest_client_request_latency_seconds.count',
         NAMESPACE + '.admission_step_admission_latencies_seconds.sum',
@@ -63,6 +67,15 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.admission_step_admission_latencies_seconds_summary.quantile',
         NAMESPACE + '.admission_controller_admission_duration_seconds.sum',
         NAMESPACE + '.admission_controller_admission_duration_seconds.count',
+        NAMESPACE + '.request_latencies.sum',
+        NAMESPACE + '.request_latencies.count',
+        NAMESPACE + '.request_duration_seconds.sum',
+        NAMESPACE + '.request_duration_seconds.count',
+        NAMESPACE + '.registered_watchers',
+        NAMESPACE + '.process_resident_memory_bytes',
+        NAMESPACE + '.process_virtual_memory_bytes',
+        NAMESPACE + '.etcd_request_duration_seconds.sum',
+        NAMESPACE + '.etcd_request_duration_seconds.count',
     ]
     COUNT_METRICS = [
         NAMESPACE + '.audit_event.count',
@@ -74,16 +87,16 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.apiserver_request_total.count',
     ]
 
-    def test_check(self, aggregator, mock_get):
+    def test_check(self, dd_run_check, aggregator, mock_get):
         """
         Testing kube_apiserver_metrics metrics collection.
         """
 
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [instance])
-        check.check(instance)
+        dd_run_check(check)
 
         # check that we then get the count metrics also
-        check.check(instance)
+        dd_run_check(check)
 
         for metric in self.METRICS + self.COUNT_METRICS:
             aggregator.assert_metric(metric)

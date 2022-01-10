@@ -1,17 +1,18 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import copy
+
 import mock
 import psycopg2
 import pytest
-from mock import MagicMock
+from mock import MagicMock, PropertyMock
 from pytest import fail
 from semver import VersionInfo
 from six import iteritems
 
-from datadog_checks.postgres import util
-
-from .common import SCHEMA_NAME
+from datadog_checks.postgres import PostgreSql, util
+from datadog_checks.postgres.version_utils import VersionUtils
 
 pytestmark = pytest.mark.unit
 
@@ -24,7 +25,7 @@ def test_get_instance_metrics_lt_92(integration_check, pg_instance):
     check = integration_check(pg_instance)
 
     res = check.metrics_cache.get_instance_metrics(VersionInfo(9, 1, 0))
-    assert res['metrics'] == util.COMMON_METRICS
+    assert res['metrics'] == dict(util.COMMON_METRICS, **util.DBM_MIGRATED_METRICS)
 
 
 def test_get_instance_metrics_92(integration_check, pg_instance):
@@ -35,7 +36,8 @@ def test_get_instance_metrics_92(integration_check, pg_instance):
     check = integration_check(pg_instance)
 
     res = check.metrics_cache.get_instance_metrics(VersionInfo(9, 2, 0))
-    assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
+    c_metrics = dict(util.COMMON_METRICS, **util.DBM_MIGRATED_METRICS)
+    assert res['metrics'] == dict(c_metrics, **util.NEWER_92_METRICS)
 
 
 def test_get_instance_metrics_state(integration_check, pg_instance):
@@ -46,10 +48,11 @@ def test_get_instance_metrics_state(integration_check, pg_instance):
     check = integration_check(pg_instance)
 
     res = check.metrics_cache.get_instance_metrics(VersionInfo(9, 2, 0))
-    assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
+    c_metrics = dict(util.COMMON_METRICS, **util.DBM_MIGRATED_METRICS)
+    assert res['metrics'] == dict(c_metrics, **util.NEWER_92_METRICS)
 
     res = check.metrics_cache.get_instance_metrics('foo')  # metrics were cached so this shouldn't be called
-    assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
+    assert res['metrics'] == dict(c_metrics, **util.NEWER_92_METRICS)
 
 
 def test_get_instance_metrics_database_size_metrics(integration_check, pg_instance):
@@ -61,23 +64,27 @@ def test_get_instance_metrics_database_size_metrics(integration_check, pg_instan
     check = integration_check(pg_instance)
 
     expected = util.COMMON_METRICS
+    expected.update(util.DBM_MIGRATED_METRICS)
     expected.update(util.NEWER_92_METRICS)
     expected.update(util.DATABASE_SIZE_METRICS)
     res = check.metrics_cache.get_instance_metrics(VersionInfo(9, 2, 0))
     assert res['metrics'] == expected
 
 
-def test_get_instance_with_default(check):
+@pytest.mark.parametrize("collect_default_database", [True, False])
+def test_get_instance_with_default(pg_instance, collect_default_database):
     """
-    Test the contents of the query string with different `collect_default_db` values
+    Test the contents of the query string with different `collect_default_database` values
     """
-    version = VersionInfo(9, 2, 0)
-    res = check.metrics_cache.get_instance_metrics(version)
-    assert "  AND psd.datname not ilike 'postgres'" in res['query']
-
-    check.config.collect_default_db = True
-    res = check.metrics_cache.get_instance_metrics(version)
-    assert "  AND psd.datname not ilike 'postgres'" not in res['query']
+    pg_instance['collect_default_database'] = collect_default_database
+    check = PostgreSql('postgres', {}, [pg_instance])
+    check._version = VersionInfo(9, 2, 0)
+    res = check.metrics_cache.get_instance_metrics(check._version)
+    dbfilter = " AND psd.datname not ilike 'postgres'"
+    if collect_default_database:
+        assert dbfilter not in res['query']
+    else:
+        assert dbfilter in res['query']
 
 
 def test_malformed_get_custom_queries(check):
@@ -88,7 +95,7 @@ def test_malformed_get_custom_queries(check):
     db = MagicMock()
     check.db = db
 
-    check.config.custom_queries = [{}]
+    check._config.custom_queries = [{}]
 
     # Make sure 'metric_prefix' is defined
     check._collect_custom_queries([])
@@ -97,7 +104,7 @@ def test_malformed_get_custom_queries(check):
 
     # Make sure 'query' is defined
     malformed_custom_query = {'metric_prefix': 'postgresql'}
-    check.config.custom_queries = [malformed_custom_query]
+    check._config.custom_queries = [malformed_custom_query]
 
     check._collect_custom_queries([])
     check.log.error.assert_called_once_with(
@@ -213,11 +220,29 @@ def test_version_metadata(check, test_case, params):
         m.assert_any_call('test:123', 'version.raw', test_case)
 
 
+@pytest.mark.parametrize(
+    'pg_version, wal_path',
+    [
+        ('9.6.2', '/var/lib/postgresql/data/pg_xlog'),
+        ('10.0.0', '/var/lib/postgresql/data/pg_wal'),
+    ],
+)
+def test_get_wal_dir(integration_check, pg_instance, pg_version, wal_path):
+    pg_instance['data_directory'] = "/var/lib/postgresql/data/"
+    check = integration_check(pg_instance)
+
+    version_utils = VersionUtils.parse_version(pg_version)
+    with mock.patch('datadog_checks.postgres.PostgreSql.version', new_callable=PropertyMock) as mock_version:
+        mock_version.return_value = version_utils
+        path_name = check._get_wal_dir()
+        assert path_name == wal_path
+
+
 @pytest.mark.usefixtures('mock_cursor_for_replica_stats')
 def test_replication_stats(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
-    base_tags = ['foo:bar', 'server:localhost', 'port:5432']
+    base_tags = ['foo:bar', 'port:5432']
     app1_tags = base_tags + ['wal_sync_state:async', 'wal_state:streaming', 'wal_app_name:app1']
     app2_tags = base_tags + ['wal_sync_state:sync', 'wal_state:backup', 'wal_app_name:app2']
 
@@ -228,24 +253,6 @@ def test_replication_stats(aggregator, integration_check, pg_instance):
         aggregator.assert_metric(metric_name, 13, app2_tags)
 
     aggregator.assert_all_metrics_covered()
-
-
-def test_relation_filter():
-    relations_config = {'breed': {'relation_name': 'breed', 'schemas': ['public']}}
-    query_filter = util.build_relations_filter(relations_config, SCHEMA_NAME)
-    assert query_filter == "( relname = 'breed' AND schemaname = ANY(array['public']::text[]) )"
-
-
-def test_relation_filter_no_schemas():
-    relations_config = {'persons': {'relation_name': 'persons', 'schemas': [util.ALL_SCHEMAS]}}
-    query_filter = util.build_relations_filter(relations_config, SCHEMA_NAME)
-    assert query_filter == "( relname = 'persons' )"
-
-
-def test_relation_filter_regex():
-    relations_config = {'persons': {'relation_regex': 'b.*', 'schemas': [util.ALL_SCHEMAS]}}
-    query_filter = util.build_relations_filter(relations_config, SCHEMA_NAME)
-    assert query_filter == "( relname ~ 'b.*' )"
 
 
 def test_query_timeout_connection_string(aggregator, integration_check, pg_instance):
@@ -260,3 +267,50 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
     except psycopg2.OperationalError:
         # could not connect to server because there is no server running
         pass
+
+
+@pytest.mark.parametrize(
+    'disable_generic_tags, expected_tags',
+    [
+        (
+            True,
+            {
+                'db:datadog_test',
+                'port:5432',
+                'foo:bar',
+            },
+        ),
+        (
+            False,
+            {
+                'db:datadog_test',
+                'foo:bar',
+                'port:5432',
+                'server:localhost',
+            },
+        ),
+    ],
+)
+def test_server_tag_(disable_generic_tags, expected_tags, pg_instance):
+    instance = copy.deepcopy(pg_instance)
+    instance['disable_generic_tags'] = disable_generic_tags
+    check = PostgreSql('test_instance', {}, [instance])
+    tags = check._get_service_check_tags()
+    assert set(tags) == expected_tags
+
+
+@pytest.mark.parametrize(
+    'disable_generic_tags, expected_hostname', [(True, 'resolved.hostname'), (False, 'stubbed.hostname')]
+)
+def test_resolved_hostname(disable_generic_tags, expected_hostname, pg_instance):
+    instance = copy.deepcopy(pg_instance)
+    instance['disable_generic_tags'] = disable_generic_tags
+    check = PostgreSql('test_instance', {}, [instance])
+
+    with mock.patch(
+        'datadog_checks.postgres.PostgreSql.resolve_db_host', return_value='resolved.hostname'
+    ) as resolve_db_host:
+        assert check.resolved_hostname == expected_hostname
+        assert resolve_db_host.called == disable_generic_tags, 'Expected resolve_db_host.called to be ' + str(
+            disable_generic_tags
+        )

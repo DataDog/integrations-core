@@ -25,7 +25,7 @@ def get_dependencies():
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog-checks-base>=11.0.0'
+CHECKS_BASE_REQ = 'datadog-checks-base>=11.2.0'
 
 setup(
     name='datadog-pgbouncer',
@@ -47,6 +47,8 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.8',
     ],
     packages=['datadog_checks.pgbouncer'],
     install_requires=[CHECKS_BASE_REQ],

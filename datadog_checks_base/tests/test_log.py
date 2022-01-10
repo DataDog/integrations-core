@@ -50,15 +50,15 @@ def test_get_check_logger(caplog):
     class MyCheck(AgentCheck):
         def __init__(self, *args, **kwargs):
             super(MyCheck, self).__init__(*args, **kwargs)
-            self.config = FooConfig()
+            self._config = FooConfig()
 
         def check(self, _):
-            self.config.do_something()
+            self._config.do_something()
 
     check = MyCheck()
     check.check({})
 
-    assert check.log is check.config.log
+    assert check.log is check._config.log
     assert "This is a warning" in caplog.text
 
 

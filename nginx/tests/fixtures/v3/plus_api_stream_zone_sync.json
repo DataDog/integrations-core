@@ -1,0 +1,19 @@
+{
+  "status": {
+    "nodes_online": 2,
+    "msgs_in": 9809,
+    "msgs_out": 9478,
+    "bytes_in": 2038758,
+    "bytes_out": 1931412
+  },
+  "zones": {
+    "zone1": {
+      "records_total": 250,
+      "records_pending": 1
+    },
+    "zone2": {
+      "records_total": 251,
+      "records_pending": 2
+    }
+  }
+}

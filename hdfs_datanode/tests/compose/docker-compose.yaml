@@ -12,7 +12,7 @@ services:
       - HDFS_CONF_dfs_webhdfs_enabled=true
       - HDFS_CONF_dfs_permissions_enabled=false
     ports:
-      - "50070:50070"
+      - "9870:9870"
 
   datanode:
     image: bde2020/hadoop-datanode:${HDFS_IMAGE_TAG}
@@ -29,7 +29,7 @@ services:
       - HDFS_CONF_dfs_webhdfs_enabled=true
       - HDFS_CONF_dfs_permissions_enabled=false
     ports:
-      - "50075:50075"
+      - "9864:9864"
 
 volumes:
   hadoop_namenode:

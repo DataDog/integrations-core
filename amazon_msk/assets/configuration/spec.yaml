@@ -4,9 +4,18 @@ files:
   options:
   - template: init_config
     options:
-      - template: init_config/openmetrics_legacy
+      - template: init_config/openmetrics
   - template: instances
     options:
+    - name: use_openmetrics
+      description: |
+        Use the latest OpenMetrics implementation for more features and better performance.
+        If running on Agent v6, you must set the `python_version` option in `datadog.yaml` to `"3"`.
+      value:
+        example: true
+        display_default: false
+        type: boolean
+      enabled: true
     - name: cluster_arn
       description: The Amazon Resource Name (ARN) that uniquely identifies the cluster.
       required: true
@@ -36,6 +45,29 @@ files:
       value:
         type: integer
         example: 11002
-    - template: instances/openmetrics_legacy
+    - name: prometheus_metrics_path
+      description: |
+        The path where Prometheus serves metrics.
+      value:
+        type: string
+        example: /metrics
+    - name: boto_config
+      description: |
+        Specify additional configuration options for the botocore Config object.
+
+        Note: Configuration values set in your AWS config file can be singularly overwritten
+        through the use of a Config object.
+        https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html
+      value:
+        example:
+          proxies_config:
+            proxy_client_cert: '/path/of/certificate'
+            proxy_ca_bundle: 'path/to/ca/bundle'
+            proxy_use_forwarding_for_https: false
+          signature_version: s3v4
+        type: object
+    - template: instances/openmetrics
       overrides:
-        prometheus_url.hidden: true
+        openmetrics_endpoint.hidden: true
+        openmetrics_endpoint.required: false
+        tls_verify.value.example: false

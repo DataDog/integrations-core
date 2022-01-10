@@ -14,11 +14,12 @@ import yaml
 
 from datadog_checks.base import ConfigurationError, to_native_string
 from datadog_checks.dev import temp_dir
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.snmp import SnmpCheck
 
 from . import common
 
-pytestmark = [pytest.mark.usefixtures("dd_environment"), common.python_autodiscovery_only]
+pytestmark = [pytest.mark.usefixtures("dd_environment"), common.snmp_integration_only]
 
 
 def test_command_generator():
@@ -122,6 +123,107 @@ def test_custom_mib(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
 
+def test_extract_value_inferred(aggregator):
+    instance = common.generate_instance_config(
+        [
+            {
+                "MIB": "DUMMY-MIB",
+                'symbol': {
+                    'OID': "1.3.6.1.4.1.123456789.4.0",
+                    'name': "aTemperatureValueInferred",
+                    'extract_value': r'(\d+)C',
+                },
+            }
+        ]
+    )
+    instance["community_string"] = "dummy"
+    check = SnmpCheck('snmp', common.MIBS_FOLDER, [instance])
+    check.check(instance)
+    aggregator.assert_metric(
+        'snmp.aTemperatureValueInferred', metric_type=aggregator.GAUGE, count=1, value=22, tags=common.CHECK_TAGS
+    )
+
+
+def test_extract_value_does_not_match(aggregator, caplog):
+    instance = common.generate_instance_config(
+        [
+            {
+                "MIB": "DUMMY-MIB",
+                'symbol': {
+                    'OID': "1.3.6.1.4.1.123456789.4.0",
+                    'name': "aTemperatureValueInferred",
+                    'extract_value': r'(\d+)ZZZ',
+                },
+            }
+        ]
+    )
+    instance["community_string"] = "dummy"
+    check = SnmpCheck('snmp', common.MIBS_FOLDER, [instance])
+    check.check(instance)
+    assert "Unable to submit metric `aTemperatureValueInferred`" in str(caplog.text)
+
+
+def test_extract_value_forced_type(aggregator):
+    instance = common.generate_instance_config(
+        [
+            {
+                "MIB": "DUMMY-MIB",
+                'forced_type': 'counter',
+                'symbol': {
+                    'OID': "1.3.6.1.4.1.123456789.4.0",
+                    'name': "aTemperatureValueForced",
+                    'extract_value': r'(\d+)C',
+                },
+            }
+        ]
+    )
+    instance["community_string"] = "dummy"
+    check = SnmpCheck('snmp', common.MIBS_FOLDER, [instance])
+    check.check(instance)
+    aggregator.assert_metric(
+        'snmp.aTemperatureValueForced', metric_type=aggregator.RATE, count=1, value=22, tags=common.CHECK_TAGS
+    )
+
+
+def test_extract_value_table(aggregator):
+    instance = common.generate_instance_config(
+        [
+            {
+                "MIB": "IF-MIB",
+                'table': {
+                    'OID': '1.3.6.1.2.1.2.2',
+                    'name': 'ifTable',
+                },
+                'symbols': [
+                    {
+                        'OID': "1.3.6.1.2.1.2.2.1.2",
+                        'name': "extractValue",
+                        'extract_value': r'ip(\d)tnl0',
+                    }
+                ],
+                'metric_tags': [
+                    {
+                        'column': {
+                            'OID': '1.3.6.1.2.1.31.1.1.1.1',
+                            'name': 'ifName',
+                        },
+                        'table': 'ifXTable',
+                        'tag': 'interface',
+                    }
+                ],
+            }
+        ]
+    )
+    instance["community_string"] = "public"
+
+    tags = common.CHECK_TAGS + ['interface:ip6tnl0']
+
+    check = SnmpCheck('snmp', common.MIBS_FOLDER, [instance])
+    check.check(instance)
+
+    aggregator.assert_metric('snmp.extractValue', metric_type=aggregator.GAUGE, count=1, value=6, tags=tags)
+
+
 def test_scalar(aggregator):
     """
     Support SNMP scalar objects
@@ -140,8 +242,42 @@ def test_scalar(aggregator):
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
-    common.assert_common_metrics(aggregator)
+    common.assert_common_metrics(aggregator, tags=common.CHECK_TAGS)
     aggregator.all_metrics_asserted()
+
+
+def test_submitted_metrics_count(aggregator):
+    instance = common.generate_instance_config(common.SCALAR_OBJECTS)
+    check = common.create_check(instance)
+    check.check(instance)
+
+    telemetry_tags = common.CHECK_TAGS + ['loader:python']
+
+    for metric in common.SCALAR_OBJECTS:
+        metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
+        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
+
+    total_snmp_submitted_metrics = len(common.SCALAR_OBJECTS) + 1  # +1 for snmp.sysUpTimeInstance
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+    aggregator.assert_metric(
+        'datadog.snmp.submitted_metrics',
+        value=total_snmp_submitted_metrics,
+        metric_type=aggregator.GAUGE,
+        count=1,
+        tags=telemetry_tags,
+    )
+    aggregator.assert_metric('datadog.snmp.check_duration', metric_type=aggregator.GAUGE, count=1, tags=telemetry_tags)
+    aggregator.assert_metric(
+        'datadog.snmp.check_interval', metric_type=aggregator.MONOTONIC_COUNT, count=1, tags=telemetry_tags
+    )
+    common.assert_common_device_metrics(aggregator, tags=common.CHECK_TAGS)
+    aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        check_submission_type=True,
+        exclude=['snmp.snmpEngineTime', 'snmp.tcpInSegs', 'snmp.udpDatagrams'],
+    )
 
 
 def test_enforce_constraint(aggregator):
@@ -422,7 +558,9 @@ def test_table_v3_SHA_AES(aggregator):
     aggregator.all_metrics_asserted()
 
 
-def test_bulk_table(aggregator):
+def test_bulk_table(aggregator, caplog):
+    caplog.set_level(logging.DEBUG)  # Needed to test that debug logs won't raise exceptions
+
     instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
     instance['bulk_threshold'] = 5
     check = common.create_check(instance)
@@ -579,7 +717,7 @@ def test_profile_by_file(aggregator):
     instance['profile'] = 'profile1'
     with temp_dir() as tmp:
         profile_file = os.path.join(tmp, 'profile1.yaml')
-        with open(profile_file, 'w') as f:
+        with open(profile_file, 'wb') as f:
             f.write(yaml.safe_dump({'metrics': common.SUPPORTED_METRIC_TYPES}))
         init_config = {'profiles': {'profile1': {'definition_file': profile_file}}}
         check = SnmpCheck('snmp', init_config, [instance])
@@ -638,8 +776,8 @@ def test_profile_sysoid_list(aggregator, caplog):
 
         tags = common_tags + ['snmp_oid:{}'.format(device['sysobjectid'])]
         aggregator.assert_metric('snmp.IAmACounter32', tags=tags, count=1)
-        aggregator.assert_metric('snmp.devices_monitored', tags=tags, count=1, value=1)
-
+        common.assert_common_device_metrics(aggregator, tags=tags, count=1, devices_monitored_value=1)
+        common.assert_common_metrics(aggregator, tags)
         aggregator.assert_all_metrics_covered()
 
         aggregator.reset()
@@ -655,8 +793,8 @@ def test_profile_sysoid_list(aggregator, caplog):
         check.check(instance)
 
         assert 'No profile matching sysObjectID 1.3.6.1.4.1.9.1.1745' in caplog.text
-        aggregator.assert_metric('snmp.devices_monitored', tags=common.CHECK_TAGS, count=1, value=1)
-
+        common.assert_common_device_metrics(aggregator, tags=common.CHECK_TAGS, count=1, devices_monitored_value=1)
+        common.assert_common_metrics(aggregator, common.CHECK_TAGS)
         aggregator.assert_all_metrics_covered()
 
         aggregator.reset()
@@ -766,6 +904,7 @@ def test_discovery(aggregator):
         'snmp_profile:profile1',
         'autodiscovery_subnet:{}'.format(to_native_string(network)),
     ]
+    network_tags = ['network:{}'.format(network), 'autodiscovery_subnet:{}'.format(network)]
 
     instance = {
         'name': 'snmp_conf',
@@ -785,7 +924,7 @@ def test_discovery(aggregator):
     try:
         for _ in range(30):
             check.check(instance)
-            if len(aggregator.metric_names) > 1:
+            if 'snmp.IAmAGauge32' in aggregator.metric_names:
                 break
             time.sleep(1)
             aggregator.reset()
@@ -798,9 +937,10 @@ def test_discovery(aggregator):
         aggregator.assert_metric(metric_name, tags=check_tags, count=1)
 
     aggregator.assert_metric('snmp.sysUpTimeInstance')
-    aggregator.assert_metric('snmp.discovered_devices_count', tags=['network:{}'.format(network)])
+    aggregator.assert_metric('snmp.discovered_devices_count', tags=network_tags)
 
-    aggregator.assert_metric('snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=check_tags)
+    common.assert_common_device_metrics(aggregator, tags=check_tags)
+    common.assert_common_check_run_metrics(aggregator, network_tags)
     aggregator.assert_all_metrics_covered()
 
 
@@ -813,6 +953,7 @@ def test_discovery_devices_monitored_count(read_mock, aggregator):
     check_tags = [
         'autodiscovery_subnet:{}'.format(to_native_string(network)),
     ]
+    network_tags = ['network:{}'.format(network), 'autodiscovery_subnet:{}'.format(network)]
     instance = {
         'name': 'snmp_conf',
         # Make sure the check handles bytes
@@ -831,11 +972,13 @@ def test_discovery_devices_monitored_count(read_mock, aggregator):
     check.check(instance)
     check._running = False
 
-    aggregator.assert_metric('snmp.discovered_devices_count', tags=['network:{}'.format(network)])
+    aggregator.assert_metric('snmp.discovered_devices_count', tags=network_tags)
 
     for device_ip in ['192.168.0.1', '192.168.0.2']:
         tags = check_tags + ['snmp_device:{}'.format(device_ip)]
-        aggregator.assert_metric('snmp.devices_monitored', metric_type=aggregator.GAUGE, value=1, count=1, tags=tags)
+        common.assert_common_device_metrics(aggregator, devices_monitored_value=1, count=1, tags=tags)
+
+    common.assert_common_check_run_metrics(aggregator, network_tags)
     aggregator.assert_all_metrics_covered()
 
 
@@ -1074,10 +1217,15 @@ def test_timeout(aggregator, caplog):
 
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.WARNING, at_least=1)
     # All metrics but `ifAdminStatus` should still arrive
+    aggregator.assert_metric('snmp.ifNumber', count=1)
     aggregator.assert_metric('snmp.ifInDiscards', count=4)
     aggregator.assert_metric('snmp.ifOutDiscards', count=4)
     aggregator.assert_metric('snmp.ifInErrors', count=4)
     aggregator.assert_metric('snmp.ifOutErrors', count=4)
+    aggregator.assert_metric('snmp.ifInDiscards.rate', count=4)
+    aggregator.assert_metric('snmp.ifOutDiscards.rate', count=4)
+    aggregator.assert_metric('snmp.ifInErrors.rate', count=4)
+    aggregator.assert_metric('snmp.ifOutErrors.rate', count=4)
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     common.assert_common_metrics(aggregator)

@@ -16,9 +16,12 @@ services:
         soft: 262144
         hard: 262144
     ports:
-      - "8124:8123"
+      - "8128:8123"
       - "9001:9000"
     volumes:
+      - ./override_configs/zookeeper.xml:/etc/clickhouse-server/config.d/zookeeper.xml
+      - ./override_configs/remote_servers.xml:/etc/clickhouse-server/config.d/remote_servers.xml
+      - ./override_configs/compression.xml:/etc/clickhouse-server/config.d/compression.xml
       - ./metrika.xml:/etc/metrika.xml
       - ./macros/macros-01.xml:/etc/clickhouse-server/config.d/macros.xml
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml
@@ -43,9 +46,12 @@ services:
         soft: 262144
         hard: 262144
     ports:
-      - "8125:8123"
+      - "8129:8123"
       - "9002:9000"
     volumes:
+      - ./override_configs/zookeeper.xml:/etc/clickhouse-server/config.d/zookeeper.xml
+      - ./override_configs/remote_servers.xml:/etc/clickhouse-server/config.d/remote_servers.xml
+      - ./override_configs/compression.xml:/etc/clickhouse-server/config.d/compression.xml
       - ./metrika.xml:/etc/metrika.xml
       - ./macros/macros-02.xml:/etc/clickhouse-server/config.d/macros.xml
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml
@@ -68,9 +74,12 @@ services:
         soft: 262144
         hard: 262144
     ports:
-      - "8126:8123"
+      - "8130:8123"
       - "9003:9000"
     volumes:
+      - ./override_configs/zookeeper.xml:/etc/clickhouse-server/config.d/zookeeper.xml
+      - ./override_configs/remote_servers.xml:/etc/clickhouse-server/config.d/remote_servers.xml
+      - ./override_configs/compression.xml:/etc/clickhouse-server/config.d/compression.xml
       - ./metrika.xml:/etc/metrika.xml
       - ./macros/macros-03.xml:/etc/clickhouse-server/config.d/macros.xml
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml
@@ -93,9 +102,12 @@ services:
         soft: 262144
         hard: 262144
     ports:
-      - "8127:8123"
+      - "8131:8123"
       - "9004:9000"
     volumes:
+      - ./override_configs/zookeeper.xml:/etc/clickhouse-server/config.d/zookeeper.xml
+      - ./override_configs/remote_servers.xml:/etc/clickhouse-server/config.d/remote_servers.xml
+      - ./override_configs/compression.xml:/etc/clickhouse-server/config.d/compression.xml
       - ./metrika.xml:/etc/metrika.xml
       - ./macros/macros-04.xml:/etc/clickhouse-server/config.d/macros.xml
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml
@@ -118,9 +130,12 @@ services:
         soft: 262144
         hard: 262144
     ports:
-      - "8128:8123"
+      - "8132:8123"
       - "9005:9000"
     volumes:
+      - ./override_configs/zookeeper.xml:/etc/clickhouse-server/config.d/zookeeper.xml
+      - ./override_configs/remote_servers.xml:/etc/clickhouse-server/config.d/remote_servers.xml
+      - ./override_configs/compression.xml:/etc/clickhouse-server/config.d/compression.xml
       - ./metrika.xml:/etc/metrika.xml
       - ./macros/macros-05.xml:/etc/clickhouse-server/config.d/macros.xml
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml
@@ -143,9 +158,12 @@ services:
         soft: 262144
         hard: 262144
     ports:
-      - "8129:8123"
+      - "8133:8123"
       - "9006:9000"
     volumes:
+      - ./override_configs/zookeeper.xml:/etc/clickhouse-server/config.d/zookeeper.xml
+      - ./override_configs/remote_servers.xml:/etc/clickhouse-server/config.d/remote_servers.xml
+      - ./override_configs/compression.xml:/etc/clickhouse-server/config.d/compression.xml
       - ./metrika.xml:/etc/metrika.xml
       - ./macros/macros-06.xml:/etc/clickhouse-server/config.d/macros.xml
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml
