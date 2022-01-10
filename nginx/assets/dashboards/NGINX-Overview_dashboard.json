@@ -1,6 +1,6 @@
 {
   "title": "NGINX - Overview",
-  "description": "This dashboard provides a high-level overview of your NGINX infrastructure, so you can see aggregated throughput and activity metrics from all your servers and spot issues quickly. Further reading on NGINX monitoring:\n\n- [Datadog's guide to key NGINX metrics](https://www.datadoghq.com/blog/how-to-monitor-nginx/)\n\n- [How to collect NGINX metrics using built-in tools](https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/)\n\n- [How to monitor NGINX with Datadog](https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/)\n\n- [Datadog's NGINX integration docs](https://docs.datadoghq.com/integrations/nginx/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+  "description": "This dashboard provides a high-level overview of your NGINX infrastructure, so you can see aggregated throughput and activity metrics from all your servers and spot issues quickly. Further reading on NGINX monitoring:\n\n- [Datadog's guide to key NGINX metrics](https://www.datadoghq.com/blog/how-to-monitor-nginx/)\n\n- [How to collect NGINX metrics using built-in tools](https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/)\n\n- [How to monitor NGINX with Datadog](https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/)\n\n- [Datadog's NGINX integration docs](https://docs.datadoghq.com/integrations/nginx/)\n\nClone this template dashboard to make changes and add your own graph widgets. (cloned) (cloned)\n\ndatadog_demo_keep:true",
   "widgets": [
     {
       "id": 5246207281015974,
@@ -36,7 +36,7 @@
             "id": 5476438101081174,
             "definition": {
               "type": "note",
-              "content": "#### Further reading on the NGINX integration:\n- [Datadog's guide to  key NGINX metrics](https://www.datadoghq.com/blog/how-to-monitor-nginx/)\n- [Collecting metrics with NGINX monitoring tool](https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/)\n- [How to monitor NGINX with Datadog](https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/)\n- [Datadog's NGINX integration docs](https://docs.datadoghq.com/integrations/nginx/?tab=host#)\n[If you're using NGINX Plus, check out our docs here](https://docs.datadoghq.com/integrations/nginx/?tab=host#nginx-plus)\n",
+              "content": "#### Further reading on the NGINX integration:\n- [Datadog's guide to  key NGINX metrics](https://www.datadoghq.com/blog/how-to-monitor-nginx/)\n- [Collecting metrics with NGINX monitoring tool](https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/)\n- [How to monitor NGINX with Datadog](https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/)\n- [Datadog's NGINX integration docs](https://docs.datadoghq.com/integrations/nginx/?tab=host#)\n[If you're using NGINX plus, check out our docs here](https://docs.datadoghq.com/integrations/nginx/?tab=host#nginx-plus)\n",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -72,7 +72,7 @@
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 2550775938226891,
+            "id": 8,
             "definition": {
               "title": "Dropped connections, last 15m",
               "title_size": "16",
@@ -113,7 +113,7 @@
               "x": 0,
               "y": 0,
               "width": 3,
-              "height": 2
+              "height": 1
             }
           },
           {
@@ -124,8 +124,8 @@
               "title_align": "left",
               "type": "check_status",
               "check": "nginx.can_connect",
-              "grouping": "cluster",
-              "group": "$cluster",
+              "grouping": "check",
+              "group": "docker_image:auto-process_nginx:latest,host:fse-ldmx-f7-18,image_name:auto-process_nginx,image_tag:latest,port:80,server:172.20.0.14,short_image:auto-process_nginx",
               "group_by": [],
               "tags": [
                 "*"
@@ -135,15 +135,15 @@
               "x": 3,
               "y": 0,
               "width": 3,
-              "height": 2
+              "height": 1
             }
           },
           {
             "id": 4071809555103542,
             "definition": {
               "type": "note",
-              "content": "The number of connections that have been dropped is equal to the difference between accepted and handled connections.\n",
-              "background_color": "yellow",
+              "content": "The number of connections that have been dropped is equal to the difference between accepts and handled.\n",
+              "background_color": "orange",
               "font_size": "14",
               "text_align": "left",
               "vertical_align": "center",
@@ -154,7 +154,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 2,
+              "y": 1,
               "width": 3,
               "height": 1
             }
@@ -164,7 +164,7 @@
             "definition": {
               "type": "note",
               "content": "This check returns CRITICAL if the Agent is unable to connect to and collect metrics from the monitored Nginx instance",
-              "background_color": "yellow",
+              "background_color": "orange",
               "font_size": "14",
               "text_align": "left",
               "vertical_align": "center",
@@ -175,7 +175,7 @@
             },
             "layout": {
               "x": 3,
-              "y": 2,
+              "y": 1,
               "width": 3,
               "height": 1
             }
@@ -200,96 +200,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 3,
-              "width": 6,
-              "height": 3
-            }
-          },
-          {
-            "id": 6866764292106620,
-            "definition": {
-              "title": "Requests per service",
-              "title_size": "16",
-              "title_align": "left",
-              "time": {
-                "live_span": "1w"
-              },
-              "type": "toplist",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "limit": {
-                        "count": 10,
-                        "order": "desc"
-                      }
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "query": "sum:nginx.net.request_per_s{*} by {service}",
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "aggregator": "avg"
-                    }
-                  ]
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 6,
-              "width": 3,
-              "height": 2
-            }
-          },
-          {
-            "id": 4851971395880802,
-            "definition": {
-              "type": "note",
-              "content": "A drastic change in requests per second can alert you to problems brewing somewhere in your environment.",
-              "background_color": "yellow",
-              "font_size": "14",
-              "text_align": "left",
-              "vertical_align": "center",
-              "show_tick": true,
-              "tick_pos": "50%",
-              "tick_edge": "bottom",
-              "has_padding": true
-            },
-            "layout": {
-              "x": 3,
-              "y": 6,
-              "width": 3,
-              "height": 2
-            }
-          },
-          {
-            "id": 4851971395880803,
-            "definition": {
-              "title": "Change in overall requests per second",
-              "title_size": "16",
-              "title_align": "left",
-              "time": {
-                "live_span": "1w"
-              },
-              "type": "change",
-              "requests": [
-                {
-                  "order_by": "change",
-                  "order_dir": "desc",
-                  "compare_to": "week_before",
-                  "q": "sum:nginx.net.request_per_s{*} by {service}",
-                  "increase_good": false,
-                  "change_type": "absolute"
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 8,
+              "y": 2,
               "width": 6,
               "height": 2
             }
@@ -300,7 +211,7 @@
         "x": 6,
         "y": 0,
         "width": 6,
-        "height": 11
+        "height": 5
       }
     },
     {
@@ -378,7 +289,7 @@
               "title_align": "left",
               "type": "log_stream",
               "indexes": [],
-              "query": "source:nginx @http.status_code:(404 OR 500)",
+              "query": "source:nginx service:fse-auto-process @http.status_code:(404 OR 500)",
               "sort": {
                 "column": "time",
                 "order": "asc"
@@ -404,9 +315,10 @@
       },
       "layout": {
         "x": 0,
-        "y": 5,
+        "y": 0,
         "width": 6,
-        "height": 7
+        "height": 7,
+        "is_column_break": true
       }
     },
     {
@@ -466,7 +378,7 @@
             }
           },
           {
-            "id": 3441805486544433,
+            "id": 3,
             "definition": {
               "title": "Requests per second by host",
               "title_size": "16",
@@ -517,7 +429,7 @@
             "id": 183855449379928,
             "definition": {
               "type": "note",
-              "content": "Sampling your request data with a fixed time interval provides you with the number of requests you’re receiving per unit of time—often minutes or seconds.\n\nMonitoring this metric can alert you to spikes in incoming web traffic, whether legitimate or nefarious, or sudden drops in traffic, which are usually indicative of problems",
+              "content": "Sampling your request data with a fixed time interval provides you with the number of requests you’re receiving per unit of time—often minutes or seconds.\n\nMonitoring this metric can alert you to spikes in incoming web traffic, whether legitimate or nefarious, or sudden drops, which are usually indicative of problems",
               "background_color": "blue",
               "font_size": "14",
               "text_align": "left",
@@ -535,7 +447,7 @@
             }
           },
           {
-            "id": 183855449379929,
+            "id": 5,
             "definition": {
               "title": "Requests: reading, writing, waiting",
               "title_size": "16",
@@ -636,14 +548,63 @@
               "width": 4,
               "height": 2
             }
+          },
+          {
+            "id": 2,
+            "definition": {
+              "title": "Change in overall requests per second",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "live_span": "1w"
+              },
+              "type": "change",
+              "requests": [
+                {
+                  "change_type": "absolute",
+                  "order_dir": "desc",
+                  "compare_to": "week_before",
+                  "q": "sum:nginx.net.request_per_s{*} by {service}",
+                  "increase_good": false,
+                  "order_by": "change"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 5,
+              "height": 2
+            }
+          },
+          {
+            "id": 4851971395880802,
+            "definition": {
+              "type": "note",
+              "content": "A drastic change in requests per second can alert you to problems brewing somewhere in your environment.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 5,
+              "y": 4,
+              "width": 1,
+              "height": 2
+            }
           }
         ]
       },
       "layout": {
         "x": 6,
-        "y": 11,
+        "y": 0,
         "width": 6,
-        "height": 5
+        "height": 7
       }
     },
     {
@@ -656,7 +617,7 @@
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 1344580655093671,
+            "id": 1,
             "definition": {
               "title": "Dropped connections per second",
               "title_size": "16",
@@ -721,7 +682,7 @@
             }
           },
           {
-            "id": 1344580655093672,
+            "id": 4,
             "definition": {
               "title": "Active connections per second",
               "title_size": "16",
@@ -805,7 +766,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 12,
+        "y": 0,
         "width": 6,
         "height": 4
       }
@@ -815,10 +776,17 @@
     {
       "name": "Host",
       "default": "*",
-      "prefix": "host"
+      "prefix": "host",
+      "available_values": [
+        "fse-ldmx-f7-18",
+        "nginx",
+        "nginx01"
+      ]
     }
   ],
   "layout_type": "ordered",
-  "is_read_only": true,
-  "id": 21
+  "is_read_only": false,
+  "notify_list": [],
+  "reflow_type": "fixed",
+  "id": "bve-zvs-p6t"
 }
