@@ -8,7 +8,7 @@ This check monitors [VoltDB][1] through the Datadog Agent.
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
 
-**Note**: This check should only be configured on one Agent per cluster. If you are monitoring a cluster spread across several hosts, you can install an Agent on each host - but do not enable the VoltDB integration on more than one host, as this results in duplicate metrics.
+**Note**: This check should only be configured on one Agent per cluster. If you are monitoring a cluster spread across several hosts, install an Agent on each host. However, do not enable the VoltDB integration on more than one host, as this results in duplicate metrics.
 
 ### Installation
 
@@ -17,7 +17,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Add a `datadog-agent` user. You can do so by editing your VoltDB `deployment.xml` file. Note that no specific roles are required, so assign the built-in `user` role.
+1. Add a `datadog-agent` user. You can do so by editing your VoltDB `deployment.xml` file. **Note**: No specific roles are required, so assign the built-in `user` role.
 
     ```xml
     <users>
@@ -105,7 +105,7 @@ partial -->
 
   3. [Restart the Agent][5].
 
-  See [Datadog's documentation][7] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+  To enable logs for Kubernetes environments, see [Kubernetes Log Collection][7].
 
 ### Validation
 

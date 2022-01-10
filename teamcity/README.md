@@ -16,7 +16,7 @@ The Teamcity check is included in the [Datadog Agent][1] package, so you don't n
 
 #### Prepare Teamcity
 
-Follow [Teamcity's documentation][2] to enable Guest Login.
+To prepare Teamcity, see [Enabling Guest Login][2].
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
@@ -134,7 +134,7 @@ The Teamcity check does not include any metrics.
 
 ### Events
 
-Teamcity events representing successful builds are forwarded to your Datadog application.
+Teamcity events representing successful builds are forwarded to Datadog.
 
 ### Service Checks
 

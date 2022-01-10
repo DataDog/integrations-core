@@ -12,7 +12,7 @@ This check collects TokuMX metrics, including:
 
 ### Installation
 
-The TokuMX check is included in the [Datadog Agent][1] package for Agent versions <=6.x, so you don't need to install anything else on your TokuMX servers.
+The TokuMX check is included in the [Datadog Agent][1] package. No additional installation is needed on your server.
 
 ### Configuration
 
@@ -51,7 +51,7 @@ The TokuMX check is included in the [Datadog Agent][1] package for Agent version
    echo -e "\033[0;31mdatadog user - Missing\033[0m"
    ```
 
-For more details about creating and managing users in MongoDB, see [the MongoDB documentation][2].
+For more details about creating and managing users in MongoDB, see the [MongoDB Security documentation][2].
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
@@ -117,7 +117,7 @@ Need help? Contact [Datadog support][10].
 - [Monitor key TokuMX metrics for MongoDB applications][11].
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://www.mongodb.org/display/DOCS/Security+and+Authentication
+[2]: https://docs.mongodb.com/manual/security/
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/tokumx/datadog_checks/tokumx/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
