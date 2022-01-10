@@ -44,10 +44,10 @@ system.net.conntrack.tcp_timeout,gauge,,second,,,0,system,timeout
 system.net.conntrack.tcp_timeout_stream,gauge,,second,,,0,system,timeout stream
 system.net.conntrack.timestamp,gauge,,unit,,Boolean to enable connection tracking flow timestamping.,0,system,timestamp
 system.net.packets_in.count,gauge,,packet,second,The number of packets of data received by the interface.,0,system,packets in
-system.net.packets_in.drop,gauge,,packet,second,The number of packet receive drops detected by the device driver.,-1,system,pkts in drop
+system.net.packets_in.drop,gauge,,packet,second,The number of packet receive drops detected by the device driver. This metric is only available on Linux or Windows.,-1,system,pkts in drop
 system.net.packets_in.error,gauge,,error,second,The number of packet receive errors detected by the device driver.,-1,system,pkts in err
 system.net.packets_out.count,gauge,,packet,second,The number of packets of data transmitted by the interface.,0,system,packets out
-system.net.packets_out.drop,gauge,,packet,second,The number of packet transmit drops detected by the device driver.,-1,system,pkts out drop
+system.net.packets_out.drop,gauge,,packet,second,The number of packet transmit drops detected by the device driver. This metric is only available on Linux or Windows.,-1,system,pkts out drop
 system.net.packets_out.error,gauge,,error,second,The number of packet transmit errors detected by the device driver.,-1,system,pkts out err
 system.net.tcp.failed_retransmits,gauge,,packet,,Number of TCP packets that failed to be retransmitted (Linux only),0,system,failed retransmit
 system.net.tcp.failed_retransmits.count,count,,packet,,Number of TCP packets that failed to be retransmitted (Linux only),0,system,failed retransmit monotonic count
