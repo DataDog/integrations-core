@@ -51,7 +51,7 @@
     },
     "dashboards": {
       "haproxy": "assets/dashboards/overview.json",
-      "HAProxy - Overview (Prometheus)": "assets/dashboards/prometheus_overview.json",
+      "HAProxy - Overview (Prometheus)": "assets/dashboards/prometheus_overview.json"
     },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",
