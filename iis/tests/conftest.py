@@ -3,5 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 import pytest
-INSTANCE = {"tbd"
+INSTANCE = {
+  'server': 'localhost'
+  'username': 'admin'
+  'password': 'admin'
 }
+@pytest.fixture(scope="session")
+def dd_environment():
+@pytest.fixture
+def instance():
+      return deepcopy(INSTANCE)
+@pytest.fixture
