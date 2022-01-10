@@ -10,6 +10,7 @@ INSTANCE = {
 }
 @pytest.fixture(scope="session")
 def dd_environment():
+      yield deepcopy(INSTANCE)
 @pytest.fixture
 def instance():
       return deepcopy(INSTANCE)
