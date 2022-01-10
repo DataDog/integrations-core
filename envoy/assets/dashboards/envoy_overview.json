@@ -1,6 +1,6 @@
 {
-  "title": "Envoy - Overview v2",
-  "description": "## Envoy\n\nThis dashboard provides a high-level overview of your Envoy cluster so you can monitor its performance and resource usage.\n\nFor further reading on monitoring Envoy, see:\n\n- [Official Envoy integration docs](https://docs.datadoghq.com/integrations/envoy/#data-collected)\n- [Monitoring AWS App Mesh and Envoy with Datadog](https://www.datadoghq.com/blog/envoy-app-mesh-monitoring/)\n\nClone this template to make changes and add your own graphs and widgets.",
+  "title": "Envoy - Overview",
+  "description": "## Envoy\n\nThis dashboard provides a high-level overview of your Envoy cluster so you can monitor its performance and resource usage.\n\nFor further reading on monitoring Envoy, see:\n\n- [Datadog Envoy integration docs](https://docs.datadoghq.com/integrations/envoy/)\n- [Monitoring AWS App Mesh and Envoy with Datadog](https://www.datadoghq.com/blog/envoy-app-mesh-monitoring/)\n\nClone this template to make changes and add your own graphs and widgets.",
   "widgets": [
     {
       "id": 2469678217434246,
@@ -35,7 +35,7 @@
             "id": 6583474077558724,
             "definition": {
               "type": "note",
-              "content": "**Refer to the following resources for more information**\n\n- [Official Envoy documentation](https://www.envoyproxy.io/docs/envoy/latest/)\n\n- [Available Envoy metrics](https://docs.datadoghq.com/integrations/envoy/?tab=host) \n\n- [How to monitor Envoy using AWS App Mesh](https://www.datadoghq.com/blog/envoy-app-mesh-monitoring/)",
+              "content": "**Refer to the following resources for more information**\n\n- [Datadog Envoy documentation](https://www.envoyproxy.io/docs/envoy/latest/)\n\n- [Available Envoy metrics](https://docs.datadoghq.com/integrations/envoy/?tab=host#data-collected) \n\n- [How to monitor Envoy using AWS App Mesh](https://www.datadoghq.com/blog/envoy-app-mesh-monitoring/)",
               "background_color": "transparent",
               "font_size": "12",
               "text_align": "left",
@@ -404,7 +404,7 @@
             "id": 4743777231988956,
             "definition": {
               "type": "note",
-              "content": "Monitoring the response times can identify latency issues before your customers are substantially impacted. \n\nConsider [creating alerts](https://www.datadoghq.com/blog/introducing-recovery-thresholds/) when your p95 response times pass acceptable thresholds.",
+              "content": "Monitor the response times to identify latency issues before your customers are substantially impacted. \n\nConsider [creating alerts](https://www.datadoghq.com/blog/introducing-recovery-thresholds/) when your p95 response times pass acceptable thresholds.",
               "background_color": "orange",
               "font_size": "14",
               "text_align": "left",
@@ -589,7 +589,7 @@
             "id": 6140256689199842,
             "definition": {
               "type": "note",
-              "content": "**Cluster load balancer (lb) panics** refer to how many times the proxy is ignoring the health check restrictions because there are not enough healthy upstreams. \n\nIt's helpful to see when Envoy is redirecting to unhealthy upstreams which should not happen normally. It's also useful to see when health checks are not properly set up. Cluster panics should always be 0.",
+              "content": "**Cluster load balancer (lb) panics** refer to how many times the proxy is ignoring the health check restrictions because there are not enough healthy upstreams. \n\nIt's helpful to see when Envoy is redirecting to unhealthy upstreams, which should not happen normally. It's also useful to see when health checks are not properly set up. Cluster panics should always be 0.",
               "background_color": "orange",
               "font_size": "14",
               "text_align": "left",
@@ -1146,7 +1146,7 @@
             "id": 6137726645487440,
             "definition": {
               "type": "note",
-              "content": "**Request rejected by reason**\n\nThis graph highlights the top reasons your Envoy requests were rejected based on the `no_route`, `no_cluster` and `cx_protocol error` metrics. ",
+              "content": "**Request rejected by reason**\n\nThis graph highlights the top reasons your Envoy requests were rejected based on the `no_route`, `no_cluster` and `cx_protocol_error` metrics. ",
               "background_color": "blue",
               "font_size": "14",
               "text_align": "left",
