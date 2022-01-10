@@ -1,5 +1,5 @@
 {
-  "title": "HAProxy - Overview v2",
+  "title": "HAProxy - Overview",
   "description": "This dashboard displays an overview of your HAProxy frontend and backend servers, helping you spot issues like rising error rates or disparities between your frontend and backend traffic. For more information, see:\n\n- [Monitoring HAProxy performance metrics](https://www.datadoghq.com/blog/monitoring-haproxy-performance-metrics/)\n\n- [Using built-in and third-party tools to collect HAProxy metrics](https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/)\n\n- [Monitor HAProxy with Datadog](https://www.datadoghq.com/blog/monitor-haproxy-with-datadog/)\n\n- [Datadog's HAProxy documentation](https://docs.datadoghq.com/integrations/haproxy/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
   "widgets": [
     {
@@ -298,7 +298,7 @@
             "id": 6952725003844530,
             "definition": {
               "type": "note",
-              "content": "Keeping an eye on peaks and drops is essential to ensure continuous service availability. In the event of a traffic spike, clients could see increases in latency or even denied connections.",
+              "content": "Keep an eye on peaks and drops to ensure continuous service availability. In the event of a traffic spike, clients might see increases in latency or even denied connections.",
               "background_color": "purple",
               "font_size": "14",
               "text_align": "left",
@@ -796,7 +796,7 @@
             "id": 1863184948995790,
             "definition": {
               "type": "note",
-              "content": "Ideally, all responses forwarded by HAProxy would be class 2xx codes, so an unexpected surge in the number of other code classes could be a sign of trouble.\n\n\n**4xx:** HTTP client errors\n\n**5xx:** HTTP server errors",
+              "content": "Ideally, all responses forwarded by HAProxy are class 2xx codes, so an unexpected surge in the number of other code classes could be a sign of trouble.\n\n\n**4xx:** HTTP client errors\n\n**5xx:** HTTP server errors",
               "background_color": "orange",
               "font_size": "14",
               "text_align": "left",
@@ -925,7 +925,7 @@
             "id": 3773616402244664,
             "definition": {
               "type": "note",
-              "content": "Monitoring the response times can identify latency issues before your customers are substantially impacted. \n\nConsider [creating alerts](https://www.datadoghq.com/blog/introducing-recovery-thresholds/) when your p95 response times pass acceptable thresholds.",
+              "content": "Monitor the response times to identify latency issues before your customers are substantially impacted. \n\nConsider [creating alerts](https://www.datadoghq.com/blog/introducing-recovery-thresholds/) when your p95 response times pass acceptable thresholds.",
               "background_color": "orange",
               "font_size": "14",
               "text_align": "left",
