@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -112,6 +112,10 @@ def instance_tags(field, value):
 
 def instance_timeout(field, value):
     return 5
+
+
+def instance_try_normal_ssl(field, value):
+    return True
 
 
 def instance_username(field, value):

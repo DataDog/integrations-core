@@ -166,6 +166,12 @@ files:
         value:
           example: False
           type: boolean
+      - name: try_normal_ssl
+        description: Whether or not to try a normal connection before SSL when `ssl_auth` is enabled.
+        value:
+          example: false
+          type: boolean
+          default: true
       - name: ssl_cipher_spec
         type: string
         description: The ssl cipher to use. It should match the value of the channels SSLCIPH attribute.
