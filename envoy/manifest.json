@@ -30,7 +30,8 @@
     },
     "monitors": {},
     "dashboards": {
-      "Envoy - Overview": "assets/dashboards/envoy_overview.json"
+      "Envoy - Overview": "assets/dashboards/envoy_overview.json",
+      "Envoy - Overview v2": "assets/dashboards/overview_v2.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {
