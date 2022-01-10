@@ -1,6 +1,6 @@
 {
 	"name": "[Kafka] High produce latency: {{value}} reqs/s on broker {{instance.name}}",
-	"type": "metric alert",
+	"type": "query alert",
 	"query": "avg(last_5m):avg:kafka.request.produce.time.99percentile{*} by {instance} > 200",
 	"message": "{{#is_alert}}\n\nALERT: The p99 produce latency on broker {{instance.name}} reached: {{value}}.\n\n{{/is_alert}} \n\n{{#is_warning}}\n\nWARNING: The p99 produce latency on broker {{instance.name}} reached: {{value}}.\n\n{{/is_warning}} \n\n\n**Potential Impacts**\n\n  - Client timeouts\n  - Delays in the ability of clients to process their workload\n  - Could be a leading indicator that the broker is falling behind\n    due to lack of capacity or a performance-impacting incident.\n\n**Recommended Actions**\n\n  - Investigate the state of the broker\n  - Consider topic rebalancing if the traffic on a given topic has\n    outstripped the resources available to it\n  - Consider expanding capacity by adding additional brokers\n  - Broker restart or replacement can help in some situations.\n    If TCP memory is high, and increasing in correlation with the\n    load, this could mean that the disk is struggling to keep up.\n    Restarting kafka has shown some immediate benefits when it comes\n    to reducing the load.",
 	"tags": [
