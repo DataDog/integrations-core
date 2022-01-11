@@ -8,6 +8,7 @@ import re
 import pytest
 from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.dev.testing import requires_py2
 from datadog_checks.iis import IIS
 
@@ -191,9 +192,10 @@ def test_check_without_sites_specified(aggregator, dd_run_check):
             )
 
     aggregator.assert_all_metrics_covered()
-    
+
+
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, aggregator, instance):
     with pytest.raises(Exception):
         dd_agent_check(instance, rate=True)
-    aggregator.assert_service_check("iis.can_connect", AgentCheck.CRITICAL)
+    aggregator.assert_service_check("iis.site_up", AgentCheck.CRITICAL)
