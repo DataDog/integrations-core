@@ -50,7 +50,7 @@ class InstanceConfig(BaseModel):
     ssl_key_repository_location: Optional[str]
     tags: Optional[Sequence[str]]
     timeout: Optional[float]
-    try_normal_ssl: Optional[bool]
+    try_normal_connection: Optional[bool]
     username: Optional[str]
 
     @root_validator(pre=True)
