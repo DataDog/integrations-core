@@ -31,7 +31,7 @@ The Datadog Terraform provider is available through the [Terraform Registry][1].
     }
     ```
 
-4. Run `terraform init`. This initializes the directory for use with Terraform and pull the Datadog provider.
+4. Run `terraform init`. This initializes the directory for use with Terraform and pulls the Datadog provider.
 5. Create any `.tf` file in the `terraform_config/` directory and start creating Datadog resources. For example:
 
     ```

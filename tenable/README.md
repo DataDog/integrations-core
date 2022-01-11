@@ -58,7 +58,7 @@ _Available for Agent versions >6.0_
 #### Log data collected
 
 1. Nessus backend logs collect data on scan names, start time, stop time, durations, target(s)
-2. Nessus web server logs collect data on access logs for nessus web server including Client IPs, User agents, login attempt/success/failure.
+2. Nessus web server logs collect data on access logs for the Nessus web server including Client IPs, User Agents, and login attempts/successes/failures.
 
 ### Metrics
 
