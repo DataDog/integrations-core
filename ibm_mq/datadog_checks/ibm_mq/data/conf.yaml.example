@@ -154,10 +154,10 @@ instances:
     #
     # ssl_auth: false
 
-    ## @param try_normal_ssl - boolean - optional - default: false
+    ## @param try_normal_connection - boolean - optional - default: false
     ## Whether or not to try a normal connection before SSL when `ssl_auth` is enabled.
     #
-    # try_normal_ssl: false
+    # try_normal_connection: false
 
     ## @param ssl_cipher_spec - string - optional - default: TLS_RSA_WITH_AES_256_CBC_SHA
     ## The ssl cipher to use. It should match the value of the channels SSLCIPH attribute.
