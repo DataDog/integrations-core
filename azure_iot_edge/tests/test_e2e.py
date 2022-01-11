@@ -41,7 +41,7 @@ def test_bad_url_e2e(e2e_instance, dd_agent_check):
     bad_url_agent_instance['edge_agent_prometheus_url'] = bad_url_hub_instance['edge_agent_prometheus_url'][:-2]
 
     with pytest.raises(requests.exceptions.SSLError):
-        dd_agent_check(bad_url_hub_instance)
+        dd_agent_check(bad_url_hub_instance, rate=True)
 
     aggregator = dd_agent_check(bad_url_agent_instance, rate=True)
     aggregator.assert_service_check('azure.iot_edge.edge_agent.prometheus.health', AzureIoTEdgeCheck.CRITICAL)
