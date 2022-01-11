@@ -103,8 +103,9 @@ The main Agent release manager will increment and build a new `rc` every day a b
 
 Before each build is triggered:
 
-1. Merge any fixes that have been approved, then pull `master`
-1. Release [all changed integrations](../integration-release.md#bulk-releases) with the exception of `datadog_checks_dev`
+1. Ensure all PRs have a `category/X` label. See list of Agent Release category labels [here](https://datadoghq.atlassian.net/wiki/spaces/agent/pages/2250408413/Merging+PRs+during+RC+development#PR-categories).
+2. Merge any fixes that have been approved, then pull `master`
+3. Release [all changed integrations](../integration-release.md#bulk-releases) with the exception of `datadog_checks_dev`
 
 For each fix merged, you must cherry-pick to the [branch](#branch):
 
