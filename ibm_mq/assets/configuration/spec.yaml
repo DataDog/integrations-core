@@ -166,7 +166,7 @@ files:
         value:
           example: False
           type: boolean
-      - name: try_normal_ssl
+      - name: try_normal_connection
         description: Whether or not to try a normal connection before SSL when `ssl_auth` is enabled.
         value:
           example: false

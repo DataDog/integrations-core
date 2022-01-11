@@ -106,7 +106,7 @@ class IBMMQConfig:
 
         # SSL options
         self.ssl = is_affirmative(instance.get('ssl_auth', False))  # type: bool
-        self.try_normal_ssl = is_affirmative(instance.get('try_normal_ssl', True))  # type: bool
+        self.try_normal_connection = is_affirmative(instance.get('try_normal_connection', True))  # type: bool
         self.ssl_cipher_spec = instance.get('ssl_cipher_spec', 'TLS_RSA_WITH_AES_256_CBC_SHA')  # type: str
         self.ssl_key_repository_location = instance.get(
             'ssl_key_repository_location', '/var/mqm/ssl-db/client/KeyringClient'
