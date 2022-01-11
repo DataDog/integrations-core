@@ -1071,10 +1071,6 @@ jmx_metrics:
           # The average number of requests per second that resulted in HTTP error responses
           alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
-        consumer.records.read-avro+v2.request-error-rate:
-          # The average number of requests per second that resulted in HTTP error responses
-          alias: confluent.$domain.jersey.$attribute
-          metric_type: gauge
         consumer.records.read-jsonschema+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
           alias: confluent.$domain.jersey.$attribute
@@ -1184,10 +1180,6 @@ jmx_metrics:
           alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         partition.produce-protobuf+v2.request-error-rate:
-          # The average number of requests per second that resulted in HTTP error responses
-          alias: confluent.$domain.jersey.$attribute
-          metric_type: gauge
-        partitions.list+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
           alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
