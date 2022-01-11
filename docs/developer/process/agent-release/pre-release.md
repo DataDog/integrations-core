@@ -103,8 +103,9 @@ The main Agent release manager will increment and build a new `rc` every day a b
 
 Before each build is triggered:
 
-1. Merge any fixes that have been approved, then pull `master`
-1. Release [all changed integrations](../integration-release.md#bulk-releases) with the exception of `datadog_checks_dev`
+1. Label every PR merged between code freeze and release with a `category/X` label. Changes unrelated to the release (such as dashboard updates) don't need a label.
+2. Merge any fixes that have been approved, then pull `master`
+3. Release [all changed integrations](../integration-release.md#bulk-releases) with the exception of `datadog_checks_dev`
 
 For each fix merged, you must cherry-pick to the [branch](#branch):
 
