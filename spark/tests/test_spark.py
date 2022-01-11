@@ -8,7 +8,6 @@ import time
 
 import mock
 import pytest
-import requests
 import urllib3
 from requests import RequestException
 from six import iteritems
@@ -1058,8 +1057,8 @@ def test_ssl(dd_run_check):
     run_ssl_server()
     c = SparkCheck('spark', {}, [SSL_CONFIG])
 
-    with pytest.raises(requests.exceptions.SSLError):
-        dd_run_check(c)
+    with pytest.raises(Exception, match="\\[SSL: CERTIFICATE_VERIFY_FAILED\\] certificate verify failed"):
+        dd_run_check(c, extract_message=True)
 
 
 @pytest.mark.unit
