@@ -1,6 +1,6 @@
 # CHANGELOG - http_check
 
-## 6.1.2 / 2022-01-08
+## 6.1.2-rc.1 / 2022-01-12
 
 * [Fixed] Add urllib3 as a dependency. See [#11071](https://github.com/DataDog/integrations-core/pull/11071).
 
