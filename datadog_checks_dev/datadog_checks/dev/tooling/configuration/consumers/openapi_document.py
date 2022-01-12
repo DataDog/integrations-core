@@ -9,7 +9,6 @@ from pydantic import BaseModel
 from datadog_checks.dev.tooling.configuration.consumers.model.model_info import ModelInfo
 
 from ..constants import OPENAPI_SCHEMA_PROPERTIES
-from ..utils import sanitize_openapi_object_properties
 
 # We don't need any self-documenting features
 ALLOWED_TYPE_FIELDS = OPENAPI_SCHEMA_PROPERTIES - {'default', 'description', 'example', 'title'}
@@ -101,7 +100,7 @@ def build_openapi_document(section: dict, model_id: str, schema_name: str, error
         for extra_field in set(type_data) - ALLOWED_TYPE_FIELDS:
             type_data.pop(extra_field, None)
 
-        sanitize_openapi_object_properties(type_data)
+        _sanitize_openapi_object_properties(type_data)
     return (
         openapi_document,
         model_info,
@@ -138,3 +137,30 @@ def _build_type_data(section_option: dict) -> dict:
 
             nested_properties.append({'name': nested_option['name'], **nested_type_data})
     return type_data
+
+
+def _sanitize_openapi_object_properties(value):
+    if 'anyOf' in value:
+        for data in value['anyOf']:
+            _sanitize_openapi_object_properties(data)
+        return
+
+    value_type = value['type']
+    if value_type == 'array':
+        _sanitize_openapi_object_properties(value['items'])
+    elif value_type == 'object':
+        spec_properties = value.pop('properties')
+        properties = value['properties'] = {}
+
+        # The config spec `properties` object modifier is not a map, but rather a list of maps with a
+        # required `name` attribute. This is so consumers will load objects consistently regardless of
+        # language guarantees regarding map key order.
+        for spec_prop in spec_properties:
+            name = spec_prop.pop('name')
+            properties[name] = spec_prop
+            _sanitize_openapi_object_properties(spec_prop)
+
+        if 'additionalProperties' in value:
+            additional_properties = value['additionalProperties']
+            if isinstance(additional_properties, dict):
+                _sanitize_openapi_object_properties(additional_properties)

@@ -1,4 +1,4 @@
-# Kube-dns Integration
+# kube-dns Integration
 
 ## Overview
 
@@ -6,14 +6,13 @@ Get metrics from kube-dns service in real time to:
 
 - Visualize and monitor DNS metrics collected with the Kubernetes' kube-dns addon through Prometheus
 
-See https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/dns for
-more information about kube-dns
+See https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/dns for more information about kube-dns.
 
 ## Setup
 
 ### Installation
 
-The Kube-dns check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.
+The kube-dns check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.
 
 ### Configuration
 
@@ -21,7 +20,7 @@ Edit the `kube_dns.d/conf.yaml` file, in the `conf.d/` folder at the root of you
 
 #### Using with service discovery
 
-If you are using one Agent pod per kubernetes worker node, use the following annotations on your kube-dns pod to retrieve the data automatically.
+If you are using one Agent pod per Kubernetes worker node, use the following annotations on your kube-dns pod to retrieve the data automatically.
 
 ```yaml
 apiVersion: v1
@@ -50,11 +49,11 @@ See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 
-The Kube-DNS check does not include any events.
+The kube-dns check does not include any events.
 
 ### Service Checks
 
-The Kube-DNS check does not include any service checks.
+The kube-dns check does not include any service checks.
 
 ## Troubleshooting
 

@@ -15,7 +15,6 @@ from datadog_checks.sqlserver import SQLServer
 
 from .common import CHECK_NAME
 from .conftest import DEFAULT_TIMEOUT
-from .utils import not_windows_ci, windows_ci
 
 try:
     import pyodbc
@@ -53,20 +52,9 @@ def instance_sql_msoledb_dbm(instance_sql_msoledb):
     return instance_sql_msoledb
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_collect_activity(aggregator, instance_docker, dd_run_check, dbm_instance):
-    _run_test_collect_activity(aggregator, instance_docker, dd_run_check, dbm_instance)
-
-
-@windows_ci
-@pytest.mark.integration
-def test_collect_activity_windows(aggregator, instance_docker, dd_run_check, instance_sql_msoledb_dbm):
-    _run_test_collect_activity(aggregator, instance_docker, dd_run_check, instance_sql_msoledb_dbm)
-
-
-def _run_test_collect_activity(aggregator, instance_docker, dd_run_check, dbm_instance):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     query = "SELECT * FROM ϑings"
     bob_conn = _get_conn_for_user(instance_docker, "bob")
@@ -231,7 +219,6 @@ def test_async_job_enabled(dd_run_check, dbm_instance, activity_enabled):
         assert check.activity._job_loop_future is None
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
@@ -246,7 +233,6 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     )
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):

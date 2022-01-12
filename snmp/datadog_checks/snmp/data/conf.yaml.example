@@ -167,7 +167,7 @@ instances:
     #
     use_device_id_as_hostname: true
 
-    ## @param oid_batch_size - integer - optional - default: 10
+    ## @param oid_batch_size - integer - optional - default: 5
     ## The number of OIDs handled by each batch. Increasing this number improves performance but
     ## uses more resources.
     ## Only available for corecheck implementation (`loader: core`).
