@@ -3,7 +3,6 @@
 ## 23.7.3 / 2022-01-12
 
 * [Fixed] Fix obfuscate_sql_with_metadata query being None. See [#11094](https://github.com/DataDog/integrations-core/pull/11094).
-* [Fixed] Backport (#11069) to rc14. See [#11071](https://github.com/DataDog/integrations-core/pull/11071).
 
 ## 23.7.2 / 2022-01-08
 
