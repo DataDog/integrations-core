@@ -523,48 +523,52 @@ class ESCheck(AgentCheck):
         custom_queries = self._config.custom_queries
 
         for query_endpoint in custom_queries:
-            columns = query_endpoint.get('columns', [])
-            data_path = query_endpoint.get('data_path')
-            raw_endpoint = query_endpoint.get('endpoint')
-            static_tags = query_endpoint.get('tags', [])
-            payload = query_endpoint.get('payload', {})
+            try:
+                columns = query_endpoint.get('columns', [])
+                data_path = query_endpoint.get('data_path')
+                raw_endpoint = query_endpoint.get('endpoint')
+                static_tags = query_endpoint.get('tags', [])
+                payload = query_endpoint.get('payload', {})
 
-            endpoint = self._join_url(raw_endpoint, admin_forwarder)
-            data = self._get_data(endpoint, data=payload)
+                endpoint = self._join_url(raw_endpoint, admin_forwarder)
+                data = self._get_data(endpoint, data=payload)
 
-            # If there are tags, add the tag path to list of paths to evaluate while processing metric
-            dynamic_tags = get_dynamic_tags(columns)
-            tags = base_tags + static_tags
+                # If there are tags, add the tag path to list of paths to evaluate while processing metric
+                dynamic_tags = get_dynamic_tags(columns)
+                tags = base_tags + static_tags
 
-            # Traverse the nested dictionaries to the data_path and get the remainder JSON response
-            value = get_value_from_path(data, data_path)
+                # Traverse the nested dictionaries to the data_path and get the remainder JSON response
+                value = get_value_from_path(data, data_path)
 
-            for column in columns:
-                metric_type = column.get('type', 'gauge')
+                for column in columns:
+                    metric_type = column.get('type', 'gauge')
 
-                # Skip tags since already processed
-                if metric_type == 'tag':
-                    continue
-                name = column.get('name')
-                value_path = column.get('value_path')
-                if name and value_path:
-                    # At this point, there may be multiple branches of value_paths.
-                    # If value is a list, go through each entry
-                    if isinstance(value, list):
-                        value = value
-                    else:
-                        value = [value]
+                    # Skip tags since already processed
+                    if metric_type == 'tag':
+                        continue
+                    name = column.get('name')
+                    value_path = column.get('value_path')
+                    if name and value_path:
+                        # At this point, there may be multiple branches of value_paths.
+                        # If value is a list, go through each entry
+                        if isinstance(value, list):
+                            value = value
+                        else:
+                            value = [value]
 
-                    for branch in value:
-                        self._process_custom_metric(
-                            value=branch,
-                            data_path=data_path,
-                            value_path=value_path,
-                            dynamic_tags=dynamic_tags,
-                            xtype=metric_type,
-                            metric_name=name,
-                            tags=tags,
-                        )
+                        for branch in value:
+                            self._process_custom_metric(
+                                value=branch,
+                                data_path=data_path,
+                                value_path=value_path,
+                                dynamic_tags=dynamic_tags,
+                                xtype=metric_type,
+                                metric_name=name,
+                                tags=tags,
+                            )
+            except Exception as e:
+                self.log.error("Custom query %s failed: %s", query_endpoint, e)
+                continue
 
     def _create_event(self, status, tags=None):
         hostname = to_string(self.hostname)
