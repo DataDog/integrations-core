@@ -18,5 +18,9 @@ def initialize_instance(values, **kwargs):
                 # Each query must have both `name` and `value_path`
                 if not (column.get('value_path') and column.get('name')):
                     raise ValueError('Each column must have a `value_path` and `name` values')
+                if column.get('type', 'gauge') not in ['gauge', 'monotonic_count', 'rate', 'tag']:
+                    raise ValueError(
+                        'Metric type {} not recognized for custom query {}'.format(column.get('type'), column)
+                    )
 
     return values
