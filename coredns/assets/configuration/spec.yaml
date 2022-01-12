@@ -9,14 +9,11 @@ files:
     options:
     - template: instances/openmetrics
       overrides:
-        openmetrics_endpoint.enabled: true
         openmetrics_endpoint.required: false
         openmetrics_endpoint.value.example: http://%%host%%:9153/metrics
-        tags.display_priority: 1
         tags.value.example:
           - "dns-pod:%%host%%"
-        metrics.hidden: false
-        metrics.value.example:
+        extra_metrics.value.example:
           - coredns_template_matches_total: template_matches_count
           - coredns_template_template_failures_total: template_templating_failures_count
           - coredns_template_rr_failures_total: template_resource_record_failures_count
@@ -55,7 +52,7 @@ files:
           type: string
         example:
           - "dns-pod:%%host%%"
-    - name: metrics
+    - name: extra_metrics
       description: |
         Metrics from the CoreDNS plugins for 'metrics', 'proxy', 'forward' and 'cache'
         are enabled by default, however in order to scrape metrics for optional

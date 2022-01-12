@@ -46,68 +46,16 @@ init_config:
 instances:
 
   -
-    ## @param tags - list of strings - optional
-    ## A list of tags to attach to every metric and service check emitted by this instance.
-    ##
-    ## Learn more about tagging at https://docs.datadoghq.com/tagging
-    #
-    # tags:
-    #   - dns-pod:%%host%%
-
     ## @param openmetrics_endpoint - string - optional - default: http://%%host%%:9153/metrics
     ## The URL exposing metrics in the OpenMetrics format.
     #
-    openmetrics_endpoint: http://%%host%%:9153/metrics
+    # openmetrics_endpoint: http://%%host%%:9153/metrics
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.
     ## All configuration options will use the prefix-less name.
     #
     # raw_metric_prefix: <PREFIX>_
-
-    ## @param metrics - (list of string or mapping) - optional
-    ## This list defines which metrics to collect from the `openmetrics_endpoint`.
-    ## Metrics may be defined in 3 ways:
-    ##
-    ## 1. If the item is a string, then it represents the exposed metric name, and
-    ##    the sent metric name will be identical. For example:
-    ##
-    ##      metrics:
-    ##      - <METRIC_1>
-    ##      - <METRIC_2>
-    ## 2. If the item is a mapping, then the keys represent the exposed metric names.
-    ##
-    ##      a. If a value is a string, then it represents the sent metric name. For example:
-    ##
-    ##           metrics:
-    ##           - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
-    ##           - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
-    ##      b. If a value is a mapping, then it must have a `name` and/or `type` key.
-    ##         The `name` represents the sent metric name, and the `type` represents how
-    ##         the metric should be handled, overriding any type information the endpoint
-    ##         may provide. For example:
-    ##
-    ##           metrics:
-    ##           - <EXPOSED_METRIC_1>:
-    ##               name: <SENT_METRIC_1>
-    ##               type: <METRIC_TYPE_1>
-    ##           - <EXPOSED_METRIC_2>:
-    ##               name: <SENT_METRIC_2>
-    ##               type: <METRIC_TYPE_2>
-    ##
-    ##         The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
-    ##
-    ## Regular expressions may be used to match the exposed metric names, for example:
-    ##
-    ##   metrics:
-    ##   - ^network_(ingress|egress)_.+
-    ##   - .+:
-    ##       type: gauge
-    #
-    # metrics:
-    #   - coredns_template_matches_total: template_matches_count
-    #   - coredns_template_template_failures_total: template_templating_failures_count
-    #   - coredns_template_rr_failures_total: template_resource_record_failures_count
 
     ## @param extra_metrics - (list of string or mapping) - optional
     ## This list defines metrics to collect from the `openmetrics_endpoint`, in addition to
@@ -149,7 +97,10 @@ instances:
     ##   - .+:
     ##       type: gauge
     #
-    # extra_metrics: []
+    # extra_metrics:
+    #   - coredns_template_matches_total: template_matches_count
+    #   - coredns_template_template_failures_total: template_templating_failures_count
+    #   - coredns_template_rr_failures_total: template_resource_record_failures_count
 
     ## @param exclude_metrics - list of strings - optional
     ## A list of metrics to exclude, with each entry being either
@@ -601,6 +552,14 @@ instances:
     ## Whether or not to allow URL redirection.
     #
     # allow_redirects: true
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - dns-pod:%%host%%
 
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
