@@ -6,9 +6,9 @@
 
 This check collects metrics from your YARN ResourceManager, including (but not limited to):
 
-- Cluster-wide metrics, such as number of running apps, running containers, unhealthy nodes, etc.
-- Per-application metrics, such as app progress, elapsed running time, running containers, memory use, etc.
-- Node metrics, such as available vCores, time of last health update, etc.)
+- Cluster-wide metrics, such as number of running apps, running containers, unhealthy nodes, and more.
+- Per-application metrics, such as app progress, elapsed running time, running containers, memory use, and more.
+- Node metrics, such as available vCores, time of last health update, and more.
 
 ### Deprecation notice
 
