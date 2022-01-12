@@ -30,13 +30,13 @@ instances:
     tags:
       - dns-pod:%%host%%
 
-    ## @param metrics - list of strings - optional
+    ## @param extra_metrics - list of strings - optional
     ## Metrics from the CoreDNS plugins for 'metrics', 'proxy', 'forward' and 'cache'
     ## are enabled by default, however in order to scrape metrics for optional
     ## plugins, enable the plugin in the CoreDNS corefile and then add the metric below.
     ## As an example, the 'template' plugin's metrics are below
     #
-    # metrics:
+    # extra_metrics:
     #   - coredns_template_matches_total: template_matches_count
     #   - coredns_template_template_failures_total: template_templating_failures_count
     #   - coredns_template_rr_failures_total: template_resource_record_failures_count
