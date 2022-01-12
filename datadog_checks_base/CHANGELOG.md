@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 23.7.3 / 2022-01-12
+
+* [Fixed] Fix obfuscate_sql_with_metadata query being None. See [#11094](https://github.com/DataDog/integrations-core/pull/11094).
+
 ## 23.7.2 / 2022-01-08
 
 * [Fixed] Add urllib3 as dependency. See [#11069](https://github.com/DataDog/integrations-core/pull/11069).
