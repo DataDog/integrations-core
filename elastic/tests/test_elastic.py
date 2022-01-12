@@ -110,6 +110,41 @@ def test_custom_queries_valid_metrics(dd_environment, dd_run_check, instance, ag
 
 
 @pytest.mark.integration
+def test_custom_queries_one_invalid(dd_environment, dd_run_check, instance, aggregator):
+    custom_queries = [
+        {
+            # Wrong endpoint
+            'endpoint': '/_nodes2',
+            'data_path': '_nodes',
+            'columns': [
+                {
+                    'value_path': 'total',
+                    'name': 'elasticsearch.custom.metric2',
+                },
+            ],
+        },
+        {
+            # Good endpoint
+            'endpoint': '/_nodes',
+            'data_path': '_nodes',
+            'columns': [
+                {
+                    'value_path': 'total',
+                    'name': 'elasticsearch.custom.metric',
+                },
+            ],
+        },
+    ]
+
+    instance = deepcopy(instance)
+    instance['custom_queries'] = custom_queries
+    check = ESCheck('elastic', {}, instances=[instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('elasticsearch.custom.metric', metric_type=aggregator.GAUGE)
+
+
+@pytest.mark.integration
 def test_custom_queries_with_payload(dd_environment, dd_run_check, instance, aggregator, cluster_tags):
     custom_queries = [
         {
