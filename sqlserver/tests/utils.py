@@ -25,8 +25,8 @@ high_cardinality_only = pytest.mark.skipif(
 
 class HighCardinalityQueries:
     """
-    HighCardinalityQueries is a test utility to run queries against a high cardinality database
-    (e.g. Large number of tables, schemas, query cardinality, etc). You must use the `hc` env to utilize this.
+    HighCardinalityQueries is a test utility to run queries against a high cardinality database (e.g. Large number of
+    tables, schemas, query cardinality, etc). You must use the `high-cardinality` env to utilize this.
     """
 
     DEFAULT_TIMEOUT = 30
@@ -128,10 +128,8 @@ class HighCardinalityQueries:
         """Creates a slow running query by trying to match a pattern that may or may not exist."""
         columns = copy(self.columns)
         shuffle(columns)
-        return (
-            'SELECT TOP 10 {col} FROM datadog_test.dbo.high_cardinality WHERE col2_txt LIKE \'%{pattern}%\''.format(
-                col={columns[0]}, pattern=self._create_rand_string()
-            )
+        return 'SELECT TOP 10 {col} FROM datadog_test.dbo.high_cardinality WHERE col2_txt LIKE \'%{pattern}%\''.format(
+            col={columns[0]}, pattern=self._create_rand_string()
         )
 
     def create_complex_query(self):
