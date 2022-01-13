@@ -1,8 +1,5 @@
 # CHANGELOG - IBM MQ
 
-## 3.17.1-beta.1 / 2022-01-11
-
-
 ## 3.17.0 / 2022-01-08
 
 * [Added] Add Windows support to IBM MQ. See [#10737](https://github.com/DataDog/integrations-core/pull/10737).
