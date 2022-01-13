@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 8.0.1 / 2022-01-13
+
+* [Fixed] mysql: Update base version. See [#11117](https://github.com/DataDog/integrations-core/pull/11117).
+
 ## 8.0.0 / 2022-01-08
 
 * [Added] Add statement metadata to events and metrics payload. See [#10880](https://github.com/DataDog/integrations-core/pull/10880).
