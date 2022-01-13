@@ -54,12 +54,6 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 You can use the [Datadog FluentD plugin][6] to forward the logs directly from FluentD to your Datadog account.
 
 ###### Add metadata to your logs

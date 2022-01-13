@@ -73,13 +73,7 @@ See [Tracing Kubernetes Applications][8] and the [Kubernetes Daemon Setup][9] fo
 
 Then, [instrument your application container][6] and set `DD_AGENT_HOST` to the name of your Agent container.
 
-#### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
+##### Log collection
 
 _Available for Agent versions >6.0_
 

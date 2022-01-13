@@ -31,13 +31,7 @@ The Cassandra Nodetool check is included in the [Datadog Agent][3] package, so y
 
 2. [Restart the Agent][6].
 
-#### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
+##### Log collection
 
 Cassandra Nodetool logs are collected by the Cassandra integration. See the [log collection instructions for Cassandra][7].
 

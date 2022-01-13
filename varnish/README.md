@@ -58,12 +58,6 @@ sudo usermod -G varnish -a dd-agent
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
 1. To enable Varnish logging uncomment the following in `/etc/default/varnishncsa`:

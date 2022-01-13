@@ -134,13 +134,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 
 `INSTANCE_CONFIG` needs to be customized depending on your vault authentication config. See example in Host section above. 
 
-#### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
+##### Log collection
 
 _Available for Agent versions >6.0_
 

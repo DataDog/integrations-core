@@ -21,13 +21,7 @@ The ASP.NET check is included in the [Datadog Agent][1] package, so you don't ne
 
 **Note**: Versions 1.9.0 or later of this check use a new implementation for metric collection, which requires Python 3. For hosts that are unable to use Python 3, or if you would like to use a legacy version of this check, refer to the following [config][9].
 
-#### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
+##### Log collection
 
 ASP.NET uses IIS logging. Follow the [setup instructions for IIS][5] in order to view logs related to ASP.NET requests and failures.
 

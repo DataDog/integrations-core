@@ -71,13 +71,7 @@ Step to configure `statsd-emitter` extension to collect the majority of [Druid m
 
 Use the default configuration of your `druid.d/conf.yaml` file to activate the collection of your Druid service checks. See the sample [druid.d/conf.yaml][6] for all available configuration options.
 
-#### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
+##### Log collection
 
 _Available for Agent versions >6.0_
 

@@ -49,13 +49,7 @@ instances:
 
 2. [Restart the Agent][8] to begin sending Gunicorn metrics to Datadog.
 
-#### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
+##### Log collection
 
 _Available for Agent versions >6.0_
 

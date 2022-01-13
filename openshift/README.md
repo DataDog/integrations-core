@@ -61,13 +61,7 @@ Depending on your needs and the [security constraints][3] of your cluster, three
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx --> 
 
-#### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
+##### Log collection
 
 See [Kubernetes Log Collection][4] for further information.
 

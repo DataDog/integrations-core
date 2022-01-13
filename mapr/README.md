@@ -46,13 +46,7 @@ Installation steps for each node:
 2. Set the `ticket_location` parameter in the config to the path of the long-lived ticket you created.
 3. [Restart the Agent][8].
 
-#### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
+##### Log collection
 
 MapR uses fluentD for logs. Use the [fluentD datadog plugin][9] to collect MapR logs. The following command downloads and installs the plugin into the right directory.
 

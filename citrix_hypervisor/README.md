@@ -26,13 +26,7 @@ The Citrix Hypervisor integration requires a user with at least [`read-only`][4]
 
 2. [Restart the Agent][6].
 
-#### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
+##### Log collection
 
 _Available for Agent versions >6.0_
 

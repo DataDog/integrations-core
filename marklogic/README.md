@@ -65,13 +65,7 @@ If you plan to use the `enable_health_service_checks` configuration, give the Da
 
 2. [Restart the Agent][9].
 
-#### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
+##### Log collection
 
 _Available for Agent versions >6.0_
 
