@@ -10,6 +10,7 @@ INSTANCE = {'server': 'localhost', 'username': 'admin', 'password': 'admin'}
 
 @pytest.fixture(scope="session")
 def dd_environment():
+    yield INSTANCE, {'docker_platform': 'windows'}
     yield deepcopy(INSTANCE)
 
 
