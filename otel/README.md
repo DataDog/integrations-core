@@ -2,7 +2,7 @@
 
 ## Overview
 
-OpenTelemetry is a vendor-agnostic standard for telemetry data. Datadog supports ingesting OpenTelemetry data through the OpenTelemetry Collector and the Datadog Agent (experimental). This tile documents how to export data to Datadog through the OpenTelemetry Collector. Check [our public documentation][7] for further information on the Datadog Agent support.
+OpenTelemetry is a vendor-agnostic standard for telemetry data. Datadog supports ingesting OpenTelemetry data through the OpenTelemetry Collector and the Datadog Agent (experimental). This tile documents how to export data to Datadog through the OpenTelemetry Collector. See [OTLP ingest in Datadog Agent][7] for further information on the Datadog Agent support.
 
 The OpenTelemetry Collector is a vendor-agnostic agent process that, through the Datadog exporter, exports telemetry data directly to Datadog servers (no Agent installation required). It reports metrics and traces from instrumented applications as well as general system metrics.
 
@@ -14,7 +14,7 @@ Host metrics are shown in the default dashboard, but you can send arbitrary metr
 
 Follow the [OpenTelemetry Collector documentation][1] to install the `opentelemetry-collector-contrib` distribution, or any other distribution that includes the Datadog exporter.
 
-The Datadog Agent is **not** needed to export telemetry data to Datadog in this setup. Check [our public documentation][7] if you want to use the Datadog Agent instead.
+The Datadog Agent is **not** needed to export telemetry data to Datadog in this setup. See [OTLP Ingest in Datadog Agent][7] if you want to use the Datadog Agent instead.
 ### Configuration
 
 To export telemetry data to Datadog from the OpenTelemetry Collector, add the Datadog exporter to your metrics and traces pipelines.
