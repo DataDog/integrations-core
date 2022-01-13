@@ -2,7 +2,7 @@
 
 ## 12.0.1 / 2022-01-13
 
-* [Fixed] postgres: Update base version. See [#11116](https://github.com/DataDog/integrations-core/pull/11116).
+* [Fixed] Bump base package. See [#11116](https://github.com/DataDog/integrations-core/pull/11116).
 
 ## 12.0.0 / 2022-01-08
 
