@@ -1,8 +1,8 @@
 # CHANGELOG - sqlserver
 
-## 7.1.0 / 2022-01-13
+## 7.0.1 / 2022-01-13
 
-* [Added] Bump base package dependency. See [#11115](https://github.com/DataDog/integrations-core/pull/11115).
+* [Fixed] Bump base package dependency. See [#11115](https://github.com/DataDog/integrations-core/pull/11115).
 
 ## 7.0.0 / 2022-01-08
 
