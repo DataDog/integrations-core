@@ -14,3 +14,8 @@ If you are spinning up a E2E for WebLogic for the first time, you will need to g
 Now, you should be able to use `ddev` to start the weblogic E2E. 
 
 Detailed Instructions for using the Oracle Container Registry are located [here](https://docs.oracle.com/en/operating-systems/oracle-linux/docker/docker-registry.html#docker-ocr-login). 
+
+## Accessing the Admin Console UI
+
+1. Navigate to http://localhost:7001/console in your browser
+2. Login credentials are located [here](./compose/weblogic/properties/docker-build/domain_security.properties).
