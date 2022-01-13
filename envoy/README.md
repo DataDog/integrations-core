@@ -157,6 +157,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][11
 | `<INTEGRATION_NAME>` | `envoy`                                     |
 | `<INIT_CONFIG>`      | blank or `{}`                               |
 | `<INSTANCE_CONFIG>`  | `{"openmetrics_endpoint": "http://%%host%%:80/stats/prometheus"}` |
+ **Note**: This is a new default check example. If you previously implemented this integration, see the [legacy example][17].
 
 ##### Log collection
 
@@ -224,3 +225,4 @@ Need help? Contact [Datadog support][16].
 [14]: https://github.com/DataDog/integrations-core/blob/master/envoy/metadata.csv
 [15]: https://github.com/DataDog/integrations-core/blob/master/envoy/assets/service_checks.json
 [16]: https://docs.datadoghq.com/help/
+[17]: https://github.com/DataDog/integrations-core/blob/7.33.x/envoy/datadog_checks/envoy/data/conf.yaml.example
