@@ -18,7 +18,7 @@ FROM     information_schema.tables
 GROUP BY table_schema"""
 
 SQL_QUERY_TABLE_ROWS_STATS = """\
-SELECT   CONCAT(table_schema,'.',table_name) as table_name, rows_read, rows_changed 
+SELECT   CONCAT(table_schema,'.',table_name) as table_name, rows_read, rows_changed
 FROM     information_schema.table_statistics"""
 
 SQL_AVG_QUERY_RUN_TIME = """\
