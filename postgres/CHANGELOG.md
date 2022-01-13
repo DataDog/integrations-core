@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 12.0.1 / 2022-01-13
+
+* [Fixed] Update base version. See [#11116](https://github.com/DataDog/integrations-core/pull/11116).
+
 ## 12.0.0 / 2022-01-08
 
 * [Added] Add statement metadata to events and metrics payload. See [#10879](https://github.com/DataDog/integrations-core/pull/10879).
