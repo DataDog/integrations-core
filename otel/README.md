@@ -98,4 +98,4 @@ Need help? Contact [Datadog support][6].
 [4]: https://github.com/open-telemetry/opentelemetry-collector/tree/master/receiver/hostmetricsreceiver
 [5]: https://github.com/DataDog/integrations-core/blob/master/opentelemetry/metadata.csv
 [6]: https://docs.datadoghq.com/help/
-[7]: https://docs.datadoghq.com/tracing/setup_overview/open_standards/#datadog-agent-otlp-ingestion-support
+[7]: https://docs.datadoghq.com/tracing/setup_overview/open_standards/#otlp-ingest-in-datadog-agent
