@@ -30,6 +30,8 @@ from .common import (
     get_local_driver,
 )
 
+from .utils import HighCardinalityQueries
+
 try:
     import pyodbc
 except ImportError:
@@ -236,22 +238,22 @@ def dd_environment():
         )
         pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
 
-    def hc_env_is_ready():
+    def high_cardinality_env_is_ready():
         conn_str = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;'.format(
             get_local_driver(), DOCKER_SERVER
         )
         conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
         with conn.cursor() as cursor:
-            cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.database_principals WHERE name LIKE \'hc_user_%\'')
+            cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.database_principals WHERE name LIKE \'high_cardinality_user_%\'')
             user_count = cursor.fetchone()[0]
-            cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.schemas WHERE name LIKE \'hc_schema_%\'')
+            cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.schemas WHERE name LIKE \'high_cardinality_schema%\'')
             schema_count = cursor.fetchone()[0]
             cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.tables')
             table_count = cursor.fetchone()[0]
             cursor.execute('SELECT COUNT(*) FROM datadog_test.dbo.high_cardinality')
             row_count = cursor.fetchone()[0]
-            expected_obj_count = 10_000
-            expected_row_count = 100_000
+            expected_obj_count = 10000
+            expected_row_count = 100000
             return (
                 user_count >= expected_obj_count
                 and schema_count >= expected_obj_count
@@ -271,7 +273,7 @@ def dd_environment():
         # This env is a highly loaded database and is expected to take a while to setup.
         # This will wait about 8 minutes before timing out.
         completion_message = 'INFO: setup.sql completed.'
-        conditions += [WaitFor(hc_env_is_ready, wait=5, attempts=90)]
+        conditions += [WaitFor(high_cardinality_env_is_ready, wait=5, attempts=90)]
 
     conditions += [CheckDockerLogs(compose_file, completion_message)]
 

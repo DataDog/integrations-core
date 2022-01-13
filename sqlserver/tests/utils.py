@@ -12,16 +12,14 @@ import pytest
 
 from datadog_checks.dev.utils import running_on_windows_ci
 
-from .conftest import DEFAULT_TIMEOUT
-
 windows_ci = pytest.mark.skipif(not running_on_windows_ci(), reason='Test can only be run on Windows CI')
 not_windows_ci = pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
 always_on = pytest.mark.skipif(
     os.environ["COMPOSE_FOLDER"] != 'compose-ha', reason='Test can only be run on AlwaysOn SQLServer instances'
 )
-hc_only = pytest.mark.skipif(
+high_cardinality_only = pytest.mark.skipif(
     os.environ["COMPOSE_FOLDER"] != 'compose-high-cardinality',
-    reason='Test can only be run in the high cardinality (hc) env.',
+    reason='Test can only be run in the high cardinality env.',
 )
 
 
@@ -31,39 +29,32 @@ class HighCardinalityQueries:
     (e.g. Large number of tables, schemas, query cardinality, etc). You must use the `hc` env to utilize this.
     """
 
-    def __init__(self, instance_docker):
-        self.EXPECTED_USER_COUNT = 10_000
-        self.EXPECTED_SCHEMA_COUNT = 10_000
-        self.EXPECTED_TABLE_COUNT = 10_000
-        self.EXPECTED_ROW_COUNT = 100_000
-        self.columns = [
-            'id',
-            'guid',
-            'app_name',
-            'app_version',
-            'app_image',
-            'app_image_base64',
-            'app_ip_v6',
-            'app_btc_addr',
-            'app_slogan',
-            'app_priority',
-            'app_permissions',
-            'subscription_renewal',
-            'primary_contact',
-            'user_firstname',
-            'user_lastname',
-            'user_city',
-            'user_state',
-            'user_country',
-            'loc_lat',
-            'loc_long',
-            'user_ssn',
-            'user_card',
-            'user_card_type',
-            'created_at',
-            'updated_at',
-        ]
+    DEFAULT_TIMEOUT = 30
 
+    def __init__(self, instance_docker=None):
+        self.EXPECTED_USER_COUNT = 10000
+        self.EXPECTED_SCHEMA_COUNT = 10000
+        self.EXPECTED_TABLE_COUNT = 10000
+        self.EXPECTED_ROW_COUNT = 100000
+        self.columns = [
+            'col1_txt',
+            'col2_txt',
+            'col3_txt',
+            'col4_txt',
+            'col5_txt',
+            'col6_txt',
+            'col7_txt',
+            'col8_txt',
+            'col9_txt',
+            'col10_txt',
+            'col11_float',
+            'col12_float',
+            'col13_float',
+            'col14_int',
+            'col15_int',
+            'col16_int',
+            'col17_date',
+        ]
         self._instance_docker = instance_docker
         self._is_running = False
         self._threads = []
@@ -138,7 +129,7 @@ class HighCardinalityQueries:
         columns = copy(self.columns)
         shuffle(columns)
         return (
-            'SELECT TOP 10 {col} FROM datadog_test.dbo.high_cardinality WHERE app_btc_addr LIKE \'%{pattern}%\''.format(
+            'SELECT TOP 10 {col} FROM datadog_test.dbo.high_cardinality WHERE col2_txt LIKE \'%{pattern}%\''.format(
                 col={columns[0]}, pattern=self._create_rand_string()
             )
         )
@@ -147,7 +138,7 @@ class HighCardinalityQueries:
         """Creates a complex query to produce complicated execution plans."""
         columns = copy(self.columns)
         shuffle(columns)
-        query = """
+        query = """\
         SELECT
             {col}
         FROM
@@ -155,24 +146,24 @@ class HighCardinalityQueries:
             JOIN (
                 SELECT
                     id,
-                    COUNT(*) app_priority
+                    COUNT(*) col12_float
                 FROM
                     datadog_test.dbo.high_cardinality AS hc2
                 WHERE
-                    hc2.app_version LIKE '8.%'
-                    AND hc2.loc_lat > (
+                    hc2.col1_txt LIKE '%-%'
+                    AND hc2.col14_int > (
                         SELECT
-                            AVG(hc3.loc_lat)
+                            AVG(hc3.col15_int)
                         FROM
                             datadog_test.dbo.high_cardinality AS hc3)
                     GROUP BY
                         hc2.id) AS hc4 ON hc4.id = hc1.id
             JOIN datadog_test.dbo.high_cardinality AS hc5 ON hc5.id = hc1.id
         WHERE
-            CAST(hc5.subscription_renewal AS VARCHAR)
-            IN('Once', 'Yearly', 'Weekly')
-            AND hc5.user_state IS NOT NULL
-            AND hc5.app_version NOT LIKE '0.%';
+            CAST(hc5.col17_date AS VARCHAR)
+            IN('2003-04-23', '2043-09-10', '1996-08-08')
+            AND hc5.col13_float IS NOT NULL
+            AND hc5.col17_date NOT LIKE '21%';
         """
         # Select a range of random columns and prefix to match our alias
         return query.format(col=','.join(['hc1.' + col for col in columns[: randint(1, len(columns) - 1)]]))
@@ -181,8 +172,8 @@ class HighCardinalityQueries:
         conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
             self._instance_docker['driver'], self._instance_docker['host'], user, "Password12!"
         )
-        conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=False)
-        conn.timeout = DEFAULT_TIMEOUT
+        conn = pyodbc.connect(conn_str, timeout=HighCardinalityQueries.DEFAULT_TIMEOUT, autocommit=False)
+        conn.timeout = HighCardinalityQueries.DEFAULT_TIMEOUT
         return conn
 
     @staticmethod
