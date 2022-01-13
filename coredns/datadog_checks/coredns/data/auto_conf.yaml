@@ -14,7 +14,7 @@ init_config:
 #
 instances:
 
-    ## @param openmetrics_endpoint - string - required
+    ## @param openmetrics_endpoint - string - optional - default: http://%%host%%:9153/metrics
     ## To enable CoreDNS metrics you must specify the openmetrics endpoint url
     ## and enable the plugin within coredns
     ## See: https://coredns.io/plugins/metrics/
