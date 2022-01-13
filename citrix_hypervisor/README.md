@@ -26,7 +26,7 @@ The Citrix Hypervisor integration requires a user with at least [`read-only`][4]
 
 2. [Restart the Agent][6].
 
-##### Log collection
+#### Log collection
 
 _Available for Agent versions >6.0_
 

@@ -40,7 +40,7 @@ If you passed the correct Master URL when starting datadog-agent, the Agent is a
 
 Unless your masters' API uses a self-signed certificate. In that case, set `disable_ssl_validation: true` in `mesos_master.d/conf.yaml`.
 
-##### Log collection
+#### Log collection
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 

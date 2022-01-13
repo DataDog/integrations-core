@@ -240,7 +240,7 @@ LABEL "com.datadoghq.ad.instances"='[{"server": "%%host%%", "user": "datadog","p
 
 See [Autodiscovery template variables][12] for details on using `<UNIQUEPASSWORD>` as an environment variable instead of a label.
 
-##### Log collection
+#### Log collection
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker Log Collection][13].
@@ -287,7 +287,7 @@ spec:
 
 See [Autodiscovery template variables][12] for details on using `<UNIQUEPASSWORD>` as an environment variable instead of a label.
 
-##### Log collection
+#### Log collection
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][17].

@@ -121,7 +121,7 @@ Optionally, you can configure the Agent to use a built in `postqueue -p` command
 
 3. [Restart the Agent][5].
 
-##### Log collection
+#### Log collection
 
 _Available for Agent versions >6.0_
 

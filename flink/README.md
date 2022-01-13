@@ -49,7 +49,7 @@ No additional installation is needed on your server.
 
 4. Restart Flink to start sending your Flink metrics to Datadog.
 
-##### Log collection
+#### Log collection
 
 _Available for Agent >6.0_
 

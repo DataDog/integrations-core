@@ -61,7 +61,7 @@ Depending on your needs and the [security constraints][3] of your cluster, three
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx --> 
 
-##### Log collection
+#### Log collection
 
 See [Kubernetes Log Collection][4] for further information.
 

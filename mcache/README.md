@@ -73,7 +73,7 @@ See [Tracing Kubernetes Applications][8] and the [Kubernetes Daemon Setup][9] fo
 
 Then, [instrument your application container][6] and set `DD_AGENT_HOST` to the name of your Agent container.
 
-##### Log collection
+#### Log collection
 
 _Available for Agent versions >6.0_
 

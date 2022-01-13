@@ -102,7 +102,7 @@ If you are not using DC/OS, use the Marathon web UI or post to the API URL the f
 
 Unless you want to configure a custom `mesos_slave.d/conf.yaml`-perhaps you need to set `disable_ssl_validation: true`-you don't need to do anything after installing the Agent.
 
-##### Log collection
+#### Log collection
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 

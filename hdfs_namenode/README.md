@@ -60,7 +60,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 | `<INIT_CONFIG>`      | blank or `{}`                                        |
 | `<INSTANCE_CONFIG>`  | `{"hdfs_namenode_jmx_uri": "https://%%host%%:9870"}` |
 
-##### Log collection
+#### Log collection
 
 **Available for Agent >6.0**
 

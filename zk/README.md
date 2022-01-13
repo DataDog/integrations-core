@@ -63,7 +63,7 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][8].
 
-##### Log collection
+#### Log collection
 
 _Available for Agent versions >6.0_
 

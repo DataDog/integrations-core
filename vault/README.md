@@ -134,7 +134,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 
 `INSTANCE_CONFIG` needs to be customized depending on your vault authentication config. See example in Host section above. 
 
-##### Log collection
+#### Log collection
 
 _Available for Agent versions >6.0_
 

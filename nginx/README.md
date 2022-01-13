@@ -256,7 +256,7 @@ LABEL "com.datadoghq.ad.instances"='[{"nginx_status_url": "http://%%host%%:81/ng
 
 **Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
 
-##### Log collection
+#### Log collection
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker Log Collection][9].
@@ -298,7 +298,7 @@ metadata:
 
 **Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
 
-##### Log collection
+#### Log collection
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][13].

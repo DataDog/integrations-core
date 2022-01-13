@@ -63,7 +63,7 @@ See the [sample nginx_ingress_controller.d/conf.yaml][3] for all available confi
     }
 ```
 
-##### Log collection
+#### Log collection
 
 _Available for Agent versions >6.0_
 

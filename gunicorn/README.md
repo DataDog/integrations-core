@@ -49,7 +49,7 @@ instances:
 
 2. [Restart the Agent][8] to begin sending Gunicorn metrics to Datadog.
 
-##### Log collection
+#### Log collection
 
 _Available for Agent versions >6.0_
 

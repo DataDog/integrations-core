@@ -42,7 +42,7 @@ For more details on the setup, see the [Azure tutorial][3].
 
 ## Data Collected
 
-##### Log collection
+### Log collection
 
 This integration allows you to setup log ingestion for Azure Active Directory activity logs.
 

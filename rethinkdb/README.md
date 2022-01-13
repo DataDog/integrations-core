@@ -52,7 +52,7 @@ configuration options.
 
 **Note**: this integration collects metrics from all servers in the cluster, so you only need a single Agent.
 
-##### Log collection
+#### Log collection
 
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:

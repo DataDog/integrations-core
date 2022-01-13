@@ -29,7 +29,7 @@ To configure this check for an Agent running on a host:
 
 Edit the `journald.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting logs.
 
-##### Log collection
+#### Log collection
 
 Collecting logs is disabled by default in the Datadog Agent, you need to enable it in the `datadog.yaml` with:
 
@@ -57,7 +57,7 @@ To fill `source` and `service` attributes, the Agent collects `SYSLOG_IDENTIFIER
 
 For containerized environments, see the [Autodiscovery Integration Templates][4] for guidance on applying the parameters below.
 
-##### Log collection
+#### Log collection
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][5].

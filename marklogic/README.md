@@ -65,7 +65,7 @@ If you plan to use the `enable_health_service_checks` configuration, give the Da
 
 2. [Restart the Agent][9].
 
-##### Log collection
+#### Log collection
 
 _Available for Agent versions >6.0_
 

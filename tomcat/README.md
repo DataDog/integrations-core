@@ -111,7 +111,7 @@ List of filters is only supported in Datadog Agent > 5.3.0. If you are using an 
       bean: second_bean_name
 ```
 
-##### Log collection
+#### Log collection
 
 
 1. To submit logs to Datadog, Tomcat uses the `log4j` logger. For versions of Tomcat before 8.0, `log4j` is configured by default. For Tomcat 8.0 and after, you must configure Tomcat to use `log4j` by following the [Apache Tomcat documentation][8]. In the first step of those instructions, edit the `log4j.properties` file in the `$CATALINA_BASE/lib` directory as follows:

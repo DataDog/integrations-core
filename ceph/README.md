@@ -35,7 +35,7 @@ If you enabled `use_sudo`, add a line like the following to your `sudoers` file:
 dd-agent ALL=(ALL) NOPASSWD:/path/to/your/ceph
 ```
 
-##### Log collection
+#### Log collection
 
 _Available for Agent versions >6.0_
 
