@@ -82,8 +82,8 @@ def get_cpu_usage(timeout):
         'query': {
             'text': (
                 "SELECT A.AVERAGE_CPU_UTILIZATION, A.CONFIGURED_CPUS, A.CURRENT_CPU_CAPACITY, "
-                "A.PARTITION_ID, A.ELAPSED_CPU_SHARED, "
-                "(A.ELAPSED_CPU_USED / A.ELAPSED_TIME * 100 * A.CURRENT_CPU_CAPACITY) / A.CONFIGURED_CPUS "
+                "A.PARTITION_ID, A.ELAPSED_CPU_SHARED "
+                "(A.ELAPSED_CPU_USED * A.CURRENT_CPU_CAPACITY) / A.CONFIGURED_CPUS "
                 "FROM TABLE(QSYS2.SYSTEM_STATUS('NO')) A INNER JOIN TABLE(QSYS2.SYSTEM_STATUS('YES')) B "
                 "ON A.PARTITION_ID = B.PARTITION_ID"
             ),
