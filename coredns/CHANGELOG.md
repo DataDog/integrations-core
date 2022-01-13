@@ -1,5 +1,10 @@
 # CHANGELOG - CoreDNS
 
+## 1.11.1 / 2022-01-13
+
+* [Fixed] Enable openmetrics_endpoint in auto_conf.yaml. See [#11133](https://github.com/DataDog/integrations-core/pull/11133).
+* [Fixed] Fix example config. See [#11109](https://github.com/DataDog/integrations-core/pull/11109).
+
 ## 1.11.0 / 2022-01-08
 
 * [Added] Add support for OpenMetricsBaseCheckV2. See [#11024](https://github.com/DataDog/integrations-core/pull/11024).
