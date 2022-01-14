@@ -198,4 +198,4 @@ def test_check_without_sites_specified(aggregator, dd_run_check):
 def test_e2e(dd_agent_check, aggregator, instance):
     with pytest.raises(Exception):
         dd_agent_check(instance, rate=True)
-    aggregator.assert_service_check("iis.site_up", AgentCheck.CRITICAL)
+    aggregator.assert_service_check("iis.site_up", IIS.CRITICAL)
