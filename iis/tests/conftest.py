@@ -5,7 +5,7 @@ from copy import deepcopy
 
 import pytest
 
-INSTANCE = {'server': 'localhost', 'username': 'admin', 'password': 'admin', 'site': 'test'}
+INSTANCE = {'server': 'localhost', 'username': 'admin', 'password': 'admin', 'site': 'test', 'app_pools': 'test'}
 
 
 @pytest.fixture(scope="session")
