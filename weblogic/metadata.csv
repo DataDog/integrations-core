@@ -2,7 +2,7 @@ metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation
 weblogic.server_runtime.open_sockets,gauge,10,,,The current number of sockets registered for socket muxing on this server.,0,weblogic,serv_open_sockets_ct
 weblogic.server.threadpool_socket_readers_percent,gauge,10,percent,,The percentage of execute threads from the default queue that can be used as socket readers.,0,weblogic,serv_tp_socket_rd_pct
 weblogic.server.max_open_sockets,gauge,10,,,The maximum number of open sockets allowed in server at a given point of time.,0,weblogic,serv_max_open_sock_ct
-weblogic.threadpool_runtime.completed_requests,gauge,10,request,,The number of completed requests in the priority queue.,0,weblogic,threadpool_comp_req_ct
+weblogic.threadpool_runtime.completed_requests,rate,10,request,,The number of completed requests in the priority queue.,0,weblogic,threadpool_comp_req_ct
 weblogic.threadpool_runtime.execute_threads_idle,gauge,10,thread,,The number of idle threads in the pool. This count does not include standby threads and stuck threads. The count indicates threads that are ready to pick up new work when it arrives.,0,weblogic,threadpool_exec_thread_idle_ct
 weblogic.threadpool_runtime.execute_threads_total,gauge,10,thread,,The total number of threads in the pool.,0,weblogic,threadpool_exec_thread_tot_ct
 weblogic.threadpool_runtime.user_requests_pending,gauge,10,request,,The number of pending user requests in the priority queue. The priority queue contains requests from internal subsystems and users. This is just the count of all user requests.,0,weblogic,threadpool_pend_usr_req_ct
@@ -24,15 +24,15 @@ weblogic.jms_runtime.connections_current,gauge,10,connection,,The current number
 weblogic.jms_runtime.connections_total,rate,10,connection,,The total number of connections made to this WebLogic Server since the last reset.,0,weblogic,jms_conn_tot
 weblogic.jms_runtime.jms_servers,gauge,10,,,The current number of JMS servers that are deployed on this WebLogic Server instance.,0,weblogic,jms_servers
 weblogic.jms_runtime.jms_servers_total,rate,10,,,The total number of JMS servers that were deployed on this WebLogic Server instance since this server was started.,0,weblogic,jms_servers_tot
-weblogic.work_manager_runtime.requests_completed,gauge,10,request,,"The number of requests that have been processed, including daemon requests.",0,weblogic,wm_req_comp
+weblogic.work_manager_runtime.requests_completed,rate,10,request,,"The number of requests that have been processed, including daemon requests.",0,weblogic,wm_req_comp
 weblogic.work_manager_runtime.requests_pending,gauge,10,request,,"The number of waiting requests in the queue, including daemon requests.",0,weblogic,wm_req_pend
 weblogic.work_manager_runtime.threads_stuck,gauge,10,thread,,The number of threads that are considered to be stuck on the basis of any stuck thread constraints.,0,weblogic,wm_threads_stuck
-weblogic.server_channel_runtime.sockets_accepted,gauge,10,,,The number of sockets that have been accepted on this channel. This includes sockets both past and present.,0,weblogic,serv_chan_socks_accp
+weblogic.server_channel_runtime.sockets_accepted,rate,10,,,The number of sockets that have been accepted on this channel. This includes sockets both past and present.,0,weblogic,serv_chan_socks_accp
 weblogic.server_channel_runtime.connections_active,gauge,10,connection,,The number of active connections and sockets associated with this channel.,0,weblogic,serv_chan_conn_active
-weblogic.server_channel_runtime.bytes_received,gauge,10,byte,,The total number of bytes received on this channel.,0,weblogic,serv_chan_bytes_rcvd
-weblogic.server_channel_runtime.bytes_sent,gauge,10,byte,,The total number of bytes sent on this channel.,0,weblogic,serv_chan_bytes_sent
-weblogic.server_channel_runtime.messages_received,gauge,10,message,,The number of messages received on this channel.,0,weblogic,serv_chan_msgs_rcvd
-weblogic.server_channel_runtime.messages_sent,gauge,10,message,,The number of messages sent on this channel.,0,weblogic,serv_chan_msgs_sent
+weblogic.server_channel_runtime.bytes_received,rate,10,byte,,The total number of bytes received on this channel.,0,weblogic,serv_chan_bytes_rcvd
+weblogic.server_channel_runtime.bytes_sent,rate,10,byte,,The total number of bytes sent on this channel.,0,weblogic,serv_chan_bytes_sent
+weblogic.server_channel_runtime.messages_received,rate,10,message,,The number of messages received on this channel.,0,weblogic,serv_chan_msgs_rcvd
+weblogic.server_channel_runtime.messages_sent,rate,10,message,,The number of messages sent on this channel.,0,weblogic,serv_chan_msgs_sent
 weblogic.servlet_runtime.exec_time_high,rate,10,millisecond,,The amount of time the single longest invocation of the servlet has executed since created.,0,weblogic,servlet_exec_time_hi
 weblogic.servlet_runtime.exec_time_total,rate,10,millisecond,,The total amount of time all invocations of the servlet have executed since created.,0,weblogic,servlet_exec_time_tot
 weblogic.servlet_runtime.exec_time_low,gauge,10,millisecond,,The amount of time the single shortest invocation of the servlet has executed since created.,0,weblogic,servlet_exec_time_low
