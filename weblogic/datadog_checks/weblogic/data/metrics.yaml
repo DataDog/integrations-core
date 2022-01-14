@@ -89,10 +89,8 @@ jmx_metrics:
           metric_type: monotonic_count
         PendingRequests:
           alias: weblogic.work_manager_runtime.requests_pending
-          metric_type: monotonic_count
         StuckThreadCount:
           alias: weblogic.work_manager_runtime.threads_stuck
-          metric_type: monotonic_count
   - include:
       domain: com.bea
       bean_regex: com.bea:ServerRuntime=([-_.\w]+),Name=([\[\-_/.\]\w]+),Type=ServerChannelRuntime
@@ -102,7 +100,6 @@ jmx_metrics:
           metric_type: monotonic_count
         ConnectionsCount:
           alias: weblogic.server_channel_runtime.connections_active
-          metric_type: monotonic_count
         BytesReceivedCount:
           alias: weblogic.server_channel_runtime.bytes_received
           metric_type: monotonic_count
