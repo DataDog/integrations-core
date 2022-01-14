@@ -69,6 +69,9 @@ def changelog(since, to, write, force):
                 else:
                     display_name = name
 
+                if display_name == 'Mesos':
+                    display_name = 'Mesos Slave'
+
                 breaking_notice = " **BREAKING CHANGE**" if ver[1] else ""
                 changelog_url = check_changelog_url.format(name)
                 changelog_contents.write(f'* {display_name} [{ver[0]}]({changelog_url}){breaking_notice}\n')
