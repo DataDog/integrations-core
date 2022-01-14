@@ -1,5 +1,10 @@
 # CHANGELOG - elastic
 
+## 4.0.1 / 2022-01-13
+
+* [Fixed] Validate custom query column type. See [#11106](https://github.com/DataDog/integrations-core/pull/11106).
+* [Fixed] Continue other custom queries when one fails. See [#11105](https://github.com/DataDog/integrations-core/pull/11105).
+
 ## 4.0.0 / 2022-01-08
 
 * [Added] Bump base dependency. See [#11064](https://github.com/DataDog/integrations-core/pull/11064).

@@ -1,5 +1,9 @@
 # CHANGELOG - Confluent Platform
 
+## 1.7.1 / 2022-01-13
+
+* [Fixed] Remove duplicated entries. See [#11095](https://github.com/DataDog/integrations-core/pull/11095).
+
 ## 1.7.0 / 2022-01-08
 
 * [Added] Increase metrics collected by the Confluent Platform integration. See [#10453](https://github.com/DataDog/integrations-core/pull/10453). Thanks [abraham-leal](https://github.com/abraham-leal).
