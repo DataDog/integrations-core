@@ -10,6 +10,8 @@ from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixt
 
 from datadog_checks.dev.testing import requires_py2
 from datadog_checks.iis import IIS
+from datadog_checks.base import AgentCheck
+
 
 from .common import (
     APP_POOL_METRICS,
@@ -197,4 +199,4 @@ def test_check_without_sites_specified(aggregator, dd_run_check):
 def test_e2e(dd_agent_check, aggregator, instance):
     with pytest.raises(Exception):
         dd_agent_check(instance, rate=True)
-    aggregator.assert_service_check("iis.site_up", IIS.CRITICAL)
+    aggregator.assert_service_check("AgentCheck.site_up", IIS.CRITICAL)
