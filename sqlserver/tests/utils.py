@@ -30,12 +30,9 @@ class HighCardinalityQueries:
     """
 
     DEFAULT_TIMEOUT = 30
+    EXPECTED_ROW_COUNT = 100000
 
     def __init__(self, instance_docker=None):
-        self.EXPECTED_USER_COUNT = 10000
-        self.EXPECTED_SCHEMA_COUNT = 10000
-        self.EXPECTED_TABLE_COUNT = 10000
-        self.EXPECTED_ROW_COUNT = 100000
         self.columns = [
             'col1_txt',
             'col2_txt',
@@ -81,31 +78,31 @@ class HighCardinalityQueries:
 
         self._is_running = True
 
-        def run_hc_query_forever():
+        def _run_hc_query_forever():
             conn = self.get_conn_for_user(user)
             while True:
                 if not self._is_running:
                     break
                 self.run_query_and_ignore_exception(conn, self.create_high_cardinality_query())
 
-        def run_slow_query_forever():
+        def _run_slow_query_forever():
             conn = self.get_conn_for_user(user)
             while True:
                 if not self._is_running:
                     break
                 self.run_query_and_ignore_exception(conn, self.create_slow_query())
 
-        def run_complex_query_forever():
+        def _run_complex_query_forever():
             conn = self.get_conn_for_user(user)
             while True:
                 if not self._is_running:
                     break
                 self.run_query_and_ignore_exception(conn, self.create_complex_query())
 
-        self._threads = [threading.Thread(target=run_hc_query_forever) for _ in range(config['hc_threads'])]
-        self._threads.extend([threading.Thread(target=run_slow_query_forever) for _ in range(config['slow_threads'])])
+        self._threads = [threading.Thread(target=_run_hc_query_forever) for _ in range(config['hc_threads'])]
+        self._threads.extend([threading.Thread(target=_run_slow_query_forever) for _ in range(config['slow_threads'])])
         self._threads.extend(
-            [threading.Thread(target=run_complex_query_forever) for _ in range(config['complex_threads'])]
+            [threading.Thread(target=_run_complex_query_forever) for _ in range(config['complex_threads'])]
         )
         for t in self._threads:
             t.start()
@@ -121,7 +118,7 @@ class HighCardinalityQueries:
         columns = copy(self.columns)
         shuffle(columns)
         return 'SELECT {col} FROM datadog_test.dbo.high_cardinality WHERE id = {id}'.format(
-            col=','.join(columns), id=randint(1, self.EXPECTED_ROW_COUNT)
+            col=','.join(columns), id=randint(1, HighCardinalityQueries.EXPECTED_ROW_COUNT)
         )
 
     def create_slow_query(self):

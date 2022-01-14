@@ -222,6 +222,31 @@ def instance_autodiscovery():
     return deepcopy(instance)
 
 
+def pytest_addoption(parser):
+    parser.addoption(
+        "--run_high_cardinality_forever",
+        action="store_true",
+        default=False,
+        help="run a test that executes high cardinality queries forever unless it's terminated",
+    )
+
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers", "run_high_cardinality_forever: mark a test to run high cardinality queries forever"
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--run_high_cardinality_forever"):
+        # --run_high_cardinality_forever given in cli: do not skip test
+        return
+    skip_run_high_cardinality_forever = pytest.mark.skip(reason="need --run_high_cardinality_forever option to run")
+    for item in items:
+        if "run_high_cardinality_forever" in item.keywords:
+            item.add_marker(skip_run_high_cardinality_forever)
+
+
 E2E_METADATA = {'docker_platform': 'windows' if using_windows_containers() else 'linux'}
 
 
