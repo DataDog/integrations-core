@@ -121,6 +121,13 @@ files:
           type: boolean
           display_default: false
           example: true
+      - name: enable_stage_id_tag
+        description: |
+          Enable to add a `stage_id` tag for stage and job metrics
+        value:
+          type: boolean
+          display_default: false
+          example: true
       - template: instances/http
         overrides:
           auth_token.description: |

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -52,6 +52,7 @@ class InstanceConfig(BaseModel):
     disable_legacy_cluster_tag: Optional[bool]
     empty_default_hostname: Optional[bool]
     enable_query_name_tag: Optional[bool]
+    enable_stage_id_tag: Optional[bool]
     executor_level_metrics: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]
     headers: Optional[Mapping[str, Any]]

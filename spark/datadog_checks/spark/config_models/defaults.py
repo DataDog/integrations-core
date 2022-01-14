@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -67,6 +67,10 @@ def instance_empty_default_hostname(field, value):
 
 
 def instance_enable_query_name_tag(field, value):
+    return False
+
+
+def instance_enable_stage_id_tag(field, value):
     return False
 
 
