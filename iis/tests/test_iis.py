@@ -8,7 +8,6 @@ import re
 import pytest
 from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
 
-# from datadog_checks.base import AgentCheck
 from datadog_checks.dev.testing import requires_py2
 from datadog_checks.iis import IIS
 
