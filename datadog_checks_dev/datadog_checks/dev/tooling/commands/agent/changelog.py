@@ -12,6 +12,13 @@ from ...constants import get_agent_changelog, get_root
 from ..console import CONTEXT_SETTINGS, abort, echo_info
 from .common import get_changes_per_agent
 
+# Extra entries in the agent changelog
+CHANGELOG_MANUAL_ENTRIES = {
+    '7.30.1': [
+        '* Revert requests bump back to 2.22.0 [#9912](https://github.com/DataDog/integrations-core/pull/9912)',
+    ]
+}
+
 
 @click.command(
     context_settings=CONTEXT_SETTINGS,
@@ -34,7 +41,6 @@ def changelog(since, to, write, force):
     tool will generate the whole changelog since Agent version 6.3.0
     (before that point we don't have enough information to build the log).
     """
-
     changes_per_agent = get_changes_per_agent(since, to)
 
     # store the changelog in memory
@@ -49,9 +55,11 @@ def changelog(since, to, write, force):
         url = agent_changelog_url.format(agent.replace('.', ''))  # Github removes dots from the anchor
         changelog_contents.write(f'## Datadog Agent version [{agent}]({url})\n\n')
 
-        if not version_changes:
+        if not version_changes and not CHANGELOG_MANUAL_ENTRIES.get(agent):
             changelog_contents.write('* There were no integration updates for this version of the Agent.\n\n')
         else:
+            for entry in CHANGELOG_MANUAL_ENTRIES.get(agent, []):
+                changelog_contents.write(f'{entry}\n')
             for name, ver in version_changes.items():
                 # get the "display name" for the check
                 manifest_file = os.path.join(get_root(), name, 'manifest.json')
