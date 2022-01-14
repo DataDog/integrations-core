@@ -7,7 +7,6 @@ from copy import copy
 
 import pytest
 
-from concurrent.futures.thread import ThreadPoolExecutor
 from datadog_checks.sqlserver import SQLServer
 
 from .common import CHECK_NAME

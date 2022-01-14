@@ -30,8 +30,6 @@ from .common import (
     get_local_driver,
 )
 
-from .utils import HighCardinalityQueries
-
 try:
     import pyodbc
 except ImportError:
@@ -244,7 +242,9 @@ def dd_environment():
         )
         conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
         with conn.cursor() as cursor:
-            cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.database_principals WHERE name LIKE \'high_cardinality_user_%\'')
+            cursor.execute(
+                'SELECT COUNT(*) FROM datadog_test.sys.database_principals WHERE name LIKE \'high_cardinality_user_%\''
+            )
             user_count = cursor.fetchone()[0]
             cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.schemas WHERE name LIKE \'high_cardinality_schema%\'')
             schema_count = cursor.fetchone()[0]
