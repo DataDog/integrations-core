@@ -26,4 +26,4 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const { issue: { number: issue_number }, repo: { owner, repo }  } = context;
-          github.issues.createComment({ issue_number, owner, repo, body: "Label `changelog/Changed` was added to this Pull Request, so the next release will bump major version. Please make sur this is a breaking change, or use the `changelog/Fixed` label." });
+          github.issues.createComment({ issue_number, owner, repo, body: "Label `changelog/Changed` was added to this Pull Request, so the next release will bump major version. Please make sure this is a breaking change, or use the `changelog/Fixed` label." });
