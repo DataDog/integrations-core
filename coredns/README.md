@@ -10,7 +10,7 @@ Get metrics from CoreDNS in real time to visualize and monitor DNS failures and 
 
 The CoreDNS check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.
 
-**Note**: The current version of the check (1.11.0+) uses [OpenMetrics][17] for metric collection, which requires Python 3. For hosts unable to use Python 3, or to use a legacy version of this check, see the following [config][18].
+**Note**: The current version of the check (1.11.0+) uses [OpenMetrics][17] for metric collection, which requires Python 3. For hosts unable to use Python 3, or to use a legacy version of this check, see the following [config][18]. The exception to this is Autodiscovery users relying on the `coredns.d/auto_conf.yaml` file, which enables the legacy version of the check by default.
 
 ### Configuration
 <!-- xxx tabs xxx -->
@@ -31,6 +31,7 @@ LABEL "com.datadoghq.ad.instances"='[{"openmetrics_endpoint":"http://%%host%%:91
 
 **Notes**:
 
+- The shipped `coredns.d/auto_conf.yaml` file enables the legacy version of the check by default. 
 - The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the dd-agent that is polling the information using the service discovery.
 - The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's specifications. Do not add it at the outer specification level.
 
@@ -85,6 +86,7 @@ spec:
 
 **Notes**:
 
+- The shipped `coredns.d/auto_conf.yaml` file enables the legacy version of the check by default.  
 - The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the service discovery.
 - The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's specifications. Do not add it at the outer specification level.
 
@@ -138,6 +140,7 @@ Set [Autodiscovery Integrations Templates][10] as Docker labels on your applicat
 
 **Notes**:
 
+- The shipped `coredns.d/auto_conf.yaml` file enables the legacy version of the check by default. 
 - The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the service discovery.
 - The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's specifications. Do not add it at the outer specification level.
 
@@ -208,3 +211,4 @@ Need help? Contact [Datadog support][16].
 [16]: http://docs.datadoghq.com/help
 [17]: https://docs.datadoghq.com/integrations/openmetrics
 [18]: https://github.com/DataDog/integrations-core/blob/7.32.x/coredns/datadog_checks/coredns/data/conf.yaml.example
+[19]: https://github.com/DataDog/integrations-core/blob/master/coredns/datadog_checks/coredns/data/auto_conf.yaml

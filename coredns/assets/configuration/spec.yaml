@@ -31,9 +31,9 @@ files:
     options: []
   - template: instances
     options:
-    - name: openmetrics_endpoint
+    - name: prometheus_url
       description: |
-        To enable CoreDNS metrics you must specify the openmetrics endpoint url
+        To enable CoreDNS metrics you must specify the prometheus url
         and enable the plugin within coredns
         See: https://coredns.io/plugins/metrics/
       enabled: true
