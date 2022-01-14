@@ -484,7 +484,10 @@ def metadata(check, check_duplicates, show_warnings):
                     if curated_metric_type not in VALID_CURATED_METRIC_TYPE:
                         errors = True
                         display_queue.append(
-                            (echo_failure, f"{current_check}:{line} `{curated_metric_type}` is an invalid curated_metric type.")
+                            (
+                                echo_failure,
+                                f"{current_check}:{line} `{curated_metric_type}` is an invalid curated_metric type."
+                            )
                         )
 
         for header, count in empty_count.items():
