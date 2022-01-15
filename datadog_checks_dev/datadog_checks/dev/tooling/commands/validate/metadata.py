@@ -486,7 +486,7 @@ def metadata(check, check_duplicates, show_warnings):
                         display_queue.append(
                             (
                                 echo_failure,
-                                f"{current_check}:{line} `{curated_metric_type}` is an invalid curated_metric type."
+                                f"{current_check}:{line} `{curated_metric_type}` is an invalid curated_metric type.",
                             )
                         )
 
