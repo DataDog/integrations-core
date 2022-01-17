@@ -4,14 +4,10 @@
 
 # Here you can include additional config validators or transformers
 #
-
-
-def initialize_instance(values, **kwargs):
-    for key, value in values.items():
-        if value is None or value == '':
-            if key in ['channel', 'queue_manager']:  # These are required options
-                raise ValueError("'{}' cannot be empty.".format(key))
-            raise ValueError(
-                "'{}' cannot be empty. If you don't want to provide a value you can comment this option".format(key)
-            )
-    return values
+# def initialize_instance(values, **kwargs):
+#     if 'my_option' not in values and 'my_legacy_option' in values:
+#         values['my_option'] = values['my_legacy_option']
+#     if values.get('my_number') > 10:
+#         raise ValueError('my_number max value is 10, got %s' % str(values.get('my_number')))
+#
+#     return values

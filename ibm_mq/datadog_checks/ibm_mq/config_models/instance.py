@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, Field, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -24,33 +24,33 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     auto_discover_queues: Optional[bool]
-    channel: str
+    channel: str = Field(..., min_length=1)
     channel_status_mapping: Optional[Mapping[str, Any]]
-    channels: Optional[Sequence[str]]
+    channels: Optional[Sequence[str]] = Field(None, min_items=1)
     collect_statistics_metrics: Optional[bool]
-    connection_name: Optional[str]
+    connection_name: Optional[str] = Field(None, min_length=1)
     convert_endianness: Optional[bool]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
-    host: Optional[str]
+    host: Optional[str] = Field(None, min_length=1)
     min_collection_interval: Optional[float]
-    mqcd_version: Optional[float]
-    password: Optional[str]
+    mqcd_version: Optional[float] = Field(None, ge=1.0)
+    password: Optional[str] = Field(None, min_length=1)
     port: Optional[int]
-    queue_manager: str
+    queue_manager: str = Field(..., min_length=1)
     queue_manager_timezone: Optional[str]
-    queue_patterns: Optional[Sequence[str]]
-    queue_regex: Optional[Sequence[str]]
+    queue_patterns: Optional[Sequence[str]] = Field(None, min_items=1)
+    queue_regex: Optional[Sequence[str]] = Field(None, min_items=1)
     queue_tag_re: Optional[Mapping[str, Any]]
-    queues: Optional[Sequence[str]]
+    queues: Optional[Sequence[str]] = Field(None, min_items=1)
     service: Optional[str]
     ssl_auth: Optional[bool]
     ssl_certificate_label: Optional[str]
     ssl_cipher_spec: Optional[str]
     ssl_key_repository_location: Optional[str]
     tags: Optional[Sequence[str]]
-    timeout: Optional[float]
-    username: Optional[str]
+    timeout: Optional[int]
+    username: Optional[str] = Field(None, min_length=1)
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

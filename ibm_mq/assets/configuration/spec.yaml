@@ -12,6 +12,7 @@ files:
         value:
           example: 'DEV.ADMIN.SVRCONN'
           type: string
+          minLength: 1
         description: The IBMMQ Channel to connect to.
       - name: queue_manager
         required: true
@@ -19,10 +20,12 @@ files:
         value:
           example: 'datadog'
           type: string
+          minLength: 1
       - name: host
         value:
           example: 'localhost'
           type: string
+          minLength: 1
         description: The host IBM MQ is running on.
       - name: port
         value:
@@ -42,14 +45,17 @@ files:
           Either `host/port` or `connection_name` configuration must be provided.
         value:
           type: string
+          minLength: 1
       - name: username
         value:
           type: string
+          minLength: 1
         description: <USERNAME> of the IBMMQ Channel to connect to.
       - name: password
         secret: true
         value:
           type: string
+          minLength: 1
         description: <PASSWORD> of the IBMMQ Channel to connect to.
       - name: queues
         description: |
@@ -59,6 +65,8 @@ files:
         value:
           example: ['<QUEUE_NAME>']
           type: array
+          minItems: 1
+          uniqueItems: true
           items:
             type: string
       - name: queue_patterns
@@ -71,6 +79,8 @@ files:
             - 'DEV.*'          # match queues starting with "DEV."
             - 'SYSTEM.*'       # match queues starting with "SYSTEM."
           type: array
+          minItems: 1
+          uniqueItems: true
           items:
             type: string
       - name: queue_regex
@@ -83,6 +93,8 @@ files:
             - '^DEV\..*$'          # match queues starting with "DEV."
             - '^SYSTEM\..*$'       # match queues starting with "SYSTEM."
           type: array
+          minItems: 1
+          uniqueItems: true
           items:
             type: string
       - name: channels
@@ -90,6 +102,8 @@ files:
         value:
           example: ['<CHANNEL_NAME>']
           type: array
+          minItems: 1
+          uniqueItems: true
           items:
             type: string
       - name: channel_status_mapping
@@ -113,6 +127,7 @@ files:
             paused: warning
             initializing: warning
           type: object
+          minProperties: 1
           properties: []
       - name: auto_discover_queues
         description: |
@@ -138,6 +153,7 @@ files:
         value:
           example: 6
           type: number
+          minimum: 1
       - name: convert_endianness
         description: |
           If you are monitoring IBM MQ remotely and if the Agent and the server are using different endianness,
@@ -155,12 +171,13 @@ files:
         value:
           example: Etc/UTC
           type: string
+          minLenght: 1
       - name: timeout
         description: |
           The number of seconds to wait for IBM MQ to respond.
         value:
           example: 5
-          type: number
+          type: integer
       - name: ssl_auth
         description: Whether or not to use SSL auth while connecting to the channel.
         value:
@@ -184,6 +201,7 @@ files:
         value:
           example: '/var/mqm/ssl-db/client/KeyringClient'
           type: string
+        minlenght: 1
       - name: ssl_certificate_label
         description: Certificate label used for SSL connection.
         value:
@@ -200,6 +218,7 @@ files:
             'SYSTEM.*': queue_type:system
             'DEV.*': role:dev,queue_type:default
           type: object
+          minProperties: 1
       - template: instances/default
   - template: logs
     example:
