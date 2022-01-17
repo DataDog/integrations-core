@@ -44,7 +44,6 @@ files:
           type: string
           example: <USER>
       - name: password
-        required: true
         description: Password for the user
         value:
           type: string
@@ -98,8 +97,10 @@ files:
           example: <OCSP_RESPONSE_CACHE_FILENAME>
       - name: authenticator
         description: |
-          Authenticator for Snowflake. The default `snowflake` uses the internal Snowflake authenticator.
-          Use `oauth` to authenticate with OAuth, be sure to set the `token` option as well.
+          Authenticator for Snowflake. Only the following values are accepted:
+          * `snowflake` (default): use the internal Snowflake authenticator.
+          * `snowflake_jwt`: use Key Pair Authentication, be sure to set `private_key_path` option as well.
+          * `oauth`: authenticate with OAuth, be sure to set the `token` option as well.
         value:
           type: string
           display_default: snowflake
@@ -107,6 +108,15 @@ files:
         description: Token used for OAuth connection to Snowflake.
         value:
           type: string
+      - name: private_key_path
+        description: |
+          Path to the private key for key pair authentication. This configuration is only used with authenticator
+          set to `snowflake_jwt`.
+
+          See https://docs.snowflake.com/en/user-guide/key-pair-auth.html.
+        value:
+          type: string
+          example: /path/to/key
       - name: client_session_keep_alive
         description: |
           If set to true, Snowflake keeps the session active indefinitely as long as the connection is active,

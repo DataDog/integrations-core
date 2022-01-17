@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -45,7 +45,8 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float]
     ocsp_response_cache_filename: Optional[str]
     only_custom_queries: Optional[bool]
-    password: str
+    password: Optional[str]
+    private_key_path: Optional[str]
     role: str
     schema_: Optional[str] = Field(None, alias='schema')
     service: Optional[str]

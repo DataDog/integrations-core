@@ -133,6 +133,7 @@ class SnowflakeCheck(AgentCheck):
                 authenticator=self._config.authenticator,
                 token=self._config.token,
                 client_session_keep_alive=self._config.client_keep_alive,
+                private_key=self._config.private_key_path,
                 proxy_host=self.proxy_host,
                 proxy_port=self.proxy_port,
                 proxy_user=self.proxy_user,

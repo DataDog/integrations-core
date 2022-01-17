@@ -39,6 +39,7 @@ class Config(object):
         ocsp_response_cache_filename = instance.get('ocsp_response_cache_filename')
         tags = instance.get('tags', [])
         authenticator = instance.get('authenticator', 'snowflake')
+        private_key_path = instance.get('private_key_path', None)
         token = instance.get('token', None)
         client_keep_alive = instance.get('client_session_keep_alive', False)
 
@@ -57,12 +58,18 @@ class Config(object):
             if password is None:
                 raise ConfigurationError('Must specify a password if using snowflake authentication')
 
-        else:
-            if authenticator == 'oauth' and token is None:
+        elif authenticator == 'oauth':
+            if token is None:
                 raise ConfigurationError('If using OAuth, you must specify a token')
 
-            if authenticator not in self.AUTHENTICATION_MODES:
-                raise ConfigurationError('The Authenticator method set is invalid: {}'.format(authenticator))
+        elif authenticator == 'snowflake_jwt':
+            if private_key_path is None:
+                raise ConfigurationError(
+                    'If using key pair authentication (snowflake_jwt), you must specify a private key path'
+                )
+
+        elif authenticator not in self.AUTHENTICATION_MODES:
+            raise ConfigurationError('The Authenticator method set is invalid: {}'.format(authenticator))
 
         if not isinstance(tags, list):
             raise ConfigurationError('tags {!r} must be a list (got {!r})'.format(tags, type(tags)))
@@ -85,5 +92,6 @@ class Config(object):
         self.tags = tags  # type: List[str]
         self.metric_groups = metric_groups
         self.authenticator = authenticator
+        self.private_key_path = private_key_path
         self.token = token
         self.client_keep_alive = client_keep_alive

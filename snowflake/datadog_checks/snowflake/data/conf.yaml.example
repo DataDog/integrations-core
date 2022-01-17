@@ -105,8 +105,10 @@ instances:
     # ocsp_response_cache_filename: <OCSP_RESPONSE_CACHE_FILENAME>
 
     ## @param authenticator - string - optional - default: snowflake
-    ## Authenticator for Snowflake. The default `snowflake` uses the internal Snowflake authenticator.
-    ## Use `oauth` to authenticate with OAuth, be sure to set the `token` option as well.
+    ## Authenticator for Snowflake. Only the following values are accepted:
+    ## * `snowflake` (default): use the internal Snowflake authenticator.
+    ## * `snowflake_jwt`: use Key Pair Authentication, be sure to set `private_key_path` option as well.
+    ## * `oauth`: authenticate with OAuth, be sure to set the `token` option as well.
     #
     # authenticator: <AUTHENTICATOR>
 
@@ -114,6 +116,14 @@ instances:
     ## Token used for OAuth connection to Snowflake.
     #
     # token: <TOKEN>
+
+    ## @param private_key_path - string - optional - default: /path/to/key
+    ## Path to the private key for key pair authentication. This configuration is only used with authenticator
+    ## set to `snowflake_jwt`.
+    ##
+    ## See https://docs.snowflake.com/en/user-guide/key-pair-auth.html.
+    #
+    # private_key_path: /path/to/key
 
     ## @param client_session_keep_alive - boolean - optional - default: false
     ## If set to true, Snowflake keeps the session active indefinitely as long as the connection is active,

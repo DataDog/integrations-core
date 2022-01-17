@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -80,6 +80,14 @@ def instance_ocsp_response_cache_filename(field, value):
 
 def instance_only_custom_queries(field, value):
     return False
+
+
+def instance_password(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_private_key_path(field, value):
+    return '/path/to/key'
 
 
 def instance_schema_(field, value):
