@@ -360,6 +360,7 @@ class Network(AgentCheck):
         proc_location = proc_location.rstrip('/')
         custom_tags = instance.get('tags', [])
 
+        # self._get_linux_sys_net(custom_tags)
         net_proc_base_location = self._get_net_proc_base_location(proc_location)
 
         if self._is_collect_cx_state_runnable(net_proc_base_location):
@@ -576,16 +577,9 @@ class Network(AgentCheck):
 
         for metric_name in filtered_available_files:
             metric_file_location = os.path.join(conntrack_files_location, 'nf_conntrack_{}'.format(metric_name))
-            try:
-                with open(metric_file_location, 'r') as conntrack_file:
-                    # Checking it's an integer
-                    try:
-                        value = int(conntrack_file.read().rstrip())
-                        self.gauge('system.net.conntrack.{}'.format(metric_name), value, tags=custom_tags)
-                    except ValueError:
-                        self.log.debug("%s is not an integer", metric_name)
-            except IOError as e:
-                self.log.debug("Unable to read %s, skipping %s.", metric_file_location, e)
+            value = self._read_int_file(metric_file_location)
+            if value:
+                self.gauge('system.net.conntrack.{}'.format(metric_name), value, tags=custom_tags)
 
     @staticmethod
     def _get_net_proc_base_location(proc_location):
@@ -594,6 +588,28 @@ class Network(AgentCheck):
         else:
             net_proc_base_location = proc_location
         return net_proc_base_location
+
+    def _read_int_file(self, file_location):
+        try:
+            with open(file_location, 'r') as f:
+                try:
+                    value = int(f.read().rstrip())
+                    return value
+                except ValueError:
+                    self.log.debug("Content of %s is not an integer", file_location)
+        except IOError as e:
+            self.log.debug("Unable to read %s, skipping %s.", file_location, e)
+            return None
+
+    def _get_linux_sys_net(self, custom_tags):
+        sys_net_location = '/sys/class/net'
+        sys_net_metrics = ['mtu', 'tx_queue_len']
+        for iface in os.listdir(sys_net_location):
+            for metric_name in sys_net_metrics:
+                metric_file_location = os.path.join(sys_net_location, iface, metric_name)
+                value = self._read_int_file(metric_file_location)
+                if value:
+                    self.gauge('system.net.iface.{}'.format(metric_name), value, tags=custom_tags + ["iface:" + iface])
 
     def _add_conntrack_stats_metrics(self, conntrack_path, use_sudo_conntrack, tags):
         """

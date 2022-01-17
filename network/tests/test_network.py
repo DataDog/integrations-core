@@ -65,6 +65,12 @@ else:
         return s.decode("utf-8")
 
 
+def listdir_mock(location):
+    if location == '/sys/class/net':
+        return ['lo', 'ens5']
+    elif location.startswith('/sys/class/net/'):
+        return ['mtu', 'tx_queue_len', 'ifindex']
+
 def ss_subprocess_mock(*args, **kwargs):
     if '--udp --all --ipv4' in args[0][2]:
         return '3', None, None
@@ -106,6 +112,7 @@ def test_cx_state(aggregator, check):
             aggregator.assert_metric(metric, value=value)
 
 
+@mock.patch('datadog_checks.network.network.Network._get_linux_sys_net', return_value=None)
 @mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
 def test_cx_state_mocked(is_linux, aggregator, check):
     instance = {'collect_connection_state': True}
