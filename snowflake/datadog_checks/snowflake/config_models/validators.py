@@ -19,7 +19,7 @@ def initialize_instance(values, **kwargs):
 def _validate_authenticator(values):
     authenticator = values.get('authenticator', 'snowflake')
 
-    if not AUTHENTICATOR_NEEDS.get(authenticator):
+    if AUTHENTICATOR_NEEDS.get(authenticator) is None:
         raise ValueError(
             'Authenticator method `{}` is not valid. Supported methods are {}. " \
             "Please update Snowflake integration configuration to use a supported method.'.format(
