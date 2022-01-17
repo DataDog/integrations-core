@@ -48,7 +48,7 @@ paramiko==2.7.2
 ply==3.11
 prometheus-client==0.9.0
 protobuf==3.7.0
-psutil==5.7.2
+psutil==5.8.0
 psycopg2-binary==2.8.6
 pyasn1==0.4.6
 pycryptodomex==3.10.1
