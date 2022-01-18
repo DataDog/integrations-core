@@ -578,7 +578,7 @@ class Network(AgentCheck):
         for metric_name in filtered_available_files:
             metric_file_location = os.path.join(conntrack_files_location, 'nf_conntrack_{}'.format(metric_name))
             value = self._read_int_file(metric_file_location)
-            if value:
+            if value is not None:
                 self.gauge('system.net.conntrack.{}'.format(metric_name), value, tags=custom_tags)
 
     @staticmethod
@@ -613,7 +613,7 @@ class Network(AgentCheck):
             for metric_name in sys_net_metrics:
                 metric_file_location = os.path.join(sys_net_location, iface, metric_name)
                 value = self._read_int_file(metric_file_location)
-                if value:
+                if value is not None:
                     self.gauge('system.net.iface.{}'.format(metric_name), value, tags=custom_tags + ["iface:" + iface])
             iface_queues_location = os.path.join(sys_net_location, iface, 'queues')
             self._get_num_iface_queues(iface, iface_queues_location, custom_tags)
