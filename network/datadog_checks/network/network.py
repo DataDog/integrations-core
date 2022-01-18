@@ -360,7 +360,7 @@ class Network(AgentCheck):
         proc_location = proc_location.rstrip('/')
         custom_tags = instance.get('tags', [])
 
-        # self._get_linux_sys_net(custom_tags)
+        self._get_linux_sys_net(custom_tags)
         net_proc_base_location = self._get_net_proc_base_location(proc_location)
 
         if self._is_collect_cx_state_runnable(net_proc_base_location):
@@ -610,6 +610,13 @@ class Network(AgentCheck):
                 value = self._read_int_file(metric_file_location)
                 if value:
                     self.gauge('system.net.iface.{}'.format(metric_name), value, tags=custom_tags + ["iface:" + iface])
+            # Get number of tx/rx queues
+            iface_queues_location = os.path.join(sys_net_location, iface, 'queues')
+            iface_queues = os.listdir(iface_queues_location)
+            num_rx_queues = len([q for q in iface_queues if q.startswith('rx-')])
+            num_tx_queues = len([q for q in iface_queues if q.startswith('tx-')])
+            self.gauge('system.net.iface.num_tx_queues', num_tx_queues, tags=custom_tags + ["iface:" + iface])
+            self.gauge('system.net.iface.num_rx_queues', num_rx_queues, tags=custom_tags + ["iface:" + iface])
 
     def _add_conntrack_stats_metrics(self, conntrack_path, use_sudo_conntrack, tags):
         """

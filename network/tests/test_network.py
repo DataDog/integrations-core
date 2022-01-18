@@ -50,6 +50,14 @@ CONNTRACK_STATS = {
     'system.net.conntrack.search_restart': (39936711, 36983181),
 }
 
+LINUX_SYS_NET_STATS = {
+    'system.net.iface.mtu': (65536, 9001),
+    'system.net.iface.tx_queue_len': (1000, 1000),
+    'system.net.iface.num_rx_queues': (1, 2),
+    'system.net.iface.num_tx_queues': (1, 3),
+}
+
+
 if PY3:
     ESCAPE_ENCODING = 'unicode-escape'
 
@@ -65,11 +73,25 @@ else:
         return s.decode("utf-8")
 
 
-def listdir_mock(location):
+def read_int_file_mock(location):
+    if location == '/sys/class/net/lo/mtu':
+        return 65536
+    elif location == '/sys/class/net/lo/tx_queue_len':
+        return 1000
+    elif location == '/sys/class/net/ens5/mtu':
+        return 9001
+    elif location == '/sys/class/net/ens5/tx_queue_len':
+        return 1000
+
+
+def os_list_dir_mock(location):
     if location == '/sys/class/net':
-        return ['lo', 'ens5']
-    elif location.startswith('/sys/class/net/'):
-        return ['mtu', 'tx_queue_len', 'ifindex']
+        return ['ens5', 'lo']
+    elif location == '/sys/class/net/lo/queues':
+        return ['rx-1', 'tx-1']
+    elif location == '/sys/class/net/ens5/queues':
+        return ['rx-1', 'rx-2', 'tx-1', 'tx-2', 'tx-3']
+
 
 def ss_subprocess_mock(*args, **kwargs):
     if '--udp --all --ipv4' in args[0][2]:
@@ -112,13 +134,24 @@ def test_cx_state(aggregator, check):
             aggregator.assert_metric(metric, value=value)
 
 
-@mock.patch('datadog_checks.network.network.Network._get_linux_sys_net', return_value=None)
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+@mock.patch('os.listdir', side_effect=os_list_dir_mock)
+@mock.patch('datadog_checks.network.network.Network._read_int_file', side_effect=read_int_file_mock)
+def test_linux_sys_net(is_linux, listdir, read_int_file, aggregator, check):
+    check.check({})
+    for metric, value in iteritems(LINUX_SYS_NET_STATS):
+        aggregator.assert_metric(metric, value=value[0], tags=['iface:lo'])
+        aggregator.assert_metric(metric, value=value[1], tags=['iface:ens5'])
+    aggregator.reset()
+
+
 @mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
 def test_cx_state_mocked(is_linux, aggregator, check):
     instance = {'collect_connection_state': True}
     with mock.patch('datadog_checks.network.network.get_subprocess_output') as out:
         out.side_effect = ss_subprocess_mock
         check._collect_cx_state = True
+        check._get_linux_sys_net = lambda x: True
         check._is_collect_cx_state_runnable = lambda x: True
         check._get_net_proc_base_location = lambda x: FIXTURE_DIR
         check.check(instance)
@@ -371,6 +404,7 @@ def test_is_collect_cx_state_runnable(aggregator, check, proc_location, ss_found
 @mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=False)
 @mock.patch('distutils.spawn.find_executable', return_value='/bin/ss')
 def test_ss_with_custom_procfs(is_linux, is_bsd, is_solaris, is_windows, aggregator, check):
+    check._get_linux_sys_net = lambda x: True
     instance = {'collect_connection_state': True}
     with mock.patch(
         'datadog_checks.network.network.get_subprocess_output', side_effect=ss_subprocess_mock
