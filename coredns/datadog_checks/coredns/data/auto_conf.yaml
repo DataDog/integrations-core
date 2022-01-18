@@ -16,7 +16,7 @@ instances:
 
     ## @param prometheus_url - string - optional - default: http://%%host%%:9153/metrics
     ## To enable CoreDNS metrics using the legacy OpenMetricsBaseCheckV1 you must specify the prometheus url
-    ## and enable the plugin within coredns. One of `prometheus_url` or `openmetrics_url` must be specified.
+    ## and enable the plugin within coredns. Either `prometheus_url` or `openmetrics_url` must be specified.
     ## See: https://coredns.io/plugins/metrics/
     #
   - prometheus_url: http://%%host%%:9153/metrics
