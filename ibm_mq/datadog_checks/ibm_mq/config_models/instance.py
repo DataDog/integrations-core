@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -38,7 +38,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str] = Field(None, min_length=1)
     port: Optional[int]
     queue_manager: str = Field(..., min_length=1)
-    queue_manager_timezone: Optional[str]
+    queue_manager_timezone: Optional[str] = Field(None, min_length=1)
     queue_patterns: Optional[Sequence[str]] = Field(None, min_items=1)
     queue_regex: Optional[Sequence[str]] = Field(None, min_items=1)
     queue_tag_re: Optional[Mapping[str, Any]]
