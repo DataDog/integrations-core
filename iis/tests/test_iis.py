@@ -206,6 +206,6 @@ def test_check_without_sites_specified(aggregator, dd_run_check):
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, check, instance):
+def test_e2e(dd_agent_check, aggregator, instance):
     aggregator = dd_agent_check(instance)
     aggregator.assert_service_check('iis.windows.perf.health')
