@@ -360,7 +360,7 @@ class Network(AgentCheck):
         proc_location = proc_location.rstrip('/')
         custom_tags = instance.get('tags', [])
 
-        self._get_linux_sys_net(custom_tags)
+        self._get_iface_sys_metrics(custom_tags)
         net_proc_base_location = self._get_net_proc_base_location(proc_location)
 
         if self._is_collect_cx_state_runnable(net_proc_base_location):
@@ -601,7 +601,7 @@ class Network(AgentCheck):
             self.log.debug("Unable to read %s, skipping %s.", file_location, e)
             return None
 
-    def _get_linux_sys_net(self, custom_tags):
+    def _get_iface_sys_metrics(self, custom_tags):
         sys_net_location = '/sys/class/net'
         sys_net_metrics = ['mtu', 'tx_queue_len']
         try:
