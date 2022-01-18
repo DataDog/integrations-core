@@ -71,7 +71,7 @@ def instance_enable_query_name_tag(field, value):
 
 
 def instance_enable_stage_id_tag(field, value):
-    return False
+    return True
 
 
 def instance_executor_level_metrics(field, value):

@@ -5,6 +5,7 @@ import os
 import ssl
 import threading
 import time
+from copy import deepcopy
 
 import mock
 import pytest
@@ -405,12 +406,15 @@ SPARK_JOB_RUNNING_METRIC_VALUES = {
     'spark.job.num_failed_stages': 100,
 }
 
-SPARK_JOB_RUNNING_METRIC_TAGS = [
+SPARK_JOB_RUNNING_METRIC_TAGS_NO_ID = [
     'status:running',
     'job_id:0',
+] + COMMON_TAGS
+
+SPARK_JOB_RUNNING_METRIC_TAGS = [
     'stage_id:0',
     'stage_id:1',
-] + COMMON_TAGS
+] + SPARK_JOB_RUNNING_METRIC_TAGS_NO_ID
 
 SPARK_JOB_SUCCEEDED_METRIC_VALUES = {
     'spark.job.count': 3,
@@ -424,13 +428,15 @@ SPARK_JOB_SUCCEEDED_METRIC_VALUES = {
     'spark.job.num_skipped_stages': 8000,
     'spark.job.num_failed_stages': 9000,
 }
-
-SPARK_JOB_SUCCEEDED_METRIC_TAGS = [
+SPARK_JOB_SUCCEEDED_METRIC_TAGS_NO_ID = [
     'status:succeeded',
     'job_id:0',
+] + COMMON_TAGS
+
+SPARK_JOB_SUCCEEDED_METRIC_TAGS = [
     'stage_id:0',
     'stage_id:1',
-] + COMMON_TAGS
+] + SPARK_JOB_SUCCEEDED_METRIC_TAGS_NO_ID
 
 SPARK_STAGE_RUNNING_METRIC_VALUES = {
     'spark.stage.count': 3,
@@ -450,10 +456,14 @@ SPARK_STAGE_RUNNING_METRIC_VALUES = {
     'spark.stage.disk_bytes_spilled': 16 * 3,
 }
 
-SPARK_STAGE_RUNNING_METRIC_TAGS = [
+SPARK_STAGE_RUNNING_METRIC_TAGS_NO_ID = [
     'status:running',
-    'stage_id:1',
 ] + COMMON_TAGS
+
+
+SPARK_STAGE_RUNNING_METRIC_TAGS = [
+    'stage_id:1',
+] + SPARK_STAGE_RUNNING_METRIC_TAGS_NO_ID
 
 SPARK_STAGE_COMPLETE_METRIC_VALUES = {
     'spark.stage.count': 2,
@@ -473,10 +483,14 @@ SPARK_STAGE_COMPLETE_METRIC_VALUES = {
     'spark.stage.disk_bytes_spilled': 113 * 2,
 }
 
-SPARK_STAGE_COMPLETE_METRIC_TAGS = [
+SPARK_STAGE_COMPLETE_METRIC_TAGS_NO_ID = [
     'status:complete',
-    'stage_id:0',
 ] + COMMON_TAGS
+
+
+SPARK_STAGE_COMPLETE_METRIC_TAGS = [
+    'stage_id:0',
+] + SPARK_STAGE_COMPLETE_METRIC_TAGS_NO_ID
 
 SPARK_DRIVER_METRIC_VALUES = {
     'spark.driver.rdd_blocks': 99,
@@ -848,6 +862,60 @@ def test_standalone_unit(aggregator):
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "enable_stage_id_tag, spark_job_running_metric_tags, spark_job_succeeded_metric_tags, "
+    "spark_stage_running_metric_tags, spark_stage_complete_metric_tags",
+    [
+        (
+            True,
+            SPARK_JOB_RUNNING_METRIC_TAGS,
+            SPARK_JOB_SUCCEEDED_METRIC_TAGS,
+            SPARK_STAGE_RUNNING_METRIC_TAGS,
+            SPARK_STAGE_COMPLETE_METRIC_TAGS,
+        ),
+        (
+            False,
+            SPARK_JOB_RUNNING_METRIC_TAGS_NO_ID,
+            SPARK_JOB_SUCCEEDED_METRIC_TAGS_NO_ID,
+            SPARK_STAGE_RUNNING_METRIC_TAGS_NO_ID,
+            SPARK_STAGE_COMPLETE_METRIC_TAGS_NO_ID,
+        ),
+    ],
+    ids=["enable_stage_id_tag", "disable_stage_id_tag"],
+)
+def test_standalone_no_stage_id_tag(
+    aggregator,
+    dd_run_check,
+    enable_stage_id_tag,
+    spark_job_running_metric_tags,
+    spark_job_succeeded_metric_tags,
+    spark_stage_running_metric_tags,
+    spark_stage_complete_metric_tags,
+):
+    with mock.patch('requests.get', standalone_requests_get_mock):
+        config = deepcopy(STANDALONE_CONFIG)
+        config['enable_stage_id_tag'] = enable_stage_id_tag
+        check = SparkCheck('spark', {}, [config])
+        dd_run_check(check)
+
+        # Check the running job metrics
+        for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=spark_job_running_metric_tags)
+
+        # Check the succeeded job metrics
+        for metric, value in iteritems(SPARK_JOB_SUCCEEDED_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=spark_job_succeeded_metric_tags)
+
+        # Check the running stage metrics
+        for metric, value in iteritems(SPARK_STAGE_RUNNING_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=spark_stage_running_metric_tags)
+
+        # Check the complete stage metrics
+        for metric, value in iteritems(SPARK_STAGE_COMPLETE_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=spark_stage_complete_metric_tags)
 
 
 @pytest.mark.unit
