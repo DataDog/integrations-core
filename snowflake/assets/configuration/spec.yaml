@@ -141,6 +141,14 @@ files:
             - snowflake.billing
             - snowflake.storage
             - snowflake.logins
+      - name: use_deprecated_aggregation
+        description: |
+          Set to `false` to aggregate table entries on the last 24 hours instead of the deprecated method
+          aggregating entries of the current day.
+        value:
+          type: boolean
+          display_default: true
+          example: false
       - template: instances/db
         overrides:
           custom_queries.value.example:

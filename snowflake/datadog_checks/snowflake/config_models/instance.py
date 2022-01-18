@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -51,6 +51,7 @@ class InstanceConfig(BaseModel):
     service: Optional[str]
     tags: Optional[Sequence[str]]
     token: Optional[str]
+    use_deprecated_aggregation: Optional[bool]
     use_global_custom_queries: Optional[str]
     username: str
     warehouse: Optional[str]

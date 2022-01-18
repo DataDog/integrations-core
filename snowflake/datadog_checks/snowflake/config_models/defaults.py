@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -96,6 +96,10 @@ def instance_tags(field, value):
 
 def instance_token(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_use_deprecated_aggregation(field, value):
+    return True
 
 
 def instance_use_global_custom_queries(field, value):
