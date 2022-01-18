@@ -5,13 +5,14 @@ from copy import deepcopy
 
 import pytest
 
-INSTANCE = {'server': 'localhost', 'username': 'admin', 'password': 'admin', 'site': 'test', 'app_pools': 'test'}
+# INSTANCE = {'server': 'localhost', 'username': 'admin', 'password': 'admin', 'site': 'test', 'app_pools': 'test'}
+from .common import INSTANCE
 
 
 @pytest.fixture(scope="session")
 def dd_environment():
     yield INSTANCE, {'docker_platform': 'windows'}
-    yield deepcopy(INSTANCE)
+    # yield deepcopy(INSTANCE)
 
 
 @pytest.fixture
