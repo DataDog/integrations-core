@@ -171,7 +171,7 @@ files:
         value:
           example: Etc/UTC
           type: string
-          minLenght: 1
+          minLength: 1
       - name: timeout
         description: |
           The number of seconds to wait for IBM MQ to respond.
@@ -201,7 +201,7 @@ files:
         value:
           example: '/var/mqm/ssl-db/client/KeyringClient'
           type: string
-        minlenght: 1
+        minLength: 1
       - name: ssl_certificate_label
         description: Certificate label used for SSL connection.
         value:
