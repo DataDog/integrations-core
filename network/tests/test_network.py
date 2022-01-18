@@ -82,15 +82,21 @@ def read_int_file_mock(location):
         return 9001
     elif location == '/sys/class/net/ens5/tx_queue_len':
         return 1000
+    elif location == '/sys/class/net/invalid/mtu':
+        return None
+    elif location == '/sys/class/net/invalid/tx_queue_len':
+        return None
 
 
 def os_list_dir_mock(location):
     if location == '/sys/class/net':
-        return ['ens5', 'lo']
+        return ['ens5', 'lo', 'invalid']
     elif location == '/sys/class/net/lo/queues':
         return ['rx-1', 'tx-1']
     elif location == '/sys/class/net/ens5/queues':
         return ['rx-1', 'rx-2', 'tx-1', 'tx-2', 'tx-3']
+    elif location == '/sys/class/net/invalid/queues':
+        raise OSError()
 
 
 def ss_subprocess_mock(*args, **kwargs):

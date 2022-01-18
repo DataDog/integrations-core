@@ -604,19 +604,31 @@ class Network(AgentCheck):
     def _get_linux_sys_net(self, custom_tags):
         sys_net_location = '/sys/class/net'
         sys_net_metrics = ['mtu', 'tx_queue_len']
-        for iface in os.listdir(sys_net_location):
+        try:
+            ifaces = os.listdir(sys_net_location)
+        except OSError as e:
+            self.log.debug("Unable to list %s, skipping %s.", sys_net_location, e)
+            return None
+        for iface in ifaces:
             for metric_name in sys_net_metrics:
                 metric_file_location = os.path.join(sys_net_location, iface, metric_name)
                 value = self._read_int_file(metric_file_location)
                 if value:
                     self.gauge('system.net.iface.{}'.format(metric_name), value, tags=custom_tags + ["iface:" + iface])
-            # Get number of tx/rx queues
             iface_queues_location = os.path.join(sys_net_location, iface, 'queues')
+            self._get_num_iface_queues(iface, iface_queues_location, custom_tags)
+
+    def _get_num_iface_queues(self, iface, iface_queues_location, custom_tags):
+        try:
             iface_queues = os.listdir(iface_queues_location)
-            num_rx_queues = len([q for q in iface_queues if q.startswith('rx-')])
-            num_tx_queues = len([q for q in iface_queues if q.startswith('tx-')])
-            self.gauge('system.net.iface.num_tx_queues', num_tx_queues, tags=custom_tags + ["iface:" + iface])
-            self.gauge('system.net.iface.num_rx_queues', num_rx_queues, tags=custom_tags + ["iface:" + iface])
+        except OSError as e:
+            self.log.debug("Unable to list %s, skipping %s.", iface_queues_location, e)
+            return
+        num_rx_queues = len([q for q in iface_queues if q.startswith('rx-')])
+        num_tx_queues = len([q for q in iface_queues if q.startswith('tx-')])
+        self.gauge('system.net.iface.num_tx_queues', num_tx_queues, tags=custom_tags + ["iface:" + iface])
+        self.gauge('system.net.iface.num_rx_queues', num_rx_queues, tags=custom_tags + ["iface:" + iface])
+
 
     def _add_conntrack_stats_metrics(self, conntrack_path, use_sudo_conntrack, tags):
         """
