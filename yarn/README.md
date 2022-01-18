@@ -6,9 +6,9 @@
 
 This check collects metrics from your YARN ResourceManager, including (but not limited to):
 
-- Cluster-wide metrics (e.g. number of running apps, running containers, unhealthy nodes, etc.)
-- Per-application metrics (e.g. app progress, elapsed running time, running containers, memory use, etc.)
-- Node metrics (e.g. available vCores, time of last health update, etc.)
+- Cluster-wide metrics, such as number of running apps, running containers, unhealthy nodes, and more.
+- Per-application metrics, such as app progress, elapsed running time, running containers, memory use, and more.
+- Node metrics, such as available vCores, time of last health update, and more.
 
 ### Deprecation notice
 
@@ -102,14 +102,14 @@ partial -->
 
 3. [Restart the Agent][5].
 
-See [Datadog's documentation][7] for additional information on how to configure the Agent for log collection in Docker environments.
+To enable logs for Docker environments, see [Docker Log Collection][7].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 ### Validation
 
-[Run the Agent's `status` subcommand][8] and look for `yarn` under the Checks section.
+Run the [Agent's status subcommand][8] and look for `yarn` under the Checks section.
 
 ## Data Collected
 
