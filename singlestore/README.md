@@ -88,7 +88,7 @@ partial -->
 **Log collection is not supported for this site.**
 {{< /site-region >}}
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][6].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][6].
 
 | Parameter      | Value                                     |
 |----------------|-------------------------------------------|

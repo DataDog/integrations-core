@@ -4,7 +4,7 @@
 
 ## Overview
 
-This check collects the number of CPU cores on a host and CPU times (i.e. system, user, idle, etc).
+This check collects the number of CPU cores on a host and CPU times, such as `system`, `user`, `idle`, etc.
 
 ## Setup
 
@@ -35,7 +35,7 @@ The System Core check is included in the [Datadog Agent][2] package. No addition
 
 See [metadata.csv][7] for a list of metrics provided by this check.
 
-Depending on the platform, the check may collect other CPU time metrics, e.g. `system.core.interrupt` on Windows, `system.core.iowait` on Linux, etc.
+Depending on the platform, the check may collect other CPU time metrics, such as `system.core.interrupt` on Windows, `system.core.iowait` on Linux, etc.
 
 ### Events
 

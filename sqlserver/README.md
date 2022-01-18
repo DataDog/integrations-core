@@ -114,9 +114,6 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][8].
 
-See [Datadog's documentation][11] for additional information on how to configure the Agent for log collection in Kubernetes environments.
-
-
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
@@ -144,7 +141,7 @@ partial -->
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection][11].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][11].
 
 | Parameter      | Value                                             |
 | -------------- | ------------------------------------------------- |

@@ -79,7 +79,7 @@ partial -->
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `statsd` under the Checks section.
+Run the [Agent's status subcommand][6] and look for `statsd` under the Checks section.
 
 ## Data Collected
 
@@ -101,9 +101,11 @@ Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
-If you don't know what StatsD is and how does it work, check out [our blog post about it][10]
+Additional helpful documentation, links, and articles:
 
-To get a better idea of how (or why) to visualize StatsD metrics with Counts Graphing with Datadog, check out our [series of blog posts][11] about it.
+- [StatsD, what it is and how it can help you][10]
+- [Visualize StatsD metrics with Counts Graphing][11]
+
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
