@@ -63,17 +63,6 @@ files:
       value:
         type: string
         example: "http://%%host%%:9153/metrics"
-    - name: openmetrics_endpoint
-      description: |
-        To enable CoreDNS metrics using OpenMetricsBaseCheckV2 you must specify the openmetrics endpoint url
-        and enable the plugin within coredns.
-        See: https://coredns.io/plugins/metrics/
-
-        Either `prometheus_url` or `openmetrics_url` must be specified.
-        See documentation: https://docs.datadoghq.com/integrations/coredns
-      value:
-        type: string
-        example: "http://%%host%%:9153/metrics"
     - name: tags
       description: |
         List of tags to attach to every metric and service check emitted by this integration.
@@ -112,6 +101,17 @@ files:
           - coredns_template_matches_total: template_matches_count
           - coredns_template_template_failures_total: template_templating_failures_count
           - coredns_template_rr_failures_total: template_resource_record_failures_count
+    - name: openmetrics_endpoint
+      description: |
+        To enable CoreDNS metrics using OpenMetricsBaseCheckV2 you must specify the openmetrics endpoint url
+        and enable the plugin within coredns.
+        See: https://coredns.io/plugins/metrics/
+
+        Either `prometheus_url` or `openmetrics_url` must be specified.
+        See documentation: https://docs.datadoghq.com/integrations/coredns
+      value:
+        type: string
+        example: "http://%%host%%:9153/metrics"
     - name: extra_metrics
       description: |
         (OpenMetricsBaseCheckV2) Metrics from the CoreDNS plugins for 'metrics', 'proxy', 'forward' and 'cache'
