@@ -56,10 +56,10 @@ instances:
     #
     username: <USER>
 
-    ## @param password - string - required
+    ## @param password - string - optional
     ## Password for the user
     #
-    password: <PASSWORD>
+    # password: <PASSWORD>
 
     ## @param role - string - required
     ## Name of the role to use.
@@ -106,14 +106,21 @@ instances:
 
     ## @param authenticator - string - optional - default: snowflake
     ## Authenticator for Snowflake. The default `snowflake` uses the internal Snowflake authenticator.
-    ## Use `oauth` to authenticate with OAuth, be sure to set the `token` option as well.
+    ## Use `oauth` to authenticate with OAuth, be sure to set the `token` or `token_path` option as well.
     #
     # authenticator: <AUTHENTICATOR>
 
     ## @param token - string - optional
-    ## Token used for OAuth connection to Snowflake.
+    ## Token used for OAuth connection to Snowflake. Can't be used along side with `token_path`.
     #
     # token: <TOKEN>
+
+    ## @param token_path - string - optional - default: /path/to/token
+    ## Path to the file containing the token used for OAuth connection to snowflake.
+    ## Can't be used along side with `token`.
+    ## The token will be re-read at each check run.
+    #
+    # token_path: /path/to/token
 
     ## @param client_session_keep_alive - boolean - optional - default: false
     ## If set to true, Snowflake keeps the session active indefinitely as long as the connection is active,
