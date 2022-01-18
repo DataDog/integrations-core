@@ -7,6 +7,9 @@ from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
 from six import iteritems, itervalues
 from six.moves.urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
+
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+
 from .constants import (
     APPLICATION_STATES,
     COUNT,
@@ -43,8 +46,6 @@ from .constants import (
     YARN_APPS_PATH,
     YARN_SERVICE_CHECK,
 )
-
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
 
 class SparkCheck(AgentCheck):
