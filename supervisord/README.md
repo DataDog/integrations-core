@@ -16,11 +16,11 @@ The Supervisor check is included in the [Datadog Agent][2] package, so you don't
 
 #### Prepare supervisord
 
-The Agent can collect data from Supervisor via HTTP server or UNIX socket. The Agent collects the same data no matter which collection method you configure.
+The Agent can collect data from Supervisor through a HTTP server or UNIX socket. The Agent collects the same data no matter which collection method you configure.
 
 ##### HTTP server
 
-Add a block like this to Supervisor's main configuration file (e.g. `/etc/supervisor.conf`):
+Add a block like this to Supervisor's main configuration file (`/etc/supervisor.conf`):
 
 ```ini
 [inet_http_server]
@@ -45,7 +45,7 @@ chown=nobody:nogroup
 ;password=pass  # optional
 ```
 
-If Supervisor is running as root, make sure `chmod` or `chown` is set so that non-root users (i.e. dd-agent) can read the socket.
+If Supervisor is running as root, make sure `chmod` or `chown` is set so that non-root users, such as `dd-agent`, can read the socket.
 
 ---
 
@@ -73,7 +73,7 @@ instances:
   #   socket: unix:///var/run/supervisor.sock
 ```
 
-Use the `proc_names` and/or `proc_regex` options to list processes you want the Agent to collect metrics on and create service checks for. If you don't provide either option, the Agent tracks _all_ child processes of Supervisor. If you provide both options, the Agent tracks processes from both lists (i.e. the two options are not mutually exclusive).
+Use the `proc_names` and/or `proc_regex` options to list processes you want the Agent to collect metrics on and create service checks for. If you don't provide either option, the Agent tracks _all_ child processes of Supervisor. If you provide both options, the Agent tracks processes from both lists meaning the two options are not mutually exclusive.
 
 See the [example check configuration][4] for comprehensive descriptions of other check options.
 
@@ -125,7 +125,7 @@ partial -->
 
 ### Validation
 
-[Run the Agent's `status` subcommand][7] and look for `supervisord` under the Checks section.
+Run the [Agent's status subcommand][7] and look for `supervisord` under the Checks section.
 
 ## Data Collected
 

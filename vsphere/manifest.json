@@ -1,6 +1,7 @@
 {
   "aliases": [
-    "/integrations/vmware/"
+    "/integrations/vmware/",
+    "/integrations/faq/can-i-limit-the-number-of-vms-that-are-pulled-in-via-the-vmware-integration/"
   ],
   "categories": [
     "cloud"
