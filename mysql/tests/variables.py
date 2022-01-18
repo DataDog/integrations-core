@@ -59,6 +59,7 @@ VARIABLES_VARS = [
     'mysql.myisam.key_buffer_size',
     'mysql.performance.key_cache_utilization',
     'mysql.net.max_connections_available',
+    'mysql.performance.max_prepared_stmt_count',
     'mysql.performance.table_open_cache',
     'mysql.performance.thread_cache_size',
 ]
