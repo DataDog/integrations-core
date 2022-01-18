@@ -27,12 +27,12 @@ def dbm_instance(instance_docker):
 def test_run_high_cardinality_forever(dbm_instance):
     """
     This test is a utility and is useful in situations where you want to connect to the database instance
-    and have queries executing against it. Note, you must kill the test operation to stop this test.
+    and have queries executing against it. Note, you must kill the test execution to stop this test.
 
     In order to run this test, you must pass the `--run_high_cardinality_forever` flag.
     e.g. `ddev ... -pa --run_high_cardinality_forever`
 
-    TIP: It's more convenient to utilize this by running it as a standalone test operation.
+    TIP: It's easier to utilize this by running it as a standalone test operation.
     e.g. in conjunction with the required flag
     `ddev ... -pa --run_high_cardinality_forever -k test_run_high_cardinality_forever`
     """

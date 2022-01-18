@@ -18,7 +18,7 @@ always_on = pytest.mark.skipif(
     os.environ["COMPOSE_FOLDER"] != 'compose-ha', reason='Test can only be run on AlwaysOn SQLServer instances'
 )
 high_cardinality_only = pytest.mark.skipif(
-    os.environ["COMPOSE_FOLDER"] != 'compose-high-cardinality',
+    'compose-high-cardinality' not in os.environ["COMPOSE_FOLDER"],
     reason='Test can only be run in the high cardinality env.',
 )
 

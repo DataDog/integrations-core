@@ -289,15 +289,14 @@ def dd_environment():
     compose_file = os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml')
     conditions = [WaitFor(sqlserver_can_connect, wait=3, attempts=10)]
 
-    completion_message = 'sqlserver setup completed'
+    completion_message = 'INFO: setup.sql completed.'
     if os.environ["COMPOSE_FOLDER"] == 'compose-ha':
         completion_message = (
             'Always On Availability Groups connection with primary database established ' 'for secondary database'
         )
-    if os.environ["COMPOSE_FOLDER"] == 'compose-high-cardinality':
+    if 'compose-high-cardinality' in os.environ["COMPOSE_FOLDER"]:
         # This env is a highly loaded database and is expected to take a while to setup.
         # This will wait about 8 minutes before timing out.
-        completion_message = 'INFO: setup.sql completed.'
         conditions += [WaitFor(high_cardinality_env_is_ready, wait=5, attempts=90)]
 
     conditions += [CheckDockerLogs(compose_file, completion_message)]
