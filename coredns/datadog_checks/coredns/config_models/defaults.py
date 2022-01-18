@@ -227,7 +227,7 @@ def instance_prometheus_metrics_prefix(field, value):
 
 
 def instance_prometheus_url(field, value):
-    return get_default_field_value(field, value)
+    return 'http://%%host%%:9153/metrics'
 
 
 def instance_proxy(field, value):
