@@ -123,7 +123,7 @@ files:
           example: true
       - name: enable_stage_id_tag
         description: |
-          Enable to add a `stage_id` tag for stage and job metrics
+          Enable to add a `stage_id` tag for stage and job metrics.
         value:
           type: boolean
           display_default: true

@@ -146,7 +146,7 @@ instances:
     # enable_query_name_tag: true
 
     ## @param enable_stage_id_tag - boolean - optional - default: true
-    ## Enable to add a `stage_id` tag for stage and job metrics
+    ## Enable to add a `stage_id` tag for stage and job metrics.
     #
     # enable_stage_id_tag: false
 
