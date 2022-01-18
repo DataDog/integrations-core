@@ -147,10 +147,13 @@
 - name: bearer_token_auth
   description: |
     If set to true, adds a bearer token authentication header.
+    If set to 'tls_only', only adds a bearer token authentication header if the endpoint is secure https.
     Note: If bearer_token_path is not set, the default path is /var/run/secrets/kubernetes.io/serviceaccount/token.
   value:
     example: false
-    type: boolean
+    anyOf:
+      - type: boolean
+      - type: string
 - name: bearer_token_path
   description: |
     The path to a Kubernetes service account bearer token file. Make sure the file exists and is mounted correctly.
