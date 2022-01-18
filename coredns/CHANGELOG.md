@@ -1,5 +1,10 @@
 # CHANGELOG - CoreDNS
 
+## 1.11.2 / 2022-01-18
+
+* [Fixed] Enable prometheus_url option in auto_conf.yaml. See [#11146](https://github.com/DataDog/integrations-core/pull/11146).
+* [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
+
 ## 1.11.1 / 2022-01-13
 
 * [Fixed] Enable openmetrics_endpoint in auto_conf.yaml. See [#11133](https://github.com/DataDog/integrations-core/pull/11133).
