@@ -629,7 +629,6 @@ class Network(AgentCheck):
         self.gauge('system.net.iface.num_tx_queues', num_tx_queues, tags=custom_tags + ["iface:" + iface])
         self.gauge('system.net.iface.num_rx_queues', num_rx_queues, tags=custom_tags + ["iface:" + iface])
 
-
     def _add_conntrack_stats_metrics(self, conntrack_path, use_sudo_conntrack, tags):
         """
         Parse the output of conntrack -S
