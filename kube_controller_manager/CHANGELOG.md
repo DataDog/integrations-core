@@ -1,5 +1,9 @@
 # CHANGELOG - Kube_controller_manager
 
+## 3.0.1 / 2022-01-18
+
+* [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
+
 ## 3.0.0 / 2022-01-08
 
 * [Added] Add kube_controller_manager config spec. See [#10505](https://github.com/DataDog/integrations-core/pull/10505).
