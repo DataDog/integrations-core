@@ -11,6 +11,7 @@ PROC_NAME = 'mysqld'
 # Vars found in "SHOW STATUS;"
 STATUS_VARS = {
     # Command Metrics
+    'Prepared_stmt_count': ('mysql.performance.prepared_stmt_count', COUNT),
     'Slow_queries': ('mysql.performance.slow_queries', RATE),
     'Questions': ('mysql.performance.questions', RATE),
     'Queries': ('mysql.performance.queries', RATE),

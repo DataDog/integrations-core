@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 STATUS_VARS = [
     # Command Metrics
+    'mysql.performance.prepared_stmt_count',
     'mysql.performance.slow_queries',
     'mysql.performance.questions',
     'mysql.performance.queries',
