@@ -406,7 +406,7 @@ SPARK_JOB_RUNNING_METRIC_VALUES = {
     'spark.job.num_failed_stages': 100,
 }
 
-SPARK_JOB_RUNNING_METRIC_TAGS_NO_ID = [
+SPARK_JOB_RUNNING_METRIC_TAGS_NO_STAGE_ID = [
     'status:running',
     'job_id:0',
 ] + COMMON_TAGS
@@ -414,7 +414,7 @@ SPARK_JOB_RUNNING_METRIC_TAGS_NO_ID = [
 SPARK_JOB_RUNNING_METRIC_TAGS = [
     'stage_id:0',
     'stage_id:1',
-] + SPARK_JOB_RUNNING_METRIC_TAGS_NO_ID
+] + SPARK_JOB_RUNNING_METRIC_TAGS_NO_STAGE_ID
 
 SPARK_JOB_SUCCEEDED_METRIC_VALUES = {
     'spark.job.count': 3,
@@ -428,7 +428,7 @@ SPARK_JOB_SUCCEEDED_METRIC_VALUES = {
     'spark.job.num_skipped_stages': 8000,
     'spark.job.num_failed_stages': 9000,
 }
-SPARK_JOB_SUCCEEDED_METRIC_TAGS_NO_ID = [
+SPARK_JOB_SUCCEEDED_METRIC_TAGS_NO_STAGE_ID = [
     'status:succeeded',
     'job_id:0',
 ] + COMMON_TAGS
@@ -436,7 +436,7 @@ SPARK_JOB_SUCCEEDED_METRIC_TAGS_NO_ID = [
 SPARK_JOB_SUCCEEDED_METRIC_TAGS = [
     'stage_id:0',
     'stage_id:1',
-] + SPARK_JOB_SUCCEEDED_METRIC_TAGS_NO_ID
+] + SPARK_JOB_SUCCEEDED_METRIC_TAGS_NO_STAGE_ID
 
 SPARK_STAGE_RUNNING_METRIC_VALUES = {
     'spark.stage.count': 3,
@@ -456,14 +456,14 @@ SPARK_STAGE_RUNNING_METRIC_VALUES = {
     'spark.stage.disk_bytes_spilled': 16 * 3,
 }
 
-SPARK_STAGE_RUNNING_METRIC_TAGS_NO_ID = [
+SPARK_STAGE_RUNNING_METRIC_TAGS_NO_STAGE_ID = [
     'status:running',
 ] + COMMON_TAGS
 
 
 SPARK_STAGE_RUNNING_METRIC_TAGS = [
     'stage_id:1',
-] + SPARK_STAGE_RUNNING_METRIC_TAGS_NO_ID
+] + SPARK_STAGE_RUNNING_METRIC_TAGS_NO_STAGE_ID
 
 SPARK_STAGE_COMPLETE_METRIC_VALUES = {
     'spark.stage.count': 2,
@@ -483,14 +483,14 @@ SPARK_STAGE_COMPLETE_METRIC_VALUES = {
     'spark.stage.disk_bytes_spilled': 113 * 2,
 }
 
-SPARK_STAGE_COMPLETE_METRIC_TAGS_NO_ID = [
+SPARK_STAGE_COMPLETE_METRIC_TAGS_NO_STAGE_ID = [
     'status:complete',
 ] + COMMON_TAGS
 
 
 SPARK_STAGE_COMPLETE_METRIC_TAGS = [
     'stage_id:0',
-] + SPARK_STAGE_COMPLETE_METRIC_TAGS_NO_ID
+] + SPARK_STAGE_COMPLETE_METRIC_TAGS_NO_STAGE_ID
 
 SPARK_DRIVER_METRIC_VALUES = {
     'spark.driver.rdd_blocks': 99,
@@ -878,10 +878,10 @@ def test_standalone_unit(aggregator):
         ),
         (
             False,
-            SPARK_JOB_RUNNING_METRIC_TAGS_NO_ID,
-            SPARK_JOB_SUCCEEDED_METRIC_TAGS_NO_ID,
-            SPARK_STAGE_RUNNING_METRIC_TAGS_NO_ID,
-            SPARK_STAGE_COMPLETE_METRIC_TAGS_NO_ID,
+            SPARK_JOB_RUNNING_METRIC_TAGS_NO_STAGE_ID,
+            SPARK_JOB_SUCCEEDED_METRIC_TAGS_NO_STAGE_ID,
+            SPARK_STAGE_RUNNING_METRIC_TAGS_NO_STAGE_ID,
+            SPARK_STAGE_COMPLETE_METRIC_TAGS_NO_STAGE_ID,
         ),
     ],
     ids=["enable_stage_id_tag", "disable_stage_id_tag"],
