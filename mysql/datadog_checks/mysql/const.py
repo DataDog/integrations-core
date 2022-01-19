@@ -64,7 +64,7 @@ VARIABLES_VARS = {
     'Key_buffer_size': ('mysql.myisam.key_buffer_size', GAUGE),
     'Key_cache_utilization': ('mysql.performance.key_cache_utilization', GAUGE),
     'max_connections': ('mysql.net.max_connections_available', GAUGE),
-    'max_prepared_stmt_count': ('mysql.performance.max_prepared_stmt_count', COUNT),
+    'max_prepared_stmt_count': ('mysql.performance.max_prepared_stmt_count', GAUGE),
     'query_cache_size': ('mysql.performance.qcache_size', GAUGE),
     'table_open_cache': ('mysql.performance.table_open_cache', GAUGE),
     'thread_cache_size': ('mysql.performance.thread_cache_size', GAUGE),
