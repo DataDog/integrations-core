@@ -225,16 +225,21 @@ def test_emit_non_generic_tags_when_disabled(instance):
 
 
 @pytest.mark.parametrize('aggregate_24_hours', [pytest.param(True), pytest.param(False)])
-def test_aggregate_24_hours_queries(instance, aggregate_24_hours):
-    inst = copy.deepcopy(instance)
-    inst['metric_groups'] = [
-        'snowflake.billing',
-        'snowflake.query',
-        'snowflake.data_transfer',
-        'snowflake.auto_recluster',
-        'snowflake.pipe',
-        'snowflake.replication',
-    ]
+def test_aggregate_24_hours_queries(aggregate_24_hours):
+    inst = {
+        'metric_groups': [
+            'snowflake.billing',
+            'snowflake.query',
+            'snowflake.data_transfer',
+            'snowflake.auto_recluster',
+            'snowflake.pipe',
+            'snowflake.replication',
+        ],
+        'user': 'user',
+        'password': 'password',
+        'account': 'account',
+        'role': 'role',
+    }
     inst['aggregate_24_hours'] = aggregate_24_hours
     check = SnowflakeCheck(CHECK_NAME, {}, [inst])
 
