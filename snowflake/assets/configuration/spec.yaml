@@ -125,7 +125,7 @@ files:
             - snowflake.query (enabled by default)
             - snowflake.billing (enabled by default)
             - snowflake.storage (enabled by default)
-            - snowflake.storage.database 
+            - snowflake.storage.database
             - snowflake.storage.table
             - snowflake.logins (enabled by default)
             - snowflake.data_transfer
