@@ -22,7 +22,7 @@ collects all relevant SonarQube performance metrics exposed through SonarQube's 
 default metrics is available in the [sonarqube.d/metrics.yaml][3] file. Documentation on these beans is available on
 [SonarQube's website][4].
 
-SonarQube's JMX server is **not enabled** by default, this means that unless it is enabled, `sonarqube.server.*` metrics are not collected. More information on how to enable and configure JMX within SonarQube is available within the [SonarQube documentation][5]. Below are but some of configurations needed to enable the JMX server for each respective Java process.
+SonarQube's JMX server is **not enabled** by default, this means that unless it is enabled, `sonarqube.server.*` metrics are not collected. More information on how to enable and configure JMX within SonarQube is available within the [SonarQube documentation][5]. Below are configurations needed to enable the JMX server for some common Java processes:
 
 ```conf
 # WEB SERVER
