@@ -122,12 +122,12 @@ files:
 
           The available metric groups are:
 
-            - snowflake.query
-            - snowflake.billing
-            - snowflake.storage
-            - snowflake.storage.database
+            - snowflake.query (enabled by default)
+            - snowflake.billing (enabled by default)
+            - snowflake.storage (enabled by default)
+            - snowflake.storage.database 
             - snowflake.storage.table
-            - snowflake.logins
+            - snowflake.logins (enabled by default)
             - snowflake.data_transfer
             - snowflake.auto_recluster
             - snowflake.pipe
