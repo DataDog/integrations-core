@@ -15,9 +15,6 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Host" xxx -->
-
 #### Host
 
 ##### Metric collection
@@ -26,8 +23,6 @@ No additional installation is needed on your server.
 2. [Restart the Agent][5].
 
 **Note**: By default, the SingleStore integration only collects metrics from the `MV_GLOBAL_STATUS`, `AGGREGATORS`, and `LEAVES` tables. To collect additional system level metrics (CPU, disk, network IO, and memory), set `collect_system_metrics: true`  in your `singlestore.d/conf.yaml` file.
-<!-- xxz tab xxx -->
-<!-- xxx tab "Containerized" xxx -->
 
 ##### Log collection
 
@@ -76,15 +71,12 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 **Log collection is not supported for this site.**
 {{< /site-region >}}
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][6].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][6].
 
 | Parameter      | Value                                     |
 |----------------|-------------------------------------------|
 | `<LOG_CONFIG>` | `{"source": "singlestore", "service": "<SERVICE_NAME>"}` |
 
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 ### Validation
 

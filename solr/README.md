@@ -12,7 +12,7 @@ The Solr check tracks the state and performance of a Solr cluster. It collects m
 
 The Solr check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Solr nodes.
 
-This check is JMX-based, so you need to enable JMX Remote on your Solr servers. Read the [JMX Check documentation][3] for more details.
+This check is JMX-based, so you need to enable JMX Remote on your Solr servers. See the [JMX Check documentation][3] for more details.
 
 ### Configuration
 
@@ -168,7 +168,7 @@ For containerized environments, see the [Autodiscovery with JMX][7] guide.
 
 4. [Restart the Agent][6].
 
-See [Datadog's documentation][11] for additional information on how to configure the Agent for log collection in Docker environments.
+To enable logs for Kubernetes environments, see [Kubernetes Log Collection][11].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->

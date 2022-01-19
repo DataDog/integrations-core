@@ -1,5 +1,9 @@
 # CHANGELOG - Kube Metrics Server
 
+## 1.4.1 / 2022-01-18
+
+* [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
+
 ## 1.4.0 / 2021-11-13
 
 * [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).

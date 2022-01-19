@@ -48,7 +48,7 @@ sudo usermod -G varnish -a dd-agent
        varnishadm: <PATH_TO_VARNISHADM_BIN>
    ```
 
-    **Note**: If you don't set `varnishadm`, the Agent won't check backend health. If you do set it, the Agent needs privileges to execute the binary with root privileges. Add the following to your `/etc/sudoers` file:
+    **Note**: If you don't set `varnishadm`, the Agent doesn't check backend health. If you do set it, the Agent needs privileges to execute the binary with root privileges. Add the following to your `/etc/sudoers` file:
 
    ```shell
      dd-agent ALL=(ALL) NOPASSWD:/usr/bin/varnishadm
@@ -111,7 +111,7 @@ Configuration of the Varnish check using Autodiscovery in containerized environm
 
 ### Validation
 
-[Run the Agent's status subcommand][8] and look for `varnish` under the Checks section.
+Run the [Agent's status subcommand][8] and look for `varnish` under the Checks section.
 
 ## Data Collected
 

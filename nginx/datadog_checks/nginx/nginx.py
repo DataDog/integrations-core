@@ -18,8 +18,6 @@ from .metrics import COUNT_METRICS, METRICS_SEND_AS_COUNT, VTS_METRIC_MAP
 if PY3:
     long = int
 
-EPOCH = datetime(1970, 1, 1)
-
 if hasattr(datetime, 'fromisoformat'):
     fromisoformat = datetime.fromisoformat
 else:

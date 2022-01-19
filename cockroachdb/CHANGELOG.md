@@ -1,5 +1,9 @@
 # CHANGELOG - CockroachDB
 
+## 1.9.1 / 2022-01-18
+
+* [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
+
 ## 1.9.0 / 2022-01-08
 
 * [Added] Allow the use of the new OpenMetrics implementation. See [#11026](https://github.com/DataDog/integrations-core/pull/11026).

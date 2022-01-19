@@ -182,7 +182,7 @@ _Available for Agent versions >6.0_
 
 ### Validation
 
-[Run the Agent's status subcommand][13] and look for `vault` under the Checks section.
+Run the [Agent's status subcommand][13] and look for `vault` under the Checks section.
 
 ## Data Collected
 

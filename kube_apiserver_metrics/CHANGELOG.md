@@ -1,5 +1,9 @@
 # CHANGELOG - Kube_apiserver_metrics
 
+## 2.0.1 / 2022-01-18
+
+* [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
+
 ## 2.0.0 / 2022-01-08
 
 * [Added] Add new storage metrics and test for Kubernetes 1.23. See [#10906](https://github.com/DataDog/integrations-core/pull/10906).

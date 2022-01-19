@@ -16,9 +16,9 @@ Edit the `vertica.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 
 #### Enabling SSL
 
-The Vertica integration supports connecting to Vertica via SSL. To enable this, set `use_tls` in `conf.yaml` to `true`. 
+The Vertica integration supports connecting to Vertica through SSL. To enable this, set `use_tls` in `conf.yaml` to `true`. 
 
-Note: For Vertica integration versions <=1.9.0, set `tls_verify` to `true` instead. For legacy support, if `tls_verify` is explicitly set to `true`, `use_tls` will be set to `true`.
+**Note**: For Vertica integration versions <=1.9.0, set `tls_verify` to `true` instead. For legacy support, if `tls_verify` is explicitly set to `true`, `use_tls` is set to `true`.
 
 #### Prepare Vertica
 
@@ -34,7 +34,7 @@ The user used to connect to the database must be granted the [SYSMONITOR][5] rol
 GRANT SYSMONITOR TO datadog WITH ADMIN OPTION;
 ```
 
-Additionally, as the metrics for current license usage use the values from the most recent [audit][6], Datadog recommends scheduling audits to occur as often as possible. For more information, see [the Vertica audit license guide][7].
+As the metrics for current license usage use the values from the most recent [audit][6], Datadog recommends scheduling audits to occur as often as possible. For more information, see the [Vertica audit license guide][7].
 
 [Restart the Agent][8] to start sending Vertica metrics to Datadog.
 

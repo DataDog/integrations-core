@@ -1,5 +1,9 @@
 # CHANGELOG - istio
 
+## 3.17.1 / 2022-01-18
+
+* [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
+
 ## 3.17.0 / 2022-01-08
 
 * [Added] Support istio_agent metrics in sidecars. See [#10702](https://github.com/DataDog/integrations-core/pull/10702).

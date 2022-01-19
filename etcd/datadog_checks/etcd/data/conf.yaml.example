@@ -145,8 +145,9 @@ instances:
     #
     # include_labels: []
 
-    ## @param bearer_token_auth - boolean - optional - default: false
+    ## @param bearer_token_auth - boolean or string - optional - default: false
     ## If set to true, adds a bearer token authentication header.
+    ## If set to 'tls_only', only adds a bearer token authentication header if the endpoint is secure https.
     ## Note: If bearer_token_path is not set, the default path is /var/run/secrets/kubernetes.io/serviceaccount/token.
     #
     # bearer_token_auth: false

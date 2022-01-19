@@ -79,7 +79,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's `status` subcommand][7] and look for `twemproxy` under the Checks section.
+Run the [Agent's status subcommand][7] and look for `twemproxy` under the Checks section.
 
 ## Data Collected
 

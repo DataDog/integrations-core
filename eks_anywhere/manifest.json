@@ -1,0 +1,32 @@
+{
+  "categories": [
+    "aws",
+    "containers",
+    "orchestration",
+    "log collection"
+  ],
+  "creates_events": false,
+  "display_name": "Amazon EKS Anywhere",
+  "guid": "2f0cb8fd-5541-419d-8e58-af9b80cf4d80",
+  "is_public": true,
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "aws.eks.",
+  "name": "eks_anywhere",
+  "public_title": "Datadog-Amazon EKS Anywhere Integration",
+  "short_description": "An EKS deployment option for operating Kubernetes clusters on-premises",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "type": "check",
+  "integration_id": "eks-anywhere",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {}
+  }
+}

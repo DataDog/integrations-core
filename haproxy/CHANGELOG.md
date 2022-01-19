@@ -1,5 +1,9 @@
 # CHANGELOG - haproxy
 
+## 3.3.1 / 2022-01-18
+
+* [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
+
 ## 3.3.0 / 2022-01-08
 
 * [Added] Add support for Haproxy v2.5. See [#10651](https://github.com/DataDog/integrations-core/pull/10651). Thanks [wdauchy](https://github.com/wdauchy).
