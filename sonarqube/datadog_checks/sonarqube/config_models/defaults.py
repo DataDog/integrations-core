@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -72,10 +72,6 @@ def instance_aws_service(field, value):
 
 def instance_collect_default_jvm_metrics(field, value):
     return True
-
-
-def instance_components(field, value):
-    return get_default_field_value(field, value)
 
 
 def instance_connect_timeout(field, value):

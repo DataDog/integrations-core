@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -56,7 +56,7 @@ class InstanceConfig(BaseModel):
     aws_region: Optional[str]
     aws_service: Optional[str]
     collect_default_jvm_metrics: Optional[bool]
-    components: Optional[Components]
+    components: Components
     connect_timeout: Optional[float]
     default_exclude: Optional[Sequence[str]]
     default_include: Optional[Sequence[str]]

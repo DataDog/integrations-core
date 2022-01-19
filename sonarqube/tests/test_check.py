@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+import mock
 import pytest
 
 from .common import PROJECT
@@ -25,6 +26,18 @@ def test_check(aggregator, dd_run_check, sonarqube_check, web_instance):
         aggregator.assert_metric(metric, tags=tags)
 
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=global_tags)
+
+
+def test_component_unavailable(aggregator, dd_run_check, sonarqube_check, web_instance):
+    web_instance['components'] = {'nonexistent': {}, 'wrongProject': {}, PROJECT: {}}
+    check = sonarqube_check(web_instance)
+    check.log = mock.MagicMock()
+    dd_run_check(check)
+
+    check.log.warning.assert_called_with(
+        'The following components specified did not match any available components: %s',
+        ['nonexistent', 'wrongProject'],
+    )
 
 
 def test_version_metadata(datadog_agent, dd_run_check, sonarqube_check, web_instance):

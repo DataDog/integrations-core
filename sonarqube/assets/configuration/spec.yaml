@@ -58,6 +58,8 @@ files:
           items:
             type: string
       - name: components
+        required: true
+        enabled: false
         description: |
           The components for which metrics should be collected. Each object may override the default
           options. The following example gathers all default metrics for "some-project",

@@ -124,7 +124,7 @@ instances:
     #
     # default_exclude: []
 
-    ## @param components - mapping - optional
+    ## @param components - mapping - required
     ## The components for which metrics should be collected. Each object may override the default
     ## options. The following example gathers all default metrics for "some-project",
     ## and only what is included/excluded for "another-project":
