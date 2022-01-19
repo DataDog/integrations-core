@@ -682,7 +682,12 @@ def test_statement_samples_enable_consumers(dd_run_check, dbm_instance, root_con
 
     enabled_consumers = mysql_check._statement_samples._get_enabled_performance_schema_consumers()
     if events_statements_enable_procedure == "datadog.enable_events_statements_consumers":
-        assert enabled_consumers == original_enabled_consumers.union({'events_statements_history_long'})
+        expected_consumers = original_enabled_consumers.union({'events_statements_history_long'})
+        # CPU consumer was added in MySQL 8.0.28
+        if mysql_check.version.version_compatible((8, 0, 28)):
+            expected_consumers.union({'events_statements_cpu'})
+
+        assert enabled_consumers == expected_consumers
     else:
         assert enabled_consumers == original_enabled_consumers
 
