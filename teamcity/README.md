@@ -44,12 +44,6 @@ Add an item like the above to `instances` for each build configuration you want 
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 1. Configure Teamcity [logs settings][6].
 
 2. By default, Datadog's integration pipeline supports the following kind of log format:
@@ -106,12 +100,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 | `<INSTANCE_CONFIG>`  | `{"name": "<BUILD_NAME>", "server":"%%host%%", "build_configuration":"<BUILD_CONFIGURATION_ID>"}` |
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection][10].
 

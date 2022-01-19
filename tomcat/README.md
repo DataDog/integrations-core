@@ -113,12 +113,6 @@ List of filters is only supported in Datadog Agent > 5.3.0. If you are using an 
 
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 
 1. To submit logs to Datadog, Tomcat uses the `log4j` logger. For versions of Tomcat before 8.0, `log4j` is configured by default. For Tomcat 8.0+, you must configure Tomcat to use `log4j`, see [Using Log4j][8]. In the first step of those instructions, edit the `log4j.properties` file in the `$CATALINA_BASE/lib` directory as follows:
 

@@ -45,12 +45,6 @@ LABEL "com.datadoghq.ad.instances"='[{"prometheus_url":"http://%%host%%:9153/met
 
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker Log Collection][3].
 
 Then, set [Log Integrations][4] as Docker labels:
@@ -112,12 +106,6 @@ To enable the legacy OpenMetricsBaseCheckV1 version of the check, replace `openm
 
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][7].
 
 Then, set [Log Integrations][8] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][9].
@@ -171,12 +159,6 @@ To enable the legacy OpenMetricsBaseCheckV1 version of the check, replace `openm
 - The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's specifications. Do not add it at the outer specification level.
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [ECS Log Collection][11].
 
