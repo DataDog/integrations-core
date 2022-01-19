@@ -145,11 +145,11 @@ instances:
     #   - snowflake.storage
     #   - snowflake.logins
 
-    ## @param use_deprecated_aggregation - boolean - optional - default: true
-    ## Set to `false` to aggregate table entries on the last 24 hours instead of the deprecated method
+    ## @param aggregate_24_hours - boolean - optional - default: false
+    ## Set to `true` to aggregate table entries on the last 24 hours instead of
     ## aggregating entries of the current day.
     #
-    # use_deprecated_aggregation: false
+    # aggregate_24_hours: true
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.

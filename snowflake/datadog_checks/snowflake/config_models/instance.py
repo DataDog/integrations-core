@@ -33,6 +33,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     account: str
+    aggregate_24_hours: Optional[bool]
     authenticator: Optional[str]
     client_prefetch_threads: Optional[int]
     client_session_keep_alive: Optional[bool]
@@ -51,7 +52,6 @@ class InstanceConfig(BaseModel):
     service: Optional[str]
     tags: Optional[Sequence[str]]
     token: Optional[str]
-    use_deprecated_aggregation: Optional[bool]
     use_global_custom_queries: Optional[str]
     username: str
     warehouse: Optional[str]

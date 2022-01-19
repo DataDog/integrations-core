@@ -41,7 +41,7 @@ class Config(object):
         authenticator = instance.get('authenticator', 'snowflake')
         token = instance.get('token', None)
         client_keep_alive = instance.get('client_session_keep_alive', False)
-        use_deprecated_aggregation = instance.get('use_deprecated_aggregation', True)
+        aggregate_24_hours = instance.get('aggregate_24_hours', False)
 
         metric_groups = instance.get('metric_groups', self.DEFAULT_METRIC_GROUP)
 
@@ -88,4 +88,4 @@ class Config(object):
         self.authenticator = authenticator
         self.token = token
         self.client_keep_alive = client_keep_alive
-        self.use_deprecated_aggregation = use_deprecated_aggregation
+        self.aggregate_24_hours = aggregate_24_hours

@@ -60,9 +60,11 @@ class SnowflakeCheck(AgentCheck):
         self.errors = []
         for mgroup in self._config.metric_groups:
             try:
-                if self._config.use_deprecated_aggregation:
+                if not self._config.aggregate_24_hours:
                     for query in range(len(METRIC_GROUPS[mgroup])):
-                        METRIC_GROUPS[mgroup][query]['query'] = METRIC_GROUPS[mgroup][query]['query'].replace('DATEADD(hour, -24, current_timestamp())', 'date_trunc(day, current_date)')
+                        METRIC_GROUPS[mgroup][query]['query'] = METRIC_GROUPS[mgroup][query]['query'].replace(
+                            'DATEADD(hour, -24, current_timestamp())', 'date_trunc(day, current_date)'
+                        )
                 self.metric_queries.extend(METRIC_GROUPS[mgroup])
             except KeyError:
                 self.errors.append(mgroup)

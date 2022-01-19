@@ -154,7 +154,8 @@ AutoReclusterHistory = {
         'select table_name, database_name, schema_name, avg(credits_used), sum(credits_used), '
         'avg(num_bytes_reclustered), sum(num_bytes_reclustered), '
         'avg(num_rows_reclustered), sum(num_rows_reclustered) '
-        'from automatic_clustering_history where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1, 2, 3;'
+        'from automatic_clustering_history where start_time >= DATEADD(hour, -24, current_timestamp()) '
+        'group by 1, 2, 3;'
     ),
     'columns': [
         {'name': 'table', 'type': 'tag'},

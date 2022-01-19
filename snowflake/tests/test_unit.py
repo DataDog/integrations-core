@@ -222,3 +222,22 @@ def test_emit_non_generic_tags_when_disabled(instance):
     tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'service:COMPUTE_WH']
     normalised_tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'snowflake_service:COMPUTE_WH']
     assert set(normalised_tags) == set(check._normalize_tags_type(tags))
+
+
+@pytest.mark.parametrize('aggregate_24_hours', [pytest.param(True), pytest.param(False)])
+def test_aggregate_24_hours_queries(instance, aggregate_24_hours):
+    inst = copy.deepcopy(instance)
+    inst['metric_groups'] = [
+        'snowflake.billing',
+        'snowflake.query',
+        'snowflake.data_transfer',
+        'snowflake.auto_recluster',
+        'snowflake.pipe',
+        'snowflake.replication',
+    ]
+    inst['aggregate_24_hours'] = aggregate_24_hours
+    check = SnowflakeCheck(CHECK_NAME, {}, [inst])
+
+    for query in check.metric_queries:
+        assert ('DATEADD(hour, -24, current_timestamp())' in query['query']) == aggregate_24_hours
+        assert ('date_trunc(day, current_date)' in query['query']) != aggregate_24_hours
