@@ -150,6 +150,17 @@ instances:
     #
     # token_path: /path/to/token
 
+    ## @param private_key_path - string - optional - default: /path/to/private_key
+    ## Path to the file that contains the private key used to connect to Snowflake.
+    ## The key is re-read at every check run.
+    #
+    # private_key_path: /path/to/private_key
+
+    ## @param private_key_password - string - optional
+    ## Password protecting the private key file in `private_key_path` option.
+    #
+    # private_key_password: <PRIVATE_KEY_PASSWORD>
+
     ## @param client_session_keep_alive - boolean - optional - default: false
     ## If set to true, Snowflake keeps the session active indefinitely as long as the connection is active,
     ## even if there is no activity from the user.

@@ -90,6 +90,14 @@ def instance_password(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_private_key_password(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_private_key_path(field, value):
+    return '/path/to/private_key'
+
+
 def instance_schema_(field, value):
     return 'ACCOUNT_USAGE'
 

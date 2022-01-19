@@ -47,6 +47,8 @@ class InstanceConfig(BaseModel):
     ocsp_response_cache_filename: Optional[str]
     only_custom_queries: Optional[bool]
     password: Optional[str]
+    private_key_password: Optional[str]
+    private_key_path: Optional[str]
     role: str
     schema_: Optional[str] = Field(None, alias='schema')
     service: Optional[str]
