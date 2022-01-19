@@ -34,6 +34,7 @@ EXCEPTIONS = {
         ERR_UNEXPECTED_LOG_COLLECTION_CAT, # Log collection but not from the agent
         ERR_UNEXPECTED_LOG_DOC, # Not collecting logs directly, but has example in its readme
     ],
+    'eks_anywhere': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # Works with amazon_eks
     'eks_fargate': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # Log collection but not from the agent
     'fluentd': [ERR_UNEXPECTED_LOG_COLLECTION_CAT],  # Fluentd is about log collection but we don't collect fluentd logs
     'jmeter': [ERR_MISSING_LOG_DOC], # Tile only in integrations-core, logs collected in DataDog/jmeter-datadog-backend-listener

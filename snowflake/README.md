@@ -202,6 +202,11 @@ To verify the result, search for the metrics using [Metrics Summary][10]:
 
 ## Data Collected
 
+<div class="alert alert-info"><bold>Note</bold>: Only metrics from the following metric groups are enabled by default: <code>snowflake.query.*</code>, <code>snowflake.billing.*</code>, <code>snowflake.storage.*</code>, and <code>snowflake.logins.*</code>.
+
+If you would like to collect metrics from other metric groups, please refer <a href="https://github.com/DataDog/integrations-core/blob/master/snowflake/datadog_checks/snowflake/data/conf.yaml.example">to the example config file for this integration</a>.
+</div>
+
 ### Metrics
 
 See [metadata.csv][13] for a list of metrics provided by this check.

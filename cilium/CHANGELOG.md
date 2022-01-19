@@ -1,5 +1,9 @@
 # CHANGELOG - Cilium
 
+## 1.10.1 / 2022-01-18
+
+* [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
+
 ## 1.10.0 / 2022-01-08
 
 * [Added] Support the new OpenMetrics V2 implementation. See [#10840](https://github.com/DataDog/integrations-core/pull/10840).

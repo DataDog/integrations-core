@@ -31,12 +31,6 @@ Edit the `journald.d/conf.yaml` file, in the `conf.d/` folder at the root of you
 
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 Collecting logs is disabled by default in the Datadog Agent, you need to enable it in the `datadog.yaml` with:
 
 ```yaml
@@ -64,12 +58,6 @@ To fill `source` and `service` attributes, the Agent collects `SYSLOG_IDENTIFIER
 For containerized environments, see the [Autodiscovery Integration Templates][4] for guidance on applying the parameters below.
 
 #### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][5].
