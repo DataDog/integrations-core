@@ -16,6 +16,9 @@ assets/               @DataDog/agent-integrations
 
 
 # Container monitoring
+/container/                               @DataDog/container-integrations @DataDog/agent-integrations
+/container/*.md                           @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/container/manifest.json                  @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /containerd/                              @DataDog/container-integrations @DataDog/agent-integrations
 /containerd/*.md                          @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /containerd/manifest.json                 @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
