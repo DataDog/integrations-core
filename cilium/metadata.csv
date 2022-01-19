@@ -123,6 +123,9 @@ cilium.operator.eni.deficit_resolver.latency.seconds.sum,count,,second,,"[OpenMe
 cilium.operator.eni.deficit_resolver.latency.seconds.bucket,count,,second,,"[OpenMetrics V1] Sample of latency between deficit resolver queue and trigger run",0,cilium,latency run bucket
 cilium.operator.eni.deficit_resolver.queued.total,gauge,,event,,"[OpenMetrics V1] Number of queued deficit resolver triggers",0,cilium,queued deficit triggers
 cilium.operator.eni.deficit_resolver.queued.count,count,,event,,"[OpenMetrics V2] Number of queued deficit resolver triggers",0,cilium,queued deficit triggers
+cilium.operator.eni_ec2.rate_limit.duration.seconds.bucket,count
+cilium.operator.eni_ec2.rate_limit.duration.seconds.count,count
+cilium.operator.eni_ec2.rate_limit.duration.seconds.sum,count
 cilium.operator.eni.ec2_resync.duration.seconds.count,count,,operation,,"[OpenMetrics V1 and V2] Count of duration of ec2 resync trigger runs",0,cilium,resync trigger run count
 cilium.operator.eni.ec2_resync.duration.seconds.sum,count,,second,,"[OpenMetrics V1 and V2] Sum of duration of ec2 resync trigger runs",0,cilium,resync trigger run sum
 cilium.operator.eni.ec2_resync.duration.seconds.bucket,count,,second,,"[OpenMetrics V2] Sample of duration of ec2 resync trigger runs",0,cilium,resync trigger run bucket
@@ -146,35 +149,77 @@ cilium.operator.eni.k8s_sync.queued.total,gauge,,unit,,"[OpenMetrics V1] Number 
 cilium.operator.eni.k8s_sync.queued.count,count,,unit,,"[OpenMetrics V2] Number of queued k8s sync triggers",0,cilium,k8s queue trigger
 cilium.operator.eni.nodes.total,gauge,,node,,"[OpenMetrics V1] Number of nodes by category",0,cilium,eni node
 cilium.operator.eni.resync.total,count,,unit,,"[OpenMetrics V1] Number of resync operations to synchronize AWS EC2 metadata",0,cilium,eni resync total
-cilium.operator.eni.resync.count,count,,unit,,"[OpenMetrics V2] Number of resync operations to synchronize AWS EC2 metadata",0,cilium,eni resync total
-cilium.operator.eni.resync.total,count,,unit,,"Number of resync operations to synchronize AWS EC2 metadata",0,cilium,eni resync total
-cilium.operator.ec2.api.duration.seconds.sum,gauge,,second,,"Sum of duration of interactions with API",0,cilium,api duration sum
-cilium.operator.ec2.api.duration.seconds.count,count,,second,,"Count of duration of interactions with API",0,cilium,api duration count
-cilium.operator.ec2.api.rate_limit.duration.seconds.sum,gauge,,second,,"Sum of duration of client-side rate limiter blocking",0,cilium,api rate limit duration sum
-cilium.operator.ec2.api.rate_limit.duration.seconds.count,count,,second,,"Count of duration of client-side rate limiter blocking",0,cilium,api rate limit duration count
-cilium.operator.ipam.allocation_ops,count,,operation,,"Count of IP allocation operations",0,cilium,ipam allocation ops
-cilium.operator.ipam.release_ops,count,,operation,,"Count of IP release operations",0,cilium,ipam release ops
-cilium.operator.ipam.interface_creation_ops,count,,operation,,"Count of interfaces allocated",0,cilium,ipam creation ops
-cilium.operator.ipam.available,gauge,,unit,,"Number of interfaces with addresses available",0,cilium,available ips
-cilium.operator.ipam.available.ips_per_subnet,gauge,,unit,,"Number of available IPs per subnet ID",0,cilium,available ips/subnet
-cilium.operator.ipam.deficit_resolver.duration.seconds.sum,gauge,,second,,"Sum of duration of deficit resolver trigger runs",0,cilium,deficit resolver duration sum
-cilium.operator.ipam.deficit_resolver.duration.seconds.count,count,,second,,"Count of duration of deficit resolver trigger runs",0,cilium,deficit resolver duration count
-cilium.operator.ipam.deficit_resolver.folds,gauge,,unit,,"Current level of deficit resolver folding",0,cilium,deficit resolver fold
-cilium.operator.ipam.deficit_resolver.latency.seconds.sum,gauge,,second,,"Sum of deficit resolver latency between queue and trigger run",0,cilium,deficit resolver latency sum
-cilium.operator.ipam.deficit_resolver.latency.seconds.count,count,,second,,"Count of deficit resolver latency between queue and trigger run",0,cilium,deficit resolver latency count
-cilium.operator.ipam.deficit_resolver.queued.total,count,,unit,,"Count of deficit resolver queued triggers",0,cilium,deficit resolver trigger count
-cilium.operator.ipam.ips,gauge,,unit,,"Number of IPs allocated",0,cilium,ipam ips
-cilium.operator.ipam.k8s_sync.duration.seconds.sum,gauge,,second,,"Sum of duration of K8s sync trigger runs",0,cilium,k8s sync duration sum
-cilium.operator.ipam.k8s_sync.duration.seconds.count,count,,second,,"Count of duration of K8s sync trigger runs",0,cilium,k8s sync duration count
-cilium.operator.ipam.k8s_sync.folds,gauge,,unit,,"Current level of K8s sync folding",0,cilium,k8s sync fold
-cilium.operator.ipam.k8s_sync.latency.seconds.sum,gauge,,second,,"Sum of K8s sync latency between queue and trigger run",0,cilium,k8s sync latency sum
-cilium.operator.ipam.k8s_sync.latency.seconds.count,count,,second,,"Count of K8s sync latency between queue and trigger run",0,cilium,k8s sync latency count
-cilium.operator.ipam.k8s_sync.queued.total,count,,unit,,"Count of K8s sync queued triggers",0,cilium,k8s sync queued
-cilium.operator.ipam.nodes,gauge,,node,,"Number of nodes by category",0,cilium,ipam nodes
-cilium.operator.ipam.resync.duration.seconds.sum,gauge,,second,,"Sum of duration of resync trigger runs",0,cilium,resync duration sum
-cilium.operator.ipam.resync.duration.seconds.count,count,,second,,"Count of duration of resync trigger runs",0,cilium,resync duration count
-cilium.operator.ipam.resync.folds,gauge,,unit,,"Current level of resync folding",0,cilium,resync fold
-cilium.operator.ipam.resync.latency.seconds.sum,gauge,,second,,"Sum of resync latency between queue and trigger run",0,cilium,resync latency sum
-cilium.operator.ipam.resync.latency.seconds.count,count,,second,,"Count of resync latency between queue and trigger run",0,cilium,resync latency count
-cilium.operator.ipam.resync.queued.total,count,,unit,,"Count of queued resync triggers",0,cilium,resync queued count
-cilium.operator.ipam.resync.total,count,,unit,,"Count of resync operations to synchronize and resolve IP deficit of nodes",0,cilium,resync total count
+cilium.operator.eni.resync.count,count,,unit,,"[OpenMetrics V2] Number of resync operations to synchronize AWS EC2 metadata",0,cilium,eni resync count
+cilium.operator.ec2.api.duration.seconds.sum,count,,second,,"[OpenMetrics V1 and V2] Sum of duration of interactions with API",0,cilium,api duration sum
+cilium.operator.ec2.api.duration.seconds.count,count,,request,,"[OpenMetrics V1 and V2] Count of duration of interactions with API",0,cilium,api duration count
+cilium.operator.ec2.api.duration.seconds.bucket,count,,second,,"[OpenMetrics V2] Sample of duration of interactions with API",0,cilium,api duration sample
+cilium.operator.ec2.api.rate_limit.duration.seconds.sum,count,,second,,"[OpenMetrics V1 and V2] Sum of duration of client-side rate limiter blocking",0,cilium,api rate limit duration sum
+cilium.operator.ec2.api.rate_limit.duration.seconds.count,count,,request,,"[OpenMetrics V1 and V2] Count of duration of client-side rate limiter blocking",0,cilium,api rate limit duration count
+cilium.operator.ec2.api.rate_limit.duration.seconds.bucket,count,,second,,"[OpenMetrics V2] Sample of duration of client-side rate limiter blocking",0,cilium,api rate limit duration sample
+cilium.operator.ipam.api.duration.seconds.sum,count,,second
+cilium.operator.ipam.api.duration.seconds.count,count,,request
+cilium.operator.ipam.api.duration.seconds.bucket,count,,second
+cilium.operator.ipam.api.rate_limit.duration.seconds.sum,count,,second
+cilium.operator.ipam.api.rate_limit.duration.seconds.count,count,,request
+cilium.operator.ipam.api.rate_limit.duration.seconds.bucket,count,,second
+cilium.operator.ipam.allocation_ops,count,,operation,,"[OpenMetrics V1 and V2] Count of IP allocation operations",0,cilium,ipam allocation ops
+cilium.operator.ipam.release_ops,count,,operation,,"[OpenMetrics V1 and V2] Count of IP release operations",0,cilium,ipam release ops
+cilium.operator.ipam.interface_creation_ops,count,,operation,,"[OpenMetrics V1 and V2] Count of interfaces allocated",0,cilium,ipam creation ops
+cilium.operator.ipam.available,gauge,,unit,,"[OpenMetrics V1 and V2] Number of interfaces with addresses available",0,cilium,available ips
+cilium.operator.ipam.available.ips_per_subnet,gauge,,unit,,"[OpenMetrics V1 and V2] Number of available IPs per subnet ID",0,cilium,available ips/subnet
+cilium.operator.ipam.deficit_resolver.duration.seconds.sum,count,,second,,"[OpenMetrics V1 and V2] Sum of duration of deficit resolver trigger runs",0,cilium,deficit resolver duration sum
+cilium.operator.ipam.deficit_resolver.duration.seconds.count,count,,request,,"[OpenMetrics V1 and V2] Count of duration of deficit resolver trigger runs",0,cilium,deficit resolver duration count
+cilium.operator.ipam.deficit_resolver.duration.seconds.bucket,count,,second,,"[OpenMetrics V2] Sample of duration of deficit resolver trigger runs",0,cilium,deficit resolver duration sample
+cilium.operator.ipam.deficit_resolver.queued.count,count,,unit,,"[OpenMetrics V1] Number of queued triggers",0,cilium,deficit resolver queued count
+cilium.operator.ipam.deficit_resolver.queued.total,count,,unit,,"[OpenMetrics V2] Number of queued triggers",0,cilium,deficit resolver queued count
+cilium.operator.ipam.deficit_resolver.folds,gauge,,unit,,"[OpenMetrics V1 and V2] Current level of deficit resolver folding",0,cilium,deficit resolver fold
+cilium.operator.ipam.deficit_resolver.latency.seconds.sum,count,,second,,"[OpenMetrics V1 and V2] Sum of deficit resolver latency between queue and trigger run",0,cilium,deficit resolver latency sum
+cilium.operator.ipam.deficit_resolver.latency.seconds.count,count,,operation,,"[OpenMetrics V1 and V2] Count of deficit resolver latency between queue and trigger run",0,cilium,deficit resolver latency count
+cilium.operator.ipam.deficit_resolver.latency.seconds.bucket,count,,second,,"[OpenMetrics V2] Sample of deficit resolver latency between queue and trigger run",0,cilium,deficit resolver latency sample
+cilium.operator.ipam.ips,gauge,,unit,,"[OpenMetrics V1 and V2] Number of IPs allocated",0,cilium,ipam ips
+cilium.operator.ipam.k8s_sync.duration.seconds.sum,count,,second,,"[OpenMetrics V1 and V2] Sum of duration of K8s sync trigger runs",0,cilium,k8s sync duration sum
+cilium.operator.ipam.k8s_sync.duration.seconds.count,count,,request,,"[OpenMetrics V1 and V2] Count of duration of K8s sync trigger runs",0,cilium,k8s sync duration count
+cilium.operator.ipam.k8s_sync.duration.seconds.bucket,count,,second,,"[OpenMetrics V2] Sample of duration of K8s sync trigger runs",0,cilium,k8s sync duration sample
+cilium.operator.ipam.k8s_sync.queued.total,count,,unit,,"[OpenMetrics V1] Number of queued k8s sync triggers",0,cilium,k8s sync queue trigger
+cilium.operator.ipam.k8s_sync.queued.count,count,,unit,,"[OpenMetrics V2] Number of queued k8s sync triggers",0,cilium,k8s sync queue trigger
+cilium.operator.ipam.k8s_sync.folds,gauge,,unit,,"[OpenMetrics V1 and V2] Current level of K8s sync folding",0,cilium,k8s sync fold
+cilium.operator.ipam.k8s_sync.latency.seconds.sum,count,,second,,"[OpenMetrics V1 and V2] Sum of K8s sync latency between queue and trigger run",0,cilium,k8s sync latency sum
+cilium.operator.ipam.k8s_sync.latency.seconds.count,count,,operation,,"[OpenMetrics V1 and V2] Count of K8s sync latency between queue and trigger run",0,cilium,k8s sync latency count
+cilium.operator.ipam.k8s_sync.latency.seconds.bucket,count,,second,,"[OpenMetrics V2] Count of K8s sync latency between queue and trigger run",0,cilium,k8s sync latency sample
+cilium.operator.ipam.nodes,gauge,,node,,"[OpenMetrics V1 and V2] Number of nodes by category",0,cilium,ipam nodes
+cilium.operator.ipam.resync.duration.seconds.sum,count,,second,,"[OpenMetrics V1 and V2]Sum of duration of resync trigger runs",0,cilium,ipam resync duration sum
+cilium.operator.ipam.resync.duration.seconds.count,count,,request,,"[OpenMetrics V1 and V2] Count of duration of resync trigger runs",0,cilium,ipam resync duration count
+cilium.operator.ipam.resync.duration.seconds.bucket,count,,second,,"[OpenMetrics V2] Sample of duration of resync trigger runs",0,cilium,ipam resync duration sample
+cilium.operator.ipam.resync.total,count,,operation,,"[OpenMetrics V1] Number of resync operations to synchronize and resolve IP deficit of nodes",0,cilium,ipam resync operations count
+cilium.operator.ipam.resync.count,count,,operation,,"[OpenMetrics V2] Number of resync operations to synchronize and resolve IP deficit of nodes",0,cilium,ipam resync operations count
+cilium.operator.ipam.resync.queued.total,count,,unit,,"[OpenMetrics V1] Number of IPAM queued triggers",0,cilium,ipam queued triggers count
+cilium.operator.ipam.resync.queued.count,count,,unit,,"[OpenMetrics V2] Number of IPAM queued triggers",0,cilium,ipam queued triggers count
+cilium.operator.ipam.resync.folds,gauge,,unit,,"[OpenMetrics V1 and V2] Current level of resync folding",0,cilium,resync fold
+cilium.operator.ipam.resync.latency.seconds.sum,count,,second,,"[OpenMetrics V1 and V2] Sum of resync latency between queue and trigger run",0,cilium,resync latency sum
+cilium.operator.ipam.resync.latency.seconds.count,count,,operation,,"[OpenMetrics V1 and V2] Count of resync latency between queue and trigger run",0,cilium,resync latency count
+cilium.operator.ipam.resync.latency.seconds.bucket,count,,second,,"[OpenMetrics V2] Sample of resync latency between queue and trigger run",0,cilium,resync latency count
+cilium.operator.ces.queueing_delay.seconds.sum,count,,second,,"[OpenMetrics V1 and V2] Sum of CiliumEndpointSlice queueing delay in seconds",0,cilium,ces queue delay sum
+cilium.operator.ces.queueing_delay.seconds.count,count,,unit,,"[OpenMetrics V1 and V2] Count of CiliumEndpointSlice queueing delay in seconds",0,cilium,ces queue delay count
+cilium.operator.ces.queueing_delay.seconds.bucket,count,,second,,"[OpenMetrics V2] Sample of CiliumEndpointSlice queueing delay in seconds",0,cilium,ces queue delay sample
+cilium.operator.ces.sync_errors.total,count,,error,,"[OpenMetrics V1] Number of CES sync errors",0,cilium,ces sync errors count
+cilium.operator.ces.sync_errors.count,count,,error,,"[OpenMetrics V2] Number of CES sync errors",0,cilium,ces sync errors count
+cilium.operator.identity_gc.entries,gauge,,garbage collection,,"[OpenMetrics V1 and V2] The number of alive and deleted identities at the end of a garbage collector run",0,cilium,gc entries
+cilium.operator.identity_gc.runs,gauge,,garbage collection,,"[OpenMetrics V1 and V2] The number of times identity garbage collector has run",0,cilium,gc runs
+cilium.operator.num_ceps_per_ces.sum,count,,unit,,"[OpenMetrics V1 and V2] Sum of CEPs batched in a CES",0,cilium,cep per ces sum
+cilium.operator.num_ceps_per_ces.count,count,,unit,,"[OpenMetrics V1 and V2] Count of CEPs batched in a CES",0,cilium,cep per ces count
+cilium.operator.num_ceps_per_ces.bucket,count,,unit,,"[OpenMetrics V1 and V2] Sample of CEPs batched in a CES",0,cilium,cep per ces sample
+cilium.operator.ipam.allocation_ops.count,count
+cilium.operator.ipam.interface_creation_ops.count,count
+cilium.operator.ipam.release_ops.count,count
+cilium.operator.ec2.api.rate_limit.duration.seconds.sum,count
+cilium.operator.ec2.api.rate_limit.duration.seconds.count,count
+cilium.operator.ec2.api.rate_limit.duration.seconds.bucket,count
+cilium.operator.eni_ec2.rate_limit.duration.seconds.sum,count
+cilium.operator.eni_ec2.rate_limit.duration.seconds.count,count
+cilium.operator.eni_ec2.rate_limit.duration.seconds.bucket,count
+cilium.operator.ipam.api.duration.seconds.sum,count
+cilium.operator.ipam.api.duration.seconds.count,count
+cilium.operator.ipam.api.duration.seconds.bucket,count
+cilium.operator.ipam.api.rate_limit.duration.seconds.sum,count
+cilium.operator.ipam.api.rate_limit.duration.seconds.count,count
+cilium.operator.ipam.api.rate_limit.duration.seconds.bucket,count

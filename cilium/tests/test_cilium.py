@@ -3,12 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import (
-    AGENT_V2_METRICS,
-    OPERATOR_V2_METRICS,
-    ADDL_OPERATOR_METRICS,
-    requires_new_environment
-)
+from .common import ADDL_OPERATOR_METRICS, AGENT_V2_METRICS, OPERATOR_V2_METRICS, requires_new_environment
 
 pytestmark = [requires_new_environment]
 
