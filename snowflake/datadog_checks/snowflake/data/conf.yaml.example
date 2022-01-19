@@ -107,23 +107,32 @@ instances:
     ## @param authenticator - string - optional - default: snowflake
     ## Authenticator for Snowflake. The default `snowflake` uses the internal Snowflake authenticator.
 <<<<<<< HEAD
+<<<<<<< HEAD
     ## Use `oauth` to authenticate with OAuth. Also, set the `token` or `token_path` option.
 =======
     ## Use `oauth` to authenticate with OAuth, be sure to set the `token` or `token_path` option as well.
 >>>>>>> 78003da9e (Add token_path config option)
+=======
+    ## Use `oauth` to authenticate with OAuth. Also, set the `token` or `token_path` option.
+>>>>>>> 1f30fba28 (Sync spec)
     #
     # authenticator: <AUTHENTICATOR>
 
     ## @param token - string - optional
 <<<<<<< HEAD
+<<<<<<< HEAD
     ## Token used for OAuth connection to Snowflake. You cannot use this alongside `token_path`.
 =======
     ## Token used for OAuth connection to Snowflake. Can't be used along side with `token_path`.
 >>>>>>> 78003da9e (Add token_path config option)
+=======
+    ## Token used for OAuth connection to Snowflake. You cannot use this alongside `token_path`.
+>>>>>>> 1f30fba28 (Sync spec)
     #
     # token: <TOKEN>
 
     ## @param token_path - string - optional - default: /path/to/token
+<<<<<<< HEAD
 <<<<<<< HEAD
     ## Path to the file that contains the token used for OAuth connection to Snowflake.
     ## You cannot use this alongside `token`.
@@ -133,6 +142,11 @@ instances:
     ## Can't be used along side with `token`.
     ## The token will be re-read at each check run.
 >>>>>>> 78003da9e (Add token_path config option)
+=======
+    ## Path to the file that contains the token used for OAuth connection to Snowflake.
+    ## You cannot use this alongside `token`.
+    ## The token is re-read at every check run.
+>>>>>>> 1f30fba28 (Sync spec)
     #
     # token_path: /path/to/token
 
