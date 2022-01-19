@@ -61,7 +61,7 @@ mysql.myisam.key_reads,gauge,,read,second,"The number of physical reads of a key
 mysql.myisam.key_write_requests,gauge,,write,second,"The number of requests to write a key block to the MyISAM key cache.",0,mysql,mysql myisam key_write_requests
 mysql.myisam.key_writes,gauge,,write,second,"The number of physical writes of a key block from the MyISAM key cache to disk.",0,mysql,mysql myisam key_writes
 mysql.myisam.key_buffer_size,gauge,,byte,,"Size of the buffer used for index blocks.",0,mysql,mysql myisam key_buffer_size
-mysql.performance.max_prepared_stmt_count,count,,,,"The total number of prepared statements in the server.",0,mysql,mysql performance prepared_stmt_count
+mysql.performance.max_prepared_stmt_count,gauge,,,,"The maximum allowed prepared statements on the server.",0,mysql,max prepared statements
 mysql.performance.qcache_size,gauge,,byte,,"The amount of memory allocated for caching query results.",0,mysql,mysql performance qcache_size
 mysql.performance.table_open_cache,gauge,,,,"The number of open tables for all threads. Increasing this value increases the number of file descriptors that mysqld requires.",0,mysql,mysql performance table_open_cache
 mysql.performance.thread_cache_size,gauge,,byte,,"How many threads the server should cache for reuse. When a client disconnects, the client's threads are put in the cache if there are fewer than thread_cache_size threads there.",0,mysql,mysql performance thread_cache_size
