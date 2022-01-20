@@ -485,7 +485,7 @@ def metadata(check, check_duplicates, show_warnings):
             errors = True
             display_queue.append((echo_failure, f'{current_check}: {header} is empty in {count} rows.'))
 
-        if row['curated_metric']:
+        if 'curated_metric' in row and row['curated_metric']:
             for curated_metric_type in row['curated_metric'].split('|'):
                 if curated_metric_type not in VALID_CURATED_METRIC_TYPES:
                     errors = True
