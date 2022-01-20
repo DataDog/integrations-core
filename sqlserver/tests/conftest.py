@@ -29,6 +29,7 @@ from .common import (
     INSTANCE_SQL_DEFAULTS,
     get_local_driver,
 )
+from .utils import HighCardinalityQueries
 
 try:
     import pyodbc
@@ -262,29 +263,9 @@ def dd_environment():
         pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
 
     def high_cardinality_env_is_ready():
-        conn_str = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;'.format(
-            get_local_driver(), DOCKER_SERVER
-        )
-        conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
-        with conn.cursor() as cursor:
-            cursor.execute(
-                'SELECT COUNT(*) FROM datadog_test.sys.database_principals WHERE name LIKE \'high_cardinality_user_%\''
-            )
-            user_count = cursor.fetchone()[0]
-            cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.schemas WHERE name LIKE \'high_cardinality_schema%\'')
-            schema_count = cursor.fetchone()[0]
-            cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.tables')
-            table_count = cursor.fetchone()[0]
-            cursor.execute('SELECT COUNT(*) FROM datadog_test.dbo.high_cardinality')
-            row_count = cursor.fetchone()[0]
-            expected_obj_count = 10000
-            expected_row_count = 100000
-            return (
-                user_count >= expected_obj_count
-                and schema_count >= expected_obj_count
-                and table_count >= expected_obj_count
-                and row_count >= expected_row_count
-            )
+        return HighCardinalityQueries(
+            {'driver': get_local_driver(), 'host': DOCKER_SERVER, 'username': 'sa', 'password': 'Password123'}
+        ).is_ready()
 
     compose_file = os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml')
     conditions = [WaitFor(sqlserver_can_connect, wait=3, attempts=10)]

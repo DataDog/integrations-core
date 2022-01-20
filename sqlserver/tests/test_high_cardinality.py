@@ -22,9 +22,16 @@ def dbm_instance(instance_docker):
     return copy(instance_docker)
 
 
+@pytest.fixture
+def high_cardinality_instance(instance_docker):
+    instance_docker['username'] = 'bob'
+    instance_docker['password'] = 'Password12!'
+    return copy(instance_docker)
+
+
 @high_cardinality_only
 @pytest.mark.run_high_cardinality_forever
-def test_run_high_cardinality_forever(dbm_instance):
+def test_run_high_cardinality_forever(high_cardinality_instance):
     """
     This test is a utility and is useful in situations where you want to connect to the database instance
     and have queries executing against it. Note, you must kill the test execution to stop this test.
@@ -36,15 +43,17 @@ def test_run_high_cardinality_forever(dbm_instance):
     e.g. in conjunction with the required flag
     `ddev ... -pa --run_high_cardinality_forever -k test_run_high_cardinality_forever`
     """
-    queries = HighCardinalityQueries(dbm_instance)
-    queries.start_background('bob', config={'hc_threads': 20, 'slow_threads': 5, 'complex_threads': 10})
+    queries = HighCardinalityQueries(high_cardinality_instance)
+    _check_queries_is_ready(queries)
+    queries.start_background(config={'hc_threads': 20, 'slow_threads': 5, 'complex_threads': 10})
 
 
 @high_cardinality_only
-def test_complete_metrics_run(dd_run_check, dbm_instance, aggregator):
+def test_complete_metrics_run(dd_run_check, dbm_instance, high_cardinality_instance):
     dbm_instance['query_activity']['enabled'] = False
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    queries = HighCardinalityQueries(dbm_instance)
+    queries = HighCardinalityQueries(high_cardinality_instance)
+    _check_queries_is_ready(queries)
 
     def _run_queries_and_time_check():
         queries_to_create = 4000
@@ -52,7 +61,7 @@ def test_complete_metrics_run(dd_run_check, dbm_instance, aggregator):
         hc_queries = [queries.create_high_cardinality_query() for _ in range(queries_to_create)]
 
         def _run_queries(idx):
-            conn = queries.get_conn_for_user('bob')
+            conn = queries.get_conn()
             queries_to_run = queries_to_create // thread_count
             for q in hc_queries[idx * queries_to_run : (idx + 1) * queries_to_run]:
                 conn.execute(q)
@@ -86,31 +95,32 @@ def test_complete_metrics_run(dd_run_check, dbm_instance, aggregator):
         {'hc_threads': 0, 'slow_threads': 0, 'complex_threads': 50},
     ],
 )
-def test_individual_dbm_jobs(dd_run_check, instance_docker, job, background_config):
+def test_individual_dbm_jobs(dd_run_check, instance_docker, high_cardinality_instance, job, background_config):
     instance_docker['dbm'] = True
     instance_docker[job] = {'enabled': True, 'run_sync': True}
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    queries = HighCardinalityQueries(instance_docker)
-    _run_check_against_high_cardinality(dd_run_check, check, queries, config=background_config)
+    _run_check_against_high_cardinality(dd_run_check, check, high_cardinality_instance, config=background_config)
 
 
 @high_cardinality_only
 @pytest.mark.skip(reason='skip until the metrics query is improved')
 @pytest.mark.parametrize("dbm_enabled,", [True, False])
-def test_check_against_hc(dd_run_check, dbm_instance, dbm_enabled):
+def test_check_against_high_cardinality(dd_run_check, dbm_instance, high_cardinality_instance, dbm_enabled):
     dbm_instance['dbm'] = dbm_enabled
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    queries = HighCardinalityQueries(dbm_instance)
     _run_check_against_high_cardinality(
-        dd_run_check, check, queries, config={'hc_threads': 20, 'slow_threads': 5, 'complex_threads': 10}
+        dd_run_check,
+        check,
+        high_cardinality_instance,
+        config={'hc_threads': 20, 'slow_threads': 5, 'complex_threads': 10},
     )
 
 
-def _run_check_against_high_cardinality(
-    dd_run_check, check, queries, config=None, user='bob', expected_time=15, delay=60
-):
+def _run_check_against_high_cardinality(dd_run_check, check, instance, config=None, expected_time=15, delay=60):
+    queries = HighCardinalityQueries(instance)
+    _check_queries_is_ready(queries)
     try:
-        queries.start_background(user, config=config)
+        queries.start_background(config=config)
         # Allow the database to build up queries in the background before proceeding
         time.sleep(delay)
 
@@ -128,3 +138,12 @@ def _run_check_against_high_cardinality(
     finally:
         queries.stop()
         check.cancel()
+
+
+def _check_queries_is_ready(queries):
+    assert queries.is_ready() is True, (
+        'Expected queries to be ready, make sure the env was setup properly. The '
+        'database is expected to have {} users, schemas, and tables and {} rows.'.format(
+            queries.EXPECTED_OBJ_COUNT, queries.EXPECTED_ROW_COUNT
+        )
+    )

@@ -30,9 +30,10 @@ class HighCardinalityQueries:
     """
 
     DEFAULT_TIMEOUT = 30
+    EXPECTED_OBJ_COUNT = 10000
     EXPECTED_ROW_COUNT = 100000
 
-    def __init__(self, instance_docker=None):
+    def __init__(self, db_instance_config):
         self.columns = [
             'col1_txt',
             'col2_txt',
@@ -52,16 +53,38 @@ class HighCardinalityQueries:
             'col16_int',
             'col17_date',
         ]
-        self._instance_docker = instance_docker
+        self._db_instance_config = db_instance_config
         self._is_running = False
         self._threads = []
 
-    def start_background(self, user, config=None):
+    def is_ready(self):
+        """
+        Checks if the database is in a 'ready' state. A 'ready' state is defined as having the expected
+        object (user, schema, and tables) and row count.
+        """
+        cursor = self.get_conn().cursor()
+        cursor.execute(
+            'SELECT COUNT(*) FROM datadog_test.sys.database_principals WHERE name LIKE \'high_cardinality_user_%\''
+        )
+        user_count = cursor.fetchone()[0]
+        cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.schemas WHERE name LIKE \'high_cardinality_schema%\'')
+        schema_count = cursor.fetchone()[0]
+        cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.tables')
+        table_count = cursor.fetchone()[0]
+        cursor.execute('SELECT COUNT(*) FROM datadog_test.dbo.high_cardinality')
+        row_count = cursor.fetchone()[0]
+        return (
+            user_count >= HighCardinalityQueries.EXPECTED_OBJ_COUNT
+            and schema_count >= HighCardinalityQueries.EXPECTED_OBJ_COUNT
+            and table_count >= HighCardinalityQueries.EXPECTED_OBJ_COUNT
+            and row_count >= HighCardinalityQueries.EXPECTED_ROW_COUNT
+        )
+
+    def start_background(self, config=None):
         """
         Run a set of queries against the table `datadog_test.dbo.high_cardinality` in the background
 
         Args:
-            user (str): The database user to run the queries.
             config (dict, optional): Configure how many threads will spin off for each kind of query.
 
         Config:
@@ -79,21 +102,21 @@ class HighCardinalityQueries:
         self._is_running = True
 
         def _run_hc_query_forever():
-            conn = self.get_conn_for_user(user)
+            conn = self.get_conn()
             while True:
                 if not self._is_running:
                     break
                 self.run_query_and_ignore_exception(conn, self.create_high_cardinality_query())
 
         def _run_slow_query_forever():
-            conn = self.get_conn_for_user(user)
+            conn = self.get_conn()
             while True:
                 if not self._is_running:
                     break
                 self.run_query_and_ignore_exception(conn, self.create_slow_query())
 
         def _run_complex_query_forever():
-            conn = self.get_conn_for_user(user)
+            conn = self.get_conn()
             while True:
                 if not self._is_running:
                     break
@@ -163,13 +186,14 @@ class HighCardinalityQueries:
         # Select a range of random columns and prefix to match our alias
         return query.format(col=','.join(['hc1.' + col for col in columns[: randint(1, len(columns) - 1)]]))
 
-    def get_conn_for_user(self, user):
+    def get_conn(self):
         conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
-            self._instance_docker['driver'], self._instance_docker['host'], user, "Password12!"
+            self._db_instance_config['driver'],
+            self._db_instance_config['host'],
+            self._db_instance_config['username'],
+            self._db_instance_config['password'],
         )
-        conn = pyodbc.connect(conn_str, timeout=HighCardinalityQueries.DEFAULT_TIMEOUT, autocommit=False)
-        conn.timeout = HighCardinalityQueries.DEFAULT_TIMEOUT
-        return conn
+        return pyodbc.connect(conn_str, timeout=HighCardinalityQueries.DEFAULT_TIMEOUT, autocommit=False)
 
     @staticmethod
     def run_query_and_ignore_exception(conn, query):
