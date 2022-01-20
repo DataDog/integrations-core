@@ -110,6 +110,12 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
         if not self.kube_apiserver_config['metrics_mapper']:
             url = self.kube_apiserver_config['prometheus_url']
             raise CheckException("You have to collect at least one metric from the endpoint: {}".format(url))
+
+        # reload from path in case the token was refreshed
+        # see https://github.com/kubernetes/enhancements/blob/master/keps/sig-auth/1205-bound-service-account-tokens/README.md
+        # same as datadog_checks_base/datadog_checks/base/checks/openmetrics/mixins.py
+        self.kube_apiserver_config['_bearer_token'] = self._get_bearer_token(self.kube_apiserver_config['bearer_token_auth'], self.kube_apiserver_config['bearer_token_path'])
+
         self.process(self.kube_apiserver_config, metric_transformers=self.metric_transformers)
 
     def get_scraper_config(self, instance):

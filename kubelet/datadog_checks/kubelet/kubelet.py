@@ -344,6 +344,10 @@ class KubeletCheck(
         self.process_stats_summary(
             self.pod_list_utils, self.stats, self.instance_tags, self.use_stats_summary_as_source
         )
+        # TODO: load given token path when set
+        token = open('/var/run/secrets/kubernetes.io/serviceaccount/token', 'r').read().rstrip()
+        self.cadvisor_scraper_config['_bearer_token'] = token
+        self.kubelet_scraper_config['_bearer_token'] = token
 
         if self.cadvisor_legacy_url:  # Legacy cAdvisor
             self.log.debug('processing legacy cadvisor metrics')

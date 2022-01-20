@@ -398,32 +398,30 @@ class OpenMetricsScraperMixin(object):
         The http handler is cached using `prometheus_url` as key.
         """
         prometheus_url = scraper_config['prometheus_url']
-        if prometheus_url in self._http_handlers:
-            return self._http_handlers[prometheus_url]
+        http_handler = self._http_handlers[prometheus_url]
+        if http_handler is None
+          # TODO: Deprecate this behavior in Agent 8
+          if scraper_config['ssl_ca_cert'] is False:
+              scraper_config['ssl_verify'] = False
 
-        # TODO: Deprecate this behavior in Agent 8
-        if scraper_config['ssl_ca_cert'] is False:
-            scraper_config['ssl_verify'] = False
+          # TODO: Deprecate this behavior in Agent 8
+          if scraper_config['ssl_verify'] is False:
+              scraper_config.setdefault('tls_ignore_warning', True)
 
-        # TODO: Deprecate this behavior in Agent 8
-        if scraper_config['ssl_verify'] is False:
-            scraper_config.setdefault('tls_ignore_warning', True)
+          http_handler = self._http_handlers[prometheus_url] = RequestsWrapper(
+              scraper_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
+          )
 
-        http_handler = self._http_handlers[prometheus_url] = RequestsWrapper(
-            scraper_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
-        )
+          # TODO: Determine if we really need this
+          http_handler.options['headers'].setdefault('accept-encoding', 'gzip')
 
-        headers = http_handler.options['headers']
+          # Explicitly set the content type we accept
+          http_handler.options['headers'].setdefault('accept', 'text/plain')
 
+        # even when using the cached handler we need to re-set this token since it could have changed
         bearer_token = scraper_config['_bearer_token']
         if bearer_token is not None:
-            headers['Authorization'] = 'Bearer {}'.format(bearer_token)
-
-        # TODO: Determine if we really need this
-        headers.setdefault('accept-encoding', 'gzip')
-
-        # Explicitly set the content type we accept
-        headers.setdefault('accept', 'text/plain')
+            http_handler.options['headers']['Authorization'] = 'Bearer {}'.format(bearer_token)
 
         return http_handler
 

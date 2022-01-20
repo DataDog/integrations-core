@@ -142,6 +142,10 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
         # Get the configuration for this specific instance
         scraper_config = self.get_scraper_config(instance)
 
+        # TODO: load given token path when set
+        token = open('/var/run/secrets/kubernetes.io/serviceaccount/token', 'r').read().rstrip()
+        scraper_config['_bearer_token'] = token
+
         # Populate the metric transformers dict
         transformers = {}
         limiters = self.DEFAUT_RATE_LIMITERS + instance.get("extra_limiters", [])

@@ -139,6 +139,8 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
                 "You have to collect at least one metric from the endpoint: {}".format(scraper_config['prometheus_url'])
             )
 
+        scraper_config['_bearer_token'] = self._get_bearer_token(scraper_config['bearer_token_auth'], scraper_config['bearer_token_path'])
+
         self.process(scraper_config)
 
     def get_scraper_config(self, instance):
