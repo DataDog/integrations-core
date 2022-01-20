@@ -1,5 +1,8 @@
 # CHANGELOG - spark
 
+## 2.3.0-beta.1 / 2022-01-20
+
+
 ## 2.2.0 / 2022-01-08
 
 * [Added] Add `query_name` as tag for Spark Structured Streaming metrics. See [#10689](https://github.com/DataDog/integrations-core/pull/10689). Thanks [otosky](https://github.com/otosky).
