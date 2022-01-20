@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import os
 
 import mock
 import pytest
@@ -79,9 +80,9 @@ def test_default_auth(instance):
             client_prefetch_threads=4,
             login_timeout=3,
             ocsp_response_cache_filename=None,
-            authenticator='snowflake',
+            authenticator='oauth',
             token=None,
-            private_key=None
+            private_key=None,
             client_session_keep_alive=False,
             proxy_host=None,
             proxy_port=None,
@@ -112,15 +113,30 @@ def test_oauth_auth(oauth_instance):
             client_prefetch_threads=4,
             login_timeout=3,
             ocsp_response_cache_filename=None,
-            authenticator='oauth',
+            authenticator='snowflake_jwt',
             token='testtoken',
-            private_key=None
+            private_key=None,
             client_session_keep_alive=False,
             proxy_host=None,
             proxy_port=None,
             proxy_user=None,
             proxy_password=None,
         )
+
+
+def test_read_key(instance):
+    # Key auth
+    inst = copy.deepcopy(instance)
+    inst['private_key_path'] = os.path.join(os.path.dirname(__file__), 'keys', 'rsa_key_example.p8')
+
+    check = SnowflakeCheck(CHECK_NAME, {}, [inst])
+    # Checking size instead of the read key
+    assert len(check.read_key()) == 1216
+
+    inst['private_key_path'] = os.path.join(os.path.dirname(__file__), 'keys', 'wrong_key.p8')
+    check = SnowflakeCheck(CHECK_NAME, {}, [inst])
+    with pytest.raises(FileNotFoundError):
+        check.read_key()
 
 
 def test_proxy_settings(instance):
@@ -151,7 +167,7 @@ def test_proxy_settings(instance):
             ocsp_response_cache_filename=None,
             authenticator='snowflake',
             token=None,
-            private_key=None
+            private_key=None,
             client_session_keep_alive=False,
             proxy_host='testhost',
             proxy_port=8000,
