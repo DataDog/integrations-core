@@ -63,8 +63,6 @@ def test_check_iptables(aggregator, mock_iptables):
     )
     aggregator.assert_metric(NAMESPACE + '.sync_proxy.rules.duration.count')
     aggregator.assert_metric(NAMESPACE + '.sync_proxy.rules.duration.sum')
-    aggregator.assert_metric(NAMESPACE + '.network_programming.duration.count')
-    aggregator.assert_metric(NAMESPACE + '.network_programming.duration.sum')
     aggregator.assert_metric(NAMESPACE + '.rest.client.exec_plugin.certificate.rotation.count')
     aggregator.assert_metric(NAMESPACE + '.rest.client.exec_plugin.certificate.rotation.sum')
     aggregator.assert_metric(NAMESPACE + '.rest.client.request.duration.count')
