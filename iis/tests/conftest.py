@@ -14,9 +14,11 @@ from .common import INSTANCE
 def dd_environment():
     yield INSTANCE, {'docker_platform': 'windows'}
 
+
 @pytest.fixture
 def check():
     return lambda instance: IIS('iis', {}, [instance])
+
 
 @pytest.fixture
 def instance():
