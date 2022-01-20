@@ -65,7 +65,7 @@ def gen_clusterquota_line(resource, count_type, applied=False):
     ))
 
 
-print("metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name")
+print("metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric")
 
 for res in RESOURCES:
     gen_clusterquota_line(res, "used", False)
