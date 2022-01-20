@@ -676,7 +676,11 @@ def test_statement_samples_enable_consumers(dd_run_check, dbm_instance, root_con
         )
 
     original_enabled_consumers = mysql_check._statement_samples._get_enabled_performance_schema_consumers()
-    assert original_enabled_consumers == {'events_statements_current', 'events_statements_history'}
+    expected_enabled_consumers = {'events_statements_current', 'events_statements_history'}
+    # CPU consumer was added in MySQL 8.0.28
+    if mysql_check.version.version_compatible((8, 0, 28)):
+        expected_enabled_consumers.union({'events_statements_cpu'})
+    assert original_enabled_consumers == expected_enabled_consumers
 
     dd_run_check(mysql_check)
 
