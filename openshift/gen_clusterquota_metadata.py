@@ -57,7 +57,7 @@ def gen_clusterquota_line(resource, count_type, applied=False):
     else:
         description += " for all namespaces"
 
-    print("{},gauge,,{},,{},{},openshift".format(
+    print("{},gauge,,{},,{},{},openshift,".format(
         metric_name,
         UNITS_PER_RESOURCE.get(resource, ""),
         description,
