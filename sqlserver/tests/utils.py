@@ -30,8 +30,8 @@ class HighCardinalityQueries:
     """
 
     DEFAULT_TIMEOUT = 30
-    EXPECTED_OBJ_COUNT = 10000
-    EXPECTED_ROW_COUNT = 100000
+    EXPECTED_OBJ_COUNT = 5000
+    EXPECTED_ROW_COUNT = 5000
 
     def __init__(self, db_instance_config):
         self.columns = [
