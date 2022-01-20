@@ -24,9 +24,6 @@ from .common import (
     WIN_SERVICES_MINIMAL_CONFIG,
 )
 
-# from datadog_checks.base.constants import ServiceCheck
-
-
 pytestmark = [requires_py2, pytest.mark.usefixtures('pdh_mocks_fixture')]
 
 
@@ -194,12 +191,3 @@ def test_check_without_sites_specified(aggregator, dd_run_check):
             )
 
     aggregator.assert_all_metrics_covered()
-
-
-# @pytest.mark.e2e
-# def test_e2e(dd_agent_check, aggregator, instance):
-# with pytest.raises(Exception):
-# dd_agent_check(instance, rate=True)
-# aggregator.assert_service_check('iis.windows.perf.health')
-# aggregator.assert_service_check('iis.windows.perf.health', ServiceCheck.CRITICAL)
-# aggregator.assert_service_check('iis.windows.perf.health', IIS.CRITICAL)

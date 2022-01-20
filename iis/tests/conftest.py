@@ -5,15 +5,18 @@ from copy import deepcopy
 
 import pytest
 
-# INSTANCE = {'server': 'localhost', 'username': 'admin', 'password': 'admin', 'site': 'test', 'app_pools': 'test'}
+from datadog_checks.iis import IIS
+
 from .common import INSTANCE
 
 
 @pytest.fixture(scope="session")
 def dd_environment():
     yield INSTANCE, {'docker_platform': 'windows'}
-    # yield deepcopy(INSTANCE)
 
+@pytest.fixture
+def check():
+    return lambda instance: IIS('iis', {}, [instance])
 
 @pytest.fixture
 def instance():

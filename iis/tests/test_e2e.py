@@ -7,8 +7,7 @@ import pytest
 # from .common import instance
 INSTANCE = {'server': 'localhost', 'username': 'admin', 'password': 'admin', 'site': 'test', 'app_pools': 'test'}
 
-
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, aggregator, instance):
-    aggregator = dd_agent_check(instance)
+def test_e2e(dd_agent_check, aggregator, INSTANCE, check):
+    aggregator = dd_agent_check(INSTANCE)
     aggregator.assert_service_check('iis.windows.perf.health')
