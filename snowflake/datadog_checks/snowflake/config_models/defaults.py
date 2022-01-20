@@ -34,7 +34,7 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_aggregate_24_hours(field, value):
+def instance_aggregate_last_24_hours(field, value):
     return False
 
 

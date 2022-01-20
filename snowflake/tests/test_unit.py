@@ -225,7 +225,7 @@ def test_emit_non_generic_tags_when_disabled(instance):
 
 
 @pytest.mark.parametrize(
-    'aggregate_24_hours, expected_query',
+    'aggregate_last_24_hours, expected_query',
     [
         pytest.param(
             True,
@@ -245,7 +245,7 @@ def test_emit_non_generic_tags_when_disabled(instance):
         ),
     ],
 )
-def test_aggregate_24_hours_queries(aggregate_24_hours, expected_query):
+def test_aggregate_last_24_hours_queries(aggregate_last_24_hours, expected_query):
     inst = {
         'metric_groups': ['snowflake.replication'],
         'user': 'user',
@@ -253,7 +253,7 @@ def test_aggregate_24_hours_queries(aggregate_24_hours, expected_query):
         'account': 'account',
         'role': 'role',
     }
-    inst['aggregate_24_hours'] = aggregate_24_hours
+    inst['aggregate_last_24_hours'] = aggregate_last_24_hours
     check = SnowflakeCheck(CHECK_NAME, {}, [inst])
 
     # Only one query configured

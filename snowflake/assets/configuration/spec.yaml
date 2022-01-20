@@ -141,7 +141,7 @@ files:
             - snowflake.billing
             - snowflake.storage
             - snowflake.logins
-      - name: aggregate_24_hours
+      - name: aggregate_last_24_hours
         description: |
           Set to `true` to aggregate table entries on the last 24 hours instead of
           aggregating entries of the current day.
