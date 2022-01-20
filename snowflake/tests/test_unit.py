@@ -81,6 +81,7 @@ def test_default_auth(instance):
             ocsp_response_cache_filename=None,
             authenticator='snowflake',
             token=None,
+            private_key=None
             client_session_keep_alive=False,
             proxy_host=None,
             proxy_port=None,
@@ -113,6 +114,7 @@ def test_oauth_auth(oauth_instance):
             ocsp_response_cache_filename=None,
             authenticator='oauth',
             token='testtoken',
+            private_key=None
             client_session_keep_alive=False,
             proxy_host=None,
             proxy_port=None,
@@ -149,6 +151,7 @@ def test_proxy_settings(instance):
             ocsp_response_cache_filename=None,
             authenticator='snowflake',
             token=None,
+            private_key=None
             client_session_keep_alive=False,
             proxy_host='testhost',
             proxy_port=8000,
