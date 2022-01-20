@@ -669,24 +669,21 @@ def test_statement_samples_enable_consumers(dd_run_check, dbm_instance, root_con
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     # deliberately disable one of the consumers
+    consumer_to_disable = 'events_statements_history_long'
     with closing(root_conn.cursor()) as cursor:
         cursor.execute(
             "UPDATE performance_schema.setup_consumers SET enabled='NO'  WHERE name = "
-            "'events_statements_history_long';"
+            "'{}';".format(consumer_to_disable)
         )
 
     original_enabled_consumers = mysql_check._statement_samples._get_enabled_performance_schema_consumers()
-    expected_enabled_consumers = {'events_statements_current', 'events_statements_history'}
-    # CPU consumer was added in MySQL 8.0.28
-    if mysql_check.version.version_compatible((8, 0, 28)):
-        expected_enabled_consumers.union({'events_statements_cpu'})
-    assert original_enabled_consumers == expected_enabled_consumers
+    assert consumer_to_disable not in original_enabled_consumers
 
     dd_run_check(mysql_check)
 
     enabled_consumers = mysql_check._statement_samples._get_enabled_performance_schema_consumers()
     if events_statements_enable_procedure == "datadog.enable_events_statements_consumers":
-        expected_consumers = original_enabled_consumers.union({'events_statements_history_long'})
+        expected_consumers = original_enabled_consumers.union({consumer_to_disable})
         # CPU consumer was added in MySQL 8.0.28
         if mysql_check.version.version_compatible((8, 0, 28)):
             expected_consumers.union({'events_statements_cpu'})
