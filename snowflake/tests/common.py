@@ -16,6 +16,7 @@ INSTANCE = {
     'schema': 'ACCOUNT_USAGE',
     'role': 'ACCOUNTADMIN',
     'disable_generic_tags': True,
+    'login_timeout': 3,
 }
 OAUTH_INSTANCE = {
     'user': 'testuser',
@@ -26,6 +27,7 @@ OAUTH_INSTANCE = {
     'authenticator': 'oauth',
     'token': 'testtoken',
     'disable_generic_tags': True,
+    'login_timeout': 3,
 }
 
 EXPECTED_TAGS = ['account:test_acct.us-central1.gcp']

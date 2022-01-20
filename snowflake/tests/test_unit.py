@@ -77,7 +77,7 @@ def test_default_auth(instance):
             passcode_in_password=False,
             passcode=None,
             client_prefetch_threads=4,
-            login_timeout=60,
+            login_timeout=3,
             ocsp_response_cache_filename=None,
             authenticator='snowflake',
             token=None,
@@ -109,7 +109,7 @@ def test_oauth_auth(oauth_instance):
             passcode_in_password=False,
             passcode=None,
             client_prefetch_threads=4,
-            login_timeout=60,
+            login_timeout=3,
             ocsp_response_cache_filename=None,
             authenticator='oauth',
             token='testtoken',
@@ -145,7 +145,7 @@ def test_proxy_settings(instance):
             passcode_in_password=False,
             passcode=None,
             client_prefetch_threads=4,
-            login_timeout=60,
+            login_timeout=3,
             ocsp_response_cache_filename=None,
             authenticator='snowflake',
             token=None,
@@ -222,3 +222,39 @@ def test_emit_non_generic_tags_when_disabled(instance):
     tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'service:COMPUTE_WH']
     normalised_tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'snowflake_service:COMPUTE_WH']
     assert set(normalised_tags) == set(check._normalize_tags_type(tags))
+
+
+@pytest.mark.parametrize(
+    'aggregate_last_24_hours, expected_query',
+    [
+        pytest.param(
+            True,
+            (
+                'select database_name, avg(credits_used), sum(credits_used), '
+                'avg(bytes_transferred), sum(bytes_transferred) from replication_usage_history '
+                'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1;'
+            ),
+        ),
+        pytest.param(
+            False,
+            (
+                'select database_name, avg(credits_used), sum(credits_used), '
+                'avg(bytes_transferred), sum(bytes_transferred) from replication_usage_history '
+                'where start_time >= date_trunc(day, current_date) group by 1;'
+            ),
+        ),
+    ],
+)
+def test_aggregate_last_24_hours_queries(aggregate_last_24_hours, expected_query):
+    inst = {
+        'metric_groups': ['snowflake.replication'],
+        'user': 'user',
+        'password': 'password',
+        'account': 'account',
+        'role': 'role',
+    }
+    inst['aggregate_last_24_hours'] = aggregate_last_24_hours
+    check = SnowflakeCheck(CHECK_NAME, {}, [inst])
+
+    # Only one query configured
+    assert check.metric_queries[0]['query'] == expected_query

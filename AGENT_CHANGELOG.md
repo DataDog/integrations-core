@@ -214,7 +214,7 @@
 
 ## Datadog Agent version [7.30.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7301)
 
-* There were no integration updates for this version of the Agent.
+* Revert requests bump back to 2.22.0 [#9912](https://github.com/DataDog/integrations-core/pull/9912)
 
 ## Datadog Agent version [7.30.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7300)
 
