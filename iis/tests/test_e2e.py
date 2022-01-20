@@ -4,6 +4,8 @@
 
 import pytest
 
+from datadog_checks.iis import IIS
+
 from datadog_checks.dev.testing import requires_py3
 
 # from .common import instance
@@ -15,4 +17,4 @@ pytestmark = [requires_py3]
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, aggregator, instance, check):
     aggregator = dd_agent_check(instance)
-    aggregator.assert_service_check('iis.windows.perf.health')
+    aggregator.assert_service_check('iis.windows.perf.health', IIS.CRITICAL)
