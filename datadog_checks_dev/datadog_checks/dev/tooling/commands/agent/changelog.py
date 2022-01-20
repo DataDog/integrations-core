@@ -19,6 +19,11 @@ CHANGELOG_MANUAL_ENTRIES = {
     ]
 }
 
+DISPLAY_NAME_MAPPING = {
+    # `Mesos` tile was migrated into `Mesos Slave`, so the display name must be manually changed
+    'Mesos': 'Mesos Slave'
+}
+
 
 @click.command(
     context_settings=CONTEXT_SETTINGS,
@@ -69,8 +74,7 @@ def changelog(since, to, write, force):
                 else:
                     display_name = name
 
-                if display_name == 'Mesos':
-                    display_name = 'Mesos Slave'
+                display_name = DISPLAY_NAME_MAPPING.get(display_name, display_name)
 
                 breaking_notice = " **BREAKING CHANGE**" if ver[1] else ""
                 changelog_url = check_changelog_url.format(name)
