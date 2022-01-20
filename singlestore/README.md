@@ -26,12 +26,6 @@ No additional installation is needed on your server.
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 {{< site-region region="us3" >}}
 **Log collection is not supported for this site.**
 {{< /site-region >}}
@@ -72,12 +66,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 **Note**: By default, the SingleStore integration only collects metrics from the `MV_GLOBAL_STATUS`, `AGGREGATORS`, and `LEAVES` tables. To collect additional system level metrics (CPU, disk, network IO, and memory), add `"collect_system_metrics": "true"`  in your `singlestore.d/conf.yaml` file.
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 {{< site-region region="us3" >}}
 **Log collection is not supported for this site.**

@@ -57,12 +57,6 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
 1. To modify the default log file location either set the `RABBITMQ_LOGS` environment variable or add the following to your RabbitMQ configuration file (`/etc/rabbitmq/rabbitmq.conf`):
@@ -110,12 +104,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 | `<INSTANCE_CONFIG>`  | `{"rabbitmq_api_url":"%%host%%:15672/api/","username": <USERNAME>, "password": <PASSWORD>}` |
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 _Available for Agent versions >6.0_
 

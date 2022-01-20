@@ -115,12 +115,6 @@ You may need to restart your Keystone, Neutron, and Nova API services to ensure 
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 1. Collecting logs is disabled by default in the Datadog Agent, you can enable it in `datadog.yaml`:
 
    ```yaml
