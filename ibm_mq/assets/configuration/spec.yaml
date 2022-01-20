@@ -85,6 +85,12 @@ files:
           type: array
           items:
             type: string
+      - name: dynamic_queue_name
+        description: |
+          Specify a dynamic queue name.
+        value:
+          example: 'PYMQPCF.*'
+          type: string
       - name: channels
         description: Check the status of the following channels
         value:

@@ -82,6 +82,11 @@ instances:
     #   - ^DEV\..*$
     #   - ^SYSTEM\..*$
 
+    ## @param dynamic_queue_name - string - optional - default: PYMQPCF.*
+    ## Specify a dynamic queue name.
+    #
+    # dynamic_queue_name: PYMQPCF.*
+
     ## @param channels - list of strings - optional
     ## Check the status of the following channels
     #

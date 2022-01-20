@@ -28,7 +28,7 @@ class MetadataCollector(object):
 
     def _get_version(self, queue_manager):
         pcf = pymqi.PCFExecute(
-            queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+            queue_manager, dynamic_queue_name=bytearray(self.config.dynamic_queue_name, "utf-8"), response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
         )
         resp = pcf.MQCMD_INQUIRE_Q_MGR({pymqi.CMQCFC.MQIACF_Q_MGR_ATTRS: [pymqi.CMQC.MQCA_VERSION]})
 

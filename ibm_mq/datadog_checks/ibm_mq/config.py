@@ -70,6 +70,7 @@ class IBMMQConfig:
         self.queues = instance.get('queues', [])  # type: List[str]
         self.queue_patterns = instance.get('queue_patterns', [])  # type: List[str]
         self.queue_regex = [re.compile(regex) for regex in instance.get('queue_regex', [])]  # type: List[Pattern]
+        self.dynamic_queue_name = instance.get('dynamic_queue_name', 'PYMQPCF.*')  # type: str
 
         self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))  # type: bool
 
