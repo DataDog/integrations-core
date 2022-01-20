@@ -33,6 +33,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     account: str
+    aggregate_last_24_hours: Optional[bool]
     authenticator: Optional[str]
     client_prefetch_threads: Optional[int]
     client_session_keep_alive: Optional[bool]
