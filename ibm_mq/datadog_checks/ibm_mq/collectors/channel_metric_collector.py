@@ -48,7 +48,7 @@ class ChannelMetricCollector(object):
         args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: pymqi.ensure_bytes('*')}
         try:
             pcf = pymqi.PCFExecute(
-                queue_manager, dynamic_queue_name=bytearray(self.config.dynamic_queue_name, "utf-8"), response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+                queue_manager, dynamic_queue_name=pymqi.ensure_bytes(self.config.dynamic_queue_name), response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
             )
             response = pcf.MQCMD_INQUIRE_CHANNEL(args)
         except pymqi.MQMIError as e:
@@ -92,7 +92,7 @@ class ChannelMetricCollector(object):
         try:
             args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: pymqi.ensure_bytes(search_channel_name)}
             pcf = pymqi.PCFExecute(
-                queue_manager, dynamic_queue_name=bytearray(self.config.dynamic_queue_name, "utf-8"), response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+                queue_manager, dynamic_queue_name=pymqi.ensure_bytes(self.config.dynamic_queue_name), response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
             )
             response = pcf.MQCMD_INQUIRE_CHANNEL_STATUS(args)
             self.service_check(self.CHANNEL_SERVICE_CHECK, AgentCheck.OK, search_channel_tags)
