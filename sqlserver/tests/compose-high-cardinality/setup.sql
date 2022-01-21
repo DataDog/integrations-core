@@ -71,7 +71,7 @@ EXEC (@main_table_query);
 -- Insert random data into the main table.
 -- Loop variables
 DECLARE @row_count INT = 1;
-DECLARE @rows_to_insert INT = 5000;
+DECLARE @rows_to_insert INT = 100;
 WHILE @row_count <= @rows_to_insert
 BEGIN
     DECLARE @col1_txt VARCHAR(225) = CONVERT(varchar(225), NEWID());
@@ -110,7 +110,7 @@ DECLARE @table_name VARCHAR(100);
 DECLARE @table_query VARCHAR(600);
 -- Loop variables
 DECLARE @object_count INT = 1;
-DECLARE @objects_to_create INT = 5000;
+DECLARE @objects_to_create INT = 2000;
 WHILE @object_count <= @objects_to_create
 BEGIN
     SET @user = 'high_cardinality_user_' + CAST(@object_count AS VARCHAR);
