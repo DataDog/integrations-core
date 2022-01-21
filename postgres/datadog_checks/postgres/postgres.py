@@ -60,10 +60,15 @@ class PostgreSql(AgentCheck):
         self._relations_manager = RelationsManager(self._config.relations)
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
-
+        if self._config.dbm_enabled:
+            self.check_initializations.append(self.validate_dbm_setup)
         # map[dbname -> psycopg connection]
         self._db_pool = {}
         self._db_pool_lock = threading.Lock()
+
+    def validate_dbm_setup(self):
+        self.statement_metrics.validate_db_config()
+        self.statement_samples.validate_db_config()
 
     def cancel(self):
         self.statement_samples.cancel()

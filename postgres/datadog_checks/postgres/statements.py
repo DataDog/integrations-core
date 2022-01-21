@@ -17,6 +17,7 @@ from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 
+from .util import DatabaseConfigurationError
 from .version_utils import V9_4
 
 try:
@@ -80,6 +81,16 @@ PG_STAT_ALL_DESIRED_COLUMNS = (
 )
 
 
+class MissingColumnsError(Exception):
+    def __init__(self, missing_columns, message="pg_stat_statements is missing required columns"):
+        self.missing_columns = missing_columns
+        self.message = message
+        super(MissingColumnsError, self).__init__(self.message)
+
+    def __str__(self):
+        return '{message}: {missing_columns}'.format(message=self.message, missing_columns=self.missing_columns)
+
+
 def _row_key(row):
     """
     :param row: a normalized row from pg_stat_statements
@@ -122,6 +133,29 @@ class PostgresStatementMetrics(DBMAsyncJob):
             maxsize=config.full_statement_text_cache_max_size,
             ttl=60 * 60 / config.full_statement_text_samples_per_hour_per_query,
         )
+
+    def validate_db_config(self):
+        try:
+            if is_affirmative(self._config.statement_metrics_config.get('enabled', True)):
+                self._query_pg_stat_statements(1)
+        except MissingColumnsError:
+            raise DatabaseConfigurationError("Missing columns in pg_stat_statements", reference_doc="https://TODO")
+        except psycopg2.Error as e:
+            if (
+                isinstance(e, psycopg2.errors.ObjectNotInPrerequisiteState)
+            ) and 'pg_stat_statements must be loaded' in str(e.pgerror):
+                raise DatabaseConfigurationError(
+                    "pg_stat_statements extension is not loaded",
+                    reference_doc="https://docs.datadoghq.com/database_monitoring/troubleshooting/?tab=postgres",
+                )
+            elif isinstance(e, psycopg2.errors.UndefinedTable) and 'pg_stat_statements' in str(e.pgerror):
+                raise DatabaseConfigurationError(
+                    "pg_stat_statements is not created in database '{db}'".format(db=self._config.dbname),
+                    reference_doc="https://docs.datadoghq.com/database_monitoring/troubleshooting#"
+                    "pg_stat_statements_not_created",
+                )
+            else:
+                self._log.warning("Unable to collect statement metrics because of an error running queries: %s", e)
 
     def _execute_query(self, cursor, query, params=()):
         try:
@@ -192,41 +226,23 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
     def _load_pg_stat_statements(self):
         try:
-            available_columns = set(self._get_pg_stat_statements_columns())
-            missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - available_columns
-            if len(missing_columns) > 0:
-                self._log.warning(
-                    'Unable to collect statement metrics because required fields are unavailable: %s',
-                    ', '.join(list(missing_columns)),
-                )
-                self._check.count(
-                    "dd.postgres.statement_metrics.error",
-                    1,
-                    tags=self._tags
-                    + [
-                        "error:database-missing_pg_stat_statements_required_columns",
-                    ]
-                    + self._check._get_debug_tags(),
-                    hostname=self._check.resolved_hostname,
-                )
-                return []
-
-            query_columns = sorted(list(available_columns & PG_STAT_ALL_DESIRED_COLUMNS))
-            params = ()
-            filters = ""
-            if self._config.dbstrict:
-                filters = "AND pg_database.datname = %s"
-                params = (self._config.dbname,)
-            return self._execute_query(
-                self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor),
-                STATEMENTS_QUERY.format(
-                    cols=', '.join(query_columns),
-                    pg_stat_statements_view=self._config.pg_stat_statements_view,
-                    filters=filters,
-                    limit=DEFAULT_STATEMENTS_LIMIT,
-                ),
-                params=params,
+            return self._query_pg_stat_statements(DEFAULT_STATEMENTS_LIMIT)
+        except MissingColumnsError as e:
+            self._log.warning(
+                'Unable to collect statement metrics because required fields are unavailable: %s',
+                ', '.join(list(e.missing_columns)),
             )
+            self._check.count(
+                "dd.postgres.statement_metrics.error",
+                1,
+                tags=self._tags
+                + [
+                    "error:database-missing_pg_stat_statements_required_columns",
+                ]
+                + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
+            return []
         except psycopg2.Error as e:
             error_tag = "error:database-{}".format(type(e).__name__)
 
@@ -253,6 +269,30 @@ class PostgresStatementMetrics(DBMAsyncJob):
             )
 
             return []
+
+    def _query_pg_stat_statements(self, row_limit):
+        self._log.warning("In query_pg_stat_statements with limit %d", row_limit)
+        available_columns = set(self._get_pg_stat_statements_columns())
+        missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - available_columns
+        if len(missing_columns) > 0:
+            raise MissingColumnsError(missing_columns)
+
+        query_columns = sorted(list(available_columns & PG_STAT_ALL_DESIRED_COLUMNS))
+        params = ()
+        filters = ""
+        if self._config.dbstrict:
+            filters = "AND pg_database.datname = %s"
+            params = (self._config.dbname,)
+        return self._execute_query(
+            self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor),
+            STATEMENTS_QUERY.format(
+                cols=', '.join(query_columns),
+                pg_stat_statements_view=self._config.pg_stat_statements_view,
+                filters=filters,
+                limit=row_limit,
+            ),
+            params=params,
+        )
 
     def _emit_pg_stat_statements_metrics(self):
         query = PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 if self._check.version < V9_4 else PG_STAT_STATEMENTS_COUNT_QUERY

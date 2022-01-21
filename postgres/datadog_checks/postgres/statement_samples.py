@@ -658,3 +658,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         statement_bytes = bytes(statement) if PY2 else bytes(statement, "utf-8")
         truncated = len(statement_bytes) >= track_activity_query_size - (MAX_CHARACTER_SIZE_IN_BYTES + 1)
         return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
+
+    def validate_db_config(self):
+        pass

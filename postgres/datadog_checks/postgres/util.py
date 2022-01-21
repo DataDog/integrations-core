@@ -22,6 +22,15 @@ class PartialFormatter(string.Formatter):
             return string.Formatter.get_value(self, key, args, kwargs)
 
 
+class DatabaseConfigurationError(Exception):
+    """Relating to a database configuration error"""
+
+    def __init__(self, message, reference_doc=""):
+        super(DatabaseConfigurationError, self).__init__(
+            '{message}. See {doc} for help'.format(message=message, doc=reference_doc)
+        )
+
+
 def milliseconds_to_nanoseconds(value):
     """Convert from ms to ns (used for pg_stat* conversion to metrics with units in ns)"""
     return value * 1000000
