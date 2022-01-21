@@ -7,7 +7,6 @@ import pytest
 from datadog_checks.dev.testing import requires_py3
 from datadog_checks.iis import IIS
 
-
 pytestmark = [requires_py3]
 
 
