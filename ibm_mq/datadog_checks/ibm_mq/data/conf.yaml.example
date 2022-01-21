@@ -83,7 +83,7 @@ instances:
     #   - ^SYSTEM\..*$
 
     ## @param dynamic_queue_name - string - optional - default: PYMQPCF.*
-    ## Specify a dynamic queue name for the reply-to queue. By default, pymqi sets the dynamic queue to 'PYMQPCF.*'.
+    ## Specify a dynamic queue name for the reply-to queue. By default, the dynamic queue is set to 'PYMQPCF.*'.
     #
     # dynamic_queue_name: PYMQPCF.*
 
