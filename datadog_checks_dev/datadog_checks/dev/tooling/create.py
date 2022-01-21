@@ -126,12 +126,12 @@ def create_template_files(template_name, new_root, config, read=False):
                     template_path = path_join(TEMPLATES_DIR, 'marketplace/', 'README.md')
                     file_path = path_join("/", config.get('check_name'), "README.md")
 
-                # Use a special image for media carousel information
+                # Use a special readme file for media carousel information
                 # .gitkeep currently only used for images, but double check anyway
                 elif template_file == '.gitkeep' and 'images' in root and config.get('manifest_v2'):
-                    image_name = 'replace_me_or_remove.png'
-                    template_path = path_join(TEMPLATES_DIR, 'marketplace/', image_name)
-                    file_path = path_join("/", config.get('check_name'), "images", image_name)
+                    image_guidelines = 'IMAGES_README.md'
+                    template_path = path_join(TEMPLATES_DIR, 'marketplace/', image_guidelines)
+                    file_path = path_join("/", config.get('check_name'), "images", image_guidelines)
 
                 else:
                     template_path = path_join(root, template_file)
