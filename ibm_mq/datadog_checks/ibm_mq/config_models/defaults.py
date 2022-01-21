@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -40,6 +40,10 @@ def instance_convert_endianness(field, value):
 
 def instance_disable_generic_tags(field, value):
     return False
+
+
+def instance_dynamic_queue_name(field, value):
+    return 'PYMQPCF.*'
 
 
 def instance_empty_default_hostname(field, value):

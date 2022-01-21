@@ -93,7 +93,10 @@ class QueueMetricCollector(object):
             pcf = None
             try:
                 pcf = pymqi.PCFExecute(
-                    queue_manager, dynamic_queue_name=pymqi.ensure_bytes(self.config.dynamic_queue_name), response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+                    queue_manager,
+                    dynamic_queue_name=pymqi.ensure_bytes(self.config.dynamic_queue_name),
+                    response_wait_interval=self.config.timeout,
+                    convert=self.config.convert_endianness,
                 )
                 response = pcf.MQCMD_INQUIRE_Q(args)
             except pymqi.MQMIError as e:
@@ -150,7 +153,10 @@ class QueueMetricCollector(object):
         try:
             args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name), pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL}
             pcf = pymqi.PCFExecute(
-                queue_manager, dynamic_queue_name=pymqi.ensure_bytes(self.config.dynamic_queue_name), response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+                queue_manager,
+                dynamic_queue_name=pymqi.ensure_bytes(self.config.dynamic_queue_name),
+                response_wait_interval=self.config.timeout,
+                convert=self.config.convert_endianness,
             )
             response = pcf.MQCMD_INQUIRE_Q(args)
         except pymqi.MQMIError as e:
@@ -193,7 +199,10 @@ class QueueMetricCollector(object):
                 pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL,
             }
             pcf = pymqi.PCFExecute(
-                queue_manager, dynamic_queue_name=pymqi.ensure_bytes(self.config.dynamic_queue_name), response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+                queue_manager,
+                dynamic_queue_name=pymqi.ensure_bytes(self.config.dynamic_queue_name),
+                response_wait_interval=self.config.timeout,
+                convert=self.config.convert_endianness,
             )
             response = pcf.MQCMD_INQUIRE_Q_STATUS(args)
         except pymqi.MQMIError as e:
@@ -243,7 +252,10 @@ class QueueMetricCollector(object):
         try:
             args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name)}
             pcf = pymqi.PCFExecute(
-                queue_manager, dynamic_queue_name=pymqi.ensure_bytes(self.config.dynamic_queue_name), response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+                queue_manager,
+                dynamic_queue_name=pymqi.ensure_bytes(self.config.dynamic_queue_name),
+                response_wait_interval=self.config.timeout,
+                convert=self.config.convert_endianness,
             )
             response = pcf.MQCMD_RESET_Q_STATS(args)
         except pymqi.MQMIError as e:

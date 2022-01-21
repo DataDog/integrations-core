@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -31,6 +31,7 @@ class InstanceConfig(BaseModel):
     connection_name: Optional[str]
     convert_endianness: Optional[bool]
     disable_generic_tags: Optional[bool]
+    dynamic_queue_name: Optional[str]
     empty_default_hostname: Optional[bool]
     host: Optional[str]
     min_collection_interval: Optional[float]
