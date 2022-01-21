@@ -10,6 +10,8 @@ HOST = get_docker_hostname()
 INSTANCE = {
     'host_address': 'http://{}:80'.format(HOST),
     'tags': ['test:silk'],
+    'enable_blocksize_statistics': True,
+    'enable_read_write_statistics': True,
 }
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
