@@ -43,6 +43,7 @@ class Config(object):
         token_path = instance.get('token_path', None)
         client_keep_alive = instance.get('client_session_keep_alive', False)
         aggregate_last_24_hours = instance.get('aggregate_last_24_hours', False)
+        custom_queries_defined = len(instance.get('custom_queries', [])) > 0
 
         metric_groups = instance.get('metric_groups', self.DEFAULT_METRIC_GROUP)
 
@@ -94,3 +95,4 @@ class Config(object):
         self.token_path = token_path
         self.client_keep_alive = client_keep_alive
         self.aggregate_last_24_hours = aggregate_last_24_hours
+        self.custom_queries_defined = custom_queries_defined

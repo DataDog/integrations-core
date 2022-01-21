@@ -198,12 +198,27 @@ def test_additional_metric_groups(instance):
 def test_metric_group_exceptions(instance):
     instance = copy.deepcopy(instance)
     instance['metric_groups'] = ['fake.metric.group']
-    with pytest.raises(Exception, match='No valid metric_groups configured, please list at least one.'):
+    with pytest.raises(Exception, match='No valid metric_groups or custom query configured, please list at least one.'):
         check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check.log = mock.MagicMock()
         check.log.warning.assert_called_once_with(
             "Invalid metric_groups found in snowflake conf.yaml: fake.metric.group"
         )
+
+
+def test_no_metric_group(instance):
+    inst = copy.deepcopy(instance)
+    inst['metric_groups'] = []
+    with pytest.raises(Exception, match='No valid metric_groups or custom query configured, please list at least one.'):
+        SnowflakeCheck(CHECK_NAME, {}, [inst])
+
+    inst['custom_queries'] = [
+        {
+            'query': "SELECT a,b from mytable where a='stuff' limit 1;",
+            'columns': [{}, {'name': 'metric.b', 'type': 'gauge'}],
+        },
+    ]
+    SnowflakeCheck(CHECK_NAME, {}, [inst])
 
 
 def test_emit_generic_and_non_generic_tags_by_default(instance):
