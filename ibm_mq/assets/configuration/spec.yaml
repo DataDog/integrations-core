@@ -87,7 +87,7 @@ files:
             type: string
       - name: dynamic_queue_name
         description: |
-          Specify a dynamic queue name for the reply-to queue. By default, pymqi sets the dynamic queue to 'PYMQPCF.*'.
+          Specify a dynamic queue name for the reply-to queue. By default, the dynamic queue is set to 'PYMQPCF.*'.
         value:
           example: 'PYMQPCF.*'
           type: string

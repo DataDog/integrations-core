@@ -314,3 +314,26 @@ def test_stats_metrics(aggregator, get_check, instance):
 
     assert_all_metrics(aggregator)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test_check_custom_dynamic_queue(aggregator, get_check, instance_dynamic_queue):
+    # Ensure that the custom dynamic tag is being used as reply-to queue instead of the default one
+    instance_dynamic_queue['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
+
+    check = get_check(instance_dynamic_queue)
+    check.check(instance_dynamic_queue)
+
+    expected_tags = [
+        'queue_manager:{}'.format(common.QUEUE_MANAGER),
+        'mq_host:{}'.format(common.HOST),
+        'port:{}'.format(common.PORT),
+        'connection_name:{}({})'.format(common.HOST, common.PORT),
+        'definition_type:temporary_dynamic',
+        'queue_type:local',
+        'queue:TEST.DYNAMIC.QUEUE'
+    ]
+
+    # Queue stats metrics are not present in every check run
+    aggregator.assert_metric("ibm_mq.stats.queue.put1_count", tags=expected_tags, at_least=0)
+    aggregator.assert_metric("ibm_mq.stats.queue.browse_count", tags=expected_tags, at_least=0)
+    aggregator.assert_metric("ibm_mq.stats.queue.get_fail_count", tags=expected_tags, at_least=0)

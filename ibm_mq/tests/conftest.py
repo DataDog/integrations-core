@@ -39,6 +39,12 @@ def instance_ssl():
 
 
 @pytest.fixture
+def instance_dynamic_queue():
+    inst = copy.deepcopy(common.INSTANCE_CUSTOM_DYNAMIC_QUEUE)
+    return inst
+
+
+@pytest.fixture
 def instance_with_connection_name():
     inst = copy.deepcopy(common.INSTANCE_WITH_CONNECTION_NAME)
     return inst

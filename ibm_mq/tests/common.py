@@ -78,6 +78,20 @@ INSTANCE_SSL = {
     'ssl_certificate_label': SSL_CLIENT_LABEL,
 }
 
+INSTANCE_CUSTOM_DYNAMIC_QUEUE = {
+    'channel': CHANNEL,
+    'queue_manager': QUEUE_MANAGER,
+    'host': HOST,
+    'port': PORT,
+    'username': USERNAME,
+    'password': PASSWORD,
+    'queues': [QUEUE],
+    'channels': [CHANNEL, BAD_CHANNEL],
+    'auto_discover_queues': True,
+    'collect_statistics_metrics': True,
+    'dynamic_queue_name': 'TEST.DYNAMIC.QUEUE'  # custom dynamic queue name
+}
+
 INSTANCE_METADATA = {
     'channel': CHANNEL,
     'queue_manager': QUEUE_MANAGER,
