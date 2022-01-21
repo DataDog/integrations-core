@@ -1,9 +1,7 @@
 # CHANGELOG - Snowflake
 
-## 4.1.0 / 2022-01-21
+## 4.0.2 / 2022-01-21
 
-* [Added] Add token_path config option. See [#11160](https://github.com/DataDog/integrations-core/pull/11160).
-* [Added] Add aggregate_last_24_hours option. See [#11157](https://github.com/DataDog/integrations-core/pull/11157).
 * [Fixed] Fix configuration error for custom queries. See [#11185](https://github.com/DataDog/integrations-core/pull/11185).
 
 ## 4.0.1 / 2021-11-23
