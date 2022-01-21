@@ -40,6 +40,7 @@ class Config(object):
         tags = instance.get('tags', [])
         authenticator = instance.get('authenticator', 'snowflake')
         token = instance.get('token', None)
+        token_path = instance.get('token_path', None)
         client_keep_alive = instance.get('client_session_keep_alive', False)
         aggregate_last_24_hours = instance.get('aggregate_last_24_hours', False)
 
@@ -58,12 +59,15 @@ class Config(object):
             if password is None:
                 raise ConfigurationError('Must specify a password if using snowflake authentication')
 
-        else:
-            if authenticator == 'oauth' and token is None:
-                raise ConfigurationError('If using OAuth, you must specify a token')
+        elif authenticator == 'oauth':
+            if token is None and token_path is None:
+                raise ConfigurationError('If using OAuth, you must specify a `token` or a `token_path`')
 
-            if authenticator not in self.AUTHENTICATION_MODES:
-                raise ConfigurationError('The Authenticator method set is invalid: {}'.format(authenticator))
+            if token and token_path:
+                raise ConfigurationError('`token` and `token_path` are set, please set only one option')
+
+        elif authenticator not in self.AUTHENTICATION_MODES:
+            raise ConfigurationError('The Authenticator method set is invalid: {}'.format(authenticator))
 
         if not isinstance(tags, list):
             raise ConfigurationError('tags {!r} must be a list (got {!r})'.format(tags, type(tags)))
@@ -87,5 +91,6 @@ class Config(object):
         self.metric_groups = metric_groups
         self.authenticator = authenticator
         self.token = token
+        self.token_path = token_path
         self.client_keep_alive = client_keep_alive
         self.aggregate_last_24_hours = aggregate_last_24_hours

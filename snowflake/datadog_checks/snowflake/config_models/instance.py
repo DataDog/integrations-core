@@ -46,12 +46,13 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float]
     ocsp_response_cache_filename: Optional[str]
     only_custom_queries: Optional[bool]
-    password: str
+    password: Optional[str]
     role: str
     schema_: Optional[str] = Field(None, alias='schema')
     service: Optional[str]
     tags: Optional[Sequence[str]]
     token: Optional[str]
+    token_path: Optional[str]
     use_global_custom_queries: Optional[str]
     username: str
     warehouse: Optional[str]

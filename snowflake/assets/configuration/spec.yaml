@@ -44,7 +44,6 @@ files:
           type: string
           example: <USER>
       - name: password
-        required: true
         description: Password for the user
         value:
           type: string
@@ -99,14 +98,22 @@ files:
       - name: authenticator
         description: |
           Authenticator for Snowflake. The default `snowflake` uses the internal Snowflake authenticator.
-          Use `oauth` to authenticate with OAuth, be sure to set the `token` option as well.
+          Use `oauth` to authenticate with OAuth. Also, set the `token` or `token_path` option.
         value:
           type: string
           display_default: snowflake
       - name: token
-        description: Token used for OAuth connection to Snowflake.
+        description: Token used for OAuth connection to Snowflake. You cannot use this alongside `token_path`.
         value:
           type: string
+      - name: token_path
+        description: |
+          Path to the file that contains the token used for OAuth connection to Snowflake.
+          You cannot use this alongside `token`.
+          The token is re-read at every check run.
+        value:
+          type: string
+          example: /path/to/token
       - name: client_session_keep_alive
         description: |
           If set to true, Snowflake keeps the session active indefinitely as long as the connection is active,

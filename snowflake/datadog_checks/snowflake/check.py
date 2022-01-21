@@ -77,6 +77,11 @@ class SnowflakeCheck(AgentCheck):
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=self.metric_queries, tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
 
+    def renew_token(self):
+        self.log.debug("Renewing Snowflake client token")
+        with open(self._config.token_path, 'rb', encoding="UTF-8") as f:
+            self._config.token = f.read()
+
     def check(self, _):
         if self.instance.get('user'):
             self._log_deprecation('_config_renamed', 'user', 'username')
@@ -120,6 +125,9 @@ class SnowflakeCheck(AgentCheck):
             self.proxy_host,
             self.proxy_port,
         )
+
+        if self._config.token_path:
+            self.renew_token()
 
         try:
             conn = sf.connect(
