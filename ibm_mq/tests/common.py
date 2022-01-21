@@ -89,7 +89,7 @@ INSTANCE_CUSTOM_DYNAMIC_QUEUE = {
     'channels': [CHANNEL, BAD_CHANNEL],
     'auto_discover_queues': True,
     'collect_statistics_metrics': True,
-    'dynamic_queue_name': 'TEST.DYNAMIC.QUEUE'  # custom dynamic queue name
+    'dynamic_queue_name': 'TEST.DYNAMIC.QUEUE',  # custom dynamic queue name
 }
 
 INSTANCE_METADATA = {

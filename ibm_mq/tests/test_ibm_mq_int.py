@@ -330,7 +330,7 @@ def test_check_custom_dynamic_queue(aggregator, get_check, instance_dynamic_queu
         'connection_name:{}({})'.format(common.HOST, common.PORT),
         'definition_type:temporary_dynamic',
         'queue_type:local',
-        'queue:TEST.DYNAMIC.QUEUE'
+        'queue:TEST.DYNAMIC.QUEUE',
     ]
 
     # Queue stats metrics are not present in every check run
