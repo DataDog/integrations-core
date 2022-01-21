@@ -4,7 +4,7 @@
 
 To use the media gallery, you must upload a minimum of one image. The gallery
 can hold a maximum of 8 pieces of media total, and one of these pieces of media
-can be a video (guidelines and submission steps on the right). Images should be
+can be a video (guidelines and submission steps below). Images should be
 added to your /images directory and referenced in the manifest.json file.
 
 
