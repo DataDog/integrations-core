@@ -189,14 +189,10 @@ def test_statement_metrics_and_plans(
         dbm_instance['query_metrics']['disable_secondary_tags'] = True
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
-    # the check must be run three times:
+    # the check must be run two times:
     # 1) set _last_stats_query_time (this needs to happen before the 1st test queries to ensure the query time
     # interval is correct)
-    # 2) load the test queries into the StatementMetrics state
-    # 3) emit the query metrics based on the diff of current and last state
-    dd_run_check(check)
-    for params in param_groups:
-        bob_conn.execute_with_retries(query, params, database=database)
+    # 2) emit the query metrics based on the diff of current and initial state
     dd_run_check(check)
     aggregator.reset()
     for params in param_groups:
