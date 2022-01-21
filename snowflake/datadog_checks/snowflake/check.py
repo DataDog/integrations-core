@@ -71,8 +71,8 @@ class SnowflakeCheck(AgentCheck):
 
         if self.errors:
             self.log.warning('Invalid metric_groups found in snowflake conf.yaml: %s', (', '.join(self.errors)))
-        if not self.metric_queries:
-            raise ConfigurationError('No valid metric_groups configured, please list at least one.')
+        if not self.metric_queries and not self._config.custom_queries_defined:
+            raise ConfigurationError('No valid metric_groups or custom query configured, please list at least one.')
 
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=self.metric_queries, tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
