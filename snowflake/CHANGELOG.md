@@ -1,9 +1,5 @@
 # CHANGELOG - Snowflake
 
-## 4.0.2 / 2022-01-21
-
-* [Fixed] Fix configuration error for custom queries. See [#11185](https://github.com/DataDog/integrations-core/pull/11185).
-
 ## 4.0.1 / 2021-11-23
 
 * [Fixed] Fix default field name of schema. See [#10714](https://github.com/DataDog/integrations-core/pull/10714).
