@@ -10,6 +10,6 @@ from datadog_checks.iis import IIS
 
 @pytest.mark.e2e
 @requires_py3
-def test_e2e_py3(dd_agent_check, aggregator, instance, check):
+def test_e2e_py3(dd_agent_check, aggregator, instance):
     aggregator = dd_agent_check(instance)
     aggregator.assert_service_check('iis.windows.perf.health', IIS.CRITICAL)
