@@ -33,6 +33,7 @@ AGENT_METRICS = {
     'cilium_ip_addresses': 'ip_addresses.count',
     'cilium_ipam_events_total': 'ipam.events.total',
     'cilium_k8s_client_api_calls_counter': 'k8s_client.api_calls.count',
+    'cilium_k8s_client_api_calls_total': 'k8s_client.api_calls.count',
     'cilium_k8s_client_api_latency_time_seconds': 'k8s_client.api_latency_time.seconds',
     'cilium_kubernetes_events_received_total': 'kubernetes.events_received.total',
     'cilium_kubernetes_events_total': 'kubernetes.events.total',

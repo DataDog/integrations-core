@@ -1,5 +1,4 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-
 cilium.agent.api_process_time.seconds.count,count,,request,,"[OpenMetrics V1 and V2] Count of processing time for all API calls",0,cilium,api proc time count
 cilium.agent.api_process_time.seconds.sum,count,,second,,"[OpenMetrics V1 and V2] Sum of processing time for all API calls",0,cilium,api proc time sum
 cilium.agent.api_process_time.seconds.bucket,count,,second,,"[OpenMetrics V2] Amount of processing time for all API calls",0,cilium,api proc time bucket
@@ -31,12 +30,12 @@ cilium.drop_count.count,count,,packet,,"[OpenMetrics V2] Total dropped packets",
 cilium.endpoint.count,gauge,,unit,,"[OpenMetrics V1 and V2] Total ready endpoints managed by agent",0,cilium,total endpoints
 cilium.endpoint.regeneration_time_stats.seconds.count,count,,operation,,"[OpenMetrics V1 and V2] Count of endpoint regeneration time stats",0,cilium,endpoint regen time count
 cilium.endpoint.regeneration_time_stats.seconds.sum,count,,second,,"[OpenMetrics V1 and V2] Sum of endpoint regeneration time stats",0,cilium,endpoint regen time sum
-cilium.endpoint.regeneration_time_stats.seconds.bucket,count,,second,,"[OpenMetrics V1 and V2] Sample of endpoint regeneration time stats",0,cilium,endpoint regen time bucket
-cilium.endpoint.regenerations.count,count,,unit,,"[OpenMetrics V1 and V2] Count of completed endpoint regenerations",1,cilium,endpoint regen count
+cilium.endpoint.regeneration_time_stats.seconds.bucket,count,,second,,"[OpenMetrics V2] Sample of endpoint regeneration time stats",0,cilium,endpoint regen time bucket
+cilium.endpoint.regenerations.count,count,,unit,,"[OpenMetrics V2] Count of completed endpoint regenerations",1,cilium,endpoint regen count
 cilium.endpoint.state,gauge,,unit,,"[OpenMetrics V1 and V2] Count of all endpoints",0,cilium,endpoint count
 cilium.errors_warning.total,count,,error,,"[OpenMetrics V1] Total error warnings",-1,cilium,error total
 cilium.errors_warning.count,count,,error,,"[OpenMetrics V2] Total error warnings",-1,cilium,error total
-cilium.event_timestamp,gauge,,time,,"[OpenMetrics V1] Last timestamp of event received",0,cilium,event ts
+cilium.event_timestamp,gauge,,time,,"[OpenMetrics V1 and V2] Last timestamp of event received",0,cilium,event ts
 cilium.forward_bytes.total,count,,byte,,"[OpenMetrics V1] Total forwarded bytes",1,cilium,forward bytes
 cilium.forward_bytes.count,count,,byte,,"[OpenMetrics V2] Total forwarded bytes",1,cilium,forward bytes
 cilium.forward_count.total,count,,packet,,"[OpenMetrics V1] Total forwarded packets",1,cilium,forward packet
@@ -50,7 +49,7 @@ cilium.ipam.events.count,count,,event,,"[OpenMetrics V2] Number of IPAM events r
 cilium.k8s_client.api_calls.count,count,,request,,"[OpenMetrics V1 and V2] Number of API calls made to kube-apiserver",0,cilium,api call count
 cilium.k8s_client.api_latency_time.seconds.count,count,,request,,"[OpenMetrics V1 and V2] Count of processed API call duration",-1,cilium,api latency count
 cilium.k8s_client.api_latency_time.seconds.sum,count,,second,,"[OpenMetrics V1 and V2] Sum of processed API call duration",-1,cilium,api latency sum
-cilium.k8s_client.api_latency_time.seconds.bucket,count,,second,,"[OpenMetrics V1 and V2] Sample of processed API call duration",-1,cilium,api latency bucket
+cilium.k8s_client.api_latency_time.seconds.bucket,count,,second,,"[OpenMetrics V2] Sample of processed API call duration",-1,cilium,api latency bucket
 cilium.kubernetes.events_received.total,count,,event,,"[OpenMetrics V1] Number of Kubernetes received events processed",0,cilium,k8s events rcv count
 cilium.kubernetes.events_received.count,count,,event,,"[OpenMetrics V2] Number of Kubernetes received events processed",0,cilium,k8s events rcv count
 cilium.kubernetes.events.total,count,,event,,"[OpenMetrics V1] Number of Kubernetes events processed",0,cilium,k8s events count
@@ -62,7 +61,7 @@ cilium.nodes.all_events_received.count,count,,event,,"[OpenMetrics V2] Number of
 cilium.nodes.managed.total,gauge,,node,,"[OpenMetrics V1 and V2] Number of nodes managed",0,cilium,node managed
 cilium.policy.count,gauge,,unit,,"[OpenMetrics V1 and V2] Number of policies currently loaded",0,cilium,policy count
 cilium.policy.endpoint_enforcement_status,gauge,,unit,,"[OpenMetrics V1 and V2] Number of endpoints labeled by polict enforcement status",0,cilium,policy enforces endpoint count
-cilium.policy.import_errors.count,count,,error,,"[OpenMetrics V1] Number of failed policy imports",-1,cilium,failed policy
+cilium.policy.import_errors.count,count,,error,,"[OpenMetrics V1 and V2] Number of failed policy imports",-1,cilium,failed policy
 cilium.policy.l7_denied.total,count,,unit,,"[OpenMetrics V1] Number of total L7 denied requests/responses due to policy",-1,cilium,denied l7 policy
 cilium.policy.l7_denied.count,count,,unit,,"[OpenMetrics V2] Number of total L7 denied requests/responses due to policy",-1,cilium,denied l7 policy
 cilium.policy.l7_forwarded.total,count,,unit,,"[OpenMetrics V1] Number of total L7 forwarded requests/responses",1,cilium,forwarded l7 policy
@@ -77,7 +76,7 @@ cilium.policy.regeneration_time_stats.seconds.sum,count,,second,,"[OpenMetrics V
 cilium.policy.regeneration_time_stats.seconds.bucket,count,,second,,"[OpenMetrics V2] Policy regeneration time stats sample",0,cilium,policy regen time bucket
 cilium.policy.regeneration.total,count,,unit,,"[OpenMetrics V1] Total number of successful policy regenerations",0,cilium,policy regen count
 cilium.policy.regeneration.count,count,,unit,,"[OpenMetrics V2] Total number of successful policy regenerations",0,cilium,policy regen count
-cilium.process.cpu.seconds.total,gauge,,second,,"[OpenMetrics V1] Process CPU time in seconds",0,cilium,proc cpu second
+cilium.process.cpu.seconds.total,count,,second,,"[OpenMetrics V1] Process CPU time in seconds",0,cilium,proc cpu second
 cilium.process.cpu.seconds.count,count,,second,,"[OpenMetrics V2] Process CPU time in seconds",0,cilium,proc cpu second
 cilium.process.max_fds,gauge,,file,,"[OpenMetrics V1 and V2] Process file descriptor maximum",0,cilium,max fd
 cilium.process.open_fds,gauge,,file,,"[OpenMetrics V1 and V2] Number of open file descriptors",0,cilium,open fd
@@ -120,12 +119,12 @@ cilium.operator.eni.deficit_resolver.duration.seconds.bucket,count,,second,,"[Op
 cilium.operator.eni.deficit_resolver.folds,gauge,,unit,,"[OpenMetrics V1 and V2] Current level of deficit resolver folding",0,cilium,fold level
 cilium.operator.eni.deficit_resolver.latency.seconds.count,count,,operation,,"[OpenMetrics V1 and V2] Count of latency between deficit resolver queue and trigger run",0,cilium,latency run count
 cilium.operator.eni.deficit_resolver.latency.seconds.sum,count,,second,,"[OpenMetrics V1 and V2] Sum of latency between deficit resolver queue and trigger run",0,cilium,latency run sum
-cilium.operator.eni.deficit_resolver.latency.seconds.bucket,count,,second,,"[OpenMetrics V1] Sample of latency between deficit resolver queue and trigger run",0,cilium,latency run bucket
+cilium.operator.eni.deficit_resolver.latency.seconds.bucket,count,,second,,"[OpenMetrics V2] Sample of latency between deficit resolver queue and trigger run",0,cilium,latency run bucket
 cilium.operator.eni.deficit_resolver.queued.total,gauge,,event,,"[OpenMetrics V1] Number of queued deficit resolver triggers",0,cilium,queued deficit triggers
 cilium.operator.eni.deficit_resolver.queued.count,count,,event,,"[OpenMetrics V2] Number of queued deficit resolver triggers",0,cilium,queued deficit triggers
-cilium.operator.eni_ec2.rate_limit.duration.seconds.bucket,count
-cilium.operator.eni_ec2.rate_limit.duration.seconds.count,count
-cilium.operator.eni_ec2.rate_limit.duration.seconds.sum,count
+cilium.operator.eni_ec2.rate_limit.duration.seconds.count,count,,request,,"[OpenMetrics V1 and V2] Count of duration of client-side rate limiter blocking",0,cilium,api rate limit duration count
+cilium.operator.eni_ec2.rate_limit.duration.seconds.sum,count,,second,,"[OpenMetrics V1 and V2] Sum of duration of client-side rate limiter blocking",0,cilium,api rate limit duration sum
+cilium.operator.eni_ec2.rate_limit.duration.seconds.bucket,count,,second,,"[OpenMetrics V2] Sample of duration of client-side rate limiter blocking",0,cilium,api rate limit duration sample
 cilium.operator.eni.ec2_resync.duration.seconds.count,count,,operation,,"[OpenMetrics V1 and V2] Count of duration of ec2 resync trigger runs",0,cilium,resync trigger run count
 cilium.operator.eni.ec2_resync.duration.seconds.sum,count,,second,,"[OpenMetrics V1 and V2] Sum of duration of ec2 resync trigger runs",0,cilium,resync trigger run sum
 cilium.operator.eni.ec2_resync.duration.seconds.bucket,count,,second,,"[OpenMetrics V2] Sample of duration of ec2 resync trigger runs",0,cilium,resync trigger run bucket
@@ -156,15 +155,18 @@ cilium.operator.ec2.api.duration.seconds.bucket,count,,second,,"[OpenMetrics V2]
 cilium.operator.ec2.api.rate_limit.duration.seconds.sum,count,,second,,"[OpenMetrics V1 and V2] Sum of duration of client-side rate limiter blocking",0,cilium,api rate limit duration sum
 cilium.operator.ec2.api.rate_limit.duration.seconds.count,count,,request,,"[OpenMetrics V1 and V2] Count of duration of client-side rate limiter blocking",0,cilium,api rate limit duration count
 cilium.operator.ec2.api.rate_limit.duration.seconds.bucket,count,,second,,"[OpenMetrics V2] Sample of duration of client-side rate limiter blocking",0,cilium,api rate limit duration sample
-cilium.operator.ipam.api.duration.seconds.sum,count,,second
-cilium.operator.ipam.api.duration.seconds.count,count,,request
-cilium.operator.ipam.api.duration.seconds.bucket,count,,second
-cilium.operator.ipam.api.rate_limit.duration.seconds.sum,count,,second
-cilium.operator.ipam.api.rate_limit.duration.seconds.count,count,,request
-cilium.operator.ipam.api.rate_limit.duration.seconds.bucket,count,,second
-cilium.operator.ipam.allocation_ops,count,,operation,,"[OpenMetrics V1 and V2] Count of IP allocation operations",0,cilium,ipam allocation ops
-cilium.operator.ipam.release_ops,count,,operation,,"[OpenMetrics V1 and V2] Count of IP release operations",0,cilium,ipam release ops
-cilium.operator.ipam.interface_creation_ops,count,,operation,,"[OpenMetrics V1 and V2] Count of interfaces allocated",0,cilium,ipam creation ops
+cilium.operator.ipam.api.duration.seconds.sum,count,,second,,"[OpenMetricsV1 and V2] Duration of interactions with external IPAM API",0,cilium,ipam api duration sum
+cilium.operator.ipam.api.duration.seconds.count,count,,request,,"[OpenMetricsV1 and V2] Duration of interactions with external IPAM API",0,cilium,ipam api duration count
+cilium.operator.ipam.api.duration.seconds.bucket,count,,second,,"[OpenMetricsV2] Duration of interactions with external IPAM API",0,cilium,ipam api duration bucket
+cilium.operator.ipam.api.rate_limit.duration.seconds.sum,count,,second,,"[OpenMetricsV1 and V2] Sum of duration of rate limiting while accessing external IPAM API",0,cilium,ipam api rate limit duration sum
+cilium.operator.ipam.api.rate_limit.duration.seconds.count,count,,request,,"[OpenMetricsV1 and V2] Count of duration of rate limiting while accessing external IPAM API",0,cilium,ipam api rate limit duration count
+cilium.operator.ipam.api.rate_limit.duration.seconds.bucket,count,,second,,"[OpenMetrics V2] Sample of duration of rate limiting while accessing external IPAM API",0,cilium,ipam api rate limit duration bucket
+cilium.operator.ipam.allocation_ops,count,,operation,,"[OpenMetrics V1] Count of IP allocation operations",0,cilium,ipam allocation ops
+cilium.operator.ipam.allocation_ops.count,count,,operation,,"[OpenMetrics V2] Count of IP allocation operations",0,cilium,ipam allocation ops
+cilium.operator.ipam.release_ops,count,,operation,,"[OpenMetrics V1] Count of IP release operations",0,cilium,ipam release ops
+cilium.operator.ipam.release_ops.count,count,,operation,,"[OpenMetrics V1] Count of IP release operations",0,cilium,ipam release ops
+cilium.operator.ipam.interface_creation_ops,count,,operation,,"[OpenMetrics V1] Count of interfaces allocated",0,cilium,ipam creation ops
+cilium.operator.ipam.interface_creation_ops.count,count,,operation,,"[OpenMetrics V2] Count of interfaces allocated",0,cilium,ipam creation ops
 cilium.operator.ipam.available,gauge,,unit,,"[OpenMetrics V1 and V2] Number of interfaces with addresses available",0,cilium,available ips
 cilium.operator.ipam.available.ips_per_subnet,gauge,,unit,,"[OpenMetrics V1 and V2] Number of available IPs per subnet ID",0,cilium,available ips/subnet
 cilium.operator.ipam.deficit_resolver.duration.seconds.sum,count,,second,,"[OpenMetrics V1 and V2] Sum of duration of deficit resolver trigger runs",0,cilium,deficit resolver duration sum
@@ -207,19 +209,4 @@ cilium.operator.identity_gc.entries,gauge,,garbage collection,,"[OpenMetrics V1 
 cilium.operator.identity_gc.runs,gauge,,garbage collection,,"[OpenMetrics V1 and V2] The number of times identity garbage collector has run",0,cilium,gc runs
 cilium.operator.num_ceps_per_ces.sum,count,,unit,,"[OpenMetrics V1 and V2] Sum of CEPs batched in a CES",0,cilium,cep per ces sum
 cilium.operator.num_ceps_per_ces.count,count,,unit,,"[OpenMetrics V1 and V2] Count of CEPs batched in a CES",0,cilium,cep per ces count
-cilium.operator.num_ceps_per_ces.bucket,count,,unit,,"[OpenMetrics V1 and V2] Sample of CEPs batched in a CES",0,cilium,cep per ces sample
-cilium.operator.ipam.allocation_ops.count,count
-cilium.operator.ipam.interface_creation_ops.count,count
-cilium.operator.ipam.release_ops.count,count
-cilium.operator.ec2.api.rate_limit.duration.seconds.sum,count
-cilium.operator.ec2.api.rate_limit.duration.seconds.count,count
-cilium.operator.ec2.api.rate_limit.duration.seconds.bucket,count
-cilium.operator.eni_ec2.rate_limit.duration.seconds.sum,count
-cilium.operator.eni_ec2.rate_limit.duration.seconds.count,count
-cilium.operator.eni_ec2.rate_limit.duration.seconds.bucket,count
-cilium.operator.ipam.api.duration.seconds.sum,count
-cilium.operator.ipam.api.duration.seconds.count,count
-cilium.operator.ipam.api.duration.seconds.bucket,count
-cilium.operator.ipam.api.rate_limit.duration.seconds.sum,count
-cilium.operator.ipam.api.rate_limit.duration.seconds.count,count
-cilium.operator.ipam.api.rate_limit.duration.seconds.bucket,count
+cilium.operator.num_ceps_per_ces.bucket,count,,unit,,"[OpenMetrics V2] Sample of CEPs batched in a CES",0,cilium,cep per ces sample
