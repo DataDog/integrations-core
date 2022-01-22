@@ -39,6 +39,10 @@ pytestmark = pytest.mark.unit
             "OR ( relname = 'my_table2' ) "
             "OR ( relname ~ 'table.*' )",
         ),
+        (
+            ['table1', 'table2'],
+            "( relname = 'table1' ) OR ( relname = 'table2' )",
+        ),
     ],
 )
 def test_relations_cases(relations_config, expected_filter):
