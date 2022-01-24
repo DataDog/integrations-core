@@ -44,6 +44,6 @@ E2E_METADATA = {
     ],
     'docker_volumes': [
         '{}:/home/snowflake_connector_patch'.format(os.path.join(HERE, 'snowflake_connector_patch')),
-        '{}:/home/keys'.format(os.path.join(HERE), 'keys'),
+        '{}:/home/keys'.format(os.path.join(HERE, 'keys')),
     ],
 }
