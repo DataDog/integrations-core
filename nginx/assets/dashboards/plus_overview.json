@@ -159,7 +159,7 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "sum:nginx.net.waiting{$host}",
+                  "q": "sum:nginx.connections.idle{$host}",
                   "aggregator": "last",
                   "conditional_formats": [
                     {
@@ -269,7 +269,7 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "sum:nginx.net.request_per_s{$host}",
+                  "q": "sum:nginx.requests.total{$host}",
                   "aggregator": "last",
                   "conditional_formats": [
                     {
