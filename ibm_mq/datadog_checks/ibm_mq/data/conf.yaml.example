@@ -125,7 +125,8 @@ instances:
 
     ## @param mqcd_version - number - optional - default: 6
     ## Which channel definition version to use. Supported values are 1 to 9 including.
-    ## If you're having connection issues make sure it matches your MQ version
+    ## If you're having connection issues make sure it matches your MQ version.
+    ## TLS encryption requires MQCD of version at least 7.
     #
     # mqcd_version: 6
 
