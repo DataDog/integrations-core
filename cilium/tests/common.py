@@ -5,6 +5,9 @@ import os
 
 import pytest
 
+from datadog_checks.dev.ci import running_on_ci
+
+ON_CI = running_on_ci()
 CHECK_NAME = 'cilium'
 NAMESPACE = 'cilium.'
 CILIUM_VERSION = os.getenv('CILIUM_VERSION')
