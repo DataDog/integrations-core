@@ -135,6 +135,7 @@ DATABASE_METRICS = [
     ('sqlserver.database.files.size', 'sys.database_files', 'size'),
     ('sqlserver.database.files.state', 'sys.database_files', 'state'),
     ('sqlserver.database.state', 'sys.databases', 'state'),
+    ('sqlserver.database.recovery_model_desc', 'sys.databases', 'recovery_model_desc'),
     ('sqlserver.database.is_sync_with_backup', 'sys.databases', 'is_sync_with_backup'),
     ('sqlserver.database.backup_count', 'msdb.dbo.backupset', 'backup_set_id_count'),
 ]
