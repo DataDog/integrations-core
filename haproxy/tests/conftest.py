@@ -94,11 +94,12 @@ def prometheus_metrics():
         metrics.pop('haproxy_process_uptime_seconds')
         metrics.pop('haproxy_sticktable_size')
         metrics.pop('haproxy_sticktable_used')
-        metrics.pop('haproxy_backend_agg_server_check_status')
         metrics_cpy = metrics.copy()
         for metric in metrics_cpy:
             if metric.startswith('haproxy_listener'):
                 metrics.pop(metric)
+    if HAPROXY_VERSION < version.parse('2.4.9'):
+        metrics.pop('haproxy_backend_agg_server_check_status')
 
     metrics = list(metrics.values())
     return metrics
