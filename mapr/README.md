@@ -48,12 +48,6 @@ Installation steps for each node:
 
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 MapR uses fluentD for logs. Use the [fluentD datadog plugin][9] to collect MapR logs. The following command downloads and installs the plugin into the right directory.
 
 `curl https://raw.githubusercontent.com/DataDog/fluent-plugin-datadog/master/lib/fluent/plugin/out_datadog.rb -o /opt/mapr/fluentd/fluentd-<VERSION>/lib/fluentd-<VERSION>-linux-x86_64/lib/app/lib/fluent/plugin/out_datadog.rb`

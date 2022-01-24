@@ -60,17 +60,27 @@ class SnowflakeCheck(AgentCheck):
         self.errors = []
         for mgroup in self._config.metric_groups:
             try:
+                if not self._config.aggregate_last_24_hours:
+                    for query in range(len(METRIC_GROUPS[mgroup])):
+                        METRIC_GROUPS[mgroup][query]['query'] = METRIC_GROUPS[mgroup][query]['query'].replace(
+                            'DATEADD(hour, -24, current_timestamp())', 'date_trunc(day, current_date)'
+                        )
                 self.metric_queries.extend(METRIC_GROUPS[mgroup])
             except KeyError:
                 self.errors.append(mgroup)
 
         if self.errors:
             self.log.warning('Invalid metric_groups found in snowflake conf.yaml: %s', (', '.join(self.errors)))
-        if not self.metric_queries:
-            raise ConfigurationError('No valid metric_groups configured, please list at least one.')
+        if not self.metric_queries and not self._config.custom_queries_defined:
+            raise ConfigurationError('No valid metric_groups or custom query configured, please list at least one.')
 
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=self.metric_queries, tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
+
+    def renew_token(self):
+        self.log.debug("Renewing Snowflake client token")
+        with open(self._config.token_path, 'rb', encoding="UTF-8") as f:
+            self._config.token = f.read()
 
     def check(self, _):
         if self.instance.get('user'):
@@ -115,6 +125,9 @@ class SnowflakeCheck(AgentCheck):
             self.proxy_host,
             self.proxy_port,
         )
+
+        if self._config.token_path:
+            self.renew_token()
 
         try:
             conn = sf.connect(

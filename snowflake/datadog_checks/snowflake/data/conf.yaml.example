@@ -56,10 +56,10 @@ instances:
     #
     username: <USER>
 
-    ## @param password - string - required
+    ## @param password - string - optional
     ## Password for the user
     #
-    password: <PASSWORD>
+    # password: <PASSWORD>
 
     ## @param role - string - required
     ## Name of the role to use.
@@ -106,14 +106,21 @@ instances:
 
     ## @param authenticator - string - optional - default: snowflake
     ## Authenticator for Snowflake. The default `snowflake` uses the internal Snowflake authenticator.
-    ## Use `oauth` to authenticate with OAuth, be sure to set the `token` option as well.
+    ## Use `oauth` to authenticate with OAuth. Also, set the `token` or `token_path` option.
     #
     # authenticator: <AUTHENTICATOR>
 
     ## @param token - string - optional
-    ## Token used for OAuth connection to Snowflake.
+    ## Token used for OAuth connection to Snowflake. You cannot use this alongside `token_path`.
     #
     # token: <TOKEN>
+
+    ## @param token_path - string - optional - default: /path/to/token
+    ## Path to the file that contains the token used for OAuth connection to Snowflake.
+    ## You cannot use this alongside `token`.
+    ## The token is re-read at every check run.
+    #
+    # token_path: /path/to/token
 
     ## @param client_session_keep_alive - boolean - optional - default: false
     ## If set to true, Snowflake keeps the session active indefinitely as long as the connection is active,
@@ -128,12 +135,12 @@ instances:
     ##
     ## The available metric groups are:
     ##
-    ##   - snowflake.query
-    ##   - snowflake.billing
-    ##   - snowflake.storage
+    ##   - snowflake.query (enabled by default)
+    ##   - snowflake.billing (enabled by default)
+    ##   - snowflake.storage (enabled by default)
     ##   - snowflake.storage.database
     ##   - snowflake.storage.table
-    ##   - snowflake.logins
+    ##   - snowflake.logins (enabled by default)
     ##   - snowflake.data_transfer
     ##   - snowflake.auto_recluster
     ##   - snowflake.pipe
@@ -144,6 +151,12 @@ instances:
     #   - snowflake.billing
     #   - snowflake.storage
     #   - snowflake.logins
+
+    ## @param aggregate_last_24_hours - boolean - optional - default: false
+    ## Set to `true` to aggregate table entries on the last 24 hours instead of
+    ## aggregating entries of the current day.
+    #
+    # aggregate_last_24_hours: true
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.

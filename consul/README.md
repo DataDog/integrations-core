@@ -132,12 +132,6 @@ Instead of using the Prometheus endpoint, you can configure Consul to send the s
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in `datadog.yaml` with:
@@ -177,12 +171,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 | `<INSTANCE_CONFIG>`  | `{"url": "https://%%host%%:8500"}` |
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 _Available for Agent versions >6.0_
 

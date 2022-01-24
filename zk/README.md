@@ -14,9 +14,9 @@ The ZooKeeper check is included in the [Datadog Agent][2] package, so you don't 
 
 ### Configuration
 
-#### ZooKeeper whitelist
+#### Inclusion list
 
-As of version 3.5, ZooKeeper has a `4lw.commands.whitelist` parameter (see [ZooKeeper documentation][3]) that whitelists [four letter word commands][4]. By default, only `srvr` is whitelisted. Add `stat` and `mntr` to the whitelist, as the integration is based on these commands.
+As of version 3.5, ZooKeeper has a `4lw.commands.whitelist` parameter. See [ZooKeeper Cluster Options][3]) for an example that allows [four letter word commands][4]. By default, only `srvr` is whitelisted. Add `stat` and `mntr` to the whitelist, as the integration is based on these commands.
 
 #### Enabling SSL
 
@@ -31,7 +31,7 @@ The following example commands assume that your JKS `truststore` and `keystore` 
 - `client_truststore.jks`
 - `client_keystore.jks`
 
-The instructions also assume that both sides' `keystore` and `truststore` files have each other's certificates with aliases `server_cert` and `client_cert`, meaning that a Java ZooKeeper client can already connect to a ZooKeeper server.
+It is also assumed that both sides' `keystore` and `truststore` files have each other's certificates with aliases `server_cert` and `client_cert`, meaning that a Java ZooKeeper client can already connect to a ZooKeeper server.
 If your private key has a password, make sure this password is included in the `config.yaml` file for config option `tls_private_key_password`.
 
 To convert the JKS files to PEM files:
@@ -65,12 +65,6 @@ To configure this check for an Agent running on a host:
 
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
 1. ZooKeeper uses the `log4j` logger per default. To activate the logging into a file and customize the format edit the `log4j.properties` file:
@@ -83,7 +77,7 @@ _Available for Agent versions >6.0_
      log4j.appender.R.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
    ```
 
-2. By default, our integration pipeline support the following conversion patterns:
+2. By default, Datadog's integration pipeline supports the following conversion patterns:
 
    ```text
      %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
@@ -135,15 +129,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][10].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][10].
 
 | Parameter      | Value                                           |
 | -------------- | ----------------------------------------------- |
@@ -181,7 +169,7 @@ See [metadata.csv][12] for a list of metrics provided by this check.
 
 #### Deprecated metrics
 
-Following metrics are still sent but will be removed eventually:
+The following metrics are still sent but will be removed eventually:
 
 - `zookeeper.bytes_received`
 - `zookeeper.bytes_sent`

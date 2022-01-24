@@ -50,7 +50,7 @@ def test_invalid_oauth(oauth_instance):
     # Test oauth without token
     no_token_config = copy.deepcopy(INVALID_CONFIG)
     no_token_config['user'] = "test_user"
-    with pytest.raises(Exception, match='If using OAuth, you must specify a token'):
+    with pytest.raises(Exception, match='If using OAuth, you must specify a `token` or a `token_path`'):
         SnowflakeCheck(CHECK_NAME, {}, [no_token_config])
 
     oauth_inst = copy.deepcopy(oauth_instance)
@@ -77,7 +77,7 @@ def test_default_auth(instance):
             passcode_in_password=False,
             passcode=None,
             client_prefetch_threads=4,
-            login_timeout=60,
+            login_timeout=3,
             ocsp_response_cache_filename=None,
             authenticator='snowflake',
             token=None,
@@ -109,7 +109,7 @@ def test_oauth_auth(oauth_instance):
             passcode_in_password=False,
             passcode=None,
             client_prefetch_threads=4,
-            login_timeout=60,
+            login_timeout=3,
             ocsp_response_cache_filename=None,
             authenticator='oauth',
             token='testtoken',
@@ -145,7 +145,7 @@ def test_proxy_settings(instance):
             passcode_in_password=False,
             passcode=None,
             client_prefetch_threads=4,
-            login_timeout=60,
+            login_timeout=3,
             ocsp_response_cache_filename=None,
             authenticator='snowflake',
             token=None,
@@ -198,12 +198,27 @@ def test_additional_metric_groups(instance):
 def test_metric_group_exceptions(instance):
     instance = copy.deepcopy(instance)
     instance['metric_groups'] = ['fake.metric.group']
-    with pytest.raises(Exception, match='No valid metric_groups configured, please list at least one.'):
+    with pytest.raises(Exception, match='No valid metric_groups or custom query configured, please list at least one.'):
         check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check.log = mock.MagicMock()
         check.log.warning.assert_called_once_with(
             "Invalid metric_groups found in snowflake conf.yaml: fake.metric.group"
         )
+
+
+def test_no_metric_group(instance):
+    inst = copy.deepcopy(instance)
+    inst['metric_groups'] = []
+    with pytest.raises(Exception, match='No valid metric_groups or custom query configured, please list at least one.'):
+        SnowflakeCheck(CHECK_NAME, {}, [inst])
+
+    inst['custom_queries'] = [
+        {
+            'query': "SELECT a,b from mytable where a='stuff' limit 1;",
+            'columns': [{}, {'name': 'metric.b', 'type': 'gauge'}],
+        },
+    ]
+    SnowflakeCheck(CHECK_NAME, {}, [inst])
 
 
 def test_emit_generic_and_non_generic_tags_by_default(instance):
@@ -222,3 +237,39 @@ def test_emit_non_generic_tags_when_disabled(instance):
     tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'service:COMPUTE_WH']
     normalised_tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'snowflake_service:COMPUTE_WH']
     assert set(normalised_tags) == set(check._normalize_tags_type(tags))
+
+
+@pytest.mark.parametrize(
+    'aggregate_last_24_hours, expected_query',
+    [
+        pytest.param(
+            True,
+            (
+                'select database_name, avg(credits_used), sum(credits_used), '
+                'avg(bytes_transferred), sum(bytes_transferred) from replication_usage_history '
+                'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1;'
+            ),
+        ),
+        pytest.param(
+            False,
+            (
+                'select database_name, avg(credits_used), sum(credits_used), '
+                'avg(bytes_transferred), sum(bytes_transferred) from replication_usage_history '
+                'where start_time >= date_trunc(day, current_date) group by 1;'
+            ),
+        ),
+    ],
+)
+def test_aggregate_last_24_hours_queries(aggregate_last_24_hours, expected_query):
+    inst = {
+        'metric_groups': ['snowflake.replication'],
+        'user': 'user',
+        'password': 'password',
+        'account': 'account',
+        'role': 'role',
+    }
+    inst['aggregate_last_24_hours'] = aggregate_last_24_hours
+    check = SnowflakeCheck(CHECK_NAME, {}, [inst])
+
+    # Only one query configured
+    assert check.metric_queries[0]['query'] == expected_query

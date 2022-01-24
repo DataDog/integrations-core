@@ -90,7 +90,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][7]
 
 3. [Restart the Agent][6].
 
-See [Datadog's documentation][8] for additional information on how to configure the Agent for log collection in Docker environments.
+To enable logs for Docker environments, see [Docker Log Collection][8].
 
 ### Validation
 

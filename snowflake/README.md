@@ -5,7 +5,7 @@
 This check monitors [Snowflake][1] through the Datadog Agent. Snowflake is a SaaS-analytic data warehouse and runs completely on cloud infrastructure. 
 This integration monitors credit usage, billing, storage, query metrics, and more.
 
-<div class="alert alert-info"><bold>NOTE: Metrics are collected via queries to Snowflake. Queries made by the Datadog integration are billable by Snowflake.</bold></div>
+<div class="alert alert-info"><bold>Note</bold>: Metrics are collected with queries to Snowflake. Queries made by the Datadog integration are billable by Snowflake.</div>
 
 ## Setup
 
@@ -16,7 +16,7 @@ Follow the instructions below to install and configure this check for an Agent r
 The Snowflake check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
-**Note**: Snowflake check is not available in Datadog Agent 6 using Python 2. To use snowflake on Agent 6 check [this doc][3] to switch the python version of your agent or upgrade to Agent 7.
+**Note**: The Snowflake check is not available in Datadog Agent v6 using Python 2. To use Snowflake on Agent v6 see [Use Python 3 with Datadog Agent v6][3] or upgrade to Agent v7.
 
 <div class="alert alert-warning">For users configuring the integration with Agent <code>v7.23.0</code>, upgrade the integration version to <code>2.0.1</code> to take advantage of latest features.
 You can upgrade the integration with the following <a href=https://docs.datadoghq.com/agent/guide/integration-management/#install>command</a>:<br>
@@ -130,7 +130,7 @@ These variables also impact every requests from integrations, including orchestr
 
 The Snowflake integration supports custom queries. By default, the integration connects to the shared `SNOWFLAKE` database and `ACCOUNT_USAGE` schema. 
 
-If you want to run custom queries in a different schema or database, add another instance to the [sample snowflake.d/conf.yaml][5] and specify the `database` and `schema` options.
+To run custom queries in a different schema or database, add another instance to the [sample snowflake.d/conf.yaml][5] and specify the `database` and `schema` options.
 Ensure the user and role has access to the specified database or schema.
 
 #### Configuration options
@@ -163,7 +163,7 @@ custom_queries:
 ```
 
 #### Example
-The following example is a query that will count all queries in the [`QUERY_HISTORY` view][9] tagged by database, schema, and warehouse names.
+The following example is a query that counts all queries in the [`QUERY_HISTORY` view][9] tagged by database, schema, and warehouse names.
 
 ```TEXT
 select count(*), DATABASE_NAME, SCHEMA_NAME, WAREHOUSE_NAME from QUERY_HISTORY group by 2, 3, 4;
@@ -171,7 +171,7 @@ select count(*), DATABASE_NAME, SCHEMA_NAME, WAREHOUSE_NAME from QUERY_HISTORY g
 
 ##### Configuration
 
-The custom query configuration in `instances` will look like the following:
+The custom query configuration in `instances` looks like the following:
 
 ```yaml
 custom_queries:
@@ -201,6 +201,11 @@ To verify the result, search for the metrics using [Metrics Summary][10]:
 [Run the Agent's status subcommand][12] and look for `snowflake` under the Checks section.
 
 ## Data Collected
+
+<div class="alert alert-info"><bold>Note</bold>: Only metrics from the following metric groups are enabled by default: <code>snowflake.query.*</code>, <code>snowflake.billing.*</code>, <code>snowflake.storage.*</code>, and <code>snowflake.logins.*</code>.
+
+If you would like to collect metrics from other metric groups, please refer <a href="https://github.com/DataDog/integrations-core/blob/master/snowflake/datadog_checks/snowflake/data/conf.yaml.example">to the example config file for this integration</a>.
+</div>
 
 ### Metrics
 

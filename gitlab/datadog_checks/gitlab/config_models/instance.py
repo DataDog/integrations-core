@@ -70,7 +70,7 @@ class InstanceConfig(BaseModel):
     aws_host: Optional[str]
     aws_region: Optional[str]
     aws_service: Optional[str]
-    bearer_token_auth: Optional[bool]
+    bearer_token_auth: Optional[Union[bool, str]]
     bearer_token_path: Optional[str]
     connect_timeout: Optional[float]
     disable_generic_tags: Optional[bool]
