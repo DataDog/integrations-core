@@ -124,14 +124,41 @@ def test_oauth_auth(oauth_instance):
         )
 
 
-def test_read_key(instance):
+def test_key_auth(instance):
     # Key auth
     inst = copy.deepcopy(instance)
     inst['private_key_path'] = os.path.join(os.path.dirname(__file__), 'keys', 'rsa_key_example.p8')
 
     check = SnowflakeCheck(CHECK_NAME, {}, [inst])
     # Checking size instead of the read key
-    assert len(check.read_key()) == 1216
+    read_key = check.read_key()
+    assert len(read_key) == 1216
+
+    with mock.patch('datadog_checks.snowflake.check.sf') as sf:
+        check = SnowflakeCheck(CHECK_NAME, {}, [inst])
+        check.check(inst)
+        sf.connect.assert_called_with(
+            user='testuser',
+            password='pass',
+            account='test_acct.us-central1.gcp',
+            database='SNOWFLAKE',
+            schema='ACCOUNT_USAGE',
+            warehouse=None,
+            role='ACCOUNTADMIN',
+            passcode_in_password=False,
+            passcode=None,
+            client_prefetch_threads=4,
+            login_timeout=3,
+            ocsp_response_cache_filename=None,
+            authenticator='snowflake',
+            token=None,
+            private_key=read_key,
+            client_session_keep_alive=False,
+            proxy_host=None,
+            proxy_port=None,
+            proxy_user=None,
+            proxy_password=None,
+        )
 
     inst['private_key_path'] = os.path.join(os.path.dirname(__file__), 'keys', 'wrong_key.p8')
     check = SnowflakeCheck(CHECK_NAME, {}, [inst])
