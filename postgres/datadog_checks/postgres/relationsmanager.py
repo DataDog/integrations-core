@@ -310,7 +310,7 @@ class RelationsManager(object):
     @staticmethod
     def _build_relations_config(yamlconfig):
         # type:  (List[Union[str, Dict]]) -> List[Dict[str, Any]]
-        """Builds a dictionary from relations configuration while maintaining compatibility"""
+        """Builds a list from relations configuration while maintaining compatibility"""
         relations = []
         for element in yamlconfig:
             config = {}
