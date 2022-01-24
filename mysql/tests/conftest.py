@@ -23,6 +23,7 @@ COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 
 @pytest.fixture(scope='session')
 def config_e2e(instance_basic):
+    instance_basic['dbm'] = True
     logs_path = _mysql_logs_path()
 
     return {
