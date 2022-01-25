@@ -42,30 +42,7 @@ def _validate_authenticator_option(values):
         'snowflake_jwt': ['private_key_path'],
         'oauth': ['token', 'token_path'],
     }
-    # if (
-    #     authenticator == 'snowflake'
-    #     and 'password' not in values
-    #     and 'private_key_path' not in values
-    # ):
-    #     raise Exception(
-    #         'Authenticator option `snowflake` (default) needs `password` or `private_key_path` option to be set.'
-    #     )
 
-    # if authenticator == 'oauth' and 'token' not in values and 'token_path' not in values:
-    #     raise Exception('Authenticator option `oauth` needs `token` or `token_path` option, please set one.')
-
-    # if authenticator == 'snowflake_jwt'and 'private_key_path' not in values:
-    #     raise Exception(
-    #         'Authenticator option `snowflake_jwt` needs `private_key_path` option to be set.'
-    #     )
-
-    # authenticator_options = ['snowflake', 'oauth', 'snowflake_jwt']
-    # if authenticator not in authenticator_options:
-    #     raise Exception(
-    #         'Unkwown authenticator option {}, supported options are {}'.format(
-    #             authenticator, authenticator_options
-    #         )
-    #     )
     if authenticator not in authenticator_dependencies:
         raise Exception(
             'Unkwown authenticator option {}, supported options are {}.'.format(
