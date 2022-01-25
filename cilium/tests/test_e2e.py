@@ -19,5 +19,5 @@ def test_check_ok(dd_agent_check):
 
 
 def test_check_not_ok(dd_agent_check):
-    aggregator = dd_agent_check(rate=True)
+    aggregator = dd_agent_check()
     aggregator.assert_service_check("cilium.openmetrics.health", status=AgentCheck.CRITICAL)
