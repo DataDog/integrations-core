@@ -21,6 +21,7 @@ requires_new_environment = pytest.mark.skipif(
 
 ON_CI = running_on_ci()
 skip_on_ci = pytest.mark.skipif(ON_CI, reason="This test environment flakes on CI")
+require_ci = pytest.mark.skipif(not ON_CI, reason="This on CI the environment flakes so it's not started")
 
 AGENT_V2_METRICS = [
     "cilium.agent.api_process_time.seconds.bucket",
