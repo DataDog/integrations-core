@@ -137,6 +137,11 @@ class TLSRemoteCheck(object):
                     context.wrap_socket(sock, server_hostname=self.agent_check._server_hostname)
                 ) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
+                    protocol_version = secure_sock.version()
+                    if protocol_version and protocol_version not in self.agent_check._allowed_versions:
+                        self.log.warning(
+                            'Protocol version not allowed for intermediate certificates: %s', protocol_version
+                        )
             except Exception as e:
                 self.log.error('Error occurred while getting cert to discover intermediate certificates: %s', e)
                 return
