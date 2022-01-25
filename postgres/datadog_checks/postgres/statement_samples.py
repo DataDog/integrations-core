@@ -391,7 +391,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "missing 'datadog' schema in the database. See https://docs.datadoghq.com/database_monitoring/"
                 "setup_postgres/selfhosted/?tab=postgres10 for more details: %s",
                 dbname,
-                repr(e)
+                repr(e),
             )
             self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
             return DBExplainError.invalid_schema, e
@@ -403,7 +403,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "%s exists in the database. See https://datadoghq.com for more details: %s",
                 dbname,
                 self._explain_function,
-                repr(e)
+                repr(e),
             )
             return DBExplainError.failed_function, e
 

@@ -365,7 +365,8 @@ def test_failed_explain_handling(
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
 @pytest.mark.parametrize(
-    "user,password,dbname,query,arg,expected_error_tag,expected_collection_errors,expected_statement_truncated,expected_warnings",
+    "user,password,dbname,query,arg,expected_error_tag,expected_collection_errors,expected_statement_truncated,"
+    "expected_warnings",
     [
         (
             "bob",
@@ -1192,8 +1193,8 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
             [
                 'Unable to collect statement metrics because pg_stat_statements extension is '
                 "not loaded in database 'datadog_test'. See "
-                'https://docs.datadoghq.com/database_monitoring/troubleshooting/?tab=postgres#query-metrics-are-missing '
-                'for more details',
+                'https://docs.datadoghq.com/database_monitoring/troubleshooting/?tab=postgres#query-metrics-are-missing'
+                ' for more details',
             ],
         ),
         (
@@ -1203,8 +1204,8 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
             [
                 'Unable to collect statement metrics because pg_stat_statements is not '
                 "created in database 'datadog_test'. See See "
-                'https://docs.datadoghq.com/database_monitoring/troubleshooting/?tab=postgres#query-metrics-are-missing '
-                'for more details',
+                'https://docs.datadoghq.com/database_monitoring/troubleshooting/?tab=postgres#query-metrics-are-missing'
+                ' for more details',
             ],
         ),
         (
