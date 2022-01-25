@@ -26,7 +26,7 @@ class InstanceConfig(BaseModel):
     auto_discover_queues: Optional[bool]
     channel: str = Field(..., min_length=1)
     channel_status_mapping: Optional[Mapping[str, Any]]
-    channels: Optional[Sequence[str]] = Field(None, min_items=1)
+    channels: Optional[Sequence[str]]
     collect_statistics_metrics: Optional[bool]
     connection_name: Optional[str] = Field(None, min_length=1)
     convert_endianness: Optional[bool]
@@ -39,10 +39,10 @@ class InstanceConfig(BaseModel):
     port: Optional[int]
     queue_manager: str = Field(..., min_length=1)
     queue_manager_timezone: Optional[str] = Field(None, min_length=1)
-    queue_patterns: Optional[Sequence[str]] = Field(None, min_items=1)
-    queue_regex: Optional[Sequence[str]] = Field(None, min_items=1)
+    queue_patterns: Optional[Sequence[str]]
+    queue_regex: Optional[Sequence[str]]
     queue_tag_re: Optional[Mapping[str, Any]]
-    queues: Optional[Sequence[str]] = Field(None, min_items=1)
+    queues: Optional[Sequence[str]]
     service: Optional[str]
     ssl_auth: Optional[bool]
     ssl_certificate_label: Optional[str]

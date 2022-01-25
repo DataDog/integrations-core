@@ -65,7 +65,6 @@ files:
         value:
           example: ['<QUEUE_NAME>']
           type: array
-          minItems: 1
           uniqueItems: true
           items:
             type: string
@@ -79,7 +78,6 @@ files:
             - 'DEV.*'          # match queues starting with "DEV."
             - 'SYSTEM.*'       # match queues starting with "SYSTEM."
           type: array
-          minItems: 1
           uniqueItems: true
           items:
             type: string
@@ -93,7 +91,6 @@ files:
             - '^DEV\..*$'          # match queues starting with "DEV."
             - '^SYSTEM\..*$'       # match queues starting with "SYSTEM."
           type: array
-          minItems: 1
           uniqueItems: true
           items:
             type: string
@@ -102,7 +99,6 @@ files:
         value:
           example: ['<CHANNEL_NAME>']
           type: array
-          minItems: 1
           uniqueItems: true
           items:
             type: string
