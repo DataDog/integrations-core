@@ -124,7 +124,7 @@ def test_oauth_auth(oauth_instance):
         )
 
 
-def test_key_auth(instance):
+def test_key_auth(dd_run_check, instance):
     # Key auth
     inst = copy.deepcopy(instance)
     inst['private_key_path'] = os.path.join(os.path.dirname(__file__), 'keys', 'rsa_key_example.p8')
@@ -136,7 +136,7 @@ def test_key_auth(instance):
 
     with mock.patch('datadog_checks.snowflake.check.sf') as sf:
         check = SnowflakeCheck(CHECK_NAME, {}, [inst])
-        check.check(inst)
+        dd_run_check(check)
         sf.connect.assert_called_with(
             user='testuser',
             password='pass',
@@ -164,6 +164,12 @@ def test_key_auth(instance):
     check = SnowflakeCheck(CHECK_NAME, {}, [inst])
     with pytest.raises(FileNotFoundError):
         check.read_key()
+
+    # Read key protected by a passphrase
+    inst['private_key_path'] = os.path.join(os.path.dirname(__file__), 'keys', 'rsa_key_pass_example.p8')
+    inst['private_key_password'] = 'keypass'
+    check = SnowflakeCheck(CHECK_NAME, {}, [inst])
+    assert len(check.read_key()) == 1218
 
 
 def test_proxy_settings(instance):
