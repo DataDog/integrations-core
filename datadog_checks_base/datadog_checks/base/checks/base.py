@@ -408,7 +408,6 @@ class AgentCheck(object):
         user_config = user_config or {}
         models_config = models_config or {}
         unknown_options = sorted(list(user_config.keys() - dict(models_config).keys()))
-
         for unknown_option in unknown_options:
             most_similar_known_option = (None, 0)
             for known_option in models_config:
@@ -416,10 +415,9 @@ class AgentCheck(object):
                 ratio = fuzz.ratio(unknown_option, known_option_name)
                 if ratio > most_similar_known_option[1]:
                     most_similar_known_option = (known_option_name, ratio)
-
             if most_similar_known_option[1] >= TYPO_SIMILARITY_THRESHOLD:
                 message = (
-                    "Detected potential typo in configuration option in {}/{} section: {}." "Did you mean `{}`?"
+                    "Detected potential typo in configuration option in {}/{} section: {}. Did you mean `{}`?"
                 ).format(self.name, level, unknown_option, most_similar_known_option[0])
                 self.log.warning(message)
 
@@ -428,7 +426,6 @@ class AgentCheck(object):
             # 'datadog_checks.<PACKAGE>.<MODULE>...'
             module_parts = self.__module__.split('.')
             package_path = '{}.config_models'.format('.'.join(module_parts[:2]))
-
         if self._config_model_shared is None:
             raw_shared_config = self._get_config_model_initialization_data()
             intg_shared_config = self._get_shared_config()
