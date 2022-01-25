@@ -1,11 +1,16 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
 
 from .. import common
+from ..common import ON_CI
 from . import legacy_common
 
-pytestmark = [common.requires_legacy_environment]
+pytestmark = [
+    pytest.mark.skipif(ON_CI, reason="This test environment flakes on CI"),
+    common.requires_legacy_environment,
+]
 
 
 def test_agent_check(aggregator, agent_instance_use_openmetrics, mock_agent_data, dd_run_check, check):
