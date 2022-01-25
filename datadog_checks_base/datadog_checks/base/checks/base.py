@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Opti
 
 import yaml
 from six import PY2, binary_type, iteritems, raise_from, text_type
+from thefuzz import fuzz
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
@@ -74,6 +75,7 @@ if TYPE_CHECKING:
 
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
+TYPO_SIMILARITY_THRESHOLD = 90
 
 
 @traced_class
@@ -402,15 +404,24 @@ class AgentCheck(object):
         self._log_deprecation('in_developer_mode')
         return False
 
-    def validate_unknown_options(self, user_config, models_config, level):
+    def find_typos_in_options(self, user_config, models_config, level):
         user_config = user_config or {}
         models_config = models_config or {}
         unknown_options = sorted(list(user_config.keys() - dict(models_config).keys()))
-        if unknown_options:
-            message = "Detected undocumented or unknown configuration options in {}/{} section: {}".format(
-                self.name, level, ", ".join(unknown_options)
-            )
-            self.log.warning(message)
+
+        for unknown_option in unknown_options:
+            most_similar_known_option = (None, 0)
+            for known_option in models_config:
+                known_option_name = known_option[0]
+                ratio = fuzz.ratio(unknown_option, known_option_name)
+                if ratio > most_similar_known_option[1]:
+                    most_similar_known_option = (known_option_name, ratio)
+
+            if most_similar_known_option[1] >= TYPO_SIMILARITY_THRESHOLD:
+                message = (
+                    "Detected potential typo in configuration option in {}/{} section: {}." "Did you mean `{}`?"
+                ).format(self.name, level, unknown_option, most_similar_known_option[0])
+                self.log.warning(message)
 
     def load_configuration_models(self, package_path=None):
         if package_path is None:
@@ -424,7 +435,7 @@ class AgentCheck(object):
             raw_shared_config.update(intg_shared_config)
 
             shared_config = self.load_configuration_model(package_path, 'SharedConfig', raw_shared_config)
-            self.validate_unknown_options(intg_shared_config, shared_config, 'init_config')
+            self.find_typos_in_options(intg_shared_config, shared_config, 'init_config')
             if shared_config is not None:
                 self._config_model_shared = shared_config
 
@@ -434,7 +445,7 @@ class AgentCheck(object):
             raw_instance_config.update(intg_instance_config)
 
             instance_config = self.load_configuration_model(package_path, 'InstanceConfig', raw_instance_config)
-            self.validate_unknown_options(intg_instance_config, instance_config, 'instances')
+            self.find_typos_in_options(intg_instance_config, instance_config, 'instances')
 
             if instance_config is not None:
                 self._config_model_instance = instance_config
