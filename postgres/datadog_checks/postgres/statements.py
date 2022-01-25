@@ -236,8 +236,8 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 error_tag = "error:database-{}-pg_stat_statements_not_loaded".format(type(e).__name__)
                 self._check.warning(
                     "Unable to collect statement metrics because pg_stat_statements extension is not "
-                    "loaded in database '%s'. See https://docs.datadoghq.com/database_monitoring/"
-                    "troubleshooting/?tab=postgres#query-metrics-are-missing for more details",
+                    "loaded in database '%s'. See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                    "troubleshooting#pg-stat-statement-not-loaded for more details",
                     self._config.dbname,
                 )
                 self._log.warning(
@@ -247,8 +247,8 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 error_tag = "error:database-{}-pg_stat_statements_not_created".format(type(e).__name__)
                 self._check.warning(
                     "Unable to collect statement metrics because pg_stat_statements is not created "
-                    "in database '%s'. See https://docs.datadoghq.com/database_monitoring/"
-                    "troubleshooting/?tab=postgres#query-metrics-are-missing for more details",
+                    "in database '%s'. See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                    "troubleshooting#pg-stat-statement-not-created for more details",
                     self._config.dbname,
                 )
             else:

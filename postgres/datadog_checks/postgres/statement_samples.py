@@ -389,7 +389,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._check.warning(
                 "Unable to collect execution plans due to invalid schema in database '%s'. This could be due to a "
                 "missing 'datadog' schema in the database. See https://docs.datadoghq.com/database_monitoring/"
-                "setup_postgres/selfhosted/?tab=postgres10 for more details: %s",
+                "setup_postgres/troubleshooting#explain-invalid-schema for more details: %s",
                 dbname,
                 repr(e),
             )
@@ -400,7 +400,8 @@ class PostgresStatementSamples(DBMAsyncJob):
             # incorrect definition)
             self._check.warning(
                 "Unable to collect execution plans in dbname=%s. Check that the function "
-                "%s exists in the database. See https://datadoghq.com for more details: %s",
+                "%s exists in the database. See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                "troubleshooting#explain-undefined-function for more details: %s",
                 dbname,
                 self._explain_function,
                 repr(e),

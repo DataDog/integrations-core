@@ -403,7 +403,7 @@ def test_failed_explain_handling(
                 'Unable to collect execution plans due to invalid schema in database '
                 "'dogs_noschema'. This could be due to a missing 'datadog' schema in the "
                 'database. See '
-                'https://docs.datadoghq.com/database_monitoring/setup_postgres/selfhosted/?tab=postgres10 '
+                'https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#explain-invalid-schema '
                 'for more details: InvalidSchemaName(\'schema "datadog" does not exist\\nLINE '
                 '1: SELECT datadog.explain_statement($stmt$SELECT * FROM '
                 "pg_stat...\\n               ^\\n')",
@@ -421,7 +421,8 @@ def test_failed_explain_handling(
             [
                 'Unable to collect execution plans in dbname=dogs_nofunc. Check that the '
                 'function datadog.explain_statement exists in the database. See '
-                "https://datadoghq.com for more details: UndefinedFunction('function "
+                "https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                "troubleshooting#explain-undefined-function for more details: UndefinedFunction('function "
                 'datadog.explain_statement(unknown) does not exist\\nLINE 1: SELECT '
                 'datadog.explain_statement($stmt$SELECT * FROM pg_stat...\\n               '
                 '^\\nHINT:  No function matches the given name and argument types. You might '
@@ -1192,8 +1193,8 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
             'error:database-ObjectNotInPrerequisiteState-pg_stat_statements_not_loaded',
             [
                 'Unable to collect statement metrics because pg_stat_statements extension is '
-                "not loaded in database 'datadog_test'. See "
-                'https://docs.datadoghq.com/database_monitoring/troubleshooting/?tab=postgres#query-metrics-are-missing'
+                "not loaded in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
+                'setup_postgres/troubleshooting#pg-stat-statement-not-loaded'
                 ' for more details',
             ],
         ),
@@ -1203,8 +1204,8 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
             'error:database-UndefinedTable-pg_stat_statements_not_created',
             [
                 'Unable to collect statement metrics because pg_stat_statements is not '
-                "created in database 'datadog_test'. See "
-                'https://docs.datadoghq.com/database_monitoring/troubleshooting/?tab=postgres#query-metrics-are-missing'
+                "created in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
+                'setup_postgres/troubleshooting#pg-stat-statement-not-created'
                 ' for more details',
             ],
         ),
