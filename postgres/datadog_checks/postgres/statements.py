@@ -250,11 +250,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 isinstance(e, psycopg2.errors.ObjectNotInPrerequisiteState)
             ) and 'pg_stat_statements must be loaded' in str(e.pgerror):
                 error_tag = "error:database-{}-pg_stat_statements_not_loaded".format(type(e).__name__)
+                self._check.warning("pg_stat_statements is not loaded in this database. See https//datadoghq.com")
                 self._log.warning(
                     "Unable to collect statement metrics because pg_stat_statements shared library is not loaded"
                 )
             elif isinstance(e, psycopg2.errors.UndefinedTable) and 'pg_stat_statements' in str(e.pgerror):
                 error_tag = "error:database-{}-pg_stat_statements_not_created".format(type(e).__name__)
+                self._check.warning("pg_stat_statements is not created in this database. See https//datadoghq.com")
                 self._log.warning(
                     "Unable to collect statement metrics because pg_stat_statements is not created in this database"
                 )

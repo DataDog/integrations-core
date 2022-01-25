@@ -18,7 +18,7 @@ from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .config import PostgresConfig
-from .util import CONNECTION_METRICS, FUNCTION_METRICS, REPLICATION_METRICS, fmt, get_schema_field
+from .util import CONNECTION_METRICS, FUNCTION_METRICS, REPLICATION_METRICS, fmt, get_schema_field, DatabaseConfigurationError
 from .version_utils import V9, V10, VersionUtils
 
 try:
@@ -67,8 +67,18 @@ class PostgreSql(AgentCheck):
         self._db_pool_lock = threading.Lock()
 
     def validate_dbm_setup(self):
-        self.statement_metrics.validate_db_config()
-        self.statement_samples.validate_db_config()
+        try:
+            self.statement_metrics.validate_db_config()
+            self.statement_samples.validate_db_config()
+        except DatabaseConfigurationError as e:
+            self.service_check(
+                self.SERVICE_CHECK_NAME,
+                AgentCheck.WARNING,
+                tags=self._get_service_check_tags(),
+                message=str(e),
+                hostname=self.resolved_hostname,
+            )
+            raise
 
     def cancel(self):
         self.statement_samples.cancel()

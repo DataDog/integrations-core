@@ -24,6 +24,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
+from .util import DatabaseConfigurationError
 
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
 # character is 6 bytes
@@ -72,6 +73,10 @@ PG_ACTIVE_CONNECTIONS_QUERY = re.sub(
 ).strip()
 
 EXPLAIN_VALIDATION_QUERY = "SELECT * FROM pg_stat_activity"
+
+PG_DATABASES_QUERY = """
+    SELECT datname FROM pg_database
+"""
 
 
 class StatementTruncationState(Enum):
@@ -660,4 +665,18 @@ class PostgresStatementSamples(DBMAsyncJob):
         return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
 
     def validate_db_config(self):
-        pass
+        if is_affirmative(self._config.statement_samples_config.get('enabled', True)):
+            row = {'query': 'SELECT 1'}
+            normalized = self._normalize_row(row)
+
+            explain_error = self._run_explain_safe(
+                dbname=self._config.dbname,
+                statement=normalized['query'],
+                obfuscated_statement=normalized['statement'],
+                query_signature=normalized['query_signature']
+            )[1]
+            if explain_error == DBExplainError.failed_function:
+                raise DatabaseConfigurationError(
+                    "missing datadog.explain_statement in database '{database}'".format(database=self._config.dbname),
+                    reference_doc="https://docs.datadoghq.com/database_monitoring/setup_postgres/selfhosted/?tab=postgres10"
+                )

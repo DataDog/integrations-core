@@ -27,7 +27,7 @@ class DatabaseConfigurationError(Exception):
 
     def __init__(self, message, reference_doc=""):
         super(DatabaseConfigurationError, self).__init__(
-            '{message}. See {doc} for help'.format(message=message, doc=reference_doc)
+            '{message}. See {doc}'.format(message=message, doc=reference_doc)
         )
 
 
