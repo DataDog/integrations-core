@@ -3,9 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
+
 from datadog_checks.base import AgentCheck
 
-from ..common import requires_legacy_environment, skip_on_ci, require_ci
+from ..common import require_ci, requires_legacy_environment, skip_on_ci
 from . import legacy_common
 
 pytestmark = [requires_legacy_environment, pytest.mark.e2e]

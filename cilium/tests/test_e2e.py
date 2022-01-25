@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 
-from .common import AGENT_V2_METRICS, requires_new_environment, skip_on_ci, require_ci
+from .common import AGENT_V2_METRICS, require_ci, requires_new_environment, skip_on_ci
 
 pytestmark = [requires_new_environment, pytest.mark.e2e]
 
