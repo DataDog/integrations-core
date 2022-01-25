@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import logging
 import os
 
@@ -23,12 +24,13 @@ COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 
 @pytest.fixture(scope='session')
 def config_e2e(instance_basic):
-    instance_basic['dbm'] = True
+    instance = copy.deepcopy(instance_basic)
+    instance['dbm'] = True
     logs_path = _mysql_logs_path()
 
     return {
         'init_config': {},
-        'instances': [instance_basic],
+        'instances': [instance],
         'logs': [
             {'type': 'file', 'path': '{}/mysql.log'.format(logs_path), 'source': 'mysql', 'service': 'local_mysql'},
             {
