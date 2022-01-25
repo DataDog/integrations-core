@@ -138,7 +138,7 @@ class TLSRemoteCheck(object):
                 ) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
                     protocol_version = secure_sock.version()
-                    if protocol_version and protocol_version not in self.agent_check._allowed_versions:
+                    if protocol_version and protocol_version not in self.agent_check.allowed_versions:
                         self.log.warning(
                             'Protocol version not allowed for intermediate certificates: %s', protocol_version
                         )
