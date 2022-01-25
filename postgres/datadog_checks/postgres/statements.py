@@ -247,7 +247,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 error_tag = "error:database-{}-pg_stat_statements_not_created".format(type(e).__name__)
                 self._check.warning(
                     "Unable to collect statement metrics because pg_stat_statements is not created "
-                    "in database '%s'. See See https://docs.datadoghq.com/database_monitoring/"
+                    "in database '%s'. See https://docs.datadoghq.com/database_monitoring/"
                     "troubleshooting/?tab=postgres#query-metrics-are-missing for more details",
                     self._config.dbname,
                 )

@@ -1203,7 +1203,7 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
             'error:database-UndefinedTable-pg_stat_statements_not_created',
             [
                 'Unable to collect statement metrics because pg_stat_statements is not '
-                "created in database 'datadog_test'. See See "
+                "created in database 'datadog_test'. See "
                 'https://docs.datadoghq.com/database_monitoring/troubleshooting/?tab=postgres#query-metrics-are-missing'
                 ' for more details',
             ],
