@@ -86,7 +86,7 @@ class KubernetesState(OpenMetricsBaseCheck):
 
         self.condition_to_status_positive = {'true': self.OK, 'false': self.CRITICAL, 'unknown': self.WARNING}
 
-        self.condition_to_status_negative = {'true': self.CRITICAL, 'false': self.OK, 'unknown': self.WARNING}
+        self.condition_to_status_negative = {'true': self.CRITICAL, 'false': self.OK, 'unknown': self.UNKNOWN}
 
         # Parameters for the count_objects_by_tags method
         self.object_count_params = {
