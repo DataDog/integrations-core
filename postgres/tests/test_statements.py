@@ -365,7 +365,7 @@ def test_failed_explain_handling(
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
 @pytest.mark.parametrize(
-    "user,password,dbname,query,arg,expected_error_tag,expected_collection_errors,expected_statement_truncated",
+    "user,password,dbname,query,arg,expected_error_tag,expected_collection_errors,expected_statement_truncated,expected_warnings",
     [
         (
             "bob",
@@ -376,6 +376,7 @@ def test_failed_explain_handling(
             None,
             None,
             StatementTruncationState.not_truncated.value,
+            [],
         ),
         (
             "dd_admin",
@@ -386,6 +387,7 @@ def test_failed_explain_handling(
             None,
             None,
             StatementTruncationState.not_truncated.value,
+            [],
         ),
         (
             "dd_admin",
@@ -396,6 +398,15 @@ def test_failed_explain_handling(
             "error:explain-invalid_schema-<class 'psycopg2.errors.InvalidSchemaName'>",
             [{'code': 'invalid_schema', 'message': "<class 'psycopg2.errors.InvalidSchemaName'>"}],
             StatementTruncationState.not_truncated.value,
+            [
+                'Unable to collect execution plans due to invalid schema in database '
+                "'dogs_noschema'. This could be due to a missing 'datadog' schema in the "
+                'database. See '
+                'https://docs.datadoghq.com/database_monitoring/setup_postgres/selfhosted/?tab=postgres10 '
+                'for more details: InvalidSchemaName(\'schema "datadog" does not exist\\nLINE '
+                '1: SELECT datadog.explain_statement($stmt$SELECT * FROM '
+                "pg_stat...\\n               ^\\n')",
+            ],
         ),
         (
             "dd_admin",
@@ -406,6 +417,15 @@ def test_failed_explain_handling(
             "error:explain-failed_function-<class 'psycopg2.errors.UndefinedFunction'>",
             [{'code': 'failed_function', 'message': "<class 'psycopg2.errors.UndefinedFunction'>"}],
             StatementTruncationState.not_truncated.value,
+            [
+                'Unable to collect execution plans in dbname=dogs_nofunc. Check that the '
+                'function datadog.explain_statement exists in the database. See '
+                "https://datadoghq.com for more details: UndefinedFunction('function "
+                'datadog.explain_statement(unknown) does not exist\\nLINE 1: SELECT '
+                'datadog.explain_statement($stmt$SELECT * FROM pg_stat...\\n               '
+                '^\\nHINT:  No function matches the given name and argument types. You might '
+                "need to add explicit type casts.\\n')",
+            ],
         ),
         (
             "bob",
@@ -429,6 +449,7 @@ def test_failed_explain_handling(
             "error:explain-query_truncated-track_activity_query_size=1024",
             [{'code': 'query_truncated', 'message': 'track_activity_query_size=1024'}],
             StatementTruncationState.truncated.value,
+            [],
         ),
     ],
 )
@@ -446,6 +467,7 @@ def test_statement_samples_collect(
     expected_collection_errors,
     expected_statement_truncated,
     datadog_agent,
+    expected_warnings,
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     check = integration_check(dbm_instance)
@@ -505,6 +527,8 @@ def test_statement_samples_collect(
                 assert event['db']['plan']['collection_errors'] == expected_collection_errors
             else:
                 assert event['db']['plan']['collection_errors'] is None
+
+        assert check.warnings == expected_warnings
 
     finally:
         conn.close()
