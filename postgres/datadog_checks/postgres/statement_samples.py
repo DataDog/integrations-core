@@ -391,9 +391,8 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "missing 'datadog' schema in the database. See https://docs.datadoghq.com/database_monitoring/"
                 "setup_postgres/troubleshooting#explain-invalid-schema for more details: %s",
                 dbname,
-                repr(e),
+                str(e),
             )
-            self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
             return DBExplainError.invalid_schema, e
         except psycopg2.DatabaseError as e:
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
@@ -404,7 +403,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "troubleshooting#explain-undefined-function for more details: %s",
                 dbname,
                 self._explain_function,
-                repr(e),
+                str(e),
             )
             return DBExplainError.failed_function, e
 

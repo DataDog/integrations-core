@@ -404,9 +404,8 @@ def test_failed_explain_handling(
                 "'dogs_noschema'. This could be due to a missing 'datadog' schema in the "
                 'database. See '
                 'https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#explain-invalid-schema '
-                'for more details: InvalidSchemaName(\'schema "datadog" does not exist\\nLINE '
-                '1: SELECT datadog.explain_statement($stmt$SELECT * FROM '
-                "pg_stat...\\n               ^\\n')",
+                'for more details: schema "datadog" does not exist\nLINE 1: SELECT datadog.explain_statement('
+                '$stmt$SELECT * FROM pg_stat...\n               ^\n',
             ],
         ),
         (
@@ -421,12 +420,12 @@ def test_failed_explain_handling(
             [
                 'Unable to collect execution plans in dbname=dogs_nofunc. Check that the '
                 'function datadog.explain_statement exists in the database. See '
-                "https://docs.datadoghq.com/database_monitoring/setup_postgres/"
-                "troubleshooting#explain-undefined-function for more details: UndefinedFunction('function "
-                'datadog.explain_statement(unknown) does not exist\\nLINE 1: SELECT '
-                'datadog.explain_statement($stmt$SELECT * FROM pg_stat...\\n               '
-                '^\\nHINT:  No function matches the given name and argument types. You might '
-                "need to add explicit type casts.\\n')",
+                'https://docs.datadoghq.com/database_monitoring/setup_postgres/'
+                'troubleshooting#explain-undefined-function for more details: function '
+                'datadog.explain_statement(unknown) does not exist\nLINE 1: SELECT '
+                'datadog.explain_statement($stmt$SELECT * FROM pg_stat...\n               '
+                '^\nHINT:  No function matches the given name and argument types. You might need to add '
+                'explicit type casts.\n',
             ],
         ),
         (
