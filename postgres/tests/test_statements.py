@@ -1183,37 +1183,52 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
 
 
 @pytest.mark.parametrize(
-    "error,metric_columns,expected_error_tag",
+    "error,metric_columns,expected_error_tag,expected_warnings",
     [
         (
             ObjectNotInPrerequisiteState('pg_stat_statements must be loaded via shared_preload_libraries'),
             [],
             'error:database-ObjectNotInPrerequisiteState-pg_stat_statements_not_loaded',
+            [
+                'Unable to collect statement metrics because pg_stat_statements extension is '
+                "not loaded in database 'datadog_test'. See "
+                'https://docs.datadoghq.com/database_monitoring/troubleshooting/?tab=postgres#query-metrics-are-missing '
+                'for more details',
+            ],
         ),
         (
             UndefinedTable('ERROR:  relation "pg_stat_statements" does not exist'),
             [],
             'error:database-UndefinedTable-pg_stat_statements_not_created',
+            [
+                'Unable to collect statement metrics because pg_stat_statements is not '
+                "created in database 'datadog_test'. See See "
+                'https://docs.datadoghq.com/database_monitoring/troubleshooting/?tab=postgres#query-metrics-are-missing '
+                'for more details',
+            ],
         ),
         (
             ObjectNotInPrerequisiteState('cannot insert into view'),
             [],
             'error:database-ObjectNotInPrerequisiteState',
+            [],
         ),
         (
             psycopg2.errors.DatabaseError(),
             [],
             'error:database-DatabaseError',
+            [],
         ),
         (
             None,
             [],
             'error:database-missing_pg_stat_statements_required_columns',
+            [],
         ),
     ],
 )
 def test_statement_metrics_database_errors(
-    aggregator, integration_check, dbm_instance, error, metric_columns, expected_error_tag
+    aggregator, integration_check, dbm_instance, error, metric_columns, expected_error_tag, expected_warnings
 ):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
@@ -1237,3 +1252,5 @@ def test_statement_metrics_database_errors(
     aggregator.assert_metric(
         'dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags, hostname='stubbed.hostname'
     )
+
+    assert check.warnings == expected_warnings
