@@ -79,10 +79,11 @@ class SnowflakeCheck(AgentCheck):
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=self.metric_queries, tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
 
-    def renew_token(self):
-        self.log.debug("Renewing Snowflake client token")
-        with open(self._config.token_path, 'rb', encoding="UTF-8") as f:
-            self._config.token = f.read()
+    def read_token(self):
+        if self._config.token_path:
+            self.log.debug("Renewing Snowflake client token")
+            with open(self._config.token_path, 'rb', encoding="UTF-8") as f:
+                self._config.token = f.read()
 
     def read_key(self):
         if self._config.private_key_path:
@@ -147,8 +148,7 @@ class SnowflakeCheck(AgentCheck):
             self.proxy_port,
         )
 
-        if self._config.token_path:
-            self.renew_token()
+        self.read_token()
 
         try:
             conn = sf.connect(
