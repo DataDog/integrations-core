@@ -24,7 +24,6 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
-from .util import DatabaseConfigurationError
 
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
 # character is 6 bytes
@@ -73,10 +72,6 @@ PG_ACTIVE_CONNECTIONS_QUERY = re.sub(
 ).strip()
 
 EXPLAIN_VALIDATION_QUERY = "SELECT * FROM pg_stat_activity"
-
-PG_DATABASES_QUERY = """
-    SELECT datname FROM pg_database
-"""
 
 
 class StatementTruncationState(Enum):
@@ -391,12 +386,25 @@ class PostgresStatementSamples(DBMAsyncJob):
         try:
             result = self._run_explain(dbname, EXPLAIN_VALIDATION_QUERY, EXPLAIN_VALIDATION_QUERY)
         except psycopg2.errors.InvalidSchemaName as e:
+            self._check.warning(
+                "Unable to collect execution plans due to invalid schema in database '%s'. This could be due to a "
+                "missing 'datadog' schema in the database. See https://docs.datadoghq.com/database_monitoring/"
+                "setup_postgres/selfhosted/?tab=postgres10 for more details: %s",
+                dbname,
+                repr(e)
+            )
             self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
             return DBExplainError.invalid_schema, e
         except psycopg2.DatabaseError as e:
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
             # incorrect definition)
-            self._log.warning("cannot collect execution plans in dbname=%s: %s", dbname, repr(e))
+            self._check.warning(
+                "Unable to collect execution plans in dbname=%s. Check that the function "
+                "%s exists in the database. See https://datadoghq.com for more details: %s",
+                dbname,
+                self._explain_function,
+                repr(e)
+            )
             return DBExplainError.failed_function, e
 
         if not result:
@@ -663,20 +671,3 @@ class PostgresStatementSamples(DBMAsyncJob):
         statement_bytes = bytes(statement) if PY2 else bytes(statement, "utf-8")
         truncated = len(statement_bytes) >= track_activity_query_size - (MAX_CHARACTER_SIZE_IN_BYTES + 1)
         return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
-
-    def validate_db_config(self):
-        if is_affirmative(self._config.statement_samples_config.get('enabled', True)):
-            row = {'query': 'SELECT 1'}
-            normalized = self._normalize_row(row)
-
-            explain_error = self._run_explain_safe(
-                dbname=self._config.dbname,
-                statement=normalized['query'],
-                obfuscated_statement=normalized['statement'],
-                query_signature=normalized['query_signature']
-            )[1]
-            if explain_error == DBExplainError.failed_function:
-                raise DatabaseConfigurationError(
-                    "missing datadog.explain_statement in database '{database}'".format(database=self._config.dbname),
-                    reference_doc="https://docs.datadoghq.com/database_monitoring/setup_postgres/selfhosted/?tab=postgres10"
-                )
