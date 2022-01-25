@@ -7,7 +7,6 @@ import pytest
 
 from datadog_checks.dev.ci import running_on_ci
 
-ON_CI = running_on_ci()
 CHECK_NAME = 'cilium'
 NAMESPACE = 'cilium.'
 CILIUM_VERSION = os.getenv('CILIUM_VERSION')
@@ -19,6 +18,9 @@ requires_legacy_environment = pytest.mark.skipif(
 requires_new_environment = pytest.mark.skipif(
     CILIUM_LEGACY != 'false', reason='Requires `use_openmetrics` config environment'
 )
+
+ON_CI = running_on_ci()
+skip_on_ci = pytest.mark.skipif(ON_CI, reason="This test environment flakes on CI")
 
 AGENT_V2_METRICS = [
     "cilium.agent.api_process_time.seconds.bucket",

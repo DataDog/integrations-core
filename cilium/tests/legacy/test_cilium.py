@@ -1,14 +1,13 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
 
 from .. import common
-from ..common import ON_CI
+from ..common import skip_on_ci
 from . import legacy_common
 
 pytestmark = [
-    pytest.mark.skipif(ON_CI, reason="This test environment flakes on CI"),
+    skip_on_ci,
     common.requires_legacy_environment,
 ]
 

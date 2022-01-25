@@ -4,10 +4,10 @@
 
 import pytest
 
-from .. import common
+from ..common import requires_legacy_environment, skip_on_ci
 from . import legacy_common
 
-pytestmark = [common.requires_legacy_environment]
+pytestmark = [skip_on_ci, requires_legacy_environment]
 
 
 @pytest.mark.e2e

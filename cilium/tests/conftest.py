@@ -17,7 +17,7 @@ try:
 except ImportError:
     from contextlib2 import ExitStack
 
-from .common import CILIUM_LEGACY
+from .common import CILIUM_LEGACY, ON_CI
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
@@ -41,8 +41,19 @@ def setup_cilium():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    kind_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
     use_openmetrics = CILIUM_LEGACY == 'false'
+    if ON_CI:
+        yield [
+            {
+                'agent_endpoint': 'http://localhost:9090/metrics',
+                'use_openmetrics': use_openmetrics,
+            },
+            {
+                'operator_endpoint': 'http://localhost:6942/metrics',
+                'use_openmetrics': use_openmetrics,
+            },
+        ]
+    kind_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
     with kind_run(conditions=[setup_cilium], kind_config=kind_config) as kubeconfig:
         with ExitStack() as stack:
             ip_ports = [
