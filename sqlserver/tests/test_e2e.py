@@ -14,7 +14,7 @@ from .common import (
     EXPECTED_METRICS_DBM_ENABLED,
     UNEXPECTED_METRICS,
 )
-from .utils import always_on, not_windows_ci
+from .utils import always_on, not_windows_ado, not_windows_ci
 
 try:
     import pyodbc
@@ -74,6 +74,7 @@ def test_check_ao_secondary(dd_agent_check, init_config, instance_ao_docker_seco
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
 
 
+@not_windows_ado
 def test_check_docker(dd_agent_check, init_config, instance_e2e):
     # run run sync to ensure only a single run of both
     instance_e2e['query_activity'] = {'run_sync': True}
