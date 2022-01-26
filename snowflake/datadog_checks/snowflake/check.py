@@ -85,6 +85,8 @@ class SnowflakeCheck(AgentCheck):
             with open(self._config.token_path, 'rb', encoding="UTF-8") as f:
                 self._config.token = f.read()
 
+        return self._config.token
+
     def read_key(self):
         if self._config.private_key_path:
             self.log.debug("Reading Snowflake client key for key pair authentication")
@@ -148,8 +150,6 @@ class SnowflakeCheck(AgentCheck):
             self.proxy_port,
         )
 
-        self.read_token()
-
         try:
             conn = sf.connect(
                 user=self._config.user,
@@ -165,7 +165,7 @@ class SnowflakeCheck(AgentCheck):
                 login_timeout=self._config.login_timeout,
                 ocsp_response_cache_filename=self._config.ocsp_response_cache_filename,
                 authenticator=self._config.authenticator,
-                token=self._config.token,
+                token=self.read_token(),
                 private_key=self.read_key(),
                 client_session_keep_alive=self._config.client_keep_alive,
                 proxy_host=self.proxy_host,
