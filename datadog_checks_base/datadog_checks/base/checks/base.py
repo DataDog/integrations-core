@@ -15,7 +15,6 @@ from os.path import basename
 from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Optional, Sequence, Tuple, Union
 
 import yaml
-from jellyfish import jaro_distance
 from six import PY2, binary_type, iteritems, raise_from, text_type
 
 from ..config import is_affirmative
@@ -405,6 +404,9 @@ class AgentCheck(object):
         return False
 
     def find_typos_in_options(self, user_config, models_config, level):
+        # only import it when running in python 3
+        from jellyfish import jaro_winkler_similarity
+
         user_config = user_config or {}
         models_config = models_config or {}
         typos = []  # type: List[str]
@@ -414,7 +416,7 @@ class AgentCheck(object):
         for unknown_option in unknown_options:
             most_similar_known_option = (None, 0)
             for known_option in known_options:
-                ratio = jaro_distance(unknown_option, known_option)
+                ratio = jaro_winkler_similarity(unknown_option, known_option)
                 if ratio > most_similar_known_option[1]:
                     most_similar_known_option = (known_option, ratio)
             if most_similar_known_option[1] >= TYPO_SIMILARITY_THRESHOLD:
