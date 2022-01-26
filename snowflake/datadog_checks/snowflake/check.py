@@ -52,9 +52,6 @@ class SnowflakeCheck(AgentCheck):
         if self._config.password:
             self.register_secret(self._config.password)
 
-        if self._config.private_key_password:
-            self.register_secret(self._config.private_key_password)
-
         if self._config.role == 'ACCOUNTADMIN':
             self.log.info(
                 'Snowflake `role` is set as `ACCOUNTADMIN` which should be used cautiously, '
