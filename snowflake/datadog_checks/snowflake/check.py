@@ -51,7 +51,7 @@ class SnowflakeCheck(AgentCheck):
 
         if self._config.password:
             self.register_secret(self._config.password)
-        
+
         if self._config.private_key_password:
             self.register_secret(self._config.private_key_password)
 
