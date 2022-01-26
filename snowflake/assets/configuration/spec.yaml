@@ -97,8 +97,11 @@ files:
           example: <OCSP_RESPONSE_CACHE_FILENAME>
       - name: authenticator
         description: |
-          Authenticator for Snowflake. The default `snowflake` uses the internal Snowflake authenticator.
-          Use `oauth` to authenticate with OAuth. Also, set the `token` or `token_path` option.
+          Authenticator for Snowflake. Supported methods are:
+          * `snowflake`, the default value, uses the internal Snowflake authenticator. It needs `password` or 
+            `private_key_path` option.
+          * `snowflake_jwt`, uses key pair authentication. It needs `private_key_path` option.
+          * `oauth`, to authenticate with OAuth method. It needs `token` or `token_path` option.
         value:
           type: string
           display_default: snowflake
