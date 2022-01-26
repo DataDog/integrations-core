@@ -68,7 +68,9 @@ def dd_environment():
                     for port in PORTS
                 ]
 
-                instances = get_instances(ip_ports[0][0], ip_ports[0][1], ip_ports[1][0], ip_ports[1][1], use_openmetrics)
+                instances = get_instances(
+                    ip_ports[0][0], ip_ports[0][1], ip_ports[1][0], ip_ports[1][1], use_openmetrics
+                )
 
             yield instances
 
