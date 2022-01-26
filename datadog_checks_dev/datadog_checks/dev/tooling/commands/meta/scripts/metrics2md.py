@@ -20,7 +20,6 @@ VALID_FIELDS = {
     'orientation',
     'integration',
     'short_name',
-    'curated_metric',
 }
 
 DEFAULT_FIELDS = ('metric_name', 'description', 'metric_type', 'unit_name')
