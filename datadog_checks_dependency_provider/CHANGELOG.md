@@ -1,6 +1,6 @@
 # CHANGELOG - datadog_checks_dependency_provider
 
-## 1.2.0 / 2021-11-13
+## 1.2.0 / 2021-11-13 / Agent 7.33.0
 
 * [Added] Update dependencies. See [#10580](https://github.com/DataDog/integrations-core/pull/10580).
 

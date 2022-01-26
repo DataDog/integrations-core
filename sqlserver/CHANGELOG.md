@@ -34,7 +34,7 @@
 * [Changed] Use dynamic query stats interval and set common request timeout . See [#10848](https://github.com/DataDog/integrations-core/pull/10848).
 * [Changed] improve internal check execution instrumentation. See [#10799](https://github.com/DataDog/integrations-core/pull/10799).
 
-## 6.2.0 / 2021-12-20
+## 6.2.0 / 2021-12-20 / Agent 7.33.0
 
 * [Security] Bump lxml package. See [#10904](https://github.com/DataDog/integrations-core/pull/10904).
 

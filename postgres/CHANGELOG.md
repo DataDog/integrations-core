@@ -17,7 +17,7 @@
 * [Fixed] Bump cachetools. See [#10742](https://github.com/DataDog/integrations-core/pull/10742).
 * [Changed] Improve internal explain error troubleshooting metrics. See [#10933](https://github.com/DataDog/integrations-core/pull/10933).
 
-## 11.1.1 / 2021-11-30
+## 11.1.1 / 2021-11-30 / Agent 7.33.0
 
 * [Fixed] Add datname to connections query for postgresql.connections. See [#10748](https://github.com/DataDog/integrations-core/pull/10748).
 
