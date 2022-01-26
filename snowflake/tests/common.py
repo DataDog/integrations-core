@@ -42,5 +42,8 @@ E2E_METADATA = {
         'pip install --upgrade setuptools',
         'pip install /home/snowflake_connector_patch',
     ],
-    'docker_volumes': ['{}:/home/snowflake_connector_patch'.format(os.path.join(HERE, 'snowflake_connector_patch'))],
+    'docker_volumes': [
+        '{}:/home/snowflake_connector_patch'.format(os.path.join(HERE, 'snowflake_connector_patch')),
+        '{}:/home/keys'.format(os.path.join(HERE, 'keys')),
+    ],
 }

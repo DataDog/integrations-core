@@ -145,7 +145,7 @@ instances:
     #
     # queue_manager_timezone: Etc/UTC
 
-    ## @param timeout - number - optional - default: 5
+    ## @param timeout - integer - optional - default: 5
     ## The number of seconds to wait for IBM MQ to respond.
     #
     # timeout: 5

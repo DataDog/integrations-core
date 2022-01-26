@@ -153,6 +153,17 @@ jmx_metrics:
           alias: confluent.$domain.session.$name.rate
           metric_type: rate
 
+  # Kafka Broker ZooKeeper Metrics (Yammer Metric Meter)
+  - include:
+      domain: kafka.server
+      bean:
+        # Zookeeper latency from client
+        - kafka.server:type=ZooKeeperClientMetrics,name=ZooKeeperRequestLatencyMs
+      attribute:
+        Count:
+          alias: confluent.$domain.session.$name
+          metric_type: gauge
+
   # Kafka Broker Request Metrics (Yammer Metric Meter)
   - include:
       domain: kafka.network

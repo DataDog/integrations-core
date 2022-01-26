@@ -159,7 +159,7 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "sum:nginx.net.waiting{$host}",
+                  "q": "sum:nginx.connections.idle{$host}",
                   "aggregator": "last",
                   "conditional_formats": [
                     {
@@ -261,56 +261,6 @@
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 5798994225731494,
-            "definition": {
-              "title": "Requests per second",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "q": "sum:nginx.net.request_per_s{$host}",
-                  "aggregator": "last",
-                  "conditional_formats": [
-                    {
-                      "comparator": ">",
-                      "palette": "white_on_green",
-                      "value": 0
-                    }
-                  ]
-                }
-              ],
-              "autoscale": true,
-              "custom_links": [],
-              "precision": 2
-            },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 4,
-              "height": 2
-            }
-          },
-          {
-            "id": 5496993404018108,
-            "definition": {
-              "type": "note",
-              "content": "Sampling your request data (**requests** in open source, or **total** in Plus) with a fixed time interval provides you with the number of requests you’re receiving per unit of time—often minutes or seconds. \n\nMonitoring this metric can alert you to spikes in incoming web traffic, whether legitimate or nefarious, or sudden drops, which are usually indicative of problems. A drastic change in requests per second can alert you to problems brewing somewhere in your environment, even if it cannot tell you exactly where those problems lie. Note that all requests are counted the same, regardless of their URLs.\n\n",
-              "background_color": "blue",
-              "font_size": "12",
-              "text_align": "left",
-              "show_tick": true,
-              "tick_pos": "50%",
-              "tick_edge": "left"
-            },
-            "layout": {
-              "x": 4,
-              "y": 0,
-              "width": 2,
-              "height": 2
-            }
-          },
-          {
             "id": 2907269326393154,
             "definition": {
               "title": "Request load by host",
@@ -327,7 +277,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 2,
+              "y": 0,
               "width": 4,
               "height": 2
             }
@@ -346,7 +296,7 @@
             },
             "layout": {
               "x": 4,
-              "y": 2,
+              "y": 0,
               "width": 2,
               "height": 2
             }
@@ -357,7 +307,7 @@
         "x": 0,
         "y": 0,
         "width": 6,
-        "height": 5
+        "height": 3
       }
     },
     {

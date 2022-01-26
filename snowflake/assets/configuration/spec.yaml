@@ -114,6 +114,20 @@ files:
         value:
           type: string
           example: /path/to/token
+      - name: private_key_path
+        description: |
+          The path to the file that contains the private key used to connect to Snowflake.
+          The key is re-read at every check run.
+        value:
+          type: string
+          display_default: null
+          example: /path/to/private_key
+      - name: private_key_password
+        secret: true
+        description: |
+          The password protecting the private key file in the `private_key_path` option.
+        value:
+          type: string
       - name: client_session_keep_alive
         description: |
           If set to true, Snowflake keeps the session active indefinitely as long as the connection is active,
