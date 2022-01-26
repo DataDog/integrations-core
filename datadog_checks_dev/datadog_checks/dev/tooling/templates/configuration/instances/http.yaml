@@ -261,6 +261,23 @@
     containing several CA certificates in PEM format. If a directory, the directory
     must have been processed using the c_rehash utility supplied with OpenSSL. See:
     https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+- name: tls_protocol
+  value:
+    example:
+    - 'SSLv3'
+    - 'TLSv1.2'
+    - 'TLSv1.3'
+    type: array
+    items:
+      type: string
+  description: |
+    The expected versions of TLS/SSL when fetching intermediate certificates.
+    The supported versions and values are:
+      SSLv3
+      TLSv1
+      TLSv1.1
+      TLSv1.2
+      TLSv1.3
 - name: headers
   value:
     example:
