@@ -15,8 +15,8 @@ from os.path import basename
 from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Optional, Sequence, Tuple, Union
 
 import yaml
+from jellyfish import jaro_distance
 from six import PY2, binary_type, iteritems, raise_from, text_type
-from thefuzz import fuzz
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
@@ -75,7 +75,7 @@ if TYPE_CHECKING:
 
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
-TYPO_SIMILARITY_THRESHOLD = 90
+TYPO_SIMILARITY_THRESHOLD = 0.85
 
 
 @traced_class
@@ -414,7 +414,7 @@ class AgentCheck(object):
         for unknown_option in unknown_options:
             most_similar_known_option = (None, 0)
             for known_option in known_options:
-                ratio = fuzz.ratio(unknown_option, known_option)
+                ratio = jaro_distance(unknown_option, known_option)
                 if ratio > most_similar_known_option[1]:
                     most_similar_known_option = (known_option, ratio)
             if most_similar_known_option[1] >= TYPO_SIMILARITY_THRESHOLD:
