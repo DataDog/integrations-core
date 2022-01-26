@@ -407,19 +407,23 @@ class AgentCheck(object):
     def find_typos_in_options(self, user_config, models_config, level):
         user_config = user_config or {}
         models_config = models_config or {}
-        unknown_options = sorted(list(user_config.keys() - dict(models_config).keys()))
+        typos = []  # type: List[str]
+
+        known_options = dict(models_config).keys()
+        unknown_options = sorted(list(user_config.keys() - known_options))
         for unknown_option in unknown_options:
             most_similar_known_option = (None, 0)
-            for known_option in models_config:
-                known_option_name = known_option[0]
-                ratio = fuzz.ratio(unknown_option, known_option_name)
+            for known_option in known_options:
+                ratio = fuzz.ratio(unknown_option, known_option)
                 if ratio > most_similar_known_option[1]:
-                    most_similar_known_option = (known_option_name, ratio)
+                    most_similar_known_option = (known_option, ratio)
             if most_similar_known_option[1] >= TYPO_SIMILARITY_THRESHOLD:
+                typos = typos + [unknown_option]
                 message = (
                     "Detected potential typo in configuration option in {}/{} section: {}. Did you mean `{}`?"
                 ).format(self.name, level, unknown_option, most_similar_known_option[0])
                 self.log.warning(message)
+        return typos
 
     def load_configuration_models(self, package_path=None):
         if package_path is None:

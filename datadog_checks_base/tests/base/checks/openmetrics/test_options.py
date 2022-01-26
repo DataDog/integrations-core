@@ -673,31 +673,6 @@ class TestShareLabels:
 
         aggregator.assert_all_metrics_covered()
 
-    def test_unknown_config(self, aggregator, dd_run_check, mock_http_response, caplog):
-        mock_http_response(
-            """
-            # HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
-            # TYPE go_memstats_gc_sys_bytes gauge
-            go_memstats_gc_sys_bytes{bar="foo"} 901120
-            # HELP go_memstats_free_bytes Number of bytes free and available for use.
-            # TYPE go_memstats_free_bytes gauge
-            go_memstats_free_bytes{bar="baz"} 6.396288e+06
-            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
-            # TYPE go_memstats_alloc_bytes gauge
-            go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
-            """
-        )
-        check = get_check(
-            {
-                'metrics': ['.+'],
-                'ollect_histogram_buckets': 'test',
-                'share_labels': {'go_memstats_alloc_bytes': True},
-                'cache_shared_labels': False,
-            }
-        )
-        dd_run_check(check)
-        assert "Detected potential typo in configuration option" in caplog.text
-
 
 class TestIgnoreTags:
     def test_simple_match(self, aggregator, dd_run_check, mock_http_response):

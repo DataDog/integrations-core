@@ -4,6 +4,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import logging
 from collections import OrderedDict
 from typing import Any
 
@@ -914,3 +915,32 @@ def test_load_configuration_models(dd_run_check, mocker):
 
     assert check._config_model_instance is instance_config
     assert check._config_model_shared is shared_config
+
+
+@requires_py3
+def test_detect_typos_configuration_models(dd_run_check, mocker, caplog):
+    check_instance = {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}}
+    check_init_config = {'endpont': 'https://1.2.3.4:4242', 'tags': ['test'], 'proxy': 'test'}
+    check = AgentCheck('test', check_init_config, [check_instance])
+    check.check_id = 'test:123'
+
+    empty_config = {}
+
+    no_shared_config = check.find_typos_in_options(check_instance, empty_config, 'instance')
+
+    assert no_shared_config == []
+
+    caplog.clear()
+    caplog.set_level(logging.WARNING)
+
+    init_config = {
+        'endpoint': 'https://1.2.3.4:4242',
+        'tags': None,
+        'proxy': 'test',
+        'option': 'test',
+        'another_option': 'test',
+    }
+    typos_config = check.find_typos_in_options(check_init_config, init_config, 'init_config')
+
+    assert typos_config == ['endpont']
+    assert "Detected potential typo in configuration option" in caplog.text
