@@ -187,7 +187,7 @@ If the unit name is not listed above, leave this value blank. To add a unit to t
 
 **`short_name`**: A more human-readable and abbreviated version of the metric name. For example, `postgresql.index_blocks_read` might be set to `idx blks read`. Aim for human-readability and easy understandability over brevity. Don't repeat the integration name. If you can't make the `short_name` shorter and easier to understand than the `metric_name`, leave this field empty.
 
-**`curated_metric`**: To mark which metrics for an integration are noteworthy for a given type (`cpu` and `memory` are the current accepted types). These will be displayed in the UI above the other metrics for the integration.
+**`curated_metric`**: To mark which metrics for an integration are noteworthy for a given type (`cpu` and `memory` are both accepted). These are displayed in the UI above the other integration metrics.
 
 #### `requirements.txt`
 
