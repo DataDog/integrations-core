@@ -420,7 +420,7 @@ def test_failed_explain_handling(
                 '^\nHINT:  No function matches the given name and argument types. You might need to add '
                 'explicit type casts.\n'
                 '\n'
-                'host=stubbed.hostname dbname=dogs_nofunc',
+                'dbname=dogs_nofunc host=stubbed.hostname',
             ],
         ),
         (
@@ -1189,7 +1189,7 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
                 'Unable to collect statement metrics because pg_stat_statements extension is '
                 "not loaded in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
                 'setup_postgres/troubleshooting#pg-stat-statement-not-loaded'
-                ' for more details\nhost=stubbed.hostname dbname=datadog_test',
+                ' for more details\ndbname=datadog_test host=stubbed.hostname',
             ],
         ),
         (
@@ -1200,7 +1200,7 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
                 'Unable to collect statement metrics because pg_stat_statements is not '
                 "created in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
                 'setup_postgres/troubleshooting#pg-stat-statement-not-created'
-                ' for more details\nhost=stubbed.hostname dbname=datadog_test',
+                ' for more details\ndbname=datadog_test host=stubbed.hostname',
             ],
         ),
         (

@@ -36,7 +36,7 @@ class DatabaseConfigurationWarning(object):
     def __str__(self):
         return '{msg}\n{key_values}'.format(
             msg=self._message,
-            key_values=" ".join('{key}={value}'.format(key=k, value=v) for k, v in self._metadata.items()),
+            key_values=" ".join('{key}={value}'.format(key=k, value=v) for k, v in sorted(self._metadata.items())),
         )
 
 
