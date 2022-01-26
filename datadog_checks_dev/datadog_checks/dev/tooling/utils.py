@@ -8,10 +8,13 @@ import os
 import re
 from ast import literal_eval
 from datetime import datetime, timezone
+from functools import lru_cache
 from json.decoder import JSONDecodeError
 
 import requests
 import semver
+import tomli
+import tomli_w
 import yaml
 
 from ..fs import dir_exists, file_exists, read_file, read_file_lines, write_file
@@ -72,7 +75,19 @@ def get_current_agent_version():
 
 
 def is_package(d):
-    return file_exists(os.path.join(d, 'setup.py'))
+    return file_exists(os.path.join(d, 'pyproject.toml')) or file_exists(os.path.join(d, 'setup.py'))
+
+
+def normalize_project_name(project_name):
+    # https://www.python.org/dev/peps/pep-0508/#names
+    if not re.search('^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$', project_name, re.IGNORECASE):
+        raise ValueError(
+            'Required field `project.name` must only contain ASCII letters/digits, '
+            'underscores, hyphens, and periods.'
+        )
+
+    # https://www.python.org/dev/peps/pep-0503/#normalized-names
+    return re.sub(r'[-_.]+', '-', project_name).lower()
 
 
 def normalize_package_name(package_name):
@@ -113,6 +128,14 @@ def get_readme_file(check_name):
 
 def get_setup_file(check_name):
     return os.path.join(get_root(), check_name, 'setup.py')
+
+
+def get_project_file(check_name):
+    return os.path.join(get_root(), check_name, 'pyproject.toml')
+
+
+def has_project_file(check_name):
+    return file_exists(get_project_file(check_name))
 
 
 def check_root():
@@ -461,6 +484,24 @@ def get_version_string(check_name, tag_prefix='v', pattern=None):
         return get_latest_tag(pattern=pattern, tag_prefix=tag_prefix)
 
 
+def load_project_file_at(path):
+    return tomli.loads(read_file(path))
+
+
+def load_project_file(check_name):
+    return load_project_file_at(get_project_file(check_name))
+
+
+@lru_cache(maxsize=None)
+def load_project_file_at_cached(path):
+    return load_project_file_at(path)
+
+
+@lru_cache(maxsize=None)
+def load_project_file_cached(check_name):
+    return load_project_file_at_cached(get_project_file(check_name))
+
+
 def load_manifest(check_name):
     """
     Load the manifest file into a dictionary
@@ -490,6 +531,14 @@ def load_saved_views(path):
     if file_exists(path):
         return json.loads(read_file(path).strip())
     return {}
+
+
+def write_project_file_at(path, project_data):
+    write_file(path, tomli_w.dumps(project_data))
+
+
+def write_project_file(check_name, project_data):
+    write_project_file_at(get_project_file(check_name), project_data)
 
 
 def write_manifest(manifest, check_name):

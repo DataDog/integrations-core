@@ -5,25 +5,46 @@ import re
 
 import click
 
+from ....fs import basepath
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_setup_file, normalize_package_name, read_setup_file
+from ...utils import (
+    complete_valid_checks,
+    get_project_file,
+    get_setup_file,
+    has_project_file,
+    load_project_file_cached,
+    normalize_package_name,
+    normalize_project_name,
+    read_setup_file,
+)
 from ..console import CONTEXT_SETTINGS, abort, annotate_display_queue, echo_failure, echo_info, echo_success
 
 # Some integrations aren't installable via the integration install command, so exclude them from the name requirements
 EXCLUDE_CHECKS = ["datadog_checks_downloader", "datadog_checks_dev", "datadog_checks_base"]
 
 
-@click.command('package', context_settings=CONTEXT_SETTINGS, short_help='Validate `setup.py` files')
+def read_project_name(check_name):
+    if has_project_file(check_name):
+        return get_project_file(check_name), load_project_file_cached(check_name)['project']['name']
+
+    lines = read_setup_file(check_name)
+    for _, line in lines:
+        match = re.search("name=['\"](.*)['\"]", line)
+        if match:
+            return get_setup_file(check_name), match.group(1)
+
+
+@click.command('package', context_settings=CONTEXT_SETTINGS, short_help='Validate Python package metadata')
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
 def package(check):
-    """Validate all `setup.py` files.
+    """Validate all files for Python package metadata.
 
     If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
-    checks, an 'all' or empty `check` value will validate all README files.
+    checks, an 'all' or empty `check` value will validate all files.
     """
 
     checks = process_checks_option(check, source='valid_checks', validate=True)
-    echo_info(f"Validating setup.py files for {len(checks)} checks ...")
+    echo_info(f'Validating files for {len(checks)} checks ...')
 
     failed_checks = 0
     ok_checks = 0
@@ -31,32 +52,29 @@ def package(check):
     for check in checks:
         display_queue = []
         file_failed = False
-        setup_file_path = get_setup_file(check)
         if check in EXCLUDE_CHECKS:
             continue
 
-        lines = read_setup_file(check)
-        for _, line in lines:
-            # The name field must match the pattern: `datadog-<folder_name>`
-            match = re.search("name=['\"](.*)['\"]", line)
-            if match:
-                group = match.group(1)
-                # Following PEP 503, lets normalize the groups and validate those
-                # https://www.python.org/dev/peps/pep-0503/#normalized-names
-                group = normalize_package_name(group)
-                normalized_package_name = normalize_package_name(f"datadog-{check}")
-                if group != normalized_package_name:
-                    file_failed = True
-                    display_queue.append(
-                        (echo_failure, f"    The name in setup.py: {group} must be: `{normalized_package_name}`")
-                    )
+        source, project_name = read_project_name(check)
+        normalization_function = normalize_project_name if has_project_file(check) else normalize_package_name
+        project_name = normalization_function(project_name)
+        normalized_project_name = normalization_function(f'datadog-{check}')
+        # The name field must match the pattern: `datadog-<folder_name>`
+        if project_name != normalized_project_name:
+            file_failed = True
+            display_queue.append(
+                (
+                    echo_failure,
+                    f'    The name in {basepath(source)}: {project_name} must be: `{normalized_project_name}`',
+                )
+            )
 
         if file_failed:
             failed_checks += 1
             # Display detailed info if file is invalid
             echo_info(f'{check}... ', nl=False)
             echo_failure(' FAILED')
-            annotate_display_queue(setup_file_path, display_queue)
+            annotate_display_queue(source, display_queue)
             for display_func, message in display_queue:
                 display_func(message)
         else:

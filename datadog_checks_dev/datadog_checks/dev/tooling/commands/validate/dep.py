@@ -9,7 +9,7 @@ from ....utils import get_next
 from ...constants import get_agent_requirements, get_root
 from ...dependencies import read_agent_dependencies, read_check_base_dependencies, read_check_dependencies
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks
+from ...utils import complete_valid_checks, get_project_file, has_project_file
 from ..console import CONTEXT_SETTINGS, abort, annotate_error, annotate_errors, echo_failure
 
 
@@ -46,7 +46,13 @@ def verify_base_dependency(source, name, base_versions, force_pinned=True, min_b
     failed = False
     for specifier_set, dependency_definitions in base_versions.items():
         checks = sorted(dep.check_name for dep in dependency_definitions)
-        file = os.path.join(get_root(), format_check_usage(checks, source), 'setup.py')
+        files = []
+        for check_name in checks:
+            if has_project_file(check_name):
+                files.append(get_project_file(check_name))
+            else:
+                files.append(os.path.join(get_root(), check_name, 'setup.py'))
+        file = ','.join(files)
         if not specifier_set and force_pinned:
             message = f'Unspecified version found for dependency `{name}`: {format_check_usage(checks, source)}'
             echo_failure(message)
@@ -170,31 +176,36 @@ def dep(check, require_base_check_version, min_base_check_version):
         abort()
 
     for check_name in checks:
-        req_file = os.path.join(root, check_name, 'requirements.in')
+        if has_project_file(check_name):
+            req_source = get_project_file(check_name)
+            base_req_source = req_source
+        else:
+            req_source = os.path.join(root, check_name, 'requirements.in')
+            base_req_source = os.path.join(root, check_name, 'setup.py')
+
         check_dependencies, check_errors = read_check_dependencies(check_name)
-        annotate_errors(req_file, check_errors)
+        annotate_errors(req_source, check_errors)
         if check_errors:
             for check_error in check_errors:
                 echo_failure(check_error)
             abort()
 
         check_base_dependencies, check_base_errors = read_check_base_dependencies(check_name)
-        base_req_file = os.path.join(root, check_name, 'setup.py')
-        annotate_errors(base_req_file, check_base_errors)
+        annotate_errors(base_req_source, check_base_errors)
         if check_base_errors:
             for check_error in check_base_errors:
                 echo_failure(check_error)
             abort()
 
         for name, versions in sorted(check_dependencies.items()):
-            if not verify_dependency('Checks', name, versions, req_file):
+            if not verify_dependency('Checks', name, versions, req_source):
                 failed = True
 
             if name not in agent_dependencies:
                 failed = True
                 message = f'Dependency needs to be synced: {name}'
                 echo_failure(message)
-                annotate_error(req_file, message)
+                annotate_error(req_source, message)
 
     check_base_dependencies, check_base_errors = read_check_base_dependencies(checks)
     check_dependencies, check_errors = read_check_dependencies(checks)
