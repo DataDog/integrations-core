@@ -17,7 +17,7 @@ try:
 except ImportError:
     from contextlib2 import ExitStack
 
-from .common import CILIUM_LEGACY, ON_CI
+from .common import CILIUM_LEGACY
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
@@ -57,22 +57,17 @@ def get_instances(agent_host, agent_port, operator_host, operator_port, use_open
 @pytest.fixture(scope='session')
 def dd_environment():
     use_openmetrics = CILIUM_LEGACY == 'false'
-    if ON_CI:
-        yield get_instances('localhost', 9090, 'localhost', 6942, use_openmetrics)
-    else:
-        kind_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
-        with kind_run(conditions=[setup_cilium], kind_config=kind_config) as kubeconfig:
-            with ExitStack() as stack:
-                ip_ports = [
-                    stack.enter_context(port_forward(kubeconfig, 'cilium', port, 'deployment', 'cilium-operator'))
-                    for port in PORTS
-                ]
+    kind_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
+    with kind_run(conditions=[setup_cilium], kind_config=kind_config) as kubeconfig:
+        with ExitStack() as stack:
+            ip_ports = [
+                stack.enter_context(port_forward(kubeconfig, 'cilium', port, 'deployment', 'cilium-operator'))
+                for port in PORTS
+            ]
 
-                instances = get_instances(
-                    ip_ports[0][0], ip_ports[0][1], ip_ports[1][0], ip_ports[1][1], use_openmetrics
-                )
+            instances = get_instances(ip_ports[0][0], ip_ports[0][1], ip_ports[1][0], ip_ports[1][1], use_openmetrics)
 
-            yield instances
+        yield instances
 
 
 @pytest.fixture(scope="session")
