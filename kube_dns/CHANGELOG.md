@@ -4,7 +4,7 @@
 
 * [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
 
-## 2.5.0 / 2021-11-13
+## 2.5.0 / 2021-11-13 / Agent 7.33.0
 
 * [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
 * [Added] Document new use_process_start_time option. See [#10601](https://github.com/DataDog/integrations-core/pull/10601).

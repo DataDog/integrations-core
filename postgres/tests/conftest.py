@@ -67,7 +67,9 @@ def pg_instance():
 
 @pytest.fixture(scope='session')
 def e2e_instance():
-    return copy.deepcopy(INSTANCE)
+    instance = copy.deepcopy(INSTANCE)
+    instance['dbm'] = True
+    return instance
 
 
 @pytest.fixture()

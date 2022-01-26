@@ -8,7 +8,7 @@
 
 * [Fixed] Fix obfuscate_sql_with_metadata query being None. See [#11094](https://github.com/DataDog/integrations-core/pull/11094).
 
-## 23.7.2 / 2022-01-08
+## 23.7.2 / 2022-01-08 / Agent 7.33.0
 
 * [Fixed] Add urllib3 as dependency. See [#11069](https://github.com/DataDog/integrations-core/pull/11069).
 

@@ -36,6 +36,7 @@ confluent.kafka.server.session.zoo_keeper_sync_connects_per_sec.rate,gauge,,unit
 confluent.kafka.server.session.zoo_keeper_auth_failures_per_sec.rate,gauge,,,second,An attempt to connect to the ensemble failed because the client has not provided correct credentials.,0,confluent_platform,session zk auth failures
 confluent.kafka.server.session.zoo_keeper_read_only_connects_per_sec.rate,gauge,,unit,second,"The server the client is connected to is currently LOOKING, which means that it is neither FOLLOWING nor LEADING.",0,confluent_platform,session zk read only connects
 confluent.kafka.server.session.zoo_keeper_sasl_authentications_per_sec.rate,gauge,,unit,second,Client has successfully authenticated.,0,confluent_platform,session zk sasl authentications
+confluent.kafka.server.session.zoo_keeper_request_latency_ms,gauge,,unit,millisecond,Client request latency,0,confluent_platform,latency from client requests
 confluent.kafka.network.request.requests_per_sec.rate,gauge,,request,second,Request rate.,0,confluent_platform,net req reqs
 confluent.kafka.controller.unclean_leader_elections_per_sec.rate,gauge,,unit,second,Unclean leader election rate.,0,confluent_platform,controller unclean leader elections rate
 confluent.kafka.controller.unclean_leader_elections_per_sec.avg,gauge,,unit,second,Unclean leader election rate avg.,0,confluent_platform,controller unclean leader elections avg
