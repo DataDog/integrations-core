@@ -15,8 +15,8 @@ from .common import YARN_CONFIG
         pytest.param("test:example", ["app_test:example"], id='tag_key_value'),
         pytest.param("test", ["app_test"], id='tag_value_only'),
         pytest.param(
-            "luigiscript_name:dash_monitor_edge,livy-batch-0-5hmfsykz,user_email:data-science-eng",
-            ["app_luigiscript_name:dash_monitor_edge", "app_livy-batch-0-5hmfsykz", "app_user_email:data-science-eng"],
+            "script_name:test_script,value_only_tag,user_email:test_email",
+            ["app_script_name:test_script", "app_value_only_tag", "app_user_email:test_email"],
             id='both_tag_key_and_value_only',
         ),
     ],
