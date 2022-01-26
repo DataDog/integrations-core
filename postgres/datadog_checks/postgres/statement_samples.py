@@ -25,6 +25,8 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 
+from .util import DatabaseConfigurationWarning
+
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
 # character is 6 bytes
 MAX_CHARACTER_SIZE_IN_BYTES = 6
@@ -386,24 +388,24 @@ class PostgresStatementSamples(DBMAsyncJob):
         try:
             result = self._run_explain(dbname, EXPLAIN_VALIDATION_QUERY, EXPLAIN_VALIDATION_QUERY)
         except psycopg2.errors.InvalidSchemaName as e:
-            self._check.warning(
-                "Unable to collect execution plans due to invalid schema in database '%s'. This could be due to a "
-                "missing 'datadog' schema in the database. See https://docs.datadoghq.com/database_monitoring/"
-                "setup_postgres/troubleshooting#explain-invalid-schema for more details: %s",
-                dbname,
-                str(e),
-            )
+            self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
             return DBExplainError.invalid_schema, e
         except psycopg2.DatabaseError as e:
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
             # incorrect definition)
             self._check.warning(
-                "Unable to collect execution plans in dbname=%s. Check that the function "
-                "%s exists in the database. See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
-                "troubleshooting#explain-undefined-function for more details: %s",
-                dbname,
-                self._explain_function,
-                str(e),
+                str(
+                    DatabaseConfigurationWarning(
+                        {'host': self._check.resolved_hostname, 'dbname': dbname},
+                        "Unable to collect execution plans in dbname=%s. Check that the function "
+                        "%s exists in the database. See "
+                        "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#"
+                        "explain-undefined-function for more details: %s",
+                        dbname,
+                        self._explain_function,
+                        str(e),
+                    ),
+                )
             )
             return DBExplainError.failed_function, e
 

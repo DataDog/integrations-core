@@ -22,6 +22,24 @@ class PartialFormatter(string.Formatter):
             return string.Formatter.get_value(self, key, args, kwargs)
 
 
+class DatabaseConfigurationWarning(object):
+    """DatabaseConfigurationWarning formalizes the format of database configuration warning messages."""
+
+    def __init__(self, metadata, message, *args):
+        if metadata is None:
+            metadata = {}
+        if args:
+            message = message % args
+        self._message = message
+        self._metadata = metadata
+
+    def __str__(self):
+        return '{msg}\n{key_values}'.format(
+            msg=self._message,
+            key_values=" ".join('{key}={value}'.format(key=k, value=v) for k, v in self._metadata.items()),
+        )
+
+
 def milliseconds_to_nanoseconds(value):
     """Convert from ms to ns (used for pg_stat* conversion to metrics with units in ns)"""
     return value * 1000000

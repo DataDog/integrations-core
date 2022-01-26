@@ -399,14 +399,7 @@ def test_failed_explain_handling(
             "error:explain-invalid_schema-<class 'psycopg2.errors.InvalidSchemaName'>",
             [{'code': 'invalid_schema', 'message': "<class 'psycopg2.errors.InvalidSchemaName'>"}],
             StatementTruncationState.not_truncated.value,
-            [
-                'Unable to collect execution plans due to invalid schema in database '
-                "'dogs_noschema'. This could be due to a missing 'datadog' schema in the "
-                'database. See '
-                'https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#explain-invalid-schema '
-                'for more details: schema "datadog" does not exist\nLINE 1: SELECT datadog.explain_statement('
-                '$stmt$SELECT * FROM pg_stat...\n               ^\n',
-            ],
+            [],
         ),
         (
             "dd_admin",
@@ -425,7 +418,9 @@ def test_failed_explain_handling(
                 'datadog.explain_statement(unknown) does not exist\nLINE 1: SELECT '
                 'datadog.explain_statement($stmt$SELECT * FROM pg_stat...\n               '
                 '^\nHINT:  No function matches the given name and argument types. You might need to add '
-                'explicit type casts.\n',
+                'explicit type casts.\n'
+                '\n'
+                'host=stubbed.hostname dbname=dogs_nofunc',
             ],
         ),
         (
@@ -1194,7 +1189,7 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
                 'Unable to collect statement metrics because pg_stat_statements extension is '
                 "not loaded in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
                 'setup_postgres/troubleshooting#pg-stat-statement-not-loaded'
-                ' for more details',
+                ' for more details\nhost=stubbed.hostname dbname=datadog_test',
             ],
         ),
         (
@@ -1205,7 +1200,7 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
                 'Unable to collect statement metrics because pg_stat_statements is not '
                 "created in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
                 'setup_postgres/troubleshooting#pg-stat-statement-not-created'
-                ' for more details',
+                ' for more details\nhost=stubbed.hostname dbname=datadog_test',
             ],
         ),
         (
