@@ -156,10 +156,10 @@ class Connection(object):
             if self.connector == 'adodbapi':
                 cs += self._conn_string_adodbapi(db_key, db_name=db_name)
                 # autocommit: true disables implicit transaction
-                rawconn = adodbapi.connect(cs, {'timeout': self.timeout, 'autocommit': True})
+                rawconn = adodbapi.connect(cs, {'timeout': self.timeout})
             else:
                 cs += self._conn_string_odbc(db_key, db_name=db_name)
-                rawconn = pyodbc.connect(cs, timeout=self.timeout, autocommit=True)
+                rawconn = pyodbc.connect(cs, timeout=self.timeout)
                 rawconn.timeout = self.timeout
 
             self.service_check_handler(AgentCheck.OK, host, database, is_default=is_default)
@@ -173,7 +173,7 @@ class Connection(object):
                     self.log.info("Could not close adodbapi db connection\n%s", e)
 
                 self._conns[conn_key] = rawconn
-            # self._setup_new_connection(rawconn)
+            self._setup_new_connection(rawconn)
         except Exception as e:
             cx = "{} - {}".format(host, database)
 
