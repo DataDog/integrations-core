@@ -20,7 +20,7 @@
 * [Fixed] Bump cachetools. See [#10742](https://github.com/DataDog/integrations-core/pull/10742).
 * [Changed] Add `server` default group for all monitor special cases. See [#10976](https://github.com/DataDog/integrations-core/pull/10976).
 
-## 7.0.1 / 2021-11-19
+## 7.0.1 / 2021-11-19 / Agent 7.33.0
 
 * [Fixed] Set correct default values and handle redundant values for additional_variable and additional_status. See [#10652](https://github.com/DataDog/integrations-core/pull/10652).
 

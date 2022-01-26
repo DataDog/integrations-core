@@ -7,7 +7,7 @@
 * [Fixed] Refresh role on replica sets and add more debug logging. See [#10843](https://github.com/DataDog/integrations-core/pull/10843).
 * [Changed] Add `server` default group for all monitor special cases. See [#10976](https://github.com/DataDog/integrations-core/pull/10976).
 
-## 2.7.1 / 2021-10-25
+## 2.7.1 / 2021-10-25 / Agent 7.33.0
 
 * [Fixed] Load CA certs if SSL is enabled and CA certs are not passed in the configurations. See [#10377](https://github.com/DataDog/integrations-core/pull/10377).
 

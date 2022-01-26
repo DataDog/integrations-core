@@ -8,7 +8,7 @@
 
 * [Added] Add support for only_custom_queries. See [#10695](https://github.com/DataDog/integrations-core/pull/10695).
 
-## 1.9.0 / 2021-11-13
+## 1.9.0 / 2021-11-13 / Agent 7.33.0
 
 * [Added] Support the `hdbcli` client library. See [#10595](https://github.com/DataDog/integrations-core/pull/10595).
 * [Fixed] Resolve unexpected errors when statuses other than 'running' or 'idle' are received. See [#10333](https://github.com/DataDog/integrations-core/pull/10333).

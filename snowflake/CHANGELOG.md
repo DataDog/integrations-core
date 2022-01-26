@@ -1,6 +1,6 @@
 # CHANGELOG - Snowflake
 
-## 4.0.1 / 2021-11-23
+## 4.0.1 / 2021-11-23 / Agent 7.33.0
 
 * [Fixed] Fix default field name of schema. See [#10714](https://github.com/DataDog/integrations-core/pull/10714).
 
