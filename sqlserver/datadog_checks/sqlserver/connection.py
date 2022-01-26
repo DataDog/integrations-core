@@ -173,7 +173,7 @@ class Connection(object):
                     self.log.info("Could not close adodbapi db connection\n%s", e)
 
                 self._conns[conn_key] = rawconn
-            self._setup_new_connection(rawconn)
+            # self._setup_new_connection(rawconn)
         except Exception as e:
             cx = "{} - {}".format(host, database)
 
