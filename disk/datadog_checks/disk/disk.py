@@ -39,6 +39,7 @@ class Disk(AgentCheck):
     METRIC_DISK = 'system.disk.{}'
     METRIC_INODE = 'system.fs.inodes.{}'
 
+    # test
     def __init__(self, name, init_config, instances):
         if instances is not None and len(instances) > 1:
             raise ConfigurationError('Disk check only supports one configured instance.')
