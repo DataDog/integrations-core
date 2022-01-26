@@ -10,15 +10,6 @@ def initialize_instance(values, **kwargs):
 
     _validate_authenticator_option(values)
 
-    # auth_options = ['password', 'token', 'token_path', 'private_key_path']
-    # auth_options_configured = [opt for opt in auth_options if opt in values]
-    # if len(auth_options_configured) > 1:
-    #     warning(
-    #         'Multiple authentication options are configured ({}), only one should be set.'.format(
-    #             auth_options_configured
-    #         )
-    #     )
-
     if 'private_key_password' in values and 'private_key_path' not in values:
         raise Exception(
             'Option `private_key_password` is set but not option `private_key_path`. '
