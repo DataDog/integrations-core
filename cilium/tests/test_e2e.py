@@ -7,10 +7,11 @@ from datadog_checks.base import AgentCheck
 
 from .common import AGENT_V2_METRICS, require_ci, requires_new_environment, skip_on_ci
 
-pytestmark = [requires_new_environment, pytest.mark.e2e]
+pytestmark = [pytest.mark.e2e]
 
 
 @skip_on_ci
+@requires_new_environment
 def test_check_ok(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
     aggregator.assert_service_check("cilium.openmetrics.health", status=AgentCheck.OK)

@@ -19,7 +19,7 @@ requires_new_environment = pytest.mark.skipif(
     CILIUM_LEGACY != 'false', reason='Requires `use_openmetrics` config environment'
 )
 
-ON_CI = running_on_ci()
+ON_CI = True # running_on_ci()
 skip_on_ci = pytest.mark.skipif(ON_CI, reason="This test environment flakes on CI")
 require_ci = pytest.mark.skipif(not ON_CI, reason="This on CI the environment flakes so it's not started")
 

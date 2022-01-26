@@ -39,42 +39,38 @@ def setup_cilium():
     run_command(["kubectl", "wait", "pods", "-n", "cilium", "--all", "--for=condition=Ready", "--timeout=300s"])
 
 
+def get_instances(agent_host, agent_port, operator_host, operator_port, use_openmetrics):
+    return {
+        'instances': [
+            {
+                'agent_endpoint': 'http://{}:{}/metrics'.format(agent_host, agent_port),
+                'use_openmetrics': use_openmetrics,
+            },
+            {
+                'operator_endpoint': 'http://{}:{}/metrics'.format(operator_host, operator_port),
+                'use_openmetrics': use_openmetrics,
+            },
+        ]
+    }
+
+
 @pytest.fixture(scope='session')
 def dd_environment():
     use_openmetrics = CILIUM_LEGACY == 'false'
     if ON_CI:
-        yield [
-            {
-                'agent_endpoint': 'http://localhost:9090/metrics',
-                'use_openmetrics': use_openmetrics,
-            },
-            {
-                'operator_endpoint': 'http://localhost:6942/metrics',
-                'use_openmetrics': use_openmetrics,
-            },
-        ]
-    kind_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
-    with kind_run(conditions=[setup_cilium], kind_config=kind_config) as kubeconfig:
-        with ExitStack() as stack:
-            ip_ports = [
-                stack.enter_context(port_forward(kubeconfig, 'cilium', port, 'deployment', 'cilium-operator'))
-                for port in PORTS
-            ]
-
-            instances = {
-                'instances': [
-                    {
-                        'agent_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0]),
-                        'use_openmetrics': use_openmetrics,
-                    },
-                    {
-                        'operator_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1]),
-                        'use_openmetrics': use_openmetrics,
-                    },
+        yield get_instances('localhost', 9090, 'localhost', 6942, use_openmetrics)
+    else:
+        kind_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
+        with kind_run(conditions=[setup_cilium], kind_config=kind_config) as kubeconfig:
+            with ExitStack() as stack:
+                ip_ports = [
+                    stack.enter_context(port_forward(kubeconfig, 'cilium', port, 'deployment', 'cilium-operator'))
+                    for port in PORTS
                 ]
-            }
 
-        yield instances
+                instances = get_instances(ip_ports[0][0], ip_ports[0][1], ip_ports[1][0], ip_ports[1][1], use_openmetrics)
+
+            yield instances
 
 
 @pytest.fixture(scope="session")
