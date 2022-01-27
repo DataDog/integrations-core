@@ -324,7 +324,7 @@ class RequestsWrapper(object):
             if protocol in SUPPORTED_PROTOCOL_VERSIONS:
                 self.tls_protocol.append(protocol)
             else:
-                self.logger.warning('Unknown protocol `%s` configured, ignoring it.')
+                self.logger.warning('Unknown protocol `%s` configured, ignoring it.', protocol)
 
         # For connection and cookie persistence, if desired. See:
         # https://en.wikipedia.org/wiki/HTTP_persistent_connection#Advantages
@@ -478,7 +478,7 @@ class RequestsWrapper(object):
                             )
                         )
             except Exception as e:
-                self.logger.error('Error occurred while getting cert to discover intermediate certificates:', e)
+                self.logger.error('Error occurred while getting cert to discover intermediate certificates: %s', e)
                 return certs
 
         self.load_intermediate_certs(der_cert, certs)
