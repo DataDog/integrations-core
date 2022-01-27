@@ -299,6 +299,7 @@ kube_node_status_condition{condition="OutOfDisk",node="minikube",status="unknown
 kube_node_status_condition{condition="Ready",node="minikube",status="false"} 0
 kube_node_status_condition{condition="Ready",node="minikube",status="true"} 1
 kube_node_status_condition{condition="Ready",node="minikube",status="unknown"} 0
+kube_node_status_condition{condition="Ready",node="test-test-node",status="unknown"} 1
 # HELP kube_node_status_network_unavailable Whether the network is correctly configured for the node.
 # TYPE kube_node_status_network_unavailable gauge
 kube_node_status_network_unavailable{node="127.0.0.1",condition="false"} 1
