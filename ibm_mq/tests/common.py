@@ -292,6 +292,7 @@ OPTIONAL_METRICS.extend(QUEUE_STATS_LIST_METRICS)
 def assert_all_metrics(aggregator, minimun_tags=None, hostname=None):
     for metric, metric_type in METRICS:
         aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), hostname=hostname)
+        minimun_tags = minimun_tags or []
         for tag in minimun_tags:
             aggregator.assert_metric_has_tag(metric, tag)
 
