@@ -883,16 +883,18 @@ class MySQLStatementSamples(DBMAsyncJob):
             return cursor.fetchone()[0]
         except pymysql.err.DatabaseError as e:
             if e.args[0] in PYMYSQL_MISSING_EXPLAIN_STATEMENT_PROC_ERRORS:
+                err_msg = e.args[1] if len(e.args) > 1 else ''
                 self._check.warning(
                     str(
                         DatabaseConfigurationWarning(
                             {'host': self._check.resolved_hostname, 'schema': schema},
                             "Unable to collect explain plans because the procedure '%s' is either undefined or not "
                             "granted access to in schema '%s'. See https://docs.datadoghq.com/database_monitoring/"
-                            'setup_mysql/troubleshooting#explain-plan-procedure-missing for more details: %s',
+                            'setup_mysql/troubleshooting#explain-plan-procedure-missing for more details: (%d) %s',
                             self._explain_procedure,
                             schema,
-                            str(e),
+                            e.args[0],
+                            str(err_msg),
                         )
                     )
                 )
@@ -909,15 +911,17 @@ class MySQLStatementSamples(DBMAsyncJob):
             return cursor.fetchone()[0]
         except pymysql.err.DatabaseError as e:
             if e.args[0] in PYMYSQL_MISSING_EXPLAIN_STATEMENT_PROC_ERRORS:
+                err_msg = e.args[1] if len(e.args) > 1 else ''
                 self._check.warning(
                     str(
                         DatabaseConfigurationWarning(
                             {'host': self._check.resolved_hostname},
                             "Unable to collect explain plans because the procedure '%s' is either undefined or "
                             'not granted access to. See https://docs.datadoghq.com/database_monitoring/setup_mysql/'
-                            'troubleshooting#explain-plan-fq-procedure for more details: %s',
+                            'troubleshooting#explain-plan-fq-procedure for more details: (%d) %s',
                             self._fully_qualified_explain_procedure,
-                            str(e),
+                            e.args[0],
+                            str(err_msg),
                         )
                     )
                 )

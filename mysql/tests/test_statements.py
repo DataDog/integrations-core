@@ -394,7 +394,7 @@ def test_statement_samples_collect(
                 "either undefined or not granted access to in schema 'information_schema'. "
                 "See https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting#"
                 "explain-plan-procedure-missing for more details: "
-                "(1044, u\"Access denied for user 'dog'@'%' to database 'information_schema'\")\n"
+                "(1044) Access denied for user 'dog'@'%' to database 'information_schema'\n"
                 "host=stubbed.hostname schema=information_schema",
             ],
         ),
