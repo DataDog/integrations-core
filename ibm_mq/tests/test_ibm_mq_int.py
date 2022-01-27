@@ -108,10 +108,10 @@ def test_check_metrics_and_service_checks(aggregator, get_check, instance, seed_
     else:
         tags.append('mq_host:{}'.format(common.HOST))
         hostname = None
+
+    assert_all_metrics(aggregator, minimun_tags=tags, hostname=hostname)
+
     channel_tags = tags + ['channel:{}'.format(common.CHANNEL)]
-
-    assert_all_metrics(aggregator, tags=channel_tags, channel_tags=tags, hostname=hostname)
-
     aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=channel_tags, count=1, hostname=hostname)
 
     bad_channel_tags = tags + ['channel:{}'.format(common.BAD_CHANNEL)]

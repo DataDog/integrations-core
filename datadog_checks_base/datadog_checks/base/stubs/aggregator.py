@@ -212,9 +212,9 @@ class AggregatorStub(object):
             for stub in self._histogram_buckets.get(to_native_string(name), [])
         ]
 
-    def assert_metric_has_tag(self, metric_name, tag, count=None, at_least=1):
+    def assert_metric_has_tags(self, metric_name, tags, count=None, at_least=1):
         """
-        Assert a metric is tagged with tag
+        Assert a metric is tagged with at least the provided tags
         """
         self._asserted.add(metric_name)
 
@@ -222,7 +222,7 @@ class AggregatorStub(object):
         candidates_with_tag = []
         for metric in self.metrics(metric_name):
             candidates.append(metric)
-            if tag in metric.tags:
+            if not set(tags).difference(set(metric.tags)):
                 candidates_with_tag.append(metric)
 
         if candidates_with_tag:  # The metric was found with the tag but not enough times
@@ -240,6 +240,12 @@ class AggregatorStub(object):
             assert len(candidates_with_tag) == count, msg
         else:
             assert len(candidates_with_tag) >= at_least, msg
+
+    def assert_metric_has_tag(self, metric_name, tag, count=None, at_least=1):
+        """
+        Assert a metric is tagged with tag
+        """
+        return self.assert_metric_has_tags(metric_name, [tag], count, at_least)
 
     # Potential kwargs: aggregation_key, alert_type, event_type,
     # msg_title, source_type_name
