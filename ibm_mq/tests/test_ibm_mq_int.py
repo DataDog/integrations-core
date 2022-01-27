@@ -12,6 +12,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.time import ensure_aware_datetime
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.ibm_mq.collectors import ChannelMetricCollector, QueueMetricCollector
 
 from . import common
 from .common import QUEUE_METRICS, assert_all_metrics, skip_windows_ci
@@ -112,7 +113,15 @@ def test_check_metrics_and_service_checks(aggregator, get_check, instance, seed_
     assert_all_metrics(aggregator, minimun_tags=tags, hostname=hostname)
 
     channel_tags = tags + ['channel:{}'.format(common.CHANNEL)]
-    aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=channel_tags, count=1, hostname=hostname)
+    aggregator.assert_service_check(
+        ChannelMetricCollector.CHANNEL_SERVICE_CHECK, check.OK, tags=channel_tags, count=1, hostname=hostname
+    )
+    aggregator.assert_service_check(
+        QueueMetricCollector.QUEUE_MANAGER_SERVICE_CHECK, check.OK, channel_tags, hostname=hostname
+    )
+
+    queue_tags = channel_tags + ['queue:DEV.QUEUE.1']
+    aggregator.assert_service_check(QueueMetricCollector.QUEUE_SERVICE_CHECK, check.OK, queue_tags, hostname=hostname)
 
     bad_channel_tags = tags + ['channel:{}'.format(common.BAD_CHANNEL)]
     aggregator.assert_service_check('ibm_mq.channel', check.CRITICAL, tags=bad_channel_tags, count=1, hostname=hostname)
