@@ -51,11 +51,17 @@ class IBMMQConfig:
 
         host = instance.get('host')  # type: str
         port = instance.get('port')  # type: str
+        override_hostname = instance.get('override_hostname', False)  # type: bool
+
         self.connection_name = instance.get('connection_name')  # type: str
         if (host or port) and self.connection_name:
             raise ConfigurationError(
                 'Specify only one host/port or connection_name configuration, '
                 '(host={}, port={}, connection_name={}).'.format(host, port, self.connection_name)
+            )
+        if override_hostname and self.connection_name:
+            raise ConfigurationError(
+                'You cannot override the hostname if you provide a connection_name instead of a host'
             )
 
         if not self.connection_name:
@@ -63,6 +69,7 @@ class IBMMQConfig:
             port = port or '1414'
             self.connection_name = "{}({})".format(host, port)
 
+        self.hostname = host if override_hostname else None
         self.username = instance.get('username')  # type: str
         self.password = instance.get('password')  # type: str
         self.timeout = int(float(instance.get('timeout', 5)) * 1000)  # type: int
@@ -98,9 +105,11 @@ class IBMMQConfig:
             "connection_name:{}".format(self.connection_name),
         ]  # type: List[str]
         tags.extend(custom_tags)
-        if host or port:
+        if host and not override_hostname:
             # 'host' is reserved and 'mq_host' is used instead
-            tags.extend({"mq_host:{}".format(host), "port:{}".format(port)})
+            tags.append("mq_host:{}".format(host))
+        if port:
+            tags.append("port:{}".format(port))
         self.tags_no_channel = tags
         self.tags = tags + ["channel:{}".format(self.channel)]  # type: List[str]
 

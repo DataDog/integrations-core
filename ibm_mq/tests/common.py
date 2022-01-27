@@ -272,9 +272,10 @@ METRICS = (
     ]
     + QUEUE_METRICS
     + QUEUE_STATUS_METRICS
-    + CHANNEL_METRICS
-    + CHANNEL_STATUS_METRICS
+
 )
+
+CHANNEL_METIRCS = (CHANNEL_METRICS + CHANNEL_STATUS_METRICS)
 
 OPTIONAL_METRICS = [
     ('ibm_mq.queue.max_channels', GAUGE),
@@ -289,11 +290,14 @@ OPTIONAL_METRICS.extend(QUEUE_STATS_METRICS)
 OPTIONAL_METRICS.extend(QUEUE_STATS_LIST_METRICS)
 
 
-def assert_all_metrics(aggregator):
+def assert_all_metrics(aggregator, tags=None, channel_tags=None, hostname=None):
     for metric, metric_type in METRICS:
-        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()))
+        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), tags=tags, hostname=hostname)
+
+    for metric, metric_type in  CHANNEL_METIRCS:
+        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), tags=channel_tags, hostname=hostname)
 
     for metric, metric_type in OPTIONAL_METRICS:
-        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), at_least=0)
+        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), tags=tags, hostname=hostname, at_least=0)
 
     aggregator.assert_all_metrics_covered()
