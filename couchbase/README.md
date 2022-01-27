@@ -98,7 +98,7 @@ See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Events
 
-The Couchbase check emits an event to Datadog each time the cluster rebalances.
+The Couchbase check emits an event to Datadog each time the cluster is rebalanced.
 
 ### Service Checks
 

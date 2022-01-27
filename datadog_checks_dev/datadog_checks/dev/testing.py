@@ -7,7 +7,7 @@
 import pytest
 from six import PY2
 
-from datadog_checks.dev.utils import ON_MACOS, ON_WINDOWS
+from .utils import ON_MACOS, ON_WINDOWS
 
 requires_windows = pytest.mark.skipif(not ON_WINDOWS, reason='Requires Windows')
 requires_linux = pytest.mark.skipif(ON_MACOS or ON_WINDOWS, reason='Requires Linux')

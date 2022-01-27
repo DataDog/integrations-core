@@ -15,7 +15,7 @@ from datadog_checks.dev.fs import create_file
 from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.vault import Vault
 
-from .common import COMPOSE_FILE, HEALTH_ENDPOINT, INSTANCES, get_vault_server_config_file
+from .common import COMPOSE_FILE, HEALTH_ENDPOINT, INSTANCES, VAULT_VERSION, get_vault_server_config_file
 
 
 @pytest.fixture(scope='session')
@@ -66,7 +66,12 @@ def dd_environment(e2e_instance, dd_save_state):
 
         with docker_run(
             COMPOSE_FILE,
-            env_vars={'JWT_DIR': jwt_dir, 'SINK_DIR': sink_dir, 'SERVER_CONFIG_FILE': get_vault_server_config_file()},
+            env_vars={
+                'JWT_DIR': jwt_dir,
+                'SINK_DIR': sink_dir,
+                'SERVER_CONFIG_FILE': get_vault_server_config_file(),
+                'VAULT_VERSION': VAULT_VERSION,
+            },
             conditions=[WaitAndUnsealVault(HEALTH_ENDPOINT), ApplyPermissions(token_file)],
             sleep=10,
             mount_logs=True,

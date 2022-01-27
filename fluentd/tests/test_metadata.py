@@ -16,12 +16,12 @@ CHECK_ID = 'test:123'
 VERSION_MOCK_SCRIPT = os.path.join(HERE, 'mock', 'fluentd_version.py')
 
 
-def test_collect_metadata_instance(aggregator, datadog_agent, instance):
+def test_collect_metadata_instance(aggregator, datadog_agent, instance, dd_run_check):
     instance['fluentd'] = 'docker exec {} fluentd'.format(FLUENTD_CONTAINER_NAME)
 
     check = Fluentd(CHECK_NAME, {}, [instance])
     check.check_id = CHECK_ID
-    check.check(None)
+    dd_run_check(check)
 
     major, minor, patch = FLUENTD_VERSION.split('.')
     version_metadata = {
@@ -37,12 +37,12 @@ def test_collect_metadata_instance(aggregator, datadog_agent, instance):
 
 
 @requires_below_1_8
-def test_collect_metadata_missing_version(aggregator, datadog_agent, instance):
+def test_collect_metadata_missing_version(aggregator, datadog_agent, dd_run_check, instance):
     instance["fluentd"] = "python {} 'fluentd not.a.version'".format(VERSION_MOCK_SCRIPT)
 
     check = Fluentd(CHECK_NAME, {}, [instance])
     check.check_id = CHECK_ID
-    check.check(None)
+    dd_run_check(check)
 
     datadog_agent.assert_metadata(CHECK_ID, {})
     datadog_agent.assert_metadata_count(0)

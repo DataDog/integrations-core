@@ -52,7 +52,7 @@ class PerfCountersBaseCheck(AgentCheck):
         # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectitemsa#remarks
         try:
             # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectsa
-            # http://timgolden.me.uk/pywin32-docs/win32pdh__EnumObjects_meth.html
+            # https://mhammond.github.io/pywin32/win32pdh__EnumObjects_meth.html
             win32pdh.EnumObjects(None, self._connection.server, win32pdh.PERF_DETAIL_WIZARD, True)
         except pywintypes.error as error:
             message = 'Error refreshing performance objects: {}'.format(error.strerror)
@@ -81,7 +81,7 @@ class PerfCountersBaseCheck(AgentCheck):
 
         try:
             # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhcollectquerydata
-            # http://timgolden.me.uk/pywin32-docs/win32pdh__CollectQueryData_meth.html
+            # https://mhammond.github.io/pywin32/win32pdh__CollectQueryData_meth.html
             win32pdh.CollectQueryData(self._connection.query_handle)
         except pywintypes.error as error:
             message = 'Error querying performance counters: {}'.format(error.strerror)
@@ -127,7 +127,7 @@ class PerfCountersBaseCheck(AgentCheck):
         self.perf_objects.extend(perf_objects)
 
     def create_connection(self):
-        self._connection = Connection(self.instance, self.hostname)
+        self._connection = Connection(self.instance)
         self.log.debug('Setting `server` to `%s`', self._connection.server)
         self._connection.connect()
 

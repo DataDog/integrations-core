@@ -5,11 +5,19 @@ import click
 import yaml
 
 from ....fs import file_exists, path_join, read_file, write_file
-from ...annotations import annotate_display_queue, annotate_error
 from ...constants import get_root
 from ...testing import coverage_sources
 from ...utils import code_coverage_enabled, get_testable_checks, load_manifest
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
+from ..console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_display_queue,
+    annotate_error,
+    echo_failure,
+    echo_info,
+    echo_success,
+    echo_warning,
+)
 
 REPOS = {
     'core': {

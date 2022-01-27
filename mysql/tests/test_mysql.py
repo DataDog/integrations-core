@@ -2,8 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import logging
 from os import environ
 
+import mock
 import pytest
 from pkg_resources import parse_version
 
@@ -12,7 +14,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mysql import MySql
 
 from . import common, tags, variables
-from .common import MYSQL_VERSION_PARSED
+from .common import HOST, MYSQL_REPLICATION, MYSQL_VERSION_PARSED, PORT, requires_static_version
 
 
 @pytest.mark.integration
@@ -67,13 +69,14 @@ def test_e2e(dd_agent_check, instance_complex):
 def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
     # Test service check
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS, hostname=hostname, count=1)
-    aggregator.assert_service_check(
-        'mysql.replication.slave_running',
-        status=MySql.OK,
-        tags=tags.SC_TAGS + ['replication_mode:source'],
-        hostname=hostname,
-        at_least=1,
-    )
+    if MYSQL_REPLICATION == 'classic':
+        aggregator.assert_service_check(
+            'mysql.replication.slave_running',
+            status=MySql.OK,
+            tags=tags.SC_TAGS + ['replication_mode:source'],
+            hostname=hostname,
+            at_least=1,
+        )
     testable_metrics = (
         variables.STATUS_VARS
         + variables.COMPLEX_STATUS_VARS
@@ -87,6 +90,15 @@ def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
         + variables.SYNTHETIC_VARS
         + variables.STATEMENT_VARS
     )
+    if MYSQL_REPLICATION == 'group':
+        testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
+        aggregator.assert_service_check(
+            'mysql.replication.group.status',
+            status=MySql.OK,
+            tags=tags.SC_TAGS
+            + ['channel_name:group_replication_applier', 'member_role:PRIMARY', 'member_state:ONLINE'],
+            count=1,
+        )
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6'):
         testable_metrics.extend(variables.PERFORMANCE_VARS)
@@ -153,6 +165,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_error):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
+@common.requires_classic_replication
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
@@ -230,17 +243,36 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         get_metadata_metrics(), check_submission_type=True, exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
     )
 
+    # Make sure group replication is not detected
+    with mysql_check._connect() as db:
+        assert mysql_check._is_group_replication_active(db) is False
 
-@pytest.mark.parametrize('dbm_enabled', (True, False))
-def test_correct_hostname(dbm_enabled, aggregator, dd_run_check, instance_basic):
+
+@pytest.mark.parametrize(
+    'dbm_enabled, reported_hostname, expected_hostname',
+    [
+        (True, '', 'resolved.hostname'),
+        (False, '', 'stubbed.hostname'),
+        (False, 'forced_hostname', 'forced_hostname'),
+        (True, 'forced_hostname', 'forced_hostname'),
+    ],
+)
+def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, aggregator, dd_run_check, instance_basic):
     instance_basic['dbm'] = dbm_enabled
+    instance_basic['disable_generic_tags'] = False  # This flag also affects the hostname
+    instance_basic['reported_hostname'] = reported_hostname
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
-    dd_run_check(mysql_check)
 
-    expected_hostname = 'stubbed.hostname' if dbm_enabled else None
+    with mock.patch('datadog_checks.mysql.MySql.resolve_db_host', return_value='resolved.hostname') as resolve_db_host:
+        dd_run_check(mysql_check)
+        if reported_hostname:
+            assert resolve_db_host.called is False, 'Expected resolve_db_host.called to be False'
+        else:
+            assert resolve_db_host.called == dbm_enabled, 'Expected resolve_db_host.called to be ' + str(dbm_enabled)
 
+    expected_tags = ['server:{}'.format(HOST), 'port:{}'.format(PORT)]
     aggregator.assert_service_check(
-        'mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS_MIN, count=1, hostname=expected_hostname
+        'mysql.can_connect', status=MySql.OK, tags=expected_tags, count=1, hostname=expected_hostname
     )
 
     testable_metrics = variables.STATUS_VARS + variables.VARIABLES_VARS + variables.INNODB_VARS + variables.BINLOG_VARS
@@ -275,6 +307,7 @@ def _test_optional_metrics(aggregator, optional_metrics):
     assert before > after
 
 
+@requires_static_version
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_version_metadata(dd_run_check, instance_basic, datadog_agent, version_metadata):
@@ -314,3 +347,48 @@ def test_additional_variable(aggregator, dd_run_check, instance_additional_varia
 
     aggregator.assert_metric('mysql.performance.long_query_time', metric_type=0, tags=tags.METRIC_TAGS)
     aggregator.assert_metric('mysql.performance.innodb_flush_log_at_trx_commit', metric_type=0, tags=tags.METRIC_TAGS)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_additional_variable_unknown(aggregator, dd_run_check, instance_invalid_var):
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_invalid_var])
+    dd_run_check(mysql_check)
+
+    aggregator.assert_metric('mysql.performance.longer_query_time', metric_type=0, tags=tags.METRIC_TAGS, count=0)
+    aggregator.assert_metric(
+        'mysql.performance.innodb_flush_log_at_trx_commit', metric_type=0, tags=tags.METRIC_TAGS, count=1
+    )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_additional_status_already_queried(aggregator, dd_run_check, instance_status_already_queried, caplog):
+    caplog.clear()
+    caplog.set_level(logging.DEBUG)
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_status_already_queried])
+    dd_run_check(mysql_check)
+
+    aggregator.assert_metric('mysql.performance.open_files_test', metric_type=0, tags=tags.METRIC_TAGS, count=0)
+    aggregator.assert_metric('mysql.performance.open_files', metric_type=0, tags=tags.METRIC_TAGS, count=1)
+
+    assert (
+        "Skipping status variable Open_files for metric mysql.performance.open_files_test as "
+        "it is already collected by mysql.performance.open_files" in caplog.text
+    )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_additional_var_already_queried(aggregator, dd_run_check, instance_var_already_queried, caplog):
+    caplog.clear()
+    caplog.set_level(logging.DEBUG)
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_var_already_queried])
+    dd_run_check(mysql_check)
+
+    aggregator.assert_metric('mysql.myisam.key_buffer_size', metric_type=0, tags=tags.METRIC_TAGS, count=1)
+
+    assert (
+        "Skipping variable Key_buffer_size for metric mysql.myisam.key_buffer_size as "
+        "it is already collected by mysql.myisam.key_buffer_size" in caplog.text
+    )

@@ -53,7 +53,7 @@ In the command above, you are able to pass your API key to the Datadog Agent usi
 | DD_URL                                                                                            | Sets the Datadog intake server URL where the Agent sends data. This is useful when [using the Agent as a proxy][9].                                                                                                              |
 | LOG_LEVEL                                                                                         | Sets logging verbosity (CRITICAL, ERROR, WARNING, INFO, DEBUG). For example, `-e LOG_LEVEL=DEBUG` sets logging to debug mode.                                                                                                    |
 | TAGS                                                                                              | Sets host tags as a comma delimited string. Both simple tags and key-value tags are available, for example: `-e TAGS="simple-tag, tag-key:tag-value"`.                                                                           |
-| EC2_TAGS                                                                                          | Enabling this feature allows the Agent to query and capture custom tags set using the EC2 API during startup. To enable, use `-e EC2_TAGS=yes`. Note that this feature requires an IAM role associated with the instance.        |
+| EC2_TAGS                                                                                          | Enabling this feature allows the Agent to query and capture custom tags set using the EC2 API during startup. To enable, use `-e EC2_TAGS=yes`. **Note**: This feature requires an IAM role associated with the instance.        |
 | NON_LOCAL_TRAFFIC                                                                                 | Enabling this feature allows StatsD reporting from any external IP. To enable, use `-e NON_LOCAL_TRAFFIC=yes`. This is used to report metrics from other containers or systems. See [network configuration][10] for more details. |
 | PROXY_HOST, PROXY_PORT, PROXY_USER, PROXY_PASSWORD                                                | Sets proxy configuration details. **Note**: `PROXY_PASSWORD` is required for passing in an authentication password and cannot be renamed. For more information, see the [Agent proxy documentation][11].                                                                                                                                  |
 | SD_BACKEND, SD_CONFIG_BACKEND, SD_BACKEND_HOST, SD_BACKEND_PORT, SD_TEMPLATE_DIR, SD_CONSUL_TOKEN | Enables and configures Autodiscovery. For more information, see the [Autodiscovery guide][12].                                                                                                                                   |
@@ -105,10 +105,10 @@ For more information about building custom Docker containers with the Datadog Ag
 
 ## Agent v6
 
-The latest Docker check is named `docker` and written in Go to take advantage of the new internal architecture. Starting from version 6.0, the Agent won't load the `docker_daemon` check anymore, even if it is still available and maintained for Agent v5. All features are ported on version >6.0 , except the following deprecations:
+The latest Docker check is named `docker` and written in Go to take advantage of the new internal architecture. Starting from v6.0, the Agent doesn't load the `docker_daemon` check anymore, even if it is still available and maintained for Agent v5. All features are ported on version >6.0 , except the following deprecations:
 
   * The `url`, `api_version` and `tags*` options are deprecated. Direct use of the [standard Docker environment variables][15] is encouraged.
-  * The `ecs_tags`, `performance_tags` and `container_tags` options are deprecated. Every relevant tag is now collected by default.
+  * The `ecs_tags`, `performance_tags` and `container_tags` options are deprecated. Every relevant tag is collected by default.
   * The `collect_container_count` option to enable the `docker.container.count` metric is not supported. `docker.containers.running` and `.stopped` should be used.
 
 Some options have moved from `docker_daemon.yaml` to the main `datadog.yaml`:

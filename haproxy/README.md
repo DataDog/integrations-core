@@ -34,7 +34,7 @@ The recommended way to set up this integration is by enabling the Prometheus end
 
 **Note**: This configuration strategy is provided as a reference for legacy users. If you are setting up the integration for the first time, consider using the Prometheus-based strategy described in the previous section.
 
-The Agent collects metrics via a stats endpoint:
+The Agent collects metrics using a stats endpoint:
 
 1. Configure one in your `haproxy.conf`:
 
@@ -81,12 +81,6 @@ Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 2. [Restart the Agent][6].
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 By default Haproxy sends logs over UDP to port 514. The Agent can listen for these logs on this port, however, binding to a port number under 1024 requires elevated permissions. Follow the instructions below to set this up. Alternatively, you can use a different port and skip step 3.
 
@@ -148,13 +142,7 @@ LABEL "com.datadoghq.ad.instances"='[{"url": "https://%%host%%/admin?stats"}]'
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][10].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker Log Collection][10].
 
 Then, set [Log Integrations][11] as Docker labels:
 
@@ -194,15 +182,9 @@ spec:
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][14].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][14].
 
 Then, set [Log Integrations][11] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][15].
 
@@ -245,15 +227,9 @@ Set [Autodiscovery Integrations Templates][9] as Docker labels on your applicati
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][16].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [ECS Log Collection][16].
 
 Then, set [Log Integrations][11] as Docker labels:
 

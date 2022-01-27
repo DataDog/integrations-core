@@ -6,6 +6,7 @@ import sys
 
 import click
 
+from ...ci import running_on_gh_actions
 from ...subprocess import run_command
 from ...tooling.constants import INTEGRATION_REPOS, set_root
 
@@ -22,6 +23,48 @@ UNKNOWN_OPTIONS = {'help_option_names': [], 'ignore_unknown_options': True}
 DEFAULT_INDENT = '    '
 DISPLAY_COLOR = None
 DEBUG_OUTPUT = False
+
+ANNOTATE_WARNING = 'warning'
+ANNOTATE_ERROR = 'error'
+GH_ANNOTATION_LEVELS = [ANNOTATE_WARNING, ANNOTATE_ERROR]
+
+
+def annotate_display_queue(file, display_queue):
+    errors = ""
+    warnings = ""
+    for func, message in display_queue:
+        if func == echo_failure:
+            errors += message + "%0A"
+        elif func == echo_warning:
+            warnings += message + "%0A"
+    if errors:
+        annotate_error(file, errors)
+    if warnings:
+        annotate_warning(file, warnings)
+
+
+def annotate_errors(file, errors):
+    if errors:
+        message = "%0A".join(errors)
+        annotate_error(file, message)
+
+
+def annotate_warning(file, message, line=1):
+    _print_github_annotation(file, message, level=ANNOTATE_WARNING, line=line)
+
+
+def annotate_error(file, message, line=1):
+    _print_github_annotation(file, message, level=ANNOTATE_ERROR, line=line)
+
+
+def _print_github_annotation(file, message, level=None, line=1):
+    if not running_on_gh_actions():
+        return
+
+    if level not in GH_ANNOTATION_LEVELS:
+        level = ANNOTATE_ERROR
+
+    os.system("echo '::{} file={},line={}::{}'".format(level, file, line, message))
 
 
 def set_color(color_choice):

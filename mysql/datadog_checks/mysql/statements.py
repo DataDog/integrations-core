@@ -14,7 +14,7 @@ from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 
 try:
@@ -109,29 +109,28 @@ class MySQLStatementMetrics(DBMAsyncJob):
         self.collect_per_statement_metrics()
 
     def collect_per_statement_metrics(self):
-        try:
-            rows = self._collect_per_statement_metrics()
-            if not rows:
-                return
+        rows = self._collect_per_statement_metrics()
+        if not rows:
+            return
 
-            for event in self._rows_to_fqt_events(rows):
-                self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
+        for event in self._rows_to_fqt_events(rows):
+            self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
 
-            # truncate query text to the maximum length supported by metrics tags
-            for row in rows:
-                row['digest_text'] = row['digest_text'][0:200] if row['digest_text'] is not None else None
+        # truncate query text to the maximum length supported by metrics tags
+        for row in rows:
+            row['digest_text'] = row['digest_text'][0:200] if row['digest_text'] is not None else None
 
-            payload = {
-                'host': self._check.resolved_hostname,
-                'timestamp': time.time() * 1000,
-                'ddagentversion': datadog_agent.get_version(),
-                'min_collection_interval': self._metric_collection_interval,
-                'tags': self._tags,
-                'mysql_rows': rows,
-            }
-            self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
-        except Exception:
-            self.log.exception('Unable to collect statement metrics due to an error')
+        payload = {
+            'host': self._check.resolved_hostname,
+            'timestamp': time.time() * 1000,
+            'mysql_version': self._check.version.version + '+' + self._check.version.build,
+            'mysql_flavor': self._check.version.flavor,
+            'ddagentversion': datadog_agent.get_version(),
+            'min_collection_interval': self._metric_collection_interval,
+            'tags': self._tags,
+            'mysql_rows': rows,
+        }
+        self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
 
     def _collect_per_statement_metrics(self):
         # type: () -> List[PyMysqlRow]
@@ -169,15 +168,10 @@ class MySQLStatementMetrics(DBMAsyncJob):
             ORDER BY `count_star` DESC
             LIMIT 10000"""
 
-        rows = []  # type: List[PyMysqlRow]
+        with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
+            cursor.execute(sql_statement_summary)
 
-        try:
-            with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
-                cursor.execute(sql_statement_summary)
-
-                rows = cursor.fetchall() or []  # type: ignore
-        except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.log.warning("Statement summary metrics are unavailable at this time: %s", e)
+            rows = cursor.fetchall() or []  # type: ignore
 
         return rows
 
@@ -186,17 +180,17 @@ class MySQLStatementMetrics(DBMAsyncJob):
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
-                obfuscated_statement = (
-                    datadog_agent.obfuscate_sql(row['digest_text'], self._obfuscate_options)
-                    if row['digest_text'] is not None
-                    else None
-                )
+                statement = obfuscate_sql_with_metadata(row['digest_text'], self._obfuscate_options)
+                obfuscated_statement = statement['query'] if row['digest_text'] is not None else None
             except Exception as e:
                 self.log.warning("Failed to obfuscate query '%s': %s", row['digest_text'], e)
                 continue
 
             normalized_row['digest_text'] = obfuscated_statement
             normalized_row['query_signature'] = compute_sql_signature(obfuscated_statement)
+            metadata = statement['metadata']
+            normalized_row['dd_tables'] = metadata.get('tables', None)
+            normalized_row['dd_commands'] = metadata.get('commands', None)
             normalized_rows.append(normalized_row)
 
         return normalized_rows

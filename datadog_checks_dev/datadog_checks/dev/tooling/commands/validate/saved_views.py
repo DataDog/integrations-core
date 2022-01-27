@@ -5,10 +5,17 @@ import json
 
 import click
 
-from ...annotations import annotate_display_queue, annotate_error
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_assets_from_manifest, load_saved_views
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ..console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_display_queue,
+    annotate_error,
+    echo_failure,
+    echo_info,
+    echo_success,
+)
 
 REQUIRED_HEADERS = {'name', 'page', 'query', 'type'}
 

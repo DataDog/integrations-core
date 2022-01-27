@@ -7,23 +7,23 @@
 The Datadog Agent can collect many metrics from NGINX instances, including (but not limited to)::
 
 - Total requests
-- Connections (e.g. accepted, handled, active)
+- Connections, such as accepted, handled, and active
 
 For users of NGINX Plus, the commercial version of NGINX, the Agent can collect the significantly more metrics that NGINX Plus provides, like:
 
-- Errors (e.g. 4xx codes, 5xx codes)
-- Upstream servers (e.g. active connections, 5xx codes, health checks, etc.)
-- Caches (e.g. size, hits, misses, etc.)
-- SSL (e.g. handshakes, failed handshakes, etc.)
+- Errors, such as 4xx codes and 5xx codes
+- Upstream servers, such as active connections, 5xx codes, and health checks
+- Caches, such as size, hits, and misses
+- SSL, such as handshakes and failed handshakes
 
 ## Setup
 
 ### Installation
 
-The NGINX check pulls metrics from a local NGINX status endpoint, so your `nginx` binaries need to have been compiled with one of two NGINX status modules:
+The NGINX check pulls metrics from a local NGINX status endpoint, so your `nginx` binaries need to be compiled with a NGINX status module:
 
-- [stub status module][2] - for open source NGINX
-- [http status module][3] - only for NGINX Plus
+- [Stub status module][2] - for open source NGINX
+- [HTTP status module][3] - only for NGINX Plus
 
 #### NGINX open source
 
@@ -45,7 +45,7 @@ NGINX Plus packages prior to release 13 include the http status module. For NGIN
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
-On each NGINX server, create a `status.conf` file in the directory that contains your other NGINX configuration files (e.g. `/etc/nginx/conf.d/`).
+On each NGINX server, create a `status.conf` file in the directory that contains your other NGINX configuration files, such as `/etc/nginx/conf.d/`.
 
 ```conf
 server {
@@ -76,7 +76,7 @@ server {
 
 **NGINX Plus**
 
-NGINX Plus users can also utilize `stub_status`, but since that module provides fewer metrics, Datadog recommends using `status`.
+NGINX Plus users can also use `stub_status`, but since that module provides fewer metrics, Datadog recommends using `status`.
 
 For NGINX Plus releases 15+, the `status` module is deprecated. Use the [http_api_module][5] instead. For example, enable the `/api` endpoint in your main NGINX configuration file (`/etc/nginx/conf.d/default.conf`):
 
@@ -107,29 +107,60 @@ sudo nginx -t && sudo nginx -s reload
 <!-- xxz tab xxx -->
 <!-- xxx tab "Kubernetes" xxx -->
 
-The following ConfigMap defines the integration template for NGINX containers:
+Add the following snippet to your configuration ConfigMaps to expose the metrics endpoint in a different port:
 
 ```yaml
 kind: ConfigMap
-apiVersion: v1
 metadata:
-  name: nginxconfig
-  namespace: default
+  name: nginx-conf
 data:
-  nginx.conf: |+
-    worker_processes  5;
-    events {
-      worker_connections  4096;
+[...]
+  status.conf: |
+    server {
+      listen 18080;
+
+      location /nginx_status {
+        stub_status on;
+      }
+
+      location / {
+        return 404;
+      }
     }
-    http {
-        server {
-            location /nginx_status {
-              stub_status on;
-              access_log  /dev/stdout;
-              allow all;
-            }
-        }
-    }
+```
+
+Then, in your NGINX pod, expose the `18080` endpoint and mount that file in the NGINX configuration folder:
+
+```yaml
+spec:
+  containers:
+    - name: nginx
+      ports:
+        - containerPort: 18080
+      volumeMounts:
+        - mountPath: /etc/nginx/conf.d/status.conf
+          subPath: status.conf
+          readOnly: true
+          name: "config"
+  volumes:
+    - name: "config"
+      configMap:
+          name: "nginx-conf"
+```
+
+Finally, expose that port in your NGINX service:
+
+```yaml
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+    name: default
+  - port: 81
+    protocol: TCP
+    targetPort: 18080
+    name: status
 ```
 
 <!-- xxz tab xxx -->
@@ -165,12 +196,6 @@ Follow the instructions below to configure this check for an Agent running on a 
 3. [Restart the Agent][7] to start sending NGINX metrics to Datadog.
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 _Available for Agent versions >6.0_
 
@@ -233,14 +258,8 @@ LABEL "com.datadoghq.ad.instances"='[{"nginx_status_url": "http://%%host%%:81/ng
 
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][9].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker Log Collection][9].
 
 Then, set [Log Integrations][10] as Docker labels:
 
@@ -275,27 +294,14 @@ metadata:
       ]
   labels:
     name: nginx
-spec:
-  containers:
-    - name: nginx
-  volumes:
-        - name: "config"
-          configMap:
-            name: "nginxconfig"
 ```
 
 **Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
 
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][13].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][13].
 
 Then, set [Log Integrations][10] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][14].
 
@@ -339,14 +345,8 @@ Set [Autodiscovery Integrations Templates][8] as Docker labels on your applicati
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][15].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [ECS Log Collection][15].
 
 Then, set [Log Integrations][10] as Docker labels:
 
@@ -377,7 +377,7 @@ See [metadata.csv][17] for a full list of provided metrics by this integration.
 
 Not all metrics shown are available to users of open source NGINX. Compare the module reference for [stub status][2] (open source NGINX) and [http status][3] (NGINX Plus) to understand which metrics are provided by each module.
 
-A few open-source NGINX metrics are named differently in NGINX Plus; they refer to the exact same metric, though:
+A few open-source NGINX metrics are named differently in NGINX Plus, but they are the same metric:
 
 | NGINX                          | NGINX Plus                   |
 | ------------------------------ | ---------------------------- |

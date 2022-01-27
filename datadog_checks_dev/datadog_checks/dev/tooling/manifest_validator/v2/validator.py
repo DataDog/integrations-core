@@ -8,9 +8,9 @@ import jsonschema
 import requests
 
 import datadog_checks.dev.tooling.manifest_validator.common.validator as common
-from datadog_checks.dev.tooling.manifest_validator.common.validator import BaseManifestValidator
 
 from ...constants import get_root
+from ...manifest_validator.common.validator import BaseManifestValidator
 from ..constants import V2
 
 METRIC_TO_CHECK_EXCLUDE_LIST = {
@@ -32,6 +32,13 @@ class DisplayOnPublicValidator(BaseManifestValidator):
                 self.fix(output, f'  new `display_on_public_website`: {correct_is_public}')
             else:
                 self.fail(output)
+
+        if not is_public:
+            message = (
+                f"  {check_name}: `display_on_public_website` is disabled, set to `True` "
+                f"if you want the integration documentation to be published."
+            )
+            self.warning(message)
 
 
 class TileDescriptionValidator(BaseManifestValidator):

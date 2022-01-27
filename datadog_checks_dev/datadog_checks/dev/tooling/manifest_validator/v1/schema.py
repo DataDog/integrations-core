@@ -123,7 +123,12 @@ def get_manifest_schema():
                 },
                 {
                     "if": {"properties": {"support": {"const": "contrib"}}},
-                    "then": {"properties": {"maintainer": {"pattern": ".*"}}},
+                    "then": {
+                        "properties": {"maintainer": {"pattern": ".*"}},
+                        "not": {
+                            "anyOf": [{"required": ["author"]}, {"required": ["pricing"]}, {"required": ["terms"]}]
+                        },
+                    },
                 },
                 {
                     "if": {"properties": {"support": {"const": "partner"}}},

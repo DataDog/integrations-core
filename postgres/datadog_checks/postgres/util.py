@@ -211,13 +211,14 @@ SELECT s.schemaname,
     'relation': False,
 }
 
-# The metrics we retrieve from pg_stat_activity when the postgres version >= 9.2
+# The metrics we retrieve from pg_stat_activity when the postgres version >= 9.6
 ACTIVITY_METRICS_9_6 = [
     "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
     "SUM(CASE WHEN state = 'idle in transaction' THEN 1 ELSE 0 END)",
     "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN wait_event is NOT NULL AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN wait_event is NOT NULL AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
 ]
 
 # The metrics we retrieve from pg_stat_activity when the postgres version >= 9.2
@@ -227,6 +228,7 @@ ACTIVITY_METRICS_9_2 = [
     "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
 ]
 
 # The metrics we retrieve from pg_stat_activity when the postgres version >= 8.3
@@ -236,6 +238,7 @@ ACTIVITY_METRICS_8_3 = [
     "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
 ]
 
 # The metrics we retrieve from pg_stat_activity when the postgres version < 8.3
@@ -245,6 +248,7 @@ ACTIVITY_METRICS_LT_8_3 = [
     "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
 ]
 
 # The metrics we collect from pg_stat_activity that we zip with one of the lists above
@@ -253,6 +257,7 @@ ACTIVITY_DD_METRICS = [
     ('postgresql.transactions.idle_in_transaction', AgentCheck.gauge),
     ('postgresql.active_queries', AgentCheck.gauge),
     ('postgresql.waiting_queries', AgentCheck.gauge),
+    ('postgresql.active_waiting_queries', AgentCheck.gauge),
 ]
 
 # The base query for postgres version >= 10

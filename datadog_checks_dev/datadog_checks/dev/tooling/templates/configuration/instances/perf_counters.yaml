@@ -15,7 +15,7 @@
     type: string
 - name: enable_health_service_check
   description: |
-    Whether or not to send a service check named `<NAMESPACE>.windows.perf.health` which reports
+    Whether or not to send a service check named `<NAMESPACE>.windows.perf.health`, which reports
     the health of the `server`.
   value:
     example: true

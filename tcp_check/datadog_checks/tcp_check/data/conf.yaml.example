@@ -48,6 +48,11 @@ instances:
     #
     # ip_cache_duration: 120
 
+    ## @param multiple_ips - boolean - optional - default: false
+    ## Enable to run the check against all IPs attached to `host`.
+    #
+    # multiple_ips: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

@@ -51,15 +51,9 @@ No additional installation is needed on your server.
 
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent >6.0_
 
-1. Flink uses the `log4j` logger by default. To activate logging to a file and customize the format edit the `log4j.properties`, `log4j-cli.properties`, `log4j-yarn-session.properties`, or `log4j-console.properties` file. See [Flink's documentation][6] for default configurations. For example `log4j.properties` contains this configuration by default:
+1. Flink uses the `log4j` logger by default. To activate logging to a file and customize the format edit the `log4j.properties`, `log4j-cli.properties`, `log4j-yarn-session.properties`, or `log4j-console.properties` file. See [Flink's repository][6] for default configurations. For example `log4j.properties` contains this configuration by default:
 
    ```conf
    log4j.appender.file=org.apache.log4j.FileAppender
@@ -69,7 +63,7 @@ _Available for Agent >6.0_
    log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
    ```
 
-2. By default, our integration pipeline supports the following conversion pattern:
+2. By default, the integration pipeline supports the following conversion pattern:
 
     ```text
     %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n

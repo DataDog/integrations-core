@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import mmh3
 
+from datadog_checks.base import ensure_bytes
 from datadog_checks.base.utils.serialization import json, sort_keys_kwargs
 
 # Unicode character "Arabic Decimal Separator" (U+066B) is a character which looks like an ascii
@@ -22,7 +23,7 @@ def compute_sql_signature(normalized_query):
         return None
     # Note: please be cautious when changing this function as some features rely on this
     # hash matching the APM resource hash generated on our backend.
-    return format(mmh3.hash64(normalized_query, signed=False)[0], 'x')
+    return format(mmh3.hash64(ensure_bytes(normalized_query), signed=False)[0], 'x')
 
 
 def normalize_query_tag(query):

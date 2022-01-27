@@ -12,6 +12,10 @@ Because Datadog already integrates with Kubernetes and AWS, it is ready-made to 
 
 Additionally, [Amazon EKS Managed Node Groups][2] and [Amazon EKS on AWS Outposts][3] are supported.
 
+### EKS Anywhere
+
+See the [Amazon EKS Anywhere integration][16] for setup instructions.
+
 ### Metric collection
 
 Monitoring EKS requires that you set up one of the following Datadog integrations along with integrations for any other AWS services you're running with EKS, such as [ELB][7].
@@ -55,3 +59,5 @@ Need help? Contact [Datadog support][11].
 [12]: https://www.datadoghq.com/blog/announcing-eks
 [13]: https://www.datadoghq.com/blog/eks-cluster-metrics
 [14]: https://docs.datadoghq.com/integrations/amazon_eks_fargate/
+[15]: https://aws.amazon.com/eks/eks-anywhere/
+[16]: https://docs.datadoghq.com/integrations/eks_anywhere/

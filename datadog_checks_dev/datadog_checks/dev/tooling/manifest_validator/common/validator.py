@@ -9,16 +9,16 @@ from typing import Dict
 
 import six
 
-from datadog_checks.dev.tooling.datastructures import JSONDict
-from datadog_checks.dev.tooling.git import git_show_file
-from datadog_checks.dev.tooling.utils import get_metadata_file, has_logs, is_metric_in_metadata_file, read_metadata_rows
-
+from ...datastructures import JSONDict
+from ...git import git_show_file
+from ...utils import get_metadata_file, has_logs, is_metric_in_metadata_file, read_metadata_rows
 from ..constants import V1, V2
 
 
 class ValidationResult(object):
     def __init__(self):
         self.failed = False
+        self.warning = False
         self.fixed = False
         self.messages = {'success': [], 'warning': [], 'failure': [], 'info': []}
 
@@ -72,6 +72,10 @@ class BaseManifestValidator(object):
     def fail(self, error_message):
         self.result.failed = True
         self.result.messages['failure'].append(error_message)
+
+    def warning(self, warning_message):
+        self.result.warning = True
+        self.result.messages['warning'].append(warning_message)
 
     def fix(self, problem, solution):
         self.result.warning_msg = problem
@@ -128,6 +132,11 @@ class MetricsMetadataValidator(BaseManifestValidator):
 
 
 class MetricToCheckValidator(BaseManifestValidator):
+    CHECKS_EXCLUDE_LIST = {
+        'agent_metrics',  # this (agent-internal) check doesn't guarantee a list of stable metrics for now
+        'moogsoft',
+        'snmp',
+    }
     METRIC_TO_CHECK_EXCLUDE_LIST = {
         'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.
         'riakcs.bucket_list_pool.workers',  # RiakCS 2.1 metric, but metadata.csv lists RiakCS 2.0 metrics only.
@@ -137,7 +146,7 @@ class MetricToCheckValidator(BaseManifestValidator):
     PRICING_PATH = {V1: "/pricing", V2: "/pricing"}
 
     def validate(self, check_name, decoded, _):
-        if not self.should_validate() or check_name == 'snmp' or check_name == 'moogsoft':
+        if not self.should_validate() or check_name in self.CHECKS_EXCLUDE_LIST:
             return
 
         metadata_path = self.METADATA_PATH[self.version]

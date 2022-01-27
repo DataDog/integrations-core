@@ -64,7 +64,7 @@ The Network check does not include any service checks.
 
 ## Troubleshooting
 
-- [How to send TCP/UDP host metrics via the Datadog API][9]
+- [Send TCP/UDP host metrics with the Datadog API][9]
 
 ## Further Reading
 

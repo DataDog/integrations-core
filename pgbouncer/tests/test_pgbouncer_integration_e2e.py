@@ -13,7 +13,7 @@ from . import common
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_check(instance, aggregator, datadog_agent):
+def test_check(instance, aggregator, datadog_agent, dd_run_check):
     # add some stats
     connection = psycopg2.connect(
         host=common.HOST,
@@ -30,7 +30,7 @@ def test_check(instance, aggregator, datadog_agent):
     # run the check
     check = PgBouncer('pgbouncer', {}, [instance])
     check.check_id = 'test:123'
-    check.check(instance)
+    dd_run_check(check)
 
     env_version = common.get_version_from_env()
     assert_metric_coverage(env_version, aggregator)
@@ -46,12 +46,21 @@ def test_check(instance, aggregator, datadog_agent):
 
 
 @pytest.mark.integration
+def test_critical_service_check(instance, aggregator, dd_run_check):
+    instance['port'] = '123'  # Bad port
+    check = PgBouncer('pgbouncer', {}, [instance])
+    with pytest.raises(Exception):
+        dd_run_check(check)
+    aggregator.assert_service_check(PgBouncer.SERVICE_CHECK_NAME, status=PgBouncer.CRITICAL)
+
+
+@pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_check_with_url(instance_with_url, aggregator, datadog_agent):
+def test_check_with_url(instance_with_url, aggregator, datadog_agent, dd_run_check):
     # run the check
     check = PgBouncer('pgbouncer', {}, [instance_with_url])
     check.check_id = 'test:123'
-    check.check(instance_with_url)
+    dd_run_check(check)
 
     env_version = common.get_version_from_env()
     assert_metric_coverage(env_version, aggregator)

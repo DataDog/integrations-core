@@ -17,9 +17,9 @@ from tests.metrics import (
     UDP_COUNTS,
 )
 
-from . import common
+from . import common, metrics
 
-pytestmark = pytest.mark.e2e
+pytestmark = [pytest.mark.e2e, common.py3_plus_only]
 
 
 def _build_device_ip(container_ip, last_digit='1'):
@@ -40,7 +40,14 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
     """
     snmp_device = _build_device_ip(container_ip)
     subnet_prefix = ".".join(container_ip.split('.')[:3])
-    aggregator = dd_agent_check({'init_config': {}, 'instances': []}, rate=True)
+
+    aggregator = common.dd_agent_check_wrapper(
+        dd_agent_check,
+        {'init_config': {}, 'instances': []},
+        rate=True,
+        discovery_min_instances=5,
+        discovery_timeout=10,
+    )
 
     # === network profile ===
     common_tags = [
@@ -93,24 +100,9 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         'ups_name:testIdentName',
         'device_vendor:apc',
     ]
-    metrics = [
-        'upsAdvBatteryNumOfBadBattPacks',
-        'upsAdvBatteryReplaceIndicator',
-        'upsAdvBatteryRunTimeRemaining',
-        'upsAdvBatteryTemperature',
-        'upsAdvBatteryCapacity',
-        'upsHighPrecInputFrequency',
-        'upsHighPrecInputLineVoltage',
-        'upsHighPrecOutputCurrent',
-        'upsAdvInputLineFailCause',
-        'upsAdvOutputLoad',
-        'upsBasicBatteryTimeOnBattery',
-        'upsAdvTestDiagnosticsResults',
-    ]
-
     common.assert_common_metrics(aggregator, common_tags, is_e2e=True)
 
-    for metric in metrics:
+    for metric in metrics.APC_UPS_METRICS:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
     aggregator.assert_metric(
         'snmp.upsOutletGroupStatusGroupState',
@@ -119,17 +111,8 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         tags=['outlet_group_name:test_outlet'] + common_tags,
     )
 
-    ups_basic_state_output_state_metrics = [
-        'snmp.upsBasicStateOutputState.AVRTrimActive',
-        'snmp.upsBasicStateOutputState.BatteriesDischarged',
-        'snmp.upsBasicStateOutputState.LowBatteryOnBattery',
-        'snmp.upsBasicStateOutputState.NoBatteriesAttached',
-        'snmp.upsBasicStateOutputState.On',
-        'snmp.upsBasicStateOutputState.OnLine',
-        'snmp.upsBasicStateOutputState.ReplaceBattery',
-    ]
-    for metric in ups_basic_state_output_state_metrics:
-        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=2, tags=common_tags)
+    for metric, value in metrics.APC_UPS_UPS_BASIC_STATE_OUTPUT_STATE_METRICS:
+        aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=2, tags=common_tags)
 
     # ==== test snmp v3 ===
     common_tags = [

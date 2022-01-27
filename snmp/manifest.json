@@ -30,7 +30,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "[SNMP] Device Down Alert": "assets/monitors/device_down.json"
+    },
     "dashboards": {
       "Interface Performance": "assets/dashboards/interface_performance.json",
       "Datacenter Overview": "assets/dashboards/datacenter_overview.json"

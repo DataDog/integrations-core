@@ -45,8 +45,10 @@ The next section will describe the process for preparing the patch release candi
 There are two main cases where the release manager will have to release integrations off of the release branch: the freeze has lifted and changes to an integration have been merged after freeze and before a bugfix for an RC, or a [patch release](#patches) is required. To release an integration off of the release branch, perform the following steps:
 
 1. Cherry-pick the bugfix commit to the [release branch](pre-release.md#branch).
-2. Release the integration on the release branch.
-    - Make a pull request with [integration release](../integration-release.md#new-integrations), then merge it to the release branch.
+2. Release the integration.
+    - Create a branch based off of the release branch. 
+    - Run the [integration release](../integration-release.md#new-integrations) command on that branch.
+    - Make a pull request with that branch, then merge it to the release branch.
 
     !!! important
         Remember to trigger the release pipeline and build the wheel. You can do so by [tagging the release](../../ddev/cli.md#ddev-release-tag):
@@ -60,6 +62,9 @@ There are two main cases where the release manager will have to release integrat
 
 4. [Tag](pre-release.md#tag) the branch with the new bumped version `<MAJOR>.<MINOR>.<PATCH>-rc.1`.
 
-5. After the release has been made, make a PR to `master` with the updates to `CHANGELOG.md`, [agent release requirements](https://github.com/DataDog/integrations-core/blob/master/requirements-agent-release.txt), and `__about__.py` of the integrations that were released on the release branch. If the current version of `__about__.py` is higher on master than the release branch, then **only** update the `CHANGELOG.md` in this PR.
+5. After the release has been made, make a PR to `master` with the updates to `CHANGELOG.md`, [agent release requirements](https://github.com/DataDog/integrations-core/blob/master/requirements-agent-release.txt), and `__about__.py` of the integrations that were released on the release branch. Do not include the change to the in-toto file. If the current version of `__about__.py` is higher on master than the release branch, then **only** update the `CHANGELOG.md` in this PR.
+
+    !!! important
+        Do not merge this PR unless the release tag from the previous PR has been pushed or the release pipeline will incorrectly attempt to release from `master`.
 
 6. Finally, if a patch release was performed, follow the same steps to [finalize the release](#finalize).

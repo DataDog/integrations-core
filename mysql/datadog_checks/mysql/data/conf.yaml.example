@@ -47,6 +47,12 @@ instances:
     #
     port: 3306
 
+    ## @param reported_hostname - string - optional
+    ## Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
+    ## and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+    #
+    # reported_hostname: <REPORTED_HOSTNAME>
+
     ## @param sock - string - optional
     ## Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).
     ## If you specify a socket you dont need to specify a host.
@@ -130,12 +136,14 @@ instances:
     #     - test:mysql
 
     ## @param additional_status - list of mappings - optional
-    ## Set this parameter to collect mysql status exclude STATUS_VARS and OPTIONAL_STATUS_VARS of const
+    ## Set this parameter to collect additional MySQL status variables as metrics
+    ## from "SHOW GLOBAL STATUS"
+    ## See MySQL documentation for available variables: https://dev.mysql.com/doc/refman/8.0/en/show-status.html
     ##
     ## The following fields are supported:
     ##
-    ## name : mysql status name on "SHOW GLOBAL STATUS"
-    ## metric_name : datadog metric name
+    ## name : MySQL status name on "SHOW GLOBAL STATUS"
+    ## metric_name : metric name
     ## type : gauge | rate | count | ...
     #
     # additional_status:
@@ -144,12 +152,14 @@ instances:
     #     type: rate
 
     ## @param additional_variable - list of mappings - optional
-    ## Set this parameter to collect mysql variable exclude VARIABLES_VARS and another VARS of const
+    ## Set this parameter to collect additional MySQL variables as metrics
+    ## from "SHOW GLOBAL VARIABLES"
+    ## See MySQL documentation for available variables: https://dev.mysql.com/doc/refman/8.0/en/show-variables.html
     ##
     ## The following fields are supported:
     ##
-    ## name : mysql variable name on "SHOW GLOBAL VARIABLES"
-    ## metric_name : datadog metric name
+    ## name : MySQL variable name on "SHOW GLOBAL VARIABLES"
+    ## metric_name : metric name
     ## type : gauge | rate | count | ...
     #
     # additional_variable:
@@ -185,9 +195,10 @@ instances:
     options:
 
         ## @param replication - boolean - optional - default: false
-        ## Set to `true` to collect replication metrics.
+        ## Set to `true` to collect replication metrics or group replication metrics.
         ## These metrics are only collected from the specified `host`. If you want to collect replication metrics
-        ## from the source node and the replica nodes you need to set separate check instances to collect them.
+        ## from the source or primary node and the replica or secondary nodes you need to set separate check
+        ## instances to collect them.
         #
         # replication: false
 
@@ -372,15 +383,41 @@ instances:
         # collection_strategy_cache_ttl: 300
 
     ## Configure how the SQL obfuscator behaves.
+    ## Note: This option only applies when `dbm` is enabled.
     #
     obfuscator_options:
 
         ## @param replace_digits - boolean - optional - default: false
         ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
-        ##
-        ## Note that this option only applies when `dbm` is enabled.
+        ## Note: This option also applies to extracted tables using `collect_tables`.
         #
         # replace_digits: false
+
+        ## @param collect_metadata - boolean - optional - default: false
+        ## Set to `true` to enable the collection of metadata in your SQL statements.
+        ## Metadata includes things such as tables, commands, and comments.
+        #
+        # collect_metadata: false
+
+        ## @param collect_tables - boolean - optional - default: true
+        ## Set to `false` to disable the collection of tables in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        #
+        # collect_tables: true
+
+        ## @param collect_commands - boolean - optional - default: true
+        ## Set to `false` to disable the collection of commands in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        ##
+        ## Examples: SELECT, UPDATE, DELETE, etc.
+        #
+        # collect_commands: true
+
+        ## @param collect_comments - boolean - optional - default: true
+        ## Set to `false` to disable the collection of comments in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        #
+        # collect_comments: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

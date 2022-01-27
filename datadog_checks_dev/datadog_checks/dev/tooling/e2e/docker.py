@@ -5,11 +5,10 @@ import re
 import time
 from contextlib import contextmanager
 
-from datadog_checks.dev.errors import SubprocessError
-from datadog_checks.dev.tooling.commands.console import echo_debug, echo_warning
-
+from ...errors import SubprocessError
 from ...subprocess import run_command
 from ...utils import ON_WINDOWS, file_exists, find_free_port, get_ip, path_join
+from ..commands.console import echo_debug, echo_warning
 from ..constants import REQUIREMENTS_IN, get_root
 from .agent import (
     DEFAULT_AGENT_VERSION,
@@ -137,6 +136,9 @@ class DockerInterface(object):
         as_table=False,
         break_point=None,
         jmx_list=None,
+        discovery_timeout=None,
+        discovery_retry_interval=None,
+        discovery_min_instances=None,
     ):
         # JMX check
         if jmx_list:
@@ -166,6 +168,15 @@ class DockerInterface(object):
 
             if as_table:
                 command.append('--table')
+
+            if discovery_timeout is not None:
+                command.extend(['--discovery-timeout', str(discovery_timeout)])
+
+            if discovery_retry_interval is not None:
+                command.extend(['--discovery-retry-interval', str(discovery_retry_interval)])
+
+            if discovery_min_instances is not None:
+                command.extend(['--discovery-min-instances', str(discovery_min_instances)])
 
         if log_level is not None:
             command.extend(['--log-level', log_level])

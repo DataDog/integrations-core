@@ -15,11 +15,11 @@ The Kubernetes-State check is included in the [Datadog Agent][1] package, so you
 
 ### Configuration
 
-Edit the `kubernetes_state.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2], to point to your server and port, set the masters to monitor. See the [sample kubernetes_state.d/conf.yaml][3] for all available configuration options.
+Edit the `kubernetes_state.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample kubernetes_state.d/conf.yaml][3] for all available configuration options.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `kubernetes_state` under the Checks section.
+Run the [Agent's status subcommand][4] and look for `kubernetes_state` under the Checks section.
 
 ## Data Collected
 

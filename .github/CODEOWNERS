@@ -14,8 +14,15 @@ auto_conf.yaml        @DataDog/documentation @DataDog/agent-integrations @DataDo
 manifest.json         @DataDog/documentation @DataDog/agent-integrations
 assets/               @DataDog/agent-integrations
 
+# Checks base
+/datadog_checks_base/                                          @DataDog/agent-core @DataDog/agent-integrations
+/datadog_checks_base/datadog_checks/base/checks/openmetrics/   @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
+/datadog_checks_base/datadog_checks/base/checks/kube_leader/   @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
 
 # Container monitoring
+/container/                               @DataDog/container-integrations @DataDog/agent-integrations
+/container/*.md                           @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/container/manifest.json                  @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /containerd/                              @DataDog/container-integrations @DataDog/agent-integrations
 /containerd/*.md                          @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /containerd/manifest.json                 @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
@@ -107,22 +114,23 @@ assets/               @DataDog/agent-integrations
 
 # Database monitoring
 **/base/utils/db/utils.py                           @DataDog/agent-integrations @DataDog/database-monitoring
-datadog_checks_base/tests/**/test_db_util.py        @DataDog/agent-integrations @DataDog/database-monitoring
+datadog_checks_base/tests/**/test_util.py           @DataDog/agent-integrations @DataDog/database-monitoring
 **/base/utils/db/sql.py                             @DataDog/database-monitoring @DataDog/agent-integrations
 datadog_checks_base/tests/**/test_db_sql.py         @DataDog/database-monitoring @DataDog/agent-integrations
 **/base/utils/db/statement_metrics.py               @DataDog/database-monitoring @DataDog/agent-integrations
 datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring @DataDog/agent-integrations
-/postgres/                                          @DataDog/agent-integrations @DataDog/database-monitoring
-/postgres/*.md                                      @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
-/postgres/manifest.json                             @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
-/mysql/                                             @DataDog/agent-integrations @DataDog/database-monitoring
-/mysql/*.md                                         @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
-/mysql/manifest.json                                @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
-
-# Checks base
-/datadog_checks_base/                                          @DataDog/agent-core @DataDog/agent-integrations
-/datadog_checks_base/datadog_checks/base/checks/openmetrics/   @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
-/datadog_checks_base/datadog_checks/base/checks/kube_leader/   @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
+/postgres/                                          @DataDog/database-monitoring @DataDog/agent-integrations
+/postgres/*.md                                      @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/postgres/manifest.json                             @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/mysql/                                             @DataDog/database-monitoring @DataDog/agent-integrations
+/mysql/*.md                                         @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/mysql/manifest.json                                @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/sqlserver/                                         @DataDog/agent-integrations @DataDog/database-monitoring
+/sqlserver/*.md                                     @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
+/sqlserver/manifest.json                            @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
+/oracle/                                            @DataDog/agent-integrations @DataDog/database-monitoring
+/oracle/*.md                                        @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
+/oracle/manifest.json                               @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
 
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/software-integrity-and-trust

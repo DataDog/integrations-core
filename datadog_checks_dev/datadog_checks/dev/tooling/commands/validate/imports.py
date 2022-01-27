@@ -4,11 +4,18 @@
 
 import click
 
-from datadog_checks.dev.tooling.annotations import annotate_error
-
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_check_files
-from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success, echo_warning
+from ..console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_error,
+    echo_debug,
+    echo_failure,
+    echo_info,
+    echo_success,
+    echo_warning,
+)
 
 
 def validate_import(filepath, check, autofix):

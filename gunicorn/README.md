@@ -6,7 +6,7 @@
 
 The Datadog Agent collects one main metric about Gunicorn: the number of worker processes running. It also sends one service check: whether or not Gunicorn is running.
 
-Gunicorn itself can provide further metrics via DogStatsD, including those for:
+Gunicorn itself can provide further metrics using DogStatsD, including:
 
 - Total request rate
 - Request rate by status code (2xx, 3xx, 4xx, 5xx)
@@ -19,7 +19,7 @@ Gunicorn itself can provide further metrics via DogStatsD, including those for:
 
 The Datadog Agent's Gunicorn check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Gunicorn servers.
 
-The Gunicorn check requires your Gunicorn app's Python environment to have the [`setproctitle`][3] package; without it, the Datadog Agent will always report that it cannot find a `gunicorn` master process (and hence, cannot find workers, either). Install the `setproctitle` package in your app's Python environment if you want to collect the `gunicorn.workers` metric.
+The Gunicorn check requires your Gunicorn app's Python environment to have the [`setproctitle`][3] package; without it, the Datadog Agent reports that it cannot find a `gunicorn` master process (and hence, cannot find workers, either). Install the `setproctitle` package in your app's Python environment if you want to collect the `gunicorn.workers` metric.
 
 ### Configuration
 
@@ -51,12 +51,6 @@ instances:
 
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -65,9 +59,11 @@ _Available for Agent versions >6.0_
    logs_enabled: true
    ```
 
-2. Use the following command to configure the path of the access log file as explained in the [Gunicorn Documentation][9]: `--access-logfile <MY_FILE_PATH>`
+2. Use the following command to configure the path of the [access log][9] file:
+    `--access-logfile <MY_FILE_PATH>`
 
-3. Use the following command to configure the path of the error log file as explained in the [Gunicorn Documentation][10]: `--error-logfile FILE, --log-file <MY_FILE_PATH>`
+3. Use the following command to configure the path of the [error log][10] file:
+    `--error-logfile FILE, --log-file <MY_FILE_PATH>`
 
 4. Add this configuration block to your `gunicorn.d/conf.yaml` file to start collecting your Gunicorn logs:
 

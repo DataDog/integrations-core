@@ -4,7 +4,6 @@
 
 import pytest
 
-from datadog_checks.base import ConfigurationError
 from datadog_checks.oracle import Oracle
 
 from .common import CHECK_NAME
@@ -25,11 +24,55 @@ def test__get_config(check, instance):
     assert len(check._query_manager.queries) == 3
 
 
-def test_check_misconfig(instance):
+def test_check_misconfig_null_server(dd_run_check, instance):
     """
-    Test bad config values
+    Test null server
     """
     instance['server'] = None
     check = Oracle(CHECK_NAME, {}, [instance])
-    with pytest.raises(ConfigurationError):
-        check.validate_config()
+    with pytest.raises(Exception):
+        dd_run_check(check)
+
+
+def test_check_misconfig_invalid_protocol(dd_run_check, instance):
+    """
+    Test invalid protocol
+    """
+    instance['protocol'] = 'TCPP'
+    check = Oracle(CHECK_NAME, {}, [instance])
+    with pytest.raises(Exception):
+        dd_run_check(check)
+
+
+@pytest.mark.parametrize(
+    'jdbc_path, jdbc_type',
+    [
+        pytest.param('', 'SSO', id='Test missing JDBC truststore path'),
+        pytest.param('/path/to/jdbc/truststore', '', id='Test missing JDBC truststore type'),
+    ],
+)
+def test_check_misconfig_empty_truststore_and_type(dd_run_check, instance, jdbc_path, jdbc_type):
+    """
+    Test if connecting via JDBC with TCPS, both `jdbc_truststore` and `jdbc_truststore_type` are non-empty
+    """
+    instance['jdbc_driver_path'] = '/path/to/jdbc/driver'
+    instance['jdbc_truststore_path'] = jdbc_path
+    instance['jdbc_truststore_type'] = jdbc_type
+    instance['protocol'] = 'TCPS'
+
+    check = Oracle(CHECK_NAME, {}, [instance])
+    with pytest.raises(Exception):
+        dd_run_check(check)
+
+
+def test_check_misconfig_invalid_truststore_type(dd_run_check, instance):
+    """
+    Test truststore type is valid
+    """
+    instance['jdbc_driver_path'] = '/path/to/jdbc/driver'
+    instance['jdbc_truststore_path'] = '/path/to/jdbc/truststore'
+    instance['jdbc_truststore_type'] = 'wrong_type'
+    instance['protocol'] = 'TCPS'
+    check = Oracle(CHECK_NAME, {}, [instance])
+    with pytest.raises(Exception):
+        dd_run_check(check)

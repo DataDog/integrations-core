@@ -12,8 +12,8 @@ pytestmark = pytest.mark.skipif(common.COUCH_MAJOR_VERSION != 1, reason='Test fo
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_couch(aggregator, check, instance):
-    check.check(instance)
+def test_couch(aggregator, check, dd_run_check):
+    dd_run_check(check)
     _assert_check(aggregator, assert_device_tag=True)
 
 

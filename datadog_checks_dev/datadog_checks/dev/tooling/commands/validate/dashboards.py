@@ -8,11 +8,19 @@ import click
 
 from ....fs import write_file
 from ....utils import read_file
-from ...annotations import annotate_display_queue, annotate_error
 from ...manifest_utils import Manifest
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_assets_from_manifest, get_manifest_file
-from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success
+from ..console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_display_queue,
+    annotate_error,
+    echo_debug,
+    echo_failure,
+    echo_info,
+    echo_success,
+)
 
 REQUIRED_ATTRIBUTES = {"description", "template_variables", "widgets"}
 DASHBOARD_ONLY_FIELDS = {"layout_type", "title", "created_at"}

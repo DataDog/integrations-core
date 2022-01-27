@@ -30,11 +30,14 @@ VALID_METRIC_TYPES = ('gauge', 'rate', 'histogram')
 SERVICE_CHECK_NAME = 'sqlserver.can_connect'
 DATABASE_SERVICE_CHECK_NAME = 'sqlserver.database.can_connect'
 
+DBM_MIGRATED_METRICS = [
+    ('sqlserver.stats.connections', 'User Connections', ''),  # LARGE_RAWCOUNT
+]
+
 # Default performance table metrics - Database Instance level
 # datadog metric name, counter name, instance name
 INSTANCE_METRICS = [
     # SQLServer:General Statistics
-    ('sqlserver.stats.connections', 'User Connections', ''),  # LARGE_RAWCOUNT
     ('sqlserver.stats.procs_blocked', 'Processes blocked', ''),  # LARGE_RAWCOUNT
     # SQLServer:Access Methods
     ('sqlserver.access.page_splits', 'Page Splits/sec', ''),  # BULK_COUNT
@@ -153,4 +156,17 @@ DATABASE_FRAGMENTATION_METRICS = [
 DATABASE_MASTER_FILES = [
     ('sqlserver.database.master_files.size', 'sys.master_files', 'size'),
     ('sqlserver.database.master_files.state', 'sys.master_files', 'state'),
+]
+
+DATABASE_FILES_IO = [
+    ('sqlserver.files.size_on_disk', 'size_on_disk_bytes', 'gauge'),
+    ('sqlserver.files.reads', 'num_of_reads', 'monotonic_count'),
+    ('sqlserver.files.read_bytes', 'num_of_bytes_read', 'monotonic_count'),
+    ('sqlserver.files.read_io_stall', 'io_stall_read_ms', 'monotonic_count'),
+    ('sqlserver.files.read_io_stall_queued', 'io_stall_queued_read_ms', 'monotonic_count'),
+    ('sqlserver.files.writes', 'num_of_writes', 'monotonic_count'),
+    ('sqlserver.files.written_bytes', 'num_of_bytes_written', 'monotonic_count'),
+    ('sqlserver.files.write_io_stall', 'io_stall_write_ms', 'monotonic_count'),
+    ('sqlserver.files.write_io_stall_queued', 'io_stall_queued_write_ms', 'monotonic_count'),
+    ('sqlserver.files.io_stall', 'io_stall', 'monotonic_count'),
 ]

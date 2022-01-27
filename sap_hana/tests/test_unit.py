@@ -19,7 +19,7 @@ def error(*args, **kwargs):
     raise Exception('test')
 
 
-def test_error_query(instance):
+def test_error_query(instance, dd_run_check):
     check = SapHanaCheck('sap_hana', {}, [instance])
     check.log = mock.MagicMock()
 
@@ -29,11 +29,11 @@ def test_error_query(instance):
     conn.cursor = lambda: cursor
     check._conn = conn
 
-    check.check(None)
+    dd_run_check(check)
     check.log.error.assert_any_call('Error querying %s: %s', 'SYS.M_DATABASE', 'test')
 
 
-def test_error_unknown(instance):
+def test_error_unknown(instance, dd_run_check):
     def query_master_database():
         error()
 
@@ -46,9 +46,9 @@ def test_error_unknown(instance):
     conn.cursor = lambda: cursor
     check._conn = conn
 
-    check.query_master_database = query_master_database
+    check._default_methods.append(query_master_database)
 
-    check.check(None)
+    dd_run_check(check)
     check.log.exception.assert_any_call('Unexpected error running `%s`: %s', 'query_master_database', 'test')
 
 

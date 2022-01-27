@@ -5,10 +5,9 @@ import re
 
 import click
 
-from ...annotations import annotate_display_queue
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_setup_file, normalize_package_name, read_setup_file
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ..console import CONTEXT_SETTINGS, abort, annotate_display_queue, echo_failure, echo_info, echo_success
 
 # Some integrations aren't installable via the integration install command, so exclude them from the name requirements
 EXCLUDE_CHECKS = ["datadog_checks_downloader", "datadog_checks_dev", "datadog_checks_base"]

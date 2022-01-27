@@ -14,8 +14,6 @@ CLUSTER_TAG = ["cluster_name:test-cluster"]
 ELASTIC_CLUSTER_TAG = ["elastic_cluster:test-cluster"]
 IS_OPENSEARCH = 'opensearch' in os.getenv('ELASTIC_REGISTRY')
 URL = 'http://{}:{}'.format(HOST, PORT)
-if IS_OPENSEARCH:
-    URL = 'https://{}:{}'.format(HOST, PORT)
 
 ELASTIC_VERSION = os.getenv('ELASTIC_VERSION', os.environ['ELASTIC_IMAGE'])
 

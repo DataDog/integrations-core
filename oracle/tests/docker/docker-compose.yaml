@@ -3,10 +3,17 @@ version: '3'
 services:
   oracle:
     container_name: oracle-database
-    image: container-registry.oracle.com/database/enterprise:${ORACLE_DATABASE_VERSION}-slim
+    build:
+      context: .
+      args:
+        - ORACLE_DATABASE_VERSION=${ORACLE_DATABASE_VERSION}
     shm_size: '8gb'
     volumes:
       - ./data:/host/data
+      - ./server/listener.ora:/host/server/listener.ora
+      - ./server/sqlnet.ora:/host/server/sqlnet.ora
+      - ./server/tnsnames.ora:/host/server/tnsnames.ora
+      - ./server/server_wallet:/host/server/server_wallet
     environment:
       - DB_SID=InfraDB
       - DB_PDB=InfraPDB1
@@ -14,4 +21,5 @@ services:
       - DB_BUNDLE=basic
     ports:
       - "1521:1521"
+      - "2484:2484"
       - "5500:5500"

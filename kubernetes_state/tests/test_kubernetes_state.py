@@ -290,6 +290,9 @@ def test_update_kube_state_metrics(aggregator, instance, check):
         check.check(instance)
 
     aggregator.assert_service_check(NAMESPACE + '.node.ready', check.OK)
+    aggregator.assert_service_check(
+        NAMESPACE + '.node.ready', check.WARNING, tags=['node:test-test-node', 'optional:tag1']
+    )
     aggregator.assert_service_check(NAMESPACE + '.node.out_of_disk', check.OK)
     aggregator.assert_service_check(NAMESPACE + '.node.memory_pressure', check.OK)
     aggregator.assert_service_check(NAMESPACE + '.node.network_unavailable', check.OK)
@@ -303,7 +306,7 @@ def test_update_kube_state_metrics(aggregator, instance, check):
         NAMESPACE + '.nodes.by_condition', tags=['condition:ready', 'status:false', 'optional:tag1'], value=0
     )
     aggregator.assert_metric(
-        NAMESPACE + '.nodes.by_condition', tags=['condition:ready', 'status:unknown', 'optional:tag1'], value=0
+        NAMESPACE + '.nodes.by_condition', tags=['condition:ready', 'status:unknown', 'optional:tag1'], value=1
     )
 
     # Make sure we send counts for all phases to avoid no-data graphing issues
@@ -886,9 +889,9 @@ def test_telemetry(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=94412.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=1002.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1334.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=94499.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=1004.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1336.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=332.0)
     aggregator.assert_metric(

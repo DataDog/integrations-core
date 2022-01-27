@@ -13,8 +13,12 @@ from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host
+from datadog_checks.base.utils.serialization import json
+from datadog_checks.sqlserver.activity import SqlserverActivity
+from datadog_checks.sqlserver.metrics import SqlFileStats
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 
 try:
@@ -31,10 +35,12 @@ from .const import (
     AUTODISCOVERY_QUERY,
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
+    DATABASE_FILES_IO,
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
+    DBM_MIGRATED_METRICS,
     DEFAULT_AUTODISCOVERY_INTERVAL,
     FCI_METRICS,
     INSTANCE_METRICS,
@@ -81,6 +87,7 @@ class SQLServer(AgentCheck):
         self.instance_per_type_metrics = defaultdict(set)
         self.do_check = True
 
+        self.reported_hostname = self.instance.get('reported_hostname')
         self.autodiscovery = is_affirmative(self.instance.get('database_autodiscovery'))
         self.autodiscovery_include = self.instance.get('autodiscovery_include', ['.*'])
         self.autodiscovery_exclude = self.instance.get('autodiscovery_exclude', [])
@@ -106,6 +113,23 @@ class SQLServer(AgentCheck):
         self.dbm_enabled = self.instance.get('dbm', False)
         self.statement_metrics_config = self.instance.get('query_metrics', {}) or {}
         self.statement_metrics = SqlserverStatementMetrics(self)
+        self.activity_config = self.instance.get('query_activity', {}) or {}
+        self.activity = SqlserverActivity(self)
+        obfuscator_options_config = self.instance.get('obfuscator_options', {}) or {}
+        self.obfuscator_options = to_native_string(
+            json.dumps(
+                {
+                    # Valid values for this can be found at
+                    # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/database.md#connection-level-attributes
+                    'dbms': 'mssql',
+                    'replace_digits': obfuscator_options_config.get('replace_digits', False),
+                    'return_json_metadata': obfuscator_options_config.get('collect_metadata', False),
+                    'table_names': obfuscator_options_config.get('collect_tables', True),
+                    'collect_commands': obfuscator_options_config.get('collect_commands', True),
+                    'collect_comments': obfuscator_options_config.get('collect_comments', True),
+                }
+            )
+        )
 
         self.static_info_cache = TTLCache(
             maxsize=100,
@@ -115,6 +139,7 @@ class SQLServer(AgentCheck):
 
     def cancel(self):
         self.statement_metrics.cancel()
+        self.activity.cancel()
 
     def config_checks(self):
         if self.autodiscovery and self.instance.get('database'):
@@ -151,7 +176,9 @@ class SQLServer(AgentCheck):
     @property
     def resolved_hostname(self):
         if self._resolved_hostname is None:
-            if self.dbm_enabled:
+            if self.reported_hostname:
+                self._resolved_hostname = self.reported_hostname
+            elif self.dbm_enabled:
                 host, port = self.split_sqlserver_host_port(self.instance.get('host'))
                 self._resolved_hostname = resolve_db_host(host)
             else:
@@ -171,6 +198,14 @@ class SQLServer(AgentCheck):
 
     def debug_tags(self):
         return self.tags + ['agent_hostname:{}'.format(self.agent_hostname)]
+
+    def debug_stats_kwargs(self, tags=None):
+        tags = tags if tags else []
+        return {
+            "tags": self.debug_tags() + tags,
+            "hostname": self.resolved_hostname,
+            "raw": True,
+        }
 
     @property
     def agent_hostname(self):
@@ -300,8 +335,12 @@ class SQLServer(AgentCheck):
         # If several check instances are querying the same server host, it can be wise to turn these off
         # to avoid sending duplicate metrics
         if is_affirmative(self.instance.get('include_instance_metrics', True)):
+            common_metrics = INSTANCE_METRICS
+            if not self.dbm_enabled:
+                common_metrics = common_metrics + DBM_MIGRATED_METRICS
+
             self._add_performance_counters(
-                chain(INSTANCE_METRICS, INSTANCE_METRICS_TOTAL), metrics_to_collect, tags, db=None
+                chain(common_metrics, INSTANCE_METRICS_TOTAL), metrics_to_collect, tags, db=None
             )
 
         # populated through autodiscovery
@@ -316,6 +355,12 @@ class SQLServer(AgentCheck):
             for db_name in db_names:
                 cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+
+        # Load database files
+        for name, column, metric_type in DATABASE_FILES_IO:
+            cfg = {'name': name, 'column': column, 'tags': tags}
+
+            metrics_to_collect.append(SqlFileStats(cfg, None, getattr(self, metric_type), column, self.log))
 
         # Load AlwaysOn metrics
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
@@ -540,6 +585,7 @@ class SQLServer(AgentCheck):
                         self.connection.check_database_conns(db_name)
             if self.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
+                self.activity.run_job_loop(self.tags)
 
         else:
             self.log.debug("Skipping check")
@@ -561,7 +607,12 @@ class SQLServer(AgentCheck):
                         instance_results[cls] = None, None
                     else:
                         try:
-                            rows, cols = getattr(metrics, cls).fetch_all_values(cursor, list(metric_names), self.log)
+                            db_names = self.databases or [
+                                self.instance.get('database', self.connection.DEFAULT_DATABASE)
+                            ]
+                            rows, cols = getattr(metrics, cls).fetch_all_values(
+                                cursor, list(metric_names), self.log, databases=db_names
+                            )
                         except Exception as e:
                             self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
                             rows, cols = None, None

@@ -74,13 +74,16 @@ elasticsearch.indices.count,gauge,,index,,The number of indices in the cluster.,
 elasticsearch.indices.indexing.index_failed,gauge,,,,The number of failed indexing operations.,-1,elasticsearch,index fails
 elasticsearch.indices.indexing.throttle_time,gauge,,millisecond,,The total time indexing waited due to throttling.,-1,elasticsearch,index fails
 elasticsearch.indices.indexing.throttle_time.count,count,,millisecond,,The total time indexing waited due to throttling.,-1,elasticsearch,index fails
+elasticsearch.indices.query_cache.cache_count,count,,,,,0,elasticsearch,
+elasticsearch.indices.query_cache.cache_size,gauge,,,,,0,elasticsearch,
 elasticsearch.indices.query_cache.evictions,gauge,,eviction,,The number of query cache evictions.,0,elasticsearch,query cache evictions
 elasticsearch.indices.query_cache.evictions.count,count,,eviction,,The number of query cache evictions.,0,elasticsearch,query cache evictions
 elasticsearch.indices.query_cache.hit_count,gauge,,hit,,The number of query cache hits.,0,elasticsearch,query cache hits
 elasticsearch.indices.query_cache.hit_count.count,count,,hit,,The number of query cache hits.,0,elasticsearch,query cache hits
 elasticsearch.indices.query_cache.memory_size_in_bytes,gauge,,byte,,The memory used by the query cache.,0,elasticsearch,query cache mem
 elasticsearch.indices.query_cache.miss_count,gauge,,miss,,The number of query cache misses.,0,elasticsearch,query cache misses
-elasticsearch.indices.query_cache.miss_count.count,count,,miss,,The number of query cache misses.,0,elasticsearch,query cache misses
+elasticsearch.indices.query_cache.miss_count.total,count,,miss,,The number of query cache misses.,0,elasticsearch,query cache misses
+elasticsearch.indices.query_cache.total_count,count,,,,,0,elasticsearch,
 elasticsearch.indices.recovery.current_as_source,gauge,,,,The number of ongoing recoveries for which a shard serves as a source.,0,elasticsearch,index recoveries shard src
 elasticsearch.indices.recovery.current_as_target,gauge,,,,The number of ongoing recoveries for which a shard serves as a target.,0,elasticsearch,index recoveries shard tgt
 elasticsearch.indices.recovery.throttle_time,gauge,,millisecond,,The total time recoveries waited due to throttling.,-1,elasticsearch,index recoveries throttle
@@ -149,8 +152,8 @@ elasticsearch.primaries.merges.total.size,gauge,,byte,,The total size of all mer
 elasticsearch.primaries.merges.total.time,gauge,,second,,The total time spent on segment merging on the primary shards.,0,elasticsearch,primary merge total time
 elasticsearch.primaries.refresh.total,gauge,,refresh,,The total number of index refreshes on the primary shards.,0,elasticsearch,primary refresh total
 elasticsearch.primaries.refresh.total.time,gauge,,second,,The total time spent on index refreshes on the primary shards.,0,elasticsearch,primary refresh total time
-elasticsearch.primaries.refresh.external_total,gauge,,refresh,,The total number of external index refreshes on the primary shards.,0,elasticsearch,primary refresh total
-elasticsearch.primaries.refresh.external_total.time,gauge,,second,,The total time spent on external index refreshes on the primary shards.,0,elasticsearch,primary refresh total time
+elasticsearch.primaries.refresh.external.total,gauge,,refresh,,The total number of external index refreshes on the primary shards.,0,elasticsearch,primary refresh total
+elasticsearch.primaries.refresh.external.total.time,gauge,,second,,The total time spent on external index refreshes on the primary shards.,0,elasticsearch,primary refresh total time
 elasticsearch.primaries.search.fetch.current,gauge,,fetch,,The number of query fetches currently running on the primary shards.,0,elasticsearch,primary current fetches
 elasticsearch.primaries.search.fetch.time,gauge,,second,,The total time spent on query fetches on the primary shards.,0,elasticsearch,primary fetch total time
 elasticsearch.primaries.search.fetch.total,gauge,,fetch,,The total number of query fetches on the primary shards.,0,elasticsearch,primary fetch total
@@ -163,8 +166,8 @@ elasticsearch.refresh.total,gauge,,refresh,,The total number of index refreshes.
 elasticsearch.refresh.total.count,count,,refresh,,The total number of index refreshes.,0,elasticsearch,total refreshes
 elasticsearch.refresh.total.time,gauge,,second,,The total time spent on index refreshes.,0,elasticsearch,total refresh time
 elasticsearch.refresh.total.time.count,count,,second,,The total time spent on index refreshes.,0,elasticsearch,total refresh time
-elasticsearch.refresh.external_total,gauge,,refresh,,The total number of external index refreshes.,0,elasticsearch,total refreshes
-elasticsearch.refresh.external_total.time,gauge,,second,,The total time spent on external index refreshes.,0,elasticsearch,total refresh time
+elasticsearch.refresh.external.total,gauge,,refresh,,The total number of external index refreshes.,0,elasticsearch,total refreshes
+elasticsearch.refresh.external.total.time,gauge,,second,,The total time spent on external index refreshes.,0,elasticsearch,total refresh time
 elasticsearch.relocating_shards,gauge,,shard,,The number of shards that are relocating from one node to another.,0,elasticsearch,relocating shards
 elasticsearch.search.fetch.current,gauge,,fetch,,The number of search fetches currently running.,0,elasticsearch,current fetches
 elasticsearch.search.fetch.open_contexts,gauge,,query,,The number of active searches.,0,elasticsearch,active searches
@@ -288,6 +291,11 @@ elasticsearch.thread_pool.snapshot.rejected,gauge,,thread,,The number of rejecte
 elasticsearch.thread_pool.snapshot.rejected.count,count,,thread,,The number of rejected threads in the snapshot pool.,0,elasticsearch,rejected snapshot threads
 elasticsearch.thread_pool.snapshot.completed,gauge,,thread,,The number of completed threads in the snapshot pool.,0,elasticsearch,completed snapshot threads
 elasticsearch.thread_pool.snapshot.completed.count,count,,thread,,The number of completed threads in the snapshot pool.,0,elasticsearch,completed snapshot threads
+elasticsearch.thread_pool.warmer.active,gauge,,thread,,The number of active threads in the warmer pool.,0,elasticsearch,active warmer threads
+elasticsearch.thread_pool.warmer.completed,gauge,,thread,,The number of completed threads in the warmer pool.,0,elasticsearch,completed warmer threads
+elasticsearch.thread_pool.warmer.queue,gauge,,thread,,The number of queued threads in the warmer pool.,0,elasticsearch,queued warmer threads
+elasticsearch.thread_pool.warmer.rejected,gauge,,thread,,The number of rejected threads in the warmer pool.,0,elasticsearch,rejected warmer threads
+elasticsearch.thread_pool.warmer.threads,gauge,,thread,,The total number of threads in the warmer pool.,0,elasticsearch,total warmer threads
 elasticsearch.thread_pool.write.active,gauge,,thread,,The number of active threads in the write pool.,0,elasticsearch,active write threads
 elasticsearch.thread_pool.write.queue,gauge,,thread,,The number of queued threads in the write pool.,0,elasticsearch,queued write threads
 elasticsearch.thread_pool.write.threads,gauge,,thread,,The total number of threads in the write pool.,0,elasticsearch,total write threads

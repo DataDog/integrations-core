@@ -28,7 +28,13 @@ def main():
     )
 
     # Start running the query that prints the running counts to the console
-    query = word_counts.writeStream.outputMode("complete").format("console").option('truncate', 'false').start()
+    query = (
+        word_counts.writeStream.queryName("my_named_query")
+        .outputMode("complete")
+        .format("console")
+        .option('truncate', 'false')
+        .start()
+    )
 
     query.awaitTermination()
     print("Game over")

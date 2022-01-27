@@ -6,12 +6,11 @@ import os
 import click
 
 from ....utils import get_next
-from ...annotations import annotate_error, annotate_errors
 from ...constants import get_agent_requirements, get_root
 from ...dependencies import read_agent_dependencies, read_check_base_dependencies, read_check_dependencies
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks
-from ..console import CONTEXT_SETTINGS, abort, echo_failure
+from ..console import CONTEXT_SETTINGS, abort, annotate_error, annotate_errors, echo_failure
 
 
 def get_marker_string(dependency_definition):

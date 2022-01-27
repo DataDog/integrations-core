@@ -651,6 +651,10 @@ class TestTags:
 class LimitedCheck(AgentCheck):
     DEFAULT_METRIC_LIMIT = 10
 
+    def check(self, _):
+        for i in range(5):
+            self.gauge('foo', i)
+
 
 class TestLimits:
     def test_context_uid(self, aggregator):
@@ -763,6 +767,26 @@ class TestLimits:
         for _ in range(12):
             check.gauge("metric", 0)
         assert len(aggregator.metrics("metric")) == 10
+
+    def test_debug_metrics_under_limit(self, aggregator, dd_run_check):
+        instance = {'debug_metrics': {'metric_contexts': True}}
+        check = LimitedCheck('test', {}, [instance])
+        dd_run_check(check)
+
+        assert len(check.get_warnings()) == 0
+        assert len(aggregator.metrics('foo')) == 5
+        aggregator.assert_metric('datadog.agent.metrics.contexts.limit', 10)
+        aggregator.assert_metric('datadog.agent.metrics.contexts.total', 5)
+
+    def test_debug_metrics_over_limit(self, aggregator, dd_run_check):
+        instance = {'debug_metrics': {'metric_contexts': True}, 'max_returned_metrics': 3}
+        check = LimitedCheck('test', {}, [instance])
+        dd_run_check(check)
+
+        assert len(check.get_warnings()) == 1
+        assert len(aggregator.metrics('foo')) == 3
+        aggregator.assert_metric('datadog.agent.metrics.contexts.limit', 3)
+        aggregator.assert_metric('datadog.agent.metrics.contexts.total', 5)
 
 
 class TestCheckInitializations:

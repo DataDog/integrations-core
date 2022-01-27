@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors the usage of the Linux TCP receive and send queues, and can detect if a TCP receive or send queue is full for individual containers.
+This check monitors the usage of the Linux TCP receive and send queues. It can detect if a TCP receive or send queue is full for individual containers.
 
 ## Setup
 
@@ -44,7 +44,7 @@ system_probe_config:
 
 ### Configuration with Helm
 
-With the [Datadog Helm chart][3], we must ensure that `system-probe` is activated by setting `datadog.systemProbe.enabled` to `true` in the `values.yaml` file.
+With the [Datadog Helm chart][3], the `system-probe` must be activated by setting `datadog.systemProbe.enabled` to `true` in the `values.yaml` file.
 Then, the check can be activated by setting the `datadog.systemProbe.enableTCPQueueLength` parameter.
 
 ### Validation

@@ -55,26 +55,20 @@ For containerized environments, see the [Autodiscovery Integration Templates][7]
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection][8].
 
 | Parameter      | Value                                                |
 | -------------- | ---------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "linkerd", "service": "<SERVICE_NAME>"}` |
 
-To increase the verbosity of the data plane logs, see [the official Linkerd documentation][9].
+To increase the verbosity of the data plane logs, see [Modifying the Proxy Log Level][9].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 ### Validation
 
-[Run the Agent's status subcommand][10] and look for `linkerd` under the Checks section.
+Run the [Agent's status subcommand][10] and look for `linkerd` under the Checks section.
 
 ## Data Collected
 
@@ -82,17 +76,17 @@ To increase the verbosity of the data plane logs, see [the official Linkerd docu
 
 See [metadata.csv][11] for a list of metrics provided by this integration.
 
-For linkerd v1, see [finagle metrics docs][12] for a detailed description of some of the available metrics and [this gist][13] for an example of metrics exposed by linkerd.
+For Linkerd v1, see the [finagle metrics guide][12] for metric descriptions and [this gist][13] for an example of metrics exposed by Linkerd.
 
-Attention: Depending on your linkerd configuration, some metrics might not be exposed by linkerd.
+**Note**: Depending on your Linkerd configuration, some metrics might not be exposed by Linkerd.
 
-To list the metrics exposed by your current configuration, run
+To list the metrics exposed by your current configuration, run:
 
 ```bash
 curl <linkerd_prometheus_endpoint>
 ```
 
-Where `linkerd_prometheus_endpoint` is the linkerd prometheus endpoint (you should use the same value as the `prometheus_url` config key in your `linkerd.yaml`)
+Where `linkerd_prometheus_endpoint` is the Linkerd Prometheus endpoint (you should use the same value as the `prometheus_url` config key in your `linkerd.yaml`)
 
 If you need to use a metric that is not provided by default, you can add an entry to `linkerd.yaml`.
 

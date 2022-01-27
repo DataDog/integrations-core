@@ -16,9 +16,8 @@ from io import open
 import yaml
 from six.moves.urllib.request import urlopen
 
-from datadog_checks.dev.fs import basepath, file_exists, get_parent_dir, path_join, read_file
-
 from .ci import running_on_ci, running_on_gh_actions, running_on_windows_ci  # noqa: F401
+from .fs import basepath, file_exists, get_parent_dir, path_join, read_file
 
 __platform = platform.system()
 ON_MACOS = os.name == 'mac' or __platform == 'Darwin'

@@ -3,16 +3,24 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+import re
 
 import click
 
 from ....fs import file_exists, read_file, write_file
-from ...annotations import annotate_display_queue, annotate_error
 from ...constants import get_root
 from ...manifest_utils import Manifest
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_manifest_file, parse_version_parts
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ..console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_display_queue,
+    annotate_error,
+    echo_failure,
+    echo_info,
+    echo_success,
+)
 
 REQUIRED_ATTRIBUTES = {'agent_version', 'check', 'description', 'groups', 'integration', 'name', 'statuses'}
 SERVICE_CHECK_NAMES = ['ok', 'warning', 'critical', 'unknown']
@@ -23,12 +31,9 @@ CHECK_TO_NAME = {
     'cassandra_nodetool': 'Cassandra',
     'disk': 'System',
     'dns_check': 'System',
-    'hdfs_datanode': 'HDFS',
-    'hdfs_namenode': 'HDFS',
     'http_check': 'System',
     'kubelet': 'Kubernetes',
     'kubernetes_state': 'Kubernetes',
-    'mesos_master': 'mesos',
     'mesos_slave': 'Mesos',
     'ntp': 'System',
     'openstack_controller': 'OpenStack',
@@ -37,6 +42,10 @@ CHECK_TO_NAME = {
     'system_core': 'System',
     'tcp_check': 'System',
 }
+
+INVALID_CHAR_RE = re.compile(r"[^a-zA-Z0-9_.]+")
+INVALID_SEQ_RE = re.compile(r"_{1,}\.+_*|_*\.+_{1,}|_{2,}|\.{2,}")
+INVALID_END_RE = re.compile(r"^_+|_+$")
 
 
 @click.command('service-checks', context_settings=CONTEXT_SETTINGS, short_help='Validate `service_checks.json` files')
@@ -124,9 +133,29 @@ def service_checks(check, sync):
 
             # check
             check = service_check.get('check')
+            invalid_chars = INVALID_CHAR_RE.findall(check)
+            invalid_seq = INVALID_SEQ_RE.findall(check)
+            invalid_end = INVALID_END_RE.findall(check)
             if not check or not isinstance(check, str):
                 file_failed = True
                 display_queue.append((echo_failure, '  required non-null string: check'))
+            elif invalid_chars or invalid_seq or invalid_end:
+                file_failed = True
+                if invalid_chars:
+                    display_queue.append(
+                        (echo_failure, f'  {check} contains one or more invalid characters: {invalid_chars}')
+                    )
+                if invalid_seq:
+                    display_queue.append(
+                        (echo_failure, f'  {check} contains one or more invalid sequences: {invalid_seq}')
+                    )
+                if invalid_end:
+                    display_queue.append(
+                        (
+                            echo_failure,
+                            f'  {check} contains the following invalid start or end character: {invalid_end}',
+                        )
+                    )
             else:
                 if check in unique_checks:
                     file_failed = True
