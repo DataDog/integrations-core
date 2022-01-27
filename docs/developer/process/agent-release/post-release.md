@@ -49,6 +49,7 @@ There are two main cases where the release manager will have to release integrat
     - Create a branch based off of the release branch. 
     - Run the [integration release](../integration-release.md#new-integrations) command on that branch.
     - Make a pull request with that branch, then merge it to the release branch.
+    - Note: if there are multiple integrations to release, do not use `ddev release make all --exclude <INTGS>`. Once `master` is unfrozen, releasing `all` may result in unwanted and unshipped changes to the release branch if new changes are introduced. Use `ddev release make check1 check2` instead if releasing `check1` and `check2`.
 
     !!! important
         Remember to trigger the release pipeline and build the wheel. You can do so by [tagging the release](../../ddev/cli.md#ddev-release-tag):
