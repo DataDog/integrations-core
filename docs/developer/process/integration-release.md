@@ -110,7 +110,7 @@ You may also pass a comma-separated list of checks to skip using the `--exclude`
 ddev release make all --exclude datadog_checks_dev
 ```
 
-Note: releasing `all` will update the `.in-toto` file to include every integration, not just the changed integrations.
+Note: releasing `all` will update the `.in-toto` file to include every integration, not just the changed integrations. This may result in an unnecessarily large `.in-toto` file if only releasing a few integrations.
 
 !!! warning
     There is a known GitHub limitation where if an issue has too many labels (100), its state cannot be modified.
@@ -119,7 +119,7 @@ Note: releasing `all` will update the `.in-toto` file to include every integrati
     1. Run the [remove-labels](../ddev/cli.md#ddev-meta-scripts-remove-labels) command
     1. After merging, manually add back the `changelog/no-changelog` label
 
-Another option for bulk releases is selectively choosing the integrations to release:
+Another option for bulk releases is selectively choosing the integrations to release. For example, if you are just releasing `check1` and `check2`: 
 
 ```
 ddev release make check1 check2
