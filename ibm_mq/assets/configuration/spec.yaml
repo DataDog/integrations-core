@@ -217,12 +217,12 @@ files:
           type: object
           minProperties: 1
       - name: override_hostname
-          description: |
-            If true, the check will use the provided host as hostname instead of the agent host.
-            In that case the `mq_host` tag will not be emitted. This wont work along connection_name
-          value:
-            type: boolean
-            example: false
+        description: |
+          If true, the check will use the provided host as hostname instead of the agent host.
+          In that case the `mq_host` tag will not be emitted. This wont work along connection_name
+        value:
+          type: boolean
+          example: false
       - template: instances/default
   - template: logs
     example:
