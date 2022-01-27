@@ -183,6 +183,7 @@ def test_statement_metrics_and_plans(
     disable_secondary_tags,
     match_pattern,
     caplog,
+    datadog_agent,
 ):
     caplog.set_level(logging.INFO)
     if disable_secondary_tags:
@@ -220,6 +221,7 @@ def test_statement_metrics_and_plans(
     # host metadata
     assert payload['sqlserver_version'].startswith("Microsoft SQL Server"), "invalid version"
     assert payload['host'] == "stubbed.hostname", "wrong hostname"
+    assert payload['ddagenthostname'] == datadog_agent.get_hostname()
     assert set(payload['tags']) == expected_instance_tags, "wrong instance tags for dbm-metrics event"
     assert type(payload['min_collection_interval']) in (float, int), "invalid min_collection_interval"
     # metrics rows

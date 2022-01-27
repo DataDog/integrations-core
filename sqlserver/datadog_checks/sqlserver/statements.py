@@ -295,6 +295,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
             'sqlserver_version': self.check.static_info_cache.get("version", ""),
             'ddagentversion': datadog_agent.get_version(),
+            'ddagenthostname': self._check.agent_hostname,
         }
 
     @tracked_method(agent_check_getter=agent_check_getter)
