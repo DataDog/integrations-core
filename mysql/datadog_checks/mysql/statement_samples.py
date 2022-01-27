@@ -23,6 +23,8 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 
+from .util import DatabaseConfigurationWarning
+
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
 # unless a specific table is configured, we try all of the events_statements tables in descending order of
@@ -197,6 +199,15 @@ PYMYSQL_NON_RETRYABLE_ERRORS = frozenset(
         1049,  # unknown database
         1305,  # procedure does not exist
         1370,  # no execute on procedure
+    }
+)
+
+PYMYSQL_MISSING_EXPLAIN_STATEMENT_PROC_ERRORS = frozenset(
+    {
+        pymysql.constants.ER.ACCESS_DENIED_ERROR,
+        pymysql.constants.ER.DBACCESS_DENIED_ERROR,
+        pymysql.constants.ER.SP_DOES_NOT_EXIST,
+        pymysql.constants.ER.PROCACCESS_DENIED_ERROR,
     }
 )
 
@@ -807,7 +818,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                 )
                 continue
             try:
-                plan = self._explain_strategies[strategy](cursor, statement, obfuscated_statement)
+                plan = self._explain_strategies[strategy](schema, cursor, statement, obfuscated_statement)
                 if plan:
                     self._collection_strategy_cache[explain_state_cache_key] = ExplainState(
                         strategy=strategy, error_code=None, error_message=None
@@ -851,7 +862,7 @@ class MySQLStatementSamples(DBMAsyncJob):
 
         return None, error_states
 
-    def _run_explain(self, cursor, statement, obfuscated_statement):
+    def _run_explain(self, schema, cursor, statement, obfuscated_statement):
         """
         Run the explain using the EXPLAIN statement
         """
@@ -863,21 +874,54 @@ class MySQLStatementSamples(DBMAsyncJob):
         )
         return cursor.fetchone()[0]
 
-    def _run_explain_procedure(self, cursor, statement, obfuscated_statement):
+    def _run_explain_procedure(self, schema, cursor, statement, obfuscated_statement):
         """
         Run the explain by calling the stored procedure if available.
         """
-        self._cursor_run(cursor, 'CALL {}(%s)'.format(self._explain_procedure), statement, obfuscated_statement)
-        return cursor.fetchone()[0]
+        try:
+            self._cursor_run(cursor, 'CALL {}(%s)'.format(self._explain_procedure), statement, obfuscated_statement)
+            return cursor.fetchone()[0]
+        except pymysql.err.DatabaseError as e:
+            if e.args[0] in PYMYSQL_MISSING_EXPLAIN_STATEMENT_PROC_ERRORS:
+                self._check.warning(
+                    str(
+                        DatabaseConfigurationWarning(
+                            {'host': self._check.resolved_hostname, 'schema': schema},
+                            "Unable to collect explain plans because the procedure '%s' is either undefined or not "
+                            "granted access to in schema '%s'. See https://docs.datadoghq.com/database_monitoring/"
+                            'setup_mysql/troubleshooting#explain-plan-procedure-missing for more details: %s',
+                            self._explain_procedure,
+                            schema,
+                            str(e),
+                        )
+                    )
+                )
+            raise
 
-    def _run_fully_qualified_explain_procedure(self, cursor, statement, obfuscated_statement):
+    def _run_fully_qualified_explain_procedure(self, schema, cursor, statement, obfuscated_statement):
         """
         Run the explain by calling the fully qualified stored procedure if available.
         """
-        self._cursor_run(
-            cursor, 'CALL {}(%s)'.format(self._fully_qualified_explain_procedure), statement, obfuscated_statement
-        )
-        return cursor.fetchone()[0]
+        try:
+            self._cursor_run(
+                cursor, 'CALL {}(%s)'.format(self._fully_qualified_explain_procedure), statement, obfuscated_statement
+            )
+            return cursor.fetchone()[0]
+        except pymysql.err.DatabaseError as e:
+            if e.args[0] in PYMYSQL_MISSING_EXPLAIN_STATEMENT_PROC_ERRORS:
+                self._check.warning(
+                    str(
+                        DatabaseConfigurationWarning(
+                            {'host': self._check.resolved_hostname},
+                            "Unable to collect explain plans because the procedure '%s' is either undefined or "
+                            'not granted access to. See https://docs.datadoghq.com/database_monitoring/setup_mysql/'
+                            'troubleshooting#explain-plan-fq-procedure for more details: %s',
+                            self._fully_qualified_explain_procedure,
+                            str(e),
+                        )
+                    )
+                )
+            raise
 
     @staticmethod
     def _can_explain(obfuscated_statement):

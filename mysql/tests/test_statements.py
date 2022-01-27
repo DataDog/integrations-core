@@ -382,6 +382,71 @@ def test_statement_samples_collect(
 
 
 @pytest.mark.parametrize(
+    "statement,schema,expected_warnings",
+    [
+        (
+            'SELECT 1',
+            # Since information_schema doesn't have the explain_plan procedure, we should detect the config
+            # error and emit a warning
+            'information_schema',
+            [
+                "Unable to collect explain plans because the procedure 'explain_statement' is "
+                "either undefined or not granted access to in schema 'information_schema'. "
+                "See https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting#"
+                "explain-plan-procedure-missing for more details: "
+                "(1044, u\"Access denied for user 'dog'@'%' to database 'information_schema'\")\n"
+                "host=stubbed.hostname schema=information_schema",
+            ],
+        ),
+        (
+            # The missing table should make the explain plan fail without reporting a warning about the procedure
+            # missing
+            'SELECT * from missing_table',
+            'testdb',
+            [],
+        ),
+    ],
+)
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_missing_explain_procedure(dbm_instance, statement, schema, expected_warnings):
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+    mysql_check._statement_samples._preferred_explain_strategies = ['PROCEDURE']
+    mysql_check._statement_samples._tags = []
+    mysql_check._statement_samples._tags_str = ''
+
+    row = {
+        'current_schema': schema,
+        'sql_text': statement,
+        'query': statement,
+        'digest_text': statement,
+        'timer_end_time_s': 10003.1,
+        'timer_wait_ns': 12.9,
+    }
+
+    mysql_check._statement_samples._collect_plan_for_statement(row)
+
+    assert mysql_check.warnings == expected_warnings
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_performance_schema_disabled(dbm_instance):
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+    # Fake the performance schema being disabled to validate the reporting of a warning when this condition occurs
+    mysql_check.performance_schema_enabled = False
+
+    mysql_check._statement_metrics.collect_per_statement_metrics()
+
+    assert mysql_check.warnings == [
+        'Unable to collect statement metrics because the performance schema is disabled. See '
+        'https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting#performance-schema-not-enabled '
+        'for more details\n'
+        'host=stubbed.hostname'
+    ]
+
+
+@pytest.mark.parametrize(
     "metadata,expected_metadata_payload",
     [
         (
