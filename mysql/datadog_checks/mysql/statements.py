@@ -17,7 +17,7 @@ from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 
-from .util import DatabaseConfigurationWarning
+from .util import DatabaseConfigurationError, warning_tags
 
 try:
     import datadog_agent
@@ -115,13 +115,13 @@ class MySQLStatementMetrics(DBMAsyncJob):
         # just returns no rows without errors if the performance schema is disabled
         if not self._check.performance_schema_enabled:
             self._check.warning(
-                str(
-                    DatabaseConfigurationWarning(
-                        {'host': self._check.resolved_hostname},
-                        'Unable to collect statement metrics because the performance schema is disabled. '
-                        'See https://docs.datadoghq.com/database_monitoring/setup_mysql/'
-                        'troubleshooting#performance-schema-not-enabled for more details',
-                    )
+                'Unable to collect statement metrics because the performance schema is disabled. '
+                'See https://docs.datadoghq.com/database_monitoring/setup_mysql/'
+                'troubleshooting#%s for more details',
+                DatabaseConfigurationError.performance_schema_not_enabled.value,
+                warning_tags(
+                    code=DatabaseConfigurationError.performance_schema_not_enabled.value,
+                    host=self._check.resolved_hostname,
                 ),
             )
             return

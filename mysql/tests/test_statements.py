@@ -396,7 +396,7 @@ def test_statement_samples_collect(
                 "See https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting#"
                 "explain-plan-procedure-missing for more details: "
                 "(1044) Access denied for user 'dog'@'%' to database 'information_schema'\n"
-                "host=stubbed.hostname schema=information_schema",
+                "code=explain-plan-procedure-missing host=stubbed.hostname schema=information_schema",
             ],
         ),
         (
@@ -443,7 +443,7 @@ def test_performance_schema_disabled(dbm_instance):
         'Unable to collect statement metrics because the performance schema is disabled. See '
         'https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting#performance-schema-not-enabled '
         'for more details\n'
-        'host=stubbed.hostname'
+        'code=performance-schema-not-enabled host=stubbed.hostname'
     ]
 
 

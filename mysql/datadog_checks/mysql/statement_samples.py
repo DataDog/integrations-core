@@ -23,7 +23,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 
-from .util import DatabaseConfigurationWarning
+from .util import DatabaseConfigurationError, warning_tags
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
@@ -885,18 +885,19 @@ class MySQLStatementSamples(DBMAsyncJob):
             if e.args[0] in PYMYSQL_MISSING_EXPLAIN_STATEMENT_PROC_ERRORS:
                 err_msg = e.args[1] if len(e.args) > 1 else ''
                 self._check.warning(
-                    str(
-                        DatabaseConfigurationWarning(
-                            {'host': self._check.resolved_hostname, 'schema': schema},
-                            "Unable to collect explain plans because the procedure '%s' is either undefined or not "
-                            "granted access to in schema '%s'. See https://docs.datadoghq.com/database_monitoring/"
-                            'setup_mysql/troubleshooting#explain-plan-procedure-missing for more details: (%d) %s',
-                            self._explain_procedure,
-                            schema,
-                            e.args[0],
-                            str(err_msg),
-                        )
-                    )
+                    "Unable to collect explain plans because the procedure '%s' is either undefined or not "
+                    "granted access to in schema '%s'. See https://docs.datadoghq.com/database_monitoring/"
+                    'setup_mysql/troubleshooting#%s for more details: (%d) %s\n%s',
+                    self._explain_procedure,
+                    schema,
+                    DatabaseConfigurationError.explain_plan_procedure_missing.value,
+                    e.args[0],
+                    str(err_msg),
+                    warning_tags(
+                        code=DatabaseConfigurationError.explain_plan_procedure_missing.value,
+                        host=self._check.resolved_hostname,
+                        schema=schema,
+                    ),
                 )
             raise
 
@@ -913,17 +914,17 @@ class MySQLStatementSamples(DBMAsyncJob):
             if e.args[0] in PYMYSQL_MISSING_EXPLAIN_STATEMENT_PROC_ERRORS:
                 err_msg = e.args[1] if len(e.args) > 1 else ''
                 self._check.warning(
-                    str(
-                        DatabaseConfigurationWarning(
-                            {'host': self._check.resolved_hostname},
-                            "Unable to collect explain plans because the procedure '%s' is either undefined or "
-                            'not granted access to. See https://docs.datadoghq.com/database_monitoring/setup_mysql/'
-                            'troubleshooting#explain-plan-fq-procedure for more details: (%d) %s',
-                            self._fully_qualified_explain_procedure,
-                            e.args[0],
-                            str(err_msg),
-                        )
-                    )
+                    "Unable to collect explain plans because the procedure '%s' is either undefined or "
+                    'not granted access to. See https://docs.datadoghq.com/database_monitoring/setup_mysql/'
+                    'troubleshooting#%s for more details: (%d) %s',
+                    self._fully_qualified_explain_procedure,
+                    DatabaseConfigurationError.explain_plan_fq_procedure_missing.value,
+                    e.args[0],
+                    str(err_msg),
+                    warning_tags(
+                        code=DatabaseConfigurationError.explain_plan_fq_procedure_missing.value,
+                        host=self._check.resolved_hostname,
+                    ),
                 )
             raise
 
