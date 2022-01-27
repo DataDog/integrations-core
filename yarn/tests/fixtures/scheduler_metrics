@@ -10,7 +10,15 @@
             "queue" : [
                {
                   "queueName" : "nofollowqueue",
-                  "absoluteCapacity" : 23
+                  "absoluteCapacity" : 23,
+                  "queues" : {
+                     "queue" : [
+                        {"queuename" : "testsubqueue1",
+                        "absoluteCapacity": 3.456},
+                        {"queuename" : "testsubqueue2",
+                        "absoluteCapacity": 4.567}
+                     ]
+                  }
                },
                {
                   "numPendingApplications" : 0,

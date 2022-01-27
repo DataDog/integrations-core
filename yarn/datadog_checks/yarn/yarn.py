@@ -346,6 +346,26 @@ class YarnCheck(AgentCheck):
                 tags.extend(addl_tags)
 
                 self._set_yarn_metrics_from_json(tags, queue_json, YARN_QUEUE_METRICS)
+                sub_queues_count = 0
+                for sub_queue_json in queue_json['queues']['queue']:
+                    sub_queue_name = queue_json['queueName']
+
+                    if sub_queue_name in queue_blacklist:
+                        self.log.debug('Sublevel Queue "%s" is blacklisted. Ignoring it', sub_queue_name)
+                        continue
+
+                        sub_queues_count += 1
+                    if sub_queues_count > MAX_DETAILED_QUEUES:
+                        self.warning(
+                            "Found more than 100 queues, will only send metrics on first 100 queues. "
+                            "Please filter the queues with the check's `queue_blacklist` parameter"
+                        )
+                        break
+
+                    tags = ['sub_queue_name:{}'.format(str(sub_queue_name))]
+                    tags.extend(addl_tags)
+
+                    self._set_yarn_metrics_from_json(tags, sub_queue_json, YARN_QUEUE_METRICS)
 
     def _set_yarn_metrics_from_json(self, tags, metrics_json, yarn_metrics):
         """
