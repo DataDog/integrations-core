@@ -17,7 +17,7 @@ from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 
-from .util import DatabaseConfigurationWarning
+from .util import DatabaseConfigurationError, warning_tags
 from .version_utils import V9_4
 
 try:
@@ -237,29 +237,31 @@ class PostgresStatementMetrics(DBMAsyncJob):
             ) and 'pg_stat_statements must be loaded' in str(e.pgerror):
                 error_tag = "error:database-{}-pg_stat_statements_not_loaded".format(type(e).__name__)
                 self._check.warning(
-                    str(
-                        DatabaseConfigurationWarning(
-                            {'host': self._check.resolved_hostname, 'dbname': self._config.dbname},
-                            "Unable to collect statement metrics because pg_stat_statements "
-                            "extension is not loaded in database '%s'. "
-                            "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
-                            "troubleshooting#pg-stat-statement-not-loaded for more details",
-                            self._config.dbname,
-                        ),
-                    )
+                    "Unable to collect statement metrics because pg_stat_statements "
+                    "extension is not loaded in database '%s'. "
+                    "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                    "troubleshooting#%s for more details\n%s",
+                    self._config.dbname,
+                    DatabaseConfigurationError.pg_stat_statement_not_loaded.value,
+                    warning_tags(
+                        host=self._check.resolved_hostname,
+                        dbname=self._config.dbname,
+                        code=DatabaseConfigurationError.pg_stat_statement_not_loaded.value,
+                    ),
                 )
             elif isinstance(e, psycopg2.errors.UndefinedTable) and 'pg_stat_statements' in str(e.pgerror):
                 error_tag = "error:database-{}-pg_stat_statements_not_created".format(type(e).__name__)
                 self._check.warning(
-                    str(
-                        DatabaseConfigurationWarning(
-                            {'host': self._check.resolved_hostname, 'dbname': self._config.dbname},
-                            "Unable to collect statement metrics because pg_stat_statements is not created "
-                            "in database '%s'. See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
-                            "troubleshooting#pg-stat-statement-not-created for more details",
-                            self._config.dbname,
-                        )
-                    )
+                    "Unable to collect statement metrics because pg_stat_statements is not created "
+                    "in database '%s'. See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                    "troubleshooting#%s for more details\n%s",
+                    self._config.dbname,
+                    DatabaseConfigurationError.pg_stat_statement_not_created.value,
+                    warning_tags(
+                        host=self._check.resolved_hostname,
+                        dbname=self._config.dbname,
+                        code=DatabaseConfigurationError.pg_stat_statement_not_created.value,
+                    ),
                 )
             else:
                 self._log.warning("Unable to collect statement metrics because of an error running queries: %s", e)

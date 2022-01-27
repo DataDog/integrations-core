@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import string
+from enum import Enum
 from typing import Any, List, Tuple
 
 from datadog_checks.base import AgentCheck
@@ -22,22 +23,18 @@ class PartialFormatter(string.Formatter):
             return string.Formatter.get_value(self, key, args, kwargs)
 
 
-class DatabaseConfigurationWarning(object):
-    """DatabaseConfigurationWarning formalizes the format of database configuration warning messages."""
+class DatabaseConfigurationError(Enum):
+    """
+    Denotes the possible database configuration errors
+    """
 
-    def __init__(self, metadata, message, *args):
-        if metadata is None:
-            metadata = {}
-        if args:
-            message = message % args
-        self._message = message
-        self._metadata = metadata
+    pg_stat_statement_not_created = 'pg-stat-statement-not-created'
+    pg_stat_statement_not_loaded = 'pg-stat-statement-not-loaded'
+    undefined_explain_function = 'undefined-explain-function'
 
-    def __str__(self):
-        return '{msg}\n{key_values}'.format(
-            msg=self._message,
-            key_values=" ".join('{key}={value}'.format(key=k, value=v) for k, v in sorted(self._metadata.items())),
-        )
+
+def warning_tags(**kwargs):
+    return " ".join('{key}={value}'.format(key=k, value=v) for k, v in sorted(kwargs.items()))
 
 
 def milliseconds_to_nanoseconds(value):

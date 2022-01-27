@@ -25,7 +25,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 
-from .util import DatabaseConfigurationWarning
+from .util import DatabaseConfigurationError, warning_tags
 
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
 # character is 6 bytes
@@ -394,18 +394,19 @@ class PostgresStatementSamples(DBMAsyncJob):
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
             # incorrect definition)
             self._check.warning(
-                str(
-                    DatabaseConfigurationWarning(
-                        {'host': self._check.resolved_hostname, 'dbname': dbname},
-                        "Unable to collect execution plans in dbname=%s. Check that the function "
-                        "%s exists in the database. See "
-                        "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#"
-                        "explain-undefined-function for more details: %s",
-                        dbname,
-                        self._explain_function,
-                        str(e),
-                    ),
-                )
+                "Unable to collect execution plans in dbname=%s. Check that the function "
+                "%s exists in the database. See "
+                "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#%s "
+                "for more details: %s\n%s",
+                dbname,
+                self._explain_function,
+                DatabaseConfigurationError.undefined_explain_function.value,
+                str(e),
+                warning_tags(
+                    host=self._check.resolved_hostname,
+                    dbname=dbname,
+                    code=DatabaseConfigurationError.undefined_explain_function.value,
+                ),
             )
             return DBExplainError.failed_function, e
 
