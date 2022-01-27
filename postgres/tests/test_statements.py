@@ -146,6 +146,7 @@ def test_statement_metrics(
     assert event['timestamp'] > 0
     assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
     assert event['ddagentversion'] == datadog_agent.get_version()
+    assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
     expected_dbm_metrics_tags = {'foo:bar', 'port:{}'.format(PORT)}
     assert set(event['tags']) == expected_dbm_metrics_tags
