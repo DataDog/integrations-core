@@ -72,7 +72,7 @@ git tag <MAJOR>.<MINOR>.0-rc.1 -m <MAJOR>.<MINOR>.0-rc.1
 git push origin <MAJOR>.<MINOR>.0-rc.1
 ```
 
-We should tag the new release candidate everytime even if there are no new changes for `integrations-core` in the upcoming rc.
+We should create a tag for each new RC, regardless of whether there are new changes from `integrations-core` in the RC.
 
 ## QA week
 
