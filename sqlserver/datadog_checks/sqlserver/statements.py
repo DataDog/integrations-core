@@ -360,11 +360,13 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
     def collect_qstats_cache_size(self, cursor):
         qstats_size = cursor.execute(QSTATS_CACHE_SIZE_QUERY)
-        return cursor.fetch()
+        rows = cursor.fetchall()
+        return rows[0]
 
     def collect_plan_cache_sizes(self, cursor):
         plan_cache_size = cursor.execute(PLAN_CACHE_SIZE_QUERY)
-        return cursor.fetch()
+        rows = cursor.fetchall()
+        return rows[0]
 
 
     def _rows_to_fqt_events(self, rows):
