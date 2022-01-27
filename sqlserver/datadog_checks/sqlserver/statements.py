@@ -80,6 +80,14 @@ select text, query_hash, query_plan_hash, max(plan_handle) as plan_handle,
     group by text, query_hash, query_plan_hash
 """
 
+QSTATS_CACHE_SIZE_QUERY = """\
+select count(*) from sys.dm_exec_query_stats
+"""
+
+PLAN_CACHE_SIZE_QUERY = """\
+select count(*) from sys.dm_exec_query_plan
+"""
+
 PLAN_LOOKUP_QUERY = """\
 select cast(query_plan as nvarchar(max)) as query_plan
 from sys.dm_exec_query_plan(CONVERT(varbinary(max), ?, 1))
@@ -321,6 +329,21 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     self.check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
                     plans_submitted += 1
 
+                qstats_size = self.collect_qstats_cache_size(cursor)
+                plan_size = self.collect_plan_cache_sizes(cursor)
+
+                self.check.gauge(
+                    "dd.sqlserver.statements.qstats_cache.len",
+                    qstats_size,
+                    **self.check.debug_stats_kwargs()
+                )
+
+                self.check.gauge(
+                    "dd.sqlserver.statements.raw_plan_cache.len",
+                    plan_size,
+                    **self.check.debug_stats_kwargs()
+                )
+
         self.check.count(
             "dd.sqlserver.statements.plans_submitted.count", plans_submitted, **self.check.debug_stats_kwargs()
         )
@@ -334,6 +357,15 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             len(self._full_statement_text_cache),
             **self.check.debug_stats_kwargs()
         )
+
+    def collect_qstats_cache_size(self, cursor):
+        qstats_size = cursor.execute(QSTATS_CACHE_SIZE_QUERY)
+        return cursor.fetch()
+
+    def collect_plan_cache_sizes(self, cursor):
+        plan_cache_size = cursor.execute(PLAN_CACHE_SIZE_QUERY)
+        return cursor.fetch()
+
 
     def _rows_to_fqt_events(self, rows):
         for row in rows:
