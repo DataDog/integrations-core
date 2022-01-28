@@ -1,9 +1,5 @@
 # CHANGELOG - Datadog Checks Dev
 
-## 15.7.0 / 2022-01-19
-
-* [Added] Allow `curated_metric` column to be accepted in future metadata.csv files. See [#11168](https://github.com/DataDog/integrations-core/pull/11168).
-
 ## 15.6.0 / 2022-01-08
 
 * [Added] Add discovery options to `ddev env check` command. See [#11044](https://github.com/DataDog/integrations-core/pull/11044).
