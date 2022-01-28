@@ -12,7 +12,7 @@ import traceback
 import unicodedata
 from collections import deque
 from os.path import basename
-from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 import yaml
 from six import PY2, binary_type, iteritems, raise_from, text_type
@@ -409,21 +409,23 @@ class AgentCheck(object):
 
         user_config = user_config or {}
         models_config = models_config or {}
-        typos = []  # type: List[str]
+        typos = set()  # type: Set[str]
 
         known_options = dict(models_config).keys()
         unknown_options = sorted(list(user_config.keys() - known_options))
+
         for unknown_option in unknown_options:
-            most_similar_known_option = (None, 0)
+            similar_known_options = []  # type: List[str]
             for known_option in known_options:
                 ratio = jaro_winkler_similarity(unknown_option, known_option)
-                if ratio > most_similar_known_option[1]:
-                    most_similar_known_option = (known_option, ratio)
-            if most_similar_known_option[1] >= TYPO_SIMILARITY_THRESHOLD:
-                typos = typos + [unknown_option]
+                if ratio > TYPO_SIMILARITY_THRESHOLD:
+                    similar_known_options = similar_known_options + [known_option]
+                    typos.add(unknown_option)
+
+            if len(similar_known_options) > 0:
                 message = (
-                    "Detected potential typo in configuration option in {}/{} section: {}. Did you mean `{}`?"
-                ).format(self.name, level, unknown_option, most_similar_known_option[0])
+                    'Detected potential typo in configuration option in {}/{} section: {}. Did you mean `{}`?'
+                ).format(self.name, level, unknown_option, ', or '.join(similar_known_options))
                 self.log.warning(message)
         return typos
 

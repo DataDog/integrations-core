@@ -918,29 +918,63 @@ def test_load_configuration_models(dd_run_check, mocker):
 
 
 @requires_py3
-def test_detect_typos_configuration_models(dd_run_check, mocker, caplog):
-    check_instance = {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}}
-    check_init_config = {'endpont': 'https://1.2.3.4:4242', 'tags': ['test'], 'proxy': 'test'}
-    check = AgentCheck('test', check_init_config, [check_instance])
-    check.check_id = 'test:123'
-
-    empty_config = {}
-
-    no_shared_config = check.find_typos_in_options(check_instance, empty_config, 'instance')
-
-    assert no_shared_config == []
-
+@pytest.mark.parametrize(
+    'check_instance_config, default_instance_config, log_line, all_typos',
+    [
+        ({'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}}, {}, None, set()),
+        (
+            {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
+            {'endpoint': 'url'},
+            None,
+            set(),
+        ),
+        (
+            {'endpoints': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
+            {'endpoint': 'url'},
+            (
+                'Detected potential typo in configuration option in test/instance section: endpoints. '
+                'Did you mean `endpoint`?'
+            ),
+            set({'endpoints'}),
+        ),
+        (
+            {'endpoints': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
+            {'endpoint': 'url', 'endpoints': 'url'},
+            None,
+            set(),
+        ),
+        (
+            {'endpont': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
+            {'endpoint': 'url', 'endpoints': 'url'},
+            (
+                'Detected potential typo in configuration option in test/instance section: endpont. '
+                'Did you mean `endpoint, or endpoints`?'
+            ),
+            set({'endpont'}),
+        ),
+    ],
+    ids=(
+        'empty default',
+        'no typo',
+        'typo',
+        'no typo similar option',
+        'typo two candidates',
+    ),
+)
+def test_detect_typos_configuration_models(
+    dd_run_check, mocker, caplog, check_instance_config, default_instance_config, log_line, all_typos
+):
     caplog.clear()
     caplog.set_level(logging.WARNING)
+    empty_config = {}
+    check = AgentCheck('test', empty_config, [check_instance_config])
+    check.check_id = 'test:123'
 
-    init_config = {
-        'endpoint': 'https://1.2.3.4:4242',
-        'tags': None,
-        'proxy': 'test',
-        'option': 'test',
-        'another_option': 'test',
-    }
-    typos_config = check.find_typos_in_options(check_init_config, init_config, 'init_config')
+    found_typos = check.find_typos_in_options(check_instance_config, default_instance_config, 'instance')
 
-    assert typos_config == ['endpont']
-    assert "Detected potential typo in configuration option" in caplog.text
+    assert found_typos == all_typos
+
+    if log_line is not None:
+        assert log_line in caplog.text
+    else:
+        assert 'Detected potential typo in configuration option' not in caplog.text
