@@ -4,8 +4,8 @@
 
 import json
 import os
+from contextlib import ExitStack
 from functools import lru_cache
-from tempfile import mkdtemp
 
 import click
 from pysmi import error
@@ -15,6 +15,8 @@ from pysmi.parser import SmiV1CompatParser
 from pysmi.reader import getReadersFromUrls
 from pysmi.searcher import AnyFileSearcher
 from pysmi.writer import FileWriter
+
+from datadog_checks.dev import TempDir
 
 from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
 from .constants import MIB_SOURCE_URL
@@ -65,65 +67,66 @@ def build_traps_db(mib_sources, compiled_mibs_sources, output_dir, output_file, 
     3- Run `ddev meta snmp build-traps-db -o ./output_dir/ /path/to/my/mibs/*`\n
     """
 
-    # Defaulting to github.com/DataDog/mibs.snmplabs.com/
-    mib_sources = [mib_sources] if mib_sources else [MIB_SOURCE_URL]
+    with ExitStack() as stack:
+        # Defaulting to github.com/DataDog/mibs.snmplabs.com/
+        mib_sources = [mib_sources] if mib_sources else [MIB_SOURCE_URL]
 
-    if not compiled_mibs_sources:
-        compiled_mibs_sources = mkdtemp()
+        if not compiled_mibs_sources:
+            compiled_mibs_sources = stack.enter_context(TempDir('ddev_mibs'))
 
-    compiled_mibs_sources = os.path.abspath(compiled_mibs_sources)
-    if not os.path.isdir(compiled_mibs_sources):
-        abort("Output directory {} does not exist".format(compiled_mibs_sources))
-    echo_info("Writing intermediate compiled MIBs to {}".format(compiled_mibs_sources))
+        compiled_mibs_sources = os.path.abspath(compiled_mibs_sources)
+        if not os.path.isdir(compiled_mibs_sources):
+            abort("Output directory {} does not exist".format(compiled_mibs_sources))
+        echo_info("Writing intermediate compiled MIBs to {}".format(compiled_mibs_sources))
 
-    mibs_sources_dir = os.path.join(compiled_mibs_sources, 'mibs_sources')
-    if not os.path.isdir(mibs_sources_dir):
-        os.mkdir(mibs_sources_dir)
+        mibs_sources_dir = os.path.join(compiled_mibs_sources, 'mibs_sources')
+        if not os.path.isdir(mibs_sources_dir):
+            os.mkdir(mibs_sources_dir)
 
-    if output_dir and output_file:
-        abort("Do not set both --output-dir and --output-file at the same time.")
-    elif not output_file and not output_dir:
-        abort("Need to set one of --output-dir or --output-file")
+        if output_dir and output_file:
+            abort("Do not set both --output-dir and --output-file at the same time.")
+        elif not output_file and not output_dir:
+            abort("Need to set one of --output-dir or --output-file")
 
-    mib_sources = (
-        sorted(set([os.path.abspath(os.path.dirname(x)) for x in mib_files if os.path.sep in x])) + mib_sources
-    )
-
-    mib_files = [os.path.basename(os.path.splitext(x)[0]) for x in mib_files if os.path.isfile(x)]
-    searchers = [AnyFileSearcher(compiled_mibs_sources).setOptions(exts=['.json'])]
-    code_generator = JsonCodeGen()
-    file_writer = FileWriter(compiled_mibs_sources).setOptions(suffix='.json')
-    mib_compiler = MibCompiler(SmiV1CompatParser(tempdir=''), code_generator, file_writer)
-    mib_compiler.addSources(*getReadersFromUrls(*mib_sources, **dict(fuzzyMatching=True)))
-    mib_compiler.addSearchers(*searchers)
-
-    try:
-        compiled_mibs, compiled_dependencies_mibs = compile_and_report_status(mib_files, mib_compiler)
-    except error.PySmiError:
-        abort("Unable to compile")
-
-    # Move all the parent MIBs that had to be compiled but were not requested in the command to a subfolder.
-    for mib_file_name in compiled_dependencies_mibs:
-        os.replace(
-            os.path.join(compiled_mibs_sources, mib_file_name + '.json'),
-            os.path.join(mibs_sources_dir, mib_file_name + '.json'),
+        mib_sources = (
+            sorted(set([os.path.abspath(os.path.dirname(x)) for x in mib_files if os.path.sep in x])) + mib_sources
         )
 
-    # Only generate trap_db with `mib_files` unless explicitly asked. Used to ignore other files that may be
-    # present "compiled_mibs_sources"
-    compiled_mibs = [os.path.join(compiled_mibs_sources, x + '.json') for x in compiled_mibs]
+        mib_files = [os.path.basename(os.path.splitext(x)[0]) for x in mib_files if os.path.isfile(x)]
+        searchers = [AnyFileSearcher(compiled_mibs_sources).setOptions(exts=['.json'])]
+        code_generator = JsonCodeGen()
+        file_writer = FileWriter(compiled_mibs_sources).setOptions(suffix='.json')
+        mib_compiler = MibCompiler(SmiV1CompatParser(tempdir=''), code_generator, file_writer)
+        mib_compiler.addSources(*getReadersFromUrls(*mib_sources, **dict(fuzzyMatching=True)))
+        mib_compiler.addSearchers(*searchers)
 
-    # Generate the trap database based on the compiled MIBs.
-    trap_db_per_mib = generate_trap_db(compiled_mibs, mibs_sources_dir)
+        try:
+            compiled_mibs, compiled_dependencies_mibs = compile_and_report_status(mib_files, mib_compiler)
+        except error.PySmiError:
+            abort("Unable to compile")
 
-    if output_file:
-        # Compact representation, only one file
-        write_compact_trap_db(trap_db_per_mib, output_file)
-        echo_success("Wrote trap data to {}".format(os.path.abspath(output_file)))
-    else:
-        # Expanded representation, one json file per MIB.
-        write_trap_db_per_mib(trap_db_per_mib, output_dir)
-        echo_success("Wrote trap data to {}".format(os.path.abspath(output_dir)))
+        # Move all the parent MIBs that had to be compiled but were not requested in the command to a subfolder.
+        for mib_file_name in compiled_dependencies_mibs:
+            os.replace(
+                os.path.join(compiled_mibs_sources, mib_file_name + '.json'),
+                os.path.join(mibs_sources_dir, mib_file_name + '.json'),
+            )
+
+        # Only generate trap_db with `mib_files` unless explicitly asked. Used to ignore other files that may be
+        # present "compiled_mibs_sources"
+        compiled_mibs = [os.path.join(compiled_mibs_sources, x + '.json') for x in compiled_mibs]
+
+        # Generate the trap database based on the compiled MIBs.
+        trap_db_per_mib = generate_trap_db(compiled_mibs, mibs_sources_dir)
+
+        if output_file:
+            # Compact representation, only one file
+            write_compact_trap_db(trap_db_per_mib, output_file)
+            echo_success("Wrote trap data to {}".format(os.path.abspath(output_file)))
+        else:
+            # Expanded representation, one json file per MIB.
+            write_trap_db_per_mib(trap_db_per_mib, output_dir)
+            echo_success("Wrote trap data to {}".format(os.path.abspath(output_dir)))
 
 
 def compile_and_report_status(mib_files, mib_compiler):
