@@ -977,7 +977,7 @@ class MySql(AgentCheck):
             self._qcache_not_cached = int(results['Qcache_not_cached'])
 
     def record_warning(self, code, message):
-        # type: (DatabaseConfigurationError, str) -> ()
+        # type: (DatabaseConfigurationError, str) -> None
         self._warnings_by_code[code] = message
 
     def _report_warnings(self):
