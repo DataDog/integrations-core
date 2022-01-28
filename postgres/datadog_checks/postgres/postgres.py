@@ -18,7 +18,14 @@ from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .config import PostgresConfig
-from .util import CONNECTION_METRICS, FUNCTION_METRICS, REPLICATION_METRICS, fmt, get_schema_field
+from .util import (
+    CONNECTION_METRICS,
+    FUNCTION_METRICS,
+    REPLICATION_METRICS,
+    DatabaseConfigurationError,
+    fmt,
+    get_schema_field,
+)
 from .version_utils import V9, V10, VersionUtils
 
 try:
@@ -54,6 +61,7 @@ class PostgreSql(AgentCheck):
             )
         self._config = PostgresConfig(self.instance)
         self.pg_settings = {}
+        self._warnings_by_code = {}
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
         self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
@@ -555,6 +563,16 @@ class PostgreSql(AgentCheck):
                             metric, value, method = info
                             getattr(self, method)(metric, value, tags=set(query_tags), hostname=self.resolved_hostname)
 
+    def record_warning(self, code, message):
+        # type: (DatabaseConfigurationError, str) -> ()
+        self._warnings_by_code[code] = message
+
+    def _report_warnings(self):
+        for warning in self._warnings_by_code.values():
+            self.warning(warning)
+        # Clear the warnings for the next check run
+        self._warnings_by_code = {}
+
     def check(self, _):
         tags = copy.copy(self._config.tags)
         # Collect metrics
@@ -600,3 +618,6 @@ class PostgreSql(AgentCheck):
             except Exception as e:
                 self.log.warning("Unable to commit: %s", e)
             self._version = None  # We don't want to cache versions between runs to capture minor updates for metadata
+        finally:
+            # Add the warnings saved during the execution of the check
+            self._report_warnings()

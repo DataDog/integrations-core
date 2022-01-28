@@ -33,8 +33,13 @@ class DatabaseConfigurationError(Enum):
     undefined_explain_function = 'undefined-explain-function'
 
 
-def warning_tags(**kwargs):
-    return " ".join('{key}={value}'.format(key=k, value=v) for k, v in sorted(kwargs.items()))
+def warning_with_tags(warning_message, *args, **kwargs):
+    if args:
+        warning_message = warning_message % args
+
+    return "{msg}\n{tags}".format(
+        msg=warning_message, tags=" ".join('{key}={value}'.format(key=k, value=v) for k, v in sorted(kwargs.items()))
+    )
 
 
 def milliseconds_to_nanoseconds(value):
