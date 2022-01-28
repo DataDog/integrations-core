@@ -919,50 +919,98 @@ def test_load_configuration_models(dd_run_check, mocker):
 
 @requires_py3
 @pytest.mark.parametrize(
-    'check_instance_config, default_instance_config, log_line, all_typos',
+    'check_instance_config, default_instance_config, log_lines, all_typos',
     [
-        ({'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}}, {}, None, set()),
-        (
+        pytest.param(
+            {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
+            {},
+            None,
+            set(),
+            id='empty default',
+        ),
+        pytest.param(
             {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
             {'endpoint': 'url'},
             None,
             set(),
+            id='no typo',
         ),
-        (
+        pytest.param(
             {'endpoints': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
             {'endpoint': 'url'},
-            (
-                'Detected potential typo in configuration option in test/instance section: endpoints. '
-                'Did you mean `endpoint`?'
-            ),
+            [
+                (
+                    'Detected potential typo in configuration option in test/instance section: `endpoints`. '
+                    'Did you mean endpoint?'
+                )
+            ],
             set({'endpoints'}),
+            id='typo',
         ),
-        (
+        pytest.param(
             {'endpoints': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
             {'endpoint': 'url', 'endpoints': 'url'},
             None,
             set(),
+            id='no typo similar option',
         ),
-        (
+        pytest.param(
             {'endpont': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
             {'endpoint': 'url', 'endpoints': 'url'},
-            (
-                'Detected potential typo in configuration option in test/instance section: endpont. '
-                'Did you mean `endpoint, or endpoints`?'
-            ),
+            [
+                (
+                    'Detected potential typo in configuration option in test/instance section: `endpont`. '
+                    'Did you mean endpoint, or endpoints?'
+                )
+            ],
             set({'endpont'}),
+            id='typo two candidates',
+        ),
+        pytest.param({'tag': 'test'}, {'tags': 'test'}, None, set(), id='short option cant catch'),
+        pytest.param(
+            {'testing_long_para': 'test'},
+            {'testing_long_param': 'test', 'test_short_param': 'test'},
+            [
+                (
+                    'Detected potential typo in configuration option in test/instance section: `testing_long_para`. '
+                    'Did you mean testing_long_param?'
+                )
+            ],
+            set({'testing_long_para'}),
+            id='somewhat similar option',
+        ),
+        pytest.param(
+            {'send_distribution_sums_as_monotonic': False, 'exclude_labels': True},
+            {'send_distribution_counts_as_monotonic': True, 'include_labels': True},
+            None,
+            set(),
+            id='different options no typos',
+        ),
+        pytest.param(
+            {'send_distribution_count_as_monotonic': True, 'exclude_label': True},
+            {
+                'send_distribution_sums_as_monotonic': False,
+                'send_distribution_counts_as_monotonic': True,
+                'exclude_labels': False,
+                'include_labels': True,
+            },
+            [
+                (
+                    'Detected potential typo in configuration option in test/instance section: '
+                    '`send_distribution_count_as_monotonic`. Did you mean send_distribution_counts_as_monotonic?'
+                ),
+                (
+                    'Detected potential typo in configuration option in test/instance section: `exclude_label`. '
+                    'Did you mean exclude_labels?'
+                ),
+            ],
+            set({'send_distribution_count_as_monotonic', 'exclude_label'}),
+            id='different options typo',
         ),
     ],
-    ids=(
-        'empty default',
-        'no typo',
-        'typo',
-        'no typo similar option',
-        'typo two candidates',
-    ),
 )
 def test_detect_typos_configuration_models(
-    dd_run_check, mocker, caplog, check_instance_config, default_instance_config, log_line, all_typos
+    dd_run_check, mocker, caplog, check_instance_config, default_instance_config, log_lines, all_typos
 ):
     caplog.clear()
     caplog.set_level(logging.WARNING)
@@ -974,7 +1022,8 @@ def test_detect_typos_configuration_models(
 
     assert found_typos == all_typos
 
-    if log_line is not None:
-        assert log_line in caplog.text
+    if log_lines is not None:
+        for log_line in log_lines:
+            assert log_line in caplog.text
     else:
         assert 'Detected potential typo in configuration option' not in caplog.text
