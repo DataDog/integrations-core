@@ -54,6 +54,7 @@ from .queries import (
 )
 from .statement_samples import MySQLStatementSamples
 from .statements import MySQLStatementMetrics
+from .util import DatabaseConfigurationError
 from .version_utils import get_version
 
 try:
@@ -97,6 +98,7 @@ class MySql(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
+        self._warnings_by_code = {}
         self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
 
@@ -179,6 +181,7 @@ class MySql(AgentCheck):
                 raise e
             finally:
                 self._conn = None
+                self._report_warnings()
 
     def cancel(self):
         self._statement_samples.cancel()
@@ -972,3 +975,13 @@ class MySql(AgentCheck):
             self._qcache_hits = int(results['Qcache_hits'])
             self._qcache_inserts = int(results['Qcache_inserts'])
             self._qcache_not_cached = int(results['Qcache_not_cached'])
+
+    def record_warning(self, code, message):
+        # type: (DatabaseConfigurationError, str) -> ()
+        self._warnings_by_code[code] = message
+
+    def _report_warnings(self):
+        for warning in self._warnings_by_code.values():
+            self.warning(warning)
+        # Clear the warnings for the next check run
+        self._warnings_by_code = {}

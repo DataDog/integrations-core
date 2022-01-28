@@ -23,7 +23,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 
-from .util import DatabaseConfigurationError, warning_tags
+from .util import DatabaseConfigurationError, warning_with_tags
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
@@ -498,7 +498,6 @@ class MySQLStatementSamples(DBMAsyncJob):
         # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
         # - `resource_hash` - hash computed off the raw sql text to match apm resources
         # - `query_signature` - hash computed from the digest text to match query metrics
-
         try:
             statement = obfuscate_sql_with_metadata(row['sql_text'], self._obfuscate_options)
             statement_digest_text = obfuscate_sql_with_metadata(row['digest_text'], self._obfuscate_options)
@@ -884,16 +883,18 @@ class MySQLStatementSamples(DBMAsyncJob):
         except pymysql.err.DatabaseError as e:
             if e.args[0] in PYMYSQL_MISSING_EXPLAIN_STATEMENT_PROC_ERRORS:
                 err_msg = e.args[1] if len(e.args) > 1 else ''
-                self._check.warning(
-                    "Unable to collect explain plans because the procedure '%s' is either undefined or not "
-                    "granted access to in schema '%s'. See https://docs.datadoghq.com/database_monitoring/"
-                    'setup_mysql/troubleshooting#%s for more details: (%d) %s\n%s',
-                    self._explain_procedure,
-                    schema,
-                    DatabaseConfigurationError.explain_plan_procedure_missing.value,
-                    e.args[0],
-                    str(err_msg),
-                    warning_tags(
+                self._log.warning("Recording warning for code explain_plan_procedure_missing")
+                self._check.record_warning(
+                    DatabaseConfigurationError.explain_plan_procedure_missing,
+                    warning_with_tags(
+                        "Unable to collect explain plans because the procedure '%s' is either undefined or not "
+                        "granted access to in schema '%s'. See https://docs.datadoghq.com/database_monitoring/"
+                        'setup_mysql/troubleshooting#%s for more details: (%d) %s',
+                        self._explain_procedure,
+                        schema,
+                        DatabaseConfigurationError.explain_plan_procedure_missing.value,
+                        e.args[0],
+                        str(err_msg),
                         code=DatabaseConfigurationError.explain_plan_procedure_missing.value,
                         host=self._check.resolved_hostname,
                         schema=schema,
@@ -913,15 +914,16 @@ class MySQLStatementSamples(DBMAsyncJob):
         except pymysql.err.DatabaseError as e:
             if e.args[0] in PYMYSQL_MISSING_EXPLAIN_STATEMENT_PROC_ERRORS:
                 err_msg = e.args[1] if len(e.args) > 1 else ''
-                self._check.warning(
-                    "Unable to collect explain plans because the procedure '%s' is either undefined or "
-                    'not granted access to. See https://docs.datadoghq.com/database_monitoring/setup_mysql/'
-                    'troubleshooting#%s for more details: (%d) %s',
-                    self._fully_qualified_explain_procedure,
-                    DatabaseConfigurationError.explain_plan_fq_procedure_missing.value,
-                    e.args[0],
-                    str(err_msg),
-                    warning_tags(
+                self._check.record_warning(
+                    DatabaseConfigurationError.explain_plan_fq_procedure_missing,
+                    warning_with_tags(
+                        "Unable to collect explain plans because the procedure '%s' is either undefined or "
+                        'not granted access to. See https://docs.datadoghq.com/database_monitoring/setup_mysql/'
+                        'troubleshooting#%s for more details: (%d) %s',
+                        self._fully_qualified_explain_procedure,
+                        DatabaseConfigurationError.explain_plan_fq_procedure_missing.value,
+                        e.args[0],
+                        str(err_msg),
                         code=DatabaseConfigurationError.explain_plan_fq_procedure_missing.value,
                         host=self._check.resolved_hostname,
                     ),

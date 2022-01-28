@@ -410,7 +410,10 @@ def test_statement_samples_collect(
 )
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_missing_explain_procedure(dbm_instance, statement, schema, expected_warnings):
+def test_missing_explain_procedure(dbm_instance, dd_run_check, aggregator, statement, schema, expected_warnings):
+    # Disable query samples to avoid interference from query samples getting picked up from db and triggering
+    # explain plans
+    dbm_instance['query_samples']['enabled'] = False
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
     mysql_check._statement_samples._preferred_explain_strategies = ['PROCEDURE']
     mysql_check._statement_samples._tags = []
@@ -426,18 +429,28 @@ def test_missing_explain_procedure(dbm_instance, statement, schema, expected_war
     }
 
     mysql_check._statement_samples._collect_plan_for_statement(row)
+    dd_run_check(mysql_check)
 
     assert mysql_check.warnings == expected_warnings
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_performance_schema_disabled(dbm_instance):
+def test_performance_schema_disabled(dbm_instance, dd_run_check):
+    # Disable query samples to avoid interference from queries from the db running explain plans
+    # and isolate the fake row from it
+    dbm_instance['query_samples']['enabled'] = False
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
     # Fake the performance schema being disabled to validate the reporting of a warning when this condition occurs
     mysql_check.performance_schema_enabled = False
 
+    # Run this twice to confirm that duplicate warnings aren't added more than once
     mysql_check._statement_metrics.collect_per_statement_metrics()
+    mysql_check._statement_metrics.collect_per_statement_metrics()
+
+    # Run the check only so that recorded warnings are actually added
+    dd_run_check(mysql_check)
 
     assert mysql_check.warnings == [
         'Unable to collect statement metrics because the performance schema is disabled. See '
