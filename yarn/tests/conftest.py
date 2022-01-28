@@ -98,9 +98,3 @@ def requests_get_mock(*args, **kwargs):
         return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'nodes_metrics'))
     elif args[0] == YARN_SCHEDULER_URL:
         return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'scheduler_metrics'))
-
-
-# @pytest.fixture
-# def mock_get_sub_queue(mock_http_response):
-#     sublevel_queue_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', sublevel_queue.json)
-#     yield mock_http_response(file_path=sublevel_queue_file_path)
