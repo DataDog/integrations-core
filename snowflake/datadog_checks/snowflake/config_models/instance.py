@@ -33,6 +33,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     account: str
+    aggregate_last_24_hours: Optional[bool]
     authenticator: Optional[str]
     client_prefetch_threads: Optional[int]
     client_session_keep_alive: Optional[bool]
@@ -45,12 +46,15 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float]
     ocsp_response_cache_filename: Optional[str]
     only_custom_queries: Optional[bool]
-    password: str
+    password: Optional[str]
+    private_key_password: Optional[str]
+    private_key_path: Optional[str]
     role: str
     schema_: Optional[str] = Field(None, alias='schema')
     service: Optional[str]
     tags: Optional[Sequence[str]]
     token: Optional[str]
+    token_path: Optional[str]
     use_global_custom_queries: Optional[str]
     username: str
     warehouse: Optional[str]

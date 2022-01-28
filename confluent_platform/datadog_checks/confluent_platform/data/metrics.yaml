@@ -153,6 +153,17 @@ jmx_metrics:
           alias: confluent.$domain.session.$name.rate
           metric_type: rate
 
+  # Kafka Broker ZooKeeper Metrics (Yammer Metric Meter)
+  - include:
+      domain: kafka.server
+      bean:
+        # Zookeeper latency from client
+        - kafka.server:type=ZooKeeperClientMetrics,name=ZooKeeperRequestLatencyMs
+      attribute:
+        Count:
+          alias: confluent.$domain.session.$name
+          metric_type: gauge
+
   # Kafka Broker Request Metrics (Yammer Metric Meter)
   - include:
       domain: kafka.network
@@ -1071,10 +1082,6 @@ jmx_metrics:
           # The average number of requests per second that resulted in HTTP error responses
           alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
-        consumer.records.read-avro+v2.request-error-rate:
-          # The average number of requests per second that resulted in HTTP error responses
-          alias: confluent.$domain.jersey.$attribute
-          metric_type: gauge
         consumer.records.read-jsonschema+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
           alias: confluent.$domain.jersey.$attribute
@@ -1184,10 +1191,6 @@ jmx_metrics:
           alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         partition.produce-protobuf+v2.request-error-rate:
-          # The average number of requests per second that resulted in HTTP error responses
-          alias: confluent.$domain.jersey.$attribute
-          metric_type: gauge
-        partitions.list+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
           alias: confluent.$domain.jersey.$attribute
           metric_type: gauge

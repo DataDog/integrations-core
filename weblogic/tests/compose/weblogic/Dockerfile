@@ -61,7 +61,7 @@ RUN cd /u01/oracle & curl -L https://github.com/oracle/docker-images/archive/ref
 RUN curl -L https://github.com/oracle/docker-images/archive/refs/heads/main.tar.gz | tar xz --strip=5 "docker-images-main/OracleWebLogic/samples/12213-domain-home-in-image/container-scripts" "docker-images-main/OracleWebLogic/samples/12213-deploy-application/container-scripts"
 
 
-COPY --chown=oracle:root create-wls-domain.py /u01/oracle/
+COPY --chown=oracle:root setup_scripts/* /u01/oracle/
 
 #Create directory where domain will be written to
 USER root
@@ -94,7 +94,7 @@ FROM wls_base
 
 WORKDIR $DOMAIN_HOME
 
-# Copy files and deploy sample application in WLST Offline mode
+# Deploy sample application in WLST Offline mode
 
 RUN cd /u01/oracle & $JAVA_HOME/bin/jar xf /u01/oracle/$APP_PKG_FILE && \
     /u01/oracle/deployAppToDomain.sh

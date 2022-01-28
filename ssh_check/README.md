@@ -8,7 +8,7 @@ This check lets you monitor SSH connectivity to remote hosts and SFTP response t
 
 ### Installation
 
-The SSH/SFTP check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your server from which you'd like to test SSH connectivity.
+The SSH/SFTP check is included in the [Datadog Agent][1] package. No additional installation is needed on your server.
 
 ### Configuration
 

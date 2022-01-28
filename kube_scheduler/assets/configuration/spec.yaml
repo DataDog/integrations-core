@@ -89,6 +89,8 @@ files:
         example: /var/run/secrets/kubernetes.io/serviceaccount/token
     - name: ssl_verify
       description: Used to verify self signed certificates.
+      enabled: true
       value:
         type: boolean
-        example: true
+        example: false
+        display_default: true

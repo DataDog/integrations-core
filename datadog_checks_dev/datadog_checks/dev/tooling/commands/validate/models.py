@@ -57,9 +57,8 @@ def standardize_new_lines(lines):
 
 
 def content_matches(current_model_file_lines, expected_model_file_lines):
-    # First line is copyright. We want to avoid changing it every new year
-    all_current_lines = standardize_new_lines(current_model_file_lines[1:])
-    all_expected_lines = standardize_new_lines(expected_model_file_lines[1:])
+    all_current_lines = standardize_new_lines(current_model_file_lines)
+    all_expected_lines = standardize_new_lines(expected_model_file_lines)
 
     return all_current_lines == all_expected_lines
 
@@ -175,6 +174,10 @@ def models(ctx, check, sync, verbose):
                     expected_model_file_lines.extend(documentation_header_lines)
 
                 expected_model_file_lines.extend(generated_model_file_lines)
+
+            # If we're re-generating a file, we should ensure we do not change the license date
+            if len(current_model_file_lines) > 0:
+                expected_model_file_lines[0] = current_model_file_lines[0]
 
             if not current_model_file_lines or not content_matches(current_model_file_lines, expected_model_file_lines):
                 if sync:

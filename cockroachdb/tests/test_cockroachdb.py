@@ -12,8 +12,8 @@ from .common import COCKROACHDB_VERSION
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_integration(aggregator, instance, dd_run_check):
-    check = CockroachdbCheck('cockroachdb', {}, [instance])
+def test_integration(aggregator, instance_legacy, dd_run_check):
+    check = CockroachdbCheck('cockroachdb', {}, [instance_legacy])
     dd_run_check(check)
 
     _test_check(aggregator)
@@ -21,9 +21,9 @@ def test_integration(aggregator, instance, dd_run_check):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_version_metadata(aggregator, instance, datadog_agent, dd_run_check):
+def test_version_metadata(aggregator, instance_legacy, datadog_agent, dd_run_check):
 
-    check_instance = CockroachdbCheck('cockroachdb', {}, [instance])
+    check_instance = CockroachdbCheck('cockroachdb', {}, [instance_legacy])
     check_instance.check_id = 'test:123'
     dd_run_check(check_instance)
 
