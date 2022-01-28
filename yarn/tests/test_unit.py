@@ -13,7 +13,8 @@ from .common import YARN_CONFIG
     'tags, expected_tags',
     [
         pytest.param("test:example", ["app_test:example"], id='tag_key_value'),
-        pytest.param("test", ["app_test"], id='tag_value_only'),
+        pytest.param("test:example1,test:example2", ["app_test:example1,app_test:example2"], id='multiple_tag_key_value'),
+        pytest.param("test1,testtag2,test2", ["app_test", "app_testag2", "app_test2"], id='multiple_tag_value_only'),
         pytest.param(
             "script_name:test_script,value_only_tag,user_email:test_email",
             ["app_script_name:test_script", "app_value_only_tag", "app_user_email:test_email"],
