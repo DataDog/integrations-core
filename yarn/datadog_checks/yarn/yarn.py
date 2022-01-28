@@ -347,7 +347,7 @@ class YarnCheck(AgentCheck):
 
                 self._set_yarn_metrics_from_json(tags, queue_json, YARN_QUEUE_METRICS)
                 sub_queues_count = 0
-                for sub_queue_json in metrics_json['queues']['queue']:
+                for sub_queue_json in queue_json['queues']['queue']:
                     sub_queue_name = sub_queue_json['queueName']
 
                     if sub_queue_name in queue_blacklist:

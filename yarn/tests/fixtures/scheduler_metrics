@@ -10,13 +10,7 @@
             "queue" : [
                {
                   "queueName" : "nofollowqueue",
-                  "absoluteCapacity" : 23,
-                  "queues" : {
-                     "queue" : [
-                        {"queuename" : "testsubqueue",
-                        "absoluteCapacity": 3.456}
-                     ]
-                  }
+                  "absoluteCapacity" : 23
                },
                {
                   "numPendingApplications" : 0,
@@ -59,6 +53,22 @@
                   },
                   "hideReservationQueues" : false,
                   "queueName" : "clientqueue",
+                  "queues" : {
+                     "queue" : [
+                        {
+                           "queueName" : "testsubqueue",
+                           "absoluteCapacity": 3.456,
+                           "resourcesUsed" : {
+                              "memory" : 34567,
+                              "vCores" : 765
+                           },
+                           "numApplications" : 5,
+                           "absoluteMaxCapacity" : 34.56,
+                           "capacity" : 34.56,
+                           "usedCapacity" : 34.56
+                        }
+                     ]
+                  },
                   "absoluteUsedCapacity" : 31.868685,
                   "resourcesUsed" : {
                      "memory" : 3164800,

@@ -104,7 +104,7 @@ def test_check(aggregator, mocked_request):
     for metric, _ in YARN_QUEUE_METRICS.values():
         aggregator.assert_metric(metric, tags=YARN_QUEUE_NOFOLLOW_METRICS_TAGS + CUSTOM_TAGS, count=0)
 
-    # Check the YARN Custom Queue Metrics
+    # Check the YARN Subqueue Metrics
     for metric, value in iteritems(YARN_SUBQUEUE_METRICS_VALUES):
         aggregator.assert_metric(metric, value=value, tags=YARN_SUBQUEUE_METRICS_TAGS + CUSTOM_TAGS, count=1)
 

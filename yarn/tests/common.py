@@ -299,7 +299,15 @@ YARN_QUEUE_METRICS_VALUES = {
     'yarn.queue.max_applications_per_user': 5212,
 }
 
-YARN_SUBQUEUE_METRICS_VALUES = {'yarn.queue.absolute_capacity': 3.456}
+YARN_SUBQUEUE_METRICS_VALUES = {
+    'yarn.queue.absolute_capacity': 3.456,
+    'yarn.queue.resources_used.memory': 34567,
+    'yarn.queue.resources_used.vcores': 765,
+    'yarn.queue.num_applications': 5,
+    'yarn.queue.absolute_max_capacity': 34.56,
+    'yarn.queue.used_capacity': 34.56,
+    'yarn.queue.capacity': 34.56,
+}
 
 YARN_QUEUE_METRICS_TAGS = ['queue_name:clientqueue'] + YARN_CLUSTER_METRICS_TAGS
 
