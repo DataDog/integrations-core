@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
+from cachetools import LRUCache
+
 logger = logging.getLogger(__name__)
 
 
@@ -18,16 +20,17 @@ class StatementMetrics:
         - DB2: mon_db_summary
 
     These tables are monotonically increasing, so the metrics are computed from the difference
-    in values between check runs.
+    in values between query metrics collection runs.
     """
 
-    def __init__(self):
-        self._previous_statements = None
+    def __init__(self, max_cache_size=10000):
+        self._statement_cache = None
+        self._max_cache_size = max_cache_size
 
     def compute_derivative_rows(self, rows, metrics, key):
         """
         Compute the first derivative of column-based metrics for a given set of rows. This function
-        takes the difference of the previous check run's values and the current check run's values
+        takes the difference of the previous check runs' values and the current check run's values
         to produce a new set of rows whose values represent the total counts in the time elapsed
         between check runs.
 
@@ -36,14 +39,14 @@ class StatementMetrics:
         metric tags. There is also custom logic around stats resets to discard all rows when a
         negative value is found, rather than just the single metric of that row/column.
 
-        This function resets the statement cache so it should only be called once per check run.
+        This function should only be called once per query metrics collection run.
 
         - **rows** (_List[dict]_) - rows from current check run
         - **metrics** (_List[str]_) - the metrics to compute for each row
         - **key** (_callable_) - function for an ID which uniquely identifies a row across runs
         """
         result = []
-        new_cache = {}
+        new_statements = {}
         metrics = set(metrics)
 
         rows = _merge_duplicate_rows(rows, metrics, key)
@@ -56,26 +59,26 @@ class StatementMetrics:
 
         for row in rows:
             row_key = key(row)
-            if row_key in new_cache:
+            if row_key in new_statements:
                 logger.error(
                     'Unexpected collision in cached query metrics. Dropping existing row, row_key=%s new=%s dropped=%s',
                     row_key,
                     row,
-                    new_cache[row_key],
+                    new_statements[row_key],
                 )
 
             # Set the row on the new cache to be checked the next run. This should happen for every row, regardless of
             # whether a metric is submitted for the row during this run or not.
-            new_cache[row_key] = row
+            new_statements[row_key] = row
 
             # Only generate derivative rows when the cache has already been initialized
-            if self._previous_statements is None:
+            if self._statement_cache is None:
                 continue
 
             metric_columns = metrics & set(row.keys())
 
             # A row missing from cache is interpreted as one with zero values for all columns
-            prev = self._previous_statements.get(row_key, {k: 0 for k in metric_columns})
+            prev = self._statement_cache.get(row_key, {k: 0 for k in metric_columns})
 
             # Take the diff of all metric values between the current row and the previous run's row.
             # There are a couple of edge cases to be aware of:
@@ -93,7 +96,7 @@ class StatementMetrics:
             # Check for negative values, but only in the columns used for metrics
             if any(diffed_row[k] < 0 for k in metric_columns):
                 # A "break" might be expected here instead of "continue," but there are cases where a subset of rows
-                # are removed. To avoid situations where all results are discarded every check run, we err on the side
+                # is removed. To avoid situations where all results are discarded every check run, we err on the side
                 # of potentially including truncated rows that exceed previous run counts.
                 continue
 
@@ -103,7 +106,11 @@ class StatementMetrics:
 
             result.append(diffed_row)
 
-        self._previous_statements = new_cache
+        if self._statement_cache is None:
+            self._statement_cache = LRUCache(self._max_cache_size)
+
+        for row_key, row in new_statements.items():
+            self._statement_cache[row_key] = row
 
         return result
 
