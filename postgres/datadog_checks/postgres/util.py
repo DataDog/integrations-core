@@ -28,9 +28,11 @@ class DatabaseConfigurationError(Enum):
     Denotes the possible database configuration errors
     """
 
-    pg_stat_statement_not_created = 'pg-stat-statement-not-created'
-    pg_stat_statement_not_loaded = 'pg-stat-statement-not-loaded'
+    pg_stat_statements_not_created = 'pg-stat-statements-not-created'
+    pg_stat_statements_not_loaded = 'pg-stat-statements-not-loaded'
+    pg_stat_statements_missing_columns = 'pg-stat-statements-missing-columns'
     undefined_explain_function = 'undefined-explain-function'
+    unable_to_collect_statement_metrics = 'unable-to-collect-statement-metrics'
 
 
 def warning_with_tags(warning_message, *args, **kwargs):

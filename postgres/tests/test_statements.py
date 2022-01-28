@@ -1162,6 +1162,9 @@ class ObjectNotInPrerequisiteState(psycopg2.errors.ObjectNotInPrerequisiteState)
         else:
             return super(ObjectNotInPrerequisiteState, self).__getattribute__(attr)
 
+    def __str__(self):
+        return self.pg_error
+
 
 class UndefinedTable(psycopg2.errors.UndefinedTable):
     """
@@ -1178,6 +1181,9 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
         else:
             return super(UndefinedTable, self).__getattribute__(attr)
 
+    def __str__(self):
+        return self.pg_error
+
 
 @pytest.mark.parametrize(
     "error,metric_columns,expected_error_tag,expected_warnings",
@@ -1189,8 +1195,8 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
             [
                 'Unable to collect statement metrics because pg_stat_statements extension is '
                 "not loaded in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
-                'setup_postgres/troubleshooting#pg-stat-statement-not-loaded'
-                ' for more details\ncode=pg-stat-statement-not-loaded dbname=datadog_test host=stubbed.hostname',
+                'setup_postgres/troubleshooting#pg-stat-statements-not-loaded'
+                ' for more details\ncode=pg-stat-statements-not-loaded dbname=datadog_test host=stubbed.hostname',
             ],
         ),
         (
@@ -1200,27 +1206,40 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
             [
                 'Unable to collect statement metrics because pg_stat_statements is not '
                 "created in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
-                'setup_postgres/troubleshooting#pg-stat-statement-not-created'
-                ' for more details\ncode=pg-stat-statement-not-created dbname=datadog_test host=stubbed.hostname',
+                'setup_postgres/troubleshooting#pg-stat-statements-not-created'
+                ' for more details\ncode=pg-stat-statements-not-created dbname=datadog_test host=stubbed.hostname',
             ],
         ),
         (
             ObjectNotInPrerequisiteState('cannot insert into view'),
             [],
             'error:database-ObjectNotInPrerequisiteState',
-            [],
+            [
+                "Unable to collect statement metrics because of an error running queries in database 'datadog_test'. "
+                "See https://docs.datadoghq.com/database_monitoring/troubleshooting for help: cannot insert into view\n"
+                "code=unable-to-collect-statement-metrics dbname=datadog_test host=stubbed.hostname"
+            ],
         ),
         (
-            psycopg2.errors.DatabaseError(),
+            psycopg2.errors.DatabaseError('connection reset'),
             [],
             'error:database-DatabaseError',
-            [],
+            [
+                "Unable to collect statement metrics because of an error running queries in database 'datadog_test'. "
+                'See https://docs.datadoghq.com/database_monitoring/troubleshooting for help: connection reset\n'
+                'code=unable-to-collect-statement-metrics dbname=datadog_test host=stubbed.hostname',
+            ],
         ),
         (
             None,
             [],
             'error:database-missing_pg_stat_statements_required_columns',
-            [],
+            [
+                'Unable to collect statement metrics because required fields are unavailable: calls, query, rows. '
+                'See https://docs.datadoghq.com/database_monitoring/'
+                'setup_postgres/troubleshooting#pg-stat-statements-missing-columns'
+                ' for help.\ncode=pg-stat-statements-missing-columns dbname=datadog_test host=stubbed.hostname',
+            ],
         ),
     ],
 )

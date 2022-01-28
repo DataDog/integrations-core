@@ -197,9 +197,18 @@ class PostgresStatementMetrics(DBMAsyncJob):
             available_columns = set(self._get_pg_stat_statements_columns())
             missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - available_columns
             if len(missing_columns) > 0:
-                self._log.warning(
-                    'Unable to collect statement metrics because required fields are unavailable: %s',
-                    ', '.join(list(missing_columns)),
+                self._check.record_warning(
+                    DatabaseConfigurationError.pg_stat_statements_missing_columns,
+                    warning_with_tags(
+                        "Unable to collect statement metrics because required fields are unavailable: %s. "
+                        "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                        "troubleshooting#%s for help.",
+                        ', '.join(sorted(list(missing_columns))),
+                        DatabaseConfigurationError.pg_stat_statements_missing_columns.value,
+                        host=self._check.resolved_hostname,
+                        dbname=self._config.dbname,
+                        code=DatabaseConfigurationError.pg_stat_statements_missing_columns.value,
+                    ),
                 )
                 self._check.count(
                     "dd.postgres.statement_metrics.error",
@@ -237,36 +246,48 @@ class PostgresStatementMetrics(DBMAsyncJob):
             ) and 'pg_stat_statements must be loaded' in str(e.pgerror):
                 error_tag = "error:database-{}-pg_stat_statements_not_loaded".format(type(e).__name__)
                 self._check.record_warning(
-                    DatabaseConfigurationError.pg_stat_statement_not_loaded,
+                    DatabaseConfigurationError.pg_stat_statements_not_loaded,
                     warning_with_tags(
                         "Unable to collect statement metrics because pg_stat_statements "
                         "extension is not loaded in database '%s'. "
                         "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
                         "troubleshooting#%s for more details",
                         self._config.dbname,
-                        DatabaseConfigurationError.pg_stat_statement_not_loaded.value,
+                        DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
                         host=self._check.resolved_hostname,
                         dbname=self._config.dbname,
-                        code=DatabaseConfigurationError.pg_stat_statement_not_loaded.value,
+                        code=DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
                     ),
                 )
             elif isinstance(e, psycopg2.errors.UndefinedTable) and 'pg_stat_statements' in str(e.pgerror):
                 error_tag = "error:database-{}-pg_stat_statements_not_created".format(type(e).__name__)
                 self._check.record_warning(
-                    DatabaseConfigurationError.pg_stat_statement_not_created,
+                    DatabaseConfigurationError.pg_stat_statements_not_created,
                     warning_with_tags(
                         "Unable to collect statement metrics because pg_stat_statements is not created "
                         "in database '%s'. See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
                         "troubleshooting#%s for more details",
                         self._config.dbname,
-                        DatabaseConfigurationError.pg_stat_statement_not_created.value,
+                        DatabaseConfigurationError.pg_stat_statements_not_created.value,
                         host=self._check.resolved_hostname,
                         dbname=self._config.dbname,
-                        code=DatabaseConfigurationError.pg_stat_statement_not_created.value,
+                        code=DatabaseConfigurationError.pg_stat_statements_not_created.value,
                     ),
                 )
             else:
-                self._log.warning("Unable to collect statement metrics because of an error running queries: %s", e)
+                self._check.record_warning(
+                    DatabaseConfigurationError.unable_to_collect_statement_metrics,
+                    warning_with_tags(
+                        "Unable to collect statement metrics because of an error running queries "
+                        "in database '%s'. See https://docs.datadoghq.com/database_monitoring/troubleshooting for "
+                        "help: %s",
+                        self._config.dbname,
+                        str(e),
+                        host=self._check.resolved_hostname,
+                        dbname=self._config.dbname,
+                        code=DatabaseConfigurationError.unable_to_collect_statement_metrics.value,
+                    ),
+                )
 
             self._check.count(
                 "dd.postgres.statement_metrics.error",
