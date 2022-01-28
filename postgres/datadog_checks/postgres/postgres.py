@@ -564,7 +564,7 @@ class PostgreSql(AgentCheck):
                             getattr(self, method)(metric, value, tags=set(query_tags), hostname=self.resolved_hostname)
 
     def record_warning(self, code, message):
-        # type: (DatabaseConfigurationError, str) -> ()
+        # type: (DatabaseConfigurationError, str) -> None
         self._warnings_by_code[code] = message
 
     def _report_warnings(self):
