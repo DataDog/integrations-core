@@ -8,6 +8,7 @@ from contextlib import ExitStack
 from functools import lru_cache
 
 import click
+import yaml
 from pysmi import error
 from pysmi.codegen import JsonCodeGen
 from pysmi.compiler import MibCompiler
@@ -51,12 +52,13 @@ NOTIFICATION_TYPE = 'notificationtype'
     '--output-file',
     help='Path to a file to store a compacted version of the traps database file. Do not use with --output-dir',
 )
+@click.option('--use-json', help='Use json instead of yaml for the output file(s).', is_flag=True)
 @click.argument(
     'mib-files',
     nargs=-1,
 )
-def build_traps_db(mib_sources, compiled_mibs_sources, output_dir, output_file, mib_files):
-    """Builds a JSON formatted document containing various information about traps. This file can be used by
+def build_traps_db(mib_sources, compiled_mibs_sources, output_dir, output_file, use_json, mib_files):
+    """Builds yaml formatted documents containing various information about traps. These file scan be used by
     the Datadog Agent to enrich trap data.
     This command is intended for "Network Devices Monitoring" users who need to enrich traps that are not automatically
     supported by Datadog.
@@ -67,9 +69,21 @@ def build_traps_db(mib_sources, compiled_mibs_sources, output_dir, output_file, 
     3- Run `ddev meta snmp build-traps-db -o ./output_dir/ /path/to/my/mibs/*`\n
     """
 
+    # Defaulting to github.com/DataDog/mibs.snmplabs.com/
+    mib_sources = [mib_sources] if mib_sources else [MIB_SOURCE_URL]
+
+    if output_file:
+        allowed_extensions = ['.json'] if use_json else ['.yml', '.yml']
+        if not any(output_file.endswith(x) for x in allowed_extensions):
+            echo_warning(
+                "Output file {} does not end with an allowed extension '{}'".format(
+                    output_file, ", ".join(allowed_extensions)
+                )
+            )
+            output_file = output_file + allowed_extensions[0]
+            echo_warning("Using {} instead.".format(output_file))
+
     with ExitStack() as stack:
-        # Defaulting to github.com/DataDog/mibs.snmplabs.com/
-        mib_sources = [mib_sources] if mib_sources else [MIB_SOURCE_URL]
 
         if not compiled_mibs_sources:
             compiled_mibs_sources = stack.enter_context(TempDir('ddev_mibs'))
@@ -121,11 +135,11 @@ def build_traps_db(mib_sources, compiled_mibs_sources, output_dir, output_file, 
 
         if output_file:
             # Compact representation, only one file
-            write_compact_trap_db(trap_db_per_mib, output_file)
+            write_compact_trap_db(trap_db_per_mib, output_file, use_json=use_json)
             echo_success("Wrote trap data to {}".format(os.path.abspath(output_file)))
         else:
-            # Expanded representation, one json file per MIB.
-            write_trap_db_per_mib(trap_db_per_mib, output_dir)
+            # Expanded representation, one file per MIB.
+            write_trap_db_per_mib(trap_db_per_mib, output_dir, use_json=use_json)
             echo_success("Wrote trap data to {}".format(os.path.abspath(output_dir)))
 
 
@@ -168,22 +182,28 @@ def compile_and_report_status(mib_files, mib_compiler):
     return child_compiled_mibs, dependencies_only_mibs
 
 
-def write_trap_db_per_mib(trap_db_per_mib, output_dir):
+def write_trap_db_per_mib(trap_db_per_mib, output_dir, use_json=False):
     """
-    Writes the generated traps database into multiple json file, one per MIB.
+    Writes the generated traps database into multiple files, one per MIB.
     :param trap_db_per_mib: {<mib_name>: {"traps": {}, "vars": {}}} The traps database
-    :param output_dir: The directory where to write the json files.
+    :param output_dir: The directory where to write the files.
+    :param use_json: Whether to write a JSON or YAML file.
     """
+    file_extension = '.json' if use_json else '.yml'
     for mib, trap_db in trap_db_per_mib.items():
-        with open(os.path.join(output_dir, mib + '.json'), 'w') as output:
-            json.dump(trap_db, output)
+        with open(os.path.join(output_dir, mib + file_extension), 'w') as output:
+            if use_json:
+                json.dump(trap_db, output)
+            else:
+                yaml.dump(trap_db, output)
 
 
-def write_compact_trap_db(trap_db_per_mib, output_file):
+def write_compact_trap_db(trap_db_per_mib, output_file, use_json=False):
     """
-    Writes the generated traps database into a single compact json file.
+    Writes the generated traps database into a single compact file.
     :param trap_db_per_mib: {<mib_name>: {"traps": {}, "vars": {}}} The traps database
     :param output_file: Path to a file where to write the database.
+    :param use_json: Whether to write a JSON or YAML file.
     """
     compact_db = {"traps": {}, "vars": {}, "mibs": []}
     for mib, trap_db in trap_db_per_mib.items():
@@ -206,7 +226,10 @@ def write_compact_trap_db(trap_db_per_mib, output_file):
         compact_db['mibs'].append(mib)
 
     with open(output_file, 'w') as output:
-        json.dump(compact_db, output)
+        if use_json:
+            json.dump(compact_db, output)
+        else:
+            yaml.dump(compact_db, output)
 
 
 def generate_trap_db(compiled_mibs, compiled_mibs_sources):
