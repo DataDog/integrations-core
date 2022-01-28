@@ -51,7 +51,7 @@ class IBMMQConfig:
 
         host = instance.get('host')  # type: str
         port = instance.get('port')  # type: str
-        override_hostname = instance.get('override_hostname', False)  # type: bool
+        override_hostname = is_affirmative(instance.get('override_hostname', False))  # type: bool
 
         self.connection_name = instance.get('connection_name')  # type: str
         if (host or port) and self.connection_name:
