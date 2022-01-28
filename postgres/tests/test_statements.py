@@ -1217,7 +1217,7 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
             [
                 "Unable to collect statement metrics because of an error running queries in database 'datadog_test'. "
                 "See https://docs.datadoghq.com/database_monitoring/troubleshooting for help: cannot insert into view\n"
-                "code=unable-to-collect-statement-metrics dbname=datadog_test host=stubbed.hostname"
+                "dbname=datadog_test host=stubbed.hostname"
             ],
         ),
         (
@@ -1227,7 +1227,7 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
             [
                 "Unable to collect statement metrics because of an error running queries in database 'datadog_test'. "
                 'See https://docs.datadoghq.com/database_monitoring/troubleshooting for help: connection reset\n'
-                'code=unable-to-collect-statement-metrics dbname=datadog_test host=stubbed.hostname',
+                'dbname=datadog_test host=stubbed.hostname',
             ],
         ),
         (
@@ -1235,10 +1235,8 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
             [],
             'error:database-missing_pg_stat_statements_required_columns',
             [
-                'Unable to collect statement metrics because required fields are unavailable: calls, query, rows. '
-                'See https://docs.datadoghq.com/database_monitoring/'
-                'setup_postgres/troubleshooting#pg-stat-statements-missing-columns'
-                ' for help.\ncode=pg-stat-statements-missing-columns dbname=datadog_test host=stubbed.hostname',
+                'Unable to collect statement metrics because required fields are unavailable: calls, query, rows.\n'
+                'dbname=datadog_test host=stubbed.hostname',
             ],
         ),
     ],

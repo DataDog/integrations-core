@@ -197,17 +197,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
             available_columns = set(self._get_pg_stat_statements_columns())
             missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - available_columns
             if len(missing_columns) > 0:
-                self._check.record_warning(
-                    DatabaseConfigurationError.pg_stat_statements_missing_columns,
+                self._check.warning(
                     warning_with_tags(
-                        "Unable to collect statement metrics because required fields are unavailable: %s. "
-                        "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
-                        "troubleshooting#%s for help.",
+                        "Unable to collect statement metrics because required fields are unavailable: %s.",
                         ', '.join(sorted(list(missing_columns))),
-                        DatabaseConfigurationError.pg_stat_statements_missing_columns.value,
                         host=self._check.resolved_hostname,
                         dbname=self._config.dbname,
-                        code=DatabaseConfigurationError.pg_stat_statements_missing_columns.value,
                     ),
                 )
                 self._check.count(
@@ -275,8 +270,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     ),
                 )
             else:
-                self._check.record_warning(
-                    DatabaseConfigurationError.unable_to_collect_statement_metrics,
+                self._check.warning(
                     warning_with_tags(
                         "Unable to collect statement metrics because of an error running queries "
                         "in database '%s'. See https://docs.datadoghq.com/database_monitoring/troubleshooting for "
@@ -285,7 +279,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
                         str(e),
                         host=self._check.resolved_hostname,
                         dbname=self._config.dbname,
-                        code=DatabaseConfigurationError.unable_to_collect_statement_metrics.value,
                     ),
                 )
 
