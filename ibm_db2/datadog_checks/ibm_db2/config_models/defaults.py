@@ -54,6 +54,10 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_security(field, value):
+    return 'none'
+
+
 def instance_tls_cert(field, value):
     return get_default_field_value(field, value)
 

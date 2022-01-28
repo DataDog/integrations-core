@@ -50,6 +50,12 @@ instances:
     #
     # port: 50000
 
+    ## @param security - string - optional
+    ## Set this parameter to `ssl` if you want to use the Secure Socket Layer (SSL) protocol is 
+    ## for a connection to the database server. 
+    #
+    # security: none
+
     ## @param tls_cert - string - optional
     ## The path to a SSL certificate to use, when connecting to a database in a secure fashion. It
     ## has to be accessible and readable by the agent user.

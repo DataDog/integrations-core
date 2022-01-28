@@ -44,6 +44,7 @@ class InstanceConfig(BaseModel):
     port: Optional[int]
     service: Optional[str]
     tags: Optional[Sequence[str]]
+    security: Optional[str]
     tls_cert: Optional[str]
     use_global_custom_queries: Optional[str]
     username: str

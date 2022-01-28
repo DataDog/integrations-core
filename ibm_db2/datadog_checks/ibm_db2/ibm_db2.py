@@ -571,13 +571,15 @@ class IbmDb2Check(AgentCheck):
             return connection
 
     @classmethod
-    def get_connection_data(cls, db, username, password, host, port, tls_cert):
+    def get_connection_data(cls, db, username, password, host, port, security, tls_cert):
         if host:
             target = 'database={};hostname={};port={};protocol=tcpip;uid={};pwd={}'.format(
                 db, host, port, username, password
             )
             username = ''
             password = ''
+            if security == 'ssl':
+                target = '{};security=ssl;'.format(target)
             if tls_cert:
                 target = '{};security=ssl;sslservercertificate={}'.format(target, tls_cert)
         else:  # no cov
