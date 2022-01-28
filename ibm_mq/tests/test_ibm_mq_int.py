@@ -110,7 +110,7 @@ def test_check_metrics_and_service_checks(aggregator, get_check, instance, seed_
         tags.append('mq_host:{}'.format(common.HOST))
         hostname = None
 
-    assert_all_metrics(aggregator, minimun_tags=tags, hostname=hostname)
+    assert_all_metrics(aggregator, minimum_tags=tags, hostname=hostname)
 
     channel_tags = tags + ['channel:{}'.format(common.CHANNEL)]
     aggregator.assert_service_check(
