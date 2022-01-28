@@ -14,7 +14,7 @@ The vSphere check is included in the [Datadog Agent][2] package, so you don't ne
 
 ### Configuration
 
-In the **Administration** section of vCenter, add a read-only user called `datadog-readonly`.
+In the **Administration** section of vCenter, add a read-only user called `datadog-readonly` and apply the read-only user permissions to the resources that need monitoring. To monitor all child objects in the resource hierarchy, select the "Propagate to children" option. 
 
 Then, edit the `vsphere.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample vsphere.d/conf.yaml][4] for all available configuration options.
 
