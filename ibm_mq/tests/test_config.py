@@ -16,7 +16,7 @@ pytestmark = pytest.mark.unit
     'override_hostname, expected_hostname, expected_tag',
     [(False, None, 'mq_host:{}'.format(HOST)), (True, HOST, None)],
 )
-def test_mq_tag(instance, override_hostname, expected_hostname, expected_tag):
+def test_mq_host_tag(instance, override_hostname, expected_hostname, expected_tag):
     instance['override_hostname'] = override_hostname
     config = IBMMQConfig(instance)
 
