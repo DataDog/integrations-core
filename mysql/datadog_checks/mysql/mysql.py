@@ -981,7 +981,9 @@ class MySql(AgentCheck):
         self._warnings_by_code[code] = message
 
     def _report_warnings(self):
-        for warning in self._warnings_by_code.values():
-            self.warning(warning)
+        messages = list(self._warnings_by_code.values())
         # Clear the warnings for the next check run
-        self._warnings_by_code = {}
+        self._warnings_by_code.clear()
+
+        for warning in messages:
+            self.warning(warning)

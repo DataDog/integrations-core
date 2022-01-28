@@ -883,7 +883,6 @@ class MySQLStatementSamples(DBMAsyncJob):
         except pymysql.err.DatabaseError as e:
             if e.args[0] in PYMYSQL_MISSING_EXPLAIN_STATEMENT_PROC_ERRORS:
                 err_msg = e.args[1] if len(e.args) > 1 else ''
-                self._log.warning("Recording warning for code explain_plan_procedure_missing")
                 self._check.record_warning(
                     DatabaseConfigurationError.explain_plan_procedure_missing,
                     warning_with_tags(
