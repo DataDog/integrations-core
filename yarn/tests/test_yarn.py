@@ -38,6 +38,8 @@ from .common import (
     YARN_ROOT_QUEUE_METRICS_VALUES,
     YARN_SSL_VERIFY_FALSE_CONFIG,
     YARN_SSL_VERIFY_TRUE_CONFIG,
+    YARN_SUBQUEUE_METRICS_TAGS,
+    YARN_SUBQUEUE_METRICS_VALUES,
 )
 
 EXPECTED_TAGS = YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS
@@ -101,6 +103,10 @@ def test_check(aggregator, mocked_request):
     # Check the YARN Queue Metrics from excluded queues are absent
     for metric, _ in YARN_QUEUE_METRICS.values():
         aggregator.assert_metric(metric, tags=YARN_QUEUE_NOFOLLOW_METRICS_TAGS + CUSTOM_TAGS, count=0)
+
+    # Check the YARN Custom Queue Metrics
+    for metric, value in iteritems(YARN_SUBQUEUE_METRICS_VALUES):
+        aggregator.assert_metric(metric, value=value, tags=YARN_SUBQUEUE_METRICS_TAGS + CUSTOM_TAGS, count=1)
 
     aggregator.assert_all_metrics_covered()
 

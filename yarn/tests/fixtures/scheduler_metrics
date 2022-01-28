@@ -13,10 +13,8 @@
                   "absoluteCapacity" : 23,
                   "queues" : {
                      "queue" : [
-                        {"queuename" : "testsubqueue1",
-                        "absoluteCapacity": 3.456},
-                        {"queuename" : "testsubqueue2",
-                        "absoluteCapacity": 4.567}
+                        {"queuename" : "testsubqueue",
+                        "absoluteCapacity": 3.456}
                      ]
                   }
                },

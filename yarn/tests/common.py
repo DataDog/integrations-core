@@ -299,6 +299,10 @@ YARN_QUEUE_METRICS_VALUES = {
     'yarn.queue.max_applications_per_user': 5212,
 }
 
+YARN_SUBQUEUE_METRICS_VALUES = {'yarn.queue.absolute_capacity': 3.456}
+
 YARN_QUEUE_METRICS_TAGS = ['queue_name:clientqueue'] + YARN_CLUSTER_METRICS_TAGS
 
 YARN_QUEUE_NOFOLLOW_METRICS_TAGS = ['queue_name:nofollowqueue'] + YARN_CLUSTER_METRICS_TAGS
+
+YARN_SUBQUEUE_METRICS_TAGS = ['sub_queue_name:testsubqueue'] + YARN_CLUSTER_METRICS_TAGS
