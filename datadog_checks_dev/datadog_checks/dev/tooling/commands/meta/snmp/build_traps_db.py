@@ -1,0 +1,268 @@
+# (C) Datadog, Inc. 2021-present
+# All rights reserved
+# Licensed under Simplified BSD License (see LICENSE)
+
+import json
+import os
+from functools import lru_cache
+from tempfile import mkdtemp
+
+import click
+from pysmi import error
+from pysmi.codegen import JsonCodeGen
+from pysmi.compiler import MibCompiler
+from pysmi.parser import SmiV1CompatParser
+from pysmi.reader import getReadersFromUrls
+from pysmi.searcher import AnyFileSearcher
+from pysmi.writer import FileWriter
+
+from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
+from .constants import MIB_SOURCE_URL
+
+# Unique identifiers of traps in json-compiled MIB files.
+NOTIFICATION_TYPE = 'notificationtype'
+
+
+@click.command(
+    context_settings=CONTEXT_SETTINGS,
+    short_help='Generate a traps database that can be used by the '
+    'Datadog Agent for resolving Traps OIDs to readable strings.',
+)
+@click.option(
+    '--mib-sources',
+    '-s',
+    help='Url or a path to a directory containing the dependencies for [mib_files...].'
+    'Traps defined in these files are ignored.',
+)
+@click.option(
+    '--compiled-mibs-sources',
+    '-c',
+    help='Path to a directory where to store the intermediate compiled MIBs in JSON format. Defaults to a temp dir',
+)
+@click.option(
+    '--output-dir',
+    '-o',
+    help='Path to a directory where to store the created traps database file per MIB.'
+    'Recommended option, do not use with --output-file',
+)
+@click.option(
+    '--output-file',
+    help='Path to a file to store a compacted version of the traps database file. Do not use with --output-dir',
+)
+@click.argument(
+    'mib-files',
+    nargs=-1,
+)
+def build_traps_db(mib_sources, compiled_mibs_sources, output_dir, output_file, mib_files):
+    """Builds a JSON formatted document containing various information about traps. This file can be used by
+    the Datadog Agent to enrich trap data.
+    This command is intended for "Network Devices Monitoring" users who need to enrich traps that are not automatically
+    supported by Datadog.
+
+    The expected workflow is as such:\n
+    1- Identify a type of device that is sending traps that Datadog does not already recognize.\n
+    2- Fetch all the MIBs that we do not support.\n
+    3- Run `ddev meta snmp build-traps-db -o ./output_dir/ /path/to/my/mibs/*`\n
+    """
+
+    # Defaulting to github.com/DataDog/mibs.snmplabs.com/
+    mib_sources = [mib_sources] if mib_sources else [MIB_SOURCE_URL]
+
+    if not compiled_mibs_sources:
+        compiled_mibs_sources = mkdtemp()
+
+    compiled_mibs_sources = os.path.abspath(compiled_mibs_sources)
+    if not os.path.isdir(compiled_mibs_sources):
+        abort("Output directory {} does not exist".format(compiled_mibs_sources))
+    echo_info("Writing intermediate compiled MIBs to {}".format(compiled_mibs_sources))
+
+    mibs_sources_dir = os.path.join(compiled_mibs_sources, 'mibs_sources')
+    if not os.path.isdir(mibs_sources_dir):
+        os.mkdir(mibs_sources_dir)
+
+    if output_dir and output_file:
+        abort("Do not set both --output-dir and --output-file at the same time.")
+    elif not output_file and not output_dir:
+        abort("Need to set one of --output-dir or --output-file")
+
+    mib_sources = (
+        sorted(set([os.path.abspath(os.path.dirname(x)) for x in mib_files if os.path.sep in x])) + mib_sources
+    )
+
+    mib_files = [os.path.basename(os.path.splitext(x)[0]) for x in mib_files if os.path.isfile(x)]
+    searchers = [AnyFileSearcher(compiled_mibs_sources).setOptions(exts=['.json'])]
+    code_generator = JsonCodeGen()
+    file_writer = FileWriter(compiled_mibs_sources).setOptions(suffix='.json')
+    mib_compiler = MibCompiler(SmiV1CompatParser(tempdir=''), code_generator, file_writer)
+    mib_compiler.addSources(*getReadersFromUrls(*mib_sources, **dict(fuzzyMatching=True)))
+    mib_compiler.addSearchers(*searchers)
+
+    try:
+        compiled_mibs, compiled_dependencies_mibs = compile_and_report_status(mib_files, mib_compiler)
+    except error.PySmiError:
+        abort("Unable to compile")
+
+    # Move all the parent MIBs that had to be compiled but were not requested in the command to a subfolder.
+    for mib_file_name in compiled_dependencies_mibs:
+        os.replace(
+            os.path.join(compiled_mibs_sources, mib_file_name + '.json'),
+            os.path.join(mibs_sources_dir, mib_file_name + '.json'),
+        )
+
+    # Only generate trap_db with `mib_files` unless explicitly asked. Used to ignore other files that may be
+    # present "compiled_mibs_sources"
+    compiled_mibs = [os.path.join(compiled_mibs_sources, x + '.json') for x in compiled_mibs]
+
+    # Generate the trap database based on the compiled MIBs.
+    trap_db_per_mib = generate_trap_db(compiled_mibs, mibs_sources_dir)
+
+    if output_file:
+        # Compact representation, only one file
+        write_compact_trap_db(trap_db_per_mib, output_file)
+        echo_success("Wrote trap data to {}".format(os.path.abspath(output_file)))
+    else:
+        # Expanded representation, one json file per MIB.
+        write_trap_db_per_mib(trap_db_per_mib, output_dir)
+        echo_success("Wrote trap data to {}".format(os.path.abspath(output_dir)))
+
+
+def compile_and_report_status(mib_files, mib_compiler):
+    """
+    Iteratively compile all the mibs into multiple json files.
+    :param mib_files: List of path to mib files to compile
+    :param mib_compiler: A pysnmp compiler object
+    :return: A list of the compiled MIBs and a list of dependant MIBs that had to be compiled as well.
+    """
+    child_compiled_mibs = []
+    all_compiled_mibs = []  # Name of all compiled mibs including the parents recursively
+    with click.progressbar(mib_files, label="Compiling MIBs: ", show_eta=False) as pb:
+        for mib_file in pb:
+            mibs_status = mib_compiler.compile(
+                mib_file, noDeps=False, rebuild=True, dryRun=False, genTexts=True, writeMibs=True, ignoreErrors=False
+            )
+            failed_mibs = {k: v for k, v in mibs_status.items() if v == 'failed'}
+            missing_mibs = [k for k, v in mibs_status.items() if v == 'missing']
+            for mib_name, compilation_status in failed_mibs.items():
+                echo_failure(
+                    '\33[2K\rFailed to compile MIB {}: {}'.format(mib_name, compilation_status.error), indent=False
+                )
+
+            if missing_mibs:
+                echo_failure('\33[2K\rMissing MIBs: {}'.format(', '.join(missing_mibs)), indent=False)
+
+            compiled_mibs = {k: v for k, v in mibs_status.items() if v == 'compiled'}
+
+            for mib_name, mib_status in compiled_mibs.items():
+                all_compiled_mibs.append(mib_name)
+                if mib_status.file == mib_file:
+                    # Let's keep this file in the output directory
+                    child_compiled_mibs.append(mib_name)
+
+    # These MIBs were compiled but where not explicitly requested by the user. They will be moved
+    # to a different folder.
+    dependencies_only_mibs = set([x for x in all_compiled_mibs if x not in child_compiled_mibs])
+
+    return child_compiled_mibs, dependencies_only_mibs
+
+
+def write_trap_db_per_mib(trap_db_per_mib, output_dir):
+    """
+    Writes the generated traps database into multiple json file, one per MIB.
+    :param trap_db_per_mib: {<mib_name>: {"traps": {}, "vars": {}}} The traps database
+    :param output_dir: The directory where to write the json files.
+    """
+    for mib, trap_db in trap_db_per_mib.items():
+        with open(os.path.join(output_dir, mib + '.json'), 'w') as output:
+            json.dump(trap_db, output)
+
+
+def write_compact_trap_db(trap_db_per_mib, output_file):
+    """
+    Writes the generated traps database into a single compact json file.
+    :param trap_db_per_mib: {<mib_name>: {"traps": {}, "vars": {}}} The traps database
+    :param output_file: Path to a file where to write the database.
+    """
+    compact_db = {"traps": {}, "vars": {}, "mibs": []}
+    for mib, trap_db in trap_db_per_mib.items():
+        for trap_oid, trap in trap_db["traps"].items():
+            if trap_oid in compact_db["traps"] and trap["name"] != compact_db["traps"][trap_oid]["name"]:
+                echo_warning(
+                    "Found name conflict for trap OID {}, ({} != {})".format(
+                        trap_oid, trap['name'], compact_db["traps"][trap_oid]["name"]
+                    )
+                )
+            compact_db["traps"][trap_oid] = trap
+        for var_oid, var in trap_db["vars"].items():
+            if var_oid in compact_db["vars"] and var["name"] != compact_db["vars"][var_oid]["name"]:
+                echo_warning(
+                    "Found name conflict for variable OID {}, ({} != {})".format(
+                        var_oid, var['name'], compact_db["vars"][var_oid]["name"]
+                    )
+                )
+            compact_db["vars"][var_oid] = var
+        compact_db['mibs'].append(mib)
+
+    with open(output_file, 'w') as output:
+        json.dump(compact_db, output)
+
+
+def generate_trap_db(compiled_mibs, compiled_mibs_sources):
+    """
+    Generates the trap database from a list of mibs.
+    :param compiled_mibs: List of path to json-compiled MIB files.
+    :param compiled_mibs_sources: Path to a directory containing additional compiled MIB files for resolving deps.
+    :return: {<mib_name>: {"traps": {}, "vars": {}}} The traps database
+    """
+    trap_db_per_mib = {}
+    for compiled_mib_file in compiled_mibs:
+        if not os.path.isfile(compiled_mib_file):
+            continue
+        with open(compiled_mib_file, 'r') as f:
+            file_content = json.load(f)
+
+        trap_db = {"traps": {}, "vars": {}}
+
+        traps = {k: v for k, v in file_content.items() if v.get('class') == NOTIFICATION_TYPE}
+        for trap in traps.values():
+            try:
+                trap_name = trap['name']
+                trap_oid = trap['oid']
+                trap_descr = trap.get('description', '')
+                trap_db["traps"][trap_oid] = {"name": trap_name, "descr": trap_descr}
+                for trap_var in trap.get('objects', []):
+                    var_oid, var_descr = get_oid_and_descr(
+                        trap_var['object'],
+                        trap_var['module'],
+                        search_locations=(os.path.dirname(compiled_mib_file), compiled_mibs_sources),
+                    )
+                    var_name = trap_var['object']
+                    trap_db["vars"][var_oid] = {"name": var_name, "description": trap_descr}
+            except Exception as e:
+                echo_info("Error in MIB {}: {}".format(compiled_mib_file, e))
+
+        if trap_db['traps']:
+            mib_name = file_content['meta']['module']
+            trap_db_per_mib[mib_name] = trap_db
+
+    return trap_db_per_mib
+
+
+@lru_cache(maxsize=None)
+def get_oid_and_descr(var_name, mib_name, search_locations=None):
+    """
+    Returns the oid and the description of a given variable and a MIB name.
+    :param var_name: Name of the variable to search for
+    :param mib_name: Name of the MIB defining the variable
+    :param search_locations: Tuple of path to directories containing json-compiled MIB files
+    :return: The oid and the description of the variable.
+    """
+    for location in search_locations:
+        file_name = os.path.join(location, mib_name + '.json')
+        if os.path.isfile(file_name):
+            break
+    else:
+        raise Exception("Missing MIB {}".format(mib_name))
+
+    with open(file_name, 'r') as f:
+        file_content = json.load(f)
+    return file_content[var_name]['oid'], file_content[var_name].get('description', '')
