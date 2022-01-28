@@ -568,9 +568,9 @@ class PostgreSql(AgentCheck):
         self._warnings_by_code[code] = message
 
     def _report_warnings(self):
-        messages = list(self._warnings_by_code.values())
-        # Clear the warnings for the next check run
-        self._warnings_by_code.clear()
+        messages = self._warnings_by_code.values()
+        # Reset the warnings for the next check run
+        self._warnings_by_code = {}
 
         for warning in messages:
             self.warning(warning)
