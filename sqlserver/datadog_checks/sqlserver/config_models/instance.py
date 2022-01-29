@@ -57,6 +57,7 @@ class QueryMetrics(BaseModel):
     enabled: Optional[bool]
     enforce_collection_interval_deadline: Optional[bool]
     samples_per_hour_per_query: Optional[int]
+    statement_cache_size_multiplier: Optional[int]
 
 
 class InstanceConfig(BaseModel):

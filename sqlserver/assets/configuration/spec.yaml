@@ -268,6 +268,16 @@ files:
             type: boolean
             example: True
           hidden: true
+        - name: statement_cache_size_multiplier
+          description: |
+            A cache of statement statistics is kept to compute statistics sent as query metrics. The cache
+            size is a multiplier of the dm_exec_query_stats_row_limit configuration. Raising the multiplier reduces
+            the likelyhood of a statement getting purged from the cache which can result in erroneous statistics when
+            the query is executed again but it increases the memory usage.
+          value:
+            type: integer
+            example: 5
+          hidden: true
 
     - name: query_activity
       description: Configure collection of active sessions monitoring

@@ -170,7 +170,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self.enforce_collection_interval_deadline = is_affirmative(
             check.statement_metrics_config.get('enforce_collection_interval_deadline', True)
         )
-        self._state = StatementMetrics(self.dm_exec_query_stats_row_limit)
+        statement_metrics_cache_size = self.dm_exec_query_stats_row_limit * check.statement_metrics_config.get(
+            'statement_cache_size_multiplier', 5)
+        self._state = StatementMetrics(statement_metrics_cache_size)
         self._init_caches()
         self._conn_key_prefix = "dbm-"
         self._statement_metrics_query = None
