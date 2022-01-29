@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import string
+from enum import Enum
 from typing import Any, List, Tuple
 
 from datadog_checks.base import AgentCheck
@@ -20,6 +21,25 @@ class PartialFormatter(string.Formatter):
             return kwargs.get(key, '{' + key + '}')
         else:
             return string.Formatter.get_value(self, key, args, kwargs)
+
+
+class DatabaseConfigurationError(Enum):
+    """
+    Denotes the possible database configuration errors
+    """
+
+    pg_stat_statements_not_created = 'pg-stat-statements-not-created'
+    pg_stat_statements_not_loaded = 'pg-stat-statements-not-loaded'
+    undefined_explain_function = 'undefined-explain-function'
+
+
+def warning_with_tags(warning_message, *args, **kwargs):
+    if args:
+        warning_message = warning_message % args
+
+    return "{msg}\n{tags}".format(
+        msg=warning_message, tags=" ".join('{key}={value}'.format(key=k, value=v) for k, v in sorted(kwargs.items()))
+    )
 
 
 def milliseconds_to_nanoseconds(value):
