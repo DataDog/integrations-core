@@ -23,7 +23,8 @@ class StatementMetrics:
     in values between query metrics collection runs.
     """
 
-    def __init__(self, max_cache_size=10000):
+    def __init__(self, check, max_cache_size=10000):
+        self._check = check
         self._statement_cache = None
         self._max_cache_size = max_cache_size
 
@@ -111,6 +112,12 @@ class StatementMetrics:
 
         for row_key, row in new_statements.items():
             self._statement_cache[row_key] = row
+
+        self._check.gauge(
+            "dd.{}.statements.seen_plans_cache.len".format(self._check.name),
+            len(self._statement_cache),
+            **self._check.debug_stats_kwargs()
+        )
 
         return result
 

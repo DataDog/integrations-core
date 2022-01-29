@@ -78,7 +78,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
         self._db = None
         self._config = config
         self.log = get_check_logger()
-        self._state = StatementMetrics()
+        self._state = StatementMetrics(self)
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
