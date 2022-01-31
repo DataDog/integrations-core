@@ -14,8 +14,6 @@ files:
         value:
           example: http://localhost:80
           type: string
-      - template: instances/http
-      - template: instances/default
       - name: enable_blocksize_statistics
         description: |
           Enable this option to collect Silk stats metrics tagged by blocksize.
@@ -28,3 +26,5 @@ files:
         value:
           type: boolean
           example: false
+      - template: instances/http
+      - template: instances/default
