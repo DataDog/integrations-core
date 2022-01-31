@@ -28,20 +28,23 @@ FROM sys.dm_exec_sessions
     GROUP BY login_name, status, DB_NAME(database_id)
 """
 
+# this wont detect open idle sessions
 ACTIVITY_QUERY = re.sub(
     r'\s+',
     ' ',
     """\
-SELECT
-    CONVERT(
-        NVARCHAR, TODATETIMEOFFSET(CURRENT_TIMESTAMP, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
+SELECT 
+    CONVERT( 
+        NVARCHAR, TODATETIMEOFFSET(CURRENT_TIMESTAMP, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126 
     ) as now,
     CONVERT(
         NVARCHAR, TODATETIMEOFFSET(at.transaction_begin_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
-    ) as transaction_begin_time,
-    CONVERT(
-        NVARCHAR, TODATETIMEOFFSET(r.start_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
-    ) as query_start,
+    ) as transaction_begin_time, 
+    CONVERT( 
+        NVARCHAR, TODATETIMEOFFSET(r.start_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126 
+    ) as query_start, 
+    sess.login_name as user_name, 
+    sess.status as session_status, 
     at.transaction_type,
     at.transaction_state,
     sess.login_name as user_name,
@@ -53,16 +56,16 @@ SELECT
     c.client_net_address as client_address,
     sess.host_name as host_name,
     r.*
-FROM sys.dm_tran_active_transactions at
-    INNER JOIN sys.dm_tran_session_transactions st ON st.transaction_id = at.transaction_id
-      LEFT OUTER JOIN sys.dm_exec_sessions sess ON st.session_id = sess.session_id
-    LEFT OUTER JOIN sys.dm_exec_connections c
+FROM sys.dm_exec_sessions sess
+    JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
-    LEFT OUTER JOIN sys.dm_exec_requests r
+    JOIN sys.dm_exec_requests r
         ON c.connection_id = r.connection_id
-        CROSS APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) text
-    WHERE sess.session_id != @@spid
-    ORDER BY at.transaction_begin_time ASC
+    FULL OUTER JOIN sys.dm_tran_session_transactions st ON st.session_id = sess.session_id 
+    FULL OUTER JOIN sys.dm_tran_active_transactions at ON st.transaction_id = at.transaction_id  
+        CROSS APPLY sys.dm_exec_sql_text(r.sql_handle) text 
+WHERE sess.session_id != @@spid
+    ORDER BY transaction_begin_time
 """,
 ).strip()
 
