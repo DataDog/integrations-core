@@ -616,9 +616,9 @@ class Network(AgentCheck):
                 if value is not None:
                     self.gauge('system.net.iface.{}'.format(metric_name), value, tags=custom_tags + ["iface:" + iface])
             iface_queues_location = os.path.join(sys_net_location, iface, 'queues')
-            self._get_num_iface_queues(iface, iface_queues_location, custom_tags)
+            self._collect_iface_queue_metrics(iface, iface_queues_location, custom_tags)
 
-    def _get_num_iface_queues(self, iface, iface_queues_location, custom_tags):
+    def _collect_iface_queue_metrics(self, iface, iface_queues_location, custom_tags):
         try:
             iface_queues = os.listdir(iface_queues_location)
         except OSError as e:
