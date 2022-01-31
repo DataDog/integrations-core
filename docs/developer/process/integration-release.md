@@ -206,32 +206,32 @@ After merging the release PR, the [build pipeline](../meta/cd.md) can fail under
 
   To resolve this, you'll need to bootstrap metadata for every integration:
 
-    1. Checkout and pull the most recent version of the `master` branch.
+  1. Checkout and pull the most recent version of the `master` branch.
 
-        ```
-        git checkout master
-        git pull
-        ```
+      ```
+      git checkout master
+      git pull
+      ```
 
-    1. Sign everything.
+  1. Sign everything.
 
-        ```
-        ddev release make all --sign-only
-        ```
+      ```
+      ddev release make all --sign-only
+      ```
 
-        You may need to touch your Yubikey multiple times.
+      You may need to touch your Yubikey multiple times.
 
-    1. Push your branch to GitHub.
-    1. Manually trigger a build.
+  1. Push your branch to GitHub.
+  1. Manually trigger a build.
 
-        ```
-        git tag <USERNAME>bootstrap-1.0.0 -m <USERNAME>bootstrap-1.0.0
-        ```
+      ```
+      git tag <USERNAME>bootstrap-1.0.0 -m <USERNAME>bootstrap-1.0.0
+      ```
 
-        The tag name is irrelevant, it just needs to look like an integration release. Gitlab doesn't sync
-        deleted tags, so any subsequent manual trigger tags will need to increment the version number.
+      The tag name is irrelevant, it just needs to look like an integration release. Gitlab doesn't sync
+      deleted tags, so any subsequent manual trigger tags will need to increment the version number.
 
-    1. Delete the branch and tag, locally and on GitHub.
+  1. Delete the branch and tag, locally and on GitHub.
     
 - If a feature PR conflicting with the release PR is merged out of order.
 
