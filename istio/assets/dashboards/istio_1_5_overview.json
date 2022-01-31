@@ -350,7 +350,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "top(avg:istio.grpc.server.msg_sent_total{$cluster}.as_count(), 10, 'mean', 'desc'), top(avg:istio.grpc.server.msg_received_total{$cluster}.as_count(), 10, 'mean', 'desc')",
+                        "q": "top(avg:istio.grpc.server.msg_sent.count{$cluster}.as_count(), 10, 'mean', 'desc'), top(avg:istio.grpc.server.msg_received.count{$cluster}.as_count(), 10, 'mean', 'desc')",
                         "display_type": "area",
                         "style": {
                             "palette": "cool",
@@ -462,7 +462,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:istio.pilot.xds.pushes{$cluster} by {type}",
+                        "q": "sum:istio.pilot.xds.pushes.count{$cluster} by {type}",
                         "display_type": "bars",
                         "style": {
                             "palette": "dog_classic",
@@ -691,7 +691,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:istio.galley.validation.failed{$cluster}.as_count()",
+                        "q": "avg:istio.galley.validation.failed.count{$cluster}.as_count()",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
