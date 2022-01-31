@@ -418,7 +418,7 @@ CONSUMER_GROUP_METRICS = [
     'confluent.kafka.consumer.group.last_heartbeat_seconds_ago',
     'confluent.kafka.consumer.group.sync_rate',
     'confluent.kafka.consumer.group.sync_time_avg',
-    'confluent.kafka.consumer.group.sync_time_max',   
+    'confluent.kafka.consumer.group.sync_time_max',
 ]
 
 KSQL_QUERY_STATS = [
