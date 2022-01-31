@@ -50,6 +50,16 @@ instances:
     #
   - host_address: http://localhost:80
 
+    ## @param enable_blocksize_statistics - boolean - optional - default: false
+    ## Enable this option to collect Silk stats metrics tagged by blocksize.
+    #
+    # enable_blocksize_statistics: false
+
+    ## @param enable_read_write_statistics - boolean - optional - default: false
+    ## Enable this option to collect Silk stats metrics differentiated by read and write.
+    #
+    # enable_read_write_statistics: false
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
@@ -366,13 +376,3 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
-
-    ## @param enable_blocksize_statistics - boolean - optional - default: false
-    ## Enable this option to collect Silk stats metrics tagged by blocksize.
-    #
-    # enable_blocksize_statistics: false
-
-    ## @param enable_read_write_statistics - boolean - optional - default: false
-    ## Enable this option to collect Silk stats metrics differentiated by read and write.
-    #
-    # enable_read_write_statistics: false
