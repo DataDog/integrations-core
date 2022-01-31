@@ -6,7 +6,7 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.silk import SilkCheck
 
-from .common import METRICS
+from .common import BLOCKSIZE_METRICS, METRICS, READ_WRITE_METRICS
 
 
 @pytest.mark.e2e
