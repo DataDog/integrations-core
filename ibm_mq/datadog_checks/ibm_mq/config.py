@@ -63,6 +63,8 @@ class IBMMQConfig:
             raise ConfigurationError(
                 'You cannot override the hostname if you provide a connection_name instead of a host'
             )
+        if override_hostname and not host:
+            raise ConfigurationError("You cannot override the hostname if don't provide a host")
 
         if not self.connection_name:
             host = host or 'localhost'
