@@ -607,7 +607,7 @@ class Network(AgentCheck):
         try:
             ifaces = os.listdir(sys_net_location)
         except OSError as e:
-            self.log.debug("Unable to list %s, skipping %s.", sys_net_location, e)
+            self.log.debug("Unable to list %s, skipping system iface metrics: %s.", sys_net_location, e)
             return None
         for iface in ifaces:
             for metric_name in sys_net_metrics:
