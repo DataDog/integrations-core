@@ -42,6 +42,8 @@ METRICS_COLUMNS = {
     'sum_no_good_index_used',
 }
 
+DEFAULT_STATEMENTS_LIMIT = 10000
+
 
 def _row_key(row):
     """
@@ -78,7 +80,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
         self._db = None
         self._config = config
         self.log = get_check_logger()
-        self._state = StatementMetrics(self)
+        self._state = StatementMetrics(self, DEFAULT_STATEMENTS_LIMIT * 5)
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
@@ -166,7 +168,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             FROM performance_schema.events_statements_summary_by_digest
             WHERE `digest_text` NOT LIKE 'EXPLAIN %' OR `digest_text` IS NULL
             ORDER BY `count_star` DESC
-            LIMIT 10000"""
+            LIMIT {limit}""".format(limit=DEFAULT_STATEMENTS_LIMIT)
 
         with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
             cursor.execute(sql_statement_summary)
