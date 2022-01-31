@@ -59,12 +59,13 @@ SELECT
 FROM sys.dm_exec_sessions sess
     JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
-    JOIN sys.dm_exec_requests r
+    FULL OUTER JOIN sys.dm_exec_requests r
         ON c.connection_id = r.connection_id
     FULL OUTER JOIN sys.dm_tran_session_transactions st ON st.session_id = sess.session_id 
     FULL OUTER JOIN sys.dm_tran_active_transactions at ON st.transaction_id = at.transaction_id  
         CROSS APPLY sys.dm_exec_sql_text(r.sql_handle) text 
-WHERE sess.session_id != @@spid
+WHERE sess.session_id != @@spid 
+    AND (at.transaction_begin_time IS NOT NULL OR r.start_time IS NOT NULL)
     ORDER BY transaction_begin_time
 """,
 ).strip()
