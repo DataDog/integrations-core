@@ -27,6 +27,26 @@ class AuthToken(BaseModel):
     writer: Optional[Mapping[str, Any]]
 
 
+class Column(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    name: Optional[str]
+    type: Optional[str]
+    value_path: Optional[str]
+
+
+class CustomQuery(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    columns: Optional[Sequence[Column]]
+    data_path: Optional[str]
+    endpoint: Optional[str]
+    payload: Optional[Mapping[str, Any]]
+    tags: Optional[Sequence[str]]
+
+
 class Proxy(BaseModel):
     class Config:
         allow_mutation = False
@@ -50,6 +70,7 @@ class InstanceConfig(BaseModel):
     cat_allocation_stats: Optional[bool]
     cluster_stats: Optional[bool]
     connect_timeout: Optional[float]
+    custom_queries: Optional[Sequence[CustomQuery]]
     detailed_index_stats: Optional[bool]
     disable_generic_tags: Optional[bool]
     disable_legacy_cluster_tag: Optional[bool]

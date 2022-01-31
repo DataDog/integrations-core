@@ -28,26 +28,7 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][5].
 
-<!-- xxz tab xxx -->
-<!-- xxx tab "Containerized" xxx -->
-
-#### Containerized
-
-For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
-
-| Parameter            | Value                                                                                         |
-| -------------------- | --------------------------------------------------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `mapreduce`                                                                                   |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                                 |
-| `<INSTANCE_CONFIG>`  | `{"resourcemanager_uri": "https://%%host%%:8088", "cluster_name":"<MAPREDUCE_CLUSTER_NAME>"}` |
-
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -72,14 +53,35 @@ partial -->
 
 3. [Restart the Agent][5].
 
-See [Datadog's documentation][7] for additional information on how to configure the Agent for log collection in Docker environments.
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
+
+| Parameter            | Value                                                                                         |
+| -------------------- | --------------------------------------------------------------------------------------------- |
+| `<INTEGRATION_NAME>` | `mapreduce`                                                                                   |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                 |
+| `<INSTANCE_CONFIG>`  | `{"resourcemanager_uri": "https://%%host%%:8088", "cluster_name":"<MAPREDUCE_CLUSTER_NAME>"}` |
+
+##### Log collection
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker Log Collection][7].
+
+Then, set [log integrations][16] as Docker labels:
+
+```yaml
+LABEL "com.datadoghq.ad.logs"='[{"source": "mapreduce", "service": "<SERVICE_NAME>"}]'
+```
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 ### Validation
 
-[Run the Agent's status subcommand][8] and look for `mapreduce` under the Checks section.
+Run the [Agent's status subcommand][8] and look for `mapreduce` under the Checks section.
 
 ## Data Collected
 
@@ -121,3 +123,4 @@ Need help? Contact [Datadog support][11].
 [13]: https://www.datadoghq.com/blog/monitor-hadoop-metrics
 [14]: https://www.datadoghq.com/blog/collecting-hadoop-metrics
 [15]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog
+[16]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations

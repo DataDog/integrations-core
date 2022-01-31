@@ -41,5 +41,19 @@
         ],
         "name": "Node Health",
         "description": "Returns `CRITICAL` if the node is unhealthy. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.34.0",
+        "integration": "Couchbase",
+        "check": "couchbase.index_stats.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host"   
+        ],
+        "name": "Index Statistics Can Connect",
+        "description": "Returns `OK` if Index Statistics endpoint can be reached. Returns `CRITICAL` otherwise."
     }
 ]

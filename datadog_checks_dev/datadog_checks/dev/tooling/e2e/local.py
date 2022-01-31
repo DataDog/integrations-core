@@ -149,6 +149,9 @@ class LocalAgentInterface(object):
         as_table=False,
         break_point=None,
         jmx_list=None,
+        discovery_timeout=None,
+        discovery_retry_interval=None,
+        discovery_min_instances=None,
     ):
         # JMX check
         if jmx_list:
@@ -178,6 +181,15 @@ class LocalAgentInterface(object):
 
             if break_point is not None:
                 command += f' --breakpoint {break_point}'
+
+            if discovery_timeout is not None:
+                command += f'--discovery-timeout {discovery_timeout}'
+
+            if discovery_retry_interval is not None:
+                command += f'--discovery-retry-interval {discovery_retry_interval}'
+
+            if discovery_min_instances is not None:
+                command += f'--discovery-min-instances {discovery_min_instances}'
 
         if log_level is not None:
             command += f' --log-level {log_level}'

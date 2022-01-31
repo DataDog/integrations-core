@@ -59,7 +59,7 @@ def instance_aws_service(field, value):
 
 
 def instance_bearer_token_auth(field, value):
-    return False
+    return get_default_field_value(field, value)
 
 
 def instance_bearer_token_path(field, value):

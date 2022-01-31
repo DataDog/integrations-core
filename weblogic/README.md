@@ -11,7 +11,7 @@ This check monitors Oracle [WebLogic][1] Server.
 The WebLogic check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
-1. This check is JMX-based and collects metrics from the Platform MBean Server exported by the JVM, so your WebLogic servers must have JMX Remote Monitoring enabled. Follow the instructions in the [Oracle documentation][9].
+1. This check is JMX-based and collects metrics from the Platform MBean Server exported by the JVM, so your WebLogic servers must have JMX Remote Monitoring enabled. See [Remote Monitoring and Management][9] for installation instructions.
 
 2. Set the system property `-Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder` to enable these metrics on the Platform MBean Server. This may be enabled in either the WebLogic Server Administration Console or in the server startup scripts:
 
@@ -66,7 +66,7 @@ No additional installation is needed on your server.
    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated when running the Datadog Agent [status command][4].
    You can specify the metrics you are interested in by editing the [configuration][3].
    
-   To learn how to customize the metrics to collect, visit the [JMX Checks documentation][5] for more detailed instructions.
+   To learn how to customize the metrics to collect, see the [JMX Checks documentation][5] for more detailed instructions.
    If you need to monitor more metrics, contact [Datadog support][6].
 
 2. [Restart the Agent][7]

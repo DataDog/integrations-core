@@ -22,7 +22,7 @@ The RabbitMQ check is included in the [Datadog Agent][3] package. No additional 
 
 #### Prepare RabbitMQ
 
-Enable the RabbitMQ management plugin. See [RabbitMQ's documentation][4] to enable it. The Agent user then needs at least the `monitoring` tag and these required permissions:
+Enable the [RabbitMQ Management Plugin][4]. The Agent user then needs at least the `monitoring` tag and these required permissions:
 
 | Permission | Command            |
 | ---------- | ------------------ |
@@ -56,12 +56,6 @@ To configure this check for an Agent running on a host:
 2. [Restart the Agent][8].
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 _Available for Agent versions >6.0_
 
@@ -111,15 +105,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][10].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][10].
 
 | Parameter      | Value                                                                                                                                               |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |

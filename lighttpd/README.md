@@ -55,12 +55,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
    ```yaml
@@ -105,7 +99,8 @@ Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-To get a better idea of how (or why) to monitor Lighttpd web server metrics with Datadog, check out our [series of blog posts][11] about it.
+- [Monitor Lighttpd web server metrics with Datadog][11].
+
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/lighttpd/images/lighttpddashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent

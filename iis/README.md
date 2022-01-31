@@ -26,12 +26,6 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
    ```yaml
@@ -51,6 +45,9 @@ partial -->
     Change the `path` and `service` parameter values and configure them for your environment. See the [sample iis.d/conf.yaml][5] for all available configuration options.
 
 3. [Restart the Agent][6].
+
+**Note**: Ensure the `datadog-agent` user has read access to tail the log files you want to collect from. See [Permission issues tailing log files][12] for more information.
+
 
 ### Validation
 
@@ -86,3 +83,4 @@ Need help? Contact [Datadog support][10].
 [9]: https://github.com/DataDog/integrations-core/blob/master/iis/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
 [11]: https://github.com/DataDog/integrations-core/blob/7.33.x/iis/datadog_checks/iis/data/conf.yaml.example
+[12]: https://docs.datadoghq.com/logs/guide/log-collection-troubleshooting-guide/#permission-issues-tailing-log-files

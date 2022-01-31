@@ -23,6 +23,10 @@ class ObfuscatorOptions(BaseModel):
     class Config:
         allow_mutation = False
 
+    collect_commands: Optional[bool]
+    collect_comments: Optional[bool]
+    collect_metadata: Optional[bool]
+    collect_tables: Optional[bool]
     replace_digits: Optional[bool]
 
 

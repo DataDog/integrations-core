@@ -16,7 +16,7 @@
     "containers"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "display_name": "Container",
   "creates_events": true,
   "integration_id": "container",

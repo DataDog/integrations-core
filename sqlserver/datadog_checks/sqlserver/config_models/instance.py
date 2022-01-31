@@ -28,6 +28,17 @@ class CustomQuery(BaseModel):
     tags: Optional[Sequence[str]]
 
 
+class ObfuscatorOptions(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collect_commands: Optional[bool]
+    collect_comments: Optional[bool]
+    collect_metadata: Optional[bool]
+    collect_tables: Optional[bool]
+    replace_digits: Optional[bool]
+
+
 class QueryActivity(BaseModel):
     class Config:
         allow_mutation = False
@@ -41,6 +52,7 @@ class QueryMetrics(BaseModel):
         allow_mutation = False
 
     collection_interval: Optional[float]
+    disable_secondary_tags: Optional[bool]
     dm_exec_query_stats_row_limit: Optional[int]
     enabled: Optional[bool]
     enforce_collection_interval_deadline: Optional[bool]
@@ -79,6 +91,7 @@ class InstanceConfig(BaseModel):
     include_master_files_metrics: Optional[bool]
     include_task_scheduler_metrics: Optional[bool]
     min_collection_interval: Optional[float]
+    obfuscator_options: Optional[ObfuscatorOptions]
     only_custom_queries: Optional[bool]
     only_emit_local: Optional[bool]
     password: Optional[str]

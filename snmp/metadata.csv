@@ -211,6 +211,7 @@ snmp.sysGlobalTmmStatMemoryTotal,gauge,,byte,,[F5 BIG-IP] The total memory avail
 snmp.sysGlobalTmmStatMemoryUsed,gauge,,byte,,[F5 BIG-IP] The memory in use in bytes for TMM (Traffic Management Module).,0,snmp,
 snmp.sysMultiHostCpuIdle,gauge,,,,[F5 BIG-IP] The time spent by the specified processor doing nothing for the associated host.,0,snmp,
 snmp.sysMultiHostCpuIowait,gauge,,,,[F5 BIG-IP] The time spent by the specified processor waiting for external I/O to complete for the associated host.,0,snmp,
+snmp.sysMultiHostCpuUsageRatio,gauge,,percent,,[F5 BIG-IP] This is usage ratio of CPU for the associated host.,0,snmp,
 snmp.sysMultiHostCpuIrq,gauge,,,,[F5 BIG-IP] The time spent by the specified processor servicing hardware interrupts for the associated host.,0,snmp,
 snmp.sysMultiHostCpuNice,gauge,,,,[F5 BIG-IP] The time spent by the specified processor running niced processes for the associated host.,0,snmp,
 snmp.sysMultiHostCpuSoftirq,gauge,,,,[F5 BIG-IP] The time spent by the specified processor servicing soft interrupts for the associated host.,0,snmp,

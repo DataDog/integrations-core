@@ -107,7 +107,7 @@ Optionally, you can configure the Agent to use a built in `postqueue -p` command
          - deferred
    ```
 
-2. For each `config_directory` in `instances`, the Agent forks a `postqueue -c` for the Postfix configuration directory. Postfix has internal access controls that limit activities on the mail queue. By default, Postfix allows `anyone` to view the queue. On production systems where the Postfix installation may be configured with stricter access controls, you may need to grant the `dd-agent` user access to view the mail queue ([postqueue Postfix documentation][6]):
+2. For each `config_directory` in `instances`, the Agent forks a `postqueue -c` for the Postfix configuration directory. Postfix has internal access controls that limit activities on the mail queue. By default, Postfix allows `anyone` to view the queue. On production systems where the Postfix installation may be configured with stricter access controls, you may need to grant the `dd-agent` user access to view the mail queue. See the [postqueue Postfix documentation][6] for more details.
 
    ```shell
    postconf -e "authorized_mailq_users = dd-agent"
@@ -122,12 +122,6 @@ Optionally, you can configure the Agent to use a built in `postqueue -p` command
 3. [Restart the Agent][5].
 
 #### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 _Available for Agent versions >6.0_
 

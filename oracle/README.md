@@ -12,7 +12,7 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 
 #### Prerequisite
 
-To use the Oracle integration, either install the Oracle Instant Client libraries, or download the Oracle JDBC Driver (Linux only).
+To use the Oracle integration, either install the Oracle Instant Client libraries, or download the Oracle JDBC driver (Linux only).
 Due to licensing restrictions, these libraries are not included in the Datadog Agent, but can be downloaded directly from Oracle.
 
 ##### Oracle Instant Client
@@ -79,7 +79,7 @@ Once it is installed, complete the following steps:
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Stand Alone" xxx -->
 
-Create a read-only `datadog` user with proper access to your Oracle Database Server. Connect to your Oracle database with an administrative user (e.g. `SYSDBA` or `SYSOPER`) and run:
+Create a read-only `datadog` user with proper access to your Oracle Database Server. Connect to your Oracle database with an administrative user, such as `SYSDBA` or `SYSOPER`, and run:
 
 ```text
 -- Enable Oracle Script.
@@ -254,7 +254,7 @@ sqlplus <USER>/<PASSWORD>@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCPS)(HO
 
 If you are connecting to Oracle Database using JDBC, you also need to specify `jdbc_truststore_path`, `jdbc_truststore_type`, and `jdbc_truststore_password` (optional) if there is a password on the truststore. 
 
-Note: `SSO` truststores don't require passwords.
+**Note**: `SSO` truststores don't require passwords.
 
 ```yaml
     # In the `instances:` section
@@ -462,7 +462,7 @@ The structure of the directory should look similar:
 - See further Linux installation documentation on [Oracle][2].
 
 ##### Windows
-- Verify the Microsoft Visual Studio <YEAR> Redistributable requirement is met for your version. See the [Windows downloads page][15] for more details.
+- Verify the Microsoft Visual Studio `<YEAR>` Redistributable requirement is met for your version. See the [Windows downloads page][15] for more details.
 - See further Windows installation documentation on [Oracle][4].
 
 

@@ -79,17 +79,11 @@ To configure this check for an Agent running on a host:
 
 Extra configuration steps are required to get the SQL Server integration running on a Linux host:
 
-1. Install an ODBC SQL Server driver, for example the [Microsoft ODBC driver][9].
+1. Install an ODBC SQL Server driver, for example the [Microsoft ODBC driver][9] or the [FreeTDS driver][10].
 2. Copy the `odbc.ini` and `odbcinst.ini` files into the `/opt/datadog-agent/embedded/etc` folder.
 3. Configure the `conf.yaml` file to use the `odbc` connector and specify the proper driver as indicated in the `odbcinst.ini` file.
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 _Available for Agent versions >6.0_
 
@@ -114,15 +108,12 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][8].
 
-See [Datadog's documentation][10] for additional information on how to configure the Agent for log collection in Kubernetes environments.
-
-
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][11] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][12] for guidance on applying the parameters below.
 
 ##### Metric collection
 
@@ -132,19 +123,13 @@ For containerized environments, see the [Autodiscovery Integration Templates][11
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                                                    |
 | `<INSTANCE_CONFIG>`  | `{"host": "%%host%%,%%port%%", "username": "datadog", "password": "<UNIQUEPASSWORD>", "connector": "odbc", "driver": "FreeTDS"}` |
 
-See [Autodiscovery template variables][12] for details on passing `<UNIQUEPASSWORD>` as an environment variable instead of a label.
+See [Autodiscovery template variables][13] for details on passing `<UNIQUEPASSWORD>` as an environment variable instead of a label.
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection][10].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][11].
 
 | Parameter      | Value                                             |
 | -------------- | ------------------------------------------------- |
@@ -155,13 +140,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's status subcommand][13] and look for `sqlserver` under the Checks section.
+[Run the Agent's status subcommand][14] and look for `sqlserver` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][14] for a list of metrics provided by this check.
+See [metadata.csv][15] for a list of metrics provided by this check.
 
 Most of these metrics come from your SQL Server's `sys.dm_os_performance_counters` table.
 
@@ -171,19 +156,19 @@ The SQL server check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][15] for a list of service checks provided by this integration.
+See [service_checks.json][16] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][16].
+Need help? Contact [Datadog support][17].
 
 ## Further Reading
 
-- [Monitor your Azure SQL Databases with Datadog][17]
-- [Key metrics for SQL Server monitoring][18]
-- [SQL Server monitoring tools][19]
-- [Monitor SQL Server performance with Datadog][20]
-- [Custom SQL Server metrics for detailed monitoring][21]
+- [Monitor your Azure SQL Databases with Datadog][18]
+- [Key metrics for SQL Server monitoring][19]
+- [SQL Server monitoring tools][20]
+- [Monitor SQL Server performance with Datadog][21]
+- [Custom SQL Server metrics for detailed monitoring][22]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/sqlserver/images/sqlserver_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -194,15 +179,16 @@ Need help? Contact [Datadog support][16].
 [7]: https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [9]: https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server?view=sql-server-2017
-[10]: https://docs.datadoghq.com/agent/kubernetes/log/
-[11]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[12]: https://docs.datadoghq.com/agent/faq/template_variables/
-[13]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[14]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/metadata.csv
-[15]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/assets/service_checks.json
-[16]: https://docs.datadoghq.com/help/
-[17]: https://www.datadoghq.com/blog/monitor-azure-sql-databases-datadog
-[18]: https://www.datadoghq.com/blog/sql-server-monitoring
-[19]: https://www.datadoghq.com/blog/sql-server-monitoring-tools
-[20]: https://www.datadoghq.com/blog/sql-server-performance
-[21]: https://www.datadoghq.com/blog/sql-server-metrics
+[10]: http://www.freetds.org/
+[11]: https://docs.datadoghq.com/agent/kubernetes/log/
+[12]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[13]: https://docs.datadoghq.com/agent/faq/template_variables/
+[14]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[15]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/metadata.csv
+[16]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/assets/service_checks.json
+[17]: https://docs.datadoghq.com/help/
+[18]: https://www.datadoghq.com/blog/monitor-azure-sql-databases-datadog
+[19]: https://www.datadoghq.com/blog/sql-server-monitoring
+[20]: https://www.datadoghq.com/blog/sql-server-monitoring-tools
+[21]: https://www.datadoghq.com/blog/sql-server-performance
+[22]: https://www.datadoghq.com/blog/sql-server-metrics

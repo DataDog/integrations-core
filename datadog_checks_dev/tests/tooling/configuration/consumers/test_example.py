@@ -955,7 +955,7 @@ def test_deprecation():
             - name: foo
               description: foo words
               deprecation:
-                Release: 8.0.0
+                Agent version: 8.0.0
                 Migration: |
                   do this
                   and that
@@ -978,7 +978,7 @@ def test_deprecation():
             ##
             ## <<< DEPRECATED >>>
             ##
-            ## Release: 8.0.0
+            ## Agent version: 8.0.0
             ## Migration: do this
             ##            and that
             #

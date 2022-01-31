@@ -113,7 +113,7 @@
               "x": 0,
               "y": 0,
               "width": 3,
-              "height": 2
+              "height": 1
             }
           },
           {
@@ -135,7 +135,7 @@
               "x": 3,
               "y": 0,
               "width": 3,
-              "height": 2
+              "height": 1
             }
           },
           {
@@ -143,7 +143,7 @@
             "definition": {
               "type": "note",
               "content": "The number of connections that have been dropped is equal to the difference between accepted and handled connections.\n",
-              "background_color": "yellow",
+              "background_color": "orange",
               "font_size": "14",
               "text_align": "left",
               "vertical_align": "center",
@@ -154,7 +154,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 2,
+              "y": 1,
               "width": 3,
               "height": 1
             }
@@ -164,7 +164,7 @@
             "definition": {
               "type": "note",
               "content": "This check returns CRITICAL if the Agent is unable to connect to and collect metrics from the monitored Nginx instance",
-              "background_color": "yellow",
+              "background_color": "orange",
               "font_size": "14",
               "text_align": "left",
               "vertical_align": "center",
@@ -175,7 +175,7 @@
             },
             "layout": {
               "x": 3,
-              "y": 2,
+              "y": 1,
               "width": 3,
               "height": 1
             }
@@ -200,96 +200,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 3,
-              "width": 6,
-              "height": 3
-            }
-          },
-          {
-            "id": 6866764292106620,
-            "definition": {
-              "title": "Requests per service",
-              "title_size": "16",
-              "title_align": "left",
-              "time": {
-                "live_span": "1w"
-              },
-              "type": "toplist",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "limit": {
-                        "count": 10,
-                        "order": "desc"
-                      }
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "query": "sum:nginx.net.request_per_s{*} by {service}",
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "aggregator": "avg"
-                    }
-                  ]
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 6,
-              "width": 3,
-              "height": 2
-            }
-          },
-          {
-            "id": 4851971395880802,
-            "definition": {
-              "type": "note",
-              "content": "A drastic change in requests per second can alert you to problems brewing somewhere in your environment.",
-              "background_color": "yellow",
-              "font_size": "14",
-              "text_align": "left",
-              "vertical_align": "center",
-              "show_tick": true,
-              "tick_pos": "50%",
-              "tick_edge": "bottom",
-              "has_padding": true
-            },
-            "layout": {
-              "x": 3,
-              "y": 6,
-              "width": 3,
-              "height": 2
-            }
-          },
-          {
-            "id": 4851971395880803,
-            "definition": {
-              "title": "Change in overall requests per second",
-              "title_size": "16",
-              "title_align": "left",
-              "time": {
-                "live_span": "1w"
-              },
-              "type": "change",
-              "requests": [
-                {
-                  "order_by": "change",
-                  "order_dir": "desc",
-                  "compare_to": "week_before",
-                  "q": "sum:nginx.net.request_per_s{*} by {service}",
-                  "increase_good": false,
-                  "change_type": "absolute"
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 8,
+              "y": 2,
               "width": 6,
               "height": 2
             }
@@ -300,7 +211,7 @@
         "x": 6,
         "y": 0,
         "width": 6,
-        "height": 11
+        "height": 5
       }
     },
     {
@@ -404,9 +315,10 @@
       },
       "layout": {
         "x": 0,
-        "y": 5,
+        "y": 0,
         "width": 6,
-        "height": 7
+        "height": 7,
+        "is_column_break": true
       }
     },
     {
@@ -636,14 +548,63 @@
               "width": 4,
               "height": 2
             }
+          },
+          {
+            "id": 4851971395880803,
+            "definition": {
+              "title": "Change in overall requests per second",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "live_span": "1w"
+              },
+              "type": "change",
+              "requests": [
+                {
+                  "change_type": "absolute",
+                  "order_dir": "desc",
+                  "compare_to": "week_before",
+                  "q": "sum:nginx.net.request_per_s{*} by {service}",
+                  "increase_good": false,
+                  "order_by": "change"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 5,
+              "height": 2
+            }
+          },
+          {
+            "id": 4851971395880802,
+            "definition": {
+              "type": "note",
+              "content": "A drastic change in requests per second can alert you to problems brewing somewhere in your environment.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 5,
+              "y": 4,
+              "width": 1,
+              "height": 2
+            }
           }
         ]
       },
       "layout": {
         "x": 6,
-        "y": 11,
+        "y": 0,
         "width": 6,
-        "height": 5
+        "height": 7
       }
     },
     {
@@ -805,7 +766,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 12,
+        "y": 0,
         "width": 6,
         "height": 4
       }

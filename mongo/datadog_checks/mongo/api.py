@@ -59,7 +59,7 @@ class MongoApi(object):
             self._log.info("Using '%s' as the authentication database", self._config.auth_source)
             self._authenticate()
 
-        self.deployment_type = self._get_deployment_type()
+        self.deployment_type = self.get_deployment_type()
 
     def _authenticate(self):
         """
@@ -98,10 +98,9 @@ class MongoApi(object):
         replset_state = repl_set_payload["myState"]
         return ReplicaSetDeployment(replset_name, replset_state, cluster_role=cluster_role)
 
-    def _get_deployment_type(self):
+    def get_deployment_type(self):
         # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is
         # a mongos or mongod, if the mongod is in a shard, if it's in a replica set, etc.
-        self._log.debug("Refreshing deployment type")
         try:
             options = self['admin'].command("getCmdLineOpts")['parsed']
         except Exception as e:

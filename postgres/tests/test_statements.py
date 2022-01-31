@@ -146,6 +146,7 @@ def test_statement_metrics(
     assert event['timestamp'] > 0
     assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
     assert event['ddagentversion'] == datadog_agent.get_version()
+    assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
     expected_dbm_metrics_tags = {'foo:bar', 'port:{}'.format(PORT)}
     assert set(event['tags']) == expected_dbm_metrics_tags
@@ -365,7 +366,8 @@ def test_failed_explain_handling(
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
 @pytest.mark.parametrize(
-    "user,password,dbname,query,arg,expected_error_tag,expected_collection_errors,expected_statement_truncated",
+    "user,password,dbname,query,arg,expected_error_tag,expected_collection_errors,expected_statement_truncated,"
+    "expected_warnings",
     [
         (
             "bob",
@@ -376,6 +378,7 @@ def test_failed_explain_handling(
             None,
             None,
             StatementTruncationState.not_truncated.value,
+            [],
         ),
         (
             "dd_admin",
@@ -386,6 +389,7 @@ def test_failed_explain_handling(
             None,
             None,
             StatementTruncationState.not_truncated.value,
+            [],
         ),
         (
             "dd_admin",
@@ -396,6 +400,7 @@ def test_failed_explain_handling(
             "error:explain-invalid_schema-<class 'psycopg2.errors.InvalidSchemaName'>",
             [{'code': 'invalid_schema', 'message': "<class 'psycopg2.errors.InvalidSchemaName'>"}],
             StatementTruncationState.not_truncated.value,
+            [],
         ),
         (
             "dd_admin",
@@ -406,6 +411,18 @@ def test_failed_explain_handling(
             "error:explain-failed_function-<class 'psycopg2.errors.UndefinedFunction'>",
             [{'code': 'failed_function', 'message': "<class 'psycopg2.errors.UndefinedFunction'>"}],
             StatementTruncationState.not_truncated.value,
+            [
+                'Unable to collect execution plans in dbname=dogs_nofunc. Check that the '
+                'function datadog.explain_statement exists in the database. See '
+                'https://docs.datadoghq.com/database_monitoring/setup_postgres/'
+                'troubleshooting#undefined-explain-function for more details: function '
+                'datadog.explain_statement(unknown) does not exist\nLINE 1: SELECT '
+                'datadog.explain_statement($stmt$SELECT * FROM pg_stat...\n               '
+                '^\nHINT:  No function matches the given name and argument types. You might need to add '
+                'explicit type casts.\n'
+                '\n'
+                'code=undefined-explain-function dbname=dogs_nofunc host=stubbed.hostname',
+            ],
         ),
         (
             "bob",
@@ -429,6 +446,7 @@ def test_failed_explain_handling(
             "error:explain-query_truncated-track_activity_query_size=1024",
             [{'code': 'query_truncated', 'message': 'track_activity_query_size=1024'}],
             StatementTruncationState.truncated.value,
+            [],
         ),
     ],
 )
@@ -446,6 +464,7 @@ def test_statement_samples_collect(
     expected_collection_errors,
     expected_statement_truncated,
     datadog_agent,
+    expected_warnings,
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     check = integration_check(dbm_instance)
@@ -506,8 +525,97 @@ def test_statement_samples_collect(
             else:
                 assert event['db']['plan']['collection_errors'] is None
 
+        assert check.warnings == expected_warnings
+
     finally:
         conn.close()
+
+
+@pytest.mark.parametrize("pg_stat_statements_view", ["pg_stat_statements", "datadog.pg_stat_statements()"])
+@pytest.mark.parametrize(
+    "metadata,expected_metadata_payload",
+    [
+        (
+            {'tables_csv': 'persons', 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+            {'tables': ['persons'], 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+        ),
+        (
+            {'tables_csv': '', 'commands': None, 'comments': None},
+            {'tables': None, 'commands': None, 'comments': None},
+        ),
+    ],
+)
+def test_statement_metadata(
+    aggregator,
+    integration_check,
+    dbm_instance,
+    datadog_agent,
+    pg_stat_statements_view,
+    metadata,
+    expected_metadata_payload,
+):
+    """Tests for metadata in both samples and metrics"""
+    dbm_instance['obfuscator_options'] = {'collect_metadata': True}
+    dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
+    dbm_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+
+    # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
+    query = '''
+    -- Test comment
+    SELECT city FROM persons WHERE city = 'hello'
+    '''
+    # Samples will match to the non normalized query signature
+    query_signature = '8074f7d4fee9fbdf'
+
+    normalized_query = 'SELECT city FROM persons WHERE city = ?'
+    # Metrics will match to the normalized query signature
+    normalized_query_signature = 'ca85e8d659051b3a'
+
+    def obfuscate_sql(query, options=None):
+        if query.startswith('SELECT city FROM persons WHERE city'):
+            return json.dumps({'query': normalized_query, 'metadata': metadata})
+        return json.dumps({'query': query, 'metadata': metadata})
+
+    check = integration_check(dbm_instance)
+    check._connect()
+    conn = psycopg2.connect(host=HOST, dbname="datadog_test", user="bob", password="bob")
+    cursor = conn.cursor()
+    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+        cursor.execute(
+            query,
+        )
+        check.check(dbm_instance)
+        cursor.execute(
+            query,
+        )
+        check.check(dbm_instance)
+
+    # Test samples metadata, metadata in samples is an object under `db`.
+    samples = aggregator.get_event_platform_events("dbm-samples")
+    matching_samples = [s for s in samples if s['db']['query_signature'] == query_signature]
+    assert len(matching_samples) == 1
+    sample = matching_samples[0]
+    assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
+    assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
+    assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
+
+    if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_statements_view == "pg_stat_statements":
+        # cannot catch any queries from other users
+        # only can see own queries
+        return False
+
+    # Test metrics metadata, metadata in metrics are located in the rows.
+    metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(metrics) == 1
+    metric = metrics[0]
+    matching_metrics = [m for m in metric['postgres_rows'] if m['query_signature'] == normalized_query_signature]
+    assert len(matching_metrics) == 1
+    metric = matching_metrics[0]
+    assert metric['dd_tables'] == expected_metadata_payload['tables']
+    assert metric['dd_commands'] == expected_metadata_payload['commands']
 
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
@@ -1054,6 +1162,9 @@ class ObjectNotInPrerequisiteState(psycopg2.errors.ObjectNotInPrerequisiteState)
         else:
             return super(ObjectNotInPrerequisiteState, self).__getattribute__(attr)
 
+    def __str__(self):
+        return self.pg_error
+
 
 class UndefinedTable(psycopg2.errors.UndefinedTable):
     """
@@ -1070,39 +1181,68 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
         else:
             return super(UndefinedTable, self).__getattribute__(attr)
 
+    def __str__(self):
+        return self.pg_error
+
 
 @pytest.mark.parametrize(
-    "error,metric_columns,expected_error_tag",
+    "error,metric_columns,expected_error_tag,expected_warnings",
     [
         (
             ObjectNotInPrerequisiteState('pg_stat_statements must be loaded via shared_preload_libraries'),
             [],
             'error:database-ObjectNotInPrerequisiteState-pg_stat_statements_not_loaded',
+            [
+                'Unable to collect statement metrics because pg_stat_statements extension is '
+                "not loaded in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
+                'setup_postgres/troubleshooting#pg-stat-statements-not-loaded'
+                ' for more details\ncode=pg-stat-statements-not-loaded dbname=datadog_test host=stubbed.hostname',
+            ],
         ),
         (
             UndefinedTable('ERROR:  relation "pg_stat_statements" does not exist'),
             [],
             'error:database-UndefinedTable-pg_stat_statements_not_created',
+            [
+                'Unable to collect statement metrics because pg_stat_statements is not '
+                "created in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
+                'setup_postgres/troubleshooting#pg-stat-statements-not-created'
+                ' for more details\ncode=pg-stat-statements-not-created dbname=datadog_test host=stubbed.hostname',
+            ],
         ),
         (
             ObjectNotInPrerequisiteState('cannot insert into view'),
             [],
             'error:database-ObjectNotInPrerequisiteState',
+            [
+                "Unable to collect statement metrics because of an error running queries in database 'datadog_test'. "
+                "See https://docs.datadoghq.com/database_monitoring/troubleshooting for help: cannot insert into view\n"
+                "dbname=datadog_test host=stubbed.hostname"
+            ],
         ),
         (
-            psycopg2.errors.DatabaseError(),
+            psycopg2.errors.DatabaseError('connection reset'),
             [],
             'error:database-DatabaseError',
+            [
+                "Unable to collect statement metrics because of an error running queries in database 'datadog_test'. "
+                'See https://docs.datadoghq.com/database_monitoring/troubleshooting for help: connection reset\n'
+                'dbname=datadog_test host=stubbed.hostname',
+            ],
         ),
         (
             None,
             [],
             'error:database-missing_pg_stat_statements_required_columns',
+            [
+                'Unable to collect statement metrics because required fields are unavailable: calls, query, rows.\n'
+                'dbname=datadog_test host=stubbed.hostname',
+            ],
         ),
     ],
 )
 def test_statement_metrics_database_errors(
-    aggregator, integration_check, dbm_instance, error, metric_columns, expected_error_tag
+    aggregator, integration_check, dbm_instance, error, metric_columns, expected_error_tag, expected_warnings
 ):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
@@ -1126,3 +1266,5 @@ def test_statement_metrics_database_errors(
     aggregator.assert_metric(
         'dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags, hostname='stubbed.hostname'
     )
+
+    assert check.warnings == expected_warnings

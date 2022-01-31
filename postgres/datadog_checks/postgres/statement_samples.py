@@ -16,9 +16,16 @@ except ImportError:
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import (
+    DBMAsyncJob,
+    RateLimitingTTLCache,
+    default_json_event_encoding,
+    obfuscate_sql_with_metadata,
+)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
+
+from .util import DatabaseConfigurationError, warning_with_tags
 
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
 # character is 6 bytes
@@ -244,10 +251,15 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def _normalize_row(self, row):
         normalized_row = dict(copy.copy(row))
-        obfuscated_statement = None
+        obfuscated_query = None
         try:
-            obfuscated_statement = datadog_agent.obfuscate_sql(row['query'], self._obfuscate_options)
-            normalized_row['query_signature'] = compute_sql_signature(obfuscated_statement)
+            statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)
+            obfuscated_query = statement['query']
+            metadata = statement['metadata']
+            normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
+            normalized_row['dd_tables'] = metadata.get('tables', None)
+            normalized_row['dd_commands'] = metadata.get('commands', None)
+            normalized_row['dd_comments'] = metadata.get('comments', None)
         except Exception as e:
             self._log.debug("Failed to obfuscate statement: %s", e)
             self._check.count(
@@ -256,7 +268,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 tags=self._dbtags(row['datname'], "error:sql-obfuscate") + self._check._get_debug_tags(),
                 hostname=self._check.resolved_hostname,
             )
-        normalized_row['statement'] = obfuscated_statement
+        normalized_row['statement'] = obfuscated_query
         return normalized_row
 
     def _get_extra_filters_and_params(self, filter_stale_idle_conn=False):
@@ -381,7 +393,22 @@ class PostgresStatementSamples(DBMAsyncJob):
         except psycopg2.DatabaseError as e:
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
             # incorrect definition)
-            self._log.warning("cannot collect execution plans in dbname=%s: %s", dbname, repr(e))
+            self._check.record_warning(
+                DatabaseConfigurationError.undefined_explain_function,
+                warning_with_tags(
+                    "Unable to collect execution plans in dbname=%s. Check that the function "
+                    "%s exists in the database. See "
+                    "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#%s "
+                    "for more details: %s",
+                    dbname,
+                    self._explain_function,
+                    DatabaseConfigurationError.undefined_explain_function.value,
+                    str(e),
+                    host=self._check.resolved_hostname,
+                    dbname=dbname,
+                    code=DatabaseConfigurationError.undefined_explain_function.value,
+                ),
+            )
             return DBExplainError.failed_function, e
 
         if not result:
@@ -540,6 +567,11 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "application": row.get('application_name', None),
                     "user": row['usename'],
                     "statement": row['statement'],
+                    "metadata": {
+                        "tables": row['dd_tables'],
+                        "commands": row['dd_commands'],
+                        "comments": row['dd_comments'],
+                    },
                     "query_truncated": self._get_truncation_state(
                         self._get_track_activity_query_size(), row['query']
                     ).value,
@@ -558,6 +590,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     if row['state_change'].tzinfo:
                         event['timestamp'] = get_timestamp(row['state_change']) * 1000
             return event
+        return None
 
     def _collect_plans(self, rows):
         events = []

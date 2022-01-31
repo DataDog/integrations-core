@@ -18,6 +18,7 @@ from cachetools import TTLCache
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.types import Transformer
+from datadog_checks.base.utils.serialization import json
 
 try:
     import datadog_agent
@@ -178,6 +179,28 @@ def default_json_event_encoding(o):
     if isinstance(o, (datetime.date, datetime.datetime)):
         return o.isoformat()
     raise TypeError
+
+
+def obfuscate_sql_with_metadata(query, options=None):
+    if not query:
+        return {'query': None, 'metadata': {}}
+
+    def _load_metadata(statement):
+        try:
+            statement_with_metadata = json.loads(statement)
+            metadata = statement_with_metadata.get('metadata', {})
+            tables = metadata.pop('tables_csv', None)
+            tables = [table.strip() for table in tables.split(',') if table != ''] if tables else None
+            statement_with_metadata['metadata']['tables'] = tables
+            return statement_with_metadata
+        except ValueError:
+            # Assume we're running against an older agent and return the obfuscated query without metadata.
+            return {'query': statement, 'metadata': {}}
+
+    obfuscated_statement = datadog_agent.obfuscate_sql(query, options)
+    if options and json.loads(options).get('return_json_metadata', False):
+        return _load_metadata(obfuscated_statement)
+    return {'query': obfuscated_statement, 'metadata': {}}
 
 
 class DBMAsyncJob(object):
