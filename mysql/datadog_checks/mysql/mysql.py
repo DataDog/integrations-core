@@ -14,7 +14,7 @@ from six import PY3, iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
-from datadog_checks.base.utils.db.utils import resolve_db_host
+from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
 from .config import MySQLConfig
@@ -54,6 +54,7 @@ from .queries import (
 )
 from .statement_samples import MySQLStatementSamples
 from .statements import MySQLStatementMetrics
+from .util import DatabaseConfigurationError
 from .version_utils import get_version
 
 try:
@@ -97,6 +98,7 @@ class MySql(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
+        self._warnings_by_code = {}
         self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
 
@@ -113,9 +115,24 @@ class MySql(AgentCheck):
 
     @property
     def resolved_hostname(self):
-        if self._resolved_hostname is None and (self._config.dbm_enabled or self.disable_generic_tags):
-            self._resolved_hostname = resolve_db_host(self._config.host)
+        if self._resolved_hostname is None:
+            if self._config.reported_hostname:
+                self._resolved_hostname = self._config.reported_hostname
+            elif self._config.dbm_enabled or self.disable_generic_tags:
+                self._resolved_hostname = self.resolve_db_host()
+            else:
+                self._resolved_hostname = self.agent_hostname
         return self._resolved_hostname
+
+    @property
+    def agent_hostname(self):
+        # type: () -> str
+        if self._agent_hostname is None:
+            self._agent_hostname = datadog_agent.get_hostname()
+        return self._agent_hostname
+
+    def resolve_db_host(self):
+        return agent_host_resolver(self._config.host)
 
     def _get_debug_tags(self):
         return ['agent_hostname:{}'.format(datadog_agent.get_hostname())]
@@ -164,6 +181,7 @@ class MySql(AgentCheck):
                 raise e
             finally:
                 self._conn = None
+                self._report_warnings()
 
     def cancel(self):
         self._statement_samples.cancel()
@@ -957,3 +975,15 @@ class MySql(AgentCheck):
             self._qcache_hits = int(results['Qcache_hits'])
             self._qcache_inserts = int(results['Qcache_inserts'])
             self._qcache_not_cached = int(results['Qcache_not_cached'])
+
+    def record_warning(self, code, message):
+        # type: (DatabaseConfigurationError, str) -> None
+        self._warnings_by_code[code] = message
+
+    def _report_warnings(self):
+        messages = self._warnings_by_code.values()
+        # Reset the warnings for the next check run
+        self._warnings_by_code = {}
+
+        for warning in messages:
+            self.warning(warning)

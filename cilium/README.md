@@ -51,15 +51,38 @@ To configure this check for an Agent running on a host:
    - To collect `cilium-agent` metrics, enable the `agent_endpoint` option.
    - To collect `cilium-operator` metrics, enable the `operator_endpoint` option.
 
+    ```yaml  
+        instances:
+        
+            ## @param use_openmetrics - boolean - optional - default: true
+            ## Use the latest OpenMetrics V2 implementation for more features and better performance.
+            ##
+            ## Note: To see the configuration options for the legacy OpenMetrics implementation (Agent 7.33 or older),
+            ## https://github.com/DataDog/integrations-core/blob/7.33.x/cilium/datadog_checks/cilium/data/conf.yaml.example
+            #
+          - use_openmetrics: true # Enables OpenMetrics V2
+        
+            ## @param agent_endpoint - string - optional
+            ## The URL where your application metrics are exposed by Prometheus.
+            ## By default, the Cilium integration collects `cilium-agent` metrics.
+            ## One of agent_endpoint or operator_endpoint must be provided.
+            #
+            agent_endpoint: http://localhost:9090/metrics
+        
+            ## @param operator_endpoint - string - optional
+            ## Provide instead of `agent_endpoint` to collect `cilium-operator` metrics.
+            ## Cilium operator metrics are exposed on port 6942.
+            #
+            operator_endpoint: http://localhost:6942/metrics
+   ```
+   
+   
+    **NOTE**: By default, the `use_openmetrics` option is enabled in the conf.yaml.example. Set the `use_openmetrics` configuration option to `false` to use the OpenMetrics V1 implementation. To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][12].
+    
+    You can read more about [OpenMetrics V2][13].
 2. [Restart the Agent][5].
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 Cilium contains two types of logs: `cilium-agent` and `cilium-operator`.
 
@@ -93,15 +116,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 |----------------------|------------------------------------------------------------|
 | `<INTEGRATION_NAME>` | `cilium`                                                   |
 | `<INIT_CONFIG>`      | blank or `{}`                                              |
-| `<INSTANCE_CONFIG>`  | `{"agent_endpoint": "http://%%host%%:9090/metrics"}`       |
+| `<INSTANCE_CONFIG>`  | `{"agent_endpoint": "http://%%host%%:9090/metrics", "use_openmetrics": True}`       |
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][7].
 
@@ -145,3 +162,5 @@ Need help? Contact [Datadog support][11].
 [9]: https://github.com/DataDog/integrations-core/blob/master/cilium/metadata.csv
 [10]: https://github.com/DataDog/integrations-core/blob/master/cilium/assets/service_checks.json
 [11]: https://docs.datadoghq.com/help/
+[12]: https://github.com/DataDog/integrations-core/blob/7.33.x/cilium/datadog_checks/cilium/data/conf.yaml.example
+[13]: https://datadoghq.dev/integrations-core/base/openmetrics/

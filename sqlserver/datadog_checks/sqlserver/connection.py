@@ -77,8 +77,10 @@ class Connection(object):
     @contextmanager
     def get_managed_cursor(self, key_prefix=None):
         cursor = self.get_cursor(self.DEFAULT_DB_KEY, key_prefix=key_prefix)
-        yield cursor
-        self.close_cursor(cursor)
+        try:
+            yield cursor
+        finally:
+            self.close_cursor(cursor)
 
     def get_cursor(self, db_key, db_name=None, key_prefix=None):
         """
@@ -129,8 +131,10 @@ class Connection(object):
     @contextmanager
     def _open_managed_db_connections(self, db_key, db_name=None, key_prefix=None):
         self.open_db_connections(db_key, db_name, key_prefix=key_prefix)
-        yield
-        self.close_db_connections(db_key, db_name, key_prefix=key_prefix)
+        try:
+            yield
+        finally:
+            self.close_db_connections(db_key, db_name, key_prefix=key_prefix)
 
     def open_db_connections(self, db_key, db_name=None, is_default=True, key_prefix=None):
         """
@@ -169,6 +173,7 @@ class Connection(object):
                     self.log.info("Could not close adodbapi db connection\n%s", e)
 
                 self._conns[conn_key] = rawconn
+            self._setup_new_connection(rawconn)
         except Exception as e:
             cx = "{} - {}".format(host, database)
 
@@ -183,6 +188,11 @@ class Connection(object):
             self.service_check_handler(AgentCheck.CRITICAL, host, database, message, is_default=is_default)
 
             raise_from(SQLConnectionError(message), None)
+
+    def _setup_new_connection(self, rawconn):
+        with rawconn.cursor() as cursor:
+            # ensure that by default, the agent's reads can never block updates to any tables it's reading from
+            cursor.execute("SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED")
 
     def close_db_connections(self, db_key, db_name=None, key_prefix=None):
         """

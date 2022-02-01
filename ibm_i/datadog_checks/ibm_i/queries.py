@@ -80,11 +80,22 @@ def get_cpu_usage(timeout):
     return {
         'name': 'cpu_usage',
         'query': {
-            'text': 'SELECT AVERAGE_CPU_UTILIZATION FROM QSYS2.SYSTEM_STATUS_INFO',
+            'text': (
+                "SELECT A.AVERAGE_CPU_UTILIZATION, A.CONFIGURED_CPUS, A.CURRENT_CPU_CAPACITY, "
+                "A.PARTITION_ID, A.ELAPSED_CPU_SHARED, "
+                "(A.ELAPSED_CPU_USED * A.CURRENT_CPU_CAPACITY) / A.CONFIGURED_CPUS "
+                "FROM TABLE(QSYS2.SYSTEM_STATUS('NO')) A INNER JOIN TABLE(QSYS2.SYSTEM_STATUS('YES')) B "
+                "ON A.PARTITION_ID = B.PARTITION_ID"
+            ),
             'timeout': timeout,
         },
         'columns': [
             {'name': 'ibm_i.system.cpu_usage', 'type': 'gauge'},
+            {'name': 'ibm_i.system.configured_cpus', 'type': 'gauge'},
+            {'name': 'ibm_i.system.current_cpu_capacity', 'type': 'gauge'},
+            {'name': 'partition_id', 'type': 'tag'},
+            {'name': 'ibm_i.system.shared_cpu_usage', 'type': 'gauge'},
+            {'name': 'ibm_i.system.normalized_cpu_usage', 'type': 'gauge'},
         ],
     }
 

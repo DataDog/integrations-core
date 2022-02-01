@@ -82,6 +82,7 @@ BROKER_METRICS = [
     'confluent.kafka.server.session.zoo_keeper_read_only_connects_per_sec.rate',
     'confluent.kafka.server.session.zoo_keeper_sasl_authentications_per_sec.rate',
     'confluent.kafka.server.session.zoo_keeper_sync_connects_per_sec.rate',
+    'confluent.kafka.server.session.zoo_keeper_request_latency_ms',
     'confluent.kafka.server.topic.bytes_in_per_sec.rate',
     'confluent.kafka.server.topic.bytes_out_per_sec.rate',
     'confluent.kafka.server.topic.bytes_rejected_per_sec.rate',

@@ -2,4 +2,4 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .example import ExampleConsumer
-from .model import ModelConsumer
+from .model.model_consumer import ModelConsumer

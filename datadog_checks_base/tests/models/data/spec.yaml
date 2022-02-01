@@ -11,7 +11,7 @@ files:
     - name: deprecated
       description: words
       deprecation:
-        Release: 8.0.0
+        Agent_Version: 8.0.0
         Migration: |
           do this
           and that
@@ -62,7 +62,7 @@ files:
     - name: deprecated
       description: words
       deprecation:
-        Release: 9.0.0
+        Agent version: 9.0.0
         Migration: |
           do this
           and that

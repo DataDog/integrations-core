@@ -14,6 +14,7 @@ extends:
   - _generic-host-resources.yaml
   - _juniper-virtualchassis.yaml
   - _juniper-firewall.yaml
+  - _juniper-junos-generic.yaml
 
 device:
   vendor: "juniper-networks"

@@ -18,6 +18,8 @@ The .NET CLR check is included in the [Datadog Agent][1] package. No additional 
 1. Edit the `dotnetclr.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start collecting your .NET CLR performance data. See the [sample dotnetclr.d/conf.yaml][3] for all available configuration options.
 2. [Restart the Agent][4].
 
+**Note**: Versions 1.10.0 or later of this check use a new implementation for metric collection, which requires Python 3. For hosts that are unable to use Python 3, or if you would like to use a legacy version of this check, refer to the following [config][8].
+
 ## Validation
 
 [Run the Agent's status subcommand][5] and look for `dotnetclr` under the Checks section.
@@ -47,3 +49,4 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/dotnetclr/metadata.csv
 [7]: https://docs.datadoghq.com/help/
+[8]: https://github.com/DataDog/integrations-core/blob/7.33.x/dotnetclr/datadog_checks/dotnetclr/data/conf.yaml.example

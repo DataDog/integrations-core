@@ -7,8 +7,11 @@ import ipaddress
 import logging
 import os
 import socket
+import sys
+from collections import defaultdict
 
 import pytest
+from six import iteritems
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.common import get_docker_hostname, to_native_string
@@ -191,8 +194,11 @@ RESOLVED_TABULAR_OBJECTS = [
     }
 ]
 
+EXCLUDED_E2E_TAG_KEYS = ['agent_version']
+
 snmp_listener_only = pytest.mark.skipif(SNMP_LISTENER_ENV != 'true', reason='Agent snmp lister tests only')
 snmp_integration_only = pytest.mark.skipif(SNMP_LISTENER_ENV != 'false', reason='Normal tests')
+py3_plus_only = pytest.mark.skipif(sys.version_info[0] < 3, reason='Run test with Python 3+ only')
 
 
 def generate_instance_config(metrics, template=None):
@@ -297,3 +303,36 @@ def assert_common_device_metrics(
     aggregator.assert_metric(
         'snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=tags, count=count, value=devices_monitored_value
     )
+
+
+def remove_tags(tags, tag_keys_to_remove):
+    """
+    Remove tags by excluding tags with specific keys.
+    """
+    new_tags = []
+    for tag in tags:
+        for tag_key in tag_keys_to_remove:
+            if tag.startswith(tag_key + ':'):
+                break
+        else:
+            new_tags.append(tag)
+    return new_tags
+
+
+def dd_agent_check_wrapper(dd_agent_check, *args, **kwargs):
+    """
+    dd_agent_check_wrapper is a wrapper around dd_agent_check that will return an aggregator.
+    The wrapper will modify tags by excluding EXCLUDED_E2E_TAG_KEYS.
+    """
+    aggregator = dd_agent_check(*args, **kwargs)
+    new_agg_metrics = defaultdict(list)
+    for metric_name, metric_list in iteritems(aggregator._metrics):
+        new_metrics = []
+        for metric in metric_list:
+            # metric is a Namedtuple, to modify namedtuple fields we need to use `._replace()`
+            new_metric = metric._replace(tags=remove_tags(metric.tags, EXCLUDED_E2E_TAG_KEYS))
+            new_metrics.append(new_metric)
+        new_agg_metrics[metric_name] = new_metrics
+
+    aggregator._metrics = new_agg_metrics
+    return aggregator

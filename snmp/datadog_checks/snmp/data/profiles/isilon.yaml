@@ -1,3 +1,6 @@
+# Example sysDescr:
+# - device-name-3 263829375 Isilon OneFS v8.2.0.0
+# - device-name-5 2316163007 Isilon OneFS v8.1.2.0
 extends:
   - _base.yaml
   - _generic-ip.yaml
@@ -7,7 +10,62 @@ extends:
 device:
   vendor: "dell"
 
-sysobjectid: 1.3.6.1.4.1.12124.*
+sysobjectid:
+  - 1.3.6.1.4.1.12124.*
+
+  # Looks like EMC Isilon devices might use the wrong sysObjectID `1.3.6.1.4.1.12325.1.1.2.1.1` (FreeBSD-FOKUS)
+  # Few related discussions:
+  # - https://thwack.solarwinds.com/product-forums/network-performance-monitor-npm/f/forum/66098/emc-isilon-showing-up-as-non-emc-device-after-upgrade/39511
+  # - https://support.servicenow.com/kb?id=kb_article_view&sysparm_article=KB0761173
+  # - https://github.com/librenms/librenms/issues/6412
+  # Long term solution:
+  # Similar to librenms a possible solution is to have other ways to match devices like sysDescr text matching. See example:
+  # https://github.com/librenms/librenms/pull/6416/files#diff-ec0470a0c495f1349b349f62b0dfdf14b928a5acb94f0de5f6c5a6e523f7817cR12-R16
+  - 1.3.6.1.4.1.12325.1.1.2.1.1
+
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "dell"
+      serial_number:
+        symbol:
+          OID: 1.3.6.1.4.1.12124.2.51.1.3.1
+          name: chassisSerialNumber  # The chassis serial number.
+      version:
+        symbol:
+          OID: 1.3.6.1.2.1.1.1.0
+          name: sysDescr
+          match_pattern: 'Isilon OneFS v(\S+)'
+          match_value: '$1'
+          # Examples:
+          #  - device-name-3 263829375 Isilon OneFS v8.2.0.0
+      product_name:
+        value: 'Isilon OneFS'
+      model:
+        symbol:
+          OID: 1.3.6.1.4.1.12124.2.51.1.4.1
+          name: chassisModel  # The chassis model name.
+          # source/hints:
+          # - https://www.dell.com/support/kbdoc/fr-fr/000020536/isilon-how-to-find-serial-numbers-for-isilon-nodes?lang=en
+          # - https://www.dell.com/community/Isilon/Querying-Isilon-Cluster-via-SNMP-For-Node-Model/td-p/7048622
+      os_name:
+        symbol:
+          OID: 1.3.6.1.2.1.1.1.0
+          name: sysDescr
+          match_pattern: '\bOneFS\b'
+          match_value: 'OneFS'
+          # Examples:
+          #  - device-name-3 263829375 Isilon OneFS v8.2.0.0
+      os_version:
+        # OneFS operating system version seems to be the same as the OneFS filestem version
+        symbol:
+          OID: 1.3.6.1.2.1.1.1.0
+          name: sysDescr
+          match_pattern: 'Isilon OneFS v(\S+)'
+          match_value: '$1'
+          # Examples:
+          #  - device-name-3 263829375 Isilon OneFS v8.2.0.0
 
 metrics:
   # fan hardware

@@ -31,11 +31,11 @@ instances:
     #
     # prometheus_url: http://%%host%%:10251/metrics
 
-    ## @param bearer_token_auth - boolean - optional - default: true
+    ## @param bearer_token_auth - boolean or string - optional - default: tls_only
     ## Used if you are using RBACs and need the Agent to authenticate
     ## against the APIServer to retrieve metrics.
     #
-    bearer_token_auth: true
+    bearer_token_auth: tls_only
 
     ## @param bearer_token_path - string - optional - default: /var/run/secrets/kubernetes.io/serviceaccount/token
     ## Used to specify the path where the service account token is located.
@@ -45,4 +45,4 @@ instances:
     ## @param ssl_verify - boolean - optional - default: true
     ## Used to verify self signed certificates.
     #
-    # ssl_verify: true
+    ssl_verify: false

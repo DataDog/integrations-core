@@ -52,7 +52,7 @@ Unlike many checks, the Process Check doesn't monitor anything useful by default
 
 ### Validation
 
-[Run the Agent's `status` subcommand][5] and look for `process` under the Checks section.
+Run the [Agent's status subcommand][5] and look for `process` under the Checks section.
 
 ### Metrics notes
 
