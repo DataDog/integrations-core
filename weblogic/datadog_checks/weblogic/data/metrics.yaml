@@ -120,6 +120,7 @@ jmx_metrics:
           metric_type: monotonic_count
           alias: weblogic.servlet_runtime.exec_time_high
         ExecutionTimeTotal:
+          metric_type: monotonic_count
           alias: weblogic.servlet_runtime.exec_time_total
         ExecutionTimeLow:
           alias: weblogic.servlet_runtime.exec_time_low
