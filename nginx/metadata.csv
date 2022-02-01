@@ -158,8 +158,8 @@ nginx.stream.upstream.peers.first_byte_time,gauge,,millisecond,,The average time
 nginx.stream.upstream.peers.max_conns,gauge,,connection,,The max_conns limit for the server.,0,nginx,stream upstr peers max conn
 nginx.stream.upstream.peers.response_time,gauge,,millisecond,,The average time to receive the last byte of data from this server.,0,nginx,stream upstr peers resp time
 nginx.stream.upstream.peers.response_time_hist,gauge,,millisecond,,The average time to receive the last byte of data from this server as a histogram.,0,nginx,stream upstr peers resp time
-nginx.stream.upstream.peers.response_time_hist.count,rate,,millisecond,,0,nginx,stream upstr peers resp time
-nginx.stream.upstream.peers.response_time_hist.avg,gauge,,millisecond,,0,nginx,stream upstr peers resp time
+nginx.stream.upstream.peers.response_time_hist.count,rate,,millisecond,,,0,nginx,stream upstr peers resp time
+nginx.stream.upstream.peers.response_time_hist.avg,gauge,,millisecond,,,0,nginx,stream upstr peers resp time
 nginx.stream.upstream.peers.connections,gauge,,connection,,The total number of client connections forwarded to this server.,0,nginx,stream upstr peers conn
 nginx.stream.upstream.peers.connections_count,count,,connection,,The total number of client connections forwarded to this server (shown as count).,0,nginx,stream upstr peers conn
 nginx.stream.upstream.peers.downstart,gauge,,millisecond,,The time (time since Epoch) when the server became "unavail" or "checking" or "unhealthy",0,nginx,stream upstr peers downstart
