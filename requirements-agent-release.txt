@@ -14,7 +14,7 @@ datadog-cacti==1.9.2; sys_platform == 'linux2'
 datadog-cassandra-nodetool==1.9.1
 datadog-cassandra==1.14.2
 datadog-ceph==2.5.1; sys_platform != 'win32'
-datadog-checks-base==23.7.4
+datadog-checks-base==23.7.5
 datadog-checks-dependency-provider==1.2.0
 datadog-checks-downloader==3.4.1
 datadog-cilium==1.10.2
@@ -115,7 +115,7 @@ datadog-process==2.1.2
 datadog-prometheus==3.3.1
 datadog-proxysql==3.3.1
 datadog-rabbitmq==2.2.1
-datadog-redisdb==4.3.1
+datadog-redisdb==4.3.2
 datadog-rethinkdb==2.1.1
 datadog-riak==2.4.1
 datadog-riakcs==2.7.1
