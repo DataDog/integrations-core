@@ -61,10 +61,10 @@ class IBMMQConfig:
             )
         if override_hostname and self.connection_name:
             raise ConfigurationError(
-                'You cannot override the hostname if you provide a connection_name instead of a host'
+                'You cannot override the hostname if you provide a `connection_name` instead of a `host`'
             )
         if override_hostname and not host:
-            raise ConfigurationError("You cannot override the hostname if don't provide a host")
+            raise ConfigurationError("You cannot override the hostname if you don't provide a `host`")
 
         if not self.connection_name:
             host = host or 'localhost'
@@ -111,6 +111,8 @@ class IBMMQConfig:
             if not override_hostname:
                 # 'host' is reserved and 'mq_host' is used instead
                 tags.append("mq_host:{}".format(host))
+            else:
+                self.log.debug("Overriding hostname with `{}`.format(host))
             tags.append("port:{}".format(port))
         self.tags_no_channel = tags
         self.tags = tags + ["channel:{}".format(self.channel)]  # type: List[str]
