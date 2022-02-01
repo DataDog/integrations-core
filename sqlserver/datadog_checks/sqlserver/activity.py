@@ -43,11 +43,8 @@ SELECT
     CONVERT( 
         NVARCHAR, TODATETIMEOFFSET(r.start_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126 
     ) as query_start, 
-    sess.login_name as user_name, 
-    sess.status as session_status, 
     at.transaction_type,
     at.transaction_state,
-    sess.login_name as user_name,
     sess.session_id as id,
     DB_NAME(sess.database_id) as database_name,
     sess.status as session_status,
@@ -66,7 +63,9 @@ FROM sys.dm_exec_sessions sess
         CROSS APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) text
 WHERE sess.session_id != @@spid
     AND (at.transaction_begin_time IS NOT NULL OR r.start_time IS NOT NULL)
-ORDER BY at.transaction_begin_time ASC
+ORDER BY 
+    CASE WHEN r.start_time IS NULL THEN 0 ELSE 1 END,
+    at.transaction_begin_time ASC
 """,
 ).strip()
 
