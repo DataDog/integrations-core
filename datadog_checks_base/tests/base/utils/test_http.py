@@ -2056,7 +2056,6 @@ class TestAIAChasing:
 
         http = RequestsWrapper({'tls_protocols_allowed': ['TLSv1.1']}, {})
         with caplog.at_level(logging.ERROR), pytest.raises(Exception):
-            # pytest.raises(Exception, match="Protocol version `TLSv1.2` not in the allowed list ['TLSv1.1']"):
             http.get("https://incomplete-chain.badssl.com/")
             assert "Protocol version `TLSv1.2` not in the allowed list ['TLSv1.1']" in caplog.text
 
