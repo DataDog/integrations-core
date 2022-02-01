@@ -39,12 +39,13 @@ SELECT
     ) as now,
     CONVERT(
         NVARCHAR, TODATETIMEOFFSET(at.transaction_begin_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
-    ) as transaction_begin_time, 
-    CONVERT( 
+    ) as transaction_begin_time,
+    CONVERT(
         NVARCHAR, TODATETIMEOFFSET(r.start_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126 
-    ) as query_start, 
+    ) as query_start,
     at.transaction_type,
     at.transaction_state,
+    sess.login_name as user_name,
     sess.session_id as id,
     DB_NAME(sess.database_id) as database_name,
     sess.status as session_status,
