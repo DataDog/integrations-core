@@ -58,7 +58,7 @@ ALLOWED_EXTENSIONS_BY_FORMAT = {"json": [".json"], "yaml": [".yml", ".yaml"]}
     nargs=-1,
 )
 def generate_traps_db(mib_sources, output_dir, output_file, output_format, debug, mib_files):
-    """Generate yaml formatted documents containing various information about traps. These files can be used by
+    """Generate yaml or json formatted documents containing various information about traps. These files can be used by
     the Datadog Agent to enrich trap data.
     This command is intended for "Network Devices Monitoring" users who need to enrich traps that are not automatically
     supported by Datadog.
