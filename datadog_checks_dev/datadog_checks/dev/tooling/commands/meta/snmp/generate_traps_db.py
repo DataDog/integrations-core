@@ -65,7 +65,7 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, debug
 
     The expected workflow is as such:\n
     1- Identify a type of device that is sending traps that Datadog does not already recognize.\n
-    2- Fetch all the MIBs that we do not support.\n
+    2- Fetch all the MIBs that Datadog does not support.\n
     3- Run `ddev meta snmp build-traps-db -o ./output_dir/ /path/to/my/mibs/*`\n
     """
     if debug:
