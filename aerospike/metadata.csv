@@ -655,7 +655,7 @@ aerospike.namespace.xmem_id,gauge,,,,The extended memory id of the namespace,0,a
 aerospike.namespace.migrate_rx_instances,gauge,,,,The number of instance objects managing immigrations.,0,aerospike,,
 aerospike.namespace.migrate_tx_instances,gauge,,,,The number of instance objects managing emigrations.,0,aerospike,,
 aerospike.set.tombstones,gauge,,,,The total number of tombstones (master and all replicas) in this set on this node.,0,aerospike,,
-aerospike.set.truncate_lut,gauge,,,,"The ""most covering"" truncate_lut for this set.",0,aerospike,,
+aerospike.set.truncate_lut,gauge,,,,The "most covering" truncate_lut for this set.,0,aerospike,,
 aerospike.batch_index_delay,gauge,,,,The number of times a batch index response buffer has been delayed (WOULDBLOCK on the send).,0,aerospike,,
 aerospike.batch_index_proto_compression_ratio,gauge,,,,This measures the average compressed size to uncompressed size ratio for protocol message data in batch index responses.,0,aerospike,,
 aerospike.batch_index_proto_uncompressed_pct,gauge,,percent,,This measures the percentage of batch index responses with uncompressed protocol message data.,0,aerospike,,

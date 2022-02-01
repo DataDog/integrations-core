@@ -16,7 +16,7 @@ hudi.action.scan_time,rate,15,millisecond,,"The total time spent scanned in an a
 hudi.action.update_records_written,rate,15,record,,"The amount of update records written in an action (commit, deltacommit, replacecommit, compaction, etc)",0,hudi,up_recs,
 hudi.index.command.duration,gauge,15,millisecond,,"The time spent performing an index command (UPSERT, INSERT_OVERWRITE, etc)",0,hudi,index dur,
 hudi.finalize.duration,gauge,15,millisecond,,The total time spent finalizing,0,hudi,clean dur,
-hudi.finalize.files_finalized,gauge,15,file,,"The number of files finalized""",0,hudi,fin files,
+hudi.finalize.files_finalized,gauge,15,file,,The number of files finalized",0,hudi,fin files,
 hudi.clean.duration,gauge,15,millisecond,,The total time spent cleaning,0,hudi,fin dur,
 hudi.clean.files_deleted,gauge,15,file,,The number of files deleted in cleans,0,hudi,roll del files,
 hudi.rollback.duration,gauge,15,millisecond,,The total time spent in rollback,0,hudi,roll dur,
