@@ -112,7 +112,7 @@ class IBMMQConfig:
                 # 'host' is reserved and 'mq_host' is used instead
                 tags.append("mq_host:{}".format(host))
             else:
-                self.log.debug("Overriding hostname with `{}`.format(host))
+                self.log.debug("Overriding hostname with `{}`".format(host))
             tags.append("port:{}".format(port))
         self.tags_no_channel = tags
         self.tags = tags + ["channel:{}".format(self.channel)]  # type: List[str]
