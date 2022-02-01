@@ -4,12 +4,10 @@
 
 import json
 import os
-from contextlib import ExitStack
 from functools import lru_cache
 
 import click
 import yaml
-from pysmi import error
 from pysmi.codegen import JsonCodeGen
 from pysmi.compiler import MibCompiler
 from pysmi.parser import SmiV1CompatParser
@@ -19,11 +17,12 @@ from pysmi.writer import FileWriter
 
 from datadog_checks.dev import TempDir
 
-from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
+from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning, set_debug
 from .constants import MIB_SOURCE_URL
 
 # Unique identifiers of traps in json-compiled MIB files.
 NOTIFICATION_TYPE = 'notificationtype'
+ALLOWED_EXTENSIONS_BY_FORMAT = {"json": [".json"], "yaml": [".yml", ".yaml"]}
 
 
 @click.command(
@@ -38,11 +37,6 @@ NOTIFICATION_TYPE = 'notificationtype'
     'Traps defined in these files are ignored.',
 )
 @click.option(
-    '--compiled-mibs-sources',
-    '-c',
-    help='Path to a directory where to store the intermediate compiled MIBs in JSON format. Defaults to a temp dir',
-)
-@click.option(
     '--output-dir',
     '-o',
     help='Path to a directory where to store the created traps database file per MIB.'
@@ -52,13 +46,19 @@ NOTIFICATION_TYPE = 'notificationtype'
     '--output-file',
     help='Path to a file to store a compacted version of the traps database file. Do not use with --output-dir',
 )
-@click.option('--use-json', help='Use json instead of yaml for the output file(s).', is_flag=True)
+@click.option(
+    '--output-format',
+    type=click.Choice(['yaml', 'json'], case_sensitive=False),
+    default='yaml',
+    help='Use json instead of yaml for the output file(s).',
+)
+@click.option('--debug', '-d', help='Include debug output', is_flag=True)
 @click.argument(
     'mib-files',
     nargs=-1,
 )
-def build_traps_db(mib_sources, compiled_mibs_sources, output_dir, output_file, use_json, mib_files):
-    """Builds yaml formatted documents containing various information about traps. These files can be used by
+def generate_traps_db(mib_sources, output_dir, output_file, output_format, debug, mib_files):
+    """Generate yaml formatted documents containing various information about traps. These files can be used by
     the Datadog Agent to enrich trap data.
     This command is intended for "Network Devices Monitoring" users who need to enrich traps that are not automatically
     supported by Datadog.
@@ -68,39 +68,38 @@ def build_traps_db(mib_sources, compiled_mibs_sources, output_dir, output_file, 
     2- Fetch all the MIBs that we do not support.\n
     3- Run `ddev meta snmp build-traps-db -o ./output_dir/ /path/to/my/mibs/*`\n
     """
+    if debug:
+        set_debug()
+        from pysmi import debug
+
+        debug.setLogger(debug.Debug('all'))
 
     # Defaulting to github.com/DataDog/mibs.snmplabs.com/
     mib_sources = [mib_sources] if mib_sources else [MIB_SOURCE_URL]
 
     if output_file:
-        allowed_extensions = ['.json'] if use_json else ['.yml', '.yml']
+        allowed_extensions = ALLOWED_EXTENSIONS_BY_FORMAT[output_format]
         if not any(output_file.endswith(x) for x in allowed_extensions):
             echo_warning(
                 "Output file {} does not end with an allowed extension '{}'".format(
                     output_file, ", ".join(allowed_extensions)
                 )
             )
-            output_file = output_file + allowed_extensions[0]
+            output_file = output_file.rsplit('.', 1)[0] + allowed_extensions[0]
             echo_warning("Using {} instead.".format(output_file))
 
-    with ExitStack() as stack:
-
-        if not compiled_mibs_sources:
-            compiled_mibs_sources = stack.enter_context(TempDir('ddev_mibs'))
-
+    with TempDir('ddev_mibs') as compiled_mibs_sources:
         compiled_mibs_sources = os.path.abspath(compiled_mibs_sources)
-        if not os.path.isdir(compiled_mibs_sources):
-            abort("Output directory {} does not exist".format(compiled_mibs_sources))
+        if output_dir and output_file:
+            abort("Do not set both --output-dir and --output-file at the same time.")
+        elif not output_file and not output_dir:
+            abort("Need to set one of --output-dir or --output-file")
+
         echo_info("Writing intermediate compiled MIBs to {}".format(compiled_mibs_sources))
 
         mibs_sources_dir = os.path.join(compiled_mibs_sources, 'mibs_sources')
         if not os.path.isdir(mibs_sources_dir):
             os.mkdir(mibs_sources_dir)
-
-        if output_dir and output_file:
-            abort("Do not set both --output-dir and --output-file at the same time.")
-        elif not output_file and not output_dir:
-            abort("Need to set one of --output-dir or --output-file")
 
         mib_sources = (
             sorted(set([os.path.abspath(os.path.dirname(x)) for x in mib_files if os.path.sep in x])) + mib_sources
@@ -114,10 +113,7 @@ def build_traps_db(mib_sources, compiled_mibs_sources, output_dir, output_file, 
         mib_compiler.addSources(*getReadersFromUrls(*mib_sources, **dict(fuzzyMatching=True)))
         mib_compiler.addSearchers(*searchers)
 
-        try:
-            compiled_mibs, compiled_dependencies_mibs = compile_and_report_status(mib_files, mib_compiler)
-        except error.PySmiError:
-            abort("Unable to compile")
+        compiled_mibs, compiled_dependencies_mibs = compile_and_report_status(mib_files, mib_compiler)
 
         # Move all the parent MIBs that had to be compiled but were not requested in the command to a subfolder.
         for mib_file_name in compiled_dependencies_mibs:
@@ -133,6 +129,7 @@ def build_traps_db(mib_sources, compiled_mibs_sources, output_dir, output_file, 
         # Generate the trap database based on the compiled MIBs.
         trap_db_per_mib = generate_trap_db(compiled_mibs, mibs_sources_dir)
 
+        use_json = output_format == "json"
         if output_file:
             # Compact representation, only one file
             write_compact_trap_db(trap_db_per_mib, output_file, use_json=use_json)
