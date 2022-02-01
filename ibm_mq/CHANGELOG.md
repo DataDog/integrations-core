@@ -1,5 +1,11 @@
 # CHANGELOG - IBM MQ
 
+## 3.18.0 / 2022-02-01
+
+* [Added] [ibm_mq] support host override. See [#11223](https://github.com/DataDog/integrations-core/pull/11223).
+* [Fixed] [IBM mq] Do not allow for empty values in configuration. See [#11138](https://github.com/DataDog/integrations-core/pull/11138).
+* [Fixed] improve log message. See [#11125](https://github.com/DataDog/integrations-core/pull/11125).
+
 ## 3.17.0 / 2022-01-08
 
 * [Added] Add Windows support to IBM MQ. See [#10737](https://github.com/DataDog/integrations-core/pull/10737).
