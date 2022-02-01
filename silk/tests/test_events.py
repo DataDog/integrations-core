@@ -37,7 +37,7 @@ EXPECTED_EVENT_PAYLOAD = {
 def mock_get_raw_events(*args):
     response = mock.MagicMock()
 
-    file_contents = read_file(os.path.join(HERE, 'fixtures', 'events?timestamp__gte=123.json'))
+    file_contents = read_file(os.path.join(HERE, 'fixtures', 'events.json'))
     response = json.loads(file_contents)
 
     return response, 200
