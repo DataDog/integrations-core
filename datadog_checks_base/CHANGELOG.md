@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 23.7.5 / 2022-02-01
+
+* [Fixed] Bump redis dependency to 4.0.2. See [#11247](https://github.com/DataDog/integrations-core/pull/11247).
+
 ## 23.7.4 / 2022-01-18
 
 * [Fixed] Raise CheckException in case of connectivity issue for OpenMetrics-based checks. See [#11153](https://github.com/DataDog/integrations-core/pull/11153).
