@@ -1,5 +1,5 @@
 # CHANGELOG - datadog_checks_base
-
+# test
 ## 23.7.4 / 2022-01-18
 
 * [Fixed] Raise CheckException in case of connectivity issue for OpenMetrics-based checks. See [#11153](https://github.com/DataDog/integrations-core/pull/11153).
