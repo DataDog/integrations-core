@@ -37,7 +37,7 @@ def test_cannot_set_override_hostname_and_connection_name(instance):
     del instance['port']
     instance['override_hostname'] = True
     with pytest.raises(
-        ConfigurationError, match="You cannot override the hostname if you provide a connection_name instead of a host"
+        ConfigurationError, match="You cannot override the hostname if you provide a `connection_name` instead of a `host`"
     ):
         IBMMQConfig(instance)
 
@@ -45,5 +45,5 @@ def test_cannot_set_override_hostname_and_connection_name(instance):
 def test_cannot_override_hostname_if_no_host_provided(instance):
     del instance['host']
     instance['override_hostname'] = True
-    with pytest.raises(ConfigurationError, match="You cannot override the hostname if don't provide a host"):
+    with pytest.raises(ConfigurationError, match="You cannot override the hostname if you don't provide a `host`"):
         IBMMQConfig(instance)
