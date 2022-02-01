@@ -919,20 +919,18 @@ def test_load_configuration_models(dd_run_check, mocker):
 
 @requires_py3
 @pytest.mark.parametrize(
-    'check_instance_config, default_instance_config, log_lines, all_typos',
+    'check_instance_config, default_instance_config, log_lines',
     [
         pytest.param(
             {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
             {},
             None,
-            set(),
             id='empty default',
         ),
         pytest.param(
             {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
             {'endpoint': 'url'},
             None,
-            set(),
             id='no typo',
         ),
         pytest.param(
@@ -944,14 +942,12 @@ def test_load_configuration_models(dd_run_check, mocker):
                     'Did you mean endpoint?'
                 )
             ],
-            set({'endpoints'}),
             id='typo',
         ),
         pytest.param(
             {'endpoints': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
             {'endpoint': 'url', 'endpoints': 'url'},
             None,
-            set(),
             id='no typo similar option',
         ),
         pytest.param(
@@ -963,10 +959,9 @@ def test_load_configuration_models(dd_run_check, mocker):
                     'Did you mean endpoint, or endpoints?'
                 )
             ],
-            set({'endpont'}),
             id='typo two candidates',
         ),
-        pytest.param({'tag': 'test'}, {'tags': 'test'}, None, set(), id='short option cant catch'),
+        pytest.param({'tag': 'test'}, {'tags': 'test'}, None, id='short option cant catch'),
         pytest.param(
             {'testing_long_para': 'test'},
             {'testing_long_param': 'test', 'test_short_param': 'test'},
@@ -976,14 +971,12 @@ def test_load_configuration_models(dd_run_check, mocker):
                     'Did you mean testing_long_param?'
                 )
             ],
-            set({'testing_long_para'}),
             id='somewhat similar option',
         ),
         pytest.param(
             {'send_distribution_sums_as_monotonic': False, 'exclude_labels': True},
             {'send_distribution_counts_as_monotonic': True, 'include_labels': True},
             None,
-            set(),
             id='different options no typos',
         ),
         pytest.param(
@@ -1004,13 +997,12 @@ def test_load_configuration_models(dd_run_check, mocker):
                     'Did you mean exclude_labels?'
                 ),
             ],
-            set({'send_distribution_count_as_monotonic', 'exclude_label'}),
             id='different options typo',
         ),
     ],
 )
 def test_detect_typos_configuration_models(
-    dd_run_check, mocker, caplog, check_instance_config, default_instance_config, log_lines, all_typos
+    dd_run_check, mocker, caplog, check_instance_config, default_instance_config, log_lines
 ):
     caplog.clear()
     caplog.set_level(logging.WARNING)
@@ -1018,9 +1010,7 @@ def test_detect_typos_configuration_models(
     check = AgentCheck('test', empty_config, [check_instance_config])
     check.check_id = 'test:123'
 
-    found_typos = check.find_typos_in_options(check_instance_config, default_instance_config, 'instance')
-
-    assert found_typos == all_typos
+    check.log_typos_in_options(check_instance_config, default_instance_config, 'instance')
 
     if log_lines is not None:
         for log_line in log_lines:

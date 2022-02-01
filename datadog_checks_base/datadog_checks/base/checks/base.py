@@ -403,7 +403,7 @@ class AgentCheck(object):
         self._log_deprecation('in_developer_mode')
         return False
 
-    def find_typos_in_options(self, user_config, models_config, level):
+    def log_typos_in_options(self, user_config, models_config, level):
         # only import it when running in python 3
         from jellyfish import jaro_winkler_similarity
 
@@ -415,17 +415,19 @@ class AgentCheck(object):
         unknown_options = sorted(list(user_config.keys() - known_options))
 
         for unknown_option in unknown_options:
-            similar_known_options = []  # type: List[str]
+            similar_known_options = []  # type: List[Tuple[str, int]]
             for known_option in known_options:
                 ratio = jaro_winkler_similarity(unknown_option, known_option)
                 if ratio > TYPO_SIMILARITY_THRESHOLD:
-                    similar_known_options = similar_known_options + [known_option]
+                    similar_known_options.append((known_option, ratio))
                     typos.add(unknown_option)
 
             if len(similar_known_options) > 0:
+                similar_known_options.sort(key=lambda option: option[1])
+                similar_known_options_names = [option[0] for option in similar_known_options]  # type: List[str]
                 message = (
                     'Detected potential typo in configuration option in {}/{} section: `{}`. Did you mean {}?'
-                ).format(self.name, level, unknown_option, ', or '.join(similar_known_options))
+                ).format(self.name, level, unknown_option, ', or '.join(similar_known_options_names))
                 self.log.warning(message)
         return typos
 
@@ -440,7 +442,7 @@ class AgentCheck(object):
             raw_shared_config.update(intg_shared_config)
 
             shared_config = self.load_configuration_model(package_path, 'SharedConfig', raw_shared_config)
-            self.find_typos_in_options(intg_shared_config, shared_config, 'init_config')
+            self.log_typos_in_options(intg_shared_config, shared_config, 'init_config')
             if shared_config is not None:
                 self._config_model_shared = shared_config
 
@@ -450,7 +452,7 @@ class AgentCheck(object):
             raw_instance_config.update(intg_instance_config)
 
             instance_config = self.load_configuration_model(package_path, 'InstanceConfig', raw_instance_config)
-            self.find_typos_in_options(intg_instance_config, instance_config, 'instances')
+            self.log_typos_in_options(intg_instance_config, instance_config, 'instances')
 
             if instance_config is not None:
                 self._config_model_instance = instance_config
