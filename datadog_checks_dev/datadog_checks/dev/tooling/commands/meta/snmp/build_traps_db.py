@@ -58,7 +58,7 @@ NOTIFICATION_TYPE = 'notificationtype'
     nargs=-1,
 )
 def build_traps_db(mib_sources, compiled_mibs_sources, output_dir, output_file, use_json, mib_files):
-    """Builds yaml formatted documents containing various information about traps. These file scan be used by
+    """Builds yaml formatted documents containing various information about traps. These files can be used by
     the Datadog Agent to enrich trap data.
     This command is intended for "Network Devices Monitoring" users who need to enrich traps that are not automatically
     supported by Datadog.
