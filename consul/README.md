@@ -11,7 +11,7 @@ The Datadog Agent collects many metrics from Consul nodes, including those for:
 - Node health - for a given node, how many of its services are up, passing, warning, critical?
 - Network coordinates - inter- and intra-datacenter latencies
 
-The _Consul_ Agent can provide further metrics via DogStatsD. These metrics are more related to the internal health of Consul itself, not to services which depend on Consul. There are metrics for:
+The _Consul_ Agent can provide further metrics with DogStatsD. These metrics are more related to the internal health of Consul itself, not to services which depend on Consul. There are metrics for:
 
 - Serf events and member flaps
 - The Raft protocol
@@ -132,12 +132,6 @@ Instead of using the Prometheus endpoint, you can configure Consul to send the s
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in `datadog.yaml` with:
@@ -178,15 +172,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][10].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][10].
 
 | Parameter      | Value                                               |
 | -------------- | --------------------------------------------------- |
@@ -200,7 +188,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see t
 
 [Run the Agent's status subcommand][11] and look for `consul` under the Checks section.
 
-**Note**: If your Consul nodes have debug logging enabled, you'll see the Datadog Agent's regular polling in the Consul log:
+**Note**: If your Consul nodes have debug logging enabled, the Datadog Agent's regular polling shows in the Consul log:
 
 ```text
 2017/03/27 21:38:12 [DEBUG] http: Request GET /v1/status/leader (59.344us) from=127.0.0.1:53768

@@ -35,7 +35,7 @@ Unlike many checks, the Process Check doesn't monitor anything useful by default
   ## all the processes that match the string exactly by default. Change this behavior with the
   ## parameter `exact_match: false`.
   ##
-  ## Note: One and only one of search_string, pid or pid_file must be specified per instance.
+  ## Note: Exactly one of search_string, pid or pid_file must be specified per instance.
   #
           search_string:
             - ssh
@@ -52,7 +52,7 @@ Unlike many checks, the Process Check doesn't monitor anything useful by default
 
 ### Validation
 
-[Run the Agent's `status` subcommand][5] and look for `process` under the Checks section.
+Run the [Agent's status subcommand][5] and look for `process` under the Checks section.
 
 ### Metrics notes
 

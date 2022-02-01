@@ -22,7 +22,7 @@ No additional installation is needed on your server.
 
 ### Validation
 
-[Run the Agent's status subcommand][5] and look for `jetson` under the Checks section.
+Run the [Agent's status subcommand][5] and look for `jetson` under the Checks section.
 
 ## Data Collected
 
@@ -40,11 +40,11 @@ Some metrics are reported only if `use_sudo` is set to true:
 
 ### Service Checks
 
-Nvidia Jetson does not include any service checks.
+The Nvidia Jetson integration does not include any service checks.
 
 ### Events
 
-Nvidia Jetson does not include any events.
+The Nvidia Jetson integration does not include any events.
 
 ## Troubleshooting
 

@@ -53,12 +53,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
     ```yaml
@@ -78,7 +72,7 @@ partial -->
 
 3. [Restart the Agent][4].
 
-See [Datadog's documentation][6] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+See [Kubernetes Log Collection][6] for information on configuring the Agent for log collection in Kubernetes environments.
 
 ### Validation
 
@@ -92,7 +86,7 @@ See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Events
 
-The Gearmand check does not include any events.
+The Gearman check does not include any events.
 
 ### Service Checks
 

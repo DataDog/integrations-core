@@ -3,8 +3,8 @@
 init_config:
 
     ## @param use_localized_counters - boolean - optional - default: false
-    ## Whether or not performance object and counter names should refer to their
-    ## locale-specific versions rather than by their English name.
+    ## Whether performance object and counter names should refer to their
+    ## locale-specific versions rather than their English name.
     #
     # use_localized_counters: false
 
@@ -36,7 +36,7 @@ instances:
     # password: <PASSWORD>
 
     ## @param enable_health_service_check - boolean - optional - default: true
-    ## Whether or not to send a service check named `<NAMESPACE>.windows.perf.health` which reports
+    ## Whether or not to send a service check named `<NAMESPACE>.windows.perf.health`, which reports
     ## the health of the `server`.
     #
     # enable_health_service_check: true
@@ -83,7 +83,7 @@ instances:
     ##                           any defined value in `init_config`.
     ##
     ## The key for each counter object represents the name of the desired counter.
-    ## Counters may be defined in the following ways:
+    ## Counters can be defined in the following ways:
     ##
     ## 1. If a value is a string, then it represents the suffix of the sent metric name, for example:
     ##
@@ -103,8 +103,8 @@ instances:
     ## The available counter options are:
     ##
     ##   type: This represents how the metric is handled, defaulting to `gauge`. The available types are:
-    ##         gauge, rate, count, monotonic_count, service_check, temporal_percent, time_elapsed
-    ##   average: When there are multiple values for the same instance name (e.g. multiple processes
+    ##         gauge, rate, count, monotonic_count, service_check, temporal_percent, and time_elapsed.
+    ##   average: When there are multiple values for the same instance name (for example, multiple processes
     ##            spawned with the same name) the check submits the sum. Setting this option to `true`
     ##            instructs the check to calculate the average instead.
     ##   aggregate: Whether or not to send an additional metric that is the aggregation of all values for

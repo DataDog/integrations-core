@@ -32,12 +32,6 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
     ```yaml
@@ -75,12 +69,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection][7].
 
 | Parameter      | Value                                             |
@@ -116,7 +104,7 @@ Need help? Contact [Datadog support][11].
 
 ## Further Reading
 
-To get a better idea of how (or why) to integrate Etcd with Datadog, check out our [blog post][12] about it.
+- [Monitor etcd performance to ensure consistent Docker configuration][12]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/etcd/images/etcd_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent

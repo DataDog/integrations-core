@@ -19,7 +19,7 @@ USING_VTS = os.getenv('NGINX_IMAGE', '').endswith('nginx-vts')
 USING_LATEST = os.getenv('NGINX_IMAGE', '').endswith('latest')
 NGINX_VERSION = os.getenv('NGINX_VERSION', os.environ.get('NGINX_IMAGE'))
 
-GAUGE_PLUS_METRICS = {
+GAUGE_PLUS_METRICS = [
     'nginx.cache.cold',
     'nginx.cache.max_size',
     'nginx.cache.size',
@@ -68,8 +68,6 @@ GAUGE_PLUS_METRICS = {
     'nginx.upstream.peers.selected',
     'nginx.upstream.peers.weight',
     'nginx.upstream.zombies',
-}
-METRICS_SEND_AS_COUNT_COUNTS = {metric + "_count" for metric in METRICS_SEND_AS_COUNT}
-ALL_PLUS_METRICS = (
-    METRICS_SEND_AS_COUNT_COUNTS.union(METRICS_SEND_AS_COUNT).union(COUNT_METRICS).union(GAUGE_PLUS_METRICS)
-)
+]
+METRICS_SEND_AS_COUNT_COUNTS = [metric + "_count" for metric in METRICS_SEND_AS_COUNT]
+ALL_PLUS_METRICS = METRICS_SEND_AS_COUNT_COUNTS + METRICS_SEND_AS_COUNT + COUNT_METRICS + GAUGE_PLUS_METRICS

@@ -1,15 +1,14 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
 import pytest
 from tests.common import SNMP_CONTAINER_NAME
 
 from datadog_checks.dev.docker import get_container_ip
 
-from . import common
+from . import common, metrics
 
-pytestmark = [pytest.mark.e2e, common.snmp_integration_only]
+pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
 
 def test_e2e_v1_with_apc_ups_profile(dd_agent_check):
@@ -70,7 +69,7 @@ def test_e2e_v1_with_apc_ups_profile_batch_size_1(dd_agent_check):
 def assert_apc_ups_metrics(dd_agent_check, config):
     config['init_config']['loader'] = 'core'
     instance = config['instances'][0]
-    aggregator = dd_agent_check(config, rate=True)
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     profile_tags = [
         'snmp_profile:apc_ups',
@@ -83,49 +82,17 @@ def assert_apc_ups_metrics(dd_agent_check, config):
     ]
     tags = profile_tags + ["snmp_device:{}".format(instance['ip_address'])]
 
-    metrics = [
-        'upsAdvBatteryNumOfBadBattPacks',
-        'upsAdvBatteryReplaceIndicator',
-        'upsAdvBatteryRunTimeRemaining',
-        'upsAdvBatteryTemperature',
-        'upsAdvBatteryCapacity',
-        'upsHighPrecInputFrequency',
-        'upsHighPrecInputLineVoltage',
-        'upsHighPrecOutputCurrent',
-        'upsAdvInputLineFailCause',
-        'upsAdvOutputLoad',
-        'upsBasicBatteryTimeOnBattery',
-        'upsAdvTestDiagnosticsResults',
-    ]
-
     common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
 
-    for metric in metrics:
+    for metric in metrics.APC_UPS_METRICS:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
     aggregator.assert_metric(
         'snmp.upsOutletGroupStatusGroupState',
         metric_type=aggregator.GAUGE,
         tags=['outlet_group_name:test_outlet'] + tags,
     )
-    aggregator.assert_metric(
-        'snmp.upsBasicStateOutputState.AVRTrimActive', 1, metric_type=aggregator.GAUGE, tags=tags, count=2
-    )
-    aggregator.assert_metric(
-        'snmp.upsBasicStateOutputState.BatteriesDischarged', 1, metric_type=aggregator.GAUGE, tags=tags, count=2
-    )
-    aggregator.assert_metric(
-        'snmp.upsBasicStateOutputState.LowBatteryOnBattery', 1, metric_type=aggregator.GAUGE, tags=tags, count=2
-    )
-    aggregator.assert_metric(
-        'snmp.upsBasicStateOutputState.NoBatteriesAttached', 1, metric_type=aggregator.GAUGE, tags=tags, count=2
-    )
-    aggregator.assert_metric(
-        'snmp.upsBasicStateOutputState.OnLine', 0, metric_type=aggregator.GAUGE, tags=tags, count=2
-    )
-    aggregator.assert_metric(
-        'snmp.upsBasicStateOutputState.ReplaceBattery', 1, metric_type=aggregator.GAUGE, tags=tags, count=2
-    )
-    aggregator.assert_metric('snmp.upsBasicStateOutputState.On', 1, metric_type=aggregator.GAUGE, tags=tags, count=2)
+    for metric, value in metrics.APC_UPS_UPS_BASIC_STATE_OUTPUT_STATE_METRICS:
+        aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=2, tags=tags)
 
     aggregator.assert_all_metrics_covered()
 
@@ -133,7 +100,7 @@ def assert_apc_ups_metrics(dd_agent_check, config):
 def test_e2e_core_discovery(dd_agent_check):
     config = common.generate_container_profile_config_with_ad('apc_ups')
     config['init_config']['loader'] = 'core'
-    aggregator = dd_agent_check(config, rate=False, times=5)
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=False, times=5)
 
     network = config['instances'][0]['network_address']
     ip_address = get_container_ip(SNMP_CONTAINER_NAME)
@@ -220,9 +187,8 @@ def test_e2e_regex_match(dd_agent_check):
             },
         },
     ]
-    aggregator = dd_agent_check(config, rate=True)
     config['init_config']['loader'] = 'core'
-    aggregator = dd_agent_check(config, rate=True)
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     # raw sysName: 41ba948911b9
     aggregator.assert_metric(

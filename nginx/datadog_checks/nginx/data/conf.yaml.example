@@ -82,6 +82,12 @@ instances:
     #
     # plus_api_version: <PLUS_API_VERSION>
 
+    ## @param only_query_enabled_endpoints - boolean - optional - default: false
+    ## Enable this option if you would like the check to determine which API endpoints
+    ## to query based on your NGINX Plus configuration.
+    #
+    only_query_enabled_endpoints: true
+
     ## @param use_vts - boolean - optional - default: false
     ## Set this option to true if you are using the nginx vhost_traffic_status module.
     ## If you are using VTS, set the nginx_status_url to something like http://localhost/nginx_stats/format/json.
@@ -263,6 +269,8 @@ instances:
 
     ## @param aws_host - string - optional
     ## If your services require AWS Signature Version 4 signing, set the host.
+    ## This only needs the hostname and does not require the protocol (HTTP, HTTPS, and more).
+    ## For example, if connecting to https://us-east-1.amazonaws.com/, set `aws_host` to `us-east-1.amazonaws.com`.
     ##
     ## Note: This setting is not necessary for official integrations.
     ##

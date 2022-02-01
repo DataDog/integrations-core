@@ -19,15 +19,11 @@ The ASP.NET check is included in the [Datadog Agent][1] package, so you don't ne
 
 2. [Restart the Agent][4]
 
+**Note**: Versions 1.9.0 or later of this check use a new implementation for metric collection, which requires Python 3. For hosts that are unable to use Python 3, or if you would like to use a legacy version of this check, refer to the following [config][9].
+
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
-ASP.NET uses IIS logging. Follow the [setup instructions for IIS][5] in order to view logs related to ASP.NET requests and failures. 
+ASP.NET uses IIS logging. Follow the [setup instructions for IIS][5] in order to view logs related to ASP.NET requests and failures.
 
 Unhandled 500 level exceptions and events related to your ASP.NET application can be viewed with the Windows Application EventLog.
 
@@ -61,3 +57,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/aspdotnet/metadata.csv
 [8]: https://docs.datadoghq.com/help/
+[9]: https://github.com/DataDog/integrations-core/blob/7.33.x/aspdotnet/datadog_checks/aspdotnet/data/conf.yaml.example

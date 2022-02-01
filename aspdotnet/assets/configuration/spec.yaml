@@ -4,14 +4,11 @@ files:
   options:
   - template: init_config
     options:
-      - template: init_config/default
+    - template: init_config/perf_counters
+    - template: init_config/default
   - template: instances
     options:
+    - template: instances/perf_counters
     - template: instances/pdh_legacy
-      overrides:
-        host.enabled: true
-        host.description: |
-          ASP .NET host to connect to.
-          Using "." means the current host. Using any other value, the Agent attempts to connect to a remote host.
-          Note: Remote access requires additional permissions
+      hidden: true
     - template: instances/default

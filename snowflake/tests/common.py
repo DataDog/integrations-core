@@ -16,6 +16,7 @@ INSTANCE = {
     'schema': 'ACCOUNT_USAGE',
     'role': 'ACCOUNTADMIN',
     'disable_generic_tags': True,
+    'login_timeout': 3,
 }
 OAUTH_INSTANCE = {
     'user': 'testuser',
@@ -26,6 +27,7 @@ OAUTH_INSTANCE = {
     'authenticator': 'oauth',
     'token': 'testtoken',
     'disable_generic_tags': True,
+    'login_timeout': 3,
 }
 
 EXPECTED_TAGS = ['account:test_acct.us-central1.gcp']
@@ -40,5 +42,8 @@ E2E_METADATA = {
         'pip install --upgrade setuptools',
         'pip install /home/snowflake_connector_patch',
     ],
-    'docker_volumes': ['{}:/home/snowflake_connector_patch'.format(os.path.join(HERE, 'snowflake_connector_patch'))],
+    'docker_volumes': [
+        '{}:/home/snowflake_connector_patch'.format(os.path.join(HERE, 'snowflake_connector_patch')),
+        '{}:/home/keys'.format(os.path.join(HERE, 'keys')),
+    ],
 }

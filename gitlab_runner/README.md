@@ -4,11 +4,10 @@
 
 Integration that allows to:
 
-- Visualize and monitor metrics collected via Gitlab Runners through Prometheus
+- Visualize and monitor metrics collected with Gitlab Runners through Prometheus
 - Validate that the Gitlab Runner can connect to Gitlab
 
-See the [Gitlab Runner documentation][1] for
-more information about Gitlab Runner and its integration with Prometheus
+See [GitLab Runner monitoring][1] for more information about Gitlab Runner and its integration with Prometheus.
 
 ## Setup
 
@@ -24,7 +23,7 @@ Edit the `gitlab_runner.d/conf.yaml` file, in the `conf.d/` folder at the root o
 
 **Note**: The `allowed_metrics` item in the `init_config` section allows to specify the metrics that should be extracted.
 
-**Remarks**: Some metrics should be reported as `rate` (i.e., `ci_runner_errors`)
+**Remarks**: Some metrics should be reported as `rate`, for example: `ci_runner_errors`.
 
 ### Validation
 
@@ -73,8 +72,7 @@ The Gitlab Runner check does not include any events.
 
 ### Service Checks
 
-The Gitlab Runner check provides a service check to ensure that the Runner can talk to the Gitlab master and another one to ensure that the
-local Prometheus endpoint is available.
+The Gitlab Runner check provides a service check to ensure that the Runner can talk to the Gitlab master and another one to ensure that the local Prometheus endpoint is available.
 
 ## Troubleshooting
 

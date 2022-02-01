@@ -1,0 +1,34 @@
+{
+	"name": "[Hudi] Anomalous commit duration for table {{table_name.name}}",
+	"type": "query alert",
+	"query": "avg(last_12h):anomalies(avg:hudi.action.duration{action:commit} by {table_name,host}, 'agile', 3, direction='above', alert_window='last_2h', interval=600, count_default_zero='true', seasonality='daily') >= 1",
+	"message": "There is an anomaly in the Hudi commit duration on host: {{host.host}} for the table {{table_name.name}} \n\n\n`hudi.action.duration` measures the amount of time it took to successfully perform a commit on a batch of records in milliseconds.",
+	"tags": [
+		"integration:hudi"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_group_delay": 60,
+		"require_full_window": false,
+		"notify_no_data": true,
+		"renotify_interval": "0",
+		"renotify_occurrences": null,
+		"renotify_statuses": null,
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 1,
+			"critical_recovery": 0
+		},
+		"threshold_windows": {
+			"trigger_window": "last_2h",
+			"recovery_window": "last_1h"
+		}
+	},
+	"recommended_monitor_metadata": {
+		"description": "Get notified when the commit duration is higher than normal."
+	}
+}

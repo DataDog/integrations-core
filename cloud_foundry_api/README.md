@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check queries the [Cloud Foundry API][1] to collect audit events and send them to Datadog via the agent.
+This check queries the [Cloud Foundry API][1] to collect audit events and send them to Datadog through the Agent.
 
 ## Setup
 

@@ -4,8 +4,7 @@
 
 This check reports a set of metrics about any running containers, regardless of the runtime used to start them.
 
-**NOTE**: The `container` check is different from the `containerd` check. The `container` checks will report standardized metrics for all containers found on the system,
-regardless of the container runtime.
+**NOTE**: The `container` check is different from the `containerd` check. The `container` checks report standardized metrics for all containers found on the system, regardless of the container runtime.
 The `containerd` is dedicated to `containerd` runtime and publishes metrics in the `containerd.*` namespace.
 
 ## Setup
@@ -17,11 +16,11 @@ Configuring access to supported container runtimes (Docker, containerd) may be r
 
 #### Installation on containers
 
-The `container` check requires some folders to be mounted to allow for automatic activation. This is handled by our official Helm Chart, the Datadog Operator, and as documented set ups for Kubernetes, Docker, ECS, and ECS Fargate.
+The `container` check requires some folders to be mounted to allow for automatic activation. This is handled by the official Helm Chart, the Datadog Operator, and as documented set ups for Kubernetes, Docker, ECS, and ECS Fargate.
 
 ### Configuration
 
-Currently, the `container` check does not expose any specific configuration settings. To customize common fields or to force the activation of the `container` check, follow these steps:
+The `container` check does not expose any specific configuration settings. To customize common fields or to force the activation of the `container` check, follow these steps:
 
 1. Create the `container.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory.
 

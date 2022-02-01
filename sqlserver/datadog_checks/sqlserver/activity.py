@@ -5,8 +5,9 @@ import time
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.tracking import tracked_method
 
 try:
     import datadog_agent
@@ -32,6 +33,9 @@ ACTIVITY_QUERY = re.sub(
     ' ',
     """\
 SELECT
+    CONVERT(
+        NVARCHAR, TODATETIMEOFFSET(CURRENT_TIMESTAMP, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
+    ) as now,
     CONVERT(
         NVARCHAR, TODATETIMEOFFSET(at.transaction_begin_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
     ) as transaction_begin_time,
@@ -83,6 +87,10 @@ def _hash_to_hex(hash):
     return to_native_string(binascii.hexlify(hash))
 
 
+def agent_check_getter(self):
+    return self.check
+
+
 class SqlserverActivity(DBMAsyncJob):
     """Collects query metrics and plans"""
 
@@ -114,6 +122,7 @@ class SqlserverActivity(DBMAsyncJob):
     def run_job(self):
         self.collect_activity()
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _get_active_connections(self, cursor):
         self.log.debug("collecting sql server current connections")
         self.log.debug("Running query [%s]", CONNECTIONS_QUERY)
@@ -124,6 +133,7 @@ class SqlserverActivity(DBMAsyncJob):
         self.log.debug("loaded sql server current connections len(rows)=%s", len(rows))
         return rows
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_activity(self, cursor):
         self.log.debug("collecting sql server activity")
         self.log.debug("Running query [%s]", ACTIVITY_QUERY)
@@ -138,7 +148,7 @@ class SqlserverActivity(DBMAsyncJob):
         estimated_size = 0
         for row in rows:
             try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['text'])
+                obfuscated_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)['query']
                 row['query_signature'] = compute_sql_signature(obfuscated_statement)
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
@@ -184,12 +194,13 @@ class SqlserverActivity(DBMAsyncJob):
     def _truncate_activity_rows(self, rows, max_bytes):
         pass
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def collect_activity(self):
         """
         Collects all current activity for the SQLServer intance.
         :return:
         """
-        start_time = time.time()
+
         # re-use the check's conn module, but set extra_key=dbm-activity- to ensure we get our own
         # raw connection. adodbapi and pyodbc modules are thread safe, but connections are not.
         with self.check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
@@ -201,18 +212,6 @@ class SqlserverActivity(DBMAsyncJob):
                 payload = json.dumps(event, default=default_json_event_encoding)
                 self._check.database_monitoring_query_activity(payload)
 
-        elapsed_ms = (time.time() - start_time) * 1000
         self.check.histogram(
-            "dd.sqlserver.activity.collect_activity.time",
-            elapsed_ms,
-            tags=self.check.debug_tags(),
-            hostname=self.check.resolved_hostname,
-            raw=True,
-        )
-        self.check.histogram(
-            "dd.sqlserver.activity.collect_activity.payload_size",
-            len(payload),
-            tags=self.check.debug_tags(),
-            hostname=self.check.resolved_hostname,
-            raw=True,
+            "dd.sqlserver.activity.collect_activity.payload_size", len(payload), **self.check.debug_stats_kwargs()
         )

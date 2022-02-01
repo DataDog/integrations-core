@@ -318,14 +318,14 @@ coverage:
         target: 75
         flags:
         - mcache
+      Mesos:
+        target: 75
+        flags:
+        - mesos_slave
       Mesos_Master:
         target: 75
         flags:
         - mesos_master
-      Mesos_Slave:
-        target: 75
-        flags:
-        - mesos_slave
       MongoDB:
         target: 75
         flags:

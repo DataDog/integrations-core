@@ -9,7 +9,8 @@
         ],
         "groups": [
             "host",
-            "db"
+            "db",
+            "server"
         ],
         "name": "Can Connect",
         "description": "Returns `CRITICAL` if the Agent is unable to connect to the monitored SQL Server instance. Returns `OK` otherwise."

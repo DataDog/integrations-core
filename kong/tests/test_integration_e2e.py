@@ -1,5 +1,8 @@
+import platform
+
 import pytest
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.kong import Kong
 
 from . import common
@@ -14,6 +17,13 @@ GAUGES = [
     'kong.connections_accepted',
     'kong.connections_writing',
     'kong.connections_handled',
+]
+
+# Our test environment only exposes these 3 metrics via prometheus
+EXPECTED_METRICS = [
+    'kong.memory.lua.shared_dict.bytes',
+    'kong.memory.lua.shared_dict.total_bytes',
+    'kong.nginx.http.current_connections',
 ]
 
 DATABASES = ['reachable']
@@ -69,3 +79,18 @@ def test_connection_failure(aggregator, check, dd_run_check):
     )
 
     aggregator.all_metrics_asserted()
+
+
+@pytest.mark.skipif(platform.python_version() < "3", reason='OpenMetrics V2 is only available with Python 3')
+@pytest.mark.e2e
+def test_e2e_openmetrics_v2(dd_agent_check, instance_openmetrics_v2):
+    aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
+    tags = "endpoint:" + instance_openmetrics_v2.get('openmetrics_endpoint')
+    tags = instance_openmetrics_v2.get('tags').append(tags)
+    aggregator.assert_service_check('kong.openmetrics.health', AgentCheck.OK, count=2, tags=tags)
+
+    # Only a subset(3) of metrics are exposed currently in our Kong test environment
+    metrics = EXPECTED_METRICS
+
+    for metric in metrics:
+        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=tags)

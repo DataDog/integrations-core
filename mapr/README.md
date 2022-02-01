@@ -16,7 +16,7 @@ The MapR check is included in the [Datadog Agent][2] package but requires additi
 
 - [MapR monitoring][3] is running correctly.
 - You have an available [MapR user][4] (with name, password, UID, and GID) with the 'consume' permission on the `/var/mapr/mapr.monitoring/metricstreams` stream. This may be an already existing user or a newly created user.
-- **On a non-secure cluster**: Follow [this guide][5] so that the `dd-agent` user can impersonate this MapR user.
+- **On a non-secure cluster**: Follow [Configuring Impersonation without Cluster Security][5] so that the `dd-agent` user can impersonate this MapR user.
 - **On a secure cluster**: Generate a [long-lived service ticket][6] for this user that is readable by the `dd-agent` user.
 
 Installation steps for each node:
@@ -48,12 +48,6 @@ Installation steps for each node:
 
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 MapR uses fluentD for logs. Use the [fluentD datadog plugin][9] to collect MapR logs. The following command downloads and installs the plugin into the right directory.
 
 `curl https://raw.githubusercontent.com/DataDog/fluent-plugin-datadog/master/lib/fluent/plugin/out_datadog.rb -o /opt/mapr/fluentd/fluentd-<VERSION>/lib/fluentd-<VERSION>-linux-x86_64/lib/app/lib/fluent/plugin/out_datadog.rb`
@@ -79,11 +73,11 @@ Then update the `/opt/mapr/fluentd/fluentd-<VERSION>/etc/fluentd/fluentd.conf` w
   </store>
 ```
 
-Refer to [fluent_datadog_plugin][9] documentation for more details about the options you can use.
+See the [fluent_datadog_plugin][9] for more details about the options you can use.
 
 ### Validation
 
-[Run the Agent's status subcommand][10] and look for `mapr` under the Checks section.
+Run the [Agent's status subcommand][10] and look for `mapr` under the Checks section.
 
 ## Data Collected
 
@@ -103,11 +97,11 @@ See [service_checks.json][12] for a list of service checks provided by this inte
 
 - **The Agent is on a crash loop after configuring the MapR integration**
 
-  There have been a few cases where the C library within _mapr-streams-python_ segfaults because of permissions issues. Make sure the `dd-agent` user has read permission on the ticket file, that the `dd-agent` user is able to run maprcli commands when the MAPR_TICKETFILE_LOCATION environment variable points to the ticket.
+  There have been a few cases where the C library within _mapr-streams-python_ segfaults because of permissions issues. Ensure the `dd-agent` user has read permission on the ticket file, that the `dd-agent` user is able to run `maprcli` commands when the `MAPR_TICKETFILE_LOCATION` environment variable points to the ticket.
 
 - **The integration seems to work correctly but doesn't send any metric**.
 
-  Make sure to let the Agent run for at least a couple of minutes, as the integration pulls data from a topic and MapR needs to push data into that topic.
+  Make sure to let the Agent run for at least a couple of minutes, because the integration pulls data from a topic and MapR needs to push data into that topic.
   If that doesn't help, but running the Agent manually with `sudo` shows data, this is a problem with permissions. Double check everything. The `dd-agent` Linux user should be able to use a locally stored ticket, allowing it to run queries against MapR as user X (which may or may not be `dd-agent` itself). Additionally, user X needs to have the `consume` permission on the `/var/mapr/mapr.monitoring/metricstreams` stream.
 
 - **You see the message `confluent_kafka was not imported correctly ...`**

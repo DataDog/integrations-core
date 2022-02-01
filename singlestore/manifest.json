@@ -29,7 +29,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
+    "dashboards": {
+      "Singlestore Overview": "assets/dashboards/overview.json"
+    },
     "monitors": {
       "[SingleStore] License expiration": "assets/monitors/license_expiration.json",
       "[SingleStore] Read failures rate": "assets/monitors/read_failures.json",

@@ -53,12 +53,6 @@ No additional installation is needed on your server.
 
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -78,12 +72,11 @@ partial -->
         source: glusterfs
     ```
 
-
   Change the `path` parameter value based on your environment. See the [sample conf.yaml][4] for all available configuration options.
 
   3. [Restart the Agent][6].
 
-  See [Datadog's documentation][7] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+For information on configuring the Agent for log collection in Kubernetes environments, see [Kubernetes Log Collection][7].
 
 ### Validation
 

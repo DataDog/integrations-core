@@ -6,12 +6,14 @@ from datadog_checks.base import AgentCheck
 COUCHBASE_STATS_PATH = '/pools/default'
 COUCHBASE_VITALS_PATH = '/admin/vitals'
 SG_METRICS_PATH = '/_expvar'
+INDEX_STATS_METRICS_PATH = '/api/v1/stats'
 
 # Service Checks
 SERVICE_CHECK_NAME = 'couchbase.can_connect'
 SG_SERVICE_CHECK_NAME = 'couchbase.sync_gateway.can_connect'
 NODE_CLUSTER_SERVICE_CHECK_NAME = 'couchbase.by_node.cluster_membership'
 NODE_HEALTH_SERVICE_CHECK_NAME = 'couchbase.by_node.health'
+INDEX_STATS_SERVICE_CHECK_NAME = 'couchbase.index_stats.can_connect'
 
 NODE_MEMBERSHIP_TRANSLATION = {
     'active': AgentCheck.OK,
@@ -323,3 +325,18 @@ SYNC_GATEWAY_COUNT_METRICS = [
     "import_partitions",
     "import_processing_time",
 ]
+
+INDEX_STATS_COUNT_METRICS = [
+    "cache_hits",
+    "cache_misses",
+    "items_count",
+    "num_docs_indexed",
+    "num_items_flushed",
+    "num_requests",
+    "num_rows_returned",
+    "num_scan_errors",
+    "num_scan_timeouts",
+    "scan_bytes_read",
+]
+
+INDEXER_STATE_MAP = {'Active': 0, 'Pause': 1, 'Warmup': 2}

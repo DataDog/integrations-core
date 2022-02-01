@@ -15,6 +15,7 @@ METRICS = {
     'go_threads': 'go_threads',
     'go_goroutines': 'go_goroutines',
     'APIServiceRegistrationController_depth': 'APIServiceRegistrationController_depth',
+    # Deprecated in 1.22 (replaced by apiserver_storage_objects)
     'etcd_object_counts': 'etcd_object_counts',
     'etcd_request_duration_seconds': 'etcd_request_duration_seconds',
     'etcd_db_total_size_in_bytes': 'etcd.db.total_size',
@@ -54,6 +55,15 @@ METRICS = {
     # For Kubernetes >= 1.17
     # https://github.com/kubernetes/kubernetes/pull/82409
     'authentication_duration_seconds': 'authentication_duration_seconds',
+    # For Kubernetes >= 1.21
+    # https://github.com/kubernetes/kubernetes/pull/100082
+    'apiserver_storage_objects': 'storage_objects',
+    # For Kubernetes >= 1.23
+    # https://github.com/kubernetes/kubernetes/pull/104983
+    'apiserver_storage_list_total': 'storage_list_total',
+    'apiserver_storage_list_fetched_objects_total': 'storage_list_fetched_objects_total',
+    'apiserver_storage_list_evaluated_objects_total': 'storage_list_evaluated_objects_total',
+    'apiserver_storage_list_returned_objects_total': 'storage_list_returned_objects_total',
 }
 
 

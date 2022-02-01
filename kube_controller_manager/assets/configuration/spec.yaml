@@ -1,0 +1,117 @@
+name: Kubernetes Controller Manager
+files:
+- name: kube-controller-manager.yaml
+  options:
+  - template: init_config
+    options:
+      - template: init_config/openmetrics_legacy
+  - template: instances
+    options:
+    - name: leader_election
+      description: |
+        Monitor the leader-election process on the kube-system:kube-controller-manager.
+      value:
+        type: boolean
+        example: true
+    - name: leader_election_kind
+      description: |
+        The kind of object to look at for the leader election.
+        Options:
+          * auto
+          * lease
+          * endpoints
+          * configmap
+        The `auto` option makes the check try `lease` first and fallback to endpoints if `lease` isn't available.
+      value:
+        type: string
+        example: auto
+    - name: health_url
+      description: |
+        The URL for the kube-controller-manager health endpoint.
+      value:
+        type: string
+        example: http://localhost:10252/healthz
+    - name: ignore_deprecated
+      description: |
+        Filter deprecated metrics from the kube-controller-manager /metrics endpoints payload.
+      value:
+        type: boolean
+        example: false
+    - name: extra_queues
+      description: |
+        Monitor additional queues, in addition to the default ones.
+        **NOTE**: `{WorkQueueName}_*` metrics were deprecated in Kubernetes v1.14 
+        in favor of `workqueue_*` metrics.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - <NAME1>
+          - <NAME2>
+    - name: extra_limiters
+      description: |
+        Monitor additional rate limiters, in addition to the default ones.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - <NAME1>
+          - <NAME2>
+    - template: instances/openmetrics_legacy
+      overrides:
+        prometheus_url.value.example: http://localhost:10252/metrics
+        prometheus_url.display_priority: 1
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - kube-controller-manager
+  - template: init_config
+    options: []
+  - template: instances
+    options:
+    - name: possible_prometheus_urls
+      required: false
+      description: |
+        The URLs to try to get your application metrics that are exposed by Prometheus.
+        The check tries each URL in the list and uses the first working one.
+        The `possible_prometheus_urls` or `prometheus_url` parameter is required.
+      enabled: true
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - https://%%host%%:10257/metrics
+          - https://localhost:10257/metrics
+          - http://%%host%%:10252/metrics
+          - http://localhost:10252/metrics
+    - name: prometheus_url
+      description: |
+        The URL where your application metrics are exposed by Prometheus.
+        The `possible_prometheus_urls` or `prometheus_url` parameter is required.
+      value:
+        example: http://%%host%%:10252/metrics
+        type: string
+    - name: bearer_token_auth
+      description: |
+        Used if you are using RBACs and need the Agent to authenticate
+        against the APIServer to retrieve metrics.
+      enabled: true
+      value:
+        example: tls_only
+        display_default: false
+        anyOf:
+        - type: boolean
+        - type: string
+    - name: ssl_verify
+      description: Used to verify self signed certificates.
+      enabled: true
+      value:
+        type: boolean
+        example: false
+        display_default: true

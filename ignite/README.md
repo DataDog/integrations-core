@@ -29,18 +29,12 @@ To configure this check for an Agent running on a host:
 
    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
    You can specify the metrics you are interested in by editing the configuration below.
-   To learn how to customize the metrics to collect visit the [JMX Checks documentation][5] for more detailed instructions.
+   To learn how to customize the metrics to collect see the [JMX Checks documentation][5] for more information.
    If you need to monitor more metrics, contact [Datadog support][6].
 
 2. [Restart the Agent][7]
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 _Available for Agent versions >6.0_
 
@@ -80,12 +74,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][8]
 To collect metrics with the Datadog-Ignite integration, see the [Autodiscovery with JMX][9] guide.
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 _Available for Agent versions >6.0_
 

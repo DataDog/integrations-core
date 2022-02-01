@@ -4,6 +4,7 @@
 
 import os
 import shutil
+import socket
 from copy import deepcopy
 
 import pytest
@@ -16,11 +17,8 @@ from datadog_checks.dev.docker import get_container_ip
 from .common import (
     COMPOSE_DIR,
     PORT,
-    SCALAR_OBJECTS,
-    SCALAR_OBJECTS_WITH_TAGS,
     SNMP_CONTAINER_NAME,
     SNMP_LISTENER_ENV,
-    TABULAR_OBJECTS,
     TOX_ENV_NAME,
     generate_container_instance_config,
 )
@@ -57,8 +55,14 @@ def dd_environment():
                     '{}:/etc/datadog-agent/datadog.yaml'.format(create_datadog_conf_file(tmp_dir))
                 ]
             else:
-                instance_config = generate_container_instance_config(
-                    SCALAR_OBJECTS + SCALAR_OBJECTS_WITH_TAGS + TABULAR_OBJECTS
+                instance_config = generate_container_instance_config([])
+                instance_config['init_config'].update(
+                    {
+                        'loader': 'core',
+                        'use_device_id_as_hostname': True,
+                        # use hostname as namespace to create different device for each user
+                        'namespace': socket.gethostname(),
+                    }
                 )
             yield instance_config, new_e2e_metadata
 
@@ -87,6 +91,10 @@ def create_datadog_conf_file(tmp_dir):
     container_ip = get_container_ip(SNMP_CONTAINER_NAME)
     prefix = ".".join(container_ip.split('.')[:3])
     datadog_conf = {
+        # Set check_runners to -1 to avoid checks being run in background when running `agent check` for e2e testing
+        # Setting check_runners to a negative number to disable check runners is a workaround,
+        # Datadog Agent might not guarantee this behaviour in the future.
+        'check_runners': -1,
         'snmp_listener': {
             'workers': 4,
             'discovery_interval': 10,
@@ -111,6 +119,7 @@ def create_datadog_conf_file(tmp_dir):
                     'version': 2,
                     'timeout': 1,
                     'retries': 2,
+                    'loader': 'python',
                 },
                 {
                     'network': '{}.0/27'.format(prefix),
@@ -125,6 +134,7 @@ def create_datadog_conf_file(tmp_dir):
                     'privacy_protocol': 'des',
                     'context_name': 'public',
                     'ignored_ip_addresses': {'{}.2'.format(prefix): True},
+                    'loader': 'core',
                 },
             ],
         },

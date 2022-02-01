@@ -84,7 +84,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         generic_instances = [kubernetes_state_instance]
         super(KubernetesState, self).__init__(name, init_config, instances=generic_instances)
 
-        self.condition_to_status_positive = {'true': self.OK, 'false': self.CRITICAL, 'unknown': self.UNKNOWN}
+        self.condition_to_status_positive = {'true': self.OK, 'false': self.CRITICAL, 'unknown': self.WARNING}
 
         self.condition_to_status_negative = {'true': self.CRITICAL, 'false': self.OK, 'unknown': self.UNKNOWN}
 

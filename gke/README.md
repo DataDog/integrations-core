@@ -84,7 +84,7 @@ You can deploy the Agent with a [Helm chart][8] or directly with a [DaemonSet][9
       datadog/datadog
   ```
 
-  Refer to the [Datadog Helm documentation][10] for a full list of configurable values.
+  See the [Datadog helm-charts repository][10] for a full list of configurable values.
 
 
 <!-- xxz tab xxx -->

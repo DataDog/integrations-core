@@ -8,7 +8,7 @@ files:
       description: |
         Collect custom metrics and send them to Datadog based on
         your SQL server counters.
-        
+
         See https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
       value:
         type: array
@@ -45,6 +45,12 @@ files:
       value:
         type: string
         example: master
+    - name: reported_hostname
+      description: |
+        Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
+        and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+      value:
+        type: string
     - name: database_autodiscovery
       description: |
         Auto-discover and monitor databases. Supported for the metrics check. 
@@ -58,8 +64,8 @@ files:
         Regular expression for database names to include as part of `database_autodiscovery`.
         Will report metrics for databases that are found in this instance, ignores databases listed but not found.
 
-        Character casing is ignored. The regular expressions start matching from the beginning, so 
-        to match anywhere, prepend `.*`. For exact matches append `$`. 
+        Character casing is ignored. The regular expressions start matching from the beginning, so
+        to match anywhere, prepend `.*`. For exact matches append `$`.
 
         Defaults to `.*` to include everything.
       value:
@@ -199,7 +205,7 @@ files:
     - name: connection_string
       description: |
         Specify a custom connection string to be used
-        Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=True"
+        Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=yes"
         "Trusted_Connection=yes" to use Windows Authentication (note that in this case the connection will be performed
         with the `ddagentuser` user, you can find more information about this user
         in https://docs.datadoghq.com/agent/faq/windows-agent-ddagent-user/)
@@ -223,6 +229,14 @@ files:
           value:
             type: boolean
             example: true
+        - name: disable_secondary_tags
+          description: |
+            Disable the secondary tags on query aggregate metrics, such as `user` and `database`. This is an optimization 
+            for certain database workloads which result in long metric collection times.
+          value:
+            type: boolean
+            example: false
+          hidden: true
         - name: collection_interval
           description: |
             Set the query metric collection interval (in seconds). Each collection involves one or more queries to
@@ -231,6 +245,30 @@ files:
           value:
             type: number
             example: 10
+        - name: dm_exec_query_stats_row_limit
+          description: |
+            Set the maximum number of query stats rows that can be retrieved in a single check run.
+          value:
+            type: integer
+            example: 10000
+        - name: samples_per_hour_per_query
+          description: |
+            Set the rate limit for the number of query sample events that are ingested per hour and per normalized
+            execution plan.
+          value:
+            type: integer
+            example: 4
+        - name: enforce_collection_interval_deadline
+          description: |
+            By default, plan collection stops if it is time for the next run of the query metrics & plans loop. This
+            means that some plans may not be collected. If it is necessary to collect all of the plans and in doing so
+            cause delays in collecting query metrics, then this deadline can be disabled by setting this option to
+            false.
+          value:
+            type: boolean
+            example: True
+          hidden: true
+
     - name: query_activity
       description: Configure collection of active sessions monitoring
       options:
@@ -249,6 +287,48 @@ files:
           value:
             type: number
             example: 10
+    - name: obfuscator_options
+      description: |
+        Configure how the SQL obfuscator behaves.
+        Note: This option only applies when `dbm` is enabled.
+      options:
+        - name: replace_digits
+          description: |
+            Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
+            Note: This option also applies to extracted tables using `collect_tables`.
+          value:
+            type: boolean
+            example: false
+        - name: collect_metadata
+          description: |
+            Set to `true` to enable the collection of metadata in your SQL statements.
+            Metadata includes things such as tables, commands, and comments.
+          value:
+            type: boolean
+            example: false
+        - name: collect_tables
+          description: |
+            Set to `false` to disable the collection of tables in your SQL statements.
+            Requires `collect_metadata: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collect_commands
+          description: |
+            Set to `false` to disable the collection of commands in your SQL statements.
+            Requires `collect_metadata: true`.
+
+            Examples: SELECT, UPDATE, DELETE, etc.
+          value:
+            type: boolean
+            example: true
+        - name: collect_comments
+          description: |
+            Set to `false` to disable the collection of comments in your SQL statements.
+            Requires `collect_metadata: true`.
+          value:
+            type: boolean
+            example: true
     - name: command_timeout
       description: Timeout in seconds for the connection and each command run
       value:

@@ -3,8 +3,8 @@
 init_config:
 
     ## @param use_localized_counters - boolean - optional - default: false
-    ## Whether or not performance object and counter names should refer to their
-    ## locale-specific versions rather than by their English name.
+    ## Whether performance object and counter names should refer to their
+    ## locale-specific versions rather than their English name.
     #
     # use_localized_counters: false
 
@@ -20,25 +20,41 @@ init_config:
 instances:
 
   -
-    ## @param sites - list of strings - optional
+    ## @param sites - list of strings or mapping - optional
     ## The `sites` parameter allows you to specify a list of sites you want to
     ## read metrics from. With sites specified, metrics are tagged with the
     ## site name. If you don't define any sites, the check pulls all of the
     ## sites, and tags each one with the site name.
+    ##
+    ## On Agent versions 7.34 or higher, this may also be defined as a mapping
+    ## with `include` and/or `exclude` keys representing arrays of regular
+    ## expressions strings.
     #
     # sites:
-    #   - <WEB_SITE_1>
-    #   - <WEB_SITE_2>
+    #   include:
+    #   - <PATTERN_1>
+    #   - <PATTERN_2>
+    #   exclude:
+    #   - <PATTERN_1>
+    #   - <PATTERN_2>
 
-    ## @param app_pools - list of strings - optional
+    ## @param app_pools - list of strings or mapping - optional
     ## The `app_pools` parameter allows you to specify a list of application pools you want to
     ## read metrics from. With application pools specified, metrics are tagged with the
     ## application pool name. If you don't define any application pools, the check pulls all of the
     ## application pools, and tags each one with the application pool name.
+    ##
+    ## On Agent versions 7.34 or higher, this may also be defined as a mapping
+    ## with `include` and/or `exclude` keys representing arrays of regular
+    ## expressions strings.
     #
     # app_pools:
-    #   - <APP_POOL_1>
-    #   - <APP_POOL_2>
+    #   include:
+    #   - <PATTERN_1>
+    #   - <PATTERN_2>
+    #   exclude:
+    #   - <PATTERN_1>
+    #   - <PATTERN_2>
 
     ## @param server - string - optional
     ## The server with which to connect, defaulting to the local machine.
@@ -56,7 +72,7 @@ instances:
     # password: <PASSWORD>
 
     ## @param enable_health_service_check - boolean - optional - default: true
-    ## Whether or not to send a service check named `<NAMESPACE>.windows.perf.health` which reports
+    ## Whether or not to send a service check named `<NAMESPACE>.windows.perf.health`, which reports
     ## the health of the `server`.
     #
     # enable_health_service_check: true
@@ -103,7 +119,7 @@ instances:
     ##                           any defined value in `init_config`.
     ##
     ## The key for each counter object represents the name of the desired counter.
-    ## Counters may be defined in the following ways:
+    ## Counters can be defined in the following ways:
     ##
     ## 1. If a value is a string, then it represents the suffix of the sent metric name, for example:
     ##
@@ -123,8 +139,8 @@ instances:
     ## The available counter options are:
     ##
     ##   type: This represents how the metric is handled, defaulting to `gauge`. The available types are:
-    ##         gauge, rate, count, monotonic_count, service_check, temporal_percent, time_elapsed
-    ##   average: When there are multiple values for the same instance name (e.g. multiple processes
+    ##         gauge, rate, count, monotonic_count, service_check, temporal_percent, and time_elapsed.
+    ##   average: When there are multiple values for the same instance name (for example, multiple processes
     ##            spawned with the same name) the check submits the sum. Setting this option to `true`
     ##            instructs the check to calculate the average instead.
     ##   aggregate: Whether or not to send an additional metric that is the aggregation of all values for
@@ -134,7 +150,11 @@ instances:
     ##   metric_name: This represents the full metric name in lieu of a `name` key and is not be prefixed by
     ##                the parent object's `name` key.
     #
-    # extra_metrics: {}
+    # extra_metrics:
+    #   Web Service:
+    #     name: httpd_request_method
+    #     counters:
+    #     - CGI Requests/sec: cgi
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

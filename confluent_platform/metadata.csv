@@ -11,6 +11,12 @@ confluent.kafka.controller.offline_partitions_count,gauge,,,,Number of partition
 confluent.kafka.controller.active_controller_count,gauge,,,,Number of active controllers in the cluster. Alert if the aggregated sum across all brokers in the cluster is anything other than 1 because there should be exactly one controller per cluster.,0,confluent_platform,controller active controller
 confluent.kafka.server.fetcher_lag.consumer_lag,gauge,,message,,Lag in number of messages per follower replica. This is useful to know if the replica is slow or has stopped replicating from the leader.,0,confluent_platform,fetcher lag consumer lag
 confluent.kafka.cluster.partition.under_min_isr,gauge,,,,Number of partitions whose in-sync replicas count is less than minIsr. These partitions will be unavailable to producers who use acks=all.,0,confluent_platform,cluster partition under min isr
+confluent.kafka.server.broker_topic_metrics.bytes_in_per_sec,gauge,,byte,,Total bytes in per topic,0,confluent_platform,bytes in per sec
+confluent.kafka.server.broker_topic_metrics.bytes_out_per_sec,gauge,,byte,,Total bytes out per topic,0,confluent_platform,bytes out per sec
+confluent.kafka.server.broker_topic_metrics.messages_in_per_sec,gauge,,byte,,Total messages in per topic,0,confluent_platform,messages in per sec
+confluent.kafka.server.broker_topic_metrics.messages_out_per_sec,gauge,,byte,,Total messages out per topic,0,confluent_platform,messages out per sec
+confluent.kafka.server.broker_topic_metrics.produce_message_conversions_per_sec,gauge,,byte,,Total messages converted at production per topic,0,confluent_platform,produce messages conv per sec
+confluent.kafka.server.broker_topic_metrics.fetch_message_conversions_per_sec,gauge,,byte,,Total messages converted at production per topic,0,confluent_platform,fetch message conv per sec
 confluent.kafka.server.topic.bytes_in_per_sec.rate,gauge,,byte,second,Aggregate incoming byte rate.,0,confluent_platform,topic bytes in
 confluent.kafka.server.topic.bytes_out_per_sec.rate,gauge,,byte,second,Aggregate outgoing byte rate.,0,confluent_platform,topic bytes out
 confluent.kafka.server.topic.bytes_rejected_per_sec.rate,gauge,,byte,second,Aggregate rejected byte rate.,0,confluent_platform,topic bytes rejected
@@ -30,13 +36,19 @@ confluent.kafka.server.session.zoo_keeper_sync_connects_per_sec.rate,gauge,,unit
 confluent.kafka.server.session.zoo_keeper_auth_failures_per_sec.rate,gauge,,,second,An attempt to connect to the ensemble failed because the client has not provided correct credentials.,0,confluent_platform,session zk auth failures
 confluent.kafka.server.session.zoo_keeper_read_only_connects_per_sec.rate,gauge,,unit,second,"The server the client is connected to is currently LOOKING, which means that it is neither FOLLOWING nor LEADING.",0,confluent_platform,session zk read only connects
 confluent.kafka.server.session.zoo_keeper_sasl_authentications_per_sec.rate,gauge,,unit,second,Client has successfully authenticated.,0,confluent_platform,session zk sasl authentications
+confluent.kafka.server.session.zoo_keeper_request_latency_ms,gauge,,unit,millisecond,Client request latency,0,confluent_platform,latency from client requests
 confluent.kafka.network.request.requests_per_sec.rate,gauge,,request,second,Request rate.,0,confluent_platform,net req reqs
 confluent.kafka.controller.unclean_leader_elections_per_sec.rate,gauge,,unit,second,Unclean leader election rate.,0,confluent_platform,controller unclean leader elections rate
 confluent.kafka.controller.unclean_leader_elections_per_sec.avg,gauge,,unit,second,Unclean leader election rate avg.,0,confluent_platform,controller unclean leader elections avg
 confluent.kafka.controller.leader_election_rate_and_time_ms.rate,gauge,,millisecond,,Leader election rate.,0,confluent_platform,controller leader election rate
 confluent.kafka.controller.leader_election_rate_and_time_ms.avg,gauge,,millisecond,,Leader election rate avg.,0,confluent_platform,controller leader election avg
+confluent.kafka.controller.preferred_replica_imbalance_count,gauge,,,,Preferred Replica Imbalance Count,0,confluent_platform,rep imbalance count
+confluent.kafka.controller.global_under_min_isr_partition_count,gauge,,,,under min isr count,0,confluent_platform,under min isr count
+confluent.kafka.controller.global_topic_count,gauge,,,,global topic count,0,confluent_platform,topic count
+confluent.kafka.controller.global_partition_count,gauge,,,,global partition count,0,confluent_platform,partition count
 confluent.kafka.log.log_flush_rate_and_time_ms.rate,gauge,,millisecond,,Log flush rate.,0,confluent_platform,log flush rate
 confluent.kafka.log.log_flush_rate_and_time_ms.avg,gauge,,millisecond,,Log flush rate avg.,0,confluent_platform,log flush avg
+confluent.kafka.log.size,gauge,,byte,,log size per topic,0,confluent_platform,log per topic
 confluent.kafka.network.request.total_time_ms.rate,gauge,,millisecond,,Total time in ms to serve the specified request (rate).,0,confluent_platform,net req tot rate
 confluent.kafka.network.request.total_time_ms.avg,gauge,,millisecond,,Total time in ms to serve the specified request (avg).,0,confluent_platform,net req tot avg
 confluent.kafka.network.request.total_time_ms.50percentile,gauge,,millisecond,,Total time in ms to serve the specified request (50percentile).,0,confluent_platform,net req tot 50p
@@ -213,48 +225,37 @@ confluent.kafka.connect.task_error.total_record_errors,gauge,,record,,The number
 confluent.kafka.connect.task_error.total_record_failures,gauge,,record,,The number of record processing failures in this task.,0,confluent_platform,task tot record failures
 confluent.kafka.connect.task_error.total_records_skipped,gauge,,record,,The number of records skipped due to errors.,0,confluent_platform,task tot records skipped
 confluent.kafka.connect.task_error.total_retries,gauge,,operation,,The number of operations retried.,0,confluent_platform,task tot retries
+confluent.kafka.connect.connect_metrics.outgoing_byte_rate,gauge,,byte,,Outgoing byte_rate,0,confluent_platform,incoming byte rate
+confluent.kafka.rest.jersey.consumer.create.request_error_rate,gauge,,request,second,The average rate of failed consumer create HTTP requests,0,confluent_platform,consumer create err rate
+confluent.kafka.connect.connect_metrics.incoming_byte_rate,gauge,,byte,,Incoming byte rate,0,confluent_platform,outgoing byte rate
+confluent.kafka.connect.connect_metrics.failed_authentication_rate,gauge,,,,Failed authentication rate,0,confluent_platform,failed auth rate
+confluent.kafka.rest.jersey.consumer.delete.request_error_rate,gauge,,request,second,The average rate of failed consumer delete HTTP requests,0,confluent_platform,consumer delete err rate
+confluent.kafka.connect.connect_metrics.successful_authentication_rate,gauge,,,,Successful authentication rate,0,confluent_platform,succ auth rate
+confluent.kafka.connect.connect_metrics.failed_authentication_total,gauge,,,,failed authentication total,0,confluent_platform,fail auth total
+confluent.kafka.connect.connect_metrics.successful_authentication_total,gauge,,,,successful authentication total,0,confluent_platform,succ auth total
+confluent.kafka.connect.connector_metrics.status,gauge,,,,Status of connector,0,confluent_platform,connector status
 confluent.kafka.rest.jetty.connections_active,gauge,,connection,,Total number of active TCP connections (REST).,0,confluent_platform,rest jetty connections active
 confluent.kafka.rest.jetty.connections_opened_rate,gauge,,connection,second,The average rate per second of opened TCP connections (REST).,0,confluent_platform,rest jetty connections opened rate
 confluent.kafka.rest.jetty.connections_closed_rate,gauge,,connection,second,The average rate per second of closed TCP connections (REST).,0,confluent_platform,rest jetty connections closed rate
-confluent.kafka.schema.registry.jetty.connections_active,gauge,,connection,,Total number of active TCP connections (Schema registry).,0,confluent_platform,schema reg jetty connections active
-confluent.kafka.schema.registry.jetty.connections_opened_rate,gauge,,connection,,The average rate per second of opened TCP connections (Schema registry).,0,confluent_platform,schema reg jetty connections opened rate
-confluent.kafka.schema.registry.jetty.connections_closed_rate,gauge,,connection,,The average rate per second of closed TCP connections (Schema registry).,0,confluent_platform,schema reg jetty connections closed rate
-confluent.kafka.rest.jersey.brokers.list.request_error_rate,gauge,,request,second,The average rate of failed brokers list HTTP requests,0,confluent_platform,brokers list err rate
-confluent.kafka.rest.jersey.consumer.assign_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer assign v2 HTTP requests,0,confluent_platform,consumer assign err rate
-confluent.kafka.rest.jersey.consumer.assignment_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer assignment v2 HTTP requests,0,confluent_platform,consumer assignment err rate
-confluent.kafka.rest.jersey.consumer.commit_offsets_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer commit offsets v2 HTTP requests,0,confluent_platform,consumer commit offsets err rate
-confluent.kafka.rest.jersey.consumer.commit.request_error_rate,gauge,,request,second,The average rate of failed consumer commit HTTP requests,0,confluent_platform,consumer commit err rate
-confluent.kafka.rest.jersey.consumer.committed_offsets_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer committed offsets v2 HTTP requests,0,confluent_platform,consumer committed offsets err rate
-confluent.kafka.rest.jersey.consumer.create_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer create v2 HTTP requests,0,confluent_platform,consumer create v2 err rate
-confluent.kafka.rest.jersey.consumer.create.request_error_rate,gauge,,request,second,The average rate of failed consumer create HTTP requests,0,confluent_platform,consumer create err rate
-confluent.kafka.rest.jersey.consumer.delete_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer delete v2 HTTP requests,0,confluent_platform,consumer delete v2 err rate
-confluent.kafka.rest.jersey.consumer.delete.request_error_rate,gauge,,request,second,The average rate of failed consumer delete HTTP requests,0,confluent_platform,consumer delete err rate
-confluent.kafka.rest.jersey.consumer.records.read_avro_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer records read avro v2 HTTP requests,0,confluent_platform,consumer records read avro err rate
-confluent.kafka.rest.jersey.consumer.records.read_binary_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer records read binary v2 HTTP requests,0,confluent_platform,consumer records read binary err rate
-confluent.kafka.rest.jersey.consumer.records.read_json_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer records read json v2 HTTP requests,0,confluent_platform,consumer records read json err rate
-confluent.kafka.rest.jersey.consumer.seek_to_beginning_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer seek to beginning v2 HTTP requests,0,confluent_platform,consumer seek to beginning err rate
-confluent.kafka.rest.jersey.consumer.seek_to_end_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer seek to end v2 HTTP requests,0,confluent_platform,consumer seek to end err rate
-confluent.kafka.rest.jersey.consumer.seek_to_offset_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer seek to offset v2 HTTP requests,0,confluent_platform,consumer seek to offset err rate
-confluent.kafka.rest.jersey.consumer.subscribe_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer subscribe v2 HTTP requests,0,confluent_platform,consumer subscribe err rate
-confluent.kafka.rest.jersey.consumer.subscription_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer subscription v2 HTTP requests,0,confluent_platform,consumer subscription err rate
 confluent.kafka.rest.jersey.consumer.topic.read_avro.request_error_rate,gauge,,request,second,The average rate of failed consumer topic read avro HTTP requests,0,confluent_platform,consumer topic read avro err rate
 confluent.kafka.rest.jersey.consumer.topic.read_binary.request_error_rate,gauge,,request,second,The average rate of failed consumer topic read binary HTTP requests,0,confluent_platform,consumer topic read binary err rate
 confluent.kafka.rest.jersey.consumer.topic.read_json.request_error_rate,gauge,,request,second,The average rate of failed consumer topic read json HTTP requests,0,confluent_platform,consumer topic read json err rate
-confluent.kafka.rest.jersey.consumer.unsubscribe_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer unsubscribe v2 HTTP requests,0,confluent_platform,consumer unsubscribe err rate
 confluent.kafka.rest.jersey.partition.consume_avro.request_error_rate,gauge,,request,second,The average rate of failed partition consume avro HTTP requests,0,confluent_platform,partition consume avro err rate
 confluent.kafka.rest.jersey.partition.consume_binary.request_error_rate,gauge,,request,second,The average rate of failed partition consume binary HTTP requests,0,confluent_platform,partition consume binary err rate
 confluent.kafka.rest.jersey.partition.consume_json.request_error_rate,gauge,,request,second,The average rate of failed partition consume json HTTP requests,0,confluent_platform,partition consume json err rate
-confluent.kafka.rest.jersey.partition.get_v2.request_error_rate,gauge,,request,second,The average rate of failed partition get v2 HTTP requests,0,confluent_platform,partition get v2 err rate
+confluent.kafka.schema.registry.jetty.connections_active,gauge,,connection,,Total number of active TCP connections (Schema registry).,0,confluent_platform,schema reg jetty connections active
+confluent.kafka.schema.registry.jetty.connections_opened_rate,gauge,,connection,,The average rate per second of opened TCP connections (Schema registry).,0,confluent_platform,schema reg jetty connections opened rate
 confluent.kafka.rest.jersey.partition.get.request_error_rate,gauge,,request,second,The average rate of failed partition get HTTP requests,0,confluent_platform,partition get err rate
-confluent.kafka.rest.jersey.partition.produce_avro_v2.request_error_rate,gauge,,request,second,The average rate of failed partition produce avro v2 HTTP requests,0,confluent_platform,partition produce avro v2 err rate
+confluent.kafka.schema.registry.jetty.connections_closed_rate,gauge,,connection,,The average rate per second of closed TCP connections (Schema registry).,0,confluent_platform,schema reg jetty connections closed rate
 confluent.kafka.rest.jersey.partition.produce_avro.request_error_rate,gauge,,request,second,The average rate of failed partition produce avro HTTP requests,0,confluent_platform,partition produce avro err rate
-confluent.kafka.rest.jersey.partition.produce_binary_v2.request_error_rate,gauge,,request,second,The average rate of failed partition produce binary v2 HTTP requests,0,confluent_platform,partition produce binary v2 err rate
+confluent.kafka.rest.jersey.brokers.list.request_error_rate,gauge,,request,second,The average rate of failed brokers list HTTP requests,0,confluent_platform,brokers list err rate
+confluent.kafka.rest.jersey.consumer.assign_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer assign v2 HTTP requests,0,confluent_platform,consumer assign err rate
 confluent.kafka.rest.jersey.partition.produce_binary.request_error_rate,gauge,,request,second,The average rate of failed partition produce binary HTTP requests,0,confluent_platform,partition produce binary err rate
-confluent.kafka.rest.jersey.partition.produce_json_v2.request_error_rate,gauge,,request,second,The average rate of failed partition produce json v2 HTTP requests,0,confluent_platform,partition produce json v2 err rate
+confluent.kafka.rest.jersey.consumer.assignment_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer assignment v2 HTTP requests,0,confluent_platform,consumer assignment err rate
 confluent.kafka.rest.jersey.partition.produce_json.request_error_rate,gauge,,request,second,The average rate of failed partition produce json HTTP requests,0,confluent_platform,partition produce json err rate
-confluent.kafka.rest.jersey.partitions.list_v2.request_error_rate,gauge,,request,second,The average rate of failed partitions list v2 HTTP requests,0,confluent_platform,partitions list v2 err rate
 confluent.kafka.rest.jersey.partitions.list.request_error_rate,gauge,,request,second,The average rate of failed partitions list HTTP requests,0,confluent_platform,partitions list err rate
-confluent.kafka.rest.jersey.request_error_rate,gauge,,request,second,The average rate of failed HTTP requests,0,confluent_platform,err rate
+confluent.kafka.rest.jersey.consumer.commit_offsets_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer commit offsets v2 HTTP requests,0,confluent_platform,consumer commit offsets err rate
+confluent.kafka.rest.jersey.consumer.commit.request_error_rate,gauge,,request,second,The average rate of failed consumer commit HTTP requests,0,confluent_platform,consumer commit err rate
 confluent.kafka.rest.jersey.root.get.request_error_rate,gauge,,request,second,The average rate of failed root get HTTP requests,0,confluent_platform,root get err rate
 confluent.kafka.rest.jersey.root.post.request_error_rate,gauge,,request,second,The average rate of failed root post HTTP requests,0,confluent_platform,root post err rate
 confluent.kafka.rest.jersey.topic.get.request_error_rate,gauge,,request,second,The average rate of failed topic get HTTP requests,0,confluent_platform,topic get err rate
@@ -263,6 +264,33 @@ confluent.kafka.rest.jersey.topic.produce_binary.request_error_rate,gauge,,reque
 confluent.kafka.rest.jersey.topic.produce_json.request_error_rate,gauge,,request,second,The average rate of failed topic produce json HTTP requests,0,confluent_platform,topic produce json err rate
 confluent.kafka.rest.jersey.topics.list.request_error_rate,gauge,,request,second,The average rate of failed topics list HTTP requests,0,confluent_platform,topics list err rate
 confluent.kafka.schema.registry.jersey.brokers.list.request_error_rate,gauge,,request,second,The average rate of failed brokers list operations,0,confluent_platform,brokers list op err rate
+confluent.kafka.rest.jersey.consumer.committed_offsets_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer committed offsets v2 HTTP requests,0,confluent_platform,consumer committed offsets err rate
+confluent.kafka.rest.jersey.consumer.create_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer create v2 HTTP requests,0,confluent_platform,consumer create v2 err rate
+confluent.kafka.rest.jersey.consumer.delete_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer delete v2 HTTP requests,0,confluent_platform,consumer delete v2 err rate
+confluent.kafka.rest.jersey.consumer.records.read_avro_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer records read avro v2 HTTP requests,0,confluent_platform,consumer records read avro err rate
+confluent.kafka.rest.jersey.consumer.records.read_binary_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer records read binary v2 HTTP requests,0,confluent_platform,consumer records read binary err rate
+confluent.kafka.rest.jersey.consumer.records.read_json_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer records read json v2 HTTP requests,0,confluent_platform,consumer records read json err rate
+confluent.kafka.rest.jersey.consumer.seek_to_beginning_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer seek to beginning v2 HTTP requests,0,confluent_platform,consumer seek to beginning err rate
+confluent.kafka.rest.jersey.consumer.seek_to_end_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer seek to end v2 HTTP requests,0,confluent_platform,consumer seek to end err rate
+confluent.kafka.rest.jersey.consumer.seek_to_offset_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer seek to offset v2 HTTP requests,0,confluent_platform,consumer seek to offset err rate
+confluent.kafka.rest.jersey.consumer.subscribe_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer subscribe v2 HTTP requests,0,confluent_platform,consumer subscribe err rate
+confluent.kafka.rest.jersey.consumer.subscription_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer subscription v2 HTTP requests,0,confluent_platform,consumer subscription err rate
+confluent.kafka.rest.jersey.consumer.records.read_jsonschema_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer topic read json HTTP requests,0,confluent_platform,consumer topic read json err rate
+confluent.kafka.rest.jersey.consumer.records.read_protobuf_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer topic read json HTTP requests,0,confluent_platform,consumer topic read json err rate
+confluent.kafka.rest.jersey.consumer.unsubscribe_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer unsubscribe v2 HTTP requests,0,confluent_platform,consumer unsubscribe err rate
+confluent.kafka.rest.jersey.partition.get_v2.request_error_rate,gauge,,request,second,The average rate of failed partition get v2 HTTP requests,0,confluent_platform,partition get v2 err rate
+confluent.kafka.rest.jersey.partition.produce_avro_v2.request_error_rate,gauge,,request,second,The average rate of failed partition produce avro v2 HTTP requests,0,confluent_platform,partition produce avro v2 err rate
+confluent.kafka.rest.jersey.partition.produce_binary_v2.request_error_rate,gauge,,request,second,The average rate of failed partition produce binary v2 HTTP requests,0,confluent_platform,partition produce binary v2 err rate
+confluent.kafka.rest.jersey.partition.produce_json_v2.request_error_rate,gauge,,request,second,The average rate of failed partition produce json v2 HTTP requests,0,confluent_platform,partition produce json v2 err rate
+confluent.kafka.rest.jersey.partition.produce_jsonschema_v2.request_error_rate,gauge,,request,second,The average rate of failed partition produce json v2 HTTP requests,0,confluent_platform,partition produce json v2 err rate
+confluent.kafka.rest.jersey.partition.produce_protobuf_v2.request_error_rate,gauge,,request,second,The average rate of failed partition produce json v2 HTTP requests,0,confluent_platform,partition produce json v2 err rate
+confluent.kafka.rest.jersey.partitions.list_v2.request_error_rate,gauge,,request,second,The average rate of failed partitions list v2 HTTP requests,0,confluent_platform,partitions list v2 err rate
+confluent.kafka.rest.jersey.request_error_rate,gauge,,request,second,The average rate of failed HTTP requests,0,confluent_platform,err rate
+confluent.kafka.rest.jersey.root.get_v2.request_error_rate,gauge,,request,second,The average rate of failed root get HTTP requests,0,confluent_platform,root get err rate
+confluent.kafka.rest.jersey.root.post_v2.request_error_rate,gauge,,request,second,The average rate of failed root post HTTP requests,0,confluent_platform,root post err rate
+confluent.kafka.rest.jersey.topic.get_v2.request_error_rate,gauge,,request,second,The average rate of failed topic get HTTP requests,0,confluent_platform,topic get err rate
+confluent.kafka.rest.jersey.topics.list_v2.request_error_rate,gauge,,request,second,The average rate of failed topics list HTTP requests,0,confluent_platform,topics list err rate
+confluent.kafka.schema.registry.jersey.brokers.list_v2.request_error_rate,gauge,,request,second,The average rate of failed brokers list operations,0,confluent_platform,brokers list op err rate
 confluent.kafka.schema.registry.jersey.consumer.assign_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer assign v2 operations,0,confluent_platform,consumer assign op err rate
 confluent.kafka.schema.registry.jersey.consumer.assignment_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer assignment v2 operations,0,confluent_platform,consumer assignment op err rate
 confluent.kafka.schema.registry.jersey.consumer.commit_offsets_v2.request_error_rate,gauge,,request,second,The average rate of failed consumer commit offsets v2 operations,0,confluent_platform,consumer commit offsets op err rate
@@ -292,6 +320,7 @@ confluent.kafka.schema.registry.jersey.partition.get.request_error_rate,gauge,,r
 confluent.kafka.schema.registry.jersey.partition.produce_avro_v2.request_error_rate,gauge,,request,second,The average rate of failed partition produce avro v2 operations,0,confluent_platform,partition produce avro v2 op err rate
 confluent.kafka.schema.registry.jersey.partition.produce_avro.request_error_rate,gauge,,request,second,The average rate of failed partition produce avro operations,0,confluent_platform,partition produce avro op err rate
 confluent.kafka.schema.registry.jersey.partition.produce_binary_v2.request_error_rate,gauge,,request,second,The average rate of failed partition produce binary v2 operations,0,confluent_platform,partition produce binary v2 op err rate
+confluent.ksql.query_stats.num_idle_queries,gauge,,message,,Number of queries with no messages available to process.,0,confluent_platform,query stats num idle queries
 confluent.kafka.schema.registry.jersey.partition.produce_binary.request_error_rate,gauge,,request,second,The average rate of failed partition produce binary operations,0,confluent_platform,partition produce binary op err rate
 confluent.kafka.schema.registry.jersey.partition.produce_json_v2.request_error_rate,gauge,,request,second,The average rate of failed partition produce json v2 operations,0,confluent_platform,partition produce json v2 op err rate
 confluent.kafka.schema.registry.jersey.partition.produce_json.request_error_rate,gauge,,request,second,The average rate of failed partition produce json operations,0,confluent_platform,partition produce json op err rate
@@ -306,6 +335,13 @@ confluent.kafka.schema.registry.jersey.topic.produce_binary.request_error_rate,g
 confluent.kafka.schema.registry.jersey.topic.produce_json.request_error_rate,gauge,,request,second,The average rate of failed topic produce json operations,0,confluent_platform,topic produce json op err rate
 confluent.kafka.schema.registry.jersey.topics.list.request_error_rate,gauge,,request,second,The average rate of failed topics list operations,0,confluent_platform,topics list op err rate
 confluent.kafka.schema.registry.master_slave_role.master_slave_role,gauge,,,,"The current role of this Schema Registry instance. A value of 1 indicates this instance is the primary, 0 indicates it is a secondary.",0,confluent_platform,schema reg master slave role master slave role
+confluent.kafka.schema.registry.avro_schemas_created,gauge,,,,schemas created avro,0,confluent_platform,schemas created avro
+confluent.kafka.schema.registry.json_schemas_created,gauge,,,,schemas created json,0,confluent_platform,schemas created json
+confluent.kafka.schema.registry.protobuf_schemas_created,gauge,,,,schemas protobuf avro,0,confluent_platform,schemas created protobuf
+confluent.kafka.schema.registry.avro_schemas_deleted,gauge,,,,schemas deleted avro,0,confluent_platform,schemas deleted avro
+confluent.kafka.schema.registry.json_schemas_deleted,gauge,,,,schemas deleted json,0,confluent_platform,schemas deleted json
+confluent.kafka.schema.registry.protobuf_schemas_deleted,gauge,,,,schemas deleted protobuf,0,confluent_platform,schemas deleted protobuf
+confluent.kafka.schema.registry.registered_count,gauge,,,,schemas registered,0,confluent_platform,schemas registered
 confluent.replicator.task.topic_partition_message_lag,gauge,,message,,"The number of messages that were produced to the origin cluster, but have not yet arrived to the destination cluster.",0,confluent_platform,replctor task topic partition message lag
 confluent.replicator.task.topic_partition_throughput,gauge,,message,second,The number of messages replicated per second from the source to destination cluster.,0,confluent_platform,replctor task topic partition throughput
 confluent.replicator.task.topic_partition_latency,gauge,,,,The average time between message production to the source cluster and message production to the destination cluster.,0,confluent_platform,replctor task topic partition latency
@@ -319,7 +355,52 @@ confluent.ksql.query_stats.messages_consumed_total,gauge,,message,,Number of mes
 confluent.ksql.query_stats.messages_produced_per_sec,gauge,,message,second,Number of messages produced per second across all queries.,0,confluent_platform,query stats messages produced
 confluent.ksql.query_stats.num_persistent_queries,gauge,,query,,Number of persistent queries that are currently executing.,0,confluent_platform,query stats num persistent queries
 confluent.ksql.query_stats.num_active_queries,gauge,,message,,Number of queries that are actively processing messages.,0,confluent_platform,query stats num active queries
-confluent.ksql.query_stats.num_idle_queries,gauge,,message,,Number of queries with no messages available to process.,0,confluent_platform,query stats num idle queries
+confluent.ksql.query_stats.running_queries,gauge,,message,,RUNNING_queries,0,confluent_platform,RUNNING_queries
+confluent.ksql.query_stats.not_running_queries,gauge,,message,,NOT_RUNNING_queries,0,confluent_platform,NOT_RUNNING_queries
+confluent.ksql.query_stats.rebalancing_queries,gauge,,message,,REBALANCING_queries,0,confluent_platform,REBALANCING_queries
+confluent.ksql.query_stats.created_queries,gauge,,message,,CREATED_queries,0,confluent_platform,CREATED_queries
+confluent.ksql.query_stats.pending_shutdown_queries,gauge,,message,,PENDING_SHUTDOWN_queries,0,confluent_platform,PENDING_SHUTDOWN_queries
+confluent.ksql.query_stats.error_queries,gauge,,message,,,0,confluent_platform,ERROR_queries
+confluent.ksql.ksql_rocksdb_aggregates.cur_size_all_mem_tables_total,gauge,,byte,,size all mem tables,0,confluent_platform,size all mem tables
+confluent.ksql.ksql_rocksdb_aggregates.cur_size_active_mem_table_total,gauge,,byte,,cur_size_active_mem_table_total,0,confluent_platform,cur_size_active_mem_table_total
+confluent.ksql.ksql_rocksdb_aggregates.mem_table_flush_pending_total,gauge,,byte,,mem_table_flush_pending_total,0,confluent_platform,mem_table_flush_pending_total
+confluent.ksql.ksql_rocksdb_aggregates.block_cache_pinned_usage_total,gauge,,byte,,block_cache_pinned_usage_total,0,confluent_platform,block_cache_pinned_usage_total
+confluent.ksql.ksql_rocksdb_aggregates.estimate_num_keys_total,gauge,,,,estimate_num_keys_total,0,confluent_platform,estimate_num_keys_total
+confluent.ksql.ksql_rocksdb_aggregates.live_sst_files_size_total,gauge,,byte,,live_sst_files_size_total,0,confluent_platform,live_sst_files_size_total
+confluent.ksql.ksql_rocksdb_aggregates.block_cache_usage_total,gauge,,byte,,block_cache_usage_total,0,confluent_platform,block_cache_usage_total
+confluent.ksql.ksql_rocksdb_aggregates.estimate_table_readers_mem_total,gauge,,byte,,estimate_table_readers_mem_total,0,confluent_platform,estimate_table_readers_mem_total
+confluent.ksql.ksql_rocksdb_aggregates.compaction_pending_total,gauge,,,,compaction_pending_total,0,confluent_platform,compaction_pending_total
+confluent.ksql.ksql_rocksdb_aggregates.num_entries_imm_mem_tables_total,gauge,,byte,,num_entries_imm_mem_tables_total,0,confluent_platform,num_entries_imm_mem_tables_total
+confluent.ksql.ksql_rocksdb_aggregates.total_sst_files_size_total,gauge,,byte,,total_sst_files_size_total,0,confluent_platform,total_sst_files_size_total
+confluent.ksql.ksql_rocksdb_aggregates.num_running_compactions_total,gauge,,,,num_running_compactions,0,confluent_platform,num_running_compactions
+confluent.ksql.ksql_rocksdb_aggregates.block_cache_pinned_usage_max,gauge,,byte,,block_cache_pinned_usage_max,0,confluent_platform,block_cache_pinned_usage_max
+confluent.ksql.ksql_rocksdb_aggregates.estimate_pending_compaction_bytes_total,gauge,,,,estimate_pending_compaction_bytes_total,0,confluent_platform,estimate_pending_compaction_bytes_total
+confluent.ksql.ksql_rocksdb_aggregates.num_deletes_active_mem_table_total,gauge,,,,num_deletes_active_mem_table_total,0,confluent_platform,num_deletes_active_mem_table_total
+confluent.ksql.ksql_rocksdb_aggregates.num_immutable_mem_table_total,gauge,,,,immutable mem table total,0,confluent_platform,immutable mem table total
+confluent.ksql.ksql_rocksdb_aggregates.num_running_flushes_total,gauge,,,,running flushes total,0,confluent_platform,running flushes total
+confluent.ksql.ksql_rocksdb_aggregates.block_cache_usage_max,gauge,,byte,,block cache usage,0,confluent_platform,block cache usage
+confluent.ksql.ksql_rocksdb_aggregates.num_entries_active_mem_table_total,gauge,,,,entries all mem tables,0,confluent_platform,entries all mem tables
+confluent.ksql.ksql_rocksdb_aggregates.num_deletes_imm_mem_tables_total,gauge,,,,delete all mem tables,0,confluent_platform,delete all mem tables
+confluent.ksql.producer_metrics.total_messages,gauge,,,,total messages,0,confluent_platform,total messages
+confluent.ksql.producer_metrics.messages_per_sec,gauge,,,,messages_per_sec,0,confluent_platform,messages_per_sec
+confluent.ksql.consumer_metrics.consumer_total_messages,gauge,,,,consumer_total_messages,0,confluent_platform,consumer_total_messages
+confluent.ksql.consumer_metrics.consumer_messages_per_sec,gauge,,,,consumer_messages_per_sec,0,confluent_platform,consumer_messages_per_sec
+confluent.ksql.consumer_metrics.consumer_total_bytes,gauge,,,,consumer_total_bytes,0,confluent_platform,consumer_total_bytes
+confluent.ksql.pull_query_metrics.pull_query_requests_total,gauge,,,,pull_query_requests_total,0,confluent_platform,pull_query_requests_total
+confluent.ksql.pull_query_metrics.pull_query_requests_rate,gauge,,,,pull_query_requests_rate,0,confluent_platform,pull_query_requests_rate
+confluent.ksql.pull_query_metrics.pull_query_requests_error_total,gauge,,,,pull_query_requests_error_total,0,confluent_platform,pull_query_requests_error_total
+confluent.ksql.pull_query_metrics.pull_query_requests_error_rate,gauge,,,,pull_query_requests_error_rate,0,confluent_platform,pull_query_requests_error_rate
+confluent.ksql.pull_query_metrics.pull_query_requests_local,gauge,,,,pull_query_requests_local,0,confluent_platform,pull_query_requests_local
+confluent.ksql.pull_query_metrics.pull_query_requests_local_rate,gauge,,,,pull_query_requests_local_rate,0,confluent_platform,pull_query_requests_local_rate
+confluent.ksql.pull_query_metrics.pull_query_requests_remote,gauge,,,,pull_query_requests_remote,0,confluent_platform,pull_query_requests_remote
+confluent.ksql.pull_query_metrics.pull_query_requests_remote_rate,gauge,,,,pull_query_requests_remote_rate,0,confluent_platform,pull_query_requests_remote_rate
+confluent.ksql.pull_query_metrics.pull_query_requests_latency_latency_min,gauge,,,,pull_query_requests_latency_latency_min,0,confluent_platform,pull_query_requests_latency_latency_min
+confluent.ksql.pull_query_metrics.pull_query_requests_latency_latency_max,gauge,,,,pull_query_requests_latency_latency_max,0,confluent_platform,pull_query_requests_latency_latency_max
+confluent.ksql.pull_query_metrics.pull_query_requests_latency_latency_avg,gauge,,,,pull_query_requests_latency_latency_avg,0,confluent_platform,pull_query_requests_latency_latency_avg
+confluent.ksql.pull_query_metrics.pull_query_requests_latency_distribution_50,gauge,,,,pull_query_requests_latency_distribution_50,0,confluent_platform,pull_query_requests_latency_distribution_50
+confluent.ksql.pull_query_metrics.pull_query_requests_latency_distribution_75,gauge,,,,pull_query_requests_latency_distribution_75,0,confluent_platform,pull_query_requests_latency_distribution_75
+confluent.ksql.pull_query_metrics.pull_query_requests_latency_distribution_90,gauge,,,,pull_query_requests_latency_distribution_90,0,confluent_platform,pull_query_requests_latency_distribution_90
+confluent.ksql.pull_query_metrics.pull_query_requests_latency_distribution_99,gauge,,,,pull_query_requests_latency_distribution_99,0,confluent_platform,pull_query_requests_latency_distribution_99
 confluent.kafka.streams.stream.commit_latency_avg,gauge,,nanosecond,,The average value of commit-latency.,0,confluent_platform,stream commit latency avg
 confluent.kafka.streams.stream.commit_latency_max,gauge,,nanosecond,,The maximum value of commit-latency.,0,confluent_platform,stream commit latency max
 confluent.kafka.streams.stream.commit_rate,gauge,,commit,second,The average per-second number of commit calls,0,confluent_platform,stream commit rate

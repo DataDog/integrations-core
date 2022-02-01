@@ -5,6 +5,7 @@ import itertools
 from contextlib import closing
 
 import cx_Oracle
+from six import PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.db import QueryManager
@@ -25,12 +26,18 @@ except ImportError as e:
 EVENT_TYPE = SOURCE_TYPE_NAME = 'oracle'
 MAX_CUSTOM_RESULTS = 100
 
+PROTOCOL_TCP = 'TCP'
+PROTOCOL_TCPS = 'TCPS'
+VALID_PROTOCOLS = [PROTOCOL_TCP, PROTOCOL_TCPS]
+VALID_TRUSTSTORE_TYPES = ['JKS', 'SSO', 'PKCS12']
+
 
 class Oracle(AgentCheck):
     __NAMESPACE__ = 'oracle'
 
     ORACLE_DRIVER_CLASS = "oracle.jdbc.OracleDriver"
     JDBC_CONNECTION_STRING = "jdbc:oracle:thin:@//{}/{}"
+    JDBC_CONNECTION_STRING_TCPS = "jdbc:oracle:thin:@{}"
 
     SERVICE_CHECK_NAME = 'can_connect'
     SERVICE_CHECK_CAN_QUERY = "can_query"
@@ -41,7 +48,11 @@ class Oracle(AgentCheck):
         self._user = self.instance.get('username') or self.instance.get('user')
         self._password = self.instance.get('password')
         self._service = self.instance.get('service_name')
+        self._protocol = self.instance.get("protocol", PROTOCOL_TCP)
         self._jdbc_driver = self.instance.get('jdbc_driver_path')
+        self._jdbc_truststore_path = self.instance.get('jdbc_truststore_path')
+        self._jdbc_truststore_type = self.instance.get('jdbc_truststore_type')
+        self._jdbc_truststore_password = self.instance.get('jdbc_truststore_password', '')
         self._tags = self.instance.get('tags') or []
         self._service_check_tags = ['server:{}'.format(self._server)]
         self._service_check_tags.extend(self._tags)
@@ -62,7 +73,9 @@ class Oracle(AgentCheck):
             tags=self._tags,
         )
 
-        self.check_initializations.append(self.validate_config)
+        # Runtime validations are only py3, so this is for manually validating config on py2
+        if PY2:
+            self.check_initializations.append(self.validate_config)
         self.check_initializations.append(self._query_manager.compile_queries)
 
         self._query_errors = 0
@@ -87,6 +100,22 @@ class Oracle(AgentCheck):
     def validate_config(self):
         if not self._server or not self._user:
             raise ConfigurationError("Oracle host and user are needed")
+
+        if self._protocol.upper() not in VALID_PROTOCOLS:
+            raise ConfigurationError("Protocol %s is not valid, must either be TCP or TCPS" % self._protocol)
+
+        if self._jdbc_driver and self._protocol.upper() == PROTOCOL_TCPS:
+            if not (self._jdbc_truststore_type and self._jdbc_truststore_path):
+                raise ConfigurationError(
+                    "TCPS connections to Oracle via JDBC requires both `jdbc_truststore_type` and "
+                    "`jdbc_truststore_path` configuration options "
+                )
+
+            if self._jdbc_truststore_type and self._jdbc_truststore_type.upper() not in VALID_TRUSTSTORE_TYPES:
+                raise ConfigurationError(
+                    "Truststore type %s is not valid, must be one of %s"
+                    % (self._jdbc_truststore_type, VALID_TRUSTSTORE_TYPES)
+                )
 
     def execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:
@@ -128,6 +157,7 @@ class Oracle(AgentCheck):
         if self._cached_connection is None:
             if self.can_use_oracle_client():
                 dsn = self._get_dsn()
+                self.log.debug("Connecting via Oracle Instant Client with DSN: %s", dsn)
                 self._cached_connection = cx_Oracle.connect(user=self._user, password=self._password, dsn=dsn)
                 self.log.debug("Connected to Oracle DB using Oracle Instant Client")
             elif JDBC_IMPORT_ERROR:
@@ -164,18 +194,36 @@ class Oracle(AgentCheck):
         except Exception:
             self._connection_errors += 1
             raise ConfigurationError('server needs to be in the <HOST>:<PORT> format, "%s"" provided' % self._server)
-        return cx_Oracle.makedsn(host, port, service_name=self._service)
+
+        if self._protocol == PROTOCOL_TCPS:
+            dsn = '(DESCRIPTION=(ADDRESS=(PROTOCOL={})(HOST={})(PORT={}))(CONNECT_DATA=(SERVICE_NAME={})))'.format(
+                self._protocol, host, port, self._service
+            )
+            return dsn
+        else:
+            return cx_Oracle.makedsn(host, port, service_name=self._service)
 
     def _jdbc_connect(self):
-        connect_string = self.JDBC_CONNECTION_STRING.format(self._server, self._service)
+        jdbc_connect_properties = {'user': self._user, 'password': self._password}
+
+        if self._protocol == PROTOCOL_TCPS:
+            connect_string = self.JDBC_CONNECTION_STRING_TCPS.format(self._get_dsn())
+            jdbc_connect_properties['javax.net.ssl.trustStoreType'] = self._jdbc_truststore_type
+            jdbc_connect_properties['javax.net.ssl.trustStorePassword'] = self._jdbc_truststore_password
+            jdbc_connect_properties['javax.net.ssl.trustStore'] = self._jdbc_truststore_path
+        else:
+            connect_string = self.JDBC_CONNECTION_STRING.format(self._server, self._service)
+
+        self.log.debug("Connecting via JDBC with connection string: %s", connect_string)
         try:
             if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
                 jpype.attachThreadToJVM()
                 jpype.java.lang.Thread.currentThread().setContextClassLoader(
                     jpype.java.lang.ClassLoader.getSystemClassLoader()
                 )
+
             connection = jdb.connect(
-                self.ORACLE_DRIVER_CLASS, connect_string, [self._user, self._password], self._jdbc_driver
+                self.ORACLE_DRIVER_CLASS, connect_string, jdbc_connect_properties, self._jdbc_driver
             )
             self.log.debug("Connected to Oracle DB using JDBC connector")
             return connection

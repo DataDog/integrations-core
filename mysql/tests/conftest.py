@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import logging
 import os
 
@@ -12,7 +13,7 @@ from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common, tags
-from .common import MYSQL_REPLICATION, requires_static_version
+from .common import MYSQL_REPLICATION
 
 logger = logging.getLogger(__name__)
 
@@ -23,11 +24,13 @@ COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 
 @pytest.fixture(scope='session')
 def config_e2e(instance_basic):
+    instance = copy.deepcopy(instance_basic)
+    instance['dbm'] = True
     logs_path = _mysql_logs_path()
 
     return {
         'init_config': {},
-        'instances': [instance_basic],
+        'instances': [instance],
         'logs': [
             {'type': 'file', 'path': '{}/mysql.log'.format(logs_path), 'source': 'mysql', 'service': 'local_mysql'},
             {
@@ -72,8 +75,8 @@ def dd_environment(config_e2e):
 def instance_basic():
     return {
         'host': common.HOST,
-        'user': common.USER,
-        'pass': common.PASS,
+        'username': common.USER,
+        'password': common.PASS,
         'port': common.PORT,
         'disable_generic_tags': 'true',
     }
@@ -83,8 +86,8 @@ def instance_basic():
 def instance_complex():
     return {
         'host': common.HOST,
-        'user': common.USER,
-        'pass': common.PASS,
+        'username': common.USER,
+        'password': common.PASS,
         'port': common.PORT,
         'disable_generic_tags': 'true',
         'options': {
@@ -116,8 +119,8 @@ def instance_complex():
 def instance_additional_status():
     return {
         'host': common.HOST,
-        'user': common.USER,
-        'pass': common.PASS,
+        'username': common.USER,
+        'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
         'disable_generic_tags': 'true',
@@ -140,8 +143,8 @@ def instance_additional_status():
 def instance_additional_variable():
     return {
         'host': common.HOST,
-        'user': common.USER,
-        'pass': common.PASS,
+        'username': common.USER,
+        'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
         'disable_generic_tags': 'true',
@@ -164,8 +167,8 @@ def instance_additional_variable():
 def instance_status_already_queried():
     return {
         'host': common.HOST,
-        'user': common.USER,
-        'pass': common.PASS,
+        'username': common.USER,
+        'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
         'disable_generic_tags': 'true',
@@ -183,8 +186,8 @@ def instance_status_already_queried():
 def instance_var_already_queried():
     return {
         'host': common.HOST,
-        'user': common.USER,
-        'pass': common.PASS,
+        'username': common.USER,
+        'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
         'disable_generic_tags': 'true',
@@ -202,8 +205,8 @@ def instance_var_already_queried():
 def instance_invalid_var():
     return {
         'host': common.HOST,
-        'user': common.USER,
-        'pass': common.PASS,
+        'username': common.USER,
+        'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
         'disable_generic_tags': 'true',
@@ -226,8 +229,8 @@ def instance_invalid_var():
 def instance_custom_queries():
     return {
         'host': common.HOST,
-        'user': common.USER,
-        'pass': common.PASS,
+        'username': common.USER,
+        'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
         'disable_generic_tags': 'true',
@@ -246,10 +249,9 @@ def instance_custom_queries():
 
 @pytest.fixture(scope='session')
 def instance_error():
-    return {'host': common.HOST, 'user': 'unknown', 'pass': common.PASS, 'disable_generic_tags': 'true'}
+    return {'host': common.HOST, 'username': 'unknown', 'password': common.PASS, 'disable_generic_tags': 'true'}
 
 
-@requires_static_version
 @pytest.fixture(scope='session')
 def version_metadata():
     parts = MYSQL_VERSION.split('-')

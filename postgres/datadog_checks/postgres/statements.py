@@ -14,9 +14,10 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 
+from .util import DatabaseConfigurationError, warning_with_tags
 from .version_utils import V9_4
 
 try:
@@ -184,6 +185,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'postgres_rows': rows,
                 'postgres_version': self._payload_pg_version(),
                 'ddagentversion': datadog_agent.get_version(),
+                "ddagenthostname": self._check.agent_hostname,
             }
             self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
         except Exception:
@@ -195,9 +197,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
             available_columns = set(self._get_pg_stat_statements_columns())
             missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - available_columns
             if len(missing_columns) > 0:
-                self._log.warning(
-                    'Unable to collect statement metrics because required fields are unavailable: %s',
-                    ', '.join(list(missing_columns)),
+                self._check.warning(
+                    warning_with_tags(
+                        "Unable to collect statement metrics because required fields are unavailable: %s.",
+                        ', '.join(sorted(list(missing_columns))),
+                        host=self._check.resolved_hostname,
+                        dbname=self._config.dbname,
+                    ),
                 )
                 self._check.count(
                     "dd.postgres.statement_metrics.error",
@@ -234,16 +240,47 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 isinstance(e, psycopg2.errors.ObjectNotInPrerequisiteState)
             ) and 'pg_stat_statements must be loaded' in str(e.pgerror):
                 error_tag = "error:database-{}-pg_stat_statements_not_loaded".format(type(e).__name__)
-                self._log.warning(
-                    "Unable to collect statement metrics because pg_stat_statements shared library is not loaded"
+                self._check.record_warning(
+                    DatabaseConfigurationError.pg_stat_statements_not_loaded,
+                    warning_with_tags(
+                        "Unable to collect statement metrics because pg_stat_statements "
+                        "extension is not loaded in database '%s'. "
+                        "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                        "troubleshooting#%s for more details",
+                        self._config.dbname,
+                        DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
+                        host=self._check.resolved_hostname,
+                        dbname=self._config.dbname,
+                        code=DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
+                    ),
                 )
             elif isinstance(e, psycopg2.errors.UndefinedTable) and 'pg_stat_statements' in str(e.pgerror):
                 error_tag = "error:database-{}-pg_stat_statements_not_created".format(type(e).__name__)
-                self._log.warning(
-                    "Unable to collect statement metrics because pg_stat_statements is not created in this database"
+                self._check.record_warning(
+                    DatabaseConfigurationError.pg_stat_statements_not_created,
+                    warning_with_tags(
+                        "Unable to collect statement metrics because pg_stat_statements is not created "
+                        "in database '%s'. See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                        "troubleshooting#%s for more details",
+                        self._config.dbname,
+                        DatabaseConfigurationError.pg_stat_statements_not_created.value,
+                        host=self._check.resolved_hostname,
+                        dbname=self._config.dbname,
+                        code=DatabaseConfigurationError.pg_stat_statements_not_created.value,
+                    ),
                 )
             else:
-                self._log.warning("Unable to collect statement metrics because of an error running queries: %s", e)
+                self._check.warning(
+                    warning_with_tags(
+                        "Unable to collect statement metrics because of an error running queries "
+                        "in database '%s'. See https://docs.datadoghq.com/database_monitoring/troubleshooting for "
+                        "help: %s",
+                        self._config.dbname,
+                        str(e),
+                        host=self._check.resolved_hostname,
+                        dbname=self._config.dbname,
+                    ),
+                )
 
             self._check.count(
                 "dd.postgres.statement_metrics.error",
@@ -304,14 +341,18 @@ class PostgresStatementMetrics(DBMAsyncJob):
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['query'], self._obfuscate_options)
+                statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
                 self._log.debug("Failed to obfuscate query '%s': %s", row['query'], e)
                 continue
 
-            normalized_row['query'] = obfuscated_statement
-            normalized_row['query_signature'] = compute_sql_signature(obfuscated_statement)
+            obfuscated_query = statement['query']
+            normalized_row['query'] = obfuscated_query
+            normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
+            metadata = statement['metadata']
+            normalized_row['dd_tables'] = metadata.get('tables', None)
+            normalized_row['dd_commands'] = metadata.get('commands', None)
             normalized_rows.append(normalized_row)
 
         return normalized_rows

@@ -451,6 +451,6 @@ For Agent versions >= 6.12:
 [11]: https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
 [12]: https://docs.datadoghq.com/developers/integrations/check_references/#metrics-metadata-file
 [13]: https://docs.datadoghq.com/developers/integrations/check_references/#service-check-file
-[14]: https://packaging.python.org/tutorials/distributing-packages
+[14]: https://packaging.python.org/en/latest/tutorials/packaging-projects/
 [15]: https://docs.datadoghq.com/agent/
 [16]: https://datadoghq.dev/integrations-core/meta/config-specs/

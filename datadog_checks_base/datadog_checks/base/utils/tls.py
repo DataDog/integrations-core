@@ -109,13 +109,13 @@ class TlsContextWrapper(object):
         context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
 
         # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.verify_mode
-        if not self.config['tls_verify']:
-            context.verify_mode = ssl.CERT_NONE
-            return context
-        context.verify_mode = ssl.CERT_REQUIRED
+        context.verify_mode = ssl.CERT_REQUIRED if self.config['tls_verify'] else ssl.CERT_NONE
 
         # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
-        context.check_hostname = self.config['tls_validate_hostname']
+        if context.verify_mode == ssl.CERT_REQUIRED:
+            context.check_hostname = self.config.get('tls_validate_hostname', True)
+        else:
+            context.check_hostname = False
 
         # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
         # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs
