@@ -159,9 +159,9 @@ def test_obfuscate_sql_with_metadata(obfuscator_return_value, expected_value, re
         )
         assert statement == expected_value
 
-    # Check that it can handle null values
+    # Check that it can handle None values
     statement = obfuscate_sql_with_metadata(None)
-    assert statement['query'] is None
+    assert statement['query'] == ''
     assert statement['metadata'] == {}
 
 
