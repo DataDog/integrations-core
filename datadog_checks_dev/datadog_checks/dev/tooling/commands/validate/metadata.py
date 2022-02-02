@@ -483,7 +483,7 @@ def metadata(check, check_duplicates, show_warnings):
 
             if 'curated_metric' in row and row['curated_metric']:
                 metric_types = row['curated_metric'].split('|')
-                if len(set(metric_types)) == len(metric_types):
+                if len(set(metric_types)) != len(metric_types):
                     errors = True
                     display_queue.append(
                         (
