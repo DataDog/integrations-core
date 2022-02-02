@@ -74,7 +74,6 @@ setup(
             'aiomultiprocess',
             'atomicwrites',
             'beautifulsoup4>=4.9.3',
-            'black==21.10b0',
             'build>=0.7.0',
             'click~=8.0',
             'codespell',

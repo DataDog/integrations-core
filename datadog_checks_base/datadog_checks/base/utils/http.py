@@ -59,6 +59,10 @@ DEFAULT_TIMEOUT = 10
 # https://www.bittorrent.org/beps/bep_0003.html
 DEFAULT_CHUNK_SIZE = 16
 
+# https://github.com/python/cpython/blob/ef516d11c1a0f885dba0aba8cf5366502077cdd4/Lib/ssl.py#L158-L165
+DEFAULT_PROTOCOL_VERSIONS = {'SSLv3', 'TLSv1.2', 'TLSv1.3'}
+SUPPORTED_PROTOCOL_VERSIONS = {'SSLv3', 'TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3'}
+
 STANDARD_FIELDS = {
     'allow_redirects': True,
     'auth_token': None,
@@ -89,6 +93,7 @@ STANDARD_FIELDS = {
     'tls_use_host_header': False,
     'tls_ignore_warning': False,
     'tls_private_key': None,
+    'tls_protocols_allowed': DEFAULT_PROTOCOL_VERSIONS,
     'tls_verify': True,
     'timeout': DEFAULT_TIMEOUT,
     'use_legacy_auth_encoding': True,
@@ -150,6 +155,7 @@ class RequestsWrapper(object):
         'request_hooks',
         'auth_token_handler',
         'request_size',
+        'tls_protocols_allowed',
     )
 
     def __init__(self, instance, init_config, remapper=None, logger=None):
@@ -313,6 +319,13 @@ class RequestsWrapper(object):
 
         self.request_size = int(float(config['request_size']) * KIBIBYTE)
 
+        self.tls_protocols_allowed = []
+        for protocol in config['tls_protocols_allowed']:
+            if protocol in SUPPORTED_PROTOCOL_VERSIONS:
+                self.tls_protocols_allowed.append(protocol)
+            else:
+                self.logger.warning('Unknown protocol `%s` configured, ignoring it.', protocol)
+
         # For connection and cookie persistence, if desired. See:
         # https://en.wikipedia.org/wiki/HTTP_persistent_connection#Advantages
         # http://docs.python-requests.org/en/master/user/advanced/#session-objects
@@ -457,8 +470,15 @@ class RequestsWrapper(object):
 
                 with closing(context.wrap_socket(sock, server_hostname=hostname)) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
+                    protocol_version = secure_sock.version()
+                    if protocol_version and protocol_version not in self.tls_protocols_allowed:
+                        raise Exception(
+                            'Protocol version `{}` not in the allowed list {}'.format(
+                                protocol_version, self.tls_protocols_allowed
+                            )
+                        )
             except Exception as e:
-                self.logger.error('Error occurred while getting cert to discover intermediate certificates:', e)
+                self.logger.error('Error occurred while getting cert to discover intermediate certificates: %s', e)
                 return certs
 
         self.load_intermediate_certs(der_cert, certs)

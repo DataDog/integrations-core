@@ -58,10 +58,12 @@ class QueueMetricCollector(object):
                 if queue_name not in self.config.DISALLOWED_QUEUES:
                     self.get_pcf_queue_status_metrics(queue_manager, queue_name, queue_tags)
                     self.get_pcf_queue_reset_metrics(queue_manager, queue_name, queue_tags)
-                self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags)
+                self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags, hostname=self.config.hostname)
             except Exception as e:
                 self.warning('Cannot connect to queue %s: %s', queue_name, e)
-                self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.CRITICAL, queue_tags)
+                self.service_check(
+                    self.QUEUE_SERVICE_CHECK, AgentCheck.CRITICAL, queue_tags, hostname=self.config.hostname
+                )
 
     def discover_queues(self, queue_manager):
         # type: (pymqi.QueueManager) -> Set[str]
@@ -137,10 +139,12 @@ class QueueMetricCollector(object):
                 m = queue_manager.inquire(pymqi_value)
                 mname = '{}.queue_manager.{}'.format(metrics.METRIC_PREFIX, mname)
                 self.send_metric(GAUGE, mname, m, tags=tags)
-                self.service_check(self.QUEUE_MANAGER_SERVICE_CHECK, AgentCheck.OK, tags)
+                self.service_check(self.QUEUE_MANAGER_SERVICE_CHECK, AgentCheck.OK, tags, hostname=self.config.hostname)
             except pymqi.Error as e:
                 self.warning("Error getting queue manager stats: %s", e)
-                self.service_check(self.QUEUE_MANAGER_SERVICE_CHECK, AgentCheck.CRITICAL, tags)
+                self.service_check(
+                    self.QUEUE_MANAGER_SERVICE_CHECK, AgentCheck.CRITICAL, tags, hostname=self.config.hostname
+                )
 
     def queue_stats(self, queue_manager, queue_name, tags):
         """
