@@ -124,7 +124,7 @@ def config(ctx, check, sync, verbose):
                             write_file(example_file_path, contents)
                         else:
                             files_failed[example_file_path] = True
-                            message = f'File `{example_file}` is not in sync, run "ddev validate config -s"'
+                            message = f'File `{example_file}` is not in sync, run "ddev validate config {check} -s"'
                             if file_exists(example_file_path):
                                 example_file = read_file(example_file_path)
                                 for diff_line in difflib.context_diff(
