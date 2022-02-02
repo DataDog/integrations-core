@@ -483,12 +483,12 @@ def metadata(check, check_duplicates, show_warnings):
 
             if 'curated_metric' in row and row['curated_metric']:
                 metric_types = row['curated_metric'].split('|')
-                if len(set(metric_types)) == len(metric_types):
+                if len(set(metric_types)) != len(metric_types):
                     errors = True
                     display_queue.append(
                         (
                             echo_failure,
-                            f"{current_check}:{line} `{row['metric_name']}` contains duplicate metric types.",
+                            f"{current_check}:{line} `{row['metric_name']}` contains duplicate curated_metric types.",
                         )
                     )
 
