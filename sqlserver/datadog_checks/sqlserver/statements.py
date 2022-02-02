@@ -245,6 +245,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         normalized_rows = []
         for row in rows:
             try:
+                if not row['text']:
+                    continue
                 statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
