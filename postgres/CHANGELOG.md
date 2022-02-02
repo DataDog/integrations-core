@@ -1,5 +1,8 @@
 # CHANGELOG - postgres
 
+## 12.0.4-rc.2 / 2022-02-02
+
+
 ## 12.0.4-rc.1 / 2022-02-02
 
 * [Added] Report known postgres database configuration errors as warnings. See [#11209](https://github.com/DataDog/integrations-core/pull/11209).
