@@ -101,7 +101,7 @@ nginx.server_zone.processing,gauge,,request,,The number of client requests that 
 nginx.server_zone.received,gauge,,byte,,The total amount of data received from clients.,0,nginx,server zone rcvd
 nginx.server_zone.received_count,count,,byte,,The total amount of data received from clients (shown as count).,0,nginx,server zone rcvd
 nginx.server_zone.requests,gauge,,request,,The total number of client requests received from clients.,0,nginx,server zone req
-nginx.server_zone.requests_count,count,,request,,The total number of client requests received from clients (shown as count).,0,nginx,server zone req
+nginx.server_zone.requests_count,count,,request,,"The total number of client requests received from clients (shown as count).",0,nginx,server zone req
 nginx.server_zone.responses.code,count,,response,,"The total number of responses per each status code, tagged with status code number.",0,nginx,server zone resp code
 nginx.server_zone.responses.1xx,gauge,,response,,The number of responses with 1xx status code.,0,nginx,server zone resp 1xx
 nginx.server_zone.responses.1xx_count,count,,response,,The number of responses with 1xx status code (shown as count).,0,nginx,server zone resp 1xx
