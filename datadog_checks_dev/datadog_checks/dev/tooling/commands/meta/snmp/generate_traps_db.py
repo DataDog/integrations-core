@@ -41,10 +41,12 @@ ALLOWED_EXTENSIONS_BY_FORMAT = {"json": [".json"], "yaml": [".yml", ".yaml"]}
     '-o',
     help='Path to a directory where to store the created traps database file per MIB.'
     'Recommended option, do not use with --output-file',
+    type=click.Path(exists=True, file_okay=False, resolve_path=True),
 )
 @click.option(
     '--output-file',
     help='Path to a file to store a compacted version of the traps database file. Do not use with --output-dir',
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
 )
 @click.option(
     '--output-format',
@@ -53,10 +55,7 @@ ALLOWED_EXTENSIONS_BY_FORMAT = {"json": [".json"], "yaml": [".yml", ".yaml"]}
     help='Use json instead of yaml for the output file(s).',
 )
 @click.option('--debug', '-d', help='Include debug output', is_flag=True)
-@click.argument(
-    'mib-files',
-    nargs=-1,
-)
+@click.argument('mib-files', nargs=-1, required=True, type=click.Path(exists=True, dir_okay=False, resolve_path=True))
 def generate_traps_db(mib_sources, output_dir, output_file, output_format, debug, mib_files):
     """Generate yaml or json formatted documents containing various information about traps. These files can be used by
     the Datadog Agent to enrich trap data.
@@ -105,7 +104,7 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, debug
             sorted(set([os.path.abspath(os.path.dirname(x)) for x in mib_files if os.path.sep in x])) + mib_sources
         )
 
-        mib_files = [os.path.basename(os.path.splitext(x)[0]) for x in mib_files if os.path.isfile(x)]
+        mib_files = [os.path.basename(os.path.splitext(x)[0]) for x in mib_files]
         searchers = [AnyFileSearcher(compiled_mibs_sources).setOptions(exts=['.json'])]
         code_generator = JsonCodeGen()
         file_writer = FileWriter(compiled_mibs_sources).setOptions(suffix='.json')
