@@ -53,7 +53,7 @@ def load_dependency_data_from_metadata(check_name, dependencies, errors):
         try:
             req = Requirement(check_dependency)
         except InvalidRequirement as e:
-            errors.append(f'File `pyproject.toml` has an invalid dependency: `{check_dependency}`\n{e}')
+            errors.append(f'File `{check_name}/pyproject.toml` has an invalid dependency: `{check_dependency}`\n{e}')
             continue
 
         name = req.name.lower().replace('_', '-')
@@ -85,7 +85,7 @@ def load_base_check(check_name, dependencies, errors):
         try:
             req = Requirement(check_dependency)
         except InvalidRequirement as e:
-            errors.append(f'File `pyproject.toml` has an invalid dependency: `{check_dependency}`\n{e}')
+            errors.append(f'File `{check_name}/pyproject.toml` has an invalid dependency: `{check_dependency}`\n{e}')
             continue
 
         name = req.name.lower().replace('_', '-')
@@ -94,7 +94,7 @@ def load_base_check(check_name, dependencies, errors):
             dependency.append(DependencyDefinition(name, req, get_project_file(check_name), None, check_name))
             break
     else:
-        errors.append(f'File `{check_name}/pyproject.toml` missing base check dependency `datadog-checks-base`')
+        errors.append(f'File `{check_name}/pyproject.toml` is missing the base check dependency `datadog-checks-base`')
 
 
 def load_base_check_legacy(req_file, dependencies, errors, check_name=None):
