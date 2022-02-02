@@ -423,7 +423,7 @@ class AgentCheck(object):
                     typos.add(unknown_option)
 
             if len(similar_known_options) > 0:
-                similar_known_options.sort(key=lambda option: option[1])
+                similar_known_options.sort(key=lambda option: option[1], reverse=True)
                 similar_known_options_names = [option[0] for option in similar_known_options]  # type: List[str]
                 message = (
                     'Detected potential typo in configuration option in {}/{} section: `{}`. Did you mean {}?'
