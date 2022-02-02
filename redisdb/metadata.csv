@@ -8,7 +8,7 @@ redis.aof.buffer_length,gauge,,byte,,Size of the AOF buffer.,0,redis,aof buf len
 redis.aof.last_rewrite_time,gauge,,second,,Duration of the last AOF rewrite.,0,redis,last aof rewrite time,
 redis.aof.rewrite,gauge,,,,Flag indicating a AOF rewrite operation is on-going.,0,redis,aof rewrite,
 redis.aof.size,gauge,,byte,,AOF current file size (aof_current_size).,0,redis,aof size,cpu
-redis.aof.loading_total_bytes,gauge,,byte,,The total amount of bytes already loaded.,0,redis,aof total bytes to load,cpu|cpu
+redis.aof.loading_total_bytes,gauge,,byte,,The total amount of bytes already loaded.,0,redis,aof total bytes to load,cpu|threads
 redis.aof.loading_loaded_bytes,gauge,,byte,,The amount of bytes to load.,0,redis,aof total bytes loaded,
 redis.aof.loading_loaded_perc,gauge,,percent,,The percent loaded.,0,redis,aof loaded percent,
 redis.aof.loading_eta_seconds,gauge,,second,,The estimated amount of time left to load.,0,redis,aof loading time left,
