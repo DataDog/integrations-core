@@ -481,20 +481,31 @@ def metadata(check, check_duplicates, show_warnings):
                     (echo_failure, f"{current_check}:{line} interval should be an int, found '{row['interval']}'.")
                 )
 
-        for header, count in empty_count.items():
-            errors = True
-            display_queue.append((echo_failure, f'{current_check}: {header} is empty in {count} rows.'))
-
-        if 'curated_metric' in row and row['curated_metric']:
-            for curated_metric_type in row['curated_metric'].split('|'):
-                if curated_metric_type not in VALID_CURATED_METRIC_TYPES:
+            if 'curated_metric' in row and row['curated_metric']:
+                metric_types = row['curated_metric'].split('|')
+                if len(set(metric_types)) != len(metric_types):
                     errors = True
                     display_queue.append(
                         (
                             echo_failure,
-                            f"{current_check}:{line} `{row['metric_name']}` contains invalid curated metric type.",
+                            f"{current_check}:{line} `{row['metric_name']}` contains duplicate curated_metric types.",
                         )
                     )
+
+                for curated_metric_type in metric_types:
+                    if curated_metric_type not in VALID_CURATED_METRIC_TYPES:
+                        errors = True
+                        display_queue.append(
+                            (
+                                echo_failure,
+                                f"{current_check}:{line} `{row['metric_name']}` contains invalid "
+                                f"curated metric type: {curated_metric_type}",
+                            )
+                        )
+
+        for header, count in empty_count.items():
+            errors = True
+            display_queue.append((echo_failure, f'{current_check}: {header} is empty in {count} rows.'))
 
         for prefix, count in metric_prefix_count.items():
             display_queue.append(
