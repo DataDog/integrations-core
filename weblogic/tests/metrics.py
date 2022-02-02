@@ -40,6 +40,7 @@ METRICS = [
     "weblogic.work_manager_runtime.threads_stuck",
     "weblogic.servlet_runtime.exec_time_high",
     "weblogic.servlet_runtime.exec_time_low",
+    "weblogic.servlet_runtime.exec_time_total",
     "weblogic.servlet_runtime.reloads_total",
     "weblogic.servlet_runtime.pool_max_capacity",
     "weblogic.webapp_component_runtime.sessions_current",
