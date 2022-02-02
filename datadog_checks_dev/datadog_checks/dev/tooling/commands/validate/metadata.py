@@ -488,7 +488,7 @@ def metadata(check, check_duplicates, show_warnings):
                     display_queue.append(
                         (
                             echo_failure,
-                            f"{current_check}:{line} `{row['metric_name']}` contains duplicate metric types.",
+                            f"{current_check}:{line} `{row['metric_name']}` contains duplicate curated_metric types.",
                         )
                     )
 
