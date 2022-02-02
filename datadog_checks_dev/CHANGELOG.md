@@ -1,5 +1,13 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 15.7.0 / 2022-01-31
+
+* [Added] Add example image with requirements for media carousel. See [#11145](https://github.com/DataDog/integrations-core/pull/11145).
+* [Fixed] Pin black package. See [#11240](https://github.com/DataDog/integrations-core/pull/11240).
+* [Fixed] Don't overwrite year in license header when generating files. See [#11188](https://github.com/DataDog/integrations-core/pull/11188).
+* [Fixed] Add manual changelog entry for 7.30.1. See [#11142](https://github.com/DataDog/integrations-core/pull/11142).
+* [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
+
 ## 15.6.0 / 2022-01-08
 
 * [Added] Add discovery options to `ddev env check` command. See [#11044](https://github.com/DataDog/integrations-core/pull/11044).

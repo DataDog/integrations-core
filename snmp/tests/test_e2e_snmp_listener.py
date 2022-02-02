@@ -120,9 +120,10 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         'autodiscovery_subnet:{}.0/27'.format(subnet_prefix),
         'snmp_host:41ba948911b9',
         'snmp_profile:generic-router',
+        'device_namespace:default',
     ]
 
-    common.assert_common_metrics(aggregator, common_tags, is_e2e=True)
+    common.assert_common_metrics(aggregator, common_tags, is_e2e=True, loader='core')
     aggregator.assert_metric('snmp.sysUpTimeInstance', tags=common_tags)
     for metric in IF_SCALAR_GAUGE:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)

@@ -35,6 +35,7 @@ class InstanceConfig(BaseModel):
     host: Optional[str] = Field(None, min_length=1)
     min_collection_interval: Optional[float]
     mqcd_version: Optional[float] = Field(None, ge=1.0)
+    override_hostname: Optional[bool]
     password: Optional[str] = Field(None, min_length=1)
     port: Optional[int]
     queue_manager: str = Field(..., min_length=1)
