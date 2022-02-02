@@ -28,8 +28,10 @@ class TestVault:
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, count=0)
 
-    def test_unsupported_api_version_fallback(self, aggregator, dd_run_check):
-        instance = INSTANCES['unsupported_api']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_unsupported_api_version_fallback(self, aggregator, dd_run_check, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['unsupported_api'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         assert not instance['api_url'].endswith(Vault.DEFAULT_API_VERSION)
@@ -38,15 +40,19 @@ class TestVault:
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
 
-    def test_service_check_connect_ok(self, aggregator, dd_run_check):
-        instance = INSTANCES['main']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_service_check_connect_ok(self, aggregator, dd_run_check, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         dd_run_check(c, dd_run_check)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
 
-    def test_service_check_connect_ok_all_tags(self, aggregator, dd_run_check, global_tags):
-        instance = INSTANCES['main']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_service_check_connect_ok_all_tags(self, aggregator, dd_run_check, global_tags, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         # Keep a reference for use during mock
@@ -114,15 +120,19 @@ class TestVault:
         with pytest.raises(ApiUnreachable, match=r"Error accessing Vault endpoint.*"):
             c.access_api("http://foo.bar", ignore_status_codes=None)
 
-    def test_service_check_unsealed_ok(self, aggregator, dd_run_check):
-        instance = INSTANCES['main']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_service_check_unsealed_ok(self, aggregator, dd_run_check, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         dd_run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_UNSEALED, status=Vault.OK, count=1)
 
-    def test_service_check_unsealed_ok_all_tags(self, aggregator, dd_run_check, global_tags):
-        instance = INSTANCES['main']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_service_check_unsealed_ok_all_tags(self, aggregator, dd_run_check, global_tags, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         # Keep a reference for use during mock
@@ -154,15 +164,18 @@ class TestVault:
 
         expected_tags = [
             'is_leader:true',
-            'cluster_name:vault-cluster-f5f44063',
             'vault_cluster:vault-cluster-f5f44063',
             'vault_version:0.10.2',
         ]
+        if not use_openmetrics:
+            expected_tags.append('cluster_name:vault-cluster-f5f44063')
         expected_tags.extend(global_tags)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_UNSEALED, status=Vault.OK, tags=expected_tags, count=1)
 
-    def test_service_check_unsealed_fail(self, aggregator, dd_run_check):
-        instance = INSTANCES['main']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_service_check_unsealed_fail(self, aggregator, dd_run_check, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         # Keep a reference for use during mock
@@ -191,15 +204,19 @@ class TestVault:
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_UNSEALED, status=Vault.CRITICAL, count=1)
 
-    def test_service_check_initialized_ok(self, aggregator, dd_run_check):
-        instance = INSTANCES['main']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_service_check_initialized_ok(self, aggregator, dd_run_check, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         dd_run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.OK, count=1)
 
-    def test_service_check_initialized_ok_all_tags(self, aggregator, dd_run_check, global_tags):
-        instance = INSTANCES['main']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_service_check_initialized_ok_all_tags(self, aggregator, dd_run_check, global_tags, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         # Keep a reference for use during mock
@@ -231,15 +248,18 @@ class TestVault:
 
         expected_tags = [
             'is_leader:true',
-            'cluster_name:vault-cluster-f5f44063',
             'vault_cluster:vault-cluster-f5f44063',
             'vault_version:0.10.2',
         ]
+        if not use_openmetrics:
+            expected_tags.append('cluster_name:vault-cluster-f5f44063')
         expected_tags.extend(global_tags)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.OK, tags=expected_tags, count=1)
 
-    def test_service_check_initialized_fail(self, aggregator, dd_run_check):
-        instance = INSTANCES['main']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_service_check_initialized_fail(self, aggregator, dd_run_check, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         # Keep a reference for use during mock
@@ -308,8 +328,10 @@ class TestVault:
         expected_tags.extend(global_tags)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.OK, tags=expected_tags, count=1)
 
-    def test_replication_dr_mode(self, aggregator, dd_run_check):
-        instance = INSTANCES['main']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_replication_dr_mode(self, aggregator, dd_run_check, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         c.log.debug = mock.MagicMock()
         # Keep a reference for use during mock
@@ -343,8 +365,10 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
         assert_all_metrics(aggregator)
 
-    def test_replication_dr_mode_changed(self, aggregator, dd_run_check):
-        instance = INSTANCES['main']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_replication_dr_mode_changed(self, aggregator, dd_run_check, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         c.log.debug = mock.MagicMock()
         # Keep a reference for use during mock
@@ -437,9 +461,11 @@ class TestVault:
         assert 'is_leader:true' in event['tags']
         assert c._previous_leader == next_leader
 
-    def test_leader_change_not_self(self, aggregator, dd_run_check):
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_leader_change_not_self(self, aggregator, dd_run_check, use_openmetrics):
         """The agent should only submit a leader change event when the monitored vault is the leader."""
-        instance = INSTANCES['main']
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         c._previous_leader = Leader('foo', '')
 
@@ -463,8 +489,10 @@ class TestVault:
 
         assert len(aggregator.events) == 0
 
-    def test_is_leader_metric_true(self, aggregator, dd_run_check):
-        instance = INSTANCES['main']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_is_leader_metric_true(self, aggregator, dd_run_check, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         # Keep a reference for use during mock
@@ -487,8 +515,10 @@ class TestVault:
 
         aggregator.assert_metric('vault.is_leader', 1)
 
-    def test_is_leader_metric_false(self, aggregator, dd_run_check):
-        instance = INSTANCES['main']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_is_leader_metric_false(self, aggregator, dd_run_check, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         # Keep a reference for use during mock
@@ -544,8 +574,10 @@ class TestVault:
         aggregator.assert_metric('vault.is_leader', 1)
         assert_all_metrics(aggregator)
 
-    def test_sys_leader_non_standard_status_codes(self, aggregator, dd_run_check):
-        instance = INSTANCES['main']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_sys_leader_non_standard_status_codes(self, aggregator, dd_run_check, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         # Keep a reference for use during mock
