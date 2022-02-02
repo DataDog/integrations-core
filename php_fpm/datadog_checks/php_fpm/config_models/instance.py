@@ -78,7 +78,7 @@ class InstanceConfig(BaseModel):
     tls_cert: Optional[str]
     tls_ignore_warning: Optional[bool]
     tls_private_key: Optional[str]
-    tls_protocol: Optional[Sequence[str]]
+    tls_protocols_allowed: Optional[Sequence[str]]
     tls_use_host_header: Optional[bool]
     tls_verify: Optional[bool]
     use_fastcgi: Optional[bool]

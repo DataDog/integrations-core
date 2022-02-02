@@ -263,7 +263,7 @@
     containing several CA certificates in PEM format. If a directory, the directory
     must have been processed using the c_rehash utility supplied with OpenSSL. See:
     https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
-- name: tls_protocol
+- name: tls_protocols_allowed
   value:
     example:
     - 'SSLv3'

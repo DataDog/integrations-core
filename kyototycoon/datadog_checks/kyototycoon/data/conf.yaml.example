@@ -290,7 +290,7 @@ instances:
     #
     # tls_ca_cert: <CA_CERT_PATH>
 
-    ## @param tls_protocol - list of strings - optional
+    ## @param tls_protocols_allowed - list of strings - optional
     ## The expected versions of TLS/SSL when fetching intermediate certificates.
     ## The supported versions and values are:
     ##   SSLv3
@@ -299,7 +299,7 @@ instances:
     ##   TLSv1.2
     ##   TLSv1.3
     #
-    # tls_protocol:
+    # tls_protocols_allowed:
     #   - SSLv3
     #   - TLSv1.2
     #   - TLSv1.3
