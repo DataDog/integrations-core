@@ -1,0 +1,35 @@
+{
+  "display_name": "ArangoDB",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "arangodb",
+  "metric_prefix": "arangodb.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "ba1fc676-d785-4805-a08b-cb0c244def82",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "ArangoDB",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "arangodb",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}
