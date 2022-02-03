@@ -214,15 +214,19 @@ def complete_valid_checks(ctx, args, incomplete):
     return [k for k in get_valid_checks() if k.startswith(incomplete)]
 
 
-def get_version_file(check_name):
+def get_package_name(check_name):
     if check_name == 'datadog_checks_base':
-        return os.path.join(get_root(), check_name, 'datadog_checks', 'base', '__about__.py')
+        return 'base'
     elif check_name == 'datadog_checks_dev':
-        return os.path.join(get_root(), check_name, 'datadog_checks', 'dev', '__about__.py')
+        return 'dev'
     elif check_name == 'datadog_checks_downloader':
-        return os.path.join(get_root(), check_name, 'datadog_checks', 'downloader', '__about__.py')
+        return 'downloader'
     else:
-        return os.path.join(get_root(), check_name, 'datadog_checks', check_name, '__about__.py')
+        return check_name.replace('-', '_')
+
+
+def get_version_file(check_name):
+    return os.path.join(get_root(), check_name, 'datadog_checks', get_package_name(check_name), '__about__.py')
 
 
 def is_agent_check(check_name):

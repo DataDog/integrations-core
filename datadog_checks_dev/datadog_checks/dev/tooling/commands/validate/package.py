@@ -9,6 +9,7 @@ from ....fs import basepath
 from ...testing import process_checks_option
 from ...utils import (
     complete_valid_checks,
+    get_package_name,
     get_project_file,
     get_setup_file,
     has_project_file,
@@ -68,6 +69,20 @@ def package(check):
                     f'    The name in {basepath(source)}: {project_name} must be: `{normalized_project_name}`',
                 )
             )
+
+        if has_project_file(check):
+            project_data = load_project_file_cached(check)
+            version_file = project_data.get('tool', {}).get('hatch', {}).get('version', {}).get('path', '')
+            expected_version_file = f'datadog_checks/{get_package_name(check)}/__about__.py'
+            if version_file != expected_version_file:
+                file_failed = True
+                display_queue.append(
+                    (
+                        echo_failure,
+                        f'    The field `tool.hatch.version.path` in {check}/pyproject.toml '
+                        f'must be set to: {expected_version_file}',
+                    )
+                )
 
         if file_failed:
             failed_checks += 1
