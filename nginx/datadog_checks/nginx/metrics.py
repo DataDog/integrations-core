@@ -112,7 +112,7 @@ METRICS_SEND_AS_COUNT = [
     'nginx.upstream.peers.unavail',
 ]
 
-METRICS_SEND_AS_HISTORGRAM = {'nginx.upstream.peers.response_time', 'nginx.stream.upstream.peers.response_time'}
+METRICS_SEND_AS_HISTOGRAM = {'nginx.upstream.peers.response_time', 'nginx.stream.upstream.peers.response_time'}
 
 # NGNINX Plus metrics that are sent as only a count.
 # These metrics will not have _count appended to their names
