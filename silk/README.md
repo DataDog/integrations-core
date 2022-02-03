@@ -15,7 +15,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `silk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your silk performance data. See the [sample silk.d/conf.yaml][4] for all available configuration options.
+1. Edit the `silk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Silk performance data. See the [sample silk.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
 
