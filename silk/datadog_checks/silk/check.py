@@ -39,10 +39,10 @@ class SilkCheck(AgentCheck):
         host = urlparse(server).netloc
         self._tags = self.instance.get("tags", []) + ["silk_host:{}".format(host)]
 
-        if self.instance.get("enable_read_write_statistics"):
+        if self.instance.get("enable_read_write_statistics", False):
             self.METRICS_TO_COLLECT.update(READ_WRITE_METRICS)
 
-        if self.instance.get("enable_blocksize_statistics"):
+        if self.instance.get("enable_blocksize_statistics", False):
             self.METRICS_TO_COLLECT.update(BLOCKSIZE_METRICS)
 
         # System tags are collected from the /state/endpoint
@@ -78,7 +78,7 @@ class SilkCheck(AgentCheck):
         try:
             response_hits, code = self._get_data(STATE_ENDPOINT)
         except Exception as e:
-            self.warning("Encountered error getting Silk state: %s", str(e))
+            self.warning("Encountered error getting Silk system state: %s", str(e))
             self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.CRITICAL, message=str(e), tags=self._tags)
             self.service_check(self.STATE_SERVICE_CHECK, AgentCheck.UNKNOWN, message=str(e), tags=self._tags)
             raise
@@ -100,7 +100,7 @@ class SilkCheck(AgentCheck):
         try:
             server_data, code = self._get_data(SERVERS_ENDPOINT)
         except Exception as e:
-            self.warning("Encountered error getting Silk state: %s", str(e))
+            self.warning("Encountered error getting Silk server state: %s", str(e))
             self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.CRITICAL, message=str(e), tags=self._tags)
             raise
         else:

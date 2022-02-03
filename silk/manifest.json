@@ -5,7 +5,7 @@
   "name": "silk",
   "metric_prefix": "silk.",
   "metric_to_check": "silk.system.capacity.free",
-  "creates_events": false,
+  "creates_events": true,
   "short_description": "Monitor Silk performance and system stats.",
   "guid": "75648ebe-8ce3-4b08-bba2-2f957a7e94fa",
   "support": "core",
