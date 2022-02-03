@@ -5,7 +5,7 @@ import os
 
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.nginx.metrics import COUNT_METRICS, METRICS_SEND_AS_COUNT, METRICS_SEND_AS_HISTORGRAM
+from datadog_checks.nginx.metrics import COUNT_METRICS, METRICS_SEND_AS_COUNT, METRICS_SEND_AS_HISTOGRAM
 
 CHECK_NAME = 'nginx'
 
@@ -71,7 +71,7 @@ GAUGE_PLUS_METRICS = [
     'nginx.upstream.zombies',
 ]
 METRICS_SEND_AS_COUNT_COUNTS = [metric + "_count" for metric in METRICS_SEND_AS_COUNT]
-METRICS_SEND_AS_HIST_HISTS = [metric + "_hist" for metric in METRICS_SEND_AS_HISTORGRAM]
+METRICS_SEND_AS_HIST_HISTS = [metric + "_histogram" for metric in METRICS_SEND_AS_HISTOGRAM]
 ALL_PLUS_METRICS = (
     METRICS_SEND_AS_COUNT_COUNTS
     + METRICS_SEND_AS_COUNT
