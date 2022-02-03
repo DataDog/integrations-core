@@ -31,8 +31,14 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
-    "monitors": {},
+    "dashboards": {
+      "overview": "assets/dashboards/overview.json",
+      "metrics": "assets/dashboards/metrics.json"
+    },
+    "monitors": {
+      "active_threads": "assets/monitors/active_threads.json",
+      "stuck_threads": "assets/monitors/stuck_threads.json"
+    },
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
     "logs": {
