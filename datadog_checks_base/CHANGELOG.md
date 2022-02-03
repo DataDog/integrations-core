@@ -2,7 +2,7 @@
 
 ## 23.7.6 / 2022-02-03
 
-* [Fixed] Update obfuscator wrapper to return empty string . See [#11277](https://github.com/DataDog/integrations-core/pull/11277).
+* [Fixed] Update obfuscator wrapper to return empty string. See [#11277](https://github.com/DataDog/integrations-core/pull/11277).
 
 ## 23.7.5 / 2022-02-01
 
