@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 12.0.4 / 2022-02-03
+
+* [Fixed] Update base version. See [#11289](https://github.com/DataDog/integrations-core/pull/11289).
+
 ## 12.0.3 / 2022-01-27
 
 * [Fixed] Fix relations config parsing when multiple relations are specified. See [#11195](https://github.com/DataDog/integrations-core/pull/11195).
