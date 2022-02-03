@@ -1,10 +1,10 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-nagios.current_users.users,gauge,,user,,Number of current user,0,nagios,curr user
-nagios.disk_space,gauge,,mebibyte,,Disk space,0,nagios,disk space
-nagios.host.pl,gauge,,percent,,Packet loss,0,nagios,host pl
-nagios.host.rta,gauge,,millisecond,,Round trip time between Nagios and client,0,nagios,host rta
-nagios.http.size,gauge,,byte,,HTTP response size,0,nagios,http size
-nagios.http.time,gauge,,second,,HTTP response time,0,nagios,http time
-nagios.ping.pl,gauge,,percent,,Packet loss,0,nagios,ping pl
-nagios.ping.rta,gauge,,millisecond,,Round trip time between Nagios and client,0,nagios,ping rta
-nagios.swap_usage.swap,gauge,,mebibyte,,Memory swap usage,0,nagios,swap usage
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+nagios.current_users.users,gauge,,user,,Number of current user,0,nagios,curr user,
+nagios.disk_space,gauge,,mebibyte,,Disk space,0,nagios,disk space,
+nagios.host.pl,gauge,,percent,,Packet loss,0,nagios,host pl,
+nagios.host.rta,gauge,,millisecond,,Round trip time between Nagios and client,0,nagios,host rta,
+nagios.http.size,gauge,,byte,,HTTP response size,0,nagios,http size,
+nagios.http.time,gauge,,second,,HTTP response time,0,nagios,http time,
+nagios.ping.pl,gauge,,percent,,Packet loss,0,nagios,ping pl,
+nagios.ping.rta,gauge,,millisecond,,Round trip time between Nagios and client,0,nagios,ping rta,
+nagios.swap_usage.swap,gauge,,mebibyte,,Memory swap usage,0,nagios,swap usage,
