@@ -323,7 +323,7 @@ instances:
 
     ## @param tls_protocols_allowed - list of strings - optional
     ## The expected versions of TLS/SSL when fetching intermediate certificates.
-    ## The supported versions and values are:
+    ## Only `SSLv3`, `TLSv1.2`, `TLSv1.3` are allowed by default. The possible values are:
     ##   SSLv3
     ##   TLSv1
     ##   TLSv1.1
