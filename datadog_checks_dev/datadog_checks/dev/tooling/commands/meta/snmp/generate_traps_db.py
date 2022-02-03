@@ -46,7 +46,7 @@ ALLOWED_EXTENSIONS_BY_FORMAT = {"json": [".json"], "yaml": [".yml", ".yaml"]}
 @click.option(
     '--output-file',
     help='Path to a file to store a compacted version of the traps database file. Do not use with --output-dir',
-    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
+    type=click.Path(exists=False, dir_okay=False, resolve_path=True),
 )
 @click.option(
     '--output-format',
@@ -189,9 +189,9 @@ def write_trap_db_per_mib(trap_db_per_mib, output_dir, use_json=False):
     for mib, trap_db in trap_db_per_mib.items():
         with open(os.path.join(output_dir, mib + file_extension), 'w') as output:
             if use_json:
-                json.dump(trap_db, output)
+                json.dump(trap_db, output, sort_keys=True)
             else:
-                yaml.dump(trap_db, output)
+                yaml.dump(trap_db, output, sort_keys=True)
 
 
 def write_compact_trap_db(trap_db_per_mib, output_file, use_json=False):
@@ -201,31 +201,41 @@ def write_compact_trap_db(trap_db_per_mib, output_file, use_json=False):
     :param output_file: Path to a file where to write the database.
     :param use_json: Whether to write a JSON or YAML file.
     """
+    # All OIDs that are defined differently in multiple MIBs. Should very rarely happen but these
+    # are ignored if any conflicts is found.
+    conflict_oids = set()
     compact_db = {"traps": {}, "vars": {}, "mibs": []}
     for mib, trap_db in trap_db_per_mib.items():
         for trap_oid, trap in trap_db["traps"].items():
             if trap_oid in compact_db["traps"] and trap["name"] != compact_db["traps"][trap_oid]["name"]:
                 echo_warning(
-                    "Found name conflict for trap OID {}, ({} != {})".format(
+                    "Found name conflict for trap OID {}, ({} != {}). Will ignore".format(
                         trap_oid, trap['name'], compact_db["traps"][trap_oid]["name"]
                     )
                 )
+                conflict_oids.add(trap_oid)
             compact_db["traps"][trap_oid] = trap
         for var_oid, var in trap_db["vars"].items():
             if var_oid in compact_db["vars"] and var["name"] != compact_db["vars"][var_oid]["name"]:
                 echo_warning(
-                    "Found name conflict for variable OID {}, ({} != {})".format(
+                    "Found name conflict for variable OID {}, ({} != {}). Will ignore".format(
                         var_oid, var['name'], compact_db["vars"][var_oid]["name"]
                     )
                 )
+                conflict_oids.add(var_oid)
             compact_db["vars"][var_oid] = var
         compact_db['mibs'].append(mib)
+    for oid in conflict_oids:
+        if oid in compact_db["traps"]:
+            del compact_db["traps"][oid]
+        if oid in compact_db["vars"]:
+            del compact_db["vars"]
 
     with open(output_file, 'w') as output:
         if use_json:
-            json.dump(compact_db, output)
+            json.dump(compact_db, output, sort_keys=True)
         else:
-            yaml.dump(compact_db, output)
+            yaml.dump(compact_db, output, sort_keys=True)
 
 
 def generate_trap_db(compiled_mibs, compiled_mibs_sources):
