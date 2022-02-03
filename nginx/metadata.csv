@@ -157,6 +157,11 @@ nginx.stream.upstream.peers.connect_time,gauge,,millisecond,,The average time to
 nginx.stream.upstream.peers.first_byte_time,gauge,,millisecond,,The average time to receive the first byte of data from this server.,0,nginx,stream upstr peers first byte
 nginx.stream.upstream.peers.max_conns,gauge,,connection,,The max_conns limit for the server.,0,nginx,stream upstr peers max conn
 nginx.stream.upstream.peers.response_time,gauge,,millisecond,,The average time to receive the last byte of data from this server.,0,nginx,stream upstr peers resp time
+nginx.stream.upstream.peers.response_time_histogram,gauge,,millisecond,,The average time to receive the last byte of data from this server as a histogram.,0,nginx,stream upstr peers resp time hist
+nginx.stream.upstream.peers.response_time_histogram.avg,gauge,,millisecond,,,0,nginx,stream upstr peers resp time avg
+nginx.stream.upstream.peers.response_time_histogram.count,rate,,millisecond,,,0,nginx,stream upstr peers resp time count
+nginx.stream.upstream.peers.response_time_histogram.max,gauge,,millisecond,,,0,nginx,stream upstr peers resp time max
+nginx.stream.upstream.peers.response_time_histogram.median,gauge,,millisecond,,,0,nginx,stream upstr peers resp time median
 nginx.stream.upstream.peers.connections,gauge,,connection,,The total number of client connections forwarded to this server.,0,nginx,stream upstr peers conn
 nginx.stream.upstream.peers.connections_count,count,,connection,,The total number of client connections forwarded to this server (shown as count).,0,nginx,stream upstr peers conn
 nginx.stream.upstream.peers.downstart,gauge,,millisecond,,The time (time since Epoch) when the server became "unavail" or "checking" or "unhealthy",0,nginx,stream upstr peers downstart
@@ -206,6 +211,11 @@ nginx.upstream.peers.received_count,count,,byte,,The total amount of data receiv
 nginx.upstream.peers.requests,gauge,,request,,The total number of client requests forwarded to this server.,0,nginx,upstr peers req
 nginx.upstream.peers.requests_count,count,,request,,The total number of client requests forwarded to this server (shown as count).,0,nginx,upstr peers req
 nginx.upstream.peers.response_time,gauge,,millisecond,,The average time to receive the last byte of data from this server.,0,nginx,upstr peers resp time
+nginx.upstream.peers.response_time_histogram,gauge,,millisecond,,The average time to receive the last byte of data from this server as a histogram.,0,nginx,upstr peers resp time hist
+nginx.upstream.peers.response_time_histogram.avg,gauge,,millisecond,,,0,nginx,upstr peers resp time avg
+nginx.upstream.peers.response_time_histogram.count,rate,,millisecond,,,0,nginx,upstr peers resp time count
+nginx.upstream.peers.response_time_histogram.max,gauge,,millisecond,,,0,nginx,upstr peers resp time max
+nginx.upstream.peers.response_time_histogram.median,gauge,,millisecond,,,0,nginx,upstr peers resp time median
 nginx.upstream.peers.responses.1xx,gauge,,response,,The number of responses with 1xx status code from this server.,0,nginx,upstr peers resp 1xx
 nginx.upstream.peers.responses.1xx_count,count,,response,,The number of responses with 1xx status code (shown as count) from this server.,0,nginx,upstr peers resp 1xx count
 nginx.upstream.peers.responses.2xx,gauge,,response,,The number of responses with 2xx status code from this server.,0,nginx,upstr peers resp 2xx
