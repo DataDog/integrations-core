@@ -8,28 +8,16 @@ from datadog_checks.base import AgentCheck
 # from datadog_checks.base.utils.db import QueryManager
 # from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 # from json import JSONDecodeError
+from datadog_checks.base import OpenMetricsBaseCheckV2
 
 
-class ArangodbCheck(AgentCheck):
+class ArangodbCheck(OpenMetricsBaseCheckV2):
 
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'arangodb'
 
     def __init__(self, name, init_config, instances):
         super(ArangodbCheck, self).__init__(name, init_config, instances)
-
-        # If the check is going to perform SQL queries you should define a query manager here.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/databases/#datadog_checks.base.utils.db.core.QueryManager
-        # sample_query = {
-        #     "name": "sample",
-        #     "query": "SELECT * FROM sample_table",
-        #     "columns": [
-        #         {"name": "metric", "type": "gauge"}
-        #     ],
-        # }
-        # self._query_manager = QueryManager(self, self.execute_query, queries=[sample_query])
-        # self.check_initializations.append(self._query_manager.compile_queries)
 
     def check(self, _):
         # type: (Any) -> None
