@@ -1,5 +1,10 @@
 # CHANGELOG - nginx
 
+## 5.1.0 / 2022-02-03
+
+* [Added] Allow for percentile aggregations for NGINX integration response time metrics. See [#11252](https://github.com/DataDog/integrations-core/pull/11252).
+* [Fixed] Instruct the user to fix the error. See [#11107](https://github.com/DataDog/integrations-core/pull/11107).
+
 ## 5.0.0 / 2022-01-08
 
 * [Added] Add option to dynamically determine what APIs to query for metrics. See [#10815](https://github.com/DataDog/integrations-core/pull/10815).
