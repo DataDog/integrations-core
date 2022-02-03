@@ -279,7 +279,7 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources):
     return trap_db_per_mib
 
 
-@lru_cache(maxsize=None)
+@cache
 def get_oid_and_descr(var_name, mib_name, search_locations=None):
     """
     Returns the oid and the description of a given variable and a MIB name.
