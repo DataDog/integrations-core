@@ -18,7 +18,7 @@ from pysmi.writer import FileWriter
 from datadog_checks.dev import TempDir
 
 from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning, set_debug
-from .constants import MIB_SOURCE_URL
+from .constants import CLEAR_LINE_ESCAPE_CODE, MIB_SOURCE_URL
 
 # Unique identifiers of traps in json-compiled MIB files.
 NOTIFICATION_TYPE = 'notificationtype'
@@ -54,9 +54,12 @@ ALLOWED_EXTENSIONS_BY_FORMAT = {"json": [".json"], "yaml": [".yml", ".yaml"]}
     default='yaml',
     help='Use json instead of yaml for the output file(s).',
 )
+@click.option(
+    '--no-descr', help='Removes descriptions from the generated file(s) when set (more compact).', is_flag=True
+)
 @click.option('--debug', '-d', help='Include debug output', is_flag=True)
 @click.argument('mib-files', nargs=-1, required=True, type=click.Path(exists=True, dir_okay=False, resolve_path=True))
-def generate_traps_db(mib_sources, output_dir, output_file, output_format, debug, mib_files):
+def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_descr, debug, mib_files):
     """Generate yaml or json formatted documents containing various information about traps. These files can be used by
     the Datadog Agent to enrich trap data.
     This command is intended for "Network Devices Monitoring" users who need to enrich traps that are not automatically
@@ -79,21 +82,19 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, debug
     if output_file:
         allowed_extensions = ALLOWED_EXTENSIONS_BY_FORMAT[output_format]
         if not any(output_file.endswith(x) for x in allowed_extensions):
-            echo_warning(
+            abort(
                 "Output file {} does not end with an allowed extension '{}'".format(
                     output_file, ", ".join(allowed_extensions)
                 )
             )
-            output_file = output_file.rsplit('.', 1)[0] + allowed_extensions[0]
-            echo_warning("Using {} instead.".format(output_file))
+
+    if output_dir and output_file:
+        abort("Do not set both --output-dir and --output-file at the same time.")
+    elif not output_file and not output_dir:
+        abort("Need to set one of --output-dir or --output-file")
 
     with TempDir('ddev_mibs') as compiled_mibs_sources:
         compiled_mibs_sources = os.path.abspath(compiled_mibs_sources)
-        if output_dir and output_file:
-            abort("Do not set both --output-dir and --output-file at the same time.")
-        elif not output_file and not output_dir:
-            abort("Need to set one of --output-dir or --output-file")
-
         echo_info("Writing intermediate compiled MIBs to {}".format(compiled_mibs_sources))
 
         mibs_sources_dir = os.path.join(compiled_mibs_sources, 'mibs_sources')
@@ -126,7 +127,7 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, debug
         compiled_mibs = [os.path.join(compiled_mibs_sources, x + '.json') for x in compiled_mibs]
 
         # Generate the trap database based on the compiled MIBs.
-        trap_db_per_mib = generate_trap_db(compiled_mibs, mibs_sources_dir)
+        trap_db_per_mib = generate_trap_db(compiled_mibs, mibs_sources_dir, no_descr)
 
         use_json = output_format == "json"
         if output_file:
@@ -157,11 +158,11 @@ def compile_and_report_status(mib_files, mib_compiler):
             missing_mibs = [k for k, v in mibs_status.items() if v == 'missing']
             for mib_name, compilation_status in failed_mibs.items():
                 echo_failure(
-                    '\33[2K\rFailed to compile MIB {}: {}'.format(mib_name, compilation_status.error), indent=False
+                    '{}Failed to compile MIB {}: {}'.format(CLEAR_LINE_ESCAPE_CODE, mib_name, compilation_status.error)
                 )
 
             if missing_mibs:
-                echo_failure('\33[2K\rMissing MIBs: {}'.format(', '.join(missing_mibs)), indent=False)
+                echo_failure('{}Missing MIBs: {}'.format(CLEAR_LINE_ESCAPE_CODE, ', '.join(missing_mibs)))
 
             compiled_mibs = {k: v for k, v in mibs_status.items() if v == 'compiled'}
 
@@ -238,7 +239,7 @@ def write_compact_trap_db(trap_db_per_mib, output_file, use_json=False):
             yaml.dump(compact_db, output, sort_keys=True)
 
 
-def generate_trap_db(compiled_mibs, compiled_mibs_sources):
+def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
     """
     Generates the trap database from a list of mibs.
     :param compiled_mibs: List of path to json-compiled MIB files.
@@ -260,7 +261,9 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources):
                 trap_name = trap['name']
                 trap_oid = trap['oid']
                 trap_descr = trap.get('description', '')
-                trap_db["traps"][trap_oid] = {"name": trap_name, "descr": trap_descr}
+                trap_db["traps"][trap_oid] = {"name": trap_name}
+                if not no_descr:
+                    trap_db["traps"][trap_oid]["descr"] = trap_descr
                 for trap_var in trap.get('objects', []):
                     var_oid, var_descr = get_oid_and_descr(
                         trap_var['object'],
@@ -268,7 +271,9 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources):
                         search_locations=(os.path.dirname(compiled_mib_file), compiled_mibs_sources),
                     )
                     var_name = trap_var['object']
-                    trap_db["vars"][var_oid] = {"name": var_name, "description": trap_descr}
+                    trap_db["vars"][var_oid] = {"name": var_name}
+                    if not no_descr:
+                        trap_db["vars"][var_oid]["descr"] = trap_descr
             except Exception as e:
                 echo_info("Error in MIB {}: {}".format(compiled_mib_file, e))
 
@@ -279,7 +284,7 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources):
     return trap_db_per_mib
 
 
-@cache
+@lru_cache(maxsize=None)
 def get_oid_and_descr(var_name, mib_name, search_locations=None):
     """
     Returns the oid and the description of a given variable and a MIB name.
