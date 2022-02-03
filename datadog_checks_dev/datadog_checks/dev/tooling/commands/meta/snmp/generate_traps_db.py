@@ -104,7 +104,7 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, debug
             sorted(set([os.path.abspath(os.path.dirname(x)) for x in mib_files if os.path.sep in x])) + mib_sources
         )
 
-        mib_files = [os.path.basename(os.path.splitext(x)[0]) for x in mib_files]
+        mib_files = [os.path.basename(x) for x in mib_files]
         searchers = [AnyFileSearcher(compiled_mibs_sources).setOptions(exts=['.json'])]
         code_generator = JsonCodeGen()
         file_writer = FileWriter(compiled_mibs_sources).setOptions(suffix='.json')
