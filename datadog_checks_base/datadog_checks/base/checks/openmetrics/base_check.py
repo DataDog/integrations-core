@@ -124,7 +124,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
                             self.log.info("Couldn't connect to %s: %s, trying next possible URL.", url, str(e))
                     else:
                         raise CheckException(
-                            "The agent could connect to none of the following URL: %s." % possible_urls
+                            "The agent could not connect to any of the following URLs: %s." % possible_urls
                         )
                 else:
                     self.get_scraper_config(instance)
