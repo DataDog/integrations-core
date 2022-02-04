@@ -126,5 +126,5 @@ benchmark_*.svg
 ## Kind
 .kube
 
-## Helm
-*/Library/
+## Helm Cache
+cilium/Library/
