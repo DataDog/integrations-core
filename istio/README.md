@@ -201,7 +201,7 @@ Additional helpful documentation, links, and articles:
 [9]: https://github.com/DataDog/integrations-core/blob/master/istio/datadog_checks/istio/data/auto_conf.yaml
 [10]: https://docs.datadoghq.com/agent/kubernetes/
 [11]: https://docs.datadoghq.com/integrations/envoy/#log-collection
-[12]: https://istio.io/docs/tasks/telemetry/logs/collecting-logs/
+[12]: https://istio.io/v1.4/docs/tasks/observability/logs/collecting-logs/
 [13]: https://docs.datadoghq.com/agent/kubernetes/log/
 [14]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [15]: https://github.com/DataDog/integrations-core/blob/master/istio/metadata.csv
