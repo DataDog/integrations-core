@@ -206,5 +206,5 @@ OPTIONAL_METRICS = [
     "cilium.datapath.errors.count",
     "cilium.endpoint.count",
     "cilium.identity.count",
-    "cilium.policy.count"
+    "cilium.policy.count",
 ]
