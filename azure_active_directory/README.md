@@ -44,12 +44,6 @@ For more details on the setup, see the [Azure tutorial][3].
 
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 This integration allows you to setup log ingestion for Azure Active Directory activity logs.
 
 This includes the following:

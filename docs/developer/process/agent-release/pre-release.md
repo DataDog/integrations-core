@@ -72,6 +72,8 @@ git tag <MAJOR>.<MINOR>.0-rc.1 -m <MAJOR>.<MINOR>.0-rc.1
 git push origin <MAJOR>.<MINOR>.0-rc.1
 ```
 
+We should create a tag for each new RC, regardless of whether there are new changes from `integrations-core` in the RC.
+
 ## QA week
 
 We test all changes to integrations that were introduced since the last release.

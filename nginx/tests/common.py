@@ -4,7 +4,8 @@
 import os
 
 from datadog_checks.dev import get_docker_hostname
-from datadog_checks.nginx.metrics import COUNT_METRICS, METRICS_SEND_AS_COUNT
+from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.nginx.metrics import COUNT_METRICS, METRICS_SEND_AS_COUNT, METRICS_SEND_AS_HISTOGRAM
 
 CHECK_NAME = 'nginx'
 
@@ -70,4 +71,26 @@ GAUGE_PLUS_METRICS = [
     'nginx.upstream.zombies',
 ]
 METRICS_SEND_AS_COUNT_COUNTS = [metric + "_count" for metric in METRICS_SEND_AS_COUNT]
-ALL_PLUS_METRICS = METRICS_SEND_AS_COUNT_COUNTS + METRICS_SEND_AS_COUNT + COUNT_METRICS + GAUGE_PLUS_METRICS
+METRICS_SEND_AS_HIST_HISTS = [metric + "_histogram" for metric in METRICS_SEND_AS_HISTOGRAM]
+ALL_PLUS_METRICS = (
+    METRICS_SEND_AS_COUNT_COUNTS
+    + METRICS_SEND_AS_COUNT
+    + COUNT_METRICS
+    + GAUGE_PLUS_METRICS
+    + METRICS_SEND_AS_HIST_HISTS
+)
+
+
+def assert_all_metrics_and_metadata(aggregator):
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    for metric in ALL_PLUS_METRICS:
+        aggregator.assert_metric(metric, at_least=0)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def assert_num_metrics(aggregator, num_expected):
+    total = 0
+    for m in aggregator.metric_names:
+        total += len(aggregator.metrics(m))
+    assert total == num_expected

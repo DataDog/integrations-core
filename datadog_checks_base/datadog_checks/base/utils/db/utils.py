@@ -182,6 +182,9 @@ def default_json_event_encoding(o):
 
 
 def obfuscate_sql_with_metadata(query, options=None):
+    if not query:
+        return {'query': '', 'metadata': {}}
+
     def _load_metadata(statement):
         try:
             statement_with_metadata = json.loads(statement)

@@ -123,12 +123,6 @@ Optionally, you can configure the Agent to use a built in `postqueue -p` command
 
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
 Postfix sends logs to the syslog daemon, which then writes logs to the file system. The naming convention and log file destinations are configurable:

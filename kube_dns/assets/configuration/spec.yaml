@@ -25,6 +25,7 @@ files:
       value.example:
       - kubedns-amd64
       - k8s-dns-kube-dns-amd64
+      - k8s-dns-kube-dns
   - template: init_config
     options: []
   - template: instances

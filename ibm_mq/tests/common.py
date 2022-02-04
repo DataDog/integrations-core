@@ -289,11 +289,16 @@ OPTIONAL_METRICS.extend(QUEUE_STATS_METRICS)
 OPTIONAL_METRICS.extend(QUEUE_STATS_LIST_METRICS)
 
 
-def assert_all_metrics(aggregator):
+def assert_all_metrics(aggregator, minimum_tags=None, hostname=None):
     for metric, metric_type in METRICS:
-        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()))
+        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), hostname=hostname)
+        minimum_tags = minimum_tags or []
+        for tag in minimum_tags:
+            aggregator.assert_metric_has_tag(metric, tag)
 
     for metric, metric_type in OPTIONAL_METRICS:
-        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), at_least=0)
+        aggregator.assert_metric(
+            metric, metric_type=getattr(aggregator, metric_type.upper()), hostname=hostname, at_least=0
+        )
 
     aggregator.assert_all_metrics_covered()

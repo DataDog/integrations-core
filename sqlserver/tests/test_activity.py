@@ -41,17 +41,6 @@ def dbm_instance(instance_docker):
     return copy(instance_docker)
 
 
-@pytest.fixture
-def instance_sql_msoledb_dbm(instance_sql_msoledb):
-    instance_sql_msoledb['dbm'] = True
-    instance_sql_msoledb['min_collection_interval'] = 1
-    instance_sql_msoledb['query_activity'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
-    # not needed for this test
-    instance_sql_msoledb['query_metrics'] = {'enabled': False}
-    instance_sql_msoledb['tags'] = ['optional:tag1']
-    return instance_sql_msoledb
-
-
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_collect_activity(aggregator, instance_docker, dd_run_check, dbm_instance):

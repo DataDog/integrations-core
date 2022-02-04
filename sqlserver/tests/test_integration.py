@@ -50,16 +50,14 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_check_stored_procedure(aggregator, dd_run_check, init_config, instance_docker):
-    instance_pass = deepcopy(instance_docker)
-
     proc = 'pyStoredProc'
     sp_tags = "foo:bar,baz:qux"
-    instance_pass['stored_procedure'] = proc
+    instance_docker['stored_procedure'] = proc
 
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_pass])
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
 
-    expected_tags = instance_pass.get('tags', []) + sp_tags.split(',')
+    expected_tags = instance_docker.get('tags', []) + sp_tags.split(',')
     aggregator.assert_metric('sql.sp.testa', value=100, tags=expected_tags, count=1)
     aggregator.assert_metric('sql.sp.testb', tags=expected_tags, count=2)
 
@@ -67,14 +65,13 @@ def test_check_stored_procedure(aggregator, dd_run_check, init_config, instance_
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_check_stored_procedure_proc_if(aggregator, dd_run_check, init_config, instance_docker):
-    instance_fail = deepcopy(instance_docker)
     proc = 'pyStoredProc'
     proc_only_fail = "select cntr_type from sys.dm_os_performance_counters where counter_name in ('FOO');"
 
-    instance_fail['proc_only_if'] = proc_only_fail
-    instance_fail['stored_procedure'] = proc
+    instance_docker['proc_only_if'] = proc_only_fail
+    instance_docker['stored_procedure'] = proc
 
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_fail])
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
 
     # apply a proc check that will never fail and assert that the metrics remain unchanged
@@ -94,10 +91,9 @@ def test_custom_metrics_object_name(aggregator, dd_run_check, init_config_object
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_custom_metrics_alt_tables(aggregator, dd_run_check, init_config_alt_tables, instance_docker):
-    instance = deepcopy(instance_docker)
-    instance['include_task_scheduler_metrics'] = False
+    instance_docker['include_task_scheduler_metrics'] = False
 
-    sqlserver_check = SQLServer(CHECK_NAME, init_config_alt_tables, [instance])
+    sqlserver_check = SQLServer(CHECK_NAME, init_config_alt_tables, [instance_docker])
     dd_run_check(sqlserver_check)
 
     aggregator.assert_metric('sqlserver.LCK_M_S.max_wait_time_ms', tags=['optional:tag1'], count=1)

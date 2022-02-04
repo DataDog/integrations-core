@@ -159,6 +159,11 @@ def test_obfuscate_sql_with_metadata(obfuscator_return_value, expected_value, re
         )
         assert statement == expected_value
 
+    # Check that it can handle None values
+    statement = obfuscate_sql_with_metadata(None)
+    assert statement['query'] == ''
+    assert statement['metadata'] == {}
+
 
 class TestJob(DBMAsyncJob):
     def __init__(self, check, run_sync=False, enabled=True, rate_limit=10, min_collection_interval=15):

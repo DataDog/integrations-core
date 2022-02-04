@@ -25,6 +25,8 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 
+from .util import DatabaseConfigurationError, warning_with_tags
+
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
 # character is 6 bytes
 MAX_CHARACTER_SIZE_IN_BYTES = 6
@@ -391,7 +393,22 @@ class PostgresStatementSamples(DBMAsyncJob):
         except psycopg2.DatabaseError as e:
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
             # incorrect definition)
-            self._log.warning("cannot collect execution plans in dbname=%s: %s", dbname, repr(e))
+            self._check.record_warning(
+                DatabaseConfigurationError.undefined_explain_function,
+                warning_with_tags(
+                    "Unable to collect execution plans in dbname=%s. Check that the function "
+                    "%s exists in the database. See "
+                    "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#%s "
+                    "for more details: %s",
+                    dbname,
+                    self._explain_function,
+                    DatabaseConfigurationError.undefined_explain_function.value,
+                    str(e),
+                    host=self._check.resolved_hostname,
+                    dbname=dbname,
+                    code=DatabaseConfigurationError.undefined_explain_function.value,
+                ),
+            )
             return DBExplainError.failed_function, e
 
         if not result:

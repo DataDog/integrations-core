@@ -6,34 +6,15 @@
 
 Amazon Elastic Kubernetes Service (EKS) is a managed Kubernetes service that automates certain aspects of deployment and maintenance for any standard Kubernetes environment. Whether you are migrating an existing Kubernetes application to Amazon EKS, or are deploying a new cluster on Amazon EKS on AWS Outposts, Datadog helps you monitor your EKS environments in real time.
 
-### EKS Anywhere
-
-[Amazon EKS Anywhere][15] is a deployment option that enables you to create and operate Kubernetes clusters on-premises, including virtual machines (for example, VMware vSphere) and bare metal servers.
-
-To monitor EKS Anywhere:
-
-1. Set `datadog.kubelet.tlsVerify` to `false`.
-2. Set a toleration on the Agent pod. This is necessary for monitoring the control plane.
-
-The following Helm snippet demonstrates the specific changes for monitoring EKS Anywhere:
-
-```yaml
-datadog:
-  kubelet:
-    tlsVerify: false
-agents:
-  tolerations:
-  - effect: NoSchedule
-    key: node-role.kubernetes.io/master
-    operator: Exists
-```
-
-
 ## Setup
 
 Because Datadog already integrates with Kubernetes and AWS, it is ready-made to monitor EKS. If you're running the Agent in a Kubernetes cluster and plan to migrate to EKS, you can continue monitoring your cluster with Datadog. 
 
 Additionally, [Amazon EKS Managed Node Groups][2] and [Amazon EKS on AWS Outposts][3] are supported.
+
+### EKS Anywhere
+
+See the [Amazon EKS Anywhere integration][16] for setup instructions.
 
 ### Metric collection
 
@@ -79,3 +60,4 @@ Need help? Contact [Datadog support][11].
 [13]: https://www.datadoghq.com/blog/eks-cluster-metrics
 [14]: https://docs.datadoghq.com/integrations/amazon_eks_fargate/
 [15]: https://aws.amazon.com/eks/eks-anywhere/
+[16]: https://docs.datadoghq.com/integrations/eks_anywhere/

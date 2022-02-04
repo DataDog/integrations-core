@@ -49,6 +49,7 @@ There are two main cases where the release manager will have to release integrat
     - Create a branch based off of the release branch. 
     - Run the [integration release](../integration-release.md#new-integrations) command on that branch.
     - Make a pull request with that branch, then merge it to the release branch.
+    - Note: if there are multiple integrations to release, do not use `ddev release make all --exclude <INTGS>`. Once `master` is unfrozen, releasing `all` may result in unwanted and unshipped changes to the release branch if new changes are introduced. Use `ddev release make check1 check2` instead if releasing `check1` and `check2`.
 
     !!! important
         Remember to trigger the release pipeline and build the wheel. You can do so by [tagging the release](../../ddev/cli.md#ddev-release-tag):
@@ -62,7 +63,7 @@ There are two main cases where the release manager will have to release integrat
 
 4. [Tag](pre-release.md#tag) the branch with the new bumped version `<MAJOR>.<MINOR>.<PATCH>-rc.1`.
 
-5. After the release has been made, make a PR to `master` with the updates to `CHANGELOG.md`, [agent release requirements](https://github.com/DataDog/integrations-core/blob/master/requirements-agent-release.txt), and `__about__.py` of the integrations that were released on the release branch. If the current version of `__about__.py` is higher on master than the release branch, then **only** update the `CHANGELOG.md` in this PR.
+5. After the release has been made, make a PR to `master` with the updates to `CHANGELOG.md`, [agent release requirements](https://github.com/DataDog/integrations-core/blob/master/requirements-agent-release.txt), and `__about__.py` of the integrations that were released on the release branch. Do not include the change to the in-toto file. If the current version of `__about__.py` is higher on master than the release branch, then **only** update the `CHANGELOG.md` in this PR.
 
     !!! important
         Do not merge this PR unless the release tag from the previous PR has been pushed or the release pipeline will incorrectly attempt to release from `master`.

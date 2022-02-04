@@ -67,4 +67,13 @@ keytool -import -v \
 
 This puts the client `cert.pem` in the server `sample_truststore.jks` file so the server trusts the client cert. 
 
+## Convert `server.cer` into `ca_cert.pem`
+
+```shell
+openssl x509 -inform der -in server.cer -out ca_cert.pem
+```
+
+This converts the `CER` file into a `PEM` file to make it easier to use in testing.
+
+
 After running all these commands, replace the `tests/compose/client` and `tests/compose/server` certs with your newly generated certificates. 
