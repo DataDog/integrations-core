@@ -70,4 +70,6 @@ yarn.queue.used_capacity,gauge,,percent,,The used queue capacity in percentage,0
 yarn.queue.num_containers,gauge,,,,The number of containers being used,0,yarn,q num cont
 yarn.queue.max_capacity,gauge,,percent,,The configured maximum queue capacity in percentage relative to its parent queue,0,yarn,q max cap
 yarn.queue.max_applications,gauge,,task,,The maximum number of applications this queue can have,0,yarn,q max app
-yarn.queue.max_applications_per_user,gauge,,task,,The maximum number of active applications per user this queue can have,0,yarn,q max app usr
+yarn.queue.max_applications_per_user,gauge,,task,,The maximum number of applications per user this queue can have,0,yarn,q max app usr
+yarn.queue.max_active_applications,gauge,,task,,The maximum number of active applications this queue can have,0,yarn,q max active app
+yarn.queue.max_active_applications_per_user,gauge,,task,,The maximum number of active applications per user this queue can have,0,yarn,q max active app usr

@@ -147,6 +147,8 @@ YARN_QUEUE_METRICS = {
     'usedCapacity': ('yarn.queue.used_capacity', GAUGE),
     'numContainers': ('yarn.queue.num_containers', GAUGE),
     'maxCapacity': ('yarn.queue.max_capacity', GAUGE),
+    'maxActiveApplications': ('yarn.queue.max_active_applications', GAUGE),
+    'maxActiveApplicationsPerUser': ('yarn.queue.max_active_applications_per_user', GAUGE),
     'maxApplications': ('yarn.queue.max_applications', GAUGE),
     'maxApplicationsPerUser': ('yarn.queue.max_applications_per_user', GAUGE),
 }
