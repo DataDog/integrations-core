@@ -82,7 +82,6 @@ assets/               @DataDog/agent-integrations
 /tcp_queue_length/                        @DataDog/container-integrations @DataDog/agent-integrations
 /tcp_queue_length/*.md                    @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /tcp_queue_length/manifest.json           @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
-/tenable/                                 @DataDog/agent-integrations
 
 # Infrastructure integrations
 /snmp/                                                             @DataDog/infrastructure-integrations @DataDog/agent-integrations
