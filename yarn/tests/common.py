@@ -297,20 +297,33 @@ YARN_QUEUE_METRICS_VALUES = {
     'yarn.queue.max_capacity': 52.12,
     'yarn.queue.max_applications': 5212,
     'yarn.queue.max_applications_per_user': 5212,
+    'yarn.queue.max_active_applications': 1,
+    'yarn.queue.max_active_applications_per_user': 100,
 }
 
 YARN_SUBQUEUE_METRICS_VALUES = {
-    'yarn.queue.absolute_capacity': 3.456,
+    'yarn.queue.absolute_capacity': 2.6775,
+    'yarn.queue.absolute_max_capacity': 25.0,
+    'yarn.queue.absolute_used_capacity': 31.868685,
+    'yarn.queue.capacity': 85.0,
+    'yarn.queue.max_applications': 267,
+    'yarn.queue.max_applications_per_user': 267,
+    'yarn.queue.max_capacity': 100.0,
+    'yarn.queue.max_active_applications': 100,
+    'yarn.queue.max_active_applications_per_user': 1,
+    'yarn.queue.num_active_applications': 5,
+    'yarn.queue.num_applications': 5,
+    'yarn.queue.num_containers': 50,
+    'yarn.queue.num_pending_applications': 0,
     'yarn.queue.resources_used.memory': 34567,
     'yarn.queue.resources_used.vcores': 765,
-    'yarn.queue.num_applications': 5,
-    'yarn.queue.absolute_max_capacity': 34.56,
-    'yarn.queue.used_capacity': 34.56,
-    'yarn.queue.capacity': 34.56,
+    'yarn.queue.used_capacity': 0,
+    'yarn.queue.user_limit': 100,
+    'yarn.queue.user_limit_factor': 1.0,
 }
 
 YARN_QUEUE_METRICS_TAGS = ['queue_name:clientqueue'] + YARN_CLUSTER_METRICS_TAGS
 
 YARN_QUEUE_NOFOLLOW_METRICS_TAGS = ['queue_name:nofollowqueue'] + YARN_CLUSTER_METRICS_TAGS
 
-YARN_SUBQUEUE_METRICS_TAGS = ['sub_queue_name:testsubqueue'] + YARN_CLUSTER_METRICS_TAGS
+YARN_SUBQUEUE_METRICS_TAGS = ['sub_queue_name:test_subqueue'] + YARN_CLUSTER_METRICS_TAGS
