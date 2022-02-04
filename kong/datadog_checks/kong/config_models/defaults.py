@@ -258,6 +258,10 @@ def instance_tls_private_key(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_tls_protocols_allowed(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_tls_use_host_header(field, value):
     return False
 
