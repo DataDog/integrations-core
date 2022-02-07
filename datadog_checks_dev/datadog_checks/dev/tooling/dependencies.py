@@ -5,7 +5,7 @@ from copy import deepcopy
 from packaging.requirements import InvalidRequirement, Requirement
 
 from ..fs import stream_file_lines
-from .constants import get_agent_requirements, get_root
+from .constants import NOT_CHECKS, get_agent_requirements, get_root
 from .utils import (
     get_project_file,
     get_valid_checks,
@@ -132,6 +132,9 @@ def read_check_dependencies(check=None):
         checks = sorted(get_valid_checks()) if check is None else [check]
 
     for check_name in checks:
+        if check_name in NOT_CHECKS:
+            continue
+
         if has_project_file(check_name):
             load_dependency_data_from_metadata(check_name, dependencies, errors)
         else:
@@ -152,7 +155,7 @@ def read_check_base_dependencies(check=None):
         checks = sorted(get_valid_checks()) if check is None else [check]
 
     for check_name in checks:
-        if check_name.startswith('datadog_checks_'):
+        if check_name in NOT_CHECKS or check_name == 'datadog_checks_base':
             continue
 
         if has_project_file(check_name):
