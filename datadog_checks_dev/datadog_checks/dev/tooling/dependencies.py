@@ -154,8 +154,10 @@ def read_check_base_dependencies(check=None):
     else:
         checks = sorted(get_valid_checks()) if check is None else [check]
 
+    not_required = {'datadog_checks_base', 'datadog_checks_downloader'}
+    not_required.update(NOT_CHECKS)
     for check_name in checks:
-        if check_name in NOT_CHECKS or check_name == 'datadog_checks_base':
+        if check_name in not_required:
             continue
 
         if has_project_file(check_name):
