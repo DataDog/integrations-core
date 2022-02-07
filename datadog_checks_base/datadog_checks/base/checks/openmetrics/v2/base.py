@@ -6,11 +6,12 @@
 from collections import ChainMap
 from contextlib import contextmanager
 
+from requests.exceptions import HTTPError
+
 from ....errors import ConfigurationError
 from ....utils.tracing import traced_class
 from ... import AgentCheck
 from .scraper import OpenMetricsScraper
-from requests.exceptions import HTTPError
 
 
 class OpenMetricsBaseCheckV2(AgentCheck):
