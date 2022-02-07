@@ -4,14 +4,16 @@
 
 from typing import Any, Callable, Dict
 
+from datadog_checks.arangodb import ArangodbCheck
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.arangodb import ArangodbCheck
 
 
 def test_check(aggregator, instance):
     return True
+
+
 #     # type: (AggregatorStub, Dict[str, Any]) -> None
 #     check = ArangodbCheck('arangodb', {}, [instance])
 #     check.check(instance)
