@@ -44,7 +44,7 @@ files:
       - template: instances
         options:
           - name: use_mount
-            required: true
+            enabled: true
             description: |
               If enabled, metrics are tagged using mount points (for example `device:/`) instead of volumes
               (for example `device:/dev/disk1s5`).

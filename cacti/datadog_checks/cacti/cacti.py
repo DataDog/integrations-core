@@ -122,7 +122,7 @@ class CactiCheck(AgentCheck):
         return rrdtool.fetch(rrd_path, c, '--start', str(start))
 
     def _read_rrd(self, rrd_path, hostname, device_name, tags):
-        """ Main metric fetching method."""
+        """Main metric fetching method."""
         metric_count = 0
 
         try:
@@ -227,7 +227,7 @@ class CactiCheck(AgentCheck):
 
     @staticmethod
     def _format_metric_name(m_name, cfunc):
-        """ Format a cacti metric name into a Datadog-friendly name. """
+        """Format a cacti metric name into a Datadog-friendly name."""
         try:
             aggr = CFUNC_TO_AGGR[cfunc]
         except KeyError:
@@ -243,7 +243,7 @@ class CactiCheck(AgentCheck):
 
     @staticmethod
     def _transform_metric(m_name, val):
-        """ Add any special case transformations here. """
+        """Add any special case transformations here."""
         # Report memory in MB
         if m_name[0:11] in ('system.mem.', 'system.disk'):
             return val / 1024

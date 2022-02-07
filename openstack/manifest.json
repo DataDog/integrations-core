@@ -15,7 +15,7 @@
   "process_signatures": [
     "stack.sh"
   ],
-  "public_title": "Datadog-OpenStack Integration",
+  "public_title": "OpenStack (legacy)",
   "short_description": "Track hypervisor and VM-level resource usage, plus Neutron metrics.",
   "support": "core",
   "supported_os": [
@@ -31,8 +31,7 @@
     },
     "monitors": {},
     "dashboards": {
-      "openstack": "assets/dashboards/openstack_dashboard.json",
-      "OpenStack Controller Overview": "assets/dashboards/openstack-controller.json"
+      "openstack": "assets/dashboards/openstack_dashboard.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {

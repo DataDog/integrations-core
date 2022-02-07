@@ -91,15 +91,16 @@ The Lighttpd check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][11] for a list of service checks provided by this integration.
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-To get a better idea of how (or why) to monitor Lighttpd web server metrics with Datadog, check out our [series of blog posts][10] about it.
+- [Monitor Lighttpd web server metrics with Datadog][11].
+
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/lighttpd/images/lighttpddashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -109,6 +110,6 @@ To get a better idea of how (or why) to monitor Lighttpd web server metrics with
 [6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/lighttpd/metadata.csv
-[9]: https://docs.datadoghq.com/help/
-[10]: https://www.datadoghq.com/blog/monitor-lighttpd-web-server-metrics
-[11]: https://github.com/DataDog/integrations-core/blob/master/lighttpd/assets/service_checks.json
+[9]: https://github.com/DataDog/integrations-core/blob/master/lighttpd/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/
+[11]: https://www.datadoghq.com/blog/monitor-lighttpd-web-server-metrics

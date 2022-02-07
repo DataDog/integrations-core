@@ -52,7 +52,7 @@ class Platform(object):
 
     @staticmethod
     def is_bsd(name=None):
-        """ Return true if this is a BSD like operating system. """
+        """Return true if this is a BSD like operating system."""
         name = name or sys.platform
         return Platform.is_darwin(name) or Platform.is_freebsd(name)
 
@@ -63,7 +63,7 @@ class Platform(object):
 
     @staticmethod
     def is_unix(name=None):
-        """ Return true if the platform is a unix, False otherwise. """
+        """Return true if the platform is a unix, False otherwise."""
         name = name or sys.platform
         return Platform.is_darwin(name) or Platform.is_linux(name) or Platform.is_freebsd(name)
 

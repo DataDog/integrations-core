@@ -131,7 +131,7 @@
                     "response_format": "scalar",
                     "queries": [
                       {
-                        "query": "sum:kubernetes_state.pod.status_phase{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob,!phase:running,!phase:succeeded} by {phase,kube_namespace}",
+                        "query": "sum:kubernetes_state.pod.status_phase{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob,!pod_phase:running,!pod_phase:succeeded} by {pod_phase,kube_namespace}",
                         "data_source": "metrics",
                         "name": "query1",
                         "aggregator": "last"

@@ -115,7 +115,7 @@ def get_stream_name(stream):
 
 
 def yaml_load_force_loader(stream, Loader):
-    """ Override the default monkey patch for this call """
+    """Override the default monkey patch for this call"""
     log.debug(
         "`%s` YAML loader is used instead of the default one, please make sure it is safe to do so", Loader.__name__
     )
@@ -125,7 +125,7 @@ def yaml_load_force_loader(stream, Loader):
 
 
 def yaml_load_all_force_loader(stream, Loader):
-    """ Override the default monkey patch for this call """
+    """Override the default monkey patch for this call"""
     log.debug(
         "`%s` YAML loader is used instead of the default one, please make sure it is safe to do so", Loader.__name__
     )

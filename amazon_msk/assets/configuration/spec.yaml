@@ -51,6 +51,21 @@ files:
       value:
         type: string
         example: /metrics
+    - name: boto_config
+      description: |
+        Specify additional configuration options for the botocore Config object.
+
+        Note: Configuration values set in your AWS config file can be singularly overwritten
+        through the use of a Config object.
+        https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html
+      value:
+        example:
+          proxies_config:
+            proxy_client_cert: '/path/of/certificate'
+            proxy_ca_bundle: 'path/to/ca/bundle'
+            proxy_use_forwarding_for_https: false
+          signature_version: s3v4
+        type: object
     - template: instances/openmetrics
       overrides:
         openmetrics_endpoint.hidden: true

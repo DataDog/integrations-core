@@ -139,7 +139,7 @@ STATS_MYSQL_CONNECTION_POOL = {
     'name': 'stats_mysql_connection_pool',
     # Need explicit selections as some columns are unusable.
     'query': 'SELECT hostgroup, srv_host, srv_port, status, ConnUsed, ConnFree, ConnOK, ConnERR, Queries, '
-    'Bytes_data_sent, Bytes_data_recv, Latency_us FROM stats_mysql_connection_pool',
+    'Bytes_data_sent, Bytes_data_recv, (Latency_us/1000.0) as Latency_ms, Latency_us FROM stats_mysql_connection_pool',
     'columns': [
         # the hostgroup in which the backend server belongs. Note that a single backend server can belong to more
         # than one hostgroup
@@ -178,7 +178,11 @@ STATS_MYSQL_CONNECTION_POOL = {
         # OK/ERR packets, fields' description, etc)
         {'name': 'pool.bytes_data_recv', 'type': 'rate'},
         # the currently ping time in microseconds, as reported from Monitor
+        # Latency_ms is a ProxySQL typo fixed in ProxySQL 1.3.3; it has been aptly renamed to Latency_us.
+        # See: https://github.com/sysown/proxysql/issues/882
         {'name': 'pool.latency_ms', 'type': 'gauge'},
+        # the currently ping time in microseconds, as reported from Monitor
+        {'name': 'pool.latency_us', 'type': 'gauge'},
     ],
 }
 

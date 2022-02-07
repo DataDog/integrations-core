@@ -45,7 +45,8 @@ init_config:
 #
 instances:
 
-    ## @param status_url - string - required
+  -
+    ## @param status_url - string - optional - default: http://localhost/status
     ## Get metrics from your FPM pool with this URL
     ## The status URLs should follow the options from your FPM pool
     ## See http://php.net/manual/en/install.fpm.configuration.php
@@ -55,9 +56,9 @@ instances:
     ## you want to monitor (FPM `listen` directive in the config, usually
     ## a UNIX socket or TCP socket.
     #
-  - status_url: http://localhost/status
+    # status_url: http://localhost/status
 
-    ## @param ping_url - string - required
+    ## @param ping_url - string - optional - default: http://localhost/ping
     ## Get a reliable service check of your FPM pool with `ping_url` parameter
     ## The ping URLs should follow the options from your FPM pool
     ## See http://php.net/manual/en/install.fpm.configuration.php
@@ -67,17 +68,17 @@ instances:
     ## you want to monitor (FPM `listen` directive in the config, usually
     ## a UNIX socket or TCP socket.
     #
-    ping_url: http://localhost/ping
+    # ping_url: http://localhost/ping
 
-    ## @param ping_reply - string - required
+    ## @param ping_reply - string - optional - default: pong
     ## Set the expected reply to the ping.
     #
-    ping_reply: pong
+    # ping_reply: pong
 
-    ## @param use_fastcgi - boolean - required
+    ## @param use_fastcgi - boolean - optional - default: false
     ## Communicate directly with PHP-FPM using FastCGI
     #
-    use_fastcgi: false
+    # use_fastcgi: false
 
     ## @param http_host - string - optional
     ## If your FPM pool is only accessible via a specific HTTP vhost, you can
@@ -260,6 +261,8 @@ instances:
 
     ## @param aws_host - string - optional
     ## If your services require AWS Signature Version 4 signing, set the host.
+    ## This only needs the hostname and does not require the protocol (HTTP, HTTPS, and more).
+    ## For example, if connecting to https://us-east-1.amazonaws.com/, set `aws_host` to `us-east-1.amazonaws.com`.
     ##
     ## Note: This setting is not necessary for official integrations.
     ##
@@ -318,6 +321,20 @@ instances:
     #
     # tls_ca_cert: <CA_CERT_PATH>
 
+    ## @param tls_protocols_allowed - list of strings - optional
+    ## The expected versions of TLS/SSL when fetching intermediate certificates.
+    ## Only `SSLv3`, `TLSv1.2`, `TLSv1.3` are allowed by default. The possible values are:
+    ##   SSLv3
+    ##   TLSv1
+    ##   TLSv1.1
+    ##   TLSv1.2
+    ##   TLSv1.3
+    #
+    # tls_protocols_allowed:
+    #   - SSLv3
+    #   - TLSv1.2
+    #   - TLSv1.3
+
     ## @param headers - mapping - optional
     ## The headers parameter allows you to send specific headers with every request.
     ## You can use it for explicitly specifying the host header or adding headers for
@@ -352,6 +369,11 @@ instances:
     ## The read timeout for accessing services. Defaults to `timeout`.
     #
     # read_timeout: <READ_TIMEOUT>
+
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
 
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.

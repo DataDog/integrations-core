@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
+import copy
 from collections import defaultdict
 
 import click
@@ -11,15 +12,31 @@ from aiomultiprocess import Pool
 from packaging.markers import InvalidMarker, Marker
 from packaging.specifiers import SpecifierSet
 
-from ...fs import read_file_lines, write_file_lines
+from ...fs import basepath, read_file_lines, write_file_lines
 from ..constants import get_agent_requirements
-from ..dependencies import read_agent_dependencies, read_check_dependencies
-from ..utils import get_check_req_file, get_valid_checks
+from ..dependencies import (
+    read_agent_dependencies,
+    read_check_dependencies,
+    update_check_dependencies,
+    update_check_dependencies_at,
+)
+from ..utils import get_check_req_file, get_valid_checks, has_project_file
 from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 from .validate.licenses import extract_classifier_value
 
 # Dependencies to ignore when update dependencies
-IGNORED_DEPS = {'psycopg2-binary'}
+IGNORED_DEPS = {
+    'psycopg2-binary',  # https://github.com/DataDog/integrations-core/pull/10456
+    'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
+    'flup',  # https://github.com/DataDog/integrations-core/pull/1997
+    # https://github.com/DataDog/integrations-core/pull/10105;
+    # snowflake-connector-python 2.6.0 has requirement cryptography<4.0.0,>=2.5.0
+    'cryptography',
+    'dnspython',
+}
+
+# Dependencies for the downloader that are security-related and should be updated separately from the others
+SECURITY_DEPS = {'in-toto', 'tuf', 'securesystemslib'}
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage dependencies')
@@ -66,21 +83,27 @@ def pin(package, version, marker):
             files_to_update[dependency_definition.file_path].append(dependency_definition)
 
     for file_path, dependency_definitions in sorted(files_to_update.items()):
-        old_lines = read_file_lines(file_path)
-
-        new_lines = old_lines.copy()
-
         for dependency_definition in dependency_definitions:
             requirement = dependency_definition.requirement
             if marker != requirement.marker:
                 continue
 
             requirement.specifier = SpecifierSet(f'=={version}')
-            new_lines[dependency_definition.line_number] = f'{requirement}\n'
 
-        if new_lines != old_lines:
-            files_updated += 1
-            write_file_lines(file_path, new_lines)
+        if basepath(file_path) == 'pyproject.toml':
+            if update_check_dependencies_at(file_path, dependency_definitions):
+                files_updated += 1
+        else:
+            old_lines = read_file_lines(file_path)
+
+            new_lines = old_lines.copy()
+
+            for dependency_definition in dependency_definitions:
+                new_lines[dependency_definition.line_number] = f'{dependency_definition.requirement}\n'
+
+            if new_lines != old_lines:
+                files_updated += 1
+                write_file_lines(file_path, new_lines)
 
     if not files_updated:
         abort('No dependency definitions to update')
@@ -155,15 +178,21 @@ def sync():
 
         if deps_to_update:
             files_updated += 1
-            check_req_file = get_check_req_file(check_name)
-            old_lines = read_file_lines(check_req_file)
-            new_lines = old_lines.copy()
-
             for dependency_definition, new_version in deps_to_update.items():
                 dependency_definition.requirement.specifier = new_version
-                new_lines[dependency_definition.line_number] = f'{dependency_definition.requirement}\n'
 
-            write_file_lines(check_req_file, new_lines)
+            if has_project_file(check_name):
+                update_check_dependencies(check_name, list(deps_to_update))
+            else:
+                check_req_file = get_check_req_file(check_name)
+                old_lines = read_file_lines(check_req_file)
+                new_lines = old_lines.copy()
+
+                for dependency_definition, new_version in deps_to_update.items():
+                    dependency_definition.requirement.specifier = new_version
+                    new_lines[dependency_definition.line_number] = f'{dependency_definition.requirement}\n'
+
+                write_file_lines(check_req_file, new_lines)
 
     if not files_updated:
         echo_info('All dependencies synced.')
@@ -234,12 +263,19 @@ def is_version_compatible(marker, supported_versions):
 @click.option('--sync', '-s', is_flag=True, help='Update the `agent_requirements.in` file')
 @click.option(
     '--check-python-classifiers',
-    '-s',
+    '-c',
     is_flag=True,
     help="""Only flag a dependency as needing an update if the newest version has python classifiers matching the marker.
     NOTE: Some packages may not have proper classifiers.""",
 )
-def updates(sync, check_python_classifiers):
+@click.option('--include-security-deps', '-i', is_flag=True, help="Attempt to update security dependencies")
+@click.option('--batch-size', '-b', type=int, help='The maximum number of dependencies to upgrade if syncing')
+def updates(sync, check_python_classifiers, include_security_deps, batch_size):
+
+    ignore_deps = copy.deepcopy(IGNORED_DEPS)
+    if not include_security_deps:
+        sec_deps = copy.deepcopy(SECURITY_DEPS)
+        ignore_deps = ignore_deps.union(sec_deps)
 
     all_agent_dependencies, errors = read_agent_dependencies()
 
@@ -255,7 +291,7 @@ def updates(sync, check_python_classifiers):
     deps_to_update = {
         agent_dependency_definition: package_data[package]['version']
         for package, package_dependency_definitions in all_agent_dependencies.items()
-        if package not in IGNORED_DEPS
+        if package not in ignore_deps
         for agent_dep_version, agent_dependency_definitions in package_dependency_definitions.items()
         for agent_dependency_definition in agent_dependency_definitions
         if str(agent_dep_version)[2:] != package_data[package]['version']
@@ -271,6 +307,7 @@ def updates(sync, check_python_classifiers):
     if sync:
         static_file = get_agent_requirements()
         if deps_to_update:
+            deps_updated = 0
             old_lines = read_file_lines(static_file)
             new_lines = old_lines.copy()
 
@@ -278,8 +315,12 @@ def updates(sync, check_python_classifiers):
                 dependency_definition.requirement.specifier = f'=={new_version}'
                 new_lines[dependency_definition.line_number] = f'{dependency_definition.requirement}\n'
 
+                deps_updated += 1
+                if batch_size is not None and deps_updated >= batch_size:
+                    break
+
             write_file_lines(static_file, new_lines)
-            echo_info(f'Updated {len(deps_to_update.keys())} dependencies in `agent_requirements.in`')
+            echo_info(f'Updated {deps_updated} dependencies in `agent_requirements.in`')
     else:
         if deps_to_update:
             echo_failure(f"{len(deps_to_update.keys())} Dependencies are out of sync:")

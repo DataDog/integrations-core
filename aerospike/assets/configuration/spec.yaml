@@ -5,13 +5,11 @@ files:
   - template: instances
     options:
     - name: host
-      required: true
       description: Aerospike host to connect to.
       value:
         type: string
         example: localhost
     - name: port
-      required: true
       description: Aerospike port to connect to.
       value:
         type: integer
@@ -134,11 +132,11 @@ files:
   - template: init_config
     options:
     - name: mappings
-      required: true
       description: |
         Rate mappings. DO NOT EDIT unless you know what you're doing.
-        See https://github.com/aerospike/aerospike-collectd/blob/develop/aerospike_schema.yaml
+        See https://github.com/aerospike-community/aerospike-collectd/blob/master/aerospike_schema.yaml
         for the definitive list
+      enabled: true
       value:
         type: array
         items:

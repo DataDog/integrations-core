@@ -226,6 +226,8 @@ instances:
 
     ## @param aws_host - string - optional
     ## If your services require AWS Signature Version 4 signing, set the host.
+    ## This only needs the hostname and does not require the protocol (HTTP, HTTPS, and more).
+    ## For example, if connecting to https://us-east-1.amazonaws.com/, set `aws_host` to `us-east-1.amazonaws.com`.
     ##
     ## Note: This setting is not necessary for official integrations.
     ##
@@ -284,6 +286,20 @@ instances:
     #
     # tls_ca_cert: <CA_CERT_PATH>
 
+    ## @param tls_protocols_allowed - list of strings - optional
+    ## The expected versions of TLS/SSL when fetching intermediate certificates.
+    ## Only `SSLv3`, `TLSv1.2`, `TLSv1.3` are allowed by default. The possible values are:
+    ##   SSLv3
+    ##   TLSv1
+    ##   TLSv1.1
+    ##   TLSv1.2
+    ##   TLSv1.3
+    #
+    # tls_protocols_allowed:
+    #   - SSLv3
+    #   - TLSv1.2
+    #   - TLSv1.3
+
     ## @param headers - mapping - optional
     ## The headers parameter allows you to send specific headers with every request.
     ## You can use it for explicitly specifying the host header or adding headers for
@@ -319,6 +335,11 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
@@ -334,25 +355,11 @@ instances:
     #
     # allow_redirects: true
 
-    ## @param collect_jdbc_stats - boolean - optional - default: true
-    ## Whether or not to collect JDBC Connection Pool stats
+    ## @param only_custom_queries - boolean - optional - default: false
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
     #
-    # collect_jdbc_stats: true
-
-    ## @param collect_jvm_stats - boolean - optional - default: true
-    ## Whether or not to collect JVM Runtime stats
-    #
-    # collect_jvm_stats: true
-
-    ## @param collect_servlet_session_stats - boolean - optional - default: true
-    ## Whether or not to collect Servlet Session Manager stats
-    #
-    # collect_servlet_session_stats: true
-
-    ## @param collect_thread_pool_stats - boolean - optional - default: true
-    ## Whether or not to collect Thread Pools stats
-    #
-    # collect_thread_pool_stats: true
+    # only_custom_queries: false
 
     ## @param custom_queries - list of mappings - optional
     ## List of custom or additional XML attributes to parse and submit as metrics

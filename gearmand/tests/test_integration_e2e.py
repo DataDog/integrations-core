@@ -4,7 +4,7 @@
 
 import pytest
 
-from datadog_checks.gearmand import Gearman
+from datadog_checks.base.constants import ServiceCheck
 
 from . import common
 
@@ -16,20 +16,21 @@ def assert_metrics(aggregator):
     aggregator.assert_metric('gearman.running', value=0.0, tags=tags, count=2)
     aggregator.assert_metric('gearman.queued', value=0.0, tags=tags, count=2)
     aggregator.assert_metric('gearman.workers', value=0.0, tags=tags, count=2)
-    aggregator.assert_service_check('gearman.can_connect', status=Gearman.OK, tags=tags, count=2)
+    aggregator.assert_service_check('gearman.can_connect', status=ServiceCheck.OK, tags=tags, count=2)
     aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_metrics(check, aggregator):
-    check.check(common.INSTANCE)
-    check.check(common.INSTANCE)
+def test_metrics(check, instance, aggregator, dd_run_check):
+    check = check(instance)
+    dd_run_check(check)
+    dd_run_check(check)
 
     assert_metrics(aggregator)
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check):
-    aggregator = dd_agent_check(common.INSTANCE, rate=True)
+def test_e2e(dd_agent_check, instance):
+    aggregator = dd_agent_check(instance, rate=True)
 
     assert_metrics(aggregator)

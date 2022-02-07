@@ -359,7 +359,7 @@ instances:
 # logs:
 #   - type: windows_event
 #     channel_path: <CHANNEL_1>
-#     source: <CHANNEL_1>
+#     source: windows.events
 #   - type: windows_event
 #     channel_path: <CHANNEL_2>
-#     source: <CHANNEL_2>
+#     source: windows.events

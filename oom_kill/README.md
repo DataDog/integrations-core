@@ -65,7 +65,7 @@ The OOM Kill check submits an event for each OOM Kill that includes the killed p
 
 Need help? Contact [Datadog support][7].
 
-[1]: https://docs.datadoghq.com/agent/guide/
+[1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/oom_kill.d/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://github.com/helm/charts/tree/master/stable/datadog

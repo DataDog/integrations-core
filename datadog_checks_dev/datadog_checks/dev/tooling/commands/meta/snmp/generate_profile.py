@@ -9,9 +9,8 @@ from tempfile import gettempdir
 import click
 import yaml
 
-from datadog_checks.dev.tooling.commands.meta.snmp.constants import MIB_COMPILED_URL, MIB_SOURCE_URL
-
 from ...console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, set_debug
+from .constants import MIB_COMPILED_URL, MIB_SOURCE_URL
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Generate an SNMP profile from a collection of MIB files')

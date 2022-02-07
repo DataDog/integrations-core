@@ -38,6 +38,12 @@ files:
       value:
         type: string
         display_default: postgres
+    - name: reported_hostname
+      description: |
+        Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
+        and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+      value:
+        type: string
     - name: dbstrict
       description: |
         Whether to restrict the scope of the check to just the database in question.
@@ -86,6 +92,43 @@ files:
         type: string
         display_default: false
         example: "false"
+    - name: ssl_root_cert
+      description: |
+        The path to the ssl root certificate.
+
+        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      value:
+        type: string
+        display_default: false
+        example: "/home/datadog/server-ca.pem"
+    - name: ssl_cert
+      description: |
+        The path to the ssl certificate.
+
+        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      value:
+        type: string
+        display_default: false
+        example: "/home/datadog/client-cert.pem"
+    - name: ssl_key
+      description: |
+        The path to the ssl client key.
+
+        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      value:
+        type: string
+        display_default: false
+        example: "/home/datadog/client-key.pem"
+    - name: ssl_password
+      description: |
+        The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
+        in encrypted form on disk.
+
+        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      value:
+        type: string
+        display_default: false
+        example: "ssl_key_password"
     - name: query_timeout
       description: |
         Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
@@ -182,6 +225,12 @@ files:
         example: true
     - name: collect_default_database
       description: Include statistics from the default database 'postgres' in the check metrics.
+      value:
+        type: boolean
+        example: false
+    - name: collect_bloat_metrics
+      description: Collect metrics about table bloat. Only available when `relation` metrics are enabled.
+      enabled: true
       value:
         type: boolean
         example: false
@@ -320,17 +369,71 @@ files:
           value:
             type: integer
             example: 10000
+    - name: query_activity
+      description: Configure collection of query activity
+      options:
+        - name: enabled
+          description: |
+            Enable collection of query activity. Requires `dbm: true`, and enabling query_samples.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the query activity collection interval (in seconds). This number cannot be smaller than
+            query_samples configured collection_interval.
+          value:
+            type: number
+            example: 10
+        - name: payload_row_limit
+          description: |
+            Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger
+            than the maximum rows set, then the top N longest running transactions will be reported.
+          value:
+            type: number
+            example: 3500
     - name: obfuscator_options
-      description: Configure how the SQL obfuscator behaves.
+      description: |
+        Configure how the SQL obfuscator behaves.
+        Note: This option only applies when `dbm` is enabled.
       options:
         - name: replace_digits
           description: |
             Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
-
-            Note that this option only applies when `dbm` is enabled.
+            Note: This option also applies to extracted tables using `collect_tables`.
           value:
             type: boolean
             example: false
+        - name: collect_metadata
+          description: |
+            Set to `true` to enable the collection of metadata in your SQL statements.
+            Metadata includes things such as tables, commands, and comments.
+          value:
+            type: boolean
+            example: false
+        - name: collect_tables
+          description: |
+            Set to `false` to disable the collection of tables in your SQL statements.
+            Requires `collect_metadata: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collect_commands
+          description: |
+            Set to `false` to disable the collection of commands in your SQL statements.
+            Requires `collect_metadata: true`.
+
+            Examples: SELECT, UPDATE, DELETE, etc.
+          value:
+            type: boolean
+            example: true
+        - name: collect_comments
+          description: |
+            Set to `false` to disable the collection of comments in your SQL statements.
+            Requires `collect_metadata: true`.
+          value:
+            type: boolean
+            example: true
     - template: instances/default
       overrides:
         disable_generic_tags.hidden: False

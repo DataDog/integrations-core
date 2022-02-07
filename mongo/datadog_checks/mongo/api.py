@@ -59,7 +59,7 @@ class MongoApi(object):
             self._log.info("Using '%s' as the authentication database", self._config.auth_source)
             self._authenticate()
 
-        self.deployment_type = self._get_deployment_type()
+        self.deployment_type = self.get_deployment_type()
 
     def _authenticate(self):
         """
@@ -98,7 +98,7 @@ class MongoApi(object):
         replset_state = repl_set_payload["myState"]
         return ReplicaSetDeployment(replset_name, replset_state, cluster_role=cluster_role)
 
-    def _get_deployment_type(self):
+    def get_deployment_type(self):
         # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is
         # a mongos or mongod, if the mongod is in a shard, if it's in a replica set, etc.
         try:
@@ -112,6 +112,7 @@ class MongoApi(object):
         cluster_role = None
         if 'sharding' in options:
             if 'configDB' in options['sharding']:
+                self._log.debug("Detected MongosDeployment. Node is principal.")
                 return MongosDeployment()
             elif 'clusterRole' in options['sharding']:
                 cluster_role = options['sharding']['clusterRole']
@@ -119,8 +120,13 @@ class MongoApi(object):
         replication_options = options.get('replication', {})
         if 'replSetName' in replication_options or 'replSet' in replication_options:
             repl_set_payload = self['admin'].command("replSetGetStatus")
-            return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
+            replica_set_deployment = self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
+            is_principal = replica_set_deployment.is_principal()
+            is_principal_log = "" if is_principal else "not "
+            self._log.debug("Detected ReplicaSetDeployment. Node is %sprincipal.", is_principal_log)
+            return replica_set_deployment
 
+        self._log.debug("Detected StandaloneDeployment. Node is principal.")
         return StandaloneDeployment()
 
     def _get_alibaba_deployment_type(self):

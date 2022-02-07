@@ -8,10 +8,18 @@ import os
 import click
 
 from ....utils import read_file
-from ...annotations import annotate_display_queue, annotate_error
+from ...manifest_utils import Manifest
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_assets_from_manifest, get_manifest_file, load_manifest
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ...utils import complete_valid_checks, get_assets_from_manifest, get_manifest_file
+from ..console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_display_queue,
+    annotate_error,
+    echo_failure,
+    echo_info,
+    echo_success,
+)
 
 REQUIRED_ATTRIBUTES = {'name', 'type', 'query', 'message', 'tags', 'options', 'recommended_monitor_metadata'}
 EXTRA_NOT_ALLOWED_FIELDS = ['id']
@@ -40,7 +48,7 @@ def recommended_monitors(check):
     for check_name in checks:
         display_queue = []
         file_failed = False
-        manifest = load_manifest(check_name)
+        manifest = Manifest.load_manifest(check_name)
         monitors_relative_locations, invalid_files = get_assets_from_manifest(check_name, 'monitors')
         manifest_file = get_manifest_file(check_name)
         for file in invalid_files:
@@ -109,7 +117,7 @@ def recommended_monitors(check):
                     file_failed = True
                     display_queue.append((echo_failure, f"    {monitor_filename} must have an `integration` tag"))
 
-                display_name = manifest.get("display_name").lower()
+                display_name = manifest.get_display_name().lower()
                 monitor_name = decoded.get('name').lower()
                 if not (check_name in monitor_name or display_name in monitor_name):
                     file_failed = True

@@ -15,13 +15,13 @@ BASE_URL = "http://{0}:{1}".format(HOST, PORT)
 STATUS_URL = "{0}/server-status".format(BASE_URL)
 AUTO_STATUS_URL = "{0}?auto".format(STATUS_URL)
 
-STATUS_CONFIG = {'apache_status_url': STATUS_URL, 'tags': ['instance:first']}
+STATUS_CONFIG = {'apache_status_url': STATUS_URL, 'tags': ['instance:first'], 'disable_generic_tags': True}
 
-AUTO_CONFIG = {'apache_status_url': AUTO_STATUS_URL, 'tags': ['instance:second']}
+AUTO_CONFIG = {'apache_status_url': AUTO_STATUS_URL, 'tags': ['instance:second'], 'disable_generic_tags': True}
 
-BAD_CONFIG = {'apache_status_url': 'http://localhost:1234/server-status'}
+BAD_CONFIG = {'apache_status_url': 'http://localhost:1234/server-status', 'disable_generic_tags': True}
 
-NO_METRIC_CONFIG = {'apache_status_url': BASE_URL}
+NO_METRIC_CONFIG = {'apache_status_url': BASE_URL, 'disable_generic_tags': True}
 
 APACHE_GAUGES = [
     'apache.performance.idle_workers',

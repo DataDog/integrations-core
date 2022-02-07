@@ -6,18 +6,18 @@ from genericpath import isfile
 from yaml.error import YAMLError
 from yaml.loader import SafeLoader
 
-from datadog_checks.dev.tooling.commands.console import echo_failure
-from datadog_checks.dev.tooling.constants import get_root
+from .....constants import get_root
+from ....console import echo_failure
 
 
-def initialize_path(directory):
-    path = []
-    path.append('./')
+def initialize_path(directories):
+    path = ['./']
 
-    path.append(get_default_snmp_profiles_path())
-
-    if directory:
-        path.append(directory)
+    if directories:
+        for directory in directories:
+            path.append(directory)
+    else:
+        path.append(get_default_snmp_profiles_path())
 
     return path
 
@@ -69,8 +69,11 @@ def get_default_snmp_profiles_path():
     return join(get_root(), 'snmp', 'datadog_checks', 'snmp', 'data', 'profiles')
 
 
-def get_all_profiles_directory(directory):
-    return glob.glob(join(directory, "*.yaml"))
+def get_all_profiles_for_directories(*directories):
+    profiles = []
+    for directory in directories:
+        profiles.extend(glob.glob(join(directory, "*.yaml")))
+    return profiles
 
 
 class SafeLineLoader(SafeLoader):

@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ...annotations import annotate_error
+from ...manifest_utils import Manifest
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_eula_from_manifest, get_manifest_file
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ...utils import complete_valid_checks, get_manifest_file
+from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_debug, echo_failure, echo_info, echo_success
 
 
 @click.command('eula', context_settings=CONTEXT_SETTINGS, short_help='Validate EULA files')
@@ -25,7 +25,12 @@ def eula(check):
     echo_info(f"Validating EULA files for {len(checks)} checks...")
 
     for check_name in checks:
-        eula_relative_location, eula_exists = get_eula_from_manifest(check_name)
+        manifest = Manifest.load_manifest(check_name)
+        if not manifest:
+            echo_debug(f"Skipping validation for check: {check}; can't process manifest")
+            continue
+
+        eula_relative_location, eula_exists = manifest.get_eula_from_manifest()
         manifest_file = get_manifest_file(check_name)
 
         if not eula_exists:

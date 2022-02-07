@@ -1,4 +1,4 @@
-name: Mesos Slave
+name: Mesos
 
 files:
   - name: mesos_slave.yaml

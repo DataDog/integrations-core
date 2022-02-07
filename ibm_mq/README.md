@@ -10,10 +10,12 @@ This check monitors [IBM MQ][1] versions 8 to 9.0.
 
 The IBM MQ check is included in the [Datadog Agent][2] package.
 
-To use the IBM MQ check, you need to:
+To use the IBM MQ check, you need to make sure the [IBM MQ Client][3] 9.1+ is installed (unless a compatible version of IBM MQ server is installed on the Agent host). Currently, the IBM MQ check does not support connecting to an IBM MQ server on z/OS.
+   
+#### On Linux
 
-1. Make sure the [IBM MQ Client][3] 9.1+ is installed (unless a compatible version of IBM MQ server is installed on the Agent host).
-2. Update your `LD_LIBRARY_PATH` and `C_INCLUDE_PATH` to include the location of the libraries. (Create these two environment variables if they don’t exist yet.) For example:
+Update your `LD_LIBRARY_PATH` and `C_INCLUDE_PATH` to include the location of the libraries. (Create these two environment variables if they don’t exist yet.)
+For example, if you installed it in `/opt`:
 
 ```text
 export LD_LIBRARY_PATH=/opt/mqm/lib64:/opt/mqm/lib:$LD_LIBRARY_PATH
@@ -25,7 +27,7 @@ export C_INCLUDE_PATH=/opt/mqm/inc:$C_INCLUDE_PATH
 - Upstart (Linux): `/etc/init/datadog-agent.conf`
 - Systemd (Linux): `/lib/systemd/system/datadog-agent.service`
 - Launchd (MacOS): `~/Library/LaunchAgents/com.datadoghq.agent.plist`
-  - This only works if MacOS SIP is disabled (might not be recommended depending on your security policy). This is due to [SIP purging `LD_LIBRARY_PATH` environ variable][12].
+  - This only works if MacOS SIP is disabled (might not be recommended depending on your security policy). This is due to [SIP purging `LD_LIBRARY_PATH` environ variable][4].
 
 Example of the configuration for `systemd`:
 
@@ -112,7 +114,7 @@ Example of the configuration for `launchd`:
 </plist>
 ```
 
-Each time there is an agent update, these files are wiped and will need to be updated again.
+Each time there is an Agent update, these files are wiped and need to be updated again.
 
 Alternatively, if you are using Linux, after the MQ Client is installed ensure the runtime linker can find the libraries. For example, using ldconfig:
 
@@ -129,11 +131,16 @@ Update the bindings:
 sudo ldconfig
 ```
 
-#### Permissions and authentication
+#### On Windows
 
-There are a number of ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions.
+There is a file called `mqclient.ini` in the IBM MQ data directory. It is normally `C:\ProgramData\IBM\MQ`.
+Configure the environment variable `MQ_FILE_PATH`, to point at the data directory.
 
-**Note**: "Queue Monitoring" must be enabled and set to at least "Medium". This can be done via the MQ UI or with an mqsc command:
+### Permissions and authentication
+
+There are many ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions.
+
+**Note**: "Queue Monitoring" must be enabled and set to at least "Medium". This can be done using the MQ UI or with an mqsc command:
 
 ```text
 > /opt/mqm/bin/runmqsc
@@ -162,15 +169,15 @@ To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
-1. Edit the `ibm_mq.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your IBM MQ performance data. See the [sample ibm_mq.d/conf.yaml][4] for all available configuration options.
-   There are a number of options to configure IBM MQ, depending on how you're using it.
+1. Edit the `ibm_mq.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your IBM MQ performance data. See the [sample ibm_mq.d/conf.yaml][5] for all available configuration options.
+   There are many options to configure IBM MQ, depending on how you're using it.
 
    - `channel`: The IBM MQ channel
    - `queue_manager`: The Queue Manager named
    - `host`: The host where IBM MQ is running
    - `port`: The port that IBM MQ has exposed
 
-    If you are using a username and password setup, you can set the `username` and `password`. If no username is set, the Agent process owner is used (e.g. `dd-agent`).
+    If you are using a username and password setup, you can set the `username` and `password`. If no username is set, the Agent process owner (`dd-agent`) is used.
 
     **Note**: The check only monitors the queues you have set with the `queues` parameter
 
@@ -180,7 +187,7 @@ To configure this check for an Agent running on a host:
       - ADMIN.QUEUE.1
     ```
 
-2. [Restart the Agent][5].
+2. [Restart the Agent][6].
 
 ##### Log collection
 
@@ -206,14 +213,14 @@ _Available for Agent versions >6.0_
              pattern: "\d{2}/\d{2}/\d{4}"
    ```
 
-3. [Restart the Agent][5].
+3. [Restart the Agent][6].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
 
 ##### Metric collection
 
@@ -227,7 +234,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][7].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][8].
 
 | Parameter      | Value                                                                                                                                                              |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -238,13 +245,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's status subcommand][8] and look for `ibm_mq` under the Checks section.
+[Run the Agent's status subcommand][9] and look for `ibm_mq` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][9] for a list of metrics provided by this integration.
+See [metadata.csv][10] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -252,28 +259,28 @@ IBM MQ does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][13] for a list of service checks provided by this integration.
+See [service_checks.json][11] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][10].
+Need help? Contact [Datadog support][12].
 
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
 
-- [Monitor IBM MQ metrics and logs with Datadog][11]
+- [Monitor IBM MQ metrics and logs with Datadog][13]
 
 [1]: https://www.ibm.com/products/mq
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://developer.ibm.com/messaging/mq-downloads
-[4]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/datadog_checks/ibm_mq/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[7]: https://docs.datadoghq.com/agent/kubernetes/log/
-[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[9]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/metadata.csv
-[10]: https://docs.datadoghq.com/help/
-[11]: https://www.datadoghq.com/blog/monitor-ibmmq-with-datadog
-[12]: https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/RuntimeProtections/RuntimeProtections.html#//apple_ref/doc/uid/TP40016462-CH3-SW1
-[13]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/assets/service_checks.json
+[4]: https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/RuntimeProtections/RuntimeProtections.html#//apple_ref/doc/uid/TP40016462-CH3-SW1
+[5]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/datadog_checks/ibm_mq/data/conf.yaml.example
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[8]: https://docs.datadoghq.com/agent/kubernetes/log/
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[10]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/metadata.csv
+[11]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/assets/service_checks.json
+[12]: https://docs.datadoghq.com/help/
+[13]: https://www.datadoghq.com/blog/monitor-ibmmq-with-datadog

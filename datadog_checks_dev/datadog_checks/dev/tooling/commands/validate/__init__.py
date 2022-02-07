@@ -15,6 +15,7 @@ from .dep import dep
 from .eula import eula
 from .http import http
 from .imports import imports
+from .integration_style import integration_style
 from .jmx_metrics import jmx_metrics
 from .licenses import licenses
 from .manifest import manifest
@@ -36,11 +37,12 @@ ALL_COMMANDS = (
     dashboards,
     dep,
     eula,
-    jmx_metrics,
-    licenses,
     http,
-    legacy_signature,
     imports,
+    integration_style,
+    jmx_metrics,
+    legacy_signature,
+    licenses,
     manifest,
     metadata,
     models,

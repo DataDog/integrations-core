@@ -2,19 +2,22 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from copy import deepcopy
 
 import mock
 import pytest
 
+INSTANCE = {'prometheus_url': 'http://localhost:5000/metrics'}
+
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield
+    yield deepcopy(INSTANCE)
 
 
 @pytest.fixture
 def instance():
-    return {'prometheus_url': 'http://localhost:5000/metrics'}
+    return deepcopy(INSTANCE)
 
 
 @pytest.fixture()

@@ -19,7 +19,7 @@
     "os & system"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "ibm-i",
   "assets": {
     "configuration": {

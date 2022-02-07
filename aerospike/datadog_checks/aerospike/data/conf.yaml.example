@@ -2,15 +2,16 @@
 #
 instances:
 
-    ## @param host - string - required
+  -
+    ## @param host - string - optional - default: localhost
     ## Aerospike host to connect to.
     #
-  - host: localhost
+    # host: localhost
 
-    ## @param port - integer - required
+    ## @param port - integer - optional - default: 3000
     ## Aerospike port to connect to.
     #
-    port: 3000
+    # port: 3000
 
     ## @param username - string - optional
     ## The database user to authenticate as.
@@ -160,9 +161,9 @@ instances:
 #
 init_config:
 
-    ## @param mappings - list of strings - required
+    ## @param mappings - list of strings - optional
     ## Rate mappings. DO NOT EDIT unless you know what you're doing.
-    ## See https://github.com/aerospike/aerospike-collectd/blob/develop/aerospike_schema.yaml
+    ## See https://github.com/aerospike-community/aerospike-collectd/blob/master/aerospike_schema.yaml
     ## for the definitive list
     #
     mappings:

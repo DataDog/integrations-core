@@ -48,7 +48,7 @@ init_config:
 #
 instances:
 
-    ## @param aci_url - string - required
+    ## @param aci_url - string - optional - default: http://localhost
     ## URL to query to gather metrics.
     #
   - aci_url: http://localhost
@@ -59,7 +59,7 @@ instances:
     #
     username: datadog
 
-    ## @param pwd - string - required
+    ## @param pwd - string - optional
     ## Authentication can use either a user auth or a certificate.
     ## If using the user auth, enter the `username` and `pwd` configuration.
     #
@@ -118,6 +118,11 @@ instances:
     ## If you want to keep the cert in a separate file, enter the file path here
     #
     # cert_key_path: <CERT_KEY_PATH>
+
+    ## @param appcenter - boolean - optional - default: false
+    ## Whether appcenter user certificates are being used.
+    #
+    # appcenter: false
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
@@ -224,6 +229,20 @@ instances:
     #
     # tls_ca_cert: <CA_CERT_PATH>
 
+    ## @param tls_protocols_allowed - list of strings - optional
+    ## The expected versions of TLS/SSL when fetching intermediate certificates.
+    ## Only `SSLv3`, `TLSv1.2`, `TLSv1.3` are allowed by default. The possible values are:
+    ##   SSLv3
+    ##   TLSv1
+    ##   TLSv1.1
+    ##   TLSv1.2
+    ##   TLSv1.3
+    #
+    # tls_protocols_allowed:
+    #   - SSLv3
+    #   - TLSv1.2
+    #   - TLSv1.3
+
     ## @param headers - mapping - optional
     ## The headers parameter allows you to send specific headers with every request.
     ## You can use it for explicitly specifying the host header or adding headers for
@@ -258,6 +277,11 @@ instances:
     ## The read timeout for accessing services. Defaults to `timeout`.
     #
     # read_timeout: <READ_TIMEOUT>
+
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
 
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.

@@ -14,7 +14,7 @@
                     {
                         "id": 6448129333592938,
                         "definition": {
-                            "title": "Average LPAR CPU ",
+                            "title": "LPAR CPU",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -38,7 +38,7 @@
                                     "on_right_yaxis": false,
                                     "queries": [
                                         {
-                                            "query": "avg:ibm_i.system.cpu_usage{$host} by {host}",
+                                            "query": "avg:ibm_i.system.normalized_cpu_usage{$host} by {host}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }

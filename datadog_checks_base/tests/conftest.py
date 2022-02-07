@@ -52,6 +52,7 @@ def kerberos():
                 'WEBPORT': webserver_port,
             },
             conditions=[CheckDockerLogs(compose_file, "ReadyToConnect")],
+            attempts=2,
         ):
             yield common_config
 
@@ -115,6 +116,7 @@ def uds_path():
                 'UDS_FILENAME': uds_filename,
             },
             conditions=[WaitFor(lambda: os.path.exists(uds_path))],
+            attempts=2,
         ):
             yield uds_path
 

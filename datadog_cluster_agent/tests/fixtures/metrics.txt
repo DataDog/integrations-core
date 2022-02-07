@@ -86,6 +86,10 @@ datadog_requests{join_leader="true",status="success"} 13006
 # HELP external_metrics Number of external metrics tagged.
 # TYPE external_metrics gauge
 external_metrics{join_leader="true"} 100
+# HELP external_metrics_datadog_metrics The label valid is true if the DatadogMetric CR is valid, false otherwise
+# TYPE external_metrics_datadog_metrics gauge
+external_metrics_datadog_metrics{join_leader="true",name="dcaautogen-776576e7e4e1d57e7df8d30d63fdabe2c60edc",namespace="default",valid="false"} 1
+external_metrics_datadog_metrics{join_leader="true",name="dcaautogen-f9a56c0456c0113a1d5d9f7673fcd09c5d6638",namespace="default",valid="true"} 1
 # HELP external_metrics_delay_seconds freshness of the metric evaluated from querying Datadog
 # TYPE external_metrics_delay_seconds gauge
 external_metrics_delay_seconds{join_leader="true",metric="kubernetes.cpu.usage.total"} 41
@@ -302,3 +306,6 @@ transactions__success_bytes{domain="https://1-13-1-app.agent.datadoghq.com",endp
 transactions__success_bytes{domain="https://1-13-1-app.agent.datadoghq.com",endpoint="intake"} 5867
 transactions__success_bytes{domain="https://1-13-1-app.agent.datadoghq.com",endpoint="series_v1"} 849
 transactions__success_bytes{domain="https://orchestrator.datadoghq.com",endpoint="orchestrator"} 22668
+# HELP secret_backend__elapsed_ms Elapsed time of secret backend invocation
+# TYPE secret_backend__elapsed_ms gauge
+secret_backend__elapsed_ms{command="/usr/local/bin/secrets",exit_code="0"} 156

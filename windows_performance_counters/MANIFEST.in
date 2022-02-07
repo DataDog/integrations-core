@@ -1,0 +1,10 @@
+graft datadog_checks
+graft tests
+
+include MANIFEST.in
+include README.md
+include requirements.in
+include requirements-dev.txt
+include manifest.json
+
+global-exclude *.py[cod] __pycache__

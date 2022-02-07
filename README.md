@@ -36,7 +36,7 @@ An up-to-date list of all developers authorized to sign releases can be found [h
 [5]: https://github.com/DataDog/integrations-extras
 [6]: https://docs.datadoghq.com/developers/integrations/
 [7]: https://github.com/DataDog/datadog-agent
-[8]: https://docs.datadoghq.com/agent/
+[8]: https://app.datadoghq.com/account/settings#agent
 [9]: https://docs.pytest.org/en/latest/
 [10]: https://packaging.python.org/tutorials/distributing-packages/
 [11]: https://docs.datadoghq.com

@@ -374,6 +374,10 @@ class Redis(AgentCheck):
                         # Send 1 if the key exists as a string
                         lengths[text_key]["length"] += 1
                         lengths_overall[text_key] += 1
+                    elif key_type == 'stream':
+                        keylen = db_conn.xlen(key)
+                        lengths[text_key]["length"] += 1
+                        lengths_overall[text_key] += 1
                     else:
                         # If the type is unknown, it might be because the key doesn't exist,
                         # which can be because the list is empty. So always send 0 in that case.
@@ -488,9 +492,17 @@ class Redis(AgentCheck):
         try:
             slowlogs = conn.slowlog_get(max_slow_entries)
         except TypeError as e:
-            # https://github.com/andymccurdy/redis-py/issues/1475
+            # This catch is needed in PY2 because there is a known issue that has only been fixed after redis
+            # dropped python 2 support
+            # issue: https://github.com/andymccurdy/redis-py/issues/1475
+            # fix: https://github.com/andymccurdy/redis-py/pull/1352
+            # TODO: remove once PY2 is no longer supported
             self.log.exception(e)
-            self.log.error('There was an error retrieving slowlog, these metrics will be skipped')
+            self.log.error(
+                'There was an error retrieving slowlog, these metrics will be skipped. This issue is fixed on Agent 7+.'
+                ' You can find more information about upgrading to agent 7 in '
+                'https://docs.datadoghq.com/agent/versions/upgrade_to_agent_v7/?tab=linux'
+            )
             slowlogs = []
 
         # Find slowlog entries between last timestamp and now using start_time

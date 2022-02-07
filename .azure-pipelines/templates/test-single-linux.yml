@@ -13,13 +13,16 @@ parameters:
   repo: 'core'
   ispr: false
   run_py2_tests: true  # Whether or not to run python2 tests.
+  run_py3_tests: true  # Whether or not to run python3 tests.
   force_base_package: false
   pip_cache_config: null
   coverage: true
+  dd_url: https://app.datadoghq.com
 
 jobs:
 - job: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux'
   displayName: '${{ parameters.display }}'
+  timeoutInMinutes: 90
 
   services:
     ${{ if eq(parameters.ddtrace_flag, '--ddtrace') }}:
@@ -31,6 +34,8 @@ jobs:
   variables:
     ${{ if not(eq(parameters.run_py2_tests, 'true')) }}:
       TOX_SKIP_ENV: py27.*  # Don't run py2 tests
+    ${{ if not(eq(parameters.run_py3_tests, 'true')) }}:
+      TOX_SKIP_ENV: py3.*  # Don't run py2 tests
     ${{ if eq(parameters.ddtrace_flag, '--ddtrace') }}:
       DD_ENV: ci
       DD_SERVICE: ddev-integrations-${{ parameters.repo }}
@@ -45,6 +50,7 @@ jobs:
       repo: ${{ parameters.repo }}
       pip_cache_config: ${{ parameters.pip_cache_config }}
       run_py2_tests: ${{ parameters.run_py2_tests }}
+      dd_url: ${{ parameters.dd_url }}
 
   - template: './set-up-integrations.yml'
     parameters:

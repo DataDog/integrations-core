@@ -188,7 +188,7 @@ def test_query_error_system_info(instance):
         system_info = check.fetch_system_info()
 
     assert system_info is None
-    check.log.error.assert_not_called()
+    check.log.error.assert_called_once()
 
 
 def test_set_up_query_manager_error(instance):
@@ -206,6 +206,7 @@ def test_set_up_query_manager_7_2(instance):
     with mock.patch('datadog_checks.ibm_i.IbmICheck.fetch_system_info', return_value=SystemInfo("host", 7, 2)):
         check.set_up_query_manager()
     assert check._query_manager is not None
+    assert check._query_manager.hostname == "host"
     assert len(check._query_manager.queries) == 8
 
 
@@ -216,6 +217,22 @@ def test_set_up_query_manager_7_4(instance):
     with mock.patch('datadog_checks.ibm_i.IbmICheck.fetch_system_info', return_value=SystemInfo("host", 7, 4)):
         check.set_up_query_manager()
     assert check._query_manager is not None
+    assert check._query_manager.hostname == "host"
+    assert len(check._query_manager.queries) == 10
+
+
+def test_set_up_query_manager_7_4_hostname(instance):
+    instance = {
+        **instance,
+        **{'hostname': 'overridden-hostname'},
+    }
+    check = IbmICheck('ibm_i', {}, [instance])
+    check.log = mock.MagicMock()
+    check.load_configuration_models()
+    with mock.patch('datadog_checks.ibm_i.IbmICheck.fetch_system_info', return_value=SystemInfo("host", 7, 4)):
+        check.set_up_query_manager()
+    assert check._query_manager is not None
+    assert check._query_manager.hostname == "overridden-hostname"
     assert len(check._query_manager.queries) == 10
 
 
@@ -241,6 +258,7 @@ def test_check_query_error(aggregator, instance):
         assert check._query_manager is None
         check.check(instance)
         assert check._query_manager is not None
+        assert check._query_manager.hostname == "host"
         check.check(instance)
     aggregator.assert_service_check("ibm_i.can_connect", count=2, status=AgentCheck.CRITICAL)
     aggregator.assert_all_metrics_covered()

@@ -11,7 +11,8 @@
   "support": "core",
   "supported_os": [
     "linux",
-    "mac_os"
+    "mac_os",
+    "windows"
   ],
   "public_title": "Datadog-IBM MQ Integration",
   "categories": [

@@ -201,6 +201,8 @@
     type: string
   description: |
     If your services require AWS Signature Version 4 signing, set the host.
+    This only needs the hostname and does not require the protocol (HTTP, HTTPS, and more).
+    For example, if connecting to https://us-east-1.amazonaws.com/, set `aws_host` to `us-east-1.amazonaws.com`.
 
     Note: This setting is not necessary for official integrations.
 
@@ -261,6 +263,23 @@
     containing several CA certificates in PEM format. If a directory, the directory
     must have been processed using the c_rehash utility supplied with OpenSSL. See:
     https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+- name: tls_protocols_allowed
+  value:
+    example:
+    - 'SSLv3'
+    - 'TLSv1.2'
+    - 'TLSv1.3'
+    type: array
+    items:
+      type: string
+  description: |
+    The expected versions of TLS/SSL when fetching intermediate certificates.
+    Only `SSLv3`, `TLSv1.2`, `TLSv1.3` are allowed by default. The possible values are:
+      SSLv3
+      TLSv1
+      TLSv1.1
+      TLSv1.2
+      TLSv1.3
 - name: headers
   value:
     example:
@@ -296,6 +315,12 @@
   value:
     type: number
   description: The read timeout for accessing services. Defaults to `timeout`.
+- name: request_size
+  description: |
+    The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+  value:
+    example: 16
+    type: number
 - name: log_requests
   value:
     example: false

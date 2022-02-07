@@ -25,5 +25,10 @@ CONFIG = {
 }
 
 E2E_METADATA = {
-    'start_commands': ['apt-get update', 'apt-get install -y build-essential libxslt-dev', 'pip install ibm_db']
+    'docker_volumes': ['{}/requirements.txt:/dev/requirements.txt'.format(os.path.join(HERE, 'docker'))],
+    'start_commands': [
+        'apt-get update',
+        'apt-get install -y build-essential libxslt-dev',
+        'pip install -r /dev/requirements.txt',
+    ],
 }

@@ -58,15 +58,17 @@ class QueueMetricCollector(object):
                 if queue_name not in self.config.DISALLOWED_QUEUES:
                     self.get_pcf_queue_status_metrics(queue_manager, queue_name, queue_tags)
                     self.get_pcf_queue_reset_metrics(queue_manager, queue_name, queue_tags)
-                self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags)
+                self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags, hostname=self.config.hostname)
             except Exception as e:
                 self.warning('Cannot connect to queue %s: %s', queue_name, e)
-                self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.CRITICAL, queue_tags)
+                self.service_check(
+                    self.QUEUE_SERVICE_CHECK, AgentCheck.CRITICAL, queue_tags, hostname=self.config.hostname
+                )
 
     def discover_queues(self, queue_manager):
         # type: (pymqi.QueueManager) -> Set[str]
         discovered_queues = set()
-        if self.config.auto_discover_queues or self.config.queue_regex:
+        if self.config.auto_discover_queues and not self.config.queue_patterns or self.config.queue_regex:
             discovered_queues.update(self._discover_queues(queue_manager, '*'))
 
         if self.config.queue_patterns:
@@ -107,9 +109,14 @@ class QueueMetricCollector(object):
                     self.warning("Error discovering queue: %s", e)
             else:
                 for queue_info in response:
-                    queue = to_string(queue_info[pymqi.CMQC.MQCA_Q_NAME]).strip()
-                    self.log.debug("Discovered queue: %s", queue)
-                    queues.append(queue)
+                    queue = queue_info.get(pymqi.CMQC.MQCA_Q_NAME, None)
+                    if queue:
+                        queue_name = to_string(queue).strip()
+                        self.log.debug("Discovered queue: %s", queue_name)
+                        queues.append(queue_name)
+                    else:
+                        self.log.debug('Discovered queue with empty name, skipping.')
+                        continue
                 self.log.debug("%s queues discovered", str(len(queues)))
             finally:
                 # Close internal reply queue to prevent filling up a dead-letter queue.
@@ -132,10 +139,12 @@ class QueueMetricCollector(object):
                 m = queue_manager.inquire(pymqi_value)
                 mname = '{}.queue_manager.{}'.format(metrics.METRIC_PREFIX, mname)
                 self.send_metric(GAUGE, mname, m, tags=tags)
-                self.service_check(self.QUEUE_MANAGER_SERVICE_CHECK, AgentCheck.OK, tags)
+                self.service_check(self.QUEUE_MANAGER_SERVICE_CHECK, AgentCheck.OK, tags, hostname=self.config.hostname)
             except pymqi.Error as e:
                 self.warning("Error getting queue manager stats: %s", e)
-                self.service_check(self.QUEUE_MANAGER_SERVICE_CHECK, AgentCheck.CRITICAL, tags)
+                self.service_check(
+                    self.QUEUE_MANAGER_SERVICE_CHECK, AgentCheck.CRITICAL, tags, hostname=self.config.hostname
+                )
 
     def queue_stats(self, queue_manager, queue_name, tags):
         """
@@ -202,17 +211,33 @@ class QueueMetricCollector(object):
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
                 for mname, values in iteritems(metrics.pcf_metrics()):
-                    failure_value = values['failure']
-                    pymqi_value = values['pymqi_value']
-                    mname = '{}.queue.{}'.format(metrics.METRIC_PREFIX, mname)
-                    m = int(queue_info[pymqi_value])
+                    metric_name = '{}.queue.{}'.format(metrics.METRIC_PREFIX, mname)
+                    try:
+                        if callable(values):
+                            metric_value = values(self.config.qm_timezone, queue_info)
+                            if metric_value is not None:
+                                self.send_metric(GAUGE, metric_name, metric_value, tags=tags)
+                            else:
+                                msg = """
+                                    Unable to get {}, turn on queue level monitoring to access these metrics for {}.
+                                    Check `DISPLAY QSTATUS({}) MONITOR`. Returned result: {}.
+                                    """
+                                msg.format(metric_name, queue_name, queue_name, metric_value)
+                                self.log.debug(msg)
+                        else:
+                            failure_value = values['failure']
+                            pymqi_value = values['pymqi_value']
+                            metric_value = int(queue_info.get(pymqi_value, None))
 
-                    if m > failure_value:
-                        self.send_metric(GAUGE, mname, m, tags=tags)
-                    else:
-                        msg = "Unable to get {}, turn on queue level monitoring to access these metrics for {}"
-                        msg = msg.format(mname, queue_name)
-                        self.log.debug(msg)
+                            if metric_value > failure_value:
+                                self.send_metric(GAUGE, metric_name, metric_value, tags=tags)
+                            else:
+                                msg = "Unable to get {}, turn on queue level monitoring to access these metrics for {}"
+                                msg = msg.format(metric_name, queue_name)
+                                self.log.debug(msg)
+                    except Exception as e:
+                        msg = "Unable to get metric {} from queue {}. Error is {}.".format(metric_name, queue_name, e)
+                        self.log.warning(msg)
         finally:
             if pcf is not None:
                 pcf.disconnect()

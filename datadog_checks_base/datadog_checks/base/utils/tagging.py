@@ -18,7 +18,6 @@ GENERIC_TAGS = {
     'host_name',
     'hostname',
     'host',
-    'server',
     'service',
     'version',
 }

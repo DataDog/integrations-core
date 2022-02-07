@@ -747,5 +747,5 @@ class PrometheusScraperMixin(object):
         return not (isnan(val) or isinf(val))
 
     def set_prometheus_timeout(self, instance, default_value=10):
-        """ extract `prometheus_timeout` directly from the instance configuration """
+        """extract `prometheus_timeout` directly from the instance configuration"""
         self.prometheus_timeout = instance.get('prometheus_timeout', default_value)

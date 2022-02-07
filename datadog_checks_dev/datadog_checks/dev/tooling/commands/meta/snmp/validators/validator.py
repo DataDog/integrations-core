@@ -3,9 +3,8 @@ from posixpath import join
 
 import jsonschema
 
-from datadog_checks.dev.tooling.constants import get_root
-
-from .utils import find_profile_in_path, get_all_profiles_directory, get_profile
+from .....constants import get_root
+from .utils import find_profile_in_path, get_all_profiles_for_directories, get_profile
 
 
 class ValidationResult(object):
@@ -215,7 +214,7 @@ class SysobjectidValidator(ProfileValidator):
         sysobjectids = self.extract_sysobjectids_profile(profile)
         self.check_sysobjectids_are_duplicated(sysobjectids, profile)
         for directory in path:
-            for profile in get_all_profiles_directory(directory):
+            for profile in get_all_profiles_for_directories(directory):
                 sysobjectids = self.extract_sysobjectids_profile(profile)
                 self.check_sysobjectids_are_duplicated(sysobjectids, profile)
         self.report_errors()
@@ -251,9 +250,48 @@ class SysobjectidValidator(ProfileValidator):
                 self.duplicated[sysobjectid] = self.used_sysobjid[sysobjectid]
 
 
+class TableColumnHasTagValidator(ProfileValidator):
+    """
+    Validator responsible to check if all metrics related to a column in a profile
+    have tags to identify which row/entity they belong to
+    """
+
+    def validate(self, profile, path):
+        file_contents = find_profile_in_path(profile, path)
+        metrics = file_contents.get('metrics', {})
+        for metric in metrics:
+            if metric.get('table'):
+                if not metric.get('metric_tags'):
+                    self.fail(
+                        "'metric_tags' is missing for table metric defined in line {}.".format(metric.get('__line__'))
+                    )
+                else:
+                    all_metric_tags_are_valid, lines = self.check_metric_tags_are_valid(metric.get('metric_tags'))
+                    if not all_metric_tags_are_valid:
+                        self.fail(
+                            "metric_tables defined in lines {} are not valid. \
+                        \nmetric_tags must have 'column' or 'index' value".format(
+                                lines
+                            )
+                        )
+
+        if not self.result.failed:
+            self.success("All metric tables have tags associated")
+
+    def check_metric_tags_are_valid(self, metric_tags):
+        all_tags_are_valid = True
+        lines = []
+        for metric_tag in metric_tags:
+            if not (metric_tag.get('column') or metric_tag.get('index')):
+                all_tags_are_valid = False
+                lines.append(metric_tag.get('__line__'))
+
+        return all_tags_are_valid, lines
+
+
 def get_all_single_validators():
     # type () -> list(ProfileValidator)
-    return [SchemaValidator(), DuplicateOIDValidator()]
+    return [SchemaValidator(), DuplicateOIDValidator(), TableColumnHasTagValidator()]
 
 
 def get_all_group_validators():

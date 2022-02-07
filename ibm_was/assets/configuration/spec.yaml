@@ -17,26 +17,6 @@ files:
               type: string
               example: http://localhost:<PORT>/wasPerfTool/servlet/perfservlet
           - template: instances/http
-          - name: collect_jdbc_stats
-            description: Whether or not to collect JDBC Connection Pool stats
-            value:
-              type: boolean
-              example: true
-          - name: collect_jvm_stats
-            description: Whether or not to collect JVM Runtime stats
-            value:
-              type: boolean
-              example: true
-          - name: collect_servlet_session_stats
-            description: Whether or not to collect Servlet Session Manager stats
-            value:
-              type: boolean
-              example: true
-          - name: collect_thread_pool_stats
-            description: Whether or not to collect Thread Pools stats
-            value:
-              type: boolean
-              example: true
           - template: instances/db
             overrides:
               use_global_custom_queries.hidden: true

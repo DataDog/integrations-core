@@ -13,13 +13,54 @@ from ....fs import (
     read_file_lines,
     write_file_lines,
 )
-from ...annotations import annotate_display_queue, annotate_error
 from ...configuration import ConfigSpec
 from ...configuration.consumers import ModelConsumer
 from ...constants import get_root
+from ...manifest_utils import Manifest
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_config_spec, get_license_header, get_models_location, get_version_string
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ...utils import (
+    CUSTOM_FILES,
+    complete_valid_checks,
+    get_config_models_documentation,
+    get_license_header,
+    get_models_location,
+    get_version_string,
+)
+from ..console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_display_queue,
+    annotate_error,
+    echo_debug,
+    echo_failure,
+    echo_info,
+    echo_success,
+)
+
+
+def standardize_new_lines(lines):
+    # If a new line is at the start or end of a line, remove it and add it to the list
+    # This way a file is the same regardless of how newlines are added when it's generated
+    result = []
+    for line in lines:
+        if line == '\n':
+            result.append(line)
+        elif line.endswith('\n'):
+            result.append(line[:-1])
+            result.append('\n')
+        elif line.startswith('\n'):
+            result.append('\n')
+            result.append(line[1:])
+        else:
+            result.append(line)
+    return result
+
+
+def content_matches(current_model_file_lines, expected_model_file_lines):
+    all_current_lines = standardize_new_lines(current_model_file_lines)
+    all_expected_lines = standardize_new_lines(expected_model_file_lines)
+
+    return all_current_lines == all_expected_lines
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate configuration data models')
@@ -43,8 +84,8 @@ def models(ctx, check, sync, verbose):
     files_failed = {}
     num_files = 0
 
-    license_header_lines = get_license_header().splitlines(True)
-    license_header_lines.append('\n')
+    license_header_lines = get_license_header().splitlines(True) + ['\n']
+    documentation_header_lines = ['\n'] + get_config_models_documentation().splitlines(True) + ['\n']
 
     code_formatter = ModelConsumer.create_code_formatter()
 
@@ -55,7 +96,11 @@ def models(ctx, check, sync, verbose):
             source = 'test'
             version = '0.0.1'
         else:
-            spec_path = get_config_spec(check)
+            manifest = Manifest.load_manifest(check)
+            if not manifest:
+                echo_debug(f"Skipping validation for check: {check}; can't process manifest")
+                continue
+            spec_path = manifest.get_config_spec()
             if not file_exists(spec_path):
                 continue
 
@@ -104,30 +149,37 @@ def models(ctx, check, sync, verbose):
                     check_display_queue.append((echo_failure, error))
                 continue
 
-            model_file_lines = contents.splitlines(True)
+            generated_model_file_lines = contents.splitlines(True)
             current_model_file_lines = []
             expected_model_file_lines = []
+
             if file_exists(model_file_path):
-                # No contents indicates a custom file
                 if not contents:
                     continue
 
-                current_model_file_lines.extend(read_file_lines(model_file_path))
+                current_model_file_lines = read_file_lines(model_file_path)
 
-                for line in current_model_file_lines:
-                    if not line.startswith('#'):
-                        break
+                if model_file in CUSTOM_FILES and (len(current_model_file_lines) + 1) > len(license_header_lines):
+                    # validators.py and deprecations.py are custom files, they should only be rendered the first time
+                    continue
 
-                    expected_model_file_lines.append(line)
-
-                expected_model_file_lines.extend(model_file_lines)
+                expected_model_file_lines.extend(license_header_lines)
+                if model_file not in CUSTOM_FILES:
+                    expected_model_file_lines.extend(documentation_header_lines)
+                expected_model_file_lines.extend(generated_model_file_lines)
             else:
                 if not community_check:
                     expected_model_file_lines.extend(license_header_lines)
+                if model_file not in CUSTOM_FILES:
+                    expected_model_file_lines.extend(documentation_header_lines)
 
-                expected_model_file_lines.extend(model_file_lines)
+                expected_model_file_lines.extend(generated_model_file_lines)
 
-            if current_model_file_lines != expected_model_file_lines:
+            # If we're re-generating a file, we should ensure we do not change the license date
+            if len(current_model_file_lines) > 0:
+                expected_model_file_lines[0] = current_model_file_lines[0]
+
+            if not current_model_file_lines or not content_matches(current_model_file_lines, expected_model_file_lines):
                 if sync:
                     echo_info(f'Writing data model file to `{model_file_path}`')
                     ensure_parent_dir_exists(model_file_path)

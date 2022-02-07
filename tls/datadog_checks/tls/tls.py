@@ -86,7 +86,7 @@ class TLSCheck(AgentCheck):
         )
 
         # https://docs.python.org/3/library/ssl.html#ssl.SSLSocket.version
-        self._allowed_versions = get_protocol_versions(
+        self.allowed_versions = get_protocol_versions(
             self.instance.get('allowed_versions', self.init_config.get('allowed_versions', []))
         )
 
@@ -127,7 +127,7 @@ class TLSCheck(AgentCheck):
             return
 
         self.log.debug('Checking protocol version')
-        if version in self._allowed_versions:
+        if version in self.allowed_versions:
             self.log.debug('Protocol version is allowed')
             self.service_check(SERVICE_CHECK_VERSION, self.OK, tags=self._tags)
         else:

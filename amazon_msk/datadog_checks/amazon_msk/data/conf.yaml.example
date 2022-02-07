@@ -85,6 +85,20 @@ instances:
     #
     # prometheus_metrics_path: /metrics
 
+    ## @param boto_config - mapping - optional
+    ## Specify additional configuration options for the botocore Config object.
+    ##
+    ## Note: Configuration values set in your AWS config file can be singularly overwritten
+    ## through the use of a Config object.
+    ## https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html
+    #
+    # boto_config:
+    #   proxies_config:
+    #     proxy_client_cert: /path/of/certificate
+    #     proxy_ca_bundle: path/to/ca/bundle
+    #     proxy_use_forwarding_for_https: false
+    #   signature_version: s3v4
+
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.
     ## All configuration options will use the prefix-less name.
@@ -146,6 +160,8 @@ instances:
     ## A mapping of labels where metrics with matching label name and values are ignored. To match
     ## all values of a label, set it to `true`.
     ##
+    ## Note: Labels filtering happens before `rename_labels`.
+    ##
     ## For example, the following configuration instructs the check to exclude all metrics with
     ## a label `worker` or a label `pid` with the value of either `23` or `42`.
     ##
@@ -159,8 +175,20 @@ instances:
 
     ## @param exclude_labels - list of strings - optional
     ## A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
+    ## May be used in conjunction with `include_labels`.
+    ## Labels defined in `excluded labels` will take precedence in case of overlap.
+    ##
+    ## Note: Labels filtering happens before `rename_labels`.
     #
     # exclude_labels: []
+
+    ## @param include_labels - list of strings - optional
+    ## A list of labels to include. May be used in conjunction with `exclude_labels`.
+    ## Labels defined in `excluded labels` will take precedence in case of overlap.
+    ##
+    ## Note: Labels filtering happens before `rename_labels`.
+    #
+    # include_labels: []
 
     ## @param rename_labels - mapping - optional
     ## A mapping of label names to how they should be renamed.
@@ -212,6 +240,14 @@ instances:
     #
     # collect_counters_with_distributions: false
 
+    ## @param use_process_start_time - boolean - optional - default: false
+    ## Whether to enable a heuristic for reporting counter values on the first scrape. When true,
+    ## the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
+    ## initial value can be assumed for counters. This requires keeping metrics in memory until the entire
+    ## response is received.
+    #
+    # use_process_start_time: false
+
     ## @param share_labels - mapping - optional
     ## This mapping allows for the sharing of labels across multiple metrics. The keys represent the
     ## exposed metrics from which to share labels, and the values are mappings that configure the
@@ -249,11 +285,6 @@ instances:
     ## Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
     #
     # cache_shared_labels: true
-
-    ## @param request_size - number - optional - default: 16
-    ## The number of kibibytes (KiB) to read from the `openmetrics_endpoint` at a time.
-    #
-    # request_size: 16
 
     ## @param raw_line_filters - list of strings - optional
     ## A list of regular expressions used to exclude lines read from the `openmetrics_endpoint`
@@ -460,6 +491,8 @@ instances:
 
     ## @param aws_host - string - optional
     ## If your services require AWS Signature Version 4 signing, set the host.
+    ## This only needs the hostname and does not require the protocol (HTTP, HTTPS, and more).
+    ## For example, if connecting to https://us-east-1.amazonaws.com/, set `aws_host` to `us-east-1.amazonaws.com`.
     ##
     ## Note: This setting is not necessary for official integrations.
     ##
@@ -518,6 +551,20 @@ instances:
     #
     # tls_ca_cert: <CA_CERT_PATH>
 
+    ## @param tls_protocols_allowed - list of strings - optional
+    ## The expected versions of TLS/SSL when fetching intermediate certificates.
+    ## Only `SSLv3`, `TLSv1.2`, `TLSv1.3` are allowed by default. The possible values are:
+    ##   SSLv3
+    ##   TLSv1
+    ##   TLSv1.1
+    ##   TLSv1.2
+    ##   TLSv1.3
+    #
+    # tls_protocols_allowed:
+    #   - SSLv3
+    #   - TLSv1.2
+    #   - TLSv1.3
+
     ## @param headers - mapping - optional
     ## The headers parameter allows you to send specific headers with every request.
     ## You can use it for explicitly specifying the host header or adding headers for
@@ -552,6 +599,11 @@ instances:
     ## The read timeout for accessing services. Defaults to `timeout`.
     #
     # read_timeout: <READ_TIMEOUT>
+
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
 
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.

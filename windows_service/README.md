@@ -38,17 +38,17 @@ The Windows Service check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][12] for a list of service checks provided by this integration.
+See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
-- [Monitoring Windows Server 2012][9]
-- [How to collect Windows Server 2012 metrics][10]
-- [Monitoring Windows Server 2012 with Datadog][11]
+- [Monitoring Windows Server 2012][10]
+- [How to collect Windows Server 2012 metrics][11]
+- [Monitoring Windows Server 2012 with Datadog][12]
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -57,8 +57,8 @@ Need help? Contact [Datadog support][8].
 [5]: https://docs.datadoghq.com/developers/metrics/custom_metrics/
 [6]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[8]: https://docs.datadoghq.com/help/
-[9]: https://www.datadoghq.com/blog/monitoring-windows-server-2012
-[10]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics
-[11]: https://www.datadoghq.com/blog/windows-server-monitoring
-[12]: https://github.com/DataDog/integrations-core/blob/master/windows_service/assets/service_checks.json
+[8]: https://github.com/DataDog/integrations-core/blob/master/windows_service/assets/service_checks.json
+[9]: https://docs.datadoghq.com/help/
+[10]: https://www.datadoghq.com/blog/monitoring-windows-server-2012
+[11]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics
+[12]: https://www.datadoghq.com/blog/windows-server-monitoring

@@ -16,7 +16,7 @@ from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 
 class Ceph(AgentCheck):
-    """ Collect metrics and events from ceph """
+    """Collect metrics and events from ceph"""
 
     DEFAULT_CEPH_CMD = '/usr/bin/ceph'
     DEFAULT_CEPH_CLUSTER = 'ceph'

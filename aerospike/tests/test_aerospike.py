@@ -23,17 +23,17 @@ from .common import (
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_check(aggregator, instance):
+def test_check(aggregator, instance, dd_run_check):
     check = AerospikeCheck('aerospike', {}, [instance])
     # sleep to make sure client is available
     time.sleep(30)
     for _ in range(10):
-        check.check(None)
+        dd_run_check(check)
         time.sleep(1)
     _test_check(aggregator)
 
 
-def test_version_metadata(aggregator, instance, datadog_agent):
+def test_version_metadata(aggregator, instance, datadog_agent, dd_run_check):
 
     check = AerospikeCheck('aerospike', {}, [instance])
     check.check_id = 'test:123'
@@ -41,7 +41,7 @@ def test_version_metadata(aggregator, instance, datadog_agent):
     # sleep to make sure client is available
     time.sleep(30)
     for _ in range(10):
-        check.check(None)
+        dd_run_check(check)
         time.sleep(1)
 
     raw_version = check.get_info("build")[0]

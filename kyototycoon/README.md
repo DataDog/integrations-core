@@ -63,11 +63,11 @@ The KyotoTycoon check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][8] for a list of service checks provided by this integration.
+See [service_checks.json][7] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][8].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
@@ -76,5 +76,5 @@ Need help? Contact [Datadog support][7].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/kyototycoon/metadata.csv
-[7]: https://docs.datadoghq.com/help/
-[8]: https://github.com/DataDog/integrations-core/blob/master/kyototycoon/assets/service_checks.json
+[7]: https://github.com/DataDog/integrations-core/blob/master/kyototycoon/assets/service_checks.json
+[8]: https://docs.datadoghq.com/help/

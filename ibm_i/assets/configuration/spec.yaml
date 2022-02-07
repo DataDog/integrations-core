@@ -12,6 +12,13 @@ files:
         The name of the IBM i system.
       value:
         type: string
+    - name: hostname
+      description: |
+        Hostname used for this instance's metrics. If unset, HOST_NAME from SYSIBMADM.ENV_SYS_INFO will be used.
+      value:
+        type: string
+        minLength: 1
+        maxLength: 255
     - name: username
       description: |
         The user profile name used to authenticate to the system.

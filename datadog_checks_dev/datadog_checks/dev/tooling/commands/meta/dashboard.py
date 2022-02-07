@@ -9,8 +9,8 @@ import click
 import requests
 
 from ....fs import ensure_dir_exists, path_join, write_file
-from ...constants import get_root
-from ...utils import get_valid_integrations, load_manifest, write_manifest
+from ...manifest_utils import Manifest
+from ...utils import get_valid_integrations, write_manifest
 from ..console import CONTEXT_SETTINGS, abort, echo_success
 
 BOARD_ID_PATTERN = r'{site}/[^/]+/([^/]+)'
@@ -82,13 +82,13 @@ def export(ctx, url, integration, author):
 
     file_name = new_payload['title'].strip().lower()
     if integration:
-        manifest = load_manifest(integration)
+        manifest = Manifest.load_manifest(integration)
 
         match = ''
         if file_name.startswith(integration):
             match = integration
         else:
-            display_name = manifest['display_name'].lower()
+            display_name = (manifest.get_display_name() or '').lower()
             if file_name.startswith(display_name):
                 match = display_name
 
@@ -98,11 +98,11 @@ def export(ctx, url, integration, author):
                 file_name = new_file_name
 
         file_name = f"{file_name.replace(' ', '_')}.json"
-        location = path_join(get_root(), integration, 'assets', 'dashboards')
+        location = manifest.get_dashboards_location()
         ensure_dir_exists(location)
 
-        manifest['assets']['dashboards'][new_payload['title']] = f'assets/dashboards/{file_name}'
-        write_manifest(manifest, integration)
+        manifest.add_dashboard(new_payload['title'], file_name)
+        write_manifest(manifest._manifest_json, integration)
     else:
         file_name = f"{file_name.replace(' ', '_')}.json"
         location = os.getcwd()

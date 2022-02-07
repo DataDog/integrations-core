@@ -108,6 +108,7 @@ class PodListUtils(object):
         self.pods = {}
         self.static_pod_uids = set()
         self.cache = {}
+        self.cache_namespace_exclusion = {}
         self.pod_uid_by_name_tuple = {}
         self.container_id_by_name_tuple = {}
         self.container_id_to_namespace = {}
@@ -187,4 +188,23 @@ class PodListUtils(object):
 
         excluded = c_is_excluded(ctr.get("name"), ctr.get("image"), self.container_id_to_namespace.get(cid, ""))
         self.cache[cid] = excluded
+        return excluded
+
+    def is_namespace_excluded(self, namespace):
+        """
+        Queries the agent container filter interface to check whether a
+        Kubernetes namespace should be excluded.
+
+        The result is cached between calls to avoid the python-go switching
+        cost.
+        :param namespace: namespace
+        :return: bool
+        """
+        if not namespace:
+            return False
+
+        # Sent empty container name and image because we are interested in
+        # applying only the namespace exclusion rules.
+        excluded = c_is_excluded('', '', namespace)
+        self.cache_namespace_exclusion[namespace] = excluded
         return excluded

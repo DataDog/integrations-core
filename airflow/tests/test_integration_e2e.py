@@ -10,9 +10,9 @@ from . import common
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_service_checks_integration(aggregator):
+def test_service_checks_integration(aggregator, dd_run_check):
     check = AirflowCheck('airflow', common.FULL_CONFIG, [common.INSTANCE])
-    check.check(None)
+    dd_run_check(check)
 
     assert_service_checks(aggregator)
 

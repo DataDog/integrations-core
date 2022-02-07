@@ -14,6 +14,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: '0'
 
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -33,66 +35,82 @@ jobs:
 
     - name: Run agent requirements validation
       run: |
-        ddev validate agent-reqs
+        ddev validate agent-reqs changed
+
+    - name: Run CI validation
+      run: |
+        ddev validate ci
 
     - name: Run configuration validation
       run: |
-        ddev validate config
+        ddev validate config changed
 
     - name: Run dashboard validation
       run: |
-        ddev validate dashboards
+        ddev validate dashboards changed
+
+    - name: Run dependency validation
+      run: |
+        ddev validate dep
 
     - name: Run HTTP wrapper validation
       run: |
-        ddev validate http
+        ddev validate http changed
 
     - name: Run imports validation
       run: |
-        ddev validate imports
+        ddev validate imports changed
+
+    - name: Run integration style and best practices validation
+      run: |
+        ddev validate integration-style changed --verbose
 
     - name: Run JMX metrics validation
       run: |
-        ddev validate jmx-metrics
-
-    - name: Run metadata validation
-      run: |
-        ddev validate metadata
+        ddev validate jmx-metrics changed
 
     - name: Run legacy signature validation
       run: |
-        ddev validate legacy-signature
+        ddev validate legacy-signature changed
 
     - name: Run licenses validation
       run: |
         ddev validate licenses
 
+    - name: Run manifest validation
+      run: |
+        ddev validate manifest changed
+
+    - name: Run metadata validation
+      run: |
+        ddev validate metadata changed
+
     - name: Run models validation
       run: |
-        ddev validate models
+        ddev validate models changed
         
     - name: Run package validation
       run: |
-        ddev validate package
+        ddev validate package changed
         
     - name: Run readmes validation
       run: |
-        ddev validate readmes
+        ddev validate readmes changed
 
     - name: Run recommended monitors validation
       run: |
-        ddev validate recommended-monitors
+        ddev validate recommended-monitors changed
 
     - name: Run saved views validation
       run: |
-        ddev validate saved-views
+        ddev validate saved-views changed
 
     - name: Run service checks validation
       run: |
-        ddev validate service-checks
+        ddev validate service-checks changed
 
     - name: Comment PR on failure
-      if: failure()
+      if: ${{ failure() && github.event.pull_request.merged != true }}
       uses: actions/github-script@0.3.0
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}

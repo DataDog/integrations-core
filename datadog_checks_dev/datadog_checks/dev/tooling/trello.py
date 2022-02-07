@@ -36,6 +36,7 @@ class TrelloClient:
             'Tools and Libraries': '5ef373fb33b7b805120d5011',
             'Runtime-Security': '5f3148683b7428276f0f2133',
             'Infra-Integrations': '5f9f9e09af18c18c628d80ee',
+            'Remote-Config': '619262c91ae65d40bafb576f',
         }
 
         # Maps the team to the trello team label
@@ -53,6 +54,7 @@ class TrelloClient:
             'team/intg-tools-libs': 'Tools and Libraries',
             'team/agent-security': 'Runtime-Security',
             'team/infra-integrations': 'Infra-Integrations',
+            'team/remote-config': 'Remote-Config',
         }
 
         # Maps the team to the github team
@@ -69,6 +71,7 @@ class TrelloClient:
             'team/intg-tools-libs': 'integrations-tools-and-libraries',
             'team/agent-security': 'agent-security',
             'team/infra-integrations': 'infrastructure-integrations',
+            'team/remote-config': 'remote-config',
         }
 
         # Maps the trello label name to trello label ID
@@ -86,6 +89,7 @@ class TrelloClient:
             'Tools and Libraries': '5ab12740841642c2a8829053',
             'Runtime-Security': '5f314f0a364ee16ea4e78868',
             'Infra-Integrations': '5f9fa48537fb6633584b0e3e',
+            'Remote-Config': '61939089d51b6f842dba4c8f',
         }
 
         self.progress_columns = {

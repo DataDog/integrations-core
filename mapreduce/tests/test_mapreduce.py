@@ -28,7 +28,7 @@ from .common import (
 pytestmark = pytest.mark.unit
 
 
-def test_check(aggregator, mocked_request):
+def test_check(aggregator, dd_run_check, mocked_request):
     """
     Test that we get all the metrics we're supposed to get
     """
@@ -38,7 +38,7 @@ def test_check(aggregator, mocked_request):
     mapreduce = MapReduceCheck('mapreduce', INIT_CONFIG, [instance])
 
     # Run the check once
-    mapreduce.check(instance)
+    dd_run_check(mapreduce)
 
     # expected tags contains both mapreduce_cluster and cluster_name tags
     expected_tags = COMMON_TAGS + CLUSTER_TAGS
@@ -94,7 +94,7 @@ def test_check(aggregator, mocked_request):
     aggregator.assert_all_metrics_covered()
 
 
-def test_auth(aggregator, mocked_auth_request):
+def test_auth(aggregator, dd_run_check, mocked_auth_request):
     """
     Test that we get all the metrics we're supposed to get
     """
@@ -104,7 +104,7 @@ def test_auth(aggregator, mocked_auth_request):
     mapreduce = MapReduceCheck('mapreduce', INIT_CONFIG, [instance])
 
     # Run the check once
-    mapreduce.check(instance)
+    dd_run_check(mapreduce)
 
     # Check the service tests
     service_check_tags = ["url:{}".format(RM_URI)] + CUSTOM_TAGS
@@ -116,7 +116,7 @@ def test_auth(aggregator, mocked_auth_request):
     )
 
 
-def test_disable_legacy_cluster_tag(aggregator, mocked_request):
+def test_disable_legacy_cluster_tag(aggregator, dd_run_check, mocked_request):
     """
     Test that we get all the metrics we're supposed to get
     """
@@ -127,7 +127,7 @@ def test_disable_legacy_cluster_tag(aggregator, mocked_request):
     mapreduce = MapReduceCheck('mapreduce', INIT_CONFIG, [instance])
 
     # Run the check once
-    mapreduce.check(instance)
+    dd_run_check(mapreduce)
 
     # Only mapreduce_cluster tag
     expected_tags = COMMON_TAGS

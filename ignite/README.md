@@ -29,7 +29,7 @@ To configure this check for an Agent running on a host:
 
    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
    You can specify the metrics you are interested in by editing the configuration below.
-   To learn how to customize the metrics to collect visit the [JMX Checks documentation][5] for more detailed instructions.
+   To learn how to customize the metrics to collect see the [JMX Checks documentation][5] for more information.
    If you need to monitor more metrics, contact [Datadog support][6].
 
 2. [Restart the Agent][7]
@@ -110,7 +110,7 @@ Need help? Contact [Datadog support][4].
 
 
 [1]: https://ignite.apache.org/
-[2]: https://docs.datadoghq.com/agent/
+[2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://apacheignite.readme.io/docs/logging#section-log4j
 [4]: https://github.com/DataDog/integrations-core/blob/master/ignite/datadog_checks/ignite/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/integrations/java/

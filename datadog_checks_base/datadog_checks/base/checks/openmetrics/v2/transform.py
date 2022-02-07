@@ -79,7 +79,16 @@ class MetricTransformer:
 
         self.logger.debug('Skipping metric `%s` as it is not defined in `metrics`', metric_name)
 
+    def add_custom_transformer(self, name, transformer, pattern=False):
+        if not pattern:
+            name = '^{}$'.format(name)
+        self.metric_patterns.append((re.compile(name), {'__transformer__': transformer}))
+
     def compile_transformer(self, config):
+        custom_transformer = config.pop('__transformer__', None)
+        if custom_transformer:
+            return None, custom_transformer
+
         metric_name = config.pop('name')
         if not isinstance(metric_name, str):
             raise TypeError('field `name` must be a string')

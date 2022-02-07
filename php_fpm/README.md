@@ -10,7 +10,7 @@ The PHP-FPM check monitors the state of your FPM pool and tracks request perform
 
 ### Installation
 
-The PHP-FPM check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your servers that use PHP-FPM.
+The PHP-FPM check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
 ### Configuration
 
@@ -138,11 +138,11 @@ The PHP-FPM check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][10] for a list of service checks provided by this integration.
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][10].
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/php_fpm/images/phpfpmoverview.png
@@ -153,5 +153,5 @@ Need help? Contact [Datadog support][9].
 [6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/php_fpm/metadata.csv
-[9]: https://docs.datadoghq.com/help/
-[10]: https://github.com/DataDog/integrations-core/blob/master/php_fpm/assets/service_checks.json
+[9]: https://github.com/DataDog/integrations-core/blob/master/php_fpm/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/

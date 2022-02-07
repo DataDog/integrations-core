@@ -25,7 +25,7 @@ def test_get_instance_metrics_lt_92(integration_check, pg_instance):
     check = integration_check(pg_instance)
 
     res = check.metrics_cache.get_instance_metrics(VersionInfo(9, 1, 0))
-    assert res['metrics'] == util.COMMON_METRICS
+    assert res['metrics'] == dict(util.COMMON_METRICS, **util.DBM_MIGRATED_METRICS)
 
 
 def test_get_instance_metrics_92(integration_check, pg_instance):
@@ -36,7 +36,8 @@ def test_get_instance_metrics_92(integration_check, pg_instance):
     check = integration_check(pg_instance)
 
     res = check.metrics_cache.get_instance_metrics(VersionInfo(9, 2, 0))
-    assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
+    c_metrics = dict(util.COMMON_METRICS, **util.DBM_MIGRATED_METRICS)
+    assert res['metrics'] == dict(c_metrics, **util.NEWER_92_METRICS)
 
 
 def test_get_instance_metrics_state(integration_check, pg_instance):
@@ -47,10 +48,11 @@ def test_get_instance_metrics_state(integration_check, pg_instance):
     check = integration_check(pg_instance)
 
     res = check.metrics_cache.get_instance_metrics(VersionInfo(9, 2, 0))
-    assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
+    c_metrics = dict(util.COMMON_METRICS, **util.DBM_MIGRATED_METRICS)
+    assert res['metrics'] == dict(c_metrics, **util.NEWER_92_METRICS)
 
     res = check.metrics_cache.get_instance_metrics('foo')  # metrics were cached so this shouldn't be called
-    assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
+    assert res['metrics'] == dict(c_metrics, **util.NEWER_92_METRICS)
 
 
 def test_get_instance_metrics_database_size_metrics(integration_check, pg_instance):
@@ -62,6 +64,7 @@ def test_get_instance_metrics_database_size_metrics(integration_check, pg_instan
     check = integration_check(pg_instance)
 
     expected = util.COMMON_METRICS
+    expected.update(util.DBM_MIGRATED_METRICS)
     expected.update(util.NEWER_92_METRICS)
     expected.update(util.DATABASE_SIZE_METRICS)
     res = check.metrics_cache.get_instance_metrics(VersionInfo(9, 2, 0))

@@ -8,7 +8,16 @@ from ....fs import file_exists, path_join, read_file, write_file
 from ...constants import get_root
 from ...testing import coverage_sources
 from ...utils import code_coverage_enabled, get_testable_checks, load_manifest
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
+from ..console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_display_queue,
+    annotate_error,
+    echo_failure,
+    echo_info,
+    echo_success,
+    echo_warning,
+)
 
 REPOS = {
     'core': {
@@ -85,6 +94,7 @@ def get_attribute_from_job(job, attribute):
 
 
 def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
+    display_queue = []
     jobs_definition_relative_path = repo_data['jobs_definition_relative_path']
     if not jobs_definition_relative_path:
         echo_info("Skipping since jobs path isn't defined")
@@ -107,7 +117,8 @@ def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
 
         if check_name not in testable_checks:
             success = False
-            echo_failure('Defined check `{}` has no tox.ini file'.format(check_name))
+            message = 'Defined check `{}` has no tox.ini file'.format(check_name)
+            annotate_error(jobs_definition_path, message)
             continue
 
         if check_name in cached_display_names:
@@ -129,7 +140,7 @@ def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
                 echo_success('Set `displayName` to `{}`'.format(display_name))
             else:
                 success = False
-                echo_failure(message)
+                display_queue.append((echo_failure, message))
 
         if not job_name.startswith(display_name):
             message = 'Job `{}` has an incorrect `displayName` ({}), it should be `{}`'.format(
@@ -143,7 +154,7 @@ def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
                 echo_success('Set `displayName` to `{}`'.format(display_name))
             else:
                 success = False
-                echo_failure(message)
+                display_queue.append((echo_failure, message))
 
         if not get_attribute_from_job(job, 'os'):
             message = 'Job `{}` has no `os` attribute'.format(check_name)
@@ -155,7 +166,7 @@ def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
                 echo_success('Set `os` to `linux`')
             else:
                 success = False
-                echo_failure(message)
+                display_queue.append((echo_failure, message))
 
     missing_checks = testable_checks - defined_checks - repo_data['ignored_missing_jobs']
     if missing_checks:
@@ -182,7 +193,7 @@ def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
             jobs[:] = sort_jobs(jobs)
         else:
             success = False
-            echo_failure(message)
+            display_queue.append((echo_failure, message))
 
     if not (missing_checks and fix):
         sorted_jobs = sort_jobs(jobs)
@@ -197,10 +208,15 @@ def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
                 echo_success('Sorted all jobs')
             else:
                 success = False
-                echo_failure(message)
+                display_queue.append((echo_failure, message))
 
     if not success:
-        echo_info('Try running `ddev validate ci --fix`')
+        message = 'Try running `ddev validate ci --fix`'
+        echo_info(message)
+        display_queue.append((echo_failure, message))
+        for func, message in display_queue:
+            func(message)
+        annotate_display_queue(jobs_definition_path, display_queue)
         abort()
     elif fixed:
         output = yaml.safe_dump(jobs_definition, default_flow_style=False, sort_keys=False)
@@ -224,6 +240,7 @@ def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_name
     defined_checks = set()
     success = True
     fixed = False
+    display_queue = []
 
     for project, data in list(projects.items()):
         if project == 'default':
@@ -232,20 +249,25 @@ def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_name
         project_flags = data.get('flags', [])
         if len(project_flags) != 1:
             success = False
-            echo_failure(f'Project `{project}` must have exactly one flag')
+            message = f'Project `{project}` must have exactly one flag'
+            echo_failure(message)
+            annotate_error(codecov_config_path, message)
             continue
 
         check_name = project_flags[0]
         if check_name in defined_checks:
             success = False
-            echo_failure(f'Check `{check_name}` is defined as a flag in more than one project')
+            message = f'Check `{check_name}` is defined as a flag in more than one project'
+            echo_failure(message)
+            annotate_error(codecov_config_path, message)
             continue
 
         defined_checks.add(check_name)
 
         if check_name not in testable_checks:
             success = False
-            echo_failure(f'Defined project `{check_name}` has no tox.ini file')
+            message = f'Defined project `{check_name}` has no tox.ini file'
+            echo_failure(codecov_config_path, message)
             continue
 
         # Project names cannot contain spaces, see:
@@ -271,7 +293,7 @@ def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_name
                 echo_success(f'Renamed project to `{display_name}`')
             else:
                 success = False
-                echo_failure(message)
+                display_queue.append((echo_failure, message))
 
     # This works because we ensure there is a 1 to 1 correspondence between projects and checks (flags)
     missing_projects = testable_checks - defined_checks - repo_data['ignored_missing_jobs']
@@ -298,7 +320,7 @@ def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_name
                 echo_success(f'Added project `{display_name}`')
         else:
             success = False
-            echo_failure(message)
+            display_queue.append((echo_failure, message))
 
     flags = codecov_config.setdefault('flags', {})
     defined_checks = set()
@@ -308,7 +330,9 @@ def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_name
 
         if flag not in testable_checks:
             success = False
-            echo_failure(f'Defined check `{flag}` has no tox.ini file')
+            message = f'Defined check `{flag}` has no tox.ini file'
+            echo_failure(message)
+            annotate_error(codecov_config_path, message)
             continue
 
         expected_coverage_paths = get_coverage_sources(flag)
@@ -324,7 +348,7 @@ def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_name
                 echo_success(f'Configured coverage paths for flag `{flag}`')
             else:
                 success = False
-                echo_failure(message)
+                display_queue.append((echo_failure, message))
 
         if not data.get('carryforward'):
             message = f'Flag `{flag}` must have carryforward set to true'
@@ -336,7 +360,7 @@ def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_name
                 echo_success(f'Enabled the carryforward feature for flag `{flag}`')
             else:
                 success = False
-                echo_failure(message)
+                display_queue.append((echo_failure, message))
 
     missing_flags = testable_checks - defined_checks - repo_data['ignored_missing_jobs']
     for check in set(missing_flags):
@@ -356,10 +380,14 @@ def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_name
                 echo_success(f'Added flag `{missing_check}`')
         else:
             success = False
-            echo_failure(message)
+            display_queue.append((echo_failure, message))
 
     if not success:
-        echo_info('Try running `ddev validate ci --fix`')
+        message = 'Try running `ddev validate ci --fix`'
+        display_queue.append((echo_info, message))
+        annotate_display_queue(codecov_config_path, display_queue)
+        for func, message in display_queue:
+            func(message)
         abort()
     elif fixed:
         codecov_config['coverage']['status']['project'] = dict(sort_projects(projects))
@@ -382,10 +410,10 @@ def ci(ctx, fix):
     testable_checks = get_testable_checks()
     cached_display_names = {}
 
-    echo_info("Validating CI Configuration...", nl=False)
+    echo_info("Validating CI Configuration...")
     validate_master_jobs(fix, repo_data, testable_checks, cached_display_names)
     echo_success("Success", nl=True)
 
-    echo_info("Validating Code Coverage Configuration...", nl=False)
+    echo_info("Validating Code Coverage Configuration...")
     validate_coverage_flags(fix, repo_data, testable_checks, cached_display_names)
     echo_success("Success", nl=True)

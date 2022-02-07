@@ -1,26 +1,30 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import difflib
+
 import click
 import yaml
 
-from datadog_checks.dev.tooling.annotations import annotate_error
-from datadog_checks.dev.tooling.config_validator.validator import validate_config
-from datadog_checks.dev.tooling.config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
-from datadog_checks.dev.tooling.configuration import ConfigSpec
-from datadog_checks.dev.tooling.configuration.consumers import ExampleConsumer
-
 from ....fs import basepath, file_exists, path_join, read_file, write_file
+from ...config_validator.validator import validate_config
+from ...config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
+from ...configuration import ConfigSpec
+from ...configuration.consumers import ExampleConsumer
+from ...manifest_utils import Manifest
 from ...testing import process_checks_option
-from ...utils import (
-    complete_valid_checks,
-    get_config_files,
-    get_config_spec,
-    get_data_directory,
-    get_version_string,
-    load_manifest,
+from ...utils import complete_valid_checks, get_config_files, get_data_directory, get_version_string
+from ..console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_error,
+    echo_debug,
+    echo_failure,
+    echo_info,
+    echo_success,
+    echo_waiting,
+    echo_warning,
 )
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
 FILE_INDENT = ' ' * 8
 
@@ -55,8 +59,13 @@ def config(ctx, check, sync, verbose):
     for check in checks:
         check_display_queue = []
 
-        spec_path = get_config_spec(check)
-        if not file_exists(spec_path):
+        manifest = Manifest.load_manifest(check)
+        if not manifest:
+            echo_debug(f"Skipping validation for check: {check}; can't process manifest")
+            continue
+
+        spec_file_path = manifest.get_config_spec()
+        if not file_exists(spec_file_path):
             validate_config_legacy(check, check_display_queue, files_failed, files_warned, file_counter)
             if verbose:
                 check_display_queue.append(lambda: echo_warning('No spec found', indent=True))
@@ -74,30 +83,30 @@ def config(ctx, check, sync, verbose):
             source = 'datadog'
             version = None
         else:
-            display_name = load_manifest(check).get('display_name', check)
+            display_name = manifest.get_display_name()
             source = check
             version = get_version_string(check)
 
-        spec_file = read_file(spec_path)
-        default_temp = validate_default_template(spec_file)
-        spec = ConfigSpec(spec_file, source=source, version=version)
+        spec_file_content = read_file(spec_file_path)
+        default_temp = validate_default_template(spec_file_content)
+        spec = ConfigSpec(spec_file_content, source=source, version=version)
         spec.load()
 
         if not default_temp:
             message = "Missing default template in init_config or instances section"
             check_display_queue.append(lambda **kwargs: echo_failure(message))
-            annotate_error(spec_path, message)
+            annotate_error(spec_file_path, message)
 
         if spec.errors:
-            files_failed[spec_path] = True
+            files_failed[spec_file_path] = True
             for error in spec.errors:
                 check_display_queue.append(lambda error=error, **kwargs: echo_failure(error, **kwargs))
         else:
             if spec.data['name'] != display_name:
-                files_failed[spec_path] = True
+                files_failed[spec_file_path] = True
                 message = f"Spec  name `{spec.data['name']}` should be `{display_name}`"
                 check_display_queue.append(lambda **kwargs: echo_failure(message, **kwargs))
-                annotate_error(spec_path, message)
+                annotate_error(spec_file_path, message)
 
             example_location = get_data_directory(check)
             example_consumer = ExampleConsumer(spec.data)
@@ -115,7 +124,13 @@ def config(ctx, check, sync, verbose):
                             write_file(example_file_path, contents)
                         else:
                             files_failed[example_file_path] = True
-                            message = f'File `{example_file}` is not in sync, run "ddev validate config -s"'
+                            message = f'File `{example_file}` is not in sync, run "ddev validate config {check} -s"'
+                            if file_exists(example_file_path):
+                                example_file = read_file(example_file_path)
+                                for diff_line in difflib.context_diff(
+                                    example_file.splitlines(), contents.splitlines(), "current", "expected"
+                                ):
+                                    message += f'\n{diff_line}'
                             check_display_queue.append(
                                 lambda example_file=example_file, **kwargs: echo_failure(message, **kwargs)
                             )

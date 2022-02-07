@@ -7,8 +7,8 @@ import warnings
 import urllib3
 from requests.adapters import HTTPAdapter
 from urllib3.exceptions import SecurityWarning
-from urllib3.packages.ssl_match_hostname import match_hostname
 from urllib3.util import ssl_
+from urllib3.util.ssl_match_hostname import match_hostname
 
 
 class WeakCiphersHTTPSConnection(urllib3.connection.VerifiedHTTPSConnection):
@@ -91,7 +91,7 @@ class WeakCiphersPoolManager(urllib3.poolmanager.PoolManager):
 
 
 class WeakCiphersAdapter(HTTPAdapter):
-    """"Transport adapter" that allows us to use TLS_RSA_WITH_RC4_128_MD5."""
+    """ "Transport adapter" that allows us to use TLS_RSA_WITH_RC4_128_MD5."""
 
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
         # Rewrite of the

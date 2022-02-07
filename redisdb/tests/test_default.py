@@ -63,6 +63,9 @@ def test_redis_default(aggregator, dd_run_check, check, redis_auth, redis_instan
     db.lpush("test_list", 1)
     db.lpush("test_list", 2)
     db.lpush("test_list", 3)
+    version = StrictVersion(db.info().get('redis_version'))
+    if version >= StrictVersion('5.0.0'):
+        db.xadd("test_stream", {"foo": "bar"})
     db.set("key1", "value")
     db.set("key2", "value")
     db.setex("expirekey", 1000, "expirevalue")
@@ -85,14 +88,17 @@ def test_redis_default(aggregator, dd_run_check, check, redis_auth, redis_instan
             aggregator.assert_metric(name, tags=expected)
 
     aggregator.assert_metric('redis.key.length', 3, count=1, tags=expected_db + ['key:test_list', 'key_type:list'])
+    if version >= StrictVersion('5.0.0'):
+        aggregator.assert_metric(
+            'redis.key.length', 1, count=1, tags=expected_db + ['key:test_stream', 'key_type:stream']
+        )
     aggregator.assert_metric('redis.net.connections', count=1, tags=expected + ['source:unknown'])
 
     aggregator.assert_metric('redis.net.maxclients')
 
     # in the old tests these was explicitly asserted, keeping it like that
     assert 'redis.net.commands' in aggregator.metric_names
-    version = db.info().get('redis_version')
-    if StrictVersion(version) >= StrictVersion('2.6.0'):
+    if version >= StrictVersion('2.6.0'):
         # instantaneous_ops_per_sec info is only available on redis>=2.6
         assert 'redis.net.instantaneous_ops_per_sec' in aggregator.metric_names
     db.flushdb()

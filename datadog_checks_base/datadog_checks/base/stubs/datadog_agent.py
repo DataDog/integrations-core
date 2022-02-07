@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
+from datadog_checks.base.utils.serialization import json
+
 
 class DatadogAgentStub(object):
     """
@@ -19,6 +21,7 @@ class DatadogAgentStub(object):
         self._cache = {}
         self._config = self.get_default_config()
         self._hostname = 'stubbed.hostname'
+        self._process_start_time = 0
 
     def get_default_config(self):
         return {'enable_metadata_collection': True, 'disable_unsafe_yaml': True}
@@ -27,6 +30,7 @@ class DatadogAgentStub(object):
         self._metadata.clear()
         self._cache.clear()
         self._config = self.get_default_config()
+        self._process_start_time = 0
 
     def assert_metadata(self, check_id, data):
         actual = {}
@@ -73,12 +77,23 @@ class DatadogAgentStub(object):
         return self._cache.get(key, '')
 
     def obfuscate_sql(self, query, options=None):
-        # This is only whitespace cleanup, NOT obfuscation. Full obfuscation implementation is in go code.
+        # Full obfuscation implementation is in go code.
+        if options:
+            # Options provided is a JSON string because the Go stub requires it, whereas
+            # the python stub does not for things such as testing.
+            if json.loads(options).get('return_json_metadata', False):
+                return json.dumps({'query': re.sub(r'\s+', ' ', query or '').strip(), 'metadata': {}})
         return re.sub(r'\s+', ' ', query or '').strip()
 
     def obfuscate_sql_exec_plan(self, plan, normalize=False):
         # Passthrough stub: obfuscation implementation is in Go code.
         return plan
+
+    def get_process_start_time(self):
+        return self._process_start_time
+
+    def set_process_start_time(self, time):
+        self._process_start_time = time
 
 
 # Use the stub as a singleton

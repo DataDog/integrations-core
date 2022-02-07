@@ -13,6 +13,14 @@ init_config:
     #
     loader: core
 
+    ## @param use_device_id_as_hostname - boolean - optional - default: false
+    ## Use `device:<DEVICE_ID>` (device_id is composed of `<NAMESPACE>:<DEVICE_IP_ADDRESS>`) as `hostname`
+    ## for metrics and service checks (meaning that metrics and services checks will have
+    ## `host:device:<DEVICE_ID>` as tag).
+    ## This option is needed for custom tags.
+    #
+    use_device_id_as_hostname: true
+
     ## @param oid_batch_size - integer - optional - default: 10
     ## The number of OIDs handled by each batch. Increasing this number improves performance but
     ## uses more resources.
@@ -91,6 +99,13 @@ init_config:
     #
     # ignore_nonincreasing_oid: false
 
+    ## @param namespace - string - optional - default: default
+    ## Namespace can be used to disambiguate devices with same IPs.
+    ## Changing namespace will cause devices being recreated in NDM app.
+    ## Only available using corecheck SNMP integration with `loader: core` config.
+    #
+    # namespace: default
+
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
@@ -144,7 +159,15 @@ instances:
     #
     loader: core
 
-    ## @param oid_batch_size - integer - optional - default: 10
+    ## @param use_device_id_as_hostname - boolean - optional - default: false
+    ## Use `device:<DEVICE_ID>` (device_id is composed of `<NAMESPACE>:<DEVICE_IP_ADDRESS>`) as `hostname`
+    ## for metrics and service checks (meaning that metrics and services checks will have
+    ## `host:device:<DEVICE_ID>` as tag).
+    ## This option is needed for custom tags.
+    #
+    use_device_id_as_hostname: true
+
+    ## @param oid_batch_size - integer - optional - default: 5
     ## The number of OIDs handled by each batch. Increasing this number improves performance but
     ## uses more resources.
     ## Only available for corecheck implementation (`loader: core`).
@@ -162,7 +185,7 @@ instances:
 
     ## @param authProtocol - string - optional
     ## Authentication type to use when connecting to your SNMP devices.
-    ## Valid types: MD5, SHA, SHA224, SHA256, SHA384, SHA512.
+    ## Available options are: MD5, SHA, SHA224, SHA256, SHA384, SHA512
     ## Defaults to MD5 when `authKey` is specified.
     ## SNMP v3 specific configuration.
     #
@@ -176,7 +199,8 @@ instances:
 
     ## @param privProtocol - string - optional
     ## Privacy type to use when connecting to your SNMP devices.
-    ## Valid types: DES, 3DES, AES, AES192, AES256, AES192C, AES256C.
+    ## Available options are: DES, AES (128 bits), AES192, AES192C, AES256, AES256C
+    ## Protocol only available for Python implementation: 3DES
     ## Defaults to DES when `privKey` is specified.
     ## SNMP v3 specific configuration.
     #
@@ -247,13 +271,11 @@ instances:
 
     ## @param network_address - string - optional
     ## The network address of the devices to scan for monitor.
-    ## Only available using python SNMP integration.
     #
     # network_address: <NETWORK_ADDRESS>
 
     ## @param ignored_ip_addresses - list of strings - optional
     ## A list of IP addresses to ignore when scanning the network.
-    ## Only available using python SNMP integration.
     #
     # ignored_ip_addresses:
     #   - <IP_ADDRESS_1>
@@ -309,6 +331,13 @@ instances:
     ##         the OIDs are refreshed only according to the refresh interval.
     #
     # refresh_oids_cache_interval: 3600
+
+    ## @param namespace - string - optional - default: default
+    ## Namespace can be used to disambiguate devices with same IPs.
+    ## Changing namespace will cause devices being recreated in NDM app.
+    ## Only available using corecheck SNMP integration with `loader: core` config.
+    #
+    # namespace: default
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

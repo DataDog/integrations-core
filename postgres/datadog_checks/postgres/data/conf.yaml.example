@@ -41,6 +41,12 @@ instances:
     #
     # dbname: <DBNAME>
 
+    ## @param reported_hostname - string - optional
+    ## Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
+    ## and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+    #
+    # reported_hostname: <REPORTED_HOSTNAME>
+
     ## @param dbstrict - boolean - optional - default: false
     ## Whether to restrict the scope of the check to just the database in question.
     ## Set to `true` if you only want to gather metrics from the database provided in the dbname parameter.
@@ -76,6 +82,35 @@ instances:
     ## Note: `true` is an alias for `require`, and `false` is an alias for `disable`.
     #
     # ssl: 'false'
+
+    ## @param ssl_root_cert - string - optional - default: false
+    ## The path to the ssl root certificate.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_root_cert: /home/datadog/server-ca.pem
+
+    ## @param ssl_cert - string - optional - default: false
+    ## The path to the ssl certificate.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_cert: /home/datadog/client-cert.pem
+
+    ## @param ssl_key - string - optional - default: false
+    ## The path to the ssl client key.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_key: /home/datadog/client-key.pem
+
+    ## @param ssl_password - string - optional - default: false
+    ## The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
+    ## in encrypted form on disk.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_password: ssl_key_password
 
     ## @param query_timeout - integer - optional - default: 5000
     ## Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
@@ -152,6 +187,11 @@ instances:
     ## Include statistics from the default database 'postgres' in the check metrics.
     #
     # collect_default_database: false
+
+    ## @param collect_bloat_metrics - boolean - optional - default: false
+    ## Collect metrics about table bloat. Only available when `relation` metrics are enabled.
+    #
+    collect_bloat_metrics: false
 
     ## @param collect_wal_metrics - boolean - optional - default: false
     ## Collect metrics about WAL file age.
@@ -270,16 +310,63 @@ instances:
         #
         # seen_samples_cache_maxsize: 10000
 
+    ## Configure collection of query activity
+    #
+    query_activity:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of query activity. Requires `dbm: true`, and enabling query_samples.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the query activity collection interval (in seconds). This number cannot be smaller than
+        ## query_samples configured collection_interval.
+        #
+        # collection_interval: 10
+
+        ## @param payload_row_limit - number - optional - default: 3500
+        ## Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger
+        ## than the maximum rows set, then the top N longest running transactions will be reported.
+        #
+        # payload_row_limit: 3500
+
     ## Configure how the SQL obfuscator behaves.
+    ## Note: This option only applies when `dbm` is enabled.
     #
     obfuscator_options:
 
         ## @param replace_digits - boolean - optional - default: false
         ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
-        ##
-        ## Note that this option only applies when `dbm` is enabled.
+        ## Note: This option also applies to extracted tables using `collect_tables`.
         #
         # replace_digits: false
+
+        ## @param collect_metadata - boolean - optional - default: false
+        ## Set to `true` to enable the collection of metadata in your SQL statements.
+        ## Metadata includes things such as tables, commands, and comments.
+        #
+        # collect_metadata: false
+
+        ## @param collect_tables - boolean - optional - default: true
+        ## Set to `false` to disable the collection of tables in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        #
+        # collect_tables: true
+
+        ## @param collect_commands - boolean - optional - default: true
+        ## Set to `false` to disable the collection of commands in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        ##
+        ## Examples: SELECT, UPDATE, DELETE, etc.
+        #
+        # collect_commands: true
+
+        ## @param collect_comments - boolean - optional - default: true
+        ## Set to `false` to disable the collection of comments in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        #
+        # collect_comments: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

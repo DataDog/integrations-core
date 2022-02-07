@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:activemq"
-      ]
+      "query_filter": "integration:activemq",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

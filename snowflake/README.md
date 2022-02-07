@@ -5,7 +5,7 @@
 This check monitors [Snowflake][1] through the Datadog Agent. Snowflake is a SaaS-analytic data warehouse and runs completely on cloud infrastructure. 
 This integration monitors credit usage, billing, storage, query metrics, and more.
 
-<div class="alert alert-info"><bold>NOTE: Metrics are collected via queries to Snowflake. Queries made by the Datadog integration are billable by Snowflake.</bold></div>
+<div class="alert alert-info"><bold>Note</bold>: Metrics are collected with queries to Snowflake. Queries made by the Datadog integration are billable by Snowflake.</div>
 
 ## Setup
 
@@ -16,7 +16,7 @@ Follow the instructions below to install and configure this check for an Agent r
 The Snowflake check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
-**Note**: Snowflake check is not available in Datadog Agent 6 using Python 2. To use snowflake on Agent 6 check [this doc][15] to switch the python version of your agent or upgrade to Agent 7.
+**Note**: The Snowflake check is not available in Datadog Agent v6 using Python 2. To use Snowflake on Agent v6 see [Use Python 3 with Datadog Agent v6][3] or upgrade to Agent v7.
 
 <div class="alert alert-warning">For users configuring the integration with Agent <code>v7.23.0</code>, upgrade the integration version to <code>2.0.1</code> to take advantage of latest features.
 You can upgrade the integration with the following <a href=https://docs.datadoghq.com/agent/guide/integration-management/#install>command</a>:<br>
@@ -32,7 +32,7 @@ datadog-agent integration install datadog-snowflake==2.0.1
 1. Create a Datadog specific role and user to monitor Snowflake. In Snowflake, run the following to create a custom role with access to the ACCOUNT_USAGE schema.
 
     Note: By default, this integration monitors the `SNOWFLAKE` database and `ACCOUNT_USAGE` schema.
-    This database is available by default and only viewable by users in the `ACCOUNTADMIN` role or [any role granted by the ACCOUNTADMIN][8].
+    This database is available by default and only viewable by users in the `ACCOUNTADMIN` role or [any role granted by the ACCOUNTADMIN][4].
     
 
     ```text
@@ -67,7 +67,7 @@ datadog-agent integration install datadog-snowflake==2.0.1
     ```
    
 
-2. Edit the `snowflake.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Snowflake performance data. See the [sample snowflake.d/conf.yaml][3] for all available configuration options.
+2. Edit the `snowflake.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Snowflake performance data. See the [sample snowflake.d/conf.yaml][5] for all available configuration options.
 
     ```yaml
         ## @param account - string - required
@@ -115,22 +115,22 @@ datadog-agent integration install datadog-snowflake==2.0.1
     Snowflake metrics are aggregated by day, you can increase the interval to reduce the number of queries.<br>
     <bold>Note</bold>: Snowflake ACCOUNT_USAGE views have a <a href="https://docs.snowflake.com/en/sql-reference/account-usage.html#data-latency">known latency</a> of 45 minutes to 3 hours.</div>
 
-3. [Restart the Agent][4].
+3. [Restart the Agent][6].
 
 #### Proxy configuration
 
-Snowflake recommends setting [environment variables for proxy configuration][12].
+Snowflake recommends setting [environment variables for proxy configuration][7].
 
-You can also set the `proxy_host`, `proxy_port`, `proxy_user`, and `proxy_password` under `init_config` in the [snowflake.d/conf.yaml][3].
+You can also set the `proxy_host`, `proxy_port`, `proxy_user`, and `proxy_password` under `init_config` in the [snowflake.d/conf.yaml][5].
 
-**NOTE**: Snowflake automatically formats the proxy configurations and sets [standard proxy environment variables][13]. 
+**NOTE**: Snowflake automatically formats the proxy configurations and sets [standard proxy environment variables][8]. 
 These variables also impact every requests from integrations, including orchestrators like Docker, ECS, and Kubernetes.
 
 ### Snowflake custom queries
 
 The Snowflake integration supports custom queries. By default, the integration connects to the shared `SNOWFLAKE` database and `ACCOUNT_USAGE` schema. 
 
-If you want to run custom queries in a different schema or database, add another instance to the [sample snowflake.d/conf.yaml][3] and specify the `database` and `schema` options.
+To run custom queries in a different schema or database, add another instance to the [sample snowflake.d/conf.yaml][5] and specify the `database` and `schema` options.
 Ensure the user and role has access to the specified database or schema.
 
 #### Configuration options
@@ -163,7 +163,7 @@ custom_queries:
 ```
 
 #### Example
-The following example is a query that will count all queries in the [`QUERY_HISTORY` view][9] tagged by database, schema, and warehouse names.
+The following example is a query that counts all queries in the [`QUERY_HISTORY` view][9] tagged by database, schema, and warehouse names.
 
 ```TEXT
 select count(*), DATABASE_NAME, SCHEMA_NAME, WAREHOUSE_NAME from QUERY_HISTORY group by 2, 3, 4;
@@ -171,7 +171,7 @@ select count(*), DATABASE_NAME, SCHEMA_NAME, WAREHOUSE_NAME from QUERY_HISTORY g
 
 ##### Configuration
 
-The custom query configuration in `instances` will look like the following:
+The custom query configuration in `instances` looks like the following:
 
 ```yaml
 custom_queries:
@@ -191,20 +191,25 @@ custom_queries:
 
 ##### Validation
 
-To verify the result, search for the metrics using [Metrics Summary][11]:
+To verify the result, search for the metrics using [Metrics Summary][10]:
 
-![Snowflake Metric Summary][10]
+![Snowflake Metric Summary][11]
 
 
 ### Validation
 
-[Run the Agent's status subcommand][5] and look for `snowflake` under the Checks section.
+[Run the Agent's status subcommand][12] and look for `snowflake` under the Checks section.
 
 ## Data Collected
 
+<div class="alert alert-info"><bold>Note</bold>: Only metrics from the following metric groups are enabled by default: <code>snowflake.query.*</code>, <code>snowflake.billing.*</code>, <code>snowflake.storage.*</code>, and <code>snowflake.logins.*</code>.
+
+If you would like to collect metrics from other metric groups, please refer <a href="https://github.com/DataDog/integrations-core/blob/master/snowflake/datadog_checks/snowflake/data/conf.yaml.example">to the example config file for this integration</a>.
+</div>
+
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this check.
+See [metadata.csv][13] for a list of metrics provided by this check.
 
 ### Events
 
@@ -216,21 +221,21 @@ See [service_checks.json][14] for a list of service checks provided by this inte
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][15].
 
 
 [1]: https://www.snowflake.com/
-[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://github.com/DataDog/integrations-core/blob/master/snowflake/datadog_checks/snowflake/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[6]: https://github.com/DataDog/integrations-core/blob/master/snowflake/metadata.csv
-[7]: https://docs.datadoghq.com/help/
-[8]: https://docs.snowflake.com/en/sql-reference/account-usage.html#enabling-account-usage-for-other-roles
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/agent/guide/agent-v6-python-3/?tab=hostagent
+[4]: https://docs.snowflake.com/en/sql-reference/account-usage.html#enabling-account-usage-for-other-roles
+[5]: https://github.com/DataDog/integrations-core/blob/master/snowflake/datadog_checks/snowflake/data/conf.yaml.example
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[7]: https://docs.snowflake.com/en/user-guide/python-connector-example.html#using-a-proxy-server
+[8]: https://github.com/snowflakedb/snowflake-connector-python/blob/d6df58f1c338b255393571a08a1f9f3a71d8f7b6/src/snowflake/connector/proxy.py#L40-L41
 [9]: https://docs.snowflake.com/en/sql-reference/account-usage/query_history.html
-[10]: https://raw.githubusercontent.com/DataDog/integrations-core/master/snowflake/images/custom_query.png
-[11]: https://docs.datadoghq.com/metrics/summary/
-[12]: https://docs.snowflake.com/en/user-guide/python-connector-example.html#using-a-proxy-server
-[13]: https://github.com/snowflakedb/snowflake-connector-python/blob/d6df58f1c338b255393571a08a1f9f3a71d8f7b6/src/snowflake/connector/proxy.py#L40-L41
+[10]: https://docs.datadoghq.com/metrics/summary/
+[11]: https://raw.githubusercontent.com/DataDog/integrations-core/master/snowflake/images/custom_query.png
+[12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[13]: https://github.com/DataDog/integrations-core/blob/master/snowflake/metadata.csv
 [14]: https://github.com/DataDog/integrations-core/blob/master/snowflake/assets/service_checks.json
-[15]: https://docs.datadoghq.com/agent/guide/agent-v6-python-3/?tab=hostagent
+[15]: https://docs.datadoghq.com/help/

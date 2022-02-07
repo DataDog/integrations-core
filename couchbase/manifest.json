@@ -35,7 +35,9 @@
       "couchbase": "assets/dashboards/couchbase_dashboard.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "couchdb"
+    },
     "metrics_metadata": "metadata.csv",
     "saved_views": {
       "couchbase_processes": "assets/saved_views/couchbase_processes.json"

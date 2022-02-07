@@ -54,17 +54,17 @@ Then add the channels in your `win32_event_log.d/conf.yaml` configuration file:
 logs:
   - type: windows_event
     channel_path: "<CHANNEL_1>"
-    source: "<CHANNEL_1>"
+    source: "windows.events"
     service: myservice
 
   - type: windows_event
     channel_path: "<CHANNEL_2>"
-    source: "<CHANNEL_2>"
+    source: "windows.events"
     service: myservice
 ```
 
 Edit the `<CHANNEL_X>` parameters with the Windows channel name you want to collect events from.
-Set the corresponding `source` parameter to the same channel name to benefit from the [integration automatic processing pipeline][5].
+Set the corresponding `source` parameter to `windows.events` to benefit from the [integration automatic processing pipeline][5].
 
 Finally, [restart the Agent][4].
 
@@ -155,7 +155,7 @@ The Win32 Event log check does not include any metrics.
 
 ### Events
 
-All Windows events are forwarded to your Datadog application.
+All Windows events are forwarded to Datadog.
 
 ### Service Checks
 

@@ -1,5 +1,15 @@
 # CHANGELOG - Kube-dns
 
+## 2.5.1 / 2022-01-18
+
+* [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
+
+## 2.5.0 / 2021-11-13 / Agent 7.33.0
+
+* [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
+* [Added] Document new use_process_start_time option. See [#10601](https://github.com/DataDog/integrations-core/pull/10601).
+* [Added] Add kube_dns config spec. See [#10508](https://github.com/DataDog/integrations-core/pull/10508).
+
 ## 2.4.2 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).

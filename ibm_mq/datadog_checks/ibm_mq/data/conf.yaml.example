@@ -58,6 +58,8 @@ instances:
 
     ## @param queues - list of strings - optional
     ## The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
+    ## This will be in addition to any queues discovered using `auto_discover_queues`, `queue_regex` or
+    ## `queue_patterns`.
     #
     # queues:
     #   - <QUEUE_NAME>
@@ -107,9 +109,10 @@ instances:
     #   initializing: warning
 
     ## @param auto_discover_queues - boolean - optional - default: false
-    ## Autodiscover the queues to monitor.
-    ## Note: Do not use in conjunction with `queue_patterns` or `queue_regex` as it may lead to unexpected results.
-    ## Warning: this will lead to some warnings in your logs
+    ## Autodiscover the queues to monitor. This will discover all available queues. If you have dynamic queues
+    ## it will discover and monitor them all which can drive CPU usage up. If you want to be more specific about the
+    ## queues to monitor use `queue_patterns` or `queue_regex` instead.
+    ## Warning: this can lead to some warnings in your logs
     #
     # auto_discover_queues: false
 
@@ -122,7 +125,8 @@ instances:
 
     ## @param mqcd_version - number - optional - default: 6
     ## Which channel definition version to use. Supported values are 1 to 9 including.
-    ## If you're having connection issues make sure it matches your MQ version
+    ## If you're having connection issues make sure it matches your MQ version.
+    ## TLS encryption requires MQCD of version at least 7.
     #
     # mqcd_version: 6
 
@@ -132,7 +136,16 @@ instances:
     #
     # convert_endianness: false
 
-    ## @param timeout - number - optional - default: 5
+    ## @param queue_manager_timezone - string - optional - default: Etc/UTC
+    ## Time zone of the queue manager in IANA/Olson timezone format, if it differs from Etc/UTC. Canonical IANA
+    ## time zone names must be used for accurate time calculations during daylight saving time periods.
+    ## E.g. `America/New_York` instead of `EST`.
+    ## https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+    ## Used to calculate `ibm_mq.queue.last_put_time` and `ibm_mq.queue.last_get_time` metrics.
+    #
+    # queue_manager_timezone: Etc/UTC
+
+    ## @param timeout - integer - optional - default: 5
     ## The number of seconds to wait for IBM MQ to respond.
     #
     # timeout: 5
@@ -173,6 +186,12 @@ instances:
     # queue_tag_re:
     #   SYSTEM.*: queue_type:system
     #   DEV.*: role:dev,queue_type:default
+
+    ## @param override_hostname - boolean - optional - default: false
+    ## If enabled, the check sends the provided `host` as hostname instead of the agent's host.
+    ## In this case the `mq_host` tag will not be emitted. This cannot be used alongside `connection_name`
+    #
+    # override_hostname: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

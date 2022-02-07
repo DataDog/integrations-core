@@ -1,5 +1,9 @@
 # CHANGELOG - kubernetes_state
 
+## 6.0.1 / 2021-11-13 / Agent 7.33.0
+
+* [Fixed] Fix clustername for invalid RFC1123 cases. See [#10262](https://github.com/DataDog/integrations-core/pull/10262).
+
 ## 6.0.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] Add `kubernetes_state.statefulset.count` metric. See [#9813](https://github.com/DataDog/integrations-core/pull/9813).

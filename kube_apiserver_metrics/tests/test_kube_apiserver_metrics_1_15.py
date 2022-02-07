@@ -87,16 +87,16 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.apiserver_request_total.count',
     ]
 
-    def test_check(self, aggregator, mock_get):
+    def test_check(self, dd_run_check, aggregator, mock_get):
         """
         Testing kube_apiserver_metrics metrics collection.
         """
 
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [instance])
-        check.check(instance)
+        dd_run_check(check)
 
         # check that we then get the count metrics also
-        check.check(instance)
+        dd_run_check(check)
 
         for metric in self.METRICS + self.COUNT_METRICS:
             aggregator.assert_metric(metric)

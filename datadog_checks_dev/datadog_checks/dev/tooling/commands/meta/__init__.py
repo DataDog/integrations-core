@@ -13,8 +13,9 @@ from .manifest import manifest
 from .prometheus import prom
 from .scripts import scripts
 from .snmp import snmp
+from .windows import windows
 
-ALL_COMMANDS = (catalog, changes, create_example_commits, dash, jmx, manifest, prom, scripts, snmp)
+ALL_COMMANDS = (catalog, changes, create_example_commits, dash, jmx, manifest, prom, scripts, snmp, windows)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Collection of useful utilities')

@@ -17,7 +17,7 @@ class Query(object):
     is based on our `custom_queries` format originally designed and implemented in !1528.
 
     It is now part of all our database integrations and
-    [other](https://cloud.google.com/solutions/sap/docs/sap-hana-monitoring-agent-user-guide#defining_custom_queries)
+    [other](https://cloud.google.com/solutions/sap/docs/sap-hana-monitoring-agent-planning-guide#defining_custom_queries)
     products have since adopted this format.
     """
 

@@ -1,0 +1,107 @@
+<ShowPlanXML xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan" Version="1.481" Build="14.0.3370.1">
+    <BatchSequence>
+        <Batch>
+            <Statements>
+                <StmtSimple StatementText="(@1 int,@2 varchar(?))SELECT * FROM [things] WHERE [id]=@1 AND [name]=@2"
+                            StatementId="1" StatementCompId="1" StatementType="SELECT" RetrievedFromCache="true"
+                            StatementSubTreeCost="0.0032842" StatementEstRows="1" SecurityPolicyApplied="false"
+                            StatementOptmLevel="TRIVIAL" QueryHash="0xEE42FC10D539A397"
+                            QueryPlanHash="0x1013D8712B73894E" CardinalityEstimationModelVersion="140">
+                    <StatementSetOptions QUOTED_IDENTIFIER="true" ARITHABORT="false" CONCAT_NULL_YIELDS_NULL="true"
+                                         ANSI_NULLS="true" ANSI_PADDING="true" ANSI_WARNINGS="true"
+                                         NUMERIC_ROUNDABORT="false"/>
+                    <QueryPlan CachedPlanSize="24" CompileTime="14" CompileCPU="10" CompileMemory="120">
+                        <MemoryGrantInfo SerialRequiredMemory="0" SerialDesiredMemory="0"/>
+                        <OptimizerHardwareDependentProperties EstimatedAvailableMemoryGrant="40652"
+                                                              EstimatedPagesCached="10163"
+                                                              EstimatedAvailableDegreeOfParallelism="2"
+                                                              MaxCompileMemory="423600"/>
+                        <OptimizerStatsUsage>
+                            <StatisticsInfo LastUpdate="2021-09-25T18:57:03.13" ModificationCount="0"
+                                            SamplingPercent="100" Statistics="[_WA_Sys_00000002_34C8D9D1]"
+                                            Table="[things]" Schema="[dbo]" Database="[datadog_test]"/>
+                            <StatisticsInfo LastUpdate="2021-09-25T18:57:03.12" ModificationCount="0"
+                                            SamplingPercent="100" Statistics="[_WA_Sys_00000001_34C8D9D1]"
+                                            Table="[things]" Schema="[dbo]" Database="[datadog_test]"/>
+                        </OptimizerStatsUsage>
+                        <TraceFlags IsCompileTime="1">
+                            <TraceFlag Value="835" Scope="Global"/>
+                            <TraceFlag Value="3105" Scope="Global"/>
+                            <TraceFlag Value="5504" Scope="Global"/>
+                            <TraceFlag Value="5521" Scope="Global"/>
+                            <TraceFlag Value="6529" Scope="Global"/>
+                            <TraceFlag Value="8020" Scope="Global"/>
+                            <TraceFlag Value="8415" Scope="Global"/>
+                        </TraceFlags>
+                        <RelOp NodeId="0" PhysicalOp="Table Scan" LogicalOp="Table Scan" EstimateRows="1"
+                               EstimatedRowsRead="2" EstimateIO="0.0032035" EstimateCPU="8.07e-005" AvgRowSize="18"
+                               EstimatedTotalSubtreeCost="0.0032842" TableCardinality="2" Parallel="0"
+                               EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                            <OutputList>
+                                <ColumnReference Database="[datadog_test]" Schema="[dbo]" Table="[things]" Column="id"/>
+                                <ColumnReference Database="[datadog_test]" Schema="[dbo]" Table="[things]"
+                                                 Column="name"/>
+                            </OutputList>
+                            <TableScan Ordered="0" ForcedIndex="0" ForceScan="0" NoExpandHint="0" Storage="RowStore">
+                                <DefinedValues>
+                                    <DefinedValue>
+                                        <ColumnReference Database="[datadog_test]" Schema="[dbo]" Table="[things]"
+                                                         Column="id"/>
+                                    </DefinedValue>
+                                    <DefinedValue>
+                                        <ColumnReference Database="[datadog_test]" Schema="[dbo]" Table="[things]"
+                                                         Column="name"/>
+                                    </DefinedValue>
+                                </DefinedValues>
+                                <Object Database="[datadog_test]" Schema="[dbo]" Table="[things]" IndexKind="Heap"
+                                        Storage="RowStore"/>
+                                <Predicate>
+                                    <ScalarOperator
+                                            ScalarString="[datadog_test].[dbo].[things].[id]=[@1] AND [datadog_test].[dbo].[things].[name]=[@2]">
+                                        <Logical Operation="AND">
+                                            <ScalarOperator>
+                                                <Compare CompareOp="EQ">
+                                                    <ScalarOperator>
+                                                        <Identifier>
+                                                            <ColumnReference Database="[datadog_test]" Schema="[dbo]"
+                                                                             Table="[things]" Column="id"/>
+                                                        </Identifier>
+                                                    </ScalarOperator>
+                                                    <ScalarOperator>
+                                                        <Identifier>
+                                                            <ColumnReference Column="@1"/>
+                                                        </Identifier>
+                                                    </ScalarOperator>
+                                                </Compare>
+                                            </ScalarOperator>
+                                            <ScalarOperator>
+                                                <Compare CompareOp="EQ">
+                                                    <ScalarOperator>
+                                                        <Identifier>
+                                                            <ColumnReference Database="[datadog_test]" Schema="[dbo]"
+                                                                             Table="[things]" Column="name"/>
+                                                        </Identifier>
+                                                    </ScalarOperator>
+                                                    <ScalarOperator>
+                                                        <Identifier>
+                                                            <ColumnReference Column="@2"/>
+                                                        </Identifier>
+                                                    </ScalarOperator>
+                                                </Compare>
+                                            </ScalarOperator>
+                                        </Logical>
+                                    </ScalarOperator>
+                                </Predicate>
+                            </TableScan>
+                        </RelOp>
+                        <ParameterList>
+                            <ColumnReference Column="@2" ParameterDataType="varchar(8000)"
+                                             ParameterCompiledValue="?"/>
+                            <ColumnReference Column="@1" ParameterDataType="int" ParameterCompiledValue="(?)"/>
+                        </ParameterList>
+                    </QueryPlan>
+                </StmtSimple>
+            </Statements>
+        </Batch>
+    </BatchSequence>
+</ShowPlanXML>

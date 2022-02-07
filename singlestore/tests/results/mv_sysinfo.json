@@ -1,0 +1,1777 @@
+[
+    {
+        "name": "singlestore.cpu.guest",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 0.0
+    },
+    {
+        "name": "singlestore.cpu.guest",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 0.0
+    },
+    {
+        "name": "singlestore.cpu.guest",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 0.0
+    },
+    {
+        "name": "singlestore.cpu.guest",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 0.0
+    },
+    {
+        "name": "singlestore.cpu.guest",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 0.0
+    },
+    {
+        "name": "singlestore.cpu.guest_nice",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 0.0
+    },
+    {
+        "name": "singlestore.cpu.guest_nice",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 0.0
+    },
+    {
+        "name": "singlestore.cpu.guest_nice",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 0.0
+    },
+    {
+        "name": "singlestore.cpu.guest_nice",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 0.0
+    },
+    {
+        "name": "singlestore.cpu.guest_nice",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 0.0
+    },
+    {
+        "name": "singlestore.cpu.idle",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 59003652.0
+    },
+    {
+        "name": "singlestore.cpu.idle",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 58636192.00000001
+    },
+    {
+        "name": "singlestore.cpu.idle",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 59130176.0
+    },
+    {
+        "name": "singlestore.cpu.idle",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 59468862.0
+    },
+    {
+        "name": "singlestore.cpu.idle",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 58766276.0
+    },
+    {
+        "name": "singlestore.cpu.iowait",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 33548.0
+    },
+    {
+        "name": "singlestore.cpu.iowait",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 34166.0
+    },
+    {
+        "name": "singlestore.cpu.iowait",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 34950.0
+    },
+    {
+        "name": "singlestore.cpu.iowait",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 34199.0
+    },
+    {
+        "name": "singlestore.cpu.iowait",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 34429.0
+    },
+    {
+        "name": "singlestore.cpu.irq",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 0.0
+    },
+    {
+        "name": "singlestore.cpu.irq",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 0.0
+    },
+    {
+        "name": "singlestore.cpu.irq",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 0.0
+    },
+    {
+        "name": "singlestore.cpu.irq",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 0.0
+    },
+    {
+        "name": "singlestore.cpu.irq",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 0.0
+    },
+    {
+        "name": "singlestore.cpu.memsql_system",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 344231.0
+    },
+    {
+        "name": "singlestore.cpu.memsql_system",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 339131.0
+    },
+    {
+        "name": "singlestore.cpu.memsql_system",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 360022.0
+    },
+    {
+        "name": "singlestore.cpu.memsql_system",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 349176.0
+    },
+    {
+        "name": "singlestore.cpu.memsql_system",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 396747.0
+    },
+    {
+        "name": "singlestore.cpu.memsql_total",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 514521.0
+    },
+    {
+        "name": "singlestore.cpu.memsql_total",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 512667.0
+    },
+    {
+        "name": "singlestore.cpu.memsql_total",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 565542.0
+    },
+    {
+        "name": "singlestore.cpu.memsql_total",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 562408.0
+    },
+    {
+        "name": "singlestore.cpu.memsql_total",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 668157.0
+    },
+    {
+        "name": "singlestore.cpu.memsql_user",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 170290.0
+    },
+    {
+        "name": "singlestore.cpu.memsql_user",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 173536.0
+    },
+    {
+        "name": "singlestore.cpu.memsql_user",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 205519.99999999997
+    },
+    {
+        "name": "singlestore.cpu.memsql_user",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 213232.00000000003
+    },
+    {
+        "name": "singlestore.cpu.memsql_user",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 271410.0
+    },
+    {
+        "name": "singlestore.cpu.nice",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 3706.0
+    },
+    {
+        "name": "singlestore.cpu.nice",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 4074.0
+    },
+    {
+        "name": "singlestore.cpu.nice",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 4991.0
+    },
+    {
+        "name": "singlestore.cpu.nice",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 4941.0
+    },
+    {
+        "name": "singlestore.cpu.nice",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 5859.0
+    },
+    {
+        "name": "singlestore.cpu.cores_count",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 8.0
+    },
+    {
+        "name": "singlestore.cpu.cores_count",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 8.0
+    },
+    {
+        "name": "singlestore.cpu.cores_count",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 8.0
+    },
+    {
+        "name": "singlestore.cpu.cores_count",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 8.0
+    },
+    {
+        "name": "singlestore.cpu.cores_count",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 8.0
+    },
+    {
+        "name": "singlestore.cpu.soft_irq",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 41108.0
+    },
+    {
+        "name": "singlestore.cpu.soft_irq",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 33965.0
+    },
+    {
+        "name": "singlestore.cpu.soft_irq",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 36773.0
+    },
+    {
+        "name": "singlestore.cpu.soft_irq",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 42877.0
+    },
+    {
+        "name": "singlestore.cpu.soft_irq",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 49093.0
+    },
+    {
+        "name": "singlestore.cpu.steal",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 23982.0
+    },
+    {
+        "name": "singlestore.cpu.steal",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 42133.0
+    },
+    {
+        "name": "singlestore.cpu.steal",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 88270.0
+    },
+    {
+        "name": "singlestore.cpu.steal",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 24443.0
+    },
+    {
+        "name": "singlestore.cpu.steal",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 107847.0
+    },
+    {
+        "name": "singlestore.cpu.system",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 383655.0
+    },
+    {
+        "name": "singlestore.cpu.system",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 385324.0
+    },
+    {
+        "name": "singlestore.cpu.system",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 436604.0
+    },
+    {
+        "name": "singlestore.cpu.system",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 416934.0
+    },
+    {
+        "name": "singlestore.cpu.system",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 491943.0
+    },
+    {
+        "name": "singlestore.cpu.total_used",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 876001.0
+    },
+    {
+        "name": "singlestore.cpu.total_used",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 1065203.0
+    },
+    {
+        "name": "singlestore.cpu.total_used",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 993910.0
+    },
+    {
+        "name": "singlestore.cpu.total_used",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 942844.0
+    },
+    {
+        "name": "singlestore.cpu.total_used",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 1114384.0
+    },
+    {
+        "name": "singlestore.cpu.user",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 447532.0
+    },
+    {
+        "name": "singlestore.cpu.user",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 641840.0
+    },
+    {
+        "name": "singlestore.cpu.user",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 515542.0
+    },
+    {
+        "name": "singlestore.cpu.user",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 478092.0
+    },
+    {
+        "name": "singlestore.cpu.user",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 567489.0
+    },
+    {
+        "name": "singlestore.disk.free",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 269107224576.0
+    },
+    {
+        "name": "singlestore.disk.free",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 269133791232.0
+    },
+    {
+        "name": "singlestore.disk.free",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 269137960960.0
+    },
+    {
+        "name": "singlestore.disk.free",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 1076514205696.0
+    },
+    {
+        "name": "singlestore.disk.free",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 1076514545664.0
+    },
+    {
+        "name": "singlestore.disk.read_bytes",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 74584064.0
+    },
+    {
+        "name": "singlestore.disk.read_bytes",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 72159232.0
+    },
+    {
+        "name": "singlestore.disk.read_bytes",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 71540736.0
+    },
+    {
+        "name": "singlestore.disk.read_bytes",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 72056832.0
+    },
+    {
+        "name": "singlestore.disk.read_bytes",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 72691712.0
+    },
+    {
+        "name": "singlestore.disk.total",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 269427478528.0
+    },
+    {
+        "name": "singlestore.disk.total",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 269427478528.0
+    },
+    {
+        "name": "singlestore.disk.total",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 269427478528.0
+    },
+    {
+        "name": "singlestore.disk.total",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 1081101176832.0
+    },
+    {
+        "name": "singlestore.disk.total",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 1081101176832.0
+    },
+    {
+        "name": "singlestore.disk.used",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 320253952.0
+    },
+    {
+        "name": "singlestore.disk.used",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 293687296.0
+    },
+    {
+        "name": "singlestore.disk.used",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 289517568.0
+    },
+    {
+        "name": "singlestore.disk.used",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 4586971136.0
+    },
+    {
+        "name": "singlestore.disk.used",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 4586631168.0
+    },
+    {
+        "name": "singlestore.disk.write_bytes",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 319164416.0
+    },
+    {
+        "name": "singlestore.disk.write_bytes",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 314015744.0
+    },
+    {
+        "name": "singlestore.disk.write_bytes",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 317726720.0
+    },
+    {
+        "name": "singlestore.disk.write_bytes",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 319987712.0
+    },
+    {
+        "name": "singlestore.disk.write_bytes",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF",
+            "mount_name:/dev/sdb",
+            "mount_point:/var/lib/memsql"
+        ],
+        "value": 316645376.0
+    },
+    {
+        "name": "singlestore.mem.cgroup_free",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 16893911040.0
+    },
+    {
+        "name": "singlestore.mem.cgroup_free",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 16914903040.0
+    },
+    {
+        "name": "singlestore.mem.cgroup_free",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 16910630912.0
+    },
+    {
+        "name": "singlestore.mem.cgroup_free",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 16843882496.0
+    },
+    {
+        "name": "singlestore.mem.cgroup_free",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 16843939840.0
+    },
+    {
+        "name": "singlestore.mem.cgroup_total",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 17179869184.0
+    },
+    {
+        "name": "singlestore.mem.cgroup_total",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 17179869184.0
+    },
+    {
+        "name": "singlestore.mem.cgroup_total",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 17179869184.0
+    },
+    {
+        "name": "singlestore.mem.cgroup_total",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 17179869184.0
+    },
+    {
+        "name": "singlestore.mem.cgroup_total",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 17179869184.0
+    },
+    {
+        "name": "singlestore.mem.cgroup_used",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 285958144.0
+    },
+    {
+        "name": "singlestore.mem.cgroup_used",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 264966144.0
+    },
+    {
+        "name": "singlestore.mem.cgroup_used",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 269238272.0
+    },
+    {
+        "name": "singlestore.mem.cgroup_used",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 335986688.0
+    },
+    {
+        "name": "singlestore.mem.cgroup_used",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 335929344.0
+    },
+    {
+        "name": "singlestore.mem.free",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 32946405376.0
+    },
+    {
+        "name": "singlestore.mem.free",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 32924192768.0
+    },
+    {
+        "name": "singlestore.mem.free",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 32898420736.0
+    },
+    {
+        "name": "singlestore.mem.free",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 32849252352.0
+    },
+    {
+        "name": "singlestore.mem.free",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 32804982784.0
+    },
+    {
+        "name": "singlestore.mem.singlestore_used_memory",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 309702656.0
+    },
+    {
+        "name": "singlestore.mem.singlestore_used_memory",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 298037248.0
+    },
+    {
+        "name": "singlestore.mem.singlestore_used_memory",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 301432832.0
+    },
+    {
+        "name": "singlestore.mem.singlestore_used_memory",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 368828416.0
+    },
+    {
+        "name": "singlestore.mem.singlestore_used_memory",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 366202880.0
+    },
+    {
+        "name": "singlestore.mem.total",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 33678073856.0
+    },
+    {
+        "name": "singlestore.mem.total",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 33678073856.0
+    },
+    {
+        "name": "singlestore.mem.total",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 33678073856.0
+    },
+    {
+        "name": "singlestore.mem.total",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 33678073856.0
+    },
+    {
+        "name": "singlestore.mem.total",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 33678073856.0
+    },
+    {
+        "name": "singlestore.mem.used",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA"
+        ],
+        "value": 731668480.0
+    },
+    {
+        "name": "singlestore.mem.used",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 753881088.0
+    },
+    {
+        "name": "singlestore.mem.used",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA"
+        ],
+        "value": 779653120.0
+    },
+    {
+        "name": "singlestore.mem.used",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 828821504.0
+    },
+    {
+        "name": "singlestore.mem.used",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF"
+        ],
+        "value": 873091072.0
+    },
+    {
+        "name": "singlestore.net.bytes_rx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA",
+            "network_interface:eth0"
+        ],
+        "value": 1160728672.0
+    },
+    {
+        "name": "singlestore.net.bytes_rx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA",
+            "network_interface:lo"
+        ],
+        "value": 60076418.0
+    },
+    {
+        "name": "singlestore.net.bytes_rx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA",
+            "network_interface:lo"
+        ],
+        "value": 57520492.0
+    },
+    {
+        "name": "singlestore.net.bytes_rx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA",
+            "network_interface:eth0"
+        ],
+        "value": 584031188.0
+    },
+    {
+        "name": "singlestore.net.bytes_rx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA",
+            "network_interface:lo"
+        ],
+        "value": 58075611.0
+    },
+    {
+        "name": "singlestore.net.bytes_rx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA",
+            "network_interface:eth0"
+        ],
+        "value": 588931505.0
+    },
+    {
+        "name": "singlestore.net.bytes_rx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF",
+            "network_interface:lo"
+        ],
+        "value": 40808237.0
+    },
+    {
+        "name": "singlestore.net.bytes_rx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF",
+            "network_interface:eth0"
+        ],
+        "value": 978287586.0
+    },
+    {
+        "name": "singlestore.net.bytes_rx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF",
+            "network_interface:eth0"
+        ],
+        "value": 971954487.0
+    },
+    {
+        "name": "singlestore.net.bytes_rx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF",
+            "network_interface:lo"
+        ],
+        "value": 40557063.0
+    },
+    {
+        "name": "singlestore.net.bytes_tx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA",
+            "network_interface:eth0"
+        ],
+        "value": 2138338090.0
+    },
+    {
+        "name": "singlestore.net.bytes_tx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:1",
+            "singlestore_node_name:node-memsql-cluster-master-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:MA",
+            "network_interface:lo"
+        ],
+        "value": 60076418.0
+    },
+    {
+        "name": "singlestore.net.bytes_tx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA",
+            "network_interface:lo"
+        ],
+        "value": 57520492.0
+    },
+    {
+        "name": "singlestore.net.bytes_tx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:2",
+            "singlestore_node_name:node-memsql-cluster-aggregator-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA",
+            "network_interface:eth0"
+        ],
+        "value": 358899313.0
+    },
+    {
+        "name": "singlestore.net.bytes_tx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA",
+            "network_interface:lo"
+        ],
+        "value": 58075611.0
+    },
+    {
+        "name": "singlestore.net.bytes_tx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:3",
+            "singlestore_node_name:node-memsql-cluster-aggregator-1.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:CA",
+            "network_interface:eth0"
+        ],
+        "value": 361404763.0
+    },
+    {
+        "name": "singlestore.net.bytes_tx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF",
+            "network_interface:lo"
+        ],
+        "value": 40808237.0
+    },
+    {
+        "name": "singlestore.net.bytes_tx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF",
+            "network_interface:eth0"
+        ],
+        "value": 716505115.0
+    },
+    {
+        "name": "singlestore.net.bytes_tx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF",
+            "network_interface:eth0"
+        ],
+        "value": 712119621.0
+    },
+    {
+        "name": "singlestore.net.bytes_tx",
+        "type": 1,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_node_type:LEAF",
+            "network_interface:lo"
+        ],
+        "value": 40557063.0
+    }
+]

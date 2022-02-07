@@ -175,6 +175,11 @@ class MongoDb(AgentCheck):
 
         return metrics_to_collect
 
+    def _refresh_replica_role(self):
+        if self._api_client and isinstance(self._api_client.deployment_type, ReplicaSetDeployment):
+            self.log.debug("Refreshing deployment type")
+            self._api_client.deployment_type = self._api_client.get_deployment_type()
+
     def check(self, _):
         try:
             self._check()
@@ -184,6 +189,7 @@ class MongoDb(AgentCheck):
 
     def _check(self):
         api = self.api_client
+        self._refresh_replica_role()
 
         try:
             mongo_version = api.server_info().get('version', '0.0')
@@ -215,7 +221,7 @@ class MongoDb(AgentCheck):
             dbnames = api.list_database_names()
             self.gauge('mongodb.dbs', len(dbnames), tags=tags)
 
-        self.refresh_collectors(api.deployment_type, mongo_version, dbnames, tags)
+        self.refresh_collectors(deployment, mongo_version, dbnames, tags)
         for collector in self.collectors:
             try:
                 collector.collect(api)

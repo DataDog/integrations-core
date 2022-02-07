@@ -12,6 +12,7 @@ files:
         value:
           example: 'DEV.ADMIN.SVRCONN'
           type: string
+          minLength: 1
         description: The IBMMQ Channel to connect to.
       - name: queue_manager
         required: true
@@ -19,10 +20,12 @@ files:
         value:
           example: 'datadog'
           type: string
+          minLength: 1
       - name: host
         value:
           example: 'localhost'
           type: string
+          minLength: 1
         description: The host IBM MQ is running on.
       - name: port
         value:
@@ -42,20 +45,27 @@ files:
           Either `host/port` or `connection_name` configuration must be provided.
         value:
           type: string
+          minLength: 1
       - name: username
         value:
           type: string
+          minLength: 1
         description: <USERNAME> of the IBMMQ Channel to connect to.
       - name: password
         secret: true
         value:
           type: string
+          minLength: 1
         description: <PASSWORD> of the IBMMQ Channel to connect to.
       - name: queues
-        description: The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
+        description: |
+          The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
+          This will be in addition to any queues discovered using `auto_discover_queues`, `queue_regex` or
+          `queue_patterns`.
         value:
           example: ['<QUEUE_NAME>']
           type: array
+          uniqueItems: true
           items:
             type: string
       - name: queue_patterns
@@ -68,6 +78,7 @@ files:
             - 'DEV.*'          # match queues starting with "DEV."
             - 'SYSTEM.*'       # match queues starting with "SYSTEM."
           type: array
+          uniqueItems: true
           items:
             type: string
       - name: queue_regex
@@ -80,6 +91,7 @@ files:
             - '^DEV\..*$'          # match queues starting with "DEV."
             - '^SYSTEM\..*$'       # match queues starting with "SYSTEM."
           type: array
+          uniqueItems: true
           items:
             type: string
       - name: channels
@@ -87,6 +99,7 @@ files:
         value:
           example: ['<CHANNEL_NAME>']
           type: array
+          uniqueItems: true
           items:
             type: string
       - name: channel_status_mapping
@@ -110,12 +123,14 @@ files:
             paused: warning
             initializing: warning
           type: object
+          minProperties: 1
           properties: []
       - name: auto_discover_queues
         description: |
-          Autodiscover the queues to monitor.
-          Note: Do not use in conjunction with `queue_patterns` or `queue_regex` as it may lead to unexpected results.
-          Warning: this will lead to some warnings in your logs
+          Autodiscover the queues to monitor. This will discover all available queues. If you have dynamic queues
+          it will discover and monitor them all which can drive CPU usage up. If you want to be more specific about the
+          queues to monitor use `queue_patterns` or `queue_regex` instead.
+          Warning: this can lead to some warnings in your logs
         value:
           example: false
           type: boolean
@@ -130,10 +145,12 @@ files:
       - name: mqcd_version
         description: |
           Which channel definition version to use. Supported values are 1 to 9 including.
-          If you're having connection issues make sure it matches your MQ version
+          If you're having connection issues make sure it matches your MQ version.
+          TLS encryption requires MQCD of version at least 7.
         value:
           example: 6
           type: number
+          minimum: 1
       - name: convert_endianness
         description: |
           If you are monitoring IBM MQ remotely and if the Agent and the server are using different endianness,
@@ -141,12 +158,23 @@ files:
         value:
           example: false
           type: boolean
+      - name: queue_manager_timezone
+        description: |
+          Time zone of the queue manager in IANA/Olson timezone format, if it differs from Etc/UTC. Canonical IANA
+          time zone names must be used for accurate time calculations during daylight saving time periods.
+          E.g. `America/New_York` instead of `EST`.
+          https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+          Used to calculate `ibm_mq.queue.last_put_time` and `ibm_mq.queue.last_get_time` metrics.
+        value:
+          example: Etc/UTC
+          type: string
+          minLength: 1
       - name: timeout
         description: |
           The number of seconds to wait for IBM MQ to respond.
         value:
           example: 5
-          type: number
+          type: integer
       - name: ssl_auth
         description: Whether or not to use SSL auth while connecting to the channel.
         value:
@@ -170,6 +198,7 @@ files:
         value:
           example: '/var/mqm/ssl-db/client/KeyringClient'
           type: string
+        minLength: 1
       - name: ssl_certificate_label
         description: Certificate label used for SSL connection.
         value:
@@ -186,6 +215,14 @@ files:
             'SYSTEM.*': queue_type:system
             'DEV.*': role:dev,queue_type:default
           type: object
+          minProperties: 1
+      - name: override_hostname
+        description: |
+          If enabled, the check sends the provided `host` as hostname instead of the agent's host.
+          In this case the `mq_host` tag will not be emitted. This cannot be used alongside `connection_name`
+        value:
+          type: boolean
+          example: false
       - template: instances/default
   - template: logs
     example:

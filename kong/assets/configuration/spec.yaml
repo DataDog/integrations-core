@@ -7,17 +7,26 @@ files:
     - template: init_config/openmetrics
   - template: instances
     options:
-    - name: kong_status_url
-      required: true
-      description: URL where Kong exposes its status.
-      value:
-        example: http://localhost:8001/status/
-        type: string
     - template: instances/openmetrics
       overrides:
+        openmetrics_endpoint.enabled: true
+        openmetrics_endpoint.required: false
+        openmetrics_endpoint.display_priority: 1
         openmetrics_endpoint.value.example: http://localhost:8001/metrics
         extra_metrics.value.example:
         - kong_memory_workers_lua_vms_bytes: memory.workers.lua.vms.bytes
+    - name: kong_status_url
+      display_priority: 1
+      description: |
+        The check collects and parses metrics from the admin /status endpoint.
+        For more info see:
+        https://docs.konghq.com/gateway-oss/2.5.x/admin-api/
+        
+        Note: See the configuration options specific to this option here,
+        https://github.com/DataDog/integrations-core/blob/7.27.x/kong/datadog_checks/kong/data/conf.yaml.example
+      value:
+        example: http://localhost:8001/status/
+        type: string
   - template: logs
     example:
     - type: file

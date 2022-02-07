@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:consul"
-      ]
+      "query_filter": "integration:consul",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

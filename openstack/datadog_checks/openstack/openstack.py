@@ -748,7 +748,7 @@ class OpenStackCheck(AgentCheck):
         return self.get_scope_for_instance(instance).service_catalog.nova_endpoint
 
     def _parse_uptime_string(self, uptime):
-        """ Parse u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n' """
+        """Parse u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n'"""
         uptime = uptime.strip()
         load_averages = uptime[uptime.find('load average:') :].split(':')[1].split(',')
         uptime_sec = uptime.split(',')[0]

@@ -10,7 +10,7 @@
     The namespace to be prepended to all metrics.
   value:
     type: string
-    pattern: '\w+'
+    pattern: '\w*'
 - name: raw_metric_prefix
   description: |
     A prefix that will be removed from all exposed metric names, if present.
@@ -147,6 +147,8 @@
     A mapping of labels where metrics with matching label name and values are ignored. To match
     all values of a label, set it to `true`.
 
+    Note: Labels filtering happens before `rename_labels`.
+
     For example, the following configuration instructs the check to exclude all metrics with
     a label `worker` or a label `pid` with the value of either `23` or `42`.
 
@@ -166,6 +168,20 @@
 - name: exclude_labels
   description: |
     A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
+    May be used in conjunction with `include_labels`.
+    Labels defined in `excluded labels` will take precedence in case of overlap.
+
+    Note: Labels filtering happens before `rename_labels`.
+  value:
+    type: array
+    items:
+      type: string
+- name: include_labels
+  description: |
+    A list of labels to include. May be used in conjunction with `exclude_labels`.
+    Labels defined in `excluded labels` will take precedence in case of overlap.
+
+    Note: Labels filtering happens before `rename_labels`.
   value:
     type: array
     items:
@@ -227,6 +243,15 @@
   value:
     example: false
     type: boolean
+- name: use_process_start_time
+  description: |
+    Whether to enable a heuristic for reporting counter values on the first scrape. When true,
+    the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
+    initial value can be assumed for counters. This requires keeping metrics in memory until the entire
+    response is received.
+  value:
+    example: false
+    type: boolean
 - name: share_labels
   description: |
     This mapping allows for the sharing of labels across multiple metrics. The keys represent the
@@ -279,12 +304,6 @@
   value:
     type: boolean
     example: true
-- name: request_size
-  description: |
-    The number of kibibytes (KiB) to read from the `openmetrics_endpoint` at a time.
-  value:
-    example: 16
-    type: number
 - name: raw_line_filters
   description: |
     A list of regular expressions used to exclude lines read from the `openmetrics_endpoint`

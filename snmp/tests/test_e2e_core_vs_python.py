@@ -10,7 +10,7 @@ from datadog_checks.base.stubs.common import MetricStub
 
 from . import common
 
-pytestmark = [pytest.mark.e2e, common.snmp_integration_only]
+pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
 SUPPORTED_METRIC_TYPES = [
     {'MIB': 'ABC', 'symbol': {'OID': "1.3.6.1.2.1.7.1.0", 'name': "IAmACounter32"}},  # Counter32
@@ -23,6 +23,10 @@ ASSERT_VALUE_METRICS = [
     'snmp.devices_monitored',
     'datadog.snmp.submitted_metrics',
 ]
+
+SKIPPED_TAGS = ['loader']
+
+CORE_ONLY_TAGS = ['device_namespace:default']
 
 
 def test_e2e_metric_types(dd_agent_check):
@@ -43,7 +47,7 @@ def test_e2e_v3_version_autodetection(dd_agent_check):
             'community_string': '',
         }
     )
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=511 + 5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=515 + 5)
 
 
 def test_e2e_v3_explicit_version(dd_agent_check):
@@ -52,18 +56,73 @@ def test_e2e_v3_explicit_version(dd_agent_check):
         {
             'user': 'datadogSHADES',
             'authKey': 'doggiepass',
-            'authProtocol': 'sha',
+            'authProtocol': 'SHA',
             'privKey': 'doggiePRIVkey',
-            'privProtocol': 'des',
+            'privProtocol': 'DES',
             'snmp_version': 3,
             'context_name': 'f5-big-ip',
             'community_string': '',
         }
     )
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=511 + 5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=515 + 5)
 
 
-def test_e2e_regex_match(dd_agent_check, aggregator):
+def test_e2e_v3_md5_aes(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    config['instances'][0].update(
+        {
+            'user': 'datadogMD5AES',
+            'authKey': 'doggiepass',
+            'authProtocol': 'MD5',
+            'privKey': 'doggiePRIVkey',
+            'privProtocol': 'AES',
+            'snmp_version': 3,
+            'context_name': 'f5-big-ip',
+            'community_string': '',
+        }
+    )
+    assert_python_vs_core(dd_agent_check, config)
+
+
+def test_e2e_v3_md5_aes256_blumenthal(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    config['instances'][0].update(
+        {
+            'user': 'datadogMD5AES256BLMT',
+            'authKey': 'doggiepass',
+            'authProtocol': 'MD5',
+            'privKey': 'doggiePRIVkey',
+            'privProtocol': 'AES256',  # `AES256` correspond to Blumenthal implementation for pysnmp and gosnmp
+            'snmp_version': 3,
+            'context_name': 'f5-big-ip',
+            'community_string': '',
+        }
+    )
+    assert_python_vs_core(dd_agent_check, config)
+
+
+def test_e2e_v3_md5_aes256_reeder(dd_agent_check):
+    # About Reeder implementation:
+    # "Many vendors, including Cisco, use the 3DES key extension algorithm to extend the privacy keys that are
+    # too short when using AES,AES192 and AES256."
+    # source: https://github.com/gosnmp/gosnmp/blob/f6fb3f74afc3fb0e5b44b3f60751b988bc960019/v3_usm.go#L458-L461
+    config = common.generate_container_instance_config([])
+    config['instances'][0].update(
+        {
+            'user': 'datadogMD5AES256',
+            'authKey': 'doggiepass',
+            'authProtocol': 'MD5',
+            'privKey': 'doggiePRIVkey',
+            'privProtocol': 'AES256C',  # `AES256C` correspond to Reeder implementation for pysnmp and gosnmp
+            'snmp_version': 3,
+            'context_name': 'f5-big-ip',
+            'community_string': '',
+        }
+    )
+    assert_python_vs_core(dd_agent_check, config)
+
+
+def test_e2e_regex_match(dd_agent_check):
     metrics = [
         {
             'MIB': "IF-MIB",
@@ -123,23 +182,6 @@ def test_e2e_regex_match(dd_agent_check, aggregator):
         },
     ]
     assert_python_vs_core(dd_agent_check, config)
-
-    config['init_config']['loader'] = 'core'
-    aggregator.reset()
-    aggregator = dd_agent_check(config, rate=True)
-
-    # raw sysName: 41ba948911b9
-    aggregator.assert_metric(
-        'snmp.devices_monitored',
-        tags=[
-            'digits:41',
-            'remainder:ba948911b9',
-            'letter1:4',
-            'letter2:1',
-            'loader:core',
-            'snmp_device:' + instance['ip_address'],
-        ],
-    )
 
 
 def test_e2e_scalar_oid_retry(dd_agent_check):
@@ -201,12 +243,12 @@ def test_e2e_custom_metrics_cases(dd_agent_check):
 
 def test_e2e_profile_apc_ups(dd_agent_check):
     config = common.generate_container_profile_config('apc_ups')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=42 + 5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=64 + 5)
 
 
 def test_e2e_profile_arista(dd_agent_check):
     config = common.generate_container_profile_config('arista')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=14 + 5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=16 + 5)
 
 
 def test_e2e_profile_aruba(dd_agent_check):
@@ -358,6 +400,7 @@ def assert_python_vs_core(
     python_config['init_config']['loader'] = 'python'
     core_config = deepcopy(config)
     core_config['init_config']['loader'] = 'core'
+    core_config['init_config']['collect_device_metadata'] = 'false'
     metrics_to_skip = metrics_to_skip or []
 
     # building expected metrics (python)
@@ -368,18 +411,20 @@ def assert_python_vs_core(
             if stub.name in metrics_to_skip:
                 continue
             stub = normalize_stub_metric(stub)
-            python_metrics[(stub.name, stub.type, tuple(sorted(stub.tags)))].append(stub)
+            python_metrics[(stub.name, stub.type, tuple(sorted(list(stub.tags) + CORE_ONLY_TAGS)))].append(stub)
 
     python_service_checks = defaultdict(list)
     for _, service_checks in aggregator._service_checks.items():
         for stub in service_checks:
-            python_service_checks[(stub.name, stub.status, tuple(sorted(stub.tags)), stub.message)].append(stub)
+            python_service_checks[
+                (stub.name, stub.status, tuple(sorted(list(stub.tags) + CORE_ONLY_TAGS)), stub.message)
+            ].append(stub)
 
     total_count_python = sum(len(stubs) for stubs in python_metrics.values())
 
     # building core metrics (core)
     aggregator.reset()
-    aggregator = dd_agent_check(core_config, rate=rate, pause=pause, times=times)
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, core_config, rate=rate, pause=pause, times=times)
     aggregator_metrics = aggregator._metrics
     aggregator._metrics = defaultdict(list)
     for metric_name in aggregator_metrics:
@@ -426,7 +471,7 @@ def assert_python_vs_core(
 
 
 def normalize_stub_metric(stub):
-    tags = [t for t in stub.tags if not t.startswith('loader:')]  # Remove `loader` tag
+    tags = [t for t in stub.tags if not is_skipped_tag(t)]  # Remove skipped tag
     return MetricStub(
         stub.name,
         stub.type,
@@ -435,3 +480,10 @@ def normalize_stub_metric(stub):
         stub.hostname,
         stub.device,
     )
+
+
+def is_skipped_tag(tag):
+    for skipped_tag in SKIPPED_TAGS:
+        if tag.startswith('{}:'.format(skipped_tag)):
+            return True
+    return False

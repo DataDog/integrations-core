@@ -1,0 +1,21 @@
+LISTENER =
+   (DESCRIPTION_LIST =
+     (DESCRIPTION =
+       (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+       (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC1521))
+       (ADDRESS = (PROTOCOL = TCPS)(HOST = 0.0.0.0)(PORT = 2484))
+     )
+   ) 
+DIAG_ADR_ENABLED = off
+SSL_VERSION = 1.2
+
+
+SSL_CLIENT_AUTHENTICATION = FALSE
+
+WALLET_LOCATION =
+  (SOURCE =
+    (METHOD = FILE)
+    (METHOD_DATA =
+      (DIRECTORY = /opt/oracle/instantclient_19_3/client_wallet))
+    )
+  )

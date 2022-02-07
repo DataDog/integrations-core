@@ -44,12 +44,32 @@ files:
     options: []
   - template: instances
     options:
+    - name: possible_prometheus_urls
+      required: true
+      description: |
+        The URLs to try to get your application metrics that are exposed by Prometheus.
+        The check will try each URLs in the list and will use the first working one.
+        One of possible_prometheus_urls or prometheus_url parameter is required.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - https://%%host%%:2379/metrics
+          - http://%%host%%:2379/metrics
     - name: prometheus_url
       description: |
         Prometheus endpoint of your etcd instance.
+        One of possible_prometheus_urls or prometheus_url parameter is required.
 
         Note: To monitor ETCD versions pre-3.x.x, set `use_preview` to `false` and use the `url` configuration option.
-      required: true
+      required: false
       value:
         example: http://%%host%%:2379/metrics
         type: string
+    - name: ssl_verify
+      required: true
+      description: Used to verify self signed certificates.
+      value:
+        type: boolean
+        example: false

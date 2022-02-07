@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:pgbouncer"
-      ]
+      "query_filter": "integration:pgbouncer",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

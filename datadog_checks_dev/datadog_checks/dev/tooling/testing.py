@@ -313,9 +313,9 @@ def get_changed_checks():
     return {line.split('/')[0] for line in changed_files}
 
 
-def get_changed_directories():
+def get_changed_directories(include_uncommitted=True):
     """Return set of check names that have any changes at all."""
-    changed_files = files_changed()
+    changed_files = files_changed(include_uncommitted)
 
     return {line.split('/')[0] for line in changed_files}
 
@@ -346,7 +346,7 @@ def process_checks_option(check, source=None, validate=False, extend_changed=Fal
     if check is None or check.lower() == 'all':
         choice = sorted(get_valid())
     elif check.lower() == 'changed':
-        choice = sorted(get_changed_directories() & get_valid())
+        choice = sorted(get_changed_directories(include_uncommitted=False) & get_valid())
         if extend_changed and ('datadog_checks_dev' in choice or 'datadog_checks_base' in choice):
             choice = sorted(get_valid())
     else:

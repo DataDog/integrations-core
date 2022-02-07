@@ -212,5 +212,5 @@ def dd_environment():
     if not ON_WINDOWS:
         conditions.append(WaitFor(prepare_queue_manager))
 
-    with docker_run(common.COMPOSE_FILE_PATH, conditions=conditions, sleep=10):
+    with docker_run(compose_file=common.COMPOSE_FILE_PATH, build=True, conditions=conditions, sleep=10, attempts=2):
         yield common.INSTANCE, e2e_meta

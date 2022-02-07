@@ -36,8 +36,8 @@ class Kong(AgentCheck):
         else:
             return super(Kong, cls).__new__(cls)
 
-    def check(self, instance):
-        metrics = self._fetch_data(instance)
+    def check(self, _):
+        metrics = self._fetch_data()
         for row in metrics:
             try:
                 name, value, tags = row
@@ -45,11 +45,11 @@ class Kong(AgentCheck):
             except Exception:
                 self.log.error(u'Could not submit metric: %s', row)
 
-    def _fetch_data(self, instance):
-        if 'kong_status_url' not in instance:
+    def _fetch_data(self):
+        if 'kong_status_url' not in self.instance:
             raise Exception('missing "kong_status_url" value')
-        tags = instance.get('tags', [])
-        url = instance.get('kong_status_url')
+        tags = self.instance.get('tags', [])
+        url = self.instance.get('kong_status_url')
 
         parsed_url = urlparse(url)
         host = parsed_url.hostname

@@ -8,7 +8,7 @@ Monitor the resolvability of and lookup times for any DNS records using nameserv
 
 ### Installation
 
-The DNS check is included in the [Datadog Agent][1] package, so you don't need to install anything else on the server from which you will probe your DNS servers.
+The DNS check is included in the [Datadog Agent][1] package. No additional installation is needed on your server.
 
 Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored DNS services.
 
@@ -53,11 +53,11 @@ The DNS check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][8] for a list of service checks provided by this integration.
+See [service_checks.json][7] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][8].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
@@ -66,5 +66,5 @@ Need help? Contact [Datadog support][7].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/dns_check/metadata.csv
-[7]: https://docs.datadoghq.com/help/
-[8]: https://github.com/DataDog/integrations-core/blob/master/dns_check/assets/service_checks.json
+[7]: https://github.com/DataDog/integrations-core/blob/master/dns_check/assets/service_checks.json
+[8]: https://docs.datadoghq.com/help/

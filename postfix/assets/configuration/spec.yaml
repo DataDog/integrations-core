@@ -39,13 +39,16 @@ files:
       description: |
         Path to the postfix directory. The directory option is required if `postqueue: false` is set. For more 
         information see https://docs.datadoghq.com/integrations/postfix/#using-sudo.
+      enabled: true
       value:
+        display_default: null
         example: /var/spool/postfix
         type: string
     - name: queues
-      required: true
       description: List of queues to monitor.
+      enabled: true
       value:
+        display_default: null
         type: array
         items:
           type: string

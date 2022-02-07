@@ -15,8 +15,15 @@ except ImportError:
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import (
+    DBMAsyncJob,
+    RateLimitingTTLCache,
+    default_json_event_encoding,
+    obfuscate_sql_with_metadata,
+)
 from datadog_checks.base.utils.serialization import json
+
+from .util import DatabaseConfigurationError, warning_with_tags
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
@@ -192,6 +199,15 @@ PYMYSQL_NON_RETRYABLE_ERRORS = frozenset(
         1049,  # unknown database
         1305,  # procedure does not exist
         1370,  # no execute on procedure
+    }
+)
+
+PYMYSQL_MISSING_EXPLAIN_STATEMENT_PROC_ERRORS = frozenset(
+    {
+        pymysql.constants.ER.ACCESS_DENIED_ERROR,
+        pymysql.constants.ER.DBACCESS_DENIED_ERROR,
+        pymysql.constants.ER.SP_DOES_NOT_EXIST,
+        pymysql.constants.ER.PROCACCESS_DENIED_ERROR,
     }
 )
 
@@ -482,10 +498,9 @@ class MySQLStatementSamples(DBMAsyncJob):
         # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
         # - `resource_hash` - hash computed off the raw sql text to match apm resources
         # - `query_signature` - hash computed from the digest text to match query metrics
-
         try:
-            obfuscated_statement = datadog_agent.obfuscate_sql(row['sql_text'], self._obfuscate_options)
-            obfuscated_digest_text = datadog_agent.obfuscate_sql(row['digest_text'], self._obfuscate_options)
+            statement = obfuscate_sql_with_metadata(row['sql_text'], self._obfuscate_options)
+            statement_digest_text = obfuscate_sql_with_metadata(row['digest_text'], self._obfuscate_options)
         except Exception:
             # do not log the raw sql_text to avoid leaking sensitive data into logs. digest_text is safe as parameters
             # are obfuscated by the database
@@ -498,6 +513,8 @@ class MySQLStatementSamples(DBMAsyncJob):
             )
             return None
 
+        obfuscated_statement = statement['query']
+        obfuscated_digest_text = statement_digest_text['query']
         apm_resource_hash = compute_sql_signature(obfuscated_statement)
         query_signature = compute_sql_signature(obfuscated_digest_text)
 
@@ -558,6 +575,11 @@ class MySQLStatementSamples(DBMAsyncJob):
                     "query_signature": query_signature,
                     "resource_hash": apm_resource_hash,
                     "statement": obfuscated_statement,
+                    "metadata": {
+                        "tables": statement['metadata'].get('tables', None),
+                        "commands": statement['metadata'].get('commands', None),
+                        "comments": statement['metadata'].get('comments', None),
+                    },
                     "query_truncated": self._get_truncation_state(row['sql_text']).value,
                 },
                 'mysql': {k: v for k, v in row.items() if k not in EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS},
@@ -795,7 +817,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                 )
                 continue
             try:
-                plan = self._explain_strategies[strategy](cursor, statement, obfuscated_statement)
+                plan = self._explain_strategies[strategy](schema, cursor, statement, obfuscated_statement)
                 if plan:
                     self._collection_strategy_cache[explain_state_cache_key] = ExplainState(
                         strategy=strategy, error_code=None, error_message=None
@@ -839,7 +861,7 @@ class MySQLStatementSamples(DBMAsyncJob):
 
         return None, error_states
 
-    def _run_explain(self, cursor, statement, obfuscated_statement):
+    def _run_explain(self, schema, cursor, statement, obfuscated_statement):
         """
         Run the explain using the EXPLAIN statement
         """
@@ -851,21 +873,61 @@ class MySQLStatementSamples(DBMAsyncJob):
         )
         return cursor.fetchone()[0]
 
-    def _run_explain_procedure(self, cursor, statement, obfuscated_statement):
+    def _run_explain_procedure(self, schema, cursor, statement, obfuscated_statement):
         """
         Run the explain by calling the stored procedure if available.
         """
-        self._cursor_run(cursor, 'CALL {}(%s)'.format(self._explain_procedure), statement, obfuscated_statement)
-        return cursor.fetchone()[0]
+        try:
+            self._cursor_run(cursor, 'CALL {}(%s)'.format(self._explain_procedure), statement, obfuscated_statement)
+            return cursor.fetchone()[0]
+        except pymysql.err.DatabaseError as e:
+            if e.args[0] in PYMYSQL_MISSING_EXPLAIN_STATEMENT_PROC_ERRORS:
+                err_msg = e.args[1] if len(e.args) > 1 else ''
+                self._check.record_warning(
+                    DatabaseConfigurationError.explain_plan_procedure_missing,
+                    warning_with_tags(
+                        "Unable to collect explain plans because the procedure '%s' is either undefined or not "
+                        "granted access to in schema '%s'. See https://docs.datadoghq.com/database_monitoring/"
+                        'setup_mysql/troubleshooting#%s for more details: (%d) %s',
+                        self._explain_procedure,
+                        schema,
+                        DatabaseConfigurationError.explain_plan_procedure_missing.value,
+                        e.args[0],
+                        str(err_msg),
+                        code=DatabaseConfigurationError.explain_plan_procedure_missing.value,
+                        host=self._check.resolved_hostname,
+                        schema=schema,
+                    ),
+                )
+            raise
 
-    def _run_fully_qualified_explain_procedure(self, cursor, statement, obfuscated_statement):
+    def _run_fully_qualified_explain_procedure(self, schema, cursor, statement, obfuscated_statement):
         """
         Run the explain by calling the fully qualified stored procedure if available.
         """
-        self._cursor_run(
-            cursor, 'CALL {}(%s)'.format(self._fully_qualified_explain_procedure), statement, obfuscated_statement
-        )
-        return cursor.fetchone()[0]
+        try:
+            self._cursor_run(
+                cursor, 'CALL {}(%s)'.format(self._fully_qualified_explain_procedure), statement, obfuscated_statement
+            )
+            return cursor.fetchone()[0]
+        except pymysql.err.DatabaseError as e:
+            if e.args[0] in PYMYSQL_MISSING_EXPLAIN_STATEMENT_PROC_ERRORS:
+                err_msg = e.args[1] if len(e.args) > 1 else ''
+                self._check.record_warning(
+                    DatabaseConfigurationError.explain_plan_fq_procedure_missing,
+                    warning_with_tags(
+                        "Unable to collect explain plans because the procedure '%s' is either undefined or "
+                        'not granted access to. See https://docs.datadoghq.com/database_monitoring/setup_mysql/'
+                        'troubleshooting#%s for more details: (%d) %s',
+                        self._fully_qualified_explain_procedure,
+                        DatabaseConfigurationError.explain_plan_fq_procedure_missing.value,
+                        e.args[0],
+                        str(err_msg),
+                        code=DatabaseConfigurationError.explain_plan_fq_procedure_missing.value,
+                        host=self._check.resolved_hostname,
+                    ),
+                )
+            raise
 
     @staticmethod
     def _can_explain(obfuscated_statement):

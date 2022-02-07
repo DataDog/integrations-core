@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:mysql"
-      ]
+      "query_filter": "integration:mysql",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

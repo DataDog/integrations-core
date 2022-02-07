@@ -121,7 +121,7 @@ def test_parse_metric_family():
 
 
 def test_check(mocked_prometheus_check):
-    """ Should not be implemented as it is the mother class """
+    """Should not be implemented as it is the mother class"""
     with pytest.raises(NotImplementedError):
         mocked_prometheus_check.check(None)
 
@@ -153,7 +153,7 @@ def test_parse_metric_family_protobuf(bin_data, mocked_prometheus_check):
 
 
 def test_parse_metric_family_text(text_data, mocked_prometheus_check):
-    """ Test the high level method for loading metrics from text format """
+    """Test the high level method for loading metrics from text format"""
     check = mocked_prometheus_check
 
     response = MockResponse(text_data, 'text/plain; version=0.0.4')
@@ -272,7 +272,7 @@ def test_process(bin_data, mocked_prometheus_check, ref_gauge):
 
 
 def test_process_send_histograms_buckets(bin_data, mocked_prometheus_check, ref_gauge):
-    """ Checks that the send_histograms_buckets parameter is passed along """
+    """Checks that the send_histograms_buckets parameter is passed along"""
     endpoint = "http://fake.endpoint:10055/metrics"
     check = mocked_prometheus_check
     check.poll = mock.MagicMock(return_value=MockResponse(bin_data, protobuf_content_type))
@@ -283,7 +283,7 @@ def test_process_send_histograms_buckets(bin_data, mocked_prometheus_check, ref_
 
 
 def test_process_send_monotonic_counter(bin_data, mocked_prometheus_check, ref_gauge):
-    """ Checks that the send_monotonic_counter parameter is passed along """
+    """Checks that the send_monotonic_counter parameter is passed along"""
     endpoint = "http://fake.endpoint:10055/metrics"
     check = mocked_prometheus_check
     check.poll = mock.MagicMock(return_value=MockResponse(bin_data, protobuf_content_type))
@@ -294,7 +294,7 @@ def test_process_send_monotonic_counter(bin_data, mocked_prometheus_check, ref_g
 
 
 def test_process_instance_with_tags(bin_data, mocked_prometheus_check, ref_gauge):
-    """ Checks that an instances with tags passes them as custom tag """
+    """Checks that an instances with tags passes them as custom tag"""
     endpoint = "http://fake.endpoint:10055/metrics"
     check = mocked_prometheus_check
     check.poll = mock.MagicMock(return_value=MockResponse(bin_data, protobuf_content_type))
@@ -308,7 +308,7 @@ def test_process_instance_with_tags(bin_data, mocked_prometheus_check, ref_gauge
 
 
 def test_process_metric_gauge(mocked_prometheus_check, ref_gauge):
-    """ Gauge ref submission """
+    """Gauge ref submission"""
     check = mocked_prometheus_check
     check._dry_run = False
     check.process_metric(ref_gauge)
@@ -316,7 +316,7 @@ def test_process_metric_gauge(mocked_prometheus_check, ref_gauge):
 
 
 def test_process_metric_filtered(mocked_prometheus_check):
-    """ Metric absent from the metrics_mapper """
+    """Metric absent from the metrics_mapper"""
     filtered_gauge = metrics_pb2.MetricFamily()
     filtered_gauge.name = "process_start_time_seconds"
     filtered_gauge.help = "Start time of the process since unix epoch in seconds."
@@ -333,7 +333,7 @@ def test_process_metric_filtered(mocked_prometheus_check):
 
 
 def test_poll_protobuf(mocked_prometheus_check, bin_data):
-    """ Tests poll using the protobuf format """
+    """Tests poll using the protobuf format"""
     check = mocked_prometheus_check
     mock_response = mock.MagicMock(status_code=200, content=bin_data, headers={'Content-Type': protobuf_content_type})
     with mock.patch('requests.get', return_value=mock_response, __name__="get"):
@@ -358,7 +358,7 @@ def test_poll_text_plain(mocked_prometheus_check, text_data):
 
 
 def test_submit_gauge_with_labels(mocked_prometheus_check, ref_gauge):
-    """ submitting metrics that contain labels should result in tags on the gauge call """
+    """submitting metrics that contain labels should result in tags on the gauge call"""
     _l1 = ref_gauge.metric[0].label.add()
     _l1.name = 'my_1st_label'
     _l1.value = 'my_1st_label_value'
@@ -391,7 +391,7 @@ def test_submit_gauge_with_labels(mocked_prometheus_check, ref_gauge):
 
 
 def test_submit_gauge_with_labels_and_hostname_override(mocked_prometheus_check, ref_gauge):
-    """ submitting metrics that contain labels should result in tags on the gauge call """
+    """submitting metrics that contain labels should result in tags on the gauge call"""
     _l1 = ref_gauge.metric[0].label.add()
     _l1.name = 'my_1st_label'
     _l1.value = 'my_1st_label_value'
@@ -418,7 +418,7 @@ def test_submit_gauge_with_labels_and_hostname_override(mocked_prometheus_check,
 
 
 def test_submit_gauge_with_labels_and_hostname_already_overridden(mocked_prometheus_check, ref_gauge):
-    """ submitting metrics that contain labels should result in tags on the gauge call """
+    """submitting metrics that contain labels should result in tags on the gauge call"""
     _l1 = ref_gauge.metric[0].label.add()
     _l1.name = 'my_1st_label'
     _l1.value = 'my_1st_label_value'
@@ -455,7 +455,7 @@ def test_labels_not_added_as_tag_once_for_each_metric(mocked_prometheus_check, r
 
 
 def test_submit_gauge_with_custom_tags(mocked_prometheus_check, ref_gauge):
-    """ Providing custom tags should add them as is on the gauge call """
+    """Providing custom tags should add them as is on the gauge call"""
     tags = ['env:dev', 'app:my_pretty_app']
     check = mocked_prometheus_check
     check._submit(check.metrics_mapper[ref_gauge.name], ref_gauge, custom_tags=tags)
@@ -1278,7 +1278,7 @@ def test_parse_one_summary_with_none_values(p_check):
 
 
 def test_label_joins(sorted_tags_check):
-    """ Tests label join on text format """
+    """Tests label join on text format"""
     text_data = None
     f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
@@ -1628,7 +1628,7 @@ def test_label_joins(sorted_tags_check):
 
 
 def test_label_joins_gc(sorted_tags_check):
-    """ Tests label join GC on text format """
+    """Tests label join GC on text format"""
     text_data = None
     f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
@@ -1694,7 +1694,7 @@ def test_label_joins_gc(sorted_tags_check):
 
 
 def test_label_joins_missconfigured(sorted_tags_check):
-    """ Tests label join missconfigured label is ignored """
+    """Tests label join missconfigured label is ignored"""
     text_data = None
     f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
@@ -1747,7 +1747,7 @@ def test_label_joins_missconfigured(sorted_tags_check):
 
 
 def test_label_join_not_existing(sorted_tags_check):
-    """ Tests label join on non existing matching label is ignored """
+    """Tests label join on non existing matching label is ignored"""
     text_data = None
     f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
@@ -1786,7 +1786,7 @@ def test_label_join_not_existing(sorted_tags_check):
 
 
 def test_label_join_metric_not_existing(sorted_tags_check):
-    """ Tests label join on non existing metric is ignored """
+    """Tests label join on non existing metric is ignored"""
     text_data = None
     f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
@@ -1825,7 +1825,7 @@ def test_label_join_metric_not_existing(sorted_tags_check):
 
 
 def test_label_join_with_hostname(sorted_tags_check):
-    """ Tests label join and hostname override on a metric """
+    """Tests label join and hostname override on a metric"""
     text_data = None
     f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
@@ -1898,7 +1898,7 @@ def mock_get():
 
 
 def test_health_service_check_ok(mock_get):
-    """ Tests endpoint health service check OK """
+    """Tests endpoint health service check OK"""
     check = PrometheusCheck('prometheus_check', {}, {}, {})
     check.NAMESPACE = 'ksm'
     check.health_service_check = True
@@ -1910,7 +1910,7 @@ def test_health_service_check_ok(mock_get):
 
 
 def test_health_service_check_failing():
-    """ Tests endpoint health service check failing """
+    """Tests endpoint health service check failing"""
     check = PrometheusCheck('prometheus_check', {}, {}, {})
     check.NAMESPACE = 'ksm'
     check.health_service_check = True
@@ -1923,7 +1923,7 @@ def test_health_service_check_failing():
 
 
 def test_set_prometheus_timeout():
-    """ Tests set_prometheus_timeout function call from a PrometheusCheck"""
+    """Tests set_prometheus_timeout function call from a PrometheusCheck"""
     # no timeout specified, should be default 10
     check = PrometheusCheck('prometheus_check', {}, {}, {})
     instance_default = {

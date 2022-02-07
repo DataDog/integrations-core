@@ -7,6 +7,7 @@ import mock
 import pytest
 
 from datadog_checks.base.utils.common import get_docker_hostname
+from datadog_checks.cilium import CiliumCheck
 from datadog_checks.dev import run_command
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
@@ -16,6 +17,7 @@ try:
 except ImportError:
     from contextlib2 import ExitStack
 
+from .common import CILIUM_LEGACY
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
@@ -29,18 +31,6 @@ PORTS = [AGENT_PORT, OPERATOR_PORT]
 
 def setup_cilium():
     config = os.path.join(HERE, 'kind', 'cilium.yaml')
-    run_command(
-        [
-            "kubectl",
-            "create",
-            "clusterrolebinding",
-            "cluster-admin-binding",
-            "--clusterrole",
-            "cluster-admin",
-            "--user",
-            "ddtest@google.email",
-        ]
-    )
     run_command(["kubectl", "create", "ns", "cilium"])
     run_command(["kubectl", "create", "-f", config])
     run_command(
@@ -49,32 +39,58 @@ def setup_cilium():
     run_command(["kubectl", "wait", "pods", "-n", "cilium", "--all", "--for=condition=Ready", "--timeout=300s"])
 
 
+def get_instances(agent_host, agent_port, operator_host, operator_port, use_openmetrics):
+    return {
+        'instances': [
+            {
+                'agent_endpoint': 'http://{}:{}/metrics'.format(agent_host, agent_port),
+                'use_openmetrics': use_openmetrics,
+            },
+            {
+                'operator_endpoint': 'http://{}:{}/metrics'.format(operator_host, operator_port),
+                'use_openmetrics': use_openmetrics,
+            },
+        ]
+    }
+
+
 @pytest.fixture(scope='session')
 def dd_environment():
-    with kind_run(conditions=[setup_cilium]) as kubeconfig:
+    use_openmetrics = CILIUM_LEGACY == 'false'
+    kind_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
+    with kind_run(conditions=[setup_cilium], kind_config=kind_config) as kubeconfig:
         with ExitStack() as stack:
             ip_ports = [
                 stack.enter_context(port_forward(kubeconfig, 'cilium', port, 'deployment', 'cilium-operator'))
                 for port in PORTS
             ]
-        instances = {
-            'instances': [
-                {'agent_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0])},
-                {'operator_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1])},
-            ]
-        }
+
+            instances = get_instances(ip_ports[0][0], ip_ports[0][1], ip_ports[1][0], ip_ports[1][1], use_openmetrics)
 
         yield instances
 
 
 @pytest.fixture(scope="session")
-def agent_instance():
-    return {'agent_endpoint': AGENT_URL, 'tags': ['pod_test']}
+def check():
+    return lambda instance: CiliumCheck('cilium', {}, [instance])
+
+
+@pytest.fixture(scope="session")
+def agent_instance_use_openmetrics():
+    return lambda use_openmetrics: {
+        'agent_endpoint': AGENT_URL,
+        'tags': ['pod_test'],
+        'use_openmetrics': use_openmetrics,
+    }
 
 
 @pytest.fixture
-def operator_instance():
-    return {'operator_endpoint': OPERATOR_URL, 'tags': ['operator_test']}
+def operator_instance_use_openmetrics():
+    return lambda use_openmetrics: {
+        'operator_endpoint': OPERATOR_URL,
+        'tags': ['operator_test'],
+        'use_openmetrics': use_openmetrics,
+    }
 
 
 @pytest.fixture()

@@ -6,7 +6,7 @@ PyMySQL,PyPI,MIT,yutaka.matsubara
 PySocks,PyPI,BSD-3-Clause,Anorov
 PyYAML,PyPI,MIT,Kirill Simonov
 Pyro4,PyPI,MIT,Irmen de Jong
-adodbapi,PyPI,LGPL-2.1-only,Vernon Cole
+adodbapi,PyPI,LGPL-2.1-only,"Henrik Ekelund, Vernon Cole, et.al."
 aerospike,PyPI,Apache-2.0,"Aerospike, Inc."
 aws-requests-auth,PyPI,BSD-3-Clause,David Muller
 beautifulsoup4,PyPI,MIT,Leonard Richardson
@@ -26,14 +26,15 @@ cx-Oracle,PyPI,BSD-3-Clause,Anthony Tuininga
 ddtrace,PyPI,BSD-3-Clause,"Datadog, Inc."
 dnspython,PyPI,ISC,Bob Halley
 enum34,PyPI,BSD-3-Clause,Ethan Furman
-flup,PyPI,BSD-3-Clause,Allan Saddi
-flup-py3,PyPI,BSD-3-Clause,Allan Saddi
+flup,Vendor,BSD-3-Clause,Allan Saddi
+flup-py3,Vendor,BSD-3-Clause,Allan Saddi
 foundationdb,PyPI,Apache-2.0,FoundationDB
 futures,PyPI,PSF,Brian Quinlan
 gearman,PyPI,Apache-2.0,Matthew Tai
 immutables,PyPI,Apache-2.0,MagicStack Inc
 in-toto,PyPI,Apache-2.0,New York University: Secure Systems Lab
 ipaddress,PyPI,PSF,Philipp Hagemeister
+jellyfish,PyPI,BSD-3-Clause,
 kafka-python,PyPI,Apache-2.0,Dana Powers
 kazoo,PyPI,Apache-2.0,Kazoo team
 kubernetes,PyPI,Apache-2.0,Kubernetes
@@ -68,7 +69,7 @@ python-dateutil,PyPI,BSD-3-Clause,Gustavo Niemeyer
 python3-gearman,PyPI,Apache-2.0,
 pyvmomi,PyPI,Apache-2.0,"VMware, Inc."
 pywin32,PyPI,PSF,Mark Hammond (et al)
-redis,PyPI,MIT,Andy McCurdy
+redis,PyPI,MIT,Andy McCurdy | Redis Inc.
 requests,PyPI,Apache-2.0,Kenneth Reitz
 requests-kerberos,PyPI,ISC,"Ian Cordasco, Cory Benfield, Michael Komitee"
 requests-toolbelt,PyPI,Apache-2.0,"Ian Cordasco, Cory Benfield"
@@ -90,5 +91,7 @@ tuf,PyPI,Apache-2.0,https://www.updateframework.com
 tuf,PyPI,MIT,https://www.updateframework.com
 typing,PyPI,PSF,"Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Ivan Levkivskyi"
 uptime,PyPI,BSD-2-Clause,Koen Crolla
+urllib3,PyPI,MIT,Andrey Petrov
 vertica-python,PyPI,Apache-2.0,"Justin Berka, Alex Kim, Siting Ren"
 win-inet-pton,PyPI,Unlicense,Ryan Vennell
+wrapt,PyPI,BSD-3-Clause,Graham Dumpleton

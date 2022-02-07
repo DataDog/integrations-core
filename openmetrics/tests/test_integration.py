@@ -6,9 +6,9 @@ from .common import CHECK_NAME, INSTANCE
 
 
 @pytest.mark.integration
-def test_integration(aggregator, dd_environment):
-    c = OpenMetricsCheck('openmetrics', {}, [dd_environment])
-    c.check(dd_environment)
+def test_integration(aggregator, dd_run_check, dd_environment):
+    check = OpenMetricsCheck('openmetrics', {}, [dd_environment])
+    dd_run_check(check)
     aggregator.assert_metric(CHECK_NAME + '.go_memstats_mallocs_total', metric_type=aggregator.MONOTONIC_COUNT)
     assert_metrics_covered(aggregator)
 

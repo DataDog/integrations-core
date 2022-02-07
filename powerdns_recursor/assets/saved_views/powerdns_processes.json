@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:powerdns_recursor"
-      ]
+      "query_filter": "integration:powerdns_recursor",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

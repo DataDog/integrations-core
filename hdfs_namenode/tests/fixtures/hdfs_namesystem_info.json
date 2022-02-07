@@ -5,7 +5,7 @@
     "Total" : 62725623808,
     "UpgradeFinalized" : true,
     "ClusterId" : "CID-44e20313-500c-4587-ad7d-4bf751a4a652",
-    "Version" : "2.7.1, r15ecc87ccf4a0228f35af08fc56de536e6ce657a",
+    "Version" : "3.1.3, rba631c436b806728f8ec2f54ab1e289526c90579",
     "Used" : 24576,
     "Free" : 55830482944,
     "Safemode" : "",
@@ -33,10 +33,10 @@
     "CorruptFiles" : "[]",
     "DistinctVersionCount" : 1,
     "DistinctVersions" : [ {
-      "key" : "2.7.1",
+      "key" : "3.1.3",
       "value" : 1
     } ],
-    "SoftwareVersion" : "2.7.1",
+    "SoftwareVersion" : "3.1.3",
     "RollingUpgradeStatus" : null,
     "Threads" : 33
   } ]

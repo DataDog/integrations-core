@@ -56,8 +56,10 @@ REL_METRICS = {
         'n_tup_hot_upd': ('postgresql.rows_hot_updated', AgentCheck.rate),
         'n_live_tup': ('postgresql.live_rows', AgentCheck.gauge),
         'n_dead_tup': ('postgresql.dead_rows', AgentCheck.gauge),
+        'vacuum_count': ('postgresql.vacuumed', AgentCheck.monotonic_count),
         'autovacuum_count': ('postgresql.autovacuumed', AgentCheck.monotonic_count),
         'analyze_count': ('postgresql.analyzed', AgentCheck.monotonic_count),
+        'autoanalyze_count': ('postgresql.autoanalyzed', AgentCheck.monotonic_count),
     },
     'query': """
 SELECT relname,schemaname,{metrics_columns}
@@ -134,17 +136,67 @@ SELECT relname,
  WHERE {relations}""",
     'relation': True,
 }
-
 # adapted from https://wiki.postgresql.org/wiki/Show_database_bloat and https://github.com/bucardo/check_postgres/
-BLOAT_QUERY = """
+TABLE_BLOAT_QUERY = """
 SELECT
-    schemaname, relname, iname,
+    schemaname, relname,
     ROUND((CASE WHEN otta=0 THEN 0.0 ELSE sml.relpages::float/otta END)::numeric,1) AS tbloat
 FROM (
     SELECT
-    schemaname, tablename, cc.relname as relname, cc.reltuples, cc.relpages, bs,
+    schemaname, tablename, cc.relname as relname, cc.reltuples, cc.relpages,
     CEIL((cc.reltuples*((datahdr+ma-
-        (CASE WHEN datahdr%ma=0 THEN ma ELSE datahdr%ma END))+nullhdr2+4))/(bs-20::float)) AS otta,
+        (CASE WHEN datahdr%ma=0 THEN ma ELSE datahdr%ma END))+nullhdr2+4))/(bs-20::float)) AS otta
+    FROM (
+    SELECT
+        ma,bs,schemaname,tablename,
+        (datawidth+(hdr+ma-(case when hdr%ma=0 THEN ma ELSE hdr%ma END)))::numeric AS datahdr,
+        (maxfracsum*(nullhdr+ma-(case when nullhdr%ma=0 THEN ma ELSE nullhdr%ma END))) AS nullhdr2
+    FROM (
+        SELECT
+    schemaname, tablename, hdr, ma, bs,
+    SUM((1-null_frac)*avg_width) AS datawidth,
+    MAX(null_frac) AS maxfracsum,
+    hdr+(
+        SELECT 1+count(*)/8
+        FROM pg_stats s2
+        WHERE null_frac<>0 AND s2.schemaname = s.schemaname AND s2.tablename = s.tablename
+    ) AS nullhdr
+        FROM pg_stats s, (
+    SELECT
+        (SELECT current_setting('block_size')::numeric) AS bs,
+        CASE WHEN substring(v,12,3) IN ('8.0','8.1','8.2') THEN 27 ELSE 23 END AS hdr,
+        CASE WHEN v ~ 'mingw32' THEN 8 ELSE 4 END AS ma
+    FROM (SELECT version() AS v) AS foo
+        ) AS constants
+        GROUP BY 1,2,3,4,5
+    ) AS foo
+    ) AS rs
+    JOIN pg_class cc ON cc.relname = rs.tablename
+    JOIN pg_namespace nn ON cc.relnamespace = nn.oid
+    AND nn.nspname = rs.schemaname
+    AND nn.nspname <> 'information_schema'
+) AS sml WHERE {relations};
+"""
+
+# The estimated table bloat
+TABLE_BLOAT = {
+    'descriptors': [('schemaname', 'schema'), ('relname', 'table')],
+    'metrics': {
+        'tbloat': ('postgresql.table_bloat', AgentCheck.gauge),
+    },
+    'query': TABLE_BLOAT_QUERY,
+    'relation': True,
+}
+
+
+# adapted from https://wiki.postgresql.org/wiki/Show_database_bloat and https://github.com/bucardo/check_postgres/
+INDEX_BLOAT_QUERY = """
+SELECT
+    schemaname, relname, iname,
+    ROUND((CASE WHEN iotta=0 OR ipages=0 THEN 0.0 ELSE ipages::float/iotta END)::numeric,1) AS ibloat
+FROM (
+    SELECT
+    schemaname, cc.relname as relname,
     COALESCE(c2.relname,'?') AS iname, COALESCE(c2.reltuples,0) AS ituples, COALESCE(c2.relpages,0) AS ipages,
     COALESCE(CEIL((c2.reltuples*(datahdr-12))/(bs-20::float)),0) AS iotta -- very rough approximation, assumes all cols
     FROM (
@@ -182,16 +234,16 @@ FROM (
 """
 
 # The estimated table bloat
-BLOAT_METRICS = {
+INDEX_BLOAT = {
     'descriptors': [('schemaname', 'schema'), ('relname', 'table'), ('iname', 'index')],
     'metrics': {
-        'tbloat': ('postgresql.table_bloat', AgentCheck.gauge),
+        'ibloat': ('postgresql.index_bloat', AgentCheck.gauge),
     },
-    'query': BLOAT_QUERY,
+    'query': INDEX_BLOAT_QUERY,
     'relation': True,
 }
 
-RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS, BLOAT_METRICS]
+RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
 
 
 class RelationsManager(object):
@@ -207,7 +259,7 @@ class RelationsManager(object):
         # type (str, str) -> str
         """Build a WHERE clause filtering relations based on relations_config and applies it to the given query"""
         relations_filter = []
-        for r in self.config.values():
+        for r in self.config:
             relation_filter = []
             if r.get(RELATION_NAME):
                 relation_filter.append("( relname = '{}'".format(r[RELATION_NAME]))
@@ -215,11 +267,12 @@ class RelationsManager(object):
                 relation_filter.append("( relname ~ '{}'".format(r[RELATION_REGEX]))
 
             if ALL_SCHEMAS not in r[SCHEMAS]:
-                schema_filter = ' ,'.join("'{}'".format(s) for s in r[SCHEMAS])
+                schema_filter = ','.join("'{}'".format(s) for s in r[SCHEMAS])
                 relation_filter.append('AND {} = ANY(array[{}]::text[])'.format(schema_field, schema_filter))
 
+            # TODO: explicitly declare `relkind` compatiblity in the query rather than implicitly checking query text
             if r.get(RELKIND) and 'FROM pg_locks' in query:
-                relkind_filter = ' ,'.join("'{}'".format(s) for s in r[RELKIND])
+                relkind_filter = ','.join("'{}'".format(s) for s in r[RELKIND])
                 relation_filter.append('AND relkind = ANY(array[{}])'.format(relkind_filter))
 
             relation_filter.append(')')
@@ -257,18 +310,16 @@ class RelationsManager(object):
 
     @staticmethod
     def _build_relations_config(yamlconfig):
-        # type:  (List[Union[str, Dict]]) -> Dict[str, Dict[str, Any]]
-        """Builds a dictionary from relations configuration while maintaining compatibility"""
-        config = {}
+        # type:  (List[Union[str, Dict]]) -> List[Dict[str, Any]]
+        """Builds a list from relations configuration while maintaining compatibility"""
+        relations = []
         for element in yamlconfig:
+            config = {}
             if isinstance(element, str):
-                config[element] = {RELATION_NAME: element, SCHEMAS: [ALL_SCHEMAS]}
+                config = {RELATION_NAME: element, SCHEMAS: [ALL_SCHEMAS]}
             elif isinstance(element, dict):
-                relname = str(element.get(RELATION_NAME))  # type: str
-                rel_regex = str(element.get(RELATION_REGEX))  # type: str
-                schemas = element.get(SCHEMAS, [])  # type: List
-                name = relname or rel_regex  # type: str
-                config[name] = element.copy()
-                if len(schemas) == 0:
-                    config[name][SCHEMAS] = [ALL_SCHEMAS]
-        return config
+                config = element.copy()
+                if len(config.get(SCHEMAS, [])) == 0:
+                    config[SCHEMAS] = [ALL_SCHEMAS]
+            relations.append(config)
+        return relations

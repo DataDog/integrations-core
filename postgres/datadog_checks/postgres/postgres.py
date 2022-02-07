@@ -13,12 +13,19 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
-from datadog_checks.postgres.relationsmanager import RELATION_METRICS, RelationsManager
+from datadog_checks.postgres.relationsmanager import INDEX_BLOAT, RELATION_METRICS, TABLE_BLOAT, RelationsManager
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .config import PostgresConfig
-from .util import CONNECTION_METRICS, FUNCTION_METRICS, REPLICATION_METRICS, fmt, get_schema_field
+from .util import (
+    CONNECTION_METRICS,
+    FUNCTION_METRICS,
+    REPLICATION_METRICS,
+    DatabaseConfigurationError,
+    fmt,
+    get_schema_field,
+)
 from .version_utils import V9, V10, VersionUtils
 
 try:
@@ -54,13 +61,13 @@ class PostgreSql(AgentCheck):
             )
         self._config = PostgresConfig(self.instance)
         self.pg_settings = {}
+        self._warnings_by_code = {}
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
         self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
         self._relations_manager = RelationsManager(self._config.relations)
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
-
         # map[dbname -> psycopg connection]
         self._db_pool = {}
         self._db_pool_lock = threading.Lock()
@@ -157,7 +164,9 @@ class PostgreSql(AgentCheck):
     def resolved_hostname(self):
         # type: () -> str
         if self._resolved_hostname is None:
-            if self._config.dbm_enabled or self.disable_generic_tags:
+            if self._config.reported_hostname:
+                self._resolved_hostname = self._config.reported_hostname
+            elif self._config.dbm_enabled or self.disable_generic_tags:
                 self._resolved_hostname = self.resolve_db_host()
             else:
                 self._resolved_hostname = self.agent_hostname
@@ -316,6 +325,8 @@ class PostgreSql(AgentCheck):
         # Do we need relation-specific metrics?
         if self._config.relations:
             metric_scope.extend(RELATION_METRICS)
+            if self._config.collect_bloat_metrics:
+                metric_scope.extend([INDEX_BLOAT, TABLE_BLOAT])
 
         replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
         if replication_metrics:
@@ -373,6 +384,14 @@ class PostgreSql(AgentCheck):
                 args['port'] = self._config.port
             if self._config.query_timeout:
                 args['options'] = '-c statement_timeout=%s' % self._config.query_timeout
+            if self._config.ssl_cert:
+                args['sslcert'] = self._config.ssl_cert
+            if self._config.ssl_root_cert:
+                args['sslrootcert'] = self._config.ssl_root_cert
+            if self._config.ssl_key:
+                args['sslkey'] = self._config.ssl_key
+            if self._config.ssl_password:
+                args['sslpassword'] = self._config.ssl_password
             conn = psycopg2.connect(**args)
         # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
         conn.set_session(autocommit=True)
@@ -544,6 +563,18 @@ class PostgreSql(AgentCheck):
                             metric, value, method = info
                             getattr(self, method)(metric, value, tags=set(query_tags), hostname=self.resolved_hostname)
 
+    def record_warning(self, code, message):
+        # type: (DatabaseConfigurationError, str) -> None
+        self._warnings_by_code[code] = message
+
+    def _report_warnings(self):
+        messages = self._warnings_by_code.values()
+        # Reset the warnings for the next check run
+        self._warnings_by_code = {}
+
+        for warning in messages:
+            self.warning(warning)
+
     def check(self, _):
         tags = copy.copy(self._config.tags)
         # Collect metrics
@@ -589,3 +620,6 @@ class PostgreSql(AgentCheck):
             except Exception as e:
                 self.log.warning("Unable to commit: %s", e)
             self._version = None  # We don't want to cache versions between runs to capture minor updates for metadata
+        finally:
+            # Add the warnings saved during the execution of the check
+            self._report_warnings()

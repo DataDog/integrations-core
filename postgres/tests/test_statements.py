@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import datetime
 import re
 import time
 from collections import Counter
@@ -36,8 +37,9 @@ SAMPLE_QUERIES = [
     ("dd_admin", "dd_admin", "dogs", "SELECT * FROM breed WHERE name = %s", "Labrador"),
 ]
 
-
 dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
+
+DEFAULT_TZ_INFO = psycopg2.tz.FixedOffsetTimezone(offset=0, name=None)
 
 
 @pytest.fixture(autouse=True)
@@ -144,6 +146,7 @@ def test_statement_metrics(
     assert event['timestamp'] > 0
     assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
     assert event['ddagentversion'] == datadog_agent.get_version()
+    assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
     expected_dbm_metrics_tags = {'foo:bar', 'port:{}'.format(PORT)}
     assert set(event['tags']) == expected_dbm_metrics_tags
@@ -250,6 +253,7 @@ def dbm_instance(pg_instance):
     pg_instance['min_collection_interval'] = 1
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
+    pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 10}
     return pg_instance
 
@@ -283,23 +287,28 @@ failed_explain_test_repeat_count = 5
 @pytest.mark.parametrize(
     "query,expected_error_tag,explain_function_override,expected_fail_count",
     [
-        ("select * from fake_table", "error:explain-<class 'psycopg2.errors.UndefinedTable'>", None, 1),
-        ("select * from fake_schema.fake_table", "error:explain-<class 'psycopg2.errors.UndefinedTable'>", None, 1),
+        ("select * from fake_table", "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>", None, 1),
+        (
+            "select * from fake_schema.fake_table",
+            "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>",
+            None,
+            1,
+        ),
         (
             "select * from pg_settings where name = $1",
-            "error:explain-<class 'psycopg2.errors.UndefinedParameter'>",
+            "error:explain-database_error-<class 'psycopg2.errors.UndefinedParameter'>",
             None,
             1,
         ),
         (
             "select * from pg_settings where name = 'this query is truncated' limi",
-            "error:explain-<class 'psycopg2.errors.SyntaxError'>",
+            "error:explain-database_error-<class 'psycopg2.errors.SyntaxError'>",
             None,
             1,
         ),
         (
             "select * from persons",
-            "error:explain-<class 'psycopg2.errors.InsufficientPrivilege'>",
+            "error:explain-database_error-<class 'psycopg2.errors.InsufficientPrivilege'>",
             "datadog.explain_statement_noaccess",
             failed_explain_test_repeat_count,
         ),
@@ -331,7 +340,7 @@ def test_failed_explain_handling(
     assert err is None
 
     for _ in range(failed_explain_test_repeat_count):
-        check.statement_samples._run_explain_safe(dbname, query, query, query)
+        check.statement_samples._run_and_track_explain(dbname, query, query, query)
 
     expected_tags = dbm_instance['tags'] + [
         'db:{}'.format(DB_NAME),
@@ -341,9 +350,14 @@ def test_failed_explain_handling(
     ]
 
     aggregator.assert_metric(
-        # even though we tried to explain the query multiple times, only a single error was registered, showing
-        # that the cached error response was used
         'dd.postgres.statement_samples.error',
+        count=failed_explain_test_repeat_count,
+        tags=expected_tags,
+        hostname='stubbed.hostname',
+    )
+
+    aggregator.assert_metric(
+        'dd.postgres.run_explain.error',
         count=expected_fail_count,
         tags=expected_tags,
         hostname='stubbed.hostname',
@@ -352,7 +366,8 @@ def test_failed_explain_handling(
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
 @pytest.mark.parametrize(
-    "user,password,dbname,query,arg,expected_error_tag,expected_collection_errors,expected_statement_truncated",
+    "user,password,dbname,query,arg,expected_error_tag,expected_collection_errors,expected_statement_truncated,"
+    "expected_warnings",
     [
         (
             "bob",
@@ -363,6 +378,7 @@ def test_failed_explain_handling(
             None,
             None,
             StatementTruncationState.not_truncated.value,
+            [],
         ),
         (
             "dd_admin",
@@ -373,6 +389,7 @@ def test_failed_explain_handling(
             None,
             None,
             StatementTruncationState.not_truncated.value,
+            [],
         ),
         (
             "dd_admin",
@@ -380,9 +397,10 @@ def test_failed_explain_handling(
             "dogs_noschema",
             "SELECT * FROM kennel WHERE id = %s",
             123,
-            "error:explain-{}".format(DBExplainError.invalid_schema),
+            "error:explain-invalid_schema-<class 'psycopg2.errors.InvalidSchemaName'>",
             [{'code': 'invalid_schema', 'message': "<class 'psycopg2.errors.InvalidSchemaName'>"}],
             StatementTruncationState.not_truncated.value,
+            [],
         ),
         (
             "dd_admin",
@@ -390,9 +408,21 @@ def test_failed_explain_handling(
             "dogs_nofunc",
             "SELECT * FROM kennel WHERE id = %s",
             123,
-            "error:explain-{}".format(DBExplainError.failed_function),
+            "error:explain-failed_function-<class 'psycopg2.errors.UndefinedFunction'>",
             [{'code': 'failed_function', 'message': "<class 'psycopg2.errors.UndefinedFunction'>"}],
             StatementTruncationState.not_truncated.value,
+            [
+                'Unable to collect execution plans in dbname=dogs_nofunc. Check that the '
+                'function datadog.explain_statement exists in the database. See '
+                'https://docs.datadoghq.com/database_monitoring/setup_postgres/'
+                'troubleshooting#undefined-explain-function for more details: function '
+                'datadog.explain_statement(unknown) does not exist\nLINE 1: SELECT '
+                'datadog.explain_statement($stmt$SELECT * FROM pg_stat...\n               '
+                '^\nHINT:  No function matches the given name and argument types. You might need to add '
+                'explicit type casts.\n'
+                '\n'
+                'code=undefined-explain-function dbname=dogs_nofunc host=stubbed.hostname',
+            ],
         ),
         (
             "bob",
@@ -413,9 +443,10 @@ def test_failed_explain_handling(
             # Use some multi-byte characters (the euro symbol) so we can validate that the code is correctly
             # looking at the length in bytes when testing for truncated statements
             u'\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC',
-            "error:explain-{}".format(DBExplainError.query_truncated),
+            "error:explain-query_truncated-track_activity_query_size=1024",
             [{'code': 'query_truncated', 'message': 'track_activity_query_size=1024'}],
             StatementTruncationState.truncated.value,
+            [],
         ),
     ],
 )
@@ -433,6 +464,7 @@ def test_statement_samples_collect(
     expected_collection_errors,
     expected_statement_truncated,
     datadog_agent,
+    expected_warnings,
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     check = integration_check(dbm_instance)
@@ -493,8 +525,300 @@ def test_statement_samples_collect(
             else:
                 assert event['db']['plan']['collection_errors'] is None
 
+        assert check.warnings == expected_warnings
+
     finally:
         conn.close()
+
+
+@pytest.mark.parametrize("pg_stat_statements_view", ["pg_stat_statements", "datadog.pg_stat_statements()"])
+@pytest.mark.parametrize(
+    "metadata,expected_metadata_payload",
+    [
+        (
+            {'tables_csv': 'persons', 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+            {'tables': ['persons'], 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+        ),
+        (
+            {'tables_csv': '', 'commands': None, 'comments': None},
+            {'tables': None, 'commands': None, 'comments': None},
+        ),
+    ],
+)
+def test_statement_metadata(
+    aggregator,
+    integration_check,
+    dbm_instance,
+    datadog_agent,
+    pg_stat_statements_view,
+    metadata,
+    expected_metadata_payload,
+):
+    """Tests for metadata in both samples and metrics"""
+    dbm_instance['obfuscator_options'] = {'collect_metadata': True}
+    dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
+    dbm_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+
+    # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
+    query = '''
+    -- Test comment
+    SELECT city FROM persons WHERE city = 'hello'
+    '''
+    # Samples will match to the non normalized query signature
+    query_signature = '8074f7d4fee9fbdf'
+
+    normalized_query = 'SELECT city FROM persons WHERE city = ?'
+    # Metrics will match to the normalized query signature
+    normalized_query_signature = 'ca85e8d659051b3a'
+
+    def obfuscate_sql(query, options=None):
+        if query.startswith('SELECT city FROM persons WHERE city'):
+            return json.dumps({'query': normalized_query, 'metadata': metadata})
+        return json.dumps({'query': query, 'metadata': metadata})
+
+    check = integration_check(dbm_instance)
+    check._connect()
+    conn = psycopg2.connect(host=HOST, dbname="datadog_test", user="bob", password="bob")
+    cursor = conn.cursor()
+    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+        cursor.execute(
+            query,
+        )
+        check.check(dbm_instance)
+        cursor.execute(
+            query,
+        )
+        check.check(dbm_instance)
+
+    # Test samples metadata, metadata in samples is an object under `db`.
+    samples = aggregator.get_event_platform_events("dbm-samples")
+    matching_samples = [s for s in samples if s['db']['query_signature'] == query_signature]
+    assert len(matching_samples) == 1
+    sample = matching_samples[0]
+    assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
+    assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
+    assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
+
+    if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_statements_view == "pg_stat_statements":
+        # cannot catch any queries from other users
+        # only can see own queries
+        return False
+
+    # Test metrics metadata, metadata in metrics are located in the rows.
+    metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(metrics) == 1
+    metric = metrics[0]
+    matching_metrics = [m for m in metric['postgres_rows'] if m['query_signature'] == normalized_query_signature]
+    assert len(matching_metrics) == 1
+    metric = matching_metrics[0]
+    assert metric['dd_tables'] == expected_metadata_payload['tables']
+    assert metric['dd_commands'] == expected_metadata_payload['commands']
+
+
+@pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
+@pytest.mark.parametrize(
+    "user,password,dbname,query,arg,expected_out,expected_keys,expected_conn_out",
+    [
+        (
+            "bob",
+            "bob",
+            "datadog_test",
+            "SELECT city FROM pg_sleep(3), persons WHERE city = %s",
+            "hello",
+            {
+                'datname': 'datadog_test',
+                'usename': 'bob',
+                'state': 'idle in transaction',
+                'query_signature': 'd9193c18a6f372d8',
+                'statement': "SELECT city FROM pg_sleep(3), persons WHERE city = 'hello'",
+            },
+            ["xact_start", "query_start", "pid", "client_port", "client_addr"],
+            {
+                'usename': 'bob',
+                'state': 'idle in transaction',
+                'application_name': '',
+                'datname': 'datadog_test',
+                'connections': 1,
+            },
+        ),
+    ],
+)
+def test_activity_snapshot_collection(
+    aggregator,
+    integration_check,
+    dbm_instance,
+    datadog_agent,
+    pg_stat_activity_view,
+    user,
+    password,
+    dbname,
+    query,
+    arg,
+    expected_out,
+    expected_keys,
+    expected_conn_out,
+):
+    dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+
+    # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
+    # the simple query protocol, sending the whole query as a plain string to postgres.
+    # if a client is using the extended query protocol with prepare then the query would appear as
+    # leave connection open until after the check has run to ensure we're able to see the query in
+    # pg_stat_activity
+    try:
+        # turn off auto commit so we can manage transactions manually
+        # this should allow us to catch queries in the 'idle in transaction' state
+        conn.autocommit = False
+        conn.cursor().execute(query, (arg,))
+        check.check(dbm_instance)
+        dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
+
+        if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
+            # cannot catch any queries from other users
+            # only can see own queries
+            return
+
+        event = dbm_activity_event[0]
+        assert event['host'] == "stubbed.hostname"
+        assert event['ddsource'] == "postgres"
+        assert event['dbm_type'] == "activity"
+        assert event['ddagentversion'] == datadog_agent.get_version()
+        assert len(event['postgres_activity']) > 0
+        # find bob's query.
+        bobs_query = None
+        for query_json in event['postgres_activity']:
+            if 'usename' in query_json and query_json['usename'] == "bob":
+                bobs_query = query_json
+        assert bobs_query is not None
+
+        for key in expected_out:
+            assert expected_out[key] == bobs_query[key]
+        for val in expected_keys:
+            assert val in bobs_query
+
+        assert 'query' not in bobs_query
+
+        expected_tags = dbm_instance['tags'] + [
+            'port:{}'.format(PORT),
+        ]
+
+        # check postgres_connections are set
+        assert len(event['postgres_connections']) > 0
+        # find bob's connections.
+        bobs_conns = None
+        for query_json in event['postgres_connections']:
+            if 'usename' in query_json and query_json['usename'] == "bob":
+                bobs_conns = query_json
+        assert bobs_conns is not None
+
+        for key in expected_conn_out:
+            assert expected_conn_out[key] == bobs_conns[key]
+
+        assert event['ddtags'] == expected_tags
+
+    finally:
+        conn.close()
+
+
+def new_time():
+    return datetime.datetime(2021, 9, 23, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO)
+
+
+def old_time():
+    return datetime.datetime(2021, 9, 22, 22, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO)
+
+
+def very_old_time():
+    return datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO)
+
+
+@pytest.mark.parametrize(
+    "active_rows,expected_users",
+    [
+        (
+            [
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'newbob',
+                    'xact_start': new_time(),
+                    'query_start': new_time(),
+                },
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'oldbob',
+                    'xact_start': old_time(),
+                    'query_start': old_time(),
+                },
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'veryoldbob',
+                    'xact_start': very_old_time(),
+                    'query_start': very_old_time(),
+                },
+            ],
+            ["veryoldbob", "oldbob"],
+        ),
+        (
+            [
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'newbob',
+                    'query_start': new_time(),
+                },
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'oldbob',
+                    'xact_start': old_time(),
+                    'query_start': old_time(),
+                },
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'veryoldbob',
+                    'query_start': very_old_time(),
+                },
+            ],
+            ["veryoldbob", "oldbob"],
+        ),
+        (
+            [
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'newbob',
+                    'query_start': new_time(),
+                },
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'sameoldtxbob',
+                    'xact_start': old_time(),
+                    'query_start': old_time(),
+                },
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'sameoldtxboblongquery',
+                    'xact_start': old_time(),
+                    'query_start': very_old_time(),
+                },
+            ],
+            ["sameoldtxboblongquery", "sameoldtxbob"],
+        ),
+    ],
+)
+def test_truncate_activity_rows(integration_check, dbm_instance, active_rows, expected_users):
+    check = integration_check(dbm_instance)
+    check._connect()
+    # set row limit to be 2
+    truncated_rows = check.statement_samples._truncate_activity_rows(active_rows, 2)
+    assert len(truncated_rows) == 2
+    # assert what is returned is sorted in the correct order
+    assert truncated_rows[0]['usename'] == expected_users[0]
+    assert truncated_rows[1]['usename'] == expected_users[1]
 
 
 @pytest.mark.parametrize(
@@ -502,13 +826,13 @@ def test_statement_samples_collect(
     [
         (
             "select * from fake_table",
-            "error:explain-<class 'psycopg2.errors.UndefinedTable'>",
+            "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>",
             DBExplainError.database_error,
             "<class 'psycopg2.errors.UndefinedTable'>",
         ),
         (
             "select * from pg_settings where name = $1",
-            "error:explain-<class 'psycopg2.errors.UndefinedParameter'>",
+            "error:explain-database_error-<class 'psycopg2.errors.UndefinedParameter'>",
             DBExplainError.database_error,
             "<class 'psycopg2.errors.UndefinedParameter'>",
         ),
@@ -525,7 +849,7 @@ def test_statement_samples_collect(
             "city as city52, city as city53, city as city54, city as city55, city as city56, city as city57, "
             "city as city58, city as city59, city as city60, city as city61 "
             "FROM persons WHERE city = 123",
-            "error:explain-{}".format(DBExplainError.query_truncated),
+            "error:explain-query_truncated-track_activity_query_size=1024",
             DBExplainError.query_truncated,
             "track_activity_query_size=1024",
         ),
@@ -544,7 +868,8 @@ def test_statement_run_explain_errors(
     check._connect()
 
     check.check(dbm_instance)
-    _, explain_err_code, err = check.statement_samples._run_explain_safe("datadog_test", query, query, query)
+    _, explain_err_code, err = check.statement_samples._run_and_track_explain("datadog_test", query, query, query)
+    check.check(dbm_instance)
 
     assert explain_err_code == expected_explain_err_code
     assert err == expected_err
@@ -553,15 +878,22 @@ def test_statement_run_explain_errors(
         'db:{}'.format(DB_NAME),
         'port:{}'.format(PORT),
         'agent_hostname:stubbed.hostname',
-        expected_err_tag,
     ]
 
     aggregator.assert_metric(
         'dd.postgres.statement_samples.error',
         count=1,
-        tags=expected_tags,
+        tags=expected_tags + [expected_err_tag],
         hostname='stubbed.hostname',
     )
+
+    if expected_explain_err_code == DBExplainError.database_error:
+        aggregator.assert_metric(
+            'dd.postgres.collect_statement_samples.explain_errors_cache.len',
+            value=1,
+            tags=expected_tags,
+            hostname='stubbed.hostname',
+        )
 
 
 @pytest.mark.parametrize("dbstrict", [True, False])
@@ -649,7 +981,7 @@ def test_pg_settings_caching(aggregator, integration_check, dbm_instance):
     ), "key should not have been blown away. If it was then pg_settings was not cached correctly"
 
 
-def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance, bob_conn):
+def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the main collection loop rate limit
     collection_interval = 0.1
     dbm_instance['query_samples']['collection_interval'] = collection_interval
@@ -663,6 +995,24 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
     check.cancel()
     metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
     assert max_collections / 2.0 <= len(metrics) <= max_collections
+
+
+def test_activity_collection_rate_limit(aggregator, integration_check, dbm_instance):
+    # test the activity collection loop rate limit
+    collection_interval = 0.1
+    activity_interval = 0.2  # double the main loop
+    dbm_instance['query_samples']['collection_interval'] = collection_interval
+    dbm_instance['query_activity']['collection_interval'] = activity_interval
+    dbm_instance['query_samples']['run_sync'] = False
+    check = integration_check(dbm_instance)
+    check._connect()
+    check.check(dbm_instance)
+    sleep_time = 1
+    time.sleep(sleep_time)
+    max_activity_collections = int(1 / activity_interval * sleep_time) + 1
+    check.cancel()
+    activity_metrics = aggregator.metrics("dd.postgres.collect_activity_snapshot.time")
+    assert max_activity_collections / 2.0 <= len(activity_metrics) <= max_activity_collections
 
 
 @pytest.mark.skip(reason='debugging flaky test (2021-09-03)')
@@ -812,6 +1162,9 @@ class ObjectNotInPrerequisiteState(psycopg2.errors.ObjectNotInPrerequisiteState)
         else:
             return super(ObjectNotInPrerequisiteState, self).__getattribute__(attr)
 
+    def __str__(self):
+        return self.pg_error
+
 
 class UndefinedTable(psycopg2.errors.UndefinedTable):
     """
@@ -828,39 +1181,68 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
         else:
             return super(UndefinedTable, self).__getattribute__(attr)
 
+    def __str__(self):
+        return self.pg_error
+
 
 @pytest.mark.parametrize(
-    "error,metric_columns,expected_error_tag",
+    "error,metric_columns,expected_error_tag,expected_warnings",
     [
         (
             ObjectNotInPrerequisiteState('pg_stat_statements must be loaded via shared_preload_libraries'),
             [],
             'error:database-ObjectNotInPrerequisiteState-pg_stat_statements_not_loaded',
+            [
+                'Unable to collect statement metrics because pg_stat_statements extension is '
+                "not loaded in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
+                'setup_postgres/troubleshooting#pg-stat-statements-not-loaded'
+                ' for more details\ncode=pg-stat-statements-not-loaded dbname=datadog_test host=stubbed.hostname',
+            ],
         ),
         (
             UndefinedTable('ERROR:  relation "pg_stat_statements" does not exist'),
             [],
             'error:database-UndefinedTable-pg_stat_statements_not_created',
+            [
+                'Unable to collect statement metrics because pg_stat_statements is not '
+                "created in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
+                'setup_postgres/troubleshooting#pg-stat-statements-not-created'
+                ' for more details\ncode=pg-stat-statements-not-created dbname=datadog_test host=stubbed.hostname',
+            ],
         ),
         (
             ObjectNotInPrerequisiteState('cannot insert into view'),
             [],
             'error:database-ObjectNotInPrerequisiteState',
+            [
+                "Unable to collect statement metrics because of an error running queries in database 'datadog_test'. "
+                "See https://docs.datadoghq.com/database_monitoring/troubleshooting for help: cannot insert into view\n"
+                "dbname=datadog_test host=stubbed.hostname"
+            ],
         ),
         (
-            psycopg2.errors.DatabaseError(),
+            psycopg2.errors.DatabaseError('connection reset'),
             [],
             'error:database-DatabaseError',
+            [
+                "Unable to collect statement metrics because of an error running queries in database 'datadog_test'. "
+                'See https://docs.datadoghq.com/database_monitoring/troubleshooting for help: connection reset\n'
+                'dbname=datadog_test host=stubbed.hostname',
+            ],
         ),
         (
             None,
             [],
             'error:database-missing_pg_stat_statements_required_columns',
+            [
+                'Unable to collect statement metrics because required fields are unavailable: calls, query, rows.\n'
+                'dbname=datadog_test host=stubbed.hostname',
+            ],
         ),
     ],
 )
 def test_statement_metrics_database_errors(
-    aggregator, integration_check, dbm_instance, error, metric_columns, expected_error_tag
+    aggregator, integration_check, dbm_instance, error, metric_columns, expected_error_tag, expected_warnings
 ):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
@@ -884,3 +1266,5 @@ def test_statement_metrics_database_errors(
     aggregator.assert_metric(
         'dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags, hostname='stubbed.hostname'
     )
+
+    assert check.warnings == expected_warnings

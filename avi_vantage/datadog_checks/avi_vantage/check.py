@@ -93,7 +93,6 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         return scraper
 
     def check(self, _):
-        self.disable_generic_tags = self.config.disable_generic_tags
         with self.login():
             try:
                 self.collect_avi_version()

@@ -11,9 +11,10 @@ from .common import (
     EXPECTED_AO_METRICS_COMMON,
     EXPECTED_AO_METRICS_PRIMARY,
     EXPECTED_AO_METRICS_SECONDARY,
-    EXPECTED_METRICS,
+    EXPECTED_METRICS_DBM_ENABLED,
+    UNEXPECTED_METRICS,
 )
-from .utils import always_on, not_windows_ci
+from .utils import always_on, not_windows_ado, not_windows_ci
 
 try:
     import pyodbc
@@ -73,13 +74,29 @@ def test_check_ao_secondary(dd_agent_check, init_config, instance_ao_docker_seco
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
 
 
+@not_windows_ado
 def test_check_docker(dd_agent_check, init_config, instance_e2e):
+    # run run sync to ensure only a single run of both
+    instance_e2e['query_activity'] = {'run_sync': True}
+    instance_e2e['query_metrics'] = {'run_sync': True}
     aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_e2e]}, rate=True)
 
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
 
-    for mname in EXPECTED_METRICS:
+    # ignore DBM debug metrics for the following tests as they're not currently part of the public set of product
+    # metrics
+    dbm_debug_metrics = [m for m in aggregator._metrics.keys() if m.startswith('dd.sqlserver.')]
+    for m in dbm_debug_metrics:
+        del aggregator._metrics[m]
+
+    for mname in EXPECTED_METRICS_DBM_ENABLED:
         aggregator.assert_metric(mname)
+
+    # Our test environment does not have failover clustering enabled, so these metrics are not expected.
+    # To test them follow this guide:
+    # https://cloud.google.com/compute/docs/instances/sql-server/configure-failover-cluster-instance
+    for mname in UNEXPECTED_METRICS:
+        aggregator.assert_metric(mname, count=0)
 
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
     aggregator.assert_all_metrics_covered()

@@ -75,17 +75,19 @@ class Connection(object):
         self.log.debug('Connection initialized.')
 
     @contextmanager
-    def get_managed_cursor(self):
-        cursor = self.get_cursor(self.DEFAULT_DB_KEY)
-        yield cursor
-        self.close_cursor(cursor)
+    def get_managed_cursor(self, key_prefix=None):
+        cursor = self.get_cursor(self.DEFAULT_DB_KEY, key_prefix=key_prefix)
+        try:
+            yield cursor
+        finally:
+            self.close_cursor(cursor)
 
-    def get_cursor(self, db_key, db_name=None):
+    def get_cursor(self, db_key, db_name=None, key_prefix=None):
         """
         Return a cursor to execute query against the db
         Cursor are cached in the self.connections dict
         """
-        conn_key = self._conn_key(db_key, db_name)
+        conn_key = self._conn_key(db_key, db_name, key_prefix)
         try:
             conn = self._conns[conn_key]
         except KeyError:
@@ -122,24 +124,26 @@ class Connection(object):
             yield
 
     @contextmanager
-    def open_managed_default_connection(self):
-        with self._open_managed_db_connections(self.DEFAULT_DB_KEY):
+    def open_managed_default_connection(self, key_prefix=None):
+        with self._open_managed_db_connections(self.DEFAULT_DB_KEY, key_prefix=key_prefix):
             yield
 
     @contextmanager
-    def _open_managed_db_connections(self, db_key, db_name=None):
-        self.open_db_connections(db_key, db_name)
-        yield
-        self.close_db_connections(db_key, db_name)
+    def _open_managed_db_connections(self, db_key, db_name=None, key_prefix=None):
+        self.open_db_connections(db_key, db_name, key_prefix=key_prefix)
+        try:
+            yield
+        finally:
+            self.close_db_connections(db_key, db_name, key_prefix=key_prefix)
 
-    def open_db_connections(self, db_key, db_name=None, is_default=True):
+    def open_db_connections(self, db_key, db_name=None, is_default=True, key_prefix=None):
         """
         We open the db connections explicitly, so we can ensure they are open
         before we use them, and are closable, once we are finished. Open db
         connections keep locks on the db, presenting issues such as the SQL
         Server Agent being unable to stop.
         """
-        conn_key = self._conn_key(db_key, db_name)
+        conn_key = self._conn_key(db_key, db_name, key_prefix)
 
         _, host, _, _, database, _ = self._get_access_info(db_key, db_name)
 
@@ -155,10 +159,10 @@ class Connection(object):
                 rawconn = adodbapi.connect(cs, {'timeout': self.timeout, 'autocommit': True})
             else:
                 cs += self._conn_string_odbc(db_key, db_name=db_name)
-                rawconn = pyodbc.connect(cs, timeout=self.timeout)
+                rawconn = pyodbc.connect(cs, timeout=self.timeout, autocommit=True)
+                rawconn.timeout = self.timeout
 
             self.service_check_handler(AgentCheck.OK, host, database, is_default=is_default)
-
             if conn_key not in self._conns:
                 self._conns[conn_key] = rawconn
             else:
@@ -169,6 +173,7 @@ class Connection(object):
                     self.log.info("Could not close adodbapi db connection\n%s", e)
 
                 self._conns[conn_key] = rawconn
+            self._setup_new_connection(rawconn)
         except Exception as e:
             cx = "{} - {}".format(host, database)
 
@@ -184,13 +189,18 @@ class Connection(object):
 
             raise_from(SQLConnectionError(message), None)
 
-    def close_db_connections(self, db_key, db_name=None):
+    def _setup_new_connection(self, rawconn):
+        with rawconn.cursor() as cursor:
+            # ensure that by default, the agent's reads can never block updates to any tables it's reading from
+            cursor.execute("SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED")
+
+    def close_db_connections(self, db_key, db_name=None, key_prefix=None):
         """
         We close the db connections explicitly b/c when we don't they keep
         locks on the db. This presents as issues such as the SQL Server Agent
         being unable to stop.
         """
-        conn_key = self._conn_key(db_key, db_name)
+        conn_key = self._conn_key(db_key, db_name, key_prefix)
         if conn_key not in self._conns:
             return
 
@@ -275,10 +285,12 @@ class Connection(object):
                 driver = self.DEFAULT_DRIVER
         return dsn, host, username, password, database, driver
 
-    def _conn_key(self, db_key, db_name=None):
+    def _conn_key(self, db_key, db_name=None, key_prefix=None):
         """Return a key to use for the connection cache"""
         dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
-        return '{}:{}:{}:{}:{}:{}'.format(dsn, host, username, password, database, driver)
+        if not key_prefix:
+            key_prefix = ""
+        return '{}{}:{}:{}:{}:{}:{}'.format(key_prefix, dsn, host, username, password, database, driver)
 
     def _connection_options_validation(self, db_key, db_name):
         cs = self.instance.get('connection_string')
@@ -346,9 +358,9 @@ class Connection(object):
         else:
             dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
 
-        conn_str = ''
+        conn_str = 'ConnectRetryCount=2;'
         if dsn:
-            conn_str = 'DSN={};'.format(dsn)
+            conn_str += 'DSN={};'.format(dsn)
 
         if driver:
             conn_str += 'DRIVER={};'.format(driver)
@@ -372,7 +384,7 @@ class Connection(object):
             _, host, username, password, database, _ = self._get_access_info(db_key, db_name)
 
         provider = self._get_adoprovider()
-        conn_str = 'Provider={};Data Source={};Initial Catalog={};'.format(provider, host, database)
+        conn_str = 'ConnectRetryCount=2;Provider={};Data Source={};Initial Catalog={};'.format(provider, host, database)
 
         if username:
             conn_str += 'User ID={};'.format(username)

@@ -10,7 +10,7 @@ import requests
 from .common import FIXTURES_PATH, HOST, NGINX_VERSION, PORT, TAGS, USING_VTS
 from .utils import mocked_perform_request, requires_static_version
 
-pytestmark = pytest.mark.skipif(USING_VTS, reason='Using VTS')
+pytestmark = [pytest.mark.skipif(USING_VTS, reason='Using VTS'), pytest.mark.integration]
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -21,7 +21,7 @@ def test_connect(check, instance, aggregator):
     check = check(instance)
     check.check(instance)
     aggregator.assert_metric("nginx.net.connections", tags=TAGS, count=1)
-    extra_tags = ['host:{}'.format(HOST), 'port:{}'.format(PORT)]
+    extra_tags = ['nginx_host:{}'.format(HOST), 'port:{}'.format(PORT)]
     aggregator.assert_service_check('nginx.can_connect', tags=TAGS + extra_tags)
 
 
@@ -65,7 +65,7 @@ def test_metadata(check, instance, datadog_agent):
 
 @mock.patch(
     'datadog_checks.nginx.Nginx._get_plus_api_data',
-    return_value=open(os.path.join(FIXTURES_PATH, 'plus_api_nginx.json')).read(),
+    return_value=open(os.path.join(FIXTURES_PATH, 'v1/' 'plus_api_nginx.json')).read(),
 )
 def test_metadata_plus(_, aggregator, check, datadog_agent):
     # Hardcoded in the fixture
@@ -73,6 +73,7 @@ def test_metadata_plus(_, aggregator, check, datadog_agent):
     instance = {
         'nginx_status_url': 'dummy_url',
         'use_plus_api': True,
+        'disable_generic_tags': True,
     }
 
     nginx_check = check(instance)

@@ -19,9 +19,12 @@
 [config-spec-producer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/configuration/core.py
 [config-spec-template-init-config-http]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/init_config/http.yaml
 [config-spec-template-instances-http]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/http.yaml
-[config-spec-template-init-config-openmetrics]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/init_config/openmetrics_legacy.yaml
-[config-spec-template-instances-openmetrics]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/openmetrics_legacy.yaml
+[config-spec-template-init-config-openmetrics-legacy]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/init_config/openmetrics_legacy.yaml
+[config-spec-template-instances-openmetrics-legacy]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/openmetrics_legacy.yaml
+[config-spec-template-instances-openmetrics]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/openmetrics.yaml
+[config-spec-template-init-config-openmetrics]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/init_config/openmetrics.yaml
 [config-spec-templates]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration
+[conf-yaml-example-share-labels]: https://github.com/DataDog/integrations-core/blob/7.32.x/openmetrics/datadog_checks/openmetrics/data/conf.yaml.example#L227
 [Datadog Agent]: https://docs.datadoghq.com/agent/
 [datadog-agent]: https://github.com/DataDog/datadog-agent
 [datadog-agent-flare]: https://docs.datadoghq.com/agent/troubleshooting/send_a_flare/

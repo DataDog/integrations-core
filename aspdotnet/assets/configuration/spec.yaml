@@ -4,24 +4,11 @@ files:
   options:
   - template: init_config
     options:
-      - template: init_config/default
+    - template: init_config/perf_counters
+    - template: init_config/default
   - template: instances
     options:
-    - name: host
-      description: |
-        ASP .NET host to connect to.
-        Using "." means the current host. Using any other value, the Agent attempts to connect to a remote host.
-        Note: Remote access requires additional permissions
-      required: true
-      value:
-        type: string
-        example: .
-        display_default: null
-    - name: port
-      description: ASP .NET port to connect to.
-      required: true
-      value:
-        type: integer
-        example: 26379
-        display_default: null
+    - template: instances/perf_counters
+    - template: instances/pdh_legacy
+      hidden: true
     - template: instances/default

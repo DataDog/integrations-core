@@ -3,6 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict
 
+import pytest
+
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.datadog_cluster_agent import DatadogClusterAgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -34,8 +37,10 @@ METRICS = [
     'datadog.rate_limit_queries.reset',
     'datadog.requests',
     'external_metrics',
+    'external_metrics.datadog_metrics',
     'external_metrics.delay_seconds',
     'external_metrics.processed_value',
+    'secret_backend.elapsed',
     'go.goroutines',
     'go.memstats.alloc_bytes',
     'go.threads',
@@ -57,3 +62,12 @@ def test_check(aggregator, instance, mock_metrics_endpoint):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+# Minimal E2E testing
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, aggregator, instance):
+    with pytest.raises(Exception):
+        dd_agent_check(instance, rate=True)
+    tag = "endpoint:" + instance.get('prometheus_url')
+    aggregator.assert_service_check("datadog.cluster_agent.prometheus.health", AgentCheck.CRITICAL, count=2, tags=[tag])

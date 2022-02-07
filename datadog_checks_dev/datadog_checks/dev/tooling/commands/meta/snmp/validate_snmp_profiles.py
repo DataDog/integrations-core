@@ -4,7 +4,7 @@ from ...console import CONTEXT_SETTINGS, echo_failure, echo_info, echo_success, 
 from . import validators
 from .validators.utils import (
     exist_profile_in_path,
-    get_all_profiles_directory,
+    get_all_profiles_for_directories,
     get_default_snmp_profiles_path,
     initialize_path,
 )
@@ -14,20 +14,19 @@ MESSAGE_METHODS = {'success': echo_success, 'warning': echo_warning, 'failure': 
 
 @click.command("validate-profile", short_help="Validate SNMP profiles", context_settings=CONTEXT_SETTINGS)
 @click.option('-f', '--file', help="Path to a profile file to validate")
-@click.option('-d', '--directory', help="Path to a directory of profiles to validate")
+@click.option('-d', '--directory', 'directories', multiple=True, help="Path to a directory of profiles to validate")
 @click.option('-v', '--verbose', help="Increase verbosity of error messages", is_flag=True)
-def validate_profile(file, directory, verbose):
-    path = initialize_path(directory)
+def validate_profile(file, directories, verbose):
+    path = initialize_path(directories)
 
     if file:
         _validate_profile(file, path)
 
     else:
-        if not directory:
-            directory = get_default_snmp_profiles_path()
+        if not directories:
+            directories = get_default_snmp_profiles_path()
 
-        all_profiles_directory = get_all_profiles_directory(directory)
-        for profile in all_profiles_directory:
+        for profile in get_all_profiles_for_directories(*directories):
             echo_info("Start validation of profile {profile}:".format(profile=profile))
             _validate_profile(profile, path)
 

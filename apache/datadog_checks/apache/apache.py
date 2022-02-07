@@ -66,13 +66,20 @@ class Apache(AgentCheck):
 
         url = self.assumed_url.get(self.instance['apache_status_url'], self.instance['apache_status_url'])
         tags = self.instance.get('tags', [])
+        disable_generic_tags = self.instance.get('disable_generic_tags', False)
 
         # Submit a service check for status page availability.
         parsed_url = urlparse(url)
         apache_host = parsed_url.hostname
         apache_port = parsed_url.port or 80
         service_check_name = 'apache.can_connect'
-        service_check_tags = ['host:%s' % apache_host, 'port:%s' % apache_port] + tags
+        service_check_tags = [
+            'host:%s' % apache_host,
+            'apache_host:%s' % apache_host,
+            'port:%s' % apache_port,
+        ] + tags
+        if disable_generic_tags:
+            service_check_tags = ['apache_host:%s' % apache_host, 'port:%s' % apache_port] + tags
         try:
             self.log.debug(
                 'apache check initiating request, connect timeout %d receive %d',

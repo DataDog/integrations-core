@@ -183,3 +183,48 @@ class TestCustomQueries:
 
         with pytest.raises(ValueError, match='^field `query` for custom query #1 is required$'):
             query_manager.compile_queries()
+
+    def test_only_custom_queries(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test.statement.foo', 'type': 'gauge', 'tags': ['override:ok']},
+                    {'name': 'test.statement.baz', 'type': 'gauge', 'raw': True},
+                ],
+                'tags': ['test:bar'],
+            },
+            check=AgentCheck(
+                'test',
+                {
+                    'global_custom_queries': [
+                        {'query': 'foo', 'columns': [{'name': 'test.foo', 'type': 'gauge'}], 'tags': ['test:bar']},
+                    ],
+                },
+                [
+                    {
+                        'only_custom_queries': True,
+                        'custom_queries': [
+                            {
+                                'query': 'foo',
+                                'columns': [{'name': 'test.custom', 'type': 'gauge'}],
+                                'tags': ['test:custom'],
+                            },
+                        ],
+                    },
+                ],
+            ),
+            executor=mock_executor([[1]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        aggregator.assert_metric('test.custom', 1, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:custom'])
+        aggregator.assert_metric(
+            'test.statement.foo', count=0, metric_type=aggregator.GAUGE, tags=['override:ok', 'test:bar']
+        )
+        aggregator.assert_metric('test.statement.baz', count=0, metric_type=aggregator.GAUGE, tags=['test:bar'])
+
+        aggregator.assert_all_metrics_covered()

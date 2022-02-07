@@ -1,7 +1,10 @@
 parameters:
+  agent_image_win: ''
+  agent_image_win_py2: ''
   ispr: false
   pip_cache_config: null
   run_py2_tests: true
+  run_py3_tests: true
   force_base_package: false
   test: true
   test_e2e: true
@@ -11,9 +14,12 @@ parameters:
 jobs:
 - template: ./test-all.yml
   parameters:
+    agent_image_win: ${{ parameters.agent_image_win }}
+    agent_image_win_py2: ${{ parameters.agent_image_win_py2 }}
     ispr: ${{ parameters.ispr }}
     pip_cache_config: ${{ parameters.pip_cache_config }}
     run_py2_tests: ${{ parameters.run_py2_tests }}
+    run_py3_tests: ${{ parameters.run_py3_tests }}
     force_base_package: ${{ parameters.force_base_package }}
     test: ${{ parameters.test }}
     test_e2e: ${{ parameters.test_e2e }}
@@ -210,6 +216,9 @@ jobs:
     - checkName: http_check
       displayName: HTTP
       os: linux
+    - checkName: hudi
+      displayName: Hudi
+      os: linux
     - checkName: ibm_db2
       displayName: IBM Db2
       os: linux
@@ -217,8 +226,11 @@ jobs:
       displayName: IBM i
       os: linux
     - checkName: ibm_mq
-      displayName: IBM MQ
+      displayName: IBM MQ (Linux)
       os: linux
+    - checkName: ibm_mq
+      displayName: IBM MQ (Windows)
+      os: windows
     - checkName: ibm_was
       displayName: IBM WAS
       os: linux
@@ -390,6 +402,9 @@ jobs:
     - checkName: scylla
       displayName: Scylla
       os: linux
+    - checkName: singlestore
+      displayName: SingleStore
+      os: linux
     - checkName: snmp
       displayName: SNMP
       os: linux
@@ -469,8 +484,14 @@ jobs:
     - checkName: vsphere
       displayName: vSphere
       os: linux
+    - checkName: weblogic
+      displayName: WebLogic
+      os: linux
     - checkName: win32_event_log
       displayName: Win32 Event Log
+      os: windows
+    - checkName: windows_performance_counters
+      displayName: Windows performance counters
       os: windows
     - checkName: windows_service
       displayName: Windows Service

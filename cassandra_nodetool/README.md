@@ -51,17 +51,17 @@ The Cassandra_nodetool check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][14] for a list of service checks provided by this integration.
+See [service_checks.json][10] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][10].
+Need help? Contact [Datadog support][11].
 
 ## Further Reading
 
-- [How to monitor Cassandra performance metrics][11]
-- [How to collect Cassandra metrics][12]
-- [Monitoring Cassandra with Datadog][13]
+- [How to monitor Cassandra performance metrics][12]
+- [How to collect Cassandra metrics][13]
+- [Monitoring Cassandra with Datadog][14]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra_nodetool/images/cassandra_dashboard.png
 [2]: https://github.com/DataDog/integrations-core/tree/master/cassandra
@@ -72,8 +72,8 @@ Need help? Contact [Datadog support][10].
 [7]: https://github.com/DataDog/integrations-core/tree/master/cassandra#log-collection
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/metadata.csv
-[10]: https://docs.datadoghq.com/help/
-[11]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics
-[12]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics
-[13]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog
-[14]: https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/assets/service_checks.json
+[10]: https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/assets/service_checks.json
+[11]: https://docs.datadoghq.com/help/
+[12]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics
+[13]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics
+[14]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog

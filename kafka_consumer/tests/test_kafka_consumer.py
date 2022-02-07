@@ -4,6 +4,7 @@
 import copy
 import os
 
+import mock
 import pytest
 
 from datadog_checks.kafka_consumer import KafkaCheck
@@ -42,6 +43,48 @@ def test_uses_new_implementation_when_new_version_specified(kafka_instance):
     assert isinstance(kafka_consumer_check.sub_check, NewKafkaConsumerCheck)
 
 
+@pytest.mark.unit
+def test_tls_config_ok(kafka_instance_tls):
+    with mock.patch('datadog_checks.base.utils.tls.ssl') as ssl:
+        with mock.patch('kafka.KafkaClient') as kafka_client:
+
+            # mock Kafka Client
+            kafka_client.return_value = mock.MagicMock()
+
+            # mock TLS context
+            tls_context = mock.MagicMock()
+            ssl.SSLContext.return_value = tls_context
+
+            kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance_tls])
+            kafka_consumer_check._create_kafka_client(clazz=kafka_client)
+
+            assert tls_context.check_hostname is True
+            assert tls_context.tls_cert is not None
+            assert tls_context.check_hostname is True
+            assert kafka_consumer_check.create_kafka_client is not None
+
+
+@pytest.mark.parametrize(
+    'extra_config, expected_http_kwargs',
+    [
+        pytest.param(
+            {'ssl_check_hostname': False}, {'tls_validate_hostname': False}, id='legacy validate_hostname param'
+        ),
+    ],
+)
+def test_tls_config_legacy(extra_config, expected_http_kwargs, kafka_instance):
+    instance = kafka_instance
+    instance.update(extra_config)
+
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+
+    kafka_consumer_check.get_tls_context()
+    actual_options = {
+        k: v for k, v in kafka_consumer_check._tls_context_wrapper.config.items() if k in expected_http_kwargs
+    }
+    assert expected_http_kwargs == actual_options
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_check_kafka(aggregator, kafka_instance, dd_run_check):
@@ -52,6 +95,17 @@ def test_check_kafka(aggregator, kafka_instance, dd_run_check):
     dd_run_check(kafka_consumer_check)
 
     assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_can_send_event(aggregator, kafka_instance, dd_run_check):
+    """
+    Testing Kafka_consumer check.
+    """
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
+    kafka_consumer_check.send_event("test", "test", [], "test", "test")
+    aggregator.assert_event("test", exact_match=False, count=1)
 
 
 @pytest.mark.integration

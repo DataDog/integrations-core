@@ -11,15 +11,15 @@ files:
       - template: instances
         options:
           - name: host
-            required: true
             description: Host of the RethinkDB server.
+            enabled: true
             value:
               example: localhost
               type: string
 
           - name: port
-            required: true
             description: Driver port of the RethinkDB server.
+            enabled: true
             value:
               example: 28015
               type: integer

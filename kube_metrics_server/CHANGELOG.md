@@ -1,5 +1,15 @@
 # CHANGELOG - Kube Metrics Server
 
+## 1.4.1 / 2022-01-18
+
+* [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
+
+## 1.4.0 / 2021-11-13 / Agent 7.33.0
+
+* [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
+* [Added] Document new use_process_start_time option. See [#10601](https://github.com/DataDog/integrations-core/pull/10601).
+* [Added] Add kube_metrics_server config spec. See [#10509](https://github.com/DataDog/integrations-core/pull/10509).
+
 ## 1.3.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Support 0.4.0 metrics server renamed metric names. See [#9202](https://github.com/DataDog/integrations-core/pull/9202). Thanks [eatwithforks](https://github.com/eatwithforks).

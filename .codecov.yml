@@ -318,14 +318,14 @@ coverage:
         target: 75
         flags:
         - mcache
+      Mesos:
+        target: 75
+        flags:
+        - mesos_slave
       Mesos_Master:
         target: 75
         flags:
         - mesos_master
-      Mesos_Slave:
-        target: 75
-        flags:
-        - mesos_slave
       MongoDB:
         target: 75
         flags:
@@ -450,6 +450,10 @@ coverage:
         target: 75
         flags:
         - scylla
+      SingleStore:
+        target: 75
+        flags:
+        - singlestore
       Snowflake:
         target: 75
         flags:
@@ -534,6 +538,10 @@ coverage:
         target: 75
         flags:
         - windows_service
+      Windows_performance_counters:
+        target: 75
+        flags:
+        - windows_performance_counters
       Yarn:
         target: 75
         flags:
@@ -1101,6 +1109,11 @@ flags:
     paths:
     - scylla/datadog_checks/scylla
     - scylla/tests
+  singlestore:
+    carryforward: true
+    paths:
+    - singlestore/datadog_checks/singlestore
+    - singlestore/tests
   snmp:
     carryforward: true
     paths:
@@ -1216,6 +1229,11 @@ flags:
     paths:
     - win32_event_log/datadog_checks/win32_event_log
     - win32_event_log/tests
+  windows_performance_counters:
+    carryforward: true
+    paths:
+    - windows_performance_counters/datadog_checks/windows_performance_counters
+    - windows_performance_counters/tests
   windows_service:
     carryforward: true
     paths:

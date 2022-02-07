@@ -10,6 +10,7 @@ import pytest
 
 from datadog_checks.dev import docker_run, get_docker_hostname, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev.http import MockResponse
 
 HERE = get_here()
 
@@ -35,14 +36,11 @@ def get_expected_metrics():
             expected_metrics = json.load(f)
 
         if endpoint is None:
-            endpoint = 'https://34.123.32.255/'
+            return expected_metrics
 
         transformed_expected_metrics = []
         for metric in expected_metrics:
-            tags = [
-                t.replace('https://34.123.32.255/', endpoint).replace('server:', 'avi_vantage_server:')
-                for t in metric['tags']
-            ]
+            tags = [t.replace('https://34.123.32.255/', endpoint) for t in metric['tags']]
             transformed_expected_metrics.append(
                 {"name": metric['name'], "type": metric['type'], "value": metric['value'], "tags": tags}
             )
@@ -57,12 +55,8 @@ def mock_client():
     with mock.patch('datadog_checks.base.utils.http.requests') as req:
 
         def get(url: AnyStr, *_: Any, **__: Any):
-            response = mock.MagicMock()
             resource = url.split('/')[-1]
-            with open(os.path.join(HERE, 'compose', 'fixtures', f"{resource}_metrics")) as f:
-                content = f.read()
-                response.iter_lines = lambda *_, **__: content.splitlines()
-                return mock.MagicMock(__enter__=mock.MagicMock(return_value=response))
+            return MockResponse(file_path=os.path.join(HERE, 'compose', 'fixtures', f'{resource}_metrics'))
 
         req.Session = mock.MagicMock(return_value=mock.MagicMock(get=get))
         yield

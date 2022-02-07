@@ -5,9 +5,8 @@ import re
 
 import click
 
-from ...annotations import annotate_error
 from ...utils import get_codeowners, get_codeowners_file, get_valid_integrations
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success
+from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_success
 
 DIRECTORY_REGEX = re.compile(r"\/(.*)\/$")
 

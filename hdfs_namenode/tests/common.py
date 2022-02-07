@@ -8,11 +8,11 @@ from datadog_checks.dev import get_here
 from datadog_checks.dev.docker import get_docker_hostname
 
 HERE = get_here()
-
 HOST = get_docker_hostname()
+FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 
 # Namenode URI
-NAMENODE_URI = 'http://{}:50070/'.format(HOST)
+NAMENODE_URI = 'http://{}:9870/'.format(HOST)
 NAMENODE_JMX_URI = NAMENODE_URI + 'jmx'
 
 # Namesystem state URL
@@ -61,6 +61,7 @@ EXPECTED_METRICS = [
     'hdfs.namenode.num_stale_storages',
     'hdfs.namenode.missing_blocks',
     'hdfs.namenode.corrupt_blocks',
+    'hdfs.namenode.fs_lock_queue_length',
 ]
 
 HDFS_NAMENODE_AUTH_CONFIG = {

@@ -12,7 +12,7 @@ def get_counter(check, metric_name, modifiers, global_options):
     metric_name = f'{metric_name}.count'
 
     def counter(metric, sample_data, runtime_data):
-        has_successfully_executed = runtime_data['has_successfully_executed']
+        flush_first_value = runtime_data['flush_first_value']
 
         for sample, tags, hostname in sample_data:
             if sample.name.endswith('_total'):
@@ -21,7 +21,7 @@ def get_counter(check, metric_name, modifiers, global_options):
                     sample.value,
                     tags=tags,
                     hostname=hostname,
-                    flush_first_value=has_successfully_executed,
+                    flush_first_value=flush_first_value,
                 )
 
     del check

@@ -21,6 +21,17 @@ files:
           example: core
           type: string
           display_default: python
+      - name: use_device_id_as_hostname
+        enabled: true
+        description: |
+            Use `device:<DEVICE_ID>` (device_id is composed of `<NAMESPACE>:<DEVICE_IP_ADDRESS>`) as `hostname`
+            for metrics and service checks (meaning that metrics and services checks will have
+            `host:device:<DEVICE_ID>` as tag).
+            This option is needed for custom tags.
+        value:
+          example: true
+          type: boolean
+          display_default: false
       - name: oid_batch_size
         description: |
             The number of OIDs handled by each batch. Increasing this number improves performance but
@@ -111,6 +122,23 @@ files:
         value:
           type: boolean
           example: false
+      - name: collect_device_metadata
+        description: |
+          Enable device metadata collection for all instances.
+          Only available using corecheck SNMP integration with `loader: core` config.
+        hidden: true
+        value:
+          type: boolean
+          example: true
+      - name: namespace
+        description: |
+            Namespace can be used to disambiguate devices with same IPs.
+            Changing namespace will cause devices being recreated in NDM app.
+            Only available using corecheck SNMP integration with `loader: core` config.
+        value:
+          example: default
+          type: string
+          display_default: default
       - template: init_config/default
     - template: instances
       options:
@@ -162,6 +190,17 @@ files:
           type: string
           example: core
           display_default: python
+      - name: use_device_id_as_hostname
+        enabled: true
+        description: |
+            Use `device:<DEVICE_ID>` (device_id is composed of `<NAMESPACE>:<DEVICE_IP_ADDRESS>`) as `hostname`
+            for metrics and service checks (meaning that metrics and services checks will have
+            `host:device:<DEVICE_ID>` as tag).
+            This option is needed for custom tags.
+        value:
+          example: true
+          type: boolean
+          display_default: false
       - name: oid_batch_size
         description: |
           The number of OIDs handled by each batch. Increasing this number improves performance but
@@ -172,6 +211,7 @@ files:
           Before version 7.30 the default value is 60 and from version 7.30 its value is 5.
         value:
           type: integer
+          display_default: 5
           example: 10
       - name: user
         description: |
@@ -183,7 +223,7 @@ files:
       - name: authProtocol
         description: |
           Authentication type to use when connecting to your SNMP devices.
-          Valid types: MD5, SHA, SHA224, SHA256, SHA384, SHA512.
+          Available options are: MD5, SHA, SHA224, SHA256, SHA384, SHA512
           Defaults to MD5 when `authKey` is specified.
           SNMP v3 specific configuration.
         value:
@@ -199,7 +239,8 @@ files:
       - name: privProtocol
         description: |
           Privacy type to use when connecting to your SNMP devices.
-          Valid types: DES, 3DES, AES, AES192, AES256, AES192C, AES256C.
+          Available options are: DES, AES (128 bits), AES192, AES192C, AES256, AES256C
+          Protocol only available for Python implementation: 3DES
           Defaults to DES when `privKey` is specified.
           SNMP v3 specific configuration.
         value:
@@ -281,13 +322,11 @@ files:
       - name: network_address
         description: |
           The network address of the devices to scan for monitor.
-          Only available using python SNMP integration.
         value:
           type: string
       - name: ignored_ip_addresses
         description: |
           A list of IP addresses to ignore when scanning the network.
-          Only available using python SNMP integration.
         value:
           type: array
           items:
@@ -355,4 +394,21 @@ files:
           type: integer
           example: 3600
           display_default: 0
+      - name: collect_device_metadata
+        description: |
+          Enable device metadata collection.
+          Only available using corecheck SNMP integration with `loader: core` config.
+        hidden: true
+        value:
+          type: boolean
+          example: true
+      - name: namespace
+        description: |
+          Namespace can be used to disambiguate devices with same IPs.
+          Changing namespace will cause devices being recreated in NDM app.
+          Only available using corecheck SNMP integration with `loader: core` config.
+        value:
+          example: default
+          type: string
+          display_default: default
       - template: instances/default

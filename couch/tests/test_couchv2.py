@@ -73,10 +73,10 @@ def gauges():
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_check(aggregator, gauges):
+def test_check(aggregator, gauges, dd_run_check):
     for config in deepcopy(INSTANCES):
         check = CouchDb(common.CHECK_NAME, {}, [config])
-        check.check(config)
+        dd_run_check(check)
     _assert_check(aggregator, gauges)
 
 

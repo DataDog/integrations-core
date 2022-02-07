@@ -72,7 +72,7 @@ if PY3:
 
 
 class ZKConnectionFailure(Exception):
-    """ Raised when we are unable to connect or get the output of a command. """
+    """Raised when we are unable to connect or get the output of a command."""
 
     pass
 
@@ -365,7 +365,6 @@ class ZookeeperCheck(AgentCheck):
 
         metrics = []
         mode = 'inactive'
-
         for line in buf:
             try:
                 tags = []
@@ -374,7 +373,11 @@ class ZookeeperCheck(AgentCheck):
                     key, tag_name, tag_val, value = m.groups()
                     tags.append('{}:{}'.format(tag_name, tag_val))
                 else:
-                    key, value = line.split()
+                    try:
+                        key, value = line.split()
+                    except ValueError as e:
+                        self.log.debug("Unexpected 'mntr' output `%s`: %s", line, str(e))
+                        continue
 
                 if key == "zk_server_state":
                     mode = value.lower()
@@ -395,8 +398,8 @@ class ZookeeperCheck(AgentCheck):
 
                 metrics.append(ZKMetric(metric_name, metric_value, metric_type, tags))
 
-            except ValueError:
-                self.log.warning("Cannot format `mntr` value. key=%s, value=%s", key, value)
+            except ValueError as e:
+                self.log.warning("Cannot format `mntr` value from `%s`: %s", line, str(e))
 
             except Exception:
                 self.log.exception("Unexpected exception occurred while parsing `mntr` command content:\n%s", buf)

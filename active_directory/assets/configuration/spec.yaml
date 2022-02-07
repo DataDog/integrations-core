@@ -4,18 +4,19 @@ files:
   options:
   - template: init_config
     options:
+    - template: init_config/perf_counters
     - template: init_config/default
   - template: instances
     options:
-    - template: instances/pdh
+    - template: instances/perf_counters
       overrides:
-          host.required: true
-          additional_metrics.value.example:
-          - [NTDS, none, DS % Writes from LDAP, active_directory.ds.writes_from_ldap, gauge]
-          counter_data_types.value.example:
-          - <METRIC_NAME>,<DATA_TYPE>
-          - active_directory.dra.inbound.bytes.total,int
-          - active_directory.ldap.bind_time,float
+        extra_metrics.value.example:
+          NTDS:
+            name: ds
+            counters:
+              - 'DS % Writes from LDAP': writes_from_ldap
+    - template: instances/pdh_legacy
+      hidden: true
     - template: instances/default
   - template: logs
     example:

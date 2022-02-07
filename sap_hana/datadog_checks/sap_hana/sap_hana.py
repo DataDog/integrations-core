@@ -7,7 +7,7 @@ from collections import defaultdict
 from contextlib import closing
 from itertools import chain
 
-from pyhdb import OperationalError
+import certifi
 from six import iteritems
 from six.moves import zip
 
@@ -17,8 +17,8 @@ from datadog_checks.base.utils.constants import MICROSECOND
 from datadog_checks.base.utils.containers import iter_unique
 
 from . import queries
-from .connection import HanaConnection
-from .exceptions import QueryExecutionError
+from .connection import USING_HDBCLI, HanaConnection
+from .exceptions import OperationalError, QueryExecutionError
 from .utils import compute_percent, positive
 
 
@@ -38,6 +38,7 @@ class SapHanaCheck(AgentCheck):
         self._batch_size = int(self.instance.get('batch_size', 1000))
         self._tags = self.instance.get('tags', [])
         self._use_tls = self.instance.get('use_tls', False)
+        self._only_custom_queries = is_affirmative(self.instance.get('only_custom_queries', False))
 
         # Add server & port tags
         self._tags.append('server:{}'.format(self._server))
@@ -55,14 +56,19 @@ class SapHanaCheck(AgentCheck):
         # Deduplicate
         self._custom_queries = list(iter_unique(custom_queries))
 
+        # Default query methods, gets defined on the first check run
+        self._default_methods = []
+
         # We'll connect on the first check run
         self._conn = None
 
         # Whether or not the connection was lost
         self._connection_lost = False
 
-        # Whether or not to persist database connection
-        self._persist_db_connections = self.instance.get('persist_db_connections', True)
+        # Whether or not to persist database connection. Default is True
+        self._persist_db_connections = self.instance.get(
+            'persist_db_connections', self.init_config.get('persist_db_connections', True)
+        )
 
         # Whether or not to use the hostnames contained in the queried views
         self._use_hana_hostnames = is_affirmative(self.instance.get('use_hana_hostnames', False))
@@ -70,7 +76,16 @@ class SapHanaCheck(AgentCheck):
         # Save master database hostname to act as the default if `use_hana_hostnames` is true
         self._master_hostname = None
 
+        self.check_initializations.append(self.parse_config)
+        self.check_initializations.append(self.set_default_methods)
+
     def check(self, instance):
+
+        if self._only_custom_queries:
+            query_methods = [self.query_custom]
+        else:
+            query_methods = self._default_methods
+
         if self._conn is None:
             connection = self.get_connection()
             if connection is None:
@@ -79,27 +94,14 @@ class SapHanaCheck(AgentCheck):
             self._conn = connection
 
         try:
-            for query_method in (
-                self.query_master_database,
-                self.query_database_status,
-                self.query_backup_status,
-                self.query_licenses,
-                self.query_connection_overview,
-                self.query_disk_usage,
-                self.query_service_memory,
-                self.query_service_component_memory,
-                self.query_row_store_memory,
-                self.query_service_statistics,
-                self.query_volume_io,
-                self.query_custom,
-            ):
+            for query_method in query_methods:
                 try:
                     query_method()
                 except QueryExecutionError as e:
                     self.log.error('Error querying %s: %s', e.source(), str(e))
                     continue
                 except Exception as e:
-                    self.log.error('Unexpected error running `%s`: %s', query_method.__name__, str(e))
+                    self.log.exception('Unexpected error running `%s`: %s', query_method.__name__, str(e))
                     continue
         finally:
             if self._connection_lost:
@@ -116,6 +118,24 @@ class SapHanaCheck(AgentCheck):
                 except OperationalError:
                     self.log.error("Could not close connection.")
                 self._conn = None
+
+    def set_default_methods(self):
+        self._default_methods.extend(
+            [
+                self.query_master_database,
+                self.query_database_status,
+                self.query_backup_status,
+                self.query_licenses,
+                self.query_connection_overview,
+                self.query_disk_usage,
+                self.query_service_memory,
+                self.query_service_component_memory,
+                self.query_row_store_memory,
+                self.query_service_statistics,
+                self.query_volume_io,
+                self.query_custom,
+            ]
+        )
 
     def query_master_database(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20ae63aa7519101496f6b832ec86afbd.html
@@ -193,8 +213,9 @@ class SapHanaCheck(AgentCheck):
             self.gauge('license.utilized', utilized, tags=tags, hostname=host)
 
     def query_connection_overview(self):
-        # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20abcf1f75191014a254a82b3d0f66bf.html
-        db_counts = defaultdict(lambda: {'running': 0, 'idle': 0})
+        # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.05/en-US/20abcf1f75191014a254a82b3d0f66bf.html
+        # Documented statuses: RUNNING, IDLE, QUEUING, EMPTY
+        db_counts = defaultdict(lambda: defaultdict(int))
         for conn in self.iter_rows(queries.GlobalSystemConnectionsStatus):
             db_counts[(conn['db_name'], conn['host'], conn['port'])][conn['status'].lower()] += conn['total']
 
@@ -206,10 +227,14 @@ class SapHanaCheck(AgentCheck):
             host = self.get_hana_hostname(host)
             running = counts['running']
             idle = counts['idle']
+            queuing = counts['queuing']
+            empty = counts['empty']
 
             self.gauge('connection.running', running, tags=tags, hostname=host)
             self.gauge('connection.idle', idle, tags=tags, hostname=host)
             self.gauge('connection.open', running + idle, tags=tags, hostname=host)
+            self.gauge('connection.queuing', queuing, tags=tags, hostname=host)
+            self.gauge('connection.empty', empty, tags=tags, hostname=host)
 
     def query_disk_usage(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/a2aac2ee72b341699fa8eb3988d8cecb.html
@@ -556,26 +581,6 @@ class SapHanaCheck(AgentCheck):
                 # Get next result set, if any
                 rows = cursor.fetchmany(self._batch_size)
 
-    def get_connection(self):
-        try:
-            tls_context = self.get_tls_context() if self._use_tls else None
-            connection = HanaConnection(
-                host=self._server,
-                port=self._port,
-                user=self._username,
-                password=self._password,
-                tls_context=tls_context,
-                timeout=self._timeout,
-            )
-            connection.connect()
-        except Exception as e:
-            error = str(e).replace(self._password, '**********')
-            self.log.error('Unable to connect to SAP HANA: %s', error)
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=error, tags=self._tags)
-        else:
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
-            return connection
-
     def execute_query(self, cursor, query, source):
         try:
             cursor.execute(query)
@@ -589,3 +594,74 @@ class SapHanaCheck(AgentCheck):
     def get_hana_hostname(self, hostname=None):
         if self._use_hana_hostnames:
             return hostname or self._master_hostname
+
+    def parse_config(self):
+        password = self._password
+        if password:
+            self.register_secret(password)
+
+    if USING_HDBCLI:
+
+        def get_connection(self):
+            # https://help.sap.com/viewer/f1b440ded6144a54ada97ff95dac7adf/2.10/en-US/ee592e89dcce4480a99571a4ae7a702f.html
+            connection_properties = self.instance.get('connection_properties', {}).copy()
+
+            connection_properties.setdefault('address', self._server)
+            connection_properties.setdefault('port', self._port)
+            connection_properties.setdefault('user', self._username)
+            connection_properties.setdefault('password', self._password)
+
+            timeout_milliseconds = int(self._timeout * 1000)
+            connection_properties.setdefault('communicationTimeout', timeout_milliseconds)
+            connection_properties.setdefault('nodeConnectTimeout', timeout_milliseconds)
+
+            if self._use_tls:
+                connection_properties.setdefault('encrypt', True)
+                connection_properties.setdefault('sslHostNameInCertificate', self._server)
+                connection_properties.setdefault('sslSNIHostname', self._server)
+
+                tls_verify = self.instance.get('tls_verify', True)
+                if not tls_verify:
+                    connection_properties.setdefault('sslValidateCertificate', False)
+
+                tls_cert = self.instance.get('tls_cert')
+                if tls_cert:
+                    connection_properties.setdefault('sslKeyStore', tls_cert)
+
+                tls_ca_cert = self.instance.get('tls_ca_cert')
+                if tls_ca_cert:
+                    connection_properties.setdefault('sslTrustStore', tls_ca_cert)
+                elif not connection_properties.get('sslUseDefaultTrustStore', True):
+                    connection_properties.setdefault('sslTrustStore', certifi.where())
+
+            try:
+                connection = HanaConnection(**connection_properties)
+            except Exception as e:
+                error = str(e)
+                self.log.error('Unable to connect to SAP HANA: %s', error)
+                self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=error, tags=self._tags)
+            else:
+                self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
+                return connection
+
+    else:
+
+        def get_connection(self):
+            try:
+                tls_context = self.get_tls_context() if self._use_tls else None
+                connection = HanaConnection(
+                    host=self._server,
+                    port=self._port,
+                    user=self._username,
+                    password=self._password,
+                    tls_context=tls_context,
+                    timeout=self._timeout,
+                )
+                connection.connect()
+            except Exception as e:
+                error = str(e)
+                self.log.error('Unable to connect to SAP HANA: %s', error)
+                self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=error, tags=self._tags)
+            else:
+                self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
+                return connection

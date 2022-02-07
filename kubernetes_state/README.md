@@ -15,11 +15,11 @@ The Kubernetes-State check is included in the [Datadog Agent][1] package, so you
 
 ### Configuration
 
-Edit the `kubernetes_state.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2], to point to your server and port, set the masters to monitor. See the [sample kubernetes_state.d/conf.yaml][3] for all available configuration options.
+Edit the `kubernetes_state.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample kubernetes_state.d/conf.yaml][3] for all available configuration options.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `kubernetes_state` under the Checks section.
+Run the [Agent's status subcommand][4] and look for `kubernetes_state` under the Checks section.
 
 ## Data Collected
 
@@ -33,11 +33,11 @@ The Kubernetes-state check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][7] for a list of service checks provided by this integration.
+See [service_checks.json][6] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][6].
+Need help? Contact [Datadog support][7].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
@@ -45,5 +45,5 @@ Need help? Contact [Datadog support][6].
 [3]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_state/datadog_checks/kubernetes_state/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_state/metadata.csv
-[6]: https://docs.datadoghq.com/help/
-[7]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_state/assets/service_checks.json
+[6]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_state/assets/service_checks.json
+[7]: https://docs.datadoghq.com/help/

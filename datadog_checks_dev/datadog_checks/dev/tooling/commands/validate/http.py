@@ -6,11 +6,9 @@ import re
 
 import click
 
-from datadog_checks.dev.tooling.annotations import annotate_error
-from datadog_checks.dev.tooling.utils import complete_valid_checks, get_check_files, get_default_config_spec
-
 from ...testing import process_checks_option
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
+from ...utils import complete_valid_checks, get_check_files, get_default_config_spec
+from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_info, echo_success, echo_warning
 
 # Integrations that are not fully updated to http wrapper class but is owned partially by a different organization
 

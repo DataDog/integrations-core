@@ -4,3 +4,6 @@ services:
     image: ${DOCKER_IMAGE}:${DOCKER_TAG}
     ports:
       - 15440:4730
+    command: ["--log-file", "/var/log/gearmand.log"]
+    volumes:
+      - ${DD_LOG_1}:/var/log/gearmand.log

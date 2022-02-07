@@ -18,7 +18,6 @@ files:
         catch these URLs and redirect them through the FPM pool target
         you want to monitor (FPM `listen` directive in the config, usually
         a UNIX socket or TCP socket.
-      required: true
       value:
         type: string
         example: http://localhost/status
@@ -32,19 +31,16 @@ files:
         catch these URLs and redirect them through the FPM pool target
         you want to monitor (FPM `listen` directive in the config, usually
         a UNIX socket or TCP socket.
-      required: true
       value:
         type: string
         example: http://localhost/ping
     - name: ping_reply
       description: Set the expected reply to the ping.
-      required: true
       value:
         type: string
         example: pong
     - name: use_fastcgi
       description: Communicate directly with PHP-FPM using FastCGI
-      required: true
       value:
         type: boolean
         example: false

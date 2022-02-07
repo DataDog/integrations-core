@@ -75,7 +75,7 @@ class BaseSqlServerMetric(object):
         return rows, columns
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         raise NotImplementedError
 
     def fetch_metric(self, rows, columns):
@@ -92,7 +92,7 @@ class SqlSimpleMetric(BaseSqlServerMetric):
     )
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, counters_list, logger)
 
     def fetch_metric(self, rows, _):
@@ -134,7 +134,7 @@ class SqlFractionMetric(BaseSqlServerMetric):
     )
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         placeholders = ', '.join('?' for _ in counters_list)
         query = cls.QUERY_BASE.format(placeholders=placeholders)
 
@@ -237,7 +237,7 @@ class SqlOsWaitStat(BaseSqlServerMetric):
     QUERY_BASE = """select * from {table} where wait_type in ({{placeholders}})""".format(table=TABLE)
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, counters_list, logger)
 
     def fetch_metric(self, rows, columns):
@@ -268,7 +268,7 @@ class SqlIoVirtualFileStat(BaseSqlServerMetric):
     )
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         # since we want the database name we need to update the SQL query at runtime with our custom columns
         # multiple formats on a string are harmless
         extra_cols = ', '.join(col for col in counters_list)
@@ -326,7 +326,7 @@ class SqlOsMemoryClerksStat(BaseSqlServerMetric):
     QUERY_BASE = """select * from {table} where type in ({{placeholders}})""".format(table=TABLE)
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, counters_list, logger)
 
     def fetch_metric(self, rows, columns):
@@ -334,14 +334,17 @@ class SqlOsMemoryClerksStat(BaseSqlServerMetric):
         value_column_index = columns.index(self.column)
         memnode_index = columns.index("memory_node_id")
 
+        sum_by_memory_node_id = defaultdict(int)
         for row in rows:
             column_val = row[value_column_index]
             node_id = row[memnode_index]
             met_type = row[type_column_index]
             if met_type != self.sql_name:
                 continue
+            sum_by_memory_node_id[node_id] += column_val
 
-            metric_tags = ['memory_node_id:{}'.format(str(node_id))]
+        for memory_node_id, column_val in sum_by_memory_node_id.items():
+            metric_tags = ['memory_node_id:{}'.format(memory_node_id)]
             metric_tags.extend(self.tags)
             metric_name = '{}.{}'.format(self.datadog_name, self.column)
             self.report_function(metric_name, column_val, tags=metric_tags)
@@ -354,7 +357,7 @@ class SqlOsSchedulers(BaseSqlServerMetric):
     QUERY_BASE = "select * from {table}".format(table=TABLE)
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns):
@@ -390,7 +393,7 @@ class SqlOsTasks(BaseSqlServerMetric):
     )
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns):
@@ -422,7 +425,7 @@ class SqlMasterDatabaseFileStats(BaseSqlServerMetric):
     DB_TYPE_MAP = {0: 'data', 1: 'transaction_log', 2: 'filestream', 3: 'unknown', 4: 'full_text'}
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns):
@@ -435,6 +438,8 @@ class SqlMasterDatabaseFileStats(BaseSqlServerMetric):
 
         for row in rows:
             column_val = row[value_column_index]
+            if column_val is None:
+                continue
             if self.column in ('size', 'max_size'):
                 column_val *= 8  # size reported in 8 KB pages
 
@@ -464,24 +469,25 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
     QUERY_BASE = "select * from {table}".format(table=TABLE)
 
     DB_TYPE_MAP = {0: 'data', 1: 'transaction_log', 2: 'filestream', 3: 'unknown', 4: 'full_text'}
-    _DATABASES = set()
 
     def __init__(self, cfg_instance, base_name, report_function, column, logger):
         super(SqlDatabaseFileStats, self).__init__(cfg_instance, base_name, report_function, column, logger)
-        self._DATABASES.add(self.instance)
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         # special case since this table is specific to databases, need to run query for each database instance
         rows = []
         columns = []
+
+        if databases is None:
+            databases = []
 
         cursor.execute('select DB_NAME()')  # This can return None in some implementations so it cannot be chained
         data = cursor.fetchall()
         current_db = data[0][0]
         logger.debug("%s: current db is %s", cls.__name__, current_db)
 
-        for db in cls._DATABASES:
+        for db in databases:
             # use statements need to be executed separate from select queries
             ctx = construct_use_statement(db)
             try:
@@ -555,6 +561,128 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
+class SqlFileStats(BaseSqlServerMetric):
+    CUSTOM_QUERIES_AVAILABLE = False
+
+    # Default base query works for server-wide view of all master files
+    QUERY_MASTER_FILES = """
+        SELECT
+            DB_NAME(fs.database_id) AS database_name,
+            mf.state_desc AS state_desc,
+            mf.name AS logical_name,
+            mf.physical_name AS physical_name,
+            fs.num_of_reads AS num_of_reads,
+            fs.num_of_bytes_read AS num_of_bytes_read,
+            fs.io_stall_read_ms AS io_stall_read_ms,
+            fs.io_stall_queued_read_ms AS io_stall_queued_read_ms,
+            fs.num_of_writes AS num_of_writes,
+            fs.num_of_bytes_written AS num_of_bytes_written,
+            fs.io_stall_write_ms AS io_stall_write_ms,
+            fs.io_stall_queued_write_ms AS io_stall_queued_write_ms,
+            fs.io_stall AS io_stall,
+            fs.size_on_disk_bytes AS size_on_disk_bytes
+        FROM sys.dm_io_virtual_file_stats(NULL, NULL) fs
+            LEFT JOIN sys.master_files mf
+                ON mf.database_id = fs.database_id
+                AND mf.file_id = fs.file_id;
+    """
+
+    # Per-database query
+    QUERY_DATABASE_FILES = """
+        SELECT
+            DB_NAME() AS database_name,
+            df.state_desc AS state_desc,
+            df.name AS logical_name,
+            df.physical_name AS physical_name,
+            fs.num_of_reads AS num_of_reads,
+            fs.num_of_bytes_read AS num_of_bytes_read,
+            fs.io_stall_read_ms AS io_stall_read_ms,
+            fs.io_stall_queued_read_ms AS io_stall_queued_read_ms,
+            fs.num_of_writes AS num_of_writes,
+            fs.num_of_bytes_written AS num_of_bytes_written,
+            fs.io_stall_write_ms AS io_stall_write_ms,
+            fs.io_stall_queued_write_ms AS io_stall_queued_write_ms,
+            fs.io_stall AS io_stall,
+            fs.size_on_disk_bytes AS size_on_disk_bytes
+        FROM sys.dm_io_virtual_file_stats(DB_ID(), NULL) fs
+            LEFT JOIN sys.database_files df
+                ON df.file_id = fs.file_id;
+    """
+
+    def __init__(self, cfg_instance, base_name, report_function, column, logger):
+        super(SqlFileStats, self).__init__(cfg_instance, base_name, report_function, column, logger)
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+        rows = []
+        columns = []
+
+        # Exclude the master database because sys.database_files is not available there
+        databases = [d for d in databases if d != 'master']
+
+        if not databases:
+            # No database list; use the server-wide master files DMV
+            query = cls.QUERY_MASTER_FILES
+
+            cursor.execute(query)
+            rows = cursor.fetchall()
+            columns = [i[0] for i in cursor.description]
+            logger.debug("%s: received %d rows and %d columns", cls.__name__, len(rows), len(columns))
+
+        else:
+            # Query each database in the list for the files in the current database
+            query = cls.QUERY_DATABASE_FILES
+
+            cursor.execute('select DB_NAME()')  # This can return None in some implementations so it cannot be chained
+            data = cursor.fetchall()
+            current_db = data[0][0]
+            logger.debug("%s: current db is %s", cls.__name__, current_db)
+
+            for db in databases:
+                # use statements need to be executed separate from select queries
+                ctx = construct_use_statement(db)
+                logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
+                cursor.execute(ctx)
+                logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
+                cursor.execute(query)
+                data = cursor.fetchall()
+
+                columns = [i[0] for i in cursor.description]
+                for r in data:
+                    rows.append(r)
+
+                logger.debug("%s: received %d rows and %d columns for db %s", cls.__name__, len(data), len(columns), db)
+
+            # reset back to previous db
+            logger.debug("%s: reverting cursor context via use statement to %s", cls.__name__, current_db)
+            cursor.execute(construct_use_statement(current_db))
+
+        return rows, columns
+
+    def fetch_metric(self, rows, columns):
+        db_name = columns.index('database_name')
+        state_desc = columns.index('state_desc')
+        logical_name = columns.index('logical_name')
+        physical_name = columns.index('physical_name')
+        column_val = columns.index(self.column)
+
+        for row in rows:
+            val = row[column_val]
+            if column_val is None:
+                continue
+
+            metric_tags = [
+                'db:{}'.format(row[db_name]),
+                'state:{}'.format(row[state_desc]),
+                'logical_name:{}'.format(row[logical_name]),
+                'file_location:{}'.format(row[physical_name]),
+            ]
+
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.datadog_name)
+            self.report_function(metric_name, val, tags=metric_tags)
+
+
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-databases-transact-sql?view=sql-server-ver15
 class SqlDatabaseStats(BaseSqlServerMetric):
     CUSTOM_QUERIES_AVAILABLE = False
@@ -563,12 +691,13 @@ class SqlDatabaseStats(BaseSqlServerMetric):
     QUERY_BASE = "select * from {table}".format(table=TABLE)
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns):
         database_name = columns.index("name")
         db_state_desc_index = columns.index("state_desc")
+        db_recovery_model_desc_index = columns.index("recovery_model_desc")
         value_column_index = columns.index(self.column)
 
         for row in rows:
@@ -577,9 +706,11 @@ class SqlDatabaseStats(BaseSqlServerMetric):
 
             column_val = row[value_column_index]
             db_state_desc = row[db_state_desc_index]
+            db_recovery_model_desc = row[db_recovery_model_desc_index]
             metric_tags = [
                 'database:{}'.format(str(self.instance)),
                 'database_state_desc:{}'.format(str(db_state_desc)),
+                'database_recovery_model_desc:{}'.format(str(db_recovery_model_desc)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
@@ -604,7 +735,7 @@ class SqlDatabaseBackup(BaseSqlServerMetric):
     )
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns):
@@ -637,7 +768,7 @@ class SqlFailoverClusteringInstance(BaseSqlServerMetric):
     QUERY_BASE = """select * from {table}""".format(table=TABLE)
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns):
@@ -651,11 +782,6 @@ class SqlFailoverClusteringInstance(BaseSqlServerMetric):
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
             self.report_function(metric_name, column_val, tags=metric_tags)
-
-        # report dummy metric
-        metric_name = '{}'.format(self.datadog_name)
-        column_val = 10
-        self.report_function(metric_name, column_val, tags=self.tags)
 
 
 # sys.dm_db_index_physical_stats
@@ -673,8 +799,6 @@ class SqlDbFragmentation(BaseSqlServerMetric):
     TABLE = 'sys.dm_db_index_physical_stats'
     DEFAULT_METRIC_TYPE = 'gauge'
 
-    _DATABASES = set()
-
     QUERY_BASE = (
         "select DB_NAME(database_id) as database_name, OBJECT_NAME(object_id) as object_name, "
         "index_id, partition_number, fragment_count, avg_fragment_size_in_pages, "
@@ -685,17 +809,18 @@ class SqlDbFragmentation(BaseSqlServerMetric):
 
     def __init__(self, cfg_instance, base_name, report_function, column, logger):
         super(SqlDbFragmentation, self).__init__(cfg_instance, base_name, report_function, column, logger)
-        self._DATABASES.add(self.instance)
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         # special case to limit this query to specific databases and monitor performance
         rows = []
         columns = []
+        if databases is None:
+            databases = []
 
-        logger.debug("%s: gathering fragmentation metrics for these databases: %s", cls.__name__, cls._DATABASES)
+        logger.debug("%s: gathering fragmentation metrics for these databases: %s", cls.__name__, databases)
 
-        for db in cls._DATABASES:
+        for db in databases:
             query = cls.QUERY_BASE.format(db=db)
             logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
             start = get_precise_time()
@@ -762,7 +887,7 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
     )
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns):
@@ -816,7 +941,7 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
     )
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns):
@@ -869,7 +994,7 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
     )
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns):

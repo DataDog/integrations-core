@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import json
 import os
 from copy import deepcopy
 
@@ -12,9 +11,11 @@ from requests.exceptions import SSLError
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.yarn import YarnCheck
 
 from .common import (
+    FIXTURE_DIR,
     HERE,
     INSTANCE_INTEGRATION,
     TEST_PASSWORD,
@@ -89,37 +90,11 @@ def mocked_bad_cert_request():
 
 
 def requests_get_mock(*args, **kwargs):
-    class MockResponse:
-        def __init__(self, json_data, status_code):
-            self.json_data = json_data
-            self.status_code = status_code
-
-        def json(self):
-            return json.loads(self.json_data)
-
-        def raise_for_status(self):
-            return True
-
     if args[0] == YARN_CLUSTER_METRICS_URL:
-        yarn_cluster_metrics = os.path.join(HERE, "fixtures", "cluster_metrics")
-        with open(yarn_cluster_metrics, "r") as f:
-            body = f.read()
-            return MockResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'cluster_metrics'))
     elif args[0] == YARN_APPS_URL:
-        yarn_apps_metrics = os.path.join(HERE, "fixtures", "apps_metrics")
-        with open(yarn_apps_metrics, "r") as f:
-            body = f.read()
-            return MockResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'apps_metrics'))
     elif args[0] == YARN_NODES_URL:
-        yarn_nodes_metrics = os.path.join(HERE, "fixtures", "nodes_metrics")
-        with open(yarn_nodes_metrics, "r") as f:
-            body = f.read()
-            return MockResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'nodes_metrics'))
     elif args[0] == YARN_SCHEDULER_URL:
-        yarn_scheduler_metrics = os.path.join(HERE, "fixtures", "scheduler_metrics")
-        with open(yarn_scheduler_metrics, "r") as f:
-            body = f.read()
-            return MockResponse(body, 200)
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'scheduler_metrics'))

@@ -110,12 +110,20 @@ You may also pass a comma-separated list of checks to skip using the `--exclude`
 ddev release make all --exclude datadog_checks_dev
 ```
 
+Note: releasing `all` will update the `.in-toto` file to include every integration, not just the changed integrations. This may result in an unnecessarily large `.in-toto` file if only releasing a few integrations.
+
 !!! warning
     There is a known GitHub limitation where if an issue has too many labels (100), its state cannot be modified.
     If you cannot merge the pull request:
 
     1. Run the [remove-labels](../ddev/cli.md#ddev-meta-scripts-remove-labels) command
     1. After merging, manually add back the `changelog/no-changelog` label
+
+Another option for bulk releases is selectively choosing the integrations to release. For example, if you are just releasing `check1` and `check2`: 
+
+```
+ddev release make check1 check2
+```
 
 ## Betas (core integrations only)
 
@@ -186,41 +194,102 @@ ddev release upload datadog_checks_[base|dev]
 
 ## Troubleshooting
 
+#### Error signing with Yubikey
 - If you encounter errors when signing with your Yubikey, ensure you ran `gpg --import <YOUR_KEY_ID>.gpg.pub`.
-- If the [build pipeline](../meta/cd.md) failed, it is likely that you modified a file in the pull request
-  without re-signing. To resolve this, you'll need to bootstrap metadata for every integration:
+- If you receive this error when signing with your Yubikey, check if you have more than one Yubikey inserted in your computer. Try removing the Yubikey that's not used for signing and try signing again.
+    
+  ```
+      File "/Users/<USER>/.pyenv/versions/3.9.4/lib/python3.9/site-packages/in_toto/runlib.py", line 529, in in_toto_run
+        securesystemslib.formats.KEYID_SCHEMA.check_match(gpg_keyid)
+      File "/Users/<USER>/.pyenv/versions/3.9.4/lib/python3.9/site-packages/securesystemslib/schema.py", line 1004, in check_match
+        raise exceptions.FormatError(
+    securesystemslib.exceptions.FormatError: '[none]' did not match 'pattern /[a-fA-F0-9]+$/'
+  ```
+    
+#### Build pipeline failed
 
-    1. Checkout and pull the most recent version of the `master` branch.
+After merging the release PR, the [build pipeline](../meta/cd.md) can fail under a few cases. See below for steps on diagnosing the error and the corresponding fix.
 
+- A file in the pull request was modified without re-signing. View the `Files Changed` tab in the recently merged release PR and verify the `.in-toto/tag.<KEYID>.link` exists and the integration files were signed.
+
+  To resolve this, you'll need to bootstrap metadata for every integration:
+
+  1. Checkout and pull the most recent version of the `master` branch.
+
+      ```
+      git checkout master
+      git pull
+      ```
+
+  1. Sign everything.
+
+      ```
+      ddev release make all --sign-only
+      ```
+
+      You may need to touch your Yubikey multiple times.
+
+  1. Push your branch to GitHub.
+  1. Manually trigger a build.
+
+      ```
+      git tag <USERNAME>bootstrap-1.0.0 -m <USERNAME>bootstrap-1.0.0
+      ```
+
+      The tag name is irrelevant, it just needs to look like an integration release. Gitlab doesn't sync
+      deleted tags, so any subsequent manual trigger tags will need to increment the version number.
+
+  1. Delete the branch and tag, locally and on GitHub.
+    
+- If a feature PR conflicting with the release PR is merged out of order.
+
+    The following is a possible sequence of events that can result in the build pipeline failing:
+    
+        1. A release PR is opened
+        2. A feature PR is opened and merged
+        3. The release PR is merged after the feature PR.
+        4. The release PR will not have updated and signed the feature PR's files, the released wheel will also not contain the changes from the feature PR.
+  
+    You may see an error like so:
+    
+    ```text
+    in_toto.exceptions.RuleVerificationError: 'DISALLOW *' matched the following artifacts: ['/shared/integrations-core/datadog_checks_dev/datadog_checks/dev/tooling/commands/ci/setup.py']
+    ```
+      
+    1. Verify whether the hash signed in `.in-toto/tag.<KEYID>.link`, [(see example)](https://github.com/DataDog/integrations-core/blob/9836c71f15a0cb93c63c1d2950dcdc28b49479a7/.in-toto/tag.57ce2495.link) matches what's on `master` for the artifact in question.
+        
+        To see the hash for the artifact, run the following `shasum` command (replace local file path):
+        
+        ```
+        shasum -a 256 datadog_checks_dev/datadog_checks/dev/tooling/commands/ci/setup.py
+        ```
+    
+    1. If any artifact mismatches, check out and pull the most recent version of the `master` branch.
+    
         ```
         git checkout master
         git pull
         ```
-
-    1. Sign everything.
-
+            
+    1. Release the integration again with a new version, bump the version appropriately.
+    
         ```
-        ddev release make all --sign-only
+        ddev release make <INTEGRATION> --version <VERSION>
         ```
-
-        You may need to touch your Yubikey multiple times.
-
-    1. Push your branch to GitHub.
-    1. Manually trigger a build.
-
+    
+    1. Verify that the integration files are signed, and update the integration changelog to reflect the feature PR title in the following format.
+        
         ```
-        git tag <USERNAME>bootstrap-1.0.0 -m <USERNAME>bootstrap-1.0.0
+        * [<Changelog label>] <PR Title>. [See #<PR Number>](<Github PR link>).
         ```
-
-        The tag name is irrelevant, it just needs to look like an integration release. Gitlab doesn't sync
-        deleted tags, so any subsequent manual trigger tags will need to increment the version number.
-
-    1. Delete the branch and tag, locally and on GitHub.
+       
+    1. After approval, merge PR to master for a new build to be triggered.
+  
 
 ## Releasers
 
 For whom it may concern, the following is a list of GPG public key fingerprints known to correspond to developers
-who, at the time of writing (28-02-2020), can trigger a build by signing [in-toto metadata](../meta/cd.md).
+who, at the time of writing (27-09-2021), can trigger a build by signing [in-toto metadata](../meta/cd.md).
 
 ??? info "[Christine Chen](https://api.github.com/users/ChristineTChen/gpg_keys)"
     - `57CE 2495 EA48 D456 B9C4  BA4F 66E8 2239 9141 D9D3`
@@ -234,34 +303,38 @@ who, at the time of writing (28-02-2020), can trigger a build by signing [in-tot
     - `8278 C406 C1BB F1F2 DFBB  5AD6 0AE7 E246 4F8F D375`
     - `98A5 37CD CCA2 8DFF B35B  0551 5D50 0742 90F6 422F`
 
+??? info "[Greg Marabout Demazure](https://api.github.com/users/gmarabout/gpg_keys)"
+    - `01CC 90D7 F047 93D4 30DF  9C7B 825B 84BD 1EE8 E57C`
+    - `C719 8925 CAE5 11DE 7FC2  EB15 A9B3 5A96 7570 B459`
+
 ??? info "[Paola Ducolin](https://api.github.com/users/pducolin/gpg_keys)"
     - `EAC5 F27E C6B1 A814 1222  1942 C4E1 549E 937E F5A2`
     - `A40A DD71 41EB C767 BBFB  E0B8 9128 2E2F E536 C858`
 
-??? info "[Mike Garabedian](https://api.github.com/users/mgarabed/gpg_keys)"
-    - `F90C 0097 67F2 4B27 9DC2  C83D A227 6601 6CB4 CF1D`
-    - `2669 6E67 28D2 0CB0 C1E0  D2BE 6643 5756 8398 9306`
-
-??? info "[Thomas Hervé](https://api.github.com/users/therve/gpg_keys)"
-    - `59DB 2532 75A5 BD4E 55C7  C5AA 0678 55A2 8E90 3B3B`
-    - `E2BD 994F 95C0 BC0B B923  1D21 F752 1EC8 F485 90D0`
+??? info "[Fanny Jiang](https://api.github.com/users/fanny-jiang/gpg_keys)"
+    - `BB47 F8E8 8908 168B CAE4  324A D9C3 43B4 D73F BE12`
+    - `800C 2BA9 A7AA 4F84 DD39  A558 4306 7845 F282 FB96`
 
 ??? info "[Ofek Lev](https://api.github.com/users/ofek/gpg_keys)"
     - `C295 CF63 B355 DFEB 3316  02F7 F426 A944 35BE 6F99`
     - `D009 8861 8057 D2F4 D855  5A62 B472 442C B7D3 AF42`
 
-??? info "[Greg Marabout Demazure](https://api.github.com/users/gmarabout/gpg_keys)"
-    - `01CC 90D7 F047 93D4 30DF  9C7B 825B 84BD 1EE8 E57C`
-    - `C719 8925 CAE5 11DE 7FC2  EB15 A9B3 5A96 7570 B459`
-
 ??? info "[Julia Simon](https://api.github.com/users/hithwen/gpg_keys)"
-    - `4A54 09A2 3361 109C 047C  C76A DC8A 42C2 8B95 0123`
+    - `0244 AAA8 DD1E FE47 30A4  F1CA 392C 882E 0DA0 C6C8`
     - `129A 26CF A726 3C85 98A6  94B0 8659 1366 CBA1 BF3C`
 
 ??? info "[Florian Veaux](https://api.github.com/users/FlorianVeaux/gpg_keys)"
     - `3109 1C85 5D78 7789 93E5  0348 9BFE 5299 D02F 83E9`
     - `7A73 0C5E 48B0 6986 1045  CF8B 8B2D 16D6 5DE4 C95E`
 
+??? info "[Sarah Witt](https://api.github.com/users/sarah-witt/gpg_keys)"
+    - `47C5 A022 73F1 CF81 04EE  8D1A 7A67 DC43 B24C 1542`
+    - `0620 14C0 3FC0 44E5 F029  32A2 E50E CC57 6463 4BC1`
+
 ??? info "[Alexandre Yang](https://api.github.com/users/AlexandreYang/gpg_keys)"
     - `FBC6 3AE0 9D0C A9B4 584C  9D7F 4291 A11A 36EA 52CD`
     - `F8D9 181D 9309 F8A4 957D  636A 27F8 F48B 18AE 91AA`
+
+??? info "[Andrew Zhang](https://api.github.com/users/yzhan289/gpg_keys)"
+    - `EABC A4AC 14AC BAF0 06CC  0384 7C67 39CB 3A79 9F86`
+    - `0149 2127 FC6E 1A4C 900B  78DA ED58 C98E BC9C C677`
