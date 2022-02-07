@@ -6,6 +6,7 @@
 ad_identifiers:
   - kubedns-amd64
   - k8s-dns-kube-dns-amd64
+  - k8s-dns-kube-dns
 
 ## All options defined here are available to all instances.
 #

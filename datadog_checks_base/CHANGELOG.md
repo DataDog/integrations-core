@@ -1,5 +1,18 @@
 # CHANGELOG - datadog_checks_base
 
+## 24.0.0 / 2022-02-02
+
+* [Added] Upgrade psutil to 5.9.0. See [#11139](https://github.com/DataDog/integrations-core/pull/11139).
+* [Changed] Add tls_protocols_allowed configuration option. See [#11237](https://github.com/DataDog/integrations-core/pull/11237).
+
+## 23.7.6 / 2022-02-03
+
+* [Fixed] Update obfuscator wrapper to return empty string. See [#11277](https://github.com/DataDog/integrations-core/pull/11277).
+
+## 23.7.5 / 2022-02-01
+
+* [Fixed] Bump redis dependency to 4.0.2. See [#11247](https://github.com/DataDog/integrations-core/pull/11247).
+
 ## 23.7.4 / 2022-01-18
 
 * [Fixed] Raise CheckException in case of connectivity issue for OpenMetrics-based checks. See [#11153](https://github.com/DataDog/integrations-core/pull/11153).

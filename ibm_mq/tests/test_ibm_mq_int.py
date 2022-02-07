@@ -12,6 +12,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.time import ensure_aware_datetime
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.ibm_mq.collectors import ChannelMetricCollector, QueueMetricCollector
 
 from . import common
 from .common import QUEUE_METRICS, assert_all_metrics, skip_windows_ci
@@ -87,30 +88,46 @@ def test_errors_are_logged(get_check, instance, caplog, dd_run_check):
         assert caplog.records
 
 
-def test_check_metrics_and_service_checks(aggregator, get_check, instance, seed_data, dd_run_check):
+@pytest.mark.parametrize(
+    'override_hostname',
+    [False, True],
+)
+def test_check_metrics_and_service_checks(aggregator, get_check, instance, seed_data, override_hostname, dd_run_check):
     instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
+    instance['override_hostname'] = override_hostname
     check = get_check(instance)
-
     dd_run_check(check)
 
-    assert_all_metrics(aggregator)
-
     tags = [
-        'queue_manager:{}'.format(common.QUEUE_MANAGER),
-        'mq_host:{}'.format(common.HOST),
-        'port:{}'.format(common.PORT),
         'connection_name:{}({})'.format(common.HOST, common.PORT),
         'foo:bar',
+        'port:{}'.format(common.PORT),
+        'queue_manager:{}'.format(common.QUEUE_MANAGER),
     ]
+    if override_hostname:
+        hostname = common.HOST
+    else:
+        tags.append('mq_host:{}'.format(common.HOST))
+        hostname = None
+
+    assert_all_metrics(aggregator, minimum_tags=tags, hostname=hostname)
 
     channel_tags = tags + ['channel:{}'.format(common.CHANNEL)]
-    aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=channel_tags, count=1)
+    aggregator.assert_service_check(
+        ChannelMetricCollector.CHANNEL_SERVICE_CHECK, check.OK, tags=channel_tags, count=1, hostname=hostname
+    )
+    aggregator.assert_service_check(
+        QueueMetricCollector.QUEUE_MANAGER_SERVICE_CHECK, check.OK, channel_tags, hostname=hostname
+    )
+
+    queue_tags = channel_tags + ['queue:DEV.QUEUE.1']
+    aggregator.assert_service_check(QueueMetricCollector.QUEUE_SERVICE_CHECK, check.OK, queue_tags, hostname=hostname)
 
     bad_channel_tags = tags + ['channel:{}'.format(common.BAD_CHANNEL)]
-    aggregator.assert_service_check('ibm_mq.channel', check.CRITICAL, tags=bad_channel_tags, count=1)
+    aggregator.assert_service_check('ibm_mq.channel', check.CRITICAL, tags=bad_channel_tags, count=1, hostname=hostname)
 
     discoverable_tags = tags + ['channel:*']
-    aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=discoverable_tags, count=1)
+    aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=discoverable_tags, count=1, hostname=hostname)
 
 
 def test_check_connection_name_one(aggregator, get_check, instance_with_connection_name, dd_run_check):

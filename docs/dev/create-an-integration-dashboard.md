@@ -40,7 +40,7 @@ Find your dashboard in [Dashboard Lists][12]. Ensure logos render correctly on t
 
 An integration dashboard should contain the following information:
 
-{{< img src="integrations/guide/best-practices-for-integrations-dashboards/dashboard-example.png" alt="An example of a Dashboard" width="100%">}}
+{{< img src="developers/create-an-integration-dashboard/dashboard-example.png" alt="An example of a Dashboard" width="100%">}}
 
 - An attention-grabbing **About** group with a banner image, concise copy, useful links, and good typography hierarchy
 - A brief annotated **Overview** group with the most important statistics at the top
@@ -72,7 +72,7 @@ An integration dashboard should contain the following information:
 
 -  Use Group widgets to title and group sections, rather than note widgets. Use partial width groups to display groups side-by-side. Most dashboards should display every widget within a group.
 
-    {{< img src="integrations/guide/best-practices-for-integrations-dashboards/full-width-grouped-logs.png" alt="An example of Group widgets" width="100%">}}
+    {{< img src="developers/create-an-integration-dashboard/full-width-grouped-logs.png" alt="An example of Group widgets" width="100%">}}
 
 -  Timeseries widgets should be at least four columns wide in order not to appear squashed on smaller displays.
 
@@ -82,7 +82,7 @@ An integration dashboard should contain the following information:
 
 -  Try to make the left and right halves of your dashboard symmetrical in high density mode. Users with large monitors will see your dashboard in high density mode by default, so it's important that group relationships make sense, and that the dashboard looks good. You can adjust group heights to achieve this, and move groups between the left and right halves.
 
-    {{< img src="integrations/guide/best-practices-for-integrations-dashboards/symmetrical-dashboard.png" alt="An example of a symmetrical dashboard" width="100%">}}
+    {{< img src="developers/create-an-integration-dashboard/symmetrical-dashboard.png" alt="An example of a symmetrical dashboard" width="100%">}}
 
 -  [Template variables][8] allow you to dynamically filter one or more widgets in a dashboard. Template variables must be universal and accessible by any user or account using the monitored service. Ensure all relevant graphs are listening to the relevant template variable filters.
 
@@ -116,11 +116,11 @@ An integration dashboard should contain the following information:
 
 -  Use colors to highlight important relationships and to improve readability, not for style. If several groups are related, apply the same group header color to all of them. If you've applied a green header color to a group, try making its notes green as well. If two groups are related, but one is more important, try using the "vivid" color on the important group and the "light" color on the less important group. Don't be afraid to leave groups with white headers, and be careful not to overuse color. For example, don't make every group on a dashboard vivid blue. Also avoid using gray headers.
 
-    {{< img src="integrations/guide/best-practices-for-integrations-dashboards/color-related-data.png" alt="An example of color-related data in a dashboard" width="100%">}}
+    {{< img src="developers/create-an-integration-dashboard/color-related-data.png" alt="An example of color-related data in a dashboard" width="100%">}}
 
 -  Use legends when they make sense. Legends make it easy to read a graph without having to hover over each series or maximize the widget. Make sure you use timeseries aliases so the legend is easy to read. Automatic mode for legends is a great option that hides legends when space is tight and shows them when there's room.
 
-    {{< img src="integrations/guide/best-practices-for-integrations-dashboards/well-named-legends.png" alt="An example of legends in a dashboard" width="100%">}}
+    {{< img src="developers/create-an-integration-dashboard/well-named-legends.png" alt="An example of legends in a dashboard" width="100%">}}
 
 -  If you want users to compare two graphs side-by-side, make sure their x-axes align. If one graph is showing a legend and the other isn't, the x-axes won't align. Make sure they both show a legend or both do not.
 

@@ -10,7 +10,7 @@ import requests
 from .common import FIXTURES_PATH, HOST, NGINX_VERSION, PORT, TAGS, USING_VTS
 from .utils import mocked_perform_request, requires_static_version
 
-pytestmark = pytest.mark.skipif(USING_VTS, reason='Using VTS')
+pytestmark = [pytest.mark.skipif(USING_VTS, reason='Using VTS'), pytest.mark.integration]
 
 
 @pytest.mark.usefixtures('dd_environment')

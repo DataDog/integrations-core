@@ -1,39 +1,39 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-activemq.queue.avg_enqueue_time,gauge,10,millisecond,,On average  the amount of time (ms) that messages remained enqueued.,0,activemq,avg enq time
-activemq.queue.consumer_count,gauge,10,,,The number of consumers connected.,0,activemq,cnsmr count
-activemq.queue.producer_count,gauge,10,,,The number of producers connected.,0,activemq,prdcr count
-activemq.queue.max_enqueue_time,gauge,10,millisecond,,The max the amount of time (ms) that messages remained enqueued.,0,activemq,max enq time
-activemq.queue.min_enqueue_time,gauge,10,millisecond,,The min the amount of time (ms) that messages remained enqueued.,0,activemq,min enq time
-activemq.queue.memory_pct,gauge,10,percent,,The percentage of memory currently in use.,0,activemq,mem pct
-activemq.queue.size,gauge,10,message,,The amount of messages that remained queued.,0,activemq,enq size
-activemq.queue.dequeue_count,gauge,10,message,,The amount of messages that remained dequeued.,0,activemq,deq size
-activemq.queue.dispatch_count,gauge,10,message,,The amount of messages that have been dispatched.,0,activemq,dsptch cnt
-activemq.queue.enqueue_count,gauge,10,message,,The amount of messages that have been enqueued.,0,activemq,enq cnt
-activemq.queue.expired_count,gauge,10,message,,The amount of messages that have been expired.,0,activemq,exp cnt
-activemq.queue.in_flight_count,gauge,10,message,,The amount of messages that have been in flight.,0,activemq,enq cnt
-activemq.broker.store_pct,gauge,10,percent,,The percentage of store in use.,0,activemq,str pct
-activemq.broker.temp_pct,gauge,10,percent,,The percentage of temporary in use.,0,activemq,temp pct
-activemq.broker.memory_pct,gauge,10,percent,,The percentage of memory in use.,0,activemq,mem pct
-activemq.artemis.address_memory_usage,gauge,,byte,,(Artemis only) Memory used by all the addresses on broker for in-memory messages.,0,activemq,art mem usage
-activemq.artemis.address_memory_usage_pct,gauge,,percent,,(Artemis only) Memory used by all the addresses on broker as a percentage of the global-max-size.,0,activemq,art mem pct
-activemq.artemis.max_disk_usage,gauge,,percent,,(Artemis only) Maximum limit for disk use in percentage.,0,activemq,art max disk
-activemq.artemis.disk_store_usage_pct,gauge,,percent,,(Artemis only) Percentage of total disk store used.,0,activemq,art disk pct
-activemq.artemis.connection_count,gauge,,connection,,(Artemis only) Number of clients connected to this server.,0,activemq,art conn count
-activemq.artemis.total_connection_count,rate,,connection,,"(Artemis only) Number of clients which have connected to this server since it was started, as a rate.",0,activemq,art total conns
-activemq.artemis.total_message_count,rate,,connection,,"(Artemis only) Number of messages in all queues on the server, as a rate.",0,activemq,art total messages
-activemq.artemis.total_messages_added,rate,,connection,,"(Artemis only) Number of messages sent to this server since it was started, as a rate.",0,activemq,art total mess added
-activemq.artemis.total_messages_acknowledged,rate,,connection,,"(Artemis only) Number of messages acknowledged from all the queues on this server since it was started, as a rate.",0,activemq,art total mess acked
-activemq.artemis.total_consumer_count,rate,,,,"(Artemis only) Number of consumers consuming messages from all the queues on this server, as a rate.",0,activemq,art total consumers
-activemq.artemis.address.size,gauge,,byte,,(Artemis only) Number of estimated bytes being used by all the queue(s) bound to this address; used to control paging and blocking.,0,activemq,add size
-activemq.artemis.address.pages_count,gauge,,page,,(Artemis only) Number of pages used by this address.,0,activemq,add pages
-activemq.artemis.address.number_of_messages,rate,,message,,"(Artemis only) The sum of messages on queue(s), including messages in delivery.",0,activemq,add num mess
-activemq.artemis.address.bytes_per_page,gauge,,byte,,(Artemis only) Number of bytes used by each page for this address.,0,activemq,add bytes page
-activemq.artemis.address.routed_messages,rate,,message,,"(Artemis only) Number of messages routed to one or more bindings, as a rate.",0,activemq,add routed
-activemq.artemis.address.unrouted_messages,rate,,message,,"(Artemis only) Number of messages not routed to any bindings, as a rate.",0,activemq,add unrouted
-activemq.artemis.queue.message_count,rate,,message,,"(Artemis only) Number of messages currently in this queue (includes scheduled, paged, and in-delivery messages), as a rate.",0,activemq,art q mess count
-activemq.artemis.queue.consumer_count,gauge,,,,(Artemis only) Number of consumers consuming messages from this queue.,0,activemq,art q consumers
-activemq.artemis.queue.max_consumers,gauge,,,,(Artemis only) Maximum number of consumers allowed on this queue at any one time.,0,activemq,art q max consumers
-activemq.artemis.queue.messages_added,rate,,message,,"(Artemis only) Number of messages added to this queue since it was created, as a rate.",0,activemq,art q mess added
-activemq.artemis.queue.messages_expired,gauge,,message,,"(Artemis only) Number of messages expired from this queue since it was created, as a rate.",0,activemq,art q mess exp
-activemq.artemis.queue.messages_acknowledged,rate,,message,,"(Artemis only) Number of messages acknowledged from this queue since it was created, as a rate.",0,activemq,art q mess acked
-activemq.artemis.queue.messages_killed,rate,,message,,"(Artemis only) Number of messages removed from this queue since it was created due to exceeding the max delivery attempts, as a rate.",0,activemq,art q mess killed
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+activemq.queue.avg_enqueue_time,gauge,10,millisecond,,On average  the amount of time (ms) that messages remained enqueued.,0,activemq,avg enq time,
+activemq.queue.consumer_count,gauge,10,,,The number of consumers connected.,0,activemq,cnsmr count,
+activemq.queue.producer_count,gauge,10,,,The number of producers connected.,0,activemq,prdcr count,
+activemq.queue.max_enqueue_time,gauge,10,millisecond,,The max the amount of time (ms) that messages remained enqueued.,0,activemq,max enq time,
+activemq.queue.min_enqueue_time,gauge,10,millisecond,,The min the amount of time (ms) that messages remained enqueued.,0,activemq,min enq time,
+activemq.queue.memory_pct,gauge,10,percent,,The percentage of memory currently in use.,0,activemq,mem pct,
+activemq.queue.size,gauge,10,message,,The amount of messages that remained queued.,0,activemq,enq size,
+activemq.queue.dequeue_count,gauge,10,message,,The amount of messages that remained dequeued.,0,activemq,deq size,
+activemq.queue.dispatch_count,gauge,10,message,,The amount of messages that have been dispatched.,0,activemq,dsptch cnt,
+activemq.queue.enqueue_count,gauge,10,message,,The amount of messages that have been enqueued.,0,activemq,enq cnt,
+activemq.queue.expired_count,gauge,10,message,,The amount of messages that have been expired.,0,activemq,exp cnt,
+activemq.queue.in_flight_count,gauge,10,message,,The amount of messages that have been in flight.,0,activemq,enq cnt,
+activemq.broker.store_pct,gauge,10,percent,,The percentage of store in use.,0,activemq,str pct,
+activemq.broker.temp_pct,gauge,10,percent,,The percentage of temporary in use.,0,activemq,temp pct,
+activemq.broker.memory_pct,gauge,10,percent,,The percentage of memory in use.,0,activemq,mem pct,
+activemq.artemis.address_memory_usage,gauge,,byte,,(Artemis only) Memory used by all the addresses on broker for in-memory messages.,0,activemq,art mem usage,
+activemq.artemis.address_memory_usage_pct,gauge,,percent,,(Artemis only) Memory used by all the addresses on broker as a percentage of the global-max-size.,0,activemq,art mem pct,
+activemq.artemis.max_disk_usage,gauge,,percent,,(Artemis only) Maximum limit for disk use in percentage.,0,activemq,art max disk,
+activemq.artemis.disk_store_usage_pct,gauge,,percent,,(Artemis only) Percentage of total disk store used.,0,activemq,art disk pct,
+activemq.artemis.connection_count,gauge,,connection,,(Artemis only) Number of clients connected to this server.,0,activemq,art conn count,
+activemq.artemis.total_connection_count,rate,,connection,,"(Artemis only) Number of clients which have connected to this server since it was started, as a rate.",0,activemq,art total conns,
+activemq.artemis.total_message_count,rate,,connection,,"(Artemis only) Number of messages in all queues on the server, as a rate.",0,activemq,art total messages,
+activemq.artemis.total_messages_added,rate,,connection,,"(Artemis only) Number of messages sent to this server since it was started, as a rate.",0,activemq,art total mess added,
+activemq.artemis.total_messages_acknowledged,rate,,connection,,"(Artemis only) Number of messages acknowledged from all the queues on this server since it was started, as a rate.",0,activemq,art total mess acked,
+activemq.artemis.total_consumer_count,rate,,,,"(Artemis only) Number of consumers consuming messages from all the queues on this server, as a rate.",0,activemq,art total consumers,
+activemq.artemis.address.size,gauge,,byte,,(Artemis only) Number of estimated bytes being used by all the queue(s) bound to this address; used to control paging and blocking.,0,activemq,add size,
+activemq.artemis.address.pages_count,gauge,,page,,(Artemis only) Number of pages used by this address.,0,activemq,add pages,
+activemq.artemis.address.number_of_messages,rate,,message,,"(Artemis only) The sum of messages on queue(s), including messages in delivery.",0,activemq,add num mess,
+activemq.artemis.address.bytes_per_page,gauge,,byte,,(Artemis only) Number of bytes used by each page for this address.,0,activemq,add bytes page,
+activemq.artemis.address.routed_messages,rate,,message,,"(Artemis only) Number of messages routed to one or more bindings, as a rate.",0,activemq,add routed,
+activemq.artemis.address.unrouted_messages,rate,,message,,"(Artemis only) Number of messages not routed to any bindings, as a rate.",0,activemq,add unrouted,
+activemq.artemis.queue.message_count,rate,,message,,"(Artemis only) Number of messages currently in this queue (includes scheduled, paged, and in-delivery messages), as a rate.",0,activemq,art q mess count,
+activemq.artemis.queue.consumer_count,gauge,,,,(Artemis only) Number of consumers consuming messages from this queue.,0,activemq,art q consumers,
+activemq.artemis.queue.max_consumers,gauge,,,,(Artemis only) Maximum number of consumers allowed on this queue at any one time.,0,activemq,art q max consumers,
+activemq.artemis.queue.messages_added,rate,,message,,"(Artemis only) Number of messages added to this queue since it was created, as a rate.",0,activemq,art q mess added,
+activemq.artemis.queue.messages_expired,gauge,,message,,"(Artemis only) Number of messages expired from this queue since it was created, as a rate.",0,activemq,art q mess exp,
+activemq.artemis.queue.messages_acknowledged,rate,,message,,"(Artemis only) Number of messages acknowledged from this queue since it was created, as a rate.",0,activemq,art q mess acked,
+activemq.artemis.queue.messages_killed,rate,,message,,"(Artemis only) Number of messages removed from this queue since it was created due to exceeding the max delivery attempts, as a rate.",0,activemq,art q mess killed,

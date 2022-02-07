@@ -13,7 +13,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
 from datadog_checks.base.utils.time import get_timestamp
 
 from .const import PLUS_API_ENDPOINTS, PLUS_API_STREAM_ENDPOINTS, TAGGED_KEYS
-from .metrics import COUNT_METRICS, METRICS_SEND_AS_COUNT, VTS_METRIC_MAP
+from .metrics import COUNT_METRICS, METRICS_SEND_AS_COUNT, METRICS_SEND_AS_HISTOGRAM, VTS_METRIC_MAP
 
 if PY3:
     long = int
@@ -76,12 +76,12 @@ class Nginx(AgentCheck):
                         continue
 
                 if name in COUNT_METRICS:
-                    func_count = metric_submission_funcs['count']
-                    func_count(name, value, tags)
+                    self.monotonic_count(name, value, tags)
                 else:
                     if name in METRICS_SEND_AS_COUNT:
-                        func_count = metric_submission_funcs['count']
-                        func_count(name + "_count", value, tags)
+                        self.monotonic_count(name + "_count", value, tags)
+                    if name in METRICS_SEND_AS_HISTOGRAM:
+                        self.histogram(name + "_histogram", value, tags)
 
                     func = metric_submission_funcs[metric_type]
                     func(name, value, tags)
