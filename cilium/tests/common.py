@@ -202,9 +202,9 @@ ADDL_OPERATOR_METRICS = [
     "cilium.operator.ces.sync_errors.count",
 ]
 
-OPTIONAL_METRICS = [
+OPTIONAL_METRICS = {
     "cilium.datapath.errors.count",
     "cilium.endpoint.count",
     "cilium.identity.count",
     "cilium.policy.count",
-]
+}
