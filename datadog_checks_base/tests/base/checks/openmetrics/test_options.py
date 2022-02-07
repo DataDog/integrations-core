@@ -5,6 +5,7 @@ import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.testing import requires_py3
+from mock import mock, Mock
 
 from .utils import get_check
 
@@ -64,7 +65,7 @@ class TestEnableHealthServiceCheck:
 
         aggregator.assert_service_check('test.openmetrics.health', ServiceCheck.OK, tags=['endpoint:test', 'foo:bar'])
 
-    def test_failure(self, aggregator, dd_run_check, mock_http_response):
+    def test_enddpoint_fails(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
@@ -74,15 +75,13 @@ class TestEnableHealthServiceCheck:
             status_code=401,
         )
         check = get_check({'metrics': ['.+'], 'tags': ['foo:bar']})
-
-        with pytest.raises(Exception):
-            dd_run_check(check)
+        dd_run_check(check)
 
         aggregator.assert_service_check(
             'test.openmetrics.health', ServiceCheck.CRITICAL, tags=['endpoint:test', 'foo:bar']
         )
 
-    def test_disable(self, aggregator, dd_run_check, mock_http_response):
+    def test_disable_health_check(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
@@ -92,11 +91,21 @@ class TestEnableHealthServiceCheck:
             status_code=401,
         )
         check = get_check({'metrics': ['.+'], 'enable_health_service_check': False})
-
-        with pytest.raises(Exception):
-            dd_run_check(check)
+        dd_run_check(check)
 
         assert not aggregator.service_check_names
+
+    def test_failure(self, aggregator):
+        check = get_check({'metrics': ['.+'], 'tags': ['foo:bar']})
+        check.configure_scrapers()
+        check.scrapers['test'].send_request = Mock(side_effect=Exception)
+
+        with pytest.raises(Exception):
+            check.check({})
+
+        aggregator.assert_service_check(
+            'test.openmetrics.health', ServiceCheck.CRITICAL, tags=['endpoint:test', 'foo:bar']
+        )
 
 
 class TestHostnameLabel:

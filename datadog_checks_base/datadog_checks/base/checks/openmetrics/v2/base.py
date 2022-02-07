@@ -10,6 +10,7 @@ from ....errors import ConfigurationError
 from ....utils.tracing import traced_class
 from ... import AgentCheck
 from .scraper import OpenMetricsScraper
+from requests.exceptions import HTTPError
 
 
 class OpenMetricsBaseCheckV2(AgentCheck):
@@ -59,7 +60,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
             with self.adopt_namespace(scraper.namespace):
                 try:
                     scraper.scrape()
-                except Exception as e:
+                except (ConnectionError, HTTPError) as e:
                     self.log.error("There was an error scraping endpoint %s: %s", endpoint, str(e))
 
     def configure_scrapers(self):
