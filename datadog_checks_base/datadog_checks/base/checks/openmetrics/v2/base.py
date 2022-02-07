@@ -6,7 +6,7 @@
 from collections import ChainMap
 from contextlib import contextmanager
 
-from requests.exceptions import HTTPError
+from requests.exceptions import RequestException
 
 from ....errors import ConfigurationError
 from ....utils.tracing import traced_class
@@ -61,7 +61,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
             with self.adopt_namespace(scraper.namespace):
                 try:
                     scraper.scrape()
-                except (ConnectionError, HTTPError) as e:
+                except (ConnectionError, RequestException) as e:
                     self.log.error("There was an error scraping endpoint %s: %s", endpoint, str(e))
 
     def configure_scrapers(self):
