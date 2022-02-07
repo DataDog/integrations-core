@@ -1,5 +1,15 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 15.8.0 / 2022-02-07
+
+* [Added] Support Python checks defined by a `pyproject.toml` file. See [#11233](https://github.com/DataDog/integrations-core/pull/11233).
+* [Added] Add snmp build-traps-db command. See [#11235](https://github.com/DataDog/integrations-core/pull/11235).
+* [Added] Add curated_metric column to check validation. See [#11168](https://github.com/DataDog/integrations-core/pull/11168).
+* [Fixed] Safely check the dashboards key exists before trying to write to it. See [#11285](https://github.com/DataDog/integrations-core/pull/11285).
+* [Fixed] Validate all `curated_metric` rows and properly validate empty `metadata.csv` files. See [#11273](https://github.com/DataDog/integrations-core/pull/11273).
+* [Fixed] More specific config validation error message. See [#11272](https://github.com/DataDog/integrations-core/pull/11272).
+* [Fixed] Unpin black. See [#11270](https://github.com/DataDog/integrations-core/pull/11270).
+
 ## 15.7.0 / 2022-01-31
 
 * [Added] Add example image with requirements for media carousel. See [#11145](https://github.com/DataDog/integrations-core/pull/11145).
