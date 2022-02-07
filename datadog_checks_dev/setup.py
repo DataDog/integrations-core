@@ -88,6 +88,7 @@ setup(
             'pip-tools',
             'platformdirs>=2.0.0a3',
             'pyperclip>=1.7.0',
+            'pysmi>=0.3.4',
             'semver',
             'tabulate>=0.8.9',
             'toml>=0.9.4, <1.0.0',
