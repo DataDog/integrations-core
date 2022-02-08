@@ -47,7 +47,7 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
 
 STATEMENT_METRICS_QUERY = """\
 with qstats as (
-    select TOP {limit} text, query_hash, query_plan_hash, last_execution_time, plan_handle,
+    select TOP {limit} query_hash, query_plan_hash, last_execution_time, plan_handle,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'user_id') as user_id,
            {query_metrics_columns}
@@ -55,13 +55,13 @@ with qstats as (
         cross apply sys.dm_exec_sql_text(sql_handle)
     where last_execution_time > dateadd(second, -?, getdate())
 )
-select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
+select query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
        D.name as database_name, U.name as user_name, max(plan_handle) as plan_handle,
     {query_metrics_column_sums}
     from qstats S
     left join sys.databases D on S.dbid = D.database_id
     left join sys.sysusers U on S.user_id = U.uid
-    group by text, query_hash, query_plan_hash, S.dbid, D.name, U.name
+    group by query_hash, query_plan_hash, S.dbid, D.name, U.name
 """
 
 # This query is an optimized version of the statement metrics query
@@ -244,17 +244,23 @@ class SqlserverStatementMetrics(DBMAsyncJob):
     def _normalize_queries(self, rows):
         normalized_rows = []
         for row in rows:
-            try:
-                statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
-            except Exception as e:
-                # obfuscation errors are relatively common so only log them during debugging
-                self.log.debug("Failed to obfuscate query: %s", e)
-                self.check.count(
-                    "dd.sqlserver.statements.error",
-                    1,
-                    **self.check.debug_stats_kwargs(tags=["error:obfuscate-query-{}".format(type(e))])
-                )
-                continue
+            if 'text' in row:
+                try:
+                    statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
+                except Exception as e:
+                    # obfuscation errors are relatively common so only log them during debugging
+                    self.log.debug("Failed to obfuscate query: %s", e)
+                    self.check.count(
+                        "dd.sqlserver.statements.error",
+                        1,
+                        **self.check.debug_stats_kwargs(tags=["error:obfuscate-query-{}".format(type(e))])
+                    )
+                    continue
+            else:
+                statement = {
+                    'query': _hash_to_hex(row['query_hash']),
+                    'metadata': {}
+                }
             obfuscated_statement = statement['query']
             row['text'] = obfuscated_statement
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
