@@ -195,6 +195,11 @@ instances:
     #
     # startup_grace_seconds: 0
 
+    ## @param openmetrics_endpoint - string - optional
+    ## The URL exposing metrics in the OpenMetrics format.
+    #
+    # openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
+
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.
     ## All configuration options will use the prefix-less name.

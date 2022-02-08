@@ -192,7 +192,6 @@ files:
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - template: instances/openmetrics
       overrides:
-        openmetrics_endpoint.hidden: true
         openmetrics_endpoint.required: false
     - template: instances/openmetrics_legacy_base
       hidden: true
