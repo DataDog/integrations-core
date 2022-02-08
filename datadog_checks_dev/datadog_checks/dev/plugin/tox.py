@@ -137,8 +137,8 @@ def add_style_checker(config, sections, make_envconfig, reader):
 
     commands = [
         'flake8 --config=../.flake8 .',
-        'black --check --diff .',
-        'isort --check-only --diff .',
+        'black --config ../pyproject.toml --check --diff .',
+        'isort --settings-path ../pyproject.toml --check-only --diff .',
     ]
 
     if sections['testenv'].get(TYPES_FLAG, 'false').lower() == 'true':

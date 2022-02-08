@@ -5,7 +5,7 @@ from copy import deepcopy
 from packaging.requirements import InvalidRequirement, Requirement
 
 from ..fs import stream_file_lines
-from .constants import get_agent_requirements, get_root
+from .constants import NOT_CHECKS, get_agent_requirements, get_root
 from .utils import (
     get_project_file,
     get_valid_checks,
@@ -48,17 +48,21 @@ def create_dependency_data():
 
 def load_dependency_data_from_metadata(check_name, dependencies, errors):
     project_data = load_project_file_cached(check_name)
-    check_dependencies = project_data['project'].get('optional-dependencies', {}).get('deps', [])
-    for check_dependency in check_dependencies:
-        try:
-            req = Requirement(check_dependency)
-        except InvalidRequirement as e:
-            errors.append(f'File `{check_name}/pyproject.toml` has an invalid dependency: `{check_dependency}`\n{e}')
-            continue
+    optional_dependencies = project_data['project'].get('optional-dependencies', {})
 
-        name = req.name.lower().replace('_', '-')
-        dependency = dependencies[name][req.specifier]
-        dependency.append(DependencyDefinition(name, req, get_project_file(check_name), None, check_name))
+    for check_dependencies in optional_dependencies.values():
+        for check_dependency in check_dependencies:
+            try:
+                req = Requirement(check_dependency)
+            except InvalidRequirement as e:
+                errors.append(
+                    f'File `{check_name}/pyproject.toml` has an invalid dependency: `{check_dependency}`\n{e}'
+                )
+                continue
+
+            name = req.name.lower().replace('_', '-')
+            dependency = dependencies[name][req.specifier]
+            dependency.append(DependencyDefinition(name, req, get_project_file(check_name), None, check_name))
 
 
 def load_dependency_data_from_requirements(req_file, dependencies, errors, check_name=None):
@@ -128,6 +132,9 @@ def read_check_dependencies(check=None):
         checks = sorted(get_valid_checks()) if check is None else [check]
 
     for check_name in checks:
+        if check_name in NOT_CHECKS:
+            continue
+
         if has_project_file(check_name):
             load_dependency_data_from_metadata(check_name, dependencies, errors)
         else:
@@ -147,8 +154,10 @@ def read_check_base_dependencies(check=None):
     else:
         checks = sorted(get_valid_checks()) if check is None else [check]
 
+    not_required = {'datadog_checks_base', 'datadog_checks_downloader'}
+    not_required.update(NOT_CHECKS)
     for check_name in checks:
-        if check_name.startswith('datadog_checks_'):
+        if check_name in not_required:
             continue
 
         if has_project_file(check_name):
@@ -162,24 +171,27 @@ def read_check_base_dependencies(check=None):
 
 def update_check_dependencies_at(path, dependency_definitions):
     project_data = deepcopy(load_project_file_at_cached(path))
-    dependencies = project_data['project'].setdefault('optional-dependencies', {}).setdefault('deps', [])
+    optional_dependencies = project_data['project'].get('optional-dependencies', {})
 
     updated = False
-    for i, old_dependency in enumerate(dependencies):
-        old_requirement = Requirement(old_dependency)
+    for dependencies in optional_dependencies.values():
+        for i, old_dependency in enumerate(dependencies):
+            old_requirement = Requirement(old_dependency)
 
-        for dependency_definition in dependency_definitions:
-            new_requirement = dependency_definition.requirement
-            if new_requirement.name == old_requirement.name:
-                if str(new_requirement) != str(old_requirement):
-                    dependencies[i] = str(new_requirement)
-                    updated = True
+            for dependency_definition in dependency_definitions:
+                new_requirement = dependency_definition.requirement
+                if new_requirement.name == old_requirement.name:
+                    if str(new_requirement) != str(old_requirement):
+                        dependencies[i] = str(new_requirement)
+                        updated = True
 
-                break
+                    break
+
+        if updated:
+            # sort, and prevent backslash escapes since strings are written using double quotes
+            dependencies[:] = sorted(str(dependency).replace('"', "'") for dependency in dependencies)
 
     if updated:
-        # sort, and prevent backslash escapes since strings are written using double quotes
-        dependencies[:] = sorted(str(dependency).replace('"', "'") for dependency in dependencies)
         write_project_file_at(path, project_data)
 
     return updated
