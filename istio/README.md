@@ -29,29 +29,29 @@ Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [
 #### Metric collection
 To monitor the `istiod` deployment and `istio-proxy` in Istio `v1.5+`, use the following configuration:
     
-    ```yaml
-    init_config:
-    
-    instances:
-      - use_openmetrics: true  # Enables Openmetrics V2 version of the integration
-        istiod_endpoint: http://istiod.istio-system:15014/metrics
-        istio_mesh_endpoint: http://istio-proxy.istio-system:15090/stats/prometheus
-        exclude_labels:
-         - source_version
-         - destination_version
-         - source_canonical_revision
-         - destination_canonical_revision
-         - source_principal
-         - destination_principal
-         - source_cluster
-         - destination_cluster
-         - source_canonical_service
-         - destination_canonical_service
-         - source_workload_namespace
-         - destination_workload_namespace
-         - request_protocol
-         - connection_security_policy
-    ```
+```yaml
+init_config:
+
+instances:
+  - use_openmetrics: true  # Enables Openmetrics V2 version of the integration
+    istiod_endpoint: http://istiod.istio-system:15014/metrics
+    istio_mesh_endpoint: http://istio-proxy.istio-system:15090/stats/prometheus
+    exclude_labels:
+      - source_version
+      - destination_version
+      - source_canonical_revision
+      - destination_canonical_revision
+      - source_principal
+      - destination_principal
+      - source_cluster
+      - destination_cluster
+      - source_canonical_service
+      - destination_canonical_service
+      - source_workload_namespace
+      - destination_workload_namespace
+      - request_protocol
+      - connection_security_policy
+```
    
 **Note**: The `connectionID` Prometheus label is excluded. The [sample istio.d/conf.yaml][8] also has a list of suggested labels to exclude.
 
@@ -131,10 +131,10 @@ See [service_checks.json][16] for a list of service checks provided by this inte
 ### Invalid chunk length error
 If you see the following error on OpenMetricsBaseCheck (V1) implementation of Istio (Istio integration version `3.13.0` or older):
 
-    ```python
-      Error: ("Connection broken: InvalidChunkLength(got length b'', 0 bytes read)", 
-      InvalidChunkLength(got length b'', 0 bytes read))
-    ```
+```python
+  Error: ("Connection broken: InvalidChunkLength(got length b'', 0 bytes read)", 
+  InvalidChunkLength(got length b'', 0 bytes read))
+```
 
 You can use the Openmetrics V2 implementation of the Istio integration to resolve this error.
 
