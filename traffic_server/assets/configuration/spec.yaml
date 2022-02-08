@@ -1,0 +1,10 @@
+name: Traffic Server
+files:
+- name: traffic_server.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/default
