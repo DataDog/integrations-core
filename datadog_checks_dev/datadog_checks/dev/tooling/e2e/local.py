@@ -204,8 +204,7 @@ class LocalAgentInterface(object):
 
     def update_base_package(self):
         command = get_pip_exe(self.python_version, self.platform)
-        command.extend(('install', '-e', self.base_package))
-        command.extend(('-r', path_join(self.base_package, REQUIREMENTS_IN)))
+        command.extend(('install', '-e', f'{self.base_package}[db,deps,http,json,kube]'))
         return run_command(command, capture=True, check=True)
 
     def update_agent(self):

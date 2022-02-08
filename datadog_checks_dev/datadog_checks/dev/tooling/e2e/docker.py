@@ -276,8 +276,7 @@ class DockerInterface(object):
     def update_base_package(self):
         command = ['docker', 'exec', self.container_name]
         command.extend(get_pip_exe(self.python_version, platform=self.container_platform))
-        command.extend(('install', '-e', self.base_mount_dir))
-        command.extend(('-r', f'{self.base_mount_dir}/{REQUIREMENTS_IN}'))
+        command.extend(('install', '-e', f'{self.base_mount_dir}[db,deps,http,json,kube]'))
         run_command(command, capture=True, check=True)
 
     def update_agent(self):
