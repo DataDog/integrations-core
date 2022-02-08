@@ -52,7 +52,6 @@ with qstats as (
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'user_id') as user_id,
            {query_metrics_columns}
     from sys.dm_exec_query_stats
-        cross apply sys.dm_exec_sql_text(sql_handle)
     where last_execution_time > dateadd(second, -?, getdate())
 )
 select query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
