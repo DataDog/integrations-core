@@ -53,6 +53,25 @@ The Datadog Terraform provider is available through the [Terraform Registry][1].
 
 6. Run `terraform apply` to create this monitor in your Datadog account!
 
+## Sending Events to Datadog
+
+By installing datadogpy, you get access to dogwrap cli, which will allow you to wrap any terraform command and bind it to a custom event.
+
+* Install datadogpy, check this [repo][4] for more information.
+  ```
+  pip install datadog
+  ```
+
+* Send a **terraform apply** event.
+  ```
+  dogwrap -n "terraform apply" -k $DD_API_KEY --submit_mode all --tags="source:terraform" "terraform apply -no-color"
+  ```
+
+* Send a **terraform destroy** event.
+  ```
+  dogwrap -n "terraform destroy" -k $DD_API_KEY --submit_mode all --tags="source:terraform" "terraform destroy -no-color"
+  ```
+
 ## Data Collected
 
 ### Metrics
@@ -74,3 +93,4 @@ Need help? Contact [Datadog support][3].
 [1]: https://registry.terraform.io/providers/DataDog/datadog/latest/docs
 [2]: https://learn.hashicorp.com/tutorials/terraform/install-cli
 [3]: https://docs.datadoghq.com/help/
+[4]: https://github.com/DataDog/datadogpy
