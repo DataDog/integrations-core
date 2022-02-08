@@ -88,7 +88,7 @@ def find_check_root(depth=0):
 
     root = get_parent_dir(frame.f_code.co_filename)
     while True:
-        if file_exists(path_join(root, 'setup.py')):
+        if file_exists(path_join(root, 'pyproject.toml')) or file_exists(path_join(root, 'setup.py')):
             break
 
         new_root = os.path.dirname(root)
