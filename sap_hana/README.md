@@ -8,7 +8,21 @@ This check monitors [SAP HANA][1] 2.0, SPS 2 through the Datadog Agent.
 
 ### Installation
 
-The SAP HANA check is included in the [Datadog Agent][2] package.
+The SAP HANA check is included in the [Datadog Agent][2] package but to be able to use this integration you must install the [hdbcli][10] library.
+The installation must be performed manually for licensing reasons.
+
+#### Install library
+##### Unix
+
+```text
+/opt/datadog-agent/embedded/bin/pip install hdbcli==2.10.15
+```
+
+##### Windows
+
+```text
+"C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\python.exe" -m pip install hdbcli==2.10.15
+```
 
 #### Prepare HANA
 
@@ -71,24 +85,6 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
    ```shell
    GRANT DD_MONITOR TO <USER>;
    ```
-
-#### Dependencies
-
-Although not required, it is recommended to install the [hdbcli][10] client library since it is the only officially maintained library and supports many new features.
-
-The installation must be performed manually for licensing reasons.
-
-##### Unix
-
-```text
-/opt/datadog-agent/embedded/bin/pip install hdbcli==2.10.15
-```
-
-##### Windows
-
-```text
-"C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\python.exe" -m pip install hdbcli==2.10.15
-```
 
 ### Configuration
 
