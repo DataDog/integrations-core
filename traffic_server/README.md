@@ -11,7 +11,10 @@ Follow the instructions below to install and configure this check for an Agent r
 ### Installation
 
 The Traffic Server check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+
+To enable monitoring in Traffic Server, enable the [Stats Over HTTP plugin][10] on your Traffic Server by adding the following line to your `plugin.config` file:
+ `stats_over_http.so`
+
 
 ### Configuration
 
@@ -35,8 +38,6 @@ The Traffic Server integration does not include any events.
 
 ### Service Checks
 
-The Traffic Server integration does not include any service checks.
-
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
@@ -44,7 +45,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][9].
 
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://trafficserver.apache.org/
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/check/datadog_checks/check/data/conf.yaml.example
@@ -53,3 +54,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/check/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/check/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://docs.trafficserver.apache.org/en/latest/admin-guide/monitoring/statistics/accessing.en.html#stats-over-http
