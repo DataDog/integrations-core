@@ -20,7 +20,7 @@ def test_assert_no_duplicate_message(aggregator):
         aggregator.assert_no_duplicate_metrics()
     except AssertionError as e:
         actual_msg = str(e)
-
+    print(repr(actual_msg))
     expected_msg = '''
 Duplicate metrics found:
   - check.metric.dup1

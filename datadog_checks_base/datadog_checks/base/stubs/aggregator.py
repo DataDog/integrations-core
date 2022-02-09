@@ -531,7 +531,6 @@ class AggregatorStub(object):
                 dup_contexts[context] = metrics
 
         err_msg_lines = ["Duplicate {}s found:".format(stub_type)]
-        # test
         for key in sorted(dup_contexts):
             contexts = dup_contexts[key]
             err_msg_lines.append('- {}'.format(contexts[0].name))
