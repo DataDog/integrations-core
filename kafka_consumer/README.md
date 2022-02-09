@@ -33,12 +33,6 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 This check does not collect additional logs. To collect logs from Kafka brokers, see [log collection instructions for Kafka][6].
 
 <!-- xxz tab xxx -->

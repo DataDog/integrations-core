@@ -16,19 +16,14 @@ from datadog_checks.dev.docker import using_windows_containers
 
 from .common import (
     DOCKER_SERVER,
-    FULL_E2E_CONFIG,
     HERE,
+    HOST,
     INIT_CONFIG,
     INIT_CONFIG_ALT_TABLES,
     INIT_CONFIG_OBJECT_NAME,
-    INSTANCE_AO_DOCKER_SECONDARY,
-    INSTANCE_DOCKER,
-    INSTANCE_DOCKER_DEFAULTS,
-    INSTANCE_E2E,
-    INSTANCE_SQL,
-    INSTANCE_SQL_DEFAULTS,
     get_local_driver,
 )
+from .utils import HighCardinalityQueries
 
 try:
     import pyodbc
@@ -51,31 +46,55 @@ def init_config_alt_tables():
     return deepcopy(INIT_CONFIG_ALT_TABLES)
 
 
-@pytest.fixture
-def instance_sql_defaults():
-    return deepcopy(INSTANCE_SQL_DEFAULTS)
-
-
-@pytest.fixture
-def instance_sql_msoledb():
-    instance = deepcopy(INSTANCE_SQL_DEFAULTS)
-    instance['adoprovider'] = "MSOLEDBSQL"
+@pytest.fixture(scope="session")
+def instance_session_default():
+    instance = {
+        'host': '{},1433'.format(HOST),
+        'connector': 'odbc',
+        'driver': get_local_driver(),
+        'username': 'datadog',
+        'password': 'Password12!',
+        'disable_generic_tags': True,
+        'tags': ['optional:tag1'],
+    }
+    windows_sqlserver_driver = os.environ.get('WINDOWS_SQLSERVER_DRIVER', None)
+    if not windows_sqlserver_driver or windows_sqlserver_driver == 'odbc':
+        return instance
+    instance['adoprovider'] = windows_sqlserver_driver
+    instance['connector'] = 'adodbapi'
     return instance
 
 
 @pytest.fixture
-def instance_sql():
-    return deepcopy(INSTANCE_SQL)
+def instance_docker_defaults(instance_session_default):
+    # deepcopy necessary here because we want to make sure each test invocation gets its own unique copy of the instance
+    # this also means that none of the test need to defensively make their own copies
+    return deepcopy(instance_session_default)
 
 
 @pytest.fixture
-def instance_docker():
-    return deepcopy(INSTANCE_DOCKER)
+def instance_minimal_defaults():
+    return {
+        'host': DOCKER_SERVER,
+        'username': 'sa',
+        'password': 'Password12!',
+        'disable_generic_tags': True,
+    }
 
 
 @pytest.fixture
-def instance_docker_defaults():
-    return deepcopy(INSTANCE_DOCKER_DEFAULTS)
+def instance_docker(instance_docker_defaults):
+    instance_docker_defaults.update(
+        {
+            'include_task_scheduler_metrics': True,
+            'include_db_fragmentation_metrics': True,
+            'include_fci_metrics': True,
+            'include_ao_metrics': False,
+            'include_master_files_metrics': True,
+            'disable_generic_tags': True,
+        }
+    )
+    return instance_docker_defaults
 
 
 # the default timeout in the integration tests is deliberately elevated beyond the default timeout in the integration
@@ -180,72 +199,108 @@ def sa_conn(instance_docker):
 
 
 @pytest.fixture
-def instance_e2e():
-    return deepcopy(INSTANCE_E2E)
+def instance_e2e(instance_docker):
+    instance_docker['driver'] = 'FreeTDS'
+    instance_docker['dbm'] = True
+    return instance_docker
 
 
 @pytest.fixture
-def instance_ao_docker_primary():
-    instance = deepcopy(INSTANCE_DOCKER)
-    instance['include_ao_metrics'] = True
-    instance['driver'] = 'FreeTDS'
-    return instance
+def instance_ao_docker_primary(instance_docker):
+    instance_docker['include_ao_metrics'] = True
+    return instance_docker
 
 
 @pytest.fixture
-def instance_ao_docker_primary_local_only():
-    instance = deepcopy(INSTANCE_DOCKER)
-    instance['include_ao_metrics'] = True
-    instance['driver'] = 'FreeTDS'
+def instance_ao_docker_primary_local_only(instance_ao_docker_primary):
+    instance = deepcopy(instance_ao_docker_primary)
     instance['only_emit_local'] = True
     return instance
 
 
 @pytest.fixture
-def instance_ao_docker_primary_non_existing_ag():
-    instance = deepcopy(INSTANCE_DOCKER)
-    instance['include_ao_metrics'] = True
-    instance['driver'] = 'FreeTDS'
+def instance_ao_docker_primary_non_existing_ag(instance_ao_docker_primary):
+    instance = deepcopy(instance_ao_docker_primary)
     instance['availability_group'] = 'AG2'
     return instance
 
 
 @pytest.fixture
-def instance_ao_docker_secondary():
-    return deepcopy(INSTANCE_AO_DOCKER_SECONDARY)
+def instance_ao_docker_secondary(instance_ao_docker_primary):
+    instance = deepcopy(instance_ao_docker_primary)
+    instance['host'] = '{},1434'.format(HOST)
+    return instance
 
 
 @pytest.fixture
-def instance_autodiscovery():
-    instance = deepcopy(INSTANCE_DOCKER)
-    instance['database_autodiscovery'] = True
-    return deepcopy(instance)
+def instance_autodiscovery(instance_docker):
+    instance_docker['database_autodiscovery'] = True
+    return instance_docker
+
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--run_high_cardinality_forever",
+        action="store_true",
+        default=False,
+        help="run a test that executes high cardinality queries forever unless it's terminated",
+    )
+
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers", "run_high_cardinality_forever: mark a test to run high cardinality queries forever"
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--run_high_cardinality_forever"):
+        # --run_high_cardinality_forever given in cli: do not skip test
+        return
+    skip_run_high_cardinality_forever = pytest.mark.skip(reason="need --run_high_cardinality_forever option to run")
+    for item in items:
+        if "run_high_cardinality_forever" in item.keywords:
+            item.add_marker(skip_run_high_cardinality_forever)
 
 
 E2E_METADATA = {'docker_platform': 'windows' if using_windows_containers() else 'linux'}
 
 
 @pytest.fixture(scope='session')
-def dd_environment():
+def full_e2e_config(instance_session_default):
+    return {"init_config": INIT_CONFIG, "instances": [instance_session_default]}
+
+
+@pytest.fixture(scope='session')
+def dd_environment(full_e2e_config):
     if pyodbc is None:
         raise Exception("pyodbc is not installed!")
 
     def sqlserver_can_connect():
-        conn = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;'.format(get_local_driver(), DOCKER_SERVER)
-        pyodbc.connect(conn, timeout=DEFAULT_TIMEOUT, autocommit=True)
+        conn_str = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;'.format(
+            get_local_driver(), DOCKER_SERVER
+        )
+        pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
+
+    def high_cardinality_env_is_ready():
+        return HighCardinalityQueries(
+            {'driver': get_local_driver(), 'host': DOCKER_SERVER, 'username': 'sa', 'password': 'Password123'}
+        ).is_ready()
 
     compose_file = os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml')
-    conditions = [
-        WaitFor(sqlserver_can_connect, wait=3, attempts=10),
-    ]
+    conditions = [WaitFor(sqlserver_can_connect, wait=3, attempts=10)]
 
-    completion_message = 'sqlserver setup completed'
+    completion_message = 'INFO: setup.sql completed.'
     if os.environ["COMPOSE_FOLDER"] == 'compose-ha':
         completion_message = (
             'Always On Availability Groups connection with primary database established ' 'for secondary database'
         )
+    if 'compose-high-cardinality' in os.environ["COMPOSE_FOLDER"]:
+        # This env is a highly loaded database and is expected to take a while to setup.
+        # This will wait about 8 minutes before timing out.
+        conditions += [WaitFor(high_cardinality_env_is_ready, wait=5, attempts=90)]
 
     conditions += [CheckDockerLogs(compose_file, completion_message)]
 
     with docker_run(compose_file=compose_file, conditions=conditions, mount_logs=True, build=True, attempts=2):
-        yield FULL_E2E_CONFIG, E2E_METADATA
+        yield full_e2e_config, E2E_METADATA

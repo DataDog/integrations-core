@@ -9,14 +9,21 @@ files:
     options:
     - template: instances/openmetrics
       overrides:
-        openmetrics_endpoint.enabled: true
         openmetrics_endpoint.required: false
+        openmetrics_endpoint.enabled: true
+        openmetrics_endpoint.display_priority: 3
         openmetrics_endpoint.value.example: http://%%host%%:9153/metrics
+        openmetrics_endpoint.description: |
+          To enable CoreDNS metrics using OpenMetricsBaseCheckV2 you must specify the openmetrics endpoint url
+          and enable the plugin within coredns.
+          See: https://coredns.io/plugins/metrics/
+
+          Either `prometheus_url` or `openmetrics_url` must be specified.
+          See documentation: https://docs.datadoghq.com/integrations/coredns
         tags.display_priority: 1
         tags.value.example:
           - "dns-pod:%%host%%"
-        metrics.hidden: false
-        metrics.value.example:
+        extra_metrics.value.example:
           - coredns_template_matches_total: template_matches_count
           - coredns_template_template_failures_total: template_templating_failures_count
           - coredns_template_rr_failures_total: template_resource_record_failures_count
@@ -24,6 +31,16 @@ files:
       hidden: true
       overrides:
         prometheus_url.required: false
+        prometheus_url.hidden: false
+        prometheus_url.display_priority: 2
+        prometheus_url.value.example: http://%%host%%:9153/metrics
+        prometheus_url.description: |
+          To enable CoreDNS metrics using the legacy OpenMetricsBaseCheckV1 you must specify the prometheus url
+          and enable the plugin within coredns.
+          See: https://coredns.io/plugins/metrics/
+
+          Either `prometheus_url` or `openmetrics_url` must be specified.
+          See documentation: https://docs.datadoghq.com/integrations/coredns
 - name: auto_conf.yaml
   options:
   - template: ad_identifiers
@@ -34,12 +51,16 @@ files:
     options: []
   - template: instances
     options:
-    - name: openmetrics_endpoint
+    - name: prometheus_url
       description: |
-        To enable CoreDNS metrics you must specify the openmetrics endpoint url
-        and enable the plugin within coredns
+        To enable CoreDNS metrics using the legacy OpenMetricsBaseCheckV1 you must specify the prometheus url
+        and enable the plugin within coredns.
         See: https://coredns.io/plugins/metrics/
-      required: false
+
+        Either `prometheus_url` or `openmetrics_url` must be specified.
+        See documentation: https://docs.datadoghq.com/integrations/coredns
+
+      enabled: true
       value:
         type: string
         example: "http://%%host%%:9153/metrics"
@@ -55,9 +76,46 @@ files:
           type: string
         example:
           - "dns-pod:%%host%%"
+    - name: send_histograms_buckets
+      description: (Legacy OpenMetricsBaseCheckV1) Set send_histograms_buckets to true to send the histograms bucket.
+      value:
+        type: boolean
+        example: True
+    - name: send_monotonic_counter
+      description: |
+        (Legacy OpenMetricsBaseCheckV1) To send counters as monotonic counter
+        see: https://github.com/DataDog/integrations-core/issues/1303
+      value:
+        type: boolean
+        example: True
     - name: metrics
       description: |
-        Metrics from the CoreDNS plugins for 'metrics', 'proxy', 'forward' and 'cache'
+        (Legacy OpenMetricsBaseCheckV1) Metrics from the CoreDNS plugins for 'metrics', 'proxy', 'forward' and 'cache'
+        are enabled by default, however in order to scrape metrics for optional
+        plugins, enable the plugin in the CoreDNS corefile and then add the metric below.
+        As an example, the 'template' plugin's metrics are below
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - coredns_template_matches_total: template_matches_count
+          - coredns_template_template_failures_total: template_templating_failures_count
+          - coredns_template_rr_failures_total: template_resource_record_failures_count
+    - name: openmetrics_endpoint
+      description: |
+        To enable CoreDNS metrics using OpenMetricsBaseCheckV2 you must specify the openmetrics endpoint url
+        and enable the plugin within coredns.
+        See: https://coredns.io/plugins/metrics/
+
+        Either `prometheus_url` or `openmetrics_url` must be specified.
+        See documentation: https://docs.datadoghq.com/integrations/coredns
+      value:
+        type: string
+        example: "http://%%host%%:9153/metrics"
+    - name: extra_metrics
+      description: |
+        (OpenMetricsBaseCheckV2) Metrics from the CoreDNS plugins for 'metrics', 'proxy', 'forward' and 'cache'
         are enabled by default, however in order to scrape metrics for optional
         plugins, enable the plugin in the CoreDNS corefile and then add the metric below.
         As an example, the 'template' plugin's metrics are below

@@ -697,6 +697,7 @@ class SqlDatabaseStats(BaseSqlServerMetric):
     def fetch_metric(self, rows, columns):
         database_name = columns.index("name")
         db_state_desc_index = columns.index("state_desc")
+        db_recovery_model_desc_index = columns.index("recovery_model_desc")
         value_column_index = columns.index(self.column)
 
         for row in rows:
@@ -705,9 +706,11 @@ class SqlDatabaseStats(BaseSqlServerMetric):
 
             column_val = row[value_column_index]
             db_state_desc = row[db_state_desc_index]
+            db_recovery_model_desc = row[db_recovery_model_desc_index]
             metric_tags = [
                 'database:{}'.format(str(self.instance)),
                 'database_state_desc:{}'.format(str(db_state_desc)),
+                'database_recovery_model_desc:{}'.format(str(db_recovery_model_desc)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)

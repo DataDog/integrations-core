@@ -73,6 +73,7 @@ trigger-agent-build:
     - git fetch origin master
     - BASE_REF=$(git merge-base HEAD FETCH_HEAD)
     - git --no-pager diff --exit-code --name-only HEAD $BASE_REF -- datadog_checks_base/datadog_checks/base/data/agent_requirements.in || export AGENT_REQUIREMENTS_CHANGED="true" || true
+    - export RELEASE_BRANCH=""
     - |
       if [[ "$AGENT_REQUIREMENTS_CHANGED" = "true" ]]; then
           export RELEASE_BRANCH=$(git tag -l '7\.*' --points-at $BASE_REF | cat | sed 's/\..-.*/\.x/')

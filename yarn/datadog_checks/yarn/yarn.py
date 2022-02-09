@@ -275,8 +275,12 @@ class YarnCheck(AgentCheck):
         tags = []
         kv_pairs = [x.split(':') for x in application_tags.split(',')]
         try:
-            for tag_key, tag_value in kv_pairs:
-                tags.append('app_{tag}:{value}'.format(tag=tag_key, value=tag_value))
+            for tag_set in kv_pairs:
+                if len(tag_set) > 1:
+                    tag_key, tag_value = tag_set
+                    tags.append('app_{tag}:{value}'.format(tag=tag_key, value=tag_value))
+                else:
+                    tags.append('app_{}'.format(tag_set[0]))
         except ValueError:
             self.log.warning("Unable to split string %s with YARN application tags", application_tags)
             # Reverting to default behavior.

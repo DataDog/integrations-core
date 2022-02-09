@@ -10,7 +10,9 @@ Monitor TCP connectivity and response time for any host and port.
 
 ### Installation
 
-The TCP check is included in the [Datadog Agent][2] package, so you don't need to install anything else on any host from which you will probe TCP ports. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you'll probably want to run this check from hosts that do not run the monitored TCP services, i.e. to test remote connectivity.
+The TCP check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
+
+Many metrics checks are best run on the same host(s) as the monitored service. However, it's recommended to run this check from hosts that do not run the monitored TCP services to test remote connectivity.
 
 ### Configuration
 
@@ -35,11 +37,11 @@ instances:
 
 Configuration Options:
 
-- `name` (Required) - Name of the service. This will be included as a tag: `instance:<name>`. Note: This tag will have any spaces and dashes converted to underscores.
-- `host` (Required) - Host to be checked. This will be included as a tag: `url:<host>:<port>`.
-- `port` (Required) - Port to be checked. This will be included as a tag: `url:<host>:<port>`.
+- `name` (Required) - Name of the service. This is included as a tag: `instance:<name>`. **Note**: Any spaces or dashes are converted to underscores.
+- `host` (Required) - Host to be checked. This is included as a tag: `url:<host>:<port>`.
+- `port` (Required) - Port to be checked. This is included as a tag: `url:<host>:<port>`.
 - `timeout` (Optional) - Timeout for the check. Defaults to 10 seconds.
-- `collect_response_time` (Optional) - Defaults to false. If this is not set to true, no response time metric will be collected. If it is set to true, the metric returned is `network.tcp.response_time`.
+- `collect_response_time` (Optional) - Defaults to false, which means no response time metric is collected. If set to true, the metric returned is `network.tcp.response_time`.
 - `tags` (Optional) - Tags to be assigned to the metric.
 
 [Restart the Agent][5] to start sending TCP service checks and response times to Datadog.

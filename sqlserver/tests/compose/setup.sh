@@ -16,9 +16,9 @@ done
 /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d master -i setup.sql -b
 if [ $? -eq 0 ]
 then
-    echo "INFO: sqlserver setup completed"
+    echo "INFO: setup.sql completed."
     exit 0
 else
-    echo "ERROR: sqlserver setup failed"
+    echo "ERROR: setup.sql failed."
     exit 1
 fi

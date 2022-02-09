@@ -8,7 +8,6 @@ METRICS = {
     'process_resident_memory_bytes': 'mem.resident',
     'process_virtual_memory_bytes': 'mem.virtual',
     # Alpha metrics
-    'kubeproxy_network_programming_duration_seconds': 'network_programming.duration',
     'kubeproxy_sync_proxy_rules_duration_seconds': 'sync_proxy.rules.duration',
     'kubeproxy_sync_proxy_rules_endpoint_changes_pending': 'sync_proxy.rules.endpoint_changes.pending',
     'kubeproxy_sync_proxy_rules_endpoint_changes_total': 'sync_proxy.rules.endpoint_changes.total',

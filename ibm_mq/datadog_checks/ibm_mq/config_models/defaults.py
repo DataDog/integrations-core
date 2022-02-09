@@ -58,6 +58,10 @@ def instance_mqcd_version(field, value):
     return 6
 
 
+def instance_override_hostname(field, value):
+    return False
+
+
 def instance_password(field, value):
     return get_default_field_value(field, value)
 

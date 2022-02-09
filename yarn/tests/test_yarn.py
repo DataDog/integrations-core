@@ -224,7 +224,8 @@ def test_check_splits_yarn_application_tags(aggregator, mocked_request):
         tags=[
             'app_queue:default',
             'app_name:dead app',
-            'app_tags:tag1,tag2',
+            'app_tag1',
+            'app_tag2',
         ]
         + EXPECTED_TAGS,
     )
@@ -254,14 +255,14 @@ def test_disable_legacy_cluster_tag(aggregator, mocked_request):
         + expected_tags,
     )
 
-    # And check that the YARN application tags have not been split for other tags
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.WARNING,
         tags=[
             'app_queue:default',
             'app_name:dead app',
-            'app_tags:tag1,tag2',
+            'app_tag1',
+            'app_tag2',
         ]
         + expected_tags,
     )

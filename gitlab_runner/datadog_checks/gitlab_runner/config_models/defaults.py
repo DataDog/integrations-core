@@ -51,7 +51,7 @@ def instance_aws_service(field, value):
 
 
 def instance_bearer_token_auth(field, value):
-    return False
+    return get_default_field_value(field, value)
 
 
 def instance_bearer_token_path(field, value):
@@ -239,6 +239,10 @@ def instance_tls_ignore_warning(field, value):
 
 
 def instance_tls_private_key(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_tls_protocols_allowed(field, value):
     return get_default_field_value(field, value)
 
 

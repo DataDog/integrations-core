@@ -50,15 +50,6 @@ def dbm_instance(instance_docker):
     return copy(instance_docker)
 
 
-@pytest.fixture
-def instance_sql_msoledb_dbm(instance_sql_msoledb):
-    instance_sql_msoledb['dbm'] = True
-    instance_sql_msoledb['min_collection_interval'] = 1
-    instance_sql_msoledb['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 2}
-    instance_sql_msoledb['tags'] = ['optional:tag1']
-    return instance_sql_msoledb
-
-
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
@@ -183,6 +174,7 @@ def test_statement_metrics_and_plans(
     disable_secondary_tags,
     match_pattern,
     caplog,
+    datadog_agent,
 ):
     caplog.set_level(logging.INFO)
     if disable_secondary_tags:
@@ -220,6 +212,7 @@ def test_statement_metrics_and_plans(
     # host metadata
     assert payload['sqlserver_version'].startswith("Microsoft SQL Server"), "invalid version"
     assert payload['host'] == "stubbed.hostname", "wrong hostname"
+    assert payload['ddagenthostname'] == datadog_agent.get_hostname()
     assert set(payload['tags']) == expected_instance_tags, "wrong instance tags for dbm-metrics event"
     assert type(payload['min_collection_interval']) in (float, int), "invalid min_collection_interval"
     # metrics rows

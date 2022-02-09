@@ -386,7 +386,7 @@ class SnmpCheck(AgentCheck):
 
             sent = []
             for host, discovered in list(config.discovered_instances.items()):
-                future = executor.submit(self._check_device, discovered)
+                future = executor.submit(self._check_device, discovered)  # type: Any
                 sent.append(future)
                 future.add_done_callback(functools.partial(self._on_check_device_done, host))
             futures.wait(sent)

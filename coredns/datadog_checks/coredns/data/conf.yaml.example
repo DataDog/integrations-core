@@ -45,7 +45,26 @@ init_config:
 #
 instances:
 
-  -
+    ## @param openmetrics_endpoint - string - optional - default: http://%%host%%:9153/metrics
+    ## To enable CoreDNS metrics using OpenMetricsBaseCheckV2 you must specify the openmetrics endpoint url
+    ## and enable the plugin within coredns.
+    ## See: https://coredns.io/plugins/metrics/
+    ##
+    ## Either `prometheus_url` or `openmetrics_url` must be specified.
+    ## See documentation: https://docs.datadoghq.com/integrations/coredns
+    #
+  - openmetrics_endpoint: http://%%host%%:9153/metrics
+
+    ## @param prometheus_url - string - optional - default: http://%%host%%:9153/metrics
+    ## To enable CoreDNS metrics using the legacy OpenMetricsBaseCheckV1 you must specify the prometheus url
+    ## and enable the plugin within coredns.
+    ## See: https://coredns.io/plugins/metrics/
+    ##
+    ## Either `prometheus_url` or `openmetrics_url` must be specified.
+    ## See documentation: https://docs.datadoghq.com/integrations/coredns
+    #
+    # prometheus_url: http://%%host%%:9153/metrics
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -54,60 +73,11 @@ instances:
     # tags:
     #   - dns-pod:%%host%%
 
-    ## @param openmetrics_endpoint - string - optional - default: http://%%host%%:9153/metrics
-    ## The URL exposing metrics in the OpenMetrics format.
-    #
-    openmetrics_endpoint: http://%%host%%:9153/metrics
-
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.
     ## All configuration options will use the prefix-less name.
     #
     # raw_metric_prefix: <PREFIX>_
-
-    ## @param metrics - (list of string or mapping) - optional
-    ## This list defines which metrics to collect from the `openmetrics_endpoint`.
-    ## Metrics may be defined in 3 ways:
-    ##
-    ## 1. If the item is a string, then it represents the exposed metric name, and
-    ##    the sent metric name will be identical. For example:
-    ##
-    ##      metrics:
-    ##      - <METRIC_1>
-    ##      - <METRIC_2>
-    ## 2. If the item is a mapping, then the keys represent the exposed metric names.
-    ##
-    ##      a. If a value is a string, then it represents the sent metric name. For example:
-    ##
-    ##           metrics:
-    ##           - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
-    ##           - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
-    ##      b. If a value is a mapping, then it must have a `name` and/or `type` key.
-    ##         The `name` represents the sent metric name, and the `type` represents how
-    ##         the metric should be handled, overriding any type information the endpoint
-    ##         may provide. For example:
-    ##
-    ##           metrics:
-    ##           - <EXPOSED_METRIC_1>:
-    ##               name: <SENT_METRIC_1>
-    ##               type: <METRIC_TYPE_1>
-    ##           - <EXPOSED_METRIC_2>:
-    ##               name: <SENT_METRIC_2>
-    ##               type: <METRIC_TYPE_2>
-    ##
-    ##         The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
-    ##
-    ## Regular expressions may be used to match the exposed metric names, for example:
-    ##
-    ##   metrics:
-    ##   - ^network_(ingress|egress)_.+
-    ##   - .+:
-    ##       type: gauge
-    #
-    # metrics:
-    #   - coredns_template_matches_total: template_matches_count
-    #   - coredns_template_template_failures_total: template_templating_failures_count
-    #   - coredns_template_rr_failures_total: template_resource_record_failures_count
 
     ## @param extra_metrics - (list of string or mapping) - optional
     ## This list defines metrics to collect from the `openmetrics_endpoint`, in addition to
@@ -149,7 +119,10 @@ instances:
     ##   - .+:
     ##       type: gauge
     #
-    # extra_metrics: []
+    # extra_metrics:
+    #   - coredns_template_matches_total: template_matches_count
+    #   - coredns_template_template_failures_total: template_templating_failures_count
+    #   - coredns_template_rr_failures_total: template_resource_record_failures_count
 
     ## @param exclude_metrics - list of strings - optional
     ## A list of metrics to exclude, with each entry being either
@@ -163,6 +136,8 @@ instances:
     ## @param exclude_metrics_by_labels - mapping - optional
     ## A mapping of labels where metrics with matching label name and values are ignored. To match
     ## all values of a label, set it to `true`.
+    ##
+    ## Note: Labels filtering happens before `rename_labels`.
     ##
     ## For example, the following configuration instructs the check to exclude all metrics with
     ## a label `worker` or a label `pid` with the value of either `23` or `42`.
@@ -179,12 +154,16 @@ instances:
     ## A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
     ## May be used in conjunction with `include_labels`.
     ## Labels defined in `excluded labels` will take precedence in case of overlap.
+    ##
+    ## Note: Labels filtering happens before `rename_labels`.
     #
     # exclude_labels: []
 
     ## @param include_labels - list of strings - optional
     ## A list of labels to include. May be used in conjunction with `exclude_labels`.
     ## Labels defined in `excluded labels` will take precedence in case of overlap.
+    ##
+    ## Note: Labels filtering happens before `rename_labels`.
     #
     # include_labels: []
 
@@ -489,6 +468,8 @@ instances:
 
     ## @param aws_host - string - optional
     ## If your services require AWS Signature Version 4 signing, set the host.
+    ## This only needs the hostname and does not require the protocol (HTTP, HTTPS, and more).
+    ## For example, if connecting to https://us-east-1.amazonaws.com/, set `aws_host` to `us-east-1.amazonaws.com`.
     ##
     ## Note: This setting is not necessary for official integrations.
     ##
@@ -546,6 +527,20 @@ instances:
     ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
     #
     # tls_ca_cert: <CA_CERT_PATH>
+
+    ## @param tls_protocols_allowed - list of strings - optional
+    ## The expected versions of TLS/SSL when fetching intermediate certificates.
+    ## Only `SSLv3`, `TLSv1.2`, `TLSv1.3` are allowed by default. The possible values are:
+    ##   SSLv3
+    ##   TLSv1
+    ##   TLSv1.1
+    ##   TLSv1.2
+    ##   TLSv1.3
+    #
+    # tls_protocols_allowed:
+    #   - SSLv3
+    #   - TLSv1.2
+    #   - TLSv1.3
 
     ## @param headers - mapping - optional
     ## The headers parameter allows you to send specific headers with every request.

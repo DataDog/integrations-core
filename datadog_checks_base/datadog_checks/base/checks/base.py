@@ -12,7 +12,7 @@ import traceback
 import unicodedata
 from collections import deque
 from os.path import basename
-from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 import yaml
 from six import PY2, binary_type, iteritems, raise_from, text_type
@@ -74,6 +74,7 @@ if TYPE_CHECKING:
 
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
+TYPO_SIMILARITY_THRESHOLD = 0.95
 
 
 @traced_class
@@ -402,25 +403,57 @@ class AgentCheck(object):
         self._log_deprecation('in_developer_mode')
         return False
 
+    def log_typos_in_options(self, user_config, models_config, level):
+        # only import it when running in python 3
+        from jellyfish import jaro_winkler_similarity
+
+        user_config = user_config or {}
+        models_config = models_config or {}
+        typos = set()  # type: Set[str]
+
+        known_options = dict(models_config).keys()
+        unknown_options = sorted(list(user_config.keys() - known_options))
+
+        for unknown_option in unknown_options:
+            similar_known_options = []  # type: List[Tuple[str, int]]
+            for known_option in known_options:
+                ratio = jaro_winkler_similarity(unknown_option, known_option)
+                if ratio > TYPO_SIMILARITY_THRESHOLD:
+                    similar_known_options.append((known_option, ratio))
+                    typos.add(unknown_option)
+
+            if len(similar_known_options) > 0:
+                similar_known_options.sort(key=lambda option: option[1], reverse=True)
+                similar_known_options_names = [option[0] for option in similar_known_options]  # type: List[str]
+                message = (
+                    'Detected potential typo in configuration option in {}/{} section: `{}`. Did you mean {}?'
+                ).format(self.name, level, unknown_option, ', or '.join(similar_known_options_names))
+                self.log.warning(message)
+        return typos
+
     def load_configuration_models(self, package_path=None):
         if package_path is None:
             # 'datadog_checks.<PACKAGE>.<MODULE>...'
             module_parts = self.__module__.split('.')
             package_path = '{}.config_models'.format('.'.join(module_parts[:2]))
-
         if self._config_model_shared is None:
             raw_shared_config = self._get_config_model_initialization_data()
-            raw_shared_config.update(self._get_shared_config())
+            intg_shared_config = self._get_shared_config()
+            raw_shared_config.update(intg_shared_config)
 
             shared_config = self.load_configuration_model(package_path, 'SharedConfig', raw_shared_config)
+            self.log_typos_in_options(intg_shared_config, shared_config, 'init_config')
             if shared_config is not None:
                 self._config_model_shared = shared_config
 
         if self._config_model_instance is None:
             raw_instance_config = self._get_config_model_initialization_data()
-            raw_instance_config.update(self._get_instance_config())
+            intg_instance_config = self._get_instance_config()
+            raw_instance_config.update(intg_instance_config)
 
             instance_config = self.load_configuration_model(package_path, 'InstanceConfig', raw_instance_config)
+            self.log_typos_in_options(intg_instance_config, instance_config, 'instances')
+
             if instance_config is not None:
                 self._config_model_instance = instance_config
 

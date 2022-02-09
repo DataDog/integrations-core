@@ -5,7 +5,7 @@ import re
 import sys
 
 from ..errors import ManifestError
-from ..fs import chdir, read_file, read_file_lines, write_file, write_file_lines
+from ..fs import chdir, file_exists, path_join, read_file, read_file_lines, write_file, write_file_lines
 from ..subprocess import run_command
 from .utils import get_version_file, load_manifest
 
@@ -118,19 +118,28 @@ def update_agent_requirements(req_file, check, newline):
 
 def build_package(package_path, sdist):
     with chdir(package_path):
-        # Clean up: Files built previously and now deleted might still persist in build directory
-        # and will be included in the final wheel. Cleaning up before avoids that.
-        result = run_command([sys.executable, 'setup.py', 'clean', '--all'], capture='out')
-        if result.code != 0:
-            return result
+        if file_exists(path_join(package_path, 'pyproject.toml')):
+            command = [sys.executable, '-m', 'build']
+            if not sdist:
+                command.append('--wheel')
 
-        result = run_command([sys.executable, 'setup.py', 'bdist_wheel', '--universal'], capture='out')
-        if result.code != 0:
-            return result
-
-        if sdist:
-            result = run_command([sys.executable, 'setup.py', 'sdist'], capture='out')
+            result = run_command(command, capture='out')
             if result.code != 0:
                 return result
+        else:
+            # Clean up: Files built previously and now deleted might still persist in build directory
+            # and will be included in the final wheel. Cleaning up before avoids that.
+            result = run_command([sys.executable, 'setup.py', 'clean', '--all'], capture='out')
+            if result.code != 0:
+                return result
+
+            result = run_command([sys.executable, 'setup.py', 'bdist_wheel', '--universal'], capture='out')
+            if result.code != 0:
+                return result
+
+            if sdist:
+                result = run_command([sys.executable, 'setup.py', 'sdist'], capture='out')
+                if result.code != 0:
+                    return result
 
     return result

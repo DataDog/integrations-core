@@ -119,6 +119,7 @@ def create_datadog_conf_file(tmp_dir):
                     'version': 2,
                     'timeout': 1,
                     'retries': 2,
+                    'loader': 'python',
                 },
                 {
                     'network': '{}.0/27'.format(prefix),
@@ -133,6 +134,7 @@ def create_datadog_conf_file(tmp_dir):
                     'privacy_protocol': 'des',
                     'context_name': 'public',
                     'ignored_ip_addresses': {'{}.2'.format(prefix): True},
+                    'loader': 'core',
                 },
             ],
         },

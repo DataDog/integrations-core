@@ -44,13 +44,20 @@ def test_check_misconfig_invalid_protocol(dd_run_check, instance):
         dd_run_check(check)
 
 
-def test_check_misconfig_empty_truststore_and_type(dd_run_check, instance):
+@pytest.mark.parametrize(
+    'jdbc_path, jdbc_type',
+    [
+        pytest.param('', 'SSO', id='Test missing JDBC truststore path'),
+        pytest.param('/path/to/jdbc/truststore', '', id='Test missing JDBC truststore type'),
+    ],
+)
+def test_check_misconfig_empty_truststore_and_type(dd_run_check, instance, jdbc_path, jdbc_type):
     """
     Test if connecting via JDBC with TCPS, both `jdbc_truststore` and `jdbc_truststore_type` are non-empty
     """
     instance['jdbc_driver_path'] = '/path/to/jdbc/driver'
-    instance['jdbc_truststore_path'] = ''
-    instance['jdbc_truststore_type'] = 'SSO'
+    instance['jdbc_truststore_path'] = jdbc_path
+    instance['jdbc_truststore_type'] = jdbc_type
     instance['protocol'] = 'TCPS'
 
     check = Oracle(CHECK_NAME, {}, [instance])

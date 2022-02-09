@@ -10,7 +10,7 @@ Follow the instructions below configure this integration for an Agent running on
 
 To install the Tenable integration configuration on your Agent:
 
-**Note**: This step will not be necessary for Agent version >= 7.18.0.
+**Note**: This step is not necessary for Agent version >= 7.18.0.
 
 1. [Install][2] the 1.0 release (`tenable==1.0.0`).
 
@@ -19,12 +19,6 @@ To install the Tenable integration configuration on your Agent:
 The Agent tails the Tenable Nessus `webserver` and `backend` logs to collect data on Nessus scans.
 
 #### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 _Available for Agent versions >6.0_
 
@@ -58,7 +52,7 @@ _Available for Agent versions >6.0_
 #### Log data collected
 
 1. Nessus backend logs collect data on scan names, start time, stop time, durations, target(s)
-2. Nessus webserver logs collect data on access logs for neesus webserver including Client IPs, User agents, login attempt/success/failure.
+2. Nessus web server logs collect data on access logs for the Nessus web server including Client IPs, User Agents, and login attempts/successes/failures.
 
 ### Metrics
 

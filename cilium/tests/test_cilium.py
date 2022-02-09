@@ -1,11 +1,12 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import AGENT_V2_METRICS, OPERATOR_V2_METRICS, requires_new_environment
+from .common import AGENT_V2_METRICS, OPERATOR_V2_METRICS, requires_new_environment, skip_on_ci
 
-pytestmark = [requires_new_environment]
+pytestmark = [skip_on_ci, requires_new_environment]
 
 
 def test_agent_check(aggregator, agent_instance_use_openmetrics, mock_agent_data, dd_run_check, check):
