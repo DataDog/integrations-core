@@ -1,6 +1,6 @@
 {
   "categories": [
-    "monitoring"
+    "os & system"
   ],
   "creates_events": false,
   "display_name": "Windows Kernel Memory",
