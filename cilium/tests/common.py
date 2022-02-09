@@ -207,4 +207,5 @@ OPTIONAL_METRICS = {
     "cilium.endpoint.count",
     "cilium.identity.count",
     "cilium.policy.count",
+    "cilium.drop_bytes.count",
 }
