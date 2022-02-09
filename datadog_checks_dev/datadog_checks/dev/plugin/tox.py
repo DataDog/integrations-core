@@ -121,6 +121,13 @@ def tox_configure(config):
         for env in config.envlist:
             config.envconfigs[env].commands.insert(0, command)
 
+    # This will inherit the configuration of `[testenv]` and if it doesn't support the platform then for some reason
+    # running a user defined environment and a generated environment at the same time (e.g. `tox -e py38,style`) will
+    # attempt to use the Python executable in the `.package` environment but will fail because the environment has
+    # not been created due to the platform mismatch.
+    if '.package' in config.envconfigs:
+        config.envconfigs['.package'].platform = 'linux|darwin|win32'
+
 
 def add_style_checker(config, sections, make_envconfig, reader):
     # testenv:style

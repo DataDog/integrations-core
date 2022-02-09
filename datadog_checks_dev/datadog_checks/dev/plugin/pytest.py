@@ -148,7 +148,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
     def run_check(config=None, **kwargs):
         root = os.path.dirname(request.module.__file__)
         while True:
-            if os.path.isfile(os.path.join(root, 'setup.py')):
+            if os.path.isfile(os.path.join(root, 'pyproject.toml')) or os.path.isfile(os.path.join(root, 'setup.py')):
                 check = os.path.basename(root)
                 break
 
