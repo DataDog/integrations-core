@@ -162,7 +162,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
         for mypy_dep in mypy_deps:
             dependencies.append(mypy_dep)
 
-        commands.append('mypy --config-file=../pyproject.toml  {}'.format(mypy_args))
+        commands.append('mypy --config-file=../mypy.ini  {}'.format(mypy_args))
 
     sections[section] = {
         'platform': 'linux|darwin|win32',
@@ -202,8 +202,8 @@ def add_style_formatter(config, sections, make_envconfig, reader):
         # Run formatter AFTER sorting imports
         'commands': '\n'.join(
             [
-                'isort .',
-                'black .',
+                'isort . --settings-path ../pyproject.toml ',
+                'black . --config ../pyproject.toml',
                 'python -c "print(\'\\n[NOTE] flake8 may still report style errors for things black cannot fix, '
                 'these will need to be fixed manually.\')"',
                 'flake8 --config=../.flake8 .',
