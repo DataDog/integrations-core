@@ -362,7 +362,7 @@ class YarnCheck(AgentCheck):
                     queues_count += 1
                     if queues_count > MAX_DETAILED_QUEUES:
                         self.warning(
-                            "Found more than 100 sub_queues, will only send metrics on first 100 queues and sub_queues. "
+                            "Found more than 100 sub_queues, will only send metrics on first 100 queues and sub_queues."
                             "Please filter the sub_queues with the check's `queue_blacklist` parameter"
                         )
                         break
