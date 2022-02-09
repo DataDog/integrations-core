@@ -919,85 +919,107 @@ def test_load_configuration_models(dd_run_check, mocker):
 
 @requires_py3
 @pytest.mark.parametrize(
-    'check_instance_config, default_instance_config, log_lines',
+    "check_instance_config, default_instance_config, log_lines",
     [
         pytest.param(
-            {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            {},
-            None,
-            id='empty default',
-        ),
-        pytest.param(
-            {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            {'endpoint': 'url'},
-            None,
-            id='no typo',
-        ),
-        pytest.param(
-            {'endpoints': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            {'endpoint': 'url'},
-            [
-                (
-                    'Detected potential typo in configuration option in test/instance section: `endpoints`. '
-                    'Did you mean endpoint?'
-                )
-            ],
-            id='typo',
-        ),
-        pytest.param(
-            {'endpoints': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            {'endpoint': 'url', 'endpoints': 'url'},
-            None,
-            id='no typo similar option',
-        ),
-        pytest.param(
-            {'endpont': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            {'endpoint': 'url', 'endpoints': 'url'},
-            [
-                (
-                    'Detected potential typo in configuration option in test/instance section: `endpont`. '
-                    'Did you mean endpoint, or endpoints?'
-                )
-            ],
-            id='typo two candidates',
-        ),
-        pytest.param({'tag': 'test'}, {'tags': 'test'}, None, id='short option cant catch'),
-        pytest.param(
-            {'testing_long_para': 'test'},
-            {'testing_long_param': 'test', 'test_short_param': 'test'},
-            [
-                (
-                    'Detected potential typo in configuration option in test/instance section: `testing_long_para`. '
-                    'Did you mean testing_long_param?'
-                )
-            ],
-            id='somewhat similar option',
-        ),
-        pytest.param(
-            {'send_distribution_sums_as_monotonic': False, 'exclude_labels': True},
-            {'send_distribution_counts_as_monotonic': True, 'include_labels': True},
-            None,
-            id='different options no typos',
-        ),
-        pytest.param(
-            {'send_distribution_count_as_monotonic': True, 'exclude_label': True},
             {
-                'send_distribution_sums_as_monotonic': False,
-                'send_distribution_counts_as_monotonic': True,
-                'exclude_labels': False,
-                'include_labels': True,
+                "endpoint": "url",
+                "tags": ["foo:bar"],
+                "proxy": {"http": "http://1.2.3.4:9000"},
             },
+            [],
+            None,
+            id="empty default",
+        ),
+        pytest.param(
+            {
+                "endpoint": "url",
+                "tags": ["foo:bar"],
+                "proxy": {"http": "http://1.2.3.4:9000"},
+            },
+            [("endpoint", "url")],
+            None,
+            id="no typo",
+        ),
+        pytest.param(
+            {
+                "endpoints": "url",
+                "tags": ["foo:bar"],
+                "proxy": {"http": "http://1.2.3.4:9000"},
+            },
+            [("endpoint", "url")],
             [
                 (
-                    'Detected potential typo in configuration option in test/instance section: '
-                    '`send_distribution_count_as_monotonic`. Did you mean send_distribution_counts_as_monotonic?'
+                    "Detected potential typo in configuration option in test/instance section: `endpoints`. "
+                    "Did you mean endpoint?"
+                )
+            ],
+            id="typo",
+        ),
+        pytest.param(
+            {
+                "endpoints": "url",
+                "tags": ["foo:bar"],
+                "proxy": {"http": "http://1.2.3.4:9000"},
+            },
+            [("endpoint", "url"), ("endpoints", "url")],
+            None,
+            id="no typo similar option",
+        ),
+        pytest.param(
+            {
+                "endpont": "url",
+                "tags": ["foo:bar"],
+                "proxy": {"http": "http://1.2.3.4:9000"},
+            },
+            [("endpoint", "url"), ("endpoints", "url")],
+            [
+                (
+                    "Detected potential typo in configuration option in test/instance section: `endpont`. "
+                    "Did you mean endpoint, or endpoints?"
+                )
+            ],
+            id="typo two candidates",
+        ),
+        pytest.param(
+            {"tag": "test"}, [("tags", "test")], None, id="short option cant catch"
+        ),
+        pytest.param(
+            {"testing_long_para": "test"},
+            [("testing_long_param", "test"), ("test_short_param", "test")],
+            [
+                (
+                    "Detected potential typo in configuration option in test/instance section: `testing_long_para`. "
+                    "Did you mean testing_long_param?"
+                )
+            ],
+            id="somewhat similar option",
+        ),
+        pytest.param(
+            {"send_distribution_sums_as_monotonic": False, "exclude_labels": True},
+            [("send_distribution_counts_as_monotonic", True), ("include_labels", True)],
+            None,
+            id="different options no typos",
+        ),
+        pytest.param(
+            {"send_distribution_count_as_monotonic": True, "exclude_label": True},
+            [
+                ("send_distribution_sums_as_monotonic", False),
+                ("send_distribution_counts_as_monotonic", True),
+                ("exclude_labels", False),
+                ("include_labels", True),
+            ],
+            [
+                (
+                    "Detected potential typo in configuration option in test/instance section: "
+                    "`send_distribution_count_as_monotonic`. Did you mean send_distribution_counts_as_monotonic?"
                 ),
                 (
-                    'Detected potential typo in configuration option in test/instance section: `exclude_label`. '
-                    'Did you mean exclude_labels?'
+                    "Detected potential typo in configuration option in test/instance section: `exclude_label`. "
+                    "Did you mean exclude_labels?"
                 ),
             ],
-            id='different options typo',
+            id="different options typo",
         ),
     ],
 )

@@ -411,7 +411,7 @@ class AgentCheck(object):
         models_config = models_config or {}
         typos = set()  # type: Set[str]
 
-        known_options = dict(models_config).keys()
+        known_options = [k for k, _ in models_config]  # type List[str]
         unknown_options = sorted(list(user_config.keys() - known_options))
 
         for unknown_option in unknown_options:
