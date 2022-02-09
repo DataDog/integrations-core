@@ -535,7 +535,7 @@ class AggregatorStub(object):
             contexts = dup_contexts[key]
             err_msg_lines.append(' - {}'.format(contexts[0].name))
             for metric in contexts:
-                err_msg_lines.append('     ' + str(metric))
+                err_msg_lines.append('    ' + str(metric))
 
         assert len(dup_contexts) == 0, "\n".join(err_msg_lines)
 
