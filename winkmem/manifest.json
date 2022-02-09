@@ -1,0 +1,29 @@
+{
+  "categories": [
+    "monitoring"
+  ],
+  "creates_events": false,
+  "display_name": "Windows Kernel Memory",
+  "guid": "ce9fc6d0-5e12-4570-93bb-bf58894996ba",
+  "is_public": false,
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "winkmem.",
+  "metric_to_check": "",
+  "name": "winkmem",
+  "public_title": "Windows Kernel Memory",
+  "short_description": "kernel memory allocation",
+  "support": "core",
+  "supported_os": [
+    "windows"
+  ],
+  "type": "check",
+  "integration_id": "winkmem",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}
