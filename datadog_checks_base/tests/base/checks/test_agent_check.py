@@ -981,9 +981,7 @@ def test_load_configuration_models(dd_run_check, mocker):
             ],
             id="typo two candidates",
         ),
-        pytest.param(
-            {"tag": "test"}, [("tags", "test")], None, id="short option cant catch"
-        ),
+        pytest.param({"tag": "test"}, [("tags", "test")], None, id="short option cant catch"),
         pytest.param(
             {"testing_long_para": "test"},
             [("testing_long_param", "test"), ("test_short_param", "test")],
