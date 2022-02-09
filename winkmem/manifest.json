@@ -9,7 +9,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "winkmem.",
-  "metric_to_check": "",
+  "metric_to_check": "winkmem.paged_pool_bytes",
   "name": "winkmem",
   "public_title": "Windows Kernel Memory",
   "short_description": "kernel memory allocation",
