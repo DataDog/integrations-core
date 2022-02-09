@@ -207,6 +207,7 @@ METRIC_MAP = {
     'haproxy_sticktable_used': 'sticktable.used',
 }
 
+
 def construct_metrics_config(metric_map):
     metrics = []
     for raw_metric_name, metric_name in metric_map.items():
