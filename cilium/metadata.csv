@@ -165,7 +165,7 @@ cilium.operator.ipam.ips,gauge,,unit,,"[OpenMetrics V1 and V2] Number of IPs all
 cilium.operator.ipam.allocation_ops,count,,operation,,"[OpenMetrics V1] Count of IP allocation operations. Available in Cilium v1.8+",0,cilium,ipam allocation ops,
 cilium.operator.ipam.allocation_ops.count,count,,operation,,"[OpenMetrics V2] Count of IP allocation operations. Available in Cilium v1.8+",0,cilium,ipam allocation ops,
 cilium.operator.ipam.release_ops,count,,operation,,"[OpenMetrics V1] Count of IP release operations. Available in Cilium v1.8+",0,cilium,ipam release ops,
-cilium.operator.ipam.release_ops.count,count,,operation,,"[OpenMetrics V1] Count of IP release operations. Available in Cilium v1.8+",0,cilium,ipam release ops,
+cilium.operator.ipam.release_ops.count,count,,operation,,"[OpenMetrics V2] Count of IP release operations. Available in Cilium v1.8+",0,cilium,ipam release ops,
 cilium.operator.ipam.interface_creation_ops,count,,operation,,"[OpenMetrics V1] Count of interfaces allocated. Available in Cilium v1.8+",0,cilium,ipam creation ops,
 cilium.operator.ipam.interface_creation_ops.count,count,,operation,,"[OpenMetrics V2] Count of interfaces allocated. Available in Cilium v1.8+",0,cilium,ipam creation ops,
 cilium.operator.ipam.available,gauge,,unit,,"[OpenMetrics V1 and V2] Number of interfaces with addresses available. Available in Cilium v1.8+",0,cilium,available ips,

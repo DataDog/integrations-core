@@ -19,9 +19,8 @@ The Cilium check is included in the [Datadog Agent][3] package, but it requires 
      `global.prometheus.enabled=true` and `global.operatorPrometheus.enabled=true`
    * Cilium >= 1.9.x:
      `prometheus.enabled=true` and `operator.prometheus.enabled=true`
-
-
-2. Or, separately enable Prometheus metrics in the Kubernetes manifests:
+   
+Or, separately enable Prometheus metrics in the Kubernetes manifests:
 
    - In the `cilium-agent` add `--prometheus-serve-addr=:9090` to the `args` section of the Cilium DaemonSet config:
 
