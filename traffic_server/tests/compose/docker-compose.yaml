@@ -9,7 +9,7 @@ services:
     entrypoint: ["/opt/ats/bin/traffic_server"]
     volumes:
      - ./plugin.config:/opt/ats/etc/trafficserver/plugin.config
-     - ./logging.yaml:/opt/ats/etc/trafficserver/logging.yaml
-     - ./records.config:/opt/ats/etc/trafficserver/records.config
+     #- ./logging.yaml:/opt/ats/etc/trafficserver/logging.yaml
+     #- ./records.config:/opt/ats/etc/trafficserver/records.config
     ports:
         - "8080:8080"
