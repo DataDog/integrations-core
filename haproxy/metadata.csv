@@ -44,7 +44,7 @@ haproxy.backend.internal.errors.total,count,,,,[OpenMetrics V1] Total number of 
 haproxy.backend.internal.errors.count,count,,,,[OpenMetrics V2] Total number of internal errors since process started (since >= 2.2).,0,haproxy,,,,
 haproxy.backend.last.session.seconds,gauge,,,,[OpenMetrics V1 and V2] Number of seconds since last session assigned to server/backend.,0,haproxy,,,,
 haproxy.backend.limit.sessions,gauge,,,,[OpenMetrics V1 and V2] Configured session limit.,0,haproxy,,,,
-haproxy.backend.loadbalanced.total,count,,,,"[OpenMetrics V1] Total number of times a service was selected, either for new sessions, or when redispatching.",0,haproxy,,
+haproxy.backend.loadbalanced.total,count,,,,"[OpenMetrics V1] Total number of times a service was selected"," either for new sessions"," or when redispatching.",0,haproxy,,
 haproxy.backend.loadbalanced.count,count,,,,"[OpenMetrics V2] Total number of times a service was selected, either for new sessions, or when redispatching.",0,haproxy,,
 haproxy.backend.max.connect.time.seconds,gauge,,,,[OpenMetrics V1 and V2] Maximum observed time spent waiting for a connection to complete,0,haproxy,,,,
 haproxy.backend.max.queue,gauge,,,,[OpenMetrics V1 and V2] Maximum observed number of queued requests.,0,haproxy,,,,
