@@ -37,6 +37,18 @@ CREATE PROCEDURE pyStoredProc
 GO
 GRANT EXECUTE on pyStoredProc to datadog;
 
+CREATE PROCEDURE exampleProcWithoutNocount
+AS
+BEGIN
+    CREATE TABLE #Hello
+    (
+        [value] int not null,
+    )
+    INSERT INTO #Hello VALUES (1)
+    select * from #Hello;
+END;
+GRANT EXECUTE on exampleProcWithoutNocount to datadog;
+
 -- Create test database for integration tests.
 -- Only bob and fred have read/write access to this database.
 CREATE DATABASE datadog_test;
