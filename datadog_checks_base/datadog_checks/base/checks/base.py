@@ -407,12 +407,12 @@ class AgentCheck(object):
         # only import it when running in python 3
         from jellyfish import jaro_winkler_similarity
 
-        user_config = user_config or {}
+        user_configs = user_config or {}  # type: Dict[str, Any]
         models_config = models_config or {}
         typos = set()  # type: Set[str]
 
-        known_options = [k for k, _ in models_config]  # type List[str]
-        unknown_options = sorted(list(user_config.keys() - known_options))
+        known_options = [k for k, _ in models_config]  # type: List[str]
+        unknown_options = [option for option in user_configs.keys() if option not in known_options]  # type: List[str]
 
         for unknown_option in unknown_options:
             similar_known_options = []  # type: List[Tuple[str, int]]
