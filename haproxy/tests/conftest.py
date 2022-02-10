@@ -25,6 +25,7 @@ from .common import (
     HAPROXY_VERSION_RAW,
     HERE,
     INSTANCE,
+    INSTANCEV2,
     requires_static_version,
 )
 from .legacy.common import (
@@ -114,8 +115,6 @@ def prometheus_metricsv2(prometheus_metrics):
         if metric == "process.failed.resolutions":
             metric = metric + ".count"
         metrics.append(metric)
-    # metrics = [re.sub('total$', 'count', metric) for metric in prometheus_metrics]
-    # metrics = [metric.replace('process.failed.resolutions', 'process.failed.resolutions.count') for metric in metrics]
     return metrics
 
 
@@ -184,6 +183,18 @@ def check():
 @pytest.fixture
 def instance():
     instance = deepcopy(CHECK_CONFIG)
+    return instance
+
+
+@pytest.fixture
+def instancev1():
+    instance = deepcopy(INSTANCE)
+    return instance
+
+
+@pytest.fixture
+def instancev2():
+    instance = deepcopy(INSTANCEV2)
     return instance
 
 
