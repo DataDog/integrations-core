@@ -17,7 +17,7 @@ from .common import ADMIN_CONFIG, COMPOSE_FILE, CONFIG, E2E_METADATA
 class DbManager(object):
     def __init__(self, config):
         self.connection_args = {
-            'host': config['server'],
+            'address': config['server'],
             'port': config['port'],
             'user': config['username'],
             'password': config['password'],
