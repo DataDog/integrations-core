@@ -26,7 +26,7 @@ The Windows Kernel Memory integration is included in the [Datadog Agent][1] pack
 
 ### Metrics
 
-The Windows Kernel Memory integration collects the metrics defined in [`conf.yaml.example`][3].
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -45,3 +45,4 @@ Need help? Contact [Datadog support][5].
 [3]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/winkmem.d/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/help/
+[6]: https://github.com/DataDog/integrations-core/blob/master/winkmem/metadata.csv
