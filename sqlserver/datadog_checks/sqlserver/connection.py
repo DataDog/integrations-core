@@ -193,11 +193,6 @@ class Connection(object):
         with rawconn.cursor() as cursor:
             # ensure that by default, the agent's reads can never block updates to any tables it's reading from
             cursor.execute("SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED")
-            # Neither pyodbc nor adodbapi are able to read results of a query if the number of rows affected
-            # statement are returned as part of the result set, so we disable for the entire connection
-            # this is important mostly for custom_queries or the stored_procedure feature
-            # https://docs.microsoft.com/en-us/sql/t-sql/statements/set-nocount-transact-sql
-            cursor.execute("SET NOCOUNT ON")
 
     def close_db_connections(self, db_key, db_name=None, key_prefix=None):
         """
