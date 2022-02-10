@@ -343,8 +343,8 @@ class YarnCheck(AgentCheck):
                 queues_count += 1
                 if queues_count > MAX_DETAILED_QUEUES:
                     self.warning(
-                        "Found more than 100 queues, will only send metrics on first 100 queues and sub_queues. "
-                        "Please filter the queues with the check's `queue_blacklist` parameter"
+                        "Found more than 100 queues, only sending metrics on the first 100 queues and sub_queues. "
+                        "Filter the queues with the check's `queue_blacklist` parameter."
                     )
                     break
 
@@ -352,25 +352,26 @@ class YarnCheck(AgentCheck):
                 tags.extend(addl_tags)
 
                 self._set_yarn_metrics_from_json(tags, queue_json, YARN_QUEUE_METRICS)
-                for sub_queue_json in queue_json['queues']['queue']:
-                    sub_queue_name = sub_queue_json['queueName']
+                if queue_json.get('queues') and queue_json['queues'].get('queue') is not None:
+                    for sub_queue_json in queue_json['queues']['queue']:
+                        sub_queue_name = sub_queue_json['queueName']
 
-                    if sub_queue_name in queue_blacklist:
-                        self.log.debug('Sublevel Queue "%s" is blacklisted. Ignoring it', sub_queue_name)
-                        continue
+                        if sub_queue_name in queue_blacklist:
+                            self.log.debug('Sublevel Queue "%s" is blacklisted. Ignoring it.', sub_queue_name)
+                            continue
 
-                    queues_count += 1
-                    if queues_count > MAX_DETAILED_QUEUES:
-                        self.warning(
-                            "Found more than 100 sub_queues, will only send metrics on first 100 queues and sub_queues."
-                            "Please filter the sub_queues with the check's `queue_blacklist` parameter"
-                        )
-                        break
+                        queues_count += 1
+                        if queues_count > MAX_DETAILED_QUEUES:
+                            self.warning(
+                                "Found more than 100 sub_queues, only sending metrics on the first 100 queues and "
+                                "sub_queues. Filter the sub_queues with the check's `queue_blacklist` parameter."
+                            )
+                            break
 
-                    tags = ['sub_queue_name:{}'.format(str(sub_queue_name))]
-                    tags.extend(addl_tags)
+                        tags = ['sub_queue_name:{}'.format(str(sub_queue_name))]
+                        tags.extend(addl_tags)
 
-                    self._set_yarn_metrics_from_json(tags, sub_queue_json, YARN_QUEUE_METRICS)
+                        self._set_yarn_metrics_from_json(tags, sub_queue_json, YARN_QUEUE_METRICS)
 
     def _set_yarn_metrics_from_json(self, tags, metrics_json, yarn_metrics):
         """

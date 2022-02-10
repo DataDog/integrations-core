@@ -77,8 +77,8 @@ files:
             description: |
               Do not emit metrics for certain yarn capacityScheduler queues and sub_queues.
               The check can send queue metrics on up to 100 queues and sub_queues in total.
-              If you have less than 100 total queues and sub_queues, you don't have to set this parameter.
-              If you have more than 100 total queues and sub_queues, please exclude queues with this parameter.
+              If you have less than 100 total queues and sub_queues, you do not need to set this parameter.
+              If you have more than 100 total queues and sub_queues, exclude queues with this parameter.
             value:
               example:
                 - "<QUEUE_NAME_1>"
