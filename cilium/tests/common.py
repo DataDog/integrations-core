@@ -209,4 +209,8 @@ OPTIONAL_METRICS = {
     "cilium.identity.count",
     "cilium.k8s_client.api_calls.count.count",
     "cilium.policy.count",
+    "cilium.policy.l7_denied.count",
+    "cilium.policy.l7_forwarded.count",
+    "cilium.policy.l7_parse_errors.count",
+    "cilium.policy.l7_received.count",
 }

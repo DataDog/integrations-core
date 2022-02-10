@@ -20,8 +20,8 @@ try:
 except ImportError:
     from contextlib2 import ExitStack
 
-from datadog_checks.dev.fs import path_join
 from datadog_checks.dev import TempDir
+from datadog_checks.dev.fs import path_join
 
 from .common import CILIUM_LEGACY
 
