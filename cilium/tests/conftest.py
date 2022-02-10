@@ -39,15 +39,15 @@ CLUSTER_NAME = 'cluster-{}-{}'.format('cilium', get_tox_env())
 
 def setup_cilium():
     run_command(["helm", "repo", "add", "cilium", "https://helm.cilium.io/"])
-    run_command(["docker", "pull", "quay.io/cilium/cilium:v{}".format(CILIUM_VERSION)])
+    run_command(["docker", "pull", IMAGE_NAME])
     run_command(
         [
             "kind",
             "load",
             "docker-image",
-            "quay.io/cilium/cilium:v{}".format(CILIUM_VERSION),
+            IMAGE_NAME,
             "--name",
-            "{}".format(CLUSTER_NAME),
+            CLUSTER_NAME,
         ]
     )
     run_command(["kubectl", "create", "ns", "cilium"])
@@ -58,7 +58,7 @@ def setup_cilium():
             "cilium",
             "cilium/cilium",
             "--version",
-            "{}".format(CILIUM_VERSION),
+            CILIUM_VERSION,
             "--namespace",
             "cilium",
             "--set",
