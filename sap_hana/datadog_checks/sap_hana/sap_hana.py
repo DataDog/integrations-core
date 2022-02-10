@@ -79,7 +79,7 @@ class SapHanaCheck(AgentCheck):
         self.check_initializations.append(self.parse_config)
         self.check_initializations.append(self.set_default_methods)
 
-    def check(self, instance):
+    def check(self, _):
 
         if self._only_custom_queries:
             query_methods = [self.query_custom]
