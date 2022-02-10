@@ -213,4 +213,5 @@ OPTIONAL_METRICS = {
     "cilium.policy.l7_forwarded.count",
     "cilium.policy.l7_parse_errors.count",
     "cilium.policy.l7_received.count",
+    "cilium.unreachable.health_endpoints",
 }
