@@ -37,8 +37,7 @@ CREATE PROCEDURE pyStoredProc
 GO
 GRANT EXECUTE on pyStoredProc to datadog;
 
-CREATE PROCEDURE exampleProcWithoutNocount
-AS
+CREATE PROCEDURE exampleProcWithoutNocount AS
 BEGIN
     CREATE TABLE #Hello
     (
@@ -47,6 +46,7 @@ BEGIN
     INSERT INTO #Hello VALUES (1)
     select * from #Hello;
 END;
+GO
 GRANT EXECUTE on exampleProcWithoutNocount to datadog;
 
 -- Create test database for integration tests.
