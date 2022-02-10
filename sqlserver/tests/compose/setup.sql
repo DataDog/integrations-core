@@ -54,6 +54,7 @@ BEGIN
 END;
 GO
 GRANT EXECUTE on pyStoredProc to datadog;
+GO
 
 CREATE PROCEDURE exampleProcWithoutNocount AS
 BEGIN
@@ -66,3 +67,4 @@ BEGIN
 END;
 GO
 GRANT EXECUTE on exampleProcWithoutNocount to datadog;
+GO

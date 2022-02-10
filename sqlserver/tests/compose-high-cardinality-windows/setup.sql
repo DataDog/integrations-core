@@ -36,6 +36,7 @@ CREATE PROCEDURE pyStoredProc
     END;
 GO
 GRANT EXECUTE on pyStoredProc to datadog;
+GO
 
 CREATE PROCEDURE exampleProcWithoutNocount AS
 BEGIN
@@ -48,6 +49,7 @@ BEGIN
 END;
 GO
 GRANT EXECUTE on exampleProcWithoutNocount to datadog;
+GO
 
 -- Create test database for integration tests.
 -- Only bob and fred have read/write access to this database.
