@@ -28,7 +28,7 @@ files:
         OpenMetrics-related options take effect only when this is set to `true`. 
         
         This check uses the latest OpenMetrics V2 implementation for more features and better performance.
-        Note: To see the configuration options for the legacy OpenMetrics implementation (Agent 7.33 or older),
+        Note: To see the configuration options for the OpenMetrics V1 implementation (Agent 7.33 or older),
         https://github.com/DataDog/integrations-core/blob/7.33.x/haproxy/datadog_checks/haproxy/data/conf.yaml.example
     - name: url
       enabled: true
