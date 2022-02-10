@@ -202,8 +202,8 @@ def add_style_formatter(config, sections, make_envconfig, reader):
         # Run formatter AFTER sorting imports
         'commands': '\n'.join(
             [
-                'isort .',
-                'black .',
+                'isort . --settings-path ../pyproject.toml ',
+                'black . --config ../pyproject.toml',
                 'python -c "print(\'\\n[NOTE] flake8 may still report style errors for things black cannot fix, '
                 'these will need to be fixed manually.\')"',
                 'flake8 --config=../.flake8 .',
