@@ -110,6 +110,9 @@ def prometheus_metrics():
 @pytest.fixture(scope='session')
 def prometheus_metricsv2(prometheus_metrics):
     metrics = []
+    # converts prometheus metric list from their v1 name to their v2 name
+    # also manually add .count to a specific count metric that doesn't follow
+    # the regular naming convention
     for metric in prometheus_metrics:
         metric = re.sub('total$', 'count', metric)
         if metric == "process.failed.resolutions":
