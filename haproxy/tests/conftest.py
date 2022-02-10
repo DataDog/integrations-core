@@ -4,8 +4,8 @@
 import getpass
 import logging
 import os
-import subprocess
 import re
+import subprocess
 from contextlib import contextmanager
 from copy import deepcopy
 
