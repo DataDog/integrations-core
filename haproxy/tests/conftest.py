@@ -108,8 +108,14 @@ def prometheus_metrics():
 
 @pytest.fixture(scope='session')
 def prometheus_metricsv2(prometheus_metrics):
-    metrics = [re.sub('total$', 'count', metric) for metric in prometheus_metrics]
-    metrics = [metric.replace('process.failed.resolutions', 'process.failed.resolutions.count') for metric in metrics]
+    metrics = []
+    for metric in prometheus_metrics:
+        metric = re.sub('total$', 'count', metric)
+        if metric == "process.failed.resolutions":
+            metric = metric + ".count"
+        metrics.append(metric)
+    # metrics = [re.sub('total$', 'count', metric) for metric in prometheus_metrics]
+    # metrics = [metric.replace('process.failed.resolutions', 'process.failed.resolutions.count') for metric in metrics]
     return metrics
 
 
