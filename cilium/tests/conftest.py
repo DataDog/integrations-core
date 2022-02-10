@@ -20,6 +20,9 @@ try:
 except ImportError:
     from contextlib2 import ExitStack
 
+from datadog_checks.dev.fs import path_join
+from datadog_checks.dev.fs import temp_dir as temp_directory
+
 from .common import CILIUM_LEGACY
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -29,6 +32,7 @@ OPERATOR_PORT = 6942
 AGENT_URL = "http://{}:{}/metrics".format(HOST, AGENT_PORT)
 OPERATOR_URL = "http://{}:{}/metrics".format(HOST, OPERATOR_PORT)
 
+IMAGE_NAME = "quay.io/cilium/cilium:v{}".format(CILIUM_VERSION)
 PORTS = [AGENT_PORT, OPERATOR_PORT]
 CLUSTER_NAME = 'cluster-{}-{}'.format('cilium', get_tox_env())
 
@@ -104,16 +108,26 @@ def get_instances(agent_host, agent_port, operator_host, operator_port, use_open
 def dd_environment():
     use_openmetrics = CILIUM_LEGACY == 'false'
     kind_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
-    with kind_run(conditions=[setup_cilium], kind_config=kind_config) as kubeconfig:
-        with ExitStack() as stack:
-            ip_ports = [
-                stack.enter_context(port_forward(kubeconfig, 'cilium', port, 'deployment', 'cilium-operator'))
-                for port in PORTS
-            ]
+    with temp_directory() as helm_cache:
+        with kind_run(
+            conditions=[setup_cilium],
+            kind_config=kind_config,
+            env_vars={
+                "HELM_CACHE_HOME": path_join(helm_cache, 'Caches'),
+                "HELM_CONFIG_HOME": path_join(helm_cache, 'Preferences'),
+            },
+        ) as kubeconfig:
+            with ExitStack() as stack:
+                ip_ports = [
+                    stack.enter_context(port_forward(kubeconfig, 'cilium', port, 'deployment', 'cilium-operator'))
+                    for port in PORTS
+                ]
 
-            instances = get_instances(ip_ports[0][0], ip_ports[0][1], ip_ports[1][0], ip_ports[1][1], use_openmetrics)
+                instances = get_instances(
+                    ip_ports[0][0], ip_ports[0][1], ip_ports[1][0], ip_ports[1][1], use_openmetrics
+                )
 
-        yield instances
+            yield instances
 
 
 @pytest.fixture(scope="session")
