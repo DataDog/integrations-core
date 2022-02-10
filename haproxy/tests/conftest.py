@@ -5,6 +5,7 @@ import getpass
 import logging
 import os
 import subprocess
+import re
 from contextlib import contextmanager
 from copy import deepcopy
 
@@ -102,6 +103,13 @@ def prometheus_metrics():
         metrics.pop('haproxy_backend_agg_server_check_status')
 
     metrics = list(metrics.values())
+    return metrics
+
+
+@pytest.fixture(scope='session')
+def prometheus_metricsv2(prometheus_metrics):
+    metrics = [re.sub('total$', 'count', metric) for metric in prometheus_metrics]
+    metrics = [metric.replace('process.failed.resolutions', 'process.failed.resolutions.count') for metric in metrics]
     return metrics
 
 
