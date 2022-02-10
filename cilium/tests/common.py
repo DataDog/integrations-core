@@ -205,6 +205,7 @@ ADDL_OPERATOR_METRICS = [
 OPTIONAL_METRICS = {
     "cilium.datapath.errors.count",
     "cilium.drop_bytes.count",
+    "cilium.drop_count.count",
     "cilium.endpoint.count",
     "cilium.identity.count",
     "cilium.policy.count",
