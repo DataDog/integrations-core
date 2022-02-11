@@ -40,24 +40,24 @@ To configure this check for an Agent running on a host:
 1. Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your HAProxy metrics. See the [sample haproxy.d/conf.yaml][27] for all available configuration options.
 
    ```yaml  
-      instances:
+   instances:
         
-      ## @param use_openmetrics - boolean - optional - default: false
-      ## Enable to preview the new version of the check which supports HAProxy version 2+
-      ## or environments using the HAProxy exporter.
-      ##
-      ## OpenMetrics-related options take effect only when this is set to `true`. 
-      ##
-      ## Uses the latest OpenMetrics V2 implementation for more features and better performance.
-      ## Note: To see the configuration options for the OpenMetrics V1 implementation (Agent 7.33 or older),
-      ## https://github.com/DataDog/integrations-core/blob/7.33.x/haproxy/datadog_checks/haproxy/data/conf.yaml.example
-      #
-      - use_openmetrics: true # Enables OpenMetrics V2
+     ## @param use_openmetrics - boolean - optional - default: false
+     ## Enable to preview the new version of the check which supports HAProxy version 2+
+     ## or environments using the HAProxy exporter.
+     ##
+     ## OpenMetrics-related options take effect only when this is set to `true`. 
+     ##
+     ## Uses the latest OpenMetrics V2 implementation for more features and better performance.
+     ## Note: To see the configuration options for the OpenMetrics V1 implementation (Agent 7.33 or older),
+     ## https://github.com/DataDog/integrations-core/blob/7.33.x/haproxy/datadog_checks/haproxy/data/conf.yaml.example
+     #
+   - use_openmetrics: true  # Enables OpenMetrics V2
         
-        ## @param openmetrics_endpoint - string - optional
-        ## The URL exposing metrics in the OpenMetrics format.
-        #
-        openmetrics_endpoint: http://localhost:<PORT>/metrics
+     ## @param openmetrics_endpoint - string - optional
+     ## The URL exposing metrics in the OpenMetrics format.
+     #
+     openmetrics_endpoint: http://localhost:<PORT>/metrics
    ```
 2. [Restart the Agent][6].
 
