@@ -12,9 +12,15 @@ Follow the instructions below to install and configure this check for an Agent r
 
 The Cilium check is included in the [Datadog Agent][3] package, but it requires additional setup steps to expose Prometheus metrics.
 
-1. In order to enable Prometheus metrics in both the `cilium-agent` and `cilium-operator`, deploy Cilium with the `global.prometheus.enabled=true` Helm value set, or:
-
-2. Separately enable Prometheus metrics:
+1. In order to enable Prometheus metrics in both the `cilium-agent` and `cilium-operator`, deploy Cilium with the following Helm values set according to your version of Cilium:
+   * Cilium < v1.8.x:
+     `global.prometheus.enabled=true`
+   * Cilium >= v1.8.x and < v1.9.x:
+     `global.prometheus.enabled=true` and `global.operatorPrometheus.enabled=true`
+   * Cilium >= 1.9.x:
+     `prometheus.enabled=true` and `operator.prometheus.enabled=true`
+   
+Or, separately enable Prometheus metrics in the Kubernetes manifests:
 
    - In the `cilium-agent` add `--prometheus-serve-addr=:9090` to the `args` section of the Cilium DaemonSet config:
 
@@ -26,17 +32,15 @@ The Cilium check is included in the [Datadog Agent][3] package, but it requires 
              - --prometheus-serve-addr=:9090
      ```
 
+   - In the `cilium-operator` add `--enable-metrics` to the `args` section of the Cilium deployment config:
 
-
-   - Or in the `cilium-operator` add `--enable-metrics` to the `args` section of the Cilium deployment config:
-
-     ```yaml
-     # [...]
-     spec:
-       containers:
-         - args:
-             - --enable-metrics
-     ```
+      ```yaml
+      # [...]
+      spec:
+        containers:
+          - args:
+              - --enable-metrics
+      ```
 
 ### Configuration
 

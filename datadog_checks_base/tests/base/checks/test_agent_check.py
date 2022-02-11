@@ -923,19 +923,19 @@ def test_load_configuration_models(dd_run_check, mocker):
     [
         pytest.param(
             {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            {},
+            [],
             None,
             id='empty default',
         ),
         pytest.param(
             {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            {'endpoint': 'url'},
+            [('endpoint', 'url')],
             None,
             id='no typo',
         ),
         pytest.param(
             {'endpoints': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            {'endpoint': 'url'},
+            [('endpoint', 'url')],
             [
                 (
                     'Detected potential typo in configuration option in test/instance section: `endpoints`. '
@@ -946,13 +946,13 @@ def test_load_configuration_models(dd_run_check, mocker):
         ),
         pytest.param(
             {'endpoints': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            {'endpoint': 'url', 'endpoints': 'url'},
+            [('endpoint', 'url'), ('endpoints', 'url')],
             None,
             id='no typo similar option',
         ),
         pytest.param(
             {'endpont': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            {'endpoint': 'url', 'endpoints': 'url'},
+            [('endpoint', 'url'), ('endpoints', 'url')],
             [
                 (
                     'Detected potential typo in configuration option in test/instance section: `endpont`. '
@@ -961,10 +961,10 @@ def test_load_configuration_models(dd_run_check, mocker):
             ],
             id='typo two candidates',
         ),
-        pytest.param({'tag': 'test'}, {'tags': 'test'}, None, id='short option cant catch'),
+        pytest.param({'tag': 'test'}, [('tags', 'test')], None, id='short option cant catch'),
         pytest.param(
             {'testing_long_para': 'test'},
-            {'testing_long_param': 'test', 'test_short_param': 'test'},
+            [('testing_long_param', 'test'), ('test_short_param', 'test')],
             [
                 (
                     'Detected potential typo in configuration option in test/instance section: `testing_long_para`. '
@@ -975,18 +975,18 @@ def test_load_configuration_models(dd_run_check, mocker):
         ),
         pytest.param(
             {'send_distribution_sums_as_monotonic': False, 'exclude_labels': True},
-            {'send_distribution_counts_as_monotonic': True, 'include_labels': True},
+            [('send_distribution_counts_as_monotonic', True), ('include_labels', True)],
             None,
             id='different options no typos',
         ),
         pytest.param(
             {'send_distribution_count_as_monotonic': True, 'exclude_label': True},
-            {
-                'send_distribution_sums_as_monotonic': False,
-                'send_distribution_counts_as_monotonic': True,
-                'exclude_labels': False,
-                'include_labels': True,
-            },
+            [
+                ('send_distribution_sums_as_monotonic', False),
+                ('send_distribution_counts_as_monotonic', True),
+                ('exclude_labels', False),
+                ('include_labels', True),
+            ],
             [
                 (
                     'Detected potential typo in configuration option in test/instance section: '
@@ -1007,10 +1007,13 @@ def test_detect_typos_configuration_models(
     caplog.clear()
     caplog.set_level(logging.WARNING)
     empty_config = {}
+    default_instance = mocker.MagicMock()
+    default_instance.__iter__ = mocker.MagicMock(return_value=iter(default_instance_config))
+
     check = AgentCheck('test', empty_config, [check_instance_config])
     check.check_id = 'test:123'
 
-    check.log_typos_in_options(check_instance_config, default_instance_config, 'instance')
+    check.log_typos_in_options(check_instance_config, default_instance, 'instance')
 
     if log_lines is not None:
         for log_line in log_lines:
