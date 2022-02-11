@@ -1,6 +1,6 @@
 {
-  "title": "WebLogic - Metrics (draft)",
-  "description": "## WebLogic - Metrics\n\n",
+  "title": "WebLogic - Metrics",
+  "description": "## WebLogic\n\nThis dashboard displays key throughput and activity metrics for your WebLogic infrastructure and helps you correlate WebLogic performance with infrastructure resources. For further reading on WebLogic:\n\n* Datadog's WebLogic integration docs\n* WebLogic docs\n* How to configure JMX converter in WebLogic\n* Information on Datadog's JMX configuration\n\nClone this template dashboard to make changes and add your own graph widgets.",
   "widgets": [
     {
       "id": 8422052567179120,
@@ -28,7 +28,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "avg:weblogic.threadpool_runtime.throughput{$weblogic_instance,$host}",
+                "query": "avg:weblogic.threadpool_runtime.throughput{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -75,7 +75,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "max:weblogic.threadpool_runtime.queue_length{$host,$weblogic_instance}",
+                "query": "max:weblogic.threadpool_runtime.queue_length{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -134,27 +134,27 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "avg:weblogic.threadpool_runtime.threads_stuck{$weblogic_instance,$host}",
+                "query": "avg:weblogic.threadpool_runtime.threads_stuck{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query1"
               },
               {
-                "query": "avg:weblogic.threadpool_runtime.threads_hogging{$weblogic_instance,$host}",
+                "query": "avg:weblogic.threadpool_runtime.threads_hogging{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query2"
               },
               {
-                "query": "avg:weblogic.threadpool_runtime.execute_threads_total{$weblogic_instance,$host}",
+                "query": "avg:weblogic.threadpool_runtime.execute_threads_total{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query3"
               },
               {
-                "query": "avg:weblogic.threadpool_runtime.threads_standby{$weblogic_instance,$host}",
+                "query": "avg:weblogic.threadpool_runtime.threads_standby{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query4"
               },
               {
-                "query": "avg:weblogic.threadpool_runtime.execute_threads_idle{$weblogic_instance,$host}",
+                "query": "avg:weblogic.threadpool_runtime.execute_threads_idle{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query5"
               }
@@ -210,22 +210,22 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "avg:weblogic.threadpool_runtime.user_requests_pending{$weblogic_instance,$host}",
+                "query": "avg:weblogic.threadpool_runtime.user_requests_pending{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query2"
               },
               {
-                "query": "avg:weblogic.threadpool_runtime.overload_rejected_requests{$weblogic_instance,$host}",
+                "query": "avg:weblogic.threadpool_runtime.overload_rejected_requests{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query3"
               },
               {
-                "query": "avg:weblogic.threadpool_runtime.shared_capacity_work_managers{$weblogic_instance,$host}",
+                "query": "avg:weblogic.threadpool_runtime.shared_capacity_work_managers{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query4"
               },
               {
-                "query": "avg:weblogic.threadpool_runtime.queue_length{$weblogic_instance,$host}",
+                "query": "avg:weblogic.threadpool_runtime.queue_length{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query5"
               }
@@ -272,7 +272,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "avg:weblogic.threadpool_runtime.completed_requests{$host,$weblogic_instance}.as_count()",
+                "query": "avg:weblogic.threadpool_runtime.completed_requests{$host,$wl_serverruntime,$wl_instance}.as_count()",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -319,7 +319,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "avg:weblogic.jvm_runtime.heap_free_percent{$host,$weblogic_instance}",
+                "query": "avg:weblogic.jvm_runtime.heap_free_percent{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -372,17 +372,17 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "avg:weblogic.jvm_runtime.heap_size{$weblogic_instance,$host}",
+                "query": "avg:weblogic.jvm_runtime.heap_size{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query1"
               },
               {
-                "query": "avg:weblogic.jvm_runtime.heap_free{$weblogic_instance,$host}",
+                "query": "avg:weblogic.jvm_runtime.heap_free{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query2"
               },
               {
-                "query": "avg:weblogic.jvm_runtime.heap_size_max{$weblogic_instance,$host}",
+                "query": "avg:weblogic.jvm_runtime.heap_size_max{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query3"
               }
@@ -429,7 +429,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "avg:weblogic.server.threadpool_socket_readers_percent{$host,$weblogic_instance}",
+                "query": "avg:weblogic.server.threadpool_socket_readers_percent{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -476,7 +476,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "avg:weblogic.work_manager_runtime.requests_completed{$host,$weblogic_instance}.as_count()",
+                "query": "avg:weblogic.work_manager_runtime.requests_completed{$host,$wl_serverruntime,$wl_instance}.as_count()",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -512,6 +512,7 @@
           "value",
           "sum"
         ],
+        "time": {},
         "type": "timeseries",
         "requests": [
           {
@@ -520,14 +521,14 @@
                 "formula": "query1"
               }
             ],
-            "response_format": "timeseries",
             "queries": [
               {
-                "query": "avg:weblogic.work_manager_runtime.requests_pending{$weblogic_instance,$host}",
+                "query": "avg:weblogic.work_manager_runtime.requests_pending{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query1"
               }
             ],
+            "response_format": "timeseries",
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -570,7 +571,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "avg:weblogic.work_manager_runtime.threads_stuck{$weblogic_instance,$host}",
+                "query": "avg:weblogic.work_manager_runtime.threads_stuck{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -620,12 +621,12 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "max:weblogic.server.max_open_sockets{$host,$weblogic_instance}",
+                "query": "max:weblogic.server.max_open_sockets{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query1"
               },
               {
-                "query": "avg:weblogic.server_runtime.open_sockets{$host,$weblogic_instance}",
+                "query": "avg:weblogic.server_runtime.open_sockets{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query2"
               }
@@ -672,7 +673,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "max:weblogic.servlet_runtime.pool_max_capacity{$host,$weblogic_instance}",
+                "query": "max:weblogic.servlet_runtime.pool_max_capacity{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -725,17 +726,17 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "min:weblogic.servlet_runtime.exec_time_low{$weblogic_instance,$host}",
+                "query": "min:weblogic.servlet_runtime.exec_time_low{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query1"
               },
               {
-                "query": "max:weblogic.servlet_runtime.exec_time_high{$weblogic_instance,$host}.as_count()",
+                "query": "max:weblogic.servlet_runtime.exec_time_high{$host,$wl_serverruntime,$wl_instance}.as_count()",
                 "data_source": "metrics",
                 "name": "query2"
               },
               {
-                "query": "max:weblogic.servlet_runtime.exec_time_total{$weblogic_instance,$host}.as_count()",
+                "query": "max:weblogic.servlet_runtime.exec_time_total{$host,$wl_serverruntime,$wl_instance}.as_count()",
                 "data_source": "metrics",
                 "name": "query3"
               }
@@ -782,7 +783,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "max:weblogic.servlet_runtime.reloads_total{$host,$weblogic_instance}",
+                "query": "max:weblogic.servlet_runtime.reloads_total{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -829,7 +830,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "avg:weblogic.webapp_component_runtime.sessions_current{$host,$weblogic_instance}",
+                "query": "avg:weblogic.webapp_component_runtime.sessions_current{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -876,7 +877,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "avg:weblogic.server_channel_runtime.sockets_accepted{$host,$weblogic_instance}.as_count()",
+                "query": "avg:weblogic.server_channel_runtime.sockets_accepted{$host,$wl_serverruntime,$wl_instance}.as_count()",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -926,12 +927,12 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "sum:weblogic.server_channel_runtime.messages_sent{$host,$weblogic_instance}.as_count()",
+                "query": "sum:weblogic.server_channel_runtime.messages_sent{$host,$wl_serverruntime,$wl_instance}.as_count()",
                 "data_source": "metrics",
                 "name": "query1"
               },
               {
-                "query": "sum:weblogic.server_channel_runtime.messages_received{$host,$weblogic_instance}.as_count()",
+                "query": "sum:weblogic.server_channel_runtime.messages_received{$host,$wl_serverruntime,$wl_instance}.as_count()",
                 "data_source": "metrics",
                 "name": "query2"
               }
@@ -981,12 +982,12 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "sum:weblogic.server_channel_runtime.bytes_sent{$host,$weblogic_instance}.as_count()",
+                "query": "sum:weblogic.server_channel_runtime.bytes_sent{$host,$wl_serverruntime,$wl_instance}.as_count()",
                 "data_source": "metrics",
                 "name": "query1"
               },
               {
-                "query": "sum:weblogic.server_channel_runtime.bytes_received{$host,$weblogic_instance}.as_count()",
+                "query": "sum:weblogic.server_channel_runtime.bytes_received{$host,$wl_serverruntime,$wl_instance}.as_count()",
                 "data_source": "metrics",
                 "name": "query2"
               }
@@ -1033,7 +1034,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "avg:weblogic.server_channel_runtime.connections_active{$host,$weblogic_instance}",
+                "query": "avg:weblogic.server_channel_runtime.connections_active{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -1080,7 +1081,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "avg:weblogic.jms_runtime.connections_current{$host,$weblogic_instance}",
+                "query": "avg:weblogic.jms_runtime.connections_current{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -1127,7 +1128,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "max:weblogic.jms_runtime.connections_total{$host,$weblogic_instance}.as_count()",
+                "query": "max:weblogic.jms_runtime.connections_total{$host,$wl_serverruntime,$wl_instance}.as_count()",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -1174,7 +1175,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "avg:weblogic.jms_runtime.jms_servers{$host,$weblogic_instance}",
+                "query": "avg:weblogic.jms_runtime.jms_servers{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -1221,7 +1222,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "avg:weblogic.jms_runtime.jms_servers_total{$host,$weblogic_instance}.as_count()",
+                "query": "avg:weblogic.jms_runtime.jms_servers_total{$host,$wl_serverruntime,$wl_instance}.as_count()",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -1271,12 +1272,12 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "avg:weblogic.connector_connection_pool_runtime.connections_active{$host,$weblogic_instance}",
+                "query": "avg:weblogic.connector_connection_pool_runtime.connections_active{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query1"
               },
               {
-                "query": "avg:weblogic.connector_connection_pool_runtime.connections_free{$host,$weblogic_instance}",
+                "query": "avg:weblogic.connector_connection_pool_runtime.connections_free{$host,$wl_serverruntime,$wl_instance}",
                 "data_source": "metrics",
                 "name": "query2"
               }
@@ -1323,7 +1324,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "sum:weblogic.connector_connection_pool_runtime.connections_created_total{$host,$weblogic_instance}.as_count()",
+                "query": "sum:weblogic.connector_connection_pool_runtime.connections_created_total{$host,$wl_serverruntime,$wl_instance}.as_count()",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -1347,15 +1348,21 @@
   ],
   "template_variables": [
     {
-      "name": "weblogic_instance",
+      "name": "host",
+      "default": "*",
+      "prefix": "host",
+      "available_values": []
+    },
+    {
+      "name": "wl_instance",
       "default": "*",
       "prefix": "instance",
       "available_values": []
     },
     {
-      "name": "host",
+      "name": "wl_serverruntime",
       "default": "*",
-      "prefix": "host",
+      "prefix": "serverruntime",
       "available_values": []
     }
   ],
