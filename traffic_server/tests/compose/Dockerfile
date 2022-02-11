@@ -17,7 +17,7 @@ RUN set -x \
         libncurses5-dev \
         ca-certificates \
  && mkdir /opt/ats \
- && curl -L https://dlcdn.apache.org/trafficserver/trafficserver-9.1.1.tar.bz2 | tar xjv --strip-components 1  \
+ && curl -L https://dlcdn.apache.org/trafficserver/trafficserver-{TRAFFIC_SERVER_VERSION}.tar.bz2 | tar xjv --strip-components 1  \
  && ./configure  --prefix=/opt/ats \
  && make  \
  && make install

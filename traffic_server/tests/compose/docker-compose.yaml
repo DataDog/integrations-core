@@ -4,6 +4,8 @@ services:
   trafficserver:
     build:
       context: .
+      args:
+        - TRAFFIC_SERVER_VERSION=${TRAFFIC_SERVER_VERSION}
     container_name: dd-test-trafficserver
     tty: true
     entrypoint: ["/opt/ats/bin/traffic_server"]

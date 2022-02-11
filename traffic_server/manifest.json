@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "traffic_server",
   "metric_prefix": "traffic_server.",
-  "metric_to_check": "",
+  "metric_to_check": "traffic_server.node.restarts.proxy.restart_count",
   "creates_events": false,
   "short_description": "",
   "guid": "c3fa3678-1166-4973-b340-b9120561e67b",
@@ -12,11 +12,13 @@
   "supported_os": [
     "linux",
     "mac_os",
-    "windows"
+    "windows",
+    "caching"
   ],
   "public_title": "Traffic Server",
   "categories": [
-    ""
+    "web",
+    "log collection"
   ],
   "type": "check",
   "is_public": false,

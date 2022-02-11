@@ -7,7 +7,7 @@ from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
 from datadog_checks.base import AgentCheck
 
-from .metrics import COUNT_METRICS, GAUGE_METRICS
+from .metrics import COUNT_METRICS, GAUGE_METRICS, VERSION_METRIC_NAME
 
 
 class TrafficServerCheck(AgentCheck):
@@ -42,6 +42,7 @@ class TrafficServerCheck(AgentCheck):
 
     def send_metrics(self, response_json):
         global_metrics = response_json.get("global")
+
         for metric_name, metric_value in global_metrics.items():
             if metric_name in COUNT_METRICS:
                 normalized_name = COUNT_METRICS[metric_name]
@@ -50,3 +51,16 @@ class TrafficServerCheck(AgentCheck):
             elif metric_name in GAUGE_METRICS:
                 normalized_name = GAUGE_METRICS[metric_name]
                 self.gauge(normalized_name, metric_value, tags=self.tags)
+
+        server_version = global_metrics.get(VERSION_METRIC_NAME, None)
+        self._submit_version_metadata(server_version)
+
+    @AgentCheck.metadata_entrypoint
+    def _submit_version_metadata(self, version):
+        if version:
+            try:
+                self.set_metadata('version', version)
+            except Exception as e:
+                self.log.debug("Could not parse version: %s", str(e))
+        else:
+            self.log.debug("Could not submit version metadata, got: %s", version)
