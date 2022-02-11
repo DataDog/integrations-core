@@ -1,7 +1,6 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-# from collections import ChainMap
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 

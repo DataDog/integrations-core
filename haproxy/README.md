@@ -355,6 +355,6 @@ Need help? Contact [Datadog support][20].
 [22]: https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics
 [23]: https://www.datadoghq.com/blog/monitor-haproxy-with-datadog
 [24]: https://docs.datadoghq.com/integrations/faq/haproxy-multi-process/
-[25]: https://github.com/DataDog/integrations-core/blob/7.33.x/haproxy/datadog_checks/haproxy/data/conf.yaml.example
+[25]: https://github.com/DataDog/integrations-core/blob/7.34.x/haproxy/datadog_checks/haproxy/data/conf.yaml.example
 [26]: https://datadoghq.dev/integrations-core/base/openmetrics/
 [27]: https://github.com/DataDog/integrations-core/blob/master/haproxy/datadog_checks/haproxy/data/conf.yaml.example
