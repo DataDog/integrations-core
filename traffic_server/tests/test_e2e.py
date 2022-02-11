@@ -17,9 +17,7 @@ def test_e2e(dd_agent_check, instance, aggregator):
 
     aggregator.assert_service_check('traffic_server.can_connect', TrafficServerCheck.OK)
     for metric_name in EXPECTED_COUNT_METRICS:
-        aggregator.assert_metric(
-            metric_name, count=1, tags=traffic_server_tags, metric_type=AggregatorStub.COUNT
-        )
+        aggregator.assert_metric(metric_name, count=1, tags=traffic_server_tags, metric_type=AggregatorStub.COUNT)
 
     for metric_name in EXPECTED_GAUGE_METRICS:
         aggregator.assert_metric(metric_name, count=2, tags=traffic_server_tags, metric_type=AggregatorStub.GAUGE)

@@ -35,6 +35,26 @@ def test_check(aggregator, instance, dd_run_check):
     # aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
+def test_check_cant_reach_url(aggregator, instance_bad_url, dd_run_check):
+    # type: (AggregatorStub, Callable[[AgentCheck, bool], None], Dict[str, Any]) -> None
+
+    check = TrafficServerCheck('traffic_server', {}, [instance_bad_url])
+
+    with pytest.raises(Exception):
+        dd_run_check(check)
+
+    for metric_name in EXPECTED_COUNT_METRICS + EXPECTED_GAUGE_METRICS:
+        aggregator.assert_metric(metric_name, count=0)
+
+    aggregator.assert_service_check('traffic_server.can_connect', TrafficServerCheck.CRITICAL)
+
+
+def test_invalid_config(instance_no_url):
+
+    with pytest.raises(Exception, match='traffic_server_url'):
+        TrafficServerCheck('traffic_server', {}, [instance_no_url])
+
+
 def test_version_metadata(instance, dd_run_check, datadog_agent):
     check = TrafficServerCheck('traffic_server', {}, [instance])
     check.check_id = 'test:123'

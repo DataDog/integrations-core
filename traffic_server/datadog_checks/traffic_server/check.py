@@ -5,7 +5,7 @@ from typing import Any
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 
 from .metrics import COUNT_METRICS, GAUGE_METRICS, VERSION_METRIC_NAME
 
@@ -20,6 +20,9 @@ class TrafficServerCheck(AgentCheck):
         self.traffic_server_url = self.instance.get("traffic_server_url")
         self.tags = self.instance.get("tags", [])
 
+        if self.traffic_server_url is None:
+            raise ConfigurationError('Must specify a traffic_server_url')
+
     def check(self, _):
         # type: (Any) -> None
 
@@ -27,7 +30,7 @@ class TrafficServerCheck(AgentCheck):
             response = self.http.get(self.traffic_server_url)
             response.raise_for_status()
             response_json = response.json()
-            self.send_metrics(response_json)
+            self.collect_metrics(response_json)
 
         except (HTTPError, Timeout, InvalidURL, ConnectionError) as e:
             self.service_check(
@@ -40,7 +43,7 @@ class TrafficServerCheck(AgentCheck):
 
         self.service_check("can_connect", AgentCheck.OK)
 
-    def send_metrics(self, response_json):
+    def collect_metrics(self, response_json):
         global_metrics = response_json.get("global")
 
         for metric_name, metric_value in global_metrics.items():

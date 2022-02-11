@@ -12,6 +12,8 @@ TRAFFIC_SERVER_VERSION = os.environ['TRAFFIC_SERVER_VERSION']
 TRAFFIC_SERVER_URL = 'http://{}:8080/_stats'.format(HOST)
 
 INSTANCE = {'traffic_server_url': TRAFFIC_SERVER_URL, 'tags': ['optional:tag1']}
+INSTANCE_NO_URL = {'traffic_server_ur': TRAFFIC_SERVER_URL, 'tags': ['optional:tag1']}
+INSTANCE_BAD_URL = {'traffic_server_url': '{}s'.format(TRAFFIC_SERVER_URL), 'tags': ['optional:tag1']}
 
 # metrics that are not available in the e2e environment
 NON_E2E_METRICS = [
