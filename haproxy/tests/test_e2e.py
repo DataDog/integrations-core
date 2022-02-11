@@ -7,7 +7,7 @@ from six import PY2
 from datadog_checks.base import is_affirmative
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import HAPROXY_LEGACY, requires_new_environment
+from .common import HAPROXY_LEGACY, requires_new_environment, ENDPOINT_PROMETHEUS
 
 pytestmark = [requires_new_environment, pytest.mark.e2e]
 
@@ -38,6 +38,7 @@ def test_checkv2(dd_agent_check, instancev2, prometheus_metricsv2):
 
     for metric in prometheus_metricsv2:
         aggregator.assert_metric('haproxy.{}'.format(metric))
+        aggregator.assert_metric_has_tag('haproxy.{}'.format(metric), tag="endpoint:" + ENDPOINT_PROMETHEUS)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
