@@ -8,7 +8,8 @@ services:
         - TRAFFIC_SERVER_VERSION=${TRAFFIC_SERVER_VERSION}
     container_name: dd-test-trafficserver
     tty: true
-    entrypoint: ["/opt/ats/bin/traffic_server"]
+    entrypoint: ["/opt/ats/bin/traffic_manager"]
+    command: ['--nosyslog', '--maxRecords', '3000']
     volumes:
      - ./plugin.config:/opt/ats/etc/trafficserver/plugin.config
      #- ./logging.yaml:/opt/ats/etc/trafficserver/logging.yaml

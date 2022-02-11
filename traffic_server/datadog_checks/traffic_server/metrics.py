@@ -33,7 +33,9 @@ COUNT_METRICS = {
     "proxy.process.http.total_parent_retries_exhausted": "process.http.total_parent_retries_exhausted",
     "proxy.process.http.total_parent_marked_down_count": "process.http.total_parent_marked_down_count",
     "proxy.process.http.background_fill_total_count": "process.http.background_fill_total_count",
-    "proxy.process.http.transaction_counts.errors.pre_accept_hangups": "process.http.transaction_counts.errors.pre_accept_hangups",  # noqa
+    "proxy.process.http.transaction_counts.errors.pre_accept_hangups": (
+        "process.http.transaction_counts.errors.pre_accept_hangups"
+    ),
     "proxy.process.http.incoming_requests": "process.http.incoming_requests",
     "proxy.process.http.outgoing_requests": "process.http.outgoing_requests",
     "proxy.process.http.incoming_responses": "process.http.incoming_responses",
@@ -60,11 +62,21 @@ COUNT_METRICS = {
     "proxy.process.http.user_agent_request_header_total_size": "process.http.user_agent_request_header_total_size",
     "proxy.process.http.user_agent_response_header_total_size": "process.http.user_agent_response_header_total_size",
     "proxy.process.http.user_agent_request_document_total_size": "process.http.user_agent_request_document_total_size",
-    "proxy.process.http.user_agent_response_document_total_size": "process.http.user_agent_response_document_total_size",  # noqa
-    "proxy.process.http.origin_server_request_header_total_size": "process.http.origin_server_request_header_total_size",  # noqa
-    "proxy.process.http.origin_server_response_header_total_size": "process.http.origin_server_response_header_total_size",  # noqa
-    "proxy.process.http.origin_server_request_document_total_size": "process.http.origin_server_request_document_total_size",  # noqa
-    "proxy.process.http.origin_server_response_document_total_size": "process.http.origin_server_response_document_total_size",  # noqa
+    "proxy.process.http.user_agent_response_document_total_size": (
+        "process.http.user_agent_response_document_total_size"
+    ),
+    "proxy.process.http.origin_server_request_header_total_size": (
+        "process.http.origin_server_request_header_total_size"
+    ),
+    "proxy.process.http.origin_server_response_header_total_size": (
+        "process.http.origin_server_response_header_total_size"
+    ),
+    "proxy.process.http.origin_server_request_document_total_size": (
+        "process.http.origin_server_request_document_total_size"
+    ),
+    "proxy.process.http.origin_server_response_document_total_size": (
+        "process.http.origin_server_response_document_total_size"
+    ),
     "proxy.process.http.parent_proxy_request_total_bytes": "process.http.parent_proxy_request_total_bytes",
     "proxy.process.http.parent_proxy_response_total_bytes": "process.http.parent_proxy_response_total_bytes",
     "proxy.process.http.pushed_response_header_total_size": "process.http.pushed_response_header_total_size",
@@ -126,27 +138,45 @@ COUNT_METRICS = {
     "proxy.process.http.transaction_counts.hit_fresh": "process.http.transaction_counts.hit_fresh",
     "proxy.process.http.transaction_totaltime.hit_fresh": "process.http.transaction_totaltime.hit_fresh",
     "proxy.process.http.transaction_counts.hit_fresh.process": "process.http.transaction_counts.hit_fresh.process",
-    "proxy.process.http.transaction_totaltime.hit_fresh.process": "process.http.transaction_totaltime.hit_fresh.process",  # noqa
+    "proxy.process.http.transaction_totaltime.hit_fresh.process": (
+        "process.http.transaction_totaltime.hit_fresh.process"
+    ),
     "proxy.process.http.transaction_counts.hit_revalidated": "process.http.transaction_counts.hit_revalidated",
     "proxy.process.http.transaction_totaltime.hit_revalidated": "process.http.transaction_totaltime.hit_revalidated",
     "proxy.process.http.transaction_counts.miss_cold": "process.http.transaction_counts.miss_cold",
     "proxy.process.http.transaction_totaltime.miss_cold": "process.http.transaction_totaltime.miss_cold",
     "proxy.process.http.transaction_counts.miss_not_cacheable": "process.http.transaction_counts.miss_not_cacheable",
-    "proxy.process.http.transaction_totaltime.miss_not_cacheable": "process.http.transaction_totaltime.miss_not_cacheable",  # noqa
+    "proxy.process.http.transaction_totaltime.miss_not_cacheable": (
+        "process.http.transaction_totaltime.miss_not_cacheable"
+    ),
     "proxy.process.http.transaction_counts.miss_changed": "process.http.transaction_counts.miss_changed",
     "proxy.process.http.transaction_totaltime.miss_changed": "process.http.transaction_totaltime.miss_changed",
-    "proxy.process.http.transaction_counts.miss_client_no_cache": "process.http.transaction_counts.miss_client_no_cache",  # noqa
-    "proxy.process.http.transaction_totaltime.miss_client_no_cache": "process.http.transaction_totaltime.miss_client_no_cache",  # noqa
+    "proxy.process.http.transaction_counts.miss_client_no_cache": (
+        "process.http.transaction_counts.miss_client_no_cache"
+    ),
+    "proxy.process.http.transaction_totaltime.miss_client_no_cache": (
+        "process.http.transaction_totaltime.miss_client_no_cache"
+    ),
     "proxy.process.http.transaction_counts.errors.aborts": "process.http.transaction_counts.errors.aborts",
     "proxy.process.http.transaction_totaltime.errors.aborts": "process.http.transaction_totaltime.errors.aborts",
-    "proxy.process.http.transaction_counts.errors.possible_aborts": "process.http.transaction_counts.errors.possible_aborts",  # noqa
-    "proxy.process.http.transaction_totaltime.errors.possible_aborts": "process.http.transaction_totaltime.errors.possible_aborts",  # noqa
-    "proxy.process.http.transaction_counts.errors.connect_failed": "process.http.transaction_counts.errors.connect_failed",  # noqa
-    "proxy.process.http.transaction_totaltime.errors.connect_failed": "process.http.transaction_totaltime.errors.connect_failed",  # noqa
+    "proxy.process.http.transaction_counts.errors.possible_aborts": (
+        "process.http.transaction_counts.errors.possible_aborts"
+    ),
+    "proxy.process.http.transaction_totaltime.errors.possible_aborts": (
+        "process.http.transaction_totaltime.errors.possible_aborts"
+    ),
+    "proxy.process.http.transaction_counts.errors.connect_failed": (
+        "process.http.transaction_counts.errors.connect_failed"
+    ),
+    "proxy.process.http.transaction_totaltime.errors.connect_failed": (
+        "process.http.transaction_totaltime.errors.connect_failed"
+    ),
     "proxy.process.http.transaction_counts.errors.other": "process.http.transaction_counts.errors.other",
     "proxy.process.http.transaction_totaltime.errors.other": "process.http.transaction_totaltime.errors.other",
     "proxy.process.http.transaction_counts.other.unclassified": "process.http.transaction_counts.other.unclassified",
-    "proxy.process.http.transaction_totaltime.other.unclassified": "process.http.transaction_totaltime.other.unclassified",  # noqa
+    "proxy.process.http.transaction_totaltime.other.unclassified": (
+        "process.http.transaction_totaltime.other.unclassified"
+    ),
     "proxy.process.http.disallowed_post_100_continue": "process.http.disallowed_post_100_continue",
     "proxy.process.http.total_x_redirect_count": "process.http.total_x_redirect_count",
     "proxy.process.https.incoming_requests": "process.https.incoming_requests",
@@ -216,9 +246,13 @@ COUNT_METRICS = {
     "proxy.process.http2.session_die_high_error_rate": "process.http2.session_die_high_error_rate",
     "proxy.process.http2.max_settings_per_frame_exceeded": "process.http2.max_settings_per_frame_exceeded",
     "proxy.process.http2.max_settings_per_minute_exceeded": "process.http2.max_settings_per_minute_exceeded",
-    "proxy.process.http2.max_settings_frames_per_minute_exceeded": "process.http2.max_settings_frames_per_minute_exceeded",  # noqa
+    "proxy.process.http2.max_settings_frames_per_minute_exceeded": (
+        "process.http2.max_settings_frames_per_minute_exceeded"
+    ),
     "proxy.process.http2.max_ping_frames_per_minute_exceeded": "process.http2.max_ping_frames_per_minute_exceeded",
-    "proxy.process.http2.max_priority_frames_per_minute_exceeded": "process.http2.max_priority_frames_per_minute_exceeded",  # noqa
+    "proxy.process.http2.max_priority_frames_per_minute_exceeded": (
+        "process.http2.max_priority_frames_per_minute_exceeded"
+    ),
     "proxy.process.http2.insufficient_avg_window_update": "process.http2.insufficient_avg_window_update",
     "proxy.process.log.event_log_error_ok": "process.log.event_log_error_ok",
     "proxy.process.log.event_log_error_skip": "process.log.event_log_error_skip",
@@ -294,17 +328,25 @@ COUNT_METRICS = {
     "proxy.process.http.origin_shutdown.pool_lock_contention": "process.http.origin_shutdown.pool_lock_contention",
     "proxy.process.http.origin_shutdown.migration_failure": "process.http.origin_shutdown.migration_failure",
     "proxy.process.http.origin_shutdown.tunnel_server": "process.http.origin_shutdown.tunnel_server",
-    "proxy.process.http.origin_shutdown.tunnel_server_no_keep_alive": "process.http.origin_shutdown.tunnel_server_no_keep_alive",  # noqa
+    "proxy.process.http.origin_shutdown.tunnel_server_no_keep_alive": (
+        "process.http.origin_shutdown.tunnel_server_no_keep_alive"
+    ),
     "proxy.process.http.origin_shutdown.tunnel_server_eos": "process.http.origin_shutdown.tunnel_server_eos",
-    "proxy.process.http.origin_shutdown.tunnel_server_plugin_tunnel": "process.http.origin_shutdown.tunnel_server_plugin_tunnel",  # noqa
+    "proxy.process.http.origin_shutdown.tunnel_server_plugin_tunnel": (
+        "process.http.origin_shutdown.tunnel_server_plugin_tunnel"
+    ),
     "proxy.process.http.origin_shutdown.tunnel_server_detach": "process.http.origin_shutdown.tunnel_server_detach",
     "proxy.process.http.origin_shutdown.tunnel_client": "process.http.origin_shutdown.tunnel_client",
     "proxy.process.http.origin_shutdown.tunnel_transform_read": "process.http.origin_shutdown.tunnel_transform_read",
     "proxy.process.http.origin_shutdown.release_no_sharing": "process.http.origin_shutdown.release_no_sharing",
     "proxy.process.http.origin_shutdown.release_no_server": "process.http.origin_shutdown.release_no_server",
     "proxy.process.http.origin_shutdown.release_no_keep_alive": "process.http.origin_shutdown.release_no_keep_alive",
-    "proxy.process.http.origin_shutdown.release_invalid_response": "process.http.origin_shutdown.release_invalid_response",  # noqa
-    "proxy.process.http.origin_shutdown.release_invalid_request": "process.http.origin_shutdown.release_invalid_request",  # noqa
+    "proxy.process.http.origin_shutdown.release_invalid_response": (
+        "process.http.origin_shutdown.release_invalid_response"
+    ),
+    "proxy.process.http.origin_shutdown.release_invalid_request": (
+        "process.http.origin_shutdown.release_invalid_request"
+    ),
     "proxy.process.http.origin_shutdown.release_modified": "process.http.origin_shutdown.release_modified",
     "proxy.process.http.origin_shutdown.release_misc": "process.http.origin_shutdown.release_misc",
     "proxy.process.http.origin_shutdown.cleanup_entry": "process.http.origin_shutdown.cleanup_entry",
@@ -378,17 +420,27 @@ GAUGE_METRICS = {
     "proxy.process.http.tcp_refresh_miss_user_agent_bytes_stat": "process.http.tcp.refresh_miss_user_agent_bytes",
     "proxy.process.http.tcp_refresh_miss_origin_server_bytes_stat": "process.http.tcp.refresh_miss_origin_server_bytes",
     "proxy.process.http.tcp_client_refresh_user_agent_bytes_stat": "process.http.tcp.client_refresh_user_agent_bytes",
-    "proxy.process.http.tcp_client_refresh_origin_server_bytes_stat": "process.http.tcp.client_refresh_origin_server_bytes",  # noqa
+    "proxy.process.http.tcp_client_refresh_origin_server_bytes_stat": (
+        "process.http.tcp.client_refresh_origin_server_bytes"
+    ),
     "proxy.process.http.tcp_ims_hit_user_agent_bytes_stat": "process.http.tcp.ims_hit_user_agent_bytes",
     "proxy.process.http.tcp_ims_hit_origin_server_bytes_stat": "process.http.tcp.ims_hit_origin_server_bytes",
     "proxy.process.http.tcp_ims_miss_user_agent_bytes_stat": "process.http.tcp.ims_miss_user_agent_bytes",
     "proxy.process.http.tcp_ims_miss_origin_server_bytes_stat": "process.http.tcp.ims_miss_origin_server_bytes",
     "proxy.process.http.err_client_abort_user_agent_bytes_stat": "process.http.error.client_abort_user_agent_bytes",
-    "proxy.process.http.err_client_abort_origin_server_bytes_stat": "process.http.error.client_abort_origin_server_bytes",  # noqa
-    "proxy.process.http.err_client_read_error_user_agent_bytes_stat": "process.http.error.client_read_error_user_agent_bytes",  # noqa
-    "proxy.process.http.err_client_read_error_origin_server_bytes_stat": "process.http.error.client_read_error_origin_server_bytes",  # noqa
+    "proxy.process.http.err_client_abort_origin_server_bytes_stat": (
+        "process.http.error.client_abort_origin_server_bytes"
+    ),
+    "proxy.process.http.err_client_read_error_user_agent_bytes_stat": (
+        "process.http.error.client_read_error_user_agent_bytes"
+    ),
+    "proxy.process.http.err_client_read_error_origin_server_bytes_stat": (
+        "process.http.error.client_read_error_origin_server_bytes"
+    ),
     "proxy.process.http.err_connect_fail_user_agent_bytes_stat": "process.http.error.connect_fail_user_agent_bytes",
-    "proxy.process.http.err_connect_fail_origin_server_bytes_stat": "process.http.error.connect_fail_origin_server_bytes",  # noqa
+    "proxy.process.http.err_connect_fail_origin_server_bytes_stat": (
+        "process.http.error.connect_fail_origin_server_bytes"
+    ),
     "proxy.process.http.misc_user_agent_bytes_stat": "process.http.misc_user_agent_bytes",
     "proxy.process.http.http_misc_origin_server_bytes_stat": "process.http.http_misc_origin_server_bytes",
     "proxy.process.http.background_fill_bytes_aborted_stat": "process.http.background_fill_bytes_aborted",
@@ -415,7 +467,9 @@ GAUGE_METRICS = {
     "proxy.process.http.background_fill_current_count": "process.http.background_fill_current_count",
     "proxy.process.http.current_client_connections": "process.http.current_client_connections",
     "proxy.process.http.current_active_client_connections": "process.http.current_active_client_connections",
-    "proxy.process.http.websocket.current_active_client_connections": "process.http.websocket.current_active_client_connections",  # noqa
+    "proxy.process.http.websocket.current_active_client_connections": (
+        "process.http.websocket.current_active_client_connections"
+    ),
     "proxy.process.http.current_client_transactions": "process.http.current_client_transactions",
     "proxy.process.http.current_server_transactions": "process.http.current_server_transactions",
     "proxy.process.http.current_parent_proxy_connections": "process.http.current_parent_proxy_connections",  # TODO
