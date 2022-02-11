@@ -332,3 +332,683 @@ cilium_operator_process_virtual_memory_bytes 1.6633856e+08
 # HELP cilium_operator_process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
 # TYPE cilium_operator_process_virtual_memory_max_bytes gauge
 cilium_operator_process_virtual_memory_max_bytes -1
+# HELP cilium_operator_ces_queueing_delay_seconds CiliumEndpointSlice queueing delay in seconds
+# TYPE cilium_operator_ces_queueing_delay_seconds histogram
+cilium_operator_ces_queueing_delay_seconds_bucket{le="0.005"} 0
+cilium_operator_ces_queueing_delay_seconds_bucket{le="0.01"} 0
+cilium_operator_ces_queueing_delay_seconds_bucket{le="0.025"} 0
+cilium_operator_ces_queueing_delay_seconds_bucket{le="0.05"} 0
+cilium_operator_ces_queueing_delay_seconds_bucket{le="0.1"} 0
+cilium_operator_ces_queueing_delay_seconds_bucket{le="0.25"} 0
+cilium_operator_ces_queueing_delay_seconds_bucket{le="0.5"} 0
+cilium_operator_ces_queueing_delay_seconds_bucket{le="1"} 0
+cilium_operator_ces_queueing_delay_seconds_bucket{le="2.5"} 0
+cilium_operator_ces_queueing_delay_seconds_bucket{le="5"} 0
+cilium_operator_ces_queueing_delay_seconds_bucket{le="10"} 0
+cilium_operator_ces_queueing_delay_seconds_bucket{le="+Inf"} 0
+cilium_operator_ces_queueing_delay_seconds_sum 0
+cilium_operator_ces_queueing_delay_seconds_count 0
+# HELP cilium_operator_ces_sync_errors_total Number of CES sync errors
+# TYPE cilium_operator_ces_sync_errors_total counter
+cilium_operator_ces_sync_errors_total 0
+# HELP cilium_operator_ec2_api_duration_seconds Duration of interactions with API
+# TYPE cilium_operator_ec2_api_duration_seconds histogram
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="0.005"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="0.01"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="0.025"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="0.05"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="0.1"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="0.25"} 2895
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="0.5"} 4283
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="1"} 4320
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="2.5"} 4321
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="5"} 4323
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="10"} 4323
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="+Inf"} 4323
+cilium_operator_ec2_api_duration_seconds_sum{operation="DescribeNetworkInterfaces",response_code="OK"} 965.2359009080029
+cilium_operator_ec2_api_duration_seconds_count{operation="DescribeNetworkInterfaces",response_code="OK"} 4323
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="0.005"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="0.01"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="0.025"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="0.05"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="0.1"} 1736
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="0.25"} 4195
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="0.5"} 4323
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="1"} 4323
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="2.5"} 4323
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="5"} 4323
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="10"} 4323
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="+Inf"} 4323
+cilium_operator_ec2_api_duration_seconds_sum{operation="DescribeSecurityGroups",response_code="OK"} 514.7893023810003
+cilium_operator_ec2_api_duration_seconds_count{operation="DescribeSecurityGroups",response_code="OK"} 4323
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="0.005"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="0.01"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="0.025"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="0.05"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="0.1"} 3058
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="0.25"} 4268
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="0.5"} 4321
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="1"} 4323
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="2.5"} 4323
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="5"} 4323
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="10"} 4323
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="+Inf"} 4323
+cilium_operator_ec2_api_duration_seconds_sum{operation="DescribeSubnets",response_code="OK"} 436.3221029820002
+cilium_operator_ec2_api_duration_seconds_count{operation="DescribeSubnets",response_code="OK"} 4323
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="503 Service Unavailable",le="0.005"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="503 Service Unavailable",le="0.01"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="503 Service Unavailable",le="0.025"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="503 Service Unavailable",le="0.05"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="503 Service Unavailable",le="0.1"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="503 Service Unavailable",le="0.25"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="503 Service Unavailable",le="0.5"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="503 Service Unavailable",le="1"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="503 Service Unavailable",le="2.5"} 1
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="503 Service Unavailable",le="5"} 1
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="503 Service Unavailable",le="10"} 1
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="503 Service Unavailable",le="+Inf"} 1
+cilium_operator_ec2_api_duration_seconds_sum{operation="DescribeVpcs",response_code="503 Service Unavailable"} 1.62250825
+cilium_operator_ec2_api_duration_seconds_count{operation="DescribeVpcs",response_code="503 Service Unavailable"} 1
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="0.005"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="0.01"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="0.025"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="0.05"} 648
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="0.1"} 3908
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="0.25"} 4276
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="0.5"} 4319
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="1"} 4322
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="2.5"} 4323
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="5"} 4323
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="10"} 4323
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="+Inf"} 4323
+cilium_operator_ec2_api_duration_seconds_sum{operation="DescribeVpcs",response_code="OK"} 306.05907443099994
+cilium_operator_ec2_api_duration_seconds_count{operation="DescribeVpcs",response_code="OK"} 4323
+# HELP cilium_operator_identity_gc_entries The number of alive and deleted identities at the end of a garbage collector run
+# TYPE cilium_operator_identity_gc_entries gauge
+cilium_operator_identity_gc_entries{status="alive"} 1
+cilium_operator_identity_gc_entries{status="deleted"} 0
+# HELP cilium_operator_identity_gc_runs The number of times identity garbage collector has run
+# TYPE cilium_operator_identity_gc_runs gauge
+cilium_operator_identity_gc_runs{outcome="success"} 291
+# HELP cilium_operator_ipam_available Number of interfaces with addresses available
+# TYPE cilium_operator_ipam_available gauge
+cilium_operator_ipam_available 0
+# HELP cilium_operator_ipam_available_ips_per_subnet Number of available IPs per subnet ID
+# TYPE cilium_operator_ipam_available_ips_per_subnet gauge
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 8176
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 8187
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 247
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 8176
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 8187
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 250
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 247
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 250
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 251
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 16360
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 250
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 4088
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 8167
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 251
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 250
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 248
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 247
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 251
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 250
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 8187
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 65529
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 248
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 16377
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 8187
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 8185
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 8166
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 4088
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 249
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 8186
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 250
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 250
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-0fde931a7793de82c"} 250
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-461bbf0f"} 4080
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-513d5a1a"} 16367
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2a",subnet_id="subnet-85d84ecd"} 251
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 16366
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 8179
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 248
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 65529
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 4088
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 8186
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 250
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 251
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 251
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 249
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 4088
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 250
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 8187
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 250
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 8187
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 8175
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 8186
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 16371
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-58d35e3f"} 4078
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-a78af0de"} 16377
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2c",subnet_id="subnet-0fde931a7793de82c"} 8187
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2c",subnet_id="subnet-0fde931a7793de82c"} 250
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2c",subnet_id="subnet-0fde931a7793de82c"} 8187
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2c",subnet_id="subnet-0fde931a7793de82c"} 8167
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2c",subnet_id="subnet-05a5a15d"} 4069
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2c",subnet_id="subnet-0fde931a7793de82c"} 251
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2c",subnet_id="subnet-0fde931a7793de82c"} 8187
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2c",subnet_id="subnet-0fde931a7793de82c"} 8187
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2c",subnet_id="subnet-0fde931a7793de82c"} 4088
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2c",subnet_id="subnet-0fde931a7793de82c"} 4088
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2c",subnet_id="subnet-0fde931a7793de82c"} 8185
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2c",subnet_id="subnet-0fde931a7793de82c"} 8177
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2c",subnet_id="subnet-0fde931a7793de82c"} 8187
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2c",subnet_id="subnet-c5abfc9f"} 16377
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2d",subnet_id="subnet-0fde931a7793de82c"} 250
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2d",subnet_id="subnet-0fde931a7793de82c"} 8187
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2d",subnet_id="subnet-0fde931a7793de82c"} 8186
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2d",subnet_id="subnet-0fde931a7793de82c"} 8187
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2d",subnet_id="subnet-0fde931a7793de82c"} 8186
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2d",subnet_id="subnet-0fde931a7793de82c"} 8167
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2d",subnet_id="subnet-0fde931a7793de82c"} 8174
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2d",subnet_id="subnet-0fde931a7793de82c"} 8186
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2d",subnet_id="subnet-0fde931a7793de82c"} 8186
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2d",subnet_id="subnet-0fde931a7793de82c"} 8186
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2d",subnet_id="subnet-0fde931a7793de82c"} 8187
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2d",subnet_id="subnet-0fde931a7793de82c"} 4089
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2d",subnet_id="subnet-0fde931a7793de82c"} 4090
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2d",subnet_id="subnet-0fde931a7793de82c"} 8186
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2d",subnet_id="subnet-0fde931a7793de82c"} 4089
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2d",subnet_id="subnet-0fde931a7793de82c"} 8187
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2d",subnet_id="subnet-19e8f831"} 4089
+# HELP cilium_operator_ipam_deficit_resolver_duration_seconds Duration of trigger runs
+# TYPE cilium_operator_ipam_deficit_resolver_duration_seconds histogram
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="0.005"} 0
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="0.01"} 0
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="0.025"} 0
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="0.05"} 0
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="0.1"} 0
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="0.25"} 0
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="0.5"} 0
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="1"} 0
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="2.5"} 0
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="5"} 0
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="10"} 0
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="+Inf"} 0
+cilium_operator_ipam_deficit_resolver_duration_seconds_sum 0
+cilium_operator_ipam_deficit_resolver_duration_seconds_count 0
+# HELP cilium_operator_ipam_deficit_resolver_folds Current level of folding
+# TYPE cilium_operator_ipam_deficit_resolver_folds gauge
+cilium_operator_ipam_deficit_resolver_folds 0
+# HELP cilium_operator_ipam_deficit_resolver_latency_seconds Latency between queue and trigger run
+# TYPE cilium_operator_ipam_deficit_resolver_latency_seconds histogram
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="0.005"} 0
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="0.01"} 0
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="0.025"} 0
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="0.05"} 0
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="0.1"} 0
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="0.25"} 0
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="0.5"} 0
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="1"} 0
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="2.5"} 0
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="5"} 0
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="10"} 0
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="+Inf"} 0
+cilium_operator_ipam_deficit_resolver_latency_seconds_sum 0
+cilium_operator_ipam_deficit_resolver_latency_seconds_count 0
+# HELP cilium_operator_ipam_deficit_resolver_queued_total Number of queued triggers
+# TYPE cilium_operator_ipam_deficit_resolver_queued_total counter
+cilium_operator_ipam_deficit_resolver_queued_total 0
+# HELP cilium_operator_ipam_ips Number of IPs allocated
+# TYPE cilium_operator_ipam_ips gauge
+cilium_operator_ipam_ips{type="available"} 22
+cilium_operator_ipam_ips{type="needed"} 0
+cilium_operator_ipam_ips{type="used"} 6
+# HELP cilium_operator_ipam_k8s_sync_duration_seconds Duration of trigger runs
+# TYPE cilium_operator_ipam_k8s_sync_duration_seconds histogram
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="0.005"} 8644
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="0.01"} 8644
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="0.025"} 8644
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="0.05"} 8644
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="0.1"} 8644
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="0.25"} 8644
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="0.5"} 8644
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="1"} 8644
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="2.5"} 8644
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="5"} 8644
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="10"} 8644
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="+Inf"} 8644
+cilium_operator_ipam_k8s_sync_duration_seconds_sum 0.5832334910000012
+cilium_operator_ipam_k8s_sync_duration_seconds_count 8644
+# HELP cilium_operator_ipam_k8s_sync_folds Current level of folding
+# TYPE cilium_operator_ipam_k8s_sync_folds gauge
+cilium_operator_ipam_k8s_sync_folds 1
+# HELP cilium_operator_ipam_k8s_sync_latency_seconds Latency between queue and trigger run
+# TYPE cilium_operator_ipam_k8s_sync_latency_seconds histogram
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="0.005"} 8642
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="0.01"} 8642
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="0.025"} 8644
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="0.05"} 8644
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="0.1"} 8644
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="0.25"} 8644
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="0.5"} 8644
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="1"} 8644
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="2.5"} 8644
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="5"} 8644
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="10"} 8644
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="+Inf"} 8644
+cilium_operator_ipam_k8s_sync_latency_seconds_sum 0.8266700699999961
+cilium_operator_ipam_k8s_sync_latency_seconds_count 8644
+# HELP cilium_operator_ipam_k8s_sync_queued_total Number of queued triggers
+# TYPE cilium_operator_ipam_k8s_sync_queued_total counter
+cilium_operator_ipam_k8s_sync_queued_total 8644
+# HELP cilium_operator_ipam_nodes Number of nodes by category { total | in-deficit | at-capacity }
+# TYPE cilium_operator_ipam_nodes gauge
+cilium_operator_ipam_nodes{category="at-capacity"} 0
+cilium_operator_ipam_nodes{category="in-deficit"} 0
+cilium_operator_ipam_nodes{category="total"} 2
+# HELP cilium_operator_ipam_resync_duration_seconds Duration of trigger runs
+# TYPE cilium_operator_ipam_resync_duration_seconds histogram
+cilium_operator_ipam_resync_duration_seconds_bucket{le="0.005"} 0
+cilium_operator_ipam_resync_duration_seconds_bucket{le="0.01"} 0
+cilium_operator_ipam_resync_duration_seconds_bucket{le="0.025"} 0
+cilium_operator_ipam_resync_duration_seconds_bucket{le="0.05"} 0
+cilium_operator_ipam_resync_duration_seconds_bucket{le="0.1"} 0
+cilium_operator_ipam_resync_duration_seconds_bucket{le="0.25"} 0
+cilium_operator_ipam_resync_duration_seconds_bucket{le="0.5"} 0
+cilium_operator_ipam_resync_duration_seconds_bucket{le="1"} 0
+cilium_operator_ipam_resync_duration_seconds_bucket{le="2.5"} 0
+cilium_operator_ipam_resync_duration_seconds_bucket{le="5"} 0
+cilium_operator_ipam_resync_duration_seconds_bucket{le="10"} 0
+cilium_operator_ipam_resync_duration_seconds_bucket{le="+Inf"} 0
+cilium_operator_ipam_resync_duration_seconds_sum 0
+cilium_operator_ipam_resync_duration_seconds_count 0
+# HELP cilium_operator_ipam_resync_folds Current level of folding
+# TYPE cilium_operator_ipam_resync_folds gauge
+cilium_operator_ipam_resync_folds 0
+# HELP cilium_operator_ipam_resync_latency_seconds Latency between queue and trigger run
+# TYPE cilium_operator_ipam_resync_latency_seconds histogram
+cilium_operator_ipam_resync_latency_seconds_bucket{le="0.005"} 0
+cilium_operator_ipam_resync_latency_seconds_bucket{le="0.01"} 0
+cilium_operator_ipam_resync_latency_seconds_bucket{le="0.025"} 0
+cilium_operator_ipam_resync_latency_seconds_bucket{le="0.05"} 0
+cilium_operator_ipam_resync_latency_seconds_bucket{le="0.1"} 0
+cilium_operator_ipam_resync_latency_seconds_bucket{le="0.25"} 0
+cilium_operator_ipam_resync_latency_seconds_bucket{le="0.5"} 0
+cilium_operator_ipam_resync_latency_seconds_bucket{le="1"} 0
+cilium_operator_ipam_resync_latency_seconds_bucket{le="2.5"} 0
+cilium_operator_ipam_resync_latency_seconds_bucket{le="5"} 0
+cilium_operator_ipam_resync_latency_seconds_bucket{le="10"} 0
+cilium_operator_ipam_resync_latency_seconds_bucket{le="+Inf"} 0
+cilium_operator_ipam_resync_latency_seconds_sum 0
+cilium_operator_ipam_resync_latency_seconds_count 0
+# HELP cilium_operator_ipam_resync_queued_total Number of queued triggers
+# TYPE cilium_operator_ipam_resync_queued_total counter
+cilium_operator_ipam_resync_queued_total 0
+# HELP cilium_operator_ipam_resync_total Number of resync operations to synchronize and resolve IP deficit of nodes
+# TYPE cilium_operator_ipam_resync_total counter
+cilium_operator_ipam_resync_total 4322
+# HELP cilium_operator_number_of_ceps_per_ces The number of CEPs batched in a CES
+# TYPE cilium_operator_number_of_ceps_per_ces histogram
+cilium_operator_number_of_ceps_per_ces_bucket{le="0.005"} 0
+cilium_operator_number_of_ceps_per_ces_bucket{le="0.01"} 0
+cilium_operator_number_of_ceps_per_ces_bucket{le="0.025"} 0
+cilium_operator_number_of_ceps_per_ces_bucket{le="0.05"} 0
+cilium_operator_number_of_ceps_per_ces_bucket{le="0.1"} 0
+cilium_operator_number_of_ceps_per_ces_bucket{le="0.25"} 0
+cilium_operator_number_of_ceps_per_ces_bucket{le="0.5"} 0
+cilium_operator_number_of_ceps_per_ces_bucket{le="1"} 0
+cilium_operator_number_of_ceps_per_ces_bucket{le="2.5"} 0
+cilium_operator_number_of_ceps_per_ces_bucket{le="5"} 0
+cilium_operator_number_of_ceps_per_ces_bucket{le="10"} 0
+cilium_operator_number_of_ceps_per_ces_bucket{le="+Inf"} 0
+cilium_operator_number_of_ceps_per_ces_sum 0
+cilium_operator_number_of_ceps_per_ces_count 0
+# HELP cilium_operator_ec2_api_duration_seconds Duration of interactions with API
+# TYPE cilium_operator_ec2_api_duration_seconds histogram
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="400 Bad Request",le="0.005"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="400 Bad Request",le="0.01"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="400 Bad Request",le="0.025"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="400 Bad Request",le="0.05"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="400 Bad Request",le="0.1"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="400 Bad Request",le="0.25"} 1
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="400 Bad Request",le="0.5"} 1
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="400 Bad Request",le="1"} 1
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="400 Bad Request",le="2.5"} 1
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="400 Bad Request",le="5"} 1
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="400 Bad Request",le="10"} 1
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="400 Bad Request",le="+Inf"} 1
+cilium_operator_ec2_api_duration_seconds_sum{operation="AssignPrivateIpAddresses",response_code="400 Bad Request"} 0.23135696
+cilium_operator_ec2_api_duration_seconds_count{operation="AssignPrivateIpAddresses",response_code="400 Bad Request"} 1
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="OK",le="0.005"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="OK",le="0.01"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="OK",le="0.025"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="OK",le="0.05"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="OK",le="0.1"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="OK",le="0.25"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="OK",le="0.5"} 27
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="OK",le="1"} 31
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="OK",le="2.5"} 31
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="OK",le="5"} 31
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="OK",le="10"} 31
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AssignPrivateIpAddresses",response_code="OK",le="+Inf"} 31
+cilium_operator_ec2_api_duration_seconds_sum{operation="AssignPrivateIpAddresses",response_code="OK"} 12.696850304000002
+cilium_operator_ec2_api_duration_seconds_count{operation="AssignPrivateIpAddresses",response_code="OK"} 31
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AttachNetworkInterface",response_code="OK",le="0.005"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AttachNetworkInterface",response_code="OK",le="0.01"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AttachNetworkInterface",response_code="OK",le="0.025"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AttachNetworkInterface",response_code="OK",le="0.05"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AttachNetworkInterface",response_code="OK",le="0.1"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AttachNetworkInterface",response_code="OK",le="0.25"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AttachNetworkInterface",response_code="OK",le="0.5"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AttachNetworkInterface",response_code="OK",le="1"} 6
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AttachNetworkInterface",response_code="OK",le="2.5"} 6
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AttachNetworkInterface",response_code="OK",le="5"} 6
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AttachNetworkInterface",response_code="OK",le="10"} 6
+cilium_operator_ec2_api_duration_seconds_bucket{operation="AttachNetworkInterface",response_code="OK",le="+Inf"} 6
+cilium_operator_ec2_api_duration_seconds_sum{operation="AttachNetworkInterface",response_code="OK"} 4.438756557
+cilium_operator_ec2_api_duration_seconds_count{operation="AttachNetworkInterface",response_code="OK"} 6
+cilium_operator_ec2_api_duration_seconds_bucket{operation="CreateNetworkInterface",response_code="OK",le="0.005"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="CreateNetworkInterface",response_code="OK",le="0.01"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="CreateNetworkInterface",response_code="OK",le="0.025"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="CreateNetworkInterface",response_code="OK",le="0.05"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="CreateNetworkInterface",response_code="OK",le="0.1"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="CreateNetworkInterface",response_code="OK",le="0.25"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="CreateNetworkInterface",response_code="OK",le="0.5"} 6
+cilium_operator_ec2_api_duration_seconds_bucket{operation="CreateNetworkInterface",response_code="OK",le="1"} 6
+cilium_operator_ec2_api_duration_seconds_bucket{operation="CreateNetworkInterface",response_code="OK",le="2.5"} 6
+cilium_operator_ec2_api_duration_seconds_bucket{operation="CreateNetworkInterface",response_code="OK",le="5"} 6
+cilium_operator_ec2_api_duration_seconds_bucket{operation="CreateNetworkInterface",response_code="OK",le="10"} 6
+cilium_operator_ec2_api_duration_seconds_bucket{operation="CreateNetworkInterface",response_code="OK",le="+Inf"} 6
+cilium_operator_ec2_api_duration_seconds_sum{operation="CreateNetworkInterface",response_code="OK"} 2.150708164
+cilium_operator_ec2_api_duration_seconds_count{operation="CreateNetworkInterface",response_code="OK"} 6
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeInstanceTypes",response_code="OK",le="0.005"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeInstanceTypes",response_code="OK",le="0.01"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeInstanceTypes",response_code="OK",le="0.025"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeInstanceTypes",response_code="OK",le="0.05"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeInstanceTypes",response_code="OK",le="0.1"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeInstanceTypes",response_code="OK",le="0.25"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeInstanceTypes",response_code="OK",le="0.5"} 1
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeInstanceTypes",response_code="OK",le="1"} 2
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeInstanceTypes",response_code="OK",le="2.5"} 3
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeInstanceTypes",response_code="OK",le="5"} 3
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeInstanceTypes",response_code="OK",le="10"} 3
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeInstanceTypes",response_code="OK",le="+Inf"} 3
+cilium_operator_ec2_api_duration_seconds_sum{operation="DescribeInstanceTypes",response_code="OK"} 3.101410602
+cilium_operator_ec2_api_duration_seconds_count{operation="DescribeInstanceTypes",response_code="OK"} 3
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="0.005"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="0.01"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="0.025"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="0.05"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="0.1"} 53
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="0.25"} 165
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="0.5"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="1"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="2.5"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="5"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="10"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeNetworkInterfaces",response_code="OK",le="+Inf"} 187
+cilium_operator_ec2_api_duration_seconds_sum{operation="DescribeNetworkInterfaces",response_code="OK"} 28.074180134999985
+cilium_operator_ec2_api_duration_seconds_count{operation="DescribeNetworkInterfaces",response_code="OK"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="0.005"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="0.01"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="0.025"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="0.05"} 62
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="0.1"} 147
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="0.25"} 183
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="0.5"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="1"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="2.5"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="5"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="10"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSecurityGroups",response_code="OK",le="+Inf"} 187
+cilium_operator_ec2_api_duration_seconds_sum{operation="DescribeSecurityGroups",response_code="OK"} 15.041272080000004
+cilium_operator_ec2_api_duration_seconds_count{operation="DescribeSecurityGroups",response_code="OK"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="0.005"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="0.01"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="0.025"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="0.05"} 50
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="0.1"} 165
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="0.25"} 186
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="0.5"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="1"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="2.5"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="5"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="10"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeSubnets",response_code="OK",le="+Inf"} 187
+cilium_operator_ec2_api_duration_seconds_sum{operation="DescribeSubnets",response_code="OK"} 13.831217826
+cilium_operator_ec2_api_duration_seconds_count{operation="DescribeSubnets",response_code="OK"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="0.005"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="0.01"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="0.025"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="0.05"} 36
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="0.1"} 174
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="0.25"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="0.5"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="1"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="2.5"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="5"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="10"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="DescribeVpcs",response_code="OK",le="+Inf"} 187
+cilium_operator_ec2_api_duration_seconds_sum{operation="DescribeVpcs",response_code="OK"} 12.977870312
+cilium_operator_ec2_api_duration_seconds_count{operation="DescribeVpcs",response_code="OK"} 187
+cilium_operator_ec2_api_duration_seconds_bucket{operation="ModifyNetworkInterface",response_code="OK",le="0.005"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="ModifyNetworkInterface",response_code="OK",le="0.01"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="ModifyNetworkInterface",response_code="OK",le="0.025"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="ModifyNetworkInterface",response_code="OK",le="0.05"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="ModifyNetworkInterface",response_code="OK",le="0.1"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="ModifyNetworkInterface",response_code="OK",le="0.25"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="ModifyNetworkInterface",response_code="OK",le="0.5"} 6
+cilium_operator_ec2_api_duration_seconds_bucket{operation="ModifyNetworkInterface",response_code="OK",le="1"} 6
+cilium_operator_ec2_api_duration_seconds_bucket{operation="ModifyNetworkInterface",response_code="OK",le="2.5"} 6
+cilium_operator_ec2_api_duration_seconds_bucket{operation="ModifyNetworkInterface",response_code="OK",le="5"} 6
+cilium_operator_ec2_api_duration_seconds_bucket{operation="ModifyNetworkInterface",response_code="OK",le="10"} 6
+cilium_operator_ec2_api_duration_seconds_bucket{operation="ModifyNetworkInterface",response_code="OK",le="+Inf"} 6
+cilium_operator_ec2_api_duration_seconds_sum{operation="ModifyNetworkInterface",response_code="OK"} 2.041397425
+cilium_operator_ec2_api_duration_seconds_count{operation="ModifyNetworkInterface",response_code="OK"} 6
+cilium_operator_ec2_api_duration_seconds_bucket{operation="UnassignPrivateIpAddresses",response_code="OK",le="0.005"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="UnassignPrivateIpAddresses",response_code="OK",le="0.01"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="UnassignPrivateIpAddresses",response_code="OK",le="0.025"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="UnassignPrivateIpAddresses",response_code="OK",le="0.05"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="UnassignPrivateIpAddresses",response_code="OK",le="0.1"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="UnassignPrivateIpAddresses",response_code="OK",le="0.25"} 0
+cilium_operator_ec2_api_duration_seconds_bucket{operation="UnassignPrivateIpAddresses",response_code="OK",le="0.5"} 10
+cilium_operator_ec2_api_duration_seconds_bucket{operation="UnassignPrivateIpAddresses",response_code="OK",le="1"} 11
+cilium_operator_ec2_api_duration_seconds_bucket{operation="UnassignPrivateIpAddresses",response_code="OK",le="2.5"} 11
+cilium_operator_ec2_api_duration_seconds_bucket{operation="UnassignPrivateIpAddresses",response_code="OK",le="5"} 11
+cilium_operator_ec2_api_duration_seconds_bucket{operation="UnassignPrivateIpAddresses",response_code="OK",le="10"} 11
+cilium_operator_ec2_api_duration_seconds_bucket{operation="UnassignPrivateIpAddresses",response_code="OK",le="+Inf"} 11
+cilium_operator_ec2_api_duration_seconds_sum{operation="UnassignPrivateIpAddresses",response_code="OK"} 4.651491499
+cilium_operator_ec2_api_duration_seconds_count{operation="UnassignPrivateIpAddresses",response_code="OK"} 11
+# HELP cilium_operator_ipam_allocation_ops Number of IP allocation operations
+# TYPE cilium_operator_ipam_allocation_ops counter
+cilium_operator_ipam_allocation_ops{subnet_id=""} 8
+cilium_operator_ipam_allocation_ops{subnet_id="subnet-0fde931a7793de82c"} 25
+cilium_operator_ipam_allocation_ops{subnet_id="subnet-0fde931a7793de82c"} 45
+cilium_operator_ipam_allocation_ops{subnet_id="subnet-0fde931a7793de82c"} 33
+# HELP cilium_operator_ipam_available Number of interfaces with addresses available
+# TYPE cilium_operator_ipam_available gauge
+cilium_operator_ipam_available 8
+# HELP cilium_operator_ipam_available_ips_per_subnet Number of available IPs per subnet ID
+# TYPE cilium_operator_ipam_available_ips_per_subnet gauge
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 4089
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 2043
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 4090
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 8162
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 8165
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 2043
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 2043
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 8162
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 4090
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 4090
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 4089
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 8171
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 2043
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 8170
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 8162
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 4090
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 2042
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2b",subnet_id="subnet-0fde931a7793de82c"} 2043
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2c",subnet_id="subnet-0fde931a7793de82c"} 4089
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2c",subnet_id="subnet-0fde931a7793de82c"} 8171
+cilium_operator_ipam_available_ips_per_subnet{availability_zone="us-west-2c",subnet_id="subnet-0fde931a7793de82c"} 2043
+# HELP cilium_operator_ipam_deficit_resolver_duration_seconds Duration of trigger runs
+# TYPE cilium_operator_ipam_deficit_resolver_duration_seconds histogram
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="0.005"} 1
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="0.01"} 1
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="0.025"} 1
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="0.05"} 1
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="0.1"} 1
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="0.25"} 1
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="0.5"} 37
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="1"} 43
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="2.5"} 49
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="5"} 49
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="10"} 49
+cilium_operator_ipam_deficit_resolver_duration_seconds_bucket{le="+Inf"} 49
+cilium_operator_ipam_deficit_resolver_duration_seconds_sum 26.325254403
+cilium_operator_ipam_deficit_resolver_duration_seconds_count 49
+# HELP cilium_operator_ipam_deficit_resolver_folds Current level of folding
+# TYPE cilium_operator_ipam_deficit_resolver_folds gauge
+cilium_operator_ipam_deficit_resolver_folds 1
+# HELP cilium_operator_ipam_deficit_resolver_latency_seconds Latency between queue and trigger run
+# TYPE cilium_operator_ipam_deficit_resolver_latency_seconds histogram
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="0.005"} 48
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="0.01"} 48
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="0.025"} 48
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="0.05"} 48
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="0.1"} 49
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="0.25"} 49
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="0.5"} 49
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="1"} 49
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="2.5"} 49
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="5"} 49
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="10"} 49
+cilium_operator_ipam_deficit_resolver_latency_seconds_bucket{le="+Inf"} 49
+cilium_operator_ipam_deficit_resolver_latency_seconds_sum 0.096260007
+cilium_operator_ipam_deficit_resolver_latency_seconds_count 49
+# HELP cilium_operator_ipam_deficit_resolver_queued_total Number of queued triggers
+# TYPE cilium_operator_ipam_deficit_resolver_queued_total counter
+cilium_operator_ipam_deficit_resolver_queued_total 49
+# HELP cilium_operator_ipam_interface_creation_ops Number of interfaces allocated
+# TYPE cilium_operator_ipam_interface_creation_ops counter
+cilium_operator_ipam_interface_creation_ops{status="ip assignment failed",subnet_id="subnet-0fde931a7793de82c"} 1
+cilium_operator_ipam_interface_creation_ops{status="success",subnet_id=""} 5
+cilium_operator_ipam_interface_creation_ops{status="success",subnet_id="subnet-0fde931a7793de82c"} 8
+cilium_operator_ipam_interface_creation_ops{status="success",subnet_id="subnet-0fde931a7793de82c"} 14
+cilium_operator_ipam_interface_creation_ops{status="success",subnet_id="subnet-0fde931a7793de82c"} 10
+# HELP cilium_operator_ipam_ips Number of IPs allocated
+# TYPE cilium_operator_ipam_ips gauge
+cilium_operator_ipam_ips{type="available"} 24
+cilium_operator_ipam_ips{type="needed"} 0
+cilium_operator_ipam_ips{type="used"} 26
+# HELP cilium_operator_ipam_k8s_sync_duration_seconds Duration of trigger runs
+# TYPE cilium_operator_ipam_k8s_sync_duration_seconds histogram
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="0.005"} 406
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="0.01"} 406
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="0.025"} 408
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="0.05"} 421
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="0.1"} 436
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="0.25"} 455
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="0.5"} 459
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="1"} 459
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="2.5"} 459
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="5"} 459
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="10"} 459
+cilium_operator_ipam_k8s_sync_duration_seconds_bucket{le="+Inf"} 459
+cilium_operator_ipam_k8s_sync_duration_seconds_sum 5.935880092000001
+cilium_operator_ipam_k8s_sync_duration_seconds_count 459
+# HELP cilium_operator_ipam_k8s_sync_folds Current level of folding
+# TYPE cilium_operator_ipam_k8s_sync_folds gauge
+cilium_operator_ipam_k8s_sync_folds 1
+# HELP cilium_operator_ipam_k8s_sync_latency_seconds Latency between queue and trigger run
+# TYPE cilium_operator_ipam_k8s_sync_latency_seconds histogram
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="0.005"} 450
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="0.01"} 450
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="0.025"} 451
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="0.05"} 451
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="0.1"} 459
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="0.25"} 459
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="0.5"} 459
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="1"} 459
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="2.5"} 459
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="5"} 459
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="10"} 459
+cilium_operator_ipam_k8s_sync_latency_seconds_bucket{le="+Inf"} 459
+cilium_operator_ipam_k8s_sync_latency_seconds_sum 0.7804985829999991
+cilium_operator_ipam_k8s_sync_latency_seconds_count 459
+# HELP cilium_operator_ipam_k8s_sync_queued_total Number of queued triggers
+# TYPE cilium_operator_ipam_k8s_sync_queued_total counter
+cilium_operator_ipam_k8s_sync_queued_total 459
+# HELP cilium_operator_ipam_nodes Number of nodes by category { total | in-deficit | at-capacity }
+# TYPE cilium_operator_ipam_nodes gauge
+cilium_operator_ipam_nodes{category="at-capacity"} 0
+cilium_operator_ipam_nodes{category="in-deficit"} 0
+cilium_operator_ipam_nodes{category="total"} 3
+# HELP cilium_operator_ipam_release_ops Number of IP release operations
+# TYPE cilium_operator_ipam_release_ops counter
+cilium_operator_ipam_release_ops{subnet_id="subnet-0fde931a7793de82c"} 3
+cilium_operator_ipam_release_ops{subnet_id="subnet-0fde931a7793de82c"} 13
+cilium_operator_ipam_release_ops{subnet_id="subnet-0fde931a7793de82c"} 11
+# HELP cilium_operator_ipam_resync_duration_seconds Duration of trigger runs
+# TYPE cilium_operator_ipam_resync_duration_seconds histogram
+cilium_operator_ipam_resync_duration_seconds_bucket{le="0.005"} 0
+cilium_operator_ipam_resync_duration_seconds_bucket{le="0.01"} 0
+cilium_operator_ipam_resync_duration_seconds_bucket{le="0.025"} 0
+cilium_operator_ipam_resync_duration_seconds_bucket{le="0.05"} 0
+cilium_operator_ipam_resync_duration_seconds_bucket{le="0.1"} 0
+cilium_operator_ipam_resync_duration_seconds_bucket{le="0.25"} 0
+cilium_operator_ipam_resync_duration_seconds_bucket{le="0.5"} 30
+cilium_operator_ipam_resync_duration_seconds_bucket{le="1"} 47
+cilium_operator_ipam_resync_duration_seconds_bucket{le="2.5"} 47
+cilium_operator_ipam_resync_duration_seconds_bucket{le="5"} 47
+cilium_operator_ipam_resync_duration_seconds_bucket{le="10"} 47
+cilium_operator_ipam_resync_duration_seconds_bucket{le="+Inf"} 47
+cilium_operator_ipam_resync_duration_seconds_sum 22.617617665999997
+cilium_operator_ipam_resync_duration_seconds_count 47
+# HELP cilium_operator_ipam_resync_folds Current level of folding
+# TYPE cilium_operator_ipam_resync_folds gauge
+cilium_operator_ipam_resync_folds 1
+# HELP cilium_operator_ipam_resync_latency_seconds Latency between queue and trigger run
+# TYPE cilium_operator_ipam_resync_latency_seconds histogram
+cilium_operator_ipam_resync_latency_seconds_bucket{le="0.005"} 42
+cilium_operator_ipam_resync_latency_seconds_bucket{le="0.01"} 42
+cilium_operator_ipam_resync_latency_seconds_bucket{le="0.025"} 42
+cilium_operator_ipam_resync_latency_seconds_bucket{le="0.05"} 42
+cilium_operator_ipam_resync_latency_seconds_bucket{le="0.1"} 42
+cilium_operator_ipam_resync_latency_seconds_bucket{le="0.25"} 43
+cilium_operator_ipam_resync_latency_seconds_bucket{le="0.5"} 46
+cilium_operator_ipam_resync_latency_seconds_bucket{le="1"} 47
+cilium_operator_ipam_resync_latency_seconds_bucket{le="2.5"} 47
+cilium_operator_ipam_resync_latency_seconds_bucket{le="5"} 47
+cilium_operator_ipam_resync_latency_seconds_bucket{le="10"} 47
+cilium_operator_ipam_resync_latency_seconds_bucket{le="+Inf"} 47
+cilium_operator_ipam_resync_latency_seconds_sum 1.7370706419999995
+cilium_operator_ipam_resync_latency_seconds_count 47
+# HELP cilium_operator_ipam_resync_queued_total Number of queued triggers
+# TYPE cilium_operator_ipam_resync_queued_total counter
+cilium_operator_ipam_resync_queued_total 49
+# HELP cilium_operator_ipam_resync_total Number of resync operations to synchronize and resolve IP deficit of nodes
+# TYPE cilium_operator_ipam_resync_total counter
+cilium_operator_ipam_resync_total 186
+# HELP cilium_operator_process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE cilium_operator_process_cpu_seconds_total counter
+cilium_operator_process_cpu_seconds_total 23.03
+# HELP cilium_operator_process_max_fds Maximum number of open file descriptors.
+# TYPE cilium_operator_process_max_fds gauge
+cilium_operator_process_max_fds 1.048576e+06
+# HELP cilium_operator_process_open_fds Number of open file descriptors.
+# TYPE cilium_operator_process_open_fds gauge
+cilium_operator_process_open_fds 17
+# HELP cilium_operator_process_resident_memory_bytes Resident memory size in bytes.
+# TYPE cilium_operator_process_resident_memory_bytes gauge
+cilium_operator_process_resident_memory_bytes 7.624704e+07
+# HELP cilium_operator_process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE cilium_operator_process_start_time_seconds gauge
+cilium_operator_process_start_time_seconds 1.632397815e+09
+# HELP cilium_operator_process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE cilium_operator_process_virtual_memory_bytes gauge
+cilium_operator_process_virtual_memory_bytes 7.91793664e+08
+# HELP cilium_operator_process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
+# TYPE cilium_operator_process_virtual_memory_max_bytes gauge
+cilium_operator_process_virtual_memory_max_bytes -1
