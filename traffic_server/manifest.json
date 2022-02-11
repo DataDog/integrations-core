@@ -14,6 +14,9 @@
     "mac_os",
     "windows"
   ],
+  "process_signatures": [
+    "traffic_server", "traffic_manager", "trafficserver"
+  ],
   "public_title": "Traffic Server",
   "categories": [
     "web",

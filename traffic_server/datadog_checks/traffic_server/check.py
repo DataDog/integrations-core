@@ -41,7 +41,7 @@ class TrafficServerCheck(AgentCheck):
             )
             raise
 
-        self.service_check("can_connect", AgentCheck.OK)
+        self.service_check("can_connect", AgentCheck.OK, tags=self.tags)
 
     def collect_metrics(self, response_json):
         global_metrics = response_json.get("global")
