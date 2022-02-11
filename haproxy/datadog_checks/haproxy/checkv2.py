@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 # from collections import ChainMap
 
-from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
+from datadog_checks.base import OpenMetricsBaseCheckV2
 
 from .metrics import METRIC_MAP, construct_metrics_config
 
