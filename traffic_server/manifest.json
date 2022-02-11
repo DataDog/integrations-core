@@ -12,13 +12,13 @@
   "supported_os": [
     "linux",
     "mac_os",
-    "windows",
-    "caching"
+    "windows"
   ],
   "public_title": "Traffic Server",
   "categories": [
     "web",
-    "log collection"
+    "log collection",
+    "caching"
   ],
   "type": "check",
   "is_public": false,
