@@ -502,7 +502,7 @@ coverage:
         target: 50
         flags:
         - tokumx
-      Traffic Server:
+      Traffic_Server:
         target: 75
         flags:
         - traffic_server

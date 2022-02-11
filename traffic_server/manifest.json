@@ -6,7 +6,7 @@
   "metric_prefix": "traffic_server.",
   "metric_to_check": "traffic_server.node.restarts.proxy.restart_count",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Monitor connection, cache, and DNS metrics",
   "guid": "c3fa3678-1166-4973-b340-b9120561e67b",
   "support": "core",
   "supported_os": [
@@ -17,7 +17,6 @@
   "public_title": "Traffic Server",
   "categories": [
     "web",
-    "log collection",
     "caching"
   ],
   "type": "check",

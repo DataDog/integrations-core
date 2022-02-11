@@ -1,1 +1,2 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+traffic_server.node.restarts.proxy.restart_count,count,,,,The number of node restarts,0,traffic_server,node restarts,
