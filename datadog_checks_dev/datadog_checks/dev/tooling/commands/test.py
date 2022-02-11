@@ -288,8 +288,8 @@ def test(
 
                     fix_coverage_report(check, 'coverage.xml')
 
-                    if repo != 'marketplace':
-                        run_command(['codecov', '-X', 'gcov', '--root', root, '-F', check, '-f', 'coverage.xml'])
+                    # if repo != 'marketplace':
+                    run_command(['codecov', '-X', 'gcov', '--root', root, '-F', check, '-f', 'coverage.xml'])
                 else:
                     if not cov_keep:
                         remove_path('.coverage')
