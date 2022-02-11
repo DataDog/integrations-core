@@ -13,7 +13,4 @@ PORT = 39017
 CONFIG = {'server': SERVER, 'port': PORT, 'username': 'datadog', 'password': 'Datadog9000'}
 ADMIN_CONFIG = {'server': SERVER, 'port': PORT, 'username': 'system', 'password': 'Admin1337'}
 
-
-E2E_METADATA = {}
-if os.environ.get('USE_PROPRIETARY_LIBRARY') == 'true':
-    E2E_METADATA['start_commands'] = ['pip install hdbcli==2.10.15']
+E2E_METADATA={'start_commands': 'pip install hdbcli==2.10.15'}
