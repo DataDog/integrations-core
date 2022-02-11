@@ -21,7 +21,6 @@ except ImportError:
 class Vault(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
     CHECK_NAME = 'vault'
-    DEFAULT_API_VERSION = '1'
     EVENT_LEADER_CHANGE = 'vault.leader_change'
     SERVICE_CHECK_CONNECT = 'vault.can_connect'
     SERVICE_CHECK_UNSEALED = 'vault.unsealed'
