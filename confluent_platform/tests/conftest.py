@@ -62,5 +62,6 @@ def dd_environment():
             WaitFor(create_connectors),
             CheckDockerLogs('connect', 'flushing 0 outstanding messages for offset commit'),
         ],
+        attempts=2
     ):
         yield CHECK_CONFIG, {'use_jmx': True}
