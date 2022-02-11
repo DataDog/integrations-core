@@ -15,7 +15,7 @@ from ..constants import get_root
 from ..dependencies import read_check_base_dependencies
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
 from ..utils import code_coverage_enabled, complete_testable_checks
-from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_success, echo_waiting, echo_warning, echo_failure
+from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_success, echo_waiting, echo_warning
 
 
 def display_envs(check_envs):
