@@ -15,7 +15,7 @@ from ..constants import get_root
 from ..dependencies import read_check_base_dependencies
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
 from ..utils import code_coverage_enabled, complete_testable_checks
-from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_success, echo_waiting, echo_warning
+from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_success, echo_waiting, echo_warning, echo_failure
 
 
 def display_envs(check_envs):
@@ -288,8 +288,8 @@ def test(
 
                     fix_coverage_report(check, 'coverage.xml')
 
-                    # if repo != 'marketplace':
-                    run_command(['codecov', '-X', 'gcov', '--root', root, '-F', check, '-f', 'coverage.xml'])
+                    if repo == 'integrations-core':
+                        run_command(['codecov', '-X', 'gcov', '--root', root, '-F', check, '-f', 'coverage.xml'])
                 else:
                     if not cov_keep:
                         remove_path('.coverage')

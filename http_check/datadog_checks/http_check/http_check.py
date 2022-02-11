@@ -93,8 +93,6 @@ class HTTPCheck(AgentCheck):
             down_msg = self._include_content(include_content, down_msg, content)
             service_checks.append((self.SC_STATUS, AgentCheck.CRITICAL, down_msg))
 
-            if True:
-                self.log.debug("Trigger codecov")
         # Store tags in a temporary list so that we don't modify the global tags data structure
         tags_list = list(tags)
         tags_list.append('url:{}'.format(addr))
