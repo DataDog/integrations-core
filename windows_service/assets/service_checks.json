@@ -11,7 +11,8 @@
         ],
         "groups": [
             "host",
-            "windows_service"
+            "windows_service",
+            "server"
         ],
         "name": "Service state",
         "description": "Returns `OK` if the windows service is in Running state, `CRITICAL` if it is Stopped, `UNKNOWN` if it is Unknown, and `WARNING` for the other service states."

@@ -18,7 +18,6 @@ except ImportError:
     pyodbc = None
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_docker):
@@ -36,7 +35,6 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
     )
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_check_docker(aggregator, dd_run_check, init_config, instance_docker):
@@ -49,43 +47,37 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker):
     assert_metrics(aggregator, expected_tags)
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_check_stored_procedure(aggregator, dd_run_check, init_config, instance_docker):
-    instance_pass = deepcopy(instance_docker)
-
     proc = 'pyStoredProc'
     sp_tags = "foo:bar,baz:qux"
-    instance_pass['stored_procedure'] = proc
+    instance_docker['stored_procedure'] = proc
 
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_pass])
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
 
-    expected_tags = instance_pass.get('tags', []) + sp_tags.split(',')
+    expected_tags = instance_docker.get('tags', []) + sp_tags.split(',')
     aggregator.assert_metric('sql.sp.testa', value=100, tags=expected_tags, count=1)
     aggregator.assert_metric('sql.sp.testb', tags=expected_tags, count=2)
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_check_stored_procedure_proc_if(aggregator, dd_run_check, init_config, instance_docker):
-    instance_fail = deepcopy(instance_docker)
     proc = 'pyStoredProc'
     proc_only_fail = "select cntr_type from sys.dm_os_performance_counters where counter_name in ('FOO');"
 
-    instance_fail['proc_only_if'] = proc_only_fail
-    instance_fail['stored_procedure'] = proc
+    instance_docker['proc_only_if'] = proc_only_fail
+    instance_docker['stored_procedure'] = proc
 
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_fail])
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
 
     # apply a proc check that will never fail and assert that the metrics remain unchanged
     assert len(aggregator._metrics) == 0
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_custom_metrics_object_name(aggregator, dd_run_check, init_config_object_name, instance_docker):
@@ -96,23 +88,25 @@ def test_custom_metrics_object_name(aggregator, dd_run_check, init_config_object
     aggregator.assert_metric('sqlserver.active_requests', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_custom_metrics_alt_tables(aggregator, dd_run_check, init_config_alt_tables, instance_docker):
-    instance = deepcopy(instance_docker)
-    instance['include_task_scheduler_metrics'] = False
+    instance_docker['include_task_scheduler_metrics'] = False
 
-    sqlserver_check = SQLServer(CHECK_NAME, init_config_alt_tables, [instance])
+    sqlserver_check = SQLServer(CHECK_NAME, init_config_alt_tables, [instance_docker])
     dd_run_check(sqlserver_check)
 
     aggregator.assert_metric('sqlserver.LCK_M_S.max_wait_time_ms', tags=['optional:tag1'], count=1)
     aggregator.assert_metric('sqlserver.LCK_M_S.signal_wait_time_ms', tags=['optional:tag1'], count=1)
     aggregator.assert_metric(
-        'sqlserver.MEMORYCLERK_BITMAP.virtual_memory_committed_kb', tags=['memory_node_id:0', 'optional:tag1'], count=1
+        'sqlserver.MEMORYCLERK_SQLGENERAL.virtual_memory_committed_kb',
+        tags=['memory_node_id:0', 'optional:tag1'],
+        count=1,
     )
     aggregator.assert_metric(
-        'sqlserver.MEMORYCLERK_BITMAP.virtual_memory_reserved_kb', tags=['memory_node_id:0', 'optional:tag1'], count=1
+        'sqlserver.MEMORYCLERK_SQLGENERAL.virtual_memory_reserved_kb',
+        tags=['memory_node_id:0', 'optional:tag1'],
+        count=1,
     )
 
     # check a second time for io metrics to be processed
@@ -152,7 +146,6 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
     aggregator.assert_metric('sqlserver.database.files.state', tags=msdb_tags)
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.parametrize(
     'service_check_enabled, default_count, extra_count',
@@ -189,7 +182,6 @@ def test_autodiscovery_db_service_checks(
     )
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_autodiscovery_exclude_db_service_checks(aggregator, dd_run_check, instance_autodiscovery):
@@ -213,7 +205,6 @@ def test_autodiscovery_exclude_db_service_checks(aggregator, dd_run_check, insta
     )
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_no_autodiscovery_service_checks(aggregator, dd_run_check, init_config, instance_docker):
@@ -224,7 +215,6 @@ def test_no_autodiscovery_service_checks(aggregator, dd_run_check, init_config, 
     aggregator.assert_service_check('sqlserver.database.can_connect', count=0)
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_autodiscovery_perf_counters(aggregator, dd_run_check, instance_autodiscovery):
@@ -256,7 +246,6 @@ def test_autodiscovery_perf_counters(aggregator, dd_run_check, instance_autodisc
         aggregator.assert_metric(metric, tags=base_tags)
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_autodiscovery_perf_counters_doesnt_duplicate_names_of_metrics_to_collect(dd_run_check, instance_autodiscovery):
@@ -269,7 +258,6 @@ def test_autodiscovery_perf_counters_doesnt_duplicate_names_of_metrics_to_collec
         assert sorted(metric_names) == sorted(expected)
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_autodiscovery_multiple_instances(aggregator, dd_run_check, instance_autodiscovery, caplog):
@@ -297,7 +285,6 @@ def test_autodiscovery_multiple_instances(aggregator, dd_run_check, instance_aut
     assert found_log == 1
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_custom_queries(aggregator, dd_run_check, instance_docker):
@@ -319,7 +306,6 @@ def test_custom_queries(aggregator, dd_run_check, instance_docker):
         aggregator.assert_metric('sqlserver.num', value=value, tags=custom_tags + ['query:another_custom_one'])
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_load_static_information(aggregator, dd_run_check, instance_docker):
@@ -332,8 +318,8 @@ def test_load_static_information(aggregator, dd_run_check, instance_docker):
 
 @windows_ci
 @pytest.mark.integration
-def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_sql_defaults):
-    check = SQLServer(CHECK_NAME, init_config, [instance_sql_defaults])
+def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_docker_defaults):
+    check = SQLServer(CHECK_NAME, init_config, [instance_docker_defaults])
     dd_run_check(check)
 
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
@@ -345,7 +331,6 @@ def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_
     aggregator.assert_all_metrics_covered()
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
@@ -363,27 +348,26 @@ def test_split_sqlserver_host(instance_docker, instance_host, split_host, split_
     assert (s_host, s_port) == (split_host, split_port)
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize("dbm_enabled,", [True, False])
 @pytest.mark.parametrize(
-    "instance_host,resolved_hostname",
+    "dbm_enabled, instance_host, reported_hostname, expected_hostname",
     [
-        ("localhost,1433,some-typo", "stubbed.hostname"),
-        ("localhost,1433", "stubbed.hostname"),
-        ("localhost", "stubbed.hostname"),
-        ("datadoghq.com,1433", "datadoghq.com"),
-        ("datadoghq.com", "datadoghq.com"),
-        ("8.8.8.8,1433", "8.8.8.8"),
-        ("8.8.8.8", "8.8.8.8"),
+        (False, 'localhost,1433,some-typo', '', 'stubbed.hostname'),
+        (True, 'localhost,1433', '', 'stubbed.hostname'),
+        (False, 'localhost', '', 'stubbed.hostname'),
+        (False, '8.8.8.8', '', 'stubbed.hostname'),
+        (True, 'localhost', 'forced_hostname', 'forced_hostname'),
+        (True, 'datadoghq.com,1433', '', 'datadoghq.com'),
+        (True, 'datadoghq.com', '', 'datadoghq.com'),
+        (True, 'datadoghq.com', 'forced_hostname', 'forced_hostname'),
+        (True, '8.8.8.8,1433', '', '8.8.8.8'),
+        (False, '8.8.8.8', 'forced_hostname', 'forced_hostname'),
     ],
 )
-def test_resolved_hostname(instance_docker, dbm_enabled, instance_host, resolved_hostname):
+def test_resolved_hostname(instance_docker, dbm_enabled, instance_host, reported_hostname, expected_hostname):
     instance_docker['dbm'] = dbm_enabled
     instance_docker['host'] = instance_host
+    instance_docker['reported_hostname'] = reported_hostname
     sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    if dbm_enabled:
-        assert sqlserver_check.resolved_hostname == resolved_hostname
-    else:
-        assert sqlserver_check.resolved_hostname == "stubbed.hostname"
+    assert sqlserver_check.resolved_hostname == expected_hostname

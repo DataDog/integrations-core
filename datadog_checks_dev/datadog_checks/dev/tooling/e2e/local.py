@@ -9,7 +9,7 @@ from shutil import copyfile, move
 from ...structures import EnvVars
 from ...subprocess import run_command
 from ...utils import ON_LINUX, ON_MACOS, ON_WINDOWS, file_exists, path_join
-from ..constants import REQUIREMENTS_IN, get_root
+from ..constants import get_root
 from .agent import (
     DEFAULT_AGENT_VERSION,
     DEFAULT_PYTHON_VERSION,
@@ -149,6 +149,9 @@ class LocalAgentInterface(object):
         as_table=False,
         break_point=None,
         jmx_list=None,
+        discovery_timeout=None,
+        discovery_retry_interval=None,
+        discovery_min_instances=None,
     ):
         # JMX check
         if jmx_list:
@@ -179,6 +182,15 @@ class LocalAgentInterface(object):
             if break_point is not None:
                 command += f' --breakpoint {break_point}'
 
+            if discovery_timeout is not None:
+                command += f'--discovery-timeout {discovery_timeout}'
+
+            if discovery_retry_interval is not None:
+                command += f'--discovery-retry-interval {discovery_retry_interval}'
+
+            if discovery_min_instances is not None:
+                command += f'--discovery-min-instances {discovery_min_instances}'
+
         if log_level is not None:
             command += f' --log-level {log_level}'
 
@@ -192,8 +204,7 @@ class LocalAgentInterface(object):
 
     def update_base_package(self):
         command = get_pip_exe(self.python_version, self.platform)
-        command.extend(('install', '-e', self.base_package))
-        command.extend(('-r', path_join(self.base_package, REQUIREMENTS_IN)))
+        command.extend(('install', '-e', f'{self.base_package}[db,deps,http,json,kube]'))
         return run_command(command, capture=True, check=True)
 
     def update_agent(self):

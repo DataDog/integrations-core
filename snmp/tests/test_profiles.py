@@ -16,7 +16,7 @@ from datadog_checks.snmp.utils import (
     recursively_expand_base_profiles,
 )
 
-from . import common
+from . import common, metrics
 from .metrics import (
     ADAPTER_IF_COUNTS,
     CCCA_ROUTER_GAUGES,
@@ -299,6 +299,9 @@ def test_f5(aggregator):
         'sysMultiHostCpuSoftirq',
         'sysMultiHostCpuIowait',
     ]
+    cpu_gauges = [
+        'sysMultiHostCpuUsageRatio',
+    ]
 
     interfaces = [
         ('1.0', 'desc2'),
@@ -328,6 +331,9 @@ def test_f5(aggregator):
     for metric in cpu_rates:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:0'] + tags, count=1)
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:1'] + tags, count=1)
+    for metric in cpu_gauges:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=['cpu:0'] + tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=['cpu:1'] + tags, count=1)
 
     for metric in IF_SCALAR_GAUGE:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
@@ -637,10 +643,10 @@ def test_cisco_3850(aggregator):
             'snmp.cefcFanTrayOperStatus', metric_type=aggregator.GAUGE, tags=['fru:{}'.format(fru)] + common_tags
         )
 
-    for metrics in MEMORY_METRICS:
+    for mem_metrics in MEMORY_METRICS:
         for pool in ['Processor', 'IOS Process stack']:
             tags = ['mem_pool_name:{}'.format(pool)] + common_tags
-            aggregator.assert_metric('snmp.{}'.format(metrics), metric_type=aggregator.GAUGE, tags=tags)
+            aggregator.assert_metric('snmp.{}'.format(mem_metrics), metric_type=aggregator.GAUGE, tags=tags)
 
     neighbor_metrics = [
         ('ospfNbrEvents', aggregator.RATE),
@@ -1885,9 +1891,9 @@ def assert_cisco_asa(aggregator, profile):
             'snmp.cefcFanTrayOperStatus', metric_type=aggregator.GAUGE, tags=['fru:{}'.format(fru)] + common_tags
         )
 
-    for metrics in MEMORY_METRICS:
+    for mem_metrics in MEMORY_METRICS:
         tags = ['mem_pool_name:test_pool'] + common_tags
-        aggregator.assert_metric('snmp.{}'.format(metrics), metric_type=aggregator.GAUGE, tags=tags)
+        aggregator.assert_metric('snmp.{}'.format(mem_metrics), metric_type=aggregator.GAUGE, tags=tags)
 
     for conn in [1, 2, 5]:
         conn_tags = ['connection_type:{}'.format(conn)] + common_tags
@@ -2013,7 +2019,7 @@ def test_checkpoint_firewall(aggregator):
 def test_arista(aggregator):
     run_profile_check('arista')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:arista', 'device_vendor:arista']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:arista', 'device_vendor:arista', 'snmp_host:DCS-7504-name']
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -2047,6 +2053,7 @@ def test_arista(aggregator):
         aggregator.assert_metric('snmp.entPhySensorValue', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
         aggregator.assert_metric('snmp.entPhySensorOperStatus', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
 
+    aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     aggregator.assert_all_metrics_covered()
 
 
@@ -2054,7 +2061,7 @@ def test_arista(aggregator):
 def test_aruba(aggregator):
     run_profile_check('aruba')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:aruba', 'device_vendor:aruba']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:aruba-switch', 'device_vendor:aruba']
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -2323,49 +2330,20 @@ def test_apc_ups(aggregator):
     ]
 
     tags = common.CHECK_TAGS + profile_tags
-    metrics = [
-        'upsAdvBatteryNumOfBadBattPacks',
-        'upsAdvBatteryReplaceIndicator',
-        'upsAdvBatteryRunTimeRemaining',
-        'upsAdvBatteryTemperature',
-        'upsAdvBatteryCapacity',
-        'upsHighPrecInputFrequency',
-        'upsHighPrecInputLineVoltage',
-        'upsHighPrecOutputCurrent',
-        'upsAdvInputLineFailCause',
-        'upsAdvOutputLoad',
-        'upsBasicBatteryTimeOnBattery',
-        'upsAdvTestDiagnosticsResults',
-    ]
 
     common.assert_common_metrics(aggregator, tags)
 
-    for metric in metrics:
+    for metric in metrics.APC_UPS_METRICS:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
     aggregator.assert_metric(
         'snmp.upsOutletGroupStatusGroupState',
         metric_type=aggregator.GAUGE,
         tags=['outlet_group_name:test_outlet'] + tags,
     )
-    aggregator.assert_metric(
-        'snmp.upsBasicStateOutputState.AVRTrimActive', 1, metric_type=aggregator.GAUGE, tags=tags, count=1
-    )
-    aggregator.assert_metric(
-        'snmp.upsBasicStateOutputState.BatteriesDischarged', 1, metric_type=aggregator.GAUGE, tags=tags, count=1
-    )
-    aggregator.assert_metric(
-        'snmp.upsBasicStateOutputState.LowBatteryOnBattery', 1, metric_type=aggregator.GAUGE, tags=tags, count=1
-    )
-    aggregator.assert_metric(
-        'snmp.upsBasicStateOutputState.NoBatteriesAttached', 1, metric_type=aggregator.GAUGE, tags=tags, count=1
-    )
-    aggregator.assert_metric(
-        'snmp.upsBasicStateOutputState.OnLine', 0, metric_type=aggregator.GAUGE, tags=tags, count=1
-    )
-    aggregator.assert_metric(
-        'snmp.upsBasicStateOutputState.ReplaceBattery', 1, metric_type=aggregator.GAUGE, tags=tags, count=1
-    )
-    aggregator.assert_metric('snmp.upsBasicStateOutputState.On', 1, metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    for metric, value in metrics.APC_UPS_UPS_BASIC_STATE_OUTPUT_STATE_METRICS:
+        aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=1, tags=tags)
+
     aggregator.assert_all_metrics_covered()
 
 

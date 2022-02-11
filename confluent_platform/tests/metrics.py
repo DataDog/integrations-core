@@ -82,6 +82,7 @@ BROKER_METRICS = [
     'confluent.kafka.server.session.zoo_keeper_read_only_connects_per_sec.rate',
     'confluent.kafka.server.session.zoo_keeper_sasl_authentications_per_sec.rate',
     'confluent.kafka.server.session.zoo_keeper_sync_connects_per_sec.rate',
+    'confluent.kafka.server.session.zoo_keeper_request_latency_ms',
     'confluent.kafka.server.topic.bytes_in_per_sec.rate',
     'confluent.kafka.server.topic.bytes_out_per_sec.rate',
     'confluent.kafka.server.topic.bytes_rejected_per_sec.rate',
@@ -405,6 +406,22 @@ CONSUMER_FETCH_TOPIC_METRICS = [
     'confluent.kafka.consumer.fetch_topic.records_per_request_avg',
 ]
 
+CONSUMER_GROUP_METRICS = [
+    'confluent.kafka.consumer.group.assigned_partitions',
+    'confluent.kafka.consumer.group.commit_latency_avg',
+    'confluent.kafka.consumer.group.commit_latency_max',
+    'confluent.kafka.consumer.group.commit_rate',
+    'confluent.kafka.consumer.group.heartbeat_rate',
+    'confluent.kafka.consumer.group.heartbeat_response_time_max',
+    'confluent.kafka.consumer.group.join_rate',
+    'confluent.kafka.consumer.group.join_time_avg',
+    'confluent.kafka.consumer.group.join_time_max',
+    'confluent.kafka.consumer.group.last_heartbeat_seconds_ago',
+    'confluent.kafka.consumer.group.sync_rate',
+    'confluent.kafka.consumer.group.sync_time_avg',
+    'confluent.kafka.consumer.group.sync_time_max',
+]
+
 KSQL_QUERY_STATS = [
     'confluent.ksql.query_stats.bytes_consumed_total',
     'confluent.ksql.query_stats.error_rate',
@@ -493,6 +510,7 @@ NOT_ALWAYS_PRESENT_METRICS = (
     + CONNECT_METRICS_OPTIONAL
     + CONSUMER_FETCH_METRICS
     + CONSUMER_FETCH_TOPIC_METRICS
+    + CONSUMER_GROUP_METRICS
     + KSQL_OPTIONAL
 )
 

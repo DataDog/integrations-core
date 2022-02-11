@@ -17,10 +17,10 @@ Get metrics from your Windows applications and servers with Windows Management I
 
 If you are only collecting standard metrics from Microsoft Windows and other packaged applications, there are no installation steps. If you need to define new metrics to collect from your application, then you have a few options:
 
-1. Submit performance counters using System.Diagnostics in .NET, then access them via WMI.
+1. Submit performance counters using System.Diagnostics in .NET, then access them with WMI.
 2. Implement a COM-based WMI provider for your application. You would typically only do this if you are using a non-.NET language.
 
-To learn more about using System.Diagnostics, see [the MSDN documentation][3]). After adding your metric you should be able to find it in WMI. To browse the WMI namespaces you may find this tool useful: [WMI Explorer][4]. You can find the same information with Powershell [here][5]. Also review the information in the [Datadog Knowledge Base article][6].
+To learn more about using System.Diagnostics, see the [PerformanceCounter Class][3]). After adding your metric you should be able to find it in WMI. To browse the WMI namespaces, you may find [WMI Explorer][4] useful. You can find the same information with Powershell using [Get-WmiObject][5]. Also, review the information in [How to retrieve WMI metrics][6].
 
 If you assign the new metric a category of My_New_Metric, the WMI path is
 `\\<ComputerName>\ROOT\CIMV2:Win32_PerfFormattedData_My_New_Metric`
@@ -144,7 +144,7 @@ Each WMI query has 2 required options, `class` and `metrics` and six optional op
   - `<METRIC_NAME>` is the name you want to show up in Datadog.
   - `<METRIC_TYPE>` is from the standard choices for all agent checks, such as gauge, rate, histogram or counter.
 
-- `host` is the optional target of the WMI query, `localhost` is assumed by default. If you set this option, make sure that Remote Management is enabled on the target host [see here][8] for more information.
+- `host` is the optional target of the WMI query, `localhost` is assumed by default. If you set this option, make sure that Remote Management is enabled on the target host. See [Configure Remote Management in Server Manager][8] for more information.
 
 - `namespace` is the optional WMI namespace to connect to (default to `cimv2`).
 
@@ -169,11 +169,11 @@ Each WMI query has 2 required options, `class` and `metrics` and six optional op
 
 ##### Example
 
-The setting `[IDProcess, Win32_Process, Handle, CommandLine]` tags each process with its command line. Any instance number will be removed from tag_by values i.e. name:process#1 => name:process. NB: The agent must be running under an **Administrator** account for this to work as the `CommandLine` property is not accessible to non-admins.
+The setting `[IDProcess, Win32_Process, Handle, CommandLine]` tags each process with its command line. Any instance number is removed from tag_by values, for example: `name:process#1` => `name:process. NB`. The Agent must be running under an **Administrator** account for this to work as the `CommandLine` property is not accessible to non-admins.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][10] and look for `wmi_check` under the Checks section.
+Run the [Agent's status subcommand][10] and look for `wmi_check` under the Checks section.
 
 ## Data Collected
 
@@ -195,9 +195,9 @@ Need help? Contact [Datadog support][13].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/wmi_check/images/wmimetric.png
 [2]: https://docs.datadoghq.com/integrations/windows_performance_counters/
-[3]: https://msdn.microsoft.com/en-us/library/system.diagnostics.performancecounter(v=vs.110.aspx
+[3]: https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.performancecounter
 [4]: https://wmie.codeplex.com
-[5]: https://msdn.microsoft.com/en-us/powershell/scripting/getting-started/cookbooks/getting-wmi-objects--get-wmiobject-
+[5]: https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-wmiobject
 [6]: https://docs.datadoghq.com/integrations/faq/how-to-retrieve-wmi-metrics/
 [7]: https://msdn.microsoft.com/en-us/library/windows/desktop/aa394084.aspx
 [8]: https://technet.microsoft.com/en-us/library/Hh921475.aspx

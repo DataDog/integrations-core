@@ -78,7 +78,7 @@ No additional installation is needed on your server.
 
 See [metadata.csv][9] for a list of metrics provided by this integration.
 
-The Sidekiq integration also allows custom metrics, see the [Sidekiq documentation][10] for custom metric inspiration.
+The Sidekiq integration also allows custom metrics, see [Sidekiq Enterprise Historical Metrics][10].
 
 ### Log collection
 
@@ -98,7 +98,7 @@ The Sidekiq integration also allows custom metrics, see the [Sidekiq documentati
           service: <SERVICE>
     ```
 
-     Change the `path` and `service` parameter values and configure them for your environment. If you cannot find your logs, [see the Sidekiq documentation on more details about logs][11].
+     Change the `path` and `service` parameter values and configure them for your environment. If you cannot find your logs, see [Sidekiq Logging][11].
 
 3. [Restart the Agent][8].
 

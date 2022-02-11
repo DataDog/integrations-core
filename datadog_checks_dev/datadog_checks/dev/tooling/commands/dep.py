@@ -12,10 +12,15 @@ from aiomultiprocess import Pool
 from packaging.markers import InvalidMarker, Marker
 from packaging.specifiers import SpecifierSet
 
-from ...fs import read_file_lines, write_file_lines
+from ...fs import basepath, read_file_lines, write_file_lines
 from ..constants import get_agent_requirements
-from ..dependencies import read_agent_dependencies, read_check_dependencies
-from ..utils import get_check_req_file, get_valid_checks
+from ..dependencies import (
+    read_agent_dependencies,
+    read_check_dependencies,
+    update_check_dependencies,
+    update_check_dependencies_at,
+)
+from ..utils import get_check_req_file, get_valid_checks, has_project_file
 from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 from .validate.licenses import extract_classifier_value
 
@@ -78,21 +83,27 @@ def pin(package, version, marker):
             files_to_update[dependency_definition.file_path].append(dependency_definition)
 
     for file_path, dependency_definitions in sorted(files_to_update.items()):
-        old_lines = read_file_lines(file_path)
-
-        new_lines = old_lines.copy()
-
         for dependency_definition in dependency_definitions:
             requirement = dependency_definition.requirement
             if marker != requirement.marker:
                 continue
 
             requirement.specifier = SpecifierSet(f'=={version}')
-            new_lines[dependency_definition.line_number] = f'{requirement}\n'
 
-        if new_lines != old_lines:
-            files_updated += 1
-            write_file_lines(file_path, new_lines)
+        if basepath(file_path) == 'pyproject.toml':
+            if update_check_dependencies_at(file_path, dependency_definitions):
+                files_updated += 1
+        else:
+            old_lines = read_file_lines(file_path)
+
+            new_lines = old_lines.copy()
+
+            for dependency_definition in dependency_definitions:
+                new_lines[dependency_definition.line_number] = f'{dependency_definition.requirement}\n'
+
+            if new_lines != old_lines:
+                files_updated += 1
+                write_file_lines(file_path, new_lines)
 
     if not files_updated:
         abort('No dependency definitions to update')
@@ -167,15 +178,21 @@ def sync():
 
         if deps_to_update:
             files_updated += 1
-            check_req_file = get_check_req_file(check_name)
-            old_lines = read_file_lines(check_req_file)
-            new_lines = old_lines.copy()
-
             for dependency_definition, new_version in deps_to_update.items():
                 dependency_definition.requirement.specifier = new_version
-                new_lines[dependency_definition.line_number] = f'{dependency_definition.requirement}\n'
 
-            write_file_lines(check_req_file, new_lines)
+            if has_project_file(check_name):
+                update_check_dependencies(check_name, list(deps_to_update))
+            else:
+                check_req_file = get_check_req_file(check_name)
+                old_lines = read_file_lines(check_req_file)
+                new_lines = old_lines.copy()
+
+                for dependency_definition, new_version in deps_to_update.items():
+                    dependency_definition.requirement.specifier = new_version
+                    new_lines[dependency_definition.line_number] = f'{dependency_definition.requirement}\n'
+
+                write_file_lines(check_req_file, new_lines)
 
     if not files_updated:
         echo_info('All dependencies synced.')

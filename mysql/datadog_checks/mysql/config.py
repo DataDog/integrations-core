@@ -13,6 +13,7 @@ class MySQLConfig(object):
         self.log = get_check_logger()
         self.host = instance.get('host', instance.get('server', ''))
         self.port = int(instance.get('port', 0))
+        self.reported_hostname = instance.get('reported_hostname', '')
         self.tags = list(instance.get('tags', []))
         self.mysql_sock = instance.get('sock', '')
         self.defaults_file = instance.get('defaults_file', '')
@@ -41,9 +42,16 @@ class MySQLConfig(object):
         self.min_collection_interval = instance.get('min_collection_interval', 15)
         obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
         self.obfuscator_options = {
+            # Valid values for this can be found at
+            # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/database.md#connection-level-attributes
+            'dbms': 'mysql',
             'replace_digits': obfuscator_options_config.get(
                 'replace_digits', obfuscator_options_config.get('quantize_sql_tables', False)
-            )
+            ),
+            'return_json_metadata': obfuscator_options_config.get('collect_metadata', False),
+            'table_names': obfuscator_options_config.get('collect_tables', True),
+            'collect_commands': obfuscator_options_config.get('collect_commands', True),
+            'collect_comments': obfuscator_options_config.get('collect_comments', True),
         }
         self.configuration_checks()
 

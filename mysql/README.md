@@ -7,9 +7,9 @@
 The Datadog Agent can collect many metrics from MySQL databases, including (but not limited to):
 
 - Query throughput
-- Query performance (e.g. average query run time, slow queries, etc.)
-- Connections (e.g. currently open connections, aborted connections, errors, etc.)
-- InnoDB (e.g. buffer pool metrics, etc.)
+- Query performance, such as average query runtime, or slow queries
+- Connections, such as currently open connections, aborted connections, or errors
+- InnoDB, such as buffer pool metrics
 
 You can also create your own metrics using custom SQL queries.
 
@@ -25,23 +25,21 @@ The MySQL check is included in the [Datadog Agent][4] package. No additional ins
 
 #### Prepare MySQL
 
-On each MySQL server, create a database user for the Datadog Agent:
+On each MySQL server, create a database user for the Datadog Agent.
+
+The following instructions grant the Agent permission to login from any host using `datadog@'%'`. You can restrict the `datadog` user to be allowed to login only from localhost by using `datadog@'localhost'`. See [MySQL Adding Accounts, Assigning Privileges, and Dropping Accounts][5] for more info.
 
 ```shell
-mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED BY '<UNIQUEPASSWORD>';
+mysql> CREATE USER 'datadog'@'%' IDENTIFIED BY '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
 For mySQL 8.0+ create the `datadog` user with the native password hashing method:
 
 ```shell
-mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED WITH mysql_native_password by '<UNIQUEPASSWORD>';
+mysql> CREATE USER 'datadog'@'%' IDENTIFIED WITH mysql_native_password by '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
 ```
-
-**Note**: `@'localhost'` is only for local connections. For remote connections, use the hostname/IP of your Agent. For more information, see the [MySQL documentation][5].
-
-**Note**: If you encounter the following error message `(1045, u"Access denied for user 'datadog'@'127.0.0.1' (using password: YES)"))`, see the [MySQL Localhost Error documentation][6].
 
 Verify the user was created successfully using the following commands - replace `<UNIQUEPASSWORD>` with the password you created above:
 
@@ -60,17 +58,17 @@ echo -e "\033[0;31mMissing REPLICATION CLIENT grant\033[0m"
 The Agent needs a few privileges to collect metrics. Grant the user the following limited privileges ONLY:
 
 ```shell
-mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
+mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'%' WITH MAX_USER_CONNECTIONS 5;
 Query OK, 0 rows affected, 1 warning (0.00 sec)
 
-mysql> GRANT PROCESS ON *.* TO 'datadog'@'localhost';
+mysql> GRANT PROCESS ON *.* TO 'datadog'@'%';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
 For MySQL 8.0+ set `max_user_connections` with:
 
 ```shell
-mysql> ALTER USER 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
+mysql> ALTER USER 'datadog'@'%' WITH MAX_USER_CONNECTIONS 5;
 Query OK, 0 rows affected (0.00 sec)
 ```
 
@@ -85,7 +83,7 @@ mysql> show databases like 'performance_schema';
 +-------------------------------+
 1 row in set (0.00 sec)
 
-mysql> GRANT SELECT ON performance_schema.* TO 'datadog'@'localhost';
+mysql> GRANT SELECT ON performance_schema.* TO 'datadog'@'%';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
@@ -126,21 +124,15 @@ Edit the `mysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [
 
 **Note**: Wrap your password in single quotes in case a special character is present.
 
-To collect `extra_performance_metrics`, your MySQL server must have `performance_schema` enabled - otherwise set `extra_performance_metrics` to `false`. For more information on `performance_schema`, [see the MySQL documentation][9].
+To collect `extra_performance_metrics`, your MySQL server must have `performance_schema` enabled - otherwise set `extra_performance_metrics` to `false`. For more information on `performance_schema`, see [MySQL Performance Schema Quick Start][9].
 
-Note that the `datadog` user should be set up in the MySQL integration configuration as `host: 127.0.0.1` instead of `localhost`. Alternatively, you may also use `sock`.
+**Note**: The `datadog` user should be set up in the MySQL integration configuration as `host: 127.0.0.1` instead of `localhost`. Alternatively, you may also use `sock`.
 
-See our [sample mysql.yaml][8] for all available configuration options, including those for custom metrics.
+See the [sample mysql.yaml][8] for all available configuration options, including those for custom metrics.
 
 [Restart the Agent][10] to start sending MySQL metrics to Datadog.
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 _Available for Agent versions >6.0_
 
@@ -226,7 +218,7 @@ _Available for Agent versions >6.0_
        #     pattern: \t\t\s*\d+\s+|\d{6}\s+\d{,2}:\d{2}:\d{2}\t\s*\d+\s+
    ```
 
-    See our [sample mysql.yaml][8] for all available configuration options, including those for custom metrics.
+    See the [sample mysql.yaml][8] for all available configuration options, including those for custom metrics.
 
 4. [Restart the Agent][10].
 
@@ -246,18 +238,12 @@ LABEL "com.datadoghq.ad.init_configs"='[{}]'
 LABEL "com.datadoghq.ad.instances"='[{"server": "%%host%%", "user": "datadog","pass": "<UNIQUEPASSWORD>"}]'
 ```
 
-See the [Autodiscovery template variables documentation][12] to learn how to pass `<UNIQUEPASSWORD>` as an environment variable instead of a label.
+See [Autodiscovery template variables][12] for details on using `<UNIQUEPASSWORD>` as an environment variable instead of a label.
 
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][13].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker Log Collection][13].
 
 Then, set [Log Integrations][14] as Docker labels:
 
@@ -299,18 +285,12 @@ spec:
     - name: mysql
 ```
 
-See the [Autodiscovery template variables documentation][12] to learn how to pass `<UNIQUEPASSWORD>` as an environment variable instead of a label.
+See [Autodiscovery template variables][12] for details on using `<UNIQUEPASSWORD>` as an environment variable instead of a label.
 
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][17].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][17].
 
 Then, set [Log Integrations][14] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][18].
 
@@ -350,19 +330,13 @@ Set [Autodiscovery Integrations Templates][11] as Docker labels on your applicat
 }
 ```
 
-See the [Autodiscovery template variables documentation][12] to learn how to pass `<UNIQUEPASSWORD>` as an environment variable instead of a label.
+See [Autodiscovery template variables][12] for details on using `<UNIQUEPASSWORD>` as an environment variable instead of a label.
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][19].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [ECS Log Collection][19].
 
 Then, set [Log Integrations][14] as Docker labels:
 
@@ -547,7 +521,7 @@ See [service_checks.json][22] for a list of service checks provided by this inte
 - [MySQL Localhost Error - Localhost VS 127.0.0.1][6]
 - [Can I use a named instance in the SQL Server integration?][24]
 - [Can I set up the dd-agent MySQL check on my Google CloudSQL?][25]
-- [How to collect metrics from custom MySQL queries][26]
+- [MySQL Custom Queries][26]
 - [Can I collect SQL Server performance metrics beyond what is available in the sys.dm_os_performance_counters table? Try WMI][27]
 - [How can I collect more metrics from my SQL Server integration?][28]
 - [Database user lacks privileges][29]
@@ -555,7 +529,9 @@ See [service_checks.json][22] for a list of service checks provided by this inte
 
 ## Further Reading
 
-Read our [series of blog posts][31] about monitoring MySQL with Datadog.
+Additional helpful documentation, links, and articles:
+
+- [Monitoring MySQL performance metrics][31]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mysql/images/mysql-dash-dd.png
 [2]: https://mariadb.org

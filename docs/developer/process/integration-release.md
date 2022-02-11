@@ -110,12 +110,20 @@ You may also pass a comma-separated list of checks to skip using the `--exclude`
 ddev release make all --exclude datadog_checks_dev
 ```
 
+Note: releasing `all` will update the `.in-toto` file to include every integration, not just the changed integrations. This may result in an unnecessarily large `.in-toto` file if only releasing a few integrations.
+
 !!! warning
     There is a known GitHub limitation where if an issue has too many labels (100), its state cannot be modified.
     If you cannot merge the pull request:
 
     1. Run the [remove-labels](../ddev/cli.md#ddev-meta-scripts-remove-labels) command
     1. After merging, manually add back the `changelog/no-changelog` label
+
+Another option for bulk releases is selectively choosing the integrations to release. For example, if you are just releasing `check1` and `check2`: 
+
+```
+ddev release make check1 check2
+```
 
 ## Betas (core integrations only)
 
@@ -206,32 +214,32 @@ After merging the release PR, the [build pipeline](../meta/cd.md) can fail under
 
   To resolve this, you'll need to bootstrap metadata for every integration:
 
-    1. Checkout and pull the most recent version of the `master` branch.
+  1. Checkout and pull the most recent version of the `master` branch.
 
-        ```
-        git checkout master
-        git pull
-        ```
+      ```
+      git checkout master
+      git pull
+      ```
 
-    1. Sign everything.
+  1. Sign everything.
 
-        ```
-        ddev release make all --sign-only
-        ```
+      ```
+      ddev release make all --sign-only
+      ```
 
-        You may need to touch your Yubikey multiple times.
+      You may need to touch your Yubikey multiple times.
 
-    1. Push your branch to GitHub.
-    1. Manually trigger a build.
+  1. Push your branch to GitHub.
+  1. Manually trigger a build.
 
-        ```
-        git tag <USERNAME>bootstrap-1.0.0 -m <USERNAME>bootstrap-1.0.0
-        ```
+      ```
+      git tag <USERNAME>bootstrap-1.0.0 -m <USERNAME>bootstrap-1.0.0
+      ```
 
-        The tag name is irrelevant, it just needs to look like an integration release. Gitlab doesn't sync
-        deleted tags, so any subsequent manual trigger tags will need to increment the version number.
+      The tag name is irrelevant, it just needs to look like an integration release. Gitlab doesn't sync
+      deleted tags, so any subsequent manual trigger tags will need to increment the version number.
 
-    1. Delete the branch and tag, locally and on GitHub.
+  1. Delete the branch and tag, locally and on GitHub.
     
 - If a feature PR conflicting with the release PR is merged out of order.
 

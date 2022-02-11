@@ -11,7 +11,7 @@ The Agent's Marathon check lets you:
 
 ### Installation
 
-The Marathon check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Marathon master.
+The Marathon check is included in the [Datadog Agent][1] package. No additional installation is needed on your server.
 
 ### Configuration
 
@@ -44,17 +44,11 @@ To configure this check for an Agent running on a host:
        password: "<PASSWORD>"
    ```
 
-   The function of `username` and `password` depends on whether or not you configure `acs_url`; If you do, the Agent uses them to request an authentication token from ACS, which it then uses to authenticate to the Marathon API. Otherwise, the Agent uses `username` and `password` to directly authenticate to the Marathon API.
+   The function of `username` and `password` depends on whether or not you configure `acs_url`. If you do, the Agent uses them to request an authentication token from ACS, which it then uses to authenticate to the Marathon API. Otherwise, the Agent uses `username` and `password` to directly authenticate to the Marathon API.
 
 2. [Restart the Agent][4].
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 _Available for Agent versions >6.0_
 
@@ -128,15 +122,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][6].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][6].
 
 | Parameter      | Value                                                 |
 | -------------- | ----------------------------------------------------- |

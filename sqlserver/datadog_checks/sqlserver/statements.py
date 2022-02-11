@@ -9,7 +9,12 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import ensure_unicode, to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import (
+    DBMAsyncJob,
+    RateLimitingTTLCache,
+    default_json_event_encoding,
+    obfuscate_sql_with_metadata,
+)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
@@ -59,6 +64,22 @@ select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
     group by text, query_hash, query_plan_hash, S.dbid, D.name, U.name
 """
 
+# This query is an optimized version of the statement metrics query
+# which removes the additional aggregate dimensions user and database.
+STATEMENT_METRICS_QUERY_NO_AGGREGATES = """\
+with qstats as (
+    select TOP {limit} text, query_hash, query_plan_hash, last_execution_time, plan_handle,
+           {query_metrics_columns}
+    from sys.dm_exec_query_stats
+        cross apply sys.dm_exec_sql_text(sql_handle)
+    where last_execution_time > dateadd(second, -?, getdate())
+)
+select text, query_hash, query_plan_hash, max(plan_handle) as plan_handle,
+    {query_metrics_column_sums}
+    from qstats S
+    group by text, query_hash, query_plan_hash
+"""
+
 PLAN_LOOKUP_QUERY = """\
 select cast(query_plan as nvarchar(max)) as query_plan
 from sys.dm_exec_query_plan(CONVERT(varbinary(max), ?, 1))
@@ -70,15 +91,23 @@ def _row_key(row):
     :param row: a normalized row from STATEMENT_METRICS_QUERY
     :return: a tuple uniquely identifying this row
     """
-    return row['database_name'], row['user_name'], row['query_signature'], row['query_hash'], row['query_plan_hash']
+    return (
+        row.get('database_name'),
+        row.get('user_name'),
+        row['query_signature'],
+        row['query_hash'],
+        row['query_plan_hash'],
+    )
 
 
-XML_PLAN_OBFUSCATION_ATTRS = {
-    "StatementText",
-    "ConstValue",
-    "ScalarString",
-    "ParameterCompiledValue",
-}
+XML_PLAN_OBFUSCATION_ATTRS = frozenset(
+    {
+        "StatementText",
+        "ConstValue",
+        "ScalarString",
+        "ParameterCompiledValue",
+    }
+)
 
 
 def agent_check_getter(self):
@@ -89,7 +118,7 @@ def _hash_to_hex(hash):
     return to_native_string(binascii.hexlify(hash))
 
 
-def obfuscate_xml_plan(raw_plan):
+def obfuscate_xml_plan(raw_plan, obfuscator_options=None):
     """
     Obfuscates SQL text & Parameters from the provided SQL Server XML Plan
     Also strips unnecessary whitespace
@@ -103,7 +132,8 @@ def obfuscate_xml_plan(raw_plan):
         for k in XML_PLAN_OBFUSCATION_ATTRS:
             val = e.attrib.get(k, None)
             if val:
-                e.attrib[k] = ensure_unicode(datadog_agent.obfuscate_sql(val))
+                statement = obfuscate_sql_with_metadata(val, obfuscator_options)
+                e.attrib[k] = ensure_unicode(statement['query'])
     return to_native_string(ET.tostring(tree, encoding="UTF-8"))
 
 
@@ -131,10 +161,13 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             job_name="query-metrics",
             shutdown_callback=self._close_db_conn,
         )
+        self.disable_secondary_tags = is_affirmative(
+            check.statement_metrics_config.get('disable_secondary_tags', False)
+        )
         self.dm_exec_query_stats_row_limit = int(
             check.statement_metrics_config.get('dm_exec_query_stats_row_limit', 10000)
         )
-        self.enforce_collection_interval_deadline = bool(
+        self.enforce_collection_interval_deadline = is_affirmative(
             check.statement_metrics_config.get('enforce_collection_interval_deadline', True)
         )
         self._state = StatementMetrics()
@@ -178,7 +211,11 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         if self._statement_metrics_query:
             return self._statement_metrics_query
         available_columns = self._get_available_query_metrics_columns(cursor, SQL_SERVER_QUERY_METRICS_COLUMNS)
-        self._statement_metrics_query = STATEMENT_METRICS_QUERY.format(
+
+        statements_query = (
+            STATEMENT_METRICS_QUERY_NO_AGGREGATES if self.disable_secondary_tags else STATEMENT_METRICS_QUERY
+        )
+        self._statement_metrics_query = statements_query.format(
             query_metrics_columns=', '.join(available_columns),
             query_metrics_column_sums=', '.join(['sum({}) as {}'.format(c, c) for c in available_columns]),
             collection_interval=int(math.ceil(self.collection_interval) * 2),
@@ -208,7 +245,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         normalized_rows = []
         for row in rows:
             try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['text'])
+                statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
                 self.log.debug("Failed to obfuscate query: %s", e)
@@ -218,11 +255,16 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     **self.check.debug_stats_kwargs(tags=["error:obfuscate-query-{}".format(type(e))])
                 )
                 continue
+            obfuscated_statement = statement['query']
             row['text'] = obfuscated_statement
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
             row['query_hash'] = _hash_to_hex(row['query_hash'])
             row['query_plan_hash'] = _hash_to_hex(row['query_plan_hash'])
             row['plan_handle'] = _hash_to_hex(row['plan_handle'])
+            metadata = statement['metadata']
+            row['dd_tables'] = metadata.get('tables', None)
+            row['dd_commands'] = metadata.get('commands', None)
+            row['dd_comments'] = metadata.get('comments', None)
             normalized_rows.append(row)
         return normalized_rows
 
@@ -238,6 +280,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
     @staticmethod
     def _to_metrics_payload_row(row):
         row = {k: v for k, v in row.items()}
+        if 'dd_comments' in row:
+            del row['dd_comments']
         # truncate query text to the maximum length supported by metrics tags
         row['text'] = row['text'][0:200]
         return row
@@ -251,6 +295,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
             'sqlserver_version': self.check.static_info_cache.get("version", ""),
             'ddagentversion': datadog_agent.get_version(),
+            'ddagenthostname': self._check.agent_hostname,
         }
 
     @tracked_method(agent_check_getter=agent_check_getter)
@@ -297,7 +342,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             if query_cache_key in self._full_statement_text_cache:
                 continue
             self._full_statement_text_cache[query_cache_key] = True
-            tags = self.check.tags + ["db:{}".format(row['database_name'])]
+            tags = list(self.check.tags)
+            if 'database_name' in row:
+                tags += ["db:{}".format(row['database_name'])]
             yield {
                 "timestamp": time.time() * 1000,
                 "host": self.check.resolved_hostname,
@@ -306,9 +353,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 "ddtags": ",".join(tags),
                 "dbm_type": "fqt",
                 "db": {
-                    "instance": row['database_name'],
+                    "instance": row.get('database_name', None),
                     "query_signature": row['query_signature'],
-                    "user": row.get("user_name", None),
+                    "user": row.get('user_name', None),
                     "statement": row['text'],
                 },
                 'sqlserver': {
@@ -344,7 +391,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 obfuscated_plan, collection_errors = None, None
 
                 try:
-                    obfuscated_plan = obfuscate_xml_plan(raw_plan)
+                    obfuscated_plan = obfuscate_xml_plan(raw_plan, self.check.obfuscator_options)
                 except Exception as e:
                     self.log.debug(
                         (
@@ -363,8 +410,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         1,
                         **self.check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))])
                     )
-
-                tags = self.check.tags + ["db:{}".format(row['database_name'])]
+                tags = list(self.check.tags)
+                if 'database_name' in row:
+                    tags += ["db:{}".format(row['database_name'])]
                 yield {
                     "host": self._db_hostname,
                     "ddagentversion": datadog_agent.get_version(),
@@ -382,9 +430,15 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         "query_signature": row['query_signature'],
                         "user": row.get("user_name", None),
                         "statement": row['text'],
+                        "metadata": {
+                            "tables": row['dd_tables'],
+                            "commands": row['dd_commands'],
+                            "comments": row['dd_comments'],
+                        },
                     },
                     'sqlserver': {
                         'query_hash': row['query_hash'],
                         'query_plan_hash': row['query_plan_hash'],
+                        'plan_handle': row['plan_handle'],
                     },
                 }
