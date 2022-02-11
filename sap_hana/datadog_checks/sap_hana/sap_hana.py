@@ -8,7 +8,13 @@ from contextlib import closing
 from itertools import chain
 
 import certifi
-from hdbcli.dbapi import Connection as HanaConnection
+
+from datadog_checks.base.errors import CheckException
+
+try:
+    from hdbcli.dbapi import Connection as HanaConnection
+except ImportError:
+    HanaConnection = None
 from six import iteritems
 from six.moves import zip
 
@@ -601,6 +607,8 @@ class SapHanaCheck(AgentCheck):
             self.register_secret(password)
 
     def get_connection(self):
+        if HanaConnection is None:
+            raise CheckException("hdbcli is not installed. Check the integration documentation to install it.")
         # https://help.sap.com/viewer/f1b440ded6144a54ada97ff95dac7adf/2.10/en-US/ee592e89dcce4480a99571a4ae7a702f.html
         connection_properties = self.instance.get('connection_properties', {}).copy()
 
