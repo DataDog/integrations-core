@@ -9,7 +9,7 @@ import pytest
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import SQLConnectionError
 
-from .common import CHECK_NAME, CUSTOM_METRICS, CUSTOM_QUERY_A, CUSTOM_QUERY_B, EXPECTED_DEFAULT_METRICS, assert_metrics
+from .common import CHECK_NAME, CUSTOM_METRICS, EXPECTED_DEFAULT_METRICS, assert_metrics
 from .utils import not_windows_ci, windows_ci
 
 try:
@@ -287,23 +287,43 @@ def test_autodiscovery_multiple_instances(aggregator, dd_run_check, instance_aut
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_custom_queries(aggregator, dd_run_check, instance_docker):
+@pytest.mark.parametrize(
+    "custom_query, assert_metrics",
+    [
+        (
+            {
+                'query': "SELECT letter, num FROM (VALUES (97, 'a'), (98, 'b')) AS t (num,letter)",
+                'columns': [{'name': 'customtag', 'type': 'tag'}, {'name': 'num', 'type': 'gauge'}],
+                'tags': ['query:custom'],
+            },
+            [
+                ("sqlserver.num", {"value": 97, "tags": ["customtag:a", "query:custom"]}),
+                ("sqlserver.num", {"value": 98, "tags": ["customtag:b", "query:custom"]}),
+            ],
+        ),
+        (
+            {
+                'query': "EXEC exampleProcWithoutNocount",
+                'columns': [{'name': 'value', 'type': 'gauge'}],
+                'tags': ['hello:there'],
+            },
+            [
+                ("sqlserver.value", {"value": 1, "tags": ["hello:there"]}),
+            ],
+        ),
+    ],
+)
+def test_custom_queries(aggregator, dd_run_check, instance_docker, custom_query, assert_metrics):
     instance = copy(instance_docker)
-    querya = copy(CUSTOM_QUERY_A)
-    queryb = copy(CUSTOM_QUERY_B)
-    instance['custom_queries'] = [querya, queryb]
+    instance['custom_queries'] = [custom_query]
 
     check = SQLServer(CHECK_NAME, {}, [instance])
     dd_run_check(check)
-    tags = list(instance['tags'])
 
-    for tag in ('a', 'b', 'c'):
-        value = ord(tag)
-        custom_tags = ['customtag:{}'.format(tag)]
-        custom_tags.extend(tags)
-
-        aggregator.assert_metric('sqlserver.num', value=value, tags=custom_tags + ['query:custom'])
-        aggregator.assert_metric('sqlserver.num', value=value, tags=custom_tags + ['query:another_custom_one'])
+    for metric_name, kwargs in assert_metrics:
+        kwargs = copy(kwargs)
+        kwargs['tags'] = instance['tags'] + kwargs.get('tags', [])
+        aggregator.assert_metric(metric_name, **kwargs)
 
 
 @pytest.mark.integration
