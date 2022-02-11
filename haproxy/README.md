@@ -27,7 +27,7 @@ The recommended way to set up this integration is by enabling the Prometheus end
 1. Configure your `haproxy.conf` using the [official guide][4].
 2. [Restart HAProxy to enable the Prometheus endpoint][5].
 
-#### Configure the agent
+#### Configure the Agent
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
