@@ -10,6 +10,7 @@ import requests
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.vault import Vault
+from datadog_checks.vault.common import DEFAULT_API_VERSION
 from datadog_checks.vault.errors import ApiUnreachable
 from datadog_checks.vault.vault import Leader
 
@@ -34,9 +35,9 @@ class TestVault:
         instance.update(INSTANCES['unsupported_api'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        assert not instance['api_url'].endswith(Vault.DEFAULT_API_VERSION)
+        assert not instance['api_url'].endswith(DEFAULT_API_VERSION)
         dd_run_check(c)
-        assert c._api_url.endswith(Vault.DEFAULT_API_VERSION)
+        assert c._api_url.endswith(DEFAULT_API_VERSION)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
 
