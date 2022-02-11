@@ -15,7 +15,7 @@ class HAProxyCheck(OpenMetricsBaseCheck):
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
-        if is_affirmative(instance.get('use_openmetrics')):
+        if is_affirmative(instance.get('use_openmetrics', False)):
             if PY2:
                 raise ConfigurationError(
                     "Openmetrics on this integration is only available when using py3. "
@@ -26,7 +26,6 @@ class HAProxyCheck(OpenMetricsBaseCheck):
 
             return HaproxyCheckV2(name, init_config, instances)
         elif is_affirmative(instance.get('use_prometheus', False)):
-            instance.pop("openmetrics_endpoint", None)
             return super(HAProxyCheck, cls).__new__(cls)
         else:
             return HAProxyCheckLegacy(name, init_config, instances)
