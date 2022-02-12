@@ -96,7 +96,14 @@ def update_link_metadata(checks, core_workflow=True):
     products = []
     for check in checks:
         products.append(path_join(check, 'datadog_checks'))
-        products.append(path_join(check, 'setup.py'))
+
+        setup_file = path_join(check, 'setup.py')
+        if file_exists(setup_file):
+            products.append(setup_file)
+
+        project_file = path_join(check, 'pyproject.toml')
+        if file_exists(project_file):
+            products.append(project_file)
 
         dep_file = path_join(check, 'requirements.in')
         if file_exists(dep_file):

@@ -634,8 +634,18 @@ class SQLServer(AgentCheck):
                         if rows is not None:
                             metric.fetch_metric(rows, cols)
 
-            # reuse connection for any custom queries
-            self._query_manager.execute()
+            # Neither pyodbc nor adodbapi are able to read results of a query if the number of rows affected
+            # statement are returned as part of the result set, so we disable for the entire connection
+            # this is important mostly for custom_queries or the stored_procedure feature
+            # https://docs.microsoft.com/en-us/sql/t-sql/statements/set-nocount-transact-sql
+            with self.connection.get_managed_cursor() as cursor:
+                cursor.execute("SET NOCOUNT ON")
+            try:
+                # reuse connection for any custom queries
+                self._query_manager.execute()
+            finally:
+                with self.connection.get_managed_cursor() as cursor:
+                    cursor.execute("SET NOCOUNT OFF")
 
     def execute_query_raw(self, query):
         with self.connection.get_managed_cursor() as cursor:
