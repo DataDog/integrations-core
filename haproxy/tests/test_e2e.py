@@ -7,7 +7,7 @@ from six import PY2
 from datadog_checks.base import is_affirmative
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import HAPROXY_LEGACY, requires_new_environment, ENDPOINT_PROMETHEUS
+from .common import ENDPOINT_PROMETHEUS, HAPROXY_LEGACY, requires_new_environment
 
 pytestmark = [requires_new_environment, pytest.mark.e2e]
 
