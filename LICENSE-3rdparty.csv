@@ -34,6 +34,7 @@ gearman,PyPI,Apache-2.0,Matthew Tai
 immutables,PyPI,Apache-2.0,MagicStack Inc
 in-toto,PyPI,Apache-2.0,New York University: Secure Systems Lab
 ipaddress,PyPI,PSF,Philipp Hagemeister
+jellyfish,PyPI,BSD-3-Clause,
 kafka-python,PyPI,Apache-2.0,Dana Powers
 kazoo,PyPI,Apache-2.0,Kazoo team
 kubernetes,PyPI,Apache-2.0,Kubernetes
