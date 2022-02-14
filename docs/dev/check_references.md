@@ -71,7 +71,7 @@ For more information about YAML syntax, see [Wikipedia][2]. Feel free to play ar
 
 Every integration contains a `manifest.json` file that describes operating parameters, positioning within the greater Datadog integration eco-system, and other such items.
 
-There are two versions of the `manifest.json` file. While most free integrations use version 1, [Datadog Marketplace][9] listings and [Datadog Apps][10] (paid or free) use version 2. 
+There are two versions of the `manifest.json` file. While we will continue supporting manifest version 1 for existing integrations, all **new** integrations, Datadog Apps, and Marketplace offerings should use version 2 of the manifest.
 
 If you see the following at the top of your `manifest.json` file, this means you are using version 2:
 
