@@ -53,7 +53,6 @@ psycopg2-binary==2.8.6
 pyasn1==0.4.6
 pycryptodomex==3.10.1
 pydantic==1.8.2; python_version > "3.0"
-pyhdb==0.3.4
 pyjwt==1.7.1; python_version < "3.0"
 pyjwt==2.0.1; python_version > "3.0"
 pymongo==3.11.4
