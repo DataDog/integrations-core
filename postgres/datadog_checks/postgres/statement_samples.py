@@ -54,7 +54,7 @@ PG_STAT_ACTIVITY_QUERY = re.sub(
     r'\s+',
     ' ',
     """
-    SELECT * FROM {pg_stat_activity_view}
+    SELECT *, pg_blocking_pids(pid) as blocking_pids FROM {pg_stat_activity_view}
     WHERE coalesce(TRIM(query), '') != ''
     AND query_start IS NOT NULL
     {extra_filters}

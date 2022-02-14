@@ -635,7 +635,7 @@ def test_statement_metadata(
                 'query_signature': 'd9193c18a6f372d8',
                 'statement': "SELECT city FROM pg_sleep(3), persons WHERE city = 'hello'",
             },
-            ["xact_start", "query_start", "pid", "client_port", "client_addr"],
+            ["xact_start", "query_start", "pid", "client_port", "client_addr", "blocking_pids"],
             {
                 'usename': 'bob',
                 'state': 'idle in transaction',
