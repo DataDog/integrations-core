@@ -4,6 +4,7 @@
 import getpass
 import logging
 import os
+import re
 import subprocess
 from contextlib import contextmanager
 from copy import deepcopy
@@ -24,6 +25,7 @@ from .common import (
     HAPROXY_VERSION_RAW,
     HERE,
     INSTANCE,
+    INSTANCEV2,
     requires_static_version,
 )
 from .legacy.common import (
@@ -105,6 +107,20 @@ def prometheus_metrics():
     return metrics
 
 
+@pytest.fixture(scope='session')
+def prometheus_metricsv2(prometheus_metrics):
+    metrics = []
+    # converts prometheus metric list from their v1 name to their v2 name
+    # also manually add .count to a specific count metric that doesn't follow
+    # the regular naming convention
+    for metric in prometheus_metrics:
+        metric = re.sub('total$', 'count', metric)
+        if metric == "process.failed.resolutions":
+            metric = metric + ".count"
+        metrics.append(metric)
+    return metrics
+
+
 def wait_for_haproxy():
     res = requests.get(STATS_URL, auth=(USERNAME, PASSWORD))
     res.raise_for_status()
@@ -170,6 +186,18 @@ def check():
 @pytest.fixture
 def instance():
     instance = deepcopy(CHECK_CONFIG)
+    return instance
+
+
+@pytest.fixture
+def instancev1():
+    instance = deepcopy(INSTANCE)
+    return instance
+
+
+@pytest.fixture
+def instancev2():
+    instance = deepcopy(INSTANCEV2)
     return instance
 
 
