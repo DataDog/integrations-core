@@ -52,6 +52,8 @@ class Options(BaseModel):
     replication_channel: Optional[str]
     replication_non_blocking_status: Optional[bool]
     schema_size_metrics: Optional[bool]
+    system_table_size_metrics: Optional[bool]
+    table_size_metrics: Optional[bool]
 
 
 class QueryMetrics(BaseModel):

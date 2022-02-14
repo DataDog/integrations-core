@@ -96,6 +96,8 @@ def instance_complex():
             'extra_innodb_metrics': True,
             'extra_performance_metrics': True,
             'schema_size_metrics': True,
+            'table_size_metrics': True,
+            'system_table_size_metrics': True,
         },
         'tags': tags.METRIC_TAGS,
         'queries': [

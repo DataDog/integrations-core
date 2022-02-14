@@ -9,8 +9,7 @@ init_config:
     ## `use_global_custom_queries` setting at the instance level.
     #
     # global_custom_queries:
-    #   - metric_prefix: vertica
-    #     query: <QUERY>
+    #   - query: <QUERY>
     #     columns: <COLUMNS>
     #     tags: <TAGS>
 

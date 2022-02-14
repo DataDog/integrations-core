@@ -1,10 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-try:
-    from hdbcli.dbapi import OperationalError  # noqa: F401
-except ImportError:
-    from pyhdb import OperationalError  # noqa: F401
+from hdbcli.dbapi import OperationalError  # noqa: F401
 
 
 class QueryExecutionError(Exception):
