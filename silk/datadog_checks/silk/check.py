@@ -5,7 +5,7 @@ from copy import deepcopy
 
 from six.moves.urllib.parse import urljoin, urlparse
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.time import get_timestamp
 
 from .events import SilkEvent
@@ -32,6 +32,10 @@ class SilkCheck(AgentCheck):
         self.metrics_to_collect = dict(METRICS)
 
         server = self.instance.get("host_address")
+
+        if server is None:
+            raise ConfigurationError("host_address is a required parameter.")
+
         self.latest_event_query = int(get_timestamp())
         self.url = "{}/api/v2/".format(server)
 

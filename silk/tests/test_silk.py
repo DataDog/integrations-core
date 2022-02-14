@@ -43,6 +43,25 @@ def test_check(aggregator, instance, dd_run_check):
     aggregator.assert_service_check('silk.server.state', SilkCheck.OK, count=2)
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_version_metadata(aggregator, instance, datadog_agent, dd_run_check):
+    check = SilkCheck('silk', {}, [instance])
+    check.check_id = 'test:123'
+    dd_run_check(check)
+
+    version_metadata = {
+        'version.scheme': 'silk',  # silk does not use semver
+        'version.major': '6',
+        'version.minor': '0',
+        'version.patch': '102',
+        'version.release': '25',
+        'version.raw': '6.0.102.25'
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+
+
 def test_error_msg_response(dd_run_check, aggregator, instance):
     error_response = {"error_msg": "Statistics data is unavailable while system is OFFLINE"}
     with mock.patch('datadog_checks.base.utils.http.requests.Response.json') as g:
