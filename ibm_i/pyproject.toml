@@ -37,7 +37,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "pyodbc==4.0.26",
+    "pyodbc==4.0.32",
 ]
 
 [project.urls]
