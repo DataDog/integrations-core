@@ -65,9 +65,8 @@ def test_error_msg_response(dd_run_check, aggregator, instance):
 
 def test_incorrect_config(dd_run_check, aggregator):
     invalid_instance = {'host_addres': 'localhost'}  # misspelled required parameter
-    check = SilkCheck('silk', {}, [invalid_instance])
-
     with pytest.raises(Exception):
+        check = SilkCheck('silk', {}, [invalid_instance])
         dd_run_check(check)
 
 
