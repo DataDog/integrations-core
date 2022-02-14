@@ -50,8 +50,8 @@ prometheus-client==0.13.1
 protobuf==3.19.4
 psutil==5.9.0
 psycopg2-binary==2.8.6
-pyasn1==0.4.8
-pycryptodomex==3.14.1
+pyasn1==0.4.6
+pycryptodomex==3.10.1
 pydantic==1.9.0; python_version > "3.0"
 pyjwt==1.7.1; python_version < "3.0"
 pyjwt==2.3.0; python_version > "3.0"
@@ -62,9 +62,9 @@ pyodbc==4.0.32
 pyro4==4.82; sys_platform == "win32"
 pysmi==0.3.4
 pysnmp-mibs==0.1.6
-pysnmp==4.4.12
+pysnmp==4.4.9
 pysocks==1.7.1
-python-binary-memcached==0.31.1; sys_platform != "win32" and python_version < "3.0"
+python-binary-memcached==0.26.1; sys_platform != "win32" and python_version < "3.0"
 python-binary-memcached==0.31.1; sys_platform != "win32" and python_version > "3.0"
 python-dateutil==2.8.2
 python3-gearman==0.1.0; sys_platform != "win32" and python_version > "3.0"
