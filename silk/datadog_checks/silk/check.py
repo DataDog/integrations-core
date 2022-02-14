@@ -21,16 +21,15 @@ STATE_MAP = {'online': AgentCheck.OK, 'offline': AgentCheck.WARNING, 'degraded':
 
 class SilkCheck(AgentCheck):
 
-    # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'silk'
 
     STATE_SERVICE_CHECK = "system.state"
     SERVERS_SERVICE_CHECK = "server.state"
     CONNECT_SERVICE_CHECK = "can_connect"
-    METRICS_TO_COLLECT = METRICS
 
     def __init__(self, name, init_config, instances):
         super(SilkCheck, self).__init__(name, init_config, instances)
+        self.metrics_to_collect = dict(METRICS)
 
         server = self.instance.get("host_address")
         self.latest_event_query = int(get_timestamp())
@@ -40,10 +39,10 @@ class SilkCheck(AgentCheck):
         self._tags = self.instance.get("tags", []) + ["silk_host:{}".format(host)]
 
         if self.instance.get("enable_read_write_statistics", False):
-            self.METRICS_TO_COLLECT.update(READ_WRITE_METRICS)
+            self.metrics_to_collect.update(READ_WRITE_METRICS)
 
         if self.instance.get("enable_blocksize_statistics", False):
-            self.METRICS_TO_COLLECT.update(BLOCKSIZE_METRICS)
+            self.metrics_to_collect.update(BLOCKSIZE_METRICS)
 
         # System tags are collected from the /state/endpoint
         self._system_tags = []
@@ -60,9 +59,13 @@ class SilkCheck(AgentCheck):
         self.collect_events(metric_tags)
 
         # Get metrics
-        get_method = getattr
+        self.collect_metrics(metric_tags)
 
-        for path, metrics_obj in self.METRICS_TO_COLLECT.items():
+        self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.OK, tags=self._tags)
+
+    def collect_metrics(self, metric_tags):
+        get_method = getattr
+        for path, metrics_obj in self.metrics_to_collect.items():
             # Need to submit an object of relevant tags
             try:
                 response_json, _ = self._get_data(path)
@@ -71,7 +74,6 @@ class SilkCheck(AgentCheck):
                 )
             except Exception as e:
                 self.log.debug("Encountered error getting Silk metrics for path %s: %s", path, str(e))
-        self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.OK, tags=self._tags)
 
     def submit_system_state(self):
         # Get Silk State
@@ -135,9 +137,9 @@ class SilkCheck(AgentCheck):
                 }
                 self.set_metadata('version', version, scheme='parts', part_map=version_parts)
             except Exception as e:
-                self.log.debug("Could not parse version: %", str(e))
+                self.log.debug("Could not parse version: %s", str(e))
         else:
-            self.log.debug("Could not submit version metadata, got: %", version)
+            self.log.debug("Could not submit version metadata, got: %s", version)
 
     def _assign_host_tags(self, state_data):
         self._system_tags = []
@@ -193,14 +195,15 @@ class SilkCheck(AgentCheck):
                     return None, code
             return response_json.get("hits"), code
         except Exception as e:
-            self.log.debug("Encountered error while getting metrics from %s: %s", path, str(e))
+            self.log.warning("Encountered error while getting data from %s: %s", path, str(e))
             raise
 
     def collect_events(self, tags):
         self.log.debug("Starting events collection (query start time: %s).", self.latest_event_query)
-        latest_event_time = None
+        last_event_time = None
         collect_events_start_time = get_timestamp()
         try:
+            # Use latest event query as starting time
             event_query = EVENT_PATH.format(self.latest_event_query)
             raw_events, code = self._get_data(event_query)
 
@@ -209,16 +212,21 @@ class SilkCheck(AgentCheck):
                 event_payload = normalized_event.get_datadog_payload()
                 if event_payload is not None:
                     self.event(event_payload)
-                if latest_event_time is None or event_payload.get("timestamp") > latest_event_time:
-                    latest_event_time = event_payload.get("timestamp")
+
+                # If this is the first valid event or this event timestamp is newer, update last event time checked
+                if (last_event_time is None and event_payload is not None) or event_payload.get(
+                    "timestamp"
+                ) > last_event_time:
+                    last_event_time = event_payload.get("timestamp")
 
         except Exception as e:
             # Don't get stuck on a failure to fetch an event
             # Ignore them for next pass
-            self.log.warning("Unable to fetch Events: %s", str(e))
+            self.log.warning("Unable to fetch events: %s", str(e))
 
-        if latest_event_time is not None:
-            self.latest_event_query = int(latest_event_time)
+        # Update latest event query to last event time
+        if last_event_time is not None:
+            self.latest_event_query = int(last_event_time)
         else:
             # In case no events were collected
             self.latest_event_query = int(collect_events_start_time)

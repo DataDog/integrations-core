@@ -5,7 +5,7 @@
 
 class Metric(object):
     """
-    Metric object contains"
+    Metric object contains:
         - the metric sub prefix,
         - metrics mapping (response JSON key to metric name and metric type)
         - tags mapping (response JSON key to tag name)
@@ -44,8 +44,8 @@ METRICS = {
                 'stream_avg_compressed_size_in_bytes': 'stream_average_compressed_bytes',
             },
             'tags': {
-                'iscsi_tgt_converted_name': 'volume_name',
                 'name': 'volume_raw_name',
+                'node_id': 'node_id',
             },
         }
     ),
