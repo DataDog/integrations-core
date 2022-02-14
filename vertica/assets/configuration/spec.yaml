@@ -8,8 +8,7 @@ files:
           - template: init_config/db
             overrides:
               global_custom_queries.value.example:
-                - metric_prefix: vertica
-                  query: <QUERY>
+                - query: <QUERY>
                   columns: <COLUMNS>
                   tags: <TAGS>
           - template: init_config/default

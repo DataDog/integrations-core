@@ -9,7 +9,7 @@ from ...errors import SubprocessError
 from ...subprocess import run_command
 from ...utils import ON_WINDOWS, file_exists, find_free_port, get_ip, path_join
 from ..commands.console import echo_debug, echo_warning
-from ..constants import REQUIREMENTS_IN, get_root
+from ..constants import get_root
 from .agent import (
     DEFAULT_AGENT_VERSION,
     DEFAULT_DOGSTATSD_PORT,
@@ -276,8 +276,7 @@ class DockerInterface(object):
     def update_base_package(self):
         command = ['docker', 'exec', self.container_name]
         command.extend(get_pip_exe(self.python_version, platform=self.container_platform))
-        command.extend(('install', '-e', self.base_mount_dir))
-        command.extend(('-r', f'{self.base_mount_dir}/{REQUIREMENTS_IN}'))
+        command.extend(('install', '-e', f'{self.base_mount_dir}[db,deps,http,json,kube]'))
         run_command(command, capture=True, check=True)
 
     def update_agent(self):
