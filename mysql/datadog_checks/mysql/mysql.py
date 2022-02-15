@@ -102,6 +102,7 @@ class MySql(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
+        self.performance_schema_enabled = None
         self._warnings_by_code = {}
         self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
@@ -135,6 +136,15 @@ class MySql(AgentCheck):
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
 
+    def check_performance_schema_enabled(self, db):
+        if self.performance_schema_enabled is None:
+            with closing(db.cursor()) as cursor:
+                cursor.execute("SHOW VARIABLES LIKE 'performance_schema'")
+                results = dict(cursor.fetchall())
+                self.performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
+
+        return self.performance_schema_enabled
+
     def resolve_db_host(self):
         return agent_host_resolver(self._config.host)
 
@@ -165,6 +175,8 @@ class MySql(AgentCheck):
                 self.is_mariadb = self.version.flavor == "MariaDB"
                 if self._get_is_aurora(db):
                     tags = tags + self._get_runtime_aurora_tags(db)
+
+                self.check_performance_schema_enabled(db)
 
                 # Metric collection
                 if not self._only_custom_queries:
@@ -329,7 +341,6 @@ class MySql(AgentCheck):
             self.log.debug("Collecting Galera Metrics.")
             metrics.update(GALERA_VARS)
 
-        self.performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
         above_560 = self.version.version_compatible((5, 6, 0))
         if (
             is_affirmative(self._config.options.get('extra_performance_metrics', False))

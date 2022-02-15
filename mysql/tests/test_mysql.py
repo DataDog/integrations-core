@@ -370,6 +370,11 @@ def test_only_custom_queries(aggregator, dd_run_check, instance_custom_queries):
             metric = metric_def[0]
             aggregator.assert_metric(metric, count=0)
 
+    # Internal check metrics are still allowed even if only_custom_queries is enabled
+    internal_metrics = [m for m in aggregator.metric_names if m.startswith('dd.')]
+    for m in internal_metrics:
+        aggregator.assert_metric(m, at_least=0)
+
     aggregator.assert_metric('alice.age', value=25, tags=tags.METRIC_TAGS)
     aggregator.assert_metric('bob.age', value=20, tags=tags.METRIC_TAGS)
     aggregator.assert_all_metrics_covered()
