@@ -50,9 +50,8 @@ instances:
     #
     # port: 50000
 
-    ## @param security - string - optional
-    ## Set this parameter to `ssl` if you want to use the Secure Socket Layer (SSL) protocol for a 
-    ## connection to the database server. 
+    ## @param security - string - optional - default: none
+    ## Set this parameter to `ssl` if you want to use the SSL protocol for a connection to the database server.
     #
     # security: none
 

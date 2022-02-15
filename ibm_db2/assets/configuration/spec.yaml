@@ -40,6 +40,11 @@ files:
         value:
           type: integer
           example: 50000
+      - name: security
+        description: Set this parameter to `ssl` if you want to use the SSL protocol for a connection to the database server.
+        value:
+          type: string
+          example: none
       - name: tls_cert
         description: |
           The path to a SSL certificate to use, when connecting to a database in a secure fashion. It
