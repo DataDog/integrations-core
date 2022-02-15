@@ -609,6 +609,11 @@ class AgentCheck(object):
         if hostname is None:
             hostname = ''
 
+        if self.global_metrics_filter is not None:
+            collect_metric = re.match(self.global_metrics_filter, name)
+            if not collect_metric:
+                return
+
         if self.metric_limiter:
             if mtype in ONE_PER_CONTEXT_METRIC_TYPES:
                 # Fast path for gauges, rates, monotonic counters, assume one set of tags per call
@@ -619,11 +624,6 @@ class AgentCheck(object):
                 context = self._context_uid(mtype, name, tags, hostname)
                 if self.metric_limiter.is_reached(context):
                     return
-
-        if self.global_metrics_filter is not None:
-            collect_metric = re.match(self.global_metrics_filter, name)
-            if not collect_metric:
-                return
 
         try:
             value = float(value)
