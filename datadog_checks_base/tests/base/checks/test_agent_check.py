@@ -648,6 +648,31 @@ class TestTags:
         tags = check._normalize_tags_type(tags=["foo:bar", "cluster:my_cluster"])
         assert set(tags) == expected_tags
 
+    @pytest.mark.parametrize(
+        "global_metrics_filter, expected_metrics, unexpected_metrics",
+        [
+            pytest.param(r'hello', ['hello'], ['my_metric', 'my_metric_count'], id='strict regex'),
+            pytest.param('hello', ['hello'], ['my_metric', 'my_metric_count'], id='string'),
+            pytest.param(r'my_metric*', ['my_metric', 'my_metric_count'], ['hello'], id='multiple matches'),
+            pytest.param(r'my_metrics', [], ['my_metric', 'my_metric_count', 'hello'], id='no matches'),
+            pytest.param(r'.*', ['my_metric', 'my_metric_count', 'hello'], [], id='everything'),
+        ],
+    )
+    def test_global_metrics_filter(self, global_metrics_filter, expected_metrics, unexpected_metrics, aggregator):
+        instance = {'global_metrics_filter': global_metrics_filter}
+        check = AgentCheck('myintegration', {}, [instance])
+        check.gauge('my_metric', 0)
+        check.count('my_metric_count', 0)
+        check.monotonic_count('hello', 0)
+        check.service_check('test.can_check', status=AgentCheck.OK)
+
+        for metric_name in expected_metrics:
+            aggregator.assert_metric(metric_name, count=1)
+
+        for metric_name in unexpected_metrics:
+            aggregator.assert_metric(metric_name, count=0)
+        aggregator.assert_service_check('test.can_check', status=AgentCheck.OK)
+
 
 class LimitedCheck(AgentCheck):
     DEFAULT_METRIC_LIMIT = 10

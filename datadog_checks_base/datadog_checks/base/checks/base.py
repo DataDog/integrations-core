@@ -204,6 +204,8 @@ class AgentCheck(object):
         self.disable_generic_tags = (
             is_affirmative(self.instance.get('disable_generic_tags', False)) if instance else False
         )
+
+        self.global_metrics_filter = self.instance.get('global_metrics_filter') if instance else None
         self.debug_metrics = {}
         if self.init_config is not None:
             self.debug_metrics.update(self.init_config.get('debug_metrics', {}))
@@ -617,6 +619,11 @@ class AgentCheck(object):
                 context = self._context_uid(mtype, name, tags, hostname)
                 if self.metric_limiter.is_reached(context):
                     return
+
+        if self.global_metrics_filter is not None:
+            collect_metric = re.match(self.global_metrics_filter, name)
+            if not collect_metric:
+                return
 
         try:
             value = float(value)
