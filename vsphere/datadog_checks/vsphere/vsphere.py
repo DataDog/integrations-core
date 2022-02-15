@@ -15,7 +15,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.checks.libs.timer import Timer
-from datadog_checks.base.utils.time import get_current_datetime
+from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache
@@ -90,7 +90,7 @@ class VSphereCheck(AgentCheck):
         self.thread_pool = ThreadPoolExecutor(max_workers=self._config.threads_count)
         self.check_initializations.append(self.initiate_api_connection)
 
-        # set timeout time here
+        self.last_connection_time = get_timestamp()
 
     def initiate_api_connection(self):
         # type: () -> None
@@ -608,9 +608,11 @@ class VSphereCheck(AgentCheck):
         # type: (Any) -> None
         self._hostname = datadog_agent.get_hostname()
         # Assert the health of the vCenter API by getting the version, and submit the service_check accordingly
-        # check if it has been connection_reset time
-        # if so, then call initiate_api_connection() again
-        # set new timeout time
+
+        now = get_timestamp()
+        if self.last_connection_time + self._config.connection_reset_timeout <= now:
+            self.last_connection_time = now
+            self.initiate_api_connection()
 
         try:
             version_info = self.api.get_version()
