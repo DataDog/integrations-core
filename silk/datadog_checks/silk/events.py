@@ -36,4 +36,3 @@ class SilkEvent(object):
 
     def get_datadog_payload(self):
         return self.payload
-
