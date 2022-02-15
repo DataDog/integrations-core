@@ -499,10 +499,43 @@ class Network(AgentCheck):
                 self.log.debug("Unable to read %s.", proc_data_path)
 
         nstat_metrics_names = {
+            'Ip': {
+                'InReceives': 'system.net.ip.in_receives',
+                'InHdrErrors': 'system.net.ip.in_header_errors',
+                'InAddrErrors': 'system.net.ip.in_addr_errors',
+                'InUnknownProtos': 'system.net.ip.in_unknown_protos',
+                'InDiscards': 'system.net.ip.in_discards',
+                'InDelivers': 'system.net.ip.in_delivers',
+                'OutRequests': 'system.net.ip.out_requests',
+                'OutDiscards': 'system.net.ip.out_discards',
+                'OutNoRoutes': 'system.net.ip.out_no_routes',
+                'ForwDatagrams': 'system.net.ip.forwarded_datagrams',
+                'ReasmTimeout': 'system.net.ip.reassembly_timeouts',
+                'ReasmReqds': 'system.net.ip.reassembly_requests',
+                'ReasmOKs': 'system.net.ip.reassembly_oks',
+                'ReasmFails': 'system.net.ip.reassembly_fails',
+                'FragOKs': 'system.net.ip.fragmentation_oks',
+                'FragFails': 'system.net.ip.fragmentation_fails',
+                'FragCreates': 'system.net.ip.fragmentation_creates',
+            },
+            'IpExt': {
+                'InNoRoutes': 'system.net.ip.in_no_routes',
+                'InTruncatedPkts': 'system.net.ip.in_truncated_pkts',
+                'InCsumErrors': 'system.net.ip.in_csum_errors',
+                'ReasmOverlaps': 'system.net.ip.reassembly_overlaps',
+            },
             'Tcp': {
                 'RetransSegs': 'system.net.tcp.retrans_segs',
                 'InSegs': 'system.net.tcp.in_segs',
                 'OutSegs': 'system.net.tcp.out_segs',
+                'ActiveOpens': 'system.net.tcp.active_opens',
+                'PassiveOpens': 'system.net.tcp.passive_opens',
+                'AttemptFails': 'system.net.tcp.attempt_fails',
+                'EstabResets': 'system.net.tcp.established_resets',
+                'CurrEstab': 'system.net.tcp.current_established',
+                'InErrs': 'system.net.tcp.in_errors',
+                'OutRsts': 'system.net.tcp.out_resets',
+                'InCsumErrors': 'system.net.tcp.in_csum_errors',
             },
             'TcpExt': {
                 'ListenOverflows': 'system.net.tcp.listen_overflows',
