@@ -19,6 +19,6 @@ def test_check(dd_agent_check, instance):
         aggregator.assert_metric(metric)
 
     for metric in OPTIONAL_METRICS:
-        aggregator.assert_metric(metric, count=0)
+        aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
