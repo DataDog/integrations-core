@@ -83,6 +83,34 @@ def validate_jmx_metrics(check_name, saved_errors, verbose):
             saved_errors[(check_name, jmx_metrics_file)].append(
                 f"domain or bean attribute is missing for rule: {include_str}"
             )
+    duplicates = duplicate_bean_check(jmx_metrics_data)
+    if duplicates:
+        saved_errors[(check_name, jmx_metrics_file)].append(
+            "The following bean and attribute combination is a duplicate:"
+        )
+        for k, v in duplicates.items():
+            saved_errors[(check_name, jmx_metrics_file)].append(f"{k}: {v}")
+
+
+def duplicate_bean_check(bean_list):
+    bean_dict = defaultdict(list)
+    duplicate_bean = defaultdict(list)
+    for beans in bean_list:
+        bean = beans["include"].get("bean")
+        if type(bean) == list:
+            for b in bean:
+                for attr in beans["include"].get("attribute", {}).keys():
+                    if attr in bean_dict[b]:
+                        duplicate_bean[b].append(attr)
+                    else:
+                        bean_dict[b].append(attr)
+        elif bean:
+            for attr in beans["include"].get("attribute", {}).keys():
+                if attr in bean_dict[bean]:
+                    duplicate_bean[bean].append(attr)
+                else:
+                    bean_dict[bean].append(attr)
+    return dict(duplicate_bean)
 
 
 def validate_config_spec(check_name, saved_errors):
