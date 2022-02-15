@@ -93,6 +93,7 @@ class MySql(AgentCheck):
         self._agent_hostname = None
         self._is_aurora = None
         self._config = MySQLConfig(self.instance)
+        self._only_custom_queries = is_affirmative(self.instance.get('only_custom_queries', False))
 
         # Create a new connection on every check run
         self._conn = None
@@ -166,8 +167,10 @@ class MySql(AgentCheck):
                     tags = tags + self._get_runtime_aurora_tags(db)
 
                 # Metric collection
-                self._collect_metrics(db, tags=tags)
-                self._collect_system_metrics(self._config.host, db, tags)
+                if not self._only_custom_queries:
+                    self._collect_metrics(db, tags=tags)
+                    self._collect_system_metrics(self._config.host, db, tags)
+
                 if self._config.dbm_enabled:
                     dbm_tags = list(set(self.service_check_tags) | set(tags))
                     self._statement_metrics.run_job_loop(dbm_tags)
