@@ -1,4 +1,4 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 silk.system.views_count,gauge,,,,Host view count,0,silk,
 silk.system.volumes_count,gauge,,,,Host volume count,0,silk,
 silk.system.io_ops.avg,gauge,,operation,,Average system IO operations,0,silk,

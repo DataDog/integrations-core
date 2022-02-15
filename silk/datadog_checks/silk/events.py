@@ -6,7 +6,12 @@ ALERT_TYPES = {"INFO": "info", "ERROR": "error", "WARNING": "warning", "CRITICAL
 
 
 class SilkEvent(object):
-    def __init__(self, raw_event, tags):
+    def __init__(self, raw_event=None, tags=None):
+        if raw_event is None:
+            raw_event = {}
+        if tags is None:
+            tags = []
+
         self.payload = {
             "timestamp": raw_event.get("timestamp"),
             "event_type": raw_event.get("labels"),

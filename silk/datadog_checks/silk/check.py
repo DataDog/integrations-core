@@ -43,10 +43,10 @@ class SilkCheck(AgentCheck):
         self._tags = self.instance.get("tags", []) + ["silk_host:{}".format(host)]
 
         if self.instance.get("enable_read_write_statistics", False):
-            self.metrics_to_collect.update(READ_WRITE_METRICS)
+            self.metrics_to_collect.update(dict(READ_WRITE_METRICS))
 
         if self.instance.get("enable_blocksize_statistics", False):
-            self.metrics_to_collect.update(BLOCKSIZE_METRICS)
+            self.metrics_to_collect.update(dict(BLOCKSIZE_METRICS))
 
         # System tags are collected from the /state/endpoint
         self._system_tags = []
@@ -202,6 +202,16 @@ class SilkCheck(AgentCheck):
             self.log.warning("Encountered error while getting data from %s: %s", path, str(e))
             raise
 
+    def _validate_event(self, event_payload):
+        if event_payload.get("timestamp") is None:
+            self.log.warning("Event has no timestamp, will not submit event")
+            return False
+        if event_payload.get("msg_title") is None:
+            self.log.warning("Event has no msg_title, will not submit event")
+            return False
+
+        return True
+
     def collect_events(self, tags):
         self.log.debug("Starting events collection (query start time: %s).", self.latest_event_query)
         last_event_time = None
@@ -214,7 +224,8 @@ class SilkCheck(AgentCheck):
             for event in raw_events:
                 normalized_event = SilkEvent(event, tags)
                 event_payload = normalized_event.get_datadog_payload()
-                if event_payload is not None:
+
+                if self._validate_event(event_payload):
                     self.event(event_payload)
 
                 # If this is the first valid event or this event timestamp is newer, update last event time checked

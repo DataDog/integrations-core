@@ -11,7 +11,7 @@ from datadog_checks.dev.fs import read_file
 from datadog_checks.silk import SilkCheck
 from datadog_checks.silk.metrics import Metric
 
-from .common import BLOCKSIZE_METRICS, HERE, HOST, METRICS, READ_WRITE_METRICS
+from .common import HERE, HOST, METRICS
 
 
 @pytest.mark.integration
@@ -25,10 +25,6 @@ def test_check(aggregator, instance, dd_run_check):
         aggregator.assert_metric(metric)
         for tag in base_tags:
             aggregator.assert_metric_has_tag(metric, tag)
-
-    # blocksize and read/write metrics don't appear in test env since caddy can't mock HTTP query strings
-    for metric in BLOCKSIZE_METRICS + READ_WRITE_METRICS:
-        aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_service_check('silk.can_connect', SilkCheck.OK)
     aggregator.assert_service_check('silk.system.state', SilkCheck.OK)
@@ -218,11 +214,14 @@ def mock_get_data(url):
         ),
     ],
 )
-def test_blocksize_metrics(dd_run_check, aggregator, instance, get_data_url, expected_metrics, metrics_to_collect):
+def test_bs_rw_metrics(dd_run_check, aggregator, instance, get_data_url, expected_metrics, metrics_to_collect):
     check = SilkCheck('silk', {}, [instance])
     check._get_data = mock.MagicMock(side_effect=mock_get_data(get_data_url))
     check.metrics_to_collect = metrics_to_collect
-    check.collect_metrics([])
+    base_tags = ['silk_host:localhost:80', 'system_id:5501', 'system_name:K2-5501', 'test:silk']
+    check.collect_metrics(base_tags)
 
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
+        for tag in base_tags:
+            aggregator.assert_metric_has_tag(metric, tag)
