@@ -26,7 +26,7 @@ def dd_environment(instance):
 
 @pytest.fixture(scope='session')
 def instance():
-    return {'openmetrics_endpoint': f'http://{common.HOST}:{common.PORT}/metrics'}
+    return {'openmetrics_endpoint': common.METRICS_URL}
 
 
 @pytest.fixture(scope='session')

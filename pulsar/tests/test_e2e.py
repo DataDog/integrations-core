@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 
-from .common import EXPECTED_METRICS, OPTIONAL_METRICS
+from .common import EXPECTED_METRICS, METRICS_URL, OPTIONAL_METRICS
 
 pytestmark = [pytest.mark.e2e]
 
@@ -17,6 +17,7 @@ def test_check(dd_agent_check, instance):
 
     for metric in EXPECTED_METRICS:
         aggregator.assert_metric(metric)
+        aggregator.assert_metric_has_tag(metric, f'endpoint:{METRICS_URL}')
 
     for metric in OPTIONAL_METRICS:
         aggregator.assert_metric(metric, at_least=0)

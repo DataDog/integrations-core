@@ -8,6 +8,7 @@ from datadog_checks.dev import get_docker_hostname, get_here
 HERE = get_here()
 HOST = get_docker_hostname()
 PORT = '8080'
+METRICS_URL = f'http://{HOST}:{PORT}/metrics'
 
 PULSAR_VERSION = os.getenv('PULSAR_VERSION')
 
