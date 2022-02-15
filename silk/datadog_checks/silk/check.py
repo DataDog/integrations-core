@@ -202,16 +202,6 @@ class SilkCheck(AgentCheck):
             self.log.warning("Encountered error while getting data from %s: %s", path, str(e))
             raise
 
-    def _validate_event(self, event_payload):
-        if event_payload.get("timestamp") is None:
-            self.log.warning("Event has no timestamp, will not submit event")
-            return False
-        if event_payload.get("msg_title") is None:
-            self.log.warning("Event has no msg_title, will not submit event")
-            return False
-
-        return True
-
     def collect_events(self, tags):
         self.log.debug("Starting events collection (query start time: %s).", self.latest_event_query)
         last_event_time = None
@@ -222,11 +212,12 @@ class SilkCheck(AgentCheck):
             raw_events, code = self._get_data(event_query)
 
             for event in raw_events:
-                normalized_event = SilkEvent(event, tags)
-                event_payload = normalized_event.get_datadog_payload()
-
-                if self._validate_event(event_payload):
+                try:
+                    normalized_event = SilkEvent(event, tags)
+                    event_payload = normalized_event.get_datadog_payload()
                     self.event(event_payload)
+                except ValueError as e:
+                    self.log.warning(str(e))
 
                 # If this is the first valid event or this event timestamp is newer, update last event time checked
                 if (last_event_time is None and event_payload is not None) or event_payload.get(

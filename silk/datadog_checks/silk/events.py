@@ -5,12 +5,23 @@
 ALERT_TYPES = {"INFO": "info", "ERROR": "error", "WARNING": "warning", "CRITICAL": "error"}
 
 
+def _validate_event(raw_event):
+    if raw_event.get("timestamp") is None:
+        raise ValueError("Event has no timestamp, will not submit event")
+    if raw_event.get("name") is None:
+        raise ValueError("Event has no name, will not submit event")
+    if raw_event.get("message") is None:
+        raise ValueError("Event has no message, will not submit event")
+
+
 class SilkEvent(object):
     def __init__(self, raw_event=None, tags=None):
         if raw_event is None:
             raw_event = {}
         if tags is None:
             tags = []
+
+        _validate_event(raw_event)
 
         self.payload = {
             "timestamp": raw_event.get("timestamp"),
@@ -25,3 +36,4 @@ class SilkEvent(object):
 
     def get_datadog_payload(self):
         return self.payload
+

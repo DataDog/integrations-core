@@ -63,7 +63,8 @@ def test_latest_event_query(aggregator, instance, dd_run_check):
     'file, log_warning',
     [
         ("events_no_timestamp.json", "Event has no timestamp, will not submit event"),
-        ("events_no_title.json", "Event has no msg_title, will not submit event"),
+        ("events_no_title.json", "Event has no name, will not submit event"),
+        ("events_no_message.json", "Event has no message, will not submit event"),
     ],
 )
 def test_malformed_event(aggregator, instance, dd_run_check, file, log_warning, caplog):
