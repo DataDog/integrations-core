@@ -555,11 +555,15 @@ def test_deobfuscated_statement(aggregator, dd_run_check, dbm_instance, datadog_
 
     sample = matching[0]
     if disable_sql_obfuscation:
-        assert sample['db']['plan']['definition_raw'] is not None
+        assert sample['db']['statement'] == normalized_query
+        assert sample['db']['plan']['definition'] is not None
         assert sample['db']['statement_raw'] == test_query
+        assert sample['db']['plan']['definition_raw'] is not None
     else:
-        assert sample['db']['plan']['definition_raw'] is None
+        assert sample['db']['statement'] == normalized_query
+        assert sample['db']['plan']['definition'] is not None
         assert sample['db']['statement_raw'] is None
+        assert sample['db']['plan']['definition_raw'] is None
 
 
 @pytest.mark.integration
