@@ -441,6 +441,14 @@ files:
               Configure how the SQL obfuscator behaves.
               Note: This option only applies when `dbm` is enabled.
             options:
+              - name: disable_sql_obfuscation
+                description: |
+                  Set to `true` to disable SQL obfuscation for your statements and explain plans.
+                  WARNING: This could result in sending sensitive data to Datadog. Do not enable this if SQL queries
+                  to this database contain sensitive data in their parameters.
+                value:
+                  type: boolean
+                  example: false
               - name: replace_digits
                 description: |
                   Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.

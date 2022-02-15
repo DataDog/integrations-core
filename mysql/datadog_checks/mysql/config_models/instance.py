@@ -36,6 +36,7 @@ class ObfuscatorOptions(BaseModel):
     collect_comments: Optional[bool]
     collect_metadata: Optional[bool]
     collect_tables: Optional[bool]
+    disable_sql_obfuscation: Optional[bool]
     replace_digits: Optional[bool]
 
 

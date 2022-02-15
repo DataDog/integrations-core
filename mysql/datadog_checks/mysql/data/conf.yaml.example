@@ -406,6 +406,13 @@ instances:
     #
     obfuscator_options:
 
+        ## @param disable_sql_obfuscation - boolean - optional - default: false
+        ## Set to `true` to disable SQL obfuscation for your statements and explain plans.
+        ## WARNING: This could result in sending sensitive data to Datadog. Do not enable this if SQL queries
+        ## to this database contain sensitive data in their parameters.
+        #
+        # disable_sql_obfuscation: false
+
         ## @param replace_digits - boolean - optional - default: false
         ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
         ## Note: This option also applies to extracted tables using `collect_tables`.
