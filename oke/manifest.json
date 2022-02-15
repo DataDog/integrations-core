@@ -27,7 +27,6 @@
   "assets": {
     "dashboards": {},
     "monitors": {},
-    "service_checks": "assets/service_checks.json",
-    "metrics_metadata": "metadata.csv"
+    "service_checks": "assets/service_checks.json"
   }
 }
