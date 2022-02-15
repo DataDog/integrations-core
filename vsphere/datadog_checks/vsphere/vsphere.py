@@ -90,6 +90,8 @@ class VSphereCheck(AgentCheck):
         self.thread_pool = ThreadPoolExecutor(max_workers=self._config.threads_count)
         self.check_initializations.append(self.initiate_api_connection)
 
+        # set timeout time here
+
     def initiate_api_connection(self):
         # type: () -> None
         try:
@@ -606,6 +608,10 @@ class VSphereCheck(AgentCheck):
         # type: (Any) -> None
         self._hostname = datadog_agent.get_hostname()
         # Assert the health of the vCenter API by getting the version, and submit the service_check accordingly
+        # check if it has been connection_reset time
+        # if so, then call initiate_api_connection() again
+        # set new timeout time
+
         try:
             version_info = self.api.get_version()
             if self.is_metadata_collection_enabled():
