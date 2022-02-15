@@ -525,6 +525,43 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agen
     assert metric['dd_commands'] == expected_metadata_payload['commands']
 
 
+@pytest.mark.parametrize("disable_sql_obfuscation", [True, False])
+def test_deobfuscated_statement(aggregator, dd_run_check, dbm_instance, datadog_agent, disable_sql_obfuscation):
+    dbm_instance['obfuscator_options'] = {'disable_sql_obfuscation': disable_sql_obfuscation}
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    test_query = "SELECT table_schema FROM information_schema.tables WHERE table_schema = 'processlist'"
+    query_signature = 'b75cb4aaad0c138c'
+    normalized_query = 'SELECT table_schema FROM information_schema.tables WHERE table_schema = ?'
+
+    def _obfuscate_sql(query, options=None):
+        if 'WHERE table_schema' in query:
+            return re.sub(r'\s+', ' ', normalized_query or '').strip()
+        return re.sub(r'\s+', ' ', query or '').strip()
+
+    def _run_query(q):
+        with mysql_check._connect() as db:
+            with closing(db.cursor()) as cursor:
+                cursor.execute(q)
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        _run_query(test_query)
+        dd_run_check(mysql_check)
+
+    samples = aggregator.get_event_platform_events("dbm-samples")
+    matching = [s for s in samples if s['db']['query_signature'] == query_signature]
+    assert len(matching) == 1
+
+    sample = matching[0]
+    if disable_sql_obfuscation:
+        assert sample['db']['plan']['definition_raw'] is not None
+        assert sample['db']['statement_raw'] == test_query
+    else:
+        assert sample['db']['plan']['definition_raw'] is None
+        assert sample['db']['statement_raw'] is None
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(

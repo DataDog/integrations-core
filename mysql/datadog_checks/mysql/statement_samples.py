@@ -552,7 +552,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             plan_signature = compute_exec_plan_signature(normalized_plan)
 
         query_plan_cache_key = (query_cache_key, plan_signature)
-        disable_sql_obfuscation = self._config.obfuscation_config.get('disable_sql_obfuscation', False)
+        disable_sql_obfuscation = self._config.obfuscator_options.get('disable_sql_obfuscation', False)
         if self._seen_samples_ratelimiter.acquire(query_plan_cache_key):
             return {
                 "timestamp": row["timer_end_time_s"] * 1000,
