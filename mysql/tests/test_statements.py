@@ -542,7 +542,8 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agen
             False,
         ),
         (
-            "SELECT table_catalog FROM information_schema.columns WHERE ordinal_position != 5 AND table_name LIKE '%_list'",
+            "SELECT table_catalog FROM information_schema.columns "
+            "WHERE ordinal_position != 5 AND table_name LIKE '%_list'",
             'SELECT table_catalog FROM information_schema.columns WHERE ordinal_position != ? AND table_name LIKE ?',
             'd75672438d2bdc11',
             True,
