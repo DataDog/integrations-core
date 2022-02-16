@@ -75,8 +75,8 @@ def dd_environment(config_e2e):
 def instance_basic():
     return {
         'host': common.HOST,
-        'user': common.USER,
-        'pass': common.PASS,
+        'username': common.USER,
+        'password': common.PASS,
         'port': common.PORT,
         'disable_generic_tags': 'true',
     }
@@ -86,8 +86,8 @@ def instance_basic():
 def instance_complex():
     return {
         'host': common.HOST,
-        'user': common.USER,
-        'pass': common.PASS,
+        'username': common.USER,
+        'password': common.PASS,
         'port': common.PORT,
         'disable_generic_tags': 'true',
         'options': {
@@ -96,6 +96,8 @@ def instance_complex():
             'extra_innodb_metrics': True,
             'extra_performance_metrics': True,
             'schema_size_metrics': True,
+            'table_size_metrics': True,
+            'system_table_size_metrics': True,
         },
         'tags': tags.METRIC_TAGS,
         'queries': [
@@ -119,8 +121,8 @@ def instance_complex():
 def instance_additional_status():
     return {
         'host': common.HOST,
-        'user': common.USER,
-        'pass': common.PASS,
+        'username': common.USER,
+        'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
         'disable_generic_tags': 'true',
@@ -143,8 +145,8 @@ def instance_additional_status():
 def instance_additional_variable():
     return {
         'host': common.HOST,
-        'user': common.USER,
-        'pass': common.PASS,
+        'username': common.USER,
+        'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
         'disable_generic_tags': 'true',
@@ -167,8 +169,8 @@ def instance_additional_variable():
 def instance_status_already_queried():
     return {
         'host': common.HOST,
-        'user': common.USER,
-        'pass': common.PASS,
+        'username': common.USER,
+        'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
         'disable_generic_tags': 'true',
@@ -186,8 +188,8 @@ def instance_status_already_queried():
 def instance_var_already_queried():
     return {
         'host': common.HOST,
-        'user': common.USER,
-        'pass': common.PASS,
+        'username': common.USER,
+        'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
         'disable_generic_tags': 'true',
@@ -205,8 +207,8 @@ def instance_var_already_queried():
 def instance_invalid_var():
     return {
         'host': common.HOST,
-        'user': common.USER,
-        'pass': common.PASS,
+        'username': common.USER,
+        'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
         'disable_generic_tags': 'true',
@@ -229,8 +231,8 @@ def instance_invalid_var():
 def instance_custom_queries():
     return {
         'host': common.HOST,
-        'user': common.USER,
-        'pass': common.PASS,
+        'username': common.USER,
+        'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
         'disable_generic_tags': 'true',
@@ -249,7 +251,7 @@ def instance_custom_queries():
 
 @pytest.fixture(scope='session')
 def instance_error():
-    return {'host': common.HOST, 'user': 'unknown', 'pass': common.PASS, 'disable_generic_tags': 'true'}
+    return {'host': common.HOST, 'username': 'unknown', 'password': common.PASS, 'disable_generic_tags': 'true'}
 
 
 @pytest.fixture(scope='session')

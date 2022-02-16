@@ -1,5 +1,31 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 15.9.0 / 2022-02-10
+
+* [Added] Add `pyproject.toml` file. See [#11303](https://github.com/DataDog/integrations-core/pull/11303).
+* [Fixed] Fix style format for Python checks defined by a pyproject.toml file . See [#11483](https://github.com/DataDog/integrations-core/pull/11483).
+* [Fixed] Fix `pytest` and `tox` plugins for checks with only a `pyproject.toml`. See [#11477](https://github.com/DataDog/integrations-core/pull/11477).
+* [Fixed] Fix E2E for new base package versions. See [#11473](https://github.com/DataDog/integrations-core/pull/11473).
+* [Fixed] Fix package signing for checks with only a `pyproject.toml`. See [#11474](https://github.com/DataDog/integrations-core/pull/11474).
+
+## 15.8.0 / 2022-02-07
+
+* [Added] Support Python checks defined by a `pyproject.toml` file. See [#11233](https://github.com/DataDog/integrations-core/pull/11233).
+* [Added] Add snmp build-traps-db command. See [#11235](https://github.com/DataDog/integrations-core/pull/11235).
+* [Added] Add curated_metric column to check validation. See [#11168](https://github.com/DataDog/integrations-core/pull/11168).
+* [Fixed] Safely check the dashboards key exists before trying to write to it. See [#11285](https://github.com/DataDog/integrations-core/pull/11285).
+* [Fixed] Validate all `curated_metric` rows and properly validate empty `metadata.csv` files. See [#11273](https://github.com/DataDog/integrations-core/pull/11273).
+* [Fixed] More specific config validation error message. See [#11272](https://github.com/DataDog/integrations-core/pull/11272).
+* [Fixed] Unpin black. See [#11270](https://github.com/DataDog/integrations-core/pull/11270).
+
+## 15.7.0 / 2022-01-31
+
+* [Added] Add example image with requirements for media carousel. See [#11145](https://github.com/DataDog/integrations-core/pull/11145).
+* [Fixed] Pin black package. See [#11240](https://github.com/DataDog/integrations-core/pull/11240).
+* [Fixed] Don't overwrite year in license header when generating files. See [#11188](https://github.com/DataDog/integrations-core/pull/11188).
+* [Fixed] Add manual changelog entry for 7.30.1. See [#11142](https://github.com/DataDog/integrations-core/pull/11142).
+* [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
+
 ## 15.6.0 / 2022-01-08
 
 * [Added] Add discovery options to `ddev env check` command. See [#11044](https://github.com/DataDog/integrations-core/pull/11044).

@@ -251,6 +251,10 @@ PERFORMANCE_VARS = {
 
 SCHEMA_VARS = {'information_schema_size': ('mysql.info.schema.size', GAUGE)}
 
+TABLE_VARS = {
+    'information_table_index_size': ('mysql.info.table.index_size', GAUGE),
+    'information_table_data_size': ('mysql.info.table.data_size', GAUGE),
+}
 
 # Vars found in "show slave status" or "show replication status" (depending on mysql version)
 REPLICA_VARS = {

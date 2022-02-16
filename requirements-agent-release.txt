@@ -14,7 +14,7 @@ datadog-cacti==1.9.2; sys_platform == 'linux2'
 datadog-cassandra-nodetool==1.9.1
 datadog-cassandra==1.14.2
 datadog-ceph==2.5.1; sys_platform != 'win32'
-datadog-checks-base==23.7.4
+datadog-checks-base==24.0.0
 datadog-checks-dependency-provider==1.2.0
 datadog-checks-downloader==3.4.1
 datadog-cilium==1.10.2
@@ -25,7 +25,7 @@ datadog-cloud-foundry-api==1.3.1
 datadog-cockroachdb==1.9.2
 datadog-confluent-platform==1.7.1
 datadog-consul==1.22.1
-datadog-coredns==1.11.3; sys_platform == 'linux2'
+datadog-coredns==1.11.4; sys_platform == 'linux2'
 datadog-couch==4.2.1
 datadog-couchbase==1.19.0
 datadog-crio==1.8.3
@@ -62,7 +62,7 @@ datadog-hudi==2.0.1
 datadog-hyperv==1.5.0; sys_platform == 'win32'
 datadog-ibm-db2==1.9.1
 datadog-ibm-i==1.1.1
-datadog-ibm-mq==3.17.0
+datadog-ibm-mq==3.18.0
 datadog-ibm-was==1.12.1
 datadog-ignite==2.1.2
 datadog-iis==2.14.1; sys_platform == 'win32'
@@ -92,12 +92,12 @@ datadog-mcache==3.0.0; sys_platform != 'win32'
 datadog-mesos-master==2.1.1; sys_platform != 'win32'
 datadog-mesos-slave==2.11.1; sys_platform != 'win32'
 datadog-mongo==3.0.0
-datadog-mysql==8.0.2
+datadog-mysql==8.0.3
 datadog-nagios==1.9.1
 datadog-network==2.5.0
 datadog-nfsstat==1.9.1; sys_platform == 'linux2'
 datadog-nginx-ingress-controller==1.11.3
-datadog-nginx==5.0.0
+datadog-nginx==5.1.0
 datadog-openldap==1.8.1
 datadog-openmetrics==1.16.3
 datadog-openstack-controller==1.13.0
@@ -108,14 +108,14 @@ datadog-pdh-check==1.14.1; sys_platform == 'win32'
 datadog-pgbouncer==4.0.0; sys_platform != 'win32'
 datadog-php-fpm==1.13.1
 datadog-postfix==1.10.2; sys_platform != 'win32'
-datadog-postgres==12.0.2
+datadog-postgres==12.0.4
 datadog-powerdns-recursor==1.10.1
 datadog-presto==2.5.2
 datadog-process==2.1.2
 datadog-prometheus==3.3.1
 datadog-proxysql==3.3.1
 datadog-rabbitmq==2.2.1
-datadog-redisdb==4.3.1
+datadog-redisdb==4.3.2
 datadog-rethinkdb==2.1.1
 datadog-riak==2.4.1
 datadog-riakcs==2.7.1
@@ -128,7 +128,7 @@ datadog-snowflake==4.1.0
 datadog-solr==1.10.2
 datadog-sonarqube==1.5.2
 datadog-spark==2.2.0
-datadog-sqlserver==7.0.2
+datadog-sqlserver==7.1.0
 datadog-squid==1.11.1
 datadog-ssh-check==2.1.1
 datadog-statsd==1.8.1
@@ -138,20 +138,20 @@ datadog-system-swap==1.12.1
 datadog-tcp-check==4.2.1
 datadog-teamcity==1.14.1
 datadog-tenable==1.3.0
-datadog-tls==2.6.1
+datadog-tls==2.6.2
 datadog-tokumx==3.0.0
 datadog-tomcat==1.10.2
 datadog-twemproxy==1.11.1
 datadog-twistlock==2.1.1
 datadog-varnish==1.12.1
-datadog-vault==2.17.1
+datadog-vault==3.0.0
 datadog-vertica==3.1.1
 datadog-voltdb==1.4.1
 datadog-vsphere==5.12.1
-datadog-weblogic==1.0.1
+datadog-weblogic==1.0.2
 datadog-win32-event-log==2.11.1; sys_platform == 'win32'
 datadog-windows-performance-counters==1.0.1; sys_platform == 'win32'
 datadog-windows-service==4.0.0; sys_platform == 'win32'
 datadog-wmi-check==1.13.1; sys_platform == 'win32'
-datadog-yarn==2.1.1
+datadog-yarn==3.0.0
 datadog-zk==4.0.0; sys_platform != 'win32'

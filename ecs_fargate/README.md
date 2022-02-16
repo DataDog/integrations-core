@@ -70,7 +70,9 @@ aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-
 
 ##### AWS CloudFormation
 
-You can use [AWS CloudFormation][10] templating to configure your Fargate containers. Use the `AWS::ECS::TaskDefinition` resource within your CloudFormation template to set the Amazon ECS task and specify `FARGATE` as the required launch type for that task. You can then set the `Datadog` option to configure log management, like in the example below:
+You can use [AWS CloudFormation][10] templating to configure your Fargate containers. Use the `AWS::ECS::TaskDefinition` resource within your CloudFormation template to set the Amazon ECS task and specify `FARGATE` as the required launch type for that task. 
+
+For example:
 
 ```yaml
 Resources:
@@ -83,29 +85,11 @@ Resources:
       Cpu: 256
       Memory: 1GB
       ContainerDefinitions:
-        - Name: tomcat-test
-          Image: 'tomcat:jdk8-adoptopenjdk-openj9'
-          LogConfiguration:
-            LogDriver: awsfirelens
-            Options:
-              Name: datadog
-              Host: http-intake.logs.datadoghq.com
-              TLS: 'on'
-              dd_service: test-service
-              dd_source: test-source
-              provider: ecs
-              apikey: <API_KEY>
-          MemoryReservation: 500
-        - Name: log_router
-          Image: 'amazon/aws-for-fluent-bit:stable'
-          Essential: true
-          FirelensConfiguration:
-            Type: fluentbit
-            Options:
-              enable-ecs-log-metadata: true
-          MemoryReservation: 50
+        - Name: datadog-agent
+          Image: 'gcr.io/datadoghq/agent:latest'
+          Cpu: 100
+          Memory: 256MB
 ```
-**Note**: Use a [TaskDefinition secret][11] to avoid exposing the `apikey` in plain text.
 
 For more information on CloudFormation templating and syntax, see the [AWS CloudFormation documentation][12].
 
@@ -320,6 +304,51 @@ Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to 
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
+
+
+### AWS CloudFormation
+
+To use [AWS CloudFormation][10] templating, use the `AWS::ECS::TaskDefinition` resource and set the `Datadog` option to configure log management.
+
+For example, to configure Fluent Bit to send logs to Datadog:
+
+```yaml
+Resources:
+  ECSTDNJH3:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+          - FARGATE
+      Cpu: 256
+      Memory: 1GB
+      ContainerDefinitions:
+        - Name: tomcat-test
+          Image: 'tomcat:jdk8-adoptopenjdk-openj9'
+          LogConfiguration:
+            LogDriver: awsfirelens
+            Options:
+              Name: datadog
+              Host: http-intake.logs.datadoghq.com
+              TLS: 'on'
+              dd_service: test-service
+              dd_source: test-source
+              provider: ecs
+              apikey: <API_KEY>
+          MemoryReservation: 500
+        - Name: log_router
+          Image: 'amazon/aws-for-fluent-bit:stable'
+          Essential: true
+          FirelensConfiguration:
+            Type: fluentbit
+            Options:
+              enable-ecs-log-metadata: true
+          MemoryReservation: 50
+```
+
+**Note**: Use a [TaskDefinition secret][11] to avoid exposing the `apikey` in plain text.
+
+For more information on CloudFormation templating and syntax, see the [AWS CloudFormation documentation][12].
 
 ### Trace collection
 
