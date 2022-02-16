@@ -93,7 +93,6 @@ class MySql(AgentCheck):
         self._agent_hostname = None
         self._is_aurora = None
         self._config = MySQLConfig(self.instance)
-        self._only_custom_queries = is_affirmative(self.instance.get('only_custom_queries', False))
 
         # Create a new connection on every check run
         self._conn = None
@@ -179,7 +178,7 @@ class MySql(AgentCheck):
                 self.check_performance_schema_enabled(db)
 
                 # Metric collection
-                if not self._only_custom_queries:
+                if not self._config.only_custom_queries:
                     self._collect_metrics(db, tags=tags)
                     self._collect_system_metrics(self._config.host, db, tags)
 

@@ -40,6 +40,7 @@ class MySQLConfig(object):
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         self.min_collection_interval = instance.get('min_collection_interval', 15)
+        self.only_custom_queries = is_affirmative(instance.get('only_custom_queries', False))
         obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
         self.obfuscator_options = {
             # Valid values for this can be found at
