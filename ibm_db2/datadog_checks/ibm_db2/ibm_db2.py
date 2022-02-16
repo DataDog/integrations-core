@@ -30,6 +30,7 @@ class IbmDb2Check(AgentCheck):
         self._host = self.instance.get('host', '')
         self._port = self.instance.get('port', 50000)
         self._tags = self.instance.get('tags', [])
+        self._security = self.instance.get('security', 'none')
         self._tls_cert = self.instance.get('tls_cert')
 
         # Add global database tag
@@ -554,7 +555,7 @@ class IbmDb2Check(AgentCheck):
 
     def get_connection(self):
         target, username, password = self.get_connection_data(
-            self._db, self._username, self._password, self._host, self._port, self._tls_cert
+            self._db, self._username, self._password, self._host, self._port, self._security, self._tls_cert
         )
 
         # Get column names in lower case
