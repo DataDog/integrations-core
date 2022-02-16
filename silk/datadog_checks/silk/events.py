@@ -25,7 +25,7 @@ class SilkEvent(object):
         self.payload = {
             "timestamp": raw_event.get("timestamp"),
             "event_type": raw_event.get("labels"),
-            "alert_type": ALERT_TYPES[raw_event.get("level", "error")],
+            "alert_type": ALERT_TYPES[raw_event.get("level", "ERROR")],
             "tags": tags[:],
             "msg_title": raw_event.get("name"),
             "msg_text": raw_event.get("message"),

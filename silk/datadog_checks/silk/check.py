@@ -47,26 +47,26 @@ class SilkCheck(AgentCheck):
 
     def check(self, _):
         # Get system state and tags
-        self.submit_system_state()
+        system_tags = self.submit_system_state()
+
         # Submit service checks for each server
         self.submit_server_state()
 
-        metric_tags = self._tags + self._system_tags
-
         # Get events
-        self.collect_events(metric_tags)
+        self.collect_events(system_tags)
 
         # Get metrics
-        self.collect_metrics(metric_tags)
+        self.collect_metrics(system_tags)
 
         self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.OK, tags=self._tags)
 
-    def collect_metrics(self, metric_tags):
+    def collect_metrics(self, system_tags):
         get_method = getattr
         for path, metrics_obj in self.metrics_to_collect.items():
             # Need to submit an object of relevant tags
             try:
                 response_json, _ = self._get_data(path)
+                metric_tags = self._tags + system_tags
                 self.parse_metrics(
                     response_json, path, metrics_mapping=metrics_obj, get_method=get_method, tags=metric_tags
                 )
@@ -75,6 +75,7 @@ class SilkCheck(AgentCheck):
 
     def submit_system_state(self):
         # Get Silk State
+        system_tags = []
         try:
             response_hits, code = self._get_data(STATE_ENDPOINT)
         except Exception as e:
@@ -88,12 +89,16 @@ class SilkCheck(AgentCheck):
                 state = data.get('state').lower()
 
                 # Assign system-wide tags and metadata
-                self._assign_host_tags(data)
+                system_tags = [
+                    'system_name:{}'.format(data.get('system_name')),
+                    'system_id:{}'.format(data.get('system_id')),
+                ]
                 self._submit_version_metadata(data.get('system_version'))
                 self.service_check(self.STATE_SERVICE_CHECK, STATE_MAP[state], tags=self._tags)
             else:
                 msg = "Could not access system state, got response: {}".format(code)
                 self.log.debug(msg)
+        return system_tags
 
     def submit_server_state(self):
         # Get Silk State
@@ -138,11 +143,6 @@ class SilkCheck(AgentCheck):
                 self.log.debug("Could not parse version: %s", str(e))
         else:
             self.log.debug("Could not submit version metadata, got: %s", version)
-
-    def _assign_host_tags(self, state_data):
-        self._system_tags = []
-        self._system_tags.append('system_name:{}'.format(state_data.get('system_name')))
-        self._system_tags.append('system_id:{}'.format(state_data.get('system_id')))
 
     def parse_metrics(self, output, path, tags=None, metrics_mapping=None, get_method=None):
         """
@@ -196,7 +196,7 @@ class SilkCheck(AgentCheck):
             self.log.warning("Encountered error while getting data from %s: %s", path, str(e))
             raise
 
-    def collect_events(self, tags):
+    def collect_events(self, system_tags):
         self.log.debug("Starting events collection (query start time: %s).", self.latest_event_query)
         last_event_time = None
         collect_events_start_time = get_timestamp()
@@ -207,6 +207,7 @@ class SilkCheck(AgentCheck):
 
             for event in raw_events:
                 try:
+                    tags = self._tags + system_tags
                     normalized_event = SilkEvent(event, tags)
                     event_payload = normalized_event.get_datadog_payload()
                     self.event(event_payload)
