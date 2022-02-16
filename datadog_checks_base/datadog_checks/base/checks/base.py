@@ -442,7 +442,10 @@ class AgentCheck(object):
             raw_shared_config.update(intg_shared_config)
 
             shared_config = self.load_configuration_model(package_path, 'SharedConfig', raw_shared_config)
-            self.log_typos_in_options(intg_shared_config, shared_config, 'init_config')
+            try:
+                self.log_typos_in_options(intg_shared_config, shared_config, 'init_config')
+            except Exception as e:
+                self.log.debug("Failed to detect typos in `init_config` section: %s", e)
             if shared_config is not None:
                 self._config_model_shared = shared_config
 
@@ -452,8 +455,10 @@ class AgentCheck(object):
             raw_instance_config.update(intg_instance_config)
 
             instance_config = self.load_configuration_model(package_path, 'InstanceConfig', raw_instance_config)
-            self.log_typos_in_options(intg_instance_config, instance_config, 'instances')
-
+            try:
+                self.log_typos_in_options(intg_instance_config, instance_config, 'instances')
+            except Exception as e:
+                self.log.debug("Failed to detect typos in `instances` section: %s", e)
             if instance_config is not None:
                 self._config_model_instance = instance_config
 
