@@ -539,3 +539,276 @@ GAUGE_METRICS = {
     "proxy.process.log.log_files_open": "process.log.log_files_open",
     "proxy.process.log.log_files_space_used": "process.log.log_files_space_used",
 }
+
+REGEX_METRICS = [
+    {
+        'regex': r'proxy.process.ssl.cipher.user_agent.(.*)',
+        'name': 'process.ssl.cipher.user_agent',
+        'tags': ('cipher',),
+    },
+    {'regex': r'proxy.process.http.(1[0-9]{2})_responses', 'name': 'process.http.1xx_responses', 'tags': ('code',)},
+    {'regex': r'proxy.process.http.(2[0-9]{2})_responses', 'name': 'process.http.2xx_responses', 'tags': ('code',)},
+    {'regex': r'proxy.process.http.(3[0-9]{2})_responses', 'name': 'process.http.3xx_responses', 'tags': ('code',)},
+    {'regex': r'proxy.process.http.(4[0-9]{2})_responses', 'name': 'process.http.4xx_responses', 'tags': ('code',)},
+    {'regex': r'proxy.process.http.(5[0-9]{2})_responses', 'name': 'process.http.5xx_responses', 'tags': ('code',)},
+    {
+        'regex': r'proxy.process.cache.(.*?)\.bytes_used',
+        'name': 'proxy.process.cache.bytes_used',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.bytes_total',
+        'name': 'proxy.process.cache.bytes_total',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.ram_cache.total_bytes',
+        'name': 'proxy.process.cache.ram_cache.total_bytes',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.ram_cache.bytes_used',
+        'name': 'proxy.process.cache.ram_cache.bytes_used',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.ram_cache.hits',
+        'name': 'proxy.process.cache.ram_cache.hits',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.ram_cache.misses',
+        'name': 'proxy.process.cache.ram_cache.misses',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.pread_count',
+        'name': 'proxy.process.cache.pread_count',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.percent_full',
+        'name': 'proxy.process.cache.percent_full',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.lookup.active',
+        'name': 'proxy.process.cache.lookup.active',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.lookup.success',
+        'name': 'proxy.process.cache.lookup.success',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.lookup.failure',
+        'name': 'proxy.process.cache.lookup.failure',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.read.active',
+        'name': 'proxy.process.cache.read.active',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.read.success',
+        'name': 'proxy.process.cache.read.success',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.read.failure',
+        'name': 'proxy.process.cache.read.failure',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.write.active',
+        'name': 'proxy.process.cache.write.active',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.write.success',
+        'name': 'proxy.process.cache.write.success',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.write.failure',
+        'name': 'proxy.process.cache.write.failure',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.write.backlog.failure',
+        'name': 'proxy.process.cache.write.backlog.failure',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.update.active',
+        'name': 'proxy.process.cache.update.active',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.update.success',
+        'name': 'proxy.process.cache.update.success',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.update.failure',
+        'name': 'proxy.process.cache.update.failure',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.remove.active',
+        'name': 'proxy.process.cache.remove.active',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.remove.success',
+        'name': 'proxy.process.cache.remove.success',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.remove.failure',
+        'name': 'proxy.process.cache.remove.failure',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.evacuate.active',
+        'name': 'proxy.process.cache.evacuate.active',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.evacuate.success',
+        'name': 'proxy.process.cache.evacuate.success',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.evacuate.failure',
+        'name': 'proxy.process.cache.evacuate.failure',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.scan.active',
+        'name': 'proxy.process.cache.scan.active',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.scan.success',
+        'name': 'proxy.process.cache.scan.success',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.scan.failure',
+        'name': 'proxy.process.cache.scan.failure',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.direntries.total',
+        'name': 'proxy.process.cache.direntries.total',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.direntries.used',
+        'name': 'proxy.process.cache.direntries.used',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.directory_collision',
+        'name': 'proxy.process.cache.directory_collision',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.frags_per_doc.1',
+        'name': 'proxy.process.cache.frags_per_doc.1',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.frags_per_doc.2',
+        'name': 'proxy.process.cache.frags_per_doc.2',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.frags_per_doc.3+',
+        'name': 'proxy.process.cache.frags_per_doc.3+',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.read_busy.success',
+        'name': 'proxy.process.cache.read_busy.success',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.read_busy.failure',
+        'name': 'proxy.process.cache.read_busy.failure',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.write_bytes_stat',
+        'name': 'proxy.process.cache.write_bytes_stat',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.vector_marshals',
+        'name': 'proxy.process.cache.vector_marshals',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.hdr_marshals',
+        'name': 'proxy.process.cache.hdr_marshals',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.hdr_marshal_bytes',
+        'name': 'proxy.process.cache.hdr_marshal_bytes',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.gc_bytes_evacuated',
+        'name': 'proxy.process.cache.gc_bytes_evacuated',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.gc_frags_evacuated',
+        'name': 'proxy.process.cache.gc_frags_evacuated',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.sync.count',
+        'name': 'proxy.process.cache.sync.count',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.sync.bytes',
+        'name': 'proxy.process.cache.sync.bytes',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.sync.time',
+        'name': 'proxy.process.cache.sync.time',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.span.errors.read',
+        'name': 'proxy.process.cache.span.errors.read',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.span.errors.write',
+        'name': 'proxy.process.cache.span.errors.write',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.span.failing',
+        'name': 'proxy.process.cache.span.failing',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.span.offline',
+        'name': 'proxy.process.cache.span.offline',
+        'tags': ('cache_volume',),
+    },
+    {
+        'regex': r'proxy.process.cache.(.*?)\.span.online',
+        'name': 'proxy.process.cache.span.online',
+        'tags': ('cache_volume',),
+    },
+]
