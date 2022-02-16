@@ -36,9 +36,7 @@ dynamic = [
 ]
 
 [project.optional-dependencies]
-deps = [
-    "pyhdb==0.3.4",
-]
+deps = []
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"
