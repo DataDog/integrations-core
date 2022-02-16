@@ -47,12 +47,11 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
 
 STATEMENT_METRICS_QUERY = """\
 with qstats as (
-    select TOP {limit} text, query_hash, query_plan_hash, last_execution_time, plan_handle,
+    select TOP {limit} query_hash, query_plan_hash, last_execution_time, plan_handle,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'user_id') as user_id,
            {query_metrics_columns}
     from sys.dm_exec_query_stats
-        cross apply sys.dm_exec_sql_text(sql_handle)
     where last_execution_time > dateadd(second, -?, getdate())
 ),
 qstats_aggr as (
