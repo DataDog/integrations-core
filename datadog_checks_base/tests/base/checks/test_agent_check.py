@@ -673,6 +673,13 @@ class TestTags:
             aggregator.assert_metric(metric_name, count=0)
         aggregator.assert_service_check('test.can_check', status=AgentCheck.OK)
 
+    def test_global_metrics_filter_invalid(self, aggregator):
+        instance = {'global_metrics_filter': r'['}
+        with pytest.raises(Exception) as conf_error:
+            AgentCheck('myintegration', {}, [instance])
+
+        assert 'The pattern `[` in `global_metrics_filter` must be a valid regex' in str(conf_error)
+
 
 class LimitedCheck(AgentCheck):
     DEFAULT_METRIC_LIMIT = 10

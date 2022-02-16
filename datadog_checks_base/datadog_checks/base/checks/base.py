@@ -210,10 +210,10 @@ class AgentCheck(object):
         if self.global_metrics_filter is not None:
             try:
                 self.global_metrics_filter = re.compile(self.global_metrics_filter)
-            except re.error:
+            except Exception:
                 raise ConfigurationError(
                     'The pattern `{}` in `global_metrics_filter` must be a valid regex'.format(
-                        self.global_metrics_filter.pattern
+                        self.global_metrics_filter
                     )
                 )
 
