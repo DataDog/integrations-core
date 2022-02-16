@@ -650,6 +650,9 @@ class KubeletCheck(
                 if pvc_name and kube_ns:
                     break
 
+            if self.pod_list_utils.is_namespace_excluded(kube_ns):
+                continue
+
             pod_tags = self.pod_tags_by_pvc.get('{}/{}'.format(kube_ns, pvc_name), {})
             tags.extend(pod_tags)
             self.gauge(metric_name_with_namespace, val, tags=list(set(tags)), hostname=custom_hostname)
