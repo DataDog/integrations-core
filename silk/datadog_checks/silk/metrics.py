@@ -26,10 +26,7 @@ class Metric(object):
 
 
 METRICS = {
-    'hosts': Metric(
-        prefix='system',
-        metrics={'views_count': 'views_count', 'volumes_count': 'volumes_count'}
-    ),
+    'hosts': Metric(prefix='system', metrics={'views_count': 'views_count', 'volumes_count': 'volumes_count'}),
     'volumes': Metric(
         prefix='volume',
         metrics={
