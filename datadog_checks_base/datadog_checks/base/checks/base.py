@@ -206,6 +206,17 @@ class AgentCheck(object):
         )
 
         self.global_metrics_filter = self.instance.get('global_metrics_filter') if instance else None
+
+        if self.global_metrics_filter is not None:
+            try:
+                self.global_metrics_filter = re.compile(self.global_metrics_filter)
+            except re.error:
+                raise ConfigurationError(
+                    'The pattern `{}` in `global_metrics_filter` must be a valid regex'.format(
+                        self.global_metrics_filter.pattern
+                    )
+                )
+
         self.debug_metrics = {}
         if self.init_config is not None:
             self.debug_metrics.update(self.init_config.get('debug_metrics', {}))
@@ -609,10 +620,8 @@ class AgentCheck(object):
         if hostname is None:
             hostname = ''
 
-        if self.global_metrics_filter is not None:
-            collect_metric = re.match(self.global_metrics_filter, name)
-            if not collect_metric:
-                return
+        if self.global_metrics_filter is not None and not self.global_metrics_filter.search(name):
+            return
 
         if self.metric_limiter:
             if mtype in ONE_PER_CONTEXT_METRIC_TYPES:
