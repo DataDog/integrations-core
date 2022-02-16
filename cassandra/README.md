@@ -13,7 +13,7 @@ Get metrics from Cassandra in real time to:
 
 ### Installation
 
-The Cassandra check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Cassandra nodes. It's recommended to use Oracle's JDK for this integration.
+The Cassandra check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Cassandra nodes. It's recommended to use Oracle's JDK for this integration. If you have a containerized environment, update your **Agent Image** for collection of JMX-exposed metrics on your Cassandra Integration via [Autodiscovery][17].
 
 **Note**: This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect see the [JMX documentation][3] for detailed instructions. If you need to monitor more metrics, contact [Datadog support][4].
 
@@ -133,3 +133,4 @@ Need help? Contact [Datadog support][4].
 [14]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics
 [15]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics
 [16]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog
+[17]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containeragent
