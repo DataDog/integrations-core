@@ -402,7 +402,7 @@ The `pyproject.toml` file provides the metadata that is used to package and buil
 Once your `pyproject.toml` is ready, create a wheel:
 
 - With the `ddev` tooling (recommended): `ddev release build <INTEGRATION_NAME>`
-- Without the `ddev` tooling: `cd <INTEGRATION_DIR> && pip wheel --no-deps --wheel-dir dist .`
+- Without the `ddev` tooling: `cd <INTEGRATION_DIR> && pip wheel . --no-deps --wheel-dir dist`
 
 ### What's in the wheel?
 
