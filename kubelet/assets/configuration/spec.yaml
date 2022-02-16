@@ -15,13 +15,11 @@ files:
         URL of the cadvisor metrics prometheus endpoint.
         Pass an empty string, or set the cadvisor_port option to disable cadvisor metrics collection.
       example: http://10.8.0.1:10255/metrics/cadvisor
-      display_priority: 1
     - name: kubelet_metrics_endpoint
       description: |
         URL of the kubelet metrics prometheus endpoint
         Pass an empty string to disable kubelet metrics collection.
       example: http://10.8.0.1:10255/metrics
-      display_priority: 1
     - name: cadvisor_port
       description: |
         Metric collection for legacy (< 1.7.6) clusters via the kubelet's cadvisor port.
@@ -30,22 +28,20 @@ files:
 
         Port to connect to, uncomment and set accordingly to enable collection.
       example: 4194
-      display_priority: 1
     - name: enabled_rates
       description: |
         Allow list of rate type metrics to collect from cadvisor.
       example:
         - cpu.*
         - network.*
-      display_priority: 1
     - name: enabled_gauges
       description: |
         Allow list of gauge type metrics to collect from cadvisor.
       example:
         - filesystem.*
-      display_priority: 1
     - template: instances/openmetrics_legacy
       overrides:
+        prometheus_url.required: false
         prometheus_url.hidden: true
         prometheus_metrics_prefix.hidden: true
         min_collection_interval.value.example: 20
