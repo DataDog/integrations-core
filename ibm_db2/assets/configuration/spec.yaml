@@ -41,7 +41,10 @@ files:
           type: integer
           example: 50000
       - name: security
-        description: Set this parameter to `ssl` if you want to use the SSL protocol for a connection to the database server.
+        description: |
+          Set this parameter to `ssl` if you want to use the SSL protocol for a connection to the database server.
+          SSL can be used without specifying a certificate for connections to Db2 on Cloud on IBM Cloud. 
+          For those services the required certificate is already a part of the driver package (ibm-db).
         value:
           type: string
           example: none
