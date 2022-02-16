@@ -74,7 +74,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][8]
 
 ##### Metric collection
 
-For containerized environments, see the [Autodiscovery with JMX][9] guide, which includes [updating your Agent Image][17] on your clusters via Autodiscovery.
+For containerized environments, see the [Autodiscovery with JMX][9] guide, which includes [updating your Agent Image][17] on your clusters through Autodiscovery.
 
 ##### Log collection
 
