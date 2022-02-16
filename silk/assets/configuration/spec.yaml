@@ -19,14 +19,12 @@ files:
           Enable this option to collect Silk stats metrics tagged by blocksize.
         value:
           type: boolean
-          example: true
-          display_default: false
+          example: false
       - name: enable_read_write_statistics
         description: |
           Enable this option to collect Silk stats metrics differentiated by read and write.
         value:
           type: boolean
-          example: true
-          display_default: false
+          example: false
       - template: instances/http
       - template: instances/default

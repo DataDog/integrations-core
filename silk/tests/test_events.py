@@ -41,7 +41,6 @@ def test_event_payload():
         "tags": ["test:silk", "user:Internal"],
         "event_type": "EVENT, ACTION",
         "alert_type": "info",
-        "source_type_name": "silk",
     }
 
     normalized_event = SilkEvent(sample_raw_event, ["test:silk"])

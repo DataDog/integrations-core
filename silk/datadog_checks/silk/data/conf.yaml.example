@@ -53,12 +53,12 @@ instances:
     ## @param enable_blocksize_statistics - boolean - optional - default: false
     ## Enable this option to collect Silk stats metrics tagged by blocksize.
     #
-    # enable_blocksize_statistics: true
+    # enable_blocksize_statistics: false
 
     ## @param enable_read_write_statistics - boolean - optional - default: false
     ## Enable this option to collect Silk stats metrics differentiated by read and write.
     #
-    # enable_read_write_statistics: true
+    # enable_read_write_statistics: false
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.

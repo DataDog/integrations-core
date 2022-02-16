@@ -8,15 +8,9 @@ from six.moves.urllib.parse import urljoin, urlparse
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.time import get_timestamp
 
+from .constants import EVENT_PATH, OK_STATE, SERVERS_ENDPOINT, STATE_ENDPOINT, STATE_MAP
 from .events import SilkEvent
 from .metrics import BLOCKSIZE_METRICS, METRICS, READ_WRITE_METRICS
-
-EVENT_PATH = "events?timestamp__gte={}"
-
-STATE_ENDPOINT = 'system/state'
-SERVERS_ENDPOINT = 'system/servers'
-
-STATE_MAP = {'online': AgentCheck.OK, 'offline': AgentCheck.WARNING, 'degraded': AgentCheck.CRITICAL}
 
 
 class SilkCheck(AgentCheck):
@@ -117,7 +111,7 @@ class SilkCheck(AgentCheck):
                     ]
                     state = server.get('status').lower()
 
-                    if state == 'ok':
+                    if state == OK_STATE:
                         self.service_check(self.SERVERS_SERVICE_CHECK, AgentCheck.OK, tags=tags)
                     else:
                         # Other states are not documented
