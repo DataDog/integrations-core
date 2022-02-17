@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import json
 import os
+import time
+
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
 
@@ -174,6 +176,40 @@ def test_get_estimated_row_size_bytes(dbm_instance, file):
         computed_size += check.activity._get_estimated_row_size_bytes(a)
 
     assert abs((actual_size - computed_size) / float(actual_size)) <= 0.10
+
+
+def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
+    # test the activity collection loop rate limit
+    collection_interval = 0.1
+    dbm_instance['query_activity']['collection_interval'] = collection_interval
+    dbm_instance['query_activity']['run_sync'] = False
+    check = dd_run_check(dbm_instance)
+    check._connect()
+    check.check(dbm_instance)
+    sleep_time = 1
+    time.sleep(sleep_time)
+    max_collections = int(1 / collection_interval * sleep_time) + 1
+    check.cancel()
+    metrics = aggregator.metrics("dd.sqlserver.activity.collect_activity.payload_size")
+    assert max_collections / 2.0 <= len(metrics) <= max_collections
+
+
+def test_tx_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
+    # test the activity collection loop rate limit
+    collection_interval = 0.1
+    tx_collection_interval = 0.2  # double the main loop
+    dbm_instance['query_activity']['collection_interval'] = collection_interval
+    dbm_instance['query_activity']['tx_collection_interval'] = tx_collection_interval
+    dbm_instance['query_activity']['run_sync'] = False
+    check = dd_run_check(dbm_instance)
+    check._connect()
+    check.check(dbm_instance)
+    sleep_time = 1
+    time.sleep(sleep_time)
+    max_tx_activity_collections = int(1 / tx_collection_interval * sleep_time) + 1
+    check.cancel()
+    activity_metrics = aggregator.metrics("dd.sqlserver.activity.get_tx_activity.tx_rows")
+    assert max_tx_activity_collections / 2.0 <= len(activity_metrics) <= max_tx_activity_collections
 
 
 def _load_test_activity_json(filename):
