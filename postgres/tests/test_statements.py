@@ -635,7 +635,7 @@ def test_statement_metadata(
                 'query_signature': 'd9193c18a6f372d8',
                 'statement': "SELECT city FROM pg_sleep(3), persons WHERE city = 'hello'",
             },
-            ["xact_start", "query_start", "pid", "client_port", "client_addr", "blocking_pids"],
+            ["xact_start", "query_start", "pid", "client_port", "client_addr", "backend_type", "blocking_pids"],
             {
                 'usename': 'bob',
                 'state': 'idle in transaction',
@@ -700,6 +700,10 @@ def test_activity_snapshot_collection(
 
         for key in expected_out:
             assert expected_out[key] == bobs_query[key]
+        if POSTGRES_VERSION.split('.')[0] == "9":
+            # pg v < 10 does not have a backend_type column
+            # so we shouldn't see this key in our activity rows
+            expected_keys.remove('backend_type')
         for val in expected_keys:
             assert val in bobs_query
 
