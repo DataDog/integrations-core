@@ -51,9 +51,8 @@ instances:
     # port: 50000
 
     ## @param security - string - optional - default: none
-    ## Set this parameter to `ssl` if you want to use the SSL protocol for a connection to the database server.
-    ## SSL can be used without specifying a certificate for connections to Db2 on Cloud on IBM Cloud. 
-    ## For those services the required certificate is already a part of the driver package (ibm-db).
+    ## Set this parameter to `ssl` to use the SSL protocol for a connection to the database server using the default
+    ## certificate from the ibm-db driver package. Specifying `tls_cert` is not required when using this option.
     #
     # security: none
 
