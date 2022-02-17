@@ -26,6 +26,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 
 from .util import DatabaseConfigurationError, warning_with_tags
+from .version_utils import V9_6
 
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
 # character is 6 bytes
@@ -73,12 +74,13 @@ PG_STAT_ACTIVITY_COLS = [
     "backend_type",
 ]
 
-#
+PG_BLOCKING_PIDS_FUNC = ",pg_blocking_pids(pid) as blocking_pids"
+
 PG_STAT_ACTIVITY_QUERY = re.sub(
     r'\s+',
     ' ',
     """
-    SELECT {pg_stat_activity_cols}, pg_blocking_pids(pid) as blocking_pids FROM {pg_stat_activity_view}
+    SELECT {pg_stat_activity_cols} {pg_blocking_func} FROM {pg_stat_activity_view}
     WHERE coalesce(TRIM(query), '') != ''
     AND query_start IS NOT NULL
     {extra_filters}
@@ -233,8 +235,13 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_new_pg_stat_activity(self, available_activity_columns):
         start_time = time.time()
         extra_filters, params = self._get_extra_filters_and_params(filter_stale_idle_conn=True)
+        blocking_func = ""
+        # minimum version for pg_blocking_pids function is v9.6
+        if self._check.version >= V9_6:
+            blocking_func = PG_BLOCKING_PIDS_FUNC
         query = PG_STAT_ACTIVITY_QUERY.format(
             pg_stat_activity_cols=', '.join(available_activity_columns),
+            pg_blocking_func=blocking_func,
             pg_stat_activity_view=self._config.pg_stat_activity_view,
             extra_filters=extra_filters,
         )

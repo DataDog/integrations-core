@@ -704,6 +704,8 @@ def test_activity_snapshot_collection(
             # pg v < 10 does not have a backend_type column
             # so we shouldn't see this key in our activity rows
             expected_keys.remove('backend_type')
+            if POSTGRES_VERSION == '9.5':
+                expected_keys.remove('blocking_pids')
         for val in expected_keys:
             assert val in bobs_query
 
