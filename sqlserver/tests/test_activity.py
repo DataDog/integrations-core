@@ -178,14 +178,12 @@ def test_get_estimated_row_size_bytes(dbm_instance, file):
     assert abs((actual_size - computed_size) / float(actual_size)) <= 0.10
 
 
-def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
+def test_activity_collection_rate_limit(aggregator, dd_run_check, instance_docker):
     # test the activity collection loop rate limit
     collection_interval = 0.1
-    dbm_instance['query_activity']['collection_interval'] = collection_interval
-    dbm_instance['query_activity']['run_sync'] = False
-    check = dd_run_check(dbm_instance)
-    check._connect()
-    check.check(dbm_instance)
+    instance_docker['query_activity']['collection_interval'] = collection_interval
+    instance_docker['query_activity']['run_sync'] = False
+    check = dd_run_check(instance_docker)
     sleep_time = 1
     time.sleep(sleep_time)
     max_collections = int(1 / collection_interval * sleep_time) + 1
@@ -194,16 +192,14 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     assert max_collections / 2.0 <= len(metrics) <= max_collections
 
 
-def test_tx_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
+def test_tx_activity_collection_rate_limit(aggregator, dd_run_check, instance_docker):
     # test the activity collection loop rate limit
     collection_interval = 0.1
     tx_collection_interval = 0.2  # double the main loop
-    dbm_instance['query_activity']['collection_interval'] = collection_interval
-    dbm_instance['query_activity']['tx_collection_interval'] = tx_collection_interval
-    dbm_instance['query_activity']['run_sync'] = False
-    check = dd_run_check(dbm_instance)
-    check._connect()
-    check.check(dbm_instance)
+    instance_docker['query_activity']['collection_interval'] = collection_interval
+    instance_docker['query_activity']['tx_collection_interval'] = tx_collection_interval
+    instance_docker['query_activity']['run_sync'] = False
+    check = dd_run_check(instance_docker)
     sleep_time = 1
     time.sleep(sleep_time)
     max_tx_activity_collections = int(1 / tx_collection_interval * sleep_time) + 1

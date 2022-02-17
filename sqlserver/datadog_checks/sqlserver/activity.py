@@ -139,7 +139,7 @@ class SqlserverActivity(DBMAsyncJob):
         collection_interval = float(check.activity_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL))
         # tx collection interval should not be shorter than the main activity col interval
         tx_collection_interval = max(
-            self._config.activity_config.get('tx_collection_interval', DEFAULT_TX_COLLECTION_INTERVAL),
+            check.activity_config.get('tx_collection_interval', DEFAULT_TX_COLLECTION_INTERVAL),
             collection_interval,
         )
         if collection_interval <= 0:
