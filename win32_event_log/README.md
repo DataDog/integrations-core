@@ -218,4 +218,4 @@ Need help? Contact [Datadog support][7].
 [10]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics
 [11]: https://www.datadoghq.com/blog/windows-server-monitoring
 [12]: https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfile
-[13]: https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc722404(v=ws.11)
+[13]: https://docs.microsoft.com/en-us/windows/win32/eventlog/event-logging
