@@ -54,48 +54,39 @@ def test_node_check_legacy(aggregator, instance_legacy, mock_client):
 
 
 @pytest.mark.usefixtures('mock_data')
-def test_disabled_exporter_legacy(aggregator, instance_legacy, mock_client):
+@pytest.mark.parametrize(
+    'jmx_exporter_port, node_exporter_port, assert_jmx_metrics_enabled, assert_node_metrics_enabled',
+    [
+        pytest.param(0, 0, False, False, id='both disabled'),
+        pytest.param(11001, 0, True, False, id='node disabled'),
+        pytest.param(0, 11002, False, True, id='jmx disabled'),
+        pytest.param(11001, 11002, True, True, id='both enabled'),
+    ],
+)
+def test_disabled_exporter_legacy(
+    aggregator,
+    dd_run_check,
+    instance_legacy,
+    mock_client,
+    jmx_exporter_port,
+    node_exporter_port,
+    assert_jmx_metrics_enabled,
+    assert_node_metrics_enabled,
+):
     inst = copy.deepcopy(instance_legacy)
 
     # Test both JMX and NODE exporters disabled
     inst.update(
         {
-            "jmx_exporter_port": 0,
-            "node_exporter_port": 0,
+            "jmx_exporter_port": jmx_exporter_port,
+            "node_exporter_port": node_exporter_port,
         }
     )
     c = AmazonMskCheck('amazon_msk', {}, [inst])
     assert not c.run()
 
-    assert_jmx_metrics_legacy(aggregator, [], is_enabled=False)
-    assert_node_metrics_legacy(aggregator, [], is_enabled=False)
-
-    # Test NODE exporter disabled
-    inst.update(
-        {
-            "jmx_exporter_port": 11001,
-            "node_exporter_port": 0,
-        }
-    )
-    c = AmazonMskCheck('amazon_msk', {}, [inst])
-    assert not c.run()
-
-    assert_jmx_metrics_legacy(aggregator, [], is_enabled=True)
-    assert_node_metrics_legacy(aggregator, [], is_enabled=False)
-
-    # Test JMX exporter disabled
-    aggregator.reset()
-    inst.update(
-        {
-            "jmx_exporter_port": 0,
-            "node_exporter_port": 11002,
-        }
-    )
-    c = AmazonMskCheck('amazon_msk', {}, [inst])
-    assert not c.run()
-
-    assert_jmx_metrics_legacy(aggregator, [], is_enabled=False)
-    assert_node_metrics_legacy(aggregator, [], is_enabled=True)
+    assert_jmx_metrics(aggregator, [], is_enabled=assert_jmx_metrics_enabled)
+    assert_node_metrics(aggregator, [], is_enabled=assert_node_metrics_enabled)
 
 
 @pytest.mark.usefixtures('mock_data')
@@ -137,48 +128,39 @@ def test_node_check(aggregator, dd_run_check, instance, mock_client):
 
 @pytest.mark.usefixtures('mock_data')
 @pytest.mark.skipif(PY2, reason='Test only available on Python 3')
-def test_disabled_exporter_check(aggregator, dd_run_check, instance, mock_client):
+@pytest.mark.parametrize(
+    'jmx_exporter_port, node_exporter_port, assert_jmx_metrics_enabled, assert_node_metrics_enabled',
+    [
+        pytest.param(0, 0, False, False, id='both disabled'),
+        pytest.param(11001, 0, True, False, id='node disabled'),
+        pytest.param(0, 11002, False, True, id='jmx disabled'),
+        pytest.param(11001, 11002, True, True, id='both enabled'),
+    ],
+)
+def test_disabled_exporter_check(
+    aggregator,
+    dd_run_check,
+    instance,
+    mock_client,
+    jmx_exporter_port,
+    node_exporter_port,
+    assert_jmx_metrics_enabled,
+    assert_node_metrics_enabled,
+):
     inst = copy.deepcopy(instance)
 
     # Test both JMX and NODE exporters disabled
     inst.update(
         {
-            "jmx_exporter_port": 0,
-            "node_exporter_port": 0,
+            "jmx_exporter_port": jmx_exporter_port,
+            "node_exporter_port": node_exporter_port,
         }
     )
     c = AmazonMskCheck('amazon_msk', {}, [inst])
     dd_run_check(c)
 
-    assert_jmx_metrics(aggregator, [], is_enabled=False)
-    assert_node_metrics(aggregator, [], is_enabled=False)
-
-    # Test NODE exporter disabled
-    inst.update(
-        {
-            "jmx_exporter_port": 11001,
-            "node_exporter_port": 0,
-        }
-    )
-    c = AmazonMskCheck('amazon_msk', {}, [inst])
-    dd_run_check(c)
-
-    assert_jmx_metrics(aggregator, [], is_enabled=True)
-    assert_node_metrics(aggregator, [], is_enabled=False)    
-
-    # Test JMX exporter disabled
-    aggregator.reset()
-    inst.update(
-        {
-            "jmx_exporter_port": 0,
-            "node_exporter_port": 11002,
-        }
-    )
-    c = AmazonMskCheck('amazon_msk', {}, [inst])
-    dd_run_check(c)
-
-    assert_jmx_metrics(aggregator, [], is_enabled=False)
-    assert_node_metrics(aggregator, [], is_enabled=True)
+    assert_jmx_metrics(aggregator, [], is_enabled=assert_jmx_metrics_enabled)
+    assert_node_metrics(aggregator, [], is_enabled=assert_node_metrics_enabled)
 
 
 def assert_node_metrics_legacy(aggregator, tags, is_enabled=True):
