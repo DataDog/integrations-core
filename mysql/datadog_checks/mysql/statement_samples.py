@@ -542,6 +542,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             plan_signature = compute_exec_plan_signature(normalized_plan)
 
         query_plan_cache_key = (query_cache_key, plan_signature)
+        disable_sql_obfuscation = is_affirmative(self._config.obfuscator_options.get('disable_sql_obfuscation', False))
         if self._seen_samples_ratelimiter.acquire(query_plan_cache_key):
             return {
                 "timestamp": row["timer_end_time_s"] * 1000,
@@ -559,12 +560,14 @@ class MySQLStatementSamples(DBMAsyncJob):
                     "instance": row['current_schema'],
                     "plan": {
                         "definition": obfuscated_plan,
+                        "definition_raw": plan if disable_sql_obfuscation else None,
                         "signature": plan_signature,
                         "collection_errors": collection_errors if collection_errors else None,
                     },
                     "query_signature": query_signature,
                     "resource_hash": apm_resource_hash,
                     "statement": obfuscated_statement,
+                    "statement_raw": row['sql_text'] if disable_sql_obfuscation else None,
                     "metadata": {
                         "tables": statement['metadata'].get('tables', None),
                         "commands": statement['metadata'].get('commands', None),

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -36,6 +36,7 @@ class ObfuscatorOptions(BaseModel):
     collect_comments: Optional[bool]
     collect_metadata: Optional[bool]
     collect_tables: Optional[bool]
+    disable_sql_obfuscation: Optional[bool]
     replace_digits: Optional[bool]
 
 

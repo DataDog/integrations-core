@@ -446,6 +446,64 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agen
     assert metric['dd_commands'] == expected_metadata_payload['commands']
 
 
+@pytest.mark.e2e
+@pytest.mark.parametrize(
+    "query,normalized_query,query_signature,disable_sql_obfuscation",
+    [
+        (
+            "SELECT table_schema FROM information_schema.tables WHERE table_schema = 'processlist'",
+            'SELECT table_schema FROM information_schema.tables WHERE table_schema = ?',
+            'dc18df8a6966a866',
+            True,
+        ),
+        (
+            "SELECT table_schema FROM information_schema.tables WHERE table_schema = 'processlist'",
+            'SELECT table_schema FROM information_schema.tables WHERE table_schema = ?',
+            'dc18df8a6966a866',
+            False,
+        ),
+        (
+            "SELECT table_catalog FROM information_schema.columns "
+            "WHERE ordinal_position != 5 AND table_name LIKE '%_list'",
+            'SELECT table_catalog FROM information_schema.columns WHERE ordinal_position != ? AND table_name LIKE ?',
+            'd75672438d2bdc11',
+            True,
+        ),
+    ],
+)
+def test_deobfuscated_statement(
+    dd_agent_check,
+    dbm_instance,
+    bob_conn,
+    query,
+    normalized_query,
+    query_signature,
+    disable_sql_obfuscation,
+):
+    dbm_instance['obfuscator_options'] = {'disable_sql_obfuscation': disable_sql_obfuscation}
+
+    with closing(bob_conn.cursor()) as cursor:
+        cursor.execute(query)
+
+    aggregator = dd_agent_check(dbm_instance)
+
+    samples = aggregator.get_event_platform_events("dbm-samples")
+    matching = [s for s in samples if s['db']['query_signature'] == query_signature]
+    assert len(matching) == 1
+
+    sample = matching[0]
+    if disable_sql_obfuscation:
+        assert sample['db']['statement'] == normalized_query
+        assert sample['db']['plan']['definition'] is not None
+        assert sample['db']['statement_raw'] == query
+        assert sample['db']['plan']['definition_raw'] is not None
+    else:
+        assert sample['db']['statement'] == normalized_query
+        assert sample['db']['plan']['definition'] is not None
+        assert sample['db']['statement_raw'] is None
+        assert sample['db']['plan']['definition_raw'] is None
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(

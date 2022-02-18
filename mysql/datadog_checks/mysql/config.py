@@ -45,6 +45,7 @@ class MySQLConfig(object):
             # Valid values for this can be found at
             # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/database.md#connection-level-attributes
             'dbms': 'mysql',
+            'disable_sql_obfuscation': obfuscator_options_config.get('disable_sql_obfuscation', False),
             'replace_digits': obfuscator_options_config.get(
                 'replace_digits', obfuscator_options_config.get('quantize_sql_tables', False)
             ),
