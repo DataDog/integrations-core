@@ -67,7 +67,7 @@ def validate_jmx_metrics(check_name, saved_errors, verbose):
         yaml.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, no_duplicates_constructor)
         yaml.load(read_file(jmx_metrics_file), Loader=yaml.FullLoader).get('jmx_metrics')
     except Exception as errors:
-        saved_errors[(check_name, jmx_metrics_file)].append("The config contains the following duplicates keys:")
+        saved_errors[(check_name, jmx_metrics_file)].append("The config contains the following duplicates entries:")
         # Convert Exception -> String -> List
         errors = literal_eval(str(errors))
         for e in errors:
