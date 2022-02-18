@@ -23,6 +23,7 @@ from .common import (
     INIT_CONFIG_OBJECT_NAME,
     get_local_driver,
 )
+from .utils import HighCardinalityQueries
 
 try:
     import pyodbc
@@ -237,6 +238,31 @@ def instance_autodiscovery(instance_docker):
     return instance_docker
 
 
+def pytest_addoption(parser):
+    parser.addoption(
+        "--run_high_cardinality_forever",
+        action="store_true",
+        default=False,
+        help="run a test that executes high cardinality queries forever unless it's terminated",
+    )
+
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers", "run_high_cardinality_forever: mark a test to run high cardinality queries forever"
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--run_high_cardinality_forever"):
+        # --run_high_cardinality_forever given in cli: do not skip test
+        return
+    skip_run_high_cardinality_forever = pytest.mark.skip(reason="need --run_high_cardinality_forever option to run")
+    for item in items:
+        if "run_high_cardinality_forever" in item.keywords:
+            item.add_marker(skip_run_high_cardinality_forever)
+
+
 E2E_METADATA = {'docker_platform': 'windows' if using_windows_containers() else 'linux'}
 
 
@@ -251,19 +277,28 @@ def dd_environment(full_e2e_config):
         raise Exception("pyodbc is not installed!")
 
     def sqlserver_can_connect():
-        conn = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;'.format(get_local_driver(), DOCKER_SERVER)
-        pyodbc.connect(conn, timeout=DEFAULT_TIMEOUT, autocommit=True)
+        conn_str = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;'.format(
+            get_local_driver(), DOCKER_SERVER
+        )
+        pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
+
+    def high_cardinality_env_is_ready():
+        return HighCardinalityQueries(
+            {'driver': get_local_driver(), 'host': DOCKER_SERVER, 'username': 'sa', 'password': 'Password123'}
+        ).is_ready()
 
     compose_file = os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml')
-    conditions = [
-        WaitFor(sqlserver_can_connect, wait=3, attempts=10),
-    ]
+    conditions = [WaitFor(sqlserver_can_connect, wait=3, attempts=10)]
 
-    completion_message = 'sqlserver setup completed'
+    completion_message = 'INFO: setup.sql completed.'
     if os.environ["COMPOSE_FOLDER"] == 'compose-ha':
         completion_message = (
             'Always On Availability Groups connection with primary database established ' 'for secondary database'
         )
+    if 'compose-high-cardinality' in os.environ["COMPOSE_FOLDER"]:
+        # This env is a highly loaded database and is expected to take a while to setup.
+        # This will wait about 8 minutes before timing out.
+        conditions += [WaitFor(high_cardinality_env_is_ready, wait=5, attempts=90)]
 
     conditions += [CheckDockerLogs(compose_file, completion_message)]
 

@@ -450,6 +450,10 @@ coverage:
         target: 75
         flags:
         - scylla
+      Silk:
+        target: 75
+        flags:
+        - silk
       SingleStore:
         target: 75
         flags:
@@ -558,6 +562,10 @@ coverage:
         target: 75
         flags:
         - fluentd
+      pulsar:
+        target: 75
+        flags:
+        - pulsar
       vSphere:
         target: 75
         flags:
@@ -1074,6 +1082,11 @@ flags:
     paths:
     - proxysql/datadog_checks/proxysql
     - proxysql/tests
+  pulsar:
+    carryforward: true
+    paths:
+    - pulsar/datadog_checks/pulsar
+    - pulsar/tests
   rabbitmq:
     carryforward: true
     paths:
@@ -1109,6 +1122,11 @@ flags:
     paths:
     - scylla/datadog_checks/scylla
     - scylla/tests
+  silk:
+    carryforward: true
+    paths:
+    - silk/datadog_checks/silk
+    - silk/tests
   singlestore:
     carryforward: true
     paths:

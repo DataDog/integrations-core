@@ -1105,3 +1105,36 @@ def test_create_pod_tags_by_pvc(monkeypatch, tagger):
     empty = defaultdict(set)
     pod_tags_by_pvc = check._create_pod_tags_by_pvc({})
     assert pod_tags_by_pvc == empty
+
+
+def test_ignore_namespace_for_volume_metrics(monkeypatch):
+    instance = {}
+    check = mock_kubelet_check(monkeypatch, [instance])
+    monkeypatch.setattr(check, 'gauge', mock.Mock())
+
+    volume_metrics = [
+        'kubernetes.kubelet.volume.stats.available_bytes',
+        'kubernetes.kubelet.volume.stats.capacity_bytes',
+        'kubernetes.kubelet.volume.stats.inodes',
+        'kubernetes.kubelet.volume.stats.inodes_free',
+        'kubernetes.kubelet.volume.stats.inodes_used',
+        'kubernetes.kubelet.volume.stats.used_bytes',
+    ]
+
+    # Call excluding all namespaces. Volume metrics should not be reported.
+    c_is_excluded = mock.Mock(return_value=True)
+    monkeypatch.setattr('datadog_checks.kubelet.common.c_is_excluded', c_is_excluded)
+    check.check(instance)
+    metrics_reported = [call.args[0] for call in check.gauge.mock_calls]
+
+    for metric in volume_metrics:
+        assert metric not in metrics_reported
+
+    # Call without excluding namespaces. Volume metrics should be reported.
+    c_is_excluded = mock.Mock(return_value=False)
+    monkeypatch.setattr('datadog_checks.kubelet.common.c_is_excluded', c_is_excluded)
+    check.check(instance)
+    metrics_reported = [call.args[0] for call in check.gauge.mock_calls]
+
+    for metric in volume_metrics:
+        assert metric in metrics_reported

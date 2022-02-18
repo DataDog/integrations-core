@@ -12,6 +12,20 @@ from pkg_resources import parse_version
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mysql import MySql
+from datadog_checks.mysql.const import (
+    BINLOG_VARS,
+    GALERA_VARS,
+    GROUP_REPLICATION_VARS,
+    INNODB_VARS,
+    OPTIONAL_STATUS_VARS,
+    OPTIONAL_STATUS_VARS_5_6_6,
+    PERFORMANCE_VARS,
+    REPLICA_VARS,
+    SCHEMA_VARS,
+    STATUS_VARS,
+    SYNTHETIC_VARS,
+    VARIABLES_VARS,
+)
 
 from . import common, tags, variables
 from .common import HOST, MYSQL_REPLICATION, MYSQL_VERSION_PARSED, PORT, requires_static_version
@@ -89,6 +103,7 @@ def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
         + variables.SCHEMA_VARS
         + variables.SYNTHETIC_VARS
         + variables.STATEMENT_VARS
+        + variables.TABLE_VARS
     )
     if MYSQL_REPLICATION == 'group':
         testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
@@ -198,6 +213,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         + variables.SCHEMA_VARS
         + variables.SYNTHETIC_VARS
         + variables.STATEMENT_VARS
+        + variables.TABLE_VARS
     )
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb':
@@ -327,6 +343,41 @@ def test_custom_queries(aggregator, instance_custom_queries, dd_run_check):
 
     aggregator.assert_metric('alice.age', value=25, tags=tags.METRIC_TAGS)
     aggregator.assert_metric('bob.age', value=20, tags=tags.METRIC_TAGS)
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_only_custom_queries(aggregator, dd_run_check, instance_custom_queries):
+    instance_custom_queries['only_custom_queries'] = True
+    check = MySql(common.CHECK_NAME, {}, [instance_custom_queries])
+    dd_run_check(check)
+
+    standard_metric_sets = [
+        STATUS_VARS,
+        VARIABLES_VARS,
+        INNODB_VARS,
+        BINLOG_VARS,
+        OPTIONAL_STATUS_VARS,
+        OPTIONAL_STATUS_VARS_5_6_6,
+        GALERA_VARS,
+        PERFORMANCE_VARS,
+        SCHEMA_VARS,
+        SYNTHETIC_VARS,
+        REPLICA_VARS,
+        GROUP_REPLICATION_VARS,
+    ]
+    for metric_set in standard_metric_sets:
+        for metric_def in metric_set.values():
+            metric = metric_def[0]
+            aggregator.assert_metric(metric, count=0)
+
+    # Internal check metrics are still allowed even if only_custom_queries is enabled
+    internal_metrics = [m for m in aggregator.metric_names if m.startswith('dd.')]
+    for m in internal_metrics:
+        aggregator.assert_metric(m, at_least=0)
+
+    aggregator.assert_metric('alice.age', value=25, tags=tags.METRIC_TAGS)
+    aggregator.assert_metric('bob.age', value=20, tags=tags.METRIC_TAGS)
+    aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.integration

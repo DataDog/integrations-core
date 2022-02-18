@@ -1,2 +1,0 @@
-beautifulsoup4==4.9.3; python_version < "3.0"
-beautifulsoup4==4.10.0; python_version > "3.0"

@@ -275,3 +275,28 @@ ROUTE_METRICS_TO_TRANSFORM = [
     'vault_route_read_',
     'vault_route_rollback_',
 ]
+
+KNOWN_GAUGES = {'vault_runtime_free_count', 'vault_runtime_malloc_count'}
+
+
+def construct_metrics_config(metric_map, type_overrides):
+    dynamic_metrics = {'go_memstats_alloc_bytes', 'go_memstats_alloc_bytes_total'}
+    metrics = []
+    for raw_metric_name, metric_name in metric_map.items():
+        if raw_metric_name in dynamic_metrics:
+            continue
+        elif raw_metric_name.endswith('_total'):
+            raw_metric_name = raw_metric_name[:-6]
+            metric_name = metric_name[:-6]
+        elif metric_name.endswith('.count') and raw_metric_name not in KNOWN_GAUGES:
+            metric_name = metric_name[:-6]
+
+        config = {raw_metric_name: {'name': metric_name}}
+        if raw_metric_name in type_overrides:
+            config[raw_metric_name]['type'] = type_overrides[raw_metric_name]
+
+        metrics.append(config)
+
+    metrics.append({'go_memstats_alloc_bytes': {'name': 'go.memstats.alloc.bytes', 'type': 'native_dynamic'}})
+
+    return metrics

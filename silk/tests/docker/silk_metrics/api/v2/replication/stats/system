@@ -1,0 +1,13 @@
+{
+   "hits":[
+      {
+         "logical_in":0,
+         "logical_out":11685069,
+         "physical_in":0,
+         "physical_out":11709845,
+         "resolution":5,
+         "timestamp":1638837180
+      }
+   ],
+   "total":1
+}

@@ -306,10 +306,12 @@ PROMETHEUS_METRICS = [
     "workers.watchdog_miss.count",
 ]
 
-FLAKY_METRICS = [
-    'listener.downstream_cx_active',
+FLAKY_METRICS = {
+    "listener.downstream_cx_active",
+    "listener.downstream_cx_destroy.count",
     "cluster.internal.upstream_rq.count",
     "cluster.internal.upstream_rq_completed.count",
     "cluster.internal.upstream_rq_xx.count",
-    'envoy.cluster.http2.keepalive_timeout.count',
-]
+    "cluster.http2.keepalive_timeout.count",
+    "cluster.upstream_rq_xx.count",
+}
