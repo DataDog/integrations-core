@@ -1,0 +1,33 @@
+{
+  "display_name": "Helm",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "helm",
+  "metric_prefix": "helm.",
+  "metric_to_check": "helm.release",
+  "creates_events": false,
+  "short_description": "Track your Helm deployments with Datadog",
+  "guid": "7f57a1f2-6dc6-4029-ae9c-426238ea2f86",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Helm",
+  "categories": [
+    "configuration & deployment",
+    "containers"
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "helm",
+  "assets": {
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}
