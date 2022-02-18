@@ -25,7 +25,7 @@ The Windows Event Log check is included in the [Datadog Agent][1] package. There
 
 First ensure that you have set `logs_enabled: true` in your `datadog.yaml` file.
 
-To collect logs from specific Windows events, add the channels to the `conf.d/win32_event_log.d/conf.yaml` file manually, or use the Datadog Agent Manager.
+To collect logs from specific Windows events, add the channels to the `conf.d/win32_event_log.d/conf.yaml` file manually, or use the Datadog Agent Manager. See the [Windows Event Logs documentation][13].
 
 To see the channel list, run the following command in a PowerShell:
 
@@ -53,9 +53,9 @@ Then add the channels in your `win32_event_log.d/conf.yaml` configuration file:
 ```yaml
 logs:
   - type: windows_event
-    channel_path: "<CHANNEL_1>"
-    source: "windows.events"
-    service: myservice
+    channel_path: Security
+    source: windows.events
+    service: Windows
 
   - type: windows_event
     channel_path: "<CHANNEL_2>"
@@ -105,31 +105,60 @@ Double-check your filters' values with <code>Get-WmiObject</code> if the integra
     For each filter, add an instance in the configuration file at `win32_event_log.d/conf.yaml`.
 
     Some example filters:
+    
+    ```yaml
+    - type: windows_event
+        channel_path: Security
+        source: windows.events
+        service: Windows       
+        log_processing_rules:
+        - type: include_at_match
+          name: relevant_security_events
+          pattern: .*(?i)eventid.+(1102|4624|4625|4634|4648|4728|4732|4735|4737|4740|4755|4756)
+      - type: windows_event
+        channel_path: System
+        source: windows.events
+        service: Windows       
+        log_processing_rules:
+        - type: include_at_match
+          name: system_errors_and_warnings
+          pattern: .*(?i)level.+((?i)(warning|error))
+      - type: windows_event
+        channel_path: Application
+        source: windows.events
+        service: Windows       
+        log_processing_rules:
+        - type: include_at_match
+          name: application_errors_and_warnings
+          pattern: .*(?i)level.+((?i)(warning|error))
+    ```
 
-   ```yaml
-   instances:
-     # The following captures errors and warnings from SQL Server which
-     # puts all events under the MSSQLSERVER source and tag them with #sqlserver.
-     - tags:
-         - sqlserver
-       type:
-         - Warning
-         - Error
-       log_file:
-         - Application
-       source_name:
-         - MSSQLSERVER
+    ```yaml
+    instances:
+      # The following captures errors and warnings from SQL Server which
+      # puts all events under the MSSQLSERVER source and tag them with #sqlserver.
+      - tags:
+          - sqlserver
+        type:
+          - Warning
+          - Error
+        log_file:
+          - Application
+        source_name:
+          - MSSQLSERVER
 
-     # This instance captures all system errors and tags them with #system.
-     - tags:
-         - system
-       type:
-         - Error
-       log_file:
-         - System
-   ```
+      # This instance captures all system errors and tags them with #system.
+      - tags:
+          - system
+        type:
+          - Error
+        log_file:
+          - System
+    ```
 
 2. [Restart the Agent][4] using the Agent Manager (or restart the service).
+
+For more examples of filtering logs, see the [Advanced Log Collection documentation][12].
 
 ### Validation
 
@@ -188,3 +217,5 @@ Need help? Contact [Datadog support][7].
 [9]: https://www.datadoghq.com/blog/monitoring-windows-server-2012
 [10]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics
 [11]: https://www.datadoghq.com/blog/windows-server-monitoring
+[12]: https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfile
+[13]: https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc722404(v=ws.11)
