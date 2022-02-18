@@ -42,6 +42,7 @@ class InstanceConfig(BaseModel):
     only_custom_queries: Optional[bool]
     password: str
     port: Optional[int]
+    security: Optional[str]
     service: Optional[str]
     tags: Optional[Sequence[str]]
     tls_cert: Optional[str]
