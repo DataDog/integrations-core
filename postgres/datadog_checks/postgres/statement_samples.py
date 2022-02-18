@@ -237,7 +237,8 @@ class PostgresStatementSamples(DBMAsyncJob):
         extra_filters, params = self._get_extra_filters_and_params(filter_stale_idle_conn=True)
         blocking_func = ""
         # minimum version for pg_blocking_pids function is v9.6
-        if self._check.version >= V9_6:
+        # only call pg_blocking_pids as often as we collect activity snapshots
+        if self._check.version >= V9_6 and self._report_activity_event():
             blocking_func = PG_BLOCKING_PIDS_FUNC
         query = PG_STAT_ACTIVITY_QUERY.format(
             pg_stat_activity_cols=', '.join(available_activity_columns),
