@@ -53,7 +53,7 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 include = [
-    "/datadog_checks",
+    "/datadog_checks/pulsar",
 ]
 dev-mode-dirs = [
     ".",
