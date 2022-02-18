@@ -57,7 +57,7 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 include = [
-    "/datadog_checks",
+    "/datadog_checks/cloud_foundry_api",
 ]
 dev-mode-dirs = [
     ".",
