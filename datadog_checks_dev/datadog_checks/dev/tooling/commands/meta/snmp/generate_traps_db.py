@@ -211,14 +211,14 @@ def write_compact_trap_db(trap_db_per_mib, output_file, use_json=False):
     compact_db = {"traps": {}, "vars": {}, "mibs": []}
     for mib, trap_db in trap_db_per_mib.items():
         for trap_oid, trap in trap_db["traps"].items():
-            if trap_oid in compact_db["traps"] and trap["name"] != compact_db["traps"][trap_oid]["name"]:
+            if trap_oid in compact_db["traps"]:
                 echo_warning(
-                    "Found name conflict for trap OID {}, ({} != {}). Will ignore".format(
-                        trap_oid, trap['name'], compact_db["traps"][trap_oid]["name"]
+                    "Found name conflict for trap OID {}, ({}::{} != {}::{}). Will ignore".format(
+                        trap_oid, mib, trap['name'], compact_db["traps"]['mib'], compact_db["traps"][trap_oid]["name"]
                     )
                 )
                 conflict_oids.add(trap_oid)
-            compact_db["traps"][trap_oid] = trap
+            compact_db["traps"][trap_oid] = {"mib": mib} | trap
         for var_oid, var in trap_db["vars"].items():
             if var_oid in compact_db["vars"] and var["name"] != compact_db["vars"][var_oid]["name"]:
                 echo_warning(
