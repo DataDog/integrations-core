@@ -72,11 +72,13 @@ instances:
 
     ## @param jmx_exporter_port - integer - optional - default: 11001
     ## The port on which the JMX Exporter serves metrics.
+    ## Set the port to 0 to disable.
     #
     # jmx_exporter_port: 11001
 
     ## @param node_exporter_port - integer - optional - default: 11002
     ## The port on which the Node Exporter serves metrics.
+    ## Set the port to 0 to disable.
     #
     # node_exporter_port: 11002
 
