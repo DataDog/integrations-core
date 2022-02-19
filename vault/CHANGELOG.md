@@ -1,5 +1,9 @@
 # CHANGELOG - Vault
 
+## 3.0.1 / 2022-02-19
+
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+
 ## 3.0.0 / 2022-02-16
 
 * [Added] Add `pyproject.toml` file. See [#11453](https://github.com/DataDog/integrations-core/pull/11453).
