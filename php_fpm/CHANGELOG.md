@@ -1,5 +1,11 @@
 # CHANGELOG - php_fpm
 
+## 2.0.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11415](https://github.com/DataDog/integrations-core/pull/11415).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
+
 ## 1.13.1 / 2022-01-08
 
 * [Fixed] Vendor flup client FCGIApp. See [#10953](https://github.com/DataDog/integrations-core/pull/10953).
