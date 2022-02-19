@@ -44,7 +44,7 @@ datadog-exchange-server==1.12.0; sys_platform == 'win32'
 datadog-external-dns==2.0.0
 datadog-flink==1.4.0
 datadog-fluentd==2.0.0
-datadog-gearmand==2.1.2; sys_platform != 'win32'
+datadog-gearmand==2.2.0; sys_platform != 'win32'
 datadog-gitlab-runner==2.14.3
 datadog-gitlab==4.7.3
 datadog-glusterfs==1.3.1; sys_platform == 'linux2'
