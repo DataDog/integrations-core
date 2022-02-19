@@ -133,7 +133,7 @@ datadog-spark==3.0.0
 datadog-sqlserver==7.2.0
 datadog-squid==2.0.0
 datadog-ssh-check==2.2.0
-datadog-statsd==1.8.1
+datadog-statsd==1.9.0
 datadog-supervisord==2.1.1
 datadog-system-core==1.11.1
 datadog-system-swap==1.12.1
