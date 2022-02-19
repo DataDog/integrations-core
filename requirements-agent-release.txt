@@ -118,7 +118,7 @@ datadog-pulsar==1.0.0
 datadog-rabbitmq==3.0.0
 datadog-redisdb==4.4.0
 datadog-rethinkdb==2.2.0
-datadog-riak==2.4.1
+datadog-riak==3.0.0
 datadog-riakcs==2.7.1
 datadog-sap-hana==1.10.1
 datadog-scylla==1.6.3
