@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 3.5.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11305](https://github.com/DataDog/integrations-core/pull/11305).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+
 ## 3.4.1 / 2021-10-19 / Agent 7.32.0
 
 * [Fixed] Update tuf to 0.19.0 for python 3. See [#10444](https://github.com/DataDog/integrations-core/pull/10444).
