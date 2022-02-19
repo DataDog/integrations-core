@@ -1,5 +1,12 @@
 # CHANGELOG - kubernetes_state
 
+## 7.0.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11387](https://github.com/DataDog/integrations-core/pull/11387).
+* [Added] Update example config. See [#11515](https://github.com/DataDog/integrations-core/pull/11515).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* [Changed] Remap value 'unknown' to 'warning' for KSM 'node.ready' service check. See [#11132](https://github.com/DataDog/integrations-core/pull/11132).
+
 ## 6.0.1 / 2021-11-13 / Agent 7.33.0
 
 * [Fixed] Fix clustername for invalid RFC1123 cases. See [#10262](https://github.com/DataDog/integrations-core/pull/10262).
