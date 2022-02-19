@@ -1,5 +1,10 @@
 # CHANGELOG - ignite
 
+## 2.2.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11372](https://github.com/DataDog/integrations-core/pull/11372).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+
 ## 2.1.2 / 2022-01-08
 
 * [Fixed] Bump base check dependency. See [#10926](https://github.com/DataDog/integrations-core/pull/10926).
