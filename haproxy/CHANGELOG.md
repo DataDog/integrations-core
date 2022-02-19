@@ -1,5 +1,10 @@
 # CHANGELOG - haproxy
 
+## 4.1.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11358](https://github.com/DataDog/integrations-core/pull/11358).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+
 ## 4.0.0 / 2022-02-16
 
 * [Added] Support the new OpenMetrics V2 implementation. See [#11485](https://github.com/DataDog/integrations-core/pull/11485).
