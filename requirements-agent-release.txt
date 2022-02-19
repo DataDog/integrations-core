@@ -155,5 +155,5 @@ datadog-win32-event-log==2.12.0; sys_platform == 'win32'
 datadog-windows-performance-counters==1.1.0; sys_platform == 'win32'
 datadog-windows-service==4.1.0; sys_platform == 'win32'
 datadog-wmi-check==1.14.0; sys_platform == 'win32'
-datadog-yarn==3.0.0
+datadog-yarn==4.0.0
 datadog-zk==4.0.0; sys_platform != 'win32'
