@@ -1,5 +1,11 @@
 # CHANGELOG - JBoss/WildFly
 
+## 2.0.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11375](https://github.com/DataDog/integrations-core/pull/11375).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* [Changed] Correct metric_type for wildfly metrics. See [#8706](https://github.com/DataDog/integrations-core/pull/8706). Thanks [codylerum](https://github.com/codylerum).
+
 ## 1.7.2 / 2022-01-08
 
 * [Fixed] Bump base check dependency. See [#10926](https://github.com/DataDog/integrations-core/pull/10926).

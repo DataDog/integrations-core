@@ -1,5 +1,10 @@
 # CHANGELOG - TLS
 
+## 2.7.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11447](https://github.com/DataDog/integrations-core/pull/11447).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+
 ## 2.6.2 / 2022-02-04
 
 * [Fixed] Check intermediate certificate protocol version. See [#11207](https://github.com/DataDog/integrations-core/pull/11207).

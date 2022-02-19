@@ -1,5 +1,11 @@
 # CHANGELOG - elastic
 
+## 5.0.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11344](https://github.com/DataDog/integrations-core/pull/11344).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
+
 ## 4.0.1 / 2022-01-13
 
 * [Fixed] Validate custom query column type. See [#11106](https://github.com/DataDog/integrations-core/pull/11106).

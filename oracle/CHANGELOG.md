@@ -1,5 +1,10 @@
 # CHANGELOG - oracle
 
+## 3.7.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11410](https://github.com/DataDog/integrations-core/pull/11410).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+
 ## 3.6.0 / 2022-01-08
 
 * [Added] Add TCPS support for Oracle DB. See [#10591](https://github.com/DataDog/integrations-core/pull/10591).

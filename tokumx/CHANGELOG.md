@@ -1,5 +1,10 @@
 # CHANGELOG - tokumx
 
+## 3.1.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11448](https://github.com/DataDog/integrations-core/pull/11448).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+
 ## 3.0.0 / 2022-01-08
 
 * [Changed] Add `server` default group for all monitor special cases. See [#10976](https://github.com/DataDog/integrations-core/pull/10976).
