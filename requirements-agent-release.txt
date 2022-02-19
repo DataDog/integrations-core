@@ -114,6 +114,7 @@ datadog-presto==2.5.2
 datadog-process==2.1.2
 datadog-prometheus==3.3.1
 datadog-proxysql==3.3.1
+datadog-pulsar==1.0.0
 datadog-rabbitmq==2.2.1
 datadog-redisdb==4.3.2
 datadog-rethinkdb==2.1.1
@@ -122,6 +123,7 @@ datadog-riakcs==2.7.1
 datadog-sap-hana==1.10.1
 datadog-scylla==1.6.3
 datadog-sidekiq==1.2.1
+datadog-silk==1.0.0
 datadog-singlestore==1.1.1
 datadog-snmp==5.5.0
 datadog-snowflake==4.1.0
