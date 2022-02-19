@@ -9,7 +9,7 @@
 * [Fixed] Properly create list of known options when detecting typos. See [#11482](https://github.com/DataDog/integrations-core/pull/11482).
 * [Fixed] Fail gracefully when scraping OpenMetrics endpoints. See [#11281](https://github.com/DataDog/integrations-core/pull/11281).
 * [Fixed] Update error message when unable to connect to any possible prometheus urls. See [#11197](https://github.com/DataDog/integrations-core/pull/11197).
-* [Fixed] Update obfuscator wrapper to return empty string . See [#11277](https://github.com/DataDog/integrations-core/pull/11277).
+* [Fixed] Update obfuscator wrapper to return empty string. See [#11277](https://github.com/DataDog/integrations-core/pull/11277).
 * [Changed] *BREAKING CHANGE* Remove pyhdb. See [#11469](https://github.com/DataDog/integrations-core/pull/11469).
 
 ## 24.0.0 / 2022-02-02
