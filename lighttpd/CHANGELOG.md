@@ -1,5 +1,11 @@
 # CHANGELOG - lighttpd
 
+## 3.0.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11389](https://github.com/DataDog/integrations-core/pull/11389).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
+
 ## 2.0.0 / 2022-01-08
 
 * [Fixed] Fix lighttpd service check name for monitors. See [#10977](https://github.com/DataDog/integrations-core/pull/10977).
