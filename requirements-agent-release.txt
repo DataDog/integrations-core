@@ -8,7 +8,7 @@ datadog-ambari==3.0.0; sys_platform != 'win32'
 datadog-apache==4.0.0
 datadog-aspdotnet==1.10.0; sys_platform == 'win32'
 datadog-avi-vantage==3.0.0
-datadog-azure-iot-edge==2.3.3
+datadog-azure-iot-edge==3.0.0
 datadog-btrfs==1.12.1; sys_platform != 'win32'
 datadog-cacti==1.9.2; sys_platform == 'linux2'
 datadog-cassandra-nodetool==1.9.1
