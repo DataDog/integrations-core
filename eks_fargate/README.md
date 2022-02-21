@@ -262,6 +262,63 @@ spec:
 
 Datadog Agent v6.19+ supports live containers in the EKS Fargate integration. Live containers appear on the [Containers][19] page.
 
+To enable [Kubernetes resources view][29]:
+1. [Setup the Datadog Cluster Agent][25].
+2. Configure the Datadog Agent sidecar container to connect to the Datadog Cluster Agent
+
+  ```yaml
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+  name: "<APPLICATION_NAME>"
+  namespace: default
+  spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "<APPLICATION_NAME>"
+      name: "<POD_NAME>"
+    spec:
+      serviceAccountName: datadog-agent
+      containers:
+      - name: "<APPLICATION_NAME>"
+        image: "<APPLICATION_IMAGE>"
+      ## Running the Agent as a side-car
+      - image: datadog/agent
+        name: datadog-agent
+        env:
+        - name: DD_API_KEY
+          value: "<YOUR_DATADOG_API_KEY>"
+          ## Set DD_SITE to "datadoghq.eu" to send your
+          ## Agent data to the Datadog EU site
+        - name: DD_SITE
+          value: "datadoghq.com"
+        - name: DD_EKS_FARGATE
+          value: "true"
+        - name: DD_KUBERNETES_KUBELET_NODENAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: spec.nodeName
+        ## Configure Cluster Agent connection and enable the orchestrator explorer
+        - name: DD_CLUSTER_AGENT_URL
+          value: "https://datadog-cluster-agent.<CLUSTER AGENT NAMESPACE>.svc.cluster.local:5005"  ## <CLUSTER AGENT NAMESPACE> corresponds to the Cluster Agent's namespace
+        - name: DD_CLUSTER_AGENT_AUTH_TOKEN
+          value: "<CLUSTER AGENT AUTH TOKEN>"  ## The same token used to deploy the Cluster Agent in the previous step
+        - name: DD_CLUSTER_AGENT_ENABLED
+          value: "true"
+        - name: DD_ORCHESTRATOR_EXPLORER_ENABLED
+          value: "true"
+        resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+  ```
+
 ### Live processes
 
 Datadog Agent v6.19+ supports live processes in the EKS Fargate integration. Live processes appear on the [Processes][20] page. To enable live processes, [enable shareProcessNamespace in the pod spec][21].
@@ -428,3 +485,4 @@ Need help? Contact [Datadog support][20].
 [26]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#process-collection
 [27]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
 [28]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
+[29]: https://docs.datadoghq.com/infrastructure/livecontainers/#kubernetes-resources-view
