@@ -26,8 +26,8 @@ This is a cluster check. For more information, see the [Cluster checks documenta
 ### Metrics
 
 This check reports a gauge, `helm.release`, set to 1 for each release deployed
-in the cluster. The metric has tags that identify the Helm release (name, app
-version, chart version, revision, etc.).
+in the cluster. The metric has tags that identify the Helm release such as name, app
+version, chart version, and revision.
 
 See [metadata.csv][4] for a list of metrics provided by this check.
 
