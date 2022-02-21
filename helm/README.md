@@ -4,8 +4,7 @@
 
 This check monitors Helm deployments through the Datadog Agent.
 
-Helm supports multiple storage backends. The default in v3 is Kubernetes
-secrets, in v2 it is configmaps. Both are supported by this check.
+Helm supports multiple storage backends. In v3, Helm defaults to Kubernetes secrets and in v2, Helm defaults to ConfigMaps. This check supports both options.
 
 ## Setup
 
