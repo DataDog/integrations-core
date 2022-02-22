@@ -10,6 +10,7 @@ name = "datadog-tokumx"
 description = "The TokuMX check"
 readme = "README.md"
 license = "BSD-3-Clause"
+requires-python = "==2.7.*"
 keywords = [
     "datadog",
     "datadog agent",
