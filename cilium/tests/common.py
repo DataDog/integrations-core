@@ -193,9 +193,12 @@ ADDL_OPERATOR_AWS_METRICS = [
     "cilium.operator.ipam.api.rate_limit.duration.seconds.bucket",
 ]
 
-ADDL_OPERATOR_METRICS = [
+ADDL_GC_OPERATOR_METRICS = [
     "cilium.operator.identity_gc.entries",
     "cilium.operator.identity_gc.runs",
+]
+
+ADDL_OPERATOR_METRICS = [
     "cilium.operator.num_ceps_per_ces.sum",
     "cilium.operator.num_ceps_per_ces.count",
     "cilium.operator.num_ceps_per_ces.bucket",
