@@ -2042,18 +2042,21 @@ class TestIntegration:
 
 class TestAIAChasing:
     def test_incomplete_chain(self):
+        # Protocol 1.2 is allowed by default
         http = RequestsWrapper({}, {})
         http.get("https://incomplete-chain.badssl.com/")
 
-    def test_tls_protocol(self, caplog):
-        http = RequestsWrapper({'tls_protocols_allowed': ['TLSv1.2']}, {})
-        http.get("https://incomplete-chain.badssl.com/")
-
+    def test_cant_allow_unknown_protocol(self, caplog):
         with caplog.at_level(logging.WARNING):
-            http = RequestsWrapper({'tls_protocols_allowed': ['unknown']}, {})
+            RequestsWrapper({'tls_protocols_allowed': ['unknown']}, {})
             assert "Unknown protocol `unknown` configured, ignoring it." in caplog.text
         caplog.clear()
 
+    def test_protocol_allowed(self):
+        http = RequestsWrapper({'tls_protocols_allowed': ['TLSv1.2']}, {})
+        http.get("https://incomplete-chain.badssl.com/")
+
+    def test_protocol_not_allowed(self, caplog):
         http = RequestsWrapper({'tls_protocols_allowed': ['TLSv1.1']}, {})
         with caplog.at_level(logging.ERROR), pytest.raises(Exception):
             http.get("https://incomplete-chain.badssl.com/")
