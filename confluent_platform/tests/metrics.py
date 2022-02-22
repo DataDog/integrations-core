@@ -415,14 +415,14 @@ CONSUMER_GROUP_METRICS = [
     'confluent.kafka.consumer.group.join_rate',
     'confluent.kafka.consumer.group.last_heartbeat_seconds_ago',
     'confluent.kafka.consumer.group.sync_rate',
-    'confluent.kafka.consumer.group.sync_time_avg',
-    'confluent.kafka.consumer.group.sync_time_max',
 ]
 
 CONSUMER_GROUP_METRICS_OPTIONAL = [
     'confluent.kafka.consumer.group.join_time_avg',
     'confluent.kafka.consumer.group.join_time_max',
     'confluent.kafka.consumer.group.commit_latency_avg',
+    'confluent.kafka.consumer.group.sync_time_avg',
+    'confluent.kafka.consumer.group.sync_time_max',
 ]
 
 KSQL_QUERY_STATS = [
