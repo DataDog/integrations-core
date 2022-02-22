@@ -89,6 +89,39 @@ def test_config_project(aggregator, instance, fixture_group):
         aggregator.assert_metric_has_tag(metric, project_tag)
 
 
+def mock_pagination(fixture_group1, fixture_group2):
+    def get_twice():
+        mock_get_factory(fixture_group1)
+        mock_get_factory(fixture_group2)
+    return get_twice()
+
+def mock_twistlock_check(monkeypatch, instances, fixture_group):
+    # methods = [
+    #     'report_registry_scan',
+    #     'report_images_scan',
+    #     'report_hosts_scan',
+    #     'report_container_compliance',
+    #     'report_vulnerabilities']
+    check = TwistlockCheck('twistlock', {}, instances)
+    monkeypatch.setattr(check, '_retrieve_json', mock.Mock(side_effect=mock_get_factory(fixture_group)))
+    return check
+
+
+@pytest.mark.parametrize('fixture_group', ['twistlock', 'twistlock_pg2'])
+def test_pagination(monkeypatch, dd_run_check, aggregator, instance, fixture_group):
+    # mock that two requests get made but with different output
+    # assert that each result is different
+    # assert that the final result is res1 + res2
+    check = mock_twistlock_check(monkeypatch, [instance], fixture_group)
+    mock_scan_results = mock.MagicMock()
+    # mocks = [
+    #     'datadog_checks.twistlock.twistlock._retrieve_json', mock_scan_results
+    # ]
+
+    dd_run_check(check)
+
+    assert check._retrieve_json.call_count == 10
+
 def test_err_response(aggregator, instance):
 
     check = TwistlockCheck('twistlock', {}, [instance])
