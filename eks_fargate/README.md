@@ -59,6 +59,14 @@ metadata:
   name: datadog-agent
 rules:
   - apiGroups:
+    - ""
+    resources:
+    - nodes
+    - namespaces
+    verbs:
+    - get
+    - list
+  - apiGroups:
       - ""
     resources:
       - nodes/metrics
@@ -143,6 +151,47 @@ spec:
 **Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][14].
 
 **Note**: Add your desired `kube_cluster_name:<CLUSTER_NAME>` to the list of `DD_TAGS` to ensure your metrics are tagged by your desired cluster. You can append additional tags here as space separated `<KEY>:<VALUE>` tags.
+
+#### Running the Cluster Agent / Cluster Checks Runner
+
+Running the Cluster Agent is recommended as it is required for a number of features: events collection, Kubernetes resources view, cluster checks, etc.
+When using EKS Fargate, two scenarios are possible depending if the EKS cluster is runnning mixed workloads (Fargate/non-Fargate) or not.
+
+If the EKS cluster runs Fargate and non-Fargate workloads **AND** you want to monitor non-Fargate workload through Node Agent DaemonSet, the Cluster Agent/Cluster Checks Runner can be easily be added to this deployment.
+Follow the [Cluster Agent Setup][25] documentation to deploy it.
+
+One specifity is that the Cluster Agent token must be reachable from the Fargate tasks you want to monitor, which is not the case by default using our Helm Chart or Datadog Operator as it creates a secret in the target namespace.
+Two options are available to allow this to work properly:
+- Use an hardcoded token value (`clusterAgent.token` in Helm, `credentials.token` in the Datadog Operator): convenient but less secure.
+- Use a manually created secret (`clusterAgent.tokenExistingSecret` in Helm, not available in Datadog Operator) and replicate it in all namespaces where Fargate tasks need to be monitored: secure but requires extra operations.
+
+If the EKS cluster runs only Fargate workloads, a standalone Cluster Agent deployment is necessary.
+This can be achieved with the following Helm `values.yaml`:
+```yaml
+datadog:
+  apiKey: <YOUR_DATADOG_API_KEY>
+  clusterName: <CLUSTER_NAME>
+agents:
+  enabled: false
+clusterAgent:
+  enabled: true
+  replicas: 2
+```
+
+The same specifity as above regarding management of Cluster Agent token is applicable.
+
+Finally, in both cases the Datadog Agent sidecar manifest needs to be changed to allow communication with the Cluster Agent:
+```yaml
+       env:
+        - name: DD_CLUSTER_AGENT_ENABLED
+          value: "true"
+        - name: DD_CLUSTER_AGENT_AUTH_TOKEN
+          value: <hardcoded token value> # Use valueFrom: if you're using a secret
+        - name: DD_CLUSTER_AGENT_URL
+          value: https://<CLUSTER_AGENT_SERVICE_NAME>.<CLUSTER_AGENT_SERVICE_NAMESPACE>.svc.cluster.local:5005
+        - name: DD_ORCHESTRATOR_EXPLORER_ENABLED # Required to get Kubernetes resources view
+          value: "true"
+```
 
 ## Metrics collection
 
@@ -266,6 +315,10 @@ Datadog Agent v6.19+ supports live containers in the EKS Fargate integration. Li
 
 Datadog Agent v6.19+ supports live processes in the EKS Fargate integration. Live processes appear on the [Processes][20] page. To enable live processes, [enable shareProcessNamespace in the pod spec][21].
 
+### Kubernetes resources view
+
+Collecting Kubernetes requires a [Cluster Agent setup][#running-the-cluster-agent-cluster-checks-runner]
+
 ## Log collection
 
 ### Collecting logs from EKS on Fargate with Fluent Bit.
@@ -351,10 +404,7 @@ spec:
 
 ## Events collection
 
-To collect events from your AWS EKS Fargate API server, run a Datadog Cluster Agent over an AWS EKS EC2 pod within your Kubernetes cluster:
-
-1. [Setup the Datadog Cluster Agent][25].
-2. [Enable Event collection for your Cluster Agent][19].
+To collect events from your AWS EKS Fargate API server, run a [Datadog Cluster Agent within your EKS cluster][#running-the-cluster-agent-cluster-checks-runner] and [Enable Event collection for your Cluster Agent][19].
 
 Optionally, deploy cluster check runners in addition to setting up the Datadog Cluster Agent to enable cluster checks.
 
