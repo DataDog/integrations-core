@@ -87,7 +87,16 @@ def download(package, version=None, root_layout_type='core'):
     if version:
         cmd.extend(['--version', version])
     cmd.append(package)
-    out = subprocess.check_output(cmd)
+
+    try:
+        out = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        if b'datadog_checks.downloader.exceptions.PythonVersionMismatch' in e.output:
+            log.debug('unmet Python version requirements')
+            return
+        else:
+            raise
+
     log.debug(' '.join(cmd))
     log.debug(out)
     log.debug('')
