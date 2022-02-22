@@ -46,6 +46,10 @@ def instance_port(field, value):
     return 50000
 
 
+def instance_security(field, value):
+    return 'none'
+
+
 def instance_service(field, value):
     return get_default_field_value(field, value)
 

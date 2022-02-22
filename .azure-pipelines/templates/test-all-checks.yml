@@ -381,6 +381,9 @@ jobs:
     - checkName: proxysql
       displayName: ProxySQL
       os: linux
+    - checkName: pulsar
+      displayName: pulsar
+      os: linux
     - checkName: rabbitmq
       displayName: RabbitMQ
       os: linux

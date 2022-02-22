@@ -1,2 +1,0 @@
-cryptography==3.3.2; python_version < '3.0'
-cryptography==3.4.8; python_version > "3.0"

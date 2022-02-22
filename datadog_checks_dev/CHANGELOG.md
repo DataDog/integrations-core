@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 15.10.1 / 2022-02-19
+
+* [Fixed] Fix integration templates. See [#11539](https://github.com/DataDog/integrations-core/pull/11539).
+* [Fixed] Handle the case in models sync where a file does not have a license header. See [#11535](https://github.com/DataDog/integrations-core/pull/11535).
+
 ## 15.10.0 / 2022-02-16
 
 * [Added] Update templates for new integrations. See [#11510](https://github.com/DataDog/integrations-core/pull/11510).

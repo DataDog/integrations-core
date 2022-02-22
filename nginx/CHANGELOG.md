@@ -1,5 +1,10 @@
 # CHANGELOG - nginx
 
+## 5.2.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11404](https://github.com/DataDog/integrations-core/pull/11404).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+
 ## 5.1.0 / 2022-02-03
 
 * [Added] Allow for percentile aggregations for NGINX integration response time metrics. See [#11252](https://github.com/DataDog/integrations-core/pull/11252).

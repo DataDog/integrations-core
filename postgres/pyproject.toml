@@ -61,7 +61,7 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 include = [
-    "/datadog_checks",
+    "/datadog_checks/postgres",
 ]
 dev-mode-dirs = [
     ".",

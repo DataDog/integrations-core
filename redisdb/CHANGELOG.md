@@ -1,5 +1,10 @@
 # CHANGELOG - redisdb
 
+## 4.4.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11424](https://github.com/DataDog/integrations-core/pull/11424).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+
 ## 4.3.2 / 2022-02-01
 
 * [Fixed] Bump redis dependency to 4.0.2. See [#11247](https://github.com/DataDog/integrations-core/pull/11247).

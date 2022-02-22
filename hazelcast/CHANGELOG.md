@@ -1,5 +1,11 @@
 # CHANGELOG - Hazelcast
 
+## 2.0.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11360](https://github.com/DataDog/integrations-core/pull/11360).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
+
 ## 1.6.1 / 2022-01-08
 
 * [Fixed] Bump base check dependency. See [#10926](https://github.com/DataDog/integrations-core/pull/10926).

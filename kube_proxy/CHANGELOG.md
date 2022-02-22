@@ -1,5 +1,11 @@
 # CHANGELOG - Kube_proxy
 
+## 5.0.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11384](https://github.com/DataDog/integrations-core/pull/11384).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
+
 ## 4.0.2 / 2022-01-21
 
 * [Fixed] Remove new kube proxy metric with high cardinality. See [#11182](https://github.com/DataDog/integrations-core/pull/11182).

@@ -1,5 +1,10 @@
 # CHANGELOG - IBM MQ
 
+## 3.19.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11370](https://github.com/DataDog/integrations-core/pull/11370).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+
 ## 3.18.0 / 2022-02-01
 
 * [Added] Support host override. See [#11223](https://github.com/DataDog/integrations-core/pull/11223).

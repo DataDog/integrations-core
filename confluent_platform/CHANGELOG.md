@@ -1,5 +1,12 @@
 # CHANGELOG - Confluent Platform
 
+## 1.8.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11330](https://github.com/DataDog/integrations-core/pull/11330).
+* [Added] Include Consumer Group Metrics. See [#10900](https://github.com/DataDog/integrations-core/pull/10900). Thanks [brunodomenici](https://github.com/brunodomenici).
+* [Added] Add Broker-Zookeeper latency metric. See [#11080](https://github.com/DataDog/integrations-core/pull/11080). Thanks [abraham-leal](https://github.com/abraham-leal).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+
 ## 1.7.1 / 2022-01-13
 
 * [Fixed] Remove duplicated entries. See [#11095](https://github.com/DataDog/integrations-core/pull/11095).
