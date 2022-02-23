@@ -264,7 +264,7 @@ Datadog Agent v6.19+ supports live containers in the EKS Fargate integration. Li
 
 To enable [Kubernetes resources view][29]:
 1. [Setup the Datadog Cluster Agent][25].
-2. Configure the Datadog Agent sidecar container to connect to the Datadog Cluster Agent
+2. Configure the Datadog Agent sidecar container to connect to the Datadog Cluster Agent.
 
   ```yaml
   apiVersion: apps/v1
