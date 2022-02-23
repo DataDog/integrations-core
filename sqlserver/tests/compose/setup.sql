@@ -27,6 +27,12 @@ EXEC sp_addrolemember 'db_datareader', 'bob'
 EXEC sp_addrolemember 'db_datawriter', 'bob'
 GO
 
+-- create an offline database to have an unavailable database to test with
+CREATE DATABASE unavailable_db;
+GO
+ALTER DATABASE unavailable_db SET OFFLINE;
+GO
+
 -- create test procedure for metrics loading feature
 USE master;
 GO
