@@ -28,7 +28,7 @@ redis.expires.percent,gauge,,percent,,Percentage of total keys with an expiratio
 redis.info.latency_ms,gauge,,millisecond,,The latency of the redis INFO command.,0,redis,info latency,cpu
 redis.key.length,gauge,,,,"The number of elements in a given key, tagged by key, e.g. 'key:mykeyname'. Enable in Agent's redisdb.yaml with the keys option.",0,redis,key length,
 redis.keys,gauge,,key,,The total number of keys.,0,redis,keys,
-redis.keys.evicted,gauge,,key,,The total number of keys evicted due to the maxmemory limit.,0,redis,keys evicted,memory
+redis.keys.evicted,gauge,,key,,The total number of keys evicted due to the maxmemory limit.,0,redis,keys evicted,cpu|memory
 redis.keys.expired,gauge,,key,,The total number of keys expired from the db.,0,redis,keys expired,
 redis.mem.fragmentation_ratio,gauge,,fraction,,Ratio between used_memory_rss and used_memory.,-1,redis,frag ratio,memory
 redis.mem.lua,gauge,,byte,,Amount of memory used by the Lua engine.,-1,redis,mem lua,
