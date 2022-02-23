@@ -1,5 +1,9 @@
 # CHANGELOG - active_directory
 
+## 1.14.0 / 2022-02-23
+
+* [Added] Add `pyproject.toml` file. See [#11551](https://github.com/DataDog/integrations-core/pull/11551).
+
 ## 1.13.0 / 2022-01-08
 
 * [Added] Support new implementation of Windows performance counters on Python 3. See [#10850](https://github.com/DataDog/integrations-core/pull/10850).
