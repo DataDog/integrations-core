@@ -1,5 +1,9 @@
 # CHANGELOG - tokumx
 
+## 3.1.1 / 2022-02-23
+
+* [Fixed] Properly indicate Python constraints. See [#11555](https://github.com/DataDog/integrations-core/pull/11555).
+
 ## 3.1.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11448](https://github.com/DataDog/integrations-core/pull/11448).
