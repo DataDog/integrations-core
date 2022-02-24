@@ -279,9 +279,9 @@ def test_only_query_enabled_endpoints(check, dd_run_check, instance_plus_v7, onl
         ),
     ],
 )
-def test_list_stream_endpoints(instance, test_input, expected_output):
+def test_list_endpoints(instance, test_input, expected_output):
     nginx = Nginx('nginx', {}, [instance])
     # Python 2 seems to have some different order of processing the keys.
     # Sorting the arrays before comparison to account for this.
-    sorted_test_output = nginx.list_stream_endpoints(test_input).sort()
+    sorted_test_output = nginx.list_endpoints(test_input).sort()
     assert eval(str(sorted_test_output)) == expected_output.sort()
