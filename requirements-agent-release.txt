@@ -16,7 +16,7 @@ datadog-cassandra==1.15.0
 datadog-ceph==2.6.0; sys_platform != 'win32'
 datadog-checks-base==25.0.1
 datadog-checks-dependency-provider==1.2.0
-datadog-checks-downloader==3.5.0
+datadog-checks-downloader==3.6.0
 datadog-cilium==2.0.0
 datadog-cisco-aci==2.0.0
 datadog-citrix-hypervisor==2.0.0
