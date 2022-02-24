@@ -123,7 +123,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
                         except (IOError, requests.HTTPError, requests.exceptions.SSLError) as e:
                             self.log.info("Couldn't connect to %s: %s, trying next possible URL.", url, str(e))
                     else:
-                        raise CheckException(
+                        self.log.error(
                             "The agent could not connect to any of the following URLs: %s." % possible_urls
                         )
                 else:
@@ -147,9 +147,15 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         If the endpoint already has a corresponding configuration, return the cached configuration.
         """
         endpoint = instance.get('prometheus_url')
+        possible_urls = instance.get('possible_prometheus_urls')
 
         if endpoint is None:
-            raise CheckException("Unable to find prometheus URL in config file.")
+            # Possible URLs were tried during initialization.
+            # If connection was not successful during init, raise exception.
+            if possible_urls is not None:
+                raise CheckException("Unable to connect to any of the possible prometheus URLs in config file.")
+            else:
+                raise CheckException("Unable to find prometheus URL in config file.")
 
         # If we've already created the corresponding scraper configuration, return it
         if endpoint in self.config_map:
