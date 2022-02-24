@@ -83,20 +83,11 @@ def download(package, version=None, root_layout_type='core'):
     # -vvv:   WARNING
     # -vvvv:  INFO
     # -vvvvv: DEBUG
-    cmd = ['python', '-m', 'datadog_checks.downloader', '-vvvv', '--type', root_layout_type]
+    cmd = ['python', '-m', 'datadog_checks.downloader', '-vvvv', '--type', root_layout_type, '--ignore-python-version']
     if version:
         cmd.extend(['--version', version])
     cmd.append(package)
-
-    try:
-        out = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
-        if b'datadog_checks.downloader.exceptions.PythonVersionMismatch' in e.output:
-            log.debug('unmet Python version requirements')
-            return
-        else:
-            raise
-
+    out = subprocess.check_output(cmd)
     log.debug(' '.join(cmd))
     log.debug(out)
     log.debug('')
