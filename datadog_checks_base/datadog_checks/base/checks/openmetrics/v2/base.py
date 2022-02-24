@@ -64,7 +64,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
                     scraper.scrape()
                 except (ConnectionError, RequestException) as e:
                     self.log.error("There was an error scraping endpoint %s: %s", endpoint, str(e))
-                    raise_from(type(e)("There was an error scraping endpoint {}: {}".format(endpoint, e), None))
+                    raise_from(type(e)("There was an error scraping endpoint {}: {}".format(endpoint, e)), None)
 
     def configure_scrapers(self):
         """
