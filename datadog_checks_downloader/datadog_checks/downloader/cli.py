@@ -116,11 +116,10 @@ def download():
                 sys.exit(1)
 
     tuf_downloader = TUFDownloader(
-        repository_url_prefix=repository_url_prefix,
-        root_layout_type=root_layout_type,
-        ignore_python_version=ignore_python_version,
-        verbose=verbose,
+        repository_url_prefix=repository_url_prefix, root_layout_type=root_layout_type, verbose=verbose
     )
-    wheel_relpath = tuf_downloader.get_wheel_relpath(standard_distribution_name, version=version)
+    wheel_relpath = tuf_downloader.get_wheel_relpath(
+        standard_distribution_name, version=version, ignore_python_version=ignore_python_version
+    )
     wheel_abspath = tuf_downloader.download(wheel_relpath)
     print(wheel_abspath)  # pylint: disable=print-statement

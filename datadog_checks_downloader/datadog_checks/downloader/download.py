@@ -59,11 +59,7 @@ logger = logging.getLogger(__name__)
 
 class TUFDownloader:
     def __init__(
-        self,
-        repository_url_prefix=REPOSITORY_URL_PREFIX,
-        root_layout_type=DEFAULT_ROOT_LAYOUT_TYPE,
-        ignore_python_version=False,
-        verbose=0,
+        self, repository_url_prefix=REPOSITORY_URL_PREFIX, root_layout_type=DEFAULT_ROOT_LAYOUT_TYPE, verbose=0
     ):
         # 0 => 60 (effectively /dev/null)
         # 1 => 50 (CRITICAL)
@@ -79,7 +75,6 @@ class TUFDownloader:
 
         tuf_settings.repositories_directory = REPOSITORIES_DIR
 
-        self.__ignore_python_version = ignore_python_version
         self.__root_layout_type = root_layout_type
         self.__root_layout = ROOT_LAYOUTS[self.__root_layout_type]
 
@@ -308,7 +303,7 @@ class TUFDownloader:
 
         return wheels
 
-    def get_wheel_relpath(self, standard_distribution_name, version=None):
+    def get_wheel_relpath(self, standard_distribution_name, version=None, ignore_python_version=False):
         """
         Returns:
             If download over TUF is successful, this function will return the
@@ -337,7 +332,7 @@ class TUFDownloader:
 
         # Otherwise, fuhgedaboutit.
         if not href:
-            if self.__ignore_python_version:
+            if ignore_python_version:
                 href = list(python_tags.values())[0]
             else:
                 raise PythonVersionMismatch(standard_distribution_name, version, this_python, python_tags)
