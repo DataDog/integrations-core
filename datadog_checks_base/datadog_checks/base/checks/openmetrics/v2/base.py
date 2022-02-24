@@ -5,6 +5,7 @@
 # type: ignore
 from collections import ChainMap
 from contextlib import contextmanager
+from six import raise_from
 
 from requests.exceptions import RequestException
 
@@ -62,7 +63,9 @@ class OpenMetricsBaseCheckV2(AgentCheck):
                 try:
                     scraper.scrape()
                 except (ConnectionError, RequestException) as e:
-                    self.log.error("There was an error scraping endpoint %s: %s", endpoint, str(e))
+                    msg = "There was an error scraping endpoint "
+                    self.log.error(msg + "%s: %s", endpoint, str(e))
+                    raise_from(ConnectionError((msg + endpoint), e), None)
 
     def configure_scrapers(self):
         """
