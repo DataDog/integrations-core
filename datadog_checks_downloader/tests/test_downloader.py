@@ -83,7 +83,7 @@ def download(package, version=None, root_layout_type='core'):
     # -vvv:   WARNING
     # -vvvv:  INFO
     # -vvvvv: DEBUG
-    cmd = ['python', '-m', 'datadog_checks.downloader', '-vvvv', '--type', root_layout_type]
+    cmd = ['python', '-m', 'datadog_checks.downloader', '-vvvv', '--type', root_layout_type, '--ignore-python-version']
     if version:
         cmd.extend(['--version', version])
     cmd.append(package)
