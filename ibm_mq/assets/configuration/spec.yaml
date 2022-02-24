@@ -46,6 +46,13 @@ files:
         value:
           type: string
           minLength: 1
+      - name: override_hostname
+        description: |
+          If enabled, the check sends the provided `host` as hostname instead of the agent's host.
+          In this case the `mq_host` tag will not be emitted. This cannot be used alongside `connection_name`
+        value:
+          type: boolean
+          example: false
       - name: username
         value:
           type: string
@@ -216,13 +223,6 @@ files:
             'DEV.*': role:dev,queue_type:default
           type: object
           minProperties: 1
-      - name: override_hostname
-        description: |
-          If enabled, the check sends the provided `host` as hostname instead of the agent's host.
-          In this case the `mq_host` tag will not be emitted. This cannot be used alongside `connection_name`
-        value:
-          type: boolean
-          example: false
       - template: instances/default
   - template: logs
     example:
