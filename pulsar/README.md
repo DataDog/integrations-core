@@ -39,7 +39,7 @@ See [metadata.csv][7] for a list of metrics provided by this check.
    logs_enabled: true
    ```
 
-3. Uncomment and edit the logs configuration block in your `pulsar.d/conf.yaml` file. Change the path and service parameter values based on your environment. See the [sample pulsar.d/conf.yaml][4]] for all available configuration options.
+3. Uncomment and edit the logs configuration block in your `pulsar.d/conf.yaml` file. Change the path and service parameter values based on your environment. See the [sample pulsar.d/conf.yaml][4] for all available configuration options.
    ```yaml
     logs:
       - type: file
