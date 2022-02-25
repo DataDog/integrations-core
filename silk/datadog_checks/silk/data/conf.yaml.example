@@ -48,7 +48,7 @@ instances:
     ## @param host_address - string - required
     ## Host address of Silk instance.
     #
-  - host_address: http://localhost:80
+  - host_address: http://localhost:443
 
     ## @param enable_blocksize_statistics - boolean - optional - default: false
     ## Enable this option to collect Silk stats metrics tagged by blocksize.
