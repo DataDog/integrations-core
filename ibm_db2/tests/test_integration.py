@@ -5,6 +5,7 @@ import pytest
 
 from datadog_checks.ibm_db2 import IbmDb2Check
 
+from datadog_checks.base import ConfigurationError
 from . import metrics
 from .common import DB2_VERSION
 
@@ -21,6 +22,14 @@ def test_bad_config(aggregator, instance, dd_run_check):
 
     aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, check.CRITICAL)
 
+
+@pytest.mark.usefixtures('dd_environment')
+def test_invalid_security_parameter(aggregator, instance, dd_run_check):
+    instance['security'] = 'invalid'
+
+    with pytest.raises(ConfigurationError):
+        invalid_check = IbmDb2Check('ibm_db2', {}, [instance])
+        dd_run_check(invalid_check)
 
 @pytest.mark.usefixtures('dd_environment')
 def test_buffer_pool_tags(aggregator, instance, dd_run_check):

@@ -9,7 +9,7 @@ from time import time as timestamp
 import ibm_db
 from requests import ConnectionError
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck, is_affirmative, ConfigurationError
 from datadog_checks.base.utils.containers import iter_unique
 
 from . import queries
@@ -21,6 +21,7 @@ class IbmDb2Check(AgentCheck):
     SERVICE_CHECK_CONNECT = '{}.can_connect'.format(METRIC_PREFIX)
     SERVICE_CHECK_STATUS = '{}.status'.format(METRIC_PREFIX)
     EVENT_TABLE_SPACE_STATE = '{}.tablespace_state_change'.format(METRIC_PREFIX)
+    SECURITY_OPTIONS = {'ssl', 'none'}
 
     def __init__(self, name, init_config, instances):
         super(IbmDb2Check, self).__init__(name, init_config, instances)
@@ -32,6 +33,9 @@ class IbmDb2Check(AgentCheck):
         self._tags = self.instance.get('tags', [])
         self._security = self.instance.get('security', 'none')
         self._tls_cert = self.instance.get('tls_cert')
+
+        if self._security not in self.SECURITY_OPTIONS:
+            raise ConfigurationError("IBM DB2 security parameter not valid")
 
         # Add global database tag
         self._tags.append('db:{}'.format(self._db))
