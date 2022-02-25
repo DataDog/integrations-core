@@ -12,12 +12,12 @@ from .common import BLOCKSIZE_METRICS, METRICS, READ_WRITE_METRICS
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance)
-    for metric in METRICS:
+    for metric in METRICS + BLOCKSIZE_METRICS:
         aggregator.assert_metric(metric)
 
-    # blocksize and read/write metrics don't appear in test env since caddy can't mock HTTP query strings
-    for metric in BLOCKSIZE_METRICS + READ_WRITE_METRICS:
-        aggregator.assert_metric(metric, at_least=0)
+    # caddy can't mock HTTP query strings, so read/write metrics default to system/stats metrics
+    for metric in READ_WRITE_METRICS:
+        aggregator.assert_metric(metric, count=0)
 
     aggregator.assert_service_check('silk.can_connect', SilkCheck.OK)
     aggregator.assert_service_check('silk.system.state', SilkCheck.OK)
