@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import logging
 import os
 
 import mock
@@ -33,10 +34,11 @@ def test_check(aggregator, instance, dd_run_check):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_version_metadata(aggregator, instance, datadog_agent, dd_run_check):
+def test_submit_system_state(instance, datadog_agent):
     check = SilkCheck('silk', {}, [instance])
     check.check_id = 'test:123'
-    dd_run_check(check)
+    system_tags = check.submit_system_state()
+    expected_system_tags = ['system_name:K2-5501', 'system_id:5501']
 
     version_metadata = {
         'version.scheme': 'silk',  # silk does not use semver
@@ -48,6 +50,21 @@ def test_version_metadata(aggregator, instance, datadog_agent, dd_run_check):
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
+    assert system_tags == expected_system_tags
+
+
+def test_submit_system_state_error(aggregator, instance, caplog):
+    caplog.set_level(logging.DEBUG)
+    check = SilkCheck('silk', {}, [instance])
+    check.check_id = 'test:123'
+
+    check._get_data = mock.MagicMock(side_effect=[(None, 404)])
+    check.submit_system_state()
+
+    assert (
+        "Could not access system state and version info, got response code `404` from endpoint `system/state`"
+        in caplog.text
+    )
 
 
 def test_error_msg_response(dd_run_check, aggregator, instance):
