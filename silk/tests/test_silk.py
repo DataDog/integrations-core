@@ -3,15 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+from copy import deepcopy
+from itertools import chain
 
 import mock
 import pytest
 
 from datadog_checks.dev.fs import read_file
 from datadog_checks.silk import SilkCheck
-from datadog_checks.silk.metrics import Metric
+from datadog_checks.silk.metrics import BLOCKSIZE_METRICS, METRICS, READ_WRITE_METRICS, Metric
 
-from .common import HERE, HOST, METRICS
+from .common import HERE, HOST
+from .common import METRICS as METRICS_TO_TEST
 
 
 @pytest.mark.integration
@@ -21,7 +24,7 @@ def test_check(aggregator, instance, dd_run_check):
     dd_run_check(check)
     base_tags = ['silk_host:localhost:80', 'system_id:5501', 'system_name:K2-5501', 'test:silk']
 
-    for metric in METRICS:
+    for metric in METRICS_TO_TEST:
         aggregator.assert_metric(metric)
         for tag in base_tags:
             aggregator.assert_metric_has_tag(metric, tag)
@@ -86,7 +89,7 @@ def mock_get_data(url):
 @pytest.mark.parametrize(
     'get_data_url, expected_metrics, metrics_to_collect',
     [
-        (
+        pytest.param(
             'system__bs_breakdown=True.json',  # `?` had to be removed to pass windows CI
             [
                 'silk.system.block_size.io_ops.avg',
@@ -111,8 +114,9 @@ def mock_get_data(url):
                     }
                 )
             },
+            id="system bs metrics",
         ),
-        (
+        pytest.param(
             'volumes__bs_breakdown=True.json',
             [
                 'silk.volume.block_size.io_ops.avg',
@@ -139,8 +143,9 @@ def mock_get_data(url):
                     }
                 )
             },
+            id="volume bs metrics",
         ),
-        (
+        pytest.param(
             'volumes__rw_breakdown=True.json',
             [
                 'silk.volume.read.io_ops.avg',
@@ -176,8 +181,9 @@ def mock_get_data(url):
                     }
                 )
             },
+            id="rw volume metrics",
         ),
-        (
+        pytest.param(
             'system__rw_breakdown=True.json',
             [
                 'silk.system.read.io_ops.avg',
@@ -211,6 +217,7 @@ def mock_get_data(url):
                     }
                 )
             },
+            id="rw system metrics",
         ),
     ],
 )
@@ -225,3 +232,24 @@ def test_bs_rw_metrics(dd_run_check, aggregator, instance, get_data_url, expecte
         aggregator.assert_metric(metric)
         for tag in base_tags:
             aggregator.assert_metric_has_tag(metric, tag)
+
+
+@pytest.mark.parametrize(
+    'enable_rw, enable_bs, extra_metrics_to_collect',
+    [
+        pytest.param(False, False, {}, id="both disabled"),
+        pytest.param(True, True, dict(chain(BLOCKSIZE_METRICS.items(), READ_WRITE_METRICS.items())), id="both enabled"),
+        pytest.param(False, True, deepcopy(BLOCKSIZE_METRICS), id="bs enabled"),
+        pytest.param(True, False, deepcopy(READ_WRITE_METRICS), id="rw enabled"),
+    ],
+)
+def test_metrics_to_collect(dd_run_check, aggregator, instance, enable_rw, enable_bs, extra_metrics_to_collect):
+    inst = deepcopy(instance)
+    inst['enable_read_write_statistics'] = enable_rw
+    inst['enable_blocksize_statistics'] = enable_bs
+
+    check = SilkCheck('silk', {}, [inst])
+
+    expected_metrics_to_collect = deepcopy(METRICS)
+    expected_metrics_to_collect.update(extra_metrics_to_collect)
+    assert sorted(check.metrics_to_collect.keys()) == sorted(expected_metrics_to_collect.keys())
