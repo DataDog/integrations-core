@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 25.0.1 / 2022-02-24
+
+* [Fixed] Properly raise scraper error in OpenMetrics v2. See [#11564](https://github.com/DataDog/integrations-core/pull/11564).
+
 ## 25.0.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11301](https://github.com/DataDog/integrations-core/pull/11301).

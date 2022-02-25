@@ -1,5 +1,9 @@
 # CHANGELOG - nginx
 
+## 5.2.1 / 2022-02-24
+
+* [Fixed] Adjust endpoint detection logic for warn log. See [#11567](https://github.com/DataDog/integrations-core/pull/11567).
+
 ## 5.2.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11404](https://github.com/DataDog/integrations-core/pull/11404).

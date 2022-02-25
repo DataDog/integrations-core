@@ -1,5 +1,9 @@
 # CHANGELOG - kubelet
 
+## 7.2.1 / 2022-02-24
+
+* [Fixed] Apply namespace exclusion rules in cadvisor and summary metrics. See [#11559](https://github.com/DataDog/integrations-core/pull/11559).
+
 ## 7.2.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11386](https://github.com/DataDog/integrations-core/pull/11386).

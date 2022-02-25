@@ -14,9 +14,9 @@ datadog-cacti==1.10.0; sys_platform == 'linux2'
 datadog-cassandra-nodetool==1.10.0
 datadog-cassandra==1.15.0
 datadog-ceph==2.6.0; sys_platform != 'win32'
-datadog-checks-base==25.0.0
+datadog-checks-base==25.0.1
 datadog-checks-dependency-provider==1.2.0
-datadog-checks-downloader==3.5.0
+datadog-checks-downloader==3.6.0
 datadog-cilium==2.0.0
 datadog-cisco-aci==2.0.0
 datadog-citrix-hypervisor==2.0.0
@@ -78,7 +78,7 @@ datadog-kube-dns==3.0.0
 datadog-kube-metrics-server==2.0.0
 datadog-kube-proxy==5.0.0
 datadog-kube-scheduler==4.0.0
-datadog-kubelet==7.2.0
+datadog-kubelet==7.2.1
 datadog-kubernetes-state==7.0.0
 datadog-kyototycoon==2.0.0
 datadog-lighttpd==3.0.0
@@ -97,7 +97,7 @@ datadog-nagios==1.10.0
 datadog-network==2.6.0
 datadog-nfsstat==1.10.0; sys_platform == 'linux2'
 datadog-nginx-ingress-controller==2.0.0
-datadog-nginx==5.2.0
+datadog-nginx==5.2.1
 datadog-openldap==1.9.0
 datadog-openmetrics==2.0.0
 datadog-openstack-controller==2.0.0
