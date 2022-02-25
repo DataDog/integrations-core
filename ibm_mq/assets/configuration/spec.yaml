@@ -198,7 +198,7 @@ files:
         value:
           example: '/var/mqm/ssl-db/client/KeyringClient'
           type: string
-        minLength: 1
+          minLength: 1
       - name: ssl_certificate_label
         description: Certificate label used for SSL connection.
         value:
