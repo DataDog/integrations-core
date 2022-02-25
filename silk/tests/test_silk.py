@@ -181,7 +181,7 @@ def mock_get_data(url):
                     }
                 )
             },
-            id="rw volume metrics",
+            id="volume rw metrics",
         ),
         pytest.param(
             'system__rw_breakdown=True.json',
@@ -217,7 +217,7 @@ def mock_get_data(url):
                     }
                 )
             },
-            id="rw system metrics",
+            id="system rw metrics",
         ),
     ],
 )
