@@ -110,7 +110,7 @@ class ModelConsumer:
                 strip_default_none=True,
                 # https://github.com/koxudaxi/datamodel-code-generator/pull/173
                 field_constraints=True,
-                # field_include_all_keys=True,
+                field_include_all_keys=True,
 
             )
             parsed_section = section_parser.parse()
