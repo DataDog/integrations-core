@@ -56,7 +56,6 @@ def test_submit_system_state(instance, datadog_agent):
 def test_submit_system_state_error(aggregator, instance, caplog):
     caplog.set_level(logging.DEBUG)
     check = SilkCheck('silk', {}, [instance])
-    check.check_id = 'test:123'
 
     check._get_data = mock.MagicMock(side_effect=[(None, 404)])
     check.submit_system_state()
