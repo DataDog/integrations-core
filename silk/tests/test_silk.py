@@ -13,8 +13,7 @@ from datadog_checks.dev.fs import read_file
 from datadog_checks.silk import SilkCheck
 from datadog_checks.silk.metrics import BLOCKSIZE_METRICS, METRICS, READ_WRITE_METRICS, Metric
 
-from .common import HERE, HOST
-from .common import METRICS as METRICS_TO_TEST
+from . import common
 
 
 @pytest.mark.integration
@@ -24,7 +23,7 @@ def test_check(aggregator, instance, dd_run_check):
     dd_run_check(check)
     base_tags = ['silk_host:localhost:80', 'system_id:5501', 'system_name:K2-5501', 'test:silk']
 
-    for metric in METRICS_TO_TEST:
+    for metric in common.METRICS:
         aggregator.assert_metric(metric)
         for tag in base_tags:
             aggregator.assert_metric_has_tag(metric, tag)
@@ -71,7 +70,7 @@ def test_incorrect_config(dd_run_check, aggregator):
 
 def test_unreachable_endpoint(dd_run_check, aggregator):
     invalid_instance = {
-        'host_address': 'http://{}:81'.format(HOST),
+        'host_address': 'http://{}:81'.format(common.HOST),
     }
     check = SilkCheck('silk', {}, [invalid_instance])
 
@@ -81,7 +80,7 @@ def test_unreachable_endpoint(dd_run_check, aggregator):
 
 
 def mock_get_data(url):
-    file_contents = read_file(os.path.join(HERE, 'fixtures', 'stats', url))
+    file_contents = read_file(os.path.join(common.HERE, 'fixtures', 'stats', url))
     response = json.loads(file_contents)
     return [(response, 200)]
 
