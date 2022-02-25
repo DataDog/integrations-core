@@ -111,10 +111,8 @@ class ModelConsumer:
                 # https://github.com/koxudaxi/datamodel-code-generator/pull/173
                 field_constraints=True,
                 field_include_all_keys=True,
-
             )
             parsed_section = section_parser.parse()
-            print(parsed_section)
         except Exception as e:
             errors.append(f'Error parsing the OpenAPI schema `{schema_name}`: {e}')
             model_files[model_file_name] = ('', errors)
