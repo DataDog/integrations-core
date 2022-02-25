@@ -174,6 +174,12 @@ class SilkCheck(AgentCheck):
                         name = "{}.{}.{}".format(metrics_mapping.prefix, metric_part, raw_metric_name)
                     else:
                         name = "{}.{}".format(metrics_mapping.prefix, raw_metric_name)
+                        if len(metrics_mapping.field_to_name.items()) > 0:
+                            self.log.debug(
+                                "Could not find metric part: %s, reverting metric name to: `%s`",
+                                list(metrics_mapping.field_to_name.keys()),
+                                name,
+                            )
 
                     get_method(self, method)(name, item.get(key), tags=metric_tags)
 

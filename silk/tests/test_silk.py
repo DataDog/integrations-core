@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import logging
 import os
 
 import mock
@@ -11,7 +12,7 @@ from datadog_checks.dev.fs import read_file
 from datadog_checks.silk import SilkCheck
 from datadog_checks.silk.metrics import Metric
 
-from .common import HERE, HOST, METRICS
+from .common import BLOCKSIZE_METRICS, HERE, HOST, METRICS
 
 
 @pytest.mark.integration
@@ -21,7 +22,7 @@ def test_check(aggregator, instance, dd_run_check):
     dd_run_check(check)
     base_tags = ['silk_host:localhost:80', 'system_id:5501', 'system_name:K2-5501', 'test:silk']
 
-    for metric in METRICS:
+    for metric in METRICS + BLOCKSIZE_METRICS:
         aggregator.assert_metric(metric)
         for tag in base_tags:
             aggregator.assert_metric_has_tag(metric, tag)
@@ -29,6 +30,16 @@ def test_check(aggregator, instance, dd_run_check):
     aggregator.assert_service_check('silk.can_connect', SilkCheck.OK)
     aggregator.assert_service_check('silk.system.state', SilkCheck.OK)
     aggregator.assert_service_check('silk.server.state', SilkCheck.OK, count=2)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_log_line(aggregator, instance, dd_run_check, caplog):
+    caplog.set_level(logging.DEBUG)
+    check = SilkCheck('silk', {}, [instance])
+    dd_run_check(check)
+
+    assert "Could not find metric part: ['rw'], reverting metric name to: `system.latency.outer`" in caplog.text
 
 
 @pytest.mark.integration
