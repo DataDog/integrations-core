@@ -40,5 +40,5 @@ OPENAPI_SCHEMA_PROPERTIES = {
     'required',
     'title',
     'type',
-    'uniqueItems',      # Not supported by datamodel-code-generator
+    # 'uniqueItems',    Not supported by datamodel-code-generator
 }
