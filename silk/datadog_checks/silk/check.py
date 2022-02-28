@@ -126,7 +126,7 @@ class SilkCheck(AgentCheck):
                     else:
                         # Other states are not documented
                         self.service_check(self.SERVERS_SERVICE_CHECK, AgentCheck.UNKNOWN, tags=tags)
-                    self.log.debug("Server %s reporting status of `%s`.", server_name, state)
+                        self.log.debug("Server %s is reporting unknown status of `%s`.", server_name, state)
             else:
                 msg = "Could not access server state, got response: {}".format(code)
                 self.log.debug(msg)
