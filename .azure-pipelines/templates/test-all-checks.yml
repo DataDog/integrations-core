@@ -66,6 +66,9 @@ jobs:
     - checkName: apache
       displayName: Apache
       os: linux
+    - checkName: arangodb
+      displayName: ArangoDB
+      os: linux
     - checkName: aspdotnet
       displayName: ASP.NET
       os: windows
