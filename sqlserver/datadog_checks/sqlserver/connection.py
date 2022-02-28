@@ -187,7 +187,9 @@ class Connection(object):
 
             self.service_check_handler(AgentCheck.CRITICAL, host, database, message, is_default=is_default)
 
-            raise_from(SQLConnectionError(message), None)
+            # Only raise exception on the default instance database
+            if is_default:
+                raise_from(SQLConnectionError(message), None)
 
     def _setup_new_connection(self, rawconn):
         with rawconn.cursor() as cursor:
