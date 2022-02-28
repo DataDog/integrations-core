@@ -21,7 +21,7 @@
 * [Added] Upgrade psutil to 5.9.0. See [#11139](https://github.com/DataDog/integrations-core/pull/11139).
 * [Changed] Add tls_protocols_allowed configuration option. See [#11237](https://github.com/DataDog/integrations-core/pull/11237).
 
-## 23.7.6 / 2022-02-03
+## 23.7.6 / 2022-02-03 / Agent 7.34.0
 
 * [Fixed] Update obfuscator wrapper to return empty string. See [#11277](https://github.com/DataDog/integrations-core/pull/11277).
 

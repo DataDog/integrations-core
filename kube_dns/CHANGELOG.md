@@ -7,7 +7,7 @@
 * [Fixed] Add k8s-dns-kube-dns as default AD identifier. See [#11269](https://github.com/DataDog/integrations-core/pull/11269).
 * [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
 
-## 2.5.1 / 2022-01-18
+## 2.5.1 / 2022-01-18 / Agent 7.34.0
 
 * [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
 

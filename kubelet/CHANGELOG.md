@@ -11,7 +11,7 @@
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
 * [Fixed] Apply namespace exclusion rules for volume metrics. See [#11512](https://github.com/DataDog/integrations-core/pull/11512).
 
-## 7.1.1 / 2022-01-08
+## 7.1.1 / 2022-01-08 / Agent 7.34.0
 
 * [Fixed] Do not drop the first kubelet eviction event. See [#11032](https://github.com/DataDog/integrations-core/pull/11032).
 

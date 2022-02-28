@@ -7,7 +7,7 @@
 * [Added] Upgrade psutil to 5.9.0. See [#11139](https://github.com/DataDog/integrations-core/pull/11139).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
 
-## 2.5.0 / 2022-01-08
+## 2.5.0 / 2022-01-08 / Agent 7.34.0
 
 * [Added] Add saturation metrics for network. See [#10551](https://github.com/DataDog/integrations-core/pull/10551). Thanks [luhenry](https://github.com/luhenry).
 * [Added] Collect additional TcpExt metrics. See [#10844](https://github.com/DataDog/integrations-core/pull/10844).
