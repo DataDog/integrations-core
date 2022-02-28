@@ -583,7 +583,12 @@ class SQLServer(AgentCheck):
             if self.autodiscovery and self.autodiscovery_db_service_check:
                 for db_name in self.databases:
                     if db_name != self.connection.DEFAULT_DATABASE:
-                        self.connection.check_database_conns(db_name)
+                        try:
+                            self.connection.check_database_conns(db_name)
+                        except Exception as e:
+                            # service_check errors on auto discovered databases should not abort the check
+                            self.log.warning("failed service check for auto discovered database: %s", e)
+
             if self.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
