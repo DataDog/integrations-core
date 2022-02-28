@@ -65,7 +65,6 @@ files:
         value:
           example: ['<QUEUE_NAME>']
           type: array
-          uniqueItems: true
           items:
             type: string
       - name: queue_patterns
@@ -78,7 +77,6 @@ files:
             - 'DEV.*'          # match queues starting with "DEV."
             - 'SYSTEM.*'       # match queues starting with "SYSTEM."
           type: array
-          uniqueItems: true
           items:
             type: string
       - name: queue_regex
@@ -91,7 +89,6 @@ files:
             - '^DEV\..*$'          # match queues starting with "DEV."
             - '^SYSTEM\..*$'       # match queues starting with "SYSTEM."
           type: array
-          uniqueItems: true
           items:
             type: string
       - name: channels
@@ -99,7 +96,6 @@ files:
         value:
           example: ['<CHANNEL_NAME>']
           type: array
-          uniqueItems: true
           items:
             type: string
       - name: channel_status_mapping
@@ -123,7 +119,6 @@ files:
             paused: warning
             initializing: warning
           type: object
-          minProperties: 1
           properties: []
       - name: auto_discover_queues
         description: |
@@ -198,7 +193,7 @@ files:
         value:
           example: '/var/mqm/ssl-db/client/KeyringClient'
           type: string
-        minLength: 1
+          minLength: 1
       - name: ssl_certificate_label
         description: Certificate label used for SSL connection.
         value:
@@ -215,7 +210,6 @@ files:
             'SYSTEM.*': queue_type:system
             'DEV.*': role:dev,queue_type:default
           type: object
-          minProperties: 1
       - name: override_hostname
         description: |
           If enabled, the check sends the provided `host` as hostname instead of the agent's host.
