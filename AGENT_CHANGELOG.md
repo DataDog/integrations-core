@@ -186,7 +186,7 @@
 * HDFS Namenode [2.2.0](https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/CHANGELOG.md)
 * Hive [1.7.1](https://github.com/DataDog/integrations-core/blob/master/hive/CHANGELOG.md)
 * HiveMQ [1.5.1](https://github.com/DataDog/integrations-core/blob/master/hivemq/CHANGELOG.md)
-* HTTP [6.1.2](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
+* HTTP [6.1.2-rc.1](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
 * Hudi [2.0.0](https://github.com/DataDog/integrations-core/blob/master/hudi/CHANGELOG.md) **BREAKING CHANGE**
 * IBM Db2 [1.9.0](https://github.com/DataDog/integrations-core/blob/master/ibm_db2/CHANGELOG.md)
 * IBM i [1.1.0](https://github.com/DataDog/integrations-core/blob/master/ibm_i/CHANGELOG.md)
