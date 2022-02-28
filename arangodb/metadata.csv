@@ -1,1 +1,94 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metrics
+arangodb.agency.append.time
+arangodb.agency.cache.callback,gauge,,callback,,The current number of entries in Agency cache callbacks table.,0,arangodb,agency cache callback,
+arangodb.agency.callback,gauge,,callback,,The current number of Agency callbacks registered.,0,arangodb,agency callback,
+arangodb.agency.callback.registered.count,count,,callback,,The total number of Agency callbacks ever registered.,0,arangodb,agency callback registered count,
+arangodb.agency.client.lookup.table_size,gauge,,entry,, The current number of entries in Agency client id lookup table.,0,arangodb,agency client lookup table size,
+arangodb.agency.commit.time.bucket
+arangodb.agency.commit.time.count
+arangodb.agency.commit.time.sum
+arangodb.agency.compaction.time.bucket
+arangodb.agency.compaction.time.count
+arangodb.agency.compaction.time.sum
+arangodb.agency.local.commit.index
+arangodb.agency.log.size
+arangodb.agency.read.no_leader.count
+arangodb.agency.read.ok.total
+arangodb.agency.supervision.failed.server.count
+arangodb.agency.supervision.runtime
+arangodb.agency.supervision.runtime.wait.for.replication,
+arangodb.agency.write.time.bucket
+arangodb.agency.write.time.count,
+arangodb.agency.write.time.sum
+arangodb.agency.write.no_leader.count,
+arangodb.agency.write.ok.total
+arangodb.arangodb.agency.request.time.bucket,count,,millisecond
+arangodb.arangodb.agency.request.time.count
+arangodb.arangodb.agency.request.time.sum
+arangodb.network.forwarded.requests.count,count,,request,,Number of requests forwarded to another Coordinator.,0,arangodb,network forwarded requests count,
+arangodb.network.request.timeouts.count,count,,request,,Number of internal requests that have timed out.,0,arangodb,network request timeouts count,
+arangodb.network.requests.in.flight,gauge,,request,,Number of outgoing internal requests in flight.,0,arangodb,network requests in flight,
+arangodb.aql.all.query.count,count,,query,,Total number of AQL queries finished.,arangodb,aql all query count,
+arangodb.aql.current.query,gauge,,query,,Current number of AQL queries executing.,arangodb,aql current query,
+arangodb.aql.global.memory.limit,gauge,,byte,,Total memory limit for all AQL queries combined.,arangodb,aql global memory limit,
+arangodb.aql.global.memory.usage,gauge,,byte,,Total memory usage of all AQL queries executing; granularity: 32768 bytes steps.arangodb,aql global memory usage,
+arangodb.aql.global.query.memory.limit.reached.count,count,,,,Number of times the global query memory limit threshold was reached.,arangodb,aql global query memory limit reached count,
+arangodb.aql.local.query.memory.limit.reached.count,count,,,,Number of times a local query memory limit threshold was reached.,arangodb,aql local query memory limit reached count,
+arangodb.aql.query.time.bucket,count,,,,Execution time histogram for all AQL queries.,arangodb,aql query time bucket,
+arangodb.aql.query.time.count,count,,,,Execution time histogram for all AQL queries.,arangodb,aql query time count,
+arangodb.aql.query.time.sum,count,,,,Execution time histogram for all AQL queries.,arangodb,aql query time sum,
+arangodb.aql.slow.query.time.bucket,count,,,,Execution time histogram for slow AQL queries.,arangodb,,
+arangodb.aql.slow.query.time.count,
+arangodb.aql.slow.query.time.sum,
+arangodb.client.connection.bytes.received.bucket,count,,byte,,Bytes received for a request.,arangodb,client connection bytes received bucket,
+arangodb.client.connection.bytes.received.count,count
+arangodb.client.connection.bytes.received.sum,count
+arangodb.client.connections,gauge,,connection,,The number of client connections that are currently open.,arangodb,client connections,
+arangodb.client.connection.time.bucket,count,,second,,Total connection time of a client.,arangodb,client connection time bucket,
+arangodb.client.connection.time.count,count,,second,,Total connection time of a client.,arangodb,client connection time count,
+arangodb.client.connection.time.sum,count,,second,,Total connection time of a client.,arangodb,client connection time sum,
+arangodb.client.connection.io.time.bucket,count,,,,I/O time needed to answer a request.,
+arangodb.client.connection.io.time.count,count,,,,I/O time needed to answer a request.,
+arangodb.client.connection.io.time.sum,count,,,,I/O time needed to answer a request.,
+arangodb.client.connection.queue.time.bucket,count,,seconds,,Queueing time needed for requests.,
+arangodb.client.connection.queue.time.count,count,,seconds,,Queueing time needed for requests.,
+arangodb.client.connection.queue.time.sum,count,,seconds,,Queueing time needed for requests.,
+arangodb.client.connection.request.time.bucket,count,,second,,Request time needed to answer a request.,
+arangodb.client.connection.request.time.count,count,,second,,Request time needed to answer a request.,
+arangodb.client.connection.request.time.sum,count,,second,,Request time needed to answer a request.,
+arangodb.client.connection.total.time.bucket,count,,second,,Total time needed to answer a request.,
+arangodb.client.connection.total.time.count,count,,second,,Total time needed to answer a request.,
+arangodb.client.connection.total.time.sum,count,,second,,Total time needed to answer a request.,
+arangodb.http.async.requests.count,count,,request,,Number of asynchronously executed HTTP requests.,
+arangodb.http.delete.requests.count,count,,request,,Number of HTTP DELETE requests.,
+arangodb.http.get.requests.count,count,,request,,Number of HTTP GET requests.,
+arangodb.http.head.requests.count,count,,request,,Number of HTTP HEAD requests.,
+arangodb.http.options.requests.count,count,,request,,Number of HTTP OPTIONS requests.,
+arangodb.http.patch.requests.count,count,,request,,Number of HTTP PATCH requests.,
+arangodb.http.put.requests.count,count,,request,,Number of HTTP PUT requests.,
+arangodb.http.other.requests.count,count,,request,,Number of other/illegal HTTP requests.,
+arangodb.http.total.requests.count,count,,request,,Total number of HTTP requests.,
+arangodb.http.user.requests.count,count,,request,,Total number of HTTP requests executed by user clients.,
+arangodb.process.page.faults.major.count,count,,fault,,Number of major page faults.,
+arangodb.process.page.faults.minor.count,count,,fault,,Number of minor page faults.,
+arangodb.process.threads,gauge,,thread,,Number of threads.,
+arangodb.process.resident_set_size,gauge,,byte,,The total size of the number of pages the process has in real memory.,
+arangodb.process.system_time,gauge,,second,,Amount of time that this process has been scheduled in kernel mode.,
+arangodb.process.user_time,gauge,,second,,Amount of time that this process has been scheduled in user mode.,
+arangodb.process.virtual_memory_size,gauge,,byte,,The side of the virtual memory the process is using.,
+arangodb.server.cpu_cores,gauge,,,,Number of CPU cores visible to the arangod process.,
+arangodb.server.idle_percent,gauge,,percent,,Percentage of time that the system CPUs have been idle.,
+arangodb.server.iowait_percent,gauge,,percent,,Percentage of time that the system CPUs have been waiting for I/O.,
+arangodb.server.physical_memory,gauge,,byte,,Physical memory of the system in bytes.,
+arangodb.server.kernel_mode.percent,gauge,,percent,,Percentage of time that system CPUs have spent in kernel mode.,
+arangodb.server.user_mode.percent,gauge,,percent,,Percentage of time that system CPUs have spent in user mode.,
+arangodb.collection.lock.acquisition.count,count,,microsecond,,Total amount of collection lock acquisition time.,
+arangodb.collection.lock.sequential_mode.count,count,,transaction,,Number of transactions using sequential locking of collections to avoid deadlocking.,
+arangodb.collection.lock.timeouts_exclusive.count,count,,timeout,,Number of timeouts when trying to acquire collection exclusive locks.,
+arangodb.collection.lock.timeouts_write.count,count,,timeout,,Number of timeouts when trying to acquire collection write locks.,
+arangodb.transactions.read.count,count,,transaction,,Number of read-only transactions.,
+arangodb.transactions.aborted.count,count,,transaction,,Number of transactions aborted.,
+arangodb.transactions.committed.count,count,,transaction,,Number of transactions committed.,
+arangodb.transactions.expired.count,count,,transaction,,"Number of expired transactions, i.e. transactions that have been begun but that were automatically garbage-collected due to inactivity within the transactions’ time-to-live (TTL) period.",
+arangodb.transactions.started.count,count,,transaction,,Number of transactions started/begun.,
+# fill out later

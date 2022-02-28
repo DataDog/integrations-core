@@ -17,13 +17,7 @@ class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     def get_default_config(self):
         return {
-            'openmetrics_endpoint': 'http://localhost:8529/_admin/metrics',
+            'openmetrics_endpoint': 'http://localhost:8529/_admin/metrics/v2',
             'metrics': construct_metrics_config(METRIC_MAP, {}),
         }
 
-    def create_scraper(self, config):
-        return OpenMetricsCompatibilityScraper(self, self.get_config_with_defaults(config))
-
-    # def check(self, _):
-    #
-    #     self.service_check("can_connect", AgentCheck.CRITICAL)
