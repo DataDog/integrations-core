@@ -21,13 +21,9 @@ from ..console import (
     echo_warning,
 )
 
-REQUIRED_VALUE_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
+REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
 
-OPTIONAL_VALUE_HEADERS = {'description', 'interval', 'unit_name', 'per_unit_name', 'short_name'}
-
-REQUIRED_HEADERS = REQUIRED_VALUE_HEADERS | OPTIONAL_VALUE_HEADERS
-
-OPTIONAL_HEADERS = {'curated_metric'}
+OPTIONAL_HEADERS = {'description', 'interval', 'unit_name', 'per_unit_name', 'short_name', 'curated_metric'}
 
 ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS
 
@@ -353,7 +349,7 @@ def metadata(check, check_duplicates, show_warnings):
                     errors = True
                     display_queue.append((echo_failure, f'{current_check}:{line} Invalid column {invalid_headers}'))
 
-                missing_headers = REQUIRED_HEADERS.difference(all_keys)
+                missing_headers = ALL_HEADERS.difference(all_keys)
                 if missing_headers:
                     errors = True
                     display_queue.append(echo_failure(f'{current_check}:{line} Missing columns {missing_headers}'))
@@ -446,7 +442,7 @@ def metadata(check, check_duplicates, show_warnings):
                 )
 
             # empty required fields
-            for header in REQUIRED_VALUE_HEADERS:
+            for header in REQUIRED_HEADERS:
                 if not row[header]:
                     empty_count[header] += 1
 
@@ -481,7 +477,7 @@ def metadata(check, check_duplicates, show_warnings):
                     (echo_failure, f"{current_check}:{line} interval should be an int, found '{row['interval']}'.")
                 )
 
-            if 'curated_metric' in row and row['curated_metric']:
+            if row['curated_metric']:
                 metric_types = row['curated_metric'].split('|')
                 if len(set(metric_types)) != len(metric_types):
                     errors = True
