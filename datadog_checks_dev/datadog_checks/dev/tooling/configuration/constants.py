@@ -30,7 +30,6 @@ OPENAPI_SCHEMA_PROPERTIES = {
     'maximum',
     'minItems',
     'minLength',
-    # 'minProperties',  Not supported https://github.com/samuelcolvin/pydantic/issues/1277
     'minimum',
     'multipleOf',
     'not',
@@ -40,5 +39,4 @@ OPENAPI_SCHEMA_PROPERTIES = {
     'required',
     'title',
     'type',
-    # 'uniqueItems',      Not supported https://github.com/koxudaxi/datamodel-code-generator/issues/719
 }
