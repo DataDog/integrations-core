@@ -96,7 +96,11 @@ class SilkCheck(AgentCheck):
                 self._submit_version_metadata(data.get('system_version'))
                 self.service_check(self.STATE_SERVICE_CHECK, STATE_MAP[state], tags=self._tags)
             else:
-                msg = "Could not access system state, got response: {}".format(code)
+                msg = (
+                    "Could not access system state and version info, got response code `{}` from endpoint `{}`".format(
+                        code, STATE_ENDPOINT
+                    )
+                )
                 self.log.debug(msg)
         return system_tags
 
