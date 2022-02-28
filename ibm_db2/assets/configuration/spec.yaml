@@ -47,6 +47,9 @@ files:
         value:
           type: string
           example: none
+          enum:
+          - none
+          - ssl
       - name: tls_cert
         description: |
           The path to a SSL certificate to use, when connecting to a database in a secure fashion. It
