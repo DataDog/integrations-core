@@ -1,5 +1,9 @@
 # CHANGELOG - IBM Db2
 
+## 1.10.1 / 2022-03-01
+
+* [Fixed] Set enum of security option. See [#11584](https://github.com/DataDog/integrations-core/pull/11584).
+
 ## 1.10.0 / 2022-02-19
 
 * [Added] Add Security parameter. See [#11236](https://github.com/DataDog/integrations-core/pull/11236). Thanks [martintietz](https://github.com/martintietz).
