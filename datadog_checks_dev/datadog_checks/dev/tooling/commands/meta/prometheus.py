@@ -16,7 +16,7 @@ from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_wai
 METRIC_SEPARATORS = ('.', '_')
 TYPE_MAP = {'gauge': 'gauge', 'counter': 'count', 'rate': 'gauge', 'histogram': 'gauge', 'summary': 'gauge'}
 METADATA_CSV_HEADER = (
-    'metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name'
+    'metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric'
 )
 
 
