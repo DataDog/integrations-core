@@ -1,6 +1,6 @@
 {
   "title": "WebLogic - Metrics",
-  "description": "## WebLogic\n\nThis dashboard displays key throughput and activity metrics for your WebLogic infrastructure and helps you correlate WebLogic performance with infrastructure resources. For further reading on WebLogic:\n\n* [Datadog's WebLogic integration docs](https://docs.datadoghq.com/integrations/weblogic/)\n* [WebLogic docs](https://docs.oracle.com/en/middleware/fusion-middleware/weblogic-server/index.html)\n* [How to configure JMX Remote Monitoring in WebLogic](https://docs.oracle.com/javase/8/docs/technotes/guides/management/agent.html#gdenl)\n* [Information on Datadog's JMX configuration](https://docs.datadoghq.com/integrations/java/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+  "description": "## WebLogic\n\nThis dashboard displays key throughput and activity metrics for your WebLogic infrastructure and helps you correlate WebLogic performance with infrastructure resources. This dashboard provides a granular deep-dive into your WebLogic infrastructure for performing metric analysis. For further reading on WebLogic:\n\n* [Datadog's WebLogic integration docs](https://docs.datadoghq.com/integrations/weblogic/)\n* [WebLogic docs](https://docs.oracle.com/en/middleware/fusion-middleware/weblogic-server/index.html)\n* [How to configure JMX Remote Monitoring in WebLogic](https://docs.oracle.com/javase/8/docs/technotes/guides/management/agent.html#gdenl)\n* [Information on Datadog's JMX configuration](https://docs.datadoghq.com/integrations/java/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
   "widgets": [
     {
       "id": 8422052567179120,
@@ -512,7 +512,6 @@
           "value",
           "sum"
         ],
-        "time": {},
         "type": "timeseries",
         "requests": [
           {
@@ -521,6 +520,7 @@
                 "formula": "query1"
               }
             ],
+            "response_format": "timeseries",
             "queries": [
               {
                 "query": "avg:weblogic.work_manager_runtime.requests_pending{$host,$wl_serverruntime,$wl_instance}",
@@ -528,7 +528,6 @@
                 "name": "query1"
               }
             ],
-            "response_format": "timeseries",
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",

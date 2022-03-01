@@ -1,6 +1,6 @@
 {
   "title": "WebLogic - Overview",
-  "description": "## WebLogic\n\nThis dashboard displays key throughput and activity metrics for your WebLogic infrastructure and helps you correlate WebLogic performance with infrastructure resources. For further reading on WebLogic:\n\n* [Datadog's WebLogic integration docs](https://docs.datadoghq.com/integrations/weblogic/)\n* [WebLogic docs](https://docs.oracle.com/en/middleware/fusion-middleware/weblogic-server/index.html)\n* [How to configure JMX Remote Monitoring in WebLogic](https://docs.oracle.com/javase/8/docs/technotes/guides/management/agent.html#gdenl)\n* [Information on Datadog's JMX configuration](https://docs.datadoghq.com/integrations/java/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+  "description": "## WebLogic\n\nThis dashboard displays key throughput and activity metrics for your WebLogic infrastructure and helps you correlate WebLogic performance with infrastructure resources. This dashboard provides a high-level overview of your WebLogic infrastructure at a quick glance. For further reading on WebLogic:\n\n* [Datadog's WebLogic integration docs](https://docs.datadoghq.com/integrations/weblogic/)\n* [WebLogic docs](https://docs.oracle.com/en/middleware/fusion-middleware/weblogic-server/index.html)\n* [How to configure JMX Remote Monitoring in WebLogic](https://docs.oracle.com/javase/8/docs/technotes/guides/management/agent.html#gdenl)\n* [Information on Datadog's JMX configuration](https://docs.datadoghq.com/integrations/java/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
   "widgets": [
     {
       "id": 1108412056789050,
@@ -36,7 +36,7 @@
             "id": 3421914602569662,
             "definition": {
               "type": "note",
-              "content": "**For more information on setup and monitoring, check out the following**\n\n- [WebLogic Integration docs&nbsp;↗](https://docs.datadoghq.com/integrations/weblogic/)",
+              "content": "**For more information on setup and monitoring, check out the following**\n\n- [WebLogic Integration docs&nbsp;↗](https://docs.datadoghq.com/integrations/weblogic/)\n- [WebLogic Server Docs](https://docs.oracle.com/en/middleware/fusion-middleware/weblogic-server/index.html)\n- [How to configure JMX Remote Monitoring in WebLogic](https://docs.oracle.com/javase/8/docs/technotes/guides/management/agent.html#gdenl)\n- [Information on Datadog's JMX configuration](https://docs.datadoghq.com/integrations/java/?tab=host)",
               "background_color": "white",
               "font_size": "16",
               "text_align": "left",
@@ -253,21 +253,12 @@
                 {
                   "formulas": [
                     {
-                      "alias": "requests pending",
-                      "formula": "query1"
-                    },
-                    {
                       "alias": "requests capacity",
                       "formula": "query2"
                     }
                   ],
                   "response_format": "timeseries",
                   "queries": [
-                    {
-                      "query": "max:weblogic.threadpool_runtime.queue_length{$host,$wl_serverruntime,$wl_instance}",
-                      "data_source": "metrics",
-                      "name": "query1"
-                    },
                     {
                       "query": "max:weblogic.threadpool_runtime.shared_capacity_work_managers{$host,$wl_serverruntime,$wl_instance}",
                       "data_source": "metrics",
@@ -279,7 +270,29 @@
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "area"
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "alias": "queue length",
+                      "formula": "query0"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "max:weblogic.threadpool_runtime.queue_length{$host,$wl_serverruntime,$wl_instance}",
+                      "data_source": "metrics",
+                      "name": "query0"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
                 }
               ]
             },
@@ -1181,7 +1194,7 @@
           {
             "id": 6934793335044858,
             "definition": {
-              "title": "Stuck Threads by Application Runtime",
+              "title": "Top Stuck Threads by Application Runtime",
               "title_size": "16",
               "title_align": "left",
               "type": "toplist",
@@ -1191,7 +1204,7 @@
                     {
                       "formula": "query1",
                       "limit": {
-                        "count": 500,
+                        "count": 25,
                         "order": "desc"
                       }
                     }
@@ -1363,7 +1376,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 30,
+        "y": 0,
         "width": 12,
         "height": 7,
         "is_column_break": true
@@ -1904,7 +1917,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 37,
+        "y": 7,
         "width": 12,
         "height": 12
       }
@@ -2118,7 +2131,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 49,
+        "y": 19,
         "width": 12,
         "height": 5
       }
@@ -2276,7 +2289,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 54,
+        "y": 24,
         "width": 12,
         "height": 5
       }
