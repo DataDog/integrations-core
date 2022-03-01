@@ -1,5 +1,9 @@
 # CHANGELOG - IBM MQ
 
+## 3.19.1 / 2022-03-01
+
+* [Fixed] Fix unique list items and min mapping properties config validations . See [#11574](https://github.com/DataDog/integrations-core/pull/11574).
+
 ## 3.19.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11370](https://github.com/DataDog/integrations-core/pull/11370).
