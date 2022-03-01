@@ -228,7 +228,7 @@ def parse(ctx, endpoint, check, here):
             metric_description = f'"{metric_description}"'
 
         output_lines.append(
-            '{check}.{metric_name},{metric_type},,,,{metric_description},0,{check},\n'.format(
+            '{check}.{metric_name},{metric_type},,,,{metric_description},0,{check},,\n'.format(
                 check=check, metric_name=metric_name, metric_type=metric_type, metric_description=metric_description
             )
         )
