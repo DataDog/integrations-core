@@ -90,7 +90,7 @@ class HTTPCheck(AgentCheck):
         def send_status_down(loginfo, down_msg):
             # TODO: A6 log needs bytes and cannot handle unicode
             self.log.info(loginfo)
-            down_msg = self._include_content(include_content, down_msg, content)
+            down_msg = self._include_content(include_content, down_msg, r.text)
             service_checks.append((self.SC_STATUS, AgentCheck.CRITICAL, down_msg))
 
         # Store tags in a temporary list so that we don't modify the global tags data structure
@@ -170,8 +170,6 @@ class HTTPCheck(AgentCheck):
             if response_time and not service_checks:
                 self.gauge('network.http.response_time', r.elapsed.total_seconds(), tags=tags_list)
 
-            content = r.text
-
             # Check HTTP response status code
             if not (service_checks or re.match(http_response_status_code, str(r.status_code))):
                 if http_response_status_code == DEFAULT_EXPECTED_CODE:
@@ -182,7 +180,7 @@ class HTTPCheck(AgentCheck):
                 message = "Incorrect HTTP return code for url {}. Expected {}, got {}.".format(
                     addr, expected_code, str(r.status_code)
                 )
-                message = self._include_content(include_content, message, content)
+                message = self._include_content(include_content, message, r.text)
 
                 self.log.info(message)
 
@@ -192,7 +190,7 @@ class HTTPCheck(AgentCheck):
                 # Host is UP
                 # Check content matching is set
                 if content_match:
-                    if re.search(content_match, content, re.UNICODE):
+                    if re.search(content_match, r.text, re.UNICODE):
                         if reverse_content_match:
                             send_status_down(
                                 '{} is found in return content with the reverse_content_match option'.format(
