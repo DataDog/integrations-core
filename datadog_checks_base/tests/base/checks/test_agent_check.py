@@ -649,17 +649,23 @@ class TestTags:
         assert set(tags) == expected_tags
 
     @pytest.mark.parametrize(
-        "global_metrics_filter, expected_metrics, unexpected_metrics",
+        "exclude_metrics_filters, include_metrics_filters, expected_metrics, unexpected_metrics",
         [
-            pytest.param(r'hello', ['hello'], ['my_metric', 'my_metric_count'], id='strict regex'),
-            pytest.param('hello', ['hello'], ['my_metric', 'my_metric_count'], id='string'),
-            pytest.param(r'my_metric*', ['my_metric', 'my_metric_count'], ['hello'], id='multiple matches'),
-            pytest.param(r'my_metrics', [], ['my_metric', 'my_metric_count', 'hello'], id='no matches'),
-            pytest.param(r'.*', ['my_metric', 'my_metric_count', 'hello'], [], id='everything'),
+            pytest.param(['hello'], [], ['my_metric', 'my_metric_count'], ['hello'], id='exclude string'),
+            pytest.param(
+                ['my_metric*'], [], ['hello'], ['my_metric', 'my_metric_count'], id='exclude multiple matches'
+            ),
+            pytest.param(['my_metrics'], [], ['my_metric', 'my_metric_count', 'hello'], [], id='exclude no matches'),
+            pytest.param(['.*'], [], [], ['my_metric', 'my_metric_count', 'hello'], id='exclude everything'),
         ],
     )
-    def test_global_metrics_filter(self, global_metrics_filter, expected_metrics, unexpected_metrics, aggregator):
-        instance = {'global_metrics_filter': global_metrics_filter}
+    def test_metrics_filters(
+        self, exclude_metrics_filters, include_metrics_filters, expected_metrics, unexpected_metrics, aggregator
+    ):
+        instance = {
+            'exclude_metrics_filters': exclude_metrics_filters,
+            'include_metrics_filters': include_metrics_filters,
+        }
         check = AgentCheck('myintegration', {}, [instance])
         check.gauge('my_metric', 0)
         check.count('my_metric_count', 0)
@@ -673,12 +679,20 @@ class TestTags:
             aggregator.assert_metric(metric_name, count=0)
         aggregator.assert_service_check('test.can_check', status=AgentCheck.OK)
 
-    def test_global_metrics_filter_invalid(self, aggregator):
-        instance = {'global_metrics_filter': r'['}
-        with pytest.raises(Exception) as conf_error:
+    @pytest.mark.parametrize(
+        "exclude_metrics_filters, include_metrics_filters, expected_error",
+        [
+            pytest.param('hello', [], r'^Setting `exclude_metrics_filters` must be an array', id='exclude not list'),
+            pytest.param([], 'hello', r'^Setting `include_metrics_filters` must be an array', id='include not list'),
+        ],
+    )
+    def test_metrics_filter_invalid(self, aggregator, exclude_metrics_filters, include_metrics_filters, expected_error):
+        instance = {
+            'exclude_metrics_filters': exclude_metrics_filters,
+            'include_metrics_filters': include_metrics_filters,
+        }
+        with pytest.raises(Exception, match=expected_error):
             AgentCheck('myintegration', {}, [instance])
-
-        assert 'The pattern `[` in `global_metrics_filter` must be a valid regex' in str(conf_error)
 
 
 class LimitedCheck(AgentCheck):

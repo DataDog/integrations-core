@@ -205,17 +205,54 @@ class AgentCheck(object):
             is_affirmative(self.instance.get('disable_generic_tags', False)) if instance else False
         )
 
-        self.global_metrics_filter = self.instance.get('global_metrics_filter') if instance else None
+        exclude_metrics_filters = self.instance.get('exclude_metrics_filters', []) if instance else []
 
-        if self.global_metrics_filter is not None:
-            try:
-                self.global_metrics_filter = re.compile(self.global_metrics_filter)
-            except Exception:
-                raise ConfigurationError(
-                    'The pattern `{}` in `global_metrics_filter` must be a valid regex'.format(
-                        self.global_metrics_filter
-                    )
+        if not isinstance(exclude_metrics_filters, list):
+            raise ConfigurationError('Setting `exclude_metrics_filters` must be an array')
+
+        self.exclude_metrics_filters = set()
+        self.exclude_metrics_pattern = None
+        exclude_metrics_patterns = []
+        for i, entry in enumerate(exclude_metrics_filters, 1):
+            if not isinstance(entry, str):
+                raise ConfigurationError('Entry #{} of setting `exclude_metrics_filters` must be a string'.format(i))
+
+            escaped_entry = re.escape(entry)
+            if entry == escaped_entry:
+                self.exclude_metrics_filters.add(entry)
+            else:
+                exclude_metrics_patterns.append(entry)
+
+        if exclude_metrics_patterns:
+            self.exclude_metrics_pattern = re.compile('|'.join(exclude_metrics_patterns))
+
+        include_metrics_filters = self.instance.get('include_metrics_filters', []) if instance else []
+
+        if not isinstance(include_metrics_filters, list):
+            raise ConfigurationError('Setting `include_metrics_filters` must be an array')
+
+        self.include_metrics_filters = set()
+        self.include_metrics_pattern = None
+        include_metrics_patterns = []
+        for i, entry in enumerate(include_metrics_filters, 1):
+            if not isinstance(entry, str):
+                raise ConfigurationError('Entry #{} of setting `include_metrics_filters` must be a string'.format(i))
+
+            if entry in exclude_metrics_filters:
+                self.log.debug(
+                    'Metric `%s` is set in both `exclude_metrics_filters` and `include_metrics_filters`.'
+                    ' Excluding Metric.',
+                    entry,
                 )
+
+            escaped_entry = re.escape(entry)
+            if entry == escaped_entry:
+                self.include_metrics_filters.add(entry)
+            else:
+                include_metrics_patterns.append(entry)
+
+        if include_metrics_patterns:
+            self.include_metrics_pattern = re.compile('|'.join(include_metrics_patterns))
 
         self.debug_metrics = {}
         if self.init_config is not None:
@@ -620,7 +657,13 @@ class AgentCheck(object):
         if hostname is None:
             hostname = ''
 
-        if self.global_metrics_filter is not None and not self.global_metrics_filter.search(name):
+        if (name in self.exclude_metrics_filters) or (
+            self.exclude_metrics_pattern is not None and self.exclude_metrics_pattern.search(name)
+        ):
+            return
+        elif (self.include_metrics_filters and name not in self.include_metrics_filters) or (
+            self.include_metrics_pattern is not None and not self.include_metrics_pattern.search(name)
+        ):
             return
 
         if self.metric_limiter:
