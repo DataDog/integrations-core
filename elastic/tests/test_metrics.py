@@ -41,6 +41,7 @@ from datadog_checks.elastic.metrics import (
         pytest.param([5, 0, 0], True, 250, id='jmx-rate-v5'),
         pytest.param([6, 3, 0], True, 250, id='jmx-rate-v6.3.0'),
         pytest.param([7, 2, 0], True, 244, id='jmx-rate-v7.2.0'),
+        pytest.param([7, 9, 0], True, 247, id='jmx-rate-v7.9.0')
     ],
 )
 def test_stats_for_version(version, jvm_rate, expected_metric_count):
@@ -65,6 +66,7 @@ def test_stats_for_version(version, jvm_rate, expected_metric_count):
         pytest.param([5, 0, 0], 34, id='v5'),
         pytest.param([6, 3, 0], 34, id='v6.3.0'),
         pytest.param([7, 2, 0], 36, id='v7.2.0'),
+        pytest.param([7, 9, 0], 36, id='v7.9.0'),
     ],
 )
 def test_pshard_stats_for_version(version, expected_metric_count):
@@ -89,6 +91,7 @@ def test_pshard_stats_for_version(version, expected_metric_count):
         pytest.param([5, 0, 0], 9, id='v5'),
         pytest.param([6, 3, 0], 9, id='v6.3.0'),
         pytest.param([7, 2, 0], 9, id='v7.2.0'),
+        pytest.param([7, 9, 0], 9, id='v7.9.0'),
     ],
 )
 @pytest.mark.unit
@@ -114,6 +117,7 @@ def test_health_stats_for_version(version, expected_metric_count):
         pytest.param([5, 0, 0], 16, id='v5'),
         pytest.param([6, 3, 0], 16, id='v6.3.0'),
         pytest.param([7, 2, 0], 16, id='v7.2.0'),
+        pytest.param([7, 9, 0], 16, id='v7.9.0'),
     ],
 )
 def test_node_system_stats_for_version(version, expected_metric_count):
