@@ -204,7 +204,6 @@ class AgentCheck(object):
         self.disable_generic_tags = (
             is_affirmative(self.instance.get('disable_generic_tags', False)) if instance else False
         )
-
         self.debug_metrics = {}
         if self.init_config is not None:
             self.debug_metrics.update(self.init_config.get('debug_metrics', {}))
