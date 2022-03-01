@@ -1,5 +1,20 @@
 # CHANGELOG - kubelet
 
+## 7.2.1 / 2022-02-24
+
+* [Fixed] Apply namespace exclusion rules in cadvisor and summary metrics. See [#11559](https://github.com/DataDog/integrations-core/pull/11559).
+
+## 7.2.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11386](https://github.com/DataDog/integrations-core/pull/11386).
+* [Added] Update example config. See [#11515](https://github.com/DataDog/integrations-core/pull/11515).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* [Fixed] Apply namespace exclusion rules for volume metrics. See [#11512](https://github.com/DataDog/integrations-core/pull/11512).
+
+## 7.1.1 / 2022-01-08
+
+* [Fixed] Do not drop the first kubelet eviction event. See [#11032](https://github.com/DataDog/integrations-core/pull/11032).
+
 ## 7.1.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).

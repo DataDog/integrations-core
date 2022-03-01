@@ -28,18 +28,12 @@ To configure this check for an Agent running on a host:
 
    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
    You can specify the metrics you are interested in by editing the configuration below.
-   To learn how to customize the metrics to collect, visit the [JMX Checks documentation][4] for more detailed instructions.
+   To learn how to customize the metrics to collect, see the [JMX Checks documentation][4] for more detailed instructions.
    If you need to monitor more metrics, contact [Datadog support][5].
 
 2. [Restart the Agent][6].
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 1. Hazelcast supports many different [logging adapters][7]. Here is an example of a `log4j2.properties` file:
 
@@ -118,12 +112,6 @@ partial -->
 For containerized environments, see the [Autodiscovery with JMX][10] guide.
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][11].
 

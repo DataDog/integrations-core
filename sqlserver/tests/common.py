@@ -11,6 +11,7 @@ from datadog_checks.sqlserver.const import (
     AO_METRICS,
     AO_METRICS_PRIMARY,
     AO_METRICS_SECONDARY,
+    DATABASE_FILES_IO,
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
@@ -39,7 +40,6 @@ def get_local_driver():
 HOST = get_docker_hostname()
 PORT = 1433
 DOCKER_SERVER = '{},{}'.format(HOST, PORT)
-LOCAL_SERVER = 'localhost,{}'.format(PORT)
 HERE = get_here()
 CHECK_NAME = "sqlserver"
 
@@ -51,6 +51,7 @@ EXPECTED_DEFAULT_METRICS = [
         DBM_MIGRATED_METRICS,
         INSTANCE_METRICS_TOTAL,
         DATABASE_METRICS,
+        DATABASE_FILES_IO,
     )
 ]
 EXPECTED_METRICS = (
@@ -66,55 +67,18 @@ EXPECTED_METRICS = (
     + CUSTOM_METRICS
 )
 
-UNEXPECTED_METRICS = FCI_METRICS
+DBM_MIGRATED_METRICS_NAMES = set(m[0] for m in DBM_MIGRATED_METRICS)
+
+EXPECTED_METRICS_DBM_ENABLED = [m for m in EXPECTED_METRICS if m not in DBM_MIGRATED_METRICS_NAMES]
+
+UNEXPECTED_METRICS = [m[0] for m in FCI_METRICS]
 
 EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in AO_METRICS_PRIMARY]
 EXPECTED_AO_METRICS_SECONDARY = [m[0] for m in AO_METRICS_SECONDARY]
 EXPECTED_AO_METRICS_COMMON = [m[0] for m in AO_METRICS]
 
-INSTANCE_DOCKER = {
-    'host': '{},1433'.format(HOST),
-    'connector': 'odbc',
-    'driver': get_local_driver(),
-    'username': 'datadog',
-    'password': 'Password12!',
-    'tags': ['optional:tag1'],
-    'include_task_scheduler_metrics': True,
-    'include_db_fragmentation_metrics': True,
-    'include_fci_metrics': True,
-    'include_ao_metrics': False,
-    'include_master_files_metrics': True,
-    'disable_generic_tags': True,
-}
-
-INSTANCE_AO_DOCKER_SECONDARY = {
-    'host': '{},1434'.format(HOST),
-    'connector': 'odbc',
-    'driver': 'FreeTDS',
-    'username': 'datadog',
-    'password': 'Password12!',
-    'tags': ['optional:tag1'],
-    'include_ao_metrics': True,
-    'disable_generic_tags': True,
-}
-
-CUSTOM_QUERY_A = {
-    'query': "SELECT letter, num FROM (VALUES (97, 'a'), (98, 'b'), (99, 'c')) AS t (num,letter)",
-    'columns': [{'name': 'customtag', 'type': 'tag'}, {'name': 'num', 'type': 'gauge'}],
-    'tags': ['query:custom'],
-}
-
-CUSTOM_QUERY_B = {
-    'query': "SELECT letter, num FROM (VALUES (97, 'a'), (98, 'b'), (99, 'c')) AS t (num,letter)",
-    'columns': [{'name': 'customtag', 'type': 'tag'}, {'name': 'num', 'type': 'gauge'}],
-    'tags': ['query:another_custom_one'],
-}
-
-INSTANCE_E2E = INSTANCE_DOCKER.copy()
-INSTANCE_E2E['driver'] = 'FreeTDS'
-
 INSTANCE_SQL_DEFAULTS = {
-    'host': LOCAL_SERVER,
+    'host': DOCKER_SERVER,
     'username': 'sa',
     'password': 'Password12!',
     'disable_generic_tags': True,
@@ -186,15 +150,13 @@ INIT_CONFIG_ALT_TABLES = {
             'columns': ['num_of_reads', 'num_of_writes'],
         },
         {
-            'name': 'sqlserver.MEMORYCLERK_BITMAP',
+            'name': 'sqlserver.MEMORYCLERK_SQLGENERAL',
             'table': 'sys.dm_os_memory_clerks',
-            'counter_name': 'MEMORYCLERK_BITMAP',
+            'counter_name': 'MEMORYCLERK_SQLGENERAL',
             'columns': ['virtual_memory_reserved_kb', 'virtual_memory_committed_kb'],
         },
     ]
 }
-
-FULL_E2E_CONFIG = {"init_config": INIT_CONFIG, "instances": [INSTANCE_E2E]}
 
 
 def assert_metrics(aggregator, expected_tags, dbm_enabled=False):

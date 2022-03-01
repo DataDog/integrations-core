@@ -12,5 +12,19 @@
         ],
         "name": "Can Connect",
         "description": "Returns `CRITICAL` if the agent can't connect to Envoy to collect metrics, otherwise `OK`."
+    },
+    {
+        "agent_version": "7.34.0",
+        "integration": "Envoy",
+        "check": "envoy.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "endpoint"
+        ],
+        "name": "Openmetrics Can Connect",
+        "description": "Returns `CRITICAL` if the agent can't connect to Envoy to collect metrics, otherwise `OK`."
     }
 ]

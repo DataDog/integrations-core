@@ -17,6 +17,20 @@ SELECT   table_schema, IFNULL(SUM(data_length+index_length)/1024/1024,0) AS tota
 FROM     information_schema.tables
 GROUP BY table_schema"""
 
+SQL_QUERY_TABLE_SIZE = """\
+SELECT   table_schema, table_name,
+         IFNULL(index_length/1024/1024,0) AS index_size_mb,
+         IFNULL(data_length/1024/1024,0) AS data_size_mb
+FROM     information_schema.tables
+WHERE    table_schema not in ('mysql', 'performance_schema', 'information_schema')"""
+
+SQL_QUERY_SYSTEM_TABLE_SIZE = """\
+SELECT   table_schema, table_name,
+         IFNULL(index_length/1024/1024,0) AS index_size_mb,
+         IFNULL(data_length/1024/1024,0) AS data_size_mb
+FROM     information_schema.tables
+WHERE    table_schema in ('mysql', 'performance_schema', 'information_schema')"""
+
 SQL_AVG_QUERY_RUN_TIME = """\
 SELECT schema_name, ROUND((SUM(sum_timer_wait) / SUM(count_star)) / 1000000) AS avg_us
 FROM performance_schema.events_statements_summary_by_digest
@@ -39,6 +53,22 @@ SQL_REPLICATION_ROLE_AWS_AURORA = """\
 SELECT IF(session_id = 'MASTER_SESSION_ID','writer', 'reader') AS replication_role
 FROM information_schema.replica_host_status
 WHERE server_id = @@aurora_server_id"""
+
+SQL_GROUP_REPLICATION_MEMBER = """\
+SELECT channel_name, member_state, member_role
+FROM performance_schema.replication_group_members
+WHERE member_id = @@server_uuid"""
+
+SQL_GROUP_REPLICATION_METRICS = """\
+SELECT channel_name,count_transactions_in_queue,count_transactions_checked,count_conflicts_detected,
+count_transactions_rows_validating,count_transactions_remote_in_applier_queue,count_transactions_remote_applied,
+count_transactions_local_proposed,count_transactions_local_rollback
+FROM performance_schema.replication_group_member_stats
+WHERE channel_name IN ('group_replication_applier', 'group_replication_recovery') AND member_id = @@server_uuid"""
+
+SQL_GROUP_REPLICATION_PLUGIN_STATUS = """\
+SELECT plugin_status
+FROM information_schema.plugins WHERE plugin_name='group_replication'"""
 
 
 def show_replica_status_query(version, is_mariadb, channel=''):

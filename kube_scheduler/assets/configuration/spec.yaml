@@ -77,9 +77,11 @@ files:
         against the APIServer to retrieve metrics.
       enabled: true
       value:
-        type: boolean
-        example: true
+        example: tls_only
         default: false
+        anyOf:
+        - type: boolean
+        - type: string
     - name: bearer_token_path
       description: Used to specify the path where the service account token is located.
       value:
@@ -87,6 +89,8 @@ files:
         example: /var/run/secrets/kubernetes.io/serviceaccount/token
     - name: ssl_verify
       description: Used to verify self signed certificates.
+      enabled: true
       value:
         type: boolean
-        example: true
+        example: false
+        display_default: true

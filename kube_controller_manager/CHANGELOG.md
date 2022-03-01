@@ -1,5 +1,21 @@
 # CHANGELOG - Kube_controller_manager
 
+## 4.0.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11381](https://github.com/DataDog/integrations-core/pull/11381).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
+
+## 3.0.1 / 2022-01-18
+
+* [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
+
+## 3.0.0 / 2022-01-08
+
+* [Added] Add kube_controller_manager config spec. See [#10505](https://github.com/DataDog/integrations-core/pull/10505).
+* [Fixed] Sync configuration spec. See [#10938](https://github.com/DataDog/integrations-core/pull/10938).
+* [Changed] Update the default value of the `bearer_token` parameter to send the bearer token only to secure https endpoints by default. See [#10708](https://github.com/DataDog/integrations-core/pull/10708).
+
 ## 2.0.1 / 2021-08-25 / Agent 7.31.0
 
 * [Fixed] Correctly use SSL options for health checks. See [#9977](https://github.com/DataDog/integrations-core/pull/9977).

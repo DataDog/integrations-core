@@ -2,8 +2,10 @@
 from __future__ import unicode_literals
 
 import logging
+import math
 import os
 import re
+import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
 
@@ -13,11 +15,11 @@ from lxml import etree as ET
 
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
+from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
 from .common import CHECK_NAME
-from .utils import not_windows_ci, windows_ci
 
 try:
     import pyodbc
@@ -37,20 +39,17 @@ def dbm_instance(instance_docker):
     instance_docker['dbm'] = True
     instance_docker['min_collection_interval'] = 1
     # set a very small collection interval so the tests go fast
-    instance_docker['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    instance_docker['query_metrics'] = {
+        'enabled': True,
+        'run_sync': True,
+        'collection_interval': 0.1,
+        # in tests sometimes things can slow down so we don't want this short deadline causing some events
+        # to fail to be collected on time
+        'enforce_collection_interval_deadline': False,
+    }
     return copy(instance_docker)
 
 
-@pytest.fixture
-def instance_sql_msoledb_dbm(instance_sql_msoledb):
-    instance_sql_msoledb['dbm'] = True
-    instance_sql_msoledb['min_collection_interval'] = 1
-    instance_sql_msoledb['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
-    instance_sql_msoledb['tags'] = ['optional:tag1']
-    return instance_sql_msoledb
-
-
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
@@ -78,7 +77,6 @@ def test_get_available_query_metrics_columns(aggregator, dbm_instance, expected_
             assert result_available_columns == available_columns
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_get_statement_metrics_query_cached(aggregator, dbm_instance, caplog):
@@ -99,7 +97,7 @@ def test_get_statement_metrics_query_cached(aggregator, dbm_instance, caplog):
 
 
 test_statement_metrics_and_plans_parameterized = (
-    "database,plan_user,query,match_pattern,param_groups",
+    "database,plan_user,query,match_pattern,param_groups,disable_secondary_tags",
     [
         [
             "datadog_test",
@@ -107,6 +105,7 @@ test_statement_metrics_and_plans_parameterized = (
             "SELECT * FROM ϑings",
             r"SELECT \* FROM ϑings",
             ((),),
+            False,
         ],
         [
             "datadog_test",
@@ -118,6 +117,7 @@ test_statement_metrics_and_plans_parameterized = (
                 (2,),
                 (3,),
             ),
+            False,
         ],
         [
             "master",
@@ -129,6 +129,7 @@ test_statement_metrics_and_plans_parameterized = (
                 (2,),
                 (3,),
             ),
+            False,
         ],
         [
             "datadog_test",
@@ -140,67 +141,58 @@ test_statement_metrics_and_plans_parameterized = (
                 (2, "there"),
                 (3, "bill"),
             ),
+            False,
+        ],
+        [
+            "datadog_test",
+            "dbo",
+            "SELECT * FROM ϑings where id = ?",
+            r"\(@P1 \w+\)SELECT \* FROM ϑings where id = @P1",
+            (
+                (1,),
+                (2,),
+                (3,),
+            ),
+            True,
         ],
     ],
 )
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(*test_statement_metrics_and_plans_parameterized)
 def test_statement_metrics_and_plans(
-    aggregator, dd_run_check, dbm_instance, bob_conn, database, plan_user, query, param_groups, match_pattern
-):
-    _run_test_statement_metrics_and_plans(
-        aggregator, dd_run_check, dbm_instance, bob_conn, database, plan_user, query, param_groups, match_pattern
-    )
-
-
-@windows_ci
-@pytest.mark.integration
-@pytest.mark.parametrize(*test_statement_metrics_and_plans_parameterized)
-def test_statement_metrics_and_plans_windows(
     aggregator,
     dd_run_check,
-    instance_sql_msoledb_dbm,
+    dbm_instance,
     bob_conn,
     database,
     plan_user,
     query,
     param_groups,
+    disable_secondary_tags,
     match_pattern,
+    caplog,
+    datadog_agent,
 ):
-    _run_test_statement_metrics_and_plans(
-        aggregator,
-        dd_run_check,
-        instance_sql_msoledb_dbm,
-        bob_conn,
-        database,
-        plan_user,
-        query,
-        param_groups,
-        match_pattern,
-    )
-
-
-def _run_test_statement_metrics_and_plans(
-    aggregator, dd_run_check, dbm_instance, bob_conn, database, plan_user, query, param_groups, match_pattern
-):
+    caplog.set_level(logging.INFO)
+    if disable_secondary_tags:
+        dbm_instance['query_metrics']['disable_secondary_tags'] = True
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
-    with bob_conn.cursor() as cursor:
-        cursor.execute("USE {}".format(database))
-
-    def _run_test_queries():
-        with bob_conn.cursor() as cursor:
-            for params in param_groups:
-                cursor.execute(query, params)
-
-    _run_test_queries()
+    # the check must be run three times:
+    # 1) set _last_stats_query_time (this needs to happen before the 1st test queries to ensure the query time
+    # interval is correct)
+    # 2) load the test queries into the StatementMetrics state
+    # 3) emit the query metrics based on the diff of current and last state
+    dd_run_check(check)
+    for params in param_groups:
+        bob_conn.execute_with_retries(query, params, database=database)
     dd_run_check(check)
     aggregator.reset()
-    _run_test_queries()
+    for params in param_groups:
+        bob_conn.execute_with_retries(query, params, database=database)
     dd_run_check(check)
 
     _conn_key_prefix = "dbm-"
@@ -220,6 +212,7 @@ def _run_test_statement_metrics_and_plans(
     # host metadata
     assert payload['sqlserver_version'].startswith("Microsoft SQL Server"), "invalid version"
     assert payload['host'] == "stubbed.hostname", "wrong hostname"
+    assert payload['ddagenthostname'] == datadog_agent.get_hostname()
     assert set(payload['tags']) == expected_instance_tags, "wrong instance tags for dbm-metrics event"
     assert type(payload['min_collection_interval']) in (float, int), "invalid min_collection_interval"
     # metrics rows
@@ -231,8 +224,12 @@ def _run_test_statement_metrics_and_plans(
     assert total_execution_count == len(param_groups), "wrong execution count"
     for row in matching_rows:
         assert row['query_signature'], "missing query signature"
-        assert row['database_name'] == database, "incorrect database_name"
-        assert row['user_name'] == plan_user, "incorrect user_name"
+        if disable_secondary_tags:
+            assert 'database_name' not in row
+            assert 'user_name' not in row
+        else:
+            assert row['database_name'] == database, "incorrect database_name"
+            assert row['user_name'] == plan_user, "incorrect user_name"
         for column in available_query_metrics_columns:
             assert column in row, "missing required metrics column {}".format(column)
             assert type(row[column]) in (float, int), "wrong type for metrics column {}".format(column)
@@ -248,7 +245,12 @@ def _run_test_statement_metrics_and_plans(
         assert event['host'] == "stubbed.hostname", "wrong hostname"
         assert event['ddsource'] == "sqlserver", "wrong source"
         assert event['ddagentversion'], "missing ddagentversion"
-        assert set(event['ddtags'].split(',')) == expected_instance_tags_with_db, "wrong instance tags for plan event"
+        if disable_secondary_tags:
+            assert set(event['ddtags'].split(',')) == expected_instance_tags, "wrong instance tags for plan event"
+        else:
+            assert (
+                set(event['ddtags'].split(',')) == expected_instance_tags_with_db
+            ), "wrong instance tags for plan event"
 
     plan_events = [s for s in dbm_samples if s['dbm_type'] == "plan"]
     assert plan_events, "should have collected some plans"
@@ -263,15 +265,78 @@ def _run_test_statement_metrics_and_plans(
 
     # internal debug metrics
     aggregator.assert_metric(
-        "dd.sqlserver.statements.collect_statement_metrics_and_plans.time",
-        tags=['agent_hostname:stubbed.hostname'] + _expected_dbm_instance_tags(dbm_instance),
+        "dd.sqlserver.operation.time",
+        tags=['agent_hostname:stubbed.hostname', 'operation:collect_statement_metrics_and_plans']
+        + _expected_dbm_instance_tags(dbm_instance),
     )
 
 
-@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "metadata,expected_metadata_payload",
+    [
+        (
+            {'tables_csv': 'sys.databases', 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+            {'tables': ['sys.databases'], 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+        ),
+        (
+            {'tables_csv': '', 'commands': None, 'comments': None},
+            {'tables': None, 'commands': None, 'comments': None},
+        ),
+    ],
+)
+def test_statement_metadata(
+    aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, metadata, expected_metadata_payload
+):
+    dbm_instance['obfuscator_options'] = {'collect_metadata': True}
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    query = '''
+    -- Test comment
+    select * from sys.databases'''
+
+    def _run_query():
+        bob_conn.execute_with_retries(query)
+
+    def _obfuscate_sql(sql_query, options=None):
+        return json.dumps({'query': sql_query, 'metadata': metadata})
+
+    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        _run_query()
+        dd_run_check(check)
+        _run_query()
+        dd_run_check(check)
+
+    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+    assert dbm_samples, "should have collected at least one sample"
+
+    matching = [
+        s for s in dbm_samples if 'select * from sys.databases' in s['db']['statement'] and s['dbm_type'] == 'plan'
+    ]
+    assert len(matching) == 1
+
+    sample = matching[0]
+    assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
+    assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
+    assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
+
+    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(dbm_metrics) == 1
+    metric = dbm_metrics[0]
+    matching_metrics = [m for m in metric['sqlserver_rows'] if 'select * from sys.databases' in m['text']]
+    assert len(matching_metrics) == 1
+    metric = matching_metrics[0]
+    assert metric['dd_tables'] == expected_metadata_payload['tables']
+    assert metric['dd_commands'] == expected_metadata_payload['commands']
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
+    now = time.time()
     test_query = "select * from sys.databases"
 
     # run this test query to guarantee there's at least one application query in the query plan cache
@@ -293,8 +358,9 @@ def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
     # without the cast this is expected to fail with
     # pyodbc.ProgrammingError: ('ODBC SQL type -150 is not yet supported.  column-index=77  type=-150', 'HY106')
     with datadog_conn_docker.cursor() as cursor:
-        logging.debug("running statement_metrics_query: %s", statement_metrics_query)
-        cursor.execute(statement_metrics_query)
+        params = (math.ceil(time.time() - now),)
+        logging.debug("running statement_metrics_query [%s] %s", statement_metrics_query, params)
+        cursor.execute(statement_metrics_query, params)
 
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
@@ -315,6 +381,35 @@ def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
 XML_PLANS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "xml_plans")
 
 
+@pytest.mark.parametrize("slow_plans", [True, False])
+@pytest.mark.skip(reason="skip to see if this test is why the tests get stuck")
+def test_plan_collection_deadline(aggregator, dd_run_check, dbm_instance, slow_plans):
+    dbm_instance['query_metrics']['enforce_collection_interval_deadline'] = True
+
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    def _mock_slow_load_plan(*_):
+        if not slow_plans:
+            check.log.debug("_mock_slow_load_plan instant return")
+            return
+        interval = dbm_instance['query_metrics']['collection_interval']
+        check.log.debug("_mock_slow_load_plan sleeping %s seconds", interval)
+        time.sleep(interval)
+
+    aggregator.reset()
+
+    with mock.patch.object(check.statement_metrics, '_load_plan', passthrough=True) as mock_obj:
+        mock_obj.side_effect = _mock_slow_load_plan
+        dd_run_check(check)
+
+    expected_debug_tags = ['agent_hostname:stubbed.hostname'] + _expected_dbm_instance_tags(dbm_instance)
+
+    if slow_plans:
+        aggregator.assert_metric("dd.sqlserver.statements.deadline_exceeded", tags=expected_debug_tags)
+    else:
+        aggregator.assert_metric("dd.sqlserver.statements.deadline_exceeded", count=0)
+
+
 def _strip_whitespace(raw_plan):
     tree = ET.fromstring(raw_plan)
     for e in tree.iter():
@@ -330,7 +425,7 @@ def _load_test_xml_plan(filename):
         return f.read()
 
 
-def _mock_sql_obfuscate(sql_string):
+def _mock_sql_obfuscate(sql_string, options=None):
     sql_string = re.sub(r"'[^']+'", r"?", sql_string)
     sql_string = re.sub(r"([^@])[0-9]+", r"\1?", sql_string)
     return sql_string
@@ -373,7 +468,6 @@ def test_async_job_enabled(dd_run_check, dbm_instance, statement_metrics_enabled
         assert check.statement_metrics._job_loop_future is None
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
@@ -388,7 +482,6 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     )
 
 
-@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):

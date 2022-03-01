@@ -24,9 +24,9 @@ The performance servlet is deployed exactly as any other servlet. Deploy the ser
 
 **Note**: Starting with version 6.1, you must enable application security to get the PerfServlet working.
 
-### Modify the currently monitored statistic set
+### Modify the monitored statistic set
 
-By default, your application server is only configured for "Basic" monitoring. In order to gain complete visibility into your JVM, JDBC connections, and servlet connections, change the currently monitored statistic set for your application server from "Basic" to "All".
+By default, your application server is only configured for "Basic" monitoring. To gain visibility into your JVM, JDBC connections, and servlet connections, change the monitored statistic set for your application server from "Basic" to "All".
 
 From the Websphere Administration Console, you can find this setting in `Application servers > <YOUR_APP_SERVER> > Performance Monitoring Infrastructure (PMI)`.
 
@@ -48,12 +48,6 @@ To configure this check for an Agent running on a host:
 2. [Restart the Agent][5].
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 _Available for Agent versions >6.0_
 
@@ -92,15 +86,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][6].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][6].
 
 | Parameter      | Value                                                |
 | -------------- | ---------------------------------------------------- |

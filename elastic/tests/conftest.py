@@ -22,7 +22,32 @@ COMPOSE_FILES_MAP = {
     '2-alpine': 'legacy.yaml',
 }
 
-INSTANCE = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': CUSTOM_TAGS, 'tls_verify': False}
+INSTANCE = {
+    'url': URL,
+    'username': USER,
+    'password': PASSWORD,
+    'tags': CUSTOM_TAGS,
+    'tls_verify': False,
+    'custom_queries': [
+        {
+            'endpoint': '/_search',
+            'data_path': 'hits.total',
+            'columns': [
+                {'value_path': 'value', 'name': 'elasticsearch.custom.metric', 'type': 'gauge'},
+                {'value_path': 'relation', 'name': 'dynamic_tag', 'type': 'tag'},
+            ],
+        },
+    ],
+}
+
+
+BENCHMARK_INSTANCE = {
+    'url': URL,
+    'username': USER,
+    'password': PASSWORD,
+    'tags': CUSTOM_TAGS,
+    'tls_verify': False,
+}
 
 
 def ping_elastic():
@@ -64,6 +89,11 @@ def create_slm():
     response.raise_for_status()
 
 
+def index_starts_with_dot():
+    create_dot_testindex = requests.put('{}/.testindex'.format(URL), auth=(USER, PASSWORD), verify=False)
+    create_dot_testindex.raise_for_status()
+
+
 @pytest.fixture(scope='session')
 def dd_environment(instance):
     image_name = os.environ.get('ELASTIC_IMAGE')
@@ -72,7 +102,11 @@ def dd_environment(instance):
 
     with docker_run(
         compose_file=compose_file,
-        conditions=[WaitFor(ping_elastic, attempts=100), WaitFor(create_slm, attempts=5)],
+        conditions=[
+            WaitFor(ping_elastic, attempts=100),
+            WaitFor(index_starts_with_dot, attempts=100),
+            WaitFor(create_slm, attempts=5),
+        ],
         attempts=2,
         attempts_wait=10,
     ):
@@ -87,6 +121,16 @@ def elastic_check():
 @pytest.fixture(scope='session')
 def instance():
     return copy.deepcopy(INSTANCE)
+
+
+@pytest.fixture
+def benchmark_elastic_check():
+    return ESCheck('elastic', {}, instances=[BENCHMARK_INSTANCE])
+
+
+@pytest.fixture(scope='session')
+def benchmark_instance():
+    return copy.deepcopy(BENCHMARK_INSTANCE)
 
 
 @pytest.fixture(scope='session')

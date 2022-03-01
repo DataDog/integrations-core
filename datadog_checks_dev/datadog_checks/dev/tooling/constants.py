@@ -56,7 +56,7 @@ AGENT_V5_ONLY = {'agent_metrics', 'docker_daemon', 'go-metro', 'kubernetes', 'nt
 
 BETA_PACKAGES = {}
 
-NOT_CHECKS = {'datadog_checks_dev'}
+NOT_CHECKS = {'datadog_checks_dev', 'datadog_checks_tests_helper'}
 
 # Some integrations do not have an associated tile, mostly system integrations
 NOT_TILES = [
@@ -138,10 +138,8 @@ integration_type_links = {
 
 # If a file changes in a PR with any of these file extensions,
 # a test will run against the check containing the file
-TESTABLE_FILE_PATTERNS = ('*.py', '*.ini', '*.in', '*.txt', '*.yml', '*.yaml', '**/tests/*')
+TESTABLE_FILE_PATTERNS = ('*.py', '*.ini', '*.in', '*.txt', '*.yml', '*.yaml', '**/tests/*', '**/pyproject.toml')
 NON_TESTABLE_FILES = ('auto_conf.yaml', 'agent_requirements.in')
-
-REQUIREMENTS_IN = 'requirements.in'
 
 ROOT = ''
 

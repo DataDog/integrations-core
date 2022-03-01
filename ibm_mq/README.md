@@ -10,10 +10,12 @@ This check monitors [IBM MQ][1] versions 8 to 9.0.
 
 The IBM MQ check is included in the [Datadog Agent][2] package.
 
-To use the IBM MQ check, you need to:
+To use the IBM MQ check, you need to make sure the [IBM MQ Client][3] 9.1+ is installed (unless a compatible version of IBM MQ server is installed on the Agent host). Currently, the IBM MQ check does not support connecting to an IBM MQ server on z/OS.
 
-1. Make sure the [IBM MQ Client][3] 9.1+ is installed (unless a compatible version of IBM MQ server is installed on the Agent host).
-2. Update your `LD_LIBRARY_PATH` and `C_INCLUDE_PATH` to include the location of the libraries. (Create these two environment variables if they don’t exist yet.) For example:
+#### On Linux
+
+Update your `LD_LIBRARY_PATH` and `C_INCLUDE_PATH` to include the location of the libraries. (Create these two environment variables if they don't exist yet.)
+For example, if you installed it in `/opt`:
 
 ```text
 export LD_LIBRARY_PATH=/opt/mqm/lib64:/opt/mqm/lib:$LD_LIBRARY_PATH
@@ -112,7 +114,7 @@ Example of the configuration for `launchd`:
 </plist>
 ```
 
-Each time there is an agent update, these files are wiped and will need to be updated again.
+Each time there is an Agent update, these files are wiped and need to be updated again.
 
 Alternatively, if you are using Linux, after the MQ Client is installed ensure the runtime linker can find the libraries. For example, using ldconfig:
 
@@ -129,11 +131,16 @@ Update the bindings:
 sudo ldconfig
 ```
 
-#### Permissions and authentication
+#### On Windows
 
-There are a number of ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions.
+There is a file called `mqclient.ini` in the IBM MQ data directory. It is normally `C:\ProgramData\IBM\MQ`.
+Configure the environment variable `MQ_FILE_PATH`, to point at the data directory.
 
-**Note**: "Queue Monitoring" must be enabled and set to at least "Medium". This can be done via the MQ UI or with an mqsc command:
+### Permissions and authentication
+
+There are many ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions.
+
+**Note**: "Queue Monitoring" must be enabled and set to at least "Medium". This can be done using the MQ UI or with an mqsc command:
 
 ```text
 > /opt/mqm/bin/runmqsc
@@ -163,14 +170,14 @@ To configure this check for an Agent running on a host:
 ##### Metric collection
 
 1. Edit the `ibm_mq.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your IBM MQ performance data. See the [sample ibm_mq.d/conf.yaml][5] for all available configuration options.
-   There are a number of options to configure IBM MQ, depending on how you're using it.
+   There are many options to configure IBM MQ, depending on how you're using it.
 
    - `channel`: The IBM MQ channel
    - `queue_manager`: The Queue Manager named
    - `host`: The host where IBM MQ is running
    - `port`: The port that IBM MQ has exposed
 
-    If you are using a username and password setup, you can set the `username` and `password`. If no username is set, the Agent process owner is used (e.g. `dd-agent`).
+    If you are using a username and password setup, you can set the `username` and `password`. If no username is set, the Agent process owner (`dd-agent`) is used.
 
     **Note**: The check only monitors the queues you have set with the `queues` parameter
 
@@ -183,12 +190,6 @@ To configure this check for an Agent running on a host:
 2. [Restart the Agent][6].
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 _Available for Agent versions >6.0_
 
@@ -231,15 +232,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][7]
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][8].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][8].
 
 | Parameter      | Value                                                                                                                                                              |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

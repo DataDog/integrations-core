@@ -397,12 +397,12 @@ The example integration contains a service check, so you need to add it to the `
 
 ## Building
 
-`setup.py` provides the `setuptools` setup script to package and build the wheel. To learn more about Python packaging, see [Packaging Python Projects][14].
+The `pyproject.toml` file provides the metadata that is used to package and build the wheel. To learn more about Python packaging, see [Packaging Python Projects][14].
 
-Once your `setup.py` is ready, create a wheel:
+Once your `pyproject.toml` is ready, create a wheel:
 
 - With the `ddev` tooling (recommended): `ddev release build <INTEGRATION_NAME>`
-- Without the `ddev` tooling: `cd <INTEGRATION_DIR> && python setup.py bdist_wheel`
+- Without the `ddev` tooling: `cd <INTEGRATION_DIR> && pip wheel . --no-deps --wheel-dir dist`
 
 ### What's in the wheel?
 
@@ -451,6 +451,6 @@ For Agent versions >= 6.12:
 [11]: https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
 [12]: https://docs.datadoghq.com/developers/integrations/check_references/#metrics-metadata-file
 [13]: https://docs.datadoghq.com/developers/integrations/check_references/#service-check-file
-[14]: https://packaging.python.org/tutorials/distributing-packages
+[14]: https://packaging.python.org/en/latest/tutorials/packaging-projects/
 [15]: https://docs.datadoghq.com/agent/
 [16]: https://datadoghq.dev/integrations-core/meta/config-specs/

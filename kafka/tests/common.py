@@ -62,4 +62,6 @@ KAFKA_E2E_METRICS = [
     # Session
     "kafka.session.fetch.count",
     "kafka.session.fetch.eviction",
+    # Listeners
+    "kafka.server.socket.connection_count",
 ]

@@ -7,6 +7,7 @@ import requests
 from six import PY2
 
 from ...errors import CheckException
+from ...utils.tracing import traced_class
 from .. import AgentCheck
 from .mixins import OpenMetricsScraperMixin
 
@@ -65,6 +66,11 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         'request_size': {'name': 'request_size', 'default': 10},
     }
 
+    # Allow tracing for openmetrics integrations
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        return traced_class(cls)
+
     def __init__(self, *args, **kwargs):
         """
         The base class for any Prometheus-based integration.
@@ -117,9 +123,8 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
                         except (IOError, requests.HTTPError, requests.exceptions.SSLError) as e:
                             self.log.info("Couldn't connect to %s: %s, trying next possible URL.", url, str(e))
                     else:
-                        self.log.error(
-                            "The agent could connect to none of the following URL: %s.",
-                            possible_urls,
+                        raise CheckException(
+                            "The agent could not connect to any of the following URLs: %s." % possible_urls
                         )
                 else:
                     self.get_scraper_config(instance)

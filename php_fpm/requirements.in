@@ -1,2 +1,0 @@
-flup==1.0.3.dev-20110405; python_version < '3.0'
-flup-py3==1.0.3; python_version > '3.0'

@@ -262,14 +262,7 @@ class Network(AgentCheck):
         metric_tags = [] if tags is None else tags[:]
         metric_tags.append('device:{}'.format(iface))
 
-        expected_metrics = [
-            'bytes_rcvd',
-            'bytes_sent',
-            'packets_in.count',
-            'packets_in.error',
-            'packets_out.count',
-            'packets_out.error',
-        ]
+        expected_metrics = self._get_expected_metrics()
         for m in expected_metrics:
             assert m in vals_by_metric
         assert len(vals_by_metric) == len(expected_metrics)
@@ -279,6 +272,24 @@ class Network(AgentCheck):
             self.rate('system.net.%s' % metric, val, tags=metric_tags)
             count += 1
         self.log.debug("tracked %s network metrics for interface %s", count, iface)
+
+    def _get_expected_metrics(self):
+        expected_metrics = [
+            'bytes_rcvd',
+            'bytes_sent',
+            'packets_in.count',
+            'packets_in.error',
+            'packets_out.count',
+            'packets_out.error',
+        ]
+        if Platform.is_linux() or Platform.is_windows():
+            expected_metrics.extend(
+                [
+                    'packets_in.drop',
+                    'packets_out.drop',
+                ]
+            )
+        return expected_metrics
 
     def _submit_ena_metrics(self, iface, vals_by_metric, tags):
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
@@ -349,6 +360,7 @@ class Network(AgentCheck):
         proc_location = proc_location.rstrip('/')
         custom_tags = instance.get('tags', [])
 
+        self._get_iface_sys_metrics(custom_tags)
         net_proc_base_location = self._get_net_proc_base_location(proc_location)
 
         if self._is_collect_cx_state_runnable(net_proc_base_location):
@@ -450,8 +462,10 @@ class Network(AgentCheck):
                     'bytes_rcvd': self._parse_value(x[0]),
                     'bytes_sent': self._parse_value(x[8]),
                     'packets_in.count': self._parse_value(x[1]),
+                    'packets_in.drop': self._parse_value(x[3]),
                     'packets_in.error': self._parse_value(x[2]) + self._parse_value(x[3]),
                     'packets_out.count': self._parse_value(x[9]),
+                    'packets_out.drop': self._parse_value(x[11]),
                     'packets_out.error': self._parse_value(x[10]) + self._parse_value(x[11]),
                 }
                 self._submit_devicemetrics(iface, metrics, custom_tags)
@@ -495,6 +509,20 @@ class Network(AgentCheck):
                 'ListenDrops': 'system.net.tcp.listen_drops',
                 'TCPBacklogDrop': 'system.net.tcp.backlog_drops',
                 'TCPRetransFail': 'system.net.tcp.failed_retransmits',
+                'IPReversePathFilter': 'system.net.ip.reverse_path_filter',
+                'PruneCalled': 'system.net.tcp.prune_called',
+                'RcvPruned': 'system.net.tcp.prune_rcv_drops',
+                'OfoPruned': 'system.net.tcp.prune_ofo_called',
+                'PAWSActive': 'system.net.tcp.paws_connection_drops',
+                'PAWSEstab': 'system.net.tcp.paws_established_drops',
+                'SyncookiesSent': 'system.net.tcp.syn_cookies_sent',
+                'SyncookiesRecv': 'system.net.tcp.syn_cookies_recv',
+                'SyncookiesFailed': 'system.net.tcp.syn_cookies_failed',
+                'TCPAbortOnTimeout': 'system.net.tcp.abort_on_timeout',
+                'TCPSynRetrans': 'system.net.tcp.syn_retrans',
+                'TCPFromZeroWindowAdv': 'system.net.tcp.from_zero_window',
+                'TCPToZeroWindowAdv': 'system.net.tcp.to_zero_window',
+                'TWRecycled': 'system.net.tcp.tw_reused',
             },
             'Udp': {
                 'InDatagrams': 'system.net.udp.in_datagrams',
@@ -549,16 +577,9 @@ class Network(AgentCheck):
 
         for metric_name in filtered_available_files:
             metric_file_location = os.path.join(conntrack_files_location, 'nf_conntrack_{}'.format(metric_name))
-            try:
-                with open(metric_file_location, 'r') as conntrack_file:
-                    # Checking it's an integer
-                    try:
-                        value = int(conntrack_file.read().rstrip())
-                        self.gauge('system.net.conntrack.{}'.format(metric_name), value, tags=custom_tags)
-                    except ValueError:
-                        self.log.debug("%s is not an integer", metric_name)
-            except IOError as e:
-                self.log.debug("Unable to read %s, skipping %s.", metric_file_location, e)
+            value = self._read_int_file(metric_file_location)
+            if value is not None:
+                self.gauge('system.net.conntrack.{}'.format(metric_name), value, tags=custom_tags)
 
     @staticmethod
     def _get_net_proc_base_location(proc_location):
@@ -567,6 +588,46 @@ class Network(AgentCheck):
         else:
             net_proc_base_location = proc_location
         return net_proc_base_location
+
+    def _read_int_file(self, file_location):
+        try:
+            with open(file_location, 'r') as f:
+                try:
+                    value = int(f.read().rstrip())
+                    return value
+                except ValueError:
+                    self.log.debug("Content of %s is not an integer", file_location)
+        except IOError as e:
+            self.log.debug("Unable to read %s, skipping %s.", file_location, e)
+            return None
+
+    def _get_iface_sys_metrics(self, custom_tags):
+        sys_net_location = '/sys/class/net'
+        sys_net_metrics = ['mtu', 'tx_queue_len']
+        try:
+            ifaces = os.listdir(sys_net_location)
+        except OSError as e:
+            self.log.debug("Unable to list %s, skipping system iface metrics: %s.", sys_net_location, e)
+            return None
+        for iface in ifaces:
+            for metric_name in sys_net_metrics:
+                metric_file_location = os.path.join(sys_net_location, iface, metric_name)
+                value = self._read_int_file(metric_file_location)
+                if value is not None:
+                    self.gauge('system.net.iface.{}'.format(metric_name), value, tags=custom_tags + ["iface:" + iface])
+            iface_queues_location = os.path.join(sys_net_location, iface, 'queues')
+            self._collect_iface_queue_metrics(iface, iface_queues_location, custom_tags)
+
+    def _collect_iface_queue_metrics(self, iface, iface_queues_location, custom_tags):
+        try:
+            iface_queues = os.listdir(iface_queues_location)
+        except OSError as e:
+            self.log.debug("Unable to list %s, skipping %s.", iface_queues_location, e)
+            return
+        num_rx_queues = len([q for q in iface_queues if q.startswith('rx-')])
+        num_tx_queues = len([q for q in iface_queues if q.startswith('tx-')])
+        self.gauge('system.net.iface.num_tx_queues', num_tx_queues, tags=custom_tags + ["iface:" + iface])
+        self.gauge('system.net.iface.num_rx_queues', num_rx_queues, tags=custom_tags + ["iface:" + iface])
 
     def _add_conntrack_stats_metrics(self, conntrack_path, use_sudo_conntrack, tags):
         """
@@ -916,8 +977,10 @@ class Network(AgentCheck):
                 'bytes_rcvd': counters.bytes_recv,
                 'bytes_sent': counters.bytes_sent,
                 'packets_in.count': counters.packets_recv,
+                'packets_in.drop': counters.dropin,
                 'packets_in.error': counters.errin,
                 'packets_out.count': counters.packets_sent,
+                'packets_out.drop': counters.dropout,
                 'packets_out.error': counters.errout,
             }
             self._submit_devicemetrics(iface, metrics, tags)

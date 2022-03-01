@@ -96,6 +96,7 @@ def test(
     root = get_root()
     testing_on_ci = running_on_ci()
     color = ctx.obj['color']
+    repo = ctx.obj['repo_name']
 
     # Implicitly track coverage
     if cov_missing:
@@ -147,6 +148,8 @@ def test(
         test_env_vars['TOX_TESTENV_PASSENV'] += ' TF_BUILD BUILD* SYSTEM*'
         test_env_vars['DD_SERVICE'] = os.getenv('DD_SERVICE', 'ddev-integrations')
         test_env_vars['DD_ENV'] = os.getenv('DD_ENV', 'ddev-integrations')
+        test_env_vars['DDEV_TRACE_ENABLED'] = 'true'
+        test_env_vars['DD_PROFILING_ENABLED'] = 'true'
 
     org_name = ctx.obj['org']
     org = ctx.obj['orgs'].get(org_name, {})
@@ -284,7 +287,9 @@ def test(
                         abort('\nFailed!', code=result.code)
 
                     fix_coverage_report(check, 'coverage.xml')
-                    run_command(['codecov', '-X', 'gcov', '--root', root, '-F', check, '-f', 'coverage.xml'])
+
+                    if repo == 'integrations-core':
+                        run_command(['codecov', '-X', 'gcov', '--root', root, '-F', check, '-f', 'coverage.xml'])
                 else:
                     if not cov_keep:
                         remove_path('.coverage')

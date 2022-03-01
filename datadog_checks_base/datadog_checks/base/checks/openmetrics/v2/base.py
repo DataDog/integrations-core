@@ -6,7 +6,11 @@
 from collections import ChainMap
 from contextlib import contextmanager
 
+from requests.exceptions import RequestException
+from six import raise_from
+
 from ....errors import ConfigurationError
+from ....utils.tracing import traced_class
 from ... import AgentCheck
 from .scraper import OpenMetricsScraper
 
@@ -30,6 +34,11 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
     DEFAULT_METRIC_LIMIT = 2000
 
+    # Allow tracing for openmetrics integrations
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        return traced_class(cls)
+
     def __init__(self, name, init_config, instances):
         """
         The base class for any OpenMetrics-based integration.
@@ -51,7 +60,11 @@ class OpenMetricsBaseCheckV2(AgentCheck):
             self.log.info('Scraping OpenMetrics endpoint: %s', endpoint)
 
             with self.adopt_namespace(scraper.namespace):
-                scraper.scrape()
+                try:
+                    scraper.scrape()
+                except (ConnectionError, RequestException) as e:
+                    self.log.error("There was an error scraping endpoint %s: %s", endpoint, str(e))
+                    raise_from(type(e)("There was an error scraping endpoint {}: {}".format(endpoint, e)), None)
 
     def configure_scrapers(self):
         """

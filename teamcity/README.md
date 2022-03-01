@@ -16,7 +16,7 @@ The Teamcity check is included in the [Datadog Agent][1] package, so you don't n
 
 #### Prepare Teamcity
 
-Follow [Teamcity's documentation][2] to enable Guest Login.
+To prepare Teamcity, see [Enabling Guest Login][2].
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
@@ -43,12 +43,6 @@ Add an item like the above to `instances` for each build configuration you want 
 [Restart the Agent][5] to start collecting and sending Teamcity events to Datadog.
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 1. Configure Teamcity [logs settings][6].
 
@@ -107,12 +101,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection][10].
 
 | Parameter      | Value                                                |
@@ -134,7 +122,7 @@ The Teamcity check does not include any metrics.
 
 ### Events
 
-Teamcity events representing successful builds are forwarded to your Datadog application.
+Teamcity events representing successful builds are forwarded to Datadog.
 
 ### Service Checks
 

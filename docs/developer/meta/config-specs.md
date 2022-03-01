@@ -57,7 +57,7 @@ Every option has 10 possible attributes:
 
     ```yaml
     deprecation:
-      Release: 8.0.0
+      Agent version: 8.0.0
       Migration: |
         do this
         and that

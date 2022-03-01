@@ -25,7 +25,22 @@ def get_dependencies():
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog-checks-base'
+def parse_pyproject_array(name):
+    import os
+    import re
+    from ast import literal_eval
+
+    pattern = r'^{{}} = (\[.*?\])$'.format(name)
+
+    with open(os.path.join(HERE, 'pyproject.toml'), 'r', encoding='utf-8') as f:
+        # Windows \r\n prevents match
+        contents = '\n'.join(line.rstrip() for line in f.readlines())
+
+    array = re.search(pattern, contents, flags=re.MULTILINE | re.DOTALL).group(1)
+    return literal_eval(array)
+
+
+CHECKS_BASE_REQ = parse_pyproject_array('dependencies')[0]
 
 
 setup(
@@ -36,7 +51,7 @@ setup(
     long_description_content_type='text/markdown',
     keywords='datadog agent {check_name} check',
     # The project's main homepage.
-    url='https://github.com/DataDog/integrations-{repo_choice}',
+    url='https://github.com/DataDog/{repo_name}',
     # Author details
     author='{author}',
     author_email='{email_packages}',
@@ -56,7 +71,7 @@ setup(
     packages=['datadog_checks.{check_name}'],
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
-    extras_require={{'deps': get_dependencies()}},
+    extras_require={{'deps': parse_pyproject_array('deps')}},
     # Extra files to ship with the wheel package
     include_package_data=True,
 )

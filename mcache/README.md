@@ -42,7 +42,7 @@ To configure this check for an Agent running on a host:
 Datadog APM integrates with Memcache to see the traces across your distributed system. Trace collection is enabled by default in the Datadog Agent v6+. To start collecting traces:
 
 1. [Enable trace collection in Datadog][5].
-2. [Instrument your application that makes requests to Memchache][6].
+2. [Instrument your application that makes requests to Memcache][6].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
@@ -75,12 +75,6 @@ Then, [instrument your application container][6] and set `DD_AGENT_HOST` to the 
 
 #### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
 1. Add this configuration block to your `mcache.d/conf.yaml` file to start collecting your Memcached Logs:
@@ -102,7 +96,7 @@ _Available for Agent versions >6.0_
 
 ### Validation
 
-[Run the Agent's `status` subcommand][10] and look for `mcache` under the Checks section.
+Run the [Agent's `status` subcommand][10] and look for `mcache` under the Checks section.
 
 ## Data Collected
 

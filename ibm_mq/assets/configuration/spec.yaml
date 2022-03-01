@@ -12,6 +12,7 @@ files:
         value:
           example: 'DEV.ADMIN.SVRCONN'
           type: string
+          minLength: 1
         description: The IBMMQ Channel to connect to.
       - name: queue_manager
         required: true
@@ -19,10 +20,12 @@ files:
         value:
           example: 'datadog'
           type: string
+          minLength: 1
       - name: host
         value:
           example: 'localhost'
           type: string
+          minLength: 1
         description: The host IBM MQ is running on.
       - name: port
         value:
@@ -42,14 +45,17 @@ files:
           Either `host/port` or `connection_name` configuration must be provided.
         value:
           type: string
+          minLength: 1
       - name: username
         value:
           type: string
+          minLength: 1
         description: <USERNAME> of the IBMMQ Channel to connect to.
       - name: password
         secret: true
         value:
           type: string
+          minLength: 1
         description: <PASSWORD> of the IBMMQ Channel to connect to.
       - name: queues
         description: |
@@ -134,10 +140,12 @@ files:
       - name: mqcd_version
         description: |
           Which channel definition version to use. Supported values are 1 to 9 including.
-          If you're having connection issues make sure it matches your MQ version
+          If you're having connection issues make sure it matches your MQ version.
+          TLS encryption requires MQCD of version at least 7.
         value:
           example: 6
           type: number
+          minimum: 1
       - name: convert_endianness
         description: |
           If you are monitoring IBM MQ remotely and if the Agent and the server are using different endianness,
@@ -155,12 +163,13 @@ files:
         value:
           example: Etc/UTC
           type: string
+          minLength: 1
       - name: timeout
         description: |
           The number of seconds to wait for IBM MQ to respond.
         value:
           example: 5
-          type: number
+          type: integer
       - name: ssl_auth
         description: Whether or not to use SSL auth while connecting to the channel.
         value:
@@ -184,6 +193,7 @@ files:
         value:
           example: '/var/mqm/ssl-db/client/KeyringClient'
           type: string
+          minLength: 1
       - name: ssl_certificate_label
         description: Certificate label used for SSL connection.
         value:
@@ -200,6 +210,13 @@ files:
             'SYSTEM.*': queue_type:system
             'DEV.*': role:dev,queue_type:default
           type: object
+      - name: override_hostname
+        description: |
+          If enabled, the check sends the provided `host` as hostname instead of the agent's host.
+          In this case the `mq_host` tag will not be emitted. This cannot be used alongside `connection_name`
+        value:
+          type: boolean
+          example: false
       - template: instances/default
   - template: logs
     example:

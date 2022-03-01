@@ -99,6 +99,8 @@ instances:
     ## @param queues_regexes - list of strings - optional
     ## Use the `queues_regexes` parameters to specify one or multiple regex to to match
     ## the queues you'd like to collect metrics on (up to 200 queues).
+    ## If you have vhosts set up, the regex pattern needs to be formatted with vhost
+    ## in the format of `<vhost>/<queue_name>`.
     ## If you have less than 200 queues, you don't have to set this parameter,
     ## the metrics are collected on all the queues by default.
     ## If you have `tag_families` enabled, the first captured group in the regex
@@ -315,6 +317,8 @@ instances:
 
     ## @param aws_host - string - optional
     ## If your services require AWS Signature Version 4 signing, set the host.
+    ## This only needs the hostname and does not require the protocol (HTTP, HTTPS, and more).
+    ## For example, if connecting to https://us-east-1.amazonaws.com/, set `aws_host` to `us-east-1.amazonaws.com`.
     ##
     ## Note: This setting is not necessary for official integrations.
     ##
@@ -372,6 +376,20 @@ instances:
     ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
     #
     # tls_ca_cert: <CA_CERT_PATH>
+
+    ## @param tls_protocols_allowed - list of strings - optional
+    ## The expected versions of TLS/SSL when fetching intermediate certificates.
+    ## Only `SSLv3`, `TLSv1.2`, `TLSv1.3` are allowed by default. The possible values are:
+    ##   SSLv3
+    ##   TLSv1
+    ##   TLSv1.1
+    ##   TLSv1.2
+    ##   TLSv1.3
+    #
+    # tls_protocols_allowed:
+    #   - SSLv3
+    #   - TLSv1.2
+    #   - TLSv1.3
 
     ## @param headers - mapping - optional
     ## The headers parameter allows you to send specific headers with every request.

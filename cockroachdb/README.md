@@ -20,16 +20,25 @@ need to install anything else on your server.
 
 To configure this check for an Agent running on a host:
 
+##### Metric collection
+
 1. Edit the `cockroachdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your CockroachDB performance data. See the [sample cockroachdb.d/conf.yaml][4] for all available configuration options.
 
-2. [Restart the Agent][5]
-##### Log collection
+   ```yaml
+   init_config:
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
+   instances:
+       ## @param openmetrics_endpoint - string - required
+       ## The URL exposing metrics in the OpenMetrics format.
+       #
+     - openmetrics_endpoint: http://localhost:8080/_status/vars
+   ```
+
+2. [Restart the Agent][5]
+
+**Note**: The current version of the check (1.9.0+) uses a newer implementation of [OpenMetrics][12] for metric collection, which requires Python 3. For hosts unable to use Python 3, or to use a legacy version of this check, see the following [config][13].
+
+##### Log collection
 
 _Available for Agent versions >6.0_
 
@@ -72,13 +81,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][7].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker Log Collection][7].
 
 Then, set [log integrations][7] as Docker labels:
 
@@ -128,3 +131,5 @@ Additional helpful documentation, links, and articles:
 [9]: https://github.com/DataDog/integrations-core/blob/master/cockroachdb/metadata.csv
 [10]: https://docs.datadoghq.com/help/
 [11]: https://www.datadoghq.com/blog/monitor-cockroachdb-performance-metrics-with-datadog
+[12]: https://docs.datadoghq.com/integrations/openmetrics/
+[13]: https://github.com/DataDog/integrations-core/blob/7.33.x/cockroachdb/datadog_checks/cockroachdb/data/conf.yaml.example

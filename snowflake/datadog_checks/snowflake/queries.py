@@ -35,7 +35,7 @@ CreditUsage = {
         'select SERVICE_TYPE, NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), '
         'sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), '
         'sum(CREDITS_USED), avg(CREDITS_USED) from METERING_HISTORY '
-        'where start_time >= date_trunc(day, current_date) group by 1, 2;'
+        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1, 2;'
     ),
     'columns': [
         {'name': 'service_type', 'type': 'tag'},
@@ -57,7 +57,7 @@ WarehouseCreditUsage = {
         'select WAREHOUSE_NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), '
         'sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), '
         'sum(CREDITS_USED), avg(CREDITS_USED) from WAREHOUSE_METERING_HISTORY '
-        'where start_time >= date_trunc(day, current_date) group by 1;'
+        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1;'
     ),
     'columns': [
         {'name': 'warehouse', 'type': 'tag'},
@@ -92,7 +92,7 @@ WarehouseLoad = {
     'query': (
         'select WAREHOUSE_NAME, AVG(AVG_RUNNING), AVG(AVG_QUEUED_LOAD), AVG(AVG_QUEUED_PROVISIONING), '
         'AVG(AVG_BLOCKED) from WAREHOUSE_LOAD_HISTORY '
-        'where start_time >= date_trunc(day, current_date) group by 1;'
+        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1;'
     ),
     'columns': [
         {'name': 'warehouse', 'type': 'tag'},
@@ -110,7 +110,7 @@ QueryHistory = {
         'select QUERY_TYPE, WAREHOUSE_NAME, DATABASE_NAME, SCHEMA_NAME, AVG(EXECUTION_TIME), '
         'AVG(COMPILATION_TIME), AVG(BYTES_SCANNED), AVG(BYTES_WRITTEN), AVG(BYTES_DELETED), '
         'AVG(BYTES_SPILLED_TO_LOCAL_STORAGE), AVG(BYTES_SPILLED_TO_REMOTE_STORAGE) '
-        'from QUERY_HISTORY where start_time >= date_trunc(day, current_date) '
+        'from QUERY_HISTORY where start_time >= DATEADD(hour, -24, current_timestamp()) '
         'group by 1, 2, 3, 4;'
     ),
     'columns': [
@@ -134,7 +134,7 @@ DataTransferHistory = {
     'query': (
         'select source_cloud, source_region, target_cloud, target_region, transfer_type, '
         'avg(bytes_transferred), sum(bytes_transferred) from DATA_TRANSFER_HISTORY '
-        'where start_time >= date_trunc(day, current_date) group by 1, 2, 3, 4, 5;'
+        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1, 2, 3, 4, 5;'
     ),
     'columns': [
         {'name': 'source_cloud', 'type': 'tag'},
@@ -154,7 +154,8 @@ AutoReclusterHistory = {
         'select table_name, database_name, schema_name, avg(credits_used), sum(credits_used), '
         'avg(num_bytes_reclustered), sum(num_bytes_reclustered), '
         'avg(num_rows_reclustered), sum(num_rows_reclustered) '
-        'from automatic_clustering_history where start_time >= date_trunc(day, current_date) group by 1, 2, 3;'
+        'from automatic_clustering_history where start_time >= DATEADD(hour, -24, current_timestamp()) '
+        'group by 1, 2, 3;'
     ),
     'columns': [
         {'name': 'table', 'type': 'tag'},
@@ -192,7 +193,7 @@ PipeHistory = {
     'query': (
         'select pipe_name, avg(credits_used), sum(credits_used), avg(bytes_inserted), sum(bytes_inserted), '
         'avg(files_inserted), sum(files_inserted) from pipe_usage_history '
-        'where start_time >= date_trunc(day, current_date) group by 1;'
+        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1;'
     ),
     'columns': [
         {'name': 'pipe', 'type': 'tag'},
@@ -211,7 +212,7 @@ ReplicationUsage = {
     'query': (
         'select database_name, avg(credits_used), sum(credits_used), '
         'avg(bytes_transferred), sum(bytes_transferred) from replication_usage_history '
-        'where start_time >= date_trunc(day, current_date) group by 1;'
+        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1;'
     ),
     'columns': [
         {'name': 'database', 'type': 'tag'},

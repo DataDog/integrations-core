@@ -110,12 +110,20 @@ You may also pass a comma-separated list of checks to skip using the `--exclude`
 ddev release make all --exclude datadog_checks_dev
 ```
 
+Note: releasing `all` will update the `.in-toto` file to include every integration, not just the changed integrations. This may result in an unnecessarily large `.in-toto` file if only releasing a few integrations.
+
 !!! warning
     There is a known GitHub limitation where if an issue has too many labels (100), its state cannot be modified.
     If you cannot merge the pull request:
 
     1. Run the [remove-labels](../ddev/cli.md#ddev-meta-scripts-remove-labels) command
     1. After merging, manually add back the `changelog/no-changelog` label
+
+Another option for bulk releases is selectively choosing the integrations to release. For example, if you are just releasing `check1` and `check2`: 
+
+```
+ddev release make check1 check2
+```
 
 ## Betas (core integrations only)
 
@@ -186,45 +194,97 @@ ddev release upload datadog_checks_[base|dev]
 
 ## Troubleshooting
 
+#### Error signing with Yubikey
 - If you encounter errors when signing with your Yubikey, ensure you ran `gpg --import <YOUR_KEY_ID>.gpg.pub`.
 - If you receive this error when signing with your Yubikey, check if you have more than one Yubikey inserted in your computer. Try removing the Yubikey that's not used for signing and try signing again.
-```
-  File "/Users/<USER>/.pyenv/versions/3.9.4/lib/python3.9/site-packages/in_toto/runlib.py", line 529, in in_toto_run
-    securesystemslib.formats.KEYID_SCHEMA.check_match(gpg_keyid)
-  File "/Users/<USER>/.pyenv/versions/3.9.4/lib/python3.9/site-packages/securesystemslib/schema.py", line 1004, in check_match
-    raise exceptions.FormatError(
-securesystemslib.exceptions.FormatError: '[none]' did not match 'pattern /[a-fA-F0-9]+$/'
-```
+    
+  ```
+      File "/Users/<USER>/.pyenv/versions/3.9.4/lib/python3.9/site-packages/in_toto/runlib.py", line 529, in in_toto_run
+        securesystemslib.formats.KEYID_SCHEMA.check_match(gpg_keyid)
+      File "/Users/<USER>/.pyenv/versions/3.9.4/lib/python3.9/site-packages/securesystemslib/schema.py", line 1004, in check_match
+        raise exceptions.FormatError(
+    securesystemslib.exceptions.FormatError: '[none]' did not match 'pattern /[a-fA-F0-9]+$/'
+  ```
+    
+#### Build pipeline failed
 
-- If the [build pipeline](../meta/cd.md) failed, it is likely that you modified a file in the pull request
-  without re-signing. To resolve this, you'll need to bootstrap metadata for every integration:
+After merging the release PR, the [build pipeline](../meta/cd.md) can fail under a few cases. See below for steps on diagnosing the error and the corresponding fix.
 
-    1. Checkout and pull the most recent version of the `master` branch.
+- A file in the pull request was modified without re-signing. View the `Files Changed` tab in the recently merged release PR and verify the `.in-toto/tag.<KEYID>.link` exists and the integration files were signed.
 
+  To resolve this, you'll need to bootstrap metadata for every integration:
+
+  1. Checkout and pull the most recent version of the `master` branch.
+
+      ```
+      git checkout master
+      git pull
+      ```
+
+  1. Sign everything.
+
+      ```
+      ddev release make all --sign-only
+      ```
+
+      You may need to touch your Yubikey multiple times.
+
+  1. Push your branch to GitHub.
+  1. Manually trigger a build.
+
+      ```
+      git tag <USERNAME>bootstrap-1.0.0 -m <USERNAME>bootstrap-1.0.0
+      ```
+
+      The tag name is irrelevant, it just needs to look like an integration release. Gitlab doesn't sync
+      deleted tags, so any subsequent manual trigger tags will need to increment the version number.
+
+  1. Delete the branch and tag, locally and on GitHub.
+    
+- If a feature PR conflicting with the release PR is merged out of order.
+
+    The following is a possible sequence of events that can result in the build pipeline failing:
+    
+        1. A release PR is opened
+        2. A feature PR is opened and merged
+        3. The release PR is merged after the feature PR.
+        4. The release PR will not have updated and signed the feature PR's files, the released wheel will also not contain the changes from the feature PR.
+  
+    You may see an error like so:
+    
+    ```text
+    in_toto.exceptions.RuleVerificationError: 'DISALLOW *' matched the following artifacts: ['/shared/integrations-core/datadog_checks_dev/datadog_checks/dev/tooling/commands/ci/setup.py']
+    ```
+      
+    1. Verify whether the hash signed in `.in-toto/tag.<KEYID>.link`, [(see example)](https://github.com/DataDog/integrations-core/blob/9836c71f15a0cb93c63c1d2950dcdc28b49479a7/.in-toto/tag.57ce2495.link) matches what's on `master` for the artifact in question.
+        
+        To see the hash for the artifact, run the following `shasum` command (replace local file path):
+        
+        ```
+        shasum -a 256 datadog_checks_dev/datadog_checks/dev/tooling/commands/ci/setup.py
+        ```
+    
+    1. If any artifact mismatches, check out and pull the most recent version of the `master` branch.
+    
         ```
         git checkout master
         git pull
         ```
-
-    1. Sign everything.
-
+            
+    1. Release the integration again with a new version, bump the version appropriately.
+    
         ```
-        ddev release make all --sign-only
+        ddev release make <INTEGRATION> --version <VERSION>
         ```
-
-        You may need to touch your Yubikey multiple times.
-
-    1. Push your branch to GitHub.
-    1. Manually trigger a build.
-
+    
+    1. Verify that the integration files are signed, and update the integration changelog to reflect the feature PR title in the following format.
+        
         ```
-        git tag <USERNAME>bootstrap-1.0.0 -m <USERNAME>bootstrap-1.0.0
+        * [<Changelog label>] <PR Title>. [See #<PR Number>](<Github PR link>).
         ```
-
-        The tag name is irrelevant, it just needs to look like an integration release. Gitlab doesn't sync
-        deleted tags, so any subsequent manual trigger tags will need to increment the version number.
-
-    1. Delete the branch and tag, locally and on GitHub.
+       
+    1. After approval, merge PR to master for a new build to be triggered.
+  
 
 ## Releasers
 

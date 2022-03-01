@@ -10,6 +10,7 @@ from six import iteritems
 DDTRACE_OPTIONS_LIST = [
     'DD_TAGS',
     'DD_TRACE*',
+    'DD_PROFILING*',
     'DD_SERVICE',
     'DD_AGENT_HOST',
     'DD_ENV',

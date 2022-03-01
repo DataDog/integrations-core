@@ -462,7 +462,7 @@ class VSphereCheck(AgentCheck):
     def collect_metrics_async(self):
         # type: () -> None
         """Run queries in multiple threads and wait for completion."""
-        tasks = []
+        tasks = []  # type: List[Any]
         try:
             for query_specs in self.make_query_specs():
                 tasks.append(self.thread_pool.submit(self.query_metrics_wrapper, query_specs))

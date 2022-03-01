@@ -9,7 +9,8 @@
         ],
         "groups": [
             "host",
-            "port"
+            "port",
+            "server"
         ],
         "name": "Can Connect",
         "description": "Returns `CRITICAL` if the Agent is unable to connect to the monitored MySQL instance. Returns `OK` otherwise."
@@ -45,5 +46,21 @@
         ],
         "name": "Replication Running",
         "description": "Returns CRITICAL for a replica that's not running Replica_IO_Running or Replica_SQL_Running, WARNING if one of the two is not running. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.34.0",
+        "integration": "MySQL",
+        "check": "mysql.replication.group.status",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "role",
+            "status"
+        ],
+        "name": "Group Replication host status",
+        "description": "Returns `OK` if the host status is ONLINE, returns `CRITICAL` otherwise."
     }
 ]

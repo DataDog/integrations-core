@@ -8,7 +8,20 @@ This check monitors [SAP HANA][1] 2.0, SPS 2 through the Datadog Agent.
 
 ### Installation
 
-The SAP HANA check is included in the [Datadog Agent][2] package.
+The SAP HANA check is included in the [Datadog Agent][2] package. To use this integration, you need to manually install the [hdbcli][10] library.
+
+
+For Unix:
+
+```text
+/opt/datadog-agent/embedded/bin/pip install hdbcli==2.10.15
+```
+
+For Windows:
+
+```text
+"C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\python.exe" -m pip install hdbcli==2.10.15
+```
 
 #### Prepare HANA
 
@@ -38,7 +51,7 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
 
 ##### Granting privileges
 
-1. Run the following command to create a monitoring role (we'll call it `DD_MONITOR` for these examples):
+1. Run the following command to create a monitoring role (named `DD_MONITOR` for these examples):
 
    ```shell
    CREATE ROLE DD_MONITOR;
@@ -72,24 +85,6 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
    GRANT DD_MONITOR TO <USER>;
    ```
 
-#### Dependencies
-
-Although not required, it is recommended to install the [hdbcli][10] client library since it is the only officially maintained library and supports many new features.
-
-The installation must be performed manually for licensing reasons.
-
-##### Unix
-
-```text
-/opt/datadog-agent/embedded/bin/pip install hdbcli==2.10.15
-```
-
-##### Windows
-
-```text
-"C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\python.exe" -m pip install hdbcli==2.10.15
-```
-
 ### Configuration
 
 1. Edit the `sap_hana.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your sap_hana performance data. See the [sample sap_hana.d/conf.yaml][4] for all available configuration options.
@@ -98,7 +93,7 @@ The installation must be performed manually for licensing reasons.
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `sap_hana` under the Checks section.
+Run the [Agent's status subcommand][6] and look for `sap_hana` under the Checks section.
 
 ## Data Collected
 

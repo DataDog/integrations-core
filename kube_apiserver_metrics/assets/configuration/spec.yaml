@@ -57,9 +57,13 @@ files:
       description: |
         Used if you are using RBACs and need the Agent to authenticate
         against the APIServer to retrieve metrics. Default to true.
+      enabled: true
       value:
-        type: boolean
-        example: true
+        example: tls_only
+        default: false
+        anyOf:
+        - type: boolean
+        - type: string
     - name: bearer_token_path
       description: Used to specify the path where the service account token is located.
       value:

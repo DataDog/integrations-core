@@ -16,9 +16,17 @@ except ImportError:
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import (
+    DBMAsyncJob,
+    RateLimitingTTLCache,
+    default_json_event_encoding,
+    obfuscate_sql_with_metadata,
+)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
+
+from .util import DatabaseConfigurationError, warning_with_tags
+from .version_utils import V9_6
 
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
 # character is 6 bytes
@@ -42,12 +50,37 @@ pg_stat_activity_sample_exclude_keys = {
     'client_port',
 }
 
-#
+# enumeration of the columns we collect
+PG_STAT_ACTIVITY_COLS = [
+    "datid",
+    "datname",
+    "pid",
+    "usesysid",
+    "usename",
+    "application_name",
+    "client_addr",
+    "client_hostname",
+    "client_port",
+    "backend_start",
+    "xact_start",
+    "query_start",
+    "state_change",
+    "wait_event_type",
+    "wait_event",
+    "state",
+    "backend_xid",
+    "backend_xmin",
+    "query",
+    "backend_type",
+]
+
+PG_BLOCKING_PIDS_FUNC = ",pg_blocking_pids(pid) as blocking_pids"
+
 PG_STAT_ACTIVITY_QUERY = re.sub(
     r'\s+',
     ' ',
     """
-    SELECT * FROM {pg_stat_activity_view}
+    SELECT {pg_stat_activity_cols} {pg_blocking_func} FROM {pg_stat_activity_view}
     WHERE coalesce(TRIM(query), '') != ''
     AND query_start IS NOT NULL
     {extra_filters}
@@ -199,11 +232,19 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return [dict(row) for row in rows]
 
-    def _get_new_pg_stat_activity(self):
+    def _get_new_pg_stat_activity(self, available_activity_columns):
         start_time = time.time()
         extra_filters, params = self._get_extra_filters_and_params(filter_stale_idle_conn=True)
+        blocking_func = ""
+        # minimum version for pg_blocking_pids function is v9.6
+        # only call pg_blocking_pids as often as we collect activity snapshots
+        if self._check.version >= V9_6 and self._report_activity_event():
+            blocking_func = PG_BLOCKING_PIDS_FUNC
         query = PG_STAT_ACTIVITY_QUERY.format(
-            pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
+            pg_stat_activity_cols=', '.join(available_activity_columns),
+            pg_blocking_func=blocking_func,
+            pg_stat_activity_view=self._config.pg_stat_activity_view,
+            extra_filters=extra_filters,
         )
         with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             self._log.debug("Running query [%s] %s", query, params)
@@ -212,6 +253,21 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return rows
+
+    def _get_available_activity_columns(self, all_expected_columns):
+        with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            cursor.execute(
+                "select * from {pg_stat_activity_view} LIMIT 0".format(
+                    pg_stat_activity_view=self._config.pg_stat_activity_view
+                )
+            )
+            all_columns = set([i[0] for i in cursor.description])
+            available_columns = [c for c in all_expected_columns if c in all_columns]
+            missing_columns = set(all_expected_columns) - set(available_columns)
+            if missing_columns:
+                self._log.debug("missing the following expected columns from pg_stat_activity: %s", missing_columns)
+            self._log.debug("found available pg_stat_activity columns: %s", available_columns)
+        return available_columns
 
     def _filter_and_normalize_statement_rows(self, rows):
         insufficient_privilege_count = 0
@@ -244,10 +300,15 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def _normalize_row(self, row):
         normalized_row = dict(copy.copy(row))
-        obfuscated_statement = None
+        obfuscated_query = None
         try:
-            obfuscated_statement = datadog_agent.obfuscate_sql(row['query'], self._obfuscate_options)
-            normalized_row['query_signature'] = compute_sql_signature(obfuscated_statement)
+            statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)
+            obfuscated_query = statement['query']
+            metadata = statement['metadata']
+            normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
+            normalized_row['dd_tables'] = metadata.get('tables', None)
+            normalized_row['dd_commands'] = metadata.get('commands', None)
+            normalized_row['dd_comments'] = metadata.get('comments', None)
         except Exception as e:
             self._log.debug("Failed to obfuscate statement: %s", e)
             self._check.count(
@@ -256,7 +317,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 tags=self._dbtags(row['datname'], "error:sql-obfuscate") + self._check._get_debug_tags(),
                 hostname=self._check.resolved_hostname,
             )
-        normalized_row['statement'] = obfuscated_statement
+        normalized_row['statement'] = obfuscated_query
         return normalized_row
 
     def _get_extra_filters_and_params(self, filter_stale_idle_conn=False):
@@ -294,7 +355,8 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def _collect_statement_samples(self):
         start_time = time.time()
-        rows = self._get_new_pg_stat_activity()
+        pg_activity_cols = self._get_available_activity_columns(PG_STAT_ACTIVITY_COLS)
+        rows = self._get_new_pg_stat_activity(pg_activity_cols)
         rows = self._filter_and_normalize_statement_rows(rows)
         event_samples = self._collect_plans(rows)
         submitted_count = 0
@@ -381,7 +443,22 @@ class PostgresStatementSamples(DBMAsyncJob):
         except psycopg2.DatabaseError as e:
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
             # incorrect definition)
-            self._log.warning("cannot collect execution plans in dbname=%s: %s", dbname, repr(e))
+            self._check.record_warning(
+                DatabaseConfigurationError.undefined_explain_function,
+                warning_with_tags(
+                    "Unable to collect execution plans in dbname=%s. Check that the function "
+                    "%s exists in the database. See "
+                    "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#%s "
+                    "for more details: %s",
+                    dbname,
+                    self._explain_function,
+                    DatabaseConfigurationError.undefined_explain_function.value,
+                    str(e),
+                    host=self._check.resolved_hostname,
+                    dbname=dbname,
+                    code=DatabaseConfigurationError.undefined_explain_function.value,
+                ),
+            )
             return DBExplainError.failed_function, e
 
         if not result:
@@ -407,21 +484,46 @@ class PostgresStatementSamples(DBMAsyncJob):
         start_time = time.time()
         with self._check._get_db(dbname).cursor() as cursor:
             self._log.debug("Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement)
-            cursor.execute(
-                """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
-                    explain_function=self._explain_function, statement=statement
+            try:
+                cursor.execute(
+                    """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
+                        explain_function=self._explain_function, statement=statement
+                    )
                 )
-            )
-            result = cursor.fetchone()
-            self._check.histogram(
-                "dd.postgres.run_explain.time",
-                (time.time() - start_time) * 1000,
-                tags=self._dbtags(dbname) + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
-            )
-            if not result or len(result) < 1 or len(result[0]) < 1:
-                return None
-            return result[0][0]
+                result = cursor.fetchone()
+                self._check.histogram(
+                    "dd.postgres.run_explain.time",
+                    (time.time() - start_time) * 1000,
+                    tags=self._dbtags(dbname) + self._check._get_debug_tags(),
+                    hostname=self._check.resolved_hostname,
+                )
+                if not result or len(result) < 1 or len(result[0]) < 1:
+                    return None
+                return result[0][0]
+            except Exception as e:
+                self._check.count(
+                    "dd.postgres.run_explain.error",
+                    1,
+                    tags=self._dbtags(dbname, "error:explain-database_error-{}".format(type(e)))
+                    + self._check._get_debug_tags(),
+                    hostname=self._check.resolved_hostname,
+                )
+                raise
+
+    def _run_and_track_explain(self, dbname, statement, obfuscated_statement, query_signature):
+        plan_dict, explain_err_code, err_msg = self._run_explain_safe(
+            dbname, statement, obfuscated_statement, query_signature
+        )
+        err_tag = "error:explain-{}".format(explain_err_code.value if explain_err_code else None)
+        if err_msg:
+            err_tag = err_tag + "-" + err_msg
+        self._check.count(
+            "dd.postgres.statement_samples.error",
+            1,
+            tags=self._dbtags(dbname, err_tag) + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
+        return plan_dict, explain_err_code, err_msg
 
     def _run_explain_safe(self, dbname, statement, obfuscated_statement, query_signature):
         # type: (str, str, str, str) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[str]]
@@ -431,13 +533,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         track_activity_query_size = self._get_track_activity_query_size()
 
         if self._get_truncation_state(track_activity_query_size, statement) == StatementTruncationState.truncated:
-            self._check.count(
-                "dd.postgres.statement_samples.error",
-                1,
-                tags=self._dbtags(dbname, "error:explain-{}".format(DBExplainError.query_truncated))
-                + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
-            )
             return (
                 None,
                 DBExplainError.query_truncated,
@@ -446,12 +541,6 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         db_explain_error, err = self._get_db_explain_setup_state_cached(dbname)
         if db_explain_error is not None:
-            self._check.count(
-                "dd.postgres.statement_samples.error",
-                1,
-                tags=self._dbtags(dbname, "error:explain-{}".format(db_explain_error)) + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
-            )
             return None, db_explain_error, '{}'.format(type(err))
 
         cached_error_response = self._explain_errors_cache.get(query_signature)
@@ -462,14 +551,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             return self._run_explain(dbname, statement, obfuscated_statement), None, None
         except psycopg2.errors.DatabaseError as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
-            self._check.count(
-                "dd.postgres.statement_samples.error",
-                1,
-                tags=self._dbtags(dbname, "error:explain-{}".format(type(e))) + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
-            )
             error_response = None, DBExplainError.database_error, '{}'.format(type(e))
-
             if isinstance(e, psycopg2.errors.ProgrammingError) and not isinstance(
                 e, psycopg2.errors.InsufficientPrivilege
             ):
@@ -492,7 +574,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
         # - `resource_hash` - hash computed off the raw sql text to match apm resources
         # - `query_signature` - hash computed from the raw sql text to match query metrics
-        plan_dict, explain_err_code, err_msg = self._run_explain_safe(
+        plan_dict, explain_err_code, err_msg = self._run_and_track_explain(
             row['datname'], row['query'], row['statement'], row['query_signature']
         )
         collection_errors = None
@@ -535,6 +617,11 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "application": row.get('application_name', None),
                     "user": row['usename'],
                     "statement": row['statement'],
+                    "metadata": {
+                        "tables": row['dd_tables'],
+                        "commands": row['dd_commands'],
+                        "comments": row['dd_comments'],
+                    },
                     "query_truncated": self._get_truncation_state(
                         self._get_track_activity_query_size(), row['query']
                     ).value,
@@ -553,6 +640,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     if row['state_change'].tzinfo:
                         event['timestamp'] = get_timestamp(row['state_change']) * 1000
             return event
+        return None
 
     def _collect_plans(self, rows):
         events = []

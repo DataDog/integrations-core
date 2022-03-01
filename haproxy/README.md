@@ -16,25 +16,79 @@ Capture HAProxy activity in Datadog to:
 
 The Haproxy check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Haproxy server.
 
-#### Prepare HAProxy
+### Configuration
 
-##### Using Prometheus
+#### Using Prometheus
 
 The recommended way to set up this integration is by enabling the Prometheus endpoint on HAProxy. This endpoint is built into HAProxy starting with version 2 (enterprise version 1.9rc1). If you are using an older version, consider setting up the [HAProxy Prometheus exporter][3], or alternatively set up the legacy socket-based integration described in the next section.
 
+#### Prepare HAProxy
+
 1. Configure your `haproxy.conf` using the [official guide][4].
+2. [Restart HAProxy to enable the Prometheus endpoint][5].
 
-2. [Enable](#configuration) the setting `use_prometheus` in `haproxy.d/conf.yaml`.
+#### Configure the Agent
 
-3. [Restart HAProxy to enable the Prometheus endpoint][5].
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
 
-4. [Restart the Agent][6].
+#### Host
 
-##### Using the stats endpoint
+##### Metric collection
+To configure this check for an Agent running on a host:
+
+1. Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your HAProxy metrics. See the [sample haproxy.d/conf.yaml][27] for all available configuration options.
+
+   ```yaml  
+   instances:
+        
+     ## @param use_openmetrics - boolean - optional - default: false
+     ## Enable to preview the new version of the check which supports HAProxy version 2+
+     ## or environments using the HAProxy exporter.
+     ##
+     ## OpenMetrics-related options take effect only when this is set to `true`. 
+     ##
+     ## Uses the latest OpenMetrics V2 implementation for more features and better performance.
+     ## Note: To see the configuration options for the OpenMetrics V1 implementation (Agent 7.33 or older),
+     ## https://github.com/DataDog/integrations-core/blob/7.33.x/haproxy/datadog_checks/haproxy/data/conf.yaml.example
+     #
+   - use_openmetrics: true  # Enables OpenMetrics V2
+        
+     ## @param openmetrics_endpoint - string - optional
+     ## The URL exposing metrics in the OpenMetrics format.
+     #
+     openmetrics_endpoint: http://localhost:<PORT>/metrics
+   ```
+2. [Restart the Agent][6].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
+
+##### Metric collection
+
+| Parameter            | Value                                                                                 |
+|----------------------|---------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `haproxy`                                                                             |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                         |
+| `<INSTANCE_CONFIG>`  | `{"openmetrics_endpoint": "http://%%host%%:<PORT>/metrics", "use_openmetrics": True}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+   
+**NOTE**: The `use_openmetrics` option uses [OpenMetrics V2][26] for metric collection, which requires Python 3. For hosts unable to use Python 3, use the OpenMetrics V1 implementation or the [socket-based legacy integration](#using-the-stats-endpoint). 
+
+To view configuration options for the OpenMetrics V1 implementation see this [conf.yaml.example][25] file.
+
+
+#### Using the stats endpoint
 
 **Note**: This configuration strategy is provided as a reference for legacy users. If you are setting up the integration for the first time, consider using the Prometheus-based strategy described in the previous section.
 
-The Agent collects metrics via a stats endpoint:
+The Agent collects metrics using a stats endpoint:
 
 1. Configure one in your `haproxy.conf`:
 
@@ -51,7 +105,6 @@ The Agent collects metrics via a stats endpoint:
 
 2. [Restart HAProxy to enable the stats endpoint][5].
 
-### Configuration
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
@@ -81,12 +134,6 @@ Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 2. [Restart the Agent][6].
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 By default Haproxy sends logs over UDP to port 514. The Agent can listen for these logs on this port, however, binding to a port number under 1024 requires elevated permissions. Follow the instructions below to set this up. Alternatively, you can use a different port and skip step 3.
 
@@ -148,13 +195,7 @@ LABEL "com.datadoghq.ad.instances"='[{"url": "https://%%host%%/admin?stats"}]'
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][10].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker Log Collection][10].
 
 Then, set [Log Integrations][11] as Docker labels:
 
@@ -194,15 +235,9 @@ spec:
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][14].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][14].
 
 Then, set [Log Integrations][11] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][15].
 
@@ -245,15 +280,9 @@ Set [Autodiscovery Integrations Templates][9] as Docker labels on your applicati
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][16].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [ECS Log Collection][16].
 
 Then, set [Log Integrations][11] as Docker labels:
 
@@ -326,3 +355,6 @@ Need help? Contact [Datadog support][20].
 [22]: https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics
 [23]: https://www.datadoghq.com/blog/monitor-haproxy-with-datadog
 [24]: https://docs.datadoghq.com/integrations/faq/haproxy-multi-process/
+[25]: https://github.com/DataDog/integrations-core/blob/7.34.x/haproxy/datadog_checks/haproxy/data/conf.yaml.example
+[26]: https://datadoghq.dev/integrations-core/base/openmetrics/
+[27]: https://github.com/DataDog/integrations-core/blob/master/haproxy/datadog_checks/haproxy/data/conf.yaml.example

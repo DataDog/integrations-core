@@ -40,7 +40,7 @@ def backend_normalize_metric_name(metric_name):
 
 
 def check_tag_names(metric, tags):
-    if not os.environ.get('DDEV_SKIP_GENERIC_TAGS_CHECK'):
+    if tags and not os.environ.get('DDEV_SKIP_GENERIC_TAGS_CHECK'):
         try:
             from datadog_checks.base.utils.tagging import GENERIC_TAGS
         except ImportError:
@@ -413,9 +413,9 @@ class AggregatorStub(object):
         msg = ''
         if not condition:
             prefix = '\n\t- '
-            msg = 'Some metrics are missing:'
+            msg = 'Some metrics are collected but not asserted:'
             msg += '\nAsserted Metrics:{}{}'.format(prefix, prefix.join(sorted(self._asserted)))
-            msg += '\nMissing Metrics:{}{}'.format(prefix, prefix.join(sorted(self.not_asserted())))
+            msg += '\nFound metrics that are not asserted:{}{}'.format(prefix, prefix.join(sorted(self.not_asserted())))
         assert condition, msg
 
     def assert_metrics_using_metadata(

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Monitor your [Consul Connect][1] Envoy sidecar proxies with the [Datadog Envoy Integration][2]. The Consul Connect integration currently only supports [Consul Connect configured with Envoy][3]. 
+Monitor your [Consul Connect][1] Envoy sidecar proxies with the [Datadog Envoy Integration][2]. The Consul Connect integration only supports [Consul Connect configured with Envoy][3]. 
 
 ## Setup
 
@@ -21,17 +21,11 @@ Follow the instructions below to configure this check for an Agent running on a 
 To configure this check for an Agent running on a host:
 
 ##### Metric collection
-1. In Consul Connect, enable the config option [`-admin-bind`][5] to configure the port where the Envoy Admin API will be exposed.
+1. In Consul Connect, enable the config option [`-admin-bind`][5] to configure the port where the Envoy Admin API is exposed.
 
 2. Enable the [Envoy integration][6] to configure metric collection.
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 Follow the [Envoy host][7] instructions to configure log collection.  
 
@@ -43,17 +37,12 @@ Follow the [Envoy host][7] instructions to configure log collection.
 Follow the [Envoy containerized instructions][8] to configure your Datadog Agent for Envoy. 
 
 ##### Metric collection
+
 1. In Consul Connect, enable the config option [`envoy_stats_bind_addr`][9] to ensure the `/stats` endpoint is exposed on the public network.
 
- 2. Configure the [Envoy integration for containerized environments instructions][10] to start collecting metrics. 
+ 2. Configure the [Envoy integration for containerized environments][10] to start collecting metrics. 
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 Follow the [Envoy containerized instructions][11] to configure log collection.
 

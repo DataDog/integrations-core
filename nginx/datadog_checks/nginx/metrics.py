@@ -34,6 +34,8 @@ VTS_METRIC_MAP = {
     'nginx.upstream.down': 'nginx.upstream.peers.health_checks.last_passed',
 }
 
+# NGNINX Plus metrics that are sent as both a count and gauge for backwards compatibility
+# The count metrics will have _count appended to their names
 METRICS_SEND_AS_COUNT = [
     'nginx.upstream.peers.responses.1xx',
     'nginx.upstream.peers.responses.2xx',
@@ -64,7 +66,7 @@ METRICS_SEND_AS_COUNT = [
     'nginx.cache.miss.responses',
     'nginx.cache.miss.responses_written',
     'nginx.cache.revalidated.bytes',
-    'nginx.cache.revalidated.response',
+    'nginx.cache.revalidated.responses',
     'nginx.cache.stale.bytes',
     'nginx.cache.stale.responses',
     'nginx.cache.updating.bytes',
@@ -92,12 +94,15 @@ METRICS_SEND_AS_COUNT = [
     'nginx.stream.server_zone.sessions.total',
     'nginx.stream.upstream.peers.connections',
     'nginx.stream.upstream.peers.fails',
+    'nginx.stream.upstream.peers.downtime',
     'nginx.stream.upstream.peers.health_checks.checks',
     'nginx.stream.upstream.peers.health_checks.fails',
     'nginx.stream.upstream.peers.health_checks.unhealthy',
     'nginx.stream.upstream.peers.received',
     'nginx.stream.upstream.peers.sent',
     'nginx.stream.upstream.peers.unavail',
+    'nginx.stream.zone_sync.zone.records_total',
+    'nginx.upstream.peers.downtime',
     'nginx.upstream.peers.fails',
     'nginx.upstream.peers.health_checks.checks',
     'nginx.upstream.peers.health_checks.fails',
@@ -105,4 +110,49 @@ METRICS_SEND_AS_COUNT = [
     'nginx.upstream.peers.requests',
     'nginx.upstream.peers.responses.total',
     'nginx.upstream.peers.unavail',
+]
+
+# NGNINX Plus metrics that are sent as both a histogram and gauge for backwards compatibility
+# The histogram metrics will have _histogram appended to their names
+METRICS_SEND_AS_HISTOGRAM = {'nginx.upstream.peers.response_time', 'nginx.stream.upstream.peers.response_time'}
+
+# NGNINX Plus metrics that are sent as only a count.
+# These metrics will not have _count appended to their names
+COUNT_METRICS = [
+    'nginx.location_zone.responses.total',
+    'nginx.location_zone.discarded',
+    'nginx.location_zone.received',
+    'nginx.location_zone.requests',
+    'nginx.location_zone.responses.1xx',
+    'nginx.location_zone.responses.2xx',
+    'nginx.location_zone.responses.3xx',
+    'nginx.location_zone.responses.4xx',
+    'nginx.location_zone.responses.5xx',
+    'nginx.location_zone.responses.code',
+    'nginx.location_zone.responses.total',
+    'nginx.location_zone.sent',
+    'nginx.resolver.requests.addr',
+    'nginx.resolver.requests.name',
+    'nginx.resolver.requests.srv',
+    'nginx.resolver.responses.formerr',
+    'nginx.resolver.responses.noerror',
+    'nginx.resolver.responses.notimp',
+    'nginx.resolver.responses.nxdomain',
+    'nginx.resolver.responses.refused',
+    'nginx.resolver.responses.servfail',
+    'nginx.resolver.responses.timedout',
+    'nginx.resolver.responses.unknown',
+    'nginx.limit_req.delayed_dry_run',
+    'nginx.limit_req.delayed',
+    'nginx.limit_req.passed',
+    'nginx.limit_req.rejected_dry_run',
+    'nginx.limit_req.rejected',
+    'nginx.limit_conn.passed',
+    'nginx.limit_conn.rejected',
+    'nginx.limit_conn.rejected_dry_run',
+    'nginx.stream.limit_conn.passed',
+    'nginx.stream.limit_conn.rejected',
+    'nginx.stream.limit_conn.rejected_dry_run',
+    'nginx.server_zone.responses.code',
+    'nginx.upstream.peers.responses.code',
 ]

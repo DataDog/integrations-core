@@ -6,15 +6,15 @@
 
 This Agent check only collects metrics for message offsets. If you want to collect JMX metrics from the Kafka brokers or Java-based consumers/producers, see the kafka check.
 
-This check fetches the highwater offsets from the Kafka brokers, consumer offsets that are stored in kafka or zookeeper (for old-style consumers), and the calculated consumer lag (which is the difference between the broker offset and the consumer offset).
+This check fetches the highwater offsets from the Kafka brokers, consumer offsets that are stored in Kafka or zookeeper (for old-style consumers), and the calculated consumer lag (which is the difference between the broker offset and the consumer offset).
 
-**Note:** This integration ensures that consumer offsets are checked before broker offsets because worst case is that consumer lag is a little overstated. Doing it the other way around can understate consumer lag to the point of having negative values, which is a dire scenario usually indicating messages are being skipped.
+**Note:** This integration ensures that consumer offsets are checked before broker offsets because worst case is that consumer lag is a little overstated. Doing it in reverse can understate consumer lag to the point of having negative values, which is a dire scenario usually indicating messages are being skipped.
 
 ## Setup
 
 ### Installation
 
-The Agent's Kafka consumer check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Kafka nodes.
+The Agent's Kafka consumer check is included in the [Datadog Agent][2] package. No additional installation is needed on your Kafka nodes.
 
 ### Configuration
 
@@ -32,12 +32,6 @@ To configure this check for an Agent running on a host:
 2. [Restart the Agent][5].
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 This check does not collect additional logs. To collect logs from Kafka brokers, see [log collection instructions for Kafka][6].
 
@@ -74,7 +68,6 @@ The Kafka-consumer check does not include any service checks.
 
 - [Troubleshooting and Deep Dive for Kafka][10]
 - [Agent failed to retrieve RMIServer stub][11]
-- [Producer and Consumer metrics don't appear in my Datadog application][12]
 
 ## Further Reading
 
@@ -93,7 +86,6 @@ The Kafka-consumer check does not include any service checks.
 [9]: https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/metadata.csv
 [10]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka/
 [11]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub/
-[12]: https://docs.datadoghq.com/integrations/faq/producer-and-consumer-metrics-don-t-appear-in-my-datadog-application/
 [13]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
 [14]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
 [15]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog

@@ -4,6 +4,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import logging
 from collections import OrderedDict
 from typing import Any
 
@@ -651,6 +652,10 @@ class TestTags:
 class LimitedCheck(AgentCheck):
     DEFAULT_METRIC_LIMIT = 10
 
+    def check(self, _):
+        for i in range(5):
+            self.gauge('foo', i)
+
 
 class TestLimits:
     def test_context_uid(self, aggregator):
@@ -764,6 +769,26 @@ class TestLimits:
             check.gauge("metric", 0)
         assert len(aggregator.metrics("metric")) == 10
 
+    def test_debug_metrics_under_limit(self, aggregator, dd_run_check):
+        instance = {'debug_metrics': {'metric_contexts': True}}
+        check = LimitedCheck('test', {}, [instance])
+        dd_run_check(check)
+
+        assert len(check.get_warnings()) == 0
+        assert len(aggregator.metrics('foo')) == 5
+        aggregator.assert_metric('datadog.agent.metrics.contexts.limit', 10)
+        aggregator.assert_metric('datadog.agent.metrics.contexts.total', 5)
+
+    def test_debug_metrics_over_limit(self, aggregator, dd_run_check):
+        instance = {'debug_metrics': {'metric_contexts': True}, 'max_returned_metrics': 3}
+        check = LimitedCheck('test', {}, [instance])
+        dd_run_check(check)
+
+        assert len(check.get_warnings()) == 1
+        assert len(aggregator.metrics('foo')) == 3
+        aggregator.assert_metric('datadog.agent.metrics.contexts.limit', 3)
+        aggregator.assert_metric('datadog.agent.metrics.contexts.total', 5)
+
 
 class TestCheckInitializations:
     def test_default(self):
@@ -870,8 +895,8 @@ def test_load_configuration_models(dd_run_check, mocker):
     assert check._config_model_instance is None
     assert check._config_model_shared is None
 
-    instance_config = object()
-    shared_config = object()
+    instance_config = {}
+    shared_config = {}
     package = mocker.MagicMock()
     package.InstanceConfig = mocker.MagicMock(return_value=instance_config)
     package.SharedConfig = mocker.MagicMock(return_value=shared_config)
@@ -890,3 +915,108 @@ def test_load_configuration_models(dd_run_check, mocker):
 
     assert check._config_model_instance is instance_config
     assert check._config_model_shared is shared_config
+
+
+@requires_py3
+@pytest.mark.parametrize(
+    'check_instance_config, default_instance_config, log_lines',
+    [
+        pytest.param(
+            {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
+            [],
+            None,
+            id='empty default',
+        ),
+        pytest.param(
+            {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
+            [('endpoint', 'url')],
+            None,
+            id='no typo',
+        ),
+        pytest.param(
+            {'endpoints': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
+            [('endpoint', 'url')],
+            [
+                (
+                    'Detected potential typo in configuration option in test/instance section: `endpoints`. '
+                    'Did you mean endpoint?'
+                )
+            ],
+            id='typo',
+        ),
+        pytest.param(
+            {'endpoints': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
+            [('endpoint', 'url'), ('endpoints', 'url')],
+            None,
+            id='no typo similar option',
+        ),
+        pytest.param(
+            {'endpont': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
+            [('endpoint', 'url'), ('endpoints', 'url')],
+            [
+                (
+                    'Detected potential typo in configuration option in test/instance section: `endpont`. '
+                    'Did you mean endpoint, or endpoints?'
+                )
+            ],
+            id='typo two candidates',
+        ),
+        pytest.param({'tag': 'test'}, [('tags', 'test')], None, id='short option cant catch'),
+        pytest.param(
+            {'testing_long_para': 'test'},
+            [('testing_long_param', 'test'), ('test_short_param', 'test')],
+            [
+                (
+                    'Detected potential typo in configuration option in test/instance section: `testing_long_para`. '
+                    'Did you mean testing_long_param?'
+                )
+            ],
+            id='somewhat similar option',
+        ),
+        pytest.param(
+            {'send_distribution_sums_as_monotonic': False, 'exclude_labels': True},
+            [('send_distribution_counts_as_monotonic', True), ('include_labels', True)],
+            None,
+            id='different options no typos',
+        ),
+        pytest.param(
+            {'send_distribution_count_as_monotonic': True, 'exclude_label': True},
+            [
+                ('send_distribution_sums_as_monotonic', False),
+                ('send_distribution_counts_as_monotonic', True),
+                ('exclude_labels', False),
+                ('include_labels', True),
+            ],
+            [
+                (
+                    'Detected potential typo in configuration option in test/instance section: '
+                    '`send_distribution_count_as_monotonic`. Did you mean send_distribution_counts_as_monotonic?'
+                ),
+                (
+                    'Detected potential typo in configuration option in test/instance section: `exclude_label`. '
+                    'Did you mean exclude_labels?'
+                ),
+            ],
+            id='different options typo',
+        ),
+    ],
+)
+def test_detect_typos_configuration_models(
+    dd_run_check, mocker, caplog, check_instance_config, default_instance_config, log_lines
+):
+    caplog.clear()
+    caplog.set_level(logging.WARNING)
+    empty_config = {}
+    default_instance = mocker.MagicMock()
+    default_instance.__iter__ = mocker.MagicMock(return_value=iter(default_instance_config))
+
+    check = AgentCheck('test', empty_config, [check_instance_config])
+    check.check_id = 'test:123'
+
+    check.log_typos_in_options(check_instance_config, default_instance, 'instance')
+
+    if log_lines is not None:
+        for log_line in log_lines:
+            assert log_line in caplog.text
+    else:
+        assert 'Detected potential typo in configuration option' not in caplog.text

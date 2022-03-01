@@ -122,3 +122,55 @@ DEFAULT_COUNTERS = [
         'gauge',
     ],
 ]
+
+METRICS_CONFIG = {
+    'Hyper-V Dynamic Memory Balancer': {
+        'name': 'dynamic_memory_balancer',
+        'counters': [{'Available Memory': 'available_memory', 'Average Pressure': 'average_pressure'}],
+    },
+    'Hyper-V Virtual Network Adapter': {
+        'name': 'virtual_network_adapter',
+        'counters': [{'Bytes/sec': 'bytes_per_sec'}],
+    },
+    'Hyper-V Hypervisor Logical Processor': {
+        'name': 'hypervisor_logical_processor',
+        'counters': [
+            {
+                '% Guest Run Time': 'guest_run_time',
+                '% Hypervisor Run Time': 'hypervisor_run_time',
+                '% Idle Time': 'idle_time',
+                '% Total Run Time': 'total_run_time',
+                'Context Switches/sec': 'context_switches_per_sec',
+            }
+        ],
+    },
+    'Hyper-V Hypervisor Root Virtual Processor': {
+        'name': 'hypervisor_root_virtual_processor',
+        'counters': [
+            {
+                '% Guest Run Time': 'guest_run_time',
+                '% Hypervisor Run Time': 'hypervisor_run_time',
+                '% Total Run Time': 'total_run_time',
+            }
+        ],
+    },
+    'Hyper-V Hypervisor Virtual Processor': {
+        'name': 'hypervisor_virtual_processor',
+        'counters': [
+            {
+                '% Guest Run Time': 'guest_run_time',
+                '% Hypervisor Run Time': 'hypervisor_run_time',
+                '% Total Run Time': 'total_run_time',
+            }
+        ],
+    },
+    'Hyper-V VM Vid Partition': {
+        'name': 'vm_vid_partition',
+        'counters': [
+            {
+                'Physical Pages Allocated': 'physical_pages_allocated',
+                'Remote Physical Pages': 'remote_physical_pages',
+            }
+        ],
+    },
+}

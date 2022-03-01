@@ -206,6 +206,8 @@ class KubeletCheck(
         ]:
             self.transformers.update(d)
 
+        self.first_run = True
+
     def _create_kubelet_prometheus_instance(self, instance):
         """
         Create a copy of the instance and set default values.
@@ -353,6 +355,8 @@ class KubeletCheck(
         if self.kubelet_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing kubelet metrics')
             self.process(self.kubelet_scraper_config, metric_transformers=self.transformers)
+
+        self.first_run = False
 
         # Free up memory
         self.pod_list = None
@@ -619,7 +623,13 @@ class KubeletCheck(
             custom_hostname = self._get_hostname(hostname, sample, scraper_config)
             # Determine the tags to send
             tags = self._metric_tags(metric.name, val, sample, scraper_config, hostname=custom_hostname)
-            self.monotonic_count(metric_name_with_namespace, val, tags=tags, hostname=custom_hostname)
+            self.monotonic_count(
+                metric_name_with_namespace,
+                val,
+                tags=tags,
+                hostname=custom_hostname,
+                flush_first_value=not self.first_run,
+            )
 
     def append_pod_tags_to_volume_metrics(self, metric, scraper_config, hostname=None):
         metric_name_with_namespace = '{}.{}'.format(scraper_config['namespace'], self.VOLUME_METRICS[metric.name])
@@ -639,6 +649,9 @@ class KubeletCheck(
                     kube_ns = label_value
                 if pvc_name and kube_ns:
                     break
+
+            if self.pod_list_utils.is_namespace_excluded(kube_ns):
+                continue
 
             pod_tags = self.pod_tags_by_pvc.get('{}/{}'.format(kube_ns, pvc_name), {})
             tags.extend(pod_tags)

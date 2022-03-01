@@ -12,14 +12,15 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.time import ensure_aware_datetime
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.ibm_mq.collectors import ChannelMetricCollector, QueueMetricCollector
 
 from . import common
-from .common import QUEUE_METRICS, assert_all_metrics
+from .common import QUEUE_METRICS, assert_all_metrics, skip_windows_ci
 
-pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
+pytestmark = [skip_windows_ci, pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
 
-def test_no_msg_errors_are_caught(get_check, instance, caplog):
+def test_no_msg_errors_are_caught(get_check, instance, caplog, dd_run_check):
     # Late import to ignore missing library for e2e
     from pymqi import MQMIError, PCFExecute
     from pymqi.CMQC import MQCC_FAILED, MQRC_NO_MSG_AVAILABLE
@@ -33,12 +34,12 @@ def test_no_msg_errors_are_caught(get_check, instance, caplog):
         m.side_effect = error
         m.unpack = PCFExecute.unpack
         check = get_check(instance)
-        check.check(instance)
+        dd_run_check(check)
 
         assert not caplog.records
 
 
-def test_unknown_service_check(aggregator, get_check, instance, caplog):
+def test_unknown_service_check(aggregator, get_check, instance, caplog, dd_run_check):
     # Late import to ignore missing library for e2e
     from pymqi import MQMIError, PCFExecute
     from pymqi.CMQC import MQCC_FAILED, MQRC_NO_MSG_AVAILABLE
@@ -51,7 +52,7 @@ def test_unknown_service_check(aggregator, get_check, instance, caplog):
         m.side_effect = error
         m.unpack = PCFExecute.unpack
         check = get_check(instance)
-        check.check(instance)
+        dd_run_check(check)
 
         tags = [
             'queue_manager:{}'.format(common.QUEUE_MANAGER),
@@ -68,7 +69,7 @@ def test_unknown_service_check(aggregator, get_check, instance, caplog):
             aggregator.assert_service_check('ibm_mq.channel', check.UNKNOWN, tags=channel_tags, count=1)
 
 
-def test_errors_are_logged(get_check, instance, caplog):
+def test_errors_are_logged(get_check, instance, caplog, dd_run_check):
     # Late import to ignore missing library for e2e
     from pymqi import MQMIError, PCFExecute
     from pymqi.CMQC import MQCC_FAILED, MQRC_BUFFER_ERROR
@@ -82,42 +83,58 @@ def test_errors_are_logged(get_check, instance, caplog):
         m.side_effect = error
         m.unpack = PCFExecute.unpack
         check = get_check(instance)
-        check.check(instance)
+        dd_run_check(check)
 
         assert caplog.records
 
 
-def test_check_metrics_and_service_checks(aggregator, get_check, instance, seed_data):
+@pytest.mark.parametrize(
+    'override_hostname',
+    [False, True],
+)
+def test_check_metrics_and_service_checks(aggregator, get_check, instance, seed_data, override_hostname, dd_run_check):
     instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
+    instance['override_hostname'] = override_hostname
     check = get_check(instance)
-
-    check.check(instance)
-
-    assert_all_metrics(aggregator)
+    dd_run_check(check)
 
     tags = [
-        'queue_manager:{}'.format(common.QUEUE_MANAGER),
-        'mq_host:{}'.format(common.HOST),
-        'port:{}'.format(common.PORT),
         'connection_name:{}({})'.format(common.HOST, common.PORT),
         'foo:bar',
+        'port:{}'.format(common.PORT),
+        'queue_manager:{}'.format(common.QUEUE_MANAGER),
     ]
+    if override_hostname:
+        hostname = common.HOST
+    else:
+        tags.append('mq_host:{}'.format(common.HOST))
+        hostname = None
+
+    assert_all_metrics(aggregator, minimum_tags=tags, hostname=hostname)
 
     channel_tags = tags + ['channel:{}'.format(common.CHANNEL)]
-    aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=channel_tags, count=1)
+    aggregator.assert_service_check(
+        ChannelMetricCollector.CHANNEL_SERVICE_CHECK, check.OK, tags=channel_tags, count=1, hostname=hostname
+    )
+    aggregator.assert_service_check(
+        QueueMetricCollector.QUEUE_MANAGER_SERVICE_CHECK, check.OK, channel_tags, hostname=hostname
+    )
+
+    queue_tags = channel_tags + ['queue:DEV.QUEUE.1']
+    aggregator.assert_service_check(QueueMetricCollector.QUEUE_SERVICE_CHECK, check.OK, queue_tags, hostname=hostname)
 
     bad_channel_tags = tags + ['channel:{}'.format(common.BAD_CHANNEL)]
-    aggregator.assert_service_check('ibm_mq.channel', check.CRITICAL, tags=bad_channel_tags, count=1)
+    aggregator.assert_service_check('ibm_mq.channel', check.CRITICAL, tags=bad_channel_tags, count=1, hostname=hostname)
 
     discoverable_tags = tags + ['channel:*']
-    aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=discoverable_tags, count=1)
+    aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=discoverable_tags, count=1, hostname=hostname)
 
 
-def test_check_connection_name_one(aggregator, get_check, instance_with_connection_name):
+def test_check_connection_name_one(aggregator, get_check, instance_with_connection_name, dd_run_check):
     instance_with_connection_name['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
 
     check = get_check(instance_with_connection_name)
-    check.check(instance_with_connection_name)
+    dd_run_check(check)
 
     assert_all_metrics(aggregator)
 
@@ -130,20 +147,20 @@ def test_check_connection_name_one(aggregator, get_check, instance_with_connecti
     aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=channel_tags, count=1)
 
 
-def test_check_connection_names_multi(aggregator, get_check, instance_with_connection_name):
+def test_check_connection_names_multi(aggregator, get_check, instance_with_connection_name, dd_run_check):
     instance = instance_with_connection_name
     instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
     instance['connection_name'] = "localhost(9999),{}".format(instance['connection_name'])
 
     check = get_check(instance)
-    check.check(instance)
+    dd_run_check(check)
 
     assert_all_metrics(aggregator)
 
 
-def test_check_all(aggregator, get_check, instance_collect_all, seed_data):
+def test_check_all(aggregator, get_check, instance_collect_all, seed_data, dd_run_check):
     check = get_check(instance_collect_all)
-    check.check(instance_collect_all)
+    dd_run_check(check)
 
     assert_all_metrics(aggregator)
 
@@ -153,26 +170,26 @@ def test_check_all(aggregator, get_check, instance_collect_all, seed_data):
     [({'running': 'warning'}, AgentCheck.WARNING), ({'running': 'critical'}, AgentCheck.CRITICAL)],
 )
 def test_integration_custom_mapping(
-    aggregator, get_check, instance, channel_status_mapping, expected_service_check_status
+    aggregator, get_check, instance, channel_status_mapping, expected_service_check_status, dd_run_check
 ):
     instance['channel_status_mapping'] = channel_status_mapping
     check = get_check(instance)
 
-    check.check(instance)
+    dd_run_check(check)
 
     aggregator.assert_service_check('ibm_mq.channel.status', expected_service_check_status)
 
 
-def test_check_queue_pattern(aggregator, get_check, instance_queue_pattern, seed_data):
+def test_check_queue_pattern(aggregator, get_check, instance_queue_pattern, seed_data, dd_run_check):
     check = get_check(instance_queue_pattern)
-    check.check(instance_queue_pattern)
+    dd_run_check(check)
 
     assert_all_metrics(aggregator)
 
 
-def test_check_queue_regex(aggregator, get_check, instance_queue_regex, seed_data):
+def test_check_queue_regex(aggregator, get_check, instance_queue_regex, seed_data, dd_run_check):
     check = get_check(instance_queue_regex)
-    check.check(instance_queue_regex)
+    dd_run_check(check)
 
     assert_all_metrics(aggregator)
 
@@ -231,9 +248,9 @@ def test_check_channel_count_status_unknown(aggregator, get_check, instance_queu
         )
 
 
-def test_check_regex_tag(aggregator, get_check, instance_queue_regex_tag, seed_data):
+def test_check_regex_tag(aggregator, get_check, instance_queue_regex_tag, seed_data, dd_run_check):
     check = get_check(instance_queue_regex_tag)
-    check.check(instance_queue_regex_tag)
+    dd_run_check(check)
 
     tags = [
         'queue_manager:{}'.format(common.QUEUE_MANAGER),
@@ -249,7 +266,7 @@ def test_check_regex_tag(aggregator, get_check, instance_queue_regex_tag, seed_d
         aggregator.assert_metric(metric, tags=tags)
 
 
-def test_stats_metrics(aggregator, get_check, instance):
+def test_stats_metrics(aggregator, get_check, instance, dd_run_check):
     # Late import to ignore missing library for e2e
     from pymqi import MQMIError
     from pymqi.CMQC import MQCC_FAILED, MQRC_NO_MSG_AVAILABLE
@@ -272,7 +289,7 @@ def test_stats_metrics(aggregator, get_check, instance):
                 queue_data,
                 MQMIError(MQCC_FAILED, MQRC_NO_MSG_AVAILABLE),
             ]
-            check.check(instance)
+            dd_run_check(check)
 
     common_tags = [
         'queue_manager:{}'.format(common.QUEUE_MANAGER),

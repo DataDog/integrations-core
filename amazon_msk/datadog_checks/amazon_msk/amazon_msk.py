@@ -117,13 +117,14 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
 
             for endpoint in broker_info['Endpoints']:
                 for (port, metrics_mapper, type_overrides) in self._exporter_data:
-                    self._scraper_config['prometheus_url'] = '{}://{}:{}{}'.format(
-                        self._endpoint_prefix, endpoint, port, self._prometheus_metrics_path
-                    )
-                    self._scraper_config['metrics_mapper'] = metrics_mapper
-                    self._scraper_config['type_overrides'] = type_overrides
+                    if port:
+                        self._scraper_config['prometheus_url'] = '{}://{}:{}{}'.format(
+                            self._endpoint_prefix, endpoint, port, self._prometheus_metrics_path
+                        )
+                        self._scraper_config['metrics_mapper'] = metrics_mapper
+                        self._scraper_config['type_overrides'] = type_overrides
 
-                    self.process(self._scraper_config)
+                        self.process(self._scraper_config)
 
     def parse_config(self):
         cluster_arn = self.instance.get('cluster_arn')
