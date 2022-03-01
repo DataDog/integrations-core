@@ -649,19 +649,21 @@ class TestTags:
         assert set(tags) == expected_tags
 
     @pytest.mark.parametrize(
-        "exclude_metrics_filters, include_metrics_filters, expected_metrics, unexpected_metrics",
+        "exclude_metrics_filters, include_metrics_filters, expected_metrics",
         [
-            pytest.param(['hello'], [], ['my_metric', 'my_metric_count'], ['hello'], id='exclude string'),
-            pytest.param(
-                ['my_metric*'], [], ['hello'], ['my_metric', 'my_metric_count'], id='exclude multiple matches'
-            ),
-            pytest.param(['my_metrics'], [], ['my_metric', 'my_metric_count', 'hello'], [], id='exclude no matches'),
-            pytest.param(['.*'], [], [], ['my_metric', 'my_metric_count', 'hello'], id='exclude everything'),
+            pytest.param(['hello'], [], ['my_metric', 'my_metric_count'], id='exclude string'),
+            pytest.param(['my_metric*'], [], ['hello'], id='exclude multiple matches'),
+            pytest.param(['my_metrics'], [], ['my_metric', 'my_metric_count', 'hello'], id='exclude no matches'),
+            pytest.param(['.*'], [], [], id='exclude everything'),
+            pytest.param(['.*'], ['hello'], [], id='exclude everything one include'),
+            pytest.param([], ['hello'], ['hello'], id='include string'),
+            pytest.param([], ['my_metric*'], ['my_metric', 'my_metric_count'], id='include multiple matches'),
+            pytest.param(['my_metric_count'], ['my_metric*'], ['my_metric'], id='match both'),
+            pytest.param(['my_metric_count'], ['hello'], ['hello'], id='include exclude'),
+            pytest.param(['test'], ['.*'], ['my_metric', 'my_metric_count', 'hello'], id='include all'),
         ],
     )
-    def test_metrics_filters(
-        self, exclude_metrics_filters, include_metrics_filters, expected_metrics, unexpected_metrics, aggregator
-    ):
+    def test_metrics_filters(self, exclude_metrics_filters, include_metrics_filters, expected_metrics, aggregator):
         instance = {
             'exclude_metrics_filters': exclude_metrics_filters,
             'include_metrics_filters': include_metrics_filters,
@@ -675,9 +677,8 @@ class TestTags:
         for metric_name in expected_metrics:
             aggregator.assert_metric(metric_name, count=1)
 
-        for metric_name in unexpected_metrics:
-            aggregator.assert_metric(metric_name, count=0)
         aggregator.assert_service_check('test.can_check', status=AgentCheck.OK)
+        aggregator.assert_all_metrics_covered()
 
     @pytest.mark.parametrize(
         "exclude_metrics_filters, include_metrics_filters, expected_error",

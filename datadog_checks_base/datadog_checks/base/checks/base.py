@@ -205,6 +205,18 @@ class AgentCheck(object):
             is_affirmative(self.instance.get('disable_generic_tags', False)) if instance else False
         )
 
+        self.debug_metrics = {}
+        if self.init_config is not None:
+            self.debug_metrics.update(self.init_config.get('debug_metrics', {}))
+        if self.instance is not None:
+            self.debug_metrics.update(self.instance.get('debug_metrics', {}))
+
+        # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
+        self.hostname = datadog_agent.get_hostname()  # type: str
+
+        logger = logging.getLogger('{}.{}'.format(__name__, self.name))
+        self.log = CheckLoggingAdapter(logger, self)
+
         exclude_metrics_filters = self.instance.get('exclude_metrics_filters', []) if instance else []
 
         if not isinstance(exclude_metrics_filters, list):
@@ -253,18 +265,6 @@ class AgentCheck(object):
 
         if include_metrics_patterns:
             self.include_metrics_pattern = re.compile('|'.join(include_metrics_patterns))
-
-        self.debug_metrics = {}
-        if self.init_config is not None:
-            self.debug_metrics.update(self.init_config.get('debug_metrics', {}))
-        if self.instance is not None:
-            self.debug_metrics.update(self.instance.get('debug_metrics', {}))
-
-        # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
-        self.hostname = datadog_agent.get_hostname()  # type: str
-
-        logger = logging.getLogger('{}.{}'.format(__name__, self.name))
-        self.log = CheckLoggingAdapter(logger, self)
 
         # TODO: Remove with Agent 5
         # Set proxy settings
