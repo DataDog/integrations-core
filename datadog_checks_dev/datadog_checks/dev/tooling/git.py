@@ -86,7 +86,7 @@ def get_commits_since(check_name, target_tag=None, exclude_branch=None):
         command = f"git log --pretty=%s {'' if target_tag is None else f'{target_tag}... '}{target_path}"
 
     with chdir(root):
-        return run_command(command, capture=True).stdout.splitlines()
+        return run_command(command, capture=True, check=True).stdout.splitlines()
 
 
 def git_show_file(path, ref):
