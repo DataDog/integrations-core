@@ -1,0 +1,17 @@
+name: Teradata
+files:
+- name: teradata.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+    - template: init_config/db
+  - template: instances
+    options:
+    - name: host
+      description: The hostname or IP of the Teradata database
+    - name: user
+      description: The username
+    - name: password
+      description: The password
+
