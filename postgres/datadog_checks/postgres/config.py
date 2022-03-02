@@ -97,7 +97,7 @@ class PostgresConfig:
             'dbms': 'postgresql',
             'replace_digits': is_affirmative(
                 obfuscator_options_config.get(
-                    'replace_digits', is_affirmative(obfuscator_options_config.get('quantize_sql_tables', False))
+                    'replace_digits', obfuscator_options_config.get('quantize_sql_tables', False)
                 )
             ),
             'return_json_metadata': is_affirmative(obfuscator_options_config.get('collect_metadata', True)),
