@@ -1,6 +1,6 @@
 # CHANGELOG - http_check
 
-## 6.1.2 / 2022-01-08
+## 6.1.2 / 2022-01-08 / Agent 7.33.0
 
 * [Fixed] Add urllib3 as dependency. See [#11069](https://github.com/DataDog/integrations-core/pull/11069).
 * [Fixed] Fix urllib3 import statement. See [#11065](https://github.com/DataDog/integrations-core/pull/11065).

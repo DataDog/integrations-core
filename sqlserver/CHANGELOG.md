@@ -12,7 +12,7 @@
 * [Added] Add recovery_model_desc tag for sqlserver database metrics. See [#11210](https://github.com/DataDog/integrations-core/pull/11210). Thanks [lowlydba](https://github.com/lowlydba).
 * [Fixed] Disable modified rowcounts in result sets for all connections. See [#11486](https://github.com/DataDog/integrations-core/pull/11486).
 
-## 7.0.3 / 2022-02-03
+## 7.0.3 / 2022-02-03 / Agent 7.34.0
 
 * [Fixed] Update base version. See [#11287](https://github.com/DataDog/integrations-core/pull/11287).
 
