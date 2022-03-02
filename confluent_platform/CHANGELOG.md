@@ -7,7 +7,7 @@
 * [Added] Add Broker-Zookeeper latency metric. See [#11080](https://github.com/DataDog/integrations-core/pull/11080). Thanks [abraham-leal](https://github.com/abraham-leal).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
 
-## 1.7.1 / 2022-01-13
+## 1.7.1 / 2022-01-13 / Agent 7.34.0
 
 * [Fixed] Remove duplicated entries. See [#11095](https://github.com/DataDog/integrations-core/pull/11095).
 
