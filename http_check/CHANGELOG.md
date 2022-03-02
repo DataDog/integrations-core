@@ -1,5 +1,11 @@
 # CHANGELOG - http_check
 
+## 7.0.0 / 2022-03-02
+
+* [Added] Add `pyproject.toml` file. See [#11365](https://github.com/DataDog/integrations-core/pull/11365).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
+
 ## 6.1.2 / 2022-01-08
 
 * [Fixed] Add urllib3 as dependency. See [#11069](https://github.com/DataDog/integrations-core/pull/11069).
