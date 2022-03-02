@@ -37,7 +37,7 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
 - [Airflow Metrics][6]
 - [Airflow Metrics Configuration][7]
 
-**Note**: Presence or absence of StatsD metrics reported by Airflow might vary depending on the Airflow Executor used. For example: `airflow.ti_failures/successes, airflow.operator_failures/successes, airflow.dag.task.duration` are [not reported for `KubernetesExecutor`][8]. 
+**Note**: Presence or absence of StatsD metrics reported by Airflow might vary depending on the Airflow Executor used. For example: `airflow.ti_failures/successes, airflow.operator_failures/successes, airflow.dag.task.duration` are [not reported for `KubernetesExecutor`][20]. 
 
 1. Install the [Airflow StatsD plugin][1].
 
@@ -281,7 +281,7 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
 - [Airflow Metrics][6]
 - [Airflow Metrics Configuration][7]
 
-**Note**: Presence or absence of StatsD metrics reported by Airflow might vary depending on the Airflow Executor used. For example: `airflow.ti_failures/successes, airflow.operator_failures/successes, airflow.dag.task.duration` are [not reported for `KubernetesExecutor`][8]. 
+**Note**: Presence or absence of StatsD metrics reported by Airflow might vary depending on the Airflow Executor used. For example: `airflow.ti_failures/successes, airflow.operator_failures/successes, airflow.dag.task.duration` are [not reported for `KubernetesExecutor`][20]. 
 
 **Note**: The environment variables used for Airflow may differ between versions. For example in Airflow `2.0.0` this utilizes the environment variable `AIRFLOW__METRICS__STATSD_HOST`, whereas Airflow `1.10.15` utilizes `AIRFLOW__SCHEDULER__STATSD_HOST`. 
 
@@ -364,7 +364,7 @@ Need help? Contact [Datadog support][11].
 [5]: https://github.com/DataDog/integrations-core/blob/master/airflow/datadog_checks/airflow/data/conf.yaml.example
 [6]: https://airflow.apache.org/docs/apache-airflow/stable/logging-monitoring/metrics.html
 [7]: https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#metrics
-[8]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[8]: https://docs.datadoghq.com/getting_started/agent/autodiscovery/?tab=docker#integration-templates
 [9]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [11]: https://docs.datadoghq.com/help/
@@ -376,3 +376,4 @@ Need help? Contact [Datadog support][11].
 [17]: https://airflow.apache.org/docs/apache-airflow-providers-datadog/stable/_modules/airflow/providers/datadog/hooks/datadog.html
 [18]: https://github.com/DataDog/integrations-core/blob/master/airflow/metadata.csv
 [19]: https://github.com/DataDog/integrations-core/blob/master/airflow/assets/service_checks.json
+[20]: https://airflow.apache.org/docs/apache-airflow/stable/executor/kubernetes.html
