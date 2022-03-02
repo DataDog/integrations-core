@@ -48,6 +48,10 @@ def tag(check, version, push, dry_run):
         if not version:
             version = get_version_string(check)
 
+        if version == '0.0.1':
+            echo_warning('skipping since not released yet')
+            continue
+
         # get the tag name
         release_tag = get_release_tag_string(check, version)
         echo_waiting(f'Tagging HEAD with {release_tag}... ', indent=True, nl=False)
