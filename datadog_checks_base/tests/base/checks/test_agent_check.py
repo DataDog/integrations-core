@@ -683,8 +683,20 @@ class TestTags:
     @pytest.mark.parametrize(
         "exclude_metrics_filters, include_metrics_filters, expected_error",
         [
-            pytest.param('hello', [], r'^Setting `exclude_metrics_filters` must be an array', id='exclude not list'),
-            pytest.param([], 'hello', r'^Setting `include_metrics_filters` must be an array', id='include not list'),
+            pytest.param('metric', [], r'^Setting `exclude_metrics_filters` must be an array', id='exclude not list'),
+            pytest.param([], 'metric', r'^Setting `include_metrics_filters` must be an array', id='include not list'),
+            pytest.param(
+                ['metric_one', 1000],
+                [],
+                r'^Entry #2 of setting `exclude_metrics_filters` must be a string',
+                id='exclude bad element',
+            ),
+            pytest.param(
+                [],
+                [10, 'metric_one'],
+                r'^Entry #1 of setting `include_metrics_filters` must be a string',
+                id='include bad element',
+            ),
         ],
     )
     def test_metrics_filter_invalid(self, aggregator, exclude_metrics_filters, include_metrics_filters, expected_error):
