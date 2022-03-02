@@ -474,7 +474,6 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
     ],
 )
 def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload):
-    dbm_instance['obfuscator_options'] = {'collect_metadata': True}
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     test_query = '''
