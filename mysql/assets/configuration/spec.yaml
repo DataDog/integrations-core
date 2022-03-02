@@ -450,11 +450,11 @@ files:
                   example: false
               - name: collect_metadata
                 description: |
-                  Set to `true` to enable the collection of metadata in your SQL statements.
+                  Set to `false` to disable the collection of metadata in your SQL statements.
                   Metadata includes things such as tables, commands, and comments.
                 value:
                   type: boolean
-                  example: false
+                  example: true
               - name: collect_tables
                 description: |
                   Set to `false` to disable the collection of tables in your SQL statements.
