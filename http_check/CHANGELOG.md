@@ -1,5 +1,10 @@
 # CHANGELOG - http_check
 
+## 7.0.1 / 2022-03-02
+
+* [Fixed] Avoid reading response content unless necessary. See [#11590](https://github.com/DataDog/integrations-core/pull/11590).
+* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+
 ## 7.0.0 / 2022-03-02
 
 * [Added] Add `pyproject.toml` file. See [#11365](https://github.com/DataDog/integrations-core/pull/11365).
