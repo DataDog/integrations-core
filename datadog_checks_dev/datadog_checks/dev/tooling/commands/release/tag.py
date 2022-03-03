@@ -9,7 +9,7 @@ from ...utils import complete_valid_checks, get_valid_checks, get_version_string
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 
 # 0.0.1 is the initial pre-release version that is generated from the integrations template.
-# Updating to any version > 0.0.1 would require a tag.*.link file to be updated.
+# Releasing any version > 0.0.1 for a core integration requires a tag.*.link file to be updated in the PR
 PRERELEASE = '0.0.1'
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Tag the git repo with the current release of a check')
