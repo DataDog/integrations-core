@@ -551,4 +551,5 @@ EXPECTED_METRICS = [
     'traffic_server.process.http2.max_priority_frames_per_minute_exceeded',
     'traffic_server.process.ssl.default_record_size_count',
     'traffic_server.process.cache.volume.bytes_used',
+    'traffic_server.process.cache.volume.ram_cache.bytes_used',
 ]

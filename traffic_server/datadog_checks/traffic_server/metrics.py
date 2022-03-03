@@ -1473,7 +1473,7 @@ REGEX_METRICS = [
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.bytes_used',
+        'regex': r'proxy.process.cache.([A-Za-z0-9_-]*)\.bytes_used',
         'name': 'process.cache.volume.bytes_used',
         'tags': ('cache_volume',),
         'method': 'gauge',
