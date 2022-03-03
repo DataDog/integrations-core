@@ -32,8 +32,8 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "dashboards": {
-      "overview": "assets/dashboards/overview.json",
-      "metrics": "assets/dashboards/metrics.json"
+      "WebLogic Overview": "assets/dashboards/overview.json",
+      "WebLogic Metrics": "assets/dashboards/metrics.json"
     },
     "monitors": {
       "active_threads": "assets/monitors/active_threads.json",
