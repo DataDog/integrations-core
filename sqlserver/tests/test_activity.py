@@ -72,9 +72,11 @@ def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_in
     executor.submit(run_test_query, fred_conn, query)
     # run the check
     dd_run_check(check)
-    # commit both transactions
+    # commit and close both transactions
     bob_conn.commit()
-    fred_conn.commit()
+    bob_conn.close()
+    fred_conn.close()
+
     expected_instance_tags = set(dbm_instance.get('tags', []))
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
@@ -139,9 +141,6 @@ def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_in
         tags=['agent_hostname:stubbed.hostname', 'operation:collect_activity']
         + _expected_dbm_instance_tags(dbm_instance),
     )
-    # clean up connections
-    bob_conn.close()
-    fred_conn.close()
 
 
 def assert_common_fields(row, start_key):
@@ -161,21 +160,33 @@ def assert_common_fields(row, start_key):
     [
         [
             [
-                {'session_status': 'suspended', 'text': "something", 'start_time': 2},
-                {'session_status': 'suspended', 'text': "something", 'start_time': 2, 'toobig': "shame" * 1000},
+                {'last_request_start_time': 'suspended', 'id': 1, 'text': "something", 'start_time': 2},
+                {
+                    'last_request_start_time': 'suspended',
+                    'id': 2,
+                    'text': "something",
+                    'start_time': 2,
+                    'toobig': "shame" * 1000,
+                },
             ],
             1,
         ],
         [
             [
-                {'session_status': 'suspended', 'text': "something", 'start_time': 2},
-                {'session_status': 'suspended', 'text': "something", 'start_time': 2},
+                {'last_request_start_time': 'suspended', 'id': 1, 'text': "something", 'start_time': 2},
+                {'last_request_start_time': 'suspended', 'id': 1, 'text': "something", 'start_time': 2},
             ],
             2,
         ],
         [
             [
-                {'session_status': 'suspended', 'text': "something", 'start_time': 2, 'toobig': "shame" * 1000},
+                {
+                    'last_request_start_time': 'suspended',
+                    'id': 1,
+                    'text': "something",
+                    'start_time': 2,
+                    'toobig': "shame" * 1000,
+                },
             ],
             0,
         ],

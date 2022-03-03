@@ -252,6 +252,15 @@ instances:
         #
         # collection_interval: 10
 
+        ## @param tx_collection_interval - number - optional - default: 60
+        ## Set the transaction collection interval in seconds. Each collection involves querying several
+        ## different DMV tables such as `dm_tran_session_transactions`, `dm_exec_connections`, and `dm_exec_sql_text`.
+        ## This setting will determine how often to collect information about open transactions.
+        ## If a non-default value is chosen, then that exact same value must be used for *every* check instance.
+        ## Running different instances with different collection intervals is not supported.
+        #
+        # tx_collection_interval: 60
+
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
     #

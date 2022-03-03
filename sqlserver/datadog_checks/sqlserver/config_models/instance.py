@@ -45,6 +45,7 @@ class QueryActivity(BaseModel):
 
     collection_interval: Optional[float]
     enabled: Optional[bool]
+    tx_collection_interval: Optional[float]
 
 
 class QueryMetrics(BaseModel):
