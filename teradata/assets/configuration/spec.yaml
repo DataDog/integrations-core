@@ -7,11 +7,46 @@ files:
     - template: init_config/default
     - template: init_config/db
   - template: instances
+    description: |
+      Every instance is scheduled independent of the others.
+
+      Note: All '%' characters must be escaped as '%%'
     options:
     - name: host
-      description: The hostname or IP of the Teradata database
-    - name: user
-      description: The username
+      description: Host IP of your Teradata instance.
+      value:
+        type: string
+        example: <HOST>
+    - name: port
+      description: Port of your Teradata instance.
+      value:
+        type: string
+        example: <PORT>
+    - name: username
+      description: Username for the Datadog-Teradata check user.
+      value:
+        type: string
     - name: password
-      description: The password
-
+      description: Password for the Datadog-Teradata check user.
+      value:
+        type: string
+    - name: database
+      description: |
+        Database name to query.
+      value:
+        type: string
+        example: system
+    - name: driver
+      description: The named ODBC driver.
+      value:
+        type: string
+        example: Teradata Database ODBC Driver 17.10
+    - name: connection_string
+      description: |
+        Specify a custom connection string to be used
+        Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=yes"
+      value:
+        type: string
+        example: "<CONNECTION_STRING>"
+  - template: instances/db
+  - template: instances/default

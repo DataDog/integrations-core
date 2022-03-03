@@ -37,7 +37,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "teradata==15.10.0.21",
+    "pyodbc==4.0.26",
 ]
 
 [project.urls]
