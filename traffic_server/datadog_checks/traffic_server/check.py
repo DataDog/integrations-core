@@ -47,10 +47,11 @@ class TrafficServerCheck(AgentCheck):
         global_metrics = response_json.get("global")
 
         for metric_name, metric_value in global_metrics.items():
-            name, tags = build_metric(metric_name, self.log)
+            name, tags, metric_type = build_metric(metric_name, self.log)
+            method = getattr(self, metric_type)
 
             if name is not None:
-                self.gauge(name, metric_value, tags=self.tags + tags)
+                method(name, metric_value, tags=self.tags + tags)
 
         server_version = global_metrics.get(VERSION_METRIC_NAME, None)
         self._submit_version_metadata(server_version)
