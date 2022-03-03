@@ -122,11 +122,16 @@ class SQLServer(AgentCheck):
                     # Valid values for this can be found at
                     # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/database.md#connection-level-attributes
                     'dbms': 'mssql',
-                    'replace_digits': obfuscator_options_config.get('replace_digits', False),
-                    'return_json_metadata': obfuscator_options_config.get('collect_metadata', False),
-                    'table_names': obfuscator_options_config.get('collect_tables', True),
-                    'collect_commands': obfuscator_options_config.get('collect_commands', True),
-                    'collect_comments': obfuscator_options_config.get('collect_comments', True),
+                    'replace_digits': is_affirmative(
+                        obfuscator_options_config.get(
+                            'replace_digits',
+                            obfuscator_options_config.get('quantize_sql_tables', False),
+                        )
+                    ),
+                    'return_json_metadata': is_affirmative(obfuscator_options_config.get('collect_metadata', True)),
+                    'table_names': is_affirmative(obfuscator_options_config.get('collect_tables', True)),
+                    'collect_commands': is_affirmative(obfuscator_options_config.get('collect_commands', True)),
+                    'collect_comments': is_affirmative(obfuscator_options_config.get('collect_comments', True)),
                 }
             )
         )
@@ -582,7 +587,12 @@ class SQLServer(AgentCheck):
             if self.autodiscovery and self.autodiscovery_db_service_check:
                 for db_name in self.databases:
                     if db_name != self.connection.DEFAULT_DATABASE:
-                        self.connection.check_database_conns(db_name)
+                        try:
+                            self.connection.check_database_conns(db_name)
+                        except Exception as e:
+                            # service_check errors on auto discovered databases should not abort the check
+                            self.log.warning("failed service check for auto discovered database: %s", e)
+
             if self.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)

@@ -52,8 +52,8 @@ instances:
     ## OpenMetrics-related options take effect only when this is set to `true`. 
     ##
     ## This check uses the latest OpenMetrics V2 implementation for more features and better performance.
-    ## Note: To see the configuration options for the OpenMetrics V1 implementation (Agent 7.33 or older),
-    ## https://github.com/DataDog/integrations-core/blob/7.33.x/haproxy/datadog_checks/haproxy/data/conf.yaml.example
+    ## Note: To see the configuration options for the OpenMetrics V1 implementation (Agent 7.34 or older),
+    ## https://github.com/DataDog/integrations-core/blob/7.34.x/haproxy/datadog_checks/haproxy/data/conf.yaml.example
     #
     # use_openmetrics: false
 
@@ -486,10 +486,6 @@ instances:
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable those by setting `tls_ignore_warning` to true.
-    ##
-    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
-    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
-    ## to true.
     #
     # tls_ignore_warning: false
 

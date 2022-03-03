@@ -1,6 +1,17 @@
 # CHANGELOG - http_check
 
-## 6.1.2 / 2022-01-08
+## 7.0.1 / 2022-03-02
+
+* [Fixed] Avoid reading response content unless necessary. See [#11590](https://github.com/DataDog/integrations-core/pull/11590).
+* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+
+## 7.0.0 / 2022-03-02
+
+* [Added] Add `pyproject.toml` file. See [#11365](https://github.com/DataDog/integrations-core/pull/11365).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
+
+## 6.1.2 / 2022-01-08 / Agent 7.33.0
 
 * [Fixed] Add urllib3 as dependency. See [#11069](https://github.com/DataDog/integrations-core/pull/11069).
 * [Fixed] Fix urllib3 import statement. See [#11065](https://github.com/DataDog/integrations-core/pull/11065).

@@ -303,7 +303,7 @@ class TUFDownloader:
 
         return wheels
 
-    def get_wheel_relpath(self, standard_distribution_name, version=None):
+    def get_wheel_relpath(self, standard_distribution_name, version=None, ignore_python_version=False):
         """
         Returns:
             If download over TUF is successful, this function will return the
@@ -332,6 +332,9 @@ class TUFDownloader:
 
         # Otherwise, fuhgedaboutit.
         if not href:
-            raise PythonVersionMismatch(standard_distribution_name, version, this_python, python_tags)
+            if ignore_python_version:
+                href = list(python_tags.values())[0]
+            else:
+                raise PythonVersionMismatch(standard_distribution_name, version, this_python, python_tags)
 
         return 'simple/{}/{}'.format(standard_distribution_name, href)
