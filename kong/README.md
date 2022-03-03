@@ -22,7 +22,7 @@ To configure this check for an Agent running on a host:
 ##### Metric collection
 
 1. Ensure that OpenMetrics metrics are exposed in your Kong service by [enabling the Prometheus plugin][14]. This needs to be configured first before the Agent can collect Kong metrics. 
-2. Add this configuration block to your `kong.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start gathering your [Kong Metrics](#metrics). See the [sample kong.d/conf.yaml][3] for all available configuration options:
+2. Add this configuration block to your `kong.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start gathering your [Kong metrics](#metrics). See the [sample kong.d/conf.yaml][3] for all available configuration options:
 
 
    ```yaml
