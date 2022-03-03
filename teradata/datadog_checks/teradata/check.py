@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any
-from teradata import UdaExec
+import pyodbc
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
@@ -16,8 +16,14 @@ class TeradataCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(TeradataCheck, self).__init__(name, init_config, instances)
 
-        # Use self.instance to read the check configuration
-        # self.url = self.instance.get("url")
+        self.host = self.instance.get("host")
+        self.port = self.instance.get("port")
+        self.username = self.instance.get("username")
+        self.password = self.instance.get("password")
+        self.db = self.instance.get("database")
+        self.odbc_driver = self.instance.get("driver")
+        self.connection_string = self.instance.get("connection_string")
+
 
         # If the check is going to perform SQL queries you should define a query manager here.
         # More info at
@@ -34,14 +40,8 @@ class TeradataCheck(AgentCheck):
 
     def check(self, _):
         # type: (Any) -> None
-
-        client = UdaExec(appName="HelloWorld", version="1.0", logConsole=False)
-
-        session = client.connect(method="odbc", system="localhost", username="dbc", password="datad0g123")
-
-        for row in session.execute("SELECT GetQueryBand()"):
-            self.log.info('This is a row %s', row)
-
+        connect = pyodbc.connect(self.connection_string)
+        cursor = connect.cursor()
 
         # The following are useful bits of code to help new users get started.
 
