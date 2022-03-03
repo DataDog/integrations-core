@@ -217,7 +217,6 @@ files:
             'SYSTEM.*': queue_type:system
             'DEV.*': role:dev,queue_type:default
           type: object
-          minProperties: 1
       - template: instances/default
   - template: logs
     example:
