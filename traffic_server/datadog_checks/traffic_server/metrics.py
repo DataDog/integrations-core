@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
+from typing import Any, List, Optional, Tuple
 
 VERSION_METRIC_NAME = "server"
 
@@ -812,3 +814,45 @@ REGEX_METRICS = [
         'tags': ('cache_volume',),
     },
 ]
+
+
+def build_metric(metric_name, logger):
+    # type: (str, Any) -> Tuple[Optional[str], Optional[List[str]]]
+    """
+    proxy.node.restarts.proxy.restart_count
+    proxy.process.cache.volume_1.span.offline
+    proxy.process.http.101_responses
+    """
+    additional_tags = []
+    name = metric_name
+    found = False
+
+    if COUNT_METRICS.get(metric_name):
+        name = COUNT_METRICS.get(metric_name)
+    elif GAUGE_METRICS.get(metric_name):
+        name = GAUGE_METRICS.get(metric_name)
+    else:
+        found = False
+        for regex in REGEX_METRICS:
+            tags_values = []  # type: List[str]
+            results = re.findall(str(regex['regex']), metric_name)
+
+            if len(results) > 0 and isinstance(results[0], tuple):
+                tags_values = list(results[0])
+            else:
+                tags_values = results
+
+            if len(tags_values) == len(regex['tags']):
+                found = True
+                name = str(regex['name'])
+                for i in range(len(regex['tags'])):
+                    additional_tags.append('{}:{}'.format(regex['tags'][i], tags_values[i]))
+                break
+
+        if not found:
+            logger.debug('Ignoring metric %s', metric_name)
+            return None, None
+
+    logger.debug('Found metric %s (%s)', name, metric_name)
+
+    return name, additional_tags

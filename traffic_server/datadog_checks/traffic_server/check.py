@@ -7,7 +7,7 @@ from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 
-from .metrics import COUNT_METRICS, GAUGE_METRICS, VERSION_METRIC_NAME
+from .metrics import VERSION_METRIC_NAME, build_metric
 
 
 class TrafficServerCheck(AgentCheck):
@@ -47,13 +47,10 @@ class TrafficServerCheck(AgentCheck):
         global_metrics = response_json.get("global")
 
         for metric_name, metric_value in global_metrics.items():
-            if metric_name in COUNT_METRICS:
-                normalized_name = COUNT_METRICS[metric_name]
-                self.monotonic_count(normalized_name, metric_value, tags=self.tags)
+            name, tags = build_metric(metric_name, self.log)
 
-            elif metric_name in GAUGE_METRICS:
-                normalized_name = GAUGE_METRICS[metric_name]
-                self.gauge(normalized_name, metric_value, tags=self.tags)
+            if name is not None:
+                self.gauge(name, metric_value, tags=self.tags + tags)
 
         server_version = global_metrics.get(VERSION_METRIC_NAME, None)
         self._submit_version_metadata(server_version)
