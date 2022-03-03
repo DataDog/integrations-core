@@ -110,7 +110,8 @@ LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
 WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND
   nspname !~ '^pg_toast' AND
   relkind = 'r' AND
-  {relations}""",
+  {relations}
+ORDER BY pg_total_relation_size(C.oid) DESC""",
 }
 
 # The pg_statio_all_tables view will contain one row for each table in the current database,
