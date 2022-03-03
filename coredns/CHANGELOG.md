@@ -11,7 +11,7 @@
 * [Fixed] Fix example config. See [#11109](https://github.com/DataDog/integrations-core/pull/11109).
 * [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
 
-## 1.11.4 / 2022-01-27
+## 1.11.4 / 2022-01-27 / Agent 7.34.0
 
 * [Fixed] Fix license header dates. See [#11200](https://github.com/DataDog/integrations-core/pull/11200).
 

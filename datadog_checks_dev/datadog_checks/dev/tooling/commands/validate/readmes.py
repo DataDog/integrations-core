@@ -141,9 +141,8 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
 def get_ascii_enforcement_error_lines(contents):
     errors_lines = []
     for i, line in enumerate(contents.splitlines()):
-        # Ignore new line
-        line = line[:-1]
-
+        # Don't print newlines
+        line = line.rstrip('\n')
         invalid_code_unit_indices = []
         indicator_code_units = []
         for code_unit in line:

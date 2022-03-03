@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 3.6.0 / 2022-02-24
+
+* [Added] Add --ignore-python-version flag. See [#11568](https://github.com/DataDog/integrations-core/pull/11568).
+
 ## 3.5.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11305](https://github.com/DataDog/integrations-core/pull/11305).

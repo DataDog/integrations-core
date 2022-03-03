@@ -75,7 +75,8 @@ class TestEnableHealthServiceCheck:
             status_code=401,
         )
         check = get_check({'metrics': ['.+'], 'tags': ['foo:bar']})
-        dd_run_check(check)
+        with pytest.raises(Exception):
+            dd_run_check(check)
 
         aggregator.assert_service_check(
             'test.openmetrics.health', ServiceCheck.CRITICAL, tags=['endpoint:test', 'foo:bar']
@@ -91,7 +92,8 @@ class TestEnableHealthServiceCheck:
             status_code=401,
         )
         check = get_check({'metrics': ['.+'], 'enable_health_service_check': False})
-        dd_run_check(check)
+        with pytest.raises(Exception):
+            dd_run_check(check)
 
         assert not aggregator.service_check_names
 

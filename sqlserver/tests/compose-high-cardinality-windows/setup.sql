@@ -69,6 +69,12 @@ EXEC sp_addrolemember 'db_datawriter', 'bob'
 EXEC sp_addrolemember 'db_datareader', 'fred'
 GO
 
+-- create an offline database to have an unavailable database to test with
+CREATE DATABASE unavailable_db;
+GO
+ALTER DATABASE unavailable_db SET OFFLINE;
+GO
+
 -- This table is pronounced "things" except we've replaced "th" with the greek lower case "theta" to ensure we
 -- correctly support unicode throughout the integration.
 CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));

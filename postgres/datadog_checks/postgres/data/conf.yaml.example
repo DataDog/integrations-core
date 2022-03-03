@@ -342,11 +342,11 @@ instances:
         #
         # replace_digits: false
 
-        ## @param collect_metadata - boolean - optional - default: false
-        ## Set to `true` to enable the collection of metadata in your SQL statements.
+        ## @param collect_metadata - boolean - optional - default: true
+        ## Set to `false` to disable the collection of metadata in your SQL statements.
         ## Metadata includes things such as tables, commands, and comments.
         #
-        # collect_metadata: false
+        # collect_metadata: true
 
         ## @param collect_tables - boolean - optional - default: true
         ## Set to `false` to disable the collection of tables in your SQL statements.

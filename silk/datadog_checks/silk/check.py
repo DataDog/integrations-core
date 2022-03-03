@@ -96,7 +96,11 @@ class SilkCheck(AgentCheck):
                 self._submit_version_metadata(data.get('system_version'))
                 self.service_check(self.STATE_SERVICE_CHECK, STATE_MAP[state], tags=self._tags)
             else:
-                msg = "Could not access system state, got response: {}".format(code)
+                msg = (
+                    "Could not access system state and version info, got response code `{}` from endpoint `{}`".format(
+                        code, STATE_ENDPOINT
+                    )
+                )
                 self.log.debug(msg)
         return system_tags
 
@@ -111,8 +115,9 @@ class SilkCheck(AgentCheck):
         else:
             if server_data:
                 for server in server_data:
+                    server_name = server.get('name')
                     tags = deepcopy(self._tags) + [
-                        'server_name:{}'.format(server.get('name')),
+                        'server_name:{}'.format(server_name),
                     ]
                     state = server.get('status').lower()
 
@@ -121,6 +126,7 @@ class SilkCheck(AgentCheck):
                     else:
                         # Other states are not documented
                         self.service_check(self.SERVERS_SERVICE_CHECK, AgentCheck.UNKNOWN, tags=tags)
+                        self.log.debug("Server %s is reporting unknown status of `%s`.", server_name, state)
             else:
                 msg = "Could not access server state, got response: {}".format(code)
                 self.log.debug(msg)
