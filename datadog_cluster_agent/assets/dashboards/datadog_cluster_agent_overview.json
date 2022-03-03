@@ -1354,12 +1354,12 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "avg:datadog.cluster_agent.external_metrics{$namespace,$cluster,$leader} by {valid,kube_namespace}"
+                                "query": "sum:datadog.cluster_agent.external_metrics{$namespace,$cluster,$leader} by {valid,kube_namespace}"
                             },
                             {
                                 "data_source": "metrics",
                                 "name": "query2",
-                                "query": "avg:datadog.cluster_agent.external_metrics.datadog_metrics{$namespace,$cluster,$leader} by {valid,kube_namespace}"
+                                "query": "sum:datadog.cluster_agent.external_metrics.datadog_metrics{$namespace,$cluster,$leader} by {valid,kube_namespace}"
                             }
                         ],
                         "response_format": "timeseries",
