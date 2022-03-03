@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Literal, Mapping, Optional, Sequence
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -42,6 +42,7 @@ class InstanceConfig(BaseModel):
     only_custom_queries: Optional[bool]
     password: str
     port: Optional[int]
+    security: Optional[Literal['none', 'ssl']]
     service: Optional[str]
     tags: Optional[Sequence[str]]
     tls_cert: Optional[str]

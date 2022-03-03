@@ -1,0 +1,39 @@
+{
+  "display_name": "pulsar",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "pulsar",
+  "metric_prefix": "pulsar.",
+  "metric_to_check": "pulsar.active_connections",
+  "creates_events": false,
+  "short_description": "Monitor your Pulsar clusters.",
+  "guid": "799b35dd-d481-4d71-825e-83c92a5227c4",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Pulsar",
+  "categories": [
+    "processing",
+    "messaging",
+    "log collection"
+  ],
+  "type": "check",
+  "is_public": true,
+  "integration_id": "pulsar",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "pulsar"
+    },
+    "metrics_metadata": "metadata.csv"
+  }
+}

@@ -1,2 +1,0 @@
-openstacksdk==0.59.0; python_version > "3.0"
-openstacksdk==0.39.0; python_version < "3.0"

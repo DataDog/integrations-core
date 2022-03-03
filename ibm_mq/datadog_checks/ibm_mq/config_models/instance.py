@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2022-present
+# (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -48,7 +48,7 @@ class InstanceConfig(BaseModel):
     ssl_auth: Optional[bool]
     ssl_certificate_label: Optional[str]
     ssl_cipher_spec: Optional[str]
-    ssl_key_repository_location: Optional[str]
+    ssl_key_repository_location: Optional[str] = Field(None, min_length=1)
     tags: Optional[Sequence[str]]
     timeout: Optional[int]
     username: Optional[str] = Field(None, min_length=1)

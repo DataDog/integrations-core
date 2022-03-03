@@ -555,7 +555,6 @@ def test_statement_metadata(
     expected_metadata_payload,
 ):
     """Tests for metadata in both samples and metrics"""
-    dbm_instance['obfuscator_options'] = {'collect_metadata': True}
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     dbm_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
@@ -635,7 +634,7 @@ def test_statement_metadata(
                 'query_signature': 'd9193c18a6f372d8',
                 'statement': "SELECT city FROM pg_sleep(3), persons WHERE city = 'hello'",
             },
-            ["xact_start", "query_start", "pid", "client_port", "client_addr"],
+            ["xact_start", "query_start", "pid", "client_port", "client_addr", "backend_type", "blocking_pids"],
             {
                 'usename': 'bob',
                 'state': 'idle in transaction',
@@ -700,6 +699,12 @@ def test_activity_snapshot_collection(
 
         for key in expected_out:
             assert expected_out[key] == bobs_query[key]
+        if POSTGRES_VERSION.split('.')[0] == "9":
+            # pg v < 10 does not have a backend_type column
+            # so we shouldn't see this key in our activity rows
+            expected_keys.remove('backend_type')
+            if POSTGRES_VERSION == '9.5':
+                expected_keys.remove('blocking_pids')
         for val in expected_keys:
             assert val in bobs_query
 

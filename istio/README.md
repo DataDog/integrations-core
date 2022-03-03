@@ -76,7 +76,30 @@ Set the `use_openmetrics` configuration option to `false` to use the OpenMetrics
 
 If you are installing the [Datadog Agent in a container][10], Datadog recommends that you first disable Istio's sidecar injection.
 
-Add the `sidecar.istio.io/inject: "false"` annotation to the `datadog-agent` DaemonSet:
+_Istio versions >= 1.10:_
+
+Add the `sidecar.istio.io/inject: "false"` _label_ to the `datadog-agent` DaemonSet:
+
+```yaml
+...
+spec:
+   ...
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "false"
+     ...
+```
+
+This can also be done with the `kubectl patch` command.
+
+```text
+kubectl patch daemonset datadog-agent -p '{"spec":{"template":{"metadata":{"labels":{"sidecar.istio.io/inject":"false"}}}}}'
+```
+
+_Istio versions <= 1.9:_ 
+
+Add the `sidecar.istio.io/inject: "false"` _annotation_ to the `datadog-agent` DaemonSet:
 
 ```yaml
 ...
@@ -89,7 +112,7 @@ spec:
      ...
 ```
 
-This can also be done with the `kubectl patch` command.
+Using the `kubectl patch` command:
 
 ```text
 kubectl patch daemonset datadog-agent -p '{"spec":{"template":{"metadata":{"annotations":{"sidecar.istio.io/inject":"false"}}}}}'
