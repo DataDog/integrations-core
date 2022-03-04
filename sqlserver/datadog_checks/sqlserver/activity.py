@@ -17,7 +17,7 @@ except ImportError:
     from ..stubs import datadog_agent
 
 DEFAULT_COLLECTION_INTERVAL = 10
-DEFAULT_TX_COLLECTION_INTERVAL = 60
+DEFAULT_TX_COLLECTION_INTERVAL = 10
 MAX_PAYLOAD_BYTES = 19e6
 
 CONNECTIONS_QUERY = """\
@@ -206,7 +206,7 @@ class SqlserverActivity(DBMAsyncJob):
     def _normalize_queries_and_filter_rows(self, rows, max_bytes_limit):
         normalized_rows = {}
         estimated_size = 0
-        for index, row in enumerate(rows):
+        for row in rows:
             row = self._obfuscate_and_sanitize_row(row)
             estimated_size += self._get_estimated_row_size_bytes(row)
             if estimated_size > max_bytes_limit:
@@ -306,7 +306,6 @@ class SqlserverActivity(DBMAsyncJob):
                 normalized_rows = self._normalize_queries_and_filter_rows(rows, MAX_PAYLOAD_BYTES)
                 if self._report_tx_activity_event():
                     tx_rows = self._get_tx_activity(cursor)
-                    self.log.warning(tx_rows)
                     normalized_rows = self._normalize_tx_rows_and_join(tx_rows, normalized_rows)
                 event = self._create_activity_event(normalized_rows, connections)
                 payload = json.dumps(event, default=default_json_event_encoding)
