@@ -63,6 +63,7 @@ PG_STAT_STATEMENTS_METRICS_COLUMNS = frozenset(
         'local_blks_written',
         'temp_blks_read',
         'temp_blks_written',
+        'blk_read_time',
     }
 )
 
