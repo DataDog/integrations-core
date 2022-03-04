@@ -17,7 +17,7 @@ except ImportError:
     from ..stubs import datadog_agent
 
 DEFAULT_COLLECTION_INTERVAL = 10
-DEFAULT_TX_COLLECTION_INTERVAL = 60
+DEFAULT_TX_COLLECTION_INTERVAL = 10
 MAX_PAYLOAD_BYTES = 19e6
 
 CONNECTIONS_QUERY = """\
@@ -58,8 +58,8 @@ FROM sys.dm_exec_sessions sess
         ON sess.session_id = c.session_id
     INNER JOIN sys.dm_exec_requests r
         ON c.connection_id = r.connection_id
-    OUTER APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) text
-WHERE sess.session_id != @@spid
+    CROSS APPLY sys.dm_exec_sql_text(r.sql_handle) text
+WHERE sess.session_id != @@spid AND sess.status != 'sleeping'
 ORDER BY r.start_time ASC
 """,
 ).strip()
@@ -161,6 +161,7 @@ class SqlserverActivity(DBMAsyncJob):
         self._activity_payload_max_bytes = MAX_PAYLOAD_BYTES
         # keep track of last time we sent an tx_activity event
         self._time_since_last_tx_activity_event = 0
+        self._num_activity_events_sent = 0
 
     def _close_db_conn(self):
         pass
@@ -206,7 +207,7 @@ class SqlserverActivity(DBMAsyncJob):
     def _normalize_queries_and_filter_rows(self, rows, max_bytes_limit):
         normalized_rows = {}
         estimated_size = 0
-        for index, row in enumerate(rows):
+        for row in rows:
             row = self._obfuscate_and_sanitize_row(row)
             estimated_size += self._get_estimated_row_size_bytes(row)
             if estimated_size > max_bytes_limit:
@@ -306,11 +307,13 @@ class SqlserverActivity(DBMAsyncJob):
                 normalized_rows = self._normalize_queries_and_filter_rows(rows, MAX_PAYLOAD_BYTES)
                 if self._report_tx_activity_event():
                     tx_rows = self._get_tx_activity(cursor)
-                    self.log.warning(tx_rows)
                     normalized_rows = self._normalize_tx_rows_and_join(tx_rows, normalized_rows)
                 event = self._create_activity_event(normalized_rows, connections)
                 payload = json.dumps(event, default=default_json_event_encoding)
                 self._check.database_monitoring_query_activity(payload)
+                self._num_activity_events_sent += 1
+                if self._num_activity_events_sent % 5 == 0:
+                    self.log.warning(payload)
 
         self.check.histogram(
             "dd.sqlserver.activity.collect_activity.payload_size", len(payload), **self.check.debug_stats_kwargs()

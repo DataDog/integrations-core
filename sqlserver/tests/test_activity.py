@@ -163,6 +163,7 @@ def new_time():
 def old_time():
     return datetime.datetime(2021, 9, 22, 22, 21, 21, 669330)
 
+
 @pytest.mark.parametrize(
     "rows,expected_len",
     [
@@ -170,7 +171,8 @@ def old_time():
             [
                 {
                     'last_request_start_time': 'suspended',
-                    'id': 1, 'text': "something",
+                    'id': 1,
+                    'text': "something",
                     'start_time': 2,
                     'query_start': new_time(),
                 },
