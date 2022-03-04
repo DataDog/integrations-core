@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import datetime
 import concurrent
 import json
 import os
@@ -155,17 +156,30 @@ def assert_common_fields(row, start_key):
     assert parser.isoparse(row[start_key]).tzinfo, "{} timestamp not formatted correctly".format(start_key)
 
 
+def new_time():
+    return datetime.datetime(2021, 9, 23, 23, 21, 21, 669330)
+
+
+def old_time():
+    return datetime.datetime(2021, 9, 22, 22, 21, 21, 669330)
+
 @pytest.mark.parametrize(
     "rows,expected_len",
     [
         [
             [
-                {'last_request_start_time': 'suspended', 'id': 1, 'text': "something", 'start_time': 2},
+                {
+                    'last_request_start_time': 'suspended',
+                    'id': 1, 'text': "something",
+                    'start_time': 2,
+                    'query_start': new_time(),
+                },
                 {
                     'last_request_start_time': 'suspended',
                     'id': 2,
                     'text': "something",
                     'start_time': 2,
+                    'query_start': old_time(),
                     'toobig': "shame" * 1000,
                 },
             ],
@@ -173,8 +187,8 @@ def assert_common_fields(row, start_key):
         ],
         [
             [
-                {'last_request_start_time': 'suspended', 'id': 1, 'text': "something", 'start_time': 2},
-                {'last_request_start_time': 'suspended', 'id': 1, 'text': "something", 'start_time': 2},
+                {'last_request_start_time': 'suspended', 'id': 1, 'text': "something", 'query_start': new_time()},
+                {'last_request_start_time': 'suspended', 'id': 2, 'text': "something", 'query_start': old_time()},
             ],
             2,
         ],
@@ -184,7 +198,7 @@ def assert_common_fields(row, start_key):
                     'last_request_start_time': 'suspended',
                     'id': 1,
                     'text': "something",
-                    'start_time': 2,
+                    'query_start': new_time(),
                     'toobig': "shame" * 1000,
                 },
             ],

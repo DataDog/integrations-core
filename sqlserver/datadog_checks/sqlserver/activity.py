@@ -1,3 +1,5 @@
+import copy
+
 import binascii
 import re
 import time
@@ -97,7 +99,6 @@ FROM sys.dm_tran_session_transactions as tst
                ON tst.session_id = ec.session_id
        CROSS APPLY sys.dm_exec_sql_text(ec.most_recent_sql_handle) TXT
 WHERE sess.session_id != @@spid
-ORDER BY transaction_begin_time ASC
 """,
 ).strip()
 
@@ -203,8 +204,7 @@ class SqlserverActivity(DBMAsyncJob):
         return rows
 
     def _normalize_queries_and_filter_rows(self, rows, max_bytes_limit):
-        normalized_rows = []
-        row_key_and_index = {}
+        normalized_rows = {}
         estimated_size = 0
         for index, row in enumerate(rows):
             row = self._obfuscate_and_sanitize_row(row)
@@ -213,32 +213,27 @@ class SqlserverActivity(DBMAsyncJob):
                 # query results are ORDER BY query_start ASC
                 # so once we hit the max bytes limit, return
                 return normalized_rows
-            normalized_rows.append(row)
             row_key = self._get_key_for_row(row)
-            if row_key not in row_key_and_index:
-                row_key_and_index.update({row_key: index})
-        return normalized_rows, row_key_and_index
+            normalized_rows.update({row_key: row})
+        return normalized_rows
 
-    def _get_key_for_row(self, row):
-        return "{}:{}".format(row['id'], row['last_request_start_time'])
+    @staticmethod
+    def _get_key_for_row(row):
+        return (row['id'], row['last_request_start_time'])
 
-    def _normalize_tx_rows_and_join(self, tx_rows, active_rows, active_row_key_and_index):
-        updated_rows = active_rows
-        self.log.warning(updated_rows)
-        self.log.warning(active_row_key_and_index)
+    def _normalize_tx_rows_and_join(self, tx_rows, active_rows):
+        updated_rows = copy.copy(active_rows)
         for cur_row in tx_rows:
             cur_row = self._obfuscate_and_sanitize_row(cur_row)
             row_key = self._get_key_for_row(cur_row)
-            self.log.warning(row_key)
-            if row_key in active_row_key_and_index:
+            if row_key in updated_rows:
                 # if the tx has a corresponding entry in exec_requests
                 # then we should merge it with its existing entry in active_rows
-                i = active_row_key_and_index[row_key]
-                old_row = updated_rows[i]
+                old_row = updated_rows[row_key]
                 old_row.update(cur_row)
             else:
                 # else just append the tx row to the end to the event
-                updated_rows.append(cur_row)
+                updated_rows.update({row_key: cur_row})
         return updated_rows
 
     def _obfuscate_and_sanitize_row(self, row):
@@ -282,7 +277,7 @@ class SqlserverActivity(DBMAsyncJob):
             "collection_interval": self.collection_interval,
             "ddtags": self.check.tags,
             "timestamp": time.time() * 1000,
-            "sqlserver_activity": active_sessions,
+            "sqlserver_activity": list(active_sessions.values()),
             "sqlserver_connections": active_connections,
         }
         return event
@@ -308,11 +303,11 @@ class SqlserverActivity(DBMAsyncJob):
             with self.check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 connections = self._get_active_connections(cursor)
                 rows = self._get_activity(cursor)
-                normalized_rows, row_key_and_index = self._normalize_queries_and_filter_rows(rows, MAX_PAYLOAD_BYTES)
+                normalized_rows = self._normalize_queries_and_filter_rows(rows, MAX_PAYLOAD_BYTES)
                 if self._report_tx_activity_event():
                     tx_rows = self._get_tx_activity(cursor)
                     self.log.warning(tx_rows)
-                    normalized_rows = self._normalize_tx_rows_and_join(tx_rows, normalized_rows, row_key_and_index)
+                    normalized_rows = self._normalize_tx_rows_and_join(tx_rows, normalized_rows)
                 event = self._create_activity_event(normalized_rows, connections)
                 payload = json.dumps(event, default=default_json_event_encoding)
                 self._check.database_monitoring_query_activity(payload)
