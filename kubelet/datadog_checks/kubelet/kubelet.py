@@ -60,6 +60,7 @@ DEFAULT_GAUGES = {
     'rest_client_requests_total': 'rest.client.requests',
     'go_threads': 'go_threads',
     'go_goroutines': 'go_goroutines',
+    'kubelet_pleg_last_seen_seconds': 'kubelet.pleg.last_seen',
 }
 
 DEPRECATED_GAUGES = {
@@ -77,6 +78,8 @@ NEW_1_14_GAUGES = {
 
 DEFAULT_HISTOGRAMS = {
     'apiserver_client_certificate_expiration_seconds': 'apiserver.certificate.expiration',
+    'kubelet_pleg_relist_duration_seconds': 'kubelet.pleg.relist_duration',
+    'kubelet_pleg_relist_interval_seconds': 'kubelet.pleg.relist_interval',
 }
 
 DEPRECATED_HISTOGRAMS = {
@@ -136,7 +139,10 @@ class KubeletCheck(
 
     DEFAULT_METRIC_LIMIT = 0
 
-    COUNTER_METRICS = {'kubelet_evictions': 'kubelet.evictions'}
+    COUNTER_METRICS = {
+        'kubelet_evictions': 'kubelet.evictions',
+        'kubelet_pleg_discard_events': 'kubelet.pleg.discard_events',
+    }
 
     VOLUME_METRICS = {
         'kubelet_volume_stats_available_bytes': 'kubelet.volume.stats.available_bytes',

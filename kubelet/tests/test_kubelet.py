@@ -121,6 +121,10 @@ EXPECTED_METRICS_PROMETHEUS_1_14 = EXPECTED_METRICS_PROMETHEUS + [
     'kubernetes.kubelet.container.log_filesystem.used_bytes',
     'kubernetes.kubelet.pod.worker.duration.sum',
     'kubernetes.kubelet.pod.worker.duration.count',
+    'kubernetes.kubelet.pleg.relist_duration.count',
+    'kubernetes.kubelet.pleg.relist_duration.sum',
+    'kubernetes.kubelet.pleg.relist_interval.count',
+    'kubernetes.kubelet.pleg.relist_interval.sum',
 ]
 
 EXPECTED_METRICS_PROMETHEUS_PRE_1_14 = EXPECTED_METRICS_PROMETHEUS + [
