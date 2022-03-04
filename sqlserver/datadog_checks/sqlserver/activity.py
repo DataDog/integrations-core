@@ -58,8 +58,8 @@ FROM sys.dm_exec_sessions sess
         ON sess.session_id = c.session_id
     INNER JOIN sys.dm_exec_requests r
         ON c.connection_id = r.connection_id
-    OUTER APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) text
-WHERE sess.session_id != @@spid
+    CROSS APPLY sys.dm_exec_sql_text(r.sql_handle) text
+WHERE sess.session_id != @@spid AND sess.status != 'sleeping'
 ORDER BY r.start_time ASC
 """,
 ).strip()
