@@ -28,8 +28,32 @@ def test(dd_agent_check):
         "hive.metastore.partition.init",
         "hive.metastore.api.get_all_databases.active_call",
         "hive.metastore.api.init.active_call",
+        "hive.server.memory.heap.usage",
+        "jvm.buffer_pool.direct.capacity",
+        "jvm.buffer_pool.direct.count",
+        "jvm.buffer_pool.direct.used",
+        "jvm.buffer_pool.mapped.capacity",
+        "jvm.buffer_pool.mapped.count",
+        "jvm.buffer_pool.mapped.used",
+        "jvm.cpu_load.process",
+        "jvm.cpu_load.system",
+        "jvm.gc.eden_size",
+        "jvm.gc.metaspace_size",
+        "jvm.gc.old_gen_size",
+        "jvm.gc.survivor_size",
+        "jvm.heap_memory",
+        "jvm.heap_memory_committed",
+        "jvm.heap_memory_init",
+        "jvm.heap_memory_max",
+        "jvm.loaded_classes",
+        "jvm.non_heap_memory",
+        "jvm.non_heap_memory_committed",
+        "jvm.non_heap_memory_init",
+        "jvm.non_heap_memory_max",
+        "jvm.os.open_file_descriptors",
+        "jvm.thread_count",
     ]
     for metric in metrics:
         aggregator.assert_metric(metric)
-    
+
     aggregator.assert_all_metrics_covered()
