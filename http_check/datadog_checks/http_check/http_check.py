@@ -96,10 +96,10 @@ class HTTPCheck(AgentCheck):
         # Store tags in a temporary list so that we don't modify the global tags data structure
         tags_list = list(tags)
         tags_list.append('url:{}'.format(addr))
-        instance_name = self.normalize_tag(instance['name'])
+        instance_name = self.normalize_tag(self.instance['name'])
         tags_list.append("instance:{}".format(instance_name))
         service_checks = []
-        service_checks_tags = self._get_service_checks_tags(instance)
+        service_checks_tags = self._get_service_checks_tags(self.instance)
         r = None
         try:
             parsed_uri = urlparse(addr)
@@ -235,7 +235,7 @@ class HTTPCheck(AgentCheck):
             self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
 
         if ssl_expire and parsed_uri.scheme == "https":
-            status, days_left, seconds_left, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs)
+            status, days_left, seconds_left, msg = self.check_cert_expiration(self.instance, timeout, instance_ca_certs)
             tags_list = list(tags)
             tags_list.append('url:{}'.format(addr))
             tags_list.append("instance:{}".format(instance_name))
