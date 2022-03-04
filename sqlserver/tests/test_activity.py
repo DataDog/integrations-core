@@ -104,7 +104,7 @@ def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_in
     # so we should join tx information to fred's activity row
     if not use_autocommit:
         assert blocked_row["transaction_begin_time"], "missing transaction_begin_time on blocked query"
-        assert blocked_row["tx_type"], "missing tx_type on blocked query"
+        assert blocked_row["transaction_type"], "missing transaction_type on blocked query"
         assert blocked_row["transaction_id"], "missing transaction_id on blocked query"
 
     # the second row in sqlserver_activity should be bob's open

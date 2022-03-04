@@ -87,13 +87,7 @@ SELECT
     sess.host_name,
     ec.client_tcp_port as client_port,
     ec.client_net_address as client_address,
-    CASE tat.transaction_type
-        WHEN 1 THEN 'Read/Write Transaction'
-        WHEN 2 THEN 'Read-Only Transaction'
-        WHEN 3 THEN 'System Transaction'
-                WHEN 4 THEN 'Distributed Transaction'
-                ELSE 'Unknown'
-    END as tx_type
+    tat.transaction_type
 FROM sys.dm_tran_session_transactions as tst
        INNER JOIN sys.dm_tran_active_transactions as tat
               ON tst.transaction_id = tat.transaction_id
@@ -206,7 +200,6 @@ class SqlserverActivity(DBMAsyncJob):
         self.check.histogram(
             "dd.sqlserver.activity.get_tx_activity.tx_rows", len(rows), **self.check.debug_stats_kwargs()
         )
-        self.log.warning(len(rows))
         return rows
 
     def _normalize_queries_and_filter_rows(self, rows, max_bytes_limit):
