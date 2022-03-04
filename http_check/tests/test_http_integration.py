@@ -31,8 +31,8 @@ from .conftest import mock_get_ca_certs_path
 @pytest.mark.usefixtures("dd_environment")
 def test_check_cert_expiration_up(http_check):
     cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
-
     instance = {'url': 'https://valid.mock/'}
+
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     assert status == AgentCheck.OK
     assert days_left > 0

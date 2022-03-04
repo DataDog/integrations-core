@@ -59,7 +59,7 @@ class HTTPCheck(AgentCheck):
             headers.clear()
             headers.update(self.instance.get('extra_headers', {}))
 
-    def check(self, _):
+    def check(self, instance):
         (
             addr,
             client_cert,
@@ -78,7 +78,7 @@ class HTTPCheck(AgentCheck):
             weakcipher,
             check_hostname,
             stream,
-        ) = from_instance(self.instance, self.ca_certs)
+        ) = from_instance(instance, self.ca_certs)
         timeout = self.http.options['timeout'][0]
         start = time.time()
 
@@ -96,10 +96,10 @@ class HTTPCheck(AgentCheck):
         # Store tags in a temporary list so that we don't modify the global tags data structure
         tags_list = list(tags)
         tags_list.append('url:{}'.format(addr))
-        instance_name = self.normalize_tag(self.instance['name'])
+        instance_name = self.normalize_tag(instance['name'])
         tags_list.append("instance:{}".format(instance_name))
         service_checks = []
-        service_checks_tags = self._get_service_checks_tags(self.instance)
+        service_checks_tags = self._get_service_checks_tags(instance)
         r = None
         try:
             parsed_uri = urlparse(addr)
@@ -235,7 +235,7 @@ class HTTPCheck(AgentCheck):
             self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
 
         if ssl_expire and parsed_uri.scheme == "https":
-            status, days_left, seconds_left, msg = self.check_cert_expiration(self.instance, timeout, instance_ca_certs)
+            status, days_left, seconds_left, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs)
             tags_list = list(tags)
             tags_list.append('url:{}'.format(addr))
             tags_list.append("instance:{}".format(instance_name))
