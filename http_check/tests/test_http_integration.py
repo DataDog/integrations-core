@@ -88,7 +88,7 @@ def test_check_cert_expiration_critical(http_check):
     assert status == AgentCheck.CRITICAL
     assert 0 < days_left < days_critical
 
-    # in seconds
+    # in seconds (ensure seconds take precedence over days config)
     seconds_critical = days_critical * 24 * 3600
     instance = {'url': 'https://valid.mock/', 'days_critical': 0, 'seconds_critical': seconds_critical}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
