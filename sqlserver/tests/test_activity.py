@@ -171,7 +171,8 @@ def old_time():
             [
                 {
                     'last_request_start_time': 'suspended',
-                    'id': 1, 'text': "something",
+                    'id': 1,
+                    'text': "something",
                     'start_time': 2,
                     'query_start': new_time(),
                 },
