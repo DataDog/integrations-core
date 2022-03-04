@@ -42,7 +42,6 @@ def dbm_instance(instance_docker):
         'enabled': True,
         'run_sync': True,
         'collection_interval': 0.1,
-        'tx_collection_interval': 0.1,
     }
     # do not need query_metrics for these tests
     instance_docker['query_metrics'] = {'enabled': False}
@@ -68,6 +67,7 @@ def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_in
     # so it needs to be run asynchronously
     executor = concurrent.futures.ThreadPoolExecutor(1)
     executor.submit(run_test_query, bob_conn, blocking_query)
+    time.sleep(1)  # sleep for one second
     # fred's query will get blocked by bob, so it needs
     # to be run asynchronously
     executor.submit(run_test_query, fred_conn, query)
@@ -91,10 +91,19 @@ def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_in
     assert set(event['ddtags']) == expected_instance_tags, "wrong instance tags activity"
     assert type(event['collection_interval']) in (float, int), "invalid collection_interval"
 
-    # fred's query is the only one present in dm_exec_requests
-    # and so the load query should catch it first
     assert len(event['sqlserver_activity']) == 2, "should have collected exactly two activity rows"
-    blocked_row = event['sqlserver_activity'][0]
+    # bobs's query has been open longer than fred's,
+    # so it should be first in the activity collected
+    blocking_row = event['sqlserver_activity'][0]
+    # assert the data that was collected is correct
+    assert blocking_row['user_name'] == "bob", "incorrect user_name"
+    assert blocking_row['session_status'] == "sleeping", "incorrect session_status"
+    assert blocking_row['text'] == blocking_query, "incorrect blocking query"
+    assert_common_fields(blocking_row, "transaction_begin_time")
+
+    # the second query should be fred's, which is currently blocked on
+    # bob who is holding a table lock
+    blocked_row = event['sqlserver_activity'][1]
     # assert the data that was collected is correct
     assert blocked_row['user_name'] == "fred", "incorrect user_name"
     assert blocked_row['session_status'] == "running", "incorrect session_status"
@@ -107,18 +116,9 @@ def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_in
         assert blocked_row["transaction_begin_time"], "missing transaction_begin_time on blocked query"
         assert blocked_row["transaction_type"], "missing transaction_type on blocked query"
         assert blocked_row["transaction_id"], "missing transaction_id on blocked query"
-
-    # the second row in sqlserver_activity should be bob's open
-    # idle tx, which is blocking fred's ability to query the ϑings table
-    blocking_row = event['sqlserver_activity'][1]
-    # assert the data that was collected is correct
-    assert blocking_row['user_name'] == "bob", "incorrect user_name"
-    assert blocking_row['session_status'] == "sleeping", "incorrect session_status"
     assert (
         blocking_row['id'] == blocked_row['blocking_session_id']
     ), "blocking id does not match blocked blocking_session_id"
-    assert blocking_row['text'] == blocking_query, "incorrect blocking query"
-    assert_common_fields(blocking_row, "transaction_begin_time")
 
     # assert connections collection
     assert len(event['sqlserver_connections']) > 0
@@ -164,56 +164,109 @@ def old_time():
     return datetime.datetime(2021, 9, 22, 22, 21, 21, 669330)
 
 
+def very_old_time():
+    return datetime.datetime(2021, 9, 20, 23, 21, 21, 669330)
+
+
 @pytest.mark.parametrize(
-    "rows,expected_len",
+    "rows,expected_len,expected_users",
     [
         [
             [
                 {
                     'last_request_start_time': 'suspended',
                     'id': 1,
+                    'user_name': 'newbob',
                     'text': "something",
                     'start_time': 2,
                     'query_start': new_time(),
+                    'transaction_begin_time': very_old_time(),
+                },
+                {
+                    'last_request_start_time': 'suspended',
+                    'id': 1,
+                    'user_name': 'olderbob',
+                    'text': "something",
+                    'start_time': 2,
+                    'query_start': old_time(),
+                    'transaction_begin_time': very_old_time(),
                 },
                 {
                     'last_request_start_time': 'suspended',
                     'id': 2,
                     'text': "something",
+                    'user_name': 'bigbob',
                     'start_time': 2,
                     'query_start': old_time(),
-                    'toobig': "shame" * 1000,
+                    'toobig': "shame" * 10000,
                 },
             ],
-            1,
-        ],
-        [
-            [
-                {'last_request_start_time': 'suspended', 'id': 1, 'text': "something", 'query_start': new_time()},
-                {'last_request_start_time': 'suspended', 'id': 2, 'text': "something", 'query_start': old_time()},
-            ],
             2,
+            ["olderbob", "newbob"],
         ],
         [
             [
                 {
                     'last_request_start_time': 'suspended',
                     'id': 1,
+                    'user_name': 'newbob',
                     'text': "something",
+                    'start_time': 2,
                     'query_start': new_time(),
-                    'toobig': "shame" * 1000,
+                },
+                {
+                    'last_request_start_time': 'suspended',
+                    'id': 1,
+                    'user_name': 'olderbob',
+                    'text': "something",
+                    'start_time': 2,
+                    'query_start': old_time(),
+                    'transaction_begin_time': very_old_time(),
+                },
+                {
+                    'last_request_start_time': 'suspended',
+                    'id': 2,
+                    'text': "something",
+                    'user_name': 'bigbob',
+                    'start_time': 2,
+                    'query_start': old_time(),
+                    'toobig': "shame" * 10000,
+                },
+            ],
+            1,
+            ["olderbob"],
+        ],
+        [
+            [
+                {'user_name': 'newbob', 'id': 1, 'text': "something", 'query_start': new_time()},
+                {'user_name': 'oldbob', 'id': 2, 'text': "something", 'query_start': old_time()},
+                {'user_name': 'olderbob', 'id': 2, 'text': "something", 'transaction_begin_time': very_old_time()},
+            ],
+            3,
+            ["olderbob", "oldbob", "newbob"],
+        ],
+        [
+            [
+                {
+                    'user_name': 'bigbob',
+                    'id': 1,
+                    'text': "something",
+                    'toobig': "shame" * 10000,
                 },
             ],
             0,
+            [],
         ],
     ],
 )
-def test_truncate_on_max_size_bytes(dbm_instance, datadog_agent, rows, expected_len):
+def test_truncate_on_max_size_bytes(dbm_instance, datadog_agent, rows, expected_len, expected_users):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = "something"
-        result_rows = check.activity._normalize_queries_and_filter_rows(rows, 1000)
+        result_rows = check.activity._normalize_queries_and_filter_rows(rows, 10000)
         assert len(result_rows) == expected_len
+        for index, user in enumerate(expected_users):
+            assert result_rows[index]['user_name'] == user
 
 
 @pytest.mark.parametrize(
@@ -247,23 +300,6 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     check.cancel()
     metrics = aggregator.metrics("dd.sqlserver.activity.collect_activity.payload_size")
     assert max_collections / 2.0 <= len(metrics) <= max_collections
-
-
-def test_tx_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
-    # test the activity collection loop rate limit
-    collection_interval = 0.1
-    tx_collection_interval = 0.2  # double the main loop
-    dbm_instance['query_activity']['collection_interval'] = collection_interval
-    dbm_instance['query_activity']['tx_collection_interval'] = tx_collection_interval
-    dbm_instance['query_activity']['run_sync'] = False
-    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(check)
-    sleep_time = 1
-    time.sleep(sleep_time)
-    max_tx_activity_collections = int(1 / tx_collection_interval * sleep_time) + 1
-    check.cancel()
-    activity_metrics = aggregator.metrics("dd.sqlserver.activity.get_tx_activity.tx_rows")
-    assert max_tx_activity_collections / 2.0 <= len(activity_metrics) <= max_tx_activity_collections
 
 
 def _load_test_activity_json(filename):

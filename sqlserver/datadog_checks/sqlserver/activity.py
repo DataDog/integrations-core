@@ -1,5 +1,3 @@
-import copy
-
 import binascii
 import re
 import time
@@ -17,7 +15,6 @@ except ImportError:
     from ..stubs import datadog_agent
 
 DEFAULT_COLLECTION_INTERVAL = 10
-DEFAULT_TX_COLLECTION_INTERVAL = 10
 MAX_PAYLOAD_BYTES = 19e6
 
 CONNECTIONS_QUERY = """\
@@ -35,70 +32,38 @@ FROM sys.dm_exec_sessions
 ACTIVITY_QUERY = re.sub(
     r'\s+',
     ' ',
-    """\
+    """
 SELECT
     CONVERT(
         NVARCHAR, TODATETIMEOFFSET(CURRENT_TIMESTAMP, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
     ) as now,
     CONVERT(
-        NVARCHAR, TODATETIMEOFFSET(r.start_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
+        NVARCHAR, TODATETIMEOFFSET(req.start_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
     ) as query_start,
+    CONVERT(
+        NVARCHAR, TODATETIMEOFFSET(ta.transaction_begin_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
+    ) as transaction_begin_time,
+    ta.transaction_state,
+    ta.transaction_type,
     sess.login_name as user_name,
     sess.last_request_start_time,
     sess.session_id as id,
     DB_NAME(sess.database_id) as database_name,
     sess.status as session_status,
     text.text as text,
-    c.client_tcp_port as client_port,
-    c.client_net_address as client_address,
-    sess.host_name as host_name,
-    r.*
-FROM sys.dm_exec_sessions sess
-    INNER JOIN sys.dm_exec_connections c
-        ON sess.session_id = c.session_id
-    INNER JOIN sys.dm_exec_requests r
-        ON c.connection_id = r.connection_id
-    CROSS APPLY sys.dm_exec_sql_text(r.sql_handle) text
-WHERE sess.session_id != @@spid AND sess.status != 'sleeping'
-ORDER BY r.start_time ASC
-""",
-).strip()
-
-# collects activity about open transactions
-TX_ACTIVITY_QUERY = re.sub(
-    r'\s+',
-    ' ',
-    """\
-SELECT
-    CONVERT(
-        NVARCHAR, TODATETIMEOFFSET(CURRENT_TIMESTAMP, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
-    ) as now,
-    CONVERT(
-        NVARCHAR, TODATETIMEOFFSET(tat.transaction_begin_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
-    ) as transaction_begin_time,
-    tst.transaction_id as tx_id,
-    tst.session_id as id,
-    sess.status as session_status,
-    sess.last_request_start_time,
-    sess.original_login_name as user_name,
-    DB_NAME(sess.database_id) as database_name,
-    tat.transaction_state,
-    CASE
-        WHEN  sess.status  = 'sleeping' THEN TXT.text
-    END as text,
+    conn.client_tcp_port as client_port,
+    conn.client_net_address as client_address,
     sess.host_name,
-    ec.client_tcp_port as client_port,
-    ec.client_net_address as client_address,
-    tat.transaction_type
-FROM sys.dm_tran_session_transactions as tst
-       INNER JOIN sys.dm_tran_active_transactions as tat
-              ON tst.transaction_id = tat.transaction_id
-       INNER JOIN sys.dm_exec_sessions sess
-              ON tst.session_id = sess.session_id
-         INNER JOIN sys.dm_exec_connections ec
-               ON tst.session_id = ec.session_id
-       CROSS APPLY sys.dm_exec_sql_text(ec.most_recent_sql_handle) TXT
-WHERE sess.session_id != @@spid
+    req.*
+from sys.dm_exec_sessions sess
+    full outer join sys.dm_exec_connections conn on sess.session_id = conn.session_id
+    full outer join sys.dm_exec_requests req on sess.session_id = req.session_id
+    full outer join sys.dm_tran_session_transactions ts on sess.session_id = ts.session_id
+    full outer join sys.dm_tran_active_transactions ta on ts.transaction_id = ta.transaction_id
+cross apply sys.dm_exec_sql_text(conn.most_recent_sql_handle) text
+where
+    (sess.status != 'sleeping' or ts.transaction_id is not null)
+    AND sess.session_id != @@spid;
 """,
 ).strip()
 
@@ -134,17 +99,9 @@ class SqlserverActivity(DBMAsyncJob):
         self.check = check
         self.log = check.log
         collection_interval = float(check.activity_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL))
-        # tx collection interval should not be shorter than the main activity col interval
-        tx_collection_interval = max(
-            check.activity_config.get('tx_collection_interval', DEFAULT_TX_COLLECTION_INTERVAL),
-            collection_interval,
-        )
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
-        if tx_collection_interval <= 0:
-            tx_collection_interval = DEFAULT_TX_COLLECTION_INTERVAL
         self.collection_interval = collection_interval
-        self.tx_collection_interval = tx_collection_interval
         super(SqlserverActivity, self).__init__(
             check,
             run_sync=is_affirmative(check.activity_config.get('run_sync', False)),
@@ -159,8 +116,6 @@ class SqlserverActivity(DBMAsyncJob):
         )
         self._conn_key_prefix = "dbm-activity-"
         self._activity_payload_max_bytes = MAX_PAYLOAD_BYTES
-        # keep track of last time we sent an tx_activity event
-        self._time_since_last_tx_activity_event = 0
 
     def _close_db_conn(self):
         pass
@@ -189,52 +144,39 @@ class SqlserverActivity(DBMAsyncJob):
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
         return rows
 
-    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _get_tx_activity(self, cursor):
-        self._time_since_last_tx_activity_event = time.time()
-        self.log.debug("collecting sql server transaction activity")
-        self.log.debug("Running query [%s]", TX_ACTIVITY_QUERY)
-        cursor.execute(TX_ACTIVITY_QUERY)
-        columns = [i[0] for i in cursor.description]
-        # construct row dicts manually as there's no DictCursor for pyodbc
-        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        self.check.histogram(
-            "dd.sqlserver.activity.get_tx_activity.tx_rows", len(rows), **self.check.debug_stats_kwargs()
-        )
-        return rows
-
     def _normalize_queries_and_filter_rows(self, rows, max_bytes_limit):
-        normalized_rows = {}
+        normalized_rows = []
         estimated_size = 0
-        for row in rows:
+        s_rows = self._sort_activity_rows(rows)
+        for row in s_rows:
             row = self._obfuscate_and_sanitize_row(row)
             estimated_size += self._get_estimated_row_size_bytes(row)
             if estimated_size > max_bytes_limit:
-                # query results are ORDER BY query_start ASC
+                # query results are pre-sorted
                 # so once we hit the max bytes limit, return
                 return normalized_rows
-            row_key = self._get_key_for_row(row)
-            normalized_rows.update({row_key: row})
+            normalized_rows.append(row)
         return normalized_rows
 
     @staticmethod
-    def _get_key_for_row(row):
-        return (row['id'], row['last_request_start_time'])
+    def _get_sort_key(row):
+        key = ""
+        if "transaction_begin_time" in row \
+                and row["transaction_begin_time"] is not None:
+            key = row["transaction_begin_time"]
+        elif "query_start" in row and row["query_start"] is not None:
+            key = row["query_start"]
+        return key
 
-    def _normalize_tx_rows_and_join(self, tx_rows, active_rows):
-        updated_rows = copy.copy(active_rows)
-        for cur_row in tx_rows:
-            cur_row = self._obfuscate_and_sanitize_row(cur_row)
-            row_key = self._get_key_for_row(cur_row)
-            if row_key in updated_rows:
-                # if the tx has a corresponding entry in exec_requests
-                # then we should merge it with its existing entry in active_rows
-                old_row = updated_rows[row_key]
-                old_row.update(cur_row)
-            else:
-                # else just append the tx row to the end to the event
-                updated_rows.update({row_key: cur_row})
-        return updated_rows
+    @staticmethod
+    def _get_secondary_key(row):
+        key = ""
+        if "query_start" in row and row["query_start"] is not None:
+            key = row["query_start"]
+        return key
+
+    def _sort_activity_rows(self, rows):
+        return sorted(rows, key=lambda r: (self._get_sort_key(r), self._get_secondary_key(r)))
 
     def _obfuscate_and_sanitize_row(self, row):
         row = self._remove_null_vals(row)
@@ -277,18 +219,10 @@ class SqlserverActivity(DBMAsyncJob):
             "collection_interval": self.collection_interval,
             "ddtags": self.check.tags,
             "timestamp": time.time() * 1000,
-            "sqlserver_activity": list(active_sessions.values()),
+            "sqlserver_activity": active_sessions,
             "sqlserver_connections": active_connections,
         }
         return event
-
-    def _report_tx_activity_event(self):
-        # Only send an event if we are configured to do so, and
-        # don't report more often than the configured collection interval
-        elapsed_s = time.time() - self._time_since_last_tx_activity_event
-        if elapsed_s >= self.tx_collection_interval:
-            return True
-        return False
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_activity(self):
@@ -304,9 +238,6 @@ class SqlserverActivity(DBMAsyncJob):
                 connections = self._get_active_connections(cursor)
                 rows = self._get_activity(cursor)
                 normalized_rows = self._normalize_queries_and_filter_rows(rows, MAX_PAYLOAD_BYTES)
-                if self._report_tx_activity_event():
-                    tx_rows = self._get_tx_activity(cursor)
-                    normalized_rows = self._normalize_tx_rows_and_join(tx_rows, normalized_rows)
                 event = self._create_activity_event(normalized_rows, connections)
                 payload = json.dumps(event, default=default_json_event_encoding)
                 self._check.database_monitoring_query_activity(payload)
