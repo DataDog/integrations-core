@@ -31,3 +31,5 @@ def test(dd_agent_check):
     ]
     for metric in metrics:
         aggregator.assert_metric(metric)
+    
+    aggregator.assert_all_metrics_covered()
