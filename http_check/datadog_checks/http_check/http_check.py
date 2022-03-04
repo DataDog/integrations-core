@@ -59,7 +59,7 @@ class HTTPCheck(AgentCheck):
             headers.clear()
             headers.update(self.instance.get('extra_headers', {}))
 
-    def check(self, instance):
+    def check(self, _):
         (
             addr,
             client_cert,
@@ -78,13 +78,13 @@ class HTTPCheck(AgentCheck):
             weakcipher,
             check_hostname,
             stream,
-        ) = from_instance(instance, self.ca_certs)
+        ) = from_instance(self.instance, self.ca_certs)
         timeout = self.http.options['timeout'][0]
         start = time.time()
 
-        def send_status_up(logMsg):
+        def send_status_up(log_msg):
             # TODO: A6 log needs bytes and cannot handle unicode
-            self.log.debug(logMsg)
+            self.log.debug(log_msg)
             service_checks.append((self.SC_STATUS, AgentCheck.OK, "UP"))
 
         def send_status_down(loginfo, down_msg):
