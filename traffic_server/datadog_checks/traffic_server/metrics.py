@@ -168,59 +168,59 @@ SIMPLE_METRICS = {
     },
     "proxy.process.http.response_document_size_100": {
         "name": "process.http.response_document_size_100",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.response_document_size_1K": {
         "name": "process.http.response_document_size_1K",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.response_document_size_3K": {
         "name": "process.http.response_document_size_3K",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.response_document_size_5K": {
         "name": "process.http.response_document_size_5K",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.response_document_size_10K": {
         "name": "process.http.response_document_size_10K",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.response_document_size_1M": {
         "name": "process.http.response_document_size_1M",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.response_document_size_inf": {
         "name": "process.http.response_document_size_inf",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.request_document_size_100": {
         "name": "process.http.request_document_size_100",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.request_document_size_1K": {
         "name": "process.http.request_document_size_1K",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.request_document_size_3K": {
         "name": "process.http.request_document_size_3K",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.request_document_size_5K": {
         "name": "process.http.request_document_size_5K",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.request_document_size_10K": {
         "name": "process.http.request_document_size_10K",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.request_document_size_1M": {
         "name": "process.http.request_document_size_1M",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.request_document_size_inf": {
         "name": "process.http.request_document_size_inf",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.total_transactions_time": {
         "name": "process.http.total_transactions_time",
@@ -251,59 +251,59 @@ SIMPLE_METRICS = {
     "proxy.process.http.cache_read_error": {"name": "process.http.cache.read_error", "method": "monotonic_count"},
     "proxy.process.http.user_agent_speed_bytes_per_sec_100": {
         "name": "process.http.user_agent_speed_bytes_per_sec_100",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.user_agent_speed_bytes_per_sec_1K": {
         "name": "process.http.user_agent_speed_bytes_per_sec_1K",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.user_agent_speed_bytes_per_sec_10K": {
         "name": "process.http.user_agent_speed_bytes_per_sec_10K",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.user_agent_speed_bytes_per_sec_100K": {
         "name": "process.http.user_agent_speed_bytes_per_sec_100K",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.user_agent_speed_bytes_per_sec_1M": {
         "name": "process.http.user_agent_speed_bytes_per_sec_1M",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.user_agent_speed_bytes_per_sec_10M": {
         "name": "process.http.user_agent_speed_bytes_per_sec_10M",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.user_agent_speed_bytes_per_sec_100M": {
         "name": "process.http.user_agent_speed_bytes_per_sec_100M",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.origin_server_speed_bytes_per_sec_100": {
         "name": "process.http.origin_server_speed_bytes_per_sec_100",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.origin_server_speed_bytes_per_sec_1K": {
         "name": "process.http.origin_server_speed_bytes_per_sec_1K",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.origin_server_speed_bytes_per_sec_10K": {
         "name": "process.http.origin_server_speed_bytes_per_sec_10K",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.origin_server_speed_bytes_per_sec_100K": {
         "name": "process.http.origin_server_speed_bytes_per_sec_100K",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.origin_server_speed_bytes_per_sec_1M": {
         "name": "process.http.origin_server_speed_bytes_per_sec_1M",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.origin_server_speed_bytes_per_sec_10M": {
         "name": "process.http.origin_server_speed_bytes_per_sec_10M",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.origin_server_speed_bytes_per_sec_100M": {
         "name": "process.http.origin_server_speed_bytes_per_sec_100M",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.tcp_hit_count_stat": {"name": "process.http.tcp.hit_count", "method": "monotonic_count"},
     "proxy.process.http.tcp_miss_count_stat": {"name": "process.http.tcp.miss_count", "method": "monotonic_count"},
@@ -348,59 +348,59 @@ SIMPLE_METRICS = {
     "proxy.process.http.cache_read_errors": {"name": "process.http.cache_read_errors", "method": "monotonic_count"},
     "proxy.process.http.transaction_counts.hit_fresh": {
         "name": "process.http.transaction_counts.hit_fresh",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.transaction_totaltime.hit_fresh": {
         "name": "process.http.transaction_totaltime.hit_fresh",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.transaction_counts.hit_fresh.process": {
         "name": "process.http.transaction_counts.hit_fresh.process",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.transaction_totaltime.hit_fresh.process": {
         "name": "process.http.transaction_totaltime.hit_fresh.process",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.transaction_counts.hit_revalidated": {
         "name": "process.http.transaction_counts.hit_revalidated",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.transaction_totaltime.hit_revalidated": {
         "name": "process.http.transaction_totaltime.hit_revalidated",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.transaction_counts.miss_cold": {
         "name": "process.http.transaction_counts.miss_cold",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.transaction_totaltime.miss_cold": {
         "name": "process.http.transaction_totaltime.miss_cold",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.transaction_counts.miss_not_cacheable": {
         "name": "process.http.transaction_counts.miss_not_cacheable",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.transaction_totaltime.miss_not_cacheable": {
         "name": "process.http.transaction_totaltime.miss_not_cacheable",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.transaction_counts.miss_changed": {
         "name": "process.http.transaction_counts.miss_changed",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.transaction_totaltime.miss_changed": {
         "name": "process.http.transaction_totaltime.miss_changed",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.transaction_counts.miss_client_no_cache": {
         "name": "process.http.transaction_counts.miss_client_no_cache",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.transaction_totaltime.miss_client_no_cache": {
         "name": "process.http.transaction_totaltime.miss_client_no_cache",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.http.transaction_counts.errors.aborts": {
         "name": "process.http.transaction_counts.errors.aborts",
@@ -1286,7 +1286,7 @@ SIMPLE_METRICS = {
     "proxy.process.http.current_parent_proxy_connections": {
         "name": "process.http.current_parent_proxy_connections",
         "method": "gauge",
-    },  # TODO
+    },
     "proxy.process.http.current_server_connections": {
         "name": "process.http.current_server_connections",
         "method": "gauge",
@@ -1302,7 +1302,7 @@ SIMPLE_METRICS = {
     "proxy.process.net.accepts_currently_open": {
         "name": "process.net.accepts_currently_open",
         "method": "gauge",
-    },  # TODO
+    },
     "proxy.process.net.connections_currently_open": {
         "name": "process.net.connections_currently_open",
         "method": "gauge",
@@ -1321,7 +1321,7 @@ SIMPLE_METRICS = {
     },
     "proxy.process.cache.frags_per_doc.1": {"name": "process.cache.frags_per_doc.1", "method": "gauge"},
     "proxy.process.cache.frags_per_doc.2": {"name": "process.cache.frags_per_doc.2", "method": "gauge"},
-    "proxy.process.cache.frags_per_doc.3+": {"name": "process.cache.frags_per_doc.3+", "method": "gauge"},
+    "proxy.process.cache.frags_per_doc.3": {"name": "process.cache.frags_per_doc.3+", "method": "gauge"},
     "proxy.process.cache.read_busy.success": {"name": "process.cache.read_busy.success", "method": "gauge"},
     "proxy.process.cache.read_busy.failure": {"name": "process.cache.read_busy.failure", "method": "gauge"},
     "proxy.process.cache.write_bytes_stat": {"name": "process.cache.write_bytes_stat", "method": "gauge"},
@@ -1340,8 +1340,8 @@ SIMPLE_METRICS = {
     "proxy.process.cache.sync.count": {"name": "process.cache.sync.count", "method": "gauge"},
     "proxy.process.cache.sync.bytes": {"name": "process.cache.sync.bytes", "method": "gauge"},
     "proxy.process.cache.sync.time": {"name": "process.cache.sync.time", "method": "gauge"},
-    "proxy.process.cache.span.errors.read": {"name": "process.cache.span.errors.read", "method": "gauge"},
-    "proxy.process.cache.span.errors.write": {"name": "process.cache.span.errors.write", "method": "gauge"},
+    "proxy.process.cache.span.errors.read": {"name": "process.cache.span.errors.read", "method": "monotonic_count"},
+    "proxy.process.cache.span.errors.write": {"name": "process.cache.span.errors.write", "method": "monotonic_count"},
     "proxy.process.cache.span.failing": {"name": "process.cache.span.failing", "method": "gauge"},
     "proxy.process.cache.span.offline": {"name": "process.cache.span.offline", "method": "gauge"},
     "proxy.process.cache.span.online": {"name": "process.cache.span.online", "method": "gauge"},

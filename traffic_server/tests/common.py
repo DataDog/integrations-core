@@ -506,7 +506,7 @@ EXPECTED_METRICS = [
     'traffic_server.process.cache.volume.evacuate.success',
     'traffic_server.process.cache.volume.frags_per_doc.1',
     'traffic_server.process.cache.volume.frags_per_doc.2',
-    'traffic_server.process.cache.volume.frags_per_doc.3+',
+    'traffic_server.process.cache.volume.frags_per_doc.3',
     'traffic_server.process.cache.volume.gc_bytes_evacuated',
     'traffic_server.process.cache.volume.gc_frags_evacuated',
     'traffic_server.process.cache.volume.hdr_marshal_bytes',
