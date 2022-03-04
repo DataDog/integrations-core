@@ -313,6 +313,7 @@ class HTTPCheck(AgentCheck):
             msg = str(e)
             if any(word in msg for word in ['expired', 'expiration']):
                 self.log.debug("error: %s. Cert might be expired.", e)
+                return AgentCheck.CRITICAL, 0, 0, msg
             elif 'Hostname mismatch' in msg or "doesn't match" in msg:
                 self.log.debug("The hostname on the SSL certificate does not match the given host: %s", e)
             else:
