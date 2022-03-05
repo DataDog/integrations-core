@@ -1,105 +1,80 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from contextlib import closing, contextmanager
 from typing import Any
+
 import pyodbc
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
 
+from .queries import DB_SPACE
+from .values_sanitizer import get_row_sanitizer
+
+DEFAULT_QUERIES = [DB_SPACE]
+
 
 class TeradataCheck(AgentCheck):
-
-    # This will be the prefix of every metric and service check the integration sends
+    DEFAULT_COMMAND_TIMEOUT = 5
+    SERVICE_CHECK_NAME = "teradata.can_connect"
     __NAMESPACE__ = 'teradata'
 
     def __init__(self, name, init_config, instances):
         super(TeradataCheck, self).__init__(name, init_config, instances)
 
-        self.host = self.instance.get("host")
-        self.port = self.instance.get("port")
-        self.username = self.instance.get("username")
-        self.password = self.instance.get("password")
-        self.db = self.instance.get("database")
-        self.odbc_driver = self.instance.get("driver")
-        self.connection_string = self.instance.get("connection_string")
+        self.host = self.instance.get("host", "")
+        self.port = self.instance.get("port", "")
+        self.username = self.instance.get("username", "")
+        self.password = self.instance.get("password", "")
+        self.db = self.instance.get("database", "")
+        self.odbc_driver = self.instance.get("driver", "")
+        self.connection_string = self.instance.get("connection_string", "")
+        self.tags = self.instance.get("tags", [])
+        self.timeout = int(self.instance.get('command_timeout', self.DEFAULT_COMMAND_TIMEOUT))
 
-
+        self._connection = None
         # If the check is going to perform SQL queries you should define a query manager here.
         # More info at
         # https://datadoghq.dev/integrations-core/base/databases/#datadog_checks.base.utils.db.core.QueryManager
-        # sample_query = {
-        #     "name": "sample",
-        #     "query": "SELECT * FROM sample_table",
-        #     "columns": [
-        #         {"name": "metric", "type": "gauge"}
-        #     ],
-        # }
-        # self._query_manager = QueryManager(self, self.execute_query, queries=[sample_query])
-        # self.check_initializations.append(self._query_manager.compile_queries)
+
+        self._query_manager = QueryManager(self, self.execute_query_raw, queries=DEFAULT_QUERIES)
+        self.check_initializations.append(self._query_manager.compile_queries)
 
     def check(self, _):
         # type: (Any) -> None
-        connect = pyodbc.connect(self.connection_string)
-        cursor = connect.cursor()
+        with self.connect() as conn:
+            self._connection = conn
+            self._query_manager.execute()
 
-        # The following are useful bits of code to help new users get started.
+    def execute_query_raw(self, query):
+        with closing(self._connection.cursor()) as cursor:
+            cursor.execute(query)
+            if cursor.rowcount < 1:
+                self.log.warning("Failed to fetch records from query: `%s`.", query)
+                return []
+            sanitizer_method = get_row_sanitizer(query)
 
-        # Perform HTTP Requests with our HTTP wrapper.
-        # More info at https://datadoghq.dev/integrations-core/base/http/
-        # try:
-        #     response = self.http.get(self.url)
-        #     response.raise_for_status()
-        #     response_json = response.json()
+            for row in cursor.fetchall():
+                try:
+                    yield sanitizer_method(row)
+                except Exception:
+                    self.log.debug("Unable to sanitize row %r.", exc_info=True)
+                    yield row
 
-        # except Timeout as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="Request timeout: {}, {}".format(self.url, e),
-        #     )
-        #     raise
-
-        # except (HTTPError, InvalidURL, ConnectionError) as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="Request failed: {}, {}".format(self.url, e),
-        #     )
-        #     raise
-
-        # except JSONDecodeError as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="JSON Parse failed: {}, {}".format(self.url, e),
-        #     )
-        #     raise
-
-        # except ValueError as e:
-        #     self.service_check(
-        #         "can_connect", AgentCheck.CRITICAL, message=str(e)
-        #     )
-        #     raise
-
-        # This is how you submit metrics
-        # There are different types of metrics that you can submit (gauge, event).
-        # More info at https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck
-        # self.gauge("test", 1.23, tags=['foo:bar'])
-
-        # Perform database queries using the Query Manager
-        # self._query_manager.execute()
-
-        # This is how you use the persistent cache. This cache file based and persists across agent restarts.
-        # If you need an in-memory cache that is persisted across runs
-        # You can define a dictionary in the __init__ method.
-        # self.write_persistent_cache("key", "value")
-        # value = self.read_persistent_cache("key")
-
-        # If your check ran successfully, you can send the status.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.service_check
-        # self.service_check("can_connect", AgentCheck.OK)
-
-        # If it didn't then it should send a critical service check
-        self.service_check("can_connect", AgentCheck.CRITICAL)
+    @contextmanager
+    def connect(self):
+        # ssl_context = self.get_tls_context() if self.config.use_tls else None
+        conn = None
+        try:
+            conn = pyodbc.connect(self.connection_string, timeout=self.timeout, autocommit=True)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK)
+            self.log.debug('Connected to Teradata')
+            yield conn
+        except Exception as e:
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL)
+            self.log.exception('Unable to connect. Error is %s', e)
+            raise
+        finally:
+            if conn:
+                conn.close()
