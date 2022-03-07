@@ -555,7 +555,7 @@ SIMPLE_METRICS = {
     "proxy.process.net.inactivity_cop_lock_acquire_failure": {
         "name": "process.net.inactivity_cop_lock_acquire_failure",
         "method": "monotonic_count",
-    },  
+    },
     "proxy.process.net.fastopen_out.attempts": {
         "name": "process.net.fastopen_out.attempts",
         "method": "monotonic_count",
