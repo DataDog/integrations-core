@@ -161,7 +161,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
         python_path = os.environ[E2E_PARENT_PYTHON]
         env = os.environ['TOX_ENV_NAME']
 
-        check_command = [python_path, '-m', 'datadog_checks.dev', 'env', 'check', check, env, '--json']
+        check_command = [python_path, '-m', 'datadog_checks.dev', 'env', 'check', check, env]
 
         if config:
             config = format_config(config)
@@ -179,7 +179,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
                 if value is not True:
                     check_command.append(str(value))
 
-        result = run_command(check_command, capture=True)
+        result = run_command(check_command, check=True)
 
         matches = re.findall(AGENT_COLLECTOR_SEPARATOR + r'\n(.*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
 
