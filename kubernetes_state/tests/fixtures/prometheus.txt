@@ -13,6 +13,21 @@ kube_hpa_status_current_replicas{hpa="hpa1",namespace="ns1"} 2
 # HELP kube_hpa_status_desired_replicas Desired number of replicas of pods managed by this autoscaler.
 # TYPE kube_hpa_status_desired_replicas gauge
 kube_hpa_status_desired_replicas{hpa="hpa1",namespace="ns1"} 2
+# HELP kube_horizontalpodautoscaler_metadata_generation The generation observed by the HorizontalPodAutoscaler controller.
+# TYPE kube_horizontalpodautoscaler_metadata_generation gauge
+kube_horizontalpodautoscaler_metadata_generation{horizontalpodautoscaler="horizontalpodautoscaler1",namespace="ns1"} 2
+# HELP kube_horizontalpodautoscaler_spec_max_replicas Upper limit for the number of pods that can be set by the autoscaler; cannot be smaller than MinReplicas.
+# TYPE kube_horizontalpodautoscaler_spec_max_replicas gauge
+kube_horizontalpodautoscaler_spec_max_replicas{horizontalpodautoscaler="horizontalpodautoscaler1",namespace="ns1"} 4
+# HELP kube_horizontalpodautoscaler_spec_min_replicas Lower limit for the number of pods that can be set by the autoscaler, default 1.
+# TYPE kube_horizontalpodautoscaler_spec_min_replicas gauge
+kube_horizontalpodautoscaler_spec_min_replicas{horizontalpodautoscaler="horizontalpodautoscaler1",namespace="ns1"} 2
+# HELP kube_horizontalpodautoscaler_status_current_replicas Current number of replicas of pods managed by this autoscaler.
+# TYPE kube_horizontalpodautoscaler_status_current_replicas gauge
+kube_horizontalpodautoscaler_status_current_replicas{horizontalpodautoscaler="horizontalpodautoscaler1",namespace="ns1"} 2
+# HELP kube_horizontalpodautoscaler_status_desired_replicas Desired number of replicas of pods managed by this autoscaler.
+# TYPE kube_horizontalpodautoscaler_status_desired_replicas gauge
+kube_horizontalpodautoscaler_status_desired_replicas{hpa="hpa1",namespace="ns1"} 2
 # HELP kube_cronjob_created Unix creation timestamp
 # TYPE kube_cronjob_created gauge
 kube_cronjob_created{cronjob="hello",namespace="default"} 1.509978394e+09

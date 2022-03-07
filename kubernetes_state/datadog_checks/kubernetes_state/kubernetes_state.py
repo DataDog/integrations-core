@@ -225,6 +225,11 @@ class KubernetesState(OpenMetricsBaseCheck):
                         'kube_hpa_status_desired_replicas': 'hpa.desired_replicas',
                         'kube_hpa_status_current_replicas': 'hpa.current_replicas',
                         'kube_hpa_status_condition': 'hpa.condition',
+                        'kube_horizontalpodautoscaler_spec_min_replicas': 'hpa.min_replicas',
+                        'kube_horizontalpodautoscaler_spec_max_replicas': 'hpa.max_replicas',
+                        'kube_horizontalpodautoscaler_status_desired_replicas': 'hpa.desired_replicas',
+                        'kube_horizontalpodautoscaler_status_current_replicas': 'hpa.current_replicas',
+                        'kube_horizontalpodautoscaler_status_condition': 'hpa.condition',
                         'kube_node_info': 'node.count',
                         'kube_pod_info': 'pod.count',
                         'kube_node_status_allocatable_cpu_cores': 'node.cpu_allocatable',
@@ -329,6 +334,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_replicationcontroller_status_observed_generation',
                     'kube_statefulset_metadata_generation',
                     'kube_hpa_metadata_generation',
+                    'kube_horizontalpodautoscaler_metadata_generation'
                     # kube_node_status_phase has no use case as a service check
                     'kube_node_status_phase',
                     # These CronJob and Job metrics need use cases to determine how do implement
@@ -364,6 +370,7 @@ class KubernetesState(OpenMetricsBaseCheck):
 
         experimental_metrics_mapping = {
             'kube_hpa_spec_target_metric': 'hpa.spec_target_metric',
+            'kube_horizontalpodautoscaler_spec_target_metric': 'hpa.spec_target_metric',
             'kube_verticalpodautoscaler_spec_resourcepolicy_container_policies_minallowed': (
                 'vpa.spec_container_minallowed'
             ),
