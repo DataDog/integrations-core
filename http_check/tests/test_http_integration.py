@@ -29,17 +29,19 @@ from .conftest import mock_get_ca_certs_path
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check_cert_expiration(http_check):
+def test_check_cert_expiration_up(http_check):
     cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
-
-    # up
     instance = {'url': 'https://valid.mock/'}
+
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     assert status == AgentCheck.OK
     assert days_left > 0
     assert seconds_left > 0
 
-    # bad hostname
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_bad_hostname(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     instance = {'url': 'https://wronghost.mock/'}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     assert status == AgentCheck.UNKNOWN
@@ -47,14 +49,20 @@ def test_check_cert_expiration(http_check):
     assert seconds_left is None
     assert 'Hostname mismatch' in msg or "doesn't match" in msg
 
-    # site is down
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_site_down(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     instance = {'url': 'https://this.does.not.exist.foo'}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     assert status == AgentCheck.UNKNOWN
     assert days_left is None
     assert seconds_left is None
 
-    # cert expired
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_cert_expired(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     instance = {'url': 'https://expired.mock/'}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     if sys.version_info[0] < 3:
@@ -68,20 +76,29 @@ def test_check_cert_expiration(http_check):
         assert days_left == 0
         assert seconds_left == 0
 
-    # critical in days
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_critical(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+
+    # in days
     days_critical = 200
     instance = {'url': 'https://valid.mock/', 'days_critical': days_critical}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     assert status == AgentCheck.CRITICAL
     assert 0 < days_left < days_critical
 
-    # critical in seconds (ensure seconds take precedence over days config)
+    # in seconds (ensure seconds take precedence over days config)
     seconds_critical = days_critical * 24 * 3600
     instance = {'url': 'https://valid.mock/', 'days_critical': 0, 'seconds_critical': seconds_critical}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     assert status == AgentCheck.CRITICAL
     assert 0 < seconds_left < seconds_critical
 
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_warning(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     # warning in days
     days_warning = 200
     instance = {'url': 'https://valid.mock/', 'days_warning': days_warning}

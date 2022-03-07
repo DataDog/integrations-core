@@ -95,13 +95,15 @@ class PostgresConfig:
             # Valid values for this can be found at
             # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/database.md#connection-level-attributes
             'dbms': 'postgresql',
-            'replace_digits': obfuscator_options_config.get(
-                'replace_digits', obfuscator_options_config.get('quantize_sql_tables', False)
+            'replace_digits': is_affirmative(
+                obfuscator_options_config.get(
+                    'replace_digits', obfuscator_options_config.get('quantize_sql_tables', False)
+                )
             ),
-            'return_json_metadata': obfuscator_options_config.get('collect_metadata', False),
-            'table_names': obfuscator_options_config.get('collect_tables', True),
-            'collect_commands': obfuscator_options_config.get('collect_commands', True),
-            'collect_comments': obfuscator_options_config.get('collect_comments', True),
+            'return_json_metadata': is_affirmative(obfuscator_options_config.get('collect_metadata', True)),
+            'table_names': is_affirmative(obfuscator_options_config.get('collect_tables', True)),
+            'collect_commands': is_affirmative(obfuscator_options_config.get('collect_commands', True)),
+            'collect_comments': is_affirmative(obfuscator_options_config.get('collect_comments', True)),
         }
 
     def _build_tags(self, custom_tags):

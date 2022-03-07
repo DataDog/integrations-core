@@ -289,7 +289,6 @@ def test_statement_metrics_and_plans(
 def test_statement_metadata(
     aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, metadata, expected_metadata_payload
 ):
-    dbm_instance['obfuscator_options'] = {'collect_metadata': True}
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     query = '''
