@@ -31,7 +31,7 @@ There are two forms of the Airflow integration. There is the Datadog Agent integ
 
 Configure the Airflow check included in the [Datadog Agent][4] package to collect health metrics and service checks. This can be done by editing the `url` within the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory, to start collecting your Airflow service checks. See the [sample airflow.d/conf.yaml][5] for all available configuration options.
 
-The `url` should match the URL used to connect to the Airflow Instance, the [webserver base_url][20].
+Ensure that `url` matches your Airflow [webserver `base_url`][20], the URL used to connect to your Airflow instance.
 
 ##### Connect Airflow to DogStatsD
 
@@ -277,7 +277,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][8]
 | `<INIT_CONFIG>`      | blank or `{}`         |
 | `<INSTANCE_CONFIG>`  | `{"url": "http://%%host%%:8080"}` |
 
-The `url` should match the URL used to connect to the Airflow Instance, the [webserver base_url][20]. With the Template Variable `%%host%%` replacing `localhost`.
+Ensure that `url` matches your Airflow [webserver `base_url`][20], the URL used to connect to your Airflow instance. Replace `localhost` with the template variable `%%host%%`.
 
 ##### Connect Airflow to DogStatsD
 
