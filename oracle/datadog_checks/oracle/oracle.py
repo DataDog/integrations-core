@@ -134,6 +134,7 @@ class Oracle(AgentCheck):
         return error
 
     def check(self, _):
+        raise Exception(self.execute_query_raw('select count(*) from v$session'))
         if self.instance.get('user'):
             self._log_deprecation('_config_renamed', 'user', 'username')
 
