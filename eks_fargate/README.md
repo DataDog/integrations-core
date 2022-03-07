@@ -124,6 +124,8 @@ spec:
          value: "datadoghq.com"
        - name: DD_EKS_FARGATE
          value: "true"
+       - name: DD_CLUSTER_NAME
+         value: "<CLUSTER_NAME>"
        - name: DD_KUBERNETES_KUBELET_NODENAME
          valueFrom:
            fieldRef:
@@ -139,6 +141,8 @@ spec:
 ```
 
 **Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][14].
+
+**Note**: Add your desired `kube_cluster_name:<CLUSTER_NAME>` to the list of `DD_TAGS` to ensure your metrics are tagged by your desired cluster. You can append additional tags here as space separated `<KEY>:<VALUE>` tags. This is not required anymore starting Agents `7.34+` and `6.34+` as you can simply set the `DD_CLUSTER_NAME` environment variable.
 
 ## Metrics collection
 
