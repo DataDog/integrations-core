@@ -340,7 +340,7 @@ SIMPLE_METRICS = {
         "method": "monotonic_count",
     },
     "proxy.process.http.err_connect_fail_count_stat": {
-        "name": "process.http.errpr.connect_fail_count",
+        "name": "process.http.error.connect_fail_count",
         "method": "monotonic_count",
     },
     "proxy.process.http.misc_count_stat": {"name": "process.http.misc_count", "method": "monotonic_count"},
@@ -954,6 +954,26 @@ SIMPLE_METRICS = {
         "name": "process.http.cache.open_write.adjust_thread",
         "method": "monotonic_count",
     },
+    "proxy.process.http.1xx_responses": {
+        "name": "process.http.1xx_responses",
+        "method": "monotonic_count",
+    },
+    "proxy.process.http.2xx_responses": {
+        "name": "process.http.2xx_responses",
+        "method": "monotonic_count",
+    },
+    "proxy.process.http.3xx_responses": {
+        "name": "process.http.3xx_responses",
+        "method": "monotonic_count",
+    },
+    "proxy.process.http.4xx_responses": {
+        "name": "process.http.4xx_responses",
+        "method": "monotonic_count",
+    },
+    "proxy.process.http.5xx_responses": {
+        "name": "process.http.5xx_responses",
+        "method": "monotonic_count",
+    },
     "proxy.process.net.default_inactivity_timeout_applied": {
         "name": "process.net.default_inactivity_timeout_applied",
         "method": "monotonic_count",
@@ -971,29 +991,28 @@ SIMPLE_METRICS = {
         "method": "monotonic_count",
     },
     "proxy.process.tcp.total_accepts": {"name": "process.tcp.total_accepts", "method": "monotonic_count"},
-    "proxy.process.cache.bytes_used": {"name": "process.cache.bytes_used", "method": "monotonic_count"},
-    "proxy.process.cache.bytes_total": {"name": "process.cache.bytes_total", "method": "monotonic_count"},
+    "proxy.process.cache.bytes_used": {"name": "process.cache.bytes_used", "method": "gauge"},
+    "proxy.process.cache.bytes_total": {"name": "process.cache.bytes_total", "method": "gauge"},
     "proxy.process.cache.ram_cache.total_bytes": {
         "name": "process.cache.ram_cache.total_bytes",
-        "method": "monotonic_count",
-    },  # TODO
+        "method": "gauge",
+    },
     "proxy.process.cache.ram_cache.bytes_used": {
         "name": "process.cache.ram_cache.bytes_used",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.cache.ram_cache.hits": {
         "name": "process.cache.ram_cache.hits",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.cache.ram_cache.misses": {
         "name": "process.cache.ram_cache.misses",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.cache.pread_count": {"name": "process.cache.pread_count", "method": "monotonic_count"},
-    # TODO cache active
     "proxy.process.cache.lookup.active": {
         "name": "process.cache.lookup.active",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.cache.lookup.success": {
         "name": "process.cache.lookup.success",
@@ -1003,10 +1022,10 @@ SIMPLE_METRICS = {
         "name": "process.cache.lookup.failure",
         "method": "monotonic_count",
     },
-    "proxy.process.cache.read.active": {"name": "process.cache.read.active", "method": "monotonic_count"},
+    "proxy.process.cache.read.active": {"name": "process.cache.read.active", "method": "gauge"},
     "proxy.process.cache.read.success": {"name": "process.cache.read.success", "method": "monotonic_count"},
     "proxy.process.cache.read.failure": {"name": "process.cache.read.failure", "method": "monotonic_count"},
-    "proxy.process.cache.write.active": {"name": "process.cache.write.active", "method": "monotonic_count"},
+    "proxy.process.cache.write.active": {"name": "process.cache.write.active", "method": "gauge"},
     "proxy.process.cache.write.success": {
         "name": "process.cache.write.success",
         "method": "monotonic_count",
@@ -1021,7 +1040,7 @@ SIMPLE_METRICS = {
     },
     "proxy.process.cache.update.active": {
         "name": "process.cache.update.active",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.cache.update.success": {
         "name": "process.cache.update.success",
@@ -1033,7 +1052,7 @@ SIMPLE_METRICS = {
     },
     "proxy.process.cache.remove.active": {
         "name": "process.cache.remove.active",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.cache.remove.success": {
         "name": "process.cache.remove.success",
@@ -1045,7 +1064,7 @@ SIMPLE_METRICS = {
     },
     "proxy.process.cache.evacuate.active": {
         "name": "process.cache.evacuate.active",
-        "method": "monotonic_count",
+        "method": "gauge",
     },
     "proxy.process.cache.evacuate.success": {
         "name": "process.cache.evacuate.success",
@@ -1055,7 +1074,7 @@ SIMPLE_METRICS = {
         "name": "process.cache.evacuate.failure",
         "method": "monotonic_count",
     },
-    "proxy.process.cache.scan.active": {"name": "process.cache.scan.active", "method": "monotonic_count"},
+    "proxy.process.cache.scan.active": {"name": "process.cache.scan.active", "method": "gauge"},
     "proxy.process.cache.scan.success": {"name": "process.cache.scan.success", "method": "monotonic_count"},
     "proxy.process.cache.scan.failure": {"name": "process.cache.scan.failure", "method": "monotonic_count"},
     "proxy.process.hostdb.cache.total_inserts": {
@@ -1117,7 +1136,6 @@ SIMPLE_METRICS = {
         "name": "process.http.avg_transactions_per_server_connection",
         "method": "gauge",
     },
-    # Tcp: look into counts
     "proxy.process.http.tcp_hit_user_agent_bytes_stat": {
         "name": "process.http.tcp.hit_user_agent_bytes",
         "method": "gauge",
@@ -1321,7 +1339,7 @@ SIMPLE_METRICS = {
     },
     "proxy.process.cache.frags_per_doc.1": {"name": "process.cache.frags_per_doc.1", "method": "gauge"},
     "proxy.process.cache.frags_per_doc.2": {"name": "process.cache.frags_per_doc.2", "method": "gauge"},
-    "proxy.process.cache.frags_per_doc.3": {"name": "process.cache.frags_per_doc.3+", "method": "gauge"},
+    "proxy.process.cache.frags_per_doc.3+": {"name": "process.cache.frags_per_doc.3", "method": "gauge"},
     "proxy.process.cache.read_busy.success": {"name": "process.cache.read_busy.success", "method": "gauge"},
     "proxy.process.cache.read_busy.failure": {"name": "process.cache.read_busy.failure", "method": "gauge"},
     "proxy.process.cache.write_bytes_stat": {"name": "process.cache.write_bytes_stat", "method": "gauge"},
@@ -1444,31 +1462,31 @@ REGEX_METRICS = [
     },
     {
         'regex': r'proxy.process.http.(1[0-9]{2})_responses',
-        'name': 'process.http.1xx_responses',
+        'name': 'process.http.code.1xx_responses',
         'tags': ('code',),
         'method': 'monotonic_count',
     },
     {
         'regex': r'proxy.process.http.(2[0-9]{2})_responses',
-        'name': 'process.http.2xx_responses',
+        'name': 'process.http.code.2xx_responses',
         'tags': ('code',),
         'method': 'monotonic_count',
     },
     {
         'regex': r'proxy.process.http.(3[0-9]{2})_responses',
-        'name': 'process.http.3xx_responses',
+        'name': 'process.http.code.3xx_responses',
         'tags': ('code',),
         'method': 'monotonic_count',
     },
     {
         'regex': r'proxy.process.http.(4[0-9]{2})_responses',
-        'name': 'process.http.4xx_responses',
+        'name': 'process.http.code.4xx_responses',
         'tags': ('code',),
         'method': 'monotonic_count',
     },
     {
         'regex': r'proxy.process.http.(5[0-9]{2})_responses',
-        'name': 'process.http.5xx_responses',
+        'name': 'process.http.code.5xx_responses',
         'tags': ('code',),
         'method': 'monotonic_count',
     },
@@ -1482,13 +1500,13 @@ REGEX_METRICS = [
         'regex': r'proxy.process.cache.(.*?)\.bytes_total',
         'name': 'process.cache.volume.bytes_total',
         'tags': ('cache_volume',),
-        'method': 'monotonic_count',
+        'method': 'gauge',
     },
     {
         'regex': r'proxy.process.cache.(.*?)\.ram_cache.total_bytes',
         'name': 'process.cache.volume.ram_cache.total_bytes',
         'tags': ('cache_volume',),
-        'method': 'monotonic_count',
+        'method': 'gauge',
     },
     {
         'regex': r'proxy.process.cache.(.*?)\.ram_cache.bytes_used',
@@ -1656,7 +1674,7 @@ REGEX_METRICS = [
         'regex': r'proxy.process.cache.(.*?)\.direntries.total',
         'name': 'process.cache.volume.direntries.total',
         'tags': ('cache_volume',),
-        'method': 'monotonic_count',
+        'method': 'gauge',
     },
     {
         'regex': r'proxy.process.cache.(.*?)\.direntries.used',
@@ -1684,7 +1702,7 @@ REGEX_METRICS = [
     },
     {
         'regex': r'proxy.process.cache.(.*?)\.frags_per_doc.3+',
-        'name': 'process.cache.volume.frags_per_doc.3+',
+        'name': 'process.cache.volume.frags_per_doc.3',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
@@ -1692,13 +1710,13 @@ REGEX_METRICS = [
         'regex': r'proxy.process.cache.(.*?)\.read_busy.success',
         'name': 'process.cache.volume.read_busy.success',
         'tags': ('cache_volume',),
-        'method': 'monotonic_count',
+        'method': 'gauge',
     },
     {
         'regex': r'proxy.process.cache.(.*?)\.read_busy.failure',
         'name': 'process.cache.volume.read_busy.failure',
         'tags': ('cache_volume',),
-        'method': 'monotonic_count',
+        'method': 'gauge',
     },
     {
         'regex': r'proxy.process.cache.(.*?)\.write_bytes_stat',
@@ -1728,19 +1746,19 @@ REGEX_METRICS = [
         'regex': r'proxy.process.cache.(.*?)\.gc_bytes_evacuated',
         'name': 'process.cache.volume.gc_bytes_evacuated',
         'tags': ('cache_volume',),
-        'method': 'monotonic_count',
+        'method': 'gauge',
     },
     {
         'regex': r'proxy.process.cache.(.*?)\.gc_frags_evacuated',
         'name': 'process.cache.volume.gc_frags_evacuated',
         'tags': ('cache_volume',),
-        'method': 'monotonic_count',
+        'method': 'gauge',
     },
     {
         'regex': r'proxy.process.cache.(.*?)\.sync.count',
         'name': 'process.cache.volume.sync.count',
         'tags': ('cache_volume',),
-        'method': 'monotonic_count',
+        'method': 'gauge',
     },
     {
         'regex': r'proxy.process.cache.(.*?)\.sync.bytes',

@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
         ),
         pytest.param(
             'proxy.process.http.399_responses',
-            'process.http.3xx_responses',
+            'process.http.code.3xx_responses',
             ['code:399'],
             "monotonic_count",
             id="response code",

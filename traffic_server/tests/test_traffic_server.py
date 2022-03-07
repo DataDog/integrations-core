@@ -7,6 +7,7 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.traffic_server import TrafficServerCheck
 
 from .common import EXPECTED_METRICS, TRAFFIC_SERVER_VERSION
@@ -31,8 +32,7 @@ def test_check(aggregator, instance, dd_run_check):
     aggregator.assert_service_check('traffic_server.can_connect', TrafficServerCheck.OK)
     aggregator.assert_all_metrics_covered()
 
-    # from datadog_checks.dev.utils import get_metadata_metrics
-    # aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_check_cant_reach_url(aggregator, instance_bad_url, dd_run_check):
