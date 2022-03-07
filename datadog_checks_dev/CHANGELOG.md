@@ -1,5 +1,25 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 15.10.1 / 2022-02-19
+
+* [Fixed] Fix integration templates. See [#11539](https://github.com/DataDog/integrations-core/pull/11539).
+* [Fixed] Handle the case in models sync where a file does not have a license header. See [#11535](https://github.com/DataDog/integrations-core/pull/11535).
+
+## 15.10.0 / 2022-02-16
+
+* [Added] Update templates for new integrations. See [#11510](https://github.com/DataDog/integrations-core/pull/11510).
+* [Added] Reintroduce ASCII validation for README files. See [#11509](https://github.com/DataDog/integrations-core/pull/11509).
+* [Fixed] Update new check template. See [#11489](https://github.com/DataDog/integrations-core/pull/11489).
+* [Fixed] Fix codecov report. See [#11492](https://github.com/DataDog/integrations-core/pull/11492).
+
+## 15.9.0 / 2022-02-10
+
+* [Added] Add `pyproject.toml` file. See [#11303](https://github.com/DataDog/integrations-core/pull/11303).
+* [Fixed] Fix style format for Python checks defined by a pyproject.toml file . See [#11483](https://github.com/DataDog/integrations-core/pull/11483).
+* [Fixed] Fix `pytest` and `tox` plugins for checks with only a `pyproject.toml`. See [#11477](https://github.com/DataDog/integrations-core/pull/11477).
+* [Fixed] Fix E2E for new base package versions. See [#11473](https://github.com/DataDog/integrations-core/pull/11473).
+* [Fixed] Fix package signing for checks with only a `pyproject.toml`. See [#11474](https://github.com/DataDog/integrations-core/pull/11474).
+
 ## 15.8.0 / 2022-02-07
 
 * [Added] Support Python checks defined by a `pyproject.toml` file. See [#11233](https://github.com/DataDog/integrations-core/pull/11233).

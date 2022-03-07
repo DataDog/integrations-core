@@ -1,6 +1,18 @@
 # CHANGELOG - sqlserver
 
-## 7.0.3 / 2022-02-03
+## 7.2.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11437](https://github.com/DataDog/integrations-core/pull/11437).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* [Fixed] remove aggregation by SQL text from query stats query. See [#11524](https://github.com/DataDog/integrations-core/pull/11524).
+
+## 7.1.0 / 2022-02-14
+
+* [Added] Add ddagenthostname to dbm-metrics payloads. See [#11232](https://github.com/DataDog/integrations-core/pull/11232).
+* [Added] Add recovery_model_desc tag for sqlserver database metrics. See [#11210](https://github.com/DataDog/integrations-core/pull/11210). Thanks [lowlydba](https://github.com/lowlydba).
+* [Fixed] Disable modified rowcounts in result sets for all connections. See [#11486](https://github.com/DataDog/integrations-core/pull/11486).
+
+## 7.0.3 / 2022-02-03 / Agent 7.34.0
 
 * [Fixed] Update base version. See [#11287](https://github.com/DataDog/integrations-core/pull/11287).
 

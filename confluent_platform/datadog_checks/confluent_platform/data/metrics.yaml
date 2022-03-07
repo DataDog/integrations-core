@@ -185,8 +185,6 @@ jmx_metrics:
         - kafka.controller:type=KafkaController,name=PreferredReplicaImbalanceCount
         # Under Min ISR Count
         - kafka.controller:type=KafkaController,name=GlobalUnderMinIsrPartitionCount
-        # Count of offline partitions
-        - kafka.controller:type=KafkaController,name=OfflinePartitionsCount
         # Count of topics
         - kafka.controller:type=KafkaController,name=GlobalTopicCount
         # Count of partitions

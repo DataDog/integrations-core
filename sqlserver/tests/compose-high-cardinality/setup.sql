@@ -36,6 +36,20 @@ CREATE PROCEDURE pyStoredProc
     END;
 GO
 GRANT EXECUTE on pyStoredProc to datadog;
+GO
+
+CREATE PROCEDURE exampleProcWithoutNocount AS
+BEGIN
+    CREATE TABLE #Hello
+    (
+        [value] int not null,
+    )
+    INSERT INTO #Hello VALUES (1)
+    select * from #Hello;
+END;
+GO
+GRANT EXECUTE on exampleProcWithoutNocount to datadog;
+GO
 
 -- Create test database for integration tests.
 -- Only bob and fred have read/write access to this database.
@@ -53,6 +67,12 @@ GO
 EXEC sp_addrolemember 'db_datareader', 'bob'
 EXEC sp_addrolemember 'db_datawriter', 'bob'
 EXEC sp_addrolemember 'db_datareader', 'fred'
+GO
+
+-- create an offline database to have an unavailable database to test with
+CREATE DATABASE unavailable_db;
+GO
+ALTER DATABASE unavailable_db SET OFFLINE;
 GO
 
 -- This table is pronounced "things" except we've replaced "th" with the greek lower case "theta" to ensure we

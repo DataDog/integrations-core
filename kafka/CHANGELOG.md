@@ -1,6 +1,11 @@
 # CHANGELOG - kafka
 
-## 2.11.0 / 2022-01-08
+## 2.12.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11377](https://github.com/DataDog/integrations-core/pull/11377).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+
+## 2.11.0 / 2022-01-08 / Agent 7.34.0
 
 * [Added] Add listeners metric. See [#10120](https://github.com/DataDog/integrations-core/pull/10120). Thanks [OuesFa](https://github.com/OuesFa).
 * [Fixed] Bump base check dependency. See [#10926](https://github.com/DataDog/integrations-core/pull/10926).

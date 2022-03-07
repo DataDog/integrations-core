@@ -124,13 +124,13 @@ spec:
          value: "datadoghq.com"
        - name: DD_EKS_FARGATE
          value: "true"
+       - name: DD_CLUSTER_NAME
+         value: "<CLUSTER_NAME>"
        - name: DD_KUBERNETES_KUBELET_NODENAME
          valueFrom:
            fieldRef:
              apiVersion: v1
              fieldPath: spec.nodeName
-       - name: DD_TAGS
-         value: "kube_cluster_name:<CLUSTER_NAME>"
       resources:
           requests:
             memory: "256Mi"
@@ -142,7 +142,7 @@ spec:
 
 **Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][14].
 
-**Note**: Add your desired `kube_cluster_name:<CLUSTER_NAME>` to the list of `DD_TAGS` to ensure your metrics are tagged by your desired cluster. You can append additional tags here as space separated `<KEY>:<VALUE>` tags.
+**Note**: Add your desired `kube_cluster_name:<CLUSTER_NAME>` to the list of `DD_TAGS` to ensure your metrics are tagged by your desired cluster. You can append additional tags here as space separated `<KEY>:<VALUE>` tags. For Agents `7.34+` and `6.34+`, this is not required. Instead, set the `DD_CLUSTER_NAME` environment variable.
 
 ## Metrics collection
 
@@ -201,11 +201,11 @@ spec:
 **Notes**:
 
 - Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][14].
-- Container metrics are not available in Fargate because the `cgroups` volume from the host can't be mounted into the Agent. The [Live Containers][19] view reports 0 for CPU and Memory.
+- Container metrics are not available in Fargate because the `cgroups` volume from the host can't be mounted into the Agent. The [Live Containers][17] view reports 0 for CPU and Memory.
 
 ### DogStatsD
 
-Set up the container port `8125` over your Agent container to forward [DogStatsD metrics][17] from your application container to Datadog.
+Set up the container port `8125` over your Agent container to forward [DogStatsD metrics][18] from your application container to Datadog.
 
 ```yaml
 apiVersion: apps/v1

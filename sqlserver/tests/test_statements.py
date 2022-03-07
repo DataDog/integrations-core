@@ -289,13 +289,11 @@ def test_statement_metrics_and_plans(
 def test_statement_metadata(
     aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, metadata, expected_metadata_payload
 ):
-    dbm_instance['obfuscator_options'] = {'collect_metadata': True}
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     query = '''
     -- Test comment
     select * from sys.databases'''
-    query_signature = '6d1d070f9b6c5647'
 
     def _run_query():
         bob_conn.execute_with_retries(query)
@@ -314,7 +312,9 @@ def test_statement_metadata(
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     assert dbm_samples, "should have collected at least one sample"
 
-    matching = [s for s in dbm_samples if s['db']['query_signature'] == query_signature and s['dbm_type'] == 'plan']
+    matching = [
+        s for s in dbm_samples if 'select * from sys.databases' in s['db']['statement'] and s['dbm_type'] == 'plan'
+    ]
     assert len(matching) == 1
 
     sample = matching[0]
@@ -325,7 +325,7 @@ def test_statement_metadata(
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1
     metric = dbm_metrics[0]
-    matching_metrics = [m for m in metric['sqlserver_rows'] if m['query_signature'] == query_signature]
+    matching_metrics = [m for m in metric['sqlserver_rows'] if 'select * from sys.databases' in m['text']]
     assert len(matching_metrics) == 1
     metric = matching_metrics[0]
     assert metric['dd_tables'] == expected_metadata_payload['tables']

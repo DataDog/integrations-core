@@ -1,11 +1,27 @@
 # CHANGELOG - datadog_checks_base
 
+## 25.0.1 / 2022-02-24
+
+* [Fixed] Properly raise scraper error in OpenMetrics v2. See [#11564](https://github.com/DataDog/integrations-core/pull/11564).
+
+## 25.0.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11301](https://github.com/DataDog/integrations-core/pull/11301).
+* [Added] Detect and warn on potential typos in configuration options. See [#11211](https://github.com/DataDog/integrations-core/pull/11211).
+* [Fixed] Add more error handling when detecting typos. See [#11519](https://github.com/DataDog/integrations-core/pull/11519).
+* [Fixed] Fix edge case in tracing utils. See [#11516](https://github.com/DataDog/integrations-core/pull/11516).
+* [Fixed] Properly create list of known options when detecting typos. See [#11482](https://github.com/DataDog/integrations-core/pull/11482).
+* [Fixed] Fail gracefully when scraping OpenMetrics endpoints. See [#11281](https://github.com/DataDog/integrations-core/pull/11281).
+* [Fixed] Update error message when unable to connect to any possible prometheus urls. See [#11197](https://github.com/DataDog/integrations-core/pull/11197).
+* [Fixed] Update obfuscator wrapper to return empty string. See [#11277](https://github.com/DataDog/integrations-core/pull/11277).
+* [Changed] *BREAKING CHANGE* Remove pyhdb. See [#11469](https://github.com/DataDog/integrations-core/pull/11469).
+
 ## 24.0.0 / 2022-02-02
 
 * [Added] Upgrade psutil to 5.9.0. See [#11139](https://github.com/DataDog/integrations-core/pull/11139).
 * [Changed] Add tls_protocols_allowed configuration option. See [#11237](https://github.com/DataDog/integrations-core/pull/11237).
 
-## 23.7.6 / 2022-02-03
+## 23.7.6 / 2022-02-03 / Agent 7.34.0
 
 * [Fixed] Update obfuscator wrapper to return empty string. See [#11277](https://github.com/DataDog/integrations-core/pull/11277).
 

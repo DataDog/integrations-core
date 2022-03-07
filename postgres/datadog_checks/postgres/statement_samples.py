@@ -26,6 +26,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 
 from .util import DatabaseConfigurationError, warning_with_tags
+from .version_utils import V9_6
 
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
 # character is 6 bytes
@@ -49,12 +50,37 @@ pg_stat_activity_sample_exclude_keys = {
     'client_port',
 }
 
-#
+# enumeration of the columns we collect
+PG_STAT_ACTIVITY_COLS = [
+    "datid",
+    "datname",
+    "pid",
+    "usesysid",
+    "usename",
+    "application_name",
+    "client_addr",
+    "client_hostname",
+    "client_port",
+    "backend_start",
+    "xact_start",
+    "query_start",
+    "state_change",
+    "wait_event_type",
+    "wait_event",
+    "state",
+    "backend_xid",
+    "backend_xmin",
+    "query",
+    "backend_type",
+]
+
+PG_BLOCKING_PIDS_FUNC = ",pg_blocking_pids(pid) as blocking_pids"
+
 PG_STAT_ACTIVITY_QUERY = re.sub(
     r'\s+',
     ' ',
     """
-    SELECT * FROM {pg_stat_activity_view}
+    SELECT {pg_stat_activity_cols} {pg_blocking_func} FROM {pg_stat_activity_view}
     WHERE coalesce(TRIM(query), '') != ''
     AND query_start IS NOT NULL
     {extra_filters}
@@ -206,11 +232,19 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return [dict(row) for row in rows]
 
-    def _get_new_pg_stat_activity(self):
+    def _get_new_pg_stat_activity(self, available_activity_columns):
         start_time = time.time()
         extra_filters, params = self._get_extra_filters_and_params(filter_stale_idle_conn=True)
+        blocking_func = ""
+        # minimum version for pg_blocking_pids function is v9.6
+        # only call pg_blocking_pids as often as we collect activity snapshots
+        if self._check.version >= V9_6 and self._report_activity_event():
+            blocking_func = PG_BLOCKING_PIDS_FUNC
         query = PG_STAT_ACTIVITY_QUERY.format(
-            pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
+            pg_stat_activity_cols=', '.join(available_activity_columns),
+            pg_blocking_func=blocking_func,
+            pg_stat_activity_view=self._config.pg_stat_activity_view,
+            extra_filters=extra_filters,
         )
         with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             self._log.debug("Running query [%s] %s", query, params)
@@ -219,6 +253,21 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return rows
+
+    def _get_available_activity_columns(self, all_expected_columns):
+        with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            cursor.execute(
+                "select * from {pg_stat_activity_view} LIMIT 0".format(
+                    pg_stat_activity_view=self._config.pg_stat_activity_view
+                )
+            )
+            all_columns = set([i[0] for i in cursor.description])
+            available_columns = [c for c in all_expected_columns if c in all_columns]
+            missing_columns = set(all_expected_columns) - set(available_columns)
+            if missing_columns:
+                self._log.debug("missing the following expected columns from pg_stat_activity: %s", missing_columns)
+            self._log.debug("found available pg_stat_activity columns: %s", available_columns)
+        return available_columns
 
     def _filter_and_normalize_statement_rows(self, rows):
         insufficient_privilege_count = 0
@@ -306,7 +355,8 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def _collect_statement_samples(self):
         start_time = time.time()
-        rows = self._get_new_pg_stat_activity()
+        pg_activity_cols = self._get_available_activity_columns(PG_STAT_ACTIVITY_COLS)
+        rows = self._get_new_pg_stat_activity(pg_activity_cols)
         rows = self._filter_and_normalize_statement_rows(rows)
         event_samples = self._collect_plans(rows)
         submitted_count = 0

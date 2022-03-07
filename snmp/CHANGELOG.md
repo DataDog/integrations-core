@@ -1,6 +1,11 @@
 # CHANGELOG - snmp
 
-## 5.5.0 / 2022-01-08
+## 5.6.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11432](https://github.com/DataDog/integrations-core/pull/11432).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+
+## 5.5.0 / 2022-01-08 / Agent 7.34.0
 
 * [Added] Add `sysMultiHostCpuUsageRatio` to BIG-IP profile. See [#10924](https://github.com/DataDog/integrations-core/pull/10924). Thanks [kei6u](https://github.com/kei6u).
 * [Added] Add profile metadata for Isilon. See [#11022](https://github.com/DataDog/integrations-core/pull/11022).

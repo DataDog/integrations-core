@@ -407,12 +407,12 @@ class AgentCheck(object):
         # only import it when running in python 3
         from jellyfish import jaro_winkler_similarity
 
-        user_config = user_config or {}
+        user_configs = user_config or {}  # type: Dict[str, Any]
         models_config = models_config or {}
         typos = set()  # type: Set[str]
 
-        known_options = dict(models_config).keys()
-        unknown_options = sorted(list(user_config.keys() - known_options))
+        known_options = [k for k, _ in models_config]  # type: List[str]
+        unknown_options = [option for option in user_configs.keys() if option not in known_options]  # type: List[str]
 
         for unknown_option in unknown_options:
             similar_known_options = []  # type: List[Tuple[str, int]]
@@ -442,7 +442,10 @@ class AgentCheck(object):
             raw_shared_config.update(intg_shared_config)
 
             shared_config = self.load_configuration_model(package_path, 'SharedConfig', raw_shared_config)
-            self.log_typos_in_options(intg_shared_config, shared_config, 'init_config')
+            try:
+                self.log_typos_in_options(intg_shared_config, shared_config, 'init_config')
+            except Exception as e:
+                self.log.debug("Failed to detect typos in `init_config` section: %s", e)
             if shared_config is not None:
                 self._config_model_shared = shared_config
 
@@ -452,8 +455,10 @@ class AgentCheck(object):
             raw_instance_config.update(intg_instance_config)
 
             instance_config = self.load_configuration_model(package_path, 'InstanceConfig', raw_instance_config)
-            self.log_typos_in_options(intg_instance_config, instance_config, 'instances')
-
+            try:
+                self.log_typos_in_options(intg_instance_config, instance_config, 'instances')
+            except Exception as e:
+                self.log.debug("Failed to detect typos in `instances` section: %s", e)
             if instance_config is not None:
                 self._config_model_instance = instance_config
 

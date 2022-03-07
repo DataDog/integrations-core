@@ -104,15 +104,18 @@ def traced_class(cls):
 
             def decorate(cls):
                 for attr in cls.__dict__:
+                    attribute = getattr(cls, attr)
                     # Ignoring staticmethod and classmethod because they don't need cls in args
+                    # also ignore nested classes
                     if (
-                        callable(getattr(cls, attr))
+                        callable(attribute)
+                        and not inspect.isclass(attribute)
                         and not isinstance(cls.__dict__[attr], staticmethod)
                         and not isinstance(cls.__dict__[attr], classmethod)
                         # Get rid of SnmpCheck._thread_factory and related
-                        and getattr(getattr(cls, attr), '__module__', 'threading') not in EXCLUDED_MODULES
+                        and getattr(attribute, '__module__', 'threading') not in EXCLUDED_MODULES
                     ):
-                        setattr(cls, attr, tracing_method(getattr(cls, attr), tracer))
+                        setattr(cls, attr, tracing_method(attribute, tracer))
                 return cls
 
             return decorate(cls)

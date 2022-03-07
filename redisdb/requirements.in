@@ -1,2 +1,0 @@
-redis==3.5.3; python_version < '3.0'
-redis==4.0.2; python_version > '3.0'

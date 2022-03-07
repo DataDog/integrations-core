@@ -1,5 +1,10 @@
 # CHANGELOG - openstack
 
+## 1.12.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11408](https://github.com/DataDog/integrations-core/pull/11408).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+
 ## 1.11.1 / 2021-10-04 / Agent 7.32.0
 
 * [Fixed] Add server as generic tag. See [#10100](https://github.com/DataDog/integrations-core/pull/10100).
