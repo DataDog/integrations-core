@@ -408,16 +408,19 @@ CONSUMER_FETCH_TOPIC_METRICS = [
 
 CONSUMER_GROUP_METRICS = [
     'confluent.kafka.consumer.group.assigned_partitions',
-    'confluent.kafka.consumer.group.commit_latency_avg',
     'confluent.kafka.consumer.group.commit_latency_max',
     'confluent.kafka.consumer.group.commit_rate',
     'confluent.kafka.consumer.group.heartbeat_rate',
     'confluent.kafka.consumer.group.heartbeat_response_time_max',
     'confluent.kafka.consumer.group.join_rate',
-    'confluent.kafka.consumer.group.join_time_avg',
-    'confluent.kafka.consumer.group.join_time_max',
     'confluent.kafka.consumer.group.last_heartbeat_seconds_ago',
     'confluent.kafka.consumer.group.sync_rate',
+]
+
+CONSUMER_GROUP_METRICS_OPTIONAL = [
+    'confluent.kafka.consumer.group.join_time_avg',
+    'confluent.kafka.consumer.group.join_time_max',
+    'confluent.kafka.consumer.group.commit_latency_avg',
     'confluent.kafka.consumer.group.sync_time_avg',
     'confluent.kafka.consumer.group.sync_time_max',
 ]
@@ -495,6 +498,7 @@ ALWAYS_PRESENT_METRICS = (
     + PRODUCER_NODE_METRICS
     + PRODUCER_TOPIC_METRICS
     + CONSUMER_METRICS
+    + CONSUMER_GROUP_METRICS
     + CONSUMER_NODE_METRICS
     + KSQL_QUERY_STATS
 )
@@ -510,7 +514,7 @@ NOT_ALWAYS_PRESENT_METRICS = (
     + CONNECT_METRICS_OPTIONAL
     + CONSUMER_FETCH_METRICS
     + CONSUMER_FETCH_TOPIC_METRICS
-    + CONSUMER_GROUP_METRICS
+    + CONSUMER_GROUP_METRICS_OPTIONAL
     + KSQL_OPTIONAL
 )
 

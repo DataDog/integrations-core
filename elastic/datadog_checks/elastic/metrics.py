@@ -288,6 +288,21 @@ STATS_METRICS = {
     'elasticsearch.fs.total.available_in_bytes': ('gauge', 'fs.total.available_in_bytes'),
 }
 
+ADDITIONAL_METRICS_POST_7_9_0 = {
+    'elasticsearch.indexing_pressure.memory.current.coordinating_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.current.coordinating_in_bytes',
+    ),
+    'elasticsearch.indexing_pressure.memory.current.primary_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.current.primary_in_bytes',
+    ),
+    'elasticsearch.indexing_pressure.memory.current.replica_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.current.replica_in_bytes',
+    ),
+}
+
 ADDITIONAL_METRICS_POST_7_2_0 = {
     'elasticsearch.refresh.external.total': ('gauge', 'indices.refresh.external_total'),
     'elasticsearch.refresh.external.total.time': (
@@ -716,6 +731,9 @@ def stats_for_version(version, jvm_rate=False):
 
     if version >= [7, 2, 0]:
         metrics.update(ADDITIONAL_METRICS_POST_7_2_0)
+
+    if version >= [7, 9, 0]:
+        metrics.update(ADDITIONAL_METRICS_POST_7_9_0)
 
     return metrics
 
