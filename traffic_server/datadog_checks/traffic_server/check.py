@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
@@ -48,6 +48,7 @@ class TrafficServerCheck(AgentCheck):
         self.service_check("can_connect", AgentCheck.OK, tags=self.tags)
 
     def get_hostname_tag(self, response_json):
+        # type: (Dict[str, Any]) -> List[str]
         global_metrics = response_json.get("global")
         if global_metrics is not None:
             for hostname_metric in HOSTNAME_METRIC_NAMES:
@@ -57,6 +58,7 @@ class TrafficServerCheck(AgentCheck):
         return []
 
     def collect_metrics(self, response_json, hostname_tag):
+        # type: (Dict[str, Any], List[str]) -> None
         global_metrics = response_json.get("global")
         if global_metrics is None:
             self.log.warning("Could not parse traffic server metrics payload, skipping metric and version collection")
@@ -81,6 +83,7 @@ class TrafficServerCheck(AgentCheck):
 
     @AgentCheck.metadata_entrypoint
     def _submit_version_metadata(self, short_version, build_number):
+        # type: (Optional[str], Optional[str]) -> None
         version = short_version
         if short_version is not None:
             try:
