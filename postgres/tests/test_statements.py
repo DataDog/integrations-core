@@ -710,13 +710,10 @@ def test_activity_snapshot_collection(
         assert event['ddagentversion'] == datadog_agent.get_version()
         assert len(event['postgres_activity']) > 0
         # find bob's query and blocking_bob's query
-        bobs_query = None
-        blocking_bobs_query = None
-        for query_json in event['postgres_activity']:
-            if 'usename' in query_json and query_json['usename'] == "bob":
-                bobs_query = query_json
-            if 'usename' in query_json and query_json['usename'] == "blocking_bob":
-                blocking_bobs_query = query_json
+        bobs_query = next((q for q in event['postgres_activity'] if q.get('usename', None) == "bob"), None)
+        blocking_bobs_query = next(
+            (q for q in event['postgres_activity'] if q.get('usename', None) == "blocking_bob"), None
+        )
         assert bobs_query is not None
         assert blocking_bobs_query is not None
 
