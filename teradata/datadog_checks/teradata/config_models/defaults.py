@@ -7,25 +7,68 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-
 from datadog_checks.base.utils.models.fields import get_default_field_value
+
+
+def shared_global_custom_queries(field, value):
+    return get_default_field_value(field, value)
 
 
 def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_empty_default_hostname(field, value):
-    return False
-
-
-def instance_min_collection_interval(field, value):
-    return 15
-
-
-def instance_service(field, value):
+def instance_account(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_tags(field, value):
+def instance_connection_string(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_database(field, value):
+    return 'system'
+
+
+def instance_dbc_name(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_driver(field, value):
+    return '<Install_Dir>/teradata/client/ODBC/lib/tdataodbc_sb64.so'
+
+
+def instance_https_port(field, value):
+    return 443
+
+
+def instance_mechanism_key(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_mechanism_name(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_password(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_ssl_ca(field, value):
+    return '/path/to/ssl_ca_dir'
+
+
+def instance_ssl_ca_path(field, value):
+    return '/path/to/ssl_ca_file/ca.pem'
+
+
+def instance_ssl_mode(field, value):
+    return 'Prefer'
+
+
+def instance_use_tls(field, value):
+    return False
+
+
+def instance_username(field, value):
     return get_default_field_value(field, value)
