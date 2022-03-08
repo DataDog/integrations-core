@@ -1,0 +1,17 @@
+{ 
+  "name": "FoundationDB errors",
+  "type": "logs",
+  "page": "stream",
+  "query": "service:foundationdb @Severity:>=40",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": ["core_index","core_host","core_service","core_status","log_Severity","log_Type"],
+  "options": {
+    "columns": ["host","@Severity","@Type"],
+    "show_date_column": true,
+    "show_message_column": true,
+    "message_display": "inline",
+    "show_timeline": true
+  }
+}

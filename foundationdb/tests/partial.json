@@ -1,0 +1,259 @@
+{
+    "client" : {
+        "cluster_file" : {
+            "path" : "/usr/local/etc/foundationdb/fdb.cluster",
+            "up_to_date" : true
+        },
+        "coordinators" : {
+            "coordinators" : [
+                {
+                    "address" : "127.0.0.1:4000",
+                    "reachable" : true
+                }
+            ],
+            "quorum_reachable" : true
+        },
+        "database_status" : {
+            "available" : true,
+            "healthy" : true
+        },
+        "messages" : [
+        ],
+        "timestamp" : 1623422626
+    },
+    "cluster" : {
+        "active_primary_dc" : "",
+        "clients" : {
+            "count" : 0
+        },
+        "cluster_controller_timestamp" : 1623422626,
+        "configuration" : {
+            "backup_worker_enabled" : 0,
+            "coordinators_count" : 1,
+            "excluded_servers" : [
+            ],
+            "log_spill" : 2,
+            "redundancy_mode" : "single",
+            "storage_engine" : "memory-2",
+            "usable_regions" : 1
+        },
+        "connection_string" : "a:b@127.0.0.1:4000",
+        "data" : {
+            "average_partition_size_bytes" : 400000,
+            "least_operating_space_bytes_log_server" : 70586275329,
+            "least_operating_space_bytes_storage_server" : 973650896,
+            "moving_data" : {
+                "highest_priority" : 0,
+                "in_flight_bytes" : 0,
+                "in_queue_bytes" : 0,
+                "total_written_bytes" : 0
+            },
+            "partitions_count" : 1,
+            "state" : {
+                "healthy" : true,
+                "min_replicas_remaining" : 1,
+                "name" : "healthy"
+            },
+            "system_kv_size_bytes" : 0,
+            "team_trackers" : [
+                {
+                    "in_flight_bytes" : 0,
+                    "primary" : true,
+                    "state" : {
+                        "healthy" : true,
+                        "min_replicas_remaining" : 1,
+                        "name" : "healthy"
+                    },
+                    "unhealthy_servers" : 0
+                }
+            ],
+            "total_disk_used_bytes" : 105054264,
+            "total_kv_size_bytes" : 0
+        },
+        "database_available" : true,
+        "database_lock_state" : {
+            "locked" : false
+        },
+        "datacenter_lag" : {
+            "seconds" : 0,
+            "versions" : 0
+        },
+        "degraded_processes" : 0,
+        "fault_tolerance" : {
+            "max_zone_failures_without_losing_availability" : 0,
+            "max_zone_failures_without_losing_data" : 0
+        },
+        "full_replication" : true,
+        "generation" : 2,
+        "incompatible_connections" : [
+        ],
+        "latency_probe" : {
+            "batch_priority_transaction_start_seconds" : 0.00027084400000000001,
+            "commit_seconds" : 0.00745702,
+            "immediate_priority_transaction_start_seconds" : 0.000122786,
+            "read_seconds" : 5.1260000000000007e-05,
+            "transaction_start_seconds" : 0.00026035300000000001
+        },
+        "layers" : {
+            "_valid" : true
+        },
+        "logs" : [
+            {
+                "begin_version" : 0,
+                "current" : true,
+                "epoch" : 2,
+                "log_fault_tolerance" : 0,
+                "log_interfaces" : [
+                    {
+                        "address" : "127.0.0.1:4000",
+                        "healthy" : true,
+                        "id" : "6b1391a23e45856b"
+                    }
+                ],
+                "log_replication_factor" : 1,
+                "log_write_anti_quorum" : 0,
+                "possibly_losing_data" : false
+            }
+        ],
+        "machines" : {
+            "ae7d88fedcc971078dc6a848fd7bc1e8" : {
+                "address" : "127.0.0.1",
+                "contributing_workers" : 1,
+                "cpu" : {
+                    "logical_core_utilization" : 0.16466699999999998
+                },
+                "excluded" : false,
+                "locality" : {
+                    "machineid" : "ae7d88fedcc971078dc6a848fd7bc1e8",
+                    "processid" : "925a00783089397aea10e19a7dab6816",
+                    "zoneid" : "ae7d88fedcc971078dc6a848fd7bc1e8"
+                },
+                "machine_id" : "ae7d88fedcc971078dc6a848fd7bc1e8",
+                "memory" : {
+                    "committed_bytes" : 14580350976,
+                    "free_bytes" : 1194438656,
+                    "total_bytes" : 15774789632
+                },
+                "network" : {
+                    "megabits_received" : {
+                        "hz" : 0
+                    },
+                    "megabits_sent" : {
+                        "hz" : 0
+                    },
+                    "tcp_segments_retransmitted" : {
+                        "hz" : 0
+                    }
+                }
+            }
+        },
+        "messages" : [
+        ],
+        "page_cache" : {
+            "log_hit_rate" : 1,
+            "storage_hit_rate" : 1
+        },
+        "protocol_version" : "fdb00b063010001",
+        "qos" : {
+            "batch_performance_limited_by" : {
+                "description" : "The database is not being saturated by the workload.",
+                "name" : "workload",
+                "reason_id" : 2
+            },
+            "batch_released_transactions_per_second" : 3.1974399999999998e-14,
+            "batch_transactions_per_second_limit" : 33872500,
+            "limiting_data_lag_storage_server" : {
+                "seconds" : 0,
+                "versions" : 0
+            },
+            "limiting_durability_lag_storage_server" : {
+                "seconds" : 5.0000299999999998,
+                "versions" : 5000032
+            },
+            "limiting_queue_bytes_storage_server" : 0,
+            "performance_limited_by" : {
+                "description" : "The database is not being saturated by the workload.",
+                "name" : "workload",
+                "reason_id" : 6
+            },
+            "released_transactions_per_second" : 1.6363799999999999,
+            "throttled_tags" : {
+                "auto" : {
+                    "count" : 0
+                },
+                "manual" : {
+                    "count" : 0
+                }
+            },
+            "transactions_per_second_limit" : 1755670,
+            "worst_data_lag_storage_server" : {
+                "seconds" : 0,
+                "versions" : 0
+            },
+            "worst_durability_lag_storage_server" : {
+                "seconds" : 5.0000299999999998,
+                "versions" : 5000032
+            },
+            "worst_queue_bytes_log_server" : 71,
+            "worst_queue_bytes_storage_server" : 2000
+        },
+        "recovery_state" : {
+            "active_generations" : 1,
+            "description" : "Recovery complete.",
+            "name" : "fully_recovered"
+        },
+        "workload" : {
+            "bytes" : {
+                "read" : {
+                    "counter" : 6467569,
+                    "hz" : 1008.63,
+                    "roughness" : 927.16399999999999
+                },
+                "written" : {
+                    "counter" : 46199,
+                    "hz" : 14.1921,
+                    "roughness" : 70
+                }
+            },
+            "keys" : {
+                "read" : {
+                    "counter" : 27810,
+                    "hz" : 4.1976399999999998,
+                    "roughness" : 2.8627500000000001
+                }
+            },
+            "operations" : {
+                "location_requests" : {
+                    "counter" : 48,
+                    "hz" : 0,
+                    "roughness" : 0
+                },
+                "low_priority_reads" : {
+                    "counter" : 0,
+                    "hz" : 0,
+                    "roughness" : 0
+                },
+                "memory_errors" : {
+                    "counter" : 0,
+                    "hz" : 0,
+                    "roughness" : 0
+                },
+                "read_requests" : {
+                    "counter" : 48440,
+                    "hz" : 7.1959600000000004,
+                    "roughness" : 4.5256100000000004
+                },
+                "reads" : {
+                    "counter" : 48440,
+                    "hz" : 7.1959600000000004,
+                    "roughness" : 4.5256100000000004
+                },
+                "writes" : {
+                    "counter" : 1307,
+                    "hz" : 0.39977699999999999,
+                    "roughness" : 1
+                }
+            }
+        }
+    }
+}
