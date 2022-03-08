@@ -4,7 +4,9 @@
 import re
 from typing import Any, List, Optional, Tuple
 
-VERSION_METRIC_NAME = "server"
+SHORT_VERSION_METRIC_NAMES = ['server', 'proxy.node.version.manager.short']
+VERSION_BUILD_NUMBER_METRIC_NAME = 'proxy.node.version.manager.build_number'
+HOSTNAME_METRIC_NAMES = ['proxy.node.hostname_FQ', 'proxy.node.hostname']
 
 SIMPLE_METRICS = {
     "proxy.process.http.origin_server_total_request_bytes": {
@@ -1329,7 +1331,6 @@ SIMPLE_METRICS = {
         "method": "gauge",
     },
     "proxy.process.cache.percent_full": {"name": "process.cache.percent_full", "method": "gauge"},
-    # TODO cache
     "proxy.process.cache.direntries.total": {"name": "process.cache.direntries.total", "method": "gauge"},
     "proxy.process.cache.direntries.used": {"name": "process.cache.direntries.used", "method": "gauge"},
     "proxy.process.cache.directory_collision": {
