@@ -42,7 +42,7 @@ SELECT
         NVARCHAR, TODATETIMEOFFSET(req.start_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
     ) as query_start,
     sess.login_name as user_name,
-    sess.last_request_start_time,
+    sess.last_request_start_time as last_request_start_time,
     sess.session_id as id,
     DB_NAME(sess.database_id) as database_name,
     sess.status as session_status,
@@ -64,9 +64,6 @@ WHERE sess.session_id != @@spid AND sess.status != 'sleeping'
 # enumeration of the columns we collect
 # from sys.dm_exec_requests
 DM_EXEC_REQUESTS_COLS = [
-    "status",
-    "session_id",
-    "start_time",
     "command",
     "blocking_session_id",
     "wait_type",
@@ -157,7 +154,7 @@ class SqlserverActivity(DBMAsyncJob):
     def _normalize_queries_and_filter_rows(self, rows, max_bytes_limit):
         normalized_rows = []
         estimated_size = 0
-        rows.sort(key=lambda r: self._get_sort_key(r))
+        rows = sorted(rows, key=lambda r: self._get_sort_key(r))
         for row in rows:
             row = self._obfuscate_and_sanitize_row(row)
             estimated_size += self._get_estimated_row_size_bytes(row)
@@ -187,9 +184,7 @@ class SqlserverActivity(DBMAsyncJob):
 
     @staticmethod
     def _get_sort_key(r):
-        if "query_start" in r and r["query_start"] is not None:
-            return r["query_start"]
-        return datetime.datetime.now()
+        return r.get("query_start") or datetime.datetime.now()
 
     def _obfuscate_and_sanitize_row(self, row):
         row = self._remove_null_vals(row)
