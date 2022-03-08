@@ -58,7 +58,7 @@ SELECT
 from sys.dm_exec_sessions sess
     full outer join sys.dm_exec_connections conn on sess.session_id = conn.session_id
     full outer join sys.dm_exec_requests req on sess.session_id = req.session_id
-    full outer join sys.dm_tran_session_transactions ts on conn.session_id = ts.session_id
+    full outer join sys.dm_tran_session_transactions ts on sess.session_id = ts.session_id
     full outer join sys.dm_tran_active_transactions ta on ts.transaction_id = ta.transaction_id
 cross apply sys.dm_exec_sql_text(conn.most_recent_sql_handle) text
 where
