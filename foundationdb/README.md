@@ -10,12 +10,12 @@ and, optionally, FoundationDB transaction logs.
 
 Both the check and metrics apply to the FoundationDB cluster as a whole,
 and should only be installed on one host. This doesn't need to be one that is
-running FoundationDB, but just one with access to it. The host chosen to
-collect the metrics is required to have the [FoundationDB client][8] installed.
+running FoundationDB, but just one with access to it.
 
 ### Installation
 
-The FoundationDB check is included in the [Datadog Agent][2] package, so you don't need to install anything.
+The FoundationDB check is included in the [Datadog Agent][2] package,
+but in it requires to have the [FoundationDB client][8] installed.
 
 ### Configuration
 
@@ -140,7 +140,7 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-extras/blob/master/foundationdb/metadata.csv
 [7]: https://docs.datadoghq.com/help/
-[8]: https://www.foundationdb.org/download/
+[8]: https://apple.github.io/foundationdb/downloads.html
 [9]: https://app.datadoghq.com/account/settings#agent
 [10]: https://apple.github.io/foundationdb/administration.html#default-cluster-file
 [11]: https://apple.github.io/foundationdb/tls.html
