@@ -74,6 +74,7 @@ class TrafficServerCheck(AgentCheck):
                 method(name, metric_value, tags=self.tags + tags)
 
     def collect_version(self, global_metrics):
+        # type: (Dict[str, Any], List[str]) -> None
         server_version = None
         for short_version in SHORT_VERSION_METRIC_NAMES:
             short_version_value = global_metrics.get(short_version)
@@ -84,6 +85,7 @@ class TrafficServerCheck(AgentCheck):
         self._submit_version_metadata(server_version, build_number)
 
     def parse_version(self, raw_version, build_number):
+        # type: (str, str) -> Dict[str, str]
         # A custom version mapper is required since the build number is available but not release
         major, minor, patch = raw_version.split('.')
         return {
