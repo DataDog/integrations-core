@@ -21,10 +21,18 @@ init_config:
     #     tags: <TAGS>
 
 ## Every instance is scheduled independent of the others.
+##
+## Note: All '%' characters must be escaped as '%%'
 #
 instances:
 
   -
+    ## @param use_odbc - string - optional
+    ## Whether or not to use ODBC method for connecting to the Teradata database. If `true`, ODBC options are required.
+    ## If `false`, the check will use the teradatasql python driver to connect to the Teradata database.
+    #
+    # use_odbc: <USE_ODBC>
+
     ## @param dsn - string - optional
     ## Data Source Name. The name of ODBC Driver for Teradata in the [ODBC Data Sources] section of odbc.ini.
     #
@@ -35,15 +43,26 @@ instances:
     #
     # account: <ACCOUNT>
 
-    ## @param dbc_name - string - optional
-    ## The IP address or FQDN (fully qualified domain name) of the Teradata database server.
+    ## @param host - string - required
+    ## The IP address or FQDN (fully qualified domain name) of the Teradata database server. If `use_odbc` is enabled,
+    ## specify the DBC name.
     #
-    # dbc_name: <IP>
+    host: <IP>
+
+    ## @param port - string - optional
+    ## Specifies the Teradata database port number
+    #
+    # port: <PORT>
 
     ## @param database - string - optional - default: system
     ## The name of the database to access.
     #
     # database: system
+
+    ## @param partition - string - optional - default: DBC/SQL
+    ## Specifies the database partition. Not available if using ODBC.
+    #
+    # partition: DBC/SQL
 
     ## @param driver - string - optional - default: Teradata Database ODBC Driver 17.10
     ## The named ODBC Driver or the full path to ODBC Driver for Teradata shared objects
@@ -52,19 +71,19 @@ instances:
     # driver: Teradata Database ODBC Driver 17.10
 
     ## @param connection_string - string - optional
-    ## A custom connection string to be used for connecting to the Teradata database.
+    ## Specify a custom connection string to be used for connecting to the Teradata database.
     #
     # connection_string: <CONNECTION_STRING>
 
-    ## @param username - string - optional
+    ## @param username - string - required
     ## Username for the Datadog-Teradata check user.
     #
-    # username: <USERNAME>
+    username: <USERNAME>
 
-    ## @param password - string - optional
+    ## @param password - string - required
     ## Password for the Datadog-Teradata check user.
     #
-    # password: <PASSWORD>
+    password: <PASSWORD>
 
     ## @param use_tls - string - optional
     ## Whether or not to use TLS for making connections to the Teradata database.
@@ -83,10 +102,15 @@ instances:
     ## * Disable
     ## * Prefer
     ## * Require
-    ## * Verify-CA
-    ## * Verify-Full
+    ## * Verify-CA (Note: Does not perform TLS certificate verification if `use_odbc: false`)
+    ## * Verify-Full (Note: Does not perform TLS certificate verification if `use_odbc: false`)
     #
     # ssl_mode: <SSL_MODE>
+
+    ## @param ssl_protocol - string - optional
+    ## Specifies the TLS protocol for HTTPS/TLS connections. Currently, only TLSv1.2 is supported.
+    #
+    # ssl_protocol: <SSL_PROTOCOL>
 
     ## @param ssl_ca - string - optional - default: /path/to/ssl_ca_dir
     ## The full path of the directory containing the root certificates for trusted CAs. If `ssl_mode` is not set to
