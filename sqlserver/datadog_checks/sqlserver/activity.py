@@ -1,7 +1,7 @@
 import binascii
+import datetime
 import re
 import time
-import datetime
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
