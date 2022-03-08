@@ -3,3 +3,4 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 DEFAULT_COMMAND_TIMEOUT = 5
 SERVICE_CHECK_NAME = "teradata.can_connect"
+DEFAULT_CONNECT_FAILURE_TTL = 300
