@@ -35,7 +35,11 @@ def instance_dbc_name(field, value):
 
 
 def instance_driver(field, value):
-    return '<Install_Dir>/teradata/client/ODBC/lib/tdataodbc_sb64.so'
+    return 'Teradata Database ODBC Driver 17.10'
+
+
+def instance_dsn(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_https_port(field, value):
