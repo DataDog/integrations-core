@@ -205,6 +205,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._activity_max_rows = self._config.statement_activity_config.get('payload_row_limit', 3500)
         # Keep track of last time we sent an activity event
         self._time_since_last_activity_event = 0
+        self._pg_stat_activity_cols = None
 
     def _dbtags(self, db, *extra_tags):
         """
@@ -253,6 +254,13 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return rows
+
+    def _get_pg_stat_activity_cols_cached(self, expected_cols):
+        if self._pg_stat_activity_cols:
+            return self._pg_stat_activity_cols
+
+        self._pg_stat_activity_cols = self._get_available_activity_columns(expected_cols)
+        return self._pg_stat_activity_cols
 
     def _get_available_activity_columns(self, all_expected_columns):
         with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
@@ -355,7 +363,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def _collect_statement_samples(self):
         start_time = time.time()
-        pg_activity_cols = self._get_available_activity_columns(PG_STAT_ACTIVITY_COLS)
+        pg_activity_cols = self._get_pg_stat_activity_cols_cached(PG_STAT_ACTIVITY_COLS)
         rows = self._get_new_pg_stat_activity(pg_activity_cols)
         rows = self._filter_and_normalize_statement_rows(rows)
         event_samples = self._collect_plans(rows)
