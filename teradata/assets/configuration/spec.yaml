@@ -9,19 +9,42 @@ files:
   - template: instances
     description: |
       Every instance is scheduled independent of the others.
-
-      Note: All '%' characters must be escaped as '%%'
+#      Note: All '%' characters must be escaped as '%%'
     options:
-    - name: host
-      description: Host IP of your Teradata instance.
+    - name: dsn
+      description: Data Source Name. The name of ODBC Driver for Teradata in the [ODBC Data Sources] section of odbc.ini.
+      required: true
       value:
         type: string
-        example: <HOST>
-    - name: port
-      description: Port of your Teradata instance.
+        example: Teradata Database ODBC Driver 17.10
+    - name: account
+      description: |
+        The account string to use when logging into the database.
       value:
         type: string
-        example: <PORT>
+    - name: dbc_name
+      description: The IP address or FQDN (fully qualified domain name) of the Teradata database server.
+      value:
+        type: string
+        example: <IP>
+    - name: database
+      description: |
+        The name of the database to access.
+      value:
+        type: string
+        example: system
+    - name: driver
+      description: |
+        The full path to ODBC Driver for Teradata shared objects.
+      value:
+        type: string
+        example: <Install_Dir>/teradata/client/ODBC/lib/tdataodbc_sb64.so
+    - name: connection_string
+      description: |
+        A custom connection string to be used for connecting to the Teradata database.
+      value:
+        type: string
+        example: "<CONNECTION_STRING>"
     - name: username
       description: Username for the Datadog-Teradata check user.
       value:
@@ -30,23 +53,62 @@ files:
       description: Password for the Datadog-Teradata check user.
       value:
         type: string
-    - name: database
+    - name: use_tls
+      description: Whether or not to use TLS for making connections to the Teradata database.
+      value:
+        type: string
+        default: false
+    - name: https_port
+      description: The port number used for making TLS connections to the Teradata database.
+      value:
+        type: string
+        example: <PORT>
+        default: 443
+    - name: ssl_mode
       description: |
-        Database name to query.
+        The SSL mode used for making TLS connections to the Teradata database.
+        Valid options are:
+        * Allow
+        * Disable
+        * Prefer
+        * Require
+        * Verify-CA
+        * Verify-Full
       value:
         type: string
-        example: system
-    - name: driver
-      description: The named ODBC driver.
-      value:
-        type: string
-        example: Teradata Database ODBC Driver 17.10
-    - name: connection_string
+        default: Prefer
+    - name: ssl_ca
       description: |
-        Specify a custom connection string to be used
-        Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=yes"
+        The full path of the directory containing the root certificates for trusted CAs. If `ssl_mode` is not set to
+        `Verify-CA` or `Verify-Full`, `ssl_ca` path or `ssl_ca_path` file name will be ignored.
       value:
         type: string
-        example: "<CONNECTION_STRING>"
+        example: /path/to/ssl_ca_dir
+    - name: ssl_ca_path
+      description: |
+        The full path and name of a .pem file containing one or more certificates for
+        trusted Root and Intermediate CAs. If `ssl_mode` is not set to `Verify-CA` or `Verify-Full`,
+        `ssl_ca` path or `ssl_ca_path` file name will be ignored.
+      value:
+        type: string
+        example: /path/to/ssl_ca_file/ca.pem
+    - name: mechanism_key
+      description: |
+        Key parameter to the authenication mechanism.
+      value:
+        type: string
+    - name: mechanism_name
+      description: |
+        The authentication mechanism for connecting to the Teradata data source. If no value is provided,
+        the default is determined by the configuration in the `tdgssconfigure` XML file.
+        For more info, see: https://docs.teradata.com/r/ODBC-Driver-for-Teradata-User-Guide/October-2021
+
+        Valid options are:
+        * TD2 - Selects Teradata 2 authentication mechanism. Username and password are required.
+        * TDNEGO - Selects the Authentication Mechanism automatically based on the policy without user involvement.
+        * LDAP - Selects LDAP as the authentication mechanism. The application provides the username and password.
+        * KRB5 - Selects Kerberos as the authentication mechanism. The application provides the username and password.
+      value:
+        type: string
   - template: instances/db
   - template: instances/default

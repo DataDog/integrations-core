@@ -7,10 +7,9 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-
 from __future__ import annotations
 
-from typing import Optional
+from typing import Any, Mapping, Optional, Sequence
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -24,6 +23,7 @@ class SharedConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    global_custom_queries: Optional[Sequence[Mapping[str, Any]]]
     service: Optional[str]
 
     @root_validator(pre=True)

@@ -7,10 +7,9 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-
 from __future__ import annotations
 
-from typing import Optional, Sequence
+from typing import Optional
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -24,10 +23,21 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    empty_default_hostname: Optional[bool]
-    min_collection_interval: Optional[float]
-    service: Optional[str]
-    tags: Optional[Sequence[str]]
+    account: Optional[str]
+    connection_string: Optional[str]
+    database: Optional[str]
+    dbc_name: Optional[str]
+    driver: Optional[str]
+    dsn: str
+    https_port: Optional[str]
+    mechanism_key: Optional[str]
+    mechanism_name: Optional[str]
+    password: Optional[str]
+    ssl_ca: Optional[str]
+    ssl_ca_path: Optional[str]
+    ssl_mode: Optional[str]
+    use_tls: Optional[str]
+    username: Optional[str]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):
