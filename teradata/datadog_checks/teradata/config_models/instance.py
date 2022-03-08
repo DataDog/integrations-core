@@ -28,7 +28,7 @@ class InstanceConfig(BaseModel):
     database: Optional[str]
     dbc_name: Optional[str]
     driver: Optional[str]
-    dsn: str
+    dsn: Optional[str]
     https_port: Optional[str]
     mechanism_key: Optional[str]
     mechanism_name: Optional[str]
