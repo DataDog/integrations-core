@@ -4,11 +4,7 @@ services:
   trafficserver:
     image: shaker/trafficserver:${TRAFFIC_SERVER_VERSION}
     tty: true
-    #entrypoint: ["/opt/ats/bin/traffic_manager"]
-    #command: ['--nosyslog', '--maxRecords', '3000']
     volumes:
      - ./plugin.config:/etc/trafficserver/plugin.config
-     #- ./logging.yaml:/opt/ats/etc/trafficserver/logging.yaml
-     #- ./records.config:/opt/ats/etc/trafficserver/records.config
     ports:
         - "8080:8080"
