@@ -41,7 +41,7 @@ SELECT
         NVARCHAR, TODATETIMEOFFSET(CURRENT_TIMESTAMP, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
     ) as now,
     CONVERT(
-        NVARCHAR, TODATETIMEOFFSET(r.start_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
+        NVARCHAR, TODATETIMEOFFSET(req.start_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
     ) as query_start,
     sess.login_name as user_name,
     sess.last_request_start_time,
@@ -52,13 +52,13 @@ SELECT
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
-    r.*
+    {exec_request_columns}
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
-    INNER JOIN sys.dm_exec_requests r
-        ON c.connection_id = r.connection_id
-    CROSS APPLY sys.dm_exec_sql_text(r.sql_handle) text
+    INNER JOIN sys.dm_exec_requests req
+        ON c.connection_id = req.connection_id
+    CROSS APPLY sys.dm_exec_sql_text(req.sql_handle) text
 WHERE sess.session_id != @@spid AND sess.status != 'sleeping'
 """,
 ).strip()
@@ -101,16 +101,37 @@ WHERE sess.session_id != @@spid
 """,
 ).strip()
 
+# enumeration of the columns we collect
+# from sys.dm_exec_requests
+DM_EXEC_REQUESTS_COLS = [
+    "status",
+    "session_id",
+    "start_time",
+    "command",
+    "blocking_session_id",
+    "wait_type",
+    "wait_time",
+    "last_wait_type",
+    "open_transaction_count",
+    "transaction_id",
+    "percent_complete",
+    "estimated_completion_time",
+    "cpu_time",
+    "total_elapsed_time",
+    "reads",
+    "writes",
+    "logical_reads",
+    "transaction_isolation_level",
+    "lock_timeout",
+    "deadlock_priority",
+    "row_count",
+    "query_hash",
+    "query_plan_hash",
+]
+
 # enumeration of columns we exclude from
 # final agent collection
 dm_exec_requests_exclude_keys = {
-    'sql_handle',
-    'plan_handle',
-    'statement_sql_handle',
-    'task_address',
-    'page_resource',
-    'scheduler_id',
-    'context_info',
     # remove status in favor of session_status
     'status',
     # remove session_id in favor of id
@@ -162,6 +183,7 @@ class SqlserverActivity(DBMAsyncJob):
         self._activity_payload_max_bytes = MAX_PAYLOAD_BYTES
         # keep track of last time we sent an event with tx data
         self._time_since_last_tx_activity_event = 0
+        self._exec_requests_cols_cached = None
 
     def _close_db_conn(self):
         pass
@@ -181,10 +203,13 @@ class SqlserverActivity(DBMAsyncJob):
         return rows
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _get_activity(self, cursor):
+    def _get_activity(self, cursor, exec_request_columns):
         self.log.debug("collecting sql server activity")
-        self.log.debug("Running query [%s]", ACTIVITY_QUERY)
-        cursor.execute(ACTIVITY_QUERY)
+        query = ACTIVITY_QUERY.format(
+            exec_request_columns=', '.join(['req.{}'.format(r) for r in exec_request_columns])
+        )
+        self.log.debug("Running query [%s]", query)
+        cursor.execute(query)
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
@@ -223,11 +248,27 @@ class SqlserverActivity(DBMAsyncJob):
     def _get_key_for_row(row):
         return (row['id'], row['last_request_start_time'])
 
+    def _get_exec_requests_cols_cached(self, cursor, expected_cols):
+        if self._exec_requests_cols_cached:
+            return self._exec_requests_cols_cached
+
+        self._exec_requests_cols_cached = self._get_available_requests_columns(cursor, expected_cols)
+        return self._exec_requests_cols_cached
+
+    def _get_available_requests_columns(self, cursor, all_expected_columns):
+        cursor.execute("select TOP 0 * from sys.dm_exec_requests")
+        all_columns = set([i[0] for i in cursor.description])
+        available_columns = [c for c in all_expected_columns if c in all_columns]
+        missing_columns = set(all_expected_columns) - set(available_columns)
+        if missing_columns:
+            self._log.debug("missing the following expected columns from sys.dm_exec_requests: %s", missing_columns)
+        self._log.debug("found available sys.dm_exec_requests columns: %s", available_columns)
+        return available_columns
+
     @staticmethod
     def _get_sort_key(row):
         key = ""
-        if "transaction_begin_time" in row \
-                and row["transaction_begin_time"] is not None:
+        if "transaction_begin_time" in row and row["transaction_begin_time"] is not None:
             key = row["transaction_begin_time"]
         elif "query_start" in row and row["query_start"] is not None:
             key = row["query_start"]
@@ -324,7 +365,8 @@ class SqlserverActivity(DBMAsyncJob):
         with self.check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self.check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 connections = self._get_active_connections(cursor)
-                rows = self._get_activity(cursor)
+                request_cols = self._get_exec_requests_cols_cached(cursor, DM_EXEC_REQUESTS_COLS)
+                rows = self._get_activity(cursor, request_cols)
                 normalized_rows = self._normalize_queries_and_filter_rows(rows, MAX_PAYLOAD_BYTES)
                 if self._report_tx_activity_event():
                     tx_rows = self._get_tx_activity(cursor)
