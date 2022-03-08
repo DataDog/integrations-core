@@ -83,12 +83,6 @@ def test_build_metric(caplog, raw_metric, expected_name, expected_tags, expected
             None, '234', "Could not submit version metadata, got: None, build number: 234", id="None server version"
         ),
         pytest.param(
-            "(null)",
-            '234',
-            "Unable to transform `version` metadata value `(null)-234`: Version does not adhere to semantic versioning",
-            id="Null server version",
-        ),
-        pytest.param(
             "9.1.2",
             "(null)",
             None,
@@ -112,6 +106,83 @@ def test_submit_metadata_invalid(caplog, instance, server_version, build_version
         assert "checks.base.traffic_server" not in caplog.text
     else:
         assert logline in caplog.text
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'mock_response_data, expected_version',
+    [
+        pytest.param({'server': '(null)'}, {}, id="only null server"),
+        pytest.param({'server': '(null)', 'proxy.node.version.manager.short': '(null)'}, {}, id="both null"),
+        pytest.param({'servr': '(null)', 'proxy.node.version.manager.short': '(null)'}, {}, id="no server"),
+        pytest.param({'server': '(null)', 'proxy.nodeversion.manager.short': '(null)'}, {}, id="no short"),
+        pytest.param({'erver': '(null)', 'roxy.node.version.manager.short': '(null)'}, {}, id="both missing"),
+        pytest.param(
+            {'server': '9.1.1', 'proxy.node.version.manager.shor': '(null)'},
+            {
+                "version.scheme": "semver",
+                "version.major": '9',
+                "version.minor": '1',
+                "version.patch": '1',
+                "version.raw": "9.1.1",
+            },
+            id="short missing",
+        ),
+        pytest.param(
+            {'erver': '9.1.1', 'proxy.node.version.manager.short': '9.0.1'},
+            {
+                "version.scheme": "semver",
+                "version.major": '9',
+                "version.minor": '0',
+                "version.patch": '1',
+                "version.raw": "9.0.1",
+            },
+            id="server missing",
+        ),
+        pytest.param(
+            {'server': '9.1.1', 'proxy.node.version.manager.short': '9.0.1'},
+            {
+                "version.scheme": "semver",
+                "version.major": '9',
+                "version.minor": '0',
+                "version.patch": '1',
+                "version.raw": "9.0.1",
+            },
+            id="both available",
+        ),
+        pytest.param(
+            {
+                'server': '9.1.1',
+                'proxy.node.version.manager.short': '9.0.1',
+                'proxy.node.version.manager.build_number': '1234',
+            },
+            {
+                "version.scheme": "traffic_server",
+                "version.major": '9',
+                "version.minor": '0',
+                "version.patch": '1',
+                "version.build": '1234',
+                "version.raw": "9.0.1",
+            },
+            id="build available",
+        ),
+        pytest.param(
+            {
+                'serve': '9.1.1',
+                'proxy.node.version.manager.shor': '9.0.1',
+                'proxy.node.version.manager.build_number': '1234',
+            },
+            {},
+            id="only build available",
+        ),
+    ],
+)
+def test_collect_version(caplog, datadog_agent, instance, mock_response_data, expected_version):
+    check = TrafficServerCheck('traffic_server', {}, [instance])
+    check.check_id = 'test:123'
+
+    check.collect_version(mock_response_data)
+    datadog_agent.assert_metadata("test:123", expected_version)
 
 
 @pytest.mark.unit
@@ -142,17 +213,7 @@ def test_submit_metadata_invalid(caplog, instance, server_version, build_version
 )
 def test_get_hostname_tag(instance, mock_response_data, expected_tag):
     check = TrafficServerCheck('traffic_server', {}, [instance])
-    global_metrics = {'global': mock_response_data}
 
-    hostname = check.get_hostname_tag(global_metrics)
+    hostname = check.get_hostname_tag(mock_response_data)
 
     assert hostname == expected_tag
-
-
-def test_collect_metrics_bad_format(instance, caplog):
-    caplog.clear()
-    caplog.set_level(logging.WARNING)
-    check = TrafficServerCheck('traffic_server', {}, [instance])
-    bad_response_json = {}
-    check.collect_metrics(bad_response_json, [])
-    assert "Could not parse traffic server metrics payload, skipping metric and version collection" in caplog.text
