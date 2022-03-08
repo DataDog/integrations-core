@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.teradata.queries import DB_SPACE
+from datadog_checks.teradata.queries import DB_SPACE, PCT_SPACE_BY_DB
 
 
 class TeradataSanitizerException(Exception):
@@ -10,7 +10,7 @@ class TeradataSanitizerException(Exception):
 
 
 def get_row_sanitizer(query):
-    sanitizers = {DB_SPACE['query']: _sanitize_row}
+    sanitizers = {DB_SPACE['query']: _sanitize_row, PCT_SPACE_BY_DB['query']: _sanitize_row}
     return sanitizers.get(query, _sanitizer_method)
 
 
