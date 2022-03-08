@@ -15,6 +15,7 @@ from dateutil import parser
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, dm_exec_requests_exclude_keys
 
 from .common import CHECK_NAME
 from .conftest import DEFAULT_TIMEOUT
@@ -67,7 +68,7 @@ def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_in
     # so it needs to be run asynchronously
     executor = concurrent.futures.ThreadPoolExecutor(1)
     executor.submit(run_test_query, bob_conn, blocking_query)
-    time.sleep(1)  # sleep for one second
+    time.sleep(3)  # sleep for 3 seconds
     # fred's query will get blocked by bob, so it needs
     # to be run asynchronously
     executor.submit(run_test_query, fred_conn, query)
@@ -109,7 +110,7 @@ def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_in
     assert blocked_row['session_status'] == "running", "incorrect session_status"
     assert blocked_row['blocking_session_id'], "missing blocking_session_id"
     assert blocked_row['text'] == query, "incorrect blocked query"
-    assert_common_fields(blocked_row, "query_start")
+    assert_common_fields(blocked_row, "query_start", req_row=True)
     # if autocommit is false, we should see fred's query show up in both tables,
     # so we should join tx information to fred's activity row
     if not use_autocommit:
@@ -144,7 +145,7 @@ def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_in
     )
 
 
-def assert_common_fields(row, start_key):
+def assert_common_fields(row, start_key, req_row=False):
     assert row['database_name'] == "datadog_test", "incorrect database_name"
     assert row['id'], "missing session id"
     assert row['now'], "missing current timestamp"
@@ -154,6 +155,10 @@ def assert_common_fields(row, start_key):
     assert parser.isoparse(row['now']).tzinfo, "current timestamp not formatted correctly"
     assert row[start_key], "missing {}".format(start_key)
     assert parser.isoparse(row[start_key]).tzinfo, "{} timestamp not formatted correctly".format(start_key)
+    exec_rows = set(DM_EXEC_REQUESTS_COLS) - set(dm_exec_requests_exclude_keys)
+    if req_row:
+        for r in exec_rows:
+            assert r in row
 
 
 def new_time():
