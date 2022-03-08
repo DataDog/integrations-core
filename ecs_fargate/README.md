@@ -358,6 +358,31 @@ For more information on CloudFormation templating and syntax, see the [AWS Cloud
 
 3. Ensure your application is running in the same task definition as the Datadog Agent container.
 
+## Out-of-the-box tags
+
+The Agent can autodiscover and attach tags to all data emitted by the entire tasks or an individual container within this task. The list of tags attached automatically depends on the agent [cardinality configuration][44].
+
+<div style="overflow-x: auto;">
+
+  | Tag                           | Cardinality  | Source               |
+  |-------------------------------|--------------|----------------------|
+  | `container_name`              | High         | ECS API              |
+  | `container_id`                | High         | ECS API              |
+  | `docker_image`                | Low          | ECS API              |
+  | `image_name`                  | Low          | ECS API              |
+  | `short_image`                 | Low          | ECS API              |
+  | `image_tag`                   | Low          | ECS API              |
+  | `ecs_cluster_name`            | Low          | ECS API              |
+  | `ecs_container_name`          | Low          | ECS API              |
+  | `task_arn`                    | Orchestrator | ECS API              |
+  | `task_family`                 | Low          | ECS API              |
+  | `task_name`                   | Low          | ECS API              |
+  | `task_version`                | Low          | ECS API              |
+  | `availability_zone`           | Low          | ECS API              |
+  | `region`                      | Low          | ECS API              |
+
+</div>
+
 ## Data Collected
 
 ### Metrics
@@ -432,4 +457,5 @@ Need help? Contact [Datadog support][22].
 [41]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
 [42]: https://www.datadoghq.com/blog/aws-fargate-on-graviton2-monitoring/
 [43]: https://www.datadoghq.com/blog/aws-fargate-windows-containers-support/
+[44]: /getting_started/tagging/assigning_tags/?tab=containerizedenvironments#environment-variables
 
