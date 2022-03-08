@@ -26,18 +26,22 @@ class InstanceConfig(BaseModel):
     account: Optional[str]
     connection_string: Optional[str]
     database: Optional[str]
-    dbc_name: Optional[str]
     driver: Optional[str]
     dsn: Optional[str]
+    host: str
     https_port: Optional[str]
     mechanism_key: Optional[str]
     mechanism_name: Optional[str]
-    password: Optional[str]
+    partition: Optional[str]
+    password: str
+    port: Optional[str]
     ssl_ca: Optional[str]
     ssl_ca_path: Optional[str]
     ssl_mode: Optional[str]
+    ssl_protocol: Optional[str]
+    use_odbc: Optional[str]
     use_tls: Optional[str]
-    username: Optional[str]
+    username: str
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

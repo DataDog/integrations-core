@@ -30,10 +30,6 @@ def instance_database(field, value):
     return 'system'
 
 
-def instance_dbc_name(field, value):
-    return get_default_field_value(field, value)
-
-
 def instance_driver(field, value):
     return 'Teradata Database ODBC Driver 17.10'
 
@@ -54,8 +50,12 @@ def instance_mechanism_name(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_password(field, value):
-    return get_default_field_value(field, value)
+def instance_partition(field, value):
+    return 'DBC/SQL'
+
+
+def instance_port(field, value):
+    return 1025
 
 
 def instance_ssl_ca(field, value):
@@ -70,9 +70,13 @@ def instance_ssl_mode(field, value):
     return 'Prefer'
 
 
+def instance_ssl_protocol(field, value):
+    return 'TLSv1.2'
+
+
+def instance_use_odbc(field, value):
+    return True
+
+
 def instance_use_tls(field, value):
     return False
-
-
-def instance_username(field, value):
-    return get_default_field_value(field, value)
