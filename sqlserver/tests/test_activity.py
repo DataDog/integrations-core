@@ -69,7 +69,7 @@ def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_in
     # so it needs to be run asynchronously
     executor = concurrent.futures.ThreadPoolExecutor(1)
     executor.submit(run_test_query, bob_conn, blocking_query)
-    time.sleep(3) # sleep for 3 seconds
+    time.sleep(3)  # sleep for 3 seconds
     # fred's query will get blocked by bob, so it needs
     # to be run asynchronously
     executor.submit(run_test_query, fred_conn, query)
