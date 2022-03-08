@@ -1139,107 +1139,107 @@ SIMPLE_METRICS = {
     },
     "proxy.process.http.tcp_hit_user_agent_bytes_stat": {
         "name": "process.http.tcp.hit_user_agent_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.tcp_hit_origin_server_bytes_stat": {
         "name": "process.http.tcp.hit_origin_server_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.tcp_miss_user_agent_bytes_stat": {
         "name": "process.http.tcp.miss_user_agent_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.tcp_miss_origin_server_bytes_stat": {
         "name": "process.http.tcp.miss_origin_server_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.tcp_expired_miss_user_agent_bytes_stat": {
         "name": "process.http.tcp.expired_miss_user_agent_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.tcp_expired_miss_origin_server_bytes_stat": {
         "name": "process.http.tcp.expired_miss_origin_server_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.tcp_refresh_hit_user_agent_bytes_stat": {
         "name": "process.http.tcp.refresh_hit_user_agent_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.tcp_refresh_hit_origin_server_bytes_stat": {
         "name": "process.http.tcp.refresh_hit_origin_server_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.tcp_refresh_miss_user_agent_bytes_stat": {
         "name": "process.http.tcp.refresh_miss_user_agent_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.tcp_refresh_miss_origin_server_bytes_stat": {
         "name": "process.http.tcp.refresh_miss_origin_server_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.tcp_client_refresh_user_agent_bytes_stat": {
         "name": "process.http.tcp.client_refresh_user_agent_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.tcp_client_refresh_origin_server_bytes_stat": {
         "name": "process.http.tcp.client_refresh_origin_server_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.tcp_ims_hit_user_agent_bytes_stat": {
         "name": "process.http.tcp.ims_hit_user_agent_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.tcp_ims_hit_origin_server_bytes_stat": {
         "name": "process.http.tcp.ims_hit_origin_server_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.tcp_ims_miss_user_agent_bytes_stat": {
         "name": "process.http.tcp.ims_miss_user_agent_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.tcp_ims_miss_origin_server_bytes_stat": {
         "name": "process.http.tcp.ims_miss_origin_server_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.err_client_abort_user_agent_bytes_stat": {
         "name": "process.http.error.client_abort_user_agent_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.err_client_abort_origin_server_bytes_stat": {
         "name": "process.http.error.client_abort_origin_server_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.err_client_read_error_user_agent_bytes_stat": {
         "name": "process.http.error.client_read_error_user_agent_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.err_client_read_error_origin_server_bytes_stat": {
         "name": "process.http.error.client_read_error_origin_server_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.err_connect_fail_user_agent_bytes_stat": {
         "name": "process.http.error.connect_fail_user_agent_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.err_connect_fail_origin_server_bytes_stat": {
         "name": "process.http.error.connect_fail_origin_server_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.misc_user_agent_bytes_stat": {
         "name": "process.http.misc_user_agent_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.http_misc_origin_server_bytes_stat": {
         "name": "process.http.http_misc_origin_server_bytes",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.background_fill_bytes_aborted_stat": {
         "name": "process.http.background_fill_bytes_aborted",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.http.background_fill_bytes_completed_stat": {
         "name": "process.http.background_fill_bytes_completed",
-        "method": "gauge",
+        "method": "monotonic_count",
     },
     "proxy.process.cache.read_per_sec": {"name": "process.cache.read_per_sec", "method": "gauge"},
     "proxy.process.cache.write_per_sec": {"name": "process.cache.write_per_sec", "method": "gauge"},

@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
             id="simple count",
         ),
         pytest.param(
-            'proxy.process.http.tcp_refresh_hit_origin_server_bytes_stat',
-            'process.http.tcp.refresh_hit_origin_server_bytes',
+            'proxy.process.cache.gc_bytes_evacuated',
+            'process.cache.gc_bytes_evacuated',
             [],
             "gauge",
             id="simple gauge",
