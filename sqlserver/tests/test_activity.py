@@ -164,56 +164,129 @@ def old_time():
     return datetime.datetime(2021, 9, 22, 22, 21, 21, 669330)
 
 
+def very_old_time():
+    return datetime.datetime(2021, 9, 20, 23, 21, 21, 669330)
+
+
 @pytest.mark.parametrize(
-    "rows,expected_len",
+    "rows,expected_len,expected_users",
     [
         [
             [
                 {
-                    'last_request_start_time': 'suspended',
+                    'last_request_start_time': '1234',
                     'id': 1,
+                    'user_name': 'newbob',
                     'text': "something",
                     'start_time': 2,
                     'query_start': new_time(),
+                    'transaction_begin_time': very_old_time(),
                 },
                 {
-                    'last_request_start_time': 'suspended',
+                    'last_request_start_time': '1234',
                     'id': 2,
+                    'user_name': 'olderbob',
                     'text': "something",
                     'start_time': 2,
                     'query_start': old_time(),
-                    'toobig': "shame" * 1000,
+                    'transaction_begin_time': very_old_time(),
+                },
+                {
+                    'last_request_start_time': '1234',
+                    'id': 3,
+                    'text': "something",
+                    'user_name': 'bigbob',
+                    'start_time': 2,
+                    'query_start': old_time(),
+                    'toobig': "shame" * 10000,
                 },
             ],
-            1,
-        ],
-        [
-            [
-                {'last_request_start_time': 'suspended', 'id': 1, 'text': "something", 'query_start': new_time()},
-                {'last_request_start_time': 'suspended', 'id': 2, 'text': "something", 'query_start': old_time()},
-            ],
             2,
+            ["olderbob", "newbob"],
         ],
         [
             [
                 {
-                    'last_request_start_time': 'suspended',
+                    'last_request_start_time': '1234',
                     'id': 1,
+                    'user_name': 'newbob',
+                    'text': "something",
+                    'start_time': 2,
+                    'query_start': new_time(),
+                },
+                {
+                    'last_request_start_time': '1234',
+                    'id': 2,
+                    'user_name': 'olderbob',
+                    'text': "something",
+                    'start_time': 2,
+                    'query_start': old_time(),
+                    'transaction_begin_time': very_old_time(),
+                },
+                {
+                    'last_request_start_time': '1234',
+                    'id': 3,
+                    'text': "something",
+                    'user_name': 'bigbob',
+                    'start_time': 2,
+                    'query_start': old_time(),
+                    'toobig': "shame" * 10000,
+                },
+            ],
+            1,
+            ["olderbob"],
+        ],
+        [
+            [
+                {
+                    'last_request_start_time': '1234',
+                    'id': 1,
+                    'user_name': 'newbob',
                     'text': "something",
                     'query_start': new_time(),
-                    'toobig': "shame" * 1000,
+                },
+                {
+                    'last_request_start_time': '1234',
+                    'id': 2,
+                    'user_name': 'oldbob',
+                    'text': "something",
+                    'query_start': old_time(),
+                },
+                {
+                    'last_request_start_time': '1234',
+                    'id': 3,
+                    'user_name': 'olderbob',
+                    'text': "something",
+                    'transaction_begin_time': very_old_time(),
+                },
+            ],
+            3,
+            ["olderbob", "oldbob", "newbob"],
+        ],
+        [
+            [
+                {
+                    'last_request_start_time': '1234',
+                    'id': 1,
+                    'user_name': 'bigbob',
+                    'text': "something",
+                    'toobig': "shame" * 10000,
                 },
             ],
             0,
+            [],
         ],
     ],
 )
-def test_truncate_on_max_size_bytes(dbm_instance, datadog_agent, rows, expected_len):
+def test_truncate_on_max_size_bytes(dbm_instance, datadog_agent, rows, expected_len, expected_users):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = "something"
-        result_rows = check.activity._normalize_queries_and_filter_rows(rows, 1000)
-        assert len(result_rows) == expected_len
+        result_rows = check.activity._normalize_queries_and_filter_rows(rows, 10000)
+        list_output = list(result_rows.values())
+        assert len(list_output) == expected_len
+        for index, user in enumerate(expected_users):
+            assert list_output[index]['user_name'] == user
 
 
 @pytest.mark.parametrize(

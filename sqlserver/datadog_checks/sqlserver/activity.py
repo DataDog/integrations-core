@@ -60,7 +60,6 @@ FROM sys.dm_exec_sessions sess
         ON c.connection_id = r.connection_id
     CROSS APPLY sys.dm_exec_sql_text(r.sql_handle) text
 WHERE sess.session_id != @@spid AND sess.status != 'sleeping'
-ORDER BY r.start_time ASC
 """,
 ).strip()
 
@@ -102,6 +101,8 @@ WHERE sess.session_id != @@spid
 """,
 ).strip()
 
+# enumeration of columns we exclude from
+# final agent collection
 dm_exec_requests_exclude_keys = {
     'sql_handle',
     'plan_handle',
@@ -159,9 +160,8 @@ class SqlserverActivity(DBMAsyncJob):
         )
         self._conn_key_prefix = "dbm-activity-"
         self._activity_payload_max_bytes = MAX_PAYLOAD_BYTES
-        # keep track of last time we sent an tx_activity event
+        # keep track of last time we sent an event with tx data
         self._time_since_last_tx_activity_event = 0
-        self._num_activity_events_sent = 0
 
     def _close_db_conn(self):
         pass
@@ -207,7 +207,8 @@ class SqlserverActivity(DBMAsyncJob):
     def _normalize_queries_and_filter_rows(self, rows, max_bytes_limit):
         normalized_rows = {}
         estimated_size = 0
-        for row in rows:
+        s_rows = self._sort_activity_rows(rows)
+        for row in s_rows:
             row = self._obfuscate_and_sanitize_row(row)
             estimated_size += self._get_estimated_row_size_bytes(row)
             if estimated_size > max_bytes_limit:
@@ -221,6 +222,26 @@ class SqlserverActivity(DBMAsyncJob):
     @staticmethod
     def _get_key_for_row(row):
         return (row['id'], row['last_request_start_time'])
+
+    @staticmethod
+    def _get_sort_key(row):
+        key = ""
+        if "transaction_begin_time" in row \
+                and row["transaction_begin_time"] is not None:
+            key = row["transaction_begin_time"]
+        elif "query_start" in row and row["query_start"] is not None:
+            key = row["query_start"]
+        return key
+
+    @staticmethod
+    def _get_secondary_key(row):
+        key = ""
+        if "query_start" in row and row["query_start"] is not None:
+            key = row["query_start"]
+        return key
+
+    def _sort_activity_rows(self, rows):
+        return sorted(rows, key=lambda r: (self._get_sort_key(r), self._get_secondary_key(r)))
 
     def _normalize_tx_rows_and_join(self, tx_rows, active_rows):
         updated_rows = copy.copy(active_rows)
@@ -311,9 +332,6 @@ class SqlserverActivity(DBMAsyncJob):
                 event = self._create_activity_event(normalized_rows, connections)
                 payload = json.dumps(event, default=default_json_event_encoding)
                 self._check.database_monitoring_query_activity(payload)
-                self._num_activity_events_sent += 1
-                if self._num_activity_events_sent % 5 == 0:
-                    self.log.warning(payload)
 
         self.check.histogram(
             "dd.sqlserver.activity.collect_activity.payload_size", len(payload), **self.check.debug_stats_kwargs()
