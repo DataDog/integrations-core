@@ -109,7 +109,7 @@ def test_submit_metadata_invalid(caplog, instance, server_version, build_version
 
     check._submit_version_metadata(server_version, build_version)
     if logline is None:
-        assert "traffic_server" not in caplog.text
+        assert "checks.base.traffic_server" not in caplog.text
     else:
         assert logline in caplog.text
 
