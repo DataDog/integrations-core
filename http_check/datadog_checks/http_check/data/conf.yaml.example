@@ -129,8 +129,6 @@ instances:
     ## that configuration parameters expressed in seconds take precedence over
     ## the corresponding ones expressed in days.
     ##
-    ## The SSL certificate will always be validated for this additional
-    ## service check regardless of the value of `tls_verify`.
     ## By default, for the expiration check, the Agent validates the SSL certificate
     ## hostname against the host of the provided url.
     #
@@ -418,6 +416,10 @@ instances:
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable those by setting `tls_ignore_warning` to true.
+    ##
+    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
+    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
+    ## to true.
     #
     # tls_ignore_warning: false
 
