@@ -38,6 +38,8 @@ class TrafficServerCheck(AgentCheck):
                 self.log.warning(
                     "Could not parse traffic server metrics payload, skipping metric and version collection"
                 )
+                self.service_check("can_connect", AgentCheck.WARNING, tags=self.tags)
+                return
 
             hostname_tag = self.get_hostname_tag(global_metrics)
             self.collect_metrics(global_metrics, hostname_tag)
