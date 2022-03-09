@@ -651,16 +651,30 @@ class TestTags:
     @pytest.mark.parametrize(
         "exclude_metrics_filters, include_metrics_filters, expected_metrics",
         [
-            pytest.param(['hello'], [], ['my_metric', 'my_metric_count'], id='exclude string'),
-            pytest.param(['my_metric*'], [], ['hello'], id='exclude multiple matches'),
-            pytest.param(['my_metrics'], [], ['my_metric', 'my_metric_count', 'hello'], id='exclude no matches'),
-            pytest.param(['.*'], [], [], id='exclude everything'),
-            pytest.param(['.*'], ['hello'], [], id='exclude everything one include'),
+            pytest.param(['hello'], [], ['my_metric', 'my_metric_count', 'test.my_metric1'], id='exclude string'),
+            pytest.param([r'my_metric_*'], [], ['hello'], id='exclude multiple matches'),
+            pytest.param(
+                [r'my_metrics'],
+                [],
+                ['my_metric', 'my_metric_count', 'hello', 'test.my_metric1'],
+                id='exclude no matches',
+            ),
+            pytest.param([r'.*'], [], [], id='exclude everything'),
+            pytest.param([r'.*'], ['hello'], [], id='exclude everything one include'),
             pytest.param([], ['hello'], ['hello'], id='include string'),
-            pytest.param([], ['my_metric*'], ['my_metric', 'my_metric_count'], id='include multiple matches'),
-            pytest.param(['my_metric_count'], ['my_metric*'], ['my_metric'], id='match both'),
+            pytest.param([], [r'^my_(me|test)tric*'], ['my_metric', 'my_metric_count'], id='include multiple matches'),
+            pytest.param([r'my_metric_count'], [r'my_metric*'], ['my_metric', 'test.my_metric1'], id='match both'),
+            pytest.param([r'my_metric_count'], [r'my_metric_count'], [], id='duplicate'),
             pytest.param(['my_metric_count'], ['hello'], ['hello'], id='include exclude'),
-            pytest.param(['test'], ['.*'], ['my_metric', 'my_metric_count', 'hello'], id='include all'),
+            pytest.param(
+                [r'testing'], [r'.*'], ['my_metric', 'my_metric_count', 'hello', 'test.my_metric1'], id='include all'
+            ),
+            pytest.param(
+                [r'test\.my_metric([0-9]{1})'],
+                [],
+                [r'my_metric', r'my_metric_count', 'hello'],
+                id='include all but regex',
+            ),
         ],
     )
     def test_metrics_filters(self, exclude_metrics_filters, include_metrics_filters, expected_metrics, aggregator):
@@ -671,6 +685,7 @@ class TestTags:
         check = AgentCheck('myintegration', {}, [instance])
         check.gauge('my_metric', 0)
         check.count('my_metric_count', 0)
+        check.count('test.my_metric1', 1)
         check.monotonic_count('hello', 0)
         check.service_check('test.can_check', status=AgentCheck.OK)
 
@@ -706,6 +721,40 @@ class TestTags:
         }
         with pytest.raises(Exception, match=expected_error):
             AgentCheck('myintegration', {}, [instance])
+
+    @pytest.mark.parametrize(
+        "exclude_metrics_filters, include_metrics_filters, expected_log",
+        [
+            pytest.param(
+                [''],
+                [],
+                'Entry #1 of setting `exclude_metrics_filters` must not be empty, ignoring',
+                id='empty exclude',
+            ),
+            pytest.param(
+                [],
+                [''],
+                'Entry #1 of setting `include_metrics_filters` must not be empty, ignoring',
+                id='empty include',
+            ),
+            pytest.param(
+                ['metric_one'],
+                ['metric_one'],
+                'Metric `metric_one` is set in both `exclude_metrics_filters` and'
+                ' `include_metrics_filters`. Excluding metric.',
+                id='duplicate',
+            ),
+        ],
+    )
+    def test_metrics_filter_warnings(self, caplog, exclude_metrics_filters, include_metrics_filters, expected_log):
+        instance = {
+            'exclude_metrics_filters': exclude_metrics_filters,
+            'include_metrics_filters': include_metrics_filters,
+        }
+        caplog.clear()
+        caplog.set_level(logging.DEBUG)
+        AgentCheck('myintegration', {}, [instance])
+        assert expected_log in caplog.text
 
 
 class LimitedCheck(AgentCheck):

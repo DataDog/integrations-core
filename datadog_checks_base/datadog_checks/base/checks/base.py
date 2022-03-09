@@ -217,53 +217,12 @@ class AgentCheck(object):
         self.log = CheckLoggingAdapter(logger, self)
 
         exclude_metrics_filters = self.instance.get('exclude_metrics_filters', []) if instance else []
-
-        if not isinstance(exclude_metrics_filters, list):
-            raise ConfigurationError('Setting `exclude_metrics_filters` must be an array')
-
-        self.exclude_metrics_filters = set()
-        self.exclude_metrics_pattern = None
-        exclude_metrics_patterns = []
-        for i, entry in enumerate(exclude_metrics_filters, 1):
-            if not isinstance(entry, str):
-                raise ConfigurationError('Entry #{} of setting `exclude_metrics_filters` must be a string'.format(i))
-
-            escaped_entry = re.escape(entry)
-            if entry == escaped_entry:
-                self.exclude_metrics_filters.add(entry)
-            else:
-                exclude_metrics_patterns.append(entry)
-
-        if exclude_metrics_patterns:
-            self.exclude_metrics_pattern = re.compile('|'.join(exclude_metrics_patterns))
+        self.exclude_metrics_pattern = self._create_metrics_pattern(exclude_metrics_filters, 'exclude_metrics_filters')
 
         include_metrics_filters = self.instance.get('include_metrics_filters', []) if instance else []
-
-        if not isinstance(include_metrics_filters, list):
-            raise ConfigurationError('Setting `include_metrics_filters` must be an array')
-
-        self.include_metrics_filters = set()
-        self.include_metrics_pattern = None
-        include_metrics_patterns = []
-        for i, entry in enumerate(include_metrics_filters, 1):
-            if not isinstance(entry, str):
-                raise ConfigurationError('Entry #{} of setting `include_metrics_filters` must be a string'.format(i))
-
-            if entry in exclude_metrics_filters:
-                self.log.debug(
-                    'Metric `%s` is set in both `exclude_metrics_filters` and `include_metrics_filters`.'
-                    ' Excluding Metric.',
-                    entry,
-                )
-
-            escaped_entry = re.escape(entry)
-            if entry == escaped_entry:
-                self.include_metrics_filters.add(entry)
-            else:
-                include_metrics_patterns.append(entry)
-
-        if include_metrics_patterns:
-            self.include_metrics_pattern = re.compile('|'.join(include_metrics_patterns))
+        self.include_metrics_pattern = self._create_metrics_pattern(
+            include_metrics_filters, 'include_metrics_filters', duplicates_to_check=exclude_metrics_filters
+        )
 
         # TODO: Remove with Agent 5
         # Set proxy settings
@@ -331,6 +290,32 @@ class AgentCheck(object):
 
         if not PY2:
             self.check_initializations.append(self.load_configuration_models)
+
+    def _create_metrics_pattern(self, filters, option_name, duplicates_to_check=None):
+        if not isinstance(filters, list):
+            raise ConfigurationError('Setting `{}` must be an array'.format(option_name))
+
+        metrics_pattern = None
+        metrics_patterns = []
+        for i, entry in enumerate(filters, 1):
+            if not isinstance(entry, str):
+                raise ConfigurationError('Entry #{} of setting `{}` must be a string'.format(i, option_name))
+            if not entry:
+                self.log.debug('Entry #%s of setting `%s` must not be empty, ignoring', i, option_name)
+                continue
+
+            if duplicates_to_check is not None and entry in duplicates_to_check:
+                self.log.debug(
+                    'Metric `%s` is set in both `exclude_metrics_filters` and `include_metrics_filters`.'
+                    ' Excluding metric.',
+                    entry,
+                )
+
+            metrics_patterns.append(entry)
+
+        if metrics_patterns:
+            metrics_pattern = re.compile('|'.join(metrics_patterns))
+        return metrics_pattern
 
     def _get_metric_limiter(self, name, instance=None):
         # type: (str, InstanceType) -> Optional[Limiter]
@@ -644,6 +629,21 @@ class AgentCheck(object):
 
         aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-activity")
 
+    def should_send_metric(self, metric_name):
+        return not self._metric_excluded(metric_name) and self._metric_included(metric_name)
+
+    def _metric_included(self, metric_name):
+        if self.include_metrics_pattern is None:
+            return True
+
+        return self.include_metrics_pattern.search(metric_name) is not None
+
+    def _metric_excluded(self, metric_name):
+        if self.exclude_metrics_pattern is None:
+            return False
+
+        return self.exclude_metrics_pattern.search(metric_name) is not None
+
     def _submit_metric(
         self, mtype, name, value, tags=None, hostname=None, device_name=None, raw=False, flush_first_value=False
     ):
@@ -656,13 +656,7 @@ class AgentCheck(object):
         if hostname is None:
             hostname = ''
 
-        if (name in self.exclude_metrics_filters) or (
-            self.exclude_metrics_pattern is not None and self.exclude_metrics_pattern.search(name)
-        ):
-            return
-        elif (self.include_metrics_filters and name not in self.include_metrics_filters) or (
-            self.include_metrics_pattern is not None and not self.include_metrics_pattern.search(name)
-        ):
+        if not self.should_send_metric(name):
             return
 
         if self.metric_limiter:
