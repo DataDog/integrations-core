@@ -42,7 +42,10 @@ class BaseSqlServerMetric(object):
         self.datadog_name = cfg_instance['name']
         self.sql_name = cfg_instance.get('counter_name', '')
         self.base_name = base_name
-        self.report_function = partial(report_function, raw=True)
+        partial_kwargs = {}
+        if 'hostname' in cfg_instance:
+            partial_kwargs['hostname'] = cfg_instance['hostname']
+        self.report_function = partial(report_function, raw=True, **partial_kwargs)
         self.instance = cfg_instance.get('instance_name', '')
         self.object_name = cfg_instance.get('object_name', '')
         self.tags = cfg_instance.get('tags', [])
