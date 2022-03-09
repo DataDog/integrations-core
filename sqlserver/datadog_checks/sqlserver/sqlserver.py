@@ -358,8 +358,7 @@ class SQLServer(AgentCheck):
 
         # Load database files
         for name, column, metric_type in DATABASE_FILES_IO:
-            cfg = {'name': name, 'column': column, 'tags': tags}
-
+            cfg = {'name': name, 'column': column, 'tags': tags, 'hostname': self.resolved_hostname}
             metrics_to_collect.append(SqlFileStats(cfg, None, getattr(self, metric_type), column, self.log))
 
         # Load AlwaysOn metrics
@@ -569,6 +568,8 @@ class SQLServer(AgentCheck):
             # Lookup metrics classes by their associated table
             metric_type_str, cls = metrics.TABLE_MAPPING[table]
             metric_type = getattr(self, metric_type_str)
+
+        cfg_inst['hostname'] = self.resolved_hostname
 
         return cls(cfg_inst, base_name, metric_type, column, self.log)
 

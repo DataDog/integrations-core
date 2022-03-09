@@ -44,7 +44,7 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker):
         'sqlserver_host:{}'.format(instance_docker.get('host')),
         'db:master',
     ]
-    assert_metrics(aggregator, expected_tags)
+    assert_metrics(aggregator, expected_tags, hostname=sqlserver_check.resolved_hostname)
 
 
 @pytest.mark.integration
