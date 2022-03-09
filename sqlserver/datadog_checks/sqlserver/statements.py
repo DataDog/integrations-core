@@ -358,6 +358,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     "query_signature": row['query_signature'],
                     "user": row.get('user_name', None),
                     "statement": row['text'],
+                    "metadata": {
+                        "tables": row['dd_tables'],
+                        "commands": row['dd_commands'],
+                    },
                 },
                 'sqlserver': {
                     'query_hash': row['query_hash'],
