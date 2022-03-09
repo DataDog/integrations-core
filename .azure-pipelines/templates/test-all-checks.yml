@@ -175,7 +175,7 @@ jobs:
       displayName: fluentd
       os: linux
     - checkName: foundationdb
-      displayName: foundationdb
+      displayName: FoundationDB
       os: linux
     - checkName: gearmand
       displayName: Gearman
