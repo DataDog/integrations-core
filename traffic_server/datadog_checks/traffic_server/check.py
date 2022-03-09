@@ -8,6 +8,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from .metrics import HOSTNAME_METRIC_NAMES, SHORT_VERSION_METRIC_NAMES, VERSION_BUILD_NUMBER_METRIC_NAME, build_metric
 
 NULL_VALUE = "(null)"
+SERVICE_CHECK_CONNECT = "can_connect"
 
 
 class TrafficServerCheck(AgentCheck):
@@ -36,7 +37,7 @@ class TrafficServerCheck(AgentCheck):
                 self.log.warning(
                     "Could not parse traffic server metrics payload, skipping metric and version collection"
                 )
-                self.service_check("can_connect", AgentCheck.WARNING, tags=self.tags)
+                self.service_check(SERVICE_CHECK_CONNECT, AgentCheck.WARNING, tags=self.tags)
                 return
 
             hostname_tag = self.get_hostname_tag(global_metrics)
@@ -45,14 +46,14 @@ class TrafficServerCheck(AgentCheck):
 
         except Exception as e:
             self.service_check(
-                "can_connect",
+                SERVICE_CHECK_CONNECT,
                 AgentCheck.CRITICAL,
                 tags=self.tags + hostname_tag,
                 message="Request failed: {}, {}".format(self.traffic_server_url, e),
             )
             raise
 
-        self.service_check("can_connect", AgentCheck.OK, tags=self.tags)
+        self.service_check(SERVICE_CHECK_CONNECT, AgentCheck.OK, tags=self.tags)
 
     def get_hostname_tag(self, global_metrics):
         # type: (Dict[str, Any]) -> List[str]
