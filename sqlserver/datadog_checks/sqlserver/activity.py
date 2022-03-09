@@ -69,6 +69,7 @@ DM_EXEC_REQUESTS_COLS = [
     "wait_type",
     "wait_time",
     "last_wait_type",
+    "wait_resource",
     "open_transaction_count",
     "transaction_id",
     "percent_complete",
