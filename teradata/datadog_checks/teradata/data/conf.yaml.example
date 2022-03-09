@@ -33,6 +33,11 @@ instances:
     #
     # use_odbc: <USE_ODBC>
 
+    ## @param use_jdbc - string - optional
+    ## Whether or not to use JDBC method for connecting to the Teradata database.
+    #
+    # use_jdbc: <USE_JDBC>
+
     ## @param dsn - string - optional
     ## Data Source Name. The name of ODBC Driver for Teradata in the [ODBC Data Sources] section of odbc.ini.
     #
@@ -59,16 +64,16 @@ instances:
     #
     # database: system
 
-    ## @param partition - string - optional - default: DBC/SQL
-    ## Specifies the database partition. Not available if using ODBC.
-    #
-    # partition: DBC/SQL
-
-    ## @param driver - string - optional - default: Teradata Database ODBC Driver 17.10
+    ## @param odbc_driver_path - string - optional - default: Teradata Database ODBC Driver 17.10
     ## The named ODBC Driver or the full path to ODBC Driver for Teradata shared objects
     ## (e.g. <DRIVER_INSTALL_DIR>/teradata/client/ODBC/lib/tdataodbc_sb64.so).
     #
-    # driver: Teradata Database ODBC Driver 17.10
+    # odbc_driver_path: Teradata Database ODBC Driver 17.10
+
+    ## @param jdbc_driver_path - string - optional - default: <DRIVER_PATH>.jar
+    ## The full path to the Teradata JDBC Driver.
+    #
+    # jdbc_driver_path: <DRIVER_PATH>.jar
 
     ## @param connection_string - string - optional
     ## Specify a custom connection string to be used for connecting to the Teradata database.

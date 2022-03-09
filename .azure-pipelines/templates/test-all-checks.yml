@@ -459,6 +459,9 @@ jobs:
     - checkName: teamcity
       displayName: TeamCity
       os: linux
+    - checkName: teradata
+      displayName: Teradata
+      os: linux
     - checkName: tls
       displayName: TLS
       os: linux
