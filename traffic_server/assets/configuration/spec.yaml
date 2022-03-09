@@ -25,3 +25,14 @@ files:
 
           Set this value to `10` to collect the most accurate 10s event loop metrics.
     - template: instances/http
+  - template: logs
+    example:
+      - type: file
+        path: /opt/trafficserver/var/log/trafficserver/traffic.out
+        source: traffic_server
+      - type: file
+        path: /opt/trafficserver/var/log/trafficserver/diags.log
+        source: traffic_server
+      - type: file
+        path: /opt/trafficserver/var/log/trafficserver/error.log
+        source: traffic_server

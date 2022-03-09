@@ -34,6 +34,33 @@ stats_over_http.so
 
 See [metadata.csv][7] for a list of metrics provided by this check.
 
+### Log collection
+
+_Available for Agent versions >6.0_
+
+1. Traffic Server logs are highly [customizable][11], but Datadog's integration pipeline supports the default conversion pattern. Clone and edit the [integration pipeline][12] if you have a different format.
+
+2. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+3. Uncomment and edit the logs configuration block in your `traffic_server.d/conf.yaml` file. Change the `path` and `service` parameter values based on your environment. See the [sample traffic_server.d/conf.yaml][4] for all available configuration options.
+
+   ```yaml
+   logs:
+      - type: file
+        path: /opt/trafficserver/var/log/trafficserver/traffic.out
+        source: traffic_server
+      - type: file
+        path: /opt/trafficserver/var/log/trafficserver/diags.log
+        source: traffic_server
+      - type: file
+        path: /opt/trafficserver/var/log/trafficserver/error.log
+        source: traffic_server
+   ```
+
 ### Events
 
 The Traffic Server integration does not include any events.
@@ -57,3 +84,5 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/traffic_server/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.trafficserver.apache.org/en/latest/admin-guide/monitoring/statistics/accessing.en.html#stats-over-http
+[11]: https://docs.trafficserver.apache.org/en/9.1.x/admin-guide/logging/understanding.en.html
+[12]: https://docs.datadoghq.com/logs/processing/#integration-pipelines

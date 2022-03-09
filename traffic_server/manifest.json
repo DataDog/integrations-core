@@ -20,7 +20,8 @@
   "public_title": "Traffic Server",
   "categories": [
     "web",
-    "caching"
+    "caching",
+    "log collection"
   ],
   "type": "check",
   "is_public": false,
@@ -33,7 +34,9 @@
     "monitors": {},
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "traffic_server"
+    },
     "metrics_metadata": "metadata.csv"
   }
 }
