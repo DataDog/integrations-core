@@ -39,6 +39,7 @@ dynamic = [
 deps = [
     "pyodbc==4.0.26",
     "teradatasql==17.10.0.7",
+    "jaydebeapi==1.2.3",
 ]
 
 [project.urls]
