@@ -749,13 +749,6 @@ class TestTags:
                 'Entry #1 of setting `include_metrics_filters` must not be empty, ignoring',
                 id='empty include',
             ),
-            pytest.param(
-                ['metric_one'],
-                ['metric_one'],
-                'Metric `metric_one` is set in both `exclude_metrics_filters` and'
-                ' `include_metrics_filters`. Excluding metric.',
-                id='duplicate',
-            ),
         ],
     )
     def test_metrics_filter_warnings(self, caplog, exclude_metrics_filters, include_metrics_filters, expected_log):

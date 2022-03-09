@@ -216,13 +216,8 @@ class AgentCheck(object):
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
         self.log = CheckLoggingAdapter(logger, self)
 
-        exclude_metrics_filters = self.instance.get('exclude_metrics_filters', []) if instance else []
-        self.exclude_metrics_pattern = self._create_metrics_pattern(exclude_metrics_filters, 'exclude_metrics_filters')
-
-        include_metrics_filters = self.instance.get('include_metrics_filters', []) if instance else []
-        self.include_metrics_pattern = self._create_metrics_pattern(
-            include_metrics_filters, 'include_metrics_filters', duplicates_to_check=exclude_metrics_filters
-        )
+        self.exclude_metrics_pattern = self._create_metrics_pattern(instance, 'exclude_metrics_filters')
+        self.include_metrics_pattern = self._create_metrics_pattern(instance, 'include_metrics_filters')
 
         # TODO: Remove with Agent 5
         # Set proxy settings
@@ -291,7 +286,8 @@ class AgentCheck(object):
         if not PY2:
             self.check_initializations.append(self.load_configuration_models)
 
-    def _create_metrics_pattern(self, filters, option_name, duplicates_to_check=None):
+    def _create_metrics_pattern(self, config, option_name):
+        filters = config.get(option_name, []) if config else []
         if not isinstance(filters, list):
             raise ConfigurationError('Setting `{}` must be an array'.format(option_name))
 
@@ -303,13 +299,6 @@ class AgentCheck(object):
             if not entry:
                 self.log.debug('Entry #%s of setting `%s` must not be empty, ignoring', i, option_name)
                 continue
-
-            if duplicates_to_check is not None and entry in duplicates_to_check:
-                self.log.debug(
-                    'Metric `%s` is set in both `exclude_metrics_filters` and `include_metrics_filters`.'
-                    ' Excluding metric.',
-                    entry,
-                )
 
             metrics_patterns.append(entry)
 
