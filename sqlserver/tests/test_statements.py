@@ -313,9 +313,7 @@ def test_statement_metadata(
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     assert dbm_samples, "should have collected at least one sample"
 
-    matching = [
-        s for s in dbm_samples if s['db']['query_signature'] == query_signature and s['dbm_type'] == 'plan'
-    ]
+    matching = [s for s in dbm_samples if s['db']['query_signature'] == query_signature and s['dbm_type'] == 'plan']
     assert len(matching) == 1
     sample = matching[0]
     assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
