@@ -652,7 +652,13 @@ class TestTags:
         "exclude_metrics_filters, include_metrics_filters, expected_metrics",
         [
             pytest.param(['hello'], [], ['my_metric', 'my_metric_count', 'test.my_metric1'], id='exclude string'),
-            pytest.param([r'my_metric_*'], [], ['hello'], id='exclude multiple matches'),
+            pytest.param([r'my_metric_*'], [], ['hello'], id='exclude multiple matches glob'),
+            pytest.param(
+                [],
+                [r'my_metricw*'],
+                ['my_metric', 'my_metric_count', 'test.my_metric1'],
+                id='include multiple matches glob',
+            ),
             pytest.param(
                 [r'my_metrics'],
                 [],
