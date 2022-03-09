@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict, List, Optional
 
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 
 from .metrics import HOSTNAME_METRIC_NAMES, SHORT_VERSION_METRIC_NAMES, VERSION_BUILD_NUMBER_METRIC_NAME, build_metric
@@ -45,7 +43,7 @@ class TrafficServerCheck(AgentCheck):
             self.collect_metrics(global_metrics, hostname_tag)
             self.collect_version(global_metrics)
 
-        except (HTTPError, Timeout, InvalidURL, ConnectionError) as e:
+        except Exception as e:
             self.service_check(
                 "can_connect",
                 AgentCheck.CRITICAL,
