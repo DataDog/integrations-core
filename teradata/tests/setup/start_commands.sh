@@ -13,5 +13,3 @@ curl -LO $ODBC_DRIVER_URL \
 
 curl -LO $JDBC_DRIVER_URL \
   && tar -xf TeraJDBC__indep_indep.17.10.00.27.tar
-
-export CLASSPATH=/terajdbc4.jar

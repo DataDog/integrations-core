@@ -26,19 +26,20 @@ class InstanceConfig(BaseModel):
     account: Optional[str]
     connection_string: Optional[str]
     database: Optional[str]
-    driver: Optional[str]
     dsn: Optional[str]
     host: str
     https_port: Optional[str]
+    jdbc_driver_path: Optional[str]
     mechanism_key: Optional[str]
     mechanism_name: Optional[str]
-    partition: Optional[str]
+    odbc_driver_path: Optional[str]
     password: str
     port: Optional[str]
     ssl_ca: Optional[str]
     ssl_ca_path: Optional[str]
     ssl_mode: Optional[str]
     ssl_protocol: Optional[str]
+    use_jdbc: Optional[str]
     use_odbc: Optional[str]
     use_tls: Optional[str]
     username: str

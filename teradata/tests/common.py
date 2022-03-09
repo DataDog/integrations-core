@@ -13,5 +13,6 @@ E2E_METADATA = {
         '{}/setup/odbc/odbcinst.ini:/opt/datadog-agent/embedded/etc/odbcinst.ini'.format(HERE),
         '{}/setup/start_commands.sh:/tmp/start_commands.sh'.format(HERE),
     ],
+    'env_vars': {'CLASSPATH': '/terajdbc4.jar'},
     'start_commands': ['bash /tmp/start_commands.sh'],
 }

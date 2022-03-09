@@ -1,12 +1,12 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 from contextlib import closing, contextmanager
 from typing import Any
 
 import pyodbc
 import teradatasql
-import json
 
 try:
     import jaydebeapi as jdb
@@ -32,7 +32,7 @@ DEFAULT_QUERIES = [DB_SPACE, PCT_SPACE_BY_DB]
 
 class TeradataCheck(AgentCheck):
     __NAMESPACE__ = 'teradata'
-    JDBC_CONNECTION_STRING = "jdbc:teradata://{}/{},{}"
+    JDBC_CONNECTION_STRING = "jdbc:teradata://{}"
     TERADATA_DRIVER_CLASS = "com.teradata.jdbc.TeraDriver"
 
     def __init__(self, name, init_config, instances):
@@ -53,33 +53,57 @@ class TeradataCheck(AgentCheck):
     def execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:
             cursor.execute(query)
-            if cursor.rowcount < 1:
+            results = cursor.fetchall()
+            if len(results) < 1:
                 self.log.warning("Failed to fetch records from query: `%s`.", query)
                 return []
-            sanitizer_method = get_row_sanitizer(query)
-
-            for row in cursor.fetchall():
-                try:
-                    yield sanitizer_method(row)
-                except Exception:
-                    self.log.debug("Unable to sanitize row %r.", exc_info=True)
-                    yield row
+            else:
+                sanitizer_method = get_row_sanitizer(query)
+                for row in results:
+                    try:
+                        yield sanitizer_method(row)
+                    except Exception:
+                        self.log.debug("Unable to sanitize row %r.", exc_info=True)
+                        yield row
 
     @contextmanager
     def connect(self):
         try:
             if self.config.use_jdbc:
-                return self.connect_jdbc()
+                return self._connect_jdbc()
             if self.config.use_odbc:
-                return self.connect_odbc()
+                return self._connect_odbc()
             else:
-                return self.connect_non_odbc()
+                return self._connect_non_odbc()
         except Exception as e:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, msg=e, tags=self._service_check_tags)
             self.log.error('Failed to connect to Teradata database. %s', e)
             raise
 
-    def connect_odbc(self):
+    def _connect_jdbc(self):
+        conn = None
+        jdbc_connect_properties = {'user': self.config.username, 'password': self.config.password}
+        conn_str = self.JDBC_CONNECTION_STRING.format(self.config.host)
+        try:
+            if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
+                jpype.attachThreadToJVM()
+                jpype.java.lang.Thread.currentThread().setContextClassLoader(
+                    jpype.java.lang.ClassLoader.getSystemClassLoader()
+                )
+            self.log.debug('Connecting to Teradata Database using JDBC Connector with connection string: %s', conn_str)
+            conn = jdb.connect(
+                self.TERADATA_DRIVER_CLASS, conn_str, jdbc_connect_properties, self.config.jdbc_driver_path
+            )
+            self.log.debug("Connected to Teradata Database using JDBC Connector")
+            yield conn
+        except Exception as e:
+            self.log.error("Failed to connect to Teradata Database using JDBC Connector. %s", e)
+            raise
+        finally:
+            if conn:
+                conn.close()
+
+    def _connect_odbc(self):
         conn = None
         connection_string = self._gen_odbc_conn_string()
         self.log.debug('Connecting to Teradata via ODBC with connection_string: %s.', connection_string)
@@ -96,7 +120,7 @@ class TeradataCheck(AgentCheck):
             if conn:
                 conn.close()
 
-    def connect_non_odbc(self):
+    def _connect_non_odbc(self):
         conn = None
         self.log.debug('Connecting to Teradata via teradatasql driver...')
         conn_params = {
@@ -110,7 +134,7 @@ class TeradataCheck(AgentCheck):
             'sslca': self.config.ssl_ca,
             'sslcapath': self.config.ssl_ca_path,
             'sslmode': self.config.ssl_mode,
-            'sslprotocol': self.config.ssl_protocol
+            'sslprotocol': self.config.ssl_protocol,
         }
         try:
             conn = teradatasql.connect(json.dumps(conn_params))
@@ -139,8 +163,8 @@ class TeradataCheck(AgentCheck):
                 conn_str += 'DBCNAME={};'.format(self.config.host)
             if self.config.db:
                 conn_str += 'DATABASE={};'.format(self.config.db)
-            if self.config.driver:
-                conn_str += 'DRIVER={};'.format(self.config.driver)
+            if self.config.odbc_driver_path:
+                conn_str += 'DRIVER={};'.format(self.config.odbc_driver_path)
             if self.config.username:
                 conn_str += 'USERNAME={};'.format(self.config.username)
             if self.config.password:
@@ -199,11 +223,7 @@ class TeradataCheck(AgentCheck):
         return normalized_cs
 
     def _normalize_conn_str(self, conn_str):
-        default_options = {
-            'RECONNECTCOUNT': '2',
-            'CHARSET': 'UTF8',
-            'USEREGIONALSETTINGS': 'N'
-        }
+        default_options = {'RECONNECTCOUNT': '2', 'CHARSET': 'UTF8', 'USEREGIONALSETTINGS': 'N'}
 
         raw_cs = conn_str.split(';')
 
@@ -211,7 +231,9 @@ class TeradataCheck(AgentCheck):
             raw_cs[index] = config.split('=')
             option = raw_cs[index][0]
             if option.upper() in default_options:
-                self.log.debug("Connection string option %s is ignored. Default setting is %s.", option, default_options[option])
+                self.log.debug(
+                    "Connection string option %s is ignored. Default setting is %s.", option, default_options[option]
+                )
                 raw_cs.remove(raw_cs[index])
             else:
                 raw_cs[index][0] = option.upper()
@@ -219,26 +241,3 @@ class TeradataCheck(AgentCheck):
 
         normalized_cs = ';'.join(raw_cs)
         return normalized_cs
-
-    def connect_jdbc(self):
-        conn = None
-        jdbc_connect_properties = {'user': self.config.username, 'password': self.config.password}
-        conn_str = self.JDBC_CONNECTION_STRING.format(self.config.host, self.config.username, self.config.password)
-        try:
-            if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
-                jpype.attachThreadToJVM()
-                jpype.java.lang.Thread.currentThread().setContextClassLoader(
-                    jpype.java.lang.ClassLoader.getSystemClassLoader()
-                )
-            self.log.debug('Connecting to Teradata Database using JDBC Connector with connection string: %s', conn_str)
-            conn = jdb.connect(
-                self.TERADATA_DRIVER_CLASS, conn_str, jdbc_connect_properties, self.config.jdbc_driver_path
-            )
-            self.log.debug("Connected to Teradata Database using JDBC Connector")
-            yield conn
-        except Exception as e:
-            self.log.error("Failed to connect to Teradata Database using JDBC Connector. %s", e)
-            raise
-        finally:
-            if conn:
-                conn.close()
