@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from typing import Dict, List
+
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, to_string
@@ -67,7 +69,9 @@ class ChannelMetricCollector(object):
                 channel_name = to_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
                 channel_tags = self.config.tags_no_channel + ["channel:{}".format(channel_name)]
 
-                self._submit_metrics_from_properties(channel_info, metrics.channel_metrics(), channel_tags)
+                self._submit_metrics_from_properties(
+                    channel_info, channel_name, metrics.channel_metrics(), channel_tags
+                )
 
         # Check specific channels
         # If a channel is not discoverable, a user may want to check it specifically.
@@ -121,17 +125,20 @@ class ChannelMetricCollector(object):
                     continue
                 channel_tags = tags + ["channel:{}".format(channel_name)]
 
-                self._submit_metrics_from_properties(channel_info, metrics.channel_status_metrics(), channel_tags)
+                self._submit_metrics_from_properties(
+                    channel_info, channel_name, metrics.channel_status_metrics(), channel_tags
+                )
 
                 channel_status = channel_info[pymqi.CMQCFC.MQIACH_CHANNEL_STATUS]
                 self._submit_channel_count(channel_name, channel_status, channel_tags)
                 self._submit_status_check(channel_name, channel_status, channel_tags)
 
-    def _submit_metrics_from_properties(self, channel_info, metrics_map, tags):
+    def _submit_metrics_from_properties(self, channel_info, channel_name, metrics_map, tags):
+        # type: (Dict, str, Dict[str, int], List[str] ) -> None
         for metric_name, pymqi_type in iteritems(metrics_map):
             metric_full_name = '{}.channel.{}'.format(metrics.METRIC_PREFIX, metric_name)
             if pymqi_type not in channel_info:
-                self.log.debug("metric not found: %s", metric_name)
+                self.log.debug("metric '%s' not found in channel: %s", metric_name, channel_name)
                 continue
             metric_value = int(channel_info[pymqi_type])
             self.gauge(metric_full_name, metric_value, tags=tags, hostname=self.config.hostname)
