@@ -230,7 +230,8 @@ def write_compact_trap_db(trap_db_per_mib, output_file, use_json=False):
                     )
                 )
                 conflict_oids.add(trap_oid)
-            compact_db["traps"][trap_oid] = {"mib": mib} | trap
+            compact_db["traps"][trap_oid] = {"mib": mib}
+            compact_db["traps"][trap_oid].update(trap)
         for var_oid, var in trap_db["vars"].items():
             if var_oid in compact_db["vars"] and var["name"] != compact_db["vars"][var_oid]["name"]:
                 echo_warning(
