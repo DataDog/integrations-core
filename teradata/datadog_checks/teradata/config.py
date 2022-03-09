@@ -12,13 +12,14 @@ class TeradataConfig(object):
     def __init__(self, instance):
         # type: (Dict[str, Any]) -> None
         self.use_odbc = is_affirmative(instance.get('use_odbc', True))
+        self.use_jdbc = is_affirmative(instance.get('use_jdbc', False))
         self.dsn = str(instance.get('dsn', ''))
         self.account = str(instance.get('account', ''))
         self.host = str(instance.get('host', ''))
         self.port = int(instance.get('port', 1025))
         self.db = str(instance.get('database', ''))
-        self.partition = str(instance.get('partition', ''))
-        self.driver = str(instance.get('driver', ''))
+        self.odbc_driver_path = str(instance.get('odbc_driver_path', ''))
+        self.jdbc_driver_path = str(instance.get('jdbc_driver_path', ''))
         self.connection_string = str(instance.get('connection_string', ''))
         self.username = str(instance.get('username', ''))
         self.password = str(instance.get('password', ''))

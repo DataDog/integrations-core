@@ -7,6 +7,7 @@ import os
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 E2E_METADATA = {
+    'use_jmx': True,
     'docker_volumes': [
         '{}/setup/odbc/odbc.ini:/opt/datadog-agent/embedded/etc/odbc.ini'.format(HERE),
         '{}/setup/odbc/odbcinst.ini:/opt/datadog-agent/embedded/etc/odbcinst.ini'.format(HERE),

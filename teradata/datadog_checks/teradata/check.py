@@ -8,6 +8,17 @@ import pyodbc
 import teradatasql
 import json
 
+try:
+    import jaydebeapi as jdb
+    import jpype
+
+    JDBC_IMPORT_ERROR = None
+except ImportError as e:
+    jdb = None
+    jpype = None
+    JDBC_IMPORT_ERROR = e
+
+
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.db import QueryManager
 
@@ -21,6 +32,8 @@ DEFAULT_QUERIES = [DB_SPACE, PCT_SPACE_BY_DB]
 
 class TeradataCheck(AgentCheck):
     __NAMESPACE__ = 'teradata'
+    JDBC_CONNECTION_STRING = "jdbc:teradata://{}/{},{}"
+    TERADATA_DRIVER_CLASS = "com.teradata.jdbc.TeraDriver"
 
     def __init__(self, name, init_config, instances):
         super(TeradataCheck, self).__init__(name, init_config, instances)
@@ -55,6 +68,8 @@ class TeradataCheck(AgentCheck):
     @contextmanager
     def connect(self):
         try:
+            if self.config.use_jdbc:
+                return self.connect_jdbc()
             if self.config.use_odbc:
                 return self.connect_odbc()
             else:
@@ -97,8 +112,6 @@ class TeradataCheck(AgentCheck):
             'sslmode': self.config.ssl_mode,
             'sslprotocol': self.config.ssl_protocol
         }
-        if self.config.partition and self.config.partition is not None:
-            conn_params.update({'partition': self.config.partition})
         try:
             conn = teradatasql.connect(json.dumps(conn_params))
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._service_check_tags)
@@ -206,3 +219,26 @@ class TeradataCheck(AgentCheck):
 
         normalized_cs = ';'.join(raw_cs)
         return normalized_cs
+
+    def connect_jdbc(self):
+        conn = None
+        jdbc_connect_properties = {'user': self.config.username, 'password': self.config.password}
+        conn_str = self.JDBC_CONNECTION_STRING.format(self.config.host, self.config.username, self.config.password)
+        try:
+            if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
+                jpype.attachThreadToJVM()
+                jpype.java.lang.Thread.currentThread().setContextClassLoader(
+                    jpype.java.lang.ClassLoader.getSystemClassLoader()
+                )
+            self.log.debug('Connecting to Teradata Database using JDBC Connector with connection string: %s', conn_str)
+            conn = jdb.connect(
+                self.TERADATA_DRIVER_CLASS, conn_str, jdbc_connect_properties, self.config.jdbc_driver_path
+            )
+            self.log.debug("Connected to Teradata Database using JDBC Connector")
+            yield conn
+        except Exception as e:
+            self.log.error("Failed to connect to Teradata Database using JDBC Connector. %s", e)
+            raise
+        finally:
+            if conn:
+                conn.close()
