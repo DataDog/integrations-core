@@ -665,6 +665,12 @@ class TestTags:
             pytest.param([], [r'^my_(me|test)tric*'], ['my_metric', 'my_metric_count'], id='include multiple matches'),
             pytest.param([r'my_metric_count'], [r'my_metric*'], ['my_metric', 'test.my_metric1'], id='match both'),
             pytest.param([r'my_metric_count'], [r'my_metric_count'], [], id='duplicate'),
+            pytest.param(
+                [],
+                ['metric'],
+                ['my_metric', 'my_metric_count', 'test.my_metric1'],
+                id='include multiple matches inside',
+            ),
             pytest.param(['my_metric_count'], ['hello'], ['hello'], id='include exclude'),
             pytest.param(
                 [r'testing'], [r'.*'], ['my_metric', 'my_metric_count', 'hello', 'test.my_metric1'], id='include all'
