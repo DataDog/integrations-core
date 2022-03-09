@@ -7,9 +7,10 @@
     "database_name": "test_db",
     "session_status": "running",
     "text": "select * from my_special.table;",
-    "session_id": 83,
+    "id": 83,
+    "last_request_start_time":123,
     "request_id": 0,
-    "start_time": "2021-11-11T06:26:49.093000",
+    "query_start": "2021-11-11T06:26:49.093000",
     "command": "SELECT",
     "statement_start_offset": 0,
     "statement_end_offset": 1562,
@@ -66,9 +67,10 @@
     "database_name": "test_db",
     "session_status": "suspended",
     "text": "INSERT ? INTO different.table;",
-    "session_id": 83,
+    "id": 83,
+    "last_request_start_time":123,
     "request_id": 0,
-    "start_time": "2021-11-11T06:33:49.090000",
+    "query_start": "2021-11-11T06:33:49.090000",
     "command": "SELECT",
     "statement_start_offset": 0,
     "statement_end_offset": 1562,
@@ -120,12 +122,14 @@
   },
   {
     "transaction_begin_time": "2021-11-11T06:33:49.090000",
+    "query_start": "2021-11-11T06:33:57.090000",
     "transaction_type": 1,
     "transaction_state": 2,
     "user_name": "fred",
     "database_name": "test_db",
     "session_status": "sleeping",
     "text": "SELECT * FROM open_tx.table;",
-    "session_id": 56
+    "id": 56,
+    "last_request_start_time":123
   }
 ]
