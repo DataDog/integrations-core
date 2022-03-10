@@ -216,12 +216,12 @@ class AgentCheck(object):
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
         self.log = CheckLoggingAdapter(logger, self)
 
-        metric_filters = self.instance.get('metric_filters', {}) if instance else {}
-        if not isinstance(metric_filters, dict):
-            raise ConfigurationError('Setting `metric_filters` must be a mapping')
+        metric_patterns = self.instance.get('metric_patterns', {}) if instance else {}
+        if not isinstance(metric_patterns, dict):
+            raise ConfigurationError('Setting `metric_patterns` must be a mapping')
 
-        self.exclude_metrics_pattern = self._create_metrics_pattern(metric_filters, 'exclude')
-        self.include_metrics_pattern = self._create_metrics_pattern(metric_filters, 'include')
+        self.exclude_metrics_pattern = self._create_metrics_pattern(metric_patterns, 'exclude')
+        self.include_metrics_pattern = self._create_metrics_pattern(metric_patterns, 'include')
 
         # TODO: Remove with Agent 5
         # Set proxy settings
@@ -290,21 +290,21 @@ class AgentCheck(object):
         if not PY2:
             self.check_initializations.append(self.load_configuration_models)
 
-    def _create_metrics_pattern(self, metric_filters, option_name):
-        filters = metric_filters.get(option_name, [])
+    def _create_metrics_pattern(self, metric_patterns, option_name):
+        all_patterns = metric_patterns.get(option_name, [])
 
-        if not isinstance(filters, list):
-            raise ConfigurationError('Setting `{}` of `metric_filters` must be an array'.format(option_name))
+        if not isinstance(all_patterns, list):
+            raise ConfigurationError('Setting `{}` of `metric_patterns` must be an array'.format(option_name))
 
         metrics_patterns = []
-        for i, entry in enumerate(filters, 1):
+        for i, entry in enumerate(all_patterns, 1):
             if not isinstance(entry, str):
                 raise ConfigurationError(
-                    'Entry #{} of setting `{}` of `metric_filters` must be a string'.format(i, option_name)
+                    'Entry #{} of setting `{}` of `metric_patterns` must be a string'.format(i, option_name)
                 )
             if not entry:
                 self.log.debug(
-                    'Entry #%s of setting `%s` of `metric_filters` must not be empty, ignoring', i, option_name
+                    'Entry #%s of setting `%s` of `metric_patterns` must not be empty, ignoring', i, option_name
                 )
                 continue
 

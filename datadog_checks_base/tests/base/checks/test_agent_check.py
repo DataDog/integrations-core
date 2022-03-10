@@ -691,7 +691,7 @@ class TestTags:
     )
     def test_metrics_filters(self, exclude_metrics_filters, include_metrics_filters, expected_metrics, aggregator):
         instance = {
-            'metric_filters': {
+            'metric_patterns': {
                 'exclude': exclude_metrics_filters,
                 'include': include_metrics_filters,
             }
@@ -713,28 +713,28 @@ class TestTags:
         "exclude_metrics_filters, include_metrics_filters, expected_error",
         [
             pytest.param(
-                'metric', [], r'^Setting `exclude` of `metric_filters` must be an array', id='exclude not list'
+                'metric', [], r'^Setting `exclude` of `metric_patterns` must be an array', id='exclude not list'
             ),
             pytest.param(
-                [], 'metric', r'^Setting `include` of `metric_filters` must be an array', id='include not list'
+                [], 'metric', r'^Setting `include` of `metric_patterns` must be an array', id='include not list'
             ),
             pytest.param(
                 ['metric_one', 1000],
                 [],
-                r'^Entry #2 of setting `exclude` of `metric_filters` must be a string',
+                r'^Entry #2 of setting `exclude` of `metric_patterns` must be a string',
                 id='exclude bad element',
             ),
             pytest.param(
                 [],
                 [10, 'metric_one'],
-                r'^Entry #1 of setting `include` of `metric_filters` must be a string',
+                r'^Entry #1 of setting `include` of `metric_patterns` must be a string',
                 id='include bad element',
             ),
         ],
     )
     def test_metrics_filter_invalid(self, aggregator, exclude_metrics_filters, include_metrics_filters, expected_error):
         instance = {
-            'metric_filters': {
+            'metric_patterns': {
                 'exclude': exclude_metrics_filters,
                 'include': include_metrics_filters,
             }
@@ -748,20 +748,20 @@ class TestTags:
             pytest.param(
                 [''],
                 [],
-                'Entry #1 of setting `exclude` of `metric_filters` must not be empty, ignoring',
+                'Entry #1 of setting `exclude` of `metric_patterns` must not be empty, ignoring',
                 id='empty exclude',
             ),
             pytest.param(
                 [],
                 [''],
-                'Entry #1 of setting `include` of `metric_filters` must not be empty, ignoring',
+                'Entry #1 of setting `include` of `metric_patterns` must not be empty, ignoring',
                 id='empty include',
             ),
         ],
     )
     def test_metrics_filter_warnings(self, caplog, exclude_metrics_filters, include_metrics_filters, expected_log):
         instance = {
-            'metric_filters': {
+            'metric_patterns': {
                 'exclude': exclude_metrics_filters,
                 'include': include_metrics_filters,
             }
