@@ -11,7 +11,7 @@
   "creates_events": false,
   "short_description": "FoundationDB integration",
   "guid": "ed46c9de-3a62-46f0-98a6-19344746dd42",
-  "support": "contrib",
+  "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
@@ -19,7 +19,8 @@
   ],
   "public_title": "FoundationDB",
   "categories": [
-    "data store"
+    "data store",
+    "log collection"
   ],
   "type": "check",
   "is_public": false,
