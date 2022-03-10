@@ -498,21 +498,22 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agen
         mock_agent.side_effect = obfuscate_sql
         run_query(test_query)
         dd_run_check(mysql_check)
+        run_query(test_query)
+        dd_run_check(mysql_check)
 
     samples = aggregator.get_event_platform_events("dbm-samples")
-    matching = [s for s in samples if s['db']['query_signature'] == query_signature]
+    matching = [s for s in samples if s['db']['query_signature'] == query_signature and s.get('dbm_type') != 'fqt']
     assert len(matching) == 1
-
     sample = matching[0]
     assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
     assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
     assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
 
-    # Run the query and check a second time so statement metrics are computed from the previous run
-    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
-        mock_agent.side_effect = obfuscate_sql
-        run_query(test_query)
-        dd_run_check(mysql_check)
+    fqt_samples = [s for s in samples if s['db']['query_signature'] == query_signature and s.get('dbm_type') == 'fqt']
+    assert len(fqt_samples) == 1
+    fqt = fqt_samples[0]
+    assert fqt['db']['metadata']['tables'] == expected_metadata_payload['tables']
+    assert fqt['db']['metadata']['commands'] == expected_metadata_payload['commands']
 
     metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(metrics) == 1
