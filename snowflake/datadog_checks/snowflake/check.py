@@ -9,6 +9,7 @@ from cryptography.hazmat.primitives import serialization
 
 from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
 from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.common import ensure_unicode
 
 from . import queries
 from .config import Config
@@ -55,7 +56,7 @@ class SnowflakeCheck(AgentCheck):
         if self._config.private_key_password:
             # private_key_password is of type bytes so it can be loaded for the pem private key
             # but this needs to converted to string to be registered as a secret for filtering
-            self.register_secret(str(self._config.private_key_password))
+            self.register_secret(ensure_unicode(self._config.private_key_password))
 
         if self._config.role == 'ACCOUNTADMIN':
             self.log.info(
