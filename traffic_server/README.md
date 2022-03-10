@@ -20,7 +20,7 @@ stats_over_http.so
 
 ### Configuration
 
-1. Edit the `traffic_server.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Traffic Server performance data. See the [sample traffic_server.d/conf.yaml][4] for all available configuration options.
+1. Edit the `traffic_server.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Traffic Server performance data. See the [sample traffic_server.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
 
@@ -32,7 +32,7 @@ stats_over_http.so
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this check.
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Log collection
 
@@ -40,7 +40,7 @@ _Available for Agent versions >6.0_
 
 1. Traffic Server logs are highly [customizable][11], but Datadog's integration pipeline supports the default conversion pattern. Clone and edit the [integration pipeline][12] if you have a different format.
 
-2. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+2. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
 
    ```yaml
    logs_enabled: true
