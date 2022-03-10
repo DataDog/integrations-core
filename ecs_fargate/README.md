@@ -362,8 +362,6 @@ For more information on CloudFormation templating and syntax, see the [AWS Cloud
 
 The Agent can autodiscover and attach tags to all data emitted by the entire task or an individual container within this task. The list of tags automatically attached depends on the agent [cardinality configuration][44].
 
-<div style="overflow-x: auto;">
-
   | Tag                           | Cardinality  | Source               |
   |-------------------------------|--------------|----------------------|
   | `container_name`              | High         | ECS API              |
@@ -380,8 +378,6 @@ The Agent can autodiscover and attach tags to all data emitted by the entire tas
   | `task_version`                | Low          | ECS API              |
   | `availability_zone`           | Low          | ECS API              |
   | `region`                      | Low          | ECS API              |
-
-</div>
 
 ## Data Collected
 
