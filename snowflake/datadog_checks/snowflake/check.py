@@ -7,9 +7,8 @@ import snowflake.connector as sf
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
-from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
+from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string, ensure_bytes
 from datadog_checks.base.utils.db import QueryManager
-from datadog_checks.base.utils.common import ensure_unicode
 
 from . import queries
 from .config import Config
@@ -56,7 +55,7 @@ class SnowflakeCheck(AgentCheck):
         if self._config.private_key_password:
             # private_key_password is of type bytes so it can be loaded for the pem private key
             # but this needs to converted to string to be registered as a secret for filtering
-            self.register_secret(ensure_unicode(self._config.private_key_password))
+            self.register_secret(self._config.private_key_password)
 
         if self._config.role == 'ACCOUNTADMIN':
             self.log.info(
@@ -99,7 +98,7 @@ class SnowflakeCheck(AgentCheck):
             # https://docs.snowflake.com/en/user-guide/python-connector-example.html#using-key-pair-authentication-key-pair-rotation
             with open(self._config.private_key_path, "rb") as key:
                 p_key = serialization.load_pem_private_key(
-                    key.read(), password=self._config.private_key_password, backend=default_backend()
+                    key.read(), password=ensure_bytes(self._config.private_key_password), backend=default_backend()
                 )
 
                 pkb = p_key.private_bytes(
