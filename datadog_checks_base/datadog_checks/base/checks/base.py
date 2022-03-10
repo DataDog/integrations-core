@@ -294,14 +294,18 @@ class AgentCheck(object):
         filters = metric_filters.get(option_name, [])
 
         if not isinstance(filters, list):
-            raise ConfigurationError('Setting `{}` must be an array'.format(option_name))
+            raise ConfigurationError('Setting `{}` of `metric_filters` must be an array'.format(option_name))
 
         metrics_patterns = []
         for i, entry in enumerate(filters, 1):
             if not isinstance(entry, str):
-                raise ConfigurationError('Entry #{} of setting `{}` must be a string'.format(i, option_name))
+                raise ConfigurationError(
+                    'Entry #{} of setting `{}` of `metric_filters` must be a string'.format(i, option_name)
+                )
             if not entry:
-                self.log.debug('Entry #%s of setting `%s` must not be empty, ignoring', i, option_name)
+                self.log.debug(
+                    'Entry #%s of setting `%s` of `metric_filters` must not be empty, ignoring', i, option_name
+                )
                 continue
 
             metrics_patterns.append(entry)

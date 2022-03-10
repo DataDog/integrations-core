@@ -712,18 +712,22 @@ class TestTags:
     @pytest.mark.parametrize(
         "exclude_metrics_filters, include_metrics_filters, expected_error",
         [
-            pytest.param('metric', [], r'^Setting `exclude_metrics_filters` must be an array', id='exclude not list'),
-            pytest.param([], 'metric', r'^Setting `include_metrics_filters` must be an array', id='include not list'),
+            pytest.param(
+                'metric', [], r'^Setting `exclude` of `metric_filters` must be an array', id='exclude not list'
+            ),
+            pytest.param(
+                [], 'metric', r'^Setting `include` of `metric_filters` must be an array', id='include not list'
+            ),
             pytest.param(
                 ['metric_one', 1000],
                 [],
-                r'^Entry #2 of setting `exclude_metrics_filters` must be a string',
+                r'^Entry #2 of setting `exclude` of `metric_filters` must be a string',
                 id='exclude bad element',
             ),
             pytest.param(
                 [],
                 [10, 'metric_one'],
-                r'^Entry #1 of setting `include_metrics_filters` must be a string',
+                r'^Entry #1 of setting `include` of `metric_filters` must be a string',
                 id='include bad element',
             ),
         ],
@@ -744,13 +748,13 @@ class TestTags:
             pytest.param(
                 [''],
                 [],
-                'Entry #1 of setting `exclude_metrics_filters` must not be empty, ignoring',
+                'Entry #1 of setting `exclude` of `metric_filters` must not be empty, ignoring',
                 id='empty exclude',
             ),
             pytest.param(
                 [],
                 [''],
-                'Entry #1 of setting `include_metrics_filters` must not be empty, ignoring',
+                'Entry #1 of setting `include` of `metric_filters` must not be empty, ignoring',
                 id='empty include',
             ),
         ],
