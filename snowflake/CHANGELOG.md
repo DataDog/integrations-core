@@ -1,5 +1,9 @@
 # CHANGELOG - Snowflake
 
+## 4.2.1 / 2022-03-10
+
+* [Fixed] Convert private key password into string instead of byte. See [#11648](https://github.com/DataDog/integrations-core/pull/11648).
+
 ## 4.2.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11433](https://github.com/DataDog/integrations-core/pull/11433).
