@@ -9,13 +9,13 @@ and, optionally, FoundationDB transaction logs.
 ## Setup
 
 Both the check and metrics apply to the FoundationDB cluster as a whole,
-and should only be installed on one host. This doesn't need to be one that is
+and should only be installed on one host. The host doesn't need to be one that is
 running FoundationDB, but just one with access to it.
 
 ### Installation
 
 The FoundationDB check is included in the [Datadog Agent][2] package,
-but in it requires to have the [FoundationDB client][8] installed.
+but requires the [FoundationDB client][8] to be installed.
 
 ### Configuration
 
@@ -26,7 +26,7 @@ but in it requires to have the [FoundationDB client][8] installed.
 
 To configure this check for an Agent running on a host:
 
-#### Metric collection
+##### Metric collection
 
 1. To start collecting your FoundationDB metrics, edit the `foundationdb.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory.
    See the [sample foundationdb.d/conf.yaml][3] for all available configuration options.
@@ -41,11 +41,11 @@ related options given to `fdbcli` to connect to such a cluster.
 
 ##### Log collection
 
-FoundationDB writes XML logs by default, however Datadog integrations expect JSON logs instead. Thus a configuration change shall be needed to
-FoundationDB itself first.
+FoundationDB writes XML logs by default, however, Datadog integrations expect JSON logs. Thus, a configuration change needs to be made to
+FoundationDB.
 
 1. Locate your `foundationdb.conf` file. Under the `fdbserver` section, add
-   or change the key `trace_format` to have the value `json`. Also make a
+   or change the key `trace_format` to have the value `json`. Also, make
    note of the `logdir`.
 
     ```
@@ -66,7 +66,7 @@ FoundationDB itself first.
     ```
 
 4. In the `foundationdb.d/conf.yaml` file, uncomment the `logs` section
-   and set the path to that found in your FoundationDB configuration file,
+   and set the path to the one in your FoundationDB configuration file,
    appending `*.json`.
 
     ```yaml
@@ -90,7 +90,7 @@ FoundationDB itself first.
 For containerized environments, see the [Autodiscovery Integration Templates][12] for guidance on applying the parameters below.
 
 
-#### Metric collection
+##### Metric collection
 
 | Parameter            | Value                                                      |
 |----------------------|------------------------------------------------------------|
