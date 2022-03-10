@@ -53,8 +53,6 @@ class SnowflakeCheck(AgentCheck):
             self.register_secret(self._config.password)
 
         if self._config.private_key_password:
-            # private_key_password is of type bytes so it can be loaded for the pem private key
-            # but this needs to converted to string to be registered as a secret for filtering
             self.register_secret(self._config.private_key_password)
 
         if self._config.role == 'ACCOUNTADMIN':
