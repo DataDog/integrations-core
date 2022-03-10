@@ -216,8 +216,12 @@ class AgentCheck(object):
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
         self.log = CheckLoggingAdapter(logger, self)
 
-        self.exclude_metrics_pattern = self._create_metrics_pattern(instance, 'exclude_metrics_filters')
-        self.include_metrics_pattern = self._create_metrics_pattern(instance, 'include_metrics_filters')
+        metric_filters = self.instance.get('metric_filters', {}) if instance else {}
+        if not isinstance(metric_filters, dict):
+            raise ConfigurationError('Setting `metric_filters` must be a mapping')
+
+        self.exclude_metrics_pattern = self._create_metrics_pattern(metric_filters, 'exclude')
+        self.include_metrics_pattern = self._create_metrics_pattern(metric_filters, 'include')
 
         # TODO: Remove with Agent 5
         # Set proxy settings
@@ -286,8 +290,9 @@ class AgentCheck(object):
         if not PY2:
             self.check_initializations.append(self.load_configuration_models)
 
-    def _create_metrics_pattern(self, config, option_name):
-        filters = config.get(option_name, []) if config else []
+    def _create_metrics_pattern(self, metric_filters, option_name):
+        filters = metric_filters.get(option_name, [])
+
         if not isinstance(filters, list):
             raise ConfigurationError('Setting `{}` must be an array'.format(option_name))
 

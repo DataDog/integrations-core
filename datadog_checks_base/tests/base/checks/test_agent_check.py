@@ -691,8 +691,10 @@ class TestTags:
     )
     def test_metrics_filters(self, exclude_metrics_filters, include_metrics_filters, expected_metrics, aggregator):
         instance = {
-            'exclude_metrics_filters': exclude_metrics_filters,
-            'include_metrics_filters': include_metrics_filters,
+            'metric_filters': {
+                'exclude': exclude_metrics_filters,
+                'include': include_metrics_filters,
+            }
         }
         check = AgentCheck('myintegration', {}, [instance])
         check.gauge('my_metric', 0)
@@ -728,8 +730,10 @@ class TestTags:
     )
     def test_metrics_filter_invalid(self, aggregator, exclude_metrics_filters, include_metrics_filters, expected_error):
         instance = {
-            'exclude_metrics_filters': exclude_metrics_filters,
-            'include_metrics_filters': include_metrics_filters,
+            'metric_filters': {
+                'exclude': exclude_metrics_filters,
+                'include': include_metrics_filters,
+            }
         }
         with pytest.raises(Exception, match=expected_error):
             AgentCheck('myintegration', {}, [instance])
@@ -753,8 +757,10 @@ class TestTags:
     )
     def test_metrics_filter_warnings(self, caplog, exclude_metrics_filters, include_metrics_filters, expected_log):
         instance = {
-            'exclude_metrics_filters': exclude_metrics_filters,
-            'include_metrics_filters': include_metrics_filters,
+            'metric_filters': {
+                'exclude': exclude_metrics_filters,
+                'include': include_metrics_filters,
+            }
         }
         caplog.clear()
         caplog.set_level(logging.DEBUG)
