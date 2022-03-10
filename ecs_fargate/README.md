@@ -360,7 +360,7 @@ For more information on CloudFormation templating and syntax, see the [AWS Cloud
 
 ## Out-of-the-box tags
 
-The Agent can autodiscover and attach tags to all data emitted by the entire task or an individual container within this task. The list of tags automatically attached depends on the agent [cardinality configuration][44].
+The Agent can autodiscover and attach tags to all data emitted by the entire task or an individual container within this task. The list of tags automatically attached depends on the Agent's [cardinality configuration][44].
 
   | Tag                           | Cardinality  | Source               |
   |-------------------------------|--------------|----------------------|
