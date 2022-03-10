@@ -602,6 +602,11 @@ def test_statement_metadata(
     assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
     assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
 
+    if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_statements_view == "pg_stat_statements":
+        # cannot catch any queries from other users
+        # only can see own queries
+        return False
+
     fqt_samples = [
         s for s in samples if s.get('dbm_type') == 'fqt' and s['db']['query_signature'] == normalized_query_signature
     ]
@@ -609,11 +614,6 @@ def test_statement_metadata(
     fqt = fqt_samples[0]
     assert fqt['db']['metadata']['tables'] == expected_metadata_payload['tables']
     assert fqt['db']['metadata']['commands'] == expected_metadata_payload['commands']
-
-    if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_statements_view == "pg_stat_statements":
-        # cannot catch any queries from other users
-        # only can see own queries
-        return False
 
     # Test metrics metadata, metadata in metrics are located in the rows.
     metrics = aggregator.get_event_platform_events("dbm-metrics")
