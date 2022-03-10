@@ -291,7 +291,6 @@ class AgentCheck(object):
         if not isinstance(filters, list):
             raise ConfigurationError('Setting `{}` must be an array'.format(option_name))
 
-        metrics_pattern = None
         metrics_patterns = []
         for i, entry in enumerate(filters, 1):
             if not isinstance(entry, str):
@@ -303,8 +302,9 @@ class AgentCheck(object):
             metrics_patterns.append(entry)
 
         if metrics_patterns:
-            metrics_pattern = re.compile('|'.join(metrics_patterns))
-        return metrics_pattern
+            return re.compile('|'.join(metrics_patterns))
+
+        return None
 
     def _get_metric_limiter(self, name, instance=None):
         # type: (str, InstanceType) -> Optional[Limiter]
