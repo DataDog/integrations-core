@@ -81,5 +81,3 @@ sqlserver.queries.dop,count,,,,The total sum of degree of parallelism used by ex
 sqlserver.queries.spills,count,,,,The total number of pages spilled by execution of this query per query (DBM only),0,sql_server,query spills,
 sqlserver.queries.duration.max,gauge,,nanosecond,,"The age of the longest running query per user, db, and app. (DBM only)",0,sql_server,queries duration max,
 sqlserver.queries.duration.sum,gauge,,nanosecond,,"The sum of the age of all running queries per user, db, and app. (DBM only)",0,sql_server,queries duration sum,
-sqlserver.transactions.duration.max,gauge,,nanosecond,,"The age of the longest running transaction per user, db, and app. (DBM only)",0,sql_server,transactions duration max,
-sqlserver.transactions.duration.sum,gauge,,nanosecond,,"The sum of the age of all running transactions per user, db, and app. (DBM only)",0,sql_server,sql_server transactions duration sum,

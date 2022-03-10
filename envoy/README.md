@@ -14,10 +14,10 @@ The Envoy check is included in the [Datadog Agent][2] package, so you don't need
 
 If you are using Envoy as part of [Istio][3], configure the Envoy integration to collect metrics from the Istio proxy metrics endpoint.
 
-    ```yaml
-    instances:
-      - openmetrics_endpoint: localhost:15090/stats/prometheus
-    ```
+```yaml
+instances:
+  - openmetrics_endpoint: localhost:15090/stats/prometheus
+```
 
 #### Standard
 
