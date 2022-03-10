@@ -101,6 +101,9 @@ metadata:
  name: "<APPLICATION_NAME>"
  namespace: default
 spec:
+ selector:
+   matchLabels:
+     app: "<APPLICATION_NAME>"
  replicas: 1
  template:
    metadata:
@@ -158,6 +161,9 @@ metadata:
  namespace: default
 spec:
  replicas: 1
+ selector:
+   matchLabels:
+     app: "<APPLICATION_NAME>"
  template:
    metadata:
      labels:
@@ -215,6 +221,9 @@ metadata:
  namespace: default
 spec:
  replicas: 1
+ selector:
+   matchLabels:
+     app: "<APPLICATION_NAME>"
  template:
    metadata:
      labels:
@@ -304,6 +313,9 @@ metadata:
  namespace: default
 spec:
  replicas: 1
+ selector:
+   matchLabels:
+     app: "<APPLICATION_NAME>"
  template:
    metadata:
      labels:
