@@ -33,12 +33,12 @@ class FoundationdbCheck(AgentCheck):
         else:
             self._db = fdb.open()
 
-    def fdb_status_data(self, _):
+    def fdb_status_data(self):
         self.construct_database()
         return self._db[u'\xff\xff/status/json'.encode(u'latin-1')]
 
-    def check(self, instance):
-        status_data = self.fdb_status_data(instance)
+    def check(self, _):
+        status_data = self.fdb_status_data()
         try:
             data = json.loads(status_data)
         except Exception:
