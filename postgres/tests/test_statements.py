@@ -570,7 +570,7 @@ def test_statement_metadata(
 
     normalized_query = 'SELECT city FROM persons WHERE city = ?'
     # Metrics will match to the normalized query signature
-    normalized_query_signature = '92a069a551c280e7'
+    normalized_query_signature = 'ca85e8d659051b3a'
 
     def obfuscate_sql(query, options=None):
         if query.startswith('SELECT city FROM persons WHERE city'):
