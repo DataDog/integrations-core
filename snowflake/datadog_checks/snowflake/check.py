@@ -7,7 +7,7 @@ import snowflake.connector as sf
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
-from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string, ensure_bytes
+from datadog_checks.base import AgentCheck, ConfigurationError, ensure_bytes, to_native_string
 from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
