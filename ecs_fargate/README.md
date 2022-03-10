@@ -457,5 +457,5 @@ Need help? Contact [Datadog support][22].
 [41]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
 [42]: https://www.datadoghq.com/blog/aws-fargate-on-graviton2-monitoring/
 [43]: https://www.datadoghq.com/blog/aws-fargate-windows-containers-support/
-[44]: /getting_started/tagging/assigning_tags/?tab=containerizedenvironments#environment-variables
+[44]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags/?tab=containerizedenvironments#environment-variables
 
