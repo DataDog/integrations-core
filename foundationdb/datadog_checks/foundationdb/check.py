@@ -16,25 +16,25 @@ class FoundationdbCheck(AgentCheck):
         super(FoundationdbCheck, self).__init__(name, init_config, instances)
         self._db = None
 
-    def construct_database(self, instance):
+    def construct_database(self):
         if self._db is not None:
             return self._db
 
         # TLS options. Each option has a different function name, so we cannot be smart with it without ugly code
-        if 'tls_certificate_file' in instance:
-            fdb.options.set_tls_cert_path(instance.get('tls_certificate_file'))
-        if 'tls_key_file' in instance:
-            fdb.options.set_tls_key_path(instance.get('tls_key_file'))
-        if 'tls_verify_peers' in instance:
-            fdb.options.set_tls_verify_peers(instance.get('tls_verify_peers').encode('latin-1'))
+        if 'tls_certificate_file' in self.instance:
+            fdb.options.set_tls_cert_path(self.instance.get('tls_certificate_file'))
+        if 'tls_key_file' in self.instance:
+            fdb.options.set_tls_key_path(self.instance.get('tls_key_file'))
+        if 'tls_verify_peers' in self.instance:
+            fdb.options.set_tls_verify_peers(self.instance.get('tls_verify_peers').encode('latin-1'))
 
-        if 'cluster_file' in instance:
-            self._db = fdb.open(cluster_file=instance.get('cluster_file'))
+        if 'cluster_file' in self.instance:
+            self._db = fdb.open(cluster_file=self.instance.get('cluster_file'))
         else:
             self._db = fdb.open()
 
-    def fdb_status_data(self, instance):
-        self.construct_database(instance)
+    def fdb_status_data(self, _):
+        self.construct_database()
         return self._db[u'\xff\xff/status/json'.encode(u'latin-1')]
 
     def check(self, instance):
@@ -46,13 +46,12 @@ class FoundationdbCheck(AgentCheck):
             raise
 
         self.check_metrics(data)
-        self.check_custom_queries(instance)
+        self.check_custom_queries()
 
-    def check_custom_queries(self, instance):
-        if 'custom_queries' not in instance:
+    def check_custom_queries(self):
+        custom_queries = self.instance.get('custom_queries')
+        if not custom_queries:
             return
-
-        custom_queries = instance['custom_queries']
         for query in custom_queries:
             metric_prefix = query['metric_prefix']
             if not metric_prefix:

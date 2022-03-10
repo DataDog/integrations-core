@@ -1,6 +1,6 @@
 {
   "display_name": "FoundationDB",
-  "maintainer": "datadog-integrations@edument.cz",
+  "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "foundationdb",
   "metric_prefix": "foundationdb.",
