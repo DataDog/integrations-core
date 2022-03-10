@@ -12,6 +12,7 @@ from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_wai
 # Releasing any version > 0.0.1 for a core integration requires a tag.*.link file to be updated in the PR
 PRERELEASE = '0.0.1'
 
+
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Tag the git repo with the current release of a check')
 @click.argument('check', autocompletion=complete_valid_checks)
 @click.argument('version', required=False)
