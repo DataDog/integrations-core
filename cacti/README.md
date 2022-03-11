@@ -101,10 +101,10 @@ sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install rrdtool
        mysql_password: "<MYSQL_PASSWORD>"
 
        ## @param rrd_path - string - required
-       ## The Cacti checks requires access toa the Cacti DB in MySQL and to the RRD
+       ## The Cacti checks requires access to the Cacti DB in MySQL and to the RRD
        ## files that contain the metrics tracked in Cacti.
        ## In almost all cases, you'll only need one instance pointing to the Cacti
-       ## database.a
+       ## database.
        ## The `rrd_path` will probably be `/var/lib/cacti/rra` on Ubuntu
        ## or `/var/www/html/cacti/rra` on any other machines.
        #
