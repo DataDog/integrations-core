@@ -56,10 +56,9 @@ FoundationDB.
     ```
 
 2. Restart the FoundationDB server so the changes take effect. Verify that
-   logs in the logdir are being written in JSON.
+   logs in the `logdir` are written in JSON.
 
-3. Ensure that log collection in the Datadog Agent is enabled. In your
-   `datadog.yaml` file, make sure this appears:
+3. Ensure that log collection is enabled in your `datadog.yaml` file:
 
     ```yaml
     logs_enabled: true
