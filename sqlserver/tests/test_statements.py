@@ -256,6 +256,9 @@ def test_statement_metrics_and_plans(
     assert plan_events, "should have collected some plans"
 
     for event in plan_events:
+        assert event['duration'], "missing duration"
+        assert event['duration'] > 0, \
+            "unable to calc duration, missing total_elapsed_time or execution_count columns in qstats"
         assert event['db']['plan']['definition'], "event plan definition missing"
         parsed_plan = ET.fromstring(event['db']['plan']['definition'])
         assert parsed_plan.tag.endswith("ShowPlanXML"), "plan does not match expected structure"

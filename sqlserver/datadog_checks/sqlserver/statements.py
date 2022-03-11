@@ -379,6 +379,14 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             return None
         return result[0][0]
 
+    @staticmethod
+    def _get_avg_query_duration(row):
+        if 'total_elapsed_time' in row and 'execution_count' in row:
+            # total_elapsed_time is measured in microseconds, but we require
+            # nanoseconds in the backend
+            return (row['total_elapsed_time'] / row['execution_count']) * 1000
+        return 0
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_plans(self, rows, cursor, deadline):
         for row in rows:
@@ -412,6 +420,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         **self.check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))])
                     )
                 tags = list(self.check.tags)
+                duration = self._get_avg_query_duration(row)
                 if 'database_name' in row:
                     tags += ["db:{}".format(row['database_name'])]
                 yield {
@@ -421,6 +430,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     "ddtags": ",".join(tags),
                     "timestamp": time.time() * 1000,
                     "dbm_type": "plan",
+                    "duration": duration,
                     "db": {
                         "instance": row.get("database_name", None),
                         "plan": {
