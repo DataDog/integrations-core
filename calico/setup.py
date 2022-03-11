@@ -24,7 +24,22 @@ def get_dependencies():
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog-checks-base>=16.9.0'
+def parse_pyproject_array(name):
+    import os
+    import re
+    from ast import literal_eval
+
+    pattern = r'^{} = (\[.*?\])$'.format(name)
+
+    with open(os.path.join(HERE, 'pyproject.toml'), 'r', encoding='utf-8') as f:
+        # Windows \r\n prevents match
+        contents = '\n'.join(line.rstrip() for line in f.readlines())
+
+    array = re.search(pattern, contents, flags=re.MULTILINE | re.DOTALL).group(1)
+    return literal_eval(array)
+
+
+CHECKS_BASE_REQ = parse_pyproject_array('dependencies')[0]
 
 
 setup(
@@ -55,7 +70,7 @@ setup(
     packages=['datadog_checks.calico'],
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
-    extras_require={'deps': get_dependencies()},
+    extras_require={'deps': parse_pyproject_array('deps')},
     # Extra files to ship with the wheel package
     include_package_data=True,
 )
