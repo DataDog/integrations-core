@@ -384,7 +384,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         if 'total_elapsed_time' in row and 'execution_count' in row:
             # total_elapsed_time is measured in microseconds, but we require
             # nanoseconds in the backend
-            return (row['total_elapsed_time'] / row['execution_count']) * 1000
+            return (float(row['total_elapsed_time']) * 1000) / row['execution_count']
         return 0
 
     @tracked_method(agent_check_getter=agent_check_getter)
