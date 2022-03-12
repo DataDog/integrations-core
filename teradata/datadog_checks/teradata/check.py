@@ -1,12 +1,7 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
 from contextlib import closing, contextmanager
-from typing import Any
-
-import pyodbc
-import teradatasql
 
 try:
     import jaydebeapi as jdb
@@ -24,10 +19,7 @@ from datadog_checks.base.utils.db import QueryManager
 
 from .common import SERVICE_CHECK_NAME
 from .config import TeradataConfig
-from .queries import DB_SPACE, PCT_SPACE_BY_DB
-from .values_sanitizer import get_row_sanitizer
-
-DEFAULT_QUERIES = [DB_SPACE, PCT_SPACE_BY_DB]
+from .queries import DEFAULT_QUERIES
 
 
 class TeradataCheck(AgentCheck):
@@ -40,50 +32,41 @@ class TeradataCheck(AgentCheck):
 
         self.config = TeradataConfig(self.instance)
         self._connection = None
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=DEFAULT_QUERIES)
+        self._query_manager = QueryManager(self, self._execute_query_raw, queries=DEFAULT_QUERIES, tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
-        self._service_check_tags = ['teradata_host:{}'.format(self.config.host)] + self.config.tags
+        self._tags = ['teradata_server:{}'.format(self.config.server)] + self.config.tags
+        self._credentials_required = True
 
     def check(self, _):
-        # type: (Any) -> None
-        with self.connect() as conn:
+        with self._connect() as conn:
             self._connection = conn
             self._query_manager.execute()
 
-    def execute_query_raw(self, query):
+    def _execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:
+            query = query.format(self.config.db)
             cursor.execute(query)
             results = cursor.fetchall()
             if len(results) < 1:
                 self.log.warning("Failed to fetch records from query: `%s`.", query)
                 return []
             else:
-                sanitizer_method = get_row_sanitizer(query)
                 for row in results:
-                    try:
-                        yield sanitizer_method(row)
-                    except Exception:
-                        self.log.debug("Unable to sanitize row %r.", exc_info=True)
-                        yield row
+                    yield row
 
     @contextmanager
-    def connect(self):
+    def _connect(self):
         try:
-            if self.config.use_jdbc:
-                return self._connect_jdbc()
-            if self.config.use_odbc:
-                return self._connect_odbc()
-            else:
-                return self._connect_non_odbc()
+            return self._connect_jdbc()
         except Exception as e:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, msg=e, tags=self._service_check_tags)
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, msg=e, tags=self._tags)
             self.log.error('Failed to connect to Teradata database. %s', e)
             raise
 
     def _connect_jdbc(self):
         conn = None
         jdbc_connect_properties = {'user': self.config.username, 'password': self.config.password}
-        conn_str = self.JDBC_CONNECTION_STRING.format(self.config.host)
+        conn_str = self._connection_string()
         try:
             if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
                 jpype.attachThreadToJVM()
@@ -94,150 +77,60 @@ class TeradataCheck(AgentCheck):
             conn = jdb.connect(
                 self.TERADATA_DRIVER_CLASS, conn_str, jdbc_connect_properties, self.config.jdbc_driver_path
             )
-            self.log.debug("Connected to Teradata Database using JDBC Connector")
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._tags)
+            self.log.debug("Connected to Teradata Database.")
             yield conn
         except Exception as e:
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.WARN, msg=e, tags=self._tags)
             self.log.error("Failed to connect to Teradata Database using JDBC Connector. %s", e)
             raise
         finally:
             if conn:
                 conn.close()
 
-    def _connect_odbc(self):
-        conn = None
-        connection_string = self._gen_odbc_conn_string()
-        self.log.debug('Connecting to Teradata via ODBC with connection_string: %s.', connection_string)
-        try:
-            conn = pyodbc.connect(connection_string, timeout=self.config.timeout, autocommit=True)
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._service_check_tags)
-            self.log.debug('Connected to Teradata.')
-            yield conn
-        except Exception as e:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL)
-            self.log.exception('Unable to connect to Teradata database. %e', e)
-            raise
-        finally:
-            if conn:
-                conn.close()
+    def _connection_string(self):
+        creds_required = self._creds_required()
+        if creds_required and (not self.config.username or not self.config.password):
+            raise ConfigurationError("`username` and `password` are required")
+            return {}
+        else:
+            conn_str = self.JDBC_CONNECTION_STRING.format(self.config.server)
+            config_opts = {
+                'account': self.config.account,
+                'dbs_port': self.config.port,
+                'https_port': self.config.https_port,
+                'sslmode': self.config.ssl_mode,
+                'sslprotocol': self.config.ssl_protocol,
+                'sslca': self.config.ssl_ca,
+                'sslcapath': self.config.ssl_ca_path,
+                'logmech': self.config.auth_mechanism,
+                'logdata': self.config.auth_data,
+            }
 
-    def _connect_non_odbc(self):
-        conn = None
-        self.log.debug('Connecting to Teradata via teradatasql driver...')
-        conn_params = {
-            'host': self.config.host,
-            'user': self.config.username,
-            'password': self.config.password,
-            'account': self.config.account,
-            'database': self.config.db,
-            'dbs_port': str(self.config.port),
-            'https_port': str(self.config.https_port),
-            'sslca': self.config.ssl_ca,
-            'sslcapath': self.config.ssl_ca_path,
-            'sslmode': self.config.ssl_mode,
-            'sslprotocol': self.config.ssl_protocol,
-        }
-        try:
-            conn = teradatasql.connect(json.dumps(conn_params))
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._service_check_tags)
-            self.log.debug('Connected to Teradata.')
-            yield conn
-        except Exception as e:
-            self.log.exception('Unable to connect via teradatasql driver. %s.', e)
-            raise
-        finally:
-            if conn:
-                conn.close()
+            if not self.config.use_tls:
+                config_opts = {
+                    'account': self.config.account,
+                    'logmech': self.config.auth_mechanism,
+                    'logdata': self.config.auth_data,
+                }
 
-    def _gen_odbc_conn_string(self):
-        conn_str = 'RECONNECTCOUNT=2;CHARSET=UTF8;USEREGIONALSETTINGS=N;'
-        try:
-            normalized_cs = self._validate_custom_connection_options()
+            param_count = 0
+            for option, value in config_opts.items():
+                if value is None:
+                    continue
+                elif param_count < 1:
+                    conn_str += '/{}={}'.format(option, value)
+                    param_count += 1
+                else:
+                    conn_str += ',{}={}'.format(option, value)
+                    param_count += 1
 
-            if self.config.connection_string:
-                conn_str += normalized_cs
-            if self.config.dsn:
-                conn_str += 'DSN={};'.format(self.config.dsn)
-            if self.config.account:
-                conn_str += 'ACCOUNTSTR={};'.format(self.config.account)
-            if self.config.host:
-                conn_str += 'DBCNAME={};'.format(self.config.host)
-            if self.config.db:
-                conn_str += 'DATABASE={};'.format(self.config.db)
-            if self.config.odbc_driver_path:
-                conn_str += 'DRIVER={};'.format(self.config.odbc_driver_path)
-            if self.config.username:
-                conn_str += 'USERNAME={};'.format(self.config.username)
-            if self.config.password:
-                conn_str += 'PASSWORD={};'.format(self.config.password)
-            if self.config.use_tls and self.config.https_port:
-                conn_str += 'HTTPS_PORT={};'.format(self.config.https_port)
-            if self.config.ssl_mode:
-                conn_str += 'SSLMODE={}'.format(self.config.ssl_mode)
-            if self.config.ssl_ca:
-                conn_str += 'SSLCA={};'.format(self.config.ssl_ca)
-            if self.config.ssl_ca_path:
-                conn_str += 'SSLCAPATH={}'.format(self.config.ssl_ca_path)
-            if self.config.mechanism_key:
-                conn_str += 'MECHANISMKEY={};'.format(self.config.mechanism_key)
-            if self.config.mechanism_name:
-                conn_str += 'MECHANISMNAME={};'.format(self.config.mechanism_name)
+        return conn_str
 
-            return conn_str
-
-        except Exception:
-            self.log.error('Error occurred while constructing connection string. Check configuration options.')
-            raise
-
-    def _validate_custom_connection_options(self):
-        normalized_cs = self._normalize_conn_str(self.config.connection_string)
-
-        odbc_options = {
-            'dsn': ['DSN'],
-            'account': ['ACCOUNTSTR', 'ACCOUNT'],
-            'dbc_name': ['DBCNAME'],
-            'db': ['DEFAULTDATABASE', 'DATABASE'],
-            'driver': ['DRIVER'],
-            'username': ['USERNAME', 'UID'],
-            'password': ['PASSWORD', 'PWD'],
-            'https_port': ['HTTPS_PORT'],
-            'ssl_mode': ['SSLMODE'],
-            'ssl_protocol': ['SSLPROTOCOL'],
-            'ssl_ca': ['SSLCA'],
-            'ssl_ca_path': ['SSLCAPATH'],
-            'mechanism_key': ['MECHANISMKEY', 'AUTHENTICATIONPARAMETER'],
-            'mechanism_name': ['MECHANISMNAME', 'AUTHENTICATION'],
-        }
-
-        required_options = ['dbc_name', 'driver', 'username', 'password']
-
-        for option, values in odbc_options.items():
-            for value in values:
-                if option in required_options and self.config.get(option) is None:
-                    raise ConfigurationError("Configuration option %s is required.")
-                if value in normalized_cs and self.config.get(option) is not None:
-                    raise ConfigurationError(
-                        "%s has been provided both in the connection string and as a configuration"
-                        " option (%s), please specify it only once." % (value, option)
-                    )
-
-        return normalized_cs
-
-    def _normalize_conn_str(self, conn_str):
-        default_options = {'RECONNECTCOUNT': '2', 'CHARSET': 'UTF8', 'USEREGIONALSETTINGS': 'N'}
-
-        raw_cs = conn_str.split(';')
-
-        for index, config in enumerate(raw_cs):
-            raw_cs[index] = config.split('=')
-            option = raw_cs[index][0]
-            if option.upper() in default_options:
-                self.log.debug(
-                    "Connection string option %s is ignored. Default setting is %s.", option, default_options[option]
-                )
-                raw_cs.remove(raw_cs[index])
-            else:
-                raw_cs[index][0] = option.upper()
-                raw_cs[index] = '='.join(raw_cs[index])
-
-        normalized_cs = ';'.join(raw_cs)
-        return normalized_cs
+    def _creds_required(self):
+        optional = ['JWT', 'KRB5', 'LDAP']
+        if self.config.auth_mechanism and self.config.auth_mechanism.upper() in optional:
+            self._credentials_required = False
+        else:
+            self._credentials_required = True
+        return self._credentials_required

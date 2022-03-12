@@ -6,7 +6,7 @@
   "metric_prefix": "teradata.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Monitor the health and performance of your Teradata Vantage Database.",
   "guid": "8205988e-888a-4d31-abf0-753720d772a7",
   "support": "core",
   "supported_os": [

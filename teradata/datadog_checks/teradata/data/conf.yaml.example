@@ -26,69 +26,41 @@ init_config:
 #
 instances:
 
-  -
-    ## @param use_odbc - string - optional
-    ## Whether or not to use ODBC method for connecting to the Teradata database. If `true`, ODBC options are required.
-    ## If `false`, the check will use the teradatasql python driver to connect to the Teradata database.
-    #
-    # use_odbc: <USE_ODBC>
-
-    ## @param use_jdbc - string - optional
-    ## Whether or not to use JDBC method for connecting to the Teradata database.
-    #
-    # use_jdbc: <USE_JDBC>
-
-    ## @param dsn - string - optional
-    ## Data Source Name. The name of ODBC Driver for Teradata in the [ODBC Data Sources] section of odbc.ini.
-    #
-    # dsn: <DSN>
-
-    ## @param account - string - optional
-    ## The account string to use when logging into the database.
-    #
-    # account: <ACCOUNT>
-
-    ## @param host - string - required
+    ## @param server - string - required
     ## The IP address or FQDN (fully qualified domain name) of the Teradata database server. If `use_odbc` is enabled,
     ## specify the DBC name.
     #
-    host: <IP>
+  - server: <IP>
 
     ## @param port - string - optional
     ## Specifies the Teradata database port number
     #
     # port: <PORT>
 
-    ## @param database - string - optional - default: system
+    ## @param username - string - optional
+    ## Username for the Datadog-Teradata check user.
+    #
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## Password for the Datadog-Teradata check user.
+    #
+    # password: <PASSWORD>
+
+    ## @param account - string - optional
+    ## The Datadog-Teradata check user's account string to use when logging into the database.
+    #
+    # account: <ACCOUNT>
+
+    ## @param database - string - required
     ## The name of the database to access.
     #
-    # database: system
-
-    ## @param odbc_driver_path - string - optional - default: Teradata Database ODBC Driver 17.10
-    ## The named ODBC Driver or the full path to ODBC Driver for Teradata shared objects
-    ## (e.g. <DRIVER_INSTALL_DIR>/teradata/client/ODBC/lib/tdataodbc_sb64.so).
-    #
-    # odbc_driver_path: Teradata Database ODBC Driver 17.10
+    database: system
 
     ## @param jdbc_driver_path - string - optional - default: <DRIVER_PATH>.jar
     ## The full path to the Teradata JDBC Driver.
     #
     # jdbc_driver_path: <DRIVER_PATH>.jar
-
-    ## @param connection_string - string - optional
-    ## Specify a custom connection string to be used for connecting to the Teradata database.
-    #
-    # connection_string: <CONNECTION_STRING>
-
-    ## @param username - string - required
-    ## Username for the Datadog-Teradata check user.
-    #
-    username: <USERNAME>
-
-    ## @param password - string - required
-    ## Password for the Datadog-Teradata check user.
-    #
-    password: <PASSWORD>
 
     ## @param use_tls - string - optional
     ## Whether or not to use TLS for making connections to the Teradata database.
@@ -130,23 +102,47 @@ instances:
     #
     # ssl_ca_path: /path/to/ssl_ca_file/ca.pem
 
-    ## @param mechanism_key - string - optional
-    ## Key parameter to the authenication mechanism.
-    #
-    # mechanism_key: <MECHANISM_KEY>
-
-    ## @param mechanism_name - string - optional
-    ## The authentication mechanism for connecting to the Teradata data source. If no value is provided,
-    ## the default is determined by the configuration in the `tdgssconfigure` XML file.
-    ## For more info, see: https://docs.teradata.com/r/ODBC-Driver-for-Teradata-User-Guide/October-2021
+    ## @param auth_mechanism - string - optional
+    ## The authentication mechanism for connecting to the Teradata data source. If no value is provided, the defined
+    ## local default mechanism is used, otherwise the default mechanism defined by the database is used.
     ##
     ## Valid options are:
     ## * TD2 - Selects Teradata 2 authentication mechanism. Username and password are required.
     ## * TDNEGO - Selects the Authentication Mechanism automatically based on the policy without user involvement.
-    ## * LDAP - Selects LDAP as the authentication mechanism. The application provides the username and password.
-    ## * KRB5 - Selects Kerberos as the authentication mechanism. The application provides the username and password.
+    ## * LDAP - Selects LDAP as the authentication mechanism. Specify the username and password using the `auth_data`
+    ##          configuration option.
+    ## * KRB5 - Selects Kerberos as the authentication mechanism. Specify the username and password using the
+    ##          `auth_data` configuration option.
+    ## * JWT - Selects JWT as the authentication mechanism, available in Teradata Advanced SQL Engine 16.20+.
+    ##         Specify the JSON Web Token using the `auth_data` configuration option.
     #
-    # mechanism_name: <MECHANISM_NAME>
+    # auth_mechanism: <AUTH_MECHANISM>
+
+    ## @param auth_data - string - optional
+    ## Specifies additional data needed by a logon authentication mechanism, such as a secure token,
+    ## Distinguished Name, or a domain/realm name. `auth_data` values are specific to each logon mechanism.
+    ## `auth_data` is not used with the TD2 mechanism.
+    ##
+    ## `auth_data` for the JWT mechanism contains token= followed by the JSON Web Token.
+    ## For example:
+    ## auth_data: token=dHkiOiJKV1QiLCJoI2tGIS42
+    ##
+    ## `auth_data` for the KRB5 mechanism can contain the Kerberos username, instance, realm, and password.
+    ## Use is optional, the current user can logon without supplying this information.
+    ## The sequence @@ always precedes the password.
+    ## For example:
+    ## auth_data: user1@ESDOM.ESDEV.TDAT@@mypassword
+    ##
+    ## `auth_data` for the LDAP mechanism can contain spaces, commas, and single quotes. When specifying
+    ## this parameter for LDAP in a JDBC connection URL, the `auth_data` parameter should be enclosed in single quotes.
+    ## Within the quoted string, a double-single quote can be used to represent an instance of a single quote.
+    ## When specifying this parameter with a DataSource, no special processing is required.
+    ## For example:
+    ## auth_data: 'authcid=username password=userpassword'
+    ## or
+    ## auth_data: username@@userpassword
+    #
+    # auth_data: <AUTH_DATA>
 
 ## @param only_custom_queries - boolean - optional - default: false
 ## Set this parameter to `true` if you want to skip the integration's default metrics collection.

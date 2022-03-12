@@ -24,25 +24,20 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     account: Optional[str]
-    connection_string: Optional[str]
-    database: Optional[str]
-    dsn: Optional[str]
-    host: str
+    auth_data: Optional[str]
+    auth_mechanism: Optional[str]
+    database: str
     https_port: Optional[str]
     jdbc_driver_path: Optional[str]
-    mechanism_key: Optional[str]
-    mechanism_name: Optional[str]
-    odbc_driver_path: Optional[str]
-    password: str
+    password: Optional[str]
     port: Optional[str]
+    server: str
     ssl_ca: Optional[str]
     ssl_ca_path: Optional[str]
     ssl_mode: Optional[str]
     ssl_protocol: Optional[str]
-    use_jdbc: Optional[str]
-    use_odbc: Optional[str]
     use_tls: Optional[str]
-    username: str
+    username: Optional[str]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

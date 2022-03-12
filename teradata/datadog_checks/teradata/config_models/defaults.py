@@ -22,15 +22,11 @@ def instance_account(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_connection_string(field, value):
+def instance_auth_data(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_database(field, value):
-    return 'system'
-
-
-def instance_dsn(field, value):
+def instance_auth_mechanism(field, value):
     return get_default_field_value(field, value)
 
 
@@ -42,16 +38,8 @@ def instance_jdbc_driver_path(field, value):
     return '<DRIVER_PATH>.jar'
 
 
-def instance_mechanism_key(field, value):
+def instance_password(field, value):
     return get_default_field_value(field, value)
-
-
-def instance_mechanism_name(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_odbc_driver_path(field, value):
-    return 'Teradata Database ODBC Driver 17.10'
 
 
 def instance_port(field, value):
@@ -74,13 +62,9 @@ def instance_ssl_protocol(field, value):
     return 'TLSv1.2'
 
 
-def instance_use_jdbc(field, value):
-    return False
-
-
-def instance_use_odbc(field, value):
-    return True
-
-
 def instance_use_tls(field, value):
     return False
+
+
+def instance_username(field, value):
+    return get_default_field_value(field, value)
