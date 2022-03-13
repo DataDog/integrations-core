@@ -381,10 +381,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
     @staticmethod
     def _get_avg_query_duration(row):
-        if 'total_elapsed_time' in row and 'execution_count' in row:
+        exe_count = row.get('execution_count')
+        total_elapsed_time = row.get('total_elapsed_time')
+        if total_elapsed_time and exe_count and exe_count >= 1:
             # total_elapsed_time is measured in microseconds, but we require
             # nanoseconds in the backend
-            return (float(row['total_elapsed_time']) * 1000) / row['execution_count']
+            return (float(total_elapsed_time) * 1000) / exe_count
         return 0
 
     @tracked_method(agent_check_getter=agent_check_getter)

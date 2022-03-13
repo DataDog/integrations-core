@@ -65,7 +65,7 @@ def dbm_instance(instance_docker):
         ],
     ],
 )
-def test_get_available_query_metrics_columns(aggregator, dbm_instance, expected_columns, available_columns):
+def test_get_available_query_metrics_columns(dbm_instance, expected_columns, available_columns):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     check.initialize_connection()
     _conn_key_prefix = "dbm-"
@@ -277,12 +277,27 @@ def test_statement_metrics_and_plans(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_avg_query_duration_calc(dbm_instance):
-    row = {'total_elapsed_time': 136, 'execution_count': 3}
+@pytest.mark.parametrize(
+    "row,expected_duration",
+    [
+        [
+            {'total_elapsed_time': 136, 'execution_count': 3},
+            45333.333333333336,
+        ],
+        [
+            {'execution_count': 3},
+            0,
+        ],
+        [
+            {'total_elapsed_time': 136, 'execution_count': 0},
+            0,
+        ],
+    ],
+)
+def test_avg_query_duration_calc(dbm_instance, row, expected_duration):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     duration = check.statement_metrics._get_avg_query_duration(row)
-    # should return a float, even though both inputs are integers
-    assert duration == 45333.333333333336
+    assert duration == expected_duration
 
 
 @pytest.mark.integration
