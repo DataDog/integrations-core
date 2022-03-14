@@ -1,5 +1,5 @@
 {
-  "display_name": "Volt Active Data",
+  "display_name": "VoltDB",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "voltdb",
@@ -30,7 +30,7 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "dashboards": {
-      "Volt Active Data - Overview": "assets/dashboards/voltdb_overview.json"
+      "VoltDB - Overview": "assets/dashboards/voltdb_overview.json"
     },
     "monitors": {
       "CPU load": "assets/monitors/cpu_load.json"
@@ -47,7 +47,7 @@
   "further_reading": [
     {"link": "https://www.datadoghq.com/blog/monitor-voltdb-with-datadog/",
       "tag": "Blog",
-      "text": "Monitor Volt Active Data with Datadog"
+      "text": "Monitor VoltDB with Datadog"
     }
   ]
 }
