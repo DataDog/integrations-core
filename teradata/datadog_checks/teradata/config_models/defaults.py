@@ -30,12 +30,12 @@ def instance_auth_mechanism(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_collect_res_usage(field, value):
+    return False
+
+
 def instance_https_port(field, value):
     return 443
-
-
-def instance_jdbc_driver_path(field, value):
-    return '<DRIVER_PATH>.jar'
 
 
 def instance_password(field, value):
@@ -63,7 +63,7 @@ def instance_ssl_protocol(field, value):
 
 
 def instance_use_tls(field, value):
-    return False
+    return True
 
 
 def instance_username(field, value):

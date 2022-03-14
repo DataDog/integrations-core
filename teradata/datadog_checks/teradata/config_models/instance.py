@@ -26,9 +26,10 @@ class InstanceConfig(BaseModel):
     account: Optional[str]
     auth_data: Optional[str]
     auth_mechanism: Optional[str]
+    collect_res_usage: Optional[str]
     database: str
     https_port: Optional[str]
-    jdbc_driver_path: Optional[str]
+    jdbc_driver_path: str
     password: Optional[str]
     port: Optional[str]
     server: str

@@ -19,7 +19,7 @@ from datadog_checks.base.utils.db import QueryManager
 
 from .common import SERVICE_CHECK_NAME
 from .config import TeradataConfig
-from .queries import DEFAULT_QUERIES
+from .queries import DEFAULT_QUERIES, COLLECT_RES_USAGE
 
 
 class TeradataCheck(AgentCheck):
@@ -29,12 +29,14 @@ class TeradataCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(TeradataCheck, self).__init__(name, init_config, instances)
-
         self.config = TeradataConfig(self.instance)
         self._connection = None
-        self._query_manager = QueryManager(self, self._execute_query_raw, queries=DEFAULT_QUERIES, tags=self._tags)
-        self.check_initializations.append(self._query_manager.compile_queries)
         self._tags = ['teradata_server:{}'.format(self.config.server)] + self.config.tags
+
+        manager_queries = COLLECT_RES_USAGE if self.config.collect_res_usage else DEFAULT_QUERIES
+
+        self._query_manager = QueryManager(self, self._execute_query_raw, queries=manager_queries, tags=self._tags)
+        self.check_initializations.append(self._query_manager.compile_queries)
         self._credentials_required = True
 
     def check(self, _):
@@ -49,7 +51,6 @@ class TeradataCheck(AgentCheck):
             results = cursor.fetchall()
             if len(results) < 1:
                 self.log.warning("Failed to fetch records from query: `%s`.", query)
-                return []
             else:
                 for row in results:
                     yield row
@@ -81,7 +82,6 @@ class TeradataCheck(AgentCheck):
             self.log.debug("Connected to Teradata Database.")
             yield conn
         except Exception as e:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.WARN, msg=e, tags=self._tags)
             self.log.error("Failed to connect to Teradata Database using JDBC Connector. %s", e)
             raise
         finally:
@@ -92,7 +92,6 @@ class TeradataCheck(AgentCheck):
         creds_required = self._creds_required()
         if creds_required and (not self.config.username or not self.config.password):
             raise ConfigurationError("`username` and `password` are required")
-            return {}
         else:
             conn_str = self.JDBC_CONNECTION_STRING.format(self.config.server)
             config_opts = {
