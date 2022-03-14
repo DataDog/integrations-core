@@ -10,13 +10,13 @@ The Calico check sends metrics concerning network and security in a Kubernetes c
 
 ### Installation
 
-The Calico check is included in the [Datadog Agent][2] package, to start gathering metrics you first need to:
+The Calico check is included in the [Datadog Agent][2] package. 
 
 #### Installation with a Kubernetes cluster-based Agent
 
 Using annotations:
 
-1. Set up Calico on your cluster if you have not already.
+1. Set up Calico on your cluster.
 
 2. Enable Prometheus metrics using the instructions in [Monitor Calico component metrics][9].
    Once enabled, you should have a `felix-metrics-svc` service running in your cluster, as well as a `prometheus-pod`.
@@ -47,19 +47,17 @@ You can find values for `<FELIX-SERVICE-IP>` and `<FELIX-SERVICE-PORT>` by runni
 
 #### Installation with an OS-based Agent
 
-1. Follow [Monitor Calico component metrics][9] until you have a `felix-metrics-svc` service running using `kubectl get all --all-namespaces`.
+1. Follow [Monitor Calico component metrics][9] until you have a `felix-metrics-svc` service running by using `kubectl get all --all-namespaces`.
 
 2. If you are using minikube, you must forward port 9091 to `felix-metrics-svc`.
    Run `kubectl port-forward service/felix-metrics-svc 9091:9091 -n kube-system`.
 
    If you are not using minikube, check that `felix-metrics-svc` has an external IP. If the service does not have an external IP, use `kubectl edit svc` to change its type from `ClusterIP` to `LoadBalancer`.
 
-Once installation is complete, you can continue to configuration (see below).
 
 ### Configuration
 
-
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+Follow the instructions to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
@@ -68,7 +66,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 To configure this check for an Agent running on a host:
 
-1. Edit the `calico.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Calico performance data.
+1. Edit the `calico.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Calico performance data.
    The only required parameter is the `openmetrics_endpoint` URL. See the [sample calico.d/conf.yaml][3] for all available configuration options.
 
 2. If you are using minikube, use 'http://localhost:9091/metrics' as your `openmetrics_endpoint` URL.
@@ -84,11 +82,12 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
-Since Calico structure is set up in a Kubernetes cluster, it is built with deployments, pods, and services.
-The Kubernetes integration fetches logs from containers.
-Therefore, when [Kubernetes][12] integration is set up, Calico logs are automatically available in the Datadog Log Explorer.
+Since Calico structure is set up in a Kubernetes cluster, it is built with deployments, pods, and services. The Kubernetes integration fetches logs from containers.
+
+After setting up the [Kubernetes][12] integration, Calico logs become available in the Datadog Log Explorer.
 
 Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+
    ```yaml
    <!-- xxz tab xxx -->
    logs_enabled: true
