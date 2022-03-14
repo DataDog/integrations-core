@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from contextlib import closing, contextmanager
 import time
+from contextlib import closing, contextmanager
+
 try:
     import jaydebeapi as jdb
     import jpype
@@ -18,7 +19,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.db import QueryManager
 
 from .config import TeradataConfig
-from .queries import DEFAULT_QUERIES, COLLECT_RES_USAGE
+from .queries import COLLECT_RES_USAGE, DEFAULT_QUERIES
 
 
 class TeradataCheck(AgentCheck):
@@ -121,7 +122,11 @@ class TeradataCheck(AgentCheck):
             for option, value in config_opts.items():
                 if value is None:
                     if option == 'logdata' and not self._credentials_required:
-                        raise ConfigurationError("`auth_data` is required for auth_mechanisms JWT, KRB5, and LDAP. Configured `auth_mechanism` is: %", self.config.auth_mechanism)
+                        raise ConfigurationError(
+                            "`auth_data` is required for auth_mechanisms JWT, KRB5, and LDAP. "
+                            "Configured `auth_mechanism` is: %",
+                            self.config.auth_mechanism,
+                        )
                     else:
                         continue
                 elif param_count < 1:
