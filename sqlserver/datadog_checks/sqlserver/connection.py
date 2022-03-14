@@ -301,7 +301,11 @@ class Connection(object):
         """
         result = {}
         for option in cs.split(';'):
-            splits = [s.strip() for s in option.strip().split('=')]
+            option = option.strip()
+            if not option:
+                # strings can end with a semicolon in which case we'll have one empty option
+                continue
+            splits = [s.strip() for s in option.split('=')]
             if len(splits) == 1:
                 raise ConfigurationError(
                     "invalid connection_string as one of the options does not contain a '=': {}".format(option)

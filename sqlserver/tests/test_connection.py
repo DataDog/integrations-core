@@ -35,6 +35,23 @@ def test_will_warn_parameters_for_the_wrong_connection(instance_minimal_defaults
 
 
 @pytest.mark.parametrize(
+    'cs, parsed, should_fail',
+    [
+        ("A=B;c=D;", {"a": "B", "c": "D"}, False),
+        ("A=B;C=;", None, True),
+        ("A=B;C==", None, True),
+    ],
+)
+def test_parse_connection_string(instance_minimal_defaults, cs, parsed, should_fail):
+    connection = Connection({}, instance_minimal_defaults, None)
+    if should_fail:
+        with pytest.raises(ConfigurationError):
+            connection._parse_connection_string(cs)
+    else:
+        assert connection._parse_connection_string(cs) == parsed
+
+
+@pytest.mark.parametrize(
     'connector, cs, param, should_fail',
     [
         pytest.param('odbc', 'DSN', 'dsn', True, id='Cannot define DSN twice'),
