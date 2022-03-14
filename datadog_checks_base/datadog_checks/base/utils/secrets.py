@@ -1,4 +1,5 @@
 from typing import Set
+from ..utils.common import ensure_unicode
 
 
 class SecretsSanitizer:
@@ -14,6 +15,9 @@ class SecretsSanitizer:
 
     def register(self, secret):
         # type: (str) -> None
+        if not isinstance(secret, str):
+            secret = ensure_unicode(secret)
+
         self.patterns.add(secret)
 
     def sanitize(self, text):

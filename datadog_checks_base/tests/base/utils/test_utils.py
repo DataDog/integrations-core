@@ -251,3 +251,11 @@ class TestSecretsSanitizer:
         sanitized = sanitizer.sanitize(message)
         assert pwd1 not in sanitized
         assert pwd2 not in sanitized
+
+    def test_sanitize_type(self):
+        # test: () -> None
+        byte_secret = str.encode("s3cr3t")  # byte type
+        sanitizer = SecretsSanitizer()
+        sanitizer.register(byte_secret)
+        message = "s3cr3t"  # string type
+        assert all(letter == '*' for letter in sanitizer.sanitize(message))
