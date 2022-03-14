@@ -49,9 +49,9 @@ files:
     - name: collect_res_usage
       description: Collect metrics from the SPMA Resource Table
       value:
-        type: string
+        type: boolean
         default: false
-        example: "true"
+        example: true
     - name: jdbc_driver_path
       required: true
       description: |
@@ -62,9 +62,9 @@ files:
     - name: use_tls
       description: Whether or not to use TLS for making connections to the Teradata database.
       value:
-        type: string
+        type: boolean
         default: true
-        example: "false"
+        example: false
     - name: https_port
       description: The port number used for making TLS connections to the Teradata database.
       value:
