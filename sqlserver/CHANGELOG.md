@@ -1,5 +1,13 @@
 # CHANGELOG - sqlserver
 
+## 7.3.0 / 2022-03-14
+
+* [Added] Add missing wait_resource column for activity collections. See [#11638](https://github.com/DataDog/integrations-core/pull/11638).
+* [Added] Enable SQL metadata collection by default. See [#11606](https://github.com/DataDog/integrations-core/pull/11606).
+* [Fixed] Use remote hostname on all metrics when DBM is enabled. See [#11634](https://github.com/DataDog/integrations-core/pull/11634).
+* [Fixed] Fix SQLServer activity query, only query for load not transactions. See [#11629](https://github.com/DataDog/integrations-core/pull/11629).
+* [Fixed] Fix service check failures on auto discovered dbs failing full check execution. See [#11563](https://github.com/DataDog/integrations-core/pull/11563).
+
 ## 7.2.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11437](https://github.com/DataDog/integrations-core/pull/11437).
