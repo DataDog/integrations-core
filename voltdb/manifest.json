@@ -1,12 +1,12 @@
 {
-  "display_name": "VoltDB",
+  "display_name": "Volt Active Data",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "voltdb",
   "metric_prefix": "voltdb.",
   "metric_to_check": "voltdb.cpu.percent_used",
   "creates_events": false,
-  "short_description": "Collect status, performance and other metrics from a VoltDB cluster.",
+  "short_description": "Collect status, performance and other metrics from a Volt Active Data cluster.",
   "guid": "15abd7c6-1845-405a-8627-f83be1e48b11",
   "support": "core",
   "supported_os": [
@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "VoltDB",
+  "public_title": "Volt Active Data",
   "categories": [
     "data store",
     "log collection"
@@ -30,7 +30,7 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "dashboards": {
-      "VoltDB - Overview": "assets/dashboards/voltdb_overview.json"
+      "Volt Active Data - Overview": "assets/dashboards/voltdb_overview.json"
     },
     "monitors": {
       "CPU load": "assets/monitors/cpu_load.json"
@@ -47,7 +47,7 @@
   "further_reading": [
     {"link": "https://www.datadoghq.com/blog/monitor-voltdb-with-datadog/",
       "tag": "Blog",
-      "text": "Monitor VoltDB with Datadog"
+      "text": "Monitor Volt Active Data with Datadog"
     }
   ]
 }
