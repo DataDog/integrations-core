@@ -26,7 +26,7 @@ class InstanceConfig(BaseModel):
     account: Optional[str]
     auth_data: Optional[str]
     auth_mechanism: Optional[str]
-    collect_res_usage: Optional[str]
+    collect_res_usage: Optional[bool]
     database: str
     https_port: Optional[str]
     jdbc_driver_path: str
@@ -37,7 +37,7 @@ class InstanceConfig(BaseModel):
     ssl_ca_path: Optional[str]
     ssl_mode: Optional[str]
     ssl_protocol: Optional[str]
-    use_tls: Optional[str]
+    use_tls: Optional[bool]
     username: Optional[str]
 
     @root_validator(pre=True)
