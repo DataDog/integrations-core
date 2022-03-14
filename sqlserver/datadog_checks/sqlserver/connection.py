@@ -361,7 +361,7 @@ class Connection(object):
 
         parsed_cs = self._parse_connection_string(cs)
 
-        if parsed_cs.get('trusted_connection', False) and (username or password):
+        if parsed_cs.get('trusted_connection', "false").lower() in {'yes', 'true'} and (username or password):
             self.log.warning("Username and password are ignored when using Windows authentication")
 
         for key, value in connector_options.items():
