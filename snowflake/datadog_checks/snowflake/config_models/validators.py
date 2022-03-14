@@ -23,6 +23,11 @@ def initialize_instance(values, **kwargs):
             '`only_custom_queries` prevents `metric_groups` to be collected.'
         )
 
+    if values.get('private_key_path', False) and not values.get('private_key_password', False):
+        raise ConfigurationError(
+            'Option `private_key_path` requires `private_key_password` entry.'
+        )
+
     return values
 
 
