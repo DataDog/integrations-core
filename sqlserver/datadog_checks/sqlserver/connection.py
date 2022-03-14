@@ -294,6 +294,30 @@ class Connection(object):
             key_prefix = ""
         return '{}{}:{}:{}:{}:{}:{}'.format(key_prefix, dsn, host, username, password, database, driver)
 
+    def _parse_connection_string(self, cs):
+        """
+        Parses a connection string (i.e. "key1=value1;key2=value2;...") into a map of {key -> value}
+        The keys are lower-cased as they're not case sensitive.
+        """
+        result = {}
+        for option in cs.split(';'):
+            splits = [s.strip() for s in option.strip().split('=')]
+            if len(splits) == 1:
+                raise ConfigurationError(
+                    "invalid connection_string as one of the options does not contain a '=': {}".format(option)
+                )
+            if len(splits) > 2:
+                raise ConfigurationError(
+                    "invalid connection_string as one of the options contains more than one '=': {}".format(option)
+                )
+            key, val = splits
+            if not key or not val:
+                raise ConfigurationError(
+                    "invalid connection_string option as it has an empty key or value: {}".format(option)
+                )
+            result[key.lower()] = val
+        return result
+
     def _connection_options_validation(self, db_key, db_name):
         cs = self.instance.get('connection_string')
         username = self.instance.get('username')
@@ -335,18 +359,19 @@ class Connection(object):
         if cs is None:
             return
 
-        if 'Trusted_Connection=yes' in cs and (username or password):
+        parsed_cs = self._parse_connection_string(cs)
+
+        if parsed_cs.get('trusted_connection', False) and (username or password):
             self.log.warning("Username and password are ignored when using Windows authentication")
-        cs = cs.upper()
 
         for key, value in connector_options.items():
-            if key.upper() in cs and self.instance.get(value) is not None:
+            if key.lower() in parsed_cs and self.instance.get(value) is not None:
                 raise ConfigurationError(
                     "%s has been provided both in the connection string and as a "
                     "configuration option (%s), please specify it only once" % (key, value)
                 )
         for key in other_connector_options.keys():
-            if key.upper() in cs:
+            if key.lower() in parsed_cs:
                 raise ConfigurationError(
                     "%s has been provided in the connection string. "
                     "This option is only available for %s connections,"

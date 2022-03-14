@@ -35,28 +35,38 @@ def test_will_warn_parameters_for_the_wrong_connection(instance_minimal_defaults
 
 
 @pytest.mark.parametrize(
-    'connector, cs, param',
+    'connector, cs, param, should_fail',
     [
-        pytest.param('odbc', 'DSN', 'dsn', id='Cannot define DSN twice'),
-        pytest.param('odbc', 'DRIVER', 'driver', id='Cannot define DRIVER twice'),
-        pytest.param('odbc', 'SERVER', 'host', id='Cannot define DRIVER twice'),
-        pytest.param('odbc', 'UID', 'username', id='Cannot define UID twice'),
-        pytest.param('odbc', 'PWD', 'password', id='Cannot define PWD twice'),
-        pytest.param('adodbapi', 'PROVIDER', 'adoprovider', id='Cannot define PROVIDER twice'),
-        pytest.param('adodbapi', 'Data Source', 'host', id='Cannot define Data Source twice'),
-        pytest.param('adodbapi', 'User ID', 'username', id='Cannot define User ID twice'),
-        pytest.param('adodbapi', 'Password', 'password', id='Cannot define Password twice'),
+        pytest.param('odbc', 'DSN', 'dsn', True, id='Cannot define DSN twice'),
+        pytest.param('odbc', 'DRIVER', 'driver', True, id='Cannot define DRIVER twice'),
+        pytest.param('odbc', 'SERVER', 'host', True, id='Cannot define DRIVER twice'),
+        pytest.param('odbc', 'UID', 'username', True, id='Cannot define UID twice'),
+        pytest.param('odbc', 'PWD', 'password', True, id='Cannot define PWD twice'),
+        pytest.param(
+            'odbc',
+            'TrustServerCertificate',
+            None,
+            False,
+            id='Should not fail as this option is not configurable in the base instance.',
+        ),
+        pytest.param('adodbapi', 'PROVIDER', 'adoprovider', True, id='Cannot define PROVIDER twice'),
+        pytest.param('adodbapi', 'Data Source', 'host', True, id='Cannot define Data Source twice'),
+        pytest.param('adodbapi', 'User ID', 'username', True, id='Cannot define User ID twice'),
+        pytest.param('adodbapi', 'Password', 'password', True, id='Cannot define Password twice'),
     ],
 )
-def test_will_fail_for_duplicate_parameters(instance_minimal_defaults, connector, cs, param):
+def test_will_fail_for_duplicate_parameters(instance_minimal_defaults, connector, cs, param, should_fail):
     instance_minimal_defaults.update({'connector': connector, param: 'foo', 'connection_string': cs + "=foo"})
     connection = Connection({}, instance_minimal_defaults, None)
-    match = (
-        "%s has been provided both in the connection string and as a configuration option (%s), "
-        "please specify it only once" % (cs, param)
-    )
+    if should_fail:
+        match = (
+            "%s has been provided both in the connection string and as a configuration option (%s), "
+            "please specify it only once" % (cs, param)
+        )
 
-    with pytest.raises(ConfigurationError, match=re.escape(match)):
+        with pytest.raises(ConfigurationError, match=re.escape(match)):
+            connection._connection_options_validation('somekey', 'somedb')
+    else:
         connection._connection_options_validation('somekey', 'somedb')
 
 
