@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import closing, contextmanager
-
+import time
 try:
     import jaydebeapi as jdb
     import jpype
@@ -17,7 +17,6 @@ except ImportError as e:
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.db import QueryManager
 
-from .common import SERVICE_CHECK_NAME
 from .config import TeradataConfig
 from .queries import DEFAULT_QUERIES, COLLECT_RES_USAGE
 
@@ -26,6 +25,7 @@ class TeradataCheck(AgentCheck):
     __NAMESPACE__ = 'teradata'
     JDBC_CONNECTION_STRING = "jdbc:teradata://{}"
     TERADATA_DRIVER_CLASS = "com.teradata.jdbc.TeraDriver"
+    SERVICE_CHECK_NAME = "teradata.can_connect"
 
     def __init__(self, name, init_config, instances):
         super(TeradataCheck, self).__init__(name, init_config, instances)
@@ -33,7 +33,11 @@ class TeradataCheck(AgentCheck):
         self._connection = None
         self._tags = ['teradata_server:{}'.format(self.config.server)] + self.config.tags
 
-        manager_queries = COLLECT_RES_USAGE if self.config.collect_res_usage else DEFAULT_QUERIES
+        manager_queries = []
+        if self.config.collect_res_usage:
+            manager_queries.extend(COLLECT_RES_USAGE)
+        else:
+            manager_queries.extend(DEFAULT_QUERIES)
 
         self._query_manager = QueryManager(self, self._execute_query_raw, queries=manager_queries, tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
@@ -53,14 +57,14 @@ class TeradataCheck(AgentCheck):
                 self.log.warning("Failed to fetch records from query: `%s`.", query)
             else:
                 for row in results:
-                    yield row
+                    yield self._validate_timestamp(row, query)
 
     @contextmanager
     def _connect(self):
         try:
             return self._connect_jdbc()
         except Exception as e:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, msg=e, tags=self._tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, msg=e, tags=self._tags)
             self.log.error('Failed to connect to Teradata database. %s', e)
             raise
 
@@ -78,7 +82,7 @@ class TeradataCheck(AgentCheck):
             conn = jdb.connect(
                 self.TERADATA_DRIVER_CLASS, conn_str, jdbc_connect_properties, self.config.jdbc_driver_path
             )
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._tags)
             self.log.debug("Connected to Teradata Database.")
             yield conn
         except Exception as e:
@@ -116,7 +120,10 @@ class TeradataCheck(AgentCheck):
             param_count = 0
             for option, value in config_opts.items():
                 if value is None:
-                    continue
+                    if option == 'logdata' and not self._credentials_required:
+                        raise ConfigurationError("`auth_data` is required for auth_mechanisms JWT, KRB5, and LDAP. Configured `auth_mechanism` is: %", self.config.auth_mechanism)
+                    else:
+                        continue
                 elif param_count < 1:
                     conn_str += '/{}={}'.format(option, value)
                     param_count += 1
@@ -133,3 +140,14 @@ class TeradataCheck(AgentCheck):
         else:
             self._credentials_required = True
         return self._credentials_required
+
+    def _validate_timestamp(self, row, query):
+        if 'DBC.ResSpmaView' in query:
+            now = time.time()
+            row_ts = row[0]
+            diff = now - row_ts
+            # Valid metrics should be no more than 10 min in the future or 1h in the past
+            if (diff > 3600) or (diff < 600):
+                raise Exception("Resource Usage stats are invalid. Is `SPMA` Resource Usage Logging enabled?")
+        else:
+            return row
