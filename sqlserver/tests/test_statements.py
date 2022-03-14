@@ -65,7 +65,7 @@ def dbm_instance(instance_docker):
         ],
     ],
 )
-def test_get_available_query_metrics_columns(aggregator, dbm_instance, expected_columns, available_columns):
+def test_get_available_query_metrics_columns(dbm_instance, expected_columns, available_columns):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     check.initialize_connection()
     _conn_key_prefix = "dbm-"
