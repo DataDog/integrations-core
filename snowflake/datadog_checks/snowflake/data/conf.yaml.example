@@ -108,7 +108,7 @@ instances:
     ## Authenticator for Snowflake. Supported methods are:
     ## * `snowflake`, the default value, uses the internal Snowflake authenticator. It needs `password` or 
     ##   `private_key_path` option.
-    ## * `snowflake_jwt`, uses key pair authentication. It needs `private_key_path` option and `private_key_password`.
+    ## * `snowflake_jwt`, uses key pair authentication. It needs `private_key_path` option.
     ## * `oauth`, to authenticate with OAuth method. It needs `token` or `token_path` option.
     #
     # authenticator: <AUTHENTICATOR>
