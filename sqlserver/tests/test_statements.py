@@ -256,11 +256,6 @@ def test_statement_metrics_and_plans(
     assert plan_events, "should have collected some plans"
 
     for event in plan_events:
-        assert event['duration'], "missing duration"
-        assert (
-            event['duration'] > 0
-        ), "unable to calc duration, missing total_elapsed_time or execution_count columns in qstats"
-        assert event['db']['plan']['definition'], "event plan definition missing"
         parsed_plan = ET.fromstring(event['db']['plan']['definition'])
         assert parsed_plan.tag.endswith("ShowPlanXML"), "plan does not match expected structure"
 
@@ -273,31 +268,6 @@ def test_statement_metrics_and_plans(
         tags=['agent_hostname:stubbed.hostname', 'operation:collect_statement_metrics_and_plans']
         + _expected_dbm_instance_tags(dbm_instance),
     )
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize(
-    "row,expected_duration",
-    [
-        [
-            {'total_elapsed_time': 136, 'execution_count': 3},
-            45333.333333333336,
-        ],
-        [
-            {'execution_count': 3},
-            0,
-        ],
-        [
-            {'total_elapsed_time': 136, 'execution_count': 0},
-            0,
-        ],
-    ],
-)
-def test_avg_query_duration_calc(dbm_instance, row, expected_duration):
-    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    duration = check.statement_metrics._get_avg_query_duration(row)
-    assert duration == expected_duration
 
 
 @pytest.mark.integration
