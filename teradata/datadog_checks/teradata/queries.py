@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from copy import deepcopy
+
 # Database and Table Disk Space
 # https://docs.teradata.com/r/Teradata-VantageTM-Data-Dictionary/July-2021/Views-Reference/AllSpaceV-X
 DISK_SPACE = {
@@ -60,11 +60,11 @@ AMP_USAGE = {
 RESOURCE_USAGE = {
     "name": "resource_usage",
     "query": """
-        SELECT TheTimestamp, FileLockBlocks, FileLockDeadlocks, FileLockEnters, DBLockBlocks, DBLockDeadlocks,IoThrottleCount, IoThrottleTime,
-        IoThrottleTimeMax, MemCtxtPageReads, MemCtxtPageWrites, MemTextPageReads, VHCacheKB, KernMemInuseKB, SegMDLInuseKB,
-        SegMaxAvailMB, SegInuseMB, SegCacheMB, SegMDLAlloc, SegMDLFree, SegMDLRelease, SegMDLRecycle,
-        SegMDLAllocKB, SegMDLFreeKB, SegMDLReleaseKB, SegMDLRecycleKB, FsgCacheKB, PageMajorFaults,
-        PageMinorFaults, ProcBlocked, ProcReady, ProcReadyMax, CPUIdle, CPUIoWait, CPUUServ, CPUUExec,
+        SELECT TheTimestamp, FileLockBlocks, FileLockDeadlocks, FileLockEnters, DBLockBlocks, DBLockDeadlocks,
+        IoThrottleCount, IoThrottleTime, IoThrottleTimeMax, MemCtxtPageReads, MemCtxtPageWrites, MemTextPageReads,
+        VHCacheKB, KernMemInuseKB, SegMDLInuseKB, SegMaxAvailMB, SegInuseMB, SegCacheMB, SegMDLAlloc, SegMDLFree,
+        SegMDLRelease, SegMDLRecycle, SegMDLAllocKB, SegMDLFreeKB, SegMDLReleaseKB, SegMDLRecycleKB, FsgCacheKB,
+        PageMajorFaults, PageMinorFaults, ProcBlocked, ProcReady, ProcReadyMax, CPUIdle, CPUIoWait, CPUUServ, CPUUExec,
         CpuThrottleCount, CpuThrottleTime FROM DBC.ResSpmaView;
         """,
     "columns": [
