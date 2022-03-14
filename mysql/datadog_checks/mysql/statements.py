@@ -232,6 +232,10 @@ class MySQLStatementMetrics(DBMAsyncJob):
                     "instance": row['schema_name'],
                     "query_signature": row['query_signature'],
                     "statement": row['digest_text'],
+                    "metadata": {
+                        "tables": row['dd_tables'],
+                        "commands": row['dd_commands'],
+                    },
                 },
                 "mysql": {"schema": row["schema_name"]},
             }

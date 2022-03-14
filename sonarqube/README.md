@@ -22,7 +22,33 @@ collects all relevant SonarQube performance metrics exposed through SonarQube's 
 default metrics is available in the [sonarqube.d/metrics.yaml][3] file. Documentation on these beans is available on
 [SonarQube's website][4].
 
-SonarQube's JMX server is not enabled by default, this means that unless it is enabled, `sonarqube.server.*` metrics are not collected. More information on how to enable and configure JMX within SonarQube is available within the [SonarQube documentation][5].
+SonarQube's JMX server is **not enabled** by default, this means that unless it is enabled, `sonarqube.server.*` metrics are not collected. More information on how to enable and configure JMX within SonarQube is available within the [SonarQube documentation][5]. Below are configurations needed to enable the JMX server for some common Java processes:
+
+```conf
+# WEB SERVER
+sonar.web.javaAdditionalOpts="
+  -Dcom.sun.management.jmxremote=true
+  -Dcom.sun.management.jmxremote.port=10443
+  -Dcom.sun.management.jmxremote.rmi.port=10443
+  ...
+  "
+
+# COMPUTE ENGINE
+sonar.ce.javaAdditionalOpts="
+  -Dcom.sun.management.jmxremote=true
+  -Dcom.sun.management.jmxremote.port=10444
+  -Dcom.sun.management.jmxremote.rmi.port=10444
+  ...
+  "
+
+# ELASTICSEARCH
+sonar.search.javaAdditionalOpts="
+  -Dcom.sun.management.jmxremote=true
+  -Dcom.sun.management.jmxremote.port=10445
+  -Dcom.sun.management.jmxremote.rmi.port=10445
+  ...
+  "
+```
 
 This is a basic `sonarqube.d/conf.yaml` example based on SonarQube and JMX defaults. You can use it as a starting point when configuring for both the host-based or container-based Agent installation.
 
@@ -31,6 +57,7 @@ init_config:
     is_jmx: false
     collect_default_metrics: true
 instances:
+
   # Web API instance
   - is_jmx: false
     web_endpoint: http://localhost:9000
@@ -38,19 +65,21 @@ instances:
     username: <username>    # Defined in the Web UI
     password: <password>    # Defined in the Web UI
     default_tag: component  # Optional
-    components:
+    components:             # Required
       my-project:
         tag: project_name
+
   # Web JMX instance
   - is_jmx: true
     host: localhost
-    port: 10443
+    port: 10443           # See sonar.web.javaAdditionalOpts in SonarQube's sonar.properties file
     user: <username>      # Defined in SonarQube's sonar.properties file
     password: <password>  # Defined in SonarQube's sonar.properties file
+
   # Compute Engine JMX instance
   - is_jmx: true
     host: localhost
-    port: 10444
+    port: 10444           # See sonar.ce.javaAdditionalOpts in SonarQube's sonar.properties file
     user: <username>      # Defined in SonarQube's sonar.properties file
     password: <password>  # Defined in SonarQube's sonar.properties file
 ```
@@ -82,7 +111,7 @@ instances:
   # Search Server JMX instance
   - is_jmx: true
     host: localhost
-    port: 10445
+    port: 10445           # See sonar.search.javaAdditionalOpts in SonarQube's sonar.properties file
     user: <username>      # Defined in SonarQube's sonar.properties file
     password: <password>  # Defined in SonarQube's sonar.properties file
 ```
