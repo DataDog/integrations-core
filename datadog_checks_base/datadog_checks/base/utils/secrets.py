@@ -15,8 +15,7 @@ class SecretsSanitizer:
 
     def register(self, secret):
         # type: (str) -> None
-        if not isinstance(secret, str):
-            secret = ensure_unicode(secret)
+        secret = ensure_unicode(secret)
 
         self.patterns.add(secret)
 
