@@ -57,15 +57,20 @@ instances:
     #
     database: system
 
-    ## @param jdbc_driver_path - string - optional - default: <DRIVER_PATH>.jar
+    ## @param collect_res_usage - string - optional - default: true
+    ## Collect metrics from the SPMA Resource Table
+    #
+    # collect_res_usage: 'true'
+
+    ## @param jdbc_driver_path - string - required
     ## The full path to the Teradata JDBC Driver.
     #
-    # jdbc_driver_path: <DRIVER_PATH>.jar
+    jdbc_driver_path: <DRIVER_PATH>.jar
 
-    ## @param use_tls - string - optional
+    ## @param use_tls - string - optional - default: false
     ## Whether or not to use TLS for making connections to the Teradata database.
     #
-    # use_tls: <USE_TLS>
+    # use_tls: 'false'
 
     ## @param https_port - string - optional
     ## The port number used for making TLS connections to the Teradata database.

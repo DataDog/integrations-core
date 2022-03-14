@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+from copy import deepcopy
 # Database and Table Disk Space
 # https://docs.teradata.com/r/Teradata-VantageTM-Data-Dictionary/July-2021/Views-Reference/AllSpaceV-X
 DISK_SPACE = {
@@ -60,8 +60,8 @@ AMP_USAGE = {
 RESOURCE_USAGE = {
     "name": "resource_usage",
     "query": """
-        SELECT FileLockBlocks, FileLockDeadlocks, FileLockEnters, IoThrottleCount, IoThrottleTime,
-        IoThrottleTimeMax, MemCtxtPageReads, MemCtxtPageWrites, VHCacheKB, KernMemInuseKB, SegMDLInuseKB,
+        SELECT FileLockBlocks, FileLockDeadlocks, FileLockEnters, DBLockBlocks, DBLockDeadlocks,IoThrottleCount, IoThrottleTime,
+        IoThrottleTimeMax, MemCtxtPageReads, MemCtxtPageWrites, MemTextPageReads, VHCacheKB, KernMemInuseKB, SegMDLInuseKB,
         SegMaxAvailMB, SegInuseMB, SegCacheMB, SegMDLAlloc, SegMDLFree, SegMDLRelease, SegMDLRecycle,
         SegMDLAllocKB, SegMDLFreeKB, SegMDLReleaseKB, SegMDLRecycleKB, FsgCacheKB, PageMajorFaults,
         PageMinorFaults, ProcBlocked, ProcReady, ProcReadyMax, CPUIdle, CPUIoWait, CPUUServ, CPUUExec,
@@ -71,11 +71,14 @@ RESOURCE_USAGE = {
         {"name": "file_lock.blocks", "type": "gauge"},
         {"name": "file_lock.deadlocks", "type": "gauge"},
         {"name": "file_lock.enters", "type": "gauge"},
+        {"name": "db_lock.blocks", "type": "gauge"},
+        {"name": "db_lock.deadlocks", "type": "gauge"},
         {"name": "io.throttle_count", "type": "gauge"},
         {"name": "io.throttle_time", "type": "gauge"},
         {"name": "io.throttle_time_max", "type": "gauge"},
-        {"name": "mem.page_reads", "type": "gauge"},
-        {"name": "mem.page_writes", "type": "gauge"},
+        {"name": "mem.ctxt_page_reads", "type": "gauge"},
+        {"name": "mem.ctxt_page_writes", "type": "gauge"},
+        {"name": "mem.txt_page_reads", "type": "gauge"},
         {"name": "mem.vh_cache_size", "type": "gauge"},
         {"name": "mem.kernel_inuse_size", "type": "gauge"},
         {"name": "mem.seg_mdl.inuse_size", "type": "gauge"},
@@ -105,4 +108,7 @@ RESOURCE_USAGE = {
     ],
 }
 
-DEFAULT_QUERIES = [DISK_SPACE, AMP_USAGE, RESOURCE_USAGE]
+DEFAULT_QUERIES = [DISK_SPACE, AMP_USAGE]
+
+COLLECT_RES_USAGE = deepcopy(DEFAULT_QUERIES)
+COLLECT_RES_USAGE.extend(RESOURCE_USAGE)
