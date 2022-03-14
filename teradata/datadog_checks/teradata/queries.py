@@ -60,7 +60,7 @@ AMP_USAGE = {
 RESOURCE_USAGE = {
     "name": "resource_usage",
     "query": """
-        SELECT FileLockBlocks, FileLockDeadlocks, FileLockEnters, DBLockBlocks, DBLockDeadlocks,IoThrottleCount, IoThrottleTime,
+        SELECT TheTimestamp, FileLockBlocks, FileLockDeadlocks, FileLockEnters, DBLockBlocks, DBLockDeadlocks,IoThrottleCount, IoThrottleTime,
         IoThrottleTimeMax, MemCtxtPageReads, MemCtxtPageWrites, MemTextPageReads, VHCacheKB, KernMemInuseKB, SegMDLInuseKB,
         SegMaxAvailMB, SegInuseMB, SegCacheMB, SegMDLAlloc, SegMDLFree, SegMDLRelease, SegMDLRecycle,
         SegMDLAllocKB, SegMDLFreeKB, SegMDLReleaseKB, SegMDLRecycleKB, FsgCacheKB, PageMajorFaults,
@@ -68,6 +68,7 @@ RESOURCE_USAGE = {
         CpuThrottleCount, CpuThrottleTime FROM DBC.ResSpmaView;
         """,
     "columns": [
+        {"name": "timestamp", "type": "source"},
         {"name": "file_lock.blocks", "type": "gauge"},
         {"name": "file_lock.deadlocks", "type": "gauge"},
         {"name": "file_lock.enters", "type": "gauge"},
@@ -110,5 +111,4 @@ RESOURCE_USAGE = {
 
 DEFAULT_QUERIES = [DISK_SPACE, AMP_USAGE]
 
-COLLECT_RES_USAGE = deepcopy(DEFAULT_QUERIES)
-COLLECT_RES_USAGE.extend(RESOURCE_USAGE)
+COLLECT_RES_USAGE = [DISK_SPACE, AMP_USAGE, RESOURCE_USAGE]

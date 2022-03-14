@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import is_affirmative
 
-from .common import DEFAULT_COMMAND_TIMEOUT
-
 
 class TeradataConfig(object):
     def __init__(self, instance):
@@ -25,7 +23,6 @@ class TeradataConfig(object):
         self.auth_data = instance.get('auth_data')
         self.auth_mechanism = instance.get('auth_mechanism')
         self.tags = instance.get('tags', [])
-        self.timeout = instance.get('command_timeout', DEFAULT_COMMAND_TIMEOUT)
 
     def get(self, option):
         return option
