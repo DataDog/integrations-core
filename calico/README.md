@@ -23,25 +23,25 @@ Using annotations:
 
 3. To use Autodiscovery, modify `prometheus-pod`. Add the following snippet to your Prometheus YAML configuration file:
 
-```
-metadata:
-  [...]
-  annotations:
-   ad.datadoghq.com/prometheus-pod.check_names: |
-   ["openmetrics"]
-   ad.datadoghq.com/prometheus-pod.init_configs: |
-   [{}]
-   ad.datadoghq.com/prometheus-pod.instances: |
-     [
-        {
-           "prometheus_url": "http://<FELIX-SERVICE-IP>:<FELIX-SERVICE-PORT>/metrics",
-           "namespace": "calico",
-           "metrics": ["*"]
-        }
-     ]
-  spec:
-    [....]
-```
+   ```
+   metadata:
+     [...]
+     annotations:
+      ad.datadoghq.com/prometheus-pod.check_names: |
+      ["openmetrics"]
+      ad.datadoghq.com/prometheus-pod.init_configs: |
+      [{}]
+      ad.datadoghq.com/prometheus-pod.instances: |
+        [
+           {
+              "prometheus_url": "http://<FELIX-SERVICE-IP>:<FELIX-SERVICE-PORT>/metrics",
+              "namespace": "calico",
+              "metrics": ["*"]
+           }
+        ]
+     spec:
+       [....]
+   ```
 
 You can find values for `<FELIX-SERVICE-IP>` and `<FELIX-SERVICE-PORT>` by running `kubectl get all -all-namespaces`.
 
