@@ -170,6 +170,10 @@ coverage:
         target: 75
         flags:
         - external_dns
+      FoundationDB:
+        target: 75
+        flags:
+        - foundationdb
       Gearman:
         target: 75
         flags:
@@ -782,6 +786,11 @@ flags:
     paths:
     - fluentd/datadog_checks/fluentd
     - fluentd/tests
+  foundationdb:
+    carryforward: true
+    paths:
+      - foundationdb/datadog_checks/foundationdb
+      - foundationdb/tests
   gearmand:
     carryforward: true
     paths:
