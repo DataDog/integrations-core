@@ -1,5 +1,6 @@
 ad_identifiers:
   - proxyv2
+  - proxyv2-rhel8
 
 ## All options defined here are available to all instances.
 #
