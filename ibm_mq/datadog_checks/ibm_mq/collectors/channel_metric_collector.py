@@ -81,7 +81,8 @@ class ChannelMetricCollector(object):
             self._submit_channel_status(queue_manager, channel, self.config.tags_no_channel)
 
         # Grab all the discoverable channels
-        self._submit_channel_status(queue_manager, '*', self.config.tags_no_channel)
+        if self.config.auto_discover_channels:
+            self._submit_channel_status(queue_manager, '*', self.config.tags_no_channel)
 
     def _submit_channel_status(self, queue_manager, search_channel_name, tags, channels_to_skip=None):
         """Submit channel status

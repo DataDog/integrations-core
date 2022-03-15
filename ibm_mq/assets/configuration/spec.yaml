@@ -105,6 +105,12 @@ files:
           type: array
           items:
             type: string
+      - name: auto_discover_channels
+        description: |
+          Autodiscover channels to monitor. This will discover all discoverable channels.
+        value:
+          example: true
+          type: boolean
       - name: channel_status_mapping
         description: |
           Custom channel status mapping for service check `ibm_mq.channel.status`.
