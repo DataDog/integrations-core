@@ -51,6 +51,29 @@ def test_parse_connection_string_properties(cs, parsed):
 
 
 @pytest.mark.parametrize(
+    'cs,username,password,expect_warning',
+    [
+        pytest.param('host=A;Trusted_Connection=true', "bob", "password123", True),
+        pytest.param('host=A;Trusted_Connection=true', None, None, False),
+        pytest.param('host=A;', "bob", "password123", False),
+    ],
+)
+def test_warn_trusted_connection_username_pass(instance_minimal_defaults, cs, username, password, expect_warning):
+    instance_minimal_defaults["connection_string"] = cs
+    instance_minimal_defaults["username"] = username
+    instance_minimal_defaults["password"] = password
+    connection = Connection({}, instance_minimal_defaults, None)
+    connection.log = mock.MagicMock()
+    connection._connection_options_validation('somekey', 'somedb')
+    if expect_warning:
+        connection.log.warning.assert_called_once_with(
+            "Username and password are ignored when using Windows authentication"
+        )
+    else:
+        connection.log.warning.assert_not_called()
+
+
+@pytest.mark.parametrize(
     'connector, param',
     [
         pytest.param('odbc', 'adoprovider', id='Provider is ignored when using odbc'),
