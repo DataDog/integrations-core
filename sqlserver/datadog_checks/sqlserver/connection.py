@@ -409,19 +409,19 @@ class Connection(object):
             return
 
         parsed_cs = parse_connection_string_properties(cs)
-        lowercased_keys = {k.lower() for k in parsed_cs.keys()}
+        lowercased_keys_cs = {k.lower(): v for k, v in parsed_cs.items()}
 
-        if parsed_cs.get('trusted_connection', "false").lower() in {'yes', 'true'} and (username or password):
+        if lowercased_keys_cs.get('trusted_connection', "false").lower() in {'yes', 'true'} and (username or password):
             self.log.warning("Username and password are ignored when using Windows authentication")
 
         for key, value in connector_options.items():
-            if key.lower() in lowercased_keys and self.instance.get(value) is not None:
+            if key.lower() in lowercased_keys_cs and self.instance.get(value) is not None:
                 raise ConfigurationError(
                     "%s has been provided both in the connection string and as a "
                     "configuration option (%s), please specify it only once" % (key, value)
                 )
         for key in other_connector_options.keys():
-            if key.lower() in lowercased_keys:
+            if key.lower() in lowercased_keys_cs:
                 raise ConfigurationError(
                     "%s has been provided in the connection string. "
                     "This option is only available for %s connections,"
