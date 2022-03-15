@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 7.4.0 / 2022-03-15
+
+* [Added] Add execution_count and total_elapsed_time fields to SQLServer Samples. See [#11652](https://github.com/DataDog/integrations-core/pull/11652).
+
 ## 7.3.0 / 2022-03-14
 
 * [Added] Add missing wait_resource column for activity collections. See [#11638](https://github.com/DataDog/integrations-core/pull/11638).
