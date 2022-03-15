@@ -17,29 +17,11 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.parametrize(
-    'connector, param',
-    [
-        pytest.param('odbc', 'adoprovider', id='Provider is ignored when using odbc'),
-        pytest.param('adodbapi', 'dsn', id='DSN is ignored when using adodbapi'),
-        pytest.param('adodbapi', 'driver', id='Driver is ignored when using adodbapi'),
-    ],
-)
-def test_will_warn_parameters_for_the_wrong_connection(instance_minimal_defaults, connector, param):
-    instance_minimal_defaults.update({'connector': connector, param: 'foo'})
-    connection = Connection({}, instance_minimal_defaults, None)
-    connection.log = mock.MagicMock()
-    connection._connection_options_validation('somekey', 'somedb')
-    connection.log.warning.assert_called_once_with(
-        "%s option will be ignored since %s connection is used", param, connector
-    )
-
-
-@pytest.mark.parametrize(
     'cs,parsed',
     [
         pytest.param(
-            'HOST=foo;password={pass";{}}word};',
-            {"HOST": "foo", "password": 'pass";{}word'},
+            'HOST=foo;password={pA s";{}}w0rd};',
+            {"HOST": "foo", "password": 'pA s";{}w0rd'},
             id="closing bracket escape sequence",
         ),
         pytest.param(
@@ -47,6 +29,9 @@ def test_will_warn_parameters_for_the_wrong_connection(instance_minimal_defaults
             {"host": "foo", "password": 'pass";{}word'},
             id="final semicolon is optional",
         ),
+        pytest.param('A=B; C=D', {"A": "B", "C": 'D'}, id="spaces allowed after semicolons"),
+        pytest.param('A =B;C=D', None, id="spaces not allowed after a key"),
+        pytest.param('A=B ;C=D', None, id="spaces not allowed after a value"),
         pytest.param('host=foo;password={pass";{}word}', None, id="escape too early then invalid character"),
         pytest.param('host=foo;password={incomplete_escape;', None, id="incomplete escape"),
         pytest.param('host=foo;password=abc[;', None, id="invalid char"),
@@ -63,6 +48,24 @@ def test_parse_connection_string_properties(cs, parsed):
         return
     with pytest.raises(ConfigurationError):
         parse_connection_string_properties(cs)
+
+
+@pytest.mark.parametrize(
+    'connector, param',
+    [
+        pytest.param('odbc', 'adoprovider', id='Provider is ignored when using odbc'),
+        pytest.param('adodbapi', 'dsn', id='DSN is ignored when using adodbapi'),
+        pytest.param('adodbapi', 'driver', id='Driver is ignored when using adodbapi'),
+    ],
+)
+def test_will_warn_parameters_for_the_wrong_connection(instance_minimal_defaults, connector, param):
+    instance_minimal_defaults.update({'connector': connector, param: 'foo'})
+    connection = Connection({}, instance_minimal_defaults, None)
+    connection.log = mock.MagicMock()
+    connection._connection_options_validation('somekey', 'somedb')
+    connection.log.warning.assert_called_once_with(
+        "%s option will be ignored since %s connection is used", param, connector
+    )
 
 
 @pytest.mark.parametrize(

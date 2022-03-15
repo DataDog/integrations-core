@@ -60,6 +60,10 @@ def parse_connection_string_properties(cs):
             escaping = True
             i += 1
             continue
+        # ignore leading whitespace, i.e. between two keys "A=B;  C=D"
+        if not key_done and not parsed and cs[i] == ' ':
+            i += 1
+            continue
         if cs[i] == '=':
             if key_done:
                 raise ConfigurationError(
