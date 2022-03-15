@@ -37,14 +37,14 @@ class StatsCollector(object):
         """
         self.log.debug("Collecting stats newer than %s", self.config.instance_creation_datetime)
         queue = Queue(queue_manager, STATISTICS_QUEUE_NAME)
-
+        pcf = None
         try:
             # It's expected for the loop to stop when pymqi.MQMIError is raised with reason MQRC_NO_MSG_AVAILABLE.
+            pcf = pymqi.PCFExecute()
             while True:
                 bin_message = queue.get()
                 self.log.trace('Stats binary message: %s', bin_message)
-
-                message, header = pymqi.PCFExecute.unpack(bin_message)
+                message, header = pcf.unpack(bin_message)
                 self.log.trace('Stats unpacked message: %s, Stats unpacked header: %s', message, header)
 
                 stats = self._get_stats(message, header)
@@ -73,6 +73,8 @@ class StatsCollector(object):
             else:
                 raise
         finally:
+            if pcf is not None:
+                pcf.disconnect()
             try:
                 queue.close()
             except pymqi.PYIFError as e:
