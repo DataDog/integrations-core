@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
-from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 
 from .config_models import ConfigMixin
 from .metrics import METRIC_MAP, construct_metrics_config
@@ -20,4 +19,3 @@ class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             'openmetrics_endpoint': 'http://localhost:8529/_admin/metrics/v2',
             'metrics': construct_metrics_config(METRIC_MAP, {}),
         }
-

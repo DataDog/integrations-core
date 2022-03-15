@@ -11,7 +11,7 @@ from .common import HOST, PORT
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCKER_DIR = os.path.join(HERE, 'docker')
-URL = 'http://{}:{}/_admin/metrics' if os.getenv('ARANGODB_VERSION') == '3.7' else 'http://{}:{}/_admin/metrics/v2'
+URL = 'http://{}:{}/_admin/metrics/v2'
 
 
 @pytest.fixture(scope='session')

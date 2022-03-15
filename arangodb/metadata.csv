@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metrics
-arangodb.agency.append.time
+arangodb.agency.append
 arangodb.agency.cache.callback,gauge,,callback,,The current number of entries in Agency cache callbacks table.,0,arangodb,agency cache callback,
 arangodb.agency.callback,gauge,,callback,,The current number of Agency callbacks registered.,0,arangodb,agency callback,
 arangodb.agency.callback.registered.count,count,,callback,,The total number of Agency callbacks ever registered.,0,arangodb,agency callback registered count,
@@ -131,7 +131,11 @@ arangodb.rocksdb.num.running.flushes,gauge,,flush,,The number of currently runni
 arangodb.rocksdb.num.snapshots,gauge,,,,The number of unreleased snapshots of the database.,
 arangodb.rocksdb.prunable.wal.files,gauge,,file,,The total number of RocksDB WAL files in the archive subdirectory that can be pruned.,
 arangodb.rocksdb.size.all.mem.tables,gauge,,byte,,"The approximate size of all active, unflushed immutable, and pinned immutable memtables in bytes, summed over all column families.",
-arangodb.rocksdb.total.disk.space,gauge,,inode,,The currently used number of inodes on the disk volume used by RocksDB.,
+arangodb.rocksdb.total.inodes,gauge,,inode,,The currently used number of inodes on the disk volume used by RocksDB.,
 arangodb.rocksdb.total.disk.space,gauge,,byte,,"The total size in bytes of all SST files, summed over all column families.",
-
-# fill out later
+arangodb.rocksdb.total.sst.files.size,gauge,,byte,,"The total size in bytes of all SST files, summed over all column families.",
+arangodb.health.dropped_followers.count,count,,event,,Total number of drop-follower events.,
+arangodb.health.heartbeat_failures.count,count,,,,Total number of failed heartbeat transmissions.,
+arangodb.health.heartbeat.sent.time.bucket,count,,millisecond,,Count of times required to send heartbeats.,
+arangodb.health.heartbeat.sent.time.count,count,,millisecond,,Count of times required to send heartbeats.,
+arangodb.health.heartbeat.sent.time.sum,count,,millisecond,,Count of times required to send heartbeats.,
