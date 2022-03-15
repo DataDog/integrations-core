@@ -1,5 +1,20 @@
 # CHANGELOG - sqlserver
 
+## 7.5.0 / 2022-03-15
+
+* [Added] Add execution_count and total_elapsed_time fields to SQLServer Samples. See [#11652](https://github.com/DataDog/integrations-core/pull/11652).
+* [Added] Add execution_count and total_elapsed_time fields to SQLServer Samples. See [#11652](https://github.com/DataDog/integrations-core/pull/11652).
+* [Added] Add missing wait_resource column for activity collections. See [#11638](https://github.com/DataDog/integrations-core/pull/11638).
+* [Added] Add missing wait_resource column for activity collections. See [#11638](https://github.com/DataDog/integrations-core/pull/11638).
+* [Added] Enable SQL metadata collection by default. See [#11606](https://github.com/DataDog/integrations-core/pull/11606).
+* [Fixed] Include SQL metadata in FQT. See [#11641](https://github.com/DataDog/integrations-core/pull/11641).
+* [Fixed] Fix service check failures on auto discovered dbs failing full check execution. See [#11563](https://github.com/DataDog/integrations-core/pull/11563).
+* [Fixed] Use remote hostname on all metrics when DBM is enabled. See [#11634](https://github.com/DataDog/integrations-core/pull/11634).
+* [Fixed] Fix SQLServer activity query, only query for load not transactions. See [#11629](https://github.com/DataDog/integrations-core/pull/11629).
+* [Fixed] Use remote hostname on all metrics when DBM is enabled. See [#11634](https://github.com/DataDog/integrations-core/pull/11634).
+* [Fixed] Fix SQLServer activity query, only query for load not transactions. See [#11629](https://github.com/DataDog/integrations-core/pull/11629).
+* [Fixed] Fix service check failures on auto discovered dbs failing full check execution. See [#11563](https://github.com/DataDog/integrations-core/pull/11563).
+
 ## 7.4.0 / 2022-03-15
 
 * [Added] Add execution_count and total_elapsed_time fields to SQLServer Samples. See [#11652](https://github.com/DataDog/integrations-core/pull/11652).

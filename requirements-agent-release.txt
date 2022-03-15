@@ -130,7 +130,7 @@ datadog-snowflake==4.2.1
 datadog-solr==1.11.0
 datadog-sonarqube==2.0.0
 datadog-spark==3.0.0
-datadog-sqlserver==7.4.0
+datadog-sqlserver==7.5.0
 datadog-squid==2.0.0
 datadog-ssh-check==2.2.0
 datadog-statsd==1.9.0
