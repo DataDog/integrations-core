@@ -46,7 +46,7 @@ def dd_environment(instance):
     else:
         e2e_metadata = {}
 
-    with docker_run(compose_file, conditions=conditions, env_vars=env_vars, mount_logs=True, sleep=60):
+    with docker_run(compose_file, conditions=conditions, env_vars=env_vars, mount_logs=True):
         yield instance, e2e_metadata
 
 
