@@ -1,5 +1,10 @@
 # CHANGELOG - postgres
 
+## 12.2.0 / 2022-03-15
+
+* [Added] Enable SQL metadata collection by default. See [#11602](https://github.com/DataDog/integrations-core/pull/11602).
+* [Fixed] Include SQL metadata in FQT. See [#11640](https://github.com/DataDog/integrations-core/pull/11640).
+
 ## 12.1.1 / 2022-03-14
 
 * [Fixed] Cache pg_stat_activity columns for sampling query. See [#11588](https://github.com/DataDog/integrations-core/pull/11588).

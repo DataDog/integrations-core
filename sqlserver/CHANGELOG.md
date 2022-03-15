@@ -1,5 +1,10 @@
 # CHANGELOG - sqlserver
 
+## 7.5.0 / 2022-03-15
+
+* [Added] Enable SQL metadata collection by default. See [#11606](https://github.com/DataDog/integrations-core/pull/11606).
+* [Fixed] Include SQL metadata in FQT. See [#11641](https://github.com/DataDog/integrations-core/pull/11641).
+
 ## 7.4.0 / 2022-03-15
 
 * [Added] Add execution_count and total_elapsed_time fields to SQLServer Samples. See [#11652](https://github.com/DataDog/integrations-core/pull/11652).
