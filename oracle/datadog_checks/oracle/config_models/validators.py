@@ -12,7 +12,7 @@ def initialize_instance(values, **kwargs):
     if not values.get('server') or not values.get('username'):
         raise ValueError('Oracle host and user are needed')
 
-    protocol = values.get('protocol').upper()
+    protocol = values.get('protocol', '').upper()
     if protocol not in VALID_PROTOCOLS:
         raise ValueError('Protocol %s is not valid, must either be TCP or TCPS' % values.get('protocol'))
 
