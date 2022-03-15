@@ -28,6 +28,75 @@ class SQLConnectionError(Exception):
     pass
 
 
+CONNECTION_STRING_SPECIAL_CHARACTERS = set('=;[]{}"\' ')
+
+
+def parse_connection_string_properties(cs):
+    """
+    Parses the properties portion of a SQL Server connection string (i.e. "key1=value1;key2=value2;...") into a map of
+    {key -> value}. The string must contain *properties only*, meaning the subprotocol, serverName, instanceName and
+    portNumber are not included in the string.
+    See https://docs.microsoft.com/en-us/sql/connect/jdbc/building-the-connection-url
+    """
+    cs = cs.strip()
+    params = {}
+    i = 0
+    escaping = False
+    key, parsed, key_done = "", "", False
+    while i < len(cs):
+        if escaping:
+            if cs[i : i + 2] == '}}':
+                parsed += '}'
+                i += 2
+                continue
+            if cs[i] == '}':
+                escaping = False
+                i += 1
+                continue
+            parsed += cs[i]
+            i += 1
+            continue
+        if cs[i] == '{':
+            escaping = True
+            i += 1
+            continue
+        if cs[i] == '=':
+            if key_done:
+                raise ConfigurationError(
+                    "Invalid connection string: unexpected '=' while parsing value at index={}: {}".format(i, cs)
+                )
+            key, parsed, key_done = parsed, "", True
+            if not key:
+                raise ConfigurationError("Invalid connection string: empty key at index={}: {}".format(i, cs))
+            i += 1
+            continue
+        if cs[i] == ';':
+            if not parsed:
+                raise ConfigurationError("Invalid connection string: empty value at index={}: {}".format(i, cs))
+            params[key] = parsed
+            key, parsed, key_done = "", "", False
+            i += 1
+            continue
+        if cs[i] in CONNECTION_STRING_SPECIAL_CHARACTERS:
+            raise ConfigurationError(
+                "Invalid connection string: invalid character '{}' at index={}: {}".format(cs[i], i, cs)
+            )
+        parsed += cs[i]
+        i += 1
+    # the last ';' can be omitted so check for a final remaining param here
+    if escaping:
+        raise ConfigurationError(
+            "Invalid connection string: did not find expected matching closing brace '}}': {}".format(cs)
+        )
+    if key:
+        if not parsed:
+            raise ConfigurationError(
+                "Invalid connection string: empty value at the end of the connection string: {}".format(cs)
+            )
+        params[key] = parsed
+    return params
+
+
 class Connection(object):
     """Manages the connection to a SQL Server instance."""
 
@@ -294,34 +363,6 @@ class Connection(object):
             key_prefix = ""
         return '{}{}:{}:{}:{}:{}:{}'.format(key_prefix, dsn, host, username, password, database, driver)
 
-    def _parse_connection_string(self, cs):
-        """
-        Parses a connection string (i.e. "key1=value1;key2=value2;...") into a map of {key -> value}
-        The keys are lower-cased as they're not case sensitive.
-        """
-        result = {}
-        for option in cs.split(';'):
-            option = option.strip()
-            if not option:
-                # strings can end with a semicolon in which case we'll have one empty option
-                continue
-            splits = [s.strip() for s in option.split('=')]
-            if len(splits) == 1:
-                raise ConfigurationError(
-                    "invalid connection_string as one of the options does not contain a '=': {}".format(option)
-                )
-            if len(splits) > 2:
-                raise ConfigurationError(
-                    "invalid connection_string as one of the options contains more than one '=': {}".format(option)
-                )
-            key, val = splits
-            if not key or not val:
-                raise ConfigurationError(
-                    "invalid connection_string option as it has an empty key or value: {}".format(option)
-                )
-            result[key.lower()] = val
-        return result
-
     def _connection_options_validation(self, db_key, db_name):
         cs = self.instance.get('connection_string')
         username = self.instance.get('username')
@@ -363,19 +404,20 @@ class Connection(object):
         if cs is None:
             return
 
-        parsed_cs = self._parse_connection_string(cs)
+        parsed_cs = parse_connection_string_properties(cs)
+        lowercased_keys = {k.lower() for k in parsed_cs.keys()}
 
         if parsed_cs.get('trusted_connection', "false").lower() in {'yes', 'true'} and (username or password):
             self.log.warning("Username and password are ignored when using Windows authentication")
 
         for key, value in connector_options.items():
-            if key.lower() in parsed_cs and self.instance.get(value) is not None:
+            if key.lower() in lowercased_keys and self.instance.get(value) is not None:
                 raise ConfigurationError(
                     "%s has been provided both in the connection string and as a "
                     "configuration option (%s), please specify it only once" % (key, value)
                 )
         for key in other_connector_options.keys():
-            if key.lower() in parsed_cs:
+            if key.lower() in lowercased_keys:
                 raise ConfigurationError(
                     "%s has been provided in the connection string. "
                     "This option is only available for %s connections,"

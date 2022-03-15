@@ -9,7 +9,7 @@ import pytest
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.sqlserver import SQLServer
-from datadog_checks.sqlserver.connection import Connection
+from datadog_checks.sqlserver.connection import Connection, parse_connection_string_properties
 
 from .common import CHECK_NAME
 
@@ -35,20 +35,34 @@ def test_will_warn_parameters_for_the_wrong_connection(instance_minimal_defaults
 
 
 @pytest.mark.parametrize(
-    'cs, parsed, should_fail',
+    'cs,parsed',
     [
-        ("A=B;c=D;", {"a": "B", "c": "D"}, False),
-        ("A=B;C=;", None, True),
-        ("A=B;C==", None, True),
+        pytest.param(
+            'HOST=foo;password={pass";{}}word};',
+            {"HOST": "foo", "password": 'pass";{}word'},
+            id="closing bracket escape sequence",
+        ),
+        pytest.param(
+            'host=foo;password={pass";{}}word}',
+            {"host": "foo", "password": 'pass";{}word'},
+            id="final semicolon is optional",
+        ),
+        pytest.param('host=foo;password={pass";{}word}', None, id="escape too early then invalid character"),
+        pytest.param('host=foo;password={incomplete_escape;', None, id="incomplete escape"),
+        pytest.param('host=foo;password=abc[;', None, id="invalid char"),
+        pytest.param('host=foo;password=ab c;', None, id="invalid char"),
+        pytest.param('host=foo;password=;', None, id="empty value"),
+        pytest.param('host=foo;=hello;', None, id="empty key"),
+        pytest.param('host=foo;;', None, id="empty both"),
+        pytest.param('host==foo;', None, id="double equal"),
     ],
 )
-def test_parse_connection_string(instance_minimal_defaults, cs, parsed, should_fail):
-    connection = Connection({}, instance_minimal_defaults, None)
-    if should_fail:
-        with pytest.raises(ConfigurationError):
-            connection._parse_connection_string(cs)
-    else:
-        assert connection._parse_connection_string(cs) == parsed
+def test_parse_connection_string_properties(cs, parsed):
+    if parsed:
+        assert parse_connection_string_properties(cs) == parsed
+        return
+    with pytest.raises(ConfigurationError):
+        parse_connection_string_properties(cs)
 
 
 @pytest.mark.parametrize(
