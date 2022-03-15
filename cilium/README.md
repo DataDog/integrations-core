@@ -148,6 +148,8 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 |----------------|-------------------------------------------|
 | `<LOG_CONFIG>` | `{"source": "cilium-operator", "service": "cilium-operator"}` |
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
