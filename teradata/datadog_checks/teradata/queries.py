@@ -60,12 +60,12 @@ AMP_USAGE = {
 RESOURCE_USAGE = {
     "name": "resource_usage",
     "query": """
-        SELECT TheTimestamp, FileLockBlocks, FileLockDeadlocks, FileLockEnters, DBLockBlocks, DBLockDeadlocks,
+        SELECT TOP 1 TheTimestamp, FileLockBlocks, FileLockDeadlocks, FileLockEnters, DBLockBlocks, DBLockDeadlocks,
         IoThrottleCount, IoThrottleTime, IoThrottleTimeMax, MemCtxtPageReads, MemCtxtPageWrites, MemTextPageReads,
         VHCacheKB, KernMemInuseKB, SegMDLInuseKB, SegMaxAvailMB, SegInuseMB, SegCacheMB, SegMDLAlloc, SegMDLFree,
         SegMDLRelease, SegMDLRecycle, SegMDLAllocKB, SegMDLFreeKB, SegMDLReleaseKB, SegMDLRecycleKB, FsgCacheKB,
         PageMajorFaults, PageMinorFaults, ProcBlocked, ProcReady, ProcReadyMax, CPUIdle, CPUIoWait, CPUUServ, CPUUExec,
-        CpuThrottleCount, CpuThrottleTime FROM DBC.ResSpmaView;
+        CpuThrottleCount, CpuThrottleTime FROM DBC.ResSpmaView ORDER BY TheTimestamp DESC NULLS LAST;
         """,
     "columns": [
         {"name": "timestamp", "type": "source"},
