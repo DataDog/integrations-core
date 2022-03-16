@@ -1,5 +1,17 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 15.11.0 / 2022-03-16
+
+* [Added] Add more allowed recommended monitor types. See [#11669](https://github.com/DataDog/integrations-core/pull/11669).
+* [Added] Prevent tags for unreleased integrations. See [#11605](https://github.com/DataDog/integrations-core/pull/11605).
+* [Added] Allow limiting released changes up to a specific ref. See [#11596](https://github.com/DataDog/integrations-core/pull/11596).
+* [Fixed] Add space above tag function. See [#11623](https://github.com/DataDog/integrations-core/pull/11623).
+* [Fixed] Don't ignore the last character of lines when validating ASCII. See [#11548](https://github.com/DataDog/integrations-core/pull/11548).
+* [Fixed] Remove unsupported schema properties. See [#11585](https://github.com/DataDog/integrations-core/pull/11585).
+* [Fixed] Fail releases for missing tags. See [#11593](https://github.com/DataDog/integrations-core/pull/11593).
+* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+* [Fixed] Fix fallback case in trello card assignment algorithm. See [#11533](https://github.com/DataDog/integrations-core/pull/11533).
+
 ## 15.10.1 / 2022-02-19
 
 * [Fixed] Fix integration templates. See [#11539](https://github.com/DataDog/integrations-core/pull/11539).
