@@ -3,14 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 METRIC_MAP = {
     # agency metrics
-    'arangodb_agency_append_hist': 'agency.append',
     'arangodb_agency_cache_callback_number': 'agency.cache.callback',
     'arangodb_agency_callback_number': 'agency.callback',
     'arangodb_agency_callback_registered_total': 'agency.callback.registered.total',
     'arangodb_agency_client_lookup_table_size': 'agency.client.lookup.table_size',
     'arangodb_agency_commit_hist': 'agency.commit',
     'arangodb_agency_compaction_hist': 'agency.compaction',
-    'arangodb_agency_local_commit_index': 'agency.local.commit.index',
     'arangodb_agency_log_size_bytes': 'agency.log.size',
     'arangodb_agency_read_no_leader_total': 'agency.read.no_leader.total',
     'arangodb_agency_read_ok_total': 'agency.read.ok.total',
@@ -123,7 +121,6 @@ METRIC_MAP = {
     'arangodb_dropped_followers_total': 'health.dropped_followers.total',
     'arangodb_heartbeat_failures_total': 'health.heartbeat_failures.total',
     'arangodb_heartbeat_send_time_msec': 'health.heartbeat.sent.time',
-
 }
 
 

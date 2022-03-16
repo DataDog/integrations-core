@@ -1,30 +1,28 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metrics
-arangodb.agency.append
 arangodb.agency.cache.callback,gauge,,callback,,The current number of entries in Agency cache callbacks table.,0,arangodb,agency cache callback,
 arangodb.agency.callback,gauge,,callback,,The current number of Agency callbacks registered.,0,arangodb,agency callback,
 arangodb.agency.callback.registered.count,count,,callback,,The total number of Agency callbacks ever registered.,0,arangodb,agency callback registered count,
 arangodb.agency.client.lookup.table_size,gauge,,entry,, The current number of entries in Agency client id lookup table.,0,arangodb,agency client lookup table size,
-arangodb.agency.commit.time.bucket
-arangodb.agency.commit.time.count
-arangodb.agency.commit.time.sum
-arangodb.agency.compaction.time.bucket
-arangodb.agency.compaction.time.count
-arangodb.agency.compaction.time.sum
-arangodb.agency.local.commit.index
+arangodb.agency.commit.bucket
+arangodb.agency.commit.count
+arangodb.agency.commit.sum
+arangodb.agency.compaction.bucket
+arangodb.agency.compaction.count
+arangodb.agency.compaction.sum
 arangodb.agency.log.size
 arangodb.agency.read.no_leader.count
-arangodb.agency.read.ok.total
+arangodb.agency.read.ok.count
 arangodb.agency.supervision.failed.server.count
 arangodb.agency.supervision.runtime
 arangodb.agency.supervision.runtime.wait.for.replication,
-arangodb.agency.write.time.bucket
-arangodb.agency.write.time.count,
-arangodb.agency.write.time.sum
+arangodb.agency.write.bucket
+arangodb.agency.write.count,
+arangodb.agency.write.sum
 arangodb.agency.write.no_leader.count,
-arangodb.agency.write.ok.total
-arangodb.arangodb.agency.request.time.bucket,count,,millisecond
-arangodb.arangodb.agency.request.time.count
-arangodb.arangodb.agency.request.time.sum
+arangodb.agency.write.ok.count
+arangodb.agency.request.time.bucket,count,,millisecond
+arangodb.agency.request.time.count,count,,millisecond
+arangodb.agency.request.time.sum,count,,millisecond
 arangodb.network.forwarded.requests.count,count,,request,,Number of requests forwarded to another Coordinator.,0,arangodb,network forwarded requests count,
 arangodb.network.request.timeouts.count,count,,request,,Number of internal requests that have timed out.,0,arangodb,network request timeouts count,
 arangodb.network.requests.in.flight,gauge,,request,,Number of outgoing internal requests in flight.,0,arangodb,network requests in flight,
@@ -38,8 +36,8 @@ arangodb.aql.query.time.bucket,count,,,,Execution time histogram for all AQL que
 arangodb.aql.query.time.count,count,,,,Execution time histogram for all AQL queries.,arangodb,aql query time count,
 arangodb.aql.query.time.sum,count,,,,Execution time histogram for all AQL queries.,arangodb,aql query time sum,
 arangodb.aql.slow.query.time.bucket,count,,,,Execution time histogram for slow AQL queries.,arangodb,,
-arangodb.aql.slow.query.time.count,
-arangodb.aql.slow.query.time.sum,
+arangodb.aql.slow.query.time.count,count,,,,Execution time histogram for slow AQL queries.,arangodb,,
+arangodb.aql.slow.query.time.sum,count,,,,Execution time histogram for slow AQL queries.,arangodb,,
 arangodb.client.connection.bytes.received.bucket,count,,byte,,Bytes received for a request.,arangodb,client connection bytes received bucket,
 arangodb.client.connection.bytes.received.count,count
 arangodb.client.connection.bytes.received.sum,count
@@ -65,6 +63,7 @@ arangodb.http.get.requests.count,count,,request,,Number of HTTP GET requests.,
 arangodb.http.head.requests.count,count,,request,,Number of HTTP HEAD requests.,
 arangodb.http.options.requests.count,count,,request,,Number of HTTP OPTIONS requests.,
 arangodb.http.patch.requests.count,count,,request,,Number of HTTP PATCH requests.,
+arangodb.http.post.requests.count,count,,request,,Number of HTTP POST requests.,
 arangodb.http.put.requests.count,count,,request,,Number of HTTP PUT requests.,
 arangodb.http.other.requests.count,count,,request,,Number of other/illegal HTTP requests.,
 arangodb.http.total.requests.count,count,,request,,Total number of HTTP requests.,
@@ -95,6 +94,7 @@ arangodb.rocksdb.collection_lock.acquisition_time.bucket,count,,second,,Histogra
 arangodb.rocksdb.collection_lock.acquisition_time.count,count,,second,,Histogram of the collection/shard lock acquisition times.,
 arangodb.rocksdb.collection_lock.acquisition_time.sum,count,,second,,Histogram of the collection/shard lock acquisition times.,
 arangodb.rocksdb.write.stalls.count,count,,,,Number of times RocksDB has entered a stalled (slowed) write state.,
+arangodb.rocksdb.write.stops.count,count,
 arangodb.rocksdb.write.stop.count,count,,,,Number of times RocksDB has entered a stopped write state.,
 arangodb.rocksdb.actual.delayed.write.rate,gauge,,,,Actual delayed RocksDB write rate.,
 arangodb.rocksdb.archived.wal.files,gauge,,file,,Number of RocksDB WAL files in the archive.,
