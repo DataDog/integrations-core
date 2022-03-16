@@ -100,6 +100,7 @@ class IBMMQConfig:
 
         self.convert_endianness = instance.get('convert_endianness', False)  # type: bool
         self.qm_timezone = instance.get('queue_manager_timezone', 'UTC')  # type: str
+        self.auto_discover_channels = instance.get('auto_discover_channels', True)  # type: bool
 
         custom_tags = instance.get('tags', [])  # type: List[str]
         tags = [
