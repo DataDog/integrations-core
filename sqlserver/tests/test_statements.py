@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import concurrent
 import logging
 import math
 import os
@@ -20,6 +21,7 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
 from .common import CHECK_NAME
+from .conftest import DEFAULT_TIMEOUT
 
 try:
     import pyodbc
@@ -46,6 +48,11 @@ def dbm_instance(instance_docker):
         # in tests sometimes things can slow down so we don't want this short deadline causing some events
         # to fail to be collected on time
         'enforce_collection_interval_deadline': False,
+    }
+    instance_docker['query_activity'] = {
+        'enabled': True,
+        'run_sync': True,
+        'collection_interval': 0.1,
     }
     return copy(instance_docker)
 
@@ -277,8 +284,8 @@ def test_statement_metrics_and_plans(
     "metadata,expected_metadata_payload",
     [
         (
-            {'tables_csv': 'sys.databases', 'commands': ['SELECT'], 'comments': ['-- Test comment']},
-            {'tables': ['sys.databases'], 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+            {'tables_csv': 'ϑings', 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+            {'tables': ['ϑings'], 'commands': ['SELECT'], 'comments': ['-- Test comment']},
         ),
         (
             {'tables_csv': '', 'commands': None, 'comments': None},
@@ -287,17 +294,29 @@ def test_statement_metrics_and_plans(
     ],
 )
 def test_statement_metadata(
-    aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, metadata, expected_metadata_payload
+    aggregator, instance_docker, dd_run_check, datadog_conn_docker, dbm_instance, datadog_agent, metadata, expected_metadata_payload
 ):
+    def _get_conn_for_user(user):
+        conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
+            instance_docker['driver'], instance_docker['host'], user, "Password12!"
+        )
+        conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=False)
+        conn.timeout = DEFAULT_TIMEOUT
+        return conn
+
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     query = '''
     -- Test comment
-    select * from sys.databases'''
-    query_signature = 'ee1663c796378ab0'
+    SELECT * FROM ϑings'''
+    query_signature = '5ff34f4267b108c6'
 
-    def _run_query():
-        bob_conn.execute_with_retries(query)
+    bob_conn = _get_conn_for_user("bob")
+
+    def _run_test_query(conn, q):
+        cur = conn.cursor()
+        cur.execute("USE {}".format("datadog_test"))
+        cur.execute(q)
 
     def _obfuscate_sql(sql_query, options=None):
         return json.dumps({'query': sql_query, 'metadata': metadata})
@@ -305,9 +324,10 @@ def test_statement_metadata(
     # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = _obfuscate_sql
-        _run_query()
+        _run_test_query(bob_conn, query)
         dd_run_check(check)
-        _run_query()
+        # Second run will emit metrics based on the diff of the current and prev state
+        _run_test_query(bob_conn, query)
         dd_run_check(check)
 
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
@@ -336,6 +356,41 @@ def test_statement_metadata(
     metric = matching_metrics[0]
     assert metric['dd_tables'] == expected_metadata_payload['tables']
     assert metric['dd_commands'] == expected_metadata_payload['commands']
+
+    # Setup activity for testing
+    blocking_query = "INSERT INTO ϑings WITH (TABLOCK, HOLDLOCK) (name) VALUES ('puppy')"
+    fred_conn = _get_conn_for_user('fred')
+
+    def _run_query_with_mock_obfuscator(conn, query):
+        # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+        with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+            mock_agent.side_effect = _obfuscate_sql
+            _run_test_query(conn, query)
+
+    # bob's query blocks until the tx is completed, so it needs to be run asynchronously.
+    executor = concurrent.futures.ThreadPoolExecutor(1)
+    executor.submit(_run_query_with_mock_obfuscator, bob_conn, blocking_query)
+
+    # fred's query will get blocked by bob, so it needs to be run asynchronously.
+    executor.submit(_run_query_with_mock_obfuscator, fred_conn, query)
+
+    dd_run_check(check)
+
+    bob_conn.commit()
+    bob_conn.close()
+    fred_conn.close()
+
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    assert dbm_activity, "should have collected at least one activity"
+    matching_activity = []
+    for event in dbm_activity:
+        for activity in event['sqlserver_activity']:
+            if activity['query_signature'] == query_signature:
+                matching_activity.append(activity)
+    assert len(matching_activity) == 1
+    activity = matching_activity[0]
+    assert activity['dd_tables'] == expected_metadata_payload['tables']
+    assert activity['dd_commands'] == expected_metadata_payload['commands']
 
 
 @pytest.mark.integration

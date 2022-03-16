@@ -192,7 +192,11 @@ class SqlserverActivity(DBMAsyncJob):
         if 'text' not in row:
             return row
         try:
-            obfuscated_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)['query']
+            statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
+            obfuscated_statement = statement['query']
+            metadata = statement['metadata']
+            row['dd_tables'] = metadata.get('tables', None)
+            row['dd_commands'] = metadata.get('commands', None)
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
         except Exception as e:
             # obfuscation errors are relatively common so only log them during debugging
