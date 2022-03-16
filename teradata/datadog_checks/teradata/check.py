@@ -26,13 +26,14 @@ class TeradataCheck(AgentCheck):
     __NAMESPACE__ = 'teradata'
     JDBC_CONNECTION_STRING = "jdbc:teradata://{}"
     TERADATA_DRIVER_CLASS = "com.teradata.jdbc.TeraDriver"
-    SERVICE_CHECK_NAME = "teradata.can_connect"
+    SERVICE_CHECK_NAME = "can_connect"
 
     def __init__(self, name, init_config, instances):
         super(TeradataCheck, self).__init__(name, init_config, instances)
         self.config = TeradataConfig(self.instance)
         self._connection = None
-        self._tags = ['teradata_server:{}'.format(self.config.server)] + self.config.tags
+        self._server_tag = 'teradata_server:{}:{}'.format(self.config.server, self.config.port)
+        self._tags = [self._server_tag] + self.config.tags
 
         manager_queries = []
         if self.config.collect_res_usage:
@@ -71,10 +72,10 @@ class TeradataCheck(AgentCheck):
 
     def _connect_jdbc(self):
         conn = None
-        jdbc_connect_properties = {'user': self.config.username, 'password': self.config.password}
         conn_str = self._connection_string()
+        jdbc_connect_properties = self._connect_properties()
         try:
-            if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
+            if jpype.isJVMStarted() and not jpype.java.lang.Thread.isAttached():
                 jpype.attachThreadToJVM()
                 jpype.java.lang.Thread.currentThread().setContextClassLoader(
                     jpype.java.lang.ClassLoader.getSystemClassLoader()
@@ -94,57 +95,58 @@ class TeradataCheck(AgentCheck):
                 conn.close()
 
     def _connection_string(self):
-        creds_required = self._creds_required()
-        if creds_required and (not self.config.username or not self.config.password):
-            raise ConfigurationError("`username` and `password` are required")
-        else:
-            conn_str = self.JDBC_CONNECTION_STRING.format(self.config.server)
+        conn_str = self.JDBC_CONNECTION_STRING.format(self.config.server)
+        config_opts = {
+            'account': self.config.account,
+            'dbs_port': self.config.port,
+            'https_port': self.config.https_port,
+            'sslmode': self.config.ssl_mode,
+            'sslprotocol': self.config.ssl_protocol,
+            'sslca': self.config.ssl_ca,
+            'sslcapath': self.config.ssl_ca_path,
+            'logmech': self.config.auth_mechanism,
+            'logdata': self.config.auth_data,
+        }
+
+        if not self.config.use_tls:
             config_opts = {
-                'account': self.config.account,
                 'dbs_port': self.config.port,
-                'https_port': self.config.https_port,
-                'sslmode': self.config.ssl_mode,
-                'sslprotocol': self.config.ssl_protocol,
-                'sslca': self.config.ssl_ca,
-                'sslcapath': self.config.ssl_ca_path,
+                'account': self.config.account,
                 'logmech': self.config.auth_mechanism,
                 'logdata': self.config.auth_data,
             }
 
-            if not self.config.use_tls:
-                config_opts = {
-                    'account': self.config.account,
-                    'logmech': self.config.auth_mechanism,
-                    'logdata': self.config.auth_data,
-                }
-
-            param_count = 0
-            for option, value in config_opts.items():
-                if value is None:
-                    if option == 'logdata' and not self._credentials_required:
-                        raise ConfigurationError(
-                            "`auth_data` is required for auth_mechanisms JWT, KRB5, and LDAP. "
-                            "Configured `auth_mechanism` is: %",
-                            self.config.auth_mechanism,
-                        )
-                    else:
-                        continue
-                elif param_count < 1:
-                    conn_str += '/{}={}'.format(option, value)
-                    param_count += 1
+        param_count = 0
+        for option, value in sorted(config_opts.items()):
+            if value is None:
+                if option == 'logdata' and not self._credentials_required:
+                    raise ConfigurationError(
+                        "`auth_data` is required for auth_mechanisms JWT, KRB5, and LDAP. "
+                        "Configured `auth_mechanism` is: %",
+                        self.config.auth_mechanism,
+                    )
                 else:
-                    conn_str += ',{}={}'.format(option, value)
-                    param_count += 1
+                    continue
+            elif param_count < 1:
+                conn_str += '/{}={}'.format(option, value)
+                param_count += 1
+            else:
+                conn_str += ',{}={}'.format(option, value)
+                param_count += 1
 
         return conn_str
 
-    def _creds_required(self):
-        optional = ['JWT', 'KRB5', 'LDAP']
+    def _connect_properties(self):
+        jdbc_connect_properties = {}
+        optional = ['JWT', 'KRB5', 'LDAP', 'TDNEGO']
         if self.config.auth_mechanism and self.config.auth_mechanism.upper() in optional:
             self._credentials_required = False
+        elif self._credentials_required and (not self.config.username or not self.config.password):
+            raise ConfigurationError("`username` and `password` are required")
+            return
         else:
-            self._credentials_required = True
-        return self._credentials_required
+            jdbc_connect_properties.update({'user': self.config.username, 'password': self.config.password})
+        return jdbc_connect_properties
 
     def _validate_timestamp(self, row, query):
         if 'DBC.ResSpmaView' in query:
@@ -152,7 +154,9 @@ class TeradataCheck(AgentCheck):
             row_ts = row[0]
             diff = now - row_ts
             # Valid metrics should be no more than 10 min in the future or 1h in the past
-            if (diff > 3600) or (diff < 600):
+            if (diff > 3600) or (diff < -600):
                 raise Exception("Resource Usage stats are invalid. Is `SPMA` Resource Usage Logging enabled?")
+            else:
+                return row
         else:
             return row
