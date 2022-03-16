@@ -72,6 +72,8 @@ def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_in
     executor = concurrent.futures.ThreadPoolExecutor(1)
     f_q = executor.submit(run_test_query, fred_conn, query)
     while not f_q.running():
+        if f_q.done():
+            break
         print("waiting on fred's query to execute")
         time.sleep(1)
 
