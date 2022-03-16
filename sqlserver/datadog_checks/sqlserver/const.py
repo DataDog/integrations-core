@@ -84,7 +84,7 @@ INSTANCE_METRICS_TOTAL = [
 #   0 = Offline, 1 = Online, 2 = Online Pending, 3 = Failed
 AO_METRICS = [
     ('sqlserver.ao.ag_sync_health', 'sys.dm_hadr_availability_group_states', 'synchronization_health'),
-    ('sqlserver.ao.ag_listener_ip_state', 'availability_group_listener_ip_addresses', 'state'),
+    ('sqlserver.ao.ag_listener_ip_state', 'sys.availability_group_listener_ip_addresses', 'state'),
     ('sqlserver.ao.replica_sync_state', 'sys.dm_hadr_database_replica_states', 'synchronization_state'),
     ('sqlserver.ao.replica_failover_mode', 'sys.availability_replicas', 'failover_mode'),
     ('sqlserver.ao.replica_failover_readiness', 'sys.availability_replicas', 'is_failover_ready'),
