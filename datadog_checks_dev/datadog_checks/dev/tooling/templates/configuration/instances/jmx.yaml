@@ -127,4 +127,4 @@
     example: true
     type: boolean
 
-- template: instances/service
+- template: instances/default_all
