@@ -107,7 +107,10 @@ files:
             type: string
       - name: auto_discover_channels
         description: |
-          Autodiscover channels to monitor. This will discover all discoverable channels.
+          Autodiscover channels to monitor. This finds all discoverable channels.
+
+          Note: autodiscovered channels are in addition to the ones provided in `channels`,
+          and these channels will only report their statuses but not property metrics.
         value:
           example: true
           type: boolean
