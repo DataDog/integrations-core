@@ -95,7 +95,7 @@ instances:
     #   - <CHANNEL_NAME>
 
     ## @param auto_discover_channels - boolean - optional - default: true
-    ## Autodiscover channels to monitor. This will discover all discoverable channels.
+    ## Autodiscover channels to monitor. This finds all discoverable channels.
     #
     # auto_discover_channels: true
 
