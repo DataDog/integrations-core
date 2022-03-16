@@ -1,4 +1,4 @@
-- template: instances/default_all
+- template: instances/all_integrations
 - name: disable_generic_tags
   description: |
     Generic tags such as `cluster` will be replaced by <integration_name>_cluster to avoid
