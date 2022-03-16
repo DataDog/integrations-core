@@ -19,6 +19,14 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
@@ -30,6 +38,7 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: Optional[str]
+    metric_patterns: Optional[MetricPatterns]
     metrics: Sequence[Sequence[str]]
     min_collection_interval: Optional[float]
     password: Optional[str]

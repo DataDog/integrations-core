@@ -708,3 +708,14 @@ instances:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     # min_collection_interval: 15
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

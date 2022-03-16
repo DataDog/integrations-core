@@ -209,6 +209,8 @@ def models(ctx, check, sync, verbose):
                     func(message, indent=True)
 
     specs_failed = len(specs_failed)
+    echo_failure(f'Files with errors: {files_failed}')
+
     files_failed = len(files_failed)
     files_passed = num_files - files_failed
 

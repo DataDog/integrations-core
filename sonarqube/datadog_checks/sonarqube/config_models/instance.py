@@ -36,6 +36,14 @@ class Components(BaseModel):
     tag: Optional[str]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class Proxy(BaseModel):
     class Config:
         allow_mutation = False
@@ -80,6 +88,7 @@ class InstanceConfig(BaseModel):
     key_store_password: Optional[str]
     key_store_path: Optional[str]
     log_requests: Optional[bool]
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     name: Optional[str]
     ntlm_domain: Optional[str]

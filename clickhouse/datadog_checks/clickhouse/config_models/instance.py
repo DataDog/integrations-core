@@ -28,6 +28,14 @@ class CustomQuery(BaseModel):
     tags: Optional[Sequence[str]]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
@@ -38,6 +46,7 @@ class InstanceConfig(BaseModel):
     db: Optional[str]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     only_custom_queries: Optional[bool]
     password: Optional[str]
