@@ -294,7 +294,7 @@ def test_statement_metrics_and_plans(
     ],
 )
 def test_statement_metadata(
-    aggregator, instance_docker, dd_run_check, datadog_conn_docker, dbm_instance, datadog_agent, metadata, expected_metadata_payload
+    aggregator, instance_docker, dd_run_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload
 ):
     def _get_conn_for_user(user):
         conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
