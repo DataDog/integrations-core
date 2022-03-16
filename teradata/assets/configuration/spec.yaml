@@ -79,8 +79,8 @@ files:
         * Disable
         * Prefer
         * Require
-        * Verify-CA (Note: Does not perform TLS certificate verification if `use_odbc: false`)
-        * Verify-Full (Note: Does not perform TLS certificate verification if `use_odbc: false`)
+        * Verify-CA
+        * Verify-Full
       value:
         type: string
         default: Prefer
