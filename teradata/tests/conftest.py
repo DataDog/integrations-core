@@ -8,13 +8,18 @@ import pytest
 
 from .common import E2E_METADATA
 
-DBCNAME = os.environ.get('DBCNAME')
+TERADATA_SERVER = os.environ.get('TERADATA_SERVER')
+TERADATA_DD_USER = os.environ.get('TERADATA_DD_USER')
+TERADATA_DD_PW = os.environ.get('TERADATA_DD_PW')
 
 CONFIG = {
-    'host': 'localhost',
-    'connection_string': 'DRIVER=Teradata Database ODBC Driver 17.10;DBCName={};UID=dbc;PWD=datad0g123;'.format(
-        DBCNAME
-    ),
+    'server': 'localhost',
+    'username': 'datadog',
+    'password': 'td_datadog',
+    'jdbc_driver_path': '/terajdbc4.jar',
+    'database': 'AdventureWorksDW',
+    'use_tls': False,
+    'collect_res_usage': True,
 }
 
 
@@ -26,3 +31,17 @@ def dd_environment():
 @pytest.fixture
 def instance():
     return deepcopy(CONFIG)
+
+
+@pytest.fixture
+def instance_res_usage():
+    instance = deepcopy(CONFIG)
+    instance['collect_res_usage'] = True
+    return instance
+
+
+@pytest.fixture
+def bad_instance():
+    bad_config = deepcopy(CONFIG)
+    bad_config['server'] = 'fakeserver.com'
+    return bad_config
