@@ -551,12 +551,12 @@ class Network(AgentCheck):
 
         # Get the rest of the metric by reading the files. Metrics available since kernel 3.6
         conntrack_files_location = os.path.join(proc_location, 'sys', 'net', 'netfilter')
-        # By default, only max and count are reported. However if the blacklist is set,
+        # By default, all conntrack metrics are reported. However if the blacklist is set,
         # the whitelist is losing its default value
         blacklisted_files = instance.get('blacklist_conntrack_metrics')
         whitelisted_files = instance.get('whitelist_conntrack_metrics')
         if blacklisted_files is None and whitelisted_files is None:
-            whitelisted_files = ['max', 'count']
+            whitelisted_files = ['.*']
 
         available_files = []
 

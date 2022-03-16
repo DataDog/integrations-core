@@ -82,12 +82,12 @@ instances:
     #
     # use_sudo_conntrack: true
 
-    ## @param whitelist_conntrack_metrics - list of strings - optional - default: ['max', 'count']
+    ## @param whitelist_conntrack_metrics - list of strings - optional - default: ['.*']
     ## Linux only.
     ## Names of the conntrack metrics to whitelist for monitoring. The metric value is in the file
     ## /${proc}/sys/net/netfilter/nf_conntrack_${metric_name}.
-    ## By default the agent collects only max and count.
-    ## Regex expressions for the project names are supported.
+    ## By default the agent collects all reported metrics.
+    ## Project names are matched using regex, which means that metrics which contain the substring will match.
     ## Blacklist takes precedence over whitelist in case of overlap.
     #
     # whitelist_conntrack_metrics:
@@ -99,7 +99,7 @@ instances:
     ## Names of the conntrack metrics to blacklist for monitoring. The metric value is in the file
     ## /${proc}/sys/net/netfilter/nf_conntrack_${metric_name}.
     ## If set, whitelist default value is reset to [].
-    ## Regex expressions for the project names are supported.
+    ## Project names are matched using regex, which means that metrics which contain the substring will match.
     ## Blacklist takes precedence over whitelist in case of overlap.
     #
     # blacklist_conntrack_metrics:
