@@ -1455,349 +1455,349 @@ SIMPLE_METRICS = {
 
 REGEX_METRICS = [
     {
-        'regex': r'proxy.process.ssl.cipher.user_agent.(.*)',
+        'regex': r'proxy\.process\.ssl\.cipher\.user_agent\.(.*)',
         'name': 'process.ssl.cipher.user_agent',
         'tags': ('cipher',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.http.(1[0-9]{2})_responses',
+        'regex': r'proxy\.process\.http\.(1[0-9]{2})_responses',
         'name': 'process.http.code.1xx_responses',
         'tags': ('code',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.http.(2[0-9]{2})_responses',
+        'regex': r'proxy\.process\.http\.(2[0-9]{2})_responses',
         'name': 'process.http.code.2xx_responses',
         'tags': ('code',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.http.(3[0-9]{2})_responses',
+        'regex': r'proxy\.process\.http\.(3[0-9]{2})_responses',
         'name': 'process.http.code.3xx_responses',
         'tags': ('code',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.http.(4[0-9]{2})_responses',
+        'regex': r'proxy\.process\.http\.(4[0-9]{2})_responses',
         'name': 'process.http.code.4xx_responses',
         'tags': ('code',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.http.(5[0-9]{2})_responses',
+        'regex': r'proxy\.process\.http\.(5[0-9]{2})_responses',
         'name': 'process.http.code.5xx_responses',
         'tags': ('code',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.([A-Za-z0-9_-]*)\.bytes_used',
+        'regex': r'proxy\.process\.cache\.([A-Za-z0-9_-]*)\.bytes_used',
         'name': 'process.cache.volume.bytes_used',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.bytes_total',
+        'regex': r'proxy\.process\.cache\.(.*?)\.bytes_total',
         'name': 'process.cache.volume.bytes_total',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.ram_cache.total_bytes',
+        'regex': r'proxy\.process\.cache\.(.*?)\.ram_cache\.total_bytes',
         'name': 'process.cache.volume.ram_cache.total_bytes',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.ram_cache.bytes_used',
+        'regex': r'proxy\.process\.cache\.(.*?)\.ram_cache\.bytes_used',
         'name': 'process.cache.volume.ram_cache.bytes_used',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.ram_cache.hits',
+        'regex': r'proxy\.process\.cache\.(.*?)\.ram_cache\.hits',
         'name': 'process.cache.volume.ram_cache.hits',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.ram_cache.misses',
+        'regex': r'proxy\.process\.cache\.(.*?)\.ram_cache\.misses',
         'name': 'process.cache.volume.ram_cache.misses',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.pread_count',
+        'regex': r'proxy\.process\.cache\.(.*?)\.pread_count',
         'name': 'process.cache.volume.pread_count',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.percent_full',
+        'regex': r'proxy\.process\.cache\.(.*?)\.percent_full',
         'name': 'process.cache.volume.percent_full',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.lookup.active',
+        'regex': r'proxy\.process\.cache\.(.*?)\.lookup\.active',
         'name': 'process.cache.volume.lookup.active',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.lookup.success',
+        'regex': r'proxy\.process\.cache\.(.*?)\.lookup\.success',
         'name': 'process.cache.volume.lookup.success',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.lookup.failure',
+        'regex': r'proxy\.process\.cache\.(.*?)\.lookup\.failure',
         'name': 'process.cache.volume.lookup.failure',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.read.active',
+        'regex': r'proxy\.process\.cache\.(.*?)\.read\.active',
         'name': 'process.cache.volume.read.active',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.read.success',
+        'regex': r'proxy\.process\.cache\.(.*?)\.read\.success',
         'name': 'process.cache.volume.read.success',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.read.failure',
+        'regex': r'proxy\.process\.cache\.(.*?)\.read\.failure',
         'name': 'process.cache.volume.read.failure',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.write.active',
+        'regex': r'proxy\.process\.cache\.(.*?)\.write\.active',
         'name': 'process.cache.volume.write.active',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.write.success',
+        'regex': r'proxy\.process\.cache\.(.*?)\.write\.success',
         'name': 'process.cache.volume.write.success',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.write.failure',
+        'regex': r'proxy\.process\.cache\.(.*?)\.write\.failure',
         'name': 'process.cache.volume.write.failure',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.write.backlog.failure',
+        'regex': r'proxy\.process\.cache\.(.*?)\.write\.backlog\.failure',
         'name': 'process.cache.volume.write.backlog.failure',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.update.active',
+        'regex': r'proxy\.process\.cache\.(.*?)\.update\.active',
         'name': 'process.cache.volume.update.active',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.update.success',
+        'regex': r'proxy\.process\.cache\.(.*?)\.update\.success',
         'name': 'process.cache.volume.update.success',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.update.failure',
+        'regex': r'proxy\.process\.cache\.(.*?)\.update\.failure',
         'name': 'process.cache.volume.update.failure',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.remove.active',
+        'regex': r'proxy\.process\.cache\.(.*?)\.remove\.active',
         'name': 'process.cache.volume.remove.active',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.remove.success',
+        'regex': r'proxy\.process\.cache\.(.*?)\.remove\.success',
         'name': 'process.cache.volume.remove.success',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.remove.failure',
+        'regex': r'proxy\.process\.cache\.(.*?)\.remove\.failure',
         'name': 'process.cache.volume.remove.failure',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.evacuate.active',
+        'regex': r'proxy\.process\.cache\.(.*?)\.evacuate\.active',
         'name': 'process.cache.volume.evacuate.active',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.evacuate.success',
+        'regex': r'proxy\.process\.cache\.(.*?)\.evacuate\.success',
         'name': 'process.cache.volume.evacuate.success',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.evacuate.failure',
+        'regex': r'proxy\.process\.cache\.(.*?)\.evacuate\.failure',
         'name': 'process.cache.volume.evacuate.failure',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.scan.active',
+        'regex': r'proxy\.process\.cache\.(.*?)\.scan\.active',
         'name': 'process.cache.volume.scan.active',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.scan.success',
+        'regex': r'proxy\.process\.cache\.(.*?)\.scan\.success',
         'name': 'process.cache.volume.scan.success',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.scan.failure',
+        'regex': r'proxy\.process\.cache\.(.*?)\.scan\.failure',
         'name': 'process.cache.volume.scan.failure',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.direntries.total',
+        'regex': r'proxy\.process\.cache\.(.*?)\.direntries\.total',
         'name': 'process.cache.volume.direntries.total',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.direntries.used',
+        'regex': r'proxy\.process\.cache\.(.*?)\.direntries\.used',
         'name': 'process.cache.volume.direntries.used',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.directory_collision',
+        'regex': r'proxy\.process\.cache\.(.*?)\.directory_collision',
         'name': 'process.cache.volume.directory_collision',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.frags_per_doc.1',
+        'regex': r'proxy\.process\.cache\.(.*?)\.frags_per_doc\.1',
         'name': 'process.cache.volume.frags_per_doc.1',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.frags_per_doc.2',
+        'regex': r'proxy\.process\.cache\.(.*?)\.frags_per_doc\.2',
         'name': 'process.cache.volume.frags_per_doc.2',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.frags_per_doc.3+',
+        'regex': r'proxy\.process\.cache\.(.*?)\.frags_per_doc\.3\+',
         'name': 'process.cache.volume.frags_per_doc.3',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.read_busy.success',
+        'regex': r'proxy\.process\.cache\.(.*?)\.read_busy\.success',
         'name': 'process.cache.volume.read_busy.success',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.read_busy.failure',
+        'regex': r'proxy\.process\.cache\.(.*?)\.read_busy\.failure',
         'name': 'process.cache.volume.read_busy.failure',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.write_bytes_stat',
+        'regex': r'proxy\.process\.cache\.(.*?)\.write_bytes_stat',
         'name': 'process.cache.volume.write_bytes_stat',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.vector_marshals',
+        'regex': r'proxy\.process\.cache\.(.*?)\.vector_marshals',
         'name': 'process.cache.volume.vector_marshals',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.hdr_marshals',
+        'regex': r'proxy\.process\.cache\.(.*?)\.hdr_marshals',
         'name': 'process.cache.volume.hdr_marshals',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.hdr_marshal_bytes',
+        'regex': r'proxy\.process\.cache\.(.*?)\.hdr_marshal_bytes',
         'name': 'process.cache.volume.hdr_marshal_bytes',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.gc_bytes_evacuated',
+        'regex': r'proxy\.process\.cache\.(.*?)\.gc_bytes_evacuated',
         'name': 'process.cache.volume.gc_bytes_evacuated',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.gc_frags_evacuated',
+        'regex': r'proxy\.process\.cache\.(.*?)\.gc_frags_evacuated',
         'name': 'process.cache.volume.gc_frags_evacuated',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.sync.count',
+        'regex': r'proxy\.process\.cache\.(.*?)\.sync\.count',
         'name': 'process.cache.volume.sync.count',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.sync.bytes',
+        'regex': r'proxy\.process\.cache\.(.*?)\.sync\.bytes',
         'name': 'process.cache.volume.sync.bytes',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.sync.time',
+        'regex': r'proxy\.process\.cache\.(.*?)\.sync\.time',
         'name': 'process.cache.volume.sync.time',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.span.errors.read',
+        'regex': r'proxy\.process\.cache\.(.*?)\.span\.errors\.read',
         'name': 'process.cache.volume.span.errors.read',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.span.errors.write',
+        'regex': r'proxy\.process\.cache\.(.*?)\.span\.errors\.write',
         'name': 'process.cache.volume.span.errors.write',
         'tags': ('cache_volume',),
         'method': 'monotonic_count',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.span.failing',
+        'regex': r'proxy\.process\.cache\.(.*?)\.span\.failing',
         'name': 'process.cache.volume.span.failing',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.span.offline',
+        'regex': r'proxy\.process\.cache\.(.*?)\.span\.offline',
         'name': 'process.cache.volume.span.offline',
         'tags': ('cache_volume',),
         'method': 'gauge',
     },
     {
-        'regex': r'proxy.process.cache.(.*?)\.span.online',
+        'regex': r'proxy\.process\.cache\.(.*?)\.span\.online',
         'name': 'process.cache.volume.span.online',
         'tags': ('cache_volume',),
         'method': 'gauge',
@@ -1814,36 +1814,32 @@ def build_metric(metric_name, logger):
     """
     additional_tags = []
     name = metric_name
-    found = False
+    method = 'gauge'
 
-    if SIMPLE_METRICS.get(metric_name):
-        found = True
-        metric_mapping = SIMPLE_METRICS.get(metric_name)
-        name = metric_mapping.get("name")
-        method = metric_mapping.get("method")
+    if metric_name in SIMPLE_METRICS:
+        metric_mapping = SIMPLE_METRICS[metric_name]
+        name = metric_mapping['name']
+        method = metric_mapping['method']
 
     else:
-        found = False
         for regex in REGEX_METRICS:
-            tags_values = []  # type: List[str]
-            results = re.findall(str(regex.get('regex')), metric_name)
+            tags_values = []
+            results = re.findall(str(regex['regex']), metric_name)
 
             if len(results) > 0 and isinstance(results[0], tuple):
                 tags_values = list(results[0])
             else:
                 tags_values = results
 
-            if len(tags_values) == len(regex.get('tags')):
-                found = True
-                method = regex.get('method')
+            if len(tags_values) == len(regex['tags']):
+                method = regex['method']
                 name = str(regex['name'])
-                for i in range(len(regex.get('tags'))):
-                    additional_tags.append('{}:{}'.format(regex.get('tags')[i], tags_values[i]))
+                for i in range(len(regex['tags'])):
+                    additional_tags.append('{}:{}'.format(regex['tags'][i], tags_values[i]))
                 break
-
-        if not found:
+        else:
             logger.debug('Ignoring metric %s', metric_name)
-            return None, [], "gauge"
+            return None, [], method
 
     logger.debug('Found metric %s (%s)', name, metric_name)
 
