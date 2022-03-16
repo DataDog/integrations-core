@@ -974,6 +974,60 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
 
             self.report_function(metric_name, column_val, tags=metric_tags)
 
+# sys.availability_group_listener_ip_addresses
+# Returns a row for each listener IP address that is assigned to an availability group's listener.
+# Each row displays the states that define the state of a given listener IP.
+#
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-availability-group-listener-ip-addresses-transact-sql?view=sql-server-ver15
+class SqlAvailabilityGroupListenerIps(BaseSqlServerMetric):
+    TABLE = 'sys.availability_group_listener_ip_addresses'
+    DEFAULT_METRIC_TYPE = 'gauge'
+    QUERY_BASE = """select ag.resource_group_id, ag.name,agl.dns_name, aglia.* 
+                    from {table} as aglia
+                    inner join sys.availability_group_listeners as agl 
+                    on agl.listener_id = aglia.listener_id
+                    inner join sys.availability_groups as ag 
+                    on ag.group_id = agl.group_id""".format(
+        table=TABLE
+    )
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+        return cls._fetch_generic_values(cursor, None, logger)
+
+    def fetch_metric(self, rows, columns):
+        value_column_index = columns.index(self.column)
+
+        resource_group_id_index = columns.index('resource_group_id')
+        resource_group_name_index = columns.index('name')
+        listener_dns_name_index = columns.index('dns_name')
+        listener_ip_address_index = columns.index('ip_address')
+        listener_ip_state_desc_index = columns.index('state_desc')
+
+        for row in rows:
+            resource_group_id = row[resource_group_id_index]
+            resource_group_name = row[resource_group_name_index]
+            listener_dns_name = row[listener_dns_name_index]
+            listener_ip_address = row[listener_ip_address_index]
+            selected_ag = self.cfg_instance.get('availability_group')
+
+            if selected_ag and selected_ag != resource_group_id:
+                continue
+
+            column_val = row[value_column_index]
+            listener_ip_state_desc = row[listener_ip_state_desc_index]
+            metric_tags = [
+                'availability_group:{}'.format(str(resource_group_id)),
+                'availability_group_name:{}'.format(str(resource_group_name)),
+                'listener_dns_name:{}'.format(str(listener_dns_name)),
+                'listener_ip_address:{}'.format(str(listener_ip_address)),
+                'listener_ip_state_desc:{}'.format(str(listener_ip_state_desc)),
+            ]
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.datadog_name)
+
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
 
 # sys.availability_replicas (Transact-SQL)
 #
