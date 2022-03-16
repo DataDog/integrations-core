@@ -155,12 +155,13 @@ spec:
 #### Running the Cluster Agent or the Cluster Checks Runner
 
 Datadog recommends you run the Cluster Agent to access features such as [events collection][29], [Kubernetes resources view][30], and [cluster checks][31].
+
 When using EKS Fargate, there are two possible scenarios depending on whether or not the EKS cluster is running mixed workloads (Fargate/non-Fargate).
 
-If the EKS cluster runs Fargate and non-Fargate workloads, and you want to monitor the non-Fargate workload through Node Agent DaemonSet, add the Cluster Agent/Cluster Checks Runner to this deployment.
-For more information, see the [Cluster Agent Setup][25].
+If the EKS cluster runs Fargate and non-Fargate workloads, and you want to monitor the non-Fargate workload through Node Agent DaemonSet, add the Cluster Agent/Cluster Checks Runner to this deployment. For more information, see the [Cluster Agent Setup][25].
 
 The Cluster Agent token must be reachable from the Fargate tasks you want to monitor. If you are using the Helm Chart or Datadog Operator, this is not reachable by default because a secret in the target namespace is created.
+
 You have two options for this to work properly:
 
 * Use an hardcoded token value (`clusterAgent.token` in Helm, `credentials.token` in the Datadog Operator); convenient, but less secure.
@@ -169,6 +170,7 @@ You have two options for this to work properly:
 If the EKS cluster runs only Fargate workloads, you need a standalone Cluster Agent deployment. 
 
 Use the following Helm `values.yaml`:
+
 ```yaml
 datadog:
   apiKey: <YOUR_DATADOG_API_KEY>
@@ -183,6 +185,7 @@ clusterAgent:
 **Note:** Be just as specific with managing your Cluster Agent token.
 
 In both cases, you need to change the Datadog Agent sidecar manifest in order to allow communication with the Cluster Agent:
+
 ```yaml
        env:
         - name: DD_CLUSTER_AGENT_ENABLED
