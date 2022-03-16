@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, Sequence
+from typing import Optional
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -25,8 +25,6 @@ class InstanceConfig(BaseModel):
 
     cassandra_aliasing: bool
     collect_default_jvm_metrics: Optional[bool]
-    disable_generic_tags: Optional[bool]
-    empty_default_hostname: Optional[bool]
     host: str
     is_jmx: Optional[bool]
     java_bin_path: Optional[str]
@@ -34,7 +32,6 @@ class InstanceConfig(BaseModel):
     jmx_url: Optional[str]
     key_store_password: Optional[str]
     key_store_path: Optional[str]
-    min_collection_interval: Optional[float]
     name: Optional[str]
     password: Optional[str]
     port: int
@@ -43,7 +40,6 @@ class InstanceConfig(BaseModel):
     rmi_connection_timeout: Optional[float]
     rmi_registry_ssl: Optional[bool]
     service: Optional[str]
-    tags: Optional[Sequence[str]]
     tools_jar_path: Optional[str]
     trust_store_password: Optional[str]
     trust_store_path: Optional[str]
