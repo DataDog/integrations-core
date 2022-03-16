@@ -10,7 +10,7 @@ from datadog_checks.arangodb import ArangodbCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import METRICS, OPTIONAL_METRICS
+from .common import METRICS
 
 
 @pytest.mark.integration
@@ -24,8 +24,5 @@ def test_check(aggregator, instance, mock_agent_data, dd_run_check):
         aggregator.assert_metric(metric)
         for tag in base_tags:
             aggregator.assert_metric_has_tag(metric, tag)
-
-    for metric in OPTIONAL_METRICS:
-        aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
