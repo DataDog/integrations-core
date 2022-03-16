@@ -85,7 +85,9 @@ def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_in
         print("blocking query finished, waiting for fred's query to complete")
         time.sleep(1)
     # clean up fred's connection
+    # and shutdown executor
     fred_conn.close()
+    executor.shutdown(wait=True)
 
     expected_instance_tags = set(dbm_instance.get('tags', []))
 
