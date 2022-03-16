@@ -974,6 +974,7 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
 
             self.report_function(metric_name, column_val, tags=metric_tags)
 
+
 # sys.availability_group_listener_ip_addresses
 # Returns a row for each listener IP address that is assigned to an availability group's listener.
 # Each row displays the states that define the state of a given listener IP.
@@ -982,11 +983,11 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
 class SqlAvailabilityGroupListenerIps(BaseSqlServerMetric):
     TABLE = 'sys.availability_group_listener_ip_addresses'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = """select ag.resource_group_id, ag.name,agl.dns_name, aglia.* 
+    QUERY_BASE = """select ag.resource_group_id, ag.name,agl.dns_name, aglia.*
                     from {table} as aglia
-                    inner join sys.availability_group_listeners as agl 
+                    inner join sys.availability_group_listeners as agl
                     on agl.listener_id = aglia.listener_id
-                    inner join sys.availability_groups as ag 
+                    inner join sys.availability_groups as ag
                     on ag.group_id = agl.group_id""".format(
         table=TABLE
     )
