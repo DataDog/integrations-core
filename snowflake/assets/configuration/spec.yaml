@@ -120,7 +120,7 @@ files:
       - name: private_key_path
         description: |
           The path to the file that contains the private key used to connect to Snowflake.
-          The key is re-read at every check run.
+          The key is re-read at every check run. This private key must be encrypted.
         value:
           type: string
           display_default: null
