@@ -38,6 +38,10 @@ def instance_https_port(field, value):
     return 443
 
 
+def instance_jdbc_driver_path(field, value):
+    return '<DRIVER_PATH>.jar'
+
+
 def instance_password(field, value):
     return get_default_field_value(field, value)
 

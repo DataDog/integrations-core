@@ -13,18 +13,21 @@ TERADATA_DD_USER = os.environ.get('TERADATA_DD_USER')
 TERADATA_DD_PW = os.environ.get('TERADATA_DD_PW')
 
 CONFIG = {
-    'server': 'localhost',
-    'username': 'datadog',
-    'password': 'td_datadog',
-    'jdbc_driver_path': '/terajdbc4.jar',
+    'server': TERADATA_SERVER,
+    'username': TERADATA_DD_USER,
+    'password': TERADATA_DD_PW,
     'database': 'AdventureWorksDW',
     'use_tls': False,
     'collect_res_usage': True,
 }
 
-
 @pytest.fixture(scope='session')
 def dd_environment():
+    if not TERADATA_SERVER or not TERADATA_DD_USER or not TERADATA_DD_PW:
+        raise Exception(
+            "Please set `TERADATA_SERVER` to a valid Teradata IP and `TERADATA_DD_USER`, `TERADATA_DD_PW` environment "
+            "variables to valid Teradata User credentials."
+        )
     yield CONFIG, E2E_METADATA
 
 

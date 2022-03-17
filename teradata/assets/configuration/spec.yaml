@@ -53,9 +53,8 @@ files:
         default: false
         example: true
     - name: jdbc_driver_path
-      required: true
       description: |
-        The full path to the Teradata JDBC Driver.
+        The full path to the Teradata JDBC Driver. The path may also be set in the $CLASSPATH instead.
       value:
         type: string
         example: <DRIVER_PATH>.jar
