@@ -41,23 +41,24 @@ To configure this check for an Agent running on a host:
 
    ```yaml  
    instances:
-        
-     ## @param use_openmetrics - boolean - optional - default: false
-     ## Enable to preview the new version of the check which supports HAProxy version 2+
-     ## or environments using the HAProxy exporter.
-     ##
-     ## OpenMetrics-related options take effect only when this is set to `true`. 
-     ##
-     ## Uses the latest OpenMetrics V2 implementation for more features and better performance.
-     ## Note: To see the configuration options for the OpenMetrics V1 implementation (Agent 7.33 or older),
-     ## https://github.com/DataDog/integrations-core/blob/7.33.x/haproxy/datadog_checks/haproxy/data/conf.yaml.example
-     #
-   - use_openmetrics: true  # Enables OpenMetrics V2
-        
-     ## @param openmetrics_endpoint - string - optional
-     ## The URL exposing metrics in the OpenMetrics format.
-     #
-     openmetrics_endpoint: http://localhost:<PORT>/metrics
+
+  -
+    ## @param use_prometheus - boolean - optional - default: false
+    ## Enable to preview the new version of the check which supports HAProxy version 2+
+    ## or environments using the HAProxy exporter.
+    ##
+    ## Prometheus-related options take effect only when this is set to `true`.
+    #
+    # use_prometheus: false
+
+    ## @param url - string - optional
+    ## Haproxy URL to connect to gather metrics.
+    ## Set the according <USERNAME> and <PASSWORD> or use directly a unix stats
+    ## or admin socket: unix:///var/run/haproxy.sock
+    ##
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
+    #
+    url: http://localhost/admin?stats
    ```
 2. [Restart the Agent][6].
 
