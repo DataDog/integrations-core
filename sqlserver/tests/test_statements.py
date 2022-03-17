@@ -357,7 +357,7 @@ def test_statement_metadata(
     assert metric['dd_tables'] == expected_metadata_payload['tables']
     assert metric['dd_commands'] == expected_metadata_payload['commands']
 
-    # Setup activity for testing
+    # Setup activity for metadata testing
     blocking_query = "INSERT INTO ϑings WITH (TABLOCK, HOLDLOCK) (name) VALUES ('puppy')"
     fred_conn = _get_conn_for_user('fred')
 
@@ -391,6 +391,7 @@ def test_statement_metadata(
     activity = matching_activity[0]
     assert activity['dd_tables'] == expected_metadata_payload['tables']
     assert activity['dd_commands'] == expected_metadata_payload['commands']
+    assert activity['dd_comments'] == expected_metadata_payload['comments']
 
 
 @pytest.mark.integration

@@ -195,8 +195,9 @@ class SqlserverActivity(DBMAsyncJob):
             statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             obfuscated_statement = statement['query']
             metadata = statement['metadata']
-            row['dd_tables'] = metadata.get('tables', None)
             row['dd_commands'] = metadata.get('commands', None)
+            row['dd_tables'] = metadata.get('tables', None)
+            row['dd_comments'] = metadata.get('comments', None)
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
         except Exception as e:
             # obfuscation errors are relatively common so only log them during debugging
