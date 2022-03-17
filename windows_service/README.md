@@ -16,7 +16,7 @@ The Windows Service check is included in the [Datadog Agent][1] package, so you 
 
 2. Provide service names as they appear in the `services.msc` properties field, **NOT** the display names. For names with spaces, enclose the whole name in double quotation marks, for example: `"Windows Service"`. **Note**: Spaces are replaced by underscores in Datadog. 
   
-- If your service name includes a special character *i.g.* `MSSQL$CRMAWS` you will need to [escape the special character](https://docs.datadoghq.com/real_user_monitoring/explorer/search_syntax/#escape-special-characters) with a "\\". The service name should look like `MSSQL\$CRMAWS` in the configuration.
+- If your service name includes a special character (for example: `MSSQL$CRMAWS`) you must [escape the special character](https://docs.datadoghq.com/real_user_monitoring/explorer/search_syntax/#escape-special-characters) with a `\`. The service name should look like `MSSQL\$CRMAWS` in the configuration.
 
 3. [Restart the Agent][4].
 
