@@ -4,6 +4,8 @@
 
 import pytest
 
+from datadog_checks.oracle import Oracle
+
 METRICS = [
     'oracle.tablespace.used',
     # ProcessMetrics
@@ -43,6 +45,14 @@ METRICS = [
 ]
 SERVICE_CHECKS = ['oracle.can_connect', 'oracle.can_query']
 
+bad_instance = {
+    "password": "badpassword",
+    "protocol": "TCP",
+    "server": "localhost:1521",
+    "service_name": "InfraDB.us.oracle.com",
+    "username": "datadog",
+}
+
 
 @pytest.mark.e2e
 def test_check(dd_agent_check):
@@ -53,3 +63,9 @@ def test_check(dd_agent_check):
     for service_check in SERVICE_CHECKS:
         aggregator.assert_service_check(service_check)
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.e2e
+def test_bad_service_check(dd_agent_check, bad_instance):
+    aggregator = dd_agent_check(bad_instance)
+    aggregator.assert_service_check("oracle.can_connect", Oracle.CRITICAL)
