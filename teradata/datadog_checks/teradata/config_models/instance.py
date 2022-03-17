@@ -29,7 +29,6 @@ class InstanceConfig(BaseModel):
     collect_res_usage: Optional[bool]
     database: str
     https_port: Optional[str]
-    jdbc_driver_path: str
     password: Optional[str]
     port: Optional[str]
     server: str

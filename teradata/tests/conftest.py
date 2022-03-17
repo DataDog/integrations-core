@@ -1,22 +1,27 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
 from copy import deepcopy
 
 import pytest
 
-from .common import E2E_METADATA
-
-TERADATA_SERVER = os.environ.get('TERADATA_SERVER')
-TERADATA_DD_USER = os.environ.get('TERADATA_DD_USER')
-TERADATA_DD_PW = os.environ.get('TERADATA_DD_PW')
+TERADATA_SERVER = '34.75.194.222'
+TERADATA_DD_USER = 'datadog'
+TERADATA_DD_PW = 'datad0g123td'
 
 CONFIG = {
     'server': 'localhost',
     'username': 'datadog',
     'password': 'td_datadog',
-    'jdbc_driver_path': '/terajdbc4.jar',
+    'database': 'AdventureWorksDW',
+    'use_tls': False,
+    'collect_res_usage': True,
+}
+
+E2E_CONFIG = {
+    'server': TERADATA_SERVER,
+    'username': TERADATA_DD_USER,
+    'password': TERADATA_DD_PW,
     'database': 'AdventureWorksDW',
     'use_tls': False,
     'collect_res_usage': True,
@@ -25,12 +30,12 @@ CONFIG = {
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield CONFIG, E2E_METADATA
+    yield E2E_CONFIG
 
 
 @pytest.fixture
 def instance():
-    return deepcopy(CONFIG)
+    return deepcopy(E2E_CONFIG)
 
 
 @pytest.fixture

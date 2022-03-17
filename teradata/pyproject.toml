@@ -37,7 +37,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "jaydebeapi==1.2.3",
+    "teradatasql==17.10.0.7",
 ]
 
 [project.urls]
