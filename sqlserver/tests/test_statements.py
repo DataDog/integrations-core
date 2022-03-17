@@ -49,11 +49,6 @@ def dbm_instance(instance_docker):
         # to fail to be collected on time
         'enforce_collection_interval_deadline': False,
     }
-    instance_docker['query_activity'] = {
-        'enabled': True,
-        'run_sync': True,
-        'collection_interval': 0.1,
-    }
     return copy(instance_docker)
 
 
@@ -294,11 +289,14 @@ def test_statement_metrics_and_plans(
     ],
 )
 def test_statement_metadata(
-    aggregator, instance_docker, dd_run_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload
+    aggregator, dd_run_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload
 ):
+    # Enable activity for this test to check for metadata
+    dbm_instance['query_activity'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+
     def _get_conn_for_user(user):
         conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
-            instance_docker['driver'], instance_docker['host'], user, "Password12!"
+            dbm_instance['driver'], dbm_instance['host'], user, "Password12!"
         )
         conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=False)
         conn.timeout = DEFAULT_TIMEOUT
@@ -379,6 +377,7 @@ def test_statement_metadata(
     bob_conn.commit()
     bob_conn.close()
     fred_conn.close()
+    executor.shutdown(wait=True)
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert dbm_activity, "should have collected at least one activity"
