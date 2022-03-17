@@ -31,6 +31,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    auto_discover_channels: Optional[bool]
     auto_discover_queues: Optional[bool]
     channel: str = Field(..., min_length=1)
     channel_status_mapping: Optional[Mapping[str, Any]]

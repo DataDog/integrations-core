@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 25.1.0 / 2022-03-16
+
+* [Added] Add `metric_patterns` options to filter all metric submission with a list of regexes. See [#11508](https://github.com/DataDog/integrations-core/pull/11508).
+* [Added] Upgrade `requests` dependency. See [#11603](https://github.com/DataDog/integrations-core/pull/11603).
+
 ## 25.0.1 / 2022-02-24
 
 * [Fixed] Properly raise scraper error in OpenMetrics v2. See [#11564](https://github.com/DataDog/integrations-core/pull/11564).
