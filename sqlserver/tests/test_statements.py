@@ -288,9 +288,7 @@ def test_statement_metrics_and_plans(
         ),
     ],
 )
-def test_statement_metadata(
-    aggregator, dd_run_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload
-):
+def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload):
     # Enable activity for this test to check for metadata
     dbm_instance['query_activity'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
 
