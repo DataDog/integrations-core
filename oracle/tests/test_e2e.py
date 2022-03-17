@@ -45,14 +45,6 @@ METRICS = [
 ]
 SERVICE_CHECKS = ['oracle.can_connect', 'oracle.can_query']
 
-bad_instance = {
-    "password": "badpassword",
-    "protocol": "TCP",
-    "server": "localhost:1521",
-    "service_name": "InfraDB.us.oracle.com",
-    "username": "datadog",
-}
-
 
 @pytest.mark.e2e
 def test_check(dd_agent_check):
