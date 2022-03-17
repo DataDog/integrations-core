@@ -7,17 +7,6 @@ import os
 HERE = os.path.dirname(os.path.abspath(__file__))
 CHECK_NAME = 'teradata'
 
-E2E_METADATA = {
-    'use_jmx': True,
-    'docker_volumes': [
-        '{}/setup/odbc/odbc.ini:/opt/datadog-agent/embedded/etc/odbc.ini'.format(HERE),
-        '{}/setup/odbc/odbcinst.ini:/opt/datadog-agent/embedded/etc/odbcinst.ini'.format(HERE),
-        '{}/setup/start_commands.sh:/tmp/start_commands.sh'.format(HERE),
-    ],
-    'env_vars': {'CLASSPATH': '/terajdbc4.jar'},
-    'start_commands': ['bash /tmp/start_commands.sh'],
-}
-
 EXPECTED_METRICS = [
     "teradata.disk_space.max_perm",
     "teradata.disk_space.max_spool",

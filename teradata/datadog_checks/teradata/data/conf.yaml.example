@@ -62,11 +62,6 @@ instances:
     #
     # collect_res_usage: true
 
-    ## @param jdbc_driver_path - string - required
-    ## The full path to the Teradata JDBC Driver.
-    #
-    jdbc_driver_path: <DRIVER_PATH>.jar
-
     ## @param use_tls - boolean - optional - default: false
     ## Whether or not to use TLS for making connections to the Teradata database.
     #

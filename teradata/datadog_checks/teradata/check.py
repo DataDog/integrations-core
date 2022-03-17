@@ -1,18 +1,17 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import time
 from contextlib import closing, contextmanager
 
 try:
-    import jaydebeapi as jdb
-    import jpype
+    import teradatasql
 
-    JDBC_IMPORT_ERROR = None
+    TERADATASQL_IMPORT_ERROR = None
 except ImportError as e:
-    jdb = None
-    jpype = None
-    JDBC_IMPORT_ERROR = e
+    teradatasql = None
+    TERADATASQL_IMPORT_ERROR = e
 
 
 from datadog_checks.base import AgentCheck, ConfigurationError
@@ -46,7 +45,7 @@ class TeradataCheck(AgentCheck):
         self._credentials_required = True
 
     def check(self, _):
-        with self._connect() as conn:
+        with self.connect() as conn:
             self._connection = conn
             self._query_manager.execute()
 
@@ -54,99 +53,57 @@ class TeradataCheck(AgentCheck):
         with closing(self._connection.cursor()) as cursor:
             query = query.format(self.config.db)
             cursor.execute(query)
-            results = cursor.fetchall()
-            if len(results) < 1:
+            if cursor.rowcount < 1:
                 self.log.warning("Failed to fetch records from query: `%s`.", query)
             else:
-                for row in results:
-                    yield self._validate_timestamp(row, query)
+                for row in cursor.fetchall():
+                    try:
+                        yield self._validate_timestamp(row, query)
+                    except Exception:
+                        self.log.debug("Unable to validate Resource Usage View timestamps.")
+                        yield row
 
     @contextmanager
-    def _connect(self):
+    def connect(self):
         try:
-            return self._connect_jdbc()
+            return self._connect()
         except Exception as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, msg=e, tags=self._tags)
             self.log.error('Failed to connect to Teradata database. %s', e)
             raise
 
-    def _connect_jdbc(self):
+    def _connect(self):
         conn = None
-        conn_str = self._connection_string()
-        jdbc_connect_properties = self._connect_properties()
-        try:
-            if jpype.isJVMStarted() and not jpype.java.lang.Thread.isAttached():
-                jpype.attachThreadToJVM()
-                jpype.java.lang.Thread.currentThread().setContextClassLoader(
-                    jpype.java.lang.ClassLoader.getSystemClassLoader()
-                )
-            self.log.debug('Connecting to Teradata Database using JDBC Connector with connection string: %s', conn_str)
-            conn = jdb.connect(
-                self.TERADATA_DRIVER_CLASS, conn_str, jdbc_connect_properties, self.config.jdbc_driver_path
-            )
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._tags)
-            self.log.debug("Connected to Teradata Database.")
-            yield conn
-        except Exception as e:
-            self.log.error("Failed to connect to Teradata Database using JDBC Connector. %s", e)
-            raise
-        finally:
-            if conn:
-                conn.close()
+        self.log.debug('Connecting to Teradata...')
+        conn_params = self._build_connect_params()
+        self.log.debug('VALIDATE PARAMS %s', self._validate_conn_params())
+        if self._validate_conn_params():
+            try:
+                conn = teradatasql.connect(json.dumps(conn_params))
+                self.log.debug('CONNECTION DUMP %s', str(json.dumps(conn_params)))
+                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._tags)
+                self.log.debug('Connected to Teradata.')
+                yield conn
+            except Exception as e:
+                self.log.exception('Unable to connect to Teradata. %s.', e)
+                raise
+            finally:
+                if conn:
+                    conn.close()
+        else:
+            self.log.exception('Unable to connect to Teradata. Check the configuration.')
 
-    def _connection_string(self):
-        conn_str = self.JDBC_CONNECTION_STRING.format(self.config.server)
-        config_opts = {
-            'account': self.config.account,
-            'dbs_port': self.config.port,
-            'https_port': self.config.https_port,
-            'sslmode': self.config.ssl_mode,
-            'sslprotocol': self.config.ssl_protocol,
-            'sslca': self.config.ssl_ca,
-            'sslcapath': self.config.ssl_ca_path,
-            'logmech': self.config.auth_mechanism,
-            'logdata': self.config.auth_data,
-        }
-
-        if not self.config.use_tls:
-            config_opts = {
-                'dbs_port': self.config.port,
-                'account': self.config.account,
-                'logmech': self.config.auth_mechanism,
-                'logdata': self.config.auth_data,
-            }
-
-        param_count = 0
-        for option, value in sorted(config_opts.items()):
-            if value is None:
-                if option == 'logdata' and not self._credentials_required:
-                    raise ConfigurationError(
-                        "`auth_data` is required for auth_mechanisms JWT, KRB5, and LDAP. "
-                        "Configured `auth_mechanism` is: %",
-                        self.config.auth_mechanism,
-                    )
-                else:
-                    continue
-            elif param_count < 1:
-                conn_str += '/{}={}'.format(option, value)
-                param_count += 1
-            else:
-                conn_str += ',{}={}'.format(option, value)
-                param_count += 1
-
-        return conn_str
-
-    def _connect_properties(self):
-        jdbc_connect_properties = {}
+    def _validate_conn_params(self):
         optional = ['JWT', 'KRB5', 'LDAP', 'TDNEGO']
+
         if self.config.auth_mechanism and self.config.auth_mechanism.upper() in optional:
             self._credentials_required = False
+            return True
         elif self._credentials_required and (not self.config.username or not self.config.password):
-            raise ConfigurationError("`username` and `password` are required")
-            return
+            raise ConfigurationError('`username` and `password` are required')
+            return False
         else:
-            jdbc_connect_properties.update({'user': self.config.username, 'password': self.config.password})
-        return jdbc_connect_properties
+            return True
 
     def _validate_timestamp(self, row, query):
         if 'DBC.ResSpmaView' in query:
@@ -155,8 +112,50 @@ class TeradataCheck(AgentCheck):
             diff = now - row_ts
             # Valid metrics should be no more than 10 min in the future or 1h in the past
             if (diff > 3600) or (diff < -600):
-                raise Exception("Resource Usage stats are invalid. Is `SPMA` Resource Usage Logging enabled?")
+                msg = 'Resource Usage stats are invalid. {}'
+                if diff > 3600:
+                    msg = msg.format(
+                        "Row timestamp is more than 1h in the past. Is `SPMA` Resource Usage Logging enabled?"
+                    )
+                elif diff < -600:
+                    msg = msg.format(
+                        "Row timestamp is more than 10 min in the future. Try checking system time settings."
+                    )
+                self.log.warning(msg)
+                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.WARNING, msg=msg, tags=self._tags)
             else:
                 return row
         else:
             return row
+
+    def _build_connect_params(self):
+        connect_params = {
+            'host': self.config.server,
+            'account': self.config.account,
+            'database': self.config.db,
+            'dbs_port': str(self.config.port),
+            'logmech': self.config.auth_mechanism,
+            'logdata': self.config.auth_data,
+        }
+
+        credentials_params = {
+            'user': self.config.username,
+            'password': self.config.password,
+        }
+
+        ssl_params = {
+            'https_port': str(self.config.https_port),
+            'sslca': self.config.ssl_ca,
+            'sslcapath': self.config.ssl_ca_path,
+            'sslmode': self.config.ssl_mode,
+            'sslprotocol': self.config.ssl_protocol,
+        }
+
+        if self._credentials_required:
+            if self.config.use_tls:
+                connect_params.update(credentials_params)
+                connect_params.update(ssl_params)
+            else:
+                connect_params.update(credentials_params)
+
+        return connect_params
