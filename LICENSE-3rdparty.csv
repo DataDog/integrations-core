@@ -87,6 +87,7 @@ simplejson,PyPI,MIT,Bob Ippolito
 six,PyPI,MIT,Benjamin Peterson
 snowflake-connector-python,PyPI,Apache-2.0,"Snowflake, Inc"
 supervisor,PyPI,BSD-3-Clause-Modification,Chris McDonough
+teradata,PyPI,Other/Proprietary License,"Teradata Corporation"
 tuf,PyPI,Apache-2.0,https://www.updateframework.com
 tuf,PyPI,MIT,https://www.updateframework.com
 typing,PyPI,PSF,"Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Ivan Levkivskyi"
