@@ -37,7 +37,6 @@ class InstanceConfig(BaseModel):
     ssl_ca_path: Optional[str]
     ssl_mode: Optional[str]
     ssl_protocol: Optional[str]
-    use_tls: Optional[bool]
     username: Optional[str]
 
     @root_validator(pre=True)

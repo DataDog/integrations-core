@@ -67,11 +67,6 @@ instances:
     #
     # jdbc_driver_path: <DRIVER_PATH>.jar
 
-    ## @param use_tls - boolean - optional - default: false
-    ## Whether or not to use TLS for making connections to the Teradata database.
-    #
-    # use_tls: false
-
     ## @param https_port - string - optional
     ## The port number used for making TLS connections to the Teradata database.
     #

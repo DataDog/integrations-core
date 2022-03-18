@@ -66,9 +66,5 @@ def instance_ssl_protocol(field, value):
     return 'TLSv1.2'
 
 
-def instance_use_tls(field, value):
-    return True
-
-
 def instance_username(field, value):
     return get_default_field_value(field, value)

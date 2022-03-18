@@ -14,7 +14,6 @@ class TeradataConfig(object):
         self.db = instance.get('database')
         self.collect_res_usage = is_affirmative(instance.get('collect_res_usage'))
         self.jdbc_driver_path = instance.get('jdbc_driver_path')
-        self.use_tls = is_affirmative(instance.get('use_tls', True))
         self.https_port = int(instance.get('https_port', 443))
         self.ssl_mode = instance.get('ssl_mode', 'PREFER')
         self.ssl_protocol = instance.get('ssl_protocol', 'TLSv1.2')
