@@ -137,6 +137,88 @@ def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_in
     )
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "metadata,expected_metadata_payload",
+    [
+        (
+            {'tables_csv': 'ϑings', 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+            {'tables': ['ϑings'], 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+        ),
+        (
+            {'tables_csv': '', 'commands': None, 'comments': None},
+            {'tables': None, 'commands': None, 'comments': None},
+        ),
+    ],
+)
+def test_activity_metadata(
+    aggregator, instance_docker, dd_run_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload
+):
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    query = '''
+    -- Test comment
+    SELECT * FROM ϑings'''
+    query_signature = '5ff34f4267b108c6'
+    blocking_query = "INSERT INTO ϑings WITH (TABLOCK, HOLDLOCK) (name) VALUES ('puppy')"
+
+    bob_conn = _get_conn_for_user(instance_docker, 'bob')
+    fred_conn = _get_conn_for_user(instance_docker, 'fred')
+
+    def _run_test_query(conn, q):
+        cur = conn.cursor()
+        cur.execute("USE {}".format("datadog_test"))
+        cur.execute(q)
+
+    def _obfuscate_sql(sql_query, options=None):
+        return json.dumps({'query': sql_query, 'metadata': metadata})
+
+    def _run_query_with_mock_obfuscator(conn, query):
+        # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+        with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+            mock_agent.side_effect = _obfuscate_sql
+            _run_test_query(conn, query)
+
+    # bob's query blocks until the tx is completed
+    _run_query_with_mock_obfuscator(bob_conn, blocking_query)
+
+    # fred's query will get blocked by bob, so it needs
+    # to be run asynchronously
+    executor = concurrent.futures.ThreadPoolExecutor(1)
+    f_q = executor.submit(_run_query_with_mock_obfuscator, fred_conn, query)
+    while not f_q.running():
+        if f_q.done():
+            break
+        print("waiting on fred's query to execute")
+        time.sleep(1)
+
+    dd_run_check(check)
+
+    bob_conn.commit()
+    bob_conn.close()
+
+    while not f_q.done():
+        print("blocking query finished, waiting for fred's query to complete")
+        time.sleep(1)
+
+    fred_conn.close()
+    executor.shutdown(wait=True)
+
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    assert dbm_activity, "should have collected at least one activity"
+    matching_activity = []
+    for event in dbm_activity:
+        for activity in event['sqlserver_activity']:
+            if activity['query_signature'] == query_signature:
+                matching_activity.append(activity)
+    assert len(matching_activity) == 1
+    activity = matching_activity[0]
+    assert activity['dd_tables'] == expected_metadata_payload['tables']
+    assert activity['dd_commands'] == expected_metadata_payload['commands']
+    assert activity['dd_comments'] == expected_metadata_payload['comments']
+
+
 def new_time():
     return datetime.datetime(2021, 9, 23, 23, 21, 21, 669330)
 
