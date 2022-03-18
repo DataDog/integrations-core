@@ -26,14 +26,15 @@ class TeradataCheck(AgentCheck):
     __NAMESPACE__ = 'teradata'
     JDBC_CONNECTION_STRING = "jdbc:teradata://{}"
     TERADATA_DRIVER_CLASS = "com.teradata.jdbc.TeraDriver"
-    SERVICE_CHECK_NAME = "can_connect"
+    SERVICE_CHECK_CONNECT = "can_connect"
 
     def __init__(self, name, init_config, instances):
         super(TeradataCheck, self).__init__(name, init_config, instances)
         self.config = TeradataConfig(self.instance)
-        self._connection = None
         self._server_tag = 'teradata_server:{}:{}'.format(self.config.server, self.config.port)
         self._tags = [self._server_tag] + self.config.tags
+
+        self._connection = None
 
         manager_queries = []
         if self.config.collect_res_usage:
@@ -43,20 +44,13 @@ class TeradataCheck(AgentCheck):
 
         self._query_manager = QueryManager(self, self._execute_query_raw, queries=manager_queries, tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
+
         self._credentials_required = True
 
     def check(self, _):
-        if JDBC_IMPORT_ERROR:
-            err_msg = """
-            Teradata JDBC Client is unavailable and the integration is unable to import JDBC libraries.
-            Please double check your installation and refer to the Datadog documentation for more information."""
-            self.log.error(err_msg)
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=err_msg, tags=self._tags)
-            raise JDBC_IMPORT_ERROR
-        else:
-            with self._connect() as conn:
-                self._connection = conn
-                self._query_manager.execute()
+        with self._connect() as conn:
+            self._connection = conn
+            self._query_manager.execute()
 
     def _execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:
@@ -71,12 +65,20 @@ class TeradataCheck(AgentCheck):
 
     @contextmanager
     def _connect(self):
-        try:
-            return self._connect_jdbc()
-        except Exception as e:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=e, tags=self._tags)
-            self.log.error('Failed to connect to Teradata database. %s', e)
-            raise
+        if JDBC_IMPORT_ERROR:
+            err_msg = """
+            Teradata JDBC Client is unavailable and the integration is unable to import JDBC libraries.
+            Please double check your installation and refer to the Datadog documentation for more information."""
+            self.log.error(err_msg)
+            self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=err_msg, tags=self._tags)
+            raise JDBC_IMPORT_ERROR
+        else:
+            try:
+                return self._connect_jdbc()
+            except Exception as e:
+                self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=e, tags=self._tags)
+                self.log.error('Failed to connect to Teradata database. %s', e)
+                raise
 
     def _connect_jdbc(self):
         conn = None
@@ -92,7 +94,7 @@ class TeradataCheck(AgentCheck):
             conn = jdb.connect(
                 self.TERADATA_DRIVER_CLASS, conn_str, jdbc_connect_properties, self.config.jdbc_driver_path
             )
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._tags)
+            self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.OK, tags=self._tags)
             self.log.debug("Connected to Teradata Database.")
             yield conn
         except Exception as e:
@@ -165,6 +167,6 @@ class TeradataCheck(AgentCheck):
                         "Row timestamp is more than 10 min in the future. Try checking system time settings."
                     )
                 self.log.warning(msg)
-                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.WARNING, message=msg, tags=self._tags)
+                self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.WARNING, message=msg, tags=self._tags)
                 raise Exception(msg)
         return row
