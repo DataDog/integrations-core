@@ -133,7 +133,7 @@ traffic_server.process.cache.total_misses,count,,,,"Represents the total number 
 traffic_server.process.cache.total_requests,count,,,,"Represents the total number of cache lookups, including both both hits and misses.",0,traffic_server,cache total req,
 traffic_server.process.cache.total_hits_bytes,count,,byte,,,0,traffic_server,cache hits bytes,
 traffic_server.process.cache.total_misses_bytes,count,,byte,,,0,traffic_server,cache misses bytes,
-traffic_server.process.cache.cache_total_bytes,count,,byte,,,0,traffic_server,cache total bytes,
+traffic_server.process.cache.total_bytes,count,,byte,,,0,traffic_server,cache total bytes,
 traffic_server.process.user_agent_total_request_bytes,count,,byte,,,0,traffic_server,user agent req bytes,
 traffic_server.process.user_agent_total_response_bytes,count,,byte,,,0,traffic_server,user agent resp bytes,
 traffic_server.process.http.completed_requests,count,,request,,,0,traffic_server,http compl req,

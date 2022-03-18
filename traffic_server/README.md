@@ -12,7 +12,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 The Traffic Server check is included in the [Datadog Agent][2] package.
 
-To enable monitoring in Traffic Server, enable the [Stats Over HTTP plugin][10] on your Traffic Server by adding the following line to your `plugin.config` file:
+To enable monitoring in Traffic Server, enable the [Stats Over HTTP plugin][10] on your Traffic Server by adding the following line to your `plugin.config` file and reloading Traffic Server:
 
 ```
 stats_over_http.so
