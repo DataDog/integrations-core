@@ -1,13 +1,14 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from copy import deepcopy
 
 import pytest
 
-TERADATA_SERVER = ''
-TERADATA_DD_USER = ''
-TERADATA_DD_PW = ''
+TERADATA_SERVER = os.environ.get('TERADATA_SERVER')
+TERADATA_DD_USER = os.environ.get('TERADATA_DD_USER')
+TERADATA_DD_PW = os.environ.get('TERADATA_DD_PW')
 
 CONFIG = {
     'server': 'localhost',

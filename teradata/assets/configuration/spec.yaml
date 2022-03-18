@@ -52,12 +52,6 @@ files:
         type: boolean
         default: false
         example: true
-    - name: use_tls
-      description: Whether or not to use TLS for making connections to the Teradata database.
-      value:
-        type: boolean
-        default: true
-        example: false
     - name: https_port
       description: The port number used for making TLS connections to the Teradata database.
       value:

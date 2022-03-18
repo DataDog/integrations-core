@@ -34,6 +34,8 @@ class TeradataCheck(AgentCheck):
         self._server_tag = 'teradata_server:{}:{}'.format(self.config.server, self.config.port)
         self._tags = [self._server_tag] + self.config.tags
 
+        self._credentials_required = True
+
         manager_queries = []
         if self.config.collect_res_usage:
             manager_queries.extend(COLLECT_RES_USAGE)
@@ -42,7 +44,6 @@ class TeradataCheck(AgentCheck):
 
         self._query_manager = QueryManager(self, self._execute_query_raw, queries=manager_queries, tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
-        self._credentials_required = True
 
     def check(self, _):
         with self.connect() as conn:
@@ -74,24 +75,31 @@ class TeradataCheck(AgentCheck):
 
     def _connect(self):
         conn = None
-        self.log.debug('Connecting to Teradata...')
-        conn_params = self._build_connect_params()
-        self.log.debug('VALIDATE PARAMS %s', self._validate_conn_params())
-        if self._validate_conn_params():
-            try:
-                conn = teradatasql.connect(json.dumps(conn_params))
-                self.log.debug('CONNECTION DUMP %s', str(json.dumps(conn_params)))
-                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._tags)
-                self.log.debug('Connected to Teradata.')
-                yield conn
-            except Exception as e:
-                self.log.exception('Unable to connect to Teradata. %s.', e)
-                raise
-            finally:
-                if conn:
-                    conn.close()
+        if TERADATASQL_IMPORT_ERROR:
+            self.log.error(
+                "Teradata SQL Driver module is unavailable. Please double check your installation and refer to the "
+                "Datadog documentation for more information."
+            )
+            raise TERADATASQL_IMPORT_ERROR
         else:
-            self.log.exception('Unable to connect to Teradata. Check the configuration.')
+            self.log.debug('Connecting to Teradata...')
+            validated_conn_params = self._validate_conn_params()
+
+            if validated_conn_params:
+                conn_params = self._build_connect_params()
+                try:
+                    conn = teradatasql.connect(json.dumps(conn_params))
+                    self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._tags)
+                    self.log.debug('Connected to Teradata.')
+                    yield conn
+                except Exception as e:
+                    self.log.exception('Unable to connect to Teradata. %s.', e)
+                    raise
+                finally:
+                    if conn:
+                        conn.close()
+            else:
+                self.log.exception('Unable to connect to Teradata. Check the configuration.')
 
     def _validate_conn_params(self):
         optional = ['JWT', 'KRB5', 'LDAP', 'TDNEGO']
@@ -129,33 +137,18 @@ class TeradataCheck(AgentCheck):
             return row
 
     def _build_connect_params(self):
-        connect_params = {
+        return {
             'host': self.config.server,
             'account': self.config.account,
             'database': self.config.db,
             'dbs_port': str(self.config.port),
             'logmech': self.config.auth_mechanism,
             'logdata': self.config.auth_data,
-        }
-
-        credentials_params = {
             'user': self.config.username,
             'password': self.config.password,
-        }
-
-        ssl_params = {
             'https_port': str(self.config.https_port),
             'sslca': self.config.ssl_ca,
             'sslcapath': self.config.ssl_ca_path,
             'sslmode': self.config.ssl_mode,
             'sslprotocol': self.config.ssl_protocol,
         }
-
-        if self._credentials_required:
-            if self.config.use_tls:
-                connect_params.update(credentials_params)
-                connect_params.update(ssl_params)
-            else:
-                connect_params.update(credentials_params)
-
-        return connect_params
