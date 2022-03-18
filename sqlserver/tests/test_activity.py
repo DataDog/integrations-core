@@ -111,6 +111,7 @@ def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_in
     # assert the data that was collected is correct
     assert blocked_row['user_name'] == "fred", "incorrect user_name"
     assert blocked_row['session_status'] == "running", "incorrect session_status"
+    assert blocked_row['request_status'] == "suspended", "incorrect request_status"
     assert blocked_row['blocking_session_id'], "missing blocking_session_id"
     assert blocked_row['text'] == query, "incorrect blocked query"
     assert blocked_row['database_name'] == "datadog_test", "incorrect database_name"
