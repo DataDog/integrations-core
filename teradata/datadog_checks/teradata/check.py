@@ -23,9 +23,8 @@ from .queries import COLLECT_RES_USAGE, DEFAULT_QUERIES
 
 class TeradataCheck(AgentCheck):
     __NAMESPACE__ = 'teradata'
-    JDBC_CONNECTION_STRING = "jdbc:teradata://{}"
-    TERADATA_DRIVER_CLASS = "com.teradata.jdbc.TeraDriver"
-    SERVICE_CHECK_NAME = "can_connect"
+    SERVICE_CHECK_CONNECT = 'can_connect'
+    SERVICE_CHECK_QUERY = 'can_query'
 
     def __init__(self, name, init_config, instances):
         super(TeradataCheck, self).__init__(name, init_config, instances)
@@ -33,8 +32,6 @@ class TeradataCheck(AgentCheck):
         self._connection = None
         self._server_tag = 'teradata_server:{}:{}'.format(self.config.server, self.config.port)
         self._tags = [self._server_tag] + self.config.tags
-
-        self._credentials_required = True
 
         manager_queries = []
         if self.config.collect_res_usage:
@@ -45,23 +42,42 @@ class TeradataCheck(AgentCheck):
         self._query_manager = QueryManager(self, self._execute_query_raw, queries=manager_queries, tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
 
+        self._credentials_required = True
+        self._connection_errors = 0
+        self._query_errors = 0
+
     def check(self, _):
+        self._connection_errors = 0
+        self._query_errors = 0
+
         with self.connect() as conn:
             self._connection = conn
             self._query_manager.execute()
+
+        if self._connection_errors:
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags)
+        else:
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
+
+        if self._query_errors:
+            self.service_check(self.SERVICE_CHECK_QUERY, self.CRITICAL, tags=self._tags)
+        else:
+            self.service_check(self.SERVICE_CHECK_QUERY, self.OK, tags=self._tags)
 
     def _execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:
             query = query.format(self.config.db)
             cursor.execute(query)
             if cursor.rowcount < 1:
-                self.log.warning("Failed to fetch records from query: `%s`.", query)
+                self.log.warning('Failed to fetch records from query: `%s`.', query)
+                self._query_errors += 1
             else:
                 for row in cursor.fetchall():
                     try:
                         yield self._validate_timestamp(row, query)
                     except Exception:
-                        self.log.debug("Unable to validate Resource Usage View timestamps.")
+                        self.log.debug('Unable to validate Resource Usage View timestamps.')
+                        self._query_errors += 1
                         yield row
 
     @contextmanager
@@ -69,7 +85,7 @@ class TeradataCheck(AgentCheck):
         try:
             return self._connect()
         except Exception as e:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, msg=e, tags=self._tags)
+            self._connection_errors += 1
             self.log.error('Failed to connect to Teradata database. %s', e)
             raise
 
@@ -77,9 +93,10 @@ class TeradataCheck(AgentCheck):
         conn = None
         if TERADATASQL_IMPORT_ERROR:
             self.log.error(
-                "Teradata SQL Driver module is unavailable. Please double check your installation and refer to the "
-                "Datadog documentation for more information."
+                'Teradata SQL Driver module is unavailable. Please double check your installation and refer to the '
+                'Datadog documentation for more information.'
             )
+            self._connection_errors += 1
             raise TERADATASQL_IMPORT_ERROR
         else:
             self.log.debug('Connecting to Teradata...')
@@ -89,17 +106,18 @@ class TeradataCheck(AgentCheck):
                 conn_params = self._build_connect_params()
                 try:
                     conn = teradatasql.connect(json.dumps(conn_params))
-                    self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._tags)
                     self.log.debug('Connected to Teradata.')
                     yield conn
                 except Exception as e:
                     self.log.exception('Unable to connect to Teradata. %s.', e)
+                    self._connection_errors += 1
                     raise
                 finally:
                     if conn:
                         conn.close()
             else:
                 self.log.exception('Unable to connect to Teradata. Check the configuration.')
+                self._connection_errors += 1
 
     def _validate_conn_params(self):
         optional = ['JWT', 'KRB5', 'LDAP', 'TDNEGO']
@@ -123,18 +141,16 @@ class TeradataCheck(AgentCheck):
                 msg = 'Resource Usage stats are invalid. {}'
                 if diff > 3600:
                     msg = msg.format(
-                        "Row timestamp is more than 1h in the past. Is `SPMA` Resource Usage Logging enabled?"
+                        'Row timestamp is more than 1h in the past. Is `SPMA` Resource Usage Logging enabled?'
                     )
                 elif diff < -600:
                     msg = msg.format(
-                        "Row timestamp is more than 10 min in the future. Try checking system time settings."
+                        'Row timestamp is more than 10 min in the future. Try checking system time settings.'
                     )
                 self.log.warning(msg)
-                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.WARNING, msg=msg, tags=self._tags)
-            else:
-                return row
-        else:
-            return row
+                self._query_errors += 1
+                raise Exception(msg)
+        return row
 
     def _build_connect_params(self):
         return {

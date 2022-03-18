@@ -73,7 +73,6 @@ from .common import CHECK_NAME
         pytest.param(
             {
                 'server': 'localhost',
-                'use_tls': True,
                 'username': 'dd',
                 'password': 'td_datadog',
                 'database': 'AdventureWorksDW',
@@ -99,7 +98,6 @@ from .common import CHECK_NAME
         pytest.param(
             {
                 'server': 'localhost',
-                'use_tls': True,
                 'https_port': 543,
                 'ssl_mode': 'REQUIRE',
                 'username': 'dd',
@@ -255,7 +253,7 @@ from .common import CHECK_NAME
 )
 def test__connect(test_instance, dd_run_check, aggregator, expected_tags, conn_params):
     """
-    Test the _connect method using the JDBC client
+    Test the _connect method
     """
     check = TeradataCheck(CHECK_NAME, {}, [test_instance])
     conn = mock.MagicMock()
