@@ -82,6 +82,10 @@ def instance_max_relations(field, value):
     return 300
 
 
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_min_collection_interval(field, value):
     return 15
 

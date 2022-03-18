@@ -40,6 +40,14 @@ class MetricFilters(BaseModel):
     vm: Optional[Sequence[str]]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class ResourceFilter(BaseModel):
     class Config:
         allow_mutation = False
@@ -128,6 +136,7 @@ class InstanceConfig(BaseModel):
     include_datastore_cluster_folder_tag: Optional[bool]
     max_historical_metrics: Optional[int]
     metric_filters: Optional[MetricFilters]
+    metric_patterns: Optional[MetricPatterns]
     metrics_per_query: Optional[int]
     min_collection_interval: Optional[float]
     password: str

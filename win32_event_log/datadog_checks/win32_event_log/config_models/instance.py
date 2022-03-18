@@ -28,6 +28,14 @@ class Filters(BaseModel):
     type: Optional[Sequence[Literal['success', 'error', 'warning', 'information', 'success audit', 'failure audit']]]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
@@ -48,6 +56,7 @@ class InstanceConfig(BaseModel):
     legacy_mode: Optional[bool]
     log_file: Optional[Sequence[str]]
     message_filters: Optional[Sequence[str]]
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     password: Optional[str]
     path: Optional[str]

@@ -46,6 +46,10 @@ def instance_host(field, value):
     return '.'
 
 
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_metrics(field, value):
     return get_default_field_value(field, value)
 

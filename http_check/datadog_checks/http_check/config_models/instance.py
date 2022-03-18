@@ -27,6 +27,14 @@ class AuthToken(BaseModel):
     writer: Optional[Mapping[str, Any]]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class Proxy(BaseModel):
     class Config:
         allow_mutation = False
@@ -70,6 +78,7 @@ class InstanceConfig(BaseModel):
     kerberos_principal: Optional[str]
     log_requests: Optional[bool]
     method: Optional[str]
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     name: str
     ntlm_domain: Optional[str]

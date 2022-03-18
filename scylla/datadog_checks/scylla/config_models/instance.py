@@ -50,6 +50,14 @@ class LabelJoins(BaseModel):
     target_metric: Optional[TargetMetric]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class Proxy(BaseModel):
     class Config:
         allow_mutation = False
@@ -94,6 +102,7 @@ class InstanceConfig(BaseModel):
     labels_mapper: Optional[Mapping[str, Any]]
     log_requests: Optional[bool]
     metric_groups: Optional[Sequence[str]]
+    metric_patterns: Optional[MetricPatterns]
     metrics: Optional[Sequence[Union[str, Mapping[str, str]]]]
     min_collection_interval: Optional[float]
     namespace: Optional[str]

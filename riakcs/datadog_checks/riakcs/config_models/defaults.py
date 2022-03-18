@@ -38,6 +38,10 @@ def instance_is_secure(field, value):
     return True
 
 
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_metrics(field, value):
     return get_default_field_value(field, value)
 
