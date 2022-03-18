@@ -1,16 +1,16 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
-docker.cpu.limit,gauge,,percent,,"Limit on CPU available to the container, expressed as percentage of a core",0,docker,docker.cpu.limit,
+docker.cpu.limit,gauge,,percent,,"Limit on CPU available to the container, expressed as percentage of a core",0,docker,docker.cpu.limit,cpu
 docker.cpu.system,gauge,,percent,,"The percent of time the CPU is executing system calls on behalf of processes of this container, unnormalized",0,docker,cpu system,
 docker.cpu.system.95percentile,gauge,,percent,,95th percentile of docker.cpu.system,0,docker,cpu system 95%,
-docker.cpu.system.avg,gauge,,percent,,Average value of docker.cpu.system,0,docker,cpu system avg,
+docker.cpu.system.avg,gauge,,percent,,Average value of docker.cpu.system,0,docker,cpu system avg,cpu
 docker.cpu.system.count,rate,,sample,second,The rate that the value of docker.cpu.system was sampled,0,docker,cpu system count,
-docker.cpu.system.max,gauge,,percent,,Max value of docker.cpu.system,0,docker,cpu system max,
+docker.cpu.system.max,gauge,,percent,,Max value of docker.cpu.system,0,docker,cpu system max,cpu
 docker.cpu.system.median,gauge,,percent,,Median value of docker.cpu.system,0,docker,cpu system median,
 docker.cpu.user,gauge,,percent,,"The percent of time the CPU is under direct control of processes of this container, unnormalized",0,docker,cpu user,
 docker.cpu.user.95percentile,gauge,,percent,,95th percentile of docker.cpu.user,0,docker,cpu user 95%,
-docker.cpu.user.avg,gauge,,percent,,Average value of docker.cpu.user,0,docker,cpu user avg,
+docker.cpu.user.avg,gauge,,percent,,Average value of docker.cpu.user,0,docker,cpu user avg,cpu
 docker.cpu.user.count,rate,,sample,second,The rate that the value of docker.cpu.user was sampled,0,docker,cpu user count,
-docker.cpu.user.max,gauge,,percent,,Max value of docker.cpu.user,0,docker,cpu user max,
+docker.cpu.user.max,gauge,,percent,,Max value of docker.cpu.user,0,docker,cpu user max,cpu
 docker.cpu.user.median,gauge,,percent,,Median value of docker.cpu.user,0,docker,cpu user median,
 docker.cpu.usage,gauge,,percent,,The percent of CPU time obtained by this container,0,docker,docker.cpu.usage,
 docker.cpu.throttled,gauge,,,,Number of times the cgroup has been throttled,-1,docker,cpu throttled,
@@ -18,15 +18,15 @@ docker.cpu.shares,gauge,,,,Shares of CPU usage allocated to the container,0,dock
 docker.kmem.usage,gauge,,byte,,"The amount of kernel memory that belongs to the container's processes.",0,docker,kmem usage,
 docker.mem.cache,gauge,,byte,,The amount of memory that is being used to cache data from disk (e.g. memory contents that can be associated precisely with a block on a block device),0,docker,mem cache,
 docker.mem.cache.95percentile,gauge,,byte,,95th percentile value of docker.mem.cache,0,docker,mem cache 95%,
-docker.mem.cache.avg,gauge,,byte,,Average value of docker.mem.cache,0,docker,mem cache avg,
+docker.mem.cache.avg,gauge,,byte,,Average value of docker.mem.cache,0,docker,mem cache avg,memory
 docker.mem.cache.count,rate,,sample,second,The rate that the value of docker.mem.cache was sampled,0,docker,mem cache count,
-docker.mem.cache.max,gauge,,byte,,Max value of docker.mem.cache,0,docker,mem cache max,
+docker.mem.cache.max,gauge,,byte,,Max value of docker.mem.cache,0,docker,mem cache max,memory
 docker.mem.cache.median,gauge,,byte,,Median value of docker.mem.cache,0,docker,mem cache median,
 docker.mem.rss,gauge,,byte,,"The amount of non-cache memory that belongs to the container's processes. Used for stacks, heaps, etc.",0,docker,mem rss,
 docker.mem.rss.95percentile,gauge,,byte,,95th percentile value of docker.mem.rss,0,docker,mem rss 95%,
-docker.mem.rss.avg,gauge,,byte,,Average value of docker.mem.rss,0,docker,mem rss avg,
+docker.mem.rss.avg,gauge,,byte,,Average value of docker.mem.rss,0,docker,mem rss avg,memory
 docker.mem.rss.count,rate,,sample,second,The rate that the value of docker.mem.rss was sampled,0,docker,mem rss count,
-docker.mem.rss.max,gauge,,byte,,Max value of docker.mem.rss,0,docker,mem rss max,
+docker.mem.rss.max,gauge,,byte,,Max value of docker.mem.rss,0,docker,mem rss max,memory
 docker.mem.rss.median,gauge,,byte,,Median value of docker.mem.rss,0,docker,mem rss median,
 docker.mem.swap,gauge,,byte,,The amount of swap currently used by the container,0,docker,mem swap,
 docker.mem.swap.95percentile,gauge,,byte,,95th percentile value of docker.mem.swap,0,docker,mem swap 95%,
@@ -53,7 +53,7 @@ docker.containers.running.total,gauge,,,,The total number of containers running 
 docker.containers.stopped.total,gauge,,,,The total number of containers stopped on this host,0,docker,total containers stopped,
 docker.images.available,gauge,,,,The number of top-level images,0,docker,images avail,
 docker.images.intermediate,gauge,,,,"The number of intermediate images, which are intermediate layers that make up other images",0,docker,images intermediate,
-docker.mem.limit,gauge,,byte,,"The memory limit for the container, if set",0,docker,mem limit,
+docker.mem.limit,gauge,,byte,,"The memory limit for the container, if set",0,docker,mem limit,memory
 docker.mem.limit.95percentile,gauge,,byte,,95th percentile of docker.mem.limit. Ordinarily this value will not change,0,docker,mem limit 95%,
 docker.mem.limit.avg,gauge,,byte,,Average value of docker.mem.limit. Ordinarily this value will not change,0,docker,mem limit avg,
 docker.mem.limit.count,rate,,sample,second,The rate that the value of docker.mem.limit was sampled,0,docker,mem limit count,
