@@ -21,6 +21,7 @@ CONFIG = {
     'collect_res_usage': True,
 }
 
+
 @pytest.fixture(scope='session')
 def dd_environment():
     if not TERADATA_SERVER or not TERADATA_DD_USER or not TERADATA_DD_PW:

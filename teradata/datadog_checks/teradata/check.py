@@ -46,9 +46,17 @@ class TeradataCheck(AgentCheck):
         self._credentials_required = True
 
     def check(self, _):
-        with self._connect() as conn:
-            self._connection = conn
-            self._query_manager.execute()
+        if JDBC_IMPORT_ERROR:
+            err_msg = """
+            Teradata JDBC Client is unavailable and the integration is unable to import JDBC libraries.
+            Please double check your installation and refer to the Datadog documentation for more information."""
+            self.log.error(err_msg)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=err_msg, tags=self._tags)
+            raise JDBC_IMPORT_ERROR
+        else:
+            with self._connect() as conn:
+                self._connection = conn
+                self._query_manager.execute()
 
     def _execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:
@@ -66,7 +74,7 @@ class TeradataCheck(AgentCheck):
         try:
             return self._connect_jdbc()
         except Exception as e:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, msg=e, tags=self._tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=e, tags=self._tags)
             self.log.error('Failed to connect to Teradata database. %s', e)
             raise
 
@@ -108,21 +116,13 @@ class TeradataCheck(AgentCheck):
             'logdata': self.config.auth_data,
         }
 
-        if not self.config.use_tls:
-            config_opts = {
-                'dbs_port': self.config.port,
-                'account': self.config.account,
-                'logmech': self.config.auth_mechanism,
-                'logdata': self.config.auth_data,
-            }
-
         param_count = 0
         for option, value in sorted(config_opts.items()):
             if value is None:
                 if option == 'logdata' and not self._credentials_required:
                     raise ConfigurationError(
                         "`auth_data` is required for auth_mechanisms JWT, KRB5, and LDAP. "
-                        "Configured `auth_mechanism` is: %",
+                        "Configured `auth_mechanism` is: %s",
                         self.config.auth_mechanism,
                     )
                 else:
@@ -155,8 +155,16 @@ class TeradataCheck(AgentCheck):
             diff = now - row_ts
             # Valid metrics should be no more than 10 min in the future or 1h in the past
             if (diff > 3600) or (diff < -600):
-                raise Exception("Resource Usage stats are invalid. Is `SPMA` Resource Usage Logging enabled?")
-            else:
-                return row
-        else:
-            return row
+                msg = 'Resource Usage stats are invalid. {}'
+                if diff > 3600:
+                    msg = msg.format(
+                        "Row timestamp is more than 1h in the past. Is `SPMA` Resource Usage Logging enabled?"
+                    )
+                elif diff < -600:
+                    msg = msg.format(
+                        "Row timestamp is more than 10 min in the future. Try checking system time settings."
+                    )
+                self.log.warning(msg)
+                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.WARNING, message=msg, tags=self._tags)
+                raise Exception(msg)
+        return row
