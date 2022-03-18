@@ -70,6 +70,10 @@ coverage:
         target: 75
         flags:
         - cacti
+      Calico:
+        target: 75
+        flags:
+          - calico
       Cassandra_Nodetool:
         target: 75
         flags:
@@ -636,6 +640,11 @@ flags:
     paths:
     - cacti/datadog_checks/cacti
     - cacti/tests
+  calico:
+    carryforward: true
+    paths:
+      - calico/datadog_checks/calico
+      - calico/tests
   cassandra_nodetool:
     carryforward: true
     paths:
