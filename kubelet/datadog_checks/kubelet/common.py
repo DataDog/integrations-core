@@ -98,7 +98,8 @@ def get_container_label(labels, l_name):
     :param l_name: str
     :return: str or None
     """
-    return labels.get(l_name, None)
+    if l_name in labels:
+        return labels[l_name]
 
 
 class PodListUtils(object):
