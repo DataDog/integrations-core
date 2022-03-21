@@ -54,6 +54,10 @@ def instance_check_certificate_expiration(field, value):
     return True
 
 
+def instance_check_hostname(field, value):
+    return True
+
+
 def instance_collect_response_time(field, value):
     return True
 

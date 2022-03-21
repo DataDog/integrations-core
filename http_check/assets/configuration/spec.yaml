@@ -130,6 +130,11 @@ files:
         the critical threshold for the HTTP check in second
       value:
         type: integer
+    - name: check_hostname
+      description: Set check_hostname to false to disable the verification check for matching hostnames.
+      value:
+        type: boolean
+        example: true
     - name: ssl_server_name
       description: |
         If necessary and check_hostname is set to true,
