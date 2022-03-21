@@ -183,7 +183,11 @@ def write_option(option, writer, indent='', start_list=False):
             multiple = option['multiple']
             multiple_instances_defined = option.get('multiple_instances_defined')
 
-            writer.write(indent, option_name, ':', '\n')
+            if not option_enabled(option):
+                writer.write(indent, '# ', option_name, ':', '\n')
+            else:
+                writer.write(indent, option_name, ':', '\n')
+
             if multiple and multiple_instances_defined:
                 for instance in option['options']:
                     write_sub_option(instance, writer, indent, multiple, include_top_description=True)
