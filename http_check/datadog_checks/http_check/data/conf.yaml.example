@@ -156,11 +156,6 @@ instances:
     #
     # seconds_critical: <SECONDS_CRITICAL>
 
-    ## @param check_hostname - boolean - optional - default: true
-    ## Set check_hostname to false to disable the verification check for matching hostnames.
-    #
-    # check_hostname: true
-
     ## @param ssl_server_name - string - optional
     ## If necessary and check_hostname is set to true,
     ## override the hostname to match with ssl_server_name.
