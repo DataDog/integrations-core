@@ -401,6 +401,20 @@ instances:
         #
         # collection_strategy_cache_ttl: 300
 
+    ## Configure collection of active sessions monitoring
+    #
+    query_activity:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of active sessions. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the activity collection interval (in seconds).
+        #
+        # collection_interval: 10
+
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
     #
