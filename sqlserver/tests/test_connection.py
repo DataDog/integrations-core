@@ -20,13 +20,13 @@ pytestmark = pytest.mark.unit
     'cs,parsed',
     [
         pytest.param(
-            'HOST=foo;password={pA s";{}}w0rd};',
-            {"HOST": "foo", "password": 'pA s";{}w0rd'},
+            'HOST=foo;password={πA s";{}}w0rd};',
+            {"HOST": "foo", "password": 'πA s";{}w0rd'},
             id="closing bracket escape sequence",
         ),
         pytest.param(
-            'host=foo;password={pass";{}}word}',
-            {"host": "foo", "password": 'pass";{}word'},
+            'host=foo;password={πass";{}}word}',
+            {"host": "foo", "password": 'πass";{}word'},
             id="final semicolon is optional",
         ),
         pytest.param('A=B; C=D', {"A": "B", "C": 'D'}, id="spaces after semicolons are ignored"),
