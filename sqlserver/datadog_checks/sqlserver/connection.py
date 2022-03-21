@@ -28,9 +28,9 @@ class SQLConnectionError(Exception):
     pass
 
 
-# we're not including space in the set of invalid characters because it's a valid key character for adodbapi
-# best be more permissive here so that the driver and the database have the final say as to whether it's valid or not
-CONNECTION_STRING_SPECIAL_CHARACTERS = set('=;[]{}"\'')
+# we're only including the bare minimum set of special characters required to parse the connection string while
+# supporting escaping using braces, letting the client library or the database ultimately decide what's valid
+CONNECTION_STRING_SPECIAL_CHARACTERS = set('=;{}')
 
 
 def parse_connection_string_properties(cs):

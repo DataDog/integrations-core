@@ -36,7 +36,6 @@ pytestmark = pytest.mark.unit
         pytest.param('A=B ;C=D', {"A": "B ", "C": 'D'}, id="spaces allowed after a value, they become part of it"),
         pytest.param('host=foo;password={pass";{}word}', None, id="escape too early then invalid character"),
         pytest.param('host=foo;password={incomplete_escape;', None, id="incomplete escape"),
-        pytest.param('host=foo;password=abc[;', None, id="invalid char"),
         pytest.param('host=foo;password=;', None, id="empty value"),
         pytest.param('host=foo;=hello;', None, id="empty key"),
         pytest.param('host=foo;;', None, id="empty both"),
