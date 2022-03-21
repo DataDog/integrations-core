@@ -16,6 +16,7 @@ from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 
+from .activity import MySQLActivity
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
 from .config import MySQLConfig
 from .const import (
@@ -105,6 +106,7 @@ class MySql(AgentCheck):
         self._warnings_by_code = {}
         self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
+        self._query_activity = MySQLActivity(self, self._config, self._get_connection_args())
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
@@ -186,6 +188,7 @@ class MySql(AgentCheck):
                     dbm_tags = list(set(self.service_check_tags) | set(tags))
                     self._statement_metrics.run_job_loop(dbm_tags)
                     self._statement_samples.run_job_loop(dbm_tags)
+                    self._query_activity.run_job_loop(dbm_tags)
 
                 # keeping track of these:
                 self._put_qcache_stats()
