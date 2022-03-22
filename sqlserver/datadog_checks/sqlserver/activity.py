@@ -164,7 +164,9 @@ class SqlserverActivity(DBMAsyncJob):
                 # so once we hit the max bytes limit, return
                 self.log.warning(
                     "Exceeded the limit of activity rows captured (%s of %s rows included). "
-                    "Database load may be under-reported as a result.", len(normalized_rows), len(rows)
+                    "Database load may be under-reported as a result.",
+                    len(normalized_rows),
+                    len(rows),
                 )
                 return normalized_rows
             normalized_rows.append(row)
