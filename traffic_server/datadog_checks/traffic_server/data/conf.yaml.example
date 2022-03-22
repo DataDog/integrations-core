@@ -49,6 +49,33 @@ instances:
     #
     # empty_default_hostname: false
 
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    ## Comment out this option to collect all available metrics.
+    #
+    metric_patterns:
+      include:
+      - traffic_server.node.*
+      - traffic_server.process.http.code.*
+      - traffic_server.process.http.*current
+      - traffic_server.process.http.*_requests
+      - traffic_server.process.http.*_connections
+      - traffic_server.process.http.transaction_.*
+      - traffic_server.process.hostdb.*
+      - traffic_server.process.dns.*
+      - traffic_server.process.traffic_server.memory.rss
+      - traffic_server.process.eventloop.*
+      - traffic_server.process.ssl.user_agent_session.*
+      - traffic_server.process.ssl.ssl_error.*
+      - traffic_server.process.ssl.user_agent_sessions
+      - traffic_server.process.cache.total.*
+      - traffic_server.process.cache.volume.dir.*
+      - traffic_server.process.cache.volume.percent_full
+      - traffic_server.process.cache.volume.bytes.*
+      - traffic_server.process.cache.volume.ram_cache.*
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
