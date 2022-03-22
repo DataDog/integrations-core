@@ -121,7 +121,7 @@ def create_template_files(template_name, new_root, config, read=False):
     for root, _, template_files in os.walk(template_root):
         for template_file in template_files:
             if not template_file.endswith(('.pyc', '.pyo')):
-                if template_file == 'README.md':
+                if template_file == 'README.md' and config.get('support_type') in ('partner', 'contrib'):
                     # Custom README for the marketplace/partner support_type integrations
                     if config.get('support_type') == 'partner':
                         template_path = path_join(TEMPLATES_DIR, 'marketplace/', 'README.md')
