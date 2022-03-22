@@ -39,8 +39,22 @@ DBM_MIGRATED_METRICS = [
 INSTANCE_METRICS = [
     # SQLServer:General Statistics
     ('sqlserver.stats.procs_blocked', 'Processes blocked', ''),  # LARGE_RAWCOUNT
+    ('sqlserver.temp_tables_active', 'Active Temp Tables', ''),
+    ('sqlserver.temp_tables_created', 'Temp Tables Creation Rate', ''),
+    ('sqlserver.deadlocks', 'Number of Deadlocks/sec', ''),
     # SQLServer:Access Methods
     ('sqlserver.access.page_splits', 'Page Splits/sec', ''),  # BULK_COUNT
+    ('sqlserver.access.full_scans', 'Full Scans/sec', ''),
+    ('sqlserver.access.range_scans', 'Range Scans/sec', ''),
+    ('sqlserver.access.probe_scans', 'Probe Scans/sec', ''),
+    ('sqlserver.access.index_searches', 'Index Searches/sec', ''),
+    ('sqlserver.access.worktables_created', 'Worktables Created/sec', ''),
+    ('sqlserver.access.pages_allocated', 'Pages Allocated/sec', ''),
+    ('sqlserver.access.extents_allocated', 'Extents Allocated/sec', ''),
+    ('sqlserver.access.mixed_page_allocations', 'Mixed page allocations/sec', ''),
+    ('sqlserver.access.extent_deallocations', 'Extent Deallocations/sec', ''),
+    ('sqlserver.access.page_deallocations', 'Page Deallocations/sec', ''),
+    ('sqlserver.access.table_lock_escalations', 'Table Lock Escalations/sec', ''),
     # SQLServer:Memory Manager
     ('sqlserver.memory.memory_grants_pending', 'Memory Grants Pending', ''),
     ('sqlserver.memory.total_server_memory', 'Total Server Memory (KB)', ''),
@@ -57,6 +71,11 @@ INSTANCE_METRICS = [
     ('sqlserver.stats.batch_requests', 'Batch Requests/sec', ''),  # BULK_COUNT
     ('sqlserver.stats.sql_compilations', 'SQL Compilations/sec', ''),  # BULK_COUNT
     ('sqlserver.stats.sql_recompilations', 'SQL Re-Compilations/sec', ''),  # BULK_COUNT
+    # SQLServer:Latches
+    ('sqlserver.latches.latch_waits', 'Latch Waits/sec', ''),
+    ('sqlserver.latches.superlatches', 'Number of SuperLatches', ''),
+    ('sqlserver.latches.superlatch_promotions', 'SuperLatch Promotions/sec', ''),
+    ('sqlserver.latches.superlatch_demotions', 'SuperLatch Demotions/sec', ''),
 ]
 
 # Performance table metrics, initially configured to track at instance-level only
