@@ -37,14 +37,21 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_check_docker(aggregator, dd_run_check, init_config, instance_docker):
+@pytest.mark.parametrize('database_autodiscovery', [True, False])
+def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, database_autodiscovery):
+    instance_docker['database_autodiscovery'] = database_autodiscovery
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     expected_tags = instance_docker.get('tags', []) + [
         'sqlserver_host:{}'.format(instance_docker.get('host')),
         'db:master',
     ]
-    assert_metrics(aggregator, expected_tags, hostname=sqlserver_check.resolved_hostname)
+    assert_metrics(
+        aggregator,
+        expected_tags,
+        hostname=sqlserver_check.resolved_hostname,
+        database_autodiscovery=database_autodiscovery,
+    )
 
 
 @pytest.mark.integration

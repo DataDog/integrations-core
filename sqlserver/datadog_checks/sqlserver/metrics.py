@@ -643,18 +643,21 @@ class SqlFileStats(BaseSqlServerMetric):
 
             for db in databases:
                 # use statements need to be executed separate from select queries
-                ctx = construct_use_statement(db)
-                logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
-                cursor.execute(ctx)
-                logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
-                cursor.execute(query)
-                data = cursor.fetchall()
-
-                columns = [i[0] for i in cursor.description]
-                for r in data:
-                    rows.append(r)
-
-                logger.debug("%s: received %d rows and %d columns for db %s", cls.__name__, len(data), len(columns), db)
+                try:
+                    ctx = construct_use_statement(db)
+                    logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
+                    cursor.execute(ctx)
+                    logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
+                    cursor.execute(query)
+                    data = cursor.fetchall()
+                    columns = [i[0] for i in cursor.description]
+                    for r in data:
+                        rows.append(r)
+                    logger.debug(
+                        "%s: received %d rows and %d columns for db %s", cls.__name__, len(data), len(columns), db
+                    )
+                except Exception as e:
+                    logger.warning("failed to fetch SQLFileStats from db %s due to Error: %s", db, e)
 
             # reset back to previous db
             logger.debug("%s: reverting cursor context via use statement to %s", cls.__name__, current_db)

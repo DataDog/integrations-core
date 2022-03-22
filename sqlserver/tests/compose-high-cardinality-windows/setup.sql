@@ -75,6 +75,13 @@ GO
 ALTER DATABASE unavailable_db SET OFFLINE;
 GO
 
+-- create a a restricted database to ensure the agent gracefully handles not being able to connect
+-- to it
+CREATE DATABASE restricted_db;
+GO
+ALTER DATABASE restricted_db SET RESTRICTED_USER
+GO
+
 -- This table is pronounced "things" except we've replaced "th" with the greek lower case "theta" to ensure we
 -- correctly support unicode throughout the integration.
 CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
