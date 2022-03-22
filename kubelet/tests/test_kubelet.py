@@ -212,6 +212,44 @@ WINDOWS_TAGS = {
     ],
 }
 
+PROBE_TAGS = {
+    'container_id://2c3f5608164033a850c9acbbfdb7fffa6ce1f68feedb1b8dad99777373c35b16': [
+        'kube_namespace:kube-system',
+        'pod_name:kube-dns-c598bd956-wgf4n',
+        'kube_container_name:sidecar',
+    ],
+    'container_id://b13f7638c80c98946900bdeabec06be564d203330f5bb706a40e6fa7466a674d': [
+        'kube_namespace:kube-system',
+        'pod_name:kube-dns-c598bd956-wgf4n',
+        'kube_container_name:kubedns',
+    ],
+    'container_id://3102f0d9499c5cd0875225208e3d048e3a9d829f5cdd74758b2d79a429a579fa': [
+        'kube_namespace:kube-system',
+        'pod_name:fluentbit-gke-45gvm',
+        'kube_container_name:fluentbit-gke',
+    ],
+    'container_id://efa5b57cc110de6d2ca3b4a0e12c0a378090530e5e2d0ba0882dffe9c5846067': [
+        'kube_namespace:kube-system',
+        'pod_name:fluentbit-gke-45gvm',
+        'kube_container_name:fluentbit',
+    ],
+    'container_id://0d8eea0b23688a4c3fbc29828b455734b323d6aac085c88f8f112e296cd5b521': [
+        'kube_namespace:kube-system',
+        'pod_name:kube-dns-c598bd956-wgf4n',
+        'kube_container_name:dnsmasq',
+    ],
+    'container_id://1669a6277ebb44aedd2790ba8bce83d21899ba85b1afde4330caf4a4161eee26': [
+        'kube_namespace:kube-system',
+        'pod_name:calico-node-9qkw7',
+        'kube_container_name:calico-node',
+    ],
+    'container_id://c81dfc25dd24b538a880bfd0f807ba9ec1ff4541e8b8eb49a8d1afcdecc5ef59': [
+        'kube_namespace:default',
+        'pod_name:datadog-t9f28',
+        'kube_container_name:agent',
+    ],
+}
+
 METRICS_WITH_DEVICE_TAG = {
     'kubernetes.filesystem.usage': '/dev/sda1',
     'kubernetes.io.read_bytes': '/dev/sda',
@@ -237,13 +275,13 @@ def tagger():
     return tagger
 
 
-def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_1_14, stats_summary_fail=False):
+def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_1_14, stats_summary_fail=False, pod_list='pods.json'):
     """
     Returns a check that uses mocked data for responses from prometheus endpoints, pod list,
     and node spec.
     """
     check = KubeletCheck('kubelet', {}, instances)
-    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
+    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file(pod_list))))
     mock_resp = mock.Mock(status_code=200, raise_for_status=mock.Mock(), json=mock.Mock(return_value=NODE_SPEC))
     monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=mock_resp))
     if stats_summary_fail:
@@ -266,6 +304,9 @@ def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_1_14, stats_sum
             elif prometheus_url.endswith('/metrics'):
                 # Mock response for "/metrics"
                 content = mock_from_file(kubelet_response)
+            elif prometheus_url.endswith('/metrics/probes'):
+                # Mock response for "/metrics/probes"
+                content = mock_from_file('probes.txt')
             else:
                 raise Exception("Must be a valid endpoint")
 
@@ -327,9 +368,11 @@ def test_kubelet_default_options():
     check = KubeletCheck('kubelet', {}, [{}])
     assert check.cadvisor_scraper_config['namespace'] == 'kubernetes'
     assert check.kubelet_scraper_config['namespace'] == 'kubernetes'
+    assert check.probes_scraper_config['namespace'] == 'kubernetes'
 
     assert isinstance(check.cadvisor_scraper_config, dict)
     assert isinstance(check.kubelet_scraper_config, dict)
+    assert isinstance(check.probes_scraper_config, dict)
 
 
 def test_kubelet_check_prometheus_instance_tags(monkeypatch, aggregator, tagger):
@@ -1151,3 +1194,84 @@ def test_ignore_namespace_for_volume_metrics(monkeypatch):
 
     for metric in volume_metrics:
         assert metric in metrics_reported
+
+
+def test_probe_metrics(monkeypatch, aggregator, tagger):
+    tagger.reset()
+    tagger.set_tags(PROBE_TAGS)
+
+    check = mock_kubelet_check(monkeypatch, [{}], pod_list='pod_list_probes.json')
+    check.check({'cadvisor_metrics_endpoint': '', 'kubelet_metrics_endpoint': ''})
+    check._perform_kubelet_check.assert_called_once()
+
+    aggregator.assert_metric(
+        'kubernetes.liveness_probe.success.total',
+        3,
+        ['kube_namespace:default', 'pod_name:datadog-t9f28', 'kube_container_name:agent'],
+    )
+
+    aggregator.assert_metric(
+        'kubernetes.readiness_probe.success.total',
+        3,
+        ['kube_namespace:default', 'pod_name:datadog-t9f28', 'kube_container_name:agent'],
+    )
+
+    aggregator.assert_metric(
+        'kubernetes.liveness_probe.success.total',
+        281049,
+        ['kube_container_name:fluentbit', 'kube_namespace:kube-system', 'pod_name:fluentbit-gke-45gvm'],
+    )
+
+    aggregator.assert_metric(
+        'kubernetes.liveness_probe.success.total',
+        281049,
+        ['kube_container_name:fluentbit-gke', 'kube_namespace:kube-system', 'pod_name:fluentbit-gke-45gvm'],
+    )
+
+    aggregator.assert_metric(
+        'kubernetes.liveness_probe.success.total',
+        1686298,
+        ['kube_container_name:kubedns', 'kube_namespace:kube-system', 'pod_name:kube-dns-c598bd956-wgf4n'],
+    )
+
+    aggregator.assert_metric(
+        'kubernetes.readiness_probe.success.total',
+        1686303,
+        ['kube_container_name:kubedns', 'kube_namespace:kube-system', 'pod_name:kube-dns-c598bd956-wgf4n'],
+    )
+
+    aggregator.assert_metric(
+        'kubernetes.readiness_probe.failure.total',
+        180,
+        ['kube_container_name:calico-node', 'kube_namespace:kube-system', 'pod_name:calico-node-9qkw7'],
+    )
+
+    aggregator.assert_metric(
+        'kubernetes.liveness_probe.failure.total',
+        100,
+        ['kube_container_name:calico-node', 'kube_namespace:kube-system', 'pod_name:calico-node-9qkw7'],
+    )
+
+    aggregator.assert_metric(
+        'kubernetes.liveness_probe.success.total',
+        1686306,
+        ['kube_container_name:calico-node', 'kube_namespace:kube-system', 'pod_name:calico-node-9qkw7'],
+    )
+
+    aggregator.assert_metric(
+        'kubernetes.readiness_probe.success.total',
+        1686127,
+        ['kube_container_name:calico-node', 'kube_namespace:kube-system', 'pod_name:calico-node-9qkw7'],
+    )
+
+    aggregator.assert_metric(
+        'kubernetes.liveness_probe.success.total',
+        1686298,
+        ['kube_container_name:sidecar', 'kube_namespace:kube-system', 'pod_name:kube-dns-c598bd956-wgf4n'],
+    )
+
+    aggregator.assert_metric(
+        'kubernetes.liveness_probe.success.total',
+        1686298,
+        ['kube_container_name:dnsmasq', 'kube_namespace:kube-system', 'pod_name:kube-dns-c598bd956-wgf4n'],
+    )
