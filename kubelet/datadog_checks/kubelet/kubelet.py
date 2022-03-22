@@ -20,6 +20,7 @@ from datadog_checks.base.utils.tagging import tagger
 
 from .cadvisor import CadvisorScraper
 from .common import CADVISOR_DEFAULT_PORT, PodListUtils, replace_container_rt_prefix
+from .probes import ProbesPrometheusScraperMixin
 from .prometheus import CadvisorPrometheusScraperMixin
 from .summary import SummaryScraperMixin
 
@@ -29,6 +30,7 @@ POD_LIST_PATH = '/pods'
 CADVISOR_METRICS_PATH = '/metrics/cadvisor'
 KUBELET_METRICS_PATH = '/metrics'
 STATS_PATH = '/stats/summary/'
+PROBES_METRICS_PATH = '/metrics/probes'
 
 # Suffixes per
 # https://github.com/kubernetes/kubernetes/blob/8fd414537b5143ab039cb910590237cabf4af783/pkg/api/resource/suffix.go#L108
@@ -128,6 +130,7 @@ class KubeletCheck(
     OpenMetricsBaseCheck,
     CadvisorScraper,
     SummaryScraperMixin,
+    ProbesPrometheusScraperMixin,
     KubeletBase,
 ):
     """
@@ -173,7 +176,8 @@ class KubeletCheck(
         self.pod_level_metrics = ["{0}.{1}".format(self.NAMESPACE, x) for x in pod_level_metrics]
 
         kubelet_instance = self._create_kubelet_prometheus_instance(inst)
-        generic_instances = [cadvisor_instance, kubelet_instance]
+        probes_instance = self._create_probes_prometheus_instance(inst)
+        generic_instances = [cadvisor_instance, kubelet_instance, probes_instance]
         super(KubeletCheck, self).__init__(name, init_config, generic_instances)
 
         self.cadvisor_legacy_port = inst.get('cadvisor_port', CADVISOR_DEFAULT_PORT)
@@ -189,6 +193,8 @@ class KubeletCheck(
 
         self.kubelet_scraper_config = self.get_scraper_config(kubelet_instance)
 
+        self.probes_scraper_config = self.get_scraper_config(probes_instance)
+
         counter_transformers = {k: self.send_always_counter for k in self.COUNTER_METRICS}
 
         histogram_transformers = {
@@ -199,6 +205,7 @@ class KubeletCheck(
 
         self.transformers = {}
         for d in [
+            self.PROBES_METRIC_TRANSFORMERS,
             self.CADVISOR_METRIC_TRANSFORMERS,
             counter_transformers,
             histogram_transformers,
@@ -320,9 +327,14 @@ class KubeletCheck(
             'kubelet_metrics_endpoint', urljoin(endpoint, KUBELET_METRICS_PATH)
         )
 
+        self.probes_scraper_config['prometheus_url'] = instance.get(
+            'probes_metrics_endpoint', urljoin(endpoint, PROBES_METRICS_PATH)
+        )
+
         # Kubelet credentials handling
         self.kubelet_credentials.configure_scraper(self.cadvisor_scraper_config)
         self.kubelet_credentials.configure_scraper(self.kubelet_scraper_config)
+        self.kubelet_credentials.configure_scraper(self.probes_scraper_config)
 
         # Legacy cadvisor support
         try:
@@ -355,6 +367,10 @@ class KubeletCheck(
         if self.kubelet_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing kubelet metrics')
             self.process(self.kubelet_scraper_config, metric_transformers=self.transformers)
+
+        if self.probes_scraper_config['prometheus_url']:
+            self.log.debug('processing probe metrics')
+            self.process(self.probes_scraper_config, metric_transformers=self.transformers)
 
         self.first_run = False
 

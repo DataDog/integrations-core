@@ -29,6 +29,13 @@ GO
 ALTER DATABASE unavailable_db SET OFFLINE;
 GO
 
+-- create a a restricted database to ensure the agent gracefully handles not being able to connect
+-- to it
+CREATE DATABASE restricted_db;
+GO
+ALTER DATABASE restricted_db SET RESTRICTED_USER
+GO
+
 -- Create test database for integration tests
 -- only bob and fred have read/write access to this database
 USE datadog_test;
