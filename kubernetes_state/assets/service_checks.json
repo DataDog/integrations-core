@@ -94,5 +94,20 @@
         ],
         "name": "CronJob next schedule",
         "description": "Returns `CRITICAL` if a cron job scheduled time is in the past. Returns `UNKNOWN` if the scheduled time is unknown. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "5.6.0",
+        "integration": "Kubernetes",
+        "check": "kubernetes_state.job.complete",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "node"
+        ],
+        "name": "Job completion status",
+        "description": " Returns `CRITICAL` if a job failed. Returns `OK` otherwise."
     }
 ]
