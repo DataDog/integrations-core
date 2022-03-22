@@ -607,6 +607,14 @@ def test_statement_metadata(
         # only can see own queries
         return False
 
+    fqt_samples = [
+        s for s in samples if s.get('dbm_type') == 'fqt' and s['db']['query_signature'] == normalized_query_signature
+    ]
+    assert len(fqt_samples) == 1
+    fqt = fqt_samples[0]
+    assert fqt['db']['metadata']['tables'] == expected_metadata_payload['tables']
+    assert fqt['db']['metadata']['commands'] == expected_metadata_payload['commands']
+
     # Test metrics metadata, metadata in metrics are located in the rows.
     metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(metrics) == 1

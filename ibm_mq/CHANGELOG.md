@@ -1,5 +1,11 @@
 # CHANGELOG - IBM MQ
 
+## 3.20.0 / 2022-03-16
+
+* [Added] Add `auto_discover_channels` option. See [#11678](https://github.com/DataDog/integrations-core/pull/11678).
+* [Fixed] Ensure PCFExecute disconnects. See [#11677](https://github.com/DataDog/integrations-core/pull/11677).
+* [Fixed] Improve debug logs. See [#11637](https://github.com/DataDog/integrations-core/pull/11637).
+
 ## 3.19.1 / 2022-03-01
 
 * [Fixed] Fix unique list items and min mapping properties config validations . See [#11574](https://github.com/DataDog/integrations-core/pull/11574).

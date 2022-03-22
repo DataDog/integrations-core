@@ -81,6 +81,9 @@ jobs:
     - checkName: cacti
       displayName: Cacti
       os: linux
+    - checkName: calico
+      displayName: Calico
+      os: linux
     - checkName: cassandra
       displayName: Cassandra
       os: linux
@@ -173,6 +176,9 @@ jobs:
       os: linux
     - checkName: fluentd
       displayName: fluentd
+      os: linux
+    - checkName: foundationdb
+      displayName: FoundationDB
       os: linux
     - checkName: gearmand
       displayName: Gearman

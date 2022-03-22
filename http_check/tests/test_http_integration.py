@@ -390,3 +390,48 @@ def test_expected_headers(dd_run_check, instance, expected_headers):
 
     dd_run_check(check)
     assert expected_headers == check.http.options['headers']
+
+
+@pytest.mark.parametrize(
+    'instance, check_hostname',
+    [
+        pytest.param(
+            {
+                'url': 'https://valid.mock',
+                'name': 'UpService',
+                'tls_verify': True,
+                'check_hostname': False,
+            },
+            False,
+            id='check_hostname disabled',
+        ),
+        pytest.param(
+            {
+                'url': 'https://valid.mock',
+                'name': 'UpService',
+                'tls_verify': True,
+                'check_hostname': True,
+            },
+            True,
+            id='check_hostname enabled',
+        ),
+        pytest.param(
+            {
+                'url': 'https://valid.mock',
+                'name': 'UpService',
+                'tls_verify': False,
+                'check_hostname': True,
+            },
+            False,
+            id='tls not verify',
+        ),
+    ],
+)
+def test_tls_config_ok(dd_run_check, instance, check_hostname):
+    check = HTTPCheck(
+        'http_check',
+        {'ca_certs': mock_get_ca_certs_path()},
+        [instance],
+    )
+    tls_context = check.get_tls_context()
+    assert tls_context.check_hostname is check_hostname

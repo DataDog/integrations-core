@@ -78,6 +78,10 @@ def instance_metric_filters(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_metrics_per_query(field, value):
     return 500
 

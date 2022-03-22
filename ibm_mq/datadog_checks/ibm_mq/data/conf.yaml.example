@@ -94,6 +94,14 @@ instances:
     # channels:
     #   - <CHANNEL_NAME>
 
+    ## @param auto_discover_channels - boolean - optional - default: true
+    ## Autodiscover channels to monitor. This finds all discoverable channels.
+    ##
+    ## Note: autodiscovered channels are in addition to the ones provided in `channels`,
+    ## and these channels will only report their statuses but not property metrics.
+    #
+    # auto_discover_channels: true
+
     ## @param channel_status_mapping - mapping - optional
     ## Custom channel status mapping for service check `ibm_mq.channel.status`.
     ##
@@ -221,6 +229,17 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
 
 ## Log Section
 ##

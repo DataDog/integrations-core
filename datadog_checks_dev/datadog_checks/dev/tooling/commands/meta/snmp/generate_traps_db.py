@@ -19,6 +19,14 @@ NOTIFICATION_TYPE = 'notificationtype'
 ALLOWED_EXTENSIONS_BY_FORMAT = {"json": [".json"], "yaml": [".yml", ".yaml"]}
 
 
+class MissingMIBException(Exception):
+    pass
+
+
+class VariableNotDefinedException(Exception):
+    pass
+
+
 @click.command(
     context_settings=CONTEXT_SETTINGS,
     short_help='Generate a traps database that can be used by the '
@@ -152,7 +160,7 @@ def compile_and_report_status(mib_files, mib_compiler):
     """
     child_compiled_mibs = []
     all_compiled_mibs = []  # Name of all compiled mibs including the parents recursively
-    with click.progressbar(mib_files, label="Compiling MIBs: ", show_eta=False) as pb:
+    with click.progressbar(mib_files, label="Compiling MIBs: ", show_eta=True, item_show_func=lambda x: x) as pb:
         for mib_file in pb:
             mibs_status = mib_compiler.compile(
                 mib_file, noDeps=False, rebuild=True, dryRun=False, genTexts=True, writeMibs=True, ignoreErrors=False
@@ -165,7 +173,11 @@ def compile_and_report_status(mib_files, mib_compiler):
                 )
 
             if missing_mibs:
-                echo_failure('{}Missing MIBs: {}'.format(CLEAR_LINE_ESCAPE_CODE, ', '.join(missing_mibs)))
+                echo_failure(
+                    '{}Missing MIBs when compiling {}: {}'.format(
+                        CLEAR_LINE_ESCAPE_CODE, mib_file, ', '.join(missing_mibs)
+                    )
+                )
 
             compiled_mibs = {k: v for k, v in mibs_status.items() if v == 'compiled'}
 
@@ -213,12 +225,13 @@ def write_compact_trap_db(trap_db_per_mib, output_file, use_json=False):
         for trap_oid, trap in trap_db["traps"].items():
             if trap_oid in compact_db["traps"] and trap["name"] != compact_db["traps"][trap_oid]["name"]:
                 echo_warning(
-                    "Found name conflict for trap OID {}, ({} != {}). Will ignore".format(
-                        trap_oid, trap['name'], compact_db["traps"][trap_oid]["name"]
+                    "Found name conflict for trap OID {}, ({}::{} != {}::{}). Will ignore".format(
+                        trap_oid, mib, trap['name'], compact_db["traps"]['mib'], compact_db["traps"][trap_oid]["name"]
                     )
                 )
                 conflict_oids.add(trap_oid)
-            compact_db["traps"][trap_oid] = trap
+            compact_db["traps"][trap_oid] = {"mib": mib}
+            compact_db["traps"][trap_oid].update(trap)
         for var_oid, var in trap_db["vars"].items():
             if var_oid in compact_db["vars"] and var["name"] != compact_db["vars"][var_oid]["name"]:
                 echo_warning(
@@ -233,7 +246,7 @@ def write_compact_trap_db(trap_db_per_mib, output_file, use_json=False):
         if oid in compact_db["traps"]:
             del compact_db["traps"][oid]
         if oid in compact_db["vars"]:
-            del compact_db["vars"]
+            del compact_db["vars"][oid]
 
     with open(output_file, 'w') as output:
         if use_json:
@@ -260,25 +273,37 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
 
         traps = {k: v for k, v in file_content.items() if v.get('class') == NOTIFICATION_TYPE}
         for trap in traps.values():
-            try:
-                trap_name = trap['name']
-                trap_oid = trap['oid']
-                trap_descr = trap.get('description', '')
-                trap_db["traps"][trap_oid] = {"name": trap_name}
-                if not no_descr:
-                    trap_db["traps"][trap_oid]["descr"] = trap_descr
-                for trap_var in trap.get('objects', []):
+            trap_name = trap['name']
+            trap_oid = trap['oid']
+            trap_descr = trap.get('description', '')
+            trap_db["traps"][trap_oid] = {"name": trap_name}
+            if not no_descr:
+                trap_db["traps"][trap_oid]["descr"] = trap_descr
+            for trap_var in trap.get('objects', []):
+                try:
+                    var_name, mib_name = trap_var['object'], trap_var['module']
                     var_oid, var_descr = get_oid_and_descr(
-                        trap_var['object'],
-                        trap_var['module'],
+                        var_name,
+                        mib_name,
                         search_locations=(os.path.dirname(compiled_mib_file), compiled_mibs_sources),
                     )
-                    var_name = trap_var['object']
-                    trap_db["vars"][var_oid] = {"name": var_name}
-                    if not no_descr:
-                        trap_db["vars"][var_oid]["descr"] = trap_descr
-            except Exception as e:
-                echo_info("Error in MIB {}: {}".format(compiled_mib_file, e))
+                except MissingMIBException:
+                    echo_failure(
+                        "Variable {} used by trap {} is defined in an unknown MIB '{}'. Ignoring this variable".format(
+                            var_name, trap_name, mib_name
+                        )
+                    )
+                    continue
+                except VariableNotDefinedException:
+                    echo_failure(
+                        "Trap {} references a variable called {} that is expected to be defined in MIB {} but is not. "
+                        "Ignoring this variable.".format(trap_name, var_name, mib_name)
+                    )
+                    continue
+                var_name = trap_var['object']
+                trap_db["vars"][var_oid] = {"name": var_name}
+                if not no_descr:
+                    trap_db["vars"][var_oid]["descr"] = trap_descr
 
         if trap_db['traps']:
             mib_name = file_content['meta']['module']
@@ -301,8 +326,11 @@ def get_oid_and_descr(var_name, mib_name, search_locations=None):
         if os.path.isfile(file_name):
             break
     else:
-        raise Exception("Missing MIB {}".format(mib_name))
+        raise MissingMIBException()
 
     with open(file_name, 'r') as f:
         file_content = json.load(f)
+
+    if var_name not in file_content:
+        raise VariableNotDefinedException()
     return file_content[var_name]['oid'], file_content[var_name].get('description', '')

@@ -64,20 +64,32 @@ def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_in
         cur.execute("USE {}".format("datadog_test"))
         cur.execute(q)
 
-    # bob's query blocks until the tx is completed,
-    # so it needs to be run asynchronously
-    executor = concurrent.futures.ThreadPoolExecutor(1)
-    executor.submit(run_test_query, bob_conn, blocking_query)
-    time.sleep(3)  # sleep for 3 seconds
+    # bob's query blocks until the tx is completed
+    run_test_query(bob_conn, blocking_query)
+
     # fred's query will get blocked by bob, so it needs
     # to be run asynchronously
-    executor.submit(run_test_query, fred_conn, query)
-    # run the check
+    executor = concurrent.futures.ThreadPoolExecutor(1)
+    f_q = executor.submit(run_test_query, fred_conn, query)
+    while not f_q.running():
+        if f_q.done():
+            break
+        print("waiting on fred's query to execute")
+        time.sleep(1)
+
+    # both queries were kicked off, so run the check
     dd_run_check(check)
-    # commit and close both transactions
+    # commit and close bob's transaction
     bob_conn.commit()
     bob_conn.close()
+
+    while not f_q.done():
+        print("blocking query finished, waiting for fred's query to complete")
+        time.sleep(1)
+    # clean up fred's connection
+    # and shutdown executor
     fred_conn.close()
+    executor.shutdown(wait=True)
 
     expected_instance_tags = set(dbm_instance.get('tags', []))
 
@@ -99,6 +111,7 @@ def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_in
     # assert the data that was collected is correct
     assert blocked_row['user_name'] == "fred", "incorrect user_name"
     assert blocked_row['session_status'] == "running", "incorrect session_status"
+    assert blocked_row['request_status'] == "suspended", "incorrect request_status"
     assert blocked_row['blocking_session_id'], "missing blocking_session_id"
     assert blocked_row['text'] == query, "incorrect blocked query"
     assert blocked_row['database_name'] == "datadog_test", "incorrect database_name"

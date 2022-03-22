@@ -1,5 +1,10 @@
 # CHANGELOG - VoltDB
 
+## 2.0.1 / 2022-03-15
+
+* [Fixed] Pass Delta flag to calls to Statistics. See [#11655](https://github.com/DataDog/integrations-core/pull/11655). Thanks [ssomagani](https://github.com/ssomagani).
+* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+
 ## 2.0.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11455](https://github.com/DataDog/integrations-core/pull/11455).

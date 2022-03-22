@@ -14,6 +14,10 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_auto_discover_channels(field, value):
+    return True
+
+
 def instance_auto_discover_queues(field, value):
     return False
 
@@ -48,6 +52,10 @@ def instance_empty_default_hostname(field, value):
 
 def instance_host(field, value):
     return 'localhost'
+
+
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_min_collection_interval(field, value):

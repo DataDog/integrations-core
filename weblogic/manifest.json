@@ -15,7 +15,7 @@
     "windows"
   ],
   "process_signatures": [
-    "weblogic.Server"
+    "java weblogic.Server"
   ],
   "public_title": "WebLogic",
   "categories": [

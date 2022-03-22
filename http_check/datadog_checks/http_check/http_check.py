@@ -45,6 +45,10 @@ class HTTPCheck(AgentCheck):
         'ca_certs': {'name': 'tls_ca_cert'},
     }
 
+    TLS_CONFIG_REMAPPER = {
+        'check_hostname': {'name': 'tls_validate_hostname'},
+    }
+
     def __init__(self, name, init_config, instances):
         super(HTTPCheck, self).__init__(name, init_config, instances)
 

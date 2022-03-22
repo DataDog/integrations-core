@@ -14,7 +14,7 @@ datadog-cacti==1.10.0; sys_platform == 'linux2'
 datadog-cassandra-nodetool==1.10.0
 datadog-cassandra==1.15.0
 datadog-ceph==2.6.0; sys_platform != 'win32'
-datadog-checks-base==25.0.1
+datadog-checks-base==25.1.0
 datadog-checks-dependency-provider==1.2.0
 datadog-checks-downloader==3.6.0
 datadog-cilium==2.0.0
@@ -62,7 +62,7 @@ datadog-hudi==2.1.0
 datadog-hyperv==1.6.0; sys_platform == 'win32'
 datadog-ibm-db2==1.10.1
 datadog-ibm-i==1.2.0
-datadog-ibm-mq==3.19.1
+datadog-ibm-mq==3.20.0
 datadog-ibm-was==2.0.0
 datadog-ignite==2.2.0
 datadog-iis==2.15.0; sys_platform == 'win32'
@@ -108,7 +108,7 @@ datadog-pdh-check==1.15.0; sys_platform == 'win32'
 datadog-pgbouncer==4.1.0; sys_platform != 'win32'
 datadog-php-fpm==2.0.0
 datadog-postfix==1.11.0; sys_platform != 'win32'
-datadog-postgres==12.1.0
+datadog-postgres==12.2.0
 datadog-powerdns-recursor==2.0.0
 datadog-presto==2.6.0
 datadog-process==2.2.0
@@ -130,7 +130,7 @@ datadog-snowflake==4.2.1
 datadog-solr==1.11.0
 datadog-sonarqube==2.0.0
 datadog-spark==3.0.0
-datadog-sqlserver==7.2.0
+datadog-sqlserver==7.5.0
 datadog-squid==2.0.0
 datadog-ssh-check==2.2.0
 datadog-statsd==1.9.0
@@ -148,7 +148,7 @@ datadog-twistlock==3.0.0
 datadog-varnish==1.13.0
 datadog-vault==3.0.2
 datadog-vertica==3.2.0
-datadog-voltdb==2.0.0
+datadog-voltdb==2.0.1
 datadog-vsphere==6.0.0
 datadog-weblogic==1.1.0
 datadog-win32-event-log==2.12.0; sys_platform == 'win32'

@@ -158,8 +158,12 @@ class Oracle(AgentCheck):
             if self.can_use_oracle_client():
                 dsn = self._get_dsn()
                 self.log.debug("Connecting via Oracle Instant Client with DSN: %s", dsn)
-                self._cached_connection = cx_Oracle.connect(user=self._user, password=self._password, dsn=dsn)
-                self.log.debug("Connected to Oracle DB using Oracle Instant Client")
+                try:
+                    self._cached_connection = cx_Oracle.connect(user=self._user, password=self._password, dsn=dsn)
+                    self.log.debug("Connected to Oracle DB using Oracle Instant Client")
+                except cx_Oracle.DatabaseError as e:
+                    self._connection_errors += 1
+                    self.log.error("Failed to connect to Oracle DB using Oracle Instant Client, error: %s", str(e))
             elif JDBC_IMPORT_ERROR:
                 self._connection_errors += 1
                 self.log.error(

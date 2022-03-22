@@ -46,6 +46,7 @@ SELECT
     sess.session_id as id,
     DB_NAME(sess.database_id) as database_name,
     sess.status as session_status,
+    req.status as request_status,
     text.text as text,
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,

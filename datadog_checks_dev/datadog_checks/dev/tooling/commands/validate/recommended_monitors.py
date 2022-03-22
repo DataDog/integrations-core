@@ -23,7 +23,16 @@ from ..console import (
 
 REQUIRED_ATTRIBUTES = {'name', 'type', 'query', 'message', 'tags', 'options', 'recommended_monitor_metadata'}
 EXTRA_NOT_ALLOWED_FIELDS = ['id']
-ALLOWED_MONITOR_TYPES = ['query alert', 'event alert', 'service check']
+ALLOWED_MONITOR_TYPES = [
+    'audit alert',
+    'event alert',
+    'event-v2 alert',
+    'log alert',
+    'query alert',
+    'rum alert',
+    'service check',
+    'trace-analytics alert',
+]
 
 
 @click.command(

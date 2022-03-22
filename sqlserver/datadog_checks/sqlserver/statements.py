@@ -358,6 +358,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     "query_signature": row['query_signature'],
                     "user": row.get('user_name', None),
                     "statement": row['text'],
+                    "metadata": {
+                        "tables": row['dd_tables'],
+                        "commands": row['dd_commands'],
+                    },
                 },
                 'sqlserver': {
                     'query_hash': row['query_hash'],
@@ -441,5 +445,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         'query_hash': row['query_hash'],
                         'query_plan_hash': row['query_plan_hash'],
                         'plan_handle': row['plan_handle'],
+                        'execution_count': row.get('execution_count', None),
+                        'total_elapsed_time': row.get('total_elapsed_time', None),
                     },
                 }
