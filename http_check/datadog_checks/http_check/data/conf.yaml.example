@@ -156,11 +156,6 @@ instances:
     #
     # seconds_critical: <SECONDS_CRITICAL>
 
-    ## @param check_hostname - boolean - optional - default: true
-    ## Set check_hostname to false to disable the verification check for matching hostnames.
-    #
-    # check_hostname: true
-
     ## @param ssl_server_name - string - optional
     ## If necessary and check_hostname is set to true,
     ## override the hostname to match with ssl_server_name.
@@ -519,3 +514,15 @@ instances:
     ## Whether or not to allow URL redirection.
     #
     # allow_redirects: true
+
+    ## @param tls_private_key_password - string - optional
+    ## Optional password to decrypt tls_private_key.
+    ##
+    ## Setting this implicitly sets `tls_verify` to true.
+    #
+    # tls_private_key_password: <PRIVATE_KEY_PASSWORD>
+
+    ## @param tls_validate_hostname - boolean - optional - default: true
+    ## Verifies that the server's cert hostname matches the one requested.
+    #
+    # tls_validate_hostname: true

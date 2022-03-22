@@ -55,7 +55,6 @@ class InstanceConfig(BaseModel):
     aws_region: Optional[str]
     aws_service: Optional[str]
     check_certificate_expiration: Optional[bool]
-    check_hostname: Optional[bool]
     collect_response_time: Optional[bool]
     connect_timeout: Optional[float]
     content_match: Optional[str]
@@ -100,8 +99,10 @@ class InstanceConfig(BaseModel):
     tls_cert: Optional[str]
     tls_ignore_warning: Optional[bool]
     tls_private_key: Optional[str]
+    tls_private_key_password: Optional[str]
     tls_protocols_allowed: Optional[Sequence[str]]
     tls_use_host_header: Optional[bool]
+    tls_validate_hostname: Optional[bool]
     tls_verify: Optional[bool]
     url: str
     use_legacy_auth_encoding: Optional[bool]
