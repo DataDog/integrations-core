@@ -8,9 +8,9 @@
  
 ### Installation
  
-1. On any Datadog dashboard, click the "Add Widgets" button
-2. Select "Apps" in the widget menu
-3. Drag the {integration_name} widget onto your dashboard
+1. Click the **Add Widgets** button on a Datadog dashboard.
+2. Select **Apps** from the widget menu.
+3. Drag and drop the {integration_name} widget on your dashboard.
  
 ### Configuration
  
