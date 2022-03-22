@@ -54,7 +54,7 @@ The release manager will initiate code freeze of the `integrations-core` repo us
 
 ### Branch
 
-We create a release branch on `integrations-core` at the beginning of freeze. The purpose of this branch is to track all of the integrations that are shipped with the agent for each release. The agent RCs will be built including the source code of the integrations that is on the release branch.
+We create a release branch on `integrations-core` at the beginning of the freeze. The purpose of this branch is to track all of the integrations that are shipped with the Agent for each release. The Agent RCs are built with the source code of integrations on the release branch.
 
 1. Create a branch based on `master` named after the highest version of the Agent being released in the form `<MAJOR>.<MINOR>.x`
 1. Push the branch to GitHub
