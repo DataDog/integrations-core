@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime
 import re
+import select
 import time
 from collections import Counter
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -606,6 +607,14 @@ def test_statement_metadata(
         # only can see own queries
         return False
 
+    fqt_samples = [
+        s for s in samples if s.get('dbm_type') == 'fqt' and s['db']['query_signature'] == normalized_query_signature
+    ]
+    assert len(fqt_samples) == 1
+    fqt = fqt_samples[0]
+    assert fqt['db']['metadata']['tables'] == expected_metadata_payload['tables']
+    assert fqt['db']['metadata']['commands'] == expected_metadata_payload['commands']
+
     # Test metrics metadata, metadata in metrics are located in the rows.
     metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(metrics) == 1
@@ -619,25 +628,26 @@ def test_statement_metadata(
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
 @pytest.mark.parametrize(
-    "user,password,dbname,query,arg,expected_out,expected_keys,expected_conn_out",
+    "user,password,dbname,query,blocking_query,arg,expected_out,expected_keys,expected_conn_out",
     [
         (
             "bob",
             "bob",
             "datadog_test",
-            "SELECT city FROM pg_sleep(3), persons WHERE city = %s",
+            "BEGIN TRANSACTION; SELECT city FROM persons WHERE city = %s;",
+            "LOCK TABLE persons IN ACCESS EXCLUSIVE MODE",
             "hello",
             {
                 'datname': 'datadog_test',
                 'usename': 'bob',
-                'state': 'idle in transaction',
-                'query_signature': 'd9193c18a6f372d8',
-                'statement': "SELECT city FROM pg_sleep(3), persons WHERE city = 'hello'",
+                'state': 'active',
+                'query_signature': '9382c42e92099c04',
+                'statement': "BEGIN TRANSACTION; SELECT city FROM persons WHERE city = 'hello';",
             },
             ["xact_start", "query_start", "pid", "client_port", "client_addr", "backend_type", "blocking_pids"],
             {
                 'usename': 'bob',
-                'state': 'idle in transaction',
+                'state': 'active',
                 'application_name': '',
                 'datname': 'datadog_test',
                 'connections': 1,
@@ -655,6 +665,7 @@ def test_activity_snapshot_collection(
     password,
     dbname,
     query,
+    blocking_query,
     arg,
     expected_out,
     expected_keys,
@@ -664,7 +675,20 @@ def test_activity_snapshot_collection(
     check = integration_check(dbm_instance)
     check._connect()
 
-    conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+    conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password, async_=1)
+    blocking_conn = psycopg2.connect(host=HOST, dbname=dbname, user="blocking_bob", password=password)
+
+    def wait(conn):
+        while True:
+            state = conn.poll()
+            if state == psycopg2.extensions.POLL_OK:
+                break
+            elif state == psycopg2.extensions.POLL_WRITE:
+                select.select([], [conn.fileno()], [])
+            elif state == psycopg2.extensions.POLL_READ:
+                select.select([conn.fileno()], [], [])
+            else:
+                raise psycopg2.OperationalError("poll() returned %s" % state)
 
     # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
     # the simple query protocol, sending the whole query as a plain string to postgres.
@@ -672,9 +696,11 @@ def test_activity_snapshot_collection(
     # leave connection open until after the check has run to ensure we're able to see the query in
     # pg_stat_activity
     try:
-        # turn off auto commit so we can manage transactions manually
-        # this should allow us to catch queries in the 'idle in transaction' state
-        conn.autocommit = False
+        # first lock the table, which will cause the test query to be blocked
+        blocking_conn.autocommit = False
+        blocking_conn.cursor().execute(blocking_query)
+        # ... now execute the test query
+        wait(conn)
         conn.cursor().execute(query, (arg,))
         check.check(dbm_instance)
         dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
@@ -690,12 +716,13 @@ def test_activity_snapshot_collection(
         assert event['dbm_type'] == "activity"
         assert event['ddagentversion'] == datadog_agent.get_version()
         assert len(event['postgres_activity']) > 0
-        # find bob's query.
-        bobs_query = None
-        for query_json in event['postgres_activity']:
-            if 'usename' in query_json and query_json['usename'] == "bob":
-                bobs_query = query_json
+        # find bob's query and blocking_bob's query
+        bobs_query = next((q for q in event['postgres_activity'] if q.get('usename', None) == "bob"), None)
+        blocking_bobs_query = next(
+            (q for q in event['postgres_activity'] if q.get('usename', None) == "blocking_bob"), None
+        )
         assert bobs_query is not None
+        assert blocking_bobs_query is not None
 
         for key in expected_out:
             assert expected_out[key] == bobs_query[key]
@@ -707,6 +734,12 @@ def test_activity_snapshot_collection(
                 expected_keys.remove('blocking_pids')
         for val in expected_keys:
             assert val in bobs_query
+
+        if 'blocking_pids' in expected_keys:
+            # if we are collecting pg blocking information, then
+            # blocking_bob's pid should show up in bob's activity
+            assert len(bobs_query['blocking_pids']) > 0
+            assert blocking_bobs_query['pid'] in bobs_query['blocking_pids']
 
         assert 'query' not in bobs_query
 
@@ -728,8 +761,32 @@ def test_activity_snapshot_collection(
 
         assert event['ddtags'] == expected_tags
 
+        if POSTGRES_VERSION == '9.5':
+            # rest of test is to confirm blocking behavior
+            # which we cannot collect in pg v9.5 at this time
+            return
+
+        # ... now run the check again after closing blocking_bob's conn.
+        # this means we should report bob as no longer blocked
+        # close blocking_bob's tx
+        blocking_conn.close()
+        check.check(dbm_instance)
+        dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
+        event = dbm_activity_event[1]
+        assert len(event['postgres_activity']) > 0
+        # find bob's query
+        bobs_query = None
+        for query_json in event['postgres_activity']:
+            if 'usename' in query_json and query_json['usename'] == "bob":
+                bobs_query = query_json
+        assert bobs_query is not None
+        assert len(bobs_query['blocking_pids']) == 0
+        # state should be idle now that it's no longer blocked
+        assert bobs_query['state'] == "idle in transaction"
+
     finally:
         conn.close()
+        blocking_conn.close()
 
 
 def new_time():

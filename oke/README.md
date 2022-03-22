@@ -6,7 +6,7 @@ Oracle Cloud Infrastructure Container Engine for Kubernetes (OKE) is a fully-man
 
 ## Setup
 
-Because Datadog already integrates with Kubernetes, it is ready-made to monitor OKE. If you’re running the Agent in a Kubernetes cluster and plan to migrate to OKE, you can continue monitoring your cluster with Datadog.
+Because Datadog already integrates with Kubernetes, it is ready-made to monitor OKE. If you're running the Agent in a Kubernetes cluster and plan to migrate to OKE, you can continue monitoring your cluster with Datadog.
 
 Additionally, OKE node pools are supported.
 

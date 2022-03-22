@@ -515,6 +515,17 @@ instances:
     #
     # empty_default_hostname: false
 
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
+
     ## @param leader_tag - boolean - optional - default: true
     ## Enable to tag metrics with `is_leader:true` or `is_leader:false`.
     #

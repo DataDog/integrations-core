@@ -378,6 +378,10 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     "instance": row['datname'],
                     "query_signature": row['query_signature'],
                     "statement": row['query'],
+                    "metadata": {
+                        "tables": row['dd_tables'],
+                        "commands": row['dd_commands'],
+                    },
                 },
                 "postgres": {
                     "datname": row["datname"],

@@ -129,8 +129,6 @@ instances:
     ## that configuration parameters expressed in seconds take precedence over
     ## the corresponding ones expressed in days.
     ##
-    ## The SSL certificate will always be validated for this additional
-    ## service check regardless of the value of `tls_verify`.
     ## By default, for the expiration check, the Agent validates the SSL certificate
     ## hostname against the host of the provided url.
     #
@@ -210,6 +208,17 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.

@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from typing import Dict, List
+
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, to_string
@@ -46,6 +48,7 @@ class ChannelMetricCollector(object):
 
     def get_pcf_channel_metrics(self, queue_manager):
         args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: pymqi.ensure_bytes('*')}
+        pcf = None
         try:
             pcf = pymqi.PCFExecute(
                 queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
@@ -67,7 +70,12 @@ class ChannelMetricCollector(object):
                 channel_name = to_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
                 channel_tags = self.config.tags_no_channel + ["channel:{}".format(channel_name)]
 
-                self._submit_metrics_from_properties(channel_info, metrics.channel_metrics(), channel_tags)
+                self._submit_metrics_from_properties(
+                    channel_info, channel_name, metrics.channel_metrics(), channel_tags
+                )
+        finally:
+            if pcf is not None:
+                pcf.disconnect()
 
         # Check specific channels
         # If a channel is not discoverable, a user may want to check it specifically.
@@ -77,7 +85,8 @@ class ChannelMetricCollector(object):
             self._submit_channel_status(queue_manager, channel, self.config.tags_no_channel)
 
         # Grab all the discoverable channels
-        self._submit_channel_status(queue_manager, '*', self.config.tags_no_channel)
+        if self.config.auto_discover_channels:
+            self._submit_channel_status(queue_manager, '*', self.config.tags_no_channel)
 
     def _submit_channel_status(self, queue_manager, search_channel_name, tags, channels_to_skip=None):
         """Submit channel status
@@ -89,6 +98,7 @@ class ChannelMetricCollector(object):
         """
         channels_to_skip = channels_to_skip or []
         search_channel_tags = tags + ["channel:{}".format(search_channel_name)]
+        pcf = None
         try:
             args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: pymqi.ensure_bytes(search_channel_name)}
             pcf = pymqi.PCFExecute(
@@ -121,17 +131,23 @@ class ChannelMetricCollector(object):
                     continue
                 channel_tags = tags + ["channel:{}".format(channel_name)]
 
-                self._submit_metrics_from_properties(channel_info, metrics.channel_status_metrics(), channel_tags)
+                self._submit_metrics_from_properties(
+                    channel_info, channel_name, metrics.channel_status_metrics(), channel_tags
+                )
 
                 channel_status = channel_info[pymqi.CMQCFC.MQIACH_CHANNEL_STATUS]
                 self._submit_channel_count(channel_name, channel_status, channel_tags)
                 self._submit_status_check(channel_name, channel_status, channel_tags)
+        finally:
+            if pcf is not None:
+                pcf.disconnect()
 
-    def _submit_metrics_from_properties(self, channel_info, metrics_map, tags):
+    def _submit_metrics_from_properties(self, channel_info, channel_name, metrics_map, tags):
+        # type: (Dict, str, Dict[str, int], List[str] ) -> None
         for metric_name, pymqi_type in iteritems(metrics_map):
             metric_full_name = '{}.channel.{}'.format(metrics.METRIC_PREFIX, metric_name)
             if pymqi_type not in channel_info:
-                self.log.debug("metric not found: %s", metric_name)
+                self.log.debug("metric '%s' not found in channel: %s", metric_name, channel_name)
                 continue
             metric_value = int(channel_info[pymqi_type])
             self.gauge(metric_full_name, metric_value, tags=tags, hostname=self.config.hostname)
