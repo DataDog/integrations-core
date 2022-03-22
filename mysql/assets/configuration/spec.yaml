@@ -107,7 +107,7 @@ files:
                 key: <KEY_FILE_PATH>
                 cert: <CERT_FILE_PATH>
                 ca: <CA_PATH_FILE>
-                check_hostname: True
+                check_hostname: true
           - template: instances/db
             overrides:
               custom_queries.value.example:
