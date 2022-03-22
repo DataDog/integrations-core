@@ -230,11 +230,6 @@ class MySql(AgentCheck):
 
     def _get_connection_args(self):
         ssl = dict(self._config.ssl) if self._config.ssl else None
-        if self._config.ssl:
-            ssl["check_hostname"] = False
-        else:
-            ssl
-
         connection_args = {
             'ssl': ssl,
             'connect_timeout': self._config.connect_timeout,
