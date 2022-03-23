@@ -91,7 +91,7 @@ files:
               key: Path to a key file.
               cert: Path to a cert file.
               ca: Path to a CA bundle file.
-              check_hostname: Set to false to ignore the strict relationship between the certificate and the hostname
+              check_hostname: Set to false to ignore the strict relationship between the certificate and the hostname.
             value:
               type: object
               properties:
