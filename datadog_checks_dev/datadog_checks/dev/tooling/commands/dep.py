@@ -40,6 +40,8 @@ IGNORED_DEPS = {
 # Dependencies for the downloader that are security-related and should be updated separately from the others
 SECURITY_DEPS = {'in-toto', 'tuf', 'securesystemslib'}
 
+SUPPORTED_PYTHON_MINOR_VERSIONS = {'2': '2.7', '3': '3.8'}
+
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage dependencies')
 def dep():
@@ -130,9 +132,22 @@ def sync():
     echo_info(f'Files updated: {len(updated_checks)}')
 
 
-def artifact_compatible_with_python(artifact, major_version):
-    python_version = artifact['python_version']
+def filter_releases(releases):
+    filtered_releases = []
+    for version, artifacts in releases.items():
+        parsed_version = parse_version(version)
+        if not parsed_version.is_prerelease:
+            filtered_releases.append((parsed_version, artifacts))
 
+    return filtered_releases
+
+
+def artifact_compatible_with_python(artifact, major_version):
+    requires_python = artifact['requires_python']
+    if requires_python is not None:
+        return SpecifierSet(requires_python).contains(SUPPORTED_PYTHON_MINOR_VERSIONS[major_version])
+
+    python_version = artifact['python_version']
     return f'py{major_version}' in python_version or f'cp{major_version}' in python_version
 
 
@@ -155,7 +170,8 @@ async def scrape_version_data(urls):
             latest_py3 = None
 
             versions = []
-            for version, artifacts in reversed(sorted(releases.items(), key=lambda item: parse_version(item[0]))):
+            for parsed_version, artifacts in reversed(sorted(filter_releases(releases))):
+                version = str(parsed_version)
                 versions.append(version)
 
                 for artifact in artifacts:
