@@ -44,6 +44,17 @@ def test_uses_new_implementation_when_new_version_specified(kafka_instance):
 
 
 @pytest.mark.unit
+def test_gssapi(kafka_instance, dd_run_check):
+    instance = copy.deepcopy(kafka_instance)
+    instance['kafka_client_api_version'] = '0.10.2'
+    instance['sasl_mechanism'] = 'GSSAPI'
+    instance['security_protocol'] = 'SASL_PLAINTEXT'
+    instance['sasl_kerberos_service_name'] = 'kafka'
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+    dd_run_check(kafka_consumer_check)
+
+
+@pytest.mark.unit
 def test_tls_config_ok(kafka_instance_tls):
     with mock.patch('datadog_checks.base.utils.tls.ssl') as ssl:
         with mock.patch('kafka.KafkaClient') as kafka_client:
