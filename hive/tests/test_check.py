@@ -9,7 +9,7 @@ from datadog_checks.dev.jmx import JVM_E2E_METRICS
 @pytest.mark.e2e
 def test(dd_agent_check):
     aggregator = dd_agent_check()
-    metrics = [
+    hive_metrics = [
         "hive.server.memory.heap.committed",
         "hive.server.memory.heap.init",
         "hive.server.memory.heap.max",
@@ -37,5 +37,6 @@ def test(dd_agent_check):
     ]
     # Removing jvm metrics that aren't exposed in hive
     jvm_metrics = list(set(JVM_E2E_METRICS) - set(['jvm.gc.parnew.time', 'jvm.gc.cms.count']))
-    for metric in metrics + jvm_metrics:
+    metrics = hive_metrics + jvm_metrics
+    for metric in metrics:
         aggregator.assert_metric(metric)
