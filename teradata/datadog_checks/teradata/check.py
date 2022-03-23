@@ -42,7 +42,6 @@ class TeradataCheck(AgentCheck):
         self._query_manager = QueryManager(self, self._execute_query_raw, queries=manager_queries, tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
 
-        self._credentials_required = True
         self._connection_errors = 0
         self._query_errors = 0
 
@@ -120,16 +119,31 @@ class TeradataCheck(AgentCheck):
                 self._connection_errors += 1
 
     def _validate_conn_params(self):
-        optional = ['JWT', 'KRB5', 'LDAP', 'TDNEGO']
+        credentials_optional = ['JWT', 'KRB5', 'LDAP', 'TDNEGO']
+        valid_ssl_modes = ['ALLOW', 'DISABLE', 'PREFER', 'REQUIRE']
+        valid_auth_mechs = ['TD2', 'TDNEGO', 'LDAP', 'KRB5', 'JWT']
 
-        if self.config.auth_mechanism and self.config.auth_mechanism.upper() in optional:
-            self._credentials_required = False
-            return True
-        elif self._credentials_required and (not self.config.username or not self.config.password):
-            raise ConfigurationError('`username` and `password` are required')
+        if self.config.auth_mechanism and self.config.auth_mechanism.upper() not in credentials_optional:
+            if not self.config.username or not self.config.password:
+                raise ConfigurationError('`username` and `password` are required.')
+                return False
+
+        if self.config.auth_mechanism is not None and self.config.auth_mechanism.upper() not in valid_auth_mechs:
+            raise ConfigurationError(
+                'Specified `auth_mechanism`: %s is not a valid option. Specify one of "TD2",'
+                '"TDNEGO", "LDAP", "KRB5" or "JWT". '
+                'Refer to the Datadog documentation for more information.'
+            )
             return False
-        else:
-            return True
+
+        if self.config.ssl_mode is not None and self.config.ssl_mode.upper() not in valid_ssl_modes:
+            raise ConfigurationError(
+                'Specified `ssl_mode`: %s is not a valid option. Specify one of "ALLOW", "DISABLE",'
+                '"PREFER", or "REQUIRE". Refer to the Datadog documentation for more information.'
+            )
+            return False
+
+        return True
 
     def _validate_timestamp(self, row, query):
         if 'DBC.ResSpmaView' in query:
@@ -163,8 +177,6 @@ class TeradataCheck(AgentCheck):
             'user': self.config.username,
             'password': self.config.password,
             'https_port': str(self.config.https_port),
-            'sslca': self.config.ssl_ca,
-            'sslcapath': self.config.ssl_ca_path,
             'sslmode': self.config.ssl_mode,
             'sslprotocol': self.config.ssl_protocol,
         }

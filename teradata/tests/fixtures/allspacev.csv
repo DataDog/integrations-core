@@ -1,0 +1,10 @@
+0,AdventureWorksDW,DBC,AdventureWorksDWBuildVersion,0,0,0,8192,0,0,0,8192,0,0,0,0,0,0,0,0,0,0,0
+0,AdventureWorksDW,DBC,DimDate,0,0,0,126976,0,0,0,126976,0,0,0,0,0,0,0,0,0,0,0
+0,AdventureWorksDW,DBC,All,250000000,19831497687,19831497687,34123776,0,0,0,34123776,0,0,0,,,250000000,19831497687,19831497687,0,0,0
+0,AdventureWorksDW,DBC,DimDepartmentGroup,0,0,0,8192,0,0,0,8192,0,0,0,0,0,0,0,0,0,0,0
+0,AdventureWorksDW,DBC,DimAccount,0,0,0,16384,0,0,0,16384,0,0,0,0,0,0,0,0,0,0,0
+0,AdventureWorksDW,DBC,DimGeography,0,0,0,36864,0,0,0,36864,0,0,0,0,0,0,0,0,0,0,0
+0,AdventureWorksDW,DBC,DimCurrency,0,0,0,12288,0,0,0,12288,0,0,0,0,0,0,0,0,0,0,0
+0,AdventureWorksDW,DBC,DimProductCategory,0,0,0,8192,0,0,0,8192,0,0,0,0,0,0,0,0,0,0,0
+0,AdventureWorksDW,DBC,DimCustomer,0,0,0,1314816,0,0,0,1314816,0,0,0,0,0,0,0,0,0,0,0
+0,AdventureWorksDW,DBC,DimProductSubcategory,0,0,0,12288,0,0,0,12288,0,0,0,0,0,0,0,0,0,0,0

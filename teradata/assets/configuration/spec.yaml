@@ -47,7 +47,7 @@ files:
         type: string
         example: system
     - name: collect_res_usage
-      description: Collect metrics from the SPMA Resource Table
+      description: Collect metrics from the SPMA Resource Table.
       value:
         type: boolean
         default: false
@@ -66,8 +66,7 @@ files:
         * Disable
         * Prefer
         * Require
-        * Verify-CA
-        * Verify-Full
+        Note: Verify-CA and Verify-Full are currently not available.
       value:
         type: string
         default: Prefer
@@ -76,28 +75,13 @@ files:
       value:
         type: string
         default: TLSv1.2
-    - name: ssl_ca
-      description: |
-        The full path of the directory containing the root certificates for trusted CAs. If `ssl_mode` is not set to
-        `Verify-CA` or `Verify-Full`, `ssl_ca` path or `ssl_ca_path` file name will be ignored.
-      value:
-        type: string
-        example: /path/to/ssl_ca_dir
-    - name: ssl_ca_path
-      description: |
-        The full path and name of a .pem file containing one or more certificates for
-        trusted Root and Intermediate CAs. If `ssl_mode` is not set to `Verify-CA` or `Verify-Full`,
-        `ssl_ca` path or `ssl_ca_path` file name will be ignored.
-      value:
-        type: string
-        example: /path/to/ssl_ca_file/ca.pem
     - name: auth_mechanism
       description: |
         The authentication mechanism for connecting to the Teradata data source. If no value is provided, the defined
         local default mechanism is used, otherwise the default mechanism defined by the database is used.
 
         Valid options are:
-        * TD2 - Selects Teradata 2 authentication mechanism. Username and password are required.
+        * TD2 - Selects Teradata 2 authentication mechanism. Username and password are required. (Default)
         * TDNEGO - Selects the Authentication Mechanism automatically based on the policy without user involvement.
         * LDAP - Selects LDAP as the authentication mechanism. Specify the username and password using the `auth_data`
                  configuration option.
