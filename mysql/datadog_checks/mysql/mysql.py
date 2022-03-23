@@ -35,6 +35,7 @@ from .const import (
     REPLICA_VARS,
     SCHEMA_VARS,
     STATUS_VARS,
+    DBM_MIGRATED_METRICS,
     SYNTHETIC_VARS,
     TABLE_VARS,
     VARIABLES_VARS,
@@ -293,6 +294,9 @@ class MySql(AgentCheck):
 
         # Get aggregate of all VARS we want to collect
         metrics = STATUS_VARS
+
+        if not self._config.dbm_enabled:
+            metrics.update(DBM_MIGRATED_METRICS)
 
         # collect results from db
         results = self._get_stats_from_status(db)

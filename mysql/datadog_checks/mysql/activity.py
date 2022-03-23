@@ -16,6 +16,7 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
+# TODO: Add count
 CONNECTIONS_QUERY = """\
 SELECT
     PROCESSLIST_USER,
@@ -29,29 +30,34 @@ WHERE
     PROCESSLIST_STATE IS NOT NULL
 """
 
+# TODO: Have an enumerated shared list of columns between all versions to clean up some stuff
+
 SYS_INNODB_LOCK_WAITS_57_COLUMNS = frozenset({'lock_waits.locked_table'})
 SYS_INNODB_LOCK_WAITS_80_COLUMNS = frozenset({'lock_waits.locked_table_name', 'lock_waits.locked_table_schema'})
 
 ACTIVITY_QUERY_57_AND_80 = """\
 SELECT
-    current_events.TIMER_START,
-    current_events.TIMER_END,
-    current_events.TIMER_WAIT,
+    current_events.TIMER_START AS event_timer_start,
+    current_events.TIMER_END AS event_timer_end,
     current_events.LOCK_TIME,
     current_events.SQL_TEXT,
     current_events.CURRENT_SCHEMA,
-    current_waits.EVENT_NAME,
+    current_waits.EVENT_NAME AS wait_event,
+    current_waits.TIMER_START AS wait_timer_start,
+    current_waits.TIMER_END AS wait_timer_end,
     threads.PROCESSLIST_ID,
     threads.PROCESSLIST_USER,
     threads.PROCESSLIST_HOST,
+    threads.PROCESSLIST_DB,
     threads.PROCESSLIST_COMMAND,
     threads.PROCESSLIST_STATE,
+    socket_instances.IP,
+    socket_instances.PORT,
     lock_waits.wait_started,
     lock_waits.wait_age,
     lock_waits.locked_index,
     lock_waits.locked_type,
     lock_waits.blocking_pid,
-    lock_waits.blocking_trx_started,
     lock_waits.blocking_trx_age,
     lock_waits.blocking_trx_rows_locked,
     lock_waits.blocking_trx_rows_modified,
@@ -63,6 +69,7 @@ FROM
     performance_schema.events_statements_current AS current_events
     JOIN performance_schema.events_waits_current AS current_waits ON current_events.THREAD_ID = current_waits.THREAD_ID
     JOIN performance_schema.threads AS threads ON current_waits.THREAD_ID = threads.THREAD_ID
+    JOIN performance_schema.socket_instances AS socket_instances ON current_waits.THREAD_ID = socket_instances.THREAD_ID
     LEFT JOIN sys.innodb_lock_waits AS lock_waits ON threads.PROCESSLIST_ID = lock_waits.waiting_pid
     LEFT JOIN INFORMATION_SCHEMA.INNODB_TRX AS innodb_trx ON threads.PROCESSLIST_ID = innodb_trx.trx_mysql_thread_id
     WHERE threads.PROCESSLIST_STATE IS NOT NULL
@@ -82,11 +89,14 @@ SELECT
     threads.PROCESSLIST_HOST,
     threads.PROCESSLIST_COMMAND,
     threads.PROCESSLIST_STATE,
+    socket_instances.IP,
+    socket_instances.PORT,
     locks_and_trx.*
 FROM
     performance_schema.events_statements_current AS current_events
     JOIN performance_schema.events_waits_current AS current_waits ON current_events.THREAD_ID = current_waits.THREAD_ID
     JOIN performance_schema.threads AS threads ON current_waits.THREAD_ID = threads.THREAD_ID
+    JOIN performance_schema.socket_instances AS socket_instances ON current_waits.THREAD_ID = socket_instances.THREAD_ID
     LEFT JOIN (
         SELECT
             innodb_trx_b.trx_mysql_thread_id AS waiting_thread,
@@ -239,7 +249,7 @@ class MySQLActivity(DBMAsyncJob):
     def _finalize_row(row, statement):
         # type: (Dict[str], Dict[str]) -> None
         obfuscated_statement = statement['query']
-        row['text'] = obfuscated_statement
+        row['SQL_TEXT'] = obfuscated_statement
         row['query_signature'] = compute_sql_signature(obfuscated_statement)
 
         metadata = statement['metadata']
