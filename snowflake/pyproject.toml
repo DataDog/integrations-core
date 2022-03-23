@@ -36,7 +36,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "snowflake-connector-python==2.6.0; python_version > '3.0'",
+    "snowflake-connector-python==2.7.6; python_version > '3.0'",
 ]
 
 [project.urls]

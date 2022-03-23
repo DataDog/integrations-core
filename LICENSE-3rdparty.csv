@@ -22,7 +22,7 @@ clickhouse-driver,PyPI,MIT,Konstantin Lebedev
 contextlib2,PyPI,PSF,Nick Coghlan
 cryptography,PyPI,Apache-2.0,The Python Cryptographic Authority and individual contributors | The cryptography developers
 cryptography,PyPI,BSD-3-Clause,The Python Cryptographic Authority and individual contributors | The cryptography developers
-cx-Oracle,PyPI,BSD-3-Clause,Anthony Tuininga
+cx-Oracle,PyPI,BSD-3-Clause,""Anthony Tuininga", | Anthony Tuininga"
 ddtrace,PyPI,BSD-3-Clause,"Datadog, Inc."
 dnspython,PyPI,ISC,Bob Halley
 enum34,PyPI,BSD-3-Clause,Ethan Furman
@@ -56,7 +56,7 @@ pyasn1,PyPI,BSD-3-Clause,Ilya Etingof
 pycryptodomex,PyPI,BSD-2-Clause,Helder Eijs
 pycryptodomex,PyPI,Unlicense,Helder Eijs
 pydantic,PyPI,MIT,Samuel Colvin
-pymongo,PyPI,Apache-2.0,Bernie Hackett
+pymongo,PyPI,Apache-2.0,Bernie Hackett | The MongoDB Python Team
 pymqi,PyPI,PSF,Dariusz Suchojad
 pyodbc,PyPI,MIT,Michael Kleehammer
 pysmi,PyPI,BSD-3-Clause,Ilya Etingof

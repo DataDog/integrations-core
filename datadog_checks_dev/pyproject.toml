@@ -40,7 +40,7 @@ dependencies = [
     "pytest-benchmark[histogram]>=3.2.1",
     "pytest-cov>=2.6.1",
     "pytest-mock",
-    "pyyaml==5.4.1",
+    "pyyaml>=5.4.1",
     "requests>=2.22.0",
     "shutilwhich==1.1.0; python_version < '3.0'",
     "six",

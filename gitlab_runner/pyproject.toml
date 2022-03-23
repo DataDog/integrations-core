@@ -37,7 +37,8 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "protobuf==3.7.0",
+    "protobuf==3.18.0; python_version < '3.0'",
+    "protobuf==3.19.4; python_version > '3.0'",
 ]
 
 [project.urls]
