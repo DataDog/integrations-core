@@ -82,7 +82,7 @@ instances:
     ## key: Path to a key file.
     ## cert: Path to a cert file.
     ## ca: Path to a CA bundle file.
-    ## check_hostname: Set to false to ignore the strict relationship between the certificate and the hostname
+    ## check_hostname: Set to false to ignore the strict relationship between the certificate and the hostname.
     #
     # ssl:
     #   key: <KEY_FILE_PATH>
@@ -474,17 +474,6 @@ instances:
     ## other integrations tags.
     #
     disable_generic_tags: true
-
-    ## @param metric_patterns - mapping - optional
-    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
-    ##
-    ## Metrics defined in `exclude` will take precedence in case of overlap.
-    #
-    # metric_patterns:
-    #   include:
-    #   - <INCLUDE_REGEX>
-    #   exclude:
-    #   - <EXCLUDE_REGEX>
 
 ## Log Section
 ##
