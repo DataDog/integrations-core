@@ -16,21 +16,20 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
-# TODO: Add count
 CONNECTIONS_QUERY = """\
 SELECT
     PROCESSLIST_USER,
     PROCESSLIST_HOST,
     PROCESSLIST_DB,
-    PROCESSLIST_STATE
+    PROCESSLIST_STATE,
+    COUNT(PROCESSLIST_USER) AS connections
 FROM
     performance_schema.threads
 WHERE
     PROCESSLIST_USER IS NOT NULL AND
     PROCESSLIST_STATE IS NOT NULL
+    GROUP BY PROCESSLIST_USER, PROCESSLIST_HOST, PROCESSLIST_DB, PROCESSLIST_STATE
 """
-
-# TODO: Have an enumerated shared list of columns between all versions to clean up some stuff
 
 SYS_INNODB_LOCK_WAITS_57_COLUMNS = frozenset({'lock_waits.locked_table'})
 SYS_INNODB_LOCK_WAITS_80_COLUMNS = frozenset({'lock_waits.locked_table_name', 'lock_waits.locked_table_schema'})
@@ -72,46 +71,11 @@ FROM
     JOIN performance_schema.socket_instances AS socket_instances ON current_waits.THREAD_ID = socket_instances.THREAD_ID
     LEFT JOIN sys.innodb_lock_waits AS lock_waits ON threads.PROCESSLIST_ID = lock_waits.waiting_pid
     LEFT JOIN INFORMATION_SCHEMA.INNODB_TRX AS innodb_trx ON threads.PROCESSLIST_ID = innodb_trx.trx_mysql_thread_id
-    WHERE threads.PROCESSLIST_STATE IS NOT NULL
-"""
-
-# TODO (alex.b): Figure out columns we need/want for this version
-ACTIVITY_QUERY_56 = """\
-SELECT
-    current_events.TIMER_START,
-    current_events.TIMER_END,
-    current_events.TIMER_WAIT,
-    current_events.SQL_TEXT,
-    current_events.CURRENT_SCHEMA,
-    current_waits.EVENT_NAME,
-    threads.PROCESSLIST_ID,
-    threads.PROCESSLIST_USER,
-    threads.PROCESSLIST_HOST,
-    threads.PROCESSLIST_COMMAND,
-    threads.PROCESSLIST_STATE,
-    socket_instances.IP,
-    socket_instances.PORT,
-    locks_and_trx.*
-FROM
-    performance_schema.events_statements_current AS current_events
-    JOIN performance_schema.events_waits_current AS current_waits ON current_events.THREAD_ID = current_waits.THREAD_ID
-    JOIN performance_schema.threads AS threads ON current_waits.THREAD_ID = threads.THREAD_ID
-    JOIN performance_schema.socket_instances AS socket_instances ON current_waits.THREAD_ID = socket_instances.THREAD_ID
-    LEFT JOIN (
-        SELECT
-            innodb_trx_b.trx_mysql_thread_id AS waiting_thread,
-            innodb_trx_a.trx_mysql_thread_id AS blocking_thread
-        FROM
-            INFORMATION_SCHEMA.INNODB_LOCK_WAITS AS lock_waits
-            JOIN INFORMATION_SCHEMA.INNODB_TRX AS innodb_trx_a ON innodb_trx_a.trx_id = lock_waits.blocking_trx_id
-            JOIN INFORMATION_SCHEMA.INNODB_TRX AS innodb_trx_b ON innodb_trx_b.trx_id = lock_waits.requesting_trx_id)
-            AS locks_and_trx ON threads.PROCESSLIST_ID = locks_and_trx.waiting_thread
-            WHERE threads.PROCESSLIST_STATE IS NOT NULL
+    WHERE threads.PROCESSLIST_ID != CONNECTION_ID() AND threads.PROCESSLIST_STATE IS NOT NULL
 """
 
 
 class MySQLVersion(Enum):
-
     # 8.0
     VERSION_80 = 80
     # 5.7
@@ -283,8 +247,6 @@ class MySQLActivity(DBMAsyncJob):
             return ACTIVITY_QUERY_57_AND_80.format(lock_wait_columns=', '.join(SYS_INNODB_LOCK_WAITS_80_COLUMNS))
         elif version == MySQLVersion.VERSION_57:
             return ACTIVITY_QUERY_57_AND_80.format(lock_wait_columns=', '.join(SYS_INNODB_LOCK_WAITS_57_COLUMNS))
-        elif version == MySQLVersion.VERSION_56:
-            return ACTIVITY_QUERY_56
 
     def _get_db_connection(self):
         """
