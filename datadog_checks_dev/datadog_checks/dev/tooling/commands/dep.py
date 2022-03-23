@@ -130,6 +130,12 @@ def sync():
     echo_info(f'Files updated: {len(updated_checks)}')
 
 
+def artifact_compatible_with_python(artifact, major_version):
+    python_version = artifact['python_version']
+
+    return f'py{major_version}' in python_version or f'cp{major_version}' in python_version
+
+
 async def get_version_data(url):
     async with request('GET', url) as response:
         try:
@@ -153,11 +159,9 @@ async def scrape_version_data(urls):
                 versions.append(version)
 
                 for artifact in artifacts:
-                    python_version = artifact['python_version']
-
-                    if latest_py2 is None and ('py2' in python_version or 'cp2' in python_version):
+                    if latest_py2 is None and artifact_compatible_with_python(artifact, '2'):
                         latest_py2 = version
-                    if latest_py3 is None and ('py3' in python_version or 'cp3' in python_version):
+                    if latest_py3 is None and artifact_compatible_with_python(artifact, '3'):
                         latest_py3 = version
 
                 if latest_py2 is not None and latest_py3 is not None:
@@ -207,7 +211,7 @@ def updates(ctx, sync_dependencies, include_security_deps, batch_size):
         dropped_py2 = len(set(new_python_versions.values())) > 1
         for python_version, package_version in new_python_versions.items():
             dependency_definitions = python_versions[python_version]
-            if not dependency_definitions:
+            if not dependency_definitions or package_version is None:
                 continue
             dependency_definition, checks = dependency_definitions.popitem()
 
