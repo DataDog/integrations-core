@@ -28,6 +28,14 @@ class CustomQuery(BaseModel):
     tags: Optional[Sequence[str]]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class ObfuscatorOptions(BaseModel):
     class Config:
         allow_mutation = False
@@ -109,6 +117,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     host: Optional[str]
     max_custom_queries: Optional[int]
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     obfuscator_options: Optional[ObfuscatorOptions]
     only_custom_queries: Optional[bool]
