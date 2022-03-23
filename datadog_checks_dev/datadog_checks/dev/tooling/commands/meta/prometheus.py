@@ -20,6 +20,7 @@ METADATA_CSV_HEADER = (
     'orientation,integration,short_name,curated_metric'
 )
 
+
 def sanitize_endpoint(endpoint):
     if not endpoint.startswith('http'):
         endpoint = f"http://{'localhost' if endpoint.startswith(':') else ''}{endpoint}"
