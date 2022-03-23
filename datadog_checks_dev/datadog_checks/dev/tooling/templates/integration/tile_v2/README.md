@@ -26,4 +26,10 @@
  
 Need help? Contact [Datadog support][1].
  
+ ## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Link text][1]
+
 [1]: https://docs.datadoghq.com/help/
