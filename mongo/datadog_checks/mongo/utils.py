@@ -4,7 +4,7 @@
 import re
 
 import pymongo
-from six.moves.urllib.parse import quote_plus, unquote_plus, urlencode, urlparse, urlunparse
+from six.moves.urllib.parse import quote_plus, unquote_plus, urlencode, urlunparse
 
 
 def build_connection_string(hosts, scheme, username=None, password=None, database=None, options=None):
@@ -38,17 +38,6 @@ def parse_mongo_uri(server, sanitize_username=False):
     Parses a MongoDB-formatted URI (e.g. mongodb://user:pass@server/db) and returns parsed elements
     and a sanitized URI.
     """
-    url_parts = urlparse(server)
-    if url_parts.username:
-        url_parts = url_parts._replace(
-            netloc=url_parts.netloc.replace(url_parts.username, quote_plus(url_parts.username))
-        )
-    if url_parts.password:
-        url_parts = url_parts._replace(
-            netloc=url_parts.netloc.replace(url_parts.password, quote_plus(url_parts.password))
-        )
-    server = urlunparse(url_parts)
-
     parsed = pymongo.uri_parser.parse_uri(server)
 
     username = parsed.get('username')
