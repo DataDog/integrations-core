@@ -36,16 +36,17 @@ WHERE
 SYS_INNODB_LOCK_WAITS_57_COLUMNS = frozenset({'lock_waits.locked_table'})
 SYS_INNODB_LOCK_WAITS_80_COLUMNS = frozenset({'lock_waits.locked_table_name', 'lock_waits.locked_table_schema'})
 
-ACTIVITY_QUERY_80 = """\
+ACTIVITY_QUERY = """\
 SELECT
-    statement.TIMER_START AS event_timer_start,
-    statement.TIMER_END AS event_timer_end,
-    statement.LOCK_TIME,
-    statement.CURRENT_SCHEMA,
+    event.TIMER_START AS event_timer_start,
+    event.TIMER_END AS event_timer_end,
+    event.LOCK_TIME,
+    event.CURRENT_SCHEMA,
     thread.PROCESSLIST_INFO AS SQL_TEXT,
-    REPLACE(REPLACE(substr(thread.PROCESSLIST_INFO, 1, 80), '\r', ''), '\n', '') AS sql_text_short,
-    IF (waits_statement.EVENT_ID = waits_statement.END_EVENT_ID, 'CPU',
-        COALESCE(waits_wait.EVENT_NAME, waits_statement.EVENT_NAME)) AS wait_event,
+    IF (PROCESSLIST_STATE ='User sleep',' User sleep', (
+      IF (waits_statement.EVENT_ID = waits_statement.END_EVENT_ID, 'CPU',
+         COALESCE(waits_wait.EVENT_NAME, waits_statement.EVENT_NAME))
+    )) AS wait_event,
     waits_statement.TIMER_START AS wait_timer_start,
     waits_statement.TIMER_END AS wait_timer_end,
     thread.thread_id,
@@ -56,12 +57,11 @@ SELECT
     thread.PROCESSLIST_COMMAND,
     thread.PROCESSLIST_STATE,
     socket.IP,
-    socket.PORT,
-    lock_wait.BLOCKING_THREAD_ID AS blocking_pid
+    socket.PORT
 FROM
     performance_schema.threads AS thread
-    LEFT JOIN performance_schema.events_statements_current AS statement
-        ON statement.THREAD_ID = thread.THREAD_ID
+    LEFT JOIN performance_schema.events_statements_current AS event
+        ON event.THREAD_ID = thread.THREAD_ID
     -- MySQL can potentially have two wait events for a given thread, so we pull both out and favor the one with 'WAIT'.
     LEFT JOIN performance_schema.events_waits_current AS waits_wait
         ON waits_wait.thread_id = thread.thread_id AND waits_wait.NESTING_EVENT_TYPE = 'WAIT'
@@ -69,59 +69,11 @@ FROM
         ON waits_statement.thread_id = thread.thread_id AND waits_statement.NESTING_EVENT_TYPE = 'STATEMENT'
     LEFT JOIN performance_schema.socket_instances AS socket
         ON thread.THREAD_ID = socket.THREAD_ID
-    LEFT JOIN performance_schema.data_lock_waits AS lock_wait
-        ON thread.THREAD_ID = lock_wait.REQUESTING_THREAD_ID
 WHERE
     thread.PROCESSLIST_STATE IS NOT NULL
     AND thread.PROCESSLIST_COMMAND != 'Sleep'
     AND thread.PROCESSLIST_COMMAND != 'Daemon'
     AND thread.PROCESSLIST_ID != CONNECTION_ID()
-"""
-
-ACTIVITY_QUERY_56_AND_57 = """
-SELECT
-    statement.TIMER_START AS event_timer_start,
-    statement.TIMER_END AS event_timer_end,
-    statement.LOCK_TIME,
-    statement.CURRENT_SCHEMA,
-    threads.PROCESSLIST_INFO AS SQL_TEXT,
-    REPLACE(REPLACE(substr(threads.PROCESSLIST_INFO, 1, 80), '\r', ''), '\n', '') AS sql_text_short,
-    IF (waits_statement.EVENT_ID = waits_statement.END_EVENT_ID, 'CPU', 
-        COALESCE(waits_wait.EVENT_NAME, waits_statement.EVENT_NAME)) AS wait_event,
-    waits_statement.TIMER_START AS wait_timer_start,
-    waits_statement.TIMER_END AS wait_timer_end,
-    threads.thread_id,
-    threads.PROCESSLIST_ID,
-    threads.PROCESSLIST_USER,
-    threads.PROCESSLIST_HOST,
-    threads.PROCESSLIST_DB,
-    threads.PROCESSLIST_COMMAND,
-    threads.PROCESSLIST_STATE,
-    socket.IP,
-    socket.PORT,
-    trx_b.trx_mysql_thread_id AS blocking_pid
-FROM 
-    performance_schema.threads AS threads
-    LEFT JOIN performance_schema.events_statements_current AS statement
-        ON statement.THREAD_ID = threads.THREAD_ID
-    -- MySQL can potentially have two wait events for a given thread, so we pull both out and favor the one with 'WAIT'.
-    LEFT JOIN performance_schema.events_waits_current AS waits_wait
-        ON waits_wait.thread_id = threads.thread_id AND waits_wait.NESTING_EVENT_TYPE = 'WAIT'
-    LEFT JOIN performance_schema.events_waits_current AS waits_statement
-        ON waits_statement.thread_id = threads.thread_id AND waits_statement.NESTING_EVENT_TYPE = 'STATEMENT'
-    LEFT JOIN performance_schema.socket_instances AS socket
-        ON threads.THREAD_ID = socket.THREAD_ID
-    LEFT JOIN information_schema.INNODB_TRX AS trx_a
-        ON threads.thread_id = trx_a.trx_mysql_thread_id
-    LEFT JOIN information_schema.innodb_lock_waits AS lock_wait
-        ON trx_a.trx_id = lock_wait.requesting_trx_id
-    LEFT JOIN information_schema.INNODB_TRX AS trx_b
-        ON lock_wait.blocking_trx_id = trx_b.trx_id
-WHERE
-    threads.PROCESSLIST_STATE IS NOT NULL
-    AND threads.PROCESSLIST_COMMAND != 'Sleep'
-    AND threads.PROCESSLIST_COMMAND != 'Daemon'
-    AND threads.PROCESSLIST_ID != CONNECTION_ID()
 """
 
 
@@ -293,10 +245,9 @@ class MySQLActivity(DBMAsyncJob):
     @staticmethod
     def _get_query_from_version(version):
         # type: (MySQLVersion) -> str
-        if version == MySQLVersion.VERSION_80:
-            return ACTIVITY_QUERY_80
-        elif version == MySQLVersion.VERSION_56 or version == MySQLVersion.VERSION_57:
-            return ACTIVITY_QUERY_56_AND_57
+        if version == MySQLVersion.VERSION_80 or version == MySQLVersion.VERSION_57:
+            return ACTIVITY_QUERY
+        raise Exception('Active sessions is not supported for this version=[{}]'.format(version))
 
     @staticmethod
     def _json_event_encoding(o):

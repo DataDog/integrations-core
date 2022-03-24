@@ -189,7 +189,12 @@ class MySql(AgentCheck):
                     dbm_tags = list(set(self.service_check_tags) | set(tags))
                     self._statement_metrics.run_job_loop(dbm_tags)
                     self._statement_samples.run_job_loop(dbm_tags)
-                    self._query_activity.run_job_loop(dbm_tags)
+                    if self.version.version_compatible((5, 7)):
+                        self._query_activity.run_job_loop(dbm_tags)
+                    else:
+                        self.log.warning(
+                            "Active sessions is currently not supported for this version=[%s]", self.version
+                        )
 
                 # keeping track of these:
                 self._put_qcache_stats()
