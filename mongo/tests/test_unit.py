@@ -123,8 +123,6 @@ def test_server_uri_sanitization(check, instance):
         ("mongodb://user:pass_%25@localhost:27017/admin", "mongodb://user:*****@localhost:27017/admin"),
         # same thing here, parsed username: `user%2`
         ("mongodb://user%2@localhost:27017/admin", "mongodb://user%2@localhost:27017/admin"),
-        # with the current sanitization approach, we expect the username to be decoded in the clean name
-        ("mongodb://user%25@localhost:27017/admin", "mongodb://user%@localhost:27017/admin"),
     )
 
     for server, expected_clean_name in server_names:
