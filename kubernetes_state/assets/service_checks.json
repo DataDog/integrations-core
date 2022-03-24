@@ -112,5 +112,21 @@
         ],
         "name": "Job completion status",
         "description": " Returns `CRITICAL` if a job failed. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.36.0",
+        "integration": "Kubernetes",
+        "check": "kubernetes_state.cronjob.complete",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+           "kube_cluster_name",
+           "kube_namespace",
+           "kube_cronjob"
+        ],
+        "name": "CronJob completion status",
+        "description": " Returns `CRITICAL` if the last job of a cronjob failed. Returns `OK` otherwise."
     }
 ]
