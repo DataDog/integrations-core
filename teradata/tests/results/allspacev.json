@@ -5,8 +5,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:AdventureWorksDWBuildVersion"
+      "td_account:$M00ADMR",
+      "td_table:AdventureWorksDWBuildVersion",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -16,8 +18,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:AdventureWorksDWBuildVersion"
+      "td_account:$M00ADMR",
+      "td_table:AdventureWorksDWBuildVersion",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -27,8 +31,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:AdventureWorksDWBuildVersion"
+      "td_account:$M00ADMR",
+      "td_table:AdventureWorksDWBuildVersion",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -38,8 +44,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:AdventureWorksDWBuildVersion"
+      "td_account:$M00ADMR",
+      "td_table:AdventureWorksDWBuildVersion",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 8192.0
   },
@@ -49,8 +57,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:AdventureWorksDWBuildVersion"
+      "td_account:$M00ADMR",
+      "td_table:AdventureWorksDWBuildVersion",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -60,8 +70,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:AdventureWorksDWBuildVersion"
+      "td_account:$M00ADMR",
+      "td_table:AdventureWorksDWBuildVersion",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -71,8 +83,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:AdventureWorksDWBuildVersion"
+      "td_account:$M00ADMR",
+      "td_table:AdventureWorksDWBuildVersion",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -82,8 +96,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:AdventureWorksDWBuildVersion"
+      "td_account:$M00ADMR",
+      "td_table:AdventureWorksDWBuildVersion",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 8192.0
   },
@@ -93,8 +109,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:AdventureWorksDWBuildVersion"
+      "td_account:$M00ADMR",
+      "td_table:AdventureWorksDWBuildVersion",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -104,8 +122,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:AdventureWorksDWBuildVersion"
+      "td_account:$M00ADMR",
+      "td_table:AdventureWorksDWBuildVersion",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -115,8 +135,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:AdventureWorksDWBuildVersion"
+      "td_account:$M00ADMR",
+      "td_table:AdventureWorksDWBuildVersion",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -126,8 +148,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:AdventureWorksDWBuildVersion"
+      "td_account:$M00ADMR",
+      "td_table:AdventureWorksDWBuildVersion",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -137,8 +161,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:AdventureWorksDWBuildVersion"
+      "td_account:$M00ADMR",
+      "td_table:AdventureWorksDWBuildVersion",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -148,8 +174,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:AdventureWorksDWBuildVersion"
+      "td_account:$M00ADMR",
+      "td_table:AdventureWorksDWBuildVersion",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -159,8 +187,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:AdventureWorksDWBuildVersion"
+      "td_account:$M00ADMR",
+      "td_table:AdventureWorksDWBuildVersion",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -170,8 +200,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:AdventureWorksDWBuildVersion"
+      "td_account:$M00ADMR",
+      "td_table:AdventureWorksDWBuildVersion",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -181,8 +213,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:AdventureWorksDWBuildVersion"
+      "td_account:$M00ADMR",
+      "td_table:AdventureWorksDWBuildVersion",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -192,8 +226,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:AdventureWorksDWBuildVersion"
+      "td_account:$M00ADMR",
+      "td_table:AdventureWorksDWBuildVersion",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -203,8 +239,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:AdventureWorksDWBuildVersion"
+      "td_account:$M00ADMR",
+      "td_table:AdventureWorksDWBuildVersion",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -214,217 +252,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDate"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.max_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDate"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.max_temp",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDate"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.curr_perm",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDate"
-    ],
-    "value": 126976.0
-  },
-  {
-    "name": "teradata.disk_space.curr_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDate"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.curr_persist_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDate"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.curr_temp",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDate"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.peak_perm",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDate"
-    ],
-    "value": 126976.0
-  },
-  {
-    "name": "teradata.disk_space.peak_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDate"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.peak_persist_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDate"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.peak_temp",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDate"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.max_prof_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDate"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.max_prof_temp",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDate"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.alloc_perm",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDate"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.alloc_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDate"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.alloc_temp",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDate"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.perm_skew",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDate"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.spool_skew",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDate"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.temp_skew",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDate"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.max_perm",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:All"
+      "td_account:$M00ADMR",
+      "td_table:All",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 250000000.0
   },
@@ -434,8 +265,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:All"
+      "td_account:$M00ADMR",
+      "td_table:All",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 19831497687.0
   },
@@ -445,8 +278,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:All"
+      "td_account:$M00ADMR",
+      "td_table:All",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 19831497687.0
   },
@@ -456,10 +291,12 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:All"
+      "td_account:$M00ADMR",
+      "td_table:All",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
-    "value": 34123776.0
+    "value": 34127872.0
   },
   {
     "name": "teradata.disk_space.curr_spool",
@@ -467,8 +304,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:All"
+      "td_account:$M00ADMR",
+      "td_table:All",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -478,8 +317,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:All"
+      "td_account:$M00ADMR",
+      "td_table:All",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -489,8 +330,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:All"
+      "td_account:$M00ADMR",
+      "td_table:All",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -500,10 +343,12 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:All"
+      "td_account:$M00ADMR",
+      "td_table:All",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
-    "value": 34123776.0
+    "value": 34127872.0
   },
   {
     "name": "teradata.disk_space.peak_spool",
@@ -511,8 +356,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:All"
+      "td_account:$M00ADMR",
+      "td_table:All",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -522,8 +369,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:All"
+      "td_account:$M00ADMR",
+      "td_table:All",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -533,32 +382,12 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:All"
+      "td_account:$M00ADMR",
+      "td_table:All",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.max_prof_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:All"
-    ],
-    "value": 0
-  },
-  {
-    "name": "teradata.disk_space.max_prof_temp",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:All"
-    ],
-    "value": 0
   },
   {
     "name": "teradata.disk_space.alloc_perm",
@@ -566,8 +395,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:All"
+      "td_account:$M00ADMR",
+      "td_table:All",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 250000000.0
   },
@@ -577,8 +408,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:All"
+      "td_account:$M00ADMR",
+      "td_table:All",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 19831497687.0
   },
@@ -588,8 +421,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:All"
+      "td_account:$M00ADMR",
+      "td_table:All",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 19831497687.0
   },
@@ -599,8 +434,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:All"
+      "td_account:$M00ADMR",
+      "td_table:All",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -610,8 +447,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:All"
+      "td_account:$M00ADMR",
+      "td_table:All",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -621,8 +460,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:All"
+      "td_account:$M00ADMR",
+      "td_table:All",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -632,8 +473,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDepartmentGroup"
+      "td_account:$M00ADMR",
+      "td_table:DimAccount",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -643,8 +486,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDepartmentGroup"
+      "td_account:$M00ADMR",
+      "td_table:DimAccount",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -654,8 +499,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDepartmentGroup"
+      "td_account:$M00ADMR",
+      "td_table:DimAccount",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -665,217 +512,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDepartmentGroup"
-    ],
-    "value": 8192.0
-  },
-  {
-    "name": "teradata.disk_space.curr_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDepartmentGroup"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.curr_persist_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDepartmentGroup"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.curr_temp",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDepartmentGroup"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.peak_perm",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDepartmentGroup"
-    ],
-    "value": 8192.0
-  },
-  {
-    "name": "teradata.disk_space.peak_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDepartmentGroup"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.peak_persist_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDepartmentGroup"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.peak_temp",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDepartmentGroup"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.max_prof_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDepartmentGroup"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.max_prof_temp",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDepartmentGroup"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.alloc_perm",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDepartmentGroup"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.alloc_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDepartmentGroup"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.alloc_temp",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDepartmentGroup"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.perm_skew",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDepartmentGroup"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.spool_skew",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDepartmentGroup"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.temp_skew",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimDepartmentGroup"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.max_perm",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimAccount"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.max_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimAccount"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.max_temp",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimAccount"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.curr_perm",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimAccount"
+      "td_account:$M00ADMR",
+      "td_table:DimAccount",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 16384.0
   },
@@ -885,8 +525,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimAccount"
+      "td_account:$M00ADMR",
+      "td_table:DimAccount",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -896,8 +538,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimAccount"
+      "td_account:$M00ADMR",
+      "td_table:DimAccount",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -907,8 +551,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimAccount"
+      "td_account:$M00ADMR",
+      "td_table:DimAccount",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -918,8 +564,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimAccount"
+      "td_account:$M00ADMR",
+      "td_table:DimAccount",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 16384.0
   },
@@ -929,8 +577,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimAccount"
+      "td_account:$M00ADMR",
+      "td_table:DimAccount",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -940,8 +590,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimAccount"
+      "td_account:$M00ADMR",
+      "td_table:DimAccount",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -951,8 +603,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimAccount"
+      "td_account:$M00ADMR",
+      "td_table:DimAccount",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -962,8 +616,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimAccount"
+      "td_account:$M00ADMR",
+      "td_table:DimAccount",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -973,8 +629,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimAccount"
+      "td_account:$M00ADMR",
+      "td_table:DimAccount",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -984,8 +642,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimAccount"
+      "td_account:$M00ADMR",
+      "td_table:DimAccount",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -995,8 +655,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimAccount"
+      "td_account:$M00ADMR",
+      "td_table:DimAccount",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1006,8 +668,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimAccount"
+      "td_account:$M00ADMR",
+      "td_table:DimAccount",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1017,8 +681,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimAccount"
+      "td_account:$M00ADMR",
+      "td_table:DimAccount",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1028,8 +694,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimAccount"
+      "td_account:$M00ADMR",
+      "td_table:DimAccount",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1039,8 +707,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimAccount"
+      "td_account:$M00ADMR",
+      "td_table:DimAccount",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1050,8 +720,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimGeography"
+      "td_account:$M00ADMR",
+      "td_table:DimCurrency",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1061,8 +733,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimGeography"
+      "td_account:$M00ADMR",
+      "td_table:DimCurrency",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1072,8 +746,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimGeography"
+      "td_account:$M00ADMR",
+      "td_table:DimCurrency",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1083,217 +759,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimGeography"
-    ],
-    "value": 36864.0
-  },
-  {
-    "name": "teradata.disk_space.curr_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimGeography"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.curr_persist_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimGeography"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.curr_temp",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimGeography"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.peak_perm",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimGeography"
-    ],
-    "value": 36864.0
-  },
-  {
-    "name": "teradata.disk_space.peak_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimGeography"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.peak_persist_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimGeography"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.peak_temp",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimGeography"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.max_prof_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimGeography"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.max_prof_temp",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimGeography"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.alloc_perm",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimGeography"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.alloc_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimGeography"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.alloc_temp",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimGeography"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.perm_skew",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimGeography"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.spool_skew",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimGeography"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.temp_skew",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimGeography"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.max_perm",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCurrency"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.max_spool",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCurrency"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.max_temp",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCurrency"
-    ],
-    "value": 0.0
-  },
-  {
-    "name": "teradata.disk_space.curr_perm",
-    "type": 0,
-    "tags": [
-      "td_vproc:0",
-      "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCurrency"
+      "td_account:$M00ADMR",
+      "td_table:DimCurrency",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 12288.0
   },
@@ -1303,8 +772,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCurrency"
+      "td_account:$M00ADMR",
+      "td_table:DimCurrency",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1314,8 +785,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCurrency"
+      "td_account:$M00ADMR",
+      "td_table:DimCurrency",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1325,8 +798,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCurrency"
+      "td_account:$M00ADMR",
+      "td_table:DimCurrency",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1336,8 +811,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCurrency"
+      "td_account:$M00ADMR",
+      "td_table:DimCurrency",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 12288.0
   },
@@ -1347,8 +824,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCurrency"
+      "td_account:$M00ADMR",
+      "td_table:DimCurrency",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1358,8 +837,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCurrency"
+      "td_account:$M00ADMR",
+      "td_table:DimCurrency",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1369,8 +850,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCurrency"
+      "td_account:$M00ADMR",
+      "td_table:DimCurrency",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1380,8 +863,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCurrency"
+      "td_account:$M00ADMR",
+      "td_table:DimCurrency",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1391,8 +876,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCurrency"
+      "td_account:$M00ADMR",
+      "td_table:DimCurrency",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1402,8 +889,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCurrency"
+      "td_account:$M00ADMR",
+      "td_table:DimCurrency",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1413,8 +902,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCurrency"
+      "td_account:$M00ADMR",
+      "td_table:DimCurrency",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1424,8 +915,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCurrency"
+      "td_account:$M00ADMR",
+      "td_table:DimCurrency",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1435,8 +928,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCurrency"
+      "td_account:$M00ADMR",
+      "td_table:DimCurrency",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1446,8 +941,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCurrency"
+      "td_account:$M00ADMR",
+      "td_table:DimCurrency",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1457,8 +954,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCurrency"
+      "td_account:$M00ADMR",
+      "td_table:DimCurrency",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1468,8 +967,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductCategory"
+      "td_account:$M00ADMR",
+      "td_table:DimDate",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1479,8 +980,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductCategory"
+      "td_account:$M00ADMR",
+      "td_table:DimDate",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1490,8 +993,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductCategory"
+      "td_account:$M00ADMR",
+      "td_table:DimDate",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1501,10 +1006,12 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductCategory"
+      "td_account:$M00ADMR",
+      "td_table:DimDate",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
-    "value": 8192.0
+    "value": 126976.0
   },
   {
     "name": "teradata.disk_space.curr_spool",
@@ -1512,8 +1019,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductCategory"
+      "td_account:$M00ADMR",
+      "td_table:DimDate",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1523,8 +1032,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductCategory"
+      "td_account:$M00ADMR",
+      "td_table:DimDate",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1534,8 +1045,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductCategory"
+      "td_account:$M00ADMR",
+      "td_table:DimDate",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1545,10 +1058,12 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductCategory"
+      "td_account:$M00ADMR",
+      "td_table:DimDate",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
-    "value": 8192.0
+    "value": 126976.0
   },
   {
     "name": "teradata.disk_space.peak_spool",
@@ -1556,8 +1071,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductCategory"
+      "td_account:$M00ADMR",
+      "td_table:DimDate",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1567,8 +1084,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductCategory"
+      "td_account:$M00ADMR",
+      "td_table:DimDate",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1578,8 +1097,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductCategory"
+      "td_account:$M00ADMR",
+      "td_table:DimDate",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1589,8 +1110,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductCategory"
+      "td_account:$M00ADMR",
+      "td_table:DimDate",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1600,8 +1123,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductCategory"
+      "td_account:$M00ADMR",
+      "td_table:DimDate",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1611,8 +1136,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductCategory"
+      "td_account:$M00ADMR",
+      "td_table:DimDate",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1622,8 +1149,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductCategory"
+      "td_account:$M00ADMR",
+      "td_table:DimDate",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1633,8 +1162,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductCategory"
+      "td_account:$M00ADMR",
+      "td_table:DimDate",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1644,8 +1175,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductCategory"
+      "td_account:$M00ADMR",
+      "td_table:DimDate",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1655,8 +1188,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductCategory"
+      "td_account:$M00ADMR",
+      "td_table:DimDate",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1666,8 +1201,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductCategory"
+      "td_account:$M00ADMR",
+      "td_table:DimDate",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1677,8 +1214,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCustomer"
+      "td_account:$M00ADMR",
+      "td_table:DimCustomer",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1688,8 +1227,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCustomer"
+      "td_account:$M00ADMR",
+      "td_table:DimCustomer",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1699,8 +1240,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCustomer"
+      "td_account:$M00ADMR",
+      "td_table:DimCustomer",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1710,8 +1253,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCustomer"
+      "td_account:$M00ADMR",
+      "td_table:DimCustomer",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 1314816.0
   },
@@ -1721,8 +1266,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCustomer"
+      "td_account:$M00ADMR",
+      "td_table:DimCustomer",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1732,8 +1279,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCustomer"
+      "td_account:$M00ADMR",
+      "td_table:DimCustomer",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1743,8 +1292,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCustomer"
+      "td_account:$M00ADMR",
+      "td_table:DimCustomer",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1754,8 +1305,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCustomer"
+      "td_account:$M00ADMR",
+      "td_table:DimCustomer",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 1314816.0
   },
@@ -1765,8 +1318,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCustomer"
+      "td_account:$M00ADMR",
+      "td_table:DimCustomer",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1776,8 +1331,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCustomer"
+      "td_account:$M00ADMR",
+      "td_table:DimCustomer",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1787,8 +1344,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCustomer"
+      "td_account:$M00ADMR",
+      "td_table:DimCustomer",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1798,8 +1357,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCustomer"
+      "td_account:$M00ADMR",
+      "td_table:DimCustomer",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1809,8 +1370,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCustomer"
+      "td_account:$M00ADMR",
+      "td_table:DimCustomer",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1820,8 +1383,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCustomer"
+      "td_account:$M00ADMR",
+      "td_table:DimCustomer",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1831,8 +1396,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCustomer"
+      "td_account:$M00ADMR",
+      "td_table:DimCustomer",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1842,8 +1409,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCustomer"
+      "td_account:$M00ADMR",
+      "td_table:DimCustomer",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1853,8 +1422,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCustomer"
+      "td_account:$M00ADMR",
+      "td_table:DimCustomer",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1864,8 +1435,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCustomer"
+      "td_account:$M00ADMR",
+      "td_table:DimCustomer",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1875,8 +1448,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimCustomer"
+      "td_account:$M00ADMR",
+      "td_table:DimCustomer",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1886,8 +1461,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductSubcategory"
+      "td_account:$M00ADMR",
+      "td_table:DimEmployee",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1897,8 +1474,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductSubcategory"
+      "td_account:$M00ADMR",
+      "td_table:DimEmployee",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1908,8 +1487,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductSubcategory"
+      "td_account:$M00ADMR",
+      "td_table:DimEmployee",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1919,10 +1500,12 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductSubcategory"
+      "td_account:$M00ADMR",
+      "td_table:DimEmployee",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
-    "value": 12288.0
+    "value": 4685824.0
   },
   {
     "name": "teradata.disk_space.curr_spool",
@@ -1930,8 +1513,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductSubcategory"
+      "td_account:$M00ADMR",
+      "td_table:DimEmployee",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1941,8 +1526,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductSubcategory"
+      "td_account:$M00ADMR",
+      "td_table:DimEmployee",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1952,8 +1539,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductSubcategory"
+      "td_account:$M00ADMR",
+      "td_table:DimEmployee",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1963,10 +1552,12 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductSubcategory"
+      "td_account:$M00ADMR",
+      "td_table:DimEmployee",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
-    "value": 12288.0
+    "value": 4685824.0
   },
   {
     "name": "teradata.disk_space.peak_spool",
@@ -1974,8 +1565,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductSubcategory"
+      "td_account:$M00ADMR",
+      "td_table:DimEmployee",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1985,8 +1578,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductSubcategory"
+      "td_account:$M00ADMR",
+      "td_table:DimEmployee",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -1996,8 +1591,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductSubcategory"
+      "td_account:$M00ADMR",
+      "td_table:DimEmployee",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -2007,8 +1604,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductSubcategory"
+      "td_account:$M00ADMR",
+      "td_table:DimEmployee",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -2018,8 +1617,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductSubcategory"
+      "td_account:$M00ADMR",
+      "td_table:DimEmployee",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -2029,8 +1630,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductSubcategory"
+      "td_account:$M00ADMR",
+      "td_table:DimEmployee",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -2040,8 +1643,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductSubcategory"
+      "td_account:$M00ADMR",
+      "td_table:DimEmployee",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -2051,8 +1656,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductSubcategory"
+      "td_account:$M00ADMR",
+      "td_table:DimEmployee",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -2062,8 +1669,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductSubcategory"
+      "td_account:$M00ADMR",
+      "td_table:DimEmployee",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -2073,8 +1682,10 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductSubcategory"
+      "td_account:$M00ADMR",
+      "td_table:DimEmployee",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   },
@@ -2084,8 +1695,751 @@
     "tags": [
       "td_vproc:0",
       "td_database:AdventureWorksDW",
-      "td_account:DBC",
-      "td_table:DimProductSubcategory"
+      "td_account:$M00ADMR",
+      "td_table:DimEmployee",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.max_perm",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimDepartmentGroup",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.max_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimDepartmentGroup",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.max_temp",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimDepartmentGroup",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.curr_perm",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimDepartmentGroup",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 8192.0
+  },
+  {
+    "name": "teradata.disk_space.curr_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimDepartmentGroup",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.curr_persist_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimDepartmentGroup",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.curr_temp",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimDepartmentGroup",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.peak_perm",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimDepartmentGroup",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 8192.0
+  },
+  {
+    "name": "teradata.disk_space.peak_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimDepartmentGroup",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.peak_persist_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimDepartmentGroup",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.peak_temp",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimDepartmentGroup",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.max_prof_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimDepartmentGroup",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.max_prof_temp",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimDepartmentGroup",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.alloc_perm",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimDepartmentGroup",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.alloc_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimDepartmentGroup",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.alloc_temp",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimDepartmentGroup",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.perm_skew",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimDepartmentGroup",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.spool_skew",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimDepartmentGroup",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.temp_skew",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimDepartmentGroup",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.max_perm",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimSalesReason",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.max_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimSalesReason",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.max_temp",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimSalesReason",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.curr_perm",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimSalesReason",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 12288.0
+  },
+  {
+    "name": "teradata.disk_space.curr_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimSalesReason",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.curr_persist_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimSalesReason",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.curr_temp",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimSalesReason",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.peak_perm",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimSalesReason",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 12288.0
+  },
+  {
+    "name": "teradata.disk_space.peak_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimSalesReason",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.peak_persist_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimSalesReason",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.peak_temp",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimSalesReason",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.max_prof_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimSalesReason",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.max_prof_temp",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimSalesReason",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.alloc_perm",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimSalesReason",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.alloc_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimSalesReason",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.alloc_temp",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimSalesReason",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.perm_skew",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimSalesReason",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.spool_skew",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimSalesReason",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.temp_skew",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimSalesReason",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.max_perm",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimGeography",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.max_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimGeography",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.max_temp",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimGeography",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.curr_perm",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimGeography",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 36864.0
+  },
+  {
+    "name": "teradata.disk_space.curr_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimGeography",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.curr_persist_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimGeography",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.curr_temp",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimGeography",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.peak_perm",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimGeography",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 36864.0
+  },
+  {
+    "name": "teradata.disk_space.peak_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimGeography",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.peak_persist_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimGeography",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.peak_temp",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimGeography",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.max_prof_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimGeography",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.max_prof_temp",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimGeography",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.alloc_perm",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimGeography",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.alloc_spool",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimGeography",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.alloc_temp",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimGeography",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.perm_skew",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimGeography",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.spool_skew",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimGeography",
+      "teradata_server:localhost",
+      "teradata_port:1025"
+    ],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.disk_space.temp_skew",
+    "type": 0,
+    "tags": [
+      "td_vproc:0",
+      "td_database:AdventureWorksDW",
+      "td_account:$M00ADMR",
+      "td_table:DimGeography",
+      "teradata_server:localhost",
+      "teradata_port:1025"
     ],
     "value": 0.0
   }

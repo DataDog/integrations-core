@@ -30,8 +30,9 @@ class TeradataCheck(AgentCheck):
         super(TeradataCheck, self).__init__(name, init_config, instances)
         self.config = TeradataConfig(self.instance)
         self._connection = None
-        self._server_tag = 'teradata_server:{}:{}'.format(self.config.server, self.config.port)
-        self._tags = [self._server_tag] + self.config.tags
+        self._server_tag = 'teradata_server:{}'.format(self.config.server)
+        self._port_tag = 'teradata_port:{}'.format(self.config.port)
+        self._tags = [self._server_tag, self._port_tag] + self.config.tags
 
         manager_queries = []
         if self.config.collect_res_usage:

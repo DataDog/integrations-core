@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import logging
 
 import mock
 import pytest
@@ -13,7 +14,9 @@ except ImportError:
 
 from datadog_checks.teradata.check import TeradataCheck
 
-from .common import CHECK_NAME
+from .common import CHECK_NAME, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY, mock_bad_executor
+
+EXPECTED_TAGS = ["teradata_server:localhost", "teradata_port:1025", "td_env:dev"]
 
 
 @pytest.mark.parametrize(
@@ -26,7 +29,7 @@ from .common import CHECK_NAME
                 'password': 'dd_teradata',
                 'database': 'AdventureWorksDW',
             },
-            ['teradata_server:localhost:1025'],
+            ['teradata_server:localhost', 'teradata_port:1025'],
             {
                 "host": "localhost",
                 "account": None,
@@ -50,7 +53,7 @@ from .common import CHECK_NAME
                 'password': 'td_datadog',
                 'database': 'AdventureWorksDW',
             },
-            ['teradata_server:td-internal:1125'],
+            ['teradata_server:td-internal', 'teradata_port:1125'],
             {
                 "host": "td-internal",
                 "account": None,
@@ -73,7 +76,7 @@ from .common import CHECK_NAME
                 'password': 'td_datadog',
                 'database': 'AdventureWorksDW',
             },
-            ['teradata_server:localhost:1025'],
+            ['teradata_server:localhost', 'teradata_port:1025'],
             {
                 "host": "localhost",
                 "account": None,
@@ -98,7 +101,7 @@ from .common import CHECK_NAME
                 'password': 'td_datadog',
                 'database': 'AdventureWorksDW',
             },
-            ['teradata_server:localhost:1025'],
+            ['teradata_server:localhost', 'teradata_port:1025'],
             {
                 "host": "localhost",
                 "account": None,
@@ -122,7 +125,7 @@ from .common import CHECK_NAME
                 'RG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
                 'database': 'AdventureWorksDW',
             },
-            ['teradata_server:localhost:1025'],
+            ['teradata_server:localhost', 'teradata_port:1025'],
             {
                 "host": "localhost",
                 "account": None,
@@ -146,7 +149,7 @@ from .common import CHECK_NAME
                 'auth_data': 'dd@localhost@@td_datadog',
                 'database': 'AdventureWorksDW',
             },
-            ['teradata_server:localhost:1025'],
+            ['teradata_server:localhost', 'teradata_port:1025'],
             {
                 "host": "localhost",
                 "account": None,
@@ -169,7 +172,7 @@ from .common import CHECK_NAME
                 'auth_data': 'dd@@td_datadog',
                 'database': 'AdventureWorksDW',
             },
-            ['teradata_server:localhost:1025'],
+            ['teradata_server:localhost', 'teradata_port:1025'],
             {
                 "host": "localhost",
                 "account": None,
@@ -191,7 +194,7 @@ from .common import CHECK_NAME
                 'auth_mechanism': 'TDNEGO',
                 'database': 'AdventureWorksDW',
             },
-            ['teradata_server:localhost:1025'],
+            ['teradata_server:localhost', 'teradata_port:1025'],
             {
                 "host": "localhost",
                 "account": None,
@@ -215,7 +218,7 @@ from .common import CHECK_NAME
                 'auth_mechanism': 'TD2',
                 'database': 'AdventureWorksDW',
             },
-            ['teradata_server:localhost:1025'],
+            ['teradata_server:localhost', 'teradata_port:1025'],
             {
                 "host": "localhost",
                 "account": None,
@@ -255,4 +258,79 @@ def test__connect(test_instance, dd_run_check, aggregator, expected_tags, conn_p
         assert check._connection == conn
 
     teradatasql.connect.assert_called_with(json.dumps(conn_params))
-    aggregator.assert_service_check("teradata.can_connect", check.OK, tags=expected_tags)
+    aggregator.assert_service_check(SERVICE_CHECK_CONNECT, check.OK, tags=expected_tags)
+    aggregator.assert_service_check(SERVICE_CHECK_QUERY, check.OK, tags=expected_tags)
+
+
+def test_import_error(dd_run_check, aggregator, instance):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+
+    teradatasql = mock.MagicMock()
+    teradatasql.return_value = ImportError
+    mock_import_error = mock.MagicMock()
+
+    mocks = [
+        ('datadog_checks.teradata.check.teradatasql', teradatasql),
+        ('datadog_checks.teradata.check.TERADATASQL_IMPORT_ERROR', mock_import_error),
+    ]
+    with pytest.raises(Exception):
+        with ExitStack() as stack:
+            for mock_call in mocks:
+                stack.enter_context(mock.patch(*mock_call))
+            dd_run_check(check)
+        assert check._connection is None
+        assert mock_import_error == ImportError
+        aggregator.assert_service_check(SERVICE_CHECK_CONNECT, check.CRITICAL, tags=EXPECTED_TAGS)
+        aggregator.assert_service_check(SERVICE_CHECK_QUERY, check.CRITICAL, tags=EXPECTED_TAGS)
+
+
+def test_cant_query_can_connect(dd_run_check, aggregator, instance):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    conn = mock.MagicMock()
+    check._query_manager.executor = mock_bad_executor()
+
+    teradatasql = mock.MagicMock()
+    teradatasql.connect.return_value = conn
+
+    check._connection_errors = 0
+    check._query_errors = 1
+
+    mocks = [
+        ('datadog_checks.teradata.check.teradatasql', teradatasql),
+        ('datadog_checks.teradata.check.TERADATASQL_IMPORT_ERROR', None),
+    ]
+
+    with pytest.raises(Exception):
+        with ExitStack() as stack:
+            for mock_call in mocks:
+                stack.enter_context(mock.patch(*mock_call))
+            dd_run_check(check)
+
+        aggregator.assert_service_check(SERVICE_CHECK_CONNECT, check.OK, tags=EXPECTED_TAGS)
+        aggregator.assert_service_check(SERVICE_CHECK_QUERY, check.CRITICAL, tags=EXPECTED_TAGS)
+
+
+def test_no_rows_returned(mock_cursor,dd_run_check, aggregator, instance, caplog):
+    caplog.clear()
+    caplog.set_level(logging.WARNING)
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    conn = mock.MagicMock()
+    cursor = mock.MagicMock(mock_cursor)
+    cursor.rowcount.return_value = 0
+
+    teradatasql = mock.MagicMock()
+    teradatasql.connect.return_value = conn
+
+    mocks = [
+        ('datadog_checks.teradata.check.teradatasql', teradatasql),
+        ('datadog_checks.teradata.check.TERADATASQL_IMPORT_ERROR', None),
+    ]
+
+    with ExitStack() as stack:
+        for mock_call in mocks:
+            stack.enter_context(mock.patch(*mock_call))
+        dd_run_check(check)
+
+    assert "Failed to fetch records from query:" in caplog.text
+    aggregator.assert_service_check(SERVICE_CHECK_CONNECT, check.OK, tags=EXPECTED_TAGS)
+    aggregator.assert_service_check(SERVICE_CHECK_QUERY, check.CRITICAL, tags=EXPECTED_TAGS)

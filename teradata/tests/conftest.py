@@ -12,12 +12,11 @@ import pytest
 
 from datadog_checks.dev import get_here
 
+from .common import TERADATA_DD_PW, TERADATA_DD_USER, TERADATA_SERVER
+
 TABLE_EXTRACTION_PATTERN = re.compile(r'SELECT .* FROM \w+\.(\w+)')
 HERE = get_here()
 
-TERADATA_SERVER = os.environ.get('TERADATA_SERVER')
-TERADATA_DD_USER = os.environ.get('TERADATA_DD_USER')
-TERADATA_DD_PW = os.environ.get('TERADATA_DD_PW')
 
 CONFIG = {
     'server': 'localhost',
@@ -45,6 +44,9 @@ def _mock_execute(query):
     with open(file, 'r') as f:
         reader = csv.reader(f)
         for line in reader:
+            for idx, col in enumerate(line):
+                if col == '':
+                    line[idx] = None
             yield line
 
 
@@ -56,13 +58,6 @@ def dd_environment():
 @pytest.fixture(scope='session')
 def instance():
     return deepcopy(CONFIG)
-
-
-@pytest.fixture
-def instance_res_usage():
-    instance = deepcopy(CONFIG)
-    instance['collect_res_usage'] = True
-    return instance
 
 
 @pytest.fixture
@@ -86,7 +81,7 @@ def mock_cursor():
 
 @pytest.fixture()
 def expected_metrics():
-    file_names = ['ampusagev.json']
+    file_names = ['allspacev.json', 'ampusagev.json', 'resspmaview.json']
     metrics = []
     for file_name in file_names:
         with open(os.path.join(HERE, 'results', file_name), 'r') as f:

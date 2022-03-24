@@ -6,12 +6,10 @@
 # https://docs.teradata.com/r/Teradata-VantageTM-Data-Dictionary/July-2021/Views-Reference/AllSpaceV-X
 DISK_SPACE = {
     "name": "disk_space",
-    "query": """
-        SELECT Vproc, TRIM(BOTH FROM DatabaseName), TRIM(BOTH FROM AccountName), TRIM(BOTH FROM TableName), MaxPerm,
-        MaxSpool, MaxTemp, CurrentPerm, CurrentSpool, CurrentPersistentSpool, CurrentTemp, PeakPerm, PeakSpool,
-        PeakPersistentSpool, PeakTemp, MaxProfileSpool, MaxProfileTemp, AllocatedPerm, AllocatedSpool, AllocatedTemp,
-        PermSkew, SpoolSkew, TempSkew FROM DBC.AllSpaceV WHERE DatabaseName='{}';
-        """,
+    "query": "SELECT Vproc, TRIM(BOTH FROM DatabaseName), TRIM(BOTH FROM AccountName), TRIM(BOTH FROM TableName), "
+    "MaxPerm, MaxSpool, MaxTemp, CurrentPerm, CurrentSpool, CurrentPersistentSpool, CurrentTemp, PeakPerm, "
+    "PeakSpool, PeakPersistentSpool, PeakTemp, MaxProfileSpool, MaxProfileTemp, AllocatedPerm, AllocatedSpool,"
+    "AllocatedTemp, PermSkew, SpoolSkew, TempSkew FROM DBC.AllSpaceV WHERE DatabaseName='{}';",
     "columns": [
         {"name": "td_vproc", "type": "tag"},
         {"name": "td_database", "type": "tag"},
@@ -43,7 +41,7 @@ DISK_SPACE = {
 # https://docs.teradata.com/r/Teradata-VantageTM-Data-Dictionary/July-2021/Views-Reference/AMPUsageV-X
 AMP_USAGE = {
     "name": "amp_usage",
-    "query": "SELECT TRIM(BOTH FROM AccountName), TRIM(BOTH FROM UserName), Vproc, TRIM(BOTH FROM VprocType), CpuTime, "
+    "query": "SELECT TRIM(BOTH FROM AccountName), TRIM(BOTH FROM UserName), Vproc, TRIM(BOTH FROM VprocType), CpuTime,"
     "DiskIO, CPUTimeNorm FROM DBC.AMPUsageV;",
     "columns": [
         {"name": "td_account", "type": "tag"},
@@ -60,14 +58,13 @@ AMP_USAGE = {
 # https://docs.teradata.com/r/Teradata-VantageTM-Resource-Usage-Macros-and-Tables/July-2021/ResUsageSpma-Table
 RESOURCE_USAGE = {
     "name": "resource_usage",
-    "query": """
-        SELECT TOP 1 TheTimestamp, FileLockBlocks, FileLockDeadlocks, FileLockEnters, DBLockBlocks, DBLockDeadlocks,
-        IoThrottleCount, IoThrottleTime, IoThrottleTimeMax, MemCtxtPageReads, MemCtxtPageWrites, MemTextPageReads,
-        VHCacheKB, KernMemInuseKB, SegMDLInuseKB, SegMaxAvailMB, SegInuseMB, SegCacheMB, SegMDLAlloc, SegMDLFree,
-        SegMDLRelease, SegMDLRecycle, SegMDLAllocKB, SegMDLFreeKB, SegMDLReleaseKB, SegMDLRecycleKB, FsgCacheKB,
-        PageMajorFaults, PageMinorFaults, ProcBlocked, ProcReady, ProcReadyMax, CPUIdle, CPUIoWait, CPUUServ, CPUUExec,
-        CpuThrottleCount, CpuThrottleTime FROM DBC.ResSpmaView ORDER BY TheTimestamp DESC NULLS LAST;
-        """,
+    "query": "SELECT TOP 1 TheTimestamp, FileLockBlocks, FileLockDeadlocks, FileLockEnters, DBLockBlocks, "
+    "DBLockDeadlocks, IoThrottleCount, IoThrottleTime, IoThrottleTimeMax, MemCtxtPageReads, MemCtxtPageWrites,"
+    "MemTextPageReads, VHCacheKB, KernMemInuseKB, SegMDLInuseKB, SegMaxAvailMB, SegInuseMB, SegCacheMB, "
+    "SegMDLAlloc, SegMDLFree, SegMDLRelease, SegMDLRecycle, SegMDLAllocKB, SegMDLFreeKB, SegMDLReleaseKB, "
+    "SegMDLRecycleKB, FsgCacheKB, PageMajorFaults, PageMinorFaults, ProcBlocked, ProcReady, ProcReadyMax, "
+    "CPUIdle, CPUIoWait, CPUUServ, CPUUExec, CpuThrottleCount, CpuThrottleTime FROM DBC.ResSpmaView "
+    "ORDER BY TheTimestamp DESC;",
     "columns": [
         {"name": "timestamp", "type": "source"},
         {"name": "file_lock.blocks", "type": "gauge"},
