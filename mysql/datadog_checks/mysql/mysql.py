@@ -22,6 +22,7 @@ from .config import MySQLConfig
 from .const import (
     BINLOG_VARS,
     COUNT,
+    DBM_MIGRATED_METRICS,
     GALERA_VARS,
     GAUGE,
     GROUP_REPLICATION_VARS,
@@ -35,7 +36,6 @@ from .const import (
     REPLICA_VARS,
     SCHEMA_VARS,
     STATUS_VARS,
-    DBM_MIGRATED_METRICS,
     SYNTHETIC_VARS,
     TABLE_VARS,
     VARIABLES_VARS,

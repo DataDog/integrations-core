@@ -1,3 +1,5 @@
+import datetime
+import decimal
 import time
 from contextlib import closing
 from enum import Enum
@@ -5,9 +7,9 @@ from typing import Dict, List
 
 import pymysql
 
-from datadog_checks.base import is_affirmative
+from datadog_checks.base import is_affirmative, to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
@@ -112,11 +114,13 @@ class MySQLActivity(DBMAsyncJob):
             shutdown_callback=self._close_db_conn,
         )
         self._check = check
+        self._config = config
         self._log = check.log
 
         self._connection_args = connection_args
         self._db = None
         self._db_version = None
+        self._obfuscator_options = to_native_string(json.dumps(self._config.obfuscator_options))
 
     def run_job(self):
         # type: () -> None
@@ -142,7 +146,7 @@ class MySQLActivity(DBMAsyncJob):
                 return
             rows = self._normalize_rows(rows)
             event = self._create_activity_event(rows, connections)
-            payload = json.dumps(event, default=default_json_event_encoding)
+            payload = json.dumps(event, default=self._json_event_encoding)
             self._check.database_monitoring_query_activity(payload)
         self._check.histogram(
             "dd.mysql.activity.collect_activity.payload_size",
@@ -188,9 +192,7 @@ class MySQLActivity(DBMAsyncJob):
     @staticmethod
     def _sort_key(row):
         # type: (Dict[str]) -> int
-        # If an event is produced from an instrument that has TIMED = NO, timing information is not collected,
-        # and TIMER_START, TIMER_END, and TIMER_WAIT are all NULL. Time is in picoseconds.
-        return row.get('TIMER_START') or int(round(time.time() * 1e12))
+        return row.get('event_timer_start') or int(round(time.time() * 1e12))
 
     def _obfuscate_and_sanitize_row(self, row):
         # type: (Dict[str]) -> Dict[str]
@@ -198,7 +200,7 @@ class MySQLActivity(DBMAsyncJob):
         if 'SQL_TEXT' not in row:
             return row
         try:
-            self._finalize_row(row, obfuscate_sql_with_metadata(row['SQL_TEXT'], self._check.obfuscator_options))
+            self._finalize_row(row, obfuscate_sql_with_metadata(row['SQL_TEXT'], self._obfuscator_options))
         except Exception as e:
             row['SQL_TEXT'] = 'ERROR: failed to obfuscate'
             self._log.debug("Failed to obfuscate | err=[%s]", e)
@@ -247,6 +249,18 @@ class MySQLActivity(DBMAsyncJob):
             return ACTIVITY_QUERY_57_AND_80.format(lock_wait_columns=', '.join(SYS_INNODB_LOCK_WAITS_80_COLUMNS))
         elif version == MySQLVersion.VERSION_57:
             return ACTIVITY_QUERY_57_AND_80.format(lock_wait_columns=', '.join(SYS_INNODB_LOCK_WAITS_57_COLUMNS))
+
+    @staticmethod
+    def _json_event_encoding(o):
+        # We have a similar event encoder in the base check, but to iterate quickly,
+        # we create a custom one here that parses differently.
+        if isinstance(o, decimal.Decimal):
+            return float(o)
+        if isinstance(o, (datetime.date, datetime.datetime)):
+            return o.isoformat()
+        if isinstance(o, datetime.timedelta):
+            return int(o.total_seconds())
+        raise TypeError
 
     def _get_db_connection(self):
         """
