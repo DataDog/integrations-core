@@ -33,15 +33,12 @@ WHERE
     GROUP BY PROCESSLIST_USER, PROCESSLIST_HOST, PROCESSLIST_DB, PROCESSLIST_STATE
 """
 
-SYS_INNODB_LOCK_WAITS_57_COLUMNS = frozenset({'lock_waits.locked_table'})
-SYS_INNODB_LOCK_WAITS_80_COLUMNS = frozenset({'lock_waits.locked_table_name', 'lock_waits.locked_table_schema'})
-
 ACTIVITY_QUERY = """\
 SELECT
-    event.TIMER_START AS event_timer_start,
-    event.TIMER_END AS event_timer_end,
-    event.LOCK_TIME,
-    event.CURRENT_SCHEMA,
+    stmt.TIMER_START AS stmt_timer_start,
+    stmt.TIMER_END AS stmt_timer_end,
+    stmt.LOCK_TIME,
+    stmt.CURRENT_SCHEMA,
     thread.PROCESSLIST_INFO AS SQL_TEXT,
     IF (PROCESSLIST_STATE ='User sleep',' User sleep', (
       IF (waits_statement.EVENT_ID = waits_statement.END_EVENT_ID, 'CPU',
@@ -60,9 +57,9 @@ SELECT
     socket.PORT
 FROM
     performance_schema.threads AS thread
-    LEFT JOIN performance_schema.events_statements_current AS event
-        ON event.THREAD_ID = thread.THREAD_ID
-    -- MySQL can potentially have two wait events for a given thread, so we pull both out and favor the one with 'WAIT'.
+    LEFT JOIN performance_schema.events_statements_current AS stmt
+        ON stmt.THREAD_ID = thread.THREAD_ID and stmt.NESTING_EVENT_LEVEL = 0
+    -- MySQL can potentially have two wait events for a given thread, so we pull both out and favor the one with 'WAIT'
     LEFT JOIN performance_schema.events_waits_current AS waits_wait
         ON waits_wait.thread_id = thread.thread_id AND waits_wait.NESTING_EVENT_TYPE = 'WAIT'
     LEFT JOIN performance_schema.events_waits_current AS waits_statement
