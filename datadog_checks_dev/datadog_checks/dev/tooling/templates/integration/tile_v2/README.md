@@ -20,7 +20,7 @@
  
 < Steps to validate that the app is functioning as expected. If no validation steps are needed, delete this section >
  
-## Troubleshooting
+## Support
  
 < Add any links to relevant documentation regarding your Datadog app >
  
