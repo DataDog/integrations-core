@@ -28,6 +28,7 @@ QUANTITIES = {'12k': 12 * 1000, '12M': 12 * (1000 * 1000), '12Ki': 12.0 * 1024, 
 KUBE_POST_1_16 = '1.16'
 KUBE_1_14 = '1.14'
 KUBE_PRE_1_14 = '1.13'
+KUBE_1_21 = '1.21'
 
 NODE_SPEC = {
     u'cloud_provider': u'GCE',
@@ -121,12 +122,57 @@ EXPECTED_METRICS_PROMETHEUS_1_14 = EXPECTED_METRICS_PROMETHEUS + [
     'kubernetes.kubelet.container.log_filesystem.used_bytes',
     'kubernetes.kubelet.pod.worker.duration.sum',
     'kubernetes.kubelet.pod.worker.duration.count',
+    'kubernetes.kubelet.pleg.relist_duration.count',
+    'kubernetes.kubelet.pleg.relist_duration.sum',
+    'kubernetes.kubelet.pleg.relist_interval.count',
+    'kubernetes.kubelet.pleg.relist_interval.sum',
 ]
 
 EXPECTED_METRICS_PROMETHEUS_PRE_1_14 = EXPECTED_METRICS_PROMETHEUS + [
     'kubernetes.kubelet.network_plugin.latency.quantile',
     'kubernetes.kubelet.pod.start.duration.quantile',
     'kubernetes.kubelet.pod.worker.start.duration.quantile',
+]
+
+EXPECTED_METRICS_PROMETHEUS_1_21 = [
+    'kubernetes.apiserver.certificate.expiration.count',
+    'kubernetes.apiserver.certificate.expiration.sum',
+    'kubernetes.containers.restarts',
+    'kubernetes.containers.running',
+    'kubernetes.cpu.capacity',
+    'kubernetes.cpu.limits',
+    'kubernetes.cpu.requests',
+    'kubernetes.ephemeral_storage.usage',
+    'kubernetes.go_goroutines',
+    'kubernetes.go_threads',
+    'kubernetes.kubelet.container.log_filesystem.used_bytes',
+    'kubernetes.kubelet.cpu.usage',
+    'kubernetes.kubelet.memory.rss',
+    'kubernetes.kubelet.network_plugin.latency.count',
+    'kubernetes.kubelet.network_plugin.latency.sum',
+    'kubernetes.kubelet.pleg.discard_events',
+    'kubernetes.kubelet.pleg.last_seen',
+    'kubernetes.kubelet.pleg.relist_duration.count',
+    'kubernetes.kubelet.pleg.relist_duration.sum',
+    'kubernetes.kubelet.pleg.relist_interval.count',
+    'kubernetes.kubelet.pleg.relist_interval.sum',
+    'kubernetes.kubelet.pod.start.duration.count',
+    'kubernetes.kubelet.pod.start.duration.sum',
+    'kubernetes.kubelet.pod.worker.start.duration.count',
+    'kubernetes.kubelet.pod.worker.start.duration.sum',
+    'kubernetes.kubelet.runtime.errors',
+    'kubernetes.kubelet.runtime.operations',
+    'kubernetes.kubelet.runtime.operations.duration.count',
+    'kubernetes.kubelet.runtime.operations.duration.sum',
+    'kubernetes.memory.capacity',
+    'kubernetes.memory.limits',
+    'kubernetes.memory.requests',
+    'kubernetes.pods.running',
+    'kubernetes.rest.client.latency.count',
+    'kubernetes.rest.client.latency.sum',
+    'kubernetes.rest.client.requests',
+    'kubernetes.runtime.cpu.usage',
+    'kubernetes.runtime.memory.rss',
 ]
 
 COMMON_TAGS = {
@@ -345,6 +391,16 @@ def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_1_14, stats_sum
                 )
             ),
         )
+    elif kube_version == KUBE_1_21:
+        monkeypatch.setattr(
+            check,
+            'poll',
+            mock.Mock(
+                side_effect=mocked_poll(
+                    cadvisor_response='cadvisor_metrics_1_21.txt', kubelet_response='kubelet_metrics_1_21.txt'
+                )
+            ),
+        )
 
     return check
 
@@ -395,6 +451,16 @@ def test_kubelet_check_prometheus_no_instance_tags_pre_1_14(monkeypatch, aggrega
     _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, kube_version=KUBE_PRE_1_14, instance_tags=None)
 
 
+def test_kubelet_check_prometheus_instance_tags_1_21(monkeypatch, aggregator, tagger):
+    _test_kubelet_check_prometheus(
+        monkeypatch, aggregator, tagger, kube_version=KUBE_1_21, instance_tags=["instance:tag"]
+    )
+
+
+def test_kubelet_check_prometheus_no_instance_tags_1_21(monkeypatch, aggregator, tagger):
+    _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, kube_version=KUBE_1_21, instance_tags=None)
+
+
 def _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, kube_version, instance_tags):
     instance = {}
     if instance_tags:
@@ -413,17 +479,21 @@ def _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, kube_version
 
     # called twice so pct metrics are guaranteed to be there
     check.check(instance)
-    for metric in EXPECTED_METRICS_COMMON:
-        aggregator.assert_metric(metric)
-        if instance_tags:
-            for tag in instance_tags:
-                aggregator.assert_metric_has_tag(metric, tag)
+    if kube_version != KUBE_1_21:
+        for metric in EXPECTED_METRICS_COMMON:
+            aggregator.assert_metric(metric)
+            if instance_tags:
+                for tag in instance_tags:
+                    aggregator.assert_metric_has_tag(metric, tag)
 
     if kube_version == KUBE_PRE_1_14:
         prom_metrics = EXPECTED_METRICS_PROMETHEUS_PRE_1_14
 
     if kube_version == KUBE_1_14:
         prom_metrics = EXPECTED_METRICS_PROMETHEUS_1_14
+
+    if kube_version == KUBE_1_21:
+        prom_metrics = EXPECTED_METRICS_PROMETHEUS_1_21
 
     for metric in prom_metrics:
         aggregator.assert_metric(metric)
