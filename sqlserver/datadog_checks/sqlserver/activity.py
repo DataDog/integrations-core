@@ -163,6 +163,17 @@ class SqlserverActivity(DBMAsyncJob):
             if estimated_size > max_bytes_limit:
                 # query results are pre-sorted
                 # so once we hit the max bytes limit, return
+                self.check.histogram(
+                    "dd.sqlserver.activity.collect_activity.max_bytes.rows_dropped",
+                    len(normalized_rows) - len(rows),
+                    **self.check.debug_stats_kwargs()
+                )
+                self.check.warning(
+                    "Exceeded the limit of activity rows captured (%s of %s rows included). "
+                    "Database load may be under-reported as a result.",
+                    len(normalized_rows),
+                    len(rows),
+                )
                 return normalized_rows
             normalized_rows.append(row)
         return normalized_rows

@@ -514,6 +514,10 @@ coverage:
         target: 50
         flags:
         - tokumx
+      Traffic_Server:
+        target: 75
+        flags:
+        - traffic_server
       Twemproxy:
         target: 75
         flags:
@@ -1225,6 +1229,11 @@ flags:
     paths:
     - tokumx/datadog_checks/tokumx
     - tokumx/tests
+  traffic_server:
+    carryforward: true
+    paths:
+    - traffic_server/datadog_checks/traffic_server
+    - traffic_server/tests
   twemproxy:
     carryforward: true
     paths:

@@ -159,7 +159,7 @@ INIT_CONFIG_ALT_TABLES = {
 }
 
 
-def assert_metrics(aggregator, expected_tags, dbm_enabled=False, hostname=None):
+def assert_metrics(aggregator, expected_tags, dbm_enabled=False, hostname=None, database_autodiscovery=False):
     """
     Boilerplate asserting all the expected metrics and service checks.
     Make sure ALL custom metric is tagged by database.
@@ -174,4 +174,6 @@ def assert_metrics(aggregator, expected_tags, dbm_enabled=False, hostname=None):
         aggregator.assert_metric(mname, hostname=hostname)
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=expected_tags)
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_no_duplicate_metrics()
+    if not database_autodiscovery:
+        # if we're autodiscovering other databases then there will be duplicate metrics, one per database
+        aggregator.assert_no_duplicate_metrics()
