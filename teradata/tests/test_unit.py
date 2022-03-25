@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import logging
+import time
 
 import mock
 import pytest
@@ -14,7 +15,7 @@ except ImportError:
 
 from datadog_checks.teradata.check import TeradataCheck
 
-from .common import CHECK_NAME, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY, mock_bad_executor
+from .common import CHECK_NAME, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY
 
 EXPECTED_TAGS = ["teradata_server:localhost", "teradata_port:1025", "td_env:dev"]
 
@@ -242,6 +243,8 @@ def test__connect(test_instance, dd_run_check, aggregator, expected_tags, conn_p
     """
     check = TeradataCheck(CHECK_NAME, {}, [test_instance])
     conn = mock.MagicMock()
+    cursor = conn.cursor()
+    cursor.rowcount = float('+inf')
 
     teradatasql = mock.MagicMock()
     teradatasql.connect.return_value = conn
@@ -262,61 +265,96 @@ def test__connect(test_instance, dd_run_check, aggregator, expected_tags, conn_p
     aggregator.assert_service_check(SERVICE_CHECK_QUERY, check.OK, tags=expected_tags)
 
 
-def test_import_error(dd_run_check, aggregator, instance):
-    check = TeradataCheck(CHECK_NAME, {}, [instance])
+def test_import_error(dd_run_check, aggregator, instance, caplog):
+    caplog.clear()
+    caplog.set_level(logging.ERROR)
 
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
     teradatasql = mock.MagicMock()
-    teradatasql.return_value = ImportError
-    mock_import_error = mock.MagicMock()
+
+    mock_import_error = ImportError()
 
     mocks = [
         ('datadog_checks.teradata.check.teradatasql', teradatasql),
         ('datadog_checks.teradata.check.TERADATASQL_IMPORT_ERROR', mock_import_error),
     ]
-    with pytest.raises(Exception):
-        with ExitStack() as stack:
-            for mock_call in mocks:
-                stack.enter_context(mock.patch(*mock_call))
+
+    with ExitStack() as stack:
+        for mock_call in mocks:
+            stack.enter_context(mock.patch(*mock_call))
+        with pytest.raises(Exception, match="raise ImportError\\(TERADATASQL_IMPORT_ERROR\\)"):
             dd_run_check(check)
-        assert check._connection is None
-        assert mock_import_error == ImportError
-        aggregator.assert_service_check(SERVICE_CHECK_CONNECT, check.CRITICAL, tags=EXPECTED_TAGS)
-        aggregator.assert_service_check(SERVICE_CHECK_QUERY, check.CRITICAL, tags=EXPECTED_TAGS)
+
+            assert check._connection is None
+
+            aggregator.assert_service_check(SERVICE_CHECK_CONNECT, check.CRITICAL, tags=EXPECTED_TAGS)
+            aggregator.assert_service_check(SERVICE_CHECK_QUERY, check.CRITICAL, tags=EXPECTED_TAGS)
+
+            assert (
+                "Teradata SQL Driver module is unavailable. Please double check your installation and refer to the "
+                "Datadog documentation for more information." in caplog.text
+            )
 
 
-def test_cant_query_can_connect(dd_run_check, aggregator, instance):
+def test_connection_errors(dd_run_check, aggregator, instance, caplog):
+    caplog.clear()
+    caplog.set_level(logging.ERROR)
     check = TeradataCheck(CHECK_NAME, {}, [instance])
-    conn = mock.MagicMock()
-    check._query_manager.executor = mock_bad_executor()
 
+    conn = mock.Mock(side_effect=Exception("teradatasql.OperationalError"))
     teradatasql = mock.MagicMock()
-    teradatasql.connect.return_value = conn
-
-    check._connection_errors = 0
-    check._query_errors = 1
+    teradatasql.connect.side_effect = conn
 
     mocks = [
         ('datadog_checks.teradata.check.teradatasql', teradatasql),
         ('datadog_checks.teradata.check.TERADATASQL_IMPORT_ERROR', None),
     ]
 
-    with pytest.raises(Exception):
-        with ExitStack() as stack:
-            for mock_call in mocks:
-                stack.enter_context(mock.patch(*mock_call))
+    with ExitStack() as stack:
+        for mock_call in mocks:
+            stack.enter_context(mock.patch(*mock_call))
+        with pytest.raises(Exception, match="Exception: teradatasql.OperationalError"):
             dd_run_check(check)
 
-        aggregator.assert_service_check(SERVICE_CHECK_CONNECT, check.OK, tags=EXPECTED_TAGS)
-        aggregator.assert_service_check(SERVICE_CHECK_QUERY, check.CRITICAL, tags=EXPECTED_TAGS)
+            assert check._connection_errors > 0
+            assert check._query_errors < 0
+
+            aggregator.assert_service_check(SERVICE_CHECK_CONNECT, check.CRITICAL, tags=EXPECTED_TAGS)
+            aggregator.assert_service_check(SERVICE_CHECK_QUERY, check.CRITICAL, tags=EXPECTED_TAGS)
 
 
-def test_no_rows_returned(mock_cursor,dd_run_check, aggregator, instance, caplog):
+def test_query_errors(dd_run_check, aggregator, instance):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    query_error = mock.Mock(side_effect=Exception("teradatasql.Error"))
+    check._query_manager.executor = mock.MagicMock()
+    check._query_manager.executor.side_effect = query_error
+
+    teradatasql = mock.MagicMock()
+
+    mocks = [
+        ('datadog_checks.teradata.check.teradatasql', teradatasql),
+        ('datadog_checks.teradata.check.TERADATASQL_IMPORT_ERROR', None),
+    ]
+
+    with ExitStack() as stack:
+        for mock_call in mocks:
+            stack.enter_context(mock.patch(*mock_call))
+        dd_run_check(check)
+
+    assert check._connection_errors < 1
+    assert check._query_errors > 0
+
+    aggregator.assert_service_check(SERVICE_CHECK_CONNECT, check.OK, tags=EXPECTED_TAGS)
+    aggregator.assert_service_check(SERVICE_CHECK_QUERY, check.CRITICAL, tags=EXPECTED_TAGS)
+
+
+def test_no_rows_returned(dd_run_check, aggregator, instance, caplog):
     caplog.clear()
     caplog.set_level(logging.WARNING)
     check = TeradataCheck(CHECK_NAME, {}, [instance])
     conn = mock.MagicMock()
-    cursor = mock.MagicMock(mock_cursor)
-    cursor.rowcount.return_value = 0
+    cursor = conn.cursor()
+    cursor.rowcount = 0
 
     teradatasql = mock.MagicMock()
     teradatasql.connect.return_value = conn
@@ -331,6 +369,45 @@ def test_no_rows_returned(mock_cursor,dd_run_check, aggregator, instance, caplog
             stack.enter_context(mock.patch(*mock_call))
         dd_run_check(check)
 
+    assert check._connection_errors < 1
+    assert check._query_errors > 0
     assert "Failed to fetch records from query:" in caplog.text
     aggregator.assert_service_check(SERVICE_CHECK_CONNECT, check.OK, tags=EXPECTED_TAGS)
     aggregator.assert_service_check(SERVICE_CHECK_QUERY, check.CRITICAL, tags=EXPECTED_TAGS)
+
+
+current_time = int(time.time())
+
+
+@pytest.mark.parametrize(
+    "row, expected",
+    [
+        pytest.param([current_time, 200.5], [current_time, 200.5], id="Valid timestamp"),
+        pytest.param(
+            [1648093966, 193.0],
+            "Resource Usage stats are invalid. Row timestamp is more than 1h in the past. "
+            "Is `SPMA` Resource Usage Logging enabled?",
+            id="Old timestamp",
+        ),
+        pytest.param(
+            [current_time + 800, 300.3],
+            "Row timestamp is more than 10 min in the future. Try checking system time settings.",
+            id="Future timestamp",
+        ),
+        pytest.param(
+            ["Not a timestamp", 500],
+            "Timestamp `Not a timestamp` is invalid. Skipping row.",
+            id="Unable to validate timestamp",
+        ),
+    ],
+)
+def test_validate_timestamp(caplog, instance, row, expected):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+
+    query = "SELECT TOP 1 TheTimestamp, FileLockBlocks FROM DBC.ResSpmaView ORDER BY TheTimestamp DESC;"
+
+    try:
+        check._validate_timestamp(row, query)
+        assert expected == row
+    except Exception:
+        assert expected in caplog.text

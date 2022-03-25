@@ -5,6 +5,7 @@ import csv
 import json
 import os
 import re
+import time
 from copy import deepcopy
 
 import mock
@@ -45,6 +46,10 @@ def _mock_execute(query):
         reader = csv.reader(f)
         for line in reader:
             for idx, col in enumerate(line):
+                # replace res usage csv timestamp with current timestamp
+                if table == 'resspmaview':
+                    line[0] = int(time.time())
+                # transform empty column result to None type
                 if col == '':
                     line[idx] = None
             yield line

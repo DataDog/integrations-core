@@ -40,7 +40,13 @@ class TeradataCheck(AgentCheck):
         else:
             manager_queries.extend(DEFAULT_QUERIES)
 
-        self._query_manager = QueryManager(self, self._execute_query_raw, queries=manager_queries, tags=self._tags)
+        self._query_manager = QueryManager(
+            self,
+            self._execute_query_raw,
+            queries=manager_queries,
+            tags=self._tags,
+            error_handler=self.executor_error_handler,
+        )
         self.check_initializations.append(self._query_manager.compile_queries)
 
         self._connection_errors = 0
@@ -75,8 +81,8 @@ class TeradataCheck(AgentCheck):
                 for row in cursor.fetchall():
                     try:
                         yield self._validate_timestamp(row, query)
-                    except Exception:
-                        self.log.debug('Unable to validate Resource Usage View timestamps.')
+                    except Exception as e:
+                        self.log.debug('Unable to validate Resource Usage View timestamps: %s', e)
                         self._query_errors += 1
                         yield row
 
@@ -87,7 +93,7 @@ class TeradataCheck(AgentCheck):
         except Exception as e:
             self._connection_errors += 1
             self.log.error('Failed to connect to Teradata database. %s', e)
-            raise
+            raise e
 
     def _connect(self):
         conn = None
@@ -97,7 +103,7 @@ class TeradataCheck(AgentCheck):
                 'Datadog documentation for more information.'
             )
             self._connection_errors += 1
-            raise TERADATASQL_IMPORT_ERROR
+            raise ImportError(TERADATASQL_IMPORT_ERROR)
         else:
             self.log.debug('Connecting to Teradata...')
             validated_conn_params = self._validate_conn_params()
@@ -111,7 +117,7 @@ class TeradataCheck(AgentCheck):
                 except Exception as e:
                     self.log.exception('Unable to connect to Teradata. %s.', e)
                     self._connection_errors += 1
-                    raise
+                    raise e
                 finally:
                     if conn:
                         conn.close()
@@ -150,21 +156,29 @@ class TeradataCheck(AgentCheck):
         if 'DBC.ResSpmaView' in query:
             now = time.time()
             row_ts = row[0]
-            diff = now - row_ts
-            # Valid metrics should be no more than 10 min in the future or 1h in the past
-            if (diff > 3600) or (diff < -600):
-                msg = 'Resource Usage stats are invalid. {}'
-                if diff > 3600:
-                    msg = msg.format(
-                        'Row timestamp is more than 1h in the past. Is `SPMA` Resource Usage Logging enabled?'
-                    )
-                elif diff < -600:
-                    msg = msg.format(
-                        'Row timestamp is more than 10 min in the future. Try checking system time settings.'
-                    )
+            if type(row_ts) is not int:
+                msg = "Timestamp `{}` is invalid. Skipping row.".format(row_ts)
                 self.log.warning(msg)
                 self._query_errors += 1
                 raise Exception(msg)
+            else:
+
+                diff = now - row_ts
+                # Valid metrics should be no more than 10 min in the future or 1h in the past
+                if (diff > 3600) or (diff < -600):
+                    msg = 'Resource Usage stats are invalid. {}'
+                    if diff > 3600:
+                        msg = msg.format(
+                            'Row timestamp is more than 1h in the past. Is `SPMA` Resource Usage Logging enabled?'
+                        )
+                    elif diff < -600:
+                        msg = msg.format(
+                            'Row timestamp is more than 10 min in the future. Try checking system time settings.'
+                        )
+                    self.log.warning(msg)
+                    self._query_errors += 1
+                    raise Exception(msg)
+
         return row
 
     def _build_connect_params(self):
@@ -181,3 +195,14 @@ class TeradataCheck(AgentCheck):
             'sslmode': self.config.ssl_mode,
             'sslprotocol': self.config.ssl_protocol,
         }
+
+    def executor_error_handler(self, error):
+        self._query_errors += 1
+        if self._connection:
+            try:
+                self._connection.close()
+            except Exception as e:
+                self.log.warning("Couldn't close the connection after a query failure: %s", str(e))
+        self._connection = None
+
+        return error

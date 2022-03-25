@@ -75,10 +75,3 @@ EXPECTED_METRICS = [
     "teradata.process.cpu_throttle",
     "teradata.process.cpu_throttle_time",
 ]
-
-
-def mock_bad_executor():
-    def executor(_):
-        raise Exception
-
-    return executor
