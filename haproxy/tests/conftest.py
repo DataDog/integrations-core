@@ -136,6 +136,10 @@ def legacy_environment():
     env = {}
     env['HAPROXY_CONFIG_DIR'] = os.path.join(HERE, 'compose')
     env['HAPROXY_CONFIG_OPEN'] = os.path.join(HERE, 'compose', 'haproxy-open.cfg')
+    env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy.cfg')
+    if HAPROXY_VERSION >= version.parse('1.6'):
+        env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy-1_6.cfg')
+
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'haproxy.yaml'),
         env_vars=env,
@@ -146,9 +150,6 @@ def legacy_environment():
         if platform_supports_sockets:
             with TempDir() as temp_dir:
                 host_socket_path = os.path.join(temp_dir, 'datadog-haproxy-stats.sock')
-                env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy.cfg')
-                if HAPROXY_VERSION >= version.parse('1.6'):
-                    env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy-1_6.cfg')
                 env['HAPROXY_SOCKET_DIR'] = temp_dir
 
                 with docker_run(

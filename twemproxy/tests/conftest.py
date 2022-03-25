@@ -25,8 +25,14 @@ def dd_environment():
     If there's any problem executing `docker compose`, let the exception bubble
     up.
     """
-    with docker_run(common.COMPOSE_FILE, service_name="etcd0", conditions=[setup_post_data]):
-        with docker_run(common.COMPOSE_FILE, log_patterns="twemproxy entered RUNNING state", mount_logs=True):
+    with docker_run(common.COMPOSE_FILE, service_name="etcd0", conditions=[setup_post_data], mount_logs=True):
+        with docker_run(
+            common.COMPOSE_FILE,
+            log_patterns="twemproxy entered RUNNING state",
+            mount_logs=True,
+            # Don't worry about spinning down since the outermost runner will already do that
+            down=lambda: None,
+        ):
             yield common.INSTANCE
 
 
