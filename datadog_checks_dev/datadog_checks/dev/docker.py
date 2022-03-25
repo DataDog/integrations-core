@@ -50,13 +50,9 @@ def compose_file_active(compose_file):
     Returns a `bool` indicating whether or not a compose file has any active services.
     """
     command = ['docker', 'compose', '-f', compose_file, 'ps']
-    lines = run_command(command, capture='out', check=True).stdout.splitlines()
+    lines = run_command(command, capture='out', check=True).stdout.strip().splitlines()
 
-    for i, line in enumerate(lines, 1):
-        if set(line.strip()) == {'-'}:
-            return len(lines[i:]) >= 1
-
-    return False
+    return len(lines) > 1
 
 
 def using_windows_containers():
