@@ -55,6 +55,7 @@ def tag(check, version, push, dry_run, skip_prerelease):
 
         if skip_prerelease and version == PRERELEASE:
             echo_warning('skipping prerelease version')
+            version = None
             continue
 
         # get the tag name
