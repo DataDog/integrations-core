@@ -176,7 +176,7 @@ class CheckDockerLogs(CheckCommandOutput):
         wait=1,  # type: int
     ):
         if file_exists(identifier):
-            command = ['docker-compose', '-f', identifier, 'logs']
+            command = ['docker', 'compose', '-f', identifier, 'logs']
         else:
             command = ['docker', 'logs', identifier]
 
