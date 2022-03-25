@@ -72,22 +72,24 @@ def test_unknown_service_check(aggregator, get_check, instance, caplog, dd_run_c
 
 def test_check_cant_connect(aggregator, get_check, instance, dd_run_check):
     instance['queue_manager'] = "not_real"
-    check = get_check(instance)
-    dd_run_check(check)
 
-    tags = [
-        'connection_name:{}({})'.format(common.HOST, common.PORT),
-        'foo:bar',
-        'port:{}'.format(common.PORT),
-        'queue_manager:not_real',
-        'channel:{}'.format(common.CHANNEL),
-    ]
-    hostname = common.HOST
+    with pytest.raises(Exception, match=r'MQI Error'):
+        check = get_check(instance)
+        dd_run_check(check)
 
-    aggregator.assert_service_check(IbmMqCheck.SERVICE_CHECK, check.CRITICAL, tags=tags, count=1, hostname=hostname)
-    aggregator.assert_service_check(
-        ChannelMetricCollector.CHANNEL_SERVICE_CHECK, check.CRITICAL, tags=tags, count=1, hostname=hostname
-    )
+        tags = [
+            'connection_name:{}({})'.format(common.HOST, common.PORT),
+            'foo:bar',
+            'port:{}'.format(common.PORT),
+            'queue_manager:not_real',
+            'channel:{}'.format(common.CHANNEL),
+        ]
+        hostname = common.HOST
+
+        aggregator.assert_service_check(IbmMqCheck.SERVICE_CHECK, check.CRITICAL, tags=tags, count=1, hostname=hostname)
+        aggregator.assert_service_check(
+            ChannelMetricCollector.CHANNEL_SERVICE_CHECK, check.CRITICAL, tags=tags, count=1, hostname=hostname
+        )
 
 
 def test_errors_are_logged(get_check, instance, caplog, dd_run_check):
