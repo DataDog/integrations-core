@@ -270,13 +270,13 @@ class DockerInterface(object):
     def update_check(self):
         command = ['docker', 'exec', self.container_name]
         command.extend(get_pip_exe(self.python_version, platform=self.container_platform))
-        command.extend(('install', 'datadog_checks_base[deps]'))
+        command.extend(('install', '-e', f'{self.check_mount_dir}[deps]'))
         run_command(command, capture=True, check=True)
 
     def update_base_package(self):
         command = ['docker', 'exec', self.container_name]
         command.extend(get_pip_exe(self.python_version, platform=self.container_platform))
-        command.extend(('install', 'datadog_checks_base[db,deps,http,json,kube]'))
+        command.extend(('install', '-e', f'{self.base_mount_dir}[db,deps,http,json,kube]'))
         run_command(command, capture=True, check=True)
 
     def update_agent(self):
