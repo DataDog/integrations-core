@@ -49,7 +49,7 @@ def compose_file_active(compose_file):
     """
     Returns a `bool` indicating whether or not a compose file has any active services.
     """
-    command = ['docker', 'compose', '-f', compose_file, 'ps']
+    command = ['docker', 'compose', '--compatibility', '-f', compose_file, 'ps']
     lines = run_command(command, capture='out', check=True).stdout.strip().splitlines()
 
     return len(lines) > 1
@@ -228,7 +228,7 @@ class ComposeFileUp(LazyFunction):
         self.compose_file = compose_file
         self.build = build
         self.service_name = service_name
-        self.command = ['docker', 'compose', '-f', self.compose_file, 'up', '-d']
+        self.command = ['docker', 'compose', '--compatibility', '-f', self.compose_file, 'up', '-d']
 
         if self.build:
             self.command.append('--build')
@@ -244,7 +244,7 @@ class ComposeFileLogs(LazyFunction):
     def __init__(self, compose_file, check=True):
         self.compose_file = compose_file
         self.check = check
-        self.command = ['docker', 'compose', '-f', self.compose_file, 'logs']
+        self.command = ['docker', 'compose', '--compatibility', '-f', self.compose_file, 'logs']
 
     def __call__(self, exception):
         return run_command(self.command, capture=False, check=self.check)
@@ -257,6 +257,7 @@ class ComposeFileDown(LazyFunction):
         self.command = [
             'docker',
             'compose',
+            '--compatibility',
             '-f',
             self.compose_file,
             'down',
@@ -284,6 +285,10 @@ def _read_example_logs_config(check_root):
 @contextmanager
 def temporarily_stop_service(service, compose_file, check=True):
     # type: (str, str, bool) -> Iterator[None]
-    run_command(['docker', 'compose', '-f', compose_file, 'stop', service], capture=False, check=check)
+    run_command(
+        ['docker', 'compose', '--compatibility', '-f', compose_file, 'stop', service], capture=False, check=check
+    )
     yield
-    run_command(['docker', 'compose', '-f', compose_file, 'start', service], capture=False, check=check)
+    run_command(
+        ['docker', 'compose', '--compatibility', '-f', compose_file, 'start', service], capture=False, check=check
+    )
