@@ -1,5 +1,3 @@
-version: '3.5'
-
 services:
   dd-test-cassandra:
     build:
@@ -20,8 +18,6 @@ services:
         -Dcom.sun.management.jmxremote.authenticate=true
         -Dcom.sun.management.jmxremote.password.file=/etc/cassandra/jmxremote.password
         -Djava.rmi.server.hostname=localhost
-    expose:
-      - ${CONTAINER_PORT}
 
   dd-test-cassandra2:
     image: cassandra:${CASSANDRA_VERSION}
