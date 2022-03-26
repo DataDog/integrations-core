@@ -31,7 +31,7 @@ jobs:
       dd_agent: dd_agent
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-2022'
 
   variables:
     ${{ if eq(parameters.agent_image_win, '') }}:
