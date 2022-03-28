@@ -3,5 +3,5 @@ name: "CodeQL config"
 paths-ignore: 
   - '**/tests'
 queries:
-  - name: Go Cryptographic Footprint Rules
-    uses: urnfdog/qlpack/go-queries/Security/FIPS@urnfdog/fipsrules
+  - name: Python Cryptographic Footprint Rules
+    uses: datadog/qlpack/python-queries/Security/CryptographicFootprint@klai/cryptographic-footprint
