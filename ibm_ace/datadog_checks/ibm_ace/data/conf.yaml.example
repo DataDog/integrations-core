@@ -94,7 +94,7 @@ instances:
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
-    ## Learn more about tagging at https://docs.datadoghq.com/getting_started/tagging
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
     # tags:
     #   - <KEY_1>:<VALUE_1>
@@ -108,15 +108,15 @@ instances:
     # service: <SERVICE>
 
     ## @param min_collection_interval - number - optional - default: 15
-    ## The collection interval of the check. For more information, see:
+    ## This changes the collection interval of the check. For more information, see:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     # min_collection_interval: 15
 
     ## @param empty_default_hostname - boolean - optional - default: false
-    ## Forces the check to send metrics with no hostname.
+    ## This forces the check to send metrics with no hostname.
     ##
-    ## Useful for cluster-level checks.
+    ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
 
