@@ -58,7 +58,7 @@ cli = [
     "atomicwrites",
     "beautifulsoup4>=4.9.3",
     "build>=0.7.0",
-    "click~=8.0",
+    "click==8.0",
     "codespell",
     "colorama",
     "datamodel-code-generator~=0.11.4",
