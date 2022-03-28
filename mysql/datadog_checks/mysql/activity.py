@@ -20,57 +20,66 @@ except ImportError:
 
 CONNECTIONS_QUERY = """\
 SELECT
-    PROCESSLIST_USER,
-    PROCESSLIST_HOST,
-    PROCESSLIST_DB,
-    PROCESSLIST_STATE,
-    COUNT(PROCESSLIST_USER) AS connections
+    processlist_user,
+    processlist_host,
+    processlist_db,
+    processlist_state,
+    COUNT(processlist_user) AS connections
 FROM
     performance_schema.threads
 WHERE
-    PROCESSLIST_USER IS NOT NULL AND
-    PROCESSLIST_STATE IS NOT NULL
-    GROUP BY PROCESSLIST_USER, PROCESSLIST_HOST, PROCESSLIST_DB, PROCESSLIST_STATE
+    processlist_user IS NOT NULL AND
+    processlist_state IS NOT NULL
+    GROUP BY processlist_user, processlist_host, processlist_db, processlist_state
 """
 
 ACTIVITY_QUERY = """\
 SELECT
-    stmt.TIMER_START AS stmt_timer_start,
-    stmt.TIMER_END AS stmt_timer_end,
-    stmt.LOCK_TIME,
-    stmt.CURRENT_SCHEMA,
-    thread.PROCESSLIST_INFO AS SQL_TEXT,
-    IF (PROCESSLIST_STATE ='User sleep',' User sleep', (
-      IF (waits_statement.EVENT_ID = waits_statement.END_EVENT_ID, 'CPU',
-         COALESCE(waits_wait.EVENT_NAME, waits_statement.EVENT_NAME))
-    )) AS wait_event,
-    waits_statement.TIMER_START AS wait_timer_start,
-    waits_statement.TIMER_END AS wait_timer_end,
-    thread.thread_id,
-    thread.PROCESSLIST_ID,
-    thread.PROCESSLIST_USER,
-    thread.PROCESSLIST_HOST,
-    thread.PROCESSLIST_DB,
-    thread.PROCESSLIST_COMMAND,
-    thread.PROCESSLIST_STATE,
-    socket.IP,
-    socket.PORT
+    thread_a.thread_id,
+    thread_a.processlist_id,
+    thread_a.processlist_user,
+    thread_a.processlist_host,
+    thread_a.processlist_db,
+    thread_a.processlist_command,
+    thread_a.processlist_state,
+    thread_a.processlist_info AS SQL_TEXT,
+    statement.timer_start AS event_timer_start,
+    statement.timer_end AS event_timer_end,
+    statement.lock_time,
+    statement.current_schema,
+    COALESCE(
+        IF(thread_a.processlist_state = 'User sleep', 'User sleep', 
+        IF(waits_a.event_id = waits_a.end_event_id, 'CPU', waits_a.event_name)), 'CPU') AS wait_event,
+    waits_a.timer_start AS wait_timer_start,
+    waits_a.timer_end AS wait_timer_end,
+    waits_a.object_schema,
+    waits_a.object_name,
+    waits_a.index_name,
+    waits_a.object_type,
+    waits_a.source,
+    socket.ip,
+    socket.port
 FROM
-    performance_schema.threads AS thread
-    LEFT JOIN performance_schema.events_statements_current AS stmt
-        ON stmt.THREAD_ID = thread.THREAD_ID and stmt.NESTING_EVENT_LEVEL = 0
-    -- MySQL can potentially have two wait events for a given thread, so we pull both out and favor the one with 'WAIT'
-    LEFT JOIN performance_schema.events_waits_current AS waits_wait
-        ON waits_wait.thread_id = thread.thread_id AND waits_wait.NESTING_EVENT_TYPE = 'WAIT'
-    LEFT JOIN performance_schema.events_waits_current AS waits_statement
-        ON waits_statement.thread_id = thread.thread_id AND waits_statement.NESTING_EVENT_TYPE = 'STATEMENT'
-    LEFT JOIN performance_schema.socket_instances AS socket
-        ON thread.THREAD_ID = socket.THREAD_ID
+    performance_schema.threads AS thread_a
+    LEFT JOIN performance_schema.events_waits_current AS waits_a ON waits_a.thread_id = thread_a.thread_id AND
+    waits_a.event_id IN(
+        SELECT
+            MAX(waits_b.EVENT_ID)
+        FROM performance_schema.threads AS thread_b
+            LEFT JOIN performance_schema.events_waits_current AS waits_b ON waits_b.thread_id = waits_b.thread_id
+        WHERE
+            thread_b.processlist_state IS NOT NULL AND
+            thread_b.processlist_command != 'Sleep' AND
+            thread_b.processlist_command != 'Daemon' AND
+            thread_b.processlist_id != connection_id()
+        GROUP BY thread_b.thread_id)
+    LEFT JOIN performance_schema.events_statements_current AS statement ON statement.thread_id = thread_a.thread_id
+    LEFT JOIN performance_schema.socket_instances AS socket ON socket.thread_id = thread_a.thread_id
 WHERE
-    thread.PROCESSLIST_STATE IS NOT NULL
-    AND thread.PROCESSLIST_COMMAND != 'Sleep'
-    AND thread.PROCESSLIST_COMMAND != 'Daemon'
-    AND thread.PROCESSLIST_ID != CONNECTION_ID()
+    thread_a.processlist_state IS NOT NULL AND
+    thread_a.processlist_command != 'Sleep' AND
+    thread_a.processlist_command != 'Daemon' AND
+    thread_a.processlist_id != CONNECTION_ID()
 """
 
 
@@ -194,12 +203,12 @@ class MySQLActivity(DBMAsyncJob):
     def _obfuscate_and_sanitize_row(self, row):
         # type: (Dict[str]) -> Dict[str]
         row = self._sanitize_row(row)
-        if 'SQL_TEXT' not in row:
+        if 'sql_text' not in row:
             return row
         try:
-            self._finalize_row(row, obfuscate_sql_with_metadata(row['SQL_TEXT'], self._obfuscator_options))
+            self._finalize_row(row, obfuscate_sql_with_metadata(row['sql_text'], self._obfuscator_options))
         except Exception as e:
-            row['SQL_TEXT'] = 'ERROR: failed to obfuscate'
+            row['sql_text'] = 'ERROR: failed to obfuscate'
             self._log.debug("Failed to obfuscate | err=[%s]", e)
         return row
 
@@ -212,7 +221,7 @@ class MySQLActivity(DBMAsyncJob):
     def _finalize_row(row, statement):
         # type: (Dict[str], Dict[str]) -> None
         obfuscated_statement = statement['query']
-        row['SQL_TEXT'] = obfuscated_statement
+        row['sql_text'] = obfuscated_statement
         row['query_signature'] = compute_sql_signature(obfuscated_statement)
 
         metadata = statement['metadata']
