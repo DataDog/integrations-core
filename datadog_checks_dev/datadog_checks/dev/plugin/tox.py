@@ -24,6 +24,8 @@ BLACK_DEP = 'black==21.10b0'
 FLAKE8_DEP = 'flake8==4.0.1'
 FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==21.9.2'
 FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.6.0'
+# TODO: remove once compatibility with click 8.1 added
+CLICK_DEP = 'click<8.1'
 # TODO: remove extra when we drop Python 2
 MYPY_DEP = 'mypy[python2]==0.910'
 # TODO: when we drop Python 2 and replace with --install-types --non-interactive
@@ -140,6 +142,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
         BLACK_DEP,
         ISORT_DEP,
         PYDANTIC_DEP,
+        CLICK_DEP,
     ] + TYPES_DEPS
 
     commands = [
