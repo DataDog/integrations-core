@@ -1,5 +1,9 @@
 # CHANGELOG - IBM MQ
 
+## 3.20.1-beta.1 / 2022-03-28
+
+* [Added] Add metric_patterns options to filter all metric submission with a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+
 ## 3.20.0 / 2022-03-16
 
 * [Added] Add `auto_discover_channels` option. See [#11678](https://github.com/DataDog/integrations-core/pull/11678).
