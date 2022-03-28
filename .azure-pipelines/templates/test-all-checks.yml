@@ -81,6 +81,9 @@ jobs:
     - checkName: cacti
       displayName: Cacti
       os: linux
+    - checkName: calico
+      displayName: Calico
+      os: linux
     - checkName: cassandra
       displayName: Cassandra
       os: linux
@@ -173,6 +176,9 @@ jobs:
       os: linux
     - checkName: fluentd
       displayName: fluentd
+      os: linux
+    - checkName: foundationdb
+      displayName: FoundationDB
       os: linux
     - checkName: gearmand
       displayName: Gearman
@@ -381,6 +387,9 @@ jobs:
     - checkName: proxysql
       displayName: ProxySQL
       os: linux
+    - checkName: pulsar
+      displayName: pulsar
+      os: linux
     - checkName: rabbitmq
       displayName: RabbitMQ
       os: linux
@@ -401,6 +410,9 @@ jobs:
       os: linux
     - checkName: scylla
       displayName: Scylla
+      os: linux
+    - checkName: silk
+      displayName: Silk
       os: linux
     - checkName: singlestore
       displayName: SingleStore
@@ -462,6 +474,9 @@ jobs:
         os: linux
     - checkName: tomcat
       displayName: Tomcat
+      os: linux
+    - checkName: traffic_server
+      displayName: Traffic Server
       os: linux
     - checkName: twemproxy
       displayName: Twemproxy

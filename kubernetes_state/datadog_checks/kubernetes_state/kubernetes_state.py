@@ -46,6 +46,8 @@ kube_labels_mapper = {
     'image': 'image_name',
 }
 
+JOB_NAME_PATTERN = r"(-\d{4,10}$)"
+
 
 class KubernetesState(OpenMetricsBaseCheck):
     """
@@ -84,7 +86,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         generic_instances = [kubernetes_state_instance]
         super(KubernetesState, self).__init__(name, init_config, instances=generic_instances)
 
-        self.condition_to_status_positive = {'true': self.OK, 'false': self.CRITICAL, 'unknown': self.UNKNOWN}
+        self.condition_to_status_positive = {'true': self.OK, 'false': self.CRITICAL, 'unknown': self.WARNING}
 
         self.condition_to_status_negative = {'true': self.CRITICAL, 'false': self.OK, 'unknown': self.UNKNOWN}
 
@@ -145,6 +147,9 @@ class KubernetesState(OpenMetricsBaseCheck):
         # Logic for Jobs
         self.job_succeeded_count = defaultdict(int)
         self.job_failed_count = defaultdict(int)
+
+        # Regex to extract cronjob from job names
+        self._job_name_re = re.compile(JOB_NAME_PATTERN)
 
     def check(self, instance):
         endpoint = instance.get('kube_state_url')
@@ -561,12 +566,23 @@ class KubernetesState(OpenMetricsBaseCheck):
             tags += self._build_tags(tag_name or name, value, scraper_config)
         return tags
 
+    def _get_job_tags(self, lname, lvalue, scraper_config):
+        """
+        Returns kube_job and kube_cronjob tags in a list.
+        """
+        trimmed_job, was_trimmed = self._trim_job_tag(lvalue)
+        tags = self._build_tags(lname, trimmed_job, scraper_config)
+        if was_trimmed:
+            tags += self._build_tags('kube_cronjob', trimmed_job, scraper_config)
+        return tags
+
     def _trim_job_tag(self, name):
         """
         Trims suffix of job names if they match -(\\d{4,10}$)
+        Returns the trimmed name and a boolean indicating whether the name was trimmed.
         """
-        pattern = r"(-\d{4,10}$)"
-        return re.sub(pattern, '', name)
+        trimmed = self._job_name_re.sub('', name)
+        return trimmed, trimmed != name
 
     def _extract_job_timestamp(self, name):
         """
@@ -672,8 +688,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             tags = []
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
-                    trimmed_job = self._trim_job_tag(label_value)
-                    tags += self._build_tags(label_name, trimmed_job, scraper_config)
+                    tags += self._get_job_tags(label_name, label_value, scraper_config)
                 else:
                     tags += self._build_tags(label_name, label_value, scraper_config)
             self.service_check(service_check_name, self.OK, tags=tags + scraper_config['custom_tags'])
@@ -684,8 +699,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             tags = []
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
-                    trimmed_job = self._trim_job_tag(label_value)
-                    tags += self._build_tags(label_name, trimmed_job, scraper_config)
+                    tags += self._get_job_tags(label_name, label_value, scraper_config)
                 else:
                     tags += self._build_tags(label_name, label_value, scraper_config)
             self.service_check(service_check_name, self.CRITICAL, tags=tags + scraper_config['custom_tags'])
@@ -696,9 +710,8 @@ class KubernetesState(OpenMetricsBaseCheck):
             tags = [] + scraper_config['custom_tags']
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
-                    trimmed_job = self._trim_job_tag(label_value)
+                    tags += self._get_job_tags(label_name, label_value, scraper_config)
                     job_ts = self._extract_job_timestamp(label_value)
-                    tags += self._build_tags(label_name, trimmed_job, scraper_config)
                 else:
                     tags += self._build_tags(label_name, label_value, scraper_config)
             if job_ts is not None:  # if there is a timestamp, this is a Cron Job
@@ -714,9 +727,8 @@ class KubernetesState(OpenMetricsBaseCheck):
             tags = [] + scraper_config['custom_tags']
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
-                    trimmed_job = self._trim_job_tag(label_value)
+                    tags += self._get_job_tags(label_name, label_value, scraper_config)
                     job_ts = self._extract_job_timestamp(label_value)
-                    tags += self._build_tags(label_name, trimmed_job, scraper_config)
                 else:
                     tags += self._build_tags(label_name, label_value, scraper_config)
             if job_ts is not None:  # if there is a timestamp, this is a Cron Job

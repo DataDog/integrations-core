@@ -34,6 +34,10 @@ def instance_host(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_min_collection_interval(field, value):
     return 15
 
@@ -44,6 +48,10 @@ def instance_only_custom_queries(field, value):
 
 def instance_port(field, value):
     return 50000
+
+
+def instance_security(field, value):
+    return 'none'
 
 
 def instance_service(field, value):

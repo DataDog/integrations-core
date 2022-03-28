@@ -11,11 +11,17 @@ from datadog_checks.cilium import CiliumCheck
 from datadog_checks.dev import run_command
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
+from datadog_checks.dev.utils import get_tox_env
+
+from .common import CILIUM_VERSION
 
 try:
     from contextlib import ExitStack
 except ImportError:
     from contextlib2 import ExitStack
+
+from datadog_checks.dev import TempDir
+from datadog_checks.dev.fs import path_join
 
 from .common import CILIUM_LEGACY
 
@@ -26,44 +32,102 @@ OPERATOR_PORT = 6942
 AGENT_URL = "http://{}:{}/metrics".format(HOST, AGENT_PORT)
 OPERATOR_URL = "http://{}:{}/metrics".format(HOST, OPERATOR_PORT)
 
+IMAGE_NAME = "quay.io/cilium/cilium:v{}".format(CILIUM_VERSION)
 PORTS = [AGENT_PORT, OPERATOR_PORT]
+CLUSTER_NAME = 'cluster-{}-{}'.format('cilium', get_tox_env())
 
 
 def setup_cilium():
-    config = os.path.join(HERE, 'kind', 'cilium.yaml')
+    run_command(["helm", "repo", "add", "cilium", "https://helm.cilium.io/"])
+    run_command(["docker", "pull", IMAGE_NAME])
+    run_command(
+        [
+            "kind",
+            "load",
+            "docker-image",
+            IMAGE_NAME,
+            "--name",
+            CLUSTER_NAME,
+        ]
+    )
     run_command(["kubectl", "create", "ns", "cilium"])
-    run_command(["kubectl", "create", "-f", config])
+    run_command(
+        [
+            "helm",
+            "install",
+            "cilium",
+            "cilium/cilium",
+            "--version",
+            CILIUM_VERSION,
+            "--namespace",
+            "cilium",
+            "--set",
+            "kubeProxyReplacement=partial",
+            "--set",
+            "hostServices.enabled=false",
+            "--set",
+            "externalIPs.enabled=true",
+            "--set",
+            "nodePort.enabled=true",
+            "--set",
+            "hostPort.enabled=true",
+            "--set",
+            "bpf.masquerade=false",
+            "--set",
+            "image.pullPolicy=IfNotPresent",
+            "--set",
+            "ipam.mode=kubernetes",
+            "--set",
+            "prometheus.enabled=true",
+            "--set",
+            "operator.prometheus.enabled=true",
+        ]
+    )
     run_command(
         ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "cilium", "--timeout=300s"]
     )
     run_command(["kubectl", "wait", "pods", "-n", "cilium", "--all", "--for=condition=Ready", "--timeout=300s"])
 
 
+def get_instances(agent_host, agent_port, operator_host, operator_port, use_openmetrics):
+    return {
+        'instances': [
+            {
+                'agent_endpoint': 'http://{}:{}/metrics'.format(agent_host, agent_port),
+                'use_openmetrics': use_openmetrics,
+            },
+            {
+                'operator_endpoint': 'http://{}:{}/metrics'.format(operator_host, operator_port),
+                'use_openmetrics': use_openmetrics,
+            },
+        ]
+    }
+
+
 @pytest.fixture(scope='session')
 def dd_environment():
-    kind_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
     use_openmetrics = CILIUM_LEGACY == 'false'
-    with kind_run(conditions=[setup_cilium], kind_config=kind_config) as kubeconfig:
-        with ExitStack() as stack:
-            ip_ports = [
-                stack.enter_context(port_forward(kubeconfig, 'cilium', port, 'deployment', 'cilium-operator'))
-                for port in PORTS
-            ]
-
-            instances = {
-                'instances': [
-                    {
-                        'agent_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0]),
-                        'use_openmetrics': use_openmetrics,
-                    },
-                    {
-                        'operator_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1]),
-                        'use_openmetrics': use_openmetrics,
-                    },
+    kind_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
+    with TempDir('helm_dir') as helm_dir:
+        with kind_run(
+            conditions=[setup_cilium],
+            kind_config=kind_config,
+            env_vars={
+                "HELM_CACHE_HOME": path_join(helm_dir, 'Caches'),
+                "HELM_CONFIG_HOME": path_join(helm_dir, 'Preferences'),
+            },
+        ) as kubeconfig:
+            with ExitStack() as stack:
+                ip_ports = [
+                    stack.enter_context(port_forward(kubeconfig, 'cilium', port, 'deployment', 'cilium-operator'))
+                    for port in PORTS
                 ]
-            }
 
-        yield instances
+                instances = get_instances(
+                    ip_ports[0][0], ip_ports[0][1], ip_ports[1][0], ip_ports[1][1], use_openmetrics
+                )
+
+            yield instances
 
 
 @pytest.fixture(scope="session")

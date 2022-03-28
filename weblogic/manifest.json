@@ -15,7 +15,7 @@
     "windows"
   ],
   "process_signatures": [
-    "weblogic.Server"
+    "java weblogic.Server"
   ],
   "public_title": "WebLogic",
   "categories": [
@@ -25,14 +25,20 @@
 
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "weblogic",
   "assets": {
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
-    "monitors": {},
+    "dashboards": {
+      "overview": "assets/dashboards/overview.json",
+      "metrics": "assets/dashboards/metrics.json"
+    },
+    "monitors": {
+      "active_threads": "assets/monitors/active_threads.json",
+      "stuck_threads": "assets/monitors/stuck_threads.json"
+    },
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
     "logs": {

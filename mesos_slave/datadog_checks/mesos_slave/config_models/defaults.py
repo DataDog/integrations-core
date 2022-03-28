@@ -110,6 +110,10 @@ def instance_master_port(field, value):
     return 5050
 
 
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_min_collection_interval(field, value):
     return 15
 
@@ -171,6 +175,10 @@ def instance_tls_ignore_warning(field, value):
 
 
 def instance_tls_private_key(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_tls_protocols_allowed(field, value):
     return get_default_field_value(field, value)
 
 

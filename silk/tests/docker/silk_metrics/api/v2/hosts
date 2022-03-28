@@ -1,0 +1,16 @@
+{
+   "hits":[
+      {
+         "host_group":null,
+         "id":1,
+         "is_part_of_group":false,
+         "name":"CentOS",
+         "type":"Linux",
+         "views_count":0,
+         "volumes_count":4
+      }
+   ],
+   "limit":100,
+   "offset":0,
+   "total":1
+}

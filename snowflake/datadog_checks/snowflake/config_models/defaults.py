@@ -34,6 +34,10 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_aggregate_last_24_hours(field, value):
+    return False
+
+
 def instance_authenticator(field, value):
     return 'snowflake'
 
@@ -70,6 +74,10 @@ def instance_metric_groups(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_min_collection_interval(field, value):
     return 3600
 
@@ -80,6 +88,18 @@ def instance_ocsp_response_cache_filename(field, value):
 
 def instance_only_custom_queries(field, value):
     return False
+
+
+def instance_password(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_private_key_password(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_private_key_path(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_schema_(field, value):
@@ -96,6 +116,10 @@ def instance_tags(field, value):
 
 def instance_token(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_token_path(field, value):
+    return '/path/to/token'
 
 
 def instance_use_global_custom_queries(field, value):

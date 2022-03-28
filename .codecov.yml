@@ -70,6 +70,10 @@ coverage:
         target: 75
         flags:
         - cacti
+      Calico:
+        target: 75
+        flags:
+          - calico
       Cassandra_Nodetool:
         target: 75
         flags:
@@ -170,6 +174,10 @@ coverage:
         target: 75
         flags:
         - external_dns
+      FoundationDB:
+        target: 75
+        flags:
+        - foundationdb
       Gearman:
         target: 75
         flags:
@@ -450,6 +458,10 @@ coverage:
         target: 75
         flags:
         - scylla
+      Silk:
+        target: 75
+        flags:
+        - silk
       SingleStore:
         target: 75
         flags:
@@ -502,6 +514,10 @@ coverage:
         target: 50
         flags:
         - tokumx
+      Traffic_Server:
+        target: 75
+        flags:
+        - traffic_server
       Twemproxy:
         target: 75
         flags:
@@ -558,6 +574,10 @@ coverage:
         target: 75
         flags:
         - fluentd
+      pulsar:
+        target: 75
+        flags:
+        - pulsar
       vSphere:
         target: 75
         flags:
@@ -624,6 +644,11 @@ flags:
     paths:
     - cacti/datadog_checks/cacti
     - cacti/tests
+  calico:
+    carryforward: true
+    paths:
+      - calico/datadog_checks/calico
+      - calico/tests
   cassandra_nodetool:
     carryforward: true
     paths:
@@ -774,6 +799,11 @@ flags:
     paths:
     - fluentd/datadog_checks/fluentd
     - fluentd/tests
+  foundationdb:
+    carryforward: true
+    paths:
+      - foundationdb/datadog_checks/foundationdb
+      - foundationdb/tests
   gearmand:
     carryforward: true
     paths:
@@ -1074,6 +1104,11 @@ flags:
     paths:
     - proxysql/datadog_checks/proxysql
     - proxysql/tests
+  pulsar:
+    carryforward: true
+    paths:
+    - pulsar/datadog_checks/pulsar
+    - pulsar/tests
   rabbitmq:
     carryforward: true
     paths:
@@ -1109,6 +1144,11 @@ flags:
     paths:
     - scylla/datadog_checks/scylla
     - scylla/tests
+  silk:
+    carryforward: true
+    paths:
+    - silk/datadog_checks/silk
+    - silk/tests
   singlestore:
     carryforward: true
     paths:
@@ -1189,6 +1229,11 @@ flags:
     paths:
     - tokumx/datadog_checks/tokumx
     - tokumx/tests
+  traffic_server:
+    carryforward: true
+    paths:
+    - traffic_server/datadog_checks/traffic_server
+    - traffic_server/tests
   twemproxy:
     carryforward: true
     paths:

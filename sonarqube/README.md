@@ -22,18 +22,42 @@ collects all relevant SonarQube performance metrics exposed through SonarQube's 
 default metrics is available in the [sonarqube.d/metrics.yaml][3] file. Documentation on these beans is available on
 [SonarQube's website][4].
 
-SonarQube's JMX server is not enabled by default, this means that unless it is enabled, `sonarqube.server.*` metrics 
-will not be collected. More information on how to enable and configure JMX within SonarQube is available within the 
-[SonarQube documentation][5]. 
+SonarQube's JMX server is **not enabled** by default, this means that unless it is enabled, `sonarqube.server.*` metrics are not collected. More information on how to enable and configure JMX within SonarQube is available within the [SonarQube documentation][5]. Below are configurations needed to enable the JMX server for some common Java processes:
 
-This is a basic `sonarqube.d/conf.yaml` example based on SonarQube and JMX defaults. You can use it as a starting point
-when configuring for both the host-based or container-based agent installation.
+```conf
+# WEB SERVER
+sonar.web.javaAdditionalOpts="
+  -Dcom.sun.management.jmxremote=true
+  -Dcom.sun.management.jmxremote.port=10443
+  -Dcom.sun.management.jmxremote.rmi.port=10443
+  ...
+  "
+
+# COMPUTE ENGINE
+sonar.ce.javaAdditionalOpts="
+  -Dcom.sun.management.jmxremote=true
+  -Dcom.sun.management.jmxremote.port=10444
+  -Dcom.sun.management.jmxremote.rmi.port=10444
+  ...
+  "
+
+# ELASTICSEARCH
+sonar.search.javaAdditionalOpts="
+  -Dcom.sun.management.jmxremote=true
+  -Dcom.sun.management.jmxremote.port=10445
+  -Dcom.sun.management.jmxremote.rmi.port=10445
+  ...
+  "
+```
+
+This is a basic `sonarqube.d/conf.yaml` example based on SonarQube and JMX defaults. You can use it as a starting point when configuring for both the host-based or container-based Agent installation.
 
 ```yaml
 init_config:
     is_jmx: false
     collect_default_metrics: true
 instances:
+
   # Web API instance
   - is_jmx: false
     web_endpoint: http://localhost:9000
@@ -41,37 +65,34 @@ instances:
     username: <username>    # Defined in the Web UI
     password: <password>    # Defined in the Web UI
     default_tag: component  # Optional
-    components:
+    components:             # Required
       my-project:
         tag: project_name
+
   # Web JMX instance
   - is_jmx: true
     host: localhost
-    port: 10443
+    port: 10443           # See sonar.web.javaAdditionalOpts in SonarQube's sonar.properties file
     user: <username>      # Defined in SonarQube's sonar.properties file
     password: <password>  # Defined in SonarQube's sonar.properties file
+
   # Compute Engine JMX instance
   - is_jmx: true
     host: localhost
-    port: 10444
+    port: 10444           # See sonar.ce.javaAdditionalOpts in SonarQube's sonar.properties file
     user: <username>      # Defined in SonarQube's sonar.properties file
     password: <password>  # Defined in SonarQube's sonar.properties file
 ```
 
-> Note: Once the integration is configured, have SonarQube scan at least one project so that the metrics to populate in
-> Datadog.
+**Note**: Once the integration is configured, have SonarQube scan at least one project so that the metrics to populate in Datadog.
 
-Metrics collected by this integation will be tagged with a `component` tag by default. If you wish to change the tag
+Metrics collected by this integration are tagged with a `component` tag by default. If you wish to change the tag
 name on a per component basis, specify the `tag` property within the component definition. To set it for all projects,
 set the `default_tag` property on the instance config.
 
-> Note: Projects in SonarQube often contain multiple source control branches. This integration can only collect metrics
-> from the default branch in SonarQube (typically `main`).
+**Note**: Projects in SonarQube often contain multiple source control branches. This integration can only collect metrics from the default branch in SonarQube (typically `main`).
 
-In addition, SonarQube exposes a Search Server which can monitored using an additional instance of this integration and
-configuration of the JMX metrics which you want to collect. To learn how to customize the metrics to collect, visit the
-[JMX Checks documentation][6] for more detailed instructions. For inspriration, use the example config below and
-default JMX metric config in [sonarqube.d/metrics.yaml][3].
+SonarQube exposes a search server, which can be monitored using an additional instance of this integration and a configuration of the JMX metrics. To learn how to customize the metrics to collect, see the [JMX Checks documentation][6] for more detailed instructions. For an example, use the config below and default JMX metric config in [sonarqube.d/metrics.yaml][3].
 
 ```yaml
 init_config:
@@ -90,7 +111,7 @@ instances:
   # Search Server JMX instance
   - is_jmx: true
     host: localhost
-    port: 10445
+    port: 10445           # See sonar.search.javaAdditionalOpts in SonarQube's sonar.properties file
     user: <username>      # Defined in SonarQube's sonar.properties file
     password: <password>  # Defined in SonarQube's sonar.properties file
 ```
@@ -110,18 +131,12 @@ To configure this check for an Agent running on a host:
 
    This check has a limit of 350 metrics per JMX instance. The number of returned metrics is indicated in the info page.
    You can specify the metrics you are interested in by editing the configuration below.
-   To learn how to customize the metrics to collect, visit the [JMX Checks documentation][6] for more detailed instructions.
+   To learn how to customize the metrics to collect, see the [JMX Checks documentation][6] for more detailed instructions.
    If you need to monitor more metrics, contact [Datadog support][8].
 
 2. [Restart the Agent][9].
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 1. Enable SonarQube [logging][10].
 
@@ -180,12 +195,6 @@ partial -->
 For containerized environments, see the [Autodiscovery with JMX][11] guide.
 
 ##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][12].
 

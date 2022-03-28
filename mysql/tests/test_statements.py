@@ -131,6 +131,7 @@ def test_statement_metrics(
 
     assert event['host'] == 'stubbed.hostname'
     assert event['ddagentversion'] == datadog_agent.get_version()
+    assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['mysql_version'] == mysql_check.version.version + '+' + mysql_check.version.build
     assert event['mysql_flavor'] == mysql_check.version.flavor
     assert event['timestamp'] > 0
@@ -382,6 +383,84 @@ def test_statement_samples_collect(
 
 
 @pytest.mark.parametrize(
+    "statement,schema,expected_warnings",
+    [
+        (
+            'SELECT 1',
+            # Since information_schema doesn't have the explain_plan procedure, we should detect the config
+            # error and emit a warning
+            'information_schema',
+            [
+                "Unable to collect explain plans because the procedure 'explain_statement' is "
+                "either undefined or not granted access to in schema 'information_schema'. "
+                "See https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting#"
+                "explain-plan-procedure-missing for more details: "
+                "(1044) Access denied for user 'dog'@'%' to database 'information_schema'\n"
+                "code=explain-plan-procedure-missing host=stubbed.hostname schema=information_schema",
+            ],
+        ),
+        (
+            # The missing table should make the explain plan fail without reporting a warning about the procedure
+            # missing
+            'SELECT * from missing_table',
+            'testdb',
+            [],
+        ),
+    ],
+)
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_missing_explain_procedure(dbm_instance, dd_run_check, aggregator, statement, schema, expected_warnings):
+    # Disable query samples to avoid interference from query samples getting picked up from db and triggering
+    # explain plans
+    dbm_instance['query_samples']['enabled'] = False
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+    mysql_check._statement_samples._preferred_explain_strategies = ['PROCEDURE']
+    mysql_check._statement_samples._tags = []
+    mysql_check._statement_samples._tags_str = ''
+
+    row = {
+        'current_schema': schema,
+        'sql_text': statement,
+        'query': statement,
+        'digest_text': statement,
+        'timer_end_time_s': 10003.1,
+        'timer_wait_ns': 12.9,
+    }
+
+    mysql_check._statement_samples._collect_plan_for_statement(row)
+    dd_run_check(mysql_check)
+
+    assert mysql_check.warnings == expected_warnings
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_performance_schema_disabled(dbm_instance, dd_run_check):
+    # Disable query samples to avoid interference from queries from the db running explain plans
+    # and isolate the fake row from it
+    dbm_instance['query_samples']['enabled'] = False
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    # Fake the performance schema being disabled to validate the reporting of a warning when this condition occurs
+    mysql_check.performance_schema_enabled = False
+
+    # Run this twice to confirm that duplicate warnings aren't added more than once
+    mysql_check._statement_metrics.collect_per_statement_metrics()
+    mysql_check._statement_metrics.collect_per_statement_metrics()
+
+    # Run the check only so that recorded warnings are actually added
+    dd_run_check(mysql_check)
+
+    assert mysql_check.warnings == [
+        'Unable to collect statement metrics because the performance schema is disabled. See '
+        'https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting#performance-schema-not-enabled '
+        'for more details\n'
+        'code=performance-schema-not-enabled host=stubbed.hostname'
+    ]
+
+
+@pytest.mark.parametrize(
     "metadata,expected_metadata_payload",
     [
         (
@@ -395,7 +474,6 @@ def test_statement_samples_collect(
     ],
 )
 def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload):
-    dbm_instance['obfuscator_options'] = {'collect_metadata': True}
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     test_query = '''
@@ -420,21 +498,22 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agen
         mock_agent.side_effect = obfuscate_sql
         run_query(test_query)
         dd_run_check(mysql_check)
+        run_query(test_query)
+        dd_run_check(mysql_check)
 
     samples = aggregator.get_event_platform_events("dbm-samples")
-    matching = [s for s in samples if s['db']['query_signature'] == query_signature]
+    matching = [s for s in samples if s['db']['query_signature'] == query_signature and s.get('dbm_type') != 'fqt']
     assert len(matching) == 1
-
     sample = matching[0]
     assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
     assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
     assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
 
-    # Run the query and check a second time so statement metrics are computed from the previous run
-    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
-        mock_agent.side_effect = obfuscate_sql
-        run_query(test_query)
-        dd_run_check(mysql_check)
+    fqt_samples = [s for s in samples if s['db']['query_signature'] == query_signature and s.get('dbm_type') == 'fqt']
+    assert len(fqt_samples) == 1
+    fqt = fqt_samples[0]
+    assert fqt['db']['metadata']['tables'] == expected_metadata_payload['tables']
+    assert fqt['db']['metadata']['commands'] == expected_metadata_payload['commands']
 
     metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(metrics) == 1
@@ -668,22 +747,28 @@ def test_statement_samples_enable_consumers(dd_run_check, dbm_instance, root_con
     dbm_instance['query_samples']['events_statements_enable_procedure'] = events_statements_enable_procedure
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
+    all_consumers = {'events_statements_current', 'events_statements_history', 'events_statements_history_long'}
+    all_consumers_gt_8_0_28 = all_consumers.union({'events_statements_cpu'})  # CPU consumer was added in MySQL 8.0.28
+
     # deliberately disable one of the consumers
+    consumer_to_disable = 'events_statements_history_long'
     with closing(root_conn.cursor()) as cursor:
         cursor.execute(
             "UPDATE performance_schema.setup_consumers SET enabled='NO'  WHERE name = "
-            "'events_statements_history_long';"
+            "'{}';".format(consumer_to_disable)
         )
 
     original_enabled_consumers = mysql_check._statement_samples._get_enabled_performance_schema_consumers()
-    assert original_enabled_consumers == {'events_statements_current', 'events_statements_history'}
+    assert consumer_to_disable not in original_enabled_consumers
 
     dd_run_check(mysql_check)
 
     enabled_consumers = mysql_check._statement_samples._get_enabled_performance_schema_consumers()
     if events_statements_enable_procedure == "datadog.enable_events_statements_consumers":
-        assert enabled_consumers == original_enabled_consumers.union({'events_statements_history_long'})
+        # ensure that the consumer was re-enabled by the check run
+        assert enabled_consumers == all_consumers or enabled_consumers == all_consumers_gt_8_0_28
     else:
+        # the consumer should not have been re-enabled
         assert enabled_consumers == original_enabled_consumers
 
 

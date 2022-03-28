@@ -27,6 +27,14 @@ class AuthToken(BaseModel):
     writer: Optional[Mapping[str, Any]]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class Proxy(BaseModel):
     class Config:
         allow_mutation = False
@@ -60,6 +68,7 @@ class InstanceConfig(BaseModel):
     kerberos_principal: Optional[str]
     lighttpd_status_url: str
     log_requests: Optional[bool]
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     ntlm_domain: Optional[str]
     password: Optional[str]
@@ -75,6 +84,7 @@ class InstanceConfig(BaseModel):
     tls_cert: Optional[str]
     tls_ignore_warning: Optional[bool]
     tls_private_key: Optional[str]
+    tls_protocols_allowed: Optional[Sequence[str]]
     tls_use_host_header: Optional[bool]
     tls_verify: Optional[bool]
     use_legacy_auth_encoding: Optional[bool]

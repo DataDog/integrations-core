@@ -121,12 +121,6 @@ Datadog APM integrates with Postgres to see the traces across your distributed s
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
 PostgreSQL default logging is to `stderr`, and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix. See the PostgreSQL documentation on[Error Reporting and Logging][7] for more information.
@@ -203,12 +197,6 @@ LABEL "com.datadoghq.ad.instances"='[{"host":"%%host%%", "port":5432,"username":
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker Log Collection][10].
 
@@ -270,12 +258,6 @@ spec:
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][15].
 
@@ -336,12 +318,6 @@ Set [Autodiscovery Integrations Templates][9] as Docker labels on your applicati
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [ECS Log Collection][12].
 
@@ -371,7 +347,7 @@ Required environment variables on the Agent container:
 | `<DD_APM_ENABLED>`      | true                                                              |
 | `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
 
-See [Tracing Docker Applications][12] for a complete list of available environment variables and configuration.
+See [Tracing Docker Applications][27] for a complete list of available environment variables and configuration.
 
 Then, [instrument your application container that makes requests to Postgres][11] and set `DD_AGENT_HOST` to the [EC2 private IP address][17].
 
@@ -445,3 +421,4 @@ Additional helpful documentation, links, and articles:
 [24]: https://www.datadoghq.com/blog/postgresql-monitoring
 [25]: https://www.datadoghq.com/blog/postgresql-monitoring-tools
 [26]: https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog
+[27]: https://docs.datadoghq.com/agent/docker/apm/

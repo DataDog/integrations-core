@@ -50,6 +50,12 @@ instances:
     #
     # port: 50000
 
+    ## @param security - string - optional - default: none
+    ## Set this parameter to `ssl` to use the SSL protocol for a connection to the database server using the default
+    ## certificate from the ibm-db driver package. Specifying `tls_cert` is not required when using this option.
+    #
+    # security: none
+
     ## @param tls_cert - string - optional
     ## The path to a SSL certificate to use, when connecting to a database in a secure fashion. It
     ## has to be accessible and readable by the agent user.
@@ -134,6 +140,17 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
 
 ## Log Section
 ##

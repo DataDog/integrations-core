@@ -1,6 +1,25 @@
 # CHANGELOG - Snowflake
 
-## 4.0.1 / 2021-11-23
+## 4.2.1 / 2022-03-10
+
+* [Fixed] Convert private key password into string instead of byte. See [#11648](https://github.com/DataDog/integrations-core/pull/11648).
+
+## 4.2.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11433](https://github.com/DataDog/integrations-core/pull/11433).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+
+## 4.1.0 / 2022-01-27
+
+* [Added] Refactor snowflake validators. See [#11208](https://github.com/DataDog/integrations-core/pull/11208).
+* [Added] Add key authentication option. See [#11180](https://github.com/DataDog/integrations-core/pull/11180).
+* [Added] Add token_path config option. See [#11160](https://github.com/DataDog/integrations-core/pull/11160).
+* [Added] Add aggregate_last_24_hours option. See [#11157](https://github.com/DataDog/integrations-core/pull/11157).
+* [Fixed] Register private_key_password as secret. See [#11215](https://github.com/DataDog/integrations-core/pull/11215).
+* [Fixed] Standardize key and token options behaviour. See [#11214](https://github.com/DataDog/integrations-core/pull/11214).
+* [Fixed] Fix configuration error for custom queries. See [#11185](https://github.com/DataDog/integrations-core/pull/11185).
+
+## 4.0.1 / 2021-11-23 / Agent 7.33.0
 
 * [Fixed] Fix default field name of schema. See [#10714](https://github.com/DataDog/integrations-core/pull/10714).
 

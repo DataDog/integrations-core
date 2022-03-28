@@ -122,11 +122,16 @@ class SQLServer(AgentCheck):
                     # Valid values for this can be found at
                     # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/database.md#connection-level-attributes
                     'dbms': 'mssql',
-                    'replace_digits': obfuscator_options_config.get('replace_digits', False),
-                    'return_json_metadata': obfuscator_options_config.get('collect_metadata', False),
-                    'table_names': obfuscator_options_config.get('collect_tables', True),
-                    'collect_commands': obfuscator_options_config.get('collect_commands', True),
-                    'collect_comments': obfuscator_options_config.get('collect_comments', True),
+                    'replace_digits': is_affirmative(
+                        obfuscator_options_config.get(
+                            'replace_digits',
+                            obfuscator_options_config.get('quantize_sql_tables', False),
+                        )
+                    ),
+                    'return_json_metadata': is_affirmative(obfuscator_options_config.get('collect_metadata', True)),
+                    'table_names': is_affirmative(obfuscator_options_config.get('collect_tables', True)),
+                    'collect_commands': is_affirmative(obfuscator_options_config.get('collect_commands', True)),
+                    'collect_comments': is_affirmative(obfuscator_options_config.get('collect_comments', True)),
                 }
             )
         )
@@ -358,8 +363,7 @@ class SQLServer(AgentCheck):
 
         # Load database files
         for name, column, metric_type in DATABASE_FILES_IO:
-            cfg = {'name': name, 'column': column, 'tags': tags}
-
+            cfg = {'name': name, 'column': column, 'tags': tags, 'hostname': self.resolved_hostname}
             metrics_to_collect.append(SqlFileStats(cfg, None, getattr(self, metric_type), column, self.log))
 
         # Load AlwaysOn metrics
@@ -570,6 +574,8 @@ class SQLServer(AgentCheck):
             metric_type_str, cls = metrics.TABLE_MAPPING[table]
             metric_type = getattr(self, metric_type_str)
 
+        cfg_inst['hostname'] = self.resolved_hostname
+
         return cls(cfg_inst, base_name, metric_type, column, self.log)
 
     def check(self, _):
@@ -582,7 +588,12 @@ class SQLServer(AgentCheck):
             if self.autodiscovery and self.autodiscovery_db_service_check:
                 for db_name in self.databases:
                     if db_name != self.connection.DEFAULT_DATABASE:
-                        self.connection.check_database_conns(db_name)
+                        try:
+                            self.connection.check_database_conns(db_name)
+                        except Exception as e:
+                            # service_check errors on auto discovered databases should not abort the check
+                            self.log.warning("failed service check for auto discovered database: %s", e)
+
             if self.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
@@ -634,8 +645,18 @@ class SQLServer(AgentCheck):
                         if rows is not None:
                             metric.fetch_metric(rows, cols)
 
-            # reuse connection for any custom queries
-            self._query_manager.execute()
+            # Neither pyodbc nor adodbapi are able to read results of a query if the number of rows affected
+            # statement are returned as part of the result set, so we disable for the entire connection
+            # this is important mostly for custom_queries or the stored_procedure feature
+            # https://docs.microsoft.com/en-us/sql/t-sql/statements/set-nocount-transact-sql
+            with self.connection.get_managed_cursor() as cursor:
+                cursor.execute("SET NOCOUNT ON")
+            try:
+                # reuse connection for any custom queries
+                self._query_manager.execute()
+            finally:
+                with self.connection.get_managed_cursor() as cursor:
+                    cursor.execute("SET NOCOUNT OFF")
 
     def execute_query_raw(self, query):
         with self.connection.get_managed_cursor() as cursor:

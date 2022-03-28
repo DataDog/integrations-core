@@ -2,11 +2,9 @@
 
 ## Overview
 
-Get internal metrics from the Datadog Agent in real time to visualize and monitor
-the Datadog Agent's internal metrics.
+Get internal metrics from the Datadog Agent to create visualizations and monitors in Datadog.
 
-Note: The list of metrics collected by this integration may change between minor Agent versions.
-Such changes may not be mentioned in the Agent's changelog.
+**Note:** The list of metrics collected by this integration may change between minor Agent versions. Such changes may not be mentioned in the Agent's changelog.
 
 ## Setup
 

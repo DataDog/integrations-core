@@ -52,10 +52,12 @@ class IbmMqCheck(AgentCheck):
     def check(self, _):
         try:
             queue_manager = connection.get_queue_manager_connection(self._config, self.log)
-            self.service_check(self.SERVICE_CHECK, AgentCheck.OK, self._config.tags)
+            self.service_check(self.SERVICE_CHECK, AgentCheck.OK, self._config.tags, hostname=self._config.hostname)
         except Exception as e:
             self.warning("cannot connect to queue manager: %s", e)
-            self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, self._config.tags)
+            self.service_check(
+                self.SERVICE_CHECK, AgentCheck.CRITICAL, self._config.tags, hostname=self._config.hostname
+            )
             raise
 
         self._collect_metadata(queue_manager)
@@ -70,7 +72,7 @@ class IbmMqCheck(AgentCheck):
 
     def send_metric(self, metric_type, metric_name, metric_value, tags):
         if metric_type in [GAUGE, COUNT]:
-            getattr(self, metric_type)(metric_name, metric_value, tags=tags)
+            getattr(self, metric_type)(metric_name, metric_value, tags=tags, hostname=self._config.hostname)
         else:
             self.log.warning("Unknown metric type `%s` for metric `%s`", metric_type, metric_name)
 

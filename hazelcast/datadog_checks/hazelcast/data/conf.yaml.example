@@ -402,6 +402,8 @@ instances:
 
     ## @param aws_host - string - optional
     ## If your services require AWS Signature Version 4 signing, set the host.
+    ## This only needs the hostname and does not require the protocol (HTTP, HTTPS, and more).
+    ## For example, if connecting to https://us-east-1.amazonaws.com/, set `aws_host` to `us-east-1.amazonaws.com`.
     ##
     ## Note: This setting is not necessary for official integrations.
     ##
@@ -432,10 +434,6 @@ instances:
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable those by setting `tls_ignore_warning` to true.
-    ##
-    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
-    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
-    ## to true.
     #
     # tls_ignore_warning: false
 
@@ -459,6 +457,20 @@ instances:
     ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
     #
     # tls_ca_cert: <CA_CERT_PATH>
+
+    ## @param tls_protocols_allowed - list of strings - optional
+    ## The expected versions of TLS/SSL when fetching intermediate certificates.
+    ## Only `SSLv3`, `TLSv1.2`, `TLSv1.3` are allowed by default. The possible values are:
+    ##   SSLv3
+    ##   TLSv1
+    ##   TLSv1.1
+    ##   TLSv1.2
+    ##   TLSv1.3
+    #
+    # tls_protocols_allowed:
+    #   - SSLv3
+    #   - TLSv1.2
+    #   - TLSv1.3
 
     ## @param headers - mapping - optional
     ## The headers parameter allows you to send specific headers with every request.

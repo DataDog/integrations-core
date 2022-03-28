@@ -1,5 +1,63 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 16.0.0 / 2022-03-25
+
+* [Added] Add `metric_patterns` to base template. See [#11696](https://github.com/DataDog/integrations-core/pull/11696).
+* [Fixed] Update check template README. See [#11719](https://github.com/DataDog/integrations-core/pull/11719).
+* [Fixed] Better logging and usability of ddev 'generate-traps-db'. See [#11544](https://github.com/DataDog/integrations-core/pull/11544).
+* [Fixed] Remove check options from jmx template. See [#11686](https://github.com/DataDog/integrations-core/pull/11686).
+* [Changed] Refactor dependency tooling. See [#11720](https://github.com/DataDog/integrations-core/pull/11720).
+
+## 15.11.0 / 2022-03-16
+
+* [Added] Add more allowed recommended monitor types. See [#11669](https://github.com/DataDog/integrations-core/pull/11669).
+* [Added] Prevent tags for unreleased integrations. See [#11605](https://github.com/DataDog/integrations-core/pull/11605).
+* [Added] Allow limiting released changes up to a specific ref. See [#11596](https://github.com/DataDog/integrations-core/pull/11596).
+* [Fixed] Add space above tag function. See [#11623](https://github.com/DataDog/integrations-core/pull/11623).
+* [Fixed] Don't ignore the last character of lines when validating ASCII. See [#11548](https://github.com/DataDog/integrations-core/pull/11548).
+* [Fixed] Remove unsupported schema properties. See [#11585](https://github.com/DataDog/integrations-core/pull/11585).
+* [Fixed] Fail releases for missing tags. See [#11593](https://github.com/DataDog/integrations-core/pull/11593).
+* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+* [Fixed] Fix fallback case in trello card assignment algorithm. See [#11533](https://github.com/DataDog/integrations-core/pull/11533).
+
+## 15.10.1 / 2022-02-19
+
+* [Fixed] Fix integration templates. See [#11539](https://github.com/DataDog/integrations-core/pull/11539).
+* [Fixed] Handle the case in models sync where a file does not have a license header. See [#11535](https://github.com/DataDog/integrations-core/pull/11535).
+
+## 15.10.0 / 2022-02-16
+
+* [Added] Update templates for new integrations. See [#11510](https://github.com/DataDog/integrations-core/pull/11510).
+* [Added] Reintroduce ASCII validation for README files. See [#11509](https://github.com/DataDog/integrations-core/pull/11509).
+* [Fixed] Update new check template. See [#11489](https://github.com/DataDog/integrations-core/pull/11489).
+* [Fixed] Fix codecov report. See [#11492](https://github.com/DataDog/integrations-core/pull/11492).
+
+## 15.9.0 / 2022-02-10
+
+* [Added] Add `pyproject.toml` file. See [#11303](https://github.com/DataDog/integrations-core/pull/11303).
+* [Fixed] Fix style format for Python checks defined by a pyproject.toml file . See [#11483](https://github.com/DataDog/integrations-core/pull/11483).
+* [Fixed] Fix `pytest` and `tox` plugins for checks with only a `pyproject.toml`. See [#11477](https://github.com/DataDog/integrations-core/pull/11477).
+* [Fixed] Fix E2E for new base package versions. See [#11473](https://github.com/DataDog/integrations-core/pull/11473).
+* [Fixed] Fix package signing for checks with only a `pyproject.toml`. See [#11474](https://github.com/DataDog/integrations-core/pull/11474).
+
+## 15.8.0 / 2022-02-07
+
+* [Added] Support Python checks defined by a `pyproject.toml` file. See [#11233](https://github.com/DataDog/integrations-core/pull/11233).
+* [Added] Add snmp build-traps-db command. See [#11235](https://github.com/DataDog/integrations-core/pull/11235).
+* [Added] Add curated_metric column to check validation. See [#11168](https://github.com/DataDog/integrations-core/pull/11168).
+* [Fixed] Safely check the dashboards key exists before trying to write to it. See [#11285](https://github.com/DataDog/integrations-core/pull/11285).
+* [Fixed] Validate all `curated_metric` rows and properly validate empty `metadata.csv` files. See [#11273](https://github.com/DataDog/integrations-core/pull/11273).
+* [Fixed] More specific config validation error message. See [#11272](https://github.com/DataDog/integrations-core/pull/11272).
+* [Fixed] Unpin black. See [#11270](https://github.com/DataDog/integrations-core/pull/11270).
+
+## 15.7.0 / 2022-01-31
+
+* [Added] Add example image with requirements for media carousel. See [#11145](https://github.com/DataDog/integrations-core/pull/11145).
+* [Fixed] Pin black package. See [#11240](https://github.com/DataDog/integrations-core/pull/11240).
+* [Fixed] Don't overwrite year in license header when generating files. See [#11188](https://github.com/DataDog/integrations-core/pull/11188).
+* [Fixed] Add manual changelog entry for 7.30.1. See [#11142](https://github.com/DataDog/integrations-core/pull/11142).
+* [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
+
 ## 15.6.0 / 2022-01-08
 
 * [Added] Add discovery options to `ddev env check` command. See [#11044](https://github.com/DataDog/integrations-core/pull/11044).

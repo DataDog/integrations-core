@@ -28,11 +28,20 @@ class CustomQuery(BaseModel):
     tags: Optional[Sequence[str]]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
     account: str
+    aggregate_last_24_hours: Optional[bool]
     authenticator: Optional[str]
     client_prefetch_threads: Optional[int]
     client_session_keep_alive: Optional[bool]
@@ -42,15 +51,19 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     login_timeout: Optional[int]
     metric_groups: Optional[Sequence[str]]
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     ocsp_response_cache_filename: Optional[str]
     only_custom_queries: Optional[bool]
-    password: str
+    password: Optional[str]
+    private_key_password: Optional[str]
+    private_key_path: Optional[str]
     role: str
     schema_: Optional[str] = Field(None, alias='schema')
     service: Optional[str]
     tags: Optional[Sequence[str]]
     token: Optional[str]
+    token_path: Optional[str]
     use_global_custom_queries: Optional[str]
     username: str
     warehouse: Optional[str]

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2022-present
+# (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -51,7 +51,7 @@ def instance_aws_service(field, value):
 
 
 def instance_bearer_token_auth(field, value):
-    return False
+    return get_default_field_value(field, value)
 
 
 def instance_bearer_token_path(field, value):
@@ -190,6 +190,10 @@ def instance_log_requests(field, value):
     return False
 
 
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_metrics(field, value):
     return get_default_field_value(field, value)
 
@@ -227,7 +231,7 @@ def instance_prometheus_metrics_prefix(field, value):
 
 
 def instance_prometheus_url(field, value):
-    return get_default_field_value(field, value)
+    return 'http://%%host%%:9153/metrics'
 
 
 def instance_proxy(field, value):
@@ -315,6 +319,10 @@ def instance_tls_ignore_warning(field, value):
 
 
 def instance_tls_private_key(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_tls_protocols_allowed(field, value):
     return get_default_field_value(field, value)
 
 

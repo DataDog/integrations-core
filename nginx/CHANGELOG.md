@@ -1,6 +1,20 @@
 # CHANGELOG - nginx
 
-## 5.0.0 / 2022-01-08
+## 5.2.1 / 2022-02-24
+
+* [Fixed] Adjust endpoint detection logic for warn log. See [#11567](https://github.com/DataDog/integrations-core/pull/11567).
+
+## 5.2.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11404](https://github.com/DataDog/integrations-core/pull/11404).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+
+## 5.1.0 / 2022-02-03
+
+* [Added] Allow for percentile aggregations for NGINX integration response time metrics. See [#11252](https://github.com/DataDog/integrations-core/pull/11252).
+* [Fixed] Instruct the user to fix the error. See [#11107](https://github.com/DataDog/integrations-core/pull/11107).
+
+## 5.0.0 / 2022-01-08 / Agent 7.34.0
 
 * [Added] Add option to dynamically determine what APIs to query for metrics. See [#10815](https://github.com/DataDog/integrations-core/pull/10815).
 * [Fixed] Bump base package. See [#11061](https://github.com/DataDog/integrations-core/pull/11061).

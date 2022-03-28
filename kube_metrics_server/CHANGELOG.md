@@ -1,6 +1,16 @@
 # CHANGELOG - Kube Metrics Server
 
-## 1.4.0 / 2021-11-13
+## 2.0.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11383](https://github.com/DataDog/integrations-core/pull/11383).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
+
+## 1.4.1 / 2022-01-18 / Agent 7.34.0
+
+* [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
+
+## 1.4.0 / 2021-11-13 / Agent 7.33.0
 
 * [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
 * [Added] Document new use_process_start_time option. See [#10601](https://github.com/DataDog/integrations-core/pull/10601).

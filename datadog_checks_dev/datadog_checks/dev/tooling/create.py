@@ -14,8 +14,14 @@ from ..fs import (
     write_file,
     write_file_binary,
 )
-from .constants import integration_type_links
-from .utils import get_config_models_documentation, get_license_header, kebab_case_name, normalize_package_name
+from .constants import REPO_CHOICES, integration_type_links
+from .utils import (
+    get_config_models_documentation,
+    get_license_header,
+    kebab_case_name,
+    normalize_package_name,
+    normalize_project_name,
+)
 
 TEMPLATES_DIR = path_join(os.path.dirname(os.path.abspath(__file__)), 'templates', 'integration')
 BINARY_EXTENSIONS = ('.png',)
@@ -28,7 +34,7 @@ def get_valid_templates():
     return sorted(templates)
 
 
-def construct_template_fields(integration_name, repo_choice, integration_type, **kwargs):
+def construct_template_fields(integration_name, repo_choice, manifest_v2, integration_type, **kwargs):
     normalized_integration_name = normalize_package_name(integration_name)
     check_name_kebab = kebab_case_name(integration_name)
 
@@ -91,6 +97,7 @@ To install the {integration_name} check on your host:
         'author': author,
         'check_class': f"{''.join(part.capitalize() for part in normalized_integration_name.split('_'))}Check",
         'check_name': check_name,
+        'project_name': normalize_project_name(normalized_integration_name),
         'documentation': get_config_models_documentation(),
         'integration_name': integration_name,
         'check_name_kebab': check_name_kebab,
@@ -100,6 +107,8 @@ To install the {integration_name} check on your host:
         'license_header': license_header,
         'install_info': install_info,
         'repo_choice': repo_choice,
+        'repo_name': REPO_CHOICES[repo_choice],
+        'manifest_v2': manifest_v2,
         'support_type': support_type,
         'test_dev_dep': test_dev_dep,
         'tox_base_dep': tox_base_dep,
@@ -124,12 +133,19 @@ def create_template_files(template_name, new_root, config, read=False):
                 if template_file == 'README.md' and config.get('support_type') == 'partner':
                     template_path = path_join(TEMPLATES_DIR, 'marketplace/', 'README.md')
                     file_path = path_join("/", config.get('check_name'), "README.md")
+
+                # Use a special readme file for media carousel information
+                # .gitkeep currently only used for images, but double check anyway
+                elif template_file == '.gitkeep' and 'images' in root and config.get('manifest_v2'):
+                    image_guidelines = 'IMAGES_README.md'
+                    template_path = path_join(TEMPLATES_DIR, 'marketplace/', image_guidelines)
+                    file_path = path_join("/", config.get('check_name'), "images", image_guidelines)
+
                 else:
                     template_path = path_join(root, template_file)
                     file_path = template_path.replace(template_root, '')
 
                 file_path = f'{new_root}{file_path.format(**config)}'
-
                 files.append(File(file_path, template_path, config, read=read))
 
     return files

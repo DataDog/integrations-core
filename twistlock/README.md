@@ -78,7 +78,7 @@ partial -->
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][6].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][6].
 
 | Parameter      | Value                                             |
 | -------------- | ------------------------------------------------- |
@@ -99,7 +99,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
      #(...)
    ```
 
-2. Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][8].
+2. Mount the Docker socket to the Datadog Agent. See the Datadog Kubernetes [example manifests][8].
 
 3. Make sure the log section is included in the Pod annotation for the defender, where the container name can be found just below in the pod spec:
 
@@ -123,7 +123,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
    ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "twistlock"}]'
    ```
 
-3. Make sure that the Docker socket is mounted to the Datadog Agent. More information about the required configuration to collect logs with the Datadog Agent available in the [Docker documentation][9].
+3. Mount the Docker socket to the Datadog Agent. More information about the required configuration to collect logs with the Datadog Agent available in [Docker Log Collection][9].
 
 4. [Restart the Agent][4].
 
@@ -132,7 +132,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's status subcommand][10] and look for `twistlock` under the Checks section.
+Run the [Agent's status subcommand][10] and look for `twistlock` under the Checks section.
 
 ## Data Collected
 
@@ -160,7 +160,7 @@ Need help? Contact [Datadog support][13].
 [5]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [6]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
 [7]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection
-[8]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#create-manifest
+[8]: https://docs.datadoghq.com/agent/kubernetes/?tab=daemonset
 [9]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/twistlock/metadata.csv

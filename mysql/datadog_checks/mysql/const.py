@@ -11,6 +11,7 @@ PROC_NAME = 'mysqld'
 # Vars found in "SHOW STATUS;"
 STATUS_VARS = {
     # Command Metrics
+    'Prepared_stmt_count': ('mysql.performance.prepared_stmt_count', GAUGE),
     'Slow_queries': ('mysql.performance.slow_queries', RATE),
     'Questions': ('mysql.performance.questions', RATE),
     'Queries': ('mysql.performance.queries', RATE),
@@ -63,6 +64,7 @@ VARIABLES_VARS = {
     'Key_buffer_size': ('mysql.myisam.key_buffer_size', GAUGE),
     'Key_cache_utilization': ('mysql.performance.key_cache_utilization', GAUGE),
     'max_connections': ('mysql.net.max_connections_available', GAUGE),
+    'max_prepared_stmt_count': ('mysql.performance.max_prepared_stmt_count', GAUGE),
     'query_cache_size': ('mysql.performance.qcache_size', GAUGE),
     'table_open_cache': ('mysql.performance.table_open_cache', GAUGE),
     'thread_cache_size': ('mysql.performance.thread_cache_size', GAUGE),
@@ -249,6 +251,10 @@ PERFORMANCE_VARS = {
 
 SCHEMA_VARS = {'information_schema_size': ('mysql.info.schema.size', GAUGE)}
 
+TABLE_VARS = {
+    'information_table_index_size': ('mysql.info.table.index_size', GAUGE),
+    'information_table_data_size': ('mysql.info.table.data_size', GAUGE),
+}
 
 # Vars found in "show slave status" or "show replication status" (depending on mysql version)
 REPLICA_VARS = {

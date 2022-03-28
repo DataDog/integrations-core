@@ -290,6 +290,9 @@ def test_update_kube_state_metrics(aggregator, instance, check):
         check.check(instance)
 
     aggregator.assert_service_check(NAMESPACE + '.node.ready', check.OK)
+    aggregator.assert_service_check(
+        NAMESPACE + '.node.ready', check.WARNING, tags=['node:test-test-node', 'optional:tag1']
+    )
     aggregator.assert_service_check(NAMESPACE + '.node.out_of_disk', check.OK)
     aggregator.assert_service_check(NAMESPACE + '.node.memory_pressure', check.OK)
     aggregator.assert_service_check(NAMESPACE + '.node.network_unavailable', check.OK)
@@ -303,7 +306,7 @@ def test_update_kube_state_metrics(aggregator, instance, check):
         NAMESPACE + '.nodes.by_condition', tags=['condition:ready', 'status:false', 'optional:tag1'], value=0
     )
     aggregator.assert_metric(
-        NAMESPACE + '.nodes.by_condition', tags=['condition:ready', 'status:unknown', 'optional:tag1'], value=0
+        NAMESPACE + '.nodes.by_condition', tags=['condition:ready', 'status:unknown', 'optional:tag1'], value=1
     )
 
     # Make sure we send counts for all phases to avoid no-data graphing issues
@@ -635,6 +638,7 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
         tags=[
             'job_name:curl-cron-job',
             'kube_job:curl-cron-job',
+            'kube_cronjob:curl-cron-job',
             'kube_namespace:default',
             'namespace:default',
             'optional:tag1',
@@ -723,12 +727,26 @@ def test_job_counts(aggregator, instance):
     # Test cron jobs
     aggregator.assert_metric(
         NAMESPACE + '.job.failed',
-        tags=['namespace:default', 'kube_namespace:default', 'kube_job:hello', 'job:hello', 'optional:tag1'],
+        tags=[
+            'namespace:default',
+            'kube_namespace:default',
+            'kube_job:hello',
+            'kube_cronjob:hello',
+            'job:hello',
+            'optional:tag1',
+        ],
         value=0,
     )
     aggregator.assert_metric(
         NAMESPACE + '.job.succeeded',
-        tags=['namespace:default', 'kube_namespace:default', 'kube_job:hello', 'job:hello', 'optional:tag1'],
+        tags=[
+            'namespace:default',
+            'kube_namespace:default',
+            'kube_job:hello',
+            'kube_cronjob:hello',
+            'job:hello',
+            'optional:tag1',
+        ],
         value=3,
     )
 
@@ -750,12 +768,26 @@ def test_job_counts(aggregator, instance):
     # Test cron jobs
     aggregator.assert_metric(
         NAMESPACE + '.job.failed',
-        tags=['namespace:default', 'kube_namespace:default', 'kube_job:hello', 'job:hello', 'optional:tag1'],
+        tags=[
+            'namespace:default',
+            'kube_namespace:default',
+            'kube_job:hello',
+            'kube_cronjob:hello',
+            'job:hello',
+            'optional:tag1',
+        ],
         value=0,
     )
     aggregator.assert_metric(
         NAMESPACE + '.job.succeeded',
-        tags=['namespace:default', 'kube_namespace:default', 'kube_job:hello', 'job:hello', 'optional:tag1'],
+        tags=[
+            'namespace:default',
+            'kube_namespace:default',
+            'kube_job:hello',
+            'kube_cronjob:hello',
+            'job:hello',
+            'optional:tag1',
+        ],
         value=3,
     )
 
@@ -789,12 +821,26 @@ def test_job_counts(aggregator, instance):
     check.check(instance)
     aggregator.assert_metric(
         NAMESPACE + '.job.failed',
-        tags=['namespace:default', 'kube_namespace:default', 'job:hello', 'kube_job:hello', 'optional:tag1'],
+        tags=[
+            'namespace:default',
+            'kube_namespace:default',
+            'job:hello',
+            'kube_job:hello',
+            'kube_cronjob:hello',
+            'optional:tag1',
+        ],
         value=1,
     )
     aggregator.assert_metric(
         NAMESPACE + '.job.succeeded',
-        tags=['namespace:default', 'kube_namespace:default', 'job:hello', 'kube_job:hello', 'optional:tag1'],
+        tags=[
+            'namespace:default',
+            'kube_namespace:default',
+            'job:hello',
+            'kube_job:hello',
+            'kube_cronjob:hello',
+            'optional:tag1',
+        ],
         value=4,
     )
 
@@ -828,7 +874,14 @@ def test_job_counts(aggregator, instance):
     check.check(instance)
     aggregator.assert_metric(
         NAMESPACE + '.job.succeeded',
-        tags=['namespace:default', 'kube_namespace:default', 'job:hello', 'kube_job:hello', 'optional:tag1'],
+        tags=[
+            'namespace:default',
+            'kube_namespace:default',
+            'job:hello',
+            'kube_job:hello',
+            'kube_cronjob:hello',
+            'optional:tag1',
+        ],
         value=5,
     )
 
@@ -886,9 +939,9 @@ def test_telemetry(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=94412.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=1002.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1334.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=94499.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=1004.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1336.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=332.0)
     aggregator.assert_metric(

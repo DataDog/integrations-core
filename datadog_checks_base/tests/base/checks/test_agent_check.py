@@ -4,6 +4,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import logging
 from collections import OrderedDict
 from typing import Any
 
@@ -647,6 +648,129 @@ class TestTags:
         tags = check._normalize_tags_type(tags=["foo:bar", "cluster:my_cluster"])
         assert set(tags) == expected_tags
 
+    @pytest.mark.parametrize(
+        "exclude_metrics_filters, include_metrics_filters, expected_metrics",
+        [
+            pytest.param(['hello'], [], ['my_metric', 'my_metric_count', 'test.my_metric1'], id='exclude string'),
+            pytest.param([r'my_metric_*'], [], ['hello'], id='exclude multiple matches glob'),
+            pytest.param(
+                [],
+                [r'my_metricw*'],
+                ['my_metric', 'my_metric_count', 'test.my_metric1'],
+                id='include multiple matches glob',
+            ),
+            pytest.param(
+                [r'my_metrics'],
+                [],
+                ['my_metric', 'my_metric_count', 'hello', 'test.my_metric1'],
+                id='exclude no matches',
+            ),
+            pytest.param([r'.*'], [], [], id='exclude everything'),
+            pytest.param([r'.*'], ['hello'], [], id='exclude everything one include'),
+            pytest.param([], ['hello'], ['hello'], id='include string'),
+            pytest.param([], [r'^my_(me|test)tric*'], ['my_metric', 'my_metric_count'], id='include multiple matches'),
+            pytest.param([r'my_metric_count'], [r'my_metric*'], ['my_metric', 'test.my_metric1'], id='match both'),
+            pytest.param([r'my_metric_count'], [r'my_metric_count'], [], id='duplicate'),
+            pytest.param(
+                [],
+                ['metric'],
+                ['my_metric', 'my_metric_count', 'test.my_metric1'],
+                id='include multiple matches inside',
+            ),
+            pytest.param(['my_metric_count'], ['hello'], ['hello'], id='include exclude'),
+            pytest.param(
+                [r'testing'], [r'.*'], ['my_metric', 'my_metric_count', 'hello', 'test.my_metric1'], id='include all'
+            ),
+            pytest.param(
+                [r'test\.my_metric([0-9]{1})'],
+                [],
+                [r'my_metric', r'my_metric_count', 'hello'],
+                id='include all but regex',
+            ),
+        ],
+    )
+    def test_metrics_filters(self, exclude_metrics_filters, include_metrics_filters, expected_metrics, aggregator):
+        instance = {
+            'metric_patterns': {
+                'exclude': exclude_metrics_filters,
+                'include': include_metrics_filters,
+            }
+        }
+        check = AgentCheck('myintegration', {}, [instance])
+        check.gauge('my_metric', 0)
+        check.count('my_metric_count', 0)
+        check.count('test.my_metric1', 1)
+        check.monotonic_count('hello', 0)
+        check.service_check('test.can_check', status=AgentCheck.OK)
+
+        for metric_name in expected_metrics:
+            aggregator.assert_metric(metric_name, count=1)
+
+        aggregator.assert_service_check('test.can_check', status=AgentCheck.OK)
+        aggregator.assert_all_metrics_covered()
+
+    @pytest.mark.parametrize(
+        "exclude_metrics_filters, include_metrics_filters, expected_error",
+        [
+            pytest.param(
+                'metric', [], r'^Setting `exclude` of `metric_patterns` must be an array', id='exclude not list'
+            ),
+            pytest.param(
+                [], 'metric', r'^Setting `include` of `metric_patterns` must be an array', id='include not list'
+            ),
+            pytest.param(
+                ['metric_one', 1000],
+                [],
+                r'^Entry #2 of setting `exclude` of `metric_patterns` must be a string',
+                id='exclude bad element',
+            ),
+            pytest.param(
+                [],
+                [10, 'metric_one'],
+                r'^Entry #1 of setting `include` of `metric_patterns` must be a string',
+                id='include bad element',
+            ),
+        ],
+    )
+    def test_metrics_filter_invalid(self, aggregator, exclude_metrics_filters, include_metrics_filters, expected_error):
+        instance = {
+            'metric_patterns': {
+                'exclude': exclude_metrics_filters,
+                'include': include_metrics_filters,
+            }
+        }
+        with pytest.raises(Exception, match=expected_error):
+            AgentCheck('myintegration', {}, [instance])
+
+    @pytest.mark.parametrize(
+        "exclude_metrics_filters, include_metrics_filters, expected_log",
+        [
+            pytest.param(
+                [''],
+                [],
+                'Entry #1 of setting `exclude` of `metric_patterns` must not be empty, ignoring',
+                id='empty exclude',
+            ),
+            pytest.param(
+                [],
+                [''],
+                'Entry #1 of setting `include` of `metric_patterns` must not be empty, ignoring',
+                id='empty include',
+            ),
+        ],
+    )
+    def test_metrics_filter_warnings(self, caplog, exclude_metrics_filters, include_metrics_filters, expected_log):
+        instance = {
+            'metric_patterns': {
+                'exclude': exclude_metrics_filters,
+                'include': include_metrics_filters,
+            }
+        }
+        caplog.clear()
+        caplog.set_level(logging.DEBUG)
+        AgentCheck('myintegration', {}, [instance])
+        assert expected_log in caplog.text
+
 
 class LimitedCheck(AgentCheck):
     DEFAULT_METRIC_LIMIT = 10
@@ -894,8 +1018,8 @@ def test_load_configuration_models(dd_run_check, mocker):
     assert check._config_model_instance is None
     assert check._config_model_shared is None
 
-    instance_config = object()
-    shared_config = object()
+    instance_config = {}
+    shared_config = {}
     package = mocker.MagicMock()
     package.InstanceConfig = mocker.MagicMock(return_value=instance_config)
     package.SharedConfig = mocker.MagicMock(return_value=shared_config)
@@ -914,3 +1038,108 @@ def test_load_configuration_models(dd_run_check, mocker):
 
     assert check._config_model_instance is instance_config
     assert check._config_model_shared is shared_config
+
+
+@requires_py3
+@pytest.mark.parametrize(
+    'check_instance_config, default_instance_config, log_lines',
+    [
+        pytest.param(
+            {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
+            [],
+            None,
+            id='empty default',
+        ),
+        pytest.param(
+            {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
+            [('endpoint', 'url')],
+            None,
+            id='no typo',
+        ),
+        pytest.param(
+            {'endpoints': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
+            [('endpoint', 'url')],
+            [
+                (
+                    'Detected potential typo in configuration option in test/instance section: `endpoints`. '
+                    'Did you mean endpoint?'
+                )
+            ],
+            id='typo',
+        ),
+        pytest.param(
+            {'endpoints': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
+            [('endpoint', 'url'), ('endpoints', 'url')],
+            None,
+            id='no typo similar option',
+        ),
+        pytest.param(
+            {'endpont': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
+            [('endpoint', 'url'), ('endpoints', 'url')],
+            [
+                (
+                    'Detected potential typo in configuration option in test/instance section: `endpont`. '
+                    'Did you mean endpoint, or endpoints?'
+                )
+            ],
+            id='typo two candidates',
+        ),
+        pytest.param({'tag': 'test'}, [('tags', 'test')], None, id='short option cant catch'),
+        pytest.param(
+            {'testing_long_para': 'test'},
+            [('testing_long_param', 'test'), ('test_short_param', 'test')],
+            [
+                (
+                    'Detected potential typo in configuration option in test/instance section: `testing_long_para`. '
+                    'Did you mean testing_long_param?'
+                )
+            ],
+            id='somewhat similar option',
+        ),
+        pytest.param(
+            {'send_distribution_sums_as_monotonic': False, 'exclude_labels': True},
+            [('send_distribution_counts_as_monotonic', True), ('include_labels', True)],
+            None,
+            id='different options no typos',
+        ),
+        pytest.param(
+            {'send_distribution_count_as_monotonic': True, 'exclude_label': True},
+            [
+                ('send_distribution_sums_as_monotonic', False),
+                ('send_distribution_counts_as_monotonic', True),
+                ('exclude_labels', False),
+                ('include_labels', True),
+            ],
+            [
+                (
+                    'Detected potential typo in configuration option in test/instance section: '
+                    '`send_distribution_count_as_monotonic`. Did you mean send_distribution_counts_as_monotonic?'
+                ),
+                (
+                    'Detected potential typo in configuration option in test/instance section: `exclude_label`. '
+                    'Did you mean exclude_labels?'
+                ),
+            ],
+            id='different options typo',
+        ),
+    ],
+)
+def test_detect_typos_configuration_models(
+    dd_run_check, mocker, caplog, check_instance_config, default_instance_config, log_lines
+):
+    caplog.clear()
+    caplog.set_level(logging.WARNING)
+    empty_config = {}
+    default_instance = mocker.MagicMock()
+    default_instance.__iter__ = mocker.MagicMock(return_value=iter(default_instance_config))
+
+    check = AgentCheck('test', empty_config, [check_instance_config])
+    check.check_id = 'test:123'
+
+    check.log_typos_in_options(check_instance_config, default_instance, 'instance')
+
+    if log_lines is not None:
+        for log_line in log_lines:
+            assert log_line in caplog.text
+    else:
+        assert 'Detected potential typo in configuration option' not in caplog.text

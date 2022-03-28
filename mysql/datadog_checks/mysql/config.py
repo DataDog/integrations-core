@@ -40,18 +40,21 @@ class MySQLConfig(object):
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         self.min_collection_interval = instance.get('min_collection_interval', 15)
+        self.only_custom_queries = is_affirmative(instance.get('only_custom_queries', False))
         obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
         self.obfuscator_options = {
             # Valid values for this can be found at
             # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/database.md#connection-level-attributes
             'dbms': 'mysql',
-            'replace_digits': obfuscator_options_config.get(
-                'replace_digits', obfuscator_options_config.get('quantize_sql_tables', False)
+            'replace_digits': is_affirmative(
+                obfuscator_options_config.get(
+                    'replace_digits', obfuscator_options_config.get('quantize_sql_tables', False)
+                )
             ),
-            'return_json_metadata': obfuscator_options_config.get('collect_metadata', False),
-            'table_names': obfuscator_options_config.get('collect_tables', True),
-            'collect_commands': obfuscator_options_config.get('collect_commands', True),
-            'collect_comments': obfuscator_options_config.get('collect_comments', True),
+            'return_json_metadata': is_affirmative(obfuscator_options_config.get('collect_metadata', True)),
+            'table_names': is_affirmative(obfuscator_options_config.get('collect_tables', True)),
+            'collect_commands': is_affirmative(obfuscator_options_config.get('collect_commands', True)),
+            'collect_comments': is_affirmative(obfuscator_options_config.get('collect_comments', True)),
         }
         self.configuration_checks()
 

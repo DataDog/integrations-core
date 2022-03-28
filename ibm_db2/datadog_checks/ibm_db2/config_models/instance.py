@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Literal, Mapping, Optional, Sequence
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -29,6 +29,14 @@ class CustomQuery(BaseModel):
     tags: Optional[Sequence[str]]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
@@ -38,10 +46,12 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: Optional[str]
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     only_custom_queries: Optional[bool]
     password: str
     port: Optional[int]
+    security: Optional[Literal['none', 'ssl']]
     service: Optional[str]
     tags: Optional[Sequence[str]]
     tls_cert: Optional[str]

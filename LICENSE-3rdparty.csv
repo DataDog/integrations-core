@@ -34,6 +34,7 @@ gearman,PyPI,Apache-2.0,Matthew Tai
 immutables,PyPI,Apache-2.0,MagicStack Inc
 in-toto,PyPI,Apache-2.0,New York University: Secure Systems Lab
 ipaddress,PyPI,PSF,Philipp Hagemeister
+jellyfish,PyPI,BSD-3-Clause,
 kafka-python,PyPI,Apache-2.0,Dana Powers
 kazoo,PyPI,Apache-2.0,Kazoo team
 kubernetes,PyPI,Apache-2.0,Kubernetes
@@ -55,7 +56,6 @@ pyasn1,PyPI,BSD-3-Clause,Ilya Etingof
 pycryptodomex,PyPI,BSD-2-Clause,Helder Eijs
 pycryptodomex,PyPI,Unlicense,Helder Eijs
 pydantic,PyPI,MIT,Samuel Colvin
-pyhdb,PyPI,Apache-2.0,Christoph Heer
 pymongo,PyPI,Apache-2.0,Bernie Hackett
 pymqi,PyPI,PSF,Dariusz Suchojad
 pyodbc,PyPI,MIT,Michael Kleehammer

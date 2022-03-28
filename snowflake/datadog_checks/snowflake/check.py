@@ -4,8 +4,10 @@
 from contextlib import closing
 
 import snowflake.connector as sf
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 
-from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
+from datadog_checks.base import AgentCheck, ConfigurationError, ensure_bytes, to_native_string
 from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
@@ -50,6 +52,9 @@ class SnowflakeCheck(AgentCheck):
         if self._config.password:
             self.register_secret(self._config.password)
 
+        if self._config.private_key_password:
+            self.register_secret(self._config.private_key_password)
+
         if self._config.role == 'ACCOUNTADMIN':
             self.log.info(
                 'Snowflake `role` is set as `ACCOUNTADMIN` which should be used cautiously, '
@@ -60,17 +65,49 @@ class SnowflakeCheck(AgentCheck):
         self.errors = []
         for mgroup in self._config.metric_groups:
             try:
+                if not self._config.aggregate_last_24_hours:
+                    for query in range(len(METRIC_GROUPS[mgroup])):
+                        METRIC_GROUPS[mgroup][query]['query'] = METRIC_GROUPS[mgroup][query]['query'].replace(
+                            'DATEADD(hour, -24, current_timestamp())', 'date_trunc(day, current_date)'
+                        )
                 self.metric_queries.extend(METRIC_GROUPS[mgroup])
             except KeyError:
                 self.errors.append(mgroup)
 
         if self.errors:
             self.log.warning('Invalid metric_groups found in snowflake conf.yaml: %s', (', '.join(self.errors)))
-        if not self.metric_queries:
-            raise ConfigurationError('No valid metric_groups configured, please list at least one.')
+        if not self.metric_queries and not self._config.custom_queries_defined:
+            raise ConfigurationError('No valid metric_groups or custom query configured, please list at least one.')
 
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=self.metric_queries, tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
+
+    def read_token(self):
+        if self._config.token_path:
+            self.log.debug("Renewing Snowflake client token")
+            with open(self._config.token_path, 'rb', encoding="UTF-8") as f:
+                self._config.token = f.read()
+
+        return self._config.token
+
+    def read_key(self):
+        if self._config.private_key_path:
+            self.log.debug("Reading Snowflake client key for key pair authentication")
+            # https://docs.snowflake.com/en/user-guide/python-connector-example.html#using-key-pair-authentication-key-pair-rotation
+            with open(self._config.private_key_path, "rb") as key:
+                p_key = serialization.load_pem_private_key(
+                    key.read(), password=ensure_bytes(self._config.private_key_password), backend=default_backend()
+                )
+
+                pkb = p_key.private_bytes(
+                    encoding=serialization.Encoding.DER,
+                    format=serialization.PrivateFormat.PKCS8,
+                    encryption_algorithm=serialization.NoEncryption(),
+                )
+
+                return pkb
+
+        return None
 
     def check(self, _):
         if self.instance.get('user'):
@@ -131,7 +168,8 @@ class SnowflakeCheck(AgentCheck):
                 login_timeout=self._config.login_timeout,
                 ocsp_response_cache_filename=self._config.ocsp_response_cache_filename,
                 authenticator=self._config.authenticator,
-                token=self._config.token,
+                token=self.read_token(),
+                private_key=self.read_key(),
                 client_session_keep_alive=self._config.client_keep_alive,
                 proxy_host=self.proxy_host,
                 proxy_port=self.proxy_port,

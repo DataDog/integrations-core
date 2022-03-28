@@ -8,7 +8,6 @@ import time
 
 import mock
 import pytest
-import requests
 import urllib3
 from requests import RequestException
 from six import iteritems
@@ -568,10 +567,10 @@ SPARK_STRUCTURED_STREAMING_METRIC_NO_TAGS = {
 
 
 @pytest.mark.unit
-def test_yarn(aggregator):
+def test_yarn(aggregator, dd_run_check):
     with mock.patch('requests.get', yarn_requests_get_mock):
         c = SparkCheck('spark', {}, [YARN_CONFIG])
-        c.check(YARN_CONFIG)
+        dd_run_check(c)
 
         # Check the succeeded job metrics
         for metric, value in iteritems(SPARK_JOB_SUCCEEDED_METRIC_VALUES):
@@ -626,10 +625,10 @@ def test_yarn(aggregator):
 
 
 @pytest.mark.unit
-def test_auth_yarn(aggregator):
+def test_auth_yarn(aggregator, dd_run_check):
     with mock.patch('requests.get', yarn_requests_auth_mock):
         c = SparkCheck('spark', {}, [YARN_AUTH_CONFIG])
-        c.check(YARN_AUTH_CONFIG)
+        dd_run_check(c)
 
         tags = ['url:http://localhost:8088'] + CUSTOM_TAGS + CLUSTER_TAGS
         tags.sort()
@@ -646,11 +645,10 @@ def test_auth_yarn(aggregator):
 
 
 @pytest.mark.unit
-def test_mesos(aggregator):
+def test_mesos(aggregator, dd_run_check):
     with mock.patch('requests.get', mesos_requests_get_mock):
         c = SparkCheck('spark', {}, [MESOS_CONFIG])
-        c.check(MESOS_CONFIG)
-
+        dd_run_check(c)
         # Check the running job metrics
         for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_JOB_RUNNING_METRIC_TAGS + CUSTOM_TAGS)
@@ -711,10 +709,10 @@ def test_mesos(aggregator):
 
 
 @pytest.mark.unit
-def test_mesos_filter(aggregator):
+def test_mesos_filter(aggregator, dd_run_check):
     with mock.patch('requests.get', mesos_requests_get_mock):
         c = SparkCheck('spark', {}, [MESOS_FILTERED_CONFIG])
-        c.check(MESOS_FILTERED_CONFIG)
+        dd_run_check(c)
 
         for sc in aggregator.service_checks(MESOS_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
@@ -724,10 +722,10 @@ def test_mesos_filter(aggregator):
 
 
 @pytest.mark.unit
-def test_driver_unit(aggregator):
+def test_driver_unit(aggregator, dd_run_check):
     with mock.patch('requests.get', driver_requests_get_mock):
         c = SparkCheck('spark', {}, [DRIVER_CONFIG])
-        c.check(DRIVER_CONFIG)
+        dd_run_check(c)
 
         # Check the running job metrics
         for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
@@ -789,10 +787,10 @@ def test_driver_unit(aggregator):
 
 
 @pytest.mark.unit
-def test_standalone_unit(aggregator):
+def test_standalone_unit(aggregator, dd_run_check):
     with mock.patch('requests.get', standalone_requests_get_mock):
         c = SparkCheck('spark', {}, [STANDALONE_CONFIG])
-        c.check(STANDALONE_CONFIG)
+        dd_run_check(c)
 
         # Check the running job metrics
         for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
@@ -851,10 +849,10 @@ def test_standalone_unit(aggregator):
 
 
 @pytest.mark.unit
-def test_standalone_unit_with_proxy_warning_page(aggregator):
+def test_standalone_unit_with_proxy_warning_page(aggregator, dd_run_check):
     c = SparkCheck('spark', {}, [STANDALONE_CONFIG])
     with mock.patch('requests.get', proxy_with_warning_page_mock):
-        c.check(STANDALONE_CONFIG)
+        dd_run_check(c)
 
         # Check the running job metrics
         for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
@@ -913,10 +911,10 @@ def test_standalone_unit_with_proxy_warning_page(aggregator):
 
 
 @pytest.mark.unit
-def test_standalone_pre20(aggregator):
+def test_standalone_pre20(aggregator, dd_run_check):
     with mock.patch('requests.get', standalone_requests_pre20_get_mock):
         c = SparkCheck('spark', {}, [STANDALONE_CONFIG_PRE_20])
-        c.check(STANDALONE_CONFIG_PRE_20)
+        dd_run_check(c)
 
         # Check the running job metrics
         for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
@@ -975,11 +973,11 @@ def test_standalone_pre20(aggregator):
 
 
 @pytest.mark.unit
-def test_metadata(aggregator, datadog_agent):
+def test_metadata(aggregator, datadog_agent, dd_run_check):
     with mock.patch('requests.get', standalone_requests_pre20_get_mock):
         c = SparkCheck(CHECK_NAME, {}, [STANDALONE_CONFIG_PRE_20])
         c.check_id = "test:123"
-        c.check(STANDALONE_CONFIG_PRE_20)
+        dd_run_check(c)
 
         c._collect_version(SPARK_APP_URL, None)
 
@@ -998,13 +996,13 @@ def test_metadata(aggregator, datadog_agent):
 
 
 @pytest.mark.unit
-def test_disable_legacy_cluster_tags(aggregator):
+def test_disable_legacy_cluster_tags(aggregator, dd_run_check):
     instance = MESOS_FILTERED_CONFIG
     instance['disable_legacy_cluster_tag'] = True
 
     with mock.patch('requests.get', mesos_requests_get_mock):
         c = SparkCheck('spark', {}, [instance])
-        c.check(instance)
+        dd_run_check(c)
 
         for sc in aggregator.service_checks(MESOS_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
@@ -1026,12 +1024,14 @@ def test_disable_legacy_cluster_tags(aggregator):
     ],
     ids=["driver", "yarn", "mesos", "standalone", "standalone_pre_20"],
 )
-def test_enable_query_name_tag_for_structured_streaming(aggregator, instance, requests_get_mock, base_tags):
+def test_enable_query_name_tag_for_structured_streaming(
+    aggregator, dd_run_check, instance, requests_get_mock, base_tags
+):
     instance['enable_query_name_tag'] = True
 
     with mock.patch('requests.get', requests_get_mock):
         c = SparkCheck('spark', {}, [instance])
-        c.check(instance)
+        dd_run_check(c)
 
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
             tags = base_tags
@@ -1053,32 +1053,32 @@ def test_do_not_crash_on_version_collection_failure():
 
 
 @pytest.mark.unit
-def test_ssl():
+def test_ssl(dd_run_check):
     run_ssl_server()
     c = SparkCheck('spark', {}, [SSL_CONFIG])
 
-    with pytest.raises(requests.exceptions.SSLError):
-        c.check(SSL_CONFIG)
+    with pytest.raises(Exception, match="\\[SSL: CERTIFICATE_VERIFY_FAILED\\] certificate verify failed"):
+        dd_run_check(c, extract_message=True)
 
 
 @pytest.mark.unit
-def test_ssl_no_verify():
+def test_ssl_no_verify(dd_run_check):
     # Disable ssl warning for self signed cert/no verify
     urllib3.disable_warnings()
     run_ssl_server()
     c = SparkCheck('spark', {}, [SSL_NO_VERIFY_CONFIG])
 
-    c.check(SSL_NO_VERIFY_CONFIG)
+    dd_run_check(c)
 
 
 @pytest.mark.unit
-def test_ssl_cert():
+def test_ssl_cert(dd_run_check):
     # Disable ssl warning for self signed cert/no verify
     urllib3.disable_warnings()
     run_ssl_server()
     c = SparkCheck('spark', {}, [SSL_CERT_CONFIG])
 
-    c.check(SSL_CERT_CONFIG)
+    dd_run_check(c)
 
 
 @pytest.mark.unit
@@ -1119,9 +1119,9 @@ SPARK_DRIVER_CLUSTER_TAGS = ['spark_cluster:{}'.format('SparkDriver'), 'cluster_
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_integration_standalone(aggregator):
+def test_integration_standalone(aggregator, dd_run_check):
     c = SparkCheck('spark', {}, [INSTANCE_STANDALONE])
-    c.check(INSTANCE_STANDALONE)
+    dd_run_check(c)
 
     expected_metric_values = (
         SPARK_JOB_RUNNING_METRIC_VALUES,
@@ -1150,9 +1150,9 @@ def test_integration_standalone(aggregator):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_integration_driver_1(aggregator):
+def test_integration_driver_1(aggregator, dd_run_check):
     c = SparkCheck('spark', {}, [INSTANCE_DRIVER_1])
-    c.check(INSTANCE_DRIVER_1)
+    dd_run_check(c)
 
     all_metric_values = (
         SPARK_JOB_RUNNING_METRIC_VALUES,
@@ -1183,9 +1183,9 @@ def test_integration_driver_1(aggregator):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_integration_driver_2(aggregator):
+def test_integration_driver_2(aggregator, dd_run_check):
     c = SparkCheck('spark', {}, [INSTANCE_DRIVER_2])
-    c.check(INSTANCE_DRIVER_2)
+    dd_run_check(c)
 
     all_metric_values = (
         SPARK_DRIVER_METRIC_VALUES,

@@ -102,6 +102,10 @@ def instance_log_requests(field, value):
     return False
 
 
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_metrics(field, value):
     return get_default_field_value(field, value)
 
@@ -167,6 +171,10 @@ def instance_tls_ignore_warning(field, value):
 
 
 def instance_tls_private_key(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_tls_protocols_allowed(field, value):
     return get_default_field_value(field, value)
 
 

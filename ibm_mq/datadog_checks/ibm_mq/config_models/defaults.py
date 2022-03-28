@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2022-present
+# (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -12,6 +12,10 @@ from datadog_checks.base.utils.models.fields import get_default_field_value
 
 def shared_service(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_auto_discover_channels(field, value):
+    return True
 
 
 def instance_auto_discover_queues(field, value):
@@ -50,12 +54,20 @@ def instance_host(field, value):
     return 'localhost'
 
 
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_min_collection_interval(field, value):
     return 15
 
 
 def instance_mqcd_version(field, value):
     return 6
+
+
+def instance_override_hostname(field, value):
+    return False
 
 
 def instance_password(field, value):

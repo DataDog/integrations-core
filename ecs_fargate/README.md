@@ -70,7 +70,9 @@ aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-
 
 ##### AWS CloudFormation
 
-You can use [AWS CloudFormation][10] templating to configure your Fargate containers. Use the `AWS::ECS::TaskDefinition` resource within your CloudFormation template to set the Amazon ECS task and specify `FARGATE` as the required launch type for that task. You can then set the `Datadog` option to configure log management, like in the example below:
+You can use [AWS CloudFormation][10] templating to configure your Fargate containers. Use the `AWS::ECS::TaskDefinition` resource within your CloudFormation template to set the Amazon ECS task and specify `FARGATE` as the required launch type for that task. 
+
+For example:
 
 ```yaml
 Resources:
@@ -83,29 +85,11 @@ Resources:
       Cpu: 256
       Memory: 1GB
       ContainerDefinitions:
-        - Name: tomcat-test
-          Image: 'tomcat:jdk8-adoptopenjdk-openj9'
-          LogConfiguration:
-            LogDriver: awsfirelens
-            Options:
-              Name: datadog
-              Host: http-intake.logs.datadoghq.com
-              TLS: 'on'
-              dd_service: test-service
-              dd_source: test-source
-              provider: ecs
-              apikey: <API_KEY>
-          MemoryReservation: 500
-        - Name: log_router
-          Image: 'amazon/aws-for-fluent-bit:stable'
-          Essential: true
-          FirelensConfiguration:
-            Type: fluentbit
-            Options:
-              enable-ecs-log-metadata: true
-          MemoryReservation: 50
+        - Name: datadog-agent
+          Image: 'gcr.io/datadoghq/agent:latest'
+          Cpu: 100
+          Memory: 256MB
 ```
-**Note**: Use a [TaskDefinition secret][11] to avoid exposing the `apikey` in plain text.
 
 For more information on CloudFormation templating and syntax, see the [AWS CloudFormation documentation][12].
 
@@ -179,18 +163,20 @@ For environment variables available with the Docker Agent container, see the [Do
 | Environment Variable               | Description                                    |
 |------------------------------------|------------------------------------------------|
 | `DD_DOCKER_LABELS_AS_TAGS`         | Extract docker container labels                |
+| `DD_CONTAINER_LABELS_AS_TAGS`      | Extract container labels                       |
 | `DD_DOCKER_ENV_AS_TAGS`            | Extract docker container environment variables |
+| `DD_CONTAINER_ENV_AS_TAGS`         | Extract container environment variables        |
 | `DD_KUBERNETES_POD_LABELS_AS_TAGS` | Extract pod labels                             |
 | `DD_CHECKS_TAG_CARDINALITY`        | Add tags to check metrics                      |
 | `DD_DOGSTATSD_TAG_CARDINALITY`     | Add tags to custom metrics                     |
 
-For global tagging, it is recommended to use `DD_DOCKER_LABELS_AS_TAGS`. With this method, the Agent pulls in tags from your Docker container labels. This requires you to add the appropriate labels to your other Docker containers. Labels can be added directly in the [task definition][19].
+For global tagging, it is recommended to use `DD_CONTAINER_LABELS_AS_TAGS`. With this method, the Agent pulls in tags from your container labels. This requires you to add the appropriate labels to your other containers. Labels can be added directly in the [task definition][19].
 
 Format for the Agent container:
 
 ```json
 {
-  "name": "DD_DOCKER_LABELS_AS_TAGS",
+  "name": "DD_CONTAINER_LABELS_AS_TAGS",
   "value": "{\"<LABEL_NAME_TO_COLLECT>\":\"<TAG_KEY_FOR_DATADOG>\"}"
 }
 ```
@@ -199,9 +185,19 @@ Example for the Agent container:
 
 ```json
 {
-  "name": "DD_DOCKER_LABELS_AS_TAGS",
+  "name": "DD_CONTAINER_LABELS_AS_TAGS",
   "value": "{\"com.docker.compose.service\":\"service_name\"}"
 }
+```
+
+CloudFormation example (YAML):
+
+```yaml
+      ContainerDefinitions:
+        - 
+          Environment:
+            - Name: DD_CONTAINER_LABELS_AS_TAGS
+              Value: "{\"com.docker.compose.service\":\"service_name\"}"
 ```
 
 **Note**: You should not use `DD_HOSTNAME` since there is no concept of a host to the user in Fargate. `DD_TAGS` is traditionally used to assign host tags, but as of Datadog Agent version 6.13.0 you can also use the environment variable to set global tags on your integration metrics.
@@ -321,6 +317,51 @@ Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+
+### AWS CloudFormation
+
+To use [AWS CloudFormation][10] templating, use the `AWS::ECS::TaskDefinition` resource and set the `Datadog` option to configure log management.
+
+For example, to configure Fluent Bit to send logs to Datadog:
+
+```yaml
+Resources:
+  ECSTDNJH3:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+          - FARGATE
+      Cpu: 256
+      Memory: 1GB
+      ContainerDefinitions:
+        - Name: tomcat-test
+          Image: 'tomcat:jdk8-adoptopenjdk-openj9'
+          LogConfiguration:
+            LogDriver: awsfirelens
+            Options:
+              Name: datadog
+              Host: http-intake.logs.datadoghq.com
+              TLS: 'on'
+              dd_service: test-service
+              dd_source: test-source
+              provider: ecs
+              apikey: <API_KEY>
+          MemoryReservation: 500
+        - Name: log_router
+          Image: 'amazon/aws-for-fluent-bit:stable'
+          Essential: true
+          FirelensConfiguration:
+            Type: fluentbit
+            Options:
+              enable-ecs-log-metadata: true
+          MemoryReservation: 50
+```
+
+**Note**: Use a [TaskDefinition secret][11] to avoid exposing the `apikey` in plain text.
+
+For more information on CloudFormation templating and syntax, see the [AWS CloudFormation documentation][12].
+
 ### Trace collection
 
 1. Follow the [instructions above](#installation) to add the Datadog Agent container to your task definition with the additional environment variable `DD_APM_ENABLED` set to `true` and set up a host port that uses **8126** with **tcp** protocol under port mappings. Set the `DD_SITE` variable to {{< region-param key="dd_site" code="true" >}}. It defaults to `datadoghq.com` if you don't set it.
@@ -328,6 +369,27 @@ Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to 
 2. [Instrument your application][34] based on your setup.
 
 3. Ensure your application is running in the same task definition as the Datadog Agent container.
+
+## Out-of-the-box tags
+
+The Agent can autodiscover and attach tags to all data emitted by the entire task or an individual container within this task. The list of tags automatically attached depends on the Agent's [cardinality configuration][44].
+
+  | Tag                           | Cardinality  | Source               |
+  |-------------------------------|--------------|----------------------|
+  | `container_name`              | High         | ECS API              |
+  | `container_id`                | High         | ECS API              |
+  | `docker_image`                | Low          | ECS API              |
+  | `image_name`                  | Low          | ECS API              |
+  | `short_image`                 | Low          | ECS API              |
+  | `image_tag`                   | Low          | ECS API              |
+  | `ecs_cluster_name`            | Low          | ECS API              |
+  | `ecs_container_name`          | Low          | ECS API              |
+  | `task_arn`                    | Orchestrator | ECS API              |
+  | `task_family`                 | Low          | ECS API              |
+  | `task_name`                   | Low          | ECS API              |
+  | `task_version`                | Low          | ECS API              |
+  | `availability_zone`           | Low          | ECS API              |
+  | `region`                      | Low          | ECS API              |
 
 ## Data Collected
 
@@ -403,4 +465,5 @@ Need help? Contact [Datadog support][22].
 [41]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
 [42]: https://www.datadoghq.com/blog/aws-fargate-on-graviton2-monitoring/
 [43]: https://www.datadoghq.com/blog/aws-fargate-windows-containers-support/
+[44]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags/?tab=containerizedenvironments#environment-variables
 

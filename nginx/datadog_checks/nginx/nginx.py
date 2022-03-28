@@ -13,12 +13,10 @@ from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
 from datadog_checks.base.utils.time import get_timestamp
 
 from .const import PLUS_API_ENDPOINTS, PLUS_API_STREAM_ENDPOINTS, TAGGED_KEYS
-from .metrics import COUNT_METRICS, METRICS_SEND_AS_COUNT, VTS_METRIC_MAP
+from .metrics import COUNT_METRICS, METRICS_SEND_AS_COUNT, METRICS_SEND_AS_HISTOGRAM, VTS_METRIC_MAP
 
 if PY3:
     long = int
-
-EPOCH = datetime(1970, 1, 1)
 
 if hasattr(datetime, 'fromisoformat'):
     fromisoformat = datetime.fromisoformat
@@ -78,12 +76,12 @@ class Nginx(AgentCheck):
                         continue
 
                 if name in COUNT_METRICS:
-                    func_count = metric_submission_funcs['count']
-                    func_count(name, value, tags)
+                    self.monotonic_count(name, value, tags)
                 else:
                     if name in METRICS_SEND_AS_COUNT:
-                        func_count = metric_submission_funcs['count']
-                        func_count(name + "_count", value, tags)
+                        self.monotonic_count(name + "_count", value, tags)
+                    if name in METRICS_SEND_AS_HISTOGRAM:
+                        self.histogram(name + "_histogram", value, tags)
 
                     func = metric_submission_funcs[metric_type]
                     func(name, value, tags)
@@ -283,8 +281,15 @@ class Nginx(AgentCheck):
             r = self._perform_request(url)
             payload = self._nest_payload(nest, r.json())
         except Exception as e:
-            if not self.only_query_enabled_endpoints and endpoint in PLUS_API_STREAM_ENDPOINTS.values():
-                self.log.warning("Stream may not be initialized. Error querying %s metrics at %s: %s", endpoint, url, e)
+            plus_endpoints = self.list_endpoints(PLUS_API_STREAM_ENDPOINTS)
+            if not self.only_query_enabled_endpoints and endpoint in plus_endpoints:
+                self.log.warning(
+                    "Error querying %s metrics at %s: %s. Stream may not be initialized, "
+                    "you can avoid this error by enabling `only_query_enabled_endpoints` option.",
+                    endpoint,
+                    url,
+                    e,
+                )
             else:
                 self.log.exception("Error querying %s metrics at %s: %s", endpoint, url, e)
 
@@ -412,3 +417,7 @@ class Nginx(AgentCheck):
                     continue
                 normalized_tags.extend(list({tag, self.degeneralise_tag(tag)}))
         return normalized_tags
+
+    def list_endpoints(self, api_dict_list):
+        endpoints = [endpoint for api_dict in list(api_dict_list.values()) for endpoint in api_dict.keys()]
+        return endpoints

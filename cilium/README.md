@@ -12,9 +12,15 @@ Follow the instructions below to install and configure this check for an Agent r
 
 The Cilium check is included in the [Datadog Agent][3] package, but it requires additional setup steps to expose Prometheus metrics.
 
-1. In order to enable Prometheus metrics in both the `cilium-agent` and `cilium-operator`, deploy Cilium with the `global.prometheus.enabled=true` Helm value set, or:
-
-2. Separately enable Prometheus metrics:
+1. In order to enable Prometheus metrics in both the `cilium-agent` and `cilium-operator`, deploy Cilium with the following Helm values set according to your version of Cilium:
+   * Cilium < v1.8.x:
+     `global.prometheus.enabled=true`
+   * Cilium >= v1.8.x and < v1.9.x:
+     `global.prometheus.enabled=true` and `global.operatorPrometheus.enabled=true`
+   * Cilium >= 1.9.x:
+     `prometheus.enabled=true` and `operator.prometheus.enabled=true`
+   
+Or, separately enable Prometheus metrics in the Kubernetes manifests:
 
    - In the `cilium-agent` add `--prometheus-serve-addr=:9090` to the `args` section of the Cilium DaemonSet config:
 
@@ -26,17 +32,15 @@ The Cilium check is included in the [Datadog Agent][3] package, but it requires 
              - --prometheus-serve-addr=:9090
      ```
 
+   - In the `cilium-operator` add `--enable-metrics` to the `args` section of the Cilium deployment config:
 
-
-   - Or in the `cilium-operator` add `--enable-metrics` to the `args` section of the Cilium deployment config:
-
-     ```yaml
-     # [...]
-     spec:
-       containers:
-         - args:
-             - --enable-metrics
-     ```
+      ```yaml
+      # [...]
+      spec:
+        containers:
+          - args:
+              - --enable-metrics
+      ```
 
 ### Configuration
 
@@ -84,12 +88,6 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 Cilium contains two types of logs: `cilium-agent` and `cilium-operator`.
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [DaemonSet configuration][4]:
@@ -116,27 +114,39 @@ Cilium contains two types of logs: `cilium-agent` and `cilium-operator`.
 
 For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
 
-##### Metric collection
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][7].
+
+##### To collect `cilium-agent` metrics and logs: 
+
+- Metric collection
 
 | Parameter            | Value                                                      |
 |----------------------|------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `cilium`                                                   |
+| `<INTEGRATION_NAME>` | `"cilium"`                                                 |
 | `<INIT_CONFIG>`      | blank or `{}`                                              |
-| `<INSTANCE_CONFIG>`  | `{"agent_endpoint": "http://%%host%%:9090/metrics", "use_openmetrics": True}`       |
+| `<INSTANCE_CONFIG>`  | `{"agent_endpoint": "http://%%host%%:9090/metrics", "use_openmetrics": "true"}` |
 
-##### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][7].
+- Log collection
 
 | Parameter      | Value                                     |
 |----------------|-------------------------------------------|
 | `<LOG_CONFIG>` | `{"source": "cilium-agent", "service": "cilium-agent"}` |
+
+##### To collect `cilium-operator` metrics and logs: 
+
+- Metric collection
+
+| Parameter            | Value                                                      |
+|----------------------|------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `"cilium"`                                                 |
+| `<INIT_CONFIG>`      | blank or `{}`                                              |
+| `<INSTANCE_CONFIG>`  | `{"operator_endpoint": "http://%%host%%:6942/metrics", "use_openmetrics": "true"}` |
+
+- Log collection
+
+| Parameter      | Value                                     |
+|----------------|-------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "cilium-operator", "service": "cilium-operator"}` |
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->

@@ -3,9 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from .. import common
+from ..common import skip_on_ci
 from . import legacy_common
 
-pytestmark = [common.requires_legacy_environment]
+pytestmark = [
+    skip_on_ci,
+    common.requires_legacy_environment,
+]
 
 
 def test_agent_check(aggregator, agent_instance_use_openmetrics, mock_agent_data, dd_run_check, check):

@@ -14,8 +14,15 @@ auto_conf.yaml        @DataDog/documentation @DataDog/agent-integrations @DataDo
 manifest.json         @DataDog/documentation @DataDog/agent-integrations
 assets/               @DataDog/agent-integrations
 
+# Checks base
+/datadog_checks_base/                                          @DataDog/agent-core @DataDog/agent-integrations
+/datadog_checks_base/datadog_checks/base/checks/openmetrics/   @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
+/datadog_checks_base/datadog_checks/base/checks/kube_leader/   @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
 
 # Container monitoring
+/container/                               @DataDog/container-integrations @DataDog/agent-integrations
+/container/*.md                           @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/container/manifest.json                  @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /containerd/                              @DataDog/container-integrations @DataDog/agent-integrations
 /containerd/*.md                          @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /containerd/manifest.json                 @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
@@ -75,7 +82,6 @@ assets/               @DataDog/agent-integrations
 /tcp_queue_length/                        @DataDog/container-integrations @DataDog/agent-integrations
 /tcp_queue_length/*.md                    @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /tcp_queue_length/manifest.json           @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
-/tenable/                                 @anshumgargdd @DataDog/agent-integrations
 
 # Infrastructure integrations
 /snmp/                                                             @DataDog/infrastructure-integrations @DataDog/agent-integrations
@@ -107,7 +113,7 @@ assets/               @DataDog/agent-integrations
 
 # Database monitoring
 **/base/utils/db/utils.py                           @DataDog/agent-integrations @DataDog/database-monitoring
-datadog_checks_base/tests/**/test_db_util.py        @DataDog/agent-integrations @DataDog/database-monitoring
+datadog_checks_base/tests/**/test_util.py           @DataDog/agent-integrations @DataDog/database-monitoring
 **/base/utils/db/sql.py                             @DataDog/database-monitoring @DataDog/agent-integrations
 datadog_checks_base/tests/**/test_db_sql.py         @DataDog/database-monitoring @DataDog/agent-integrations
 **/base/utils/db/statement_metrics.py               @DataDog/database-monitoring @DataDog/agent-integrations
@@ -124,12 +130,6 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 /oracle/                                            @DataDog/agent-integrations @DataDog/database-monitoring
 /oracle/*.md                                        @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
 /oracle/manifest.json                               @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
-
-
-# Checks base
-/datadog_checks_base/                                          @DataDog/agent-core @DataDog/agent-integrations
-/datadog_checks_base/datadog_checks/base/checks/openmetrics/   @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
-/datadog_checks_base/datadog_checks/base/checks/kube_leader/   @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
 
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/software-integrity-and-trust

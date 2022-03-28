@@ -29,29 +29,29 @@ Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [
 #### Metric collection
 To monitor the `istiod` deployment and `istio-proxy` in Istio `v1.5+`, use the following configuration:
     
-    ```yaml
-    init_config:
-    
-    instances:
-      - use_openmetrics: true  # Enables Openmetrics V2 version of the integration
-        istiod_endpoint: http://istiod.istio-system:15014/metrics
-        istio_mesh_endpoint: http://istio-proxy.istio-system:15090/stats/prometheus
-        exclude_labels:
-         - source_version
-         - destination_version
-         - source_canonical_revision
-         - destination_canonical_revision
-         - source_principal
-         - destination_principal
-         - source_cluster
-         - destination_cluster
-         - source_canonical_service
-         - destination_canonical_service
-         - source_workload_namespace
-         - destination_workload_namespace
-         - request_protocol
-         - connection_security_policy
-    ```
+```yaml
+init_config:
+
+instances:
+  - use_openmetrics: true  # Enables Openmetrics V2 version of the integration
+    istiod_endpoint: http://istiod.istio-system:15014/metrics
+    istio_mesh_endpoint: http://istio-proxy.istio-system:15090/stats/prometheus
+    exclude_labels:
+      - source_version
+      - destination_version
+      - source_canonical_revision
+      - destination_canonical_revision
+      - source_principal
+      - destination_principal
+      - source_cluster
+      - destination_cluster
+      - source_canonical_service
+      - destination_canonical_service
+      - source_workload_namespace
+      - destination_workload_namespace
+      - request_protocol
+      - connection_security_policy
+```
    
 **Note**: The `connectionID` Prometheus label is excluded. The [sample istio.d/conf.yaml][8] also has a list of suggested labels to exclude.
 
@@ -76,7 +76,30 @@ Set the `use_openmetrics` configuration option to `false` to use the OpenMetrics
 
 If you are installing the [Datadog Agent in a container][10], Datadog recommends that you first disable Istio's sidecar injection.
 
-Add the `sidecar.istio.io/inject: "false"` annotation to the `datadog-agent` DaemonSet:
+_Istio versions >= 1.10:_
+
+Add the `sidecar.istio.io/inject: "false"` _label_ to the `datadog-agent` DaemonSet:
+
+```yaml
+...
+spec:
+   ...
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "false"
+     ...
+```
+
+This can also be done with the `kubectl patch` command.
+
+```text
+kubectl patch daemonset datadog-agent -p '{"spec":{"template":{"metadata":{"labels":{"sidecar.istio.io/inject":"false"}}}}}'
+```
+
+_Istio versions <= 1.9:_ 
+
+Add the `sidecar.istio.io/inject: "false"` _annotation_ to the `datadog-agent` DaemonSet:
 
 ```yaml
 ...
@@ -89,19 +112,13 @@ spec:
      ...
 ```
 
-This can also be done with the `kubectl patch` command.
+Using the `kubectl patch` command:
 
 ```text
 kubectl patch daemonset datadog-agent -p '{"spec":{"template":{"metadata":{"annotations":{"sidecar.istio.io/inject":"false"}}}}}'
 ```
 
 #### Log collection
-
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
 
 Istio contains two types of logs. Envoy access logs that are collected with the [Envoy integration][11] and [Istio logs][12].
 
@@ -137,10 +154,10 @@ See [service_checks.json][16] for a list of service checks provided by this inte
 ### Invalid chunk length error
 If you see the following error on OpenMetricsBaseCheck (V1) implementation of Istio (Istio integration version `3.13.0` or older):
 
-    ```python
-      Error: ("Connection broken: InvalidChunkLength(got length b'', 0 bytes read)", 
-      InvalidChunkLength(got length b'', 0 bytes read))
-    ```
+```python
+  Error: ("Connection broken: InvalidChunkLength(got length b'', 0 bytes read)", 
+  InvalidChunkLength(got length b'', 0 bytes read))
+```
 
 You can use the Openmetrics V2 implementation of the Istio integration to resolve this error.
 
@@ -207,7 +224,7 @@ Additional helpful documentation, links, and articles:
 [9]: https://github.com/DataDog/integrations-core/blob/master/istio/datadog_checks/istio/data/auto_conf.yaml
 [10]: https://docs.datadoghq.com/agent/kubernetes/
 [11]: https://docs.datadoghq.com/integrations/envoy/#log-collection
-[12]: https://istio.io/docs/tasks/telemetry/logs/collecting-logs/
+[12]: https://istio.io/v1.4/docs/tasks/observability/logs/collecting-logs/
 [13]: https://docs.datadoghq.com/agent/kubernetes/log/
 [14]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [15]: https://github.com/DataDog/integrations-core/blob/master/istio/metadata.csv

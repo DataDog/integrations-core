@@ -534,3 +534,84 @@ metric_tags:
         device_type: \1
         host: \2
 ```
+
+### `metadata`
+
+_(Optional)_
+
+This `metadata` section is used to declare where and how metadata should be collected.
+
+General structure:
+
+```yaml
+metadata:
+  <RESOURCCE>:  # example: device, interface
+    fields:
+      <FIELD_NAME>: # example: vendor, model, serial_number, etc
+        value: "dell"
+```
+
+Supported resources and fields can be found here: [payload.go](https://github.com/DataDog/datadog-agent/blob/main/pkg/collector/corechecks/snmp/metadata/payload.go)
+
+#### Value from a static value
+
+```yaml
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "dell"
+```
+
+#### Value from an OID (symbol) value
+
+```yaml
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "dell"
+      serial_number:
+        symbol:
+          OID: 1.3.6.1.4.1.12124.2.51.1.3.1
+          name: chassisSerialNumber
+```
+
+#### Value from an OID (symbol) value with regex match
+
+```yaml
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "dell"
+      version:
+        symbol:
+          OID: 1.3.6.1.2.1.1.1.0
+          name: sysDescr
+          match_pattern: 'Isilon OneFS v(\S+)'
+          match_value: '$1'
+          # Will match `8.2.0.0` in `device-name-3 263829375 Isilon OneFS v8.2.0.0`
+```
+
+Regex groups captured in `match_pattern` can be used in `match_value`. `$1` is the first captured group, `$2` is the second captured group, and so on.
+
+#### Value from multiple OIDs (symbols)
+
+When the value might be from multiple symbols, we try to get the value from first symbol, if the value can't be fetched (e.g. OID not available from the device), we try to get the value from the second symbol, and so on.
+
+```yaml
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "dell"
+      model:
+        symbols:
+          - OID: 1.3.6.100.0
+            name: someSymbolName
+          - OID: 1.3.6.101.0
+            name: someSymbolName
+```
+
+All OID values are fetched, even if they might not be used in the end. In the example above, both `1.3.6.100.0` and `1.3.6.101.0` are retrieved.

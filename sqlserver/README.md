@@ -22,7 +22,7 @@ _Server Properties_ -> _Security_ -> _SQL Server and Windows Authentication mode
 
 1. Create a read-only login to connect to your server:
 
-    ```text
+    ```SQL
         CREATE LOGIN datadog WITH PASSWORD = '<PASSWORD>';
         CREATE USER datadog FOR LOGIN datadog;
         GRANT SELECT on sys.dm_os_performance_counters to datadog;
@@ -31,7 +31,7 @@ _Server Properties_ -> _Security_ -> _SQL Server and Windows Authentication mode
    
    To collect file size metrics per database, ensure the user you created (`datadog`) has [connect permission access][3] to your databases by running:
    
-   ```text
+   ```SQL
        GRANT CONNECT ANY DATABASE to datadog; 
    ```
 
@@ -39,7 +39,7 @@ _Server Properties_ -> _Security_ -> _SQL Server and Windows Authentication mode
 
 3. (Required for AlwaysOn and `sys.master_files` metrics) To gather AlwaysOn and `sys.master_files` metrics, grant the following additional permission:
 
-    ```text
+    ```SQL
         GRANT VIEW ANY DEFINITION to datadog;
     ```
 
@@ -85,12 +85,6 @@ Extra configuration steps are required to get the SQL Server integration running
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -114,9 +108,6 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][8].
 
-See [Datadog's documentation][11] for additional information on how to configure the Agent for log collection in Kubernetes environments.
-
-
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
@@ -136,15 +127,9 @@ See [Autodiscovery template variables][13] for details on passing `<UNIQUEPASSWO
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection][11].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][11].
 
 | Parameter      | Value                                             |
 | -------------- | ------------------------------------------------- |

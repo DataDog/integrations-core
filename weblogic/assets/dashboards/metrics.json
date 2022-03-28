@@ -1,0 +1,1373 @@
+{
+  "title": "WebLogic - Metrics",
+  "description": "## WebLogic\n\nThis dashboard displays key throughput and activity metrics for your WebLogic infrastructure and helps you correlate WebLogic performance with infrastructure resources. This dashboard provides a granular deep-dive into your WebLogic infrastructure for performing metric analysis. For further reading on WebLogic:\n\n* [Datadog's WebLogic integration docs](https://docs.datadoghq.com/integrations/weblogic/)\n* [WebLogic docs](https://docs.oracle.com/en/middleware/fusion-middleware/weblogic-server/index.html)\n* [How to configure JMX Remote Monitoring in WebLogic](https://docs.oracle.com/javase/8/docs/technotes/guides/management/agent.html#gdenl)\n* [Information on Datadog's JMX configuration](https://docs.datadoghq.com/integrations/java/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+  "widgets": [
+    {
+      "id": 8422052567179120,
+      "definition": {
+        "title": "Thread Pool Throughput",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "avg:weblogic.threadpool_runtime.throughput{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 5811942268903440,
+      "definition": {
+        "title": "Thread Pool Queue Length",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "max:weblogic.threadpool_runtime.queue_length{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 3,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 1612792106152292,
+      "definition": {
+        "title": "WebLogic Threads",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              },
+              {
+                "formula": "query2"
+              },
+              {
+                "formula": "query3"
+              },
+              {
+                "formula": "query4"
+              },
+              {
+                "formula": "query5"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "avg:weblogic.threadpool_runtime.threads_stuck{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query1"
+              },
+              {
+                "query": "avg:weblogic.threadpool_runtime.threads_hogging{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query2"
+              },
+              {
+                "query": "avg:weblogic.threadpool_runtime.execute_threads_total{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query3"
+              },
+              {
+                "query": "avg:weblogic.threadpool_runtime.threads_standby{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query4"
+              },
+              {
+                "query": "avg:weblogic.threadpool_runtime.execute_threads_idle{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query5"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 5018556232293968,
+      "definition": {
+        "title": "Thread Pool Requests",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query2"
+              },
+              {
+                "formula": "query3"
+              },
+              {
+                "formula": "query4"
+              },
+              {
+                "formula": "query5"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "avg:weblogic.threadpool_runtime.user_requests_pending{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query2"
+              },
+              {
+                "query": "avg:weblogic.threadpool_runtime.overload_rejected_requests{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query3"
+              },
+              {
+                "query": "avg:weblogic.threadpool_runtime.shared_capacity_work_managers{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query4"
+              },
+              {
+                "query": "avg:weblogic.threadpool_runtime.queue_length{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query5"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 9,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 2811801771969704,
+      "definition": {
+        "title": "Thread Pool Completed Requests",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "avg:weblogic.threadpool_runtime.completed_requests{$host,$wl_serverruntime,$wl_instance}.as_count()",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 5526352286897134,
+      "definition": {
+        "title": "% WebLogic JVM Heap Free",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "avg:weblogic.jvm_runtime.heap_free_percent{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 3,
+        "y": 2,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 24093359320808,
+      "definition": {
+        "title": "WebLogic JVM Heap",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              },
+              {
+                "formula": "query2"
+              },
+              {
+                "formula": "query3"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "avg:weblogic.jvm_runtime.heap_size{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query1"
+              },
+              {
+                "query": "avg:weblogic.jvm_runtime.heap_free{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query2"
+              },
+              {
+                "query": "avg:weblogic.jvm_runtime.heap_size_max{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query3"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "area"
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 2,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 3442337747476464,
+      "definition": {
+        "title": "% Available Socket Readers",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "avg:weblogic.server.threadpool_socket_readers_percent{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 9,
+        "y": 2,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 8421166491304132,
+      "definition": {
+        "title": "Work Manager Completed Requests",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "avg:weblogic.work_manager_runtime.requests_completed{$host,$wl_serverruntime,$wl_instance}.as_count()",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 4,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 6530101800702048,
+      "definition": {
+        "title": "Work Manager Requests Pending",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "avg:weblogic.work_manager_runtime.requests_pending{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 3,
+        "y": 4,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 5662913458743344,
+      "definition": {
+        "title": "Work Manager Threads Stuck",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "avg:weblogic.work_manager_runtime.threads_stuck{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 4,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 7637649024713202,
+      "definition": {
+        "title": "Open Sockets",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              },
+              {
+                "formula": "query2"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "max:weblogic.server.max_open_sockets{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query1"
+              },
+              {
+                "query": "avg:weblogic.server_runtime.open_sockets{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query2"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 9,
+        "y": 4,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 4476348181343944,
+      "definition": {
+        "title": "Servlet Pool Max Capacity",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "max:weblogic.servlet_runtime.pool_max_capacity{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 6,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 7921920921386074,
+      "definition": {
+        "title": "Servlet Execution Time",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              },
+              {
+                "formula": "query2"
+              },
+              {
+                "formula": "query3"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "min:weblogic.servlet_runtime.exec_time_low{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query1"
+              },
+              {
+                "query": "max:weblogic.servlet_runtime.exec_time_high{$host,$wl_serverruntime,$wl_instance}.as_count()",
+                "data_source": "metrics",
+                "name": "query2"
+              },
+              {
+                "query": "max:weblogic.servlet_runtime.exec_time_total{$host,$wl_serverruntime,$wl_instance}.as_count()",
+                "data_source": "metrics",
+                "name": "query3"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "area"
+          }
+        ]
+      },
+      "layout": {
+        "x": 3,
+        "y": 6,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 7389850591897454,
+      "definition": {
+        "title": "Servet Reloads Total",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "max:weblogic.servlet_runtime.reloads_total{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 6,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 2237935956162456,
+      "definition": {
+        "title": "Web App Open Sessions",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "avg:weblogic.webapp_component_runtime.sessions_current{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 9,
+        "y": 6,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 8899087144165876,
+      "definition": {
+        "title": "Server Channel Sockets Accepted",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "avg:weblogic.server_channel_runtime.sockets_accepted{$host,$wl_serverruntime,$wl_instance}.as_count()",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 6673529936580432,
+      "definition": {
+        "title": "Server Channel Messages Sent and Received (per sec)",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              },
+              {
+                "formula": "query2"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "sum:weblogic.server_channel_runtime.messages_sent{$host,$wl_serverruntime,$wl_instance}.as_count()",
+                "data_source": "metrics",
+                "name": "query1"
+              },
+              {
+                "query": "sum:weblogic.server_channel_runtime.messages_received{$host,$wl_serverruntime,$wl_instance}.as_count()",
+                "data_source": "metrics",
+                "name": "query2"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 3,
+        "y": 8,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 5898343173408380,
+      "definition": {
+        "title": "Server Channel Bytes Sent and Received (per sec)",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              },
+              {
+                "formula": "query2"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "sum:weblogic.server_channel_runtime.bytes_sent{$host,$wl_serverruntime,$wl_instance}.as_count()",
+                "data_source": "metrics",
+                "name": "query1"
+              },
+              {
+                "query": "sum:weblogic.server_channel_runtime.bytes_received{$host,$wl_serverruntime,$wl_instance}.as_count()",
+                "data_source": "metrics",
+                "name": "query2"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 8,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 8625317619232204,
+      "definition": {
+        "title": "Server Channel Active Connections",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "avg:weblogic.server_channel_runtime.connections_active{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 9,
+        "y": 8,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 3625841251478430,
+      "definition": {
+        "title": "JMS Connections",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "avg:weblogic.jms_runtime.connections_current{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 10,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 5589608439427882,
+      "definition": {
+        "title": "JMS Connections Total",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "max:weblogic.jms_runtime.connections_total{$host,$wl_serverruntime,$wl_instance}.as_count()",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 3,
+        "y": 10,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 2983703647470076,
+      "definition": {
+        "title": "JMS Servers",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "avg:weblogic.jms_runtime.jms_servers{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 10,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 2780959999930884,
+      "definition": {
+        "title": "JMS Servers Total",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "avg:weblogic.jms_runtime.jms_servers_total{$host,$wl_serverruntime,$wl_instance}.as_count()",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 9,
+        "y": 10,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 8424651213772920,
+      "definition": {
+        "title": "Connector Pool Connections (Active and Free)",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              },
+              {
+                "formula": "query2"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "avg:weblogic.connector_connection_pool_runtime.connections_active{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query1"
+              },
+              {
+                "query": "avg:weblogic.connector_connection_pool_runtime.connections_free{$host,$wl_serverruntime,$wl_instance}",
+                "data_source": "metrics",
+                "name": "query2"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 12,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 2948992047178456,
+      "definition": {
+        "title": "Connector Pool Connections Created (per sec)",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "sum:weblogic.connector_connection_pool_runtime.connections_created_total{$host,$wl_serverruntime,$wl_instance}.as_count()",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 3,
+        "y": 12,
+        "width": 3,
+        "height": 2
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "host",
+      "default": "*",
+      "prefix": "host",
+      "available_values": []
+    },
+    {
+      "name": "wl_instance",
+      "default": "*",
+      "prefix": "instance",
+      "available_values": []
+    },
+    {
+      "name": "wl_serverruntime",
+      "default": "*",
+      "prefix": "serverruntime",
+      "available_values": []
+    }
+  ],
+  "layout_type": "ordered",
+  "is_read_only": false,
+  "notify_list": [],
+  "reflow_type": "fixed",
+  "id": "7zv-2yb-g8j"
+}

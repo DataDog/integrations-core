@@ -59,6 +59,14 @@ class LabelJoins(BaseModel):
     target_metric: Optional[TargetMetric]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class Metric(BaseModel):
     class Config:
         extra = Extra.allow
@@ -95,7 +103,7 @@ class InstanceConfig(BaseModel):
     aws_host: Optional[str]
     aws_region: Optional[str]
     aws_service: Optional[str]
-    bearer_token_auth: Optional[bool]
+    bearer_token_auth: Optional[Union[bool, str]]
     bearer_token_path: Optional[str]
     cache_metric_wildcards: Optional[bool]
     cache_shared_labels: Optional[bool]
@@ -132,6 +140,7 @@ class InstanceConfig(BaseModel):
     label_to_hostname: Optional[str]
     labels_mapper: Optional[Mapping[str, Any]]
     log_requests: Optional[bool]
+    metric_patterns: Optional[MetricPatterns]
     metrics: Optional[Sequence[Union[str, Mapping[str, Union[str, Metric]]]]]
     min_collection_interval: Optional[float]
     namespace: Optional[str] = Field(None, regex='\\w*')
@@ -164,6 +173,7 @@ class InstanceConfig(BaseModel):
     tls_cert: Optional[str]
     tls_ignore_warning: Optional[bool]
     tls_private_key: Optional[str]
+    tls_protocols_allowed: Optional[Sequence[str]]
     tls_use_host_header: Optional[bool]
     tls_verify: Optional[bool]
     type_overrides: Optional[Mapping[str, Any]]

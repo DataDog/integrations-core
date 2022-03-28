@@ -47,37 +47,38 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
 
 STATEMENT_METRICS_QUERY = """\
 with qstats as (
-    select TOP {limit} text, query_hash, query_plan_hash, last_execution_time, plan_handle,
+    select TOP {limit} query_hash, query_plan_hash, last_execution_time, plan_handle,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'user_id') as user_id,
            {query_metrics_columns}
     from sys.dm_exec_query_stats
-        cross apply sys.dm_exec_sql_text(sql_handle)
     where last_execution_time > dateadd(second, -?, getdate())
-)
-select text, query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
+),
+qstats_aggr as (
+    select query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
        D.name as database_name, U.name as user_name, max(plan_handle) as plan_handle,
     {query_metrics_column_sums}
     from qstats S
     left join sys.databases D on S.dbid = D.database_id
     left join sys.sysusers U on S.user_id = U.uid
-    group by text, query_hash, query_plan_hash, S.dbid, D.name, U.name
+    group by query_hash, query_plan_hash, S.dbid, D.name, U.name
+)
+select text, * from qstats_aggr
+    cross apply sys.dm_exec_sql_text(plan_handle)
 """
 
 # This query is an optimized version of the statement metrics query
 # which removes the additional aggregate dimensions user and database.
 STATEMENT_METRICS_QUERY_NO_AGGREGATES = """\
-with qstats as (
-    select TOP {limit} text, query_hash, query_plan_hash, last_execution_time, plan_handle,
-           {query_metrics_columns}
-    from sys.dm_exec_query_stats
-        cross apply sys.dm_exec_sql_text(sql_handle)
-    where last_execution_time > dateadd(second, -?, getdate())
+with qstats_aggr as (
+    select TOP {limit} query_hash, query_plan_hash, max(plan_handle) as plan_handle,
+        {query_metrics_column_sums}
+        from sys.dm_exec_query_stats S
+        where last_execution_time > dateadd(second, -?, getdate())
+        group by query_hash, query_plan_hash
 )
-select text, query_hash, query_plan_hash, max(plan_handle) as plan_handle,
-    {query_metrics_column_sums}
-    from qstats S
-    group by text, query_hash, query_plan_hash
+select text, * from qstats_aggr
+    cross apply sys.dm_exec_sql_text(plan_handle)
 """
 
 PLAN_LOOKUP_QUERY = """\
@@ -295,6 +296,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
             'sqlserver_version': self.check.static_info_cache.get("version", ""),
             'ddagentversion': datadog_agent.get_version(),
+            'ddagenthostname': self._check.agent_hostname,
         }
 
     @tracked_method(agent_check_getter=agent_check_getter)
@@ -356,6 +358,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     "query_signature": row['query_signature'],
                     "user": row.get('user_name', None),
                     "statement": row['text'],
+                    "metadata": {
+                        "tables": row['dd_tables'],
+                        "commands": row['dd_commands'],
+                    },
                 },
                 'sqlserver': {
                     'query_hash': row['query_hash'],
@@ -439,5 +445,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         'query_hash': row['query_hash'],
                         'query_plan_hash': row['query_plan_hash'],
                         'plan_handle': row['plan_handle'],
+                        'execution_count': row.get('execution_count', None),
+                        'total_elapsed_time': row.get('total_elapsed_time', None),
                     },
                 }

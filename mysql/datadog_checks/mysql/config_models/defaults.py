@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2022-present
+# (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -60,6 +60,10 @@ def instance_host(field, value):
 
 def instance_max_custom_queries(field, value):
     return 20
+
+
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_min_collection_interval(field, value):

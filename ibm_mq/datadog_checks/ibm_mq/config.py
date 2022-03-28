@@ -51,18 +51,27 @@ class IBMMQConfig:
 
         host = instance.get('host')  # type: str
         port = instance.get('port')  # type: str
+        override_hostname = is_affirmative(instance.get('override_hostname', False))  # type: bool
+
         self.connection_name = instance.get('connection_name')  # type: str
         if (host or port) and self.connection_name:
             raise ConfigurationError(
                 'Specify only one host/port or connection_name configuration, '
                 '(host={}, port={}, connection_name={}).'.format(host, port, self.connection_name)
             )
+        if override_hostname and self.connection_name:
+            raise ConfigurationError(
+                'You cannot override the hostname if you provide a `connection_name` instead of a `host`'
+            )
+        if override_hostname and not host:
+            raise ConfigurationError("You cannot override the hostname if you don't provide a `host`")
 
         if not self.connection_name:
             host = host or 'localhost'
             port = port or '1414'
             self.connection_name = "{}({})".format(host, port)
 
+        self.hostname = host if override_hostname else None
         self.username = instance.get('username')  # type: str
         self.password = instance.get('password')  # type: str
         self.timeout = int(float(instance.get('timeout', 5)) * 1000)  # type: int
@@ -91,6 +100,7 @@ class IBMMQConfig:
 
         self.convert_endianness = instance.get('convert_endianness', False)  # type: bool
         self.qm_timezone = instance.get('queue_manager_timezone', 'UTC')  # type: str
+        self.auto_discover_channels = instance.get('auto_discover_channels', True)  # type: bool
 
         custom_tags = instance.get('tags', [])  # type: List[str]
         tags = [
@@ -99,8 +109,12 @@ class IBMMQConfig:
         ]  # type: List[str]
         tags.extend(custom_tags)
         if host or port:
-            # 'host' is reserved and 'mq_host' is used instead
-            tags.extend({"mq_host:{}".format(host), "port:{}".format(port)})
+            if not override_hostname:
+                # 'host' is reserved and 'mq_host' is used instead
+                tags.append("mq_host:{}".format(host))
+            else:
+                self.log.debug("Overriding hostname with `%s`", host)
+            tags.append("port:{}".format(port))
         self.tags_no_channel = tags
         self.tags = tags + ["channel:{}".format(self.channel)]  # type: List[str]
 

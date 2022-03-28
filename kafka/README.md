@@ -43,12 +43,6 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
 1. Kafka uses the `log4j` logger by default. To activate logging to a file and customize the format edit the `log4j.properties` file:
@@ -106,12 +100,6 @@ For containerized environments, see the [Autodiscovery with JMX][11] guide.
 
 ##### Log collection
 
-<!-- partial
-{{< site-region region="us3" >}}
-**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
-{{< /site-region >}}
-partial -->
-
 _Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][12].
@@ -168,7 +156,7 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka/images/kafka_dashboard.png
 [2]: https://docs.datadoghq.com/integrations/java/
-[3]: https://docs.datadoghq.com/integrations/kafka/#agent-check-kafka-consumer
+[3]: https://docs.datadoghq.com/integrations/kafka/?tab=host#kafka-consumer-integration
 [4]: https://app.datadoghq.com/account/settings#agent
 [5]: https://github.com/DataDog/jmxfetch
 [6]: https://docs.datadoghq.com/integrations/amazon_msk/#pagetitle

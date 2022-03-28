@@ -153,6 +153,17 @@ jmx_metrics:
           alias: confluent.$domain.session.$name.rate
           metric_type: rate
 
+  # Kafka Broker ZooKeeper Metrics (Yammer Metric Meter)
+  - include:
+      domain: kafka.server
+      bean:
+        # Zookeeper latency from client
+        - kafka.server:type=ZooKeeperClientMetrics,name=ZooKeeperRequestLatencyMs
+      attribute:
+        Count:
+          alias: confluent.$domain.session.$name
+          metric_type: gauge
+
   # Kafka Broker Request Metrics (Yammer Metric Meter)
   - include:
       domain: kafka.network
@@ -174,8 +185,6 @@ jmx_metrics:
         - kafka.controller:type=KafkaController,name=PreferredReplicaImbalanceCount
         # Under Min ISR Count
         - kafka.controller:type=KafkaController,name=GlobalUnderMinIsrPartitionCount
-        # Count of offline partitions
-        - kafka.controller:type=KafkaController,name=OfflinePartitionsCount
         # Count of topics
         - kafka.controller:type=KafkaController,name=GlobalTopicCount
         # Count of partitions
@@ -603,6 +612,63 @@ jmx_metrics:
             alias: confluent.$domain.fetch_topic.$attribute
             metric_type: gauge
 
+# Confluent Broker Consumer Group Metrics: https://docs.confluent.io/platform/current/kafka/monitoring.html#consumer-group-metrics
+  - include:
+      domain: kafka.consumer
+      bean_regex: kafka\.consumer:type=consumer-coordinator-metrics,client-id=([-.\w]+)$
+      attribute:
+        assigned-partitions:
+          # The number of partitions currently assigned to this consumer.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        commit-latency-avg:
+          # The average time taken for a commit request.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        commit-latency-max:
+          # The max time taken for a commit request.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        commit-rate:
+          # The number of commit calls per second.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        heartbeat-rate:
+          # The average number of heartbeats per second. After a rebalance, the consumer sends heartbeats to the coordinator to keep itself active in the group. You can control this using the heartbeat.interval.ms setting for the consumer. You may see a lower rate than configured if the processing loop is taking more time to handle message batches. Usually this is OK as long as you see no increase in the join rate.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        heartbeat-response-time-max:
+          # The max time taken to receive a response to a heartbeat request.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        join-rate:
+          # The number of group joins per second. Group joining is the first phase of the rebalance protocol. A large value indicates that the consumer group is unstable and will likely be coupled with increased lag.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        join-time-avg:
+          # The average time taken for a group rejoin. This value can get as high as the configured session timeout for the consumer, but should usually be lower.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        join-time-max:
+          # The max time taken for a group rejoin. This value should not get much higher than the configured session timeout for the consumer.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        last-heartbeat-seconds-ago:
+          # The number of seconds since the last controller heartbeat.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        sync-rate:
+          # The number of group syncs per second. Group synchronization is the second and last phase of the rebalance protocol. Similar to join-rate, a large value indicates group instability.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        sync-time-avg:
+          # The average time taken for a group sync.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        sync-time-max:
+          # The max time taken for a group sync.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
 
   # Kafka Connect Metrics
   # https://kafka.apache.org/documentation/#connect_monitoring

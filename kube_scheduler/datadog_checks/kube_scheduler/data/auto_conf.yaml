@@ -45,4 +45,4 @@ instances:
     ## @param ssl_verify - boolean - optional - default: true
     ## Used to verify self signed certificates.
     #
-    # ssl_verify: true
+    ssl_verify: false

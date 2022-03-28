@@ -18,6 +18,7 @@ E2E_METADATA = {
         'apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y docker.io',
     ],
     'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock'],
+    'env_vars': {'DD_IGNORE_AUTOCONF': 'docker'},
 }
 
 

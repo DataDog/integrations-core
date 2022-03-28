@@ -40,6 +40,14 @@ class MetricFilters(BaseModel):
     vm: Optional[Sequence[str]]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class ResourceFilter(BaseModel):
     class Config:
         allow_mutation = False
@@ -100,6 +108,7 @@ class RestApiOptions(BaseModel):
     tls_cert: Optional[str]
     tls_ignore_warning: Optional[bool]
     tls_private_key: Optional[str]
+    tls_protocols_allowed: Optional[Sequence[str]]
     tls_use_host_header: Optional[bool]
     tls_verify: Optional[bool]
     use_legacy_auth_encoding: Optional[bool]
@@ -127,6 +136,7 @@ class InstanceConfig(BaseModel):
     include_datastore_cluster_folder_tag: Optional[bool]
     max_historical_metrics: Optional[int]
     metric_filters: Optional[MetricFilters]
+    metric_patterns: Optional[MetricPatterns]
     metrics_per_query: Optional[int]
     min_collection_interval: Optional[float]
     password: str

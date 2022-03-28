@@ -42,7 +42,10 @@ class BaseSqlServerMetric(object):
         self.datadog_name = cfg_instance['name']
         self.sql_name = cfg_instance.get('counter_name', '')
         self.base_name = base_name
-        self.report_function = partial(report_function, raw=True)
+        partial_kwargs = {}
+        if 'hostname' in cfg_instance:
+            partial_kwargs['hostname'] = cfg_instance['hostname']
+        self.report_function = partial(report_function, raw=True, **partial_kwargs)
         self.instance = cfg_instance.get('instance_name', '')
         self.object_name = cfg_instance.get('object_name', '')
         self.tags = cfg_instance.get('tags', [])
@@ -640,18 +643,21 @@ class SqlFileStats(BaseSqlServerMetric):
 
             for db in databases:
                 # use statements need to be executed separate from select queries
-                ctx = construct_use_statement(db)
-                logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
-                cursor.execute(ctx)
-                logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
-                cursor.execute(query)
-                data = cursor.fetchall()
-
-                columns = [i[0] for i in cursor.description]
-                for r in data:
-                    rows.append(r)
-
-                logger.debug("%s: received %d rows and %d columns for db %s", cls.__name__, len(data), len(columns), db)
+                try:
+                    ctx = construct_use_statement(db)
+                    logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
+                    cursor.execute(ctx)
+                    logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
+                    cursor.execute(query)
+                    data = cursor.fetchall()
+                    columns = [i[0] for i in cursor.description]
+                    for r in data:
+                        rows.append(r)
+                    logger.debug(
+                        "%s: received %d rows and %d columns for db %s", cls.__name__, len(data), len(columns), db
+                    )
+                except Exception as e:
+                    logger.warning("failed to fetch SQLFileStats from db %s due to Error: %s", db, e)
 
             # reset back to previous db
             logger.debug("%s: reverting cursor context via use statement to %s", cls.__name__, current_db)
@@ -697,6 +703,7 @@ class SqlDatabaseStats(BaseSqlServerMetric):
     def fetch_metric(self, rows, columns):
         database_name = columns.index("name")
         db_state_desc_index = columns.index("state_desc")
+        db_recovery_model_desc_index = columns.index("recovery_model_desc")
         value_column_index = columns.index(self.column)
 
         for row in rows:
@@ -705,9 +712,11 @@ class SqlDatabaseStats(BaseSqlServerMetric):
 
             column_val = row[value_column_index]
             db_state_desc = row[db_state_desc_index]
+            db_recovery_model_desc = row[db_recovery_model_desc_index]
             metric_tags = [
                 'database:{}'.format(str(self.instance)),
                 'database_state_desc:{}'.format(str(db_state_desc)),
+                'database_recovery_model_desc:{}'.format(str(db_recovery_model_desc)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)

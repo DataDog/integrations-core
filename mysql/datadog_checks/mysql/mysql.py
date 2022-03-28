@@ -35,6 +35,7 @@ from .const import (
     SCHEMA_VARS,
     STATUS_VARS,
     SYNTHETIC_VARS,
+    TABLE_VARS,
     VARIABLES_VARS,
 )
 from .innodb_metrics import InnoDBMetrics
@@ -47,6 +48,8 @@ from .queries import (
     SQL_INNODB_ENGINES,
     SQL_PROCESS_LIST,
     SQL_QUERY_SCHEMA_SIZE,
+    SQL_QUERY_SYSTEM_TABLE_SIZE,
+    SQL_QUERY_TABLE_SIZE,
     SQL_REPLICATION_ROLE_AWS_AURORA,
     SQL_SERVER_ID_AWS_AURORA,
     SQL_WORKER_THREADS,
@@ -54,6 +57,7 @@ from .queries import (
 )
 from .statement_samples import MySQLStatementSamples
 from .statements import MySQLStatementMetrics
+from .util import DatabaseConfigurationError
 from .version_utils import get_version
 
 try:
@@ -97,6 +101,8 @@ class MySql(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
+        self.performance_schema_enabled = None
+        self._warnings_by_code = {}
         self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
 
@@ -129,6 +135,15 @@ class MySql(AgentCheck):
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
 
+    def check_performance_schema_enabled(self, db):
+        if self.performance_schema_enabled is None:
+            with closing(db.cursor()) as cursor:
+                cursor.execute("SHOW VARIABLES LIKE 'performance_schema'")
+                results = dict(cursor.fetchall())
+                self.performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
+
+        return self.performance_schema_enabled
+
     def resolve_db_host(self):
         return agent_host_resolver(self._config.host)
 
@@ -160,9 +175,13 @@ class MySql(AgentCheck):
                 if self._get_is_aurora(db):
                     tags = tags + self._get_runtime_aurora_tags(db)
 
+                self.check_performance_schema_enabled(db)
+
                 # Metric collection
-                self._collect_metrics(db, tags=tags)
-                self._collect_system_metrics(self._config.host, db, tags)
+                if not self._config.only_custom_queries:
+                    self._collect_metrics(db, tags=tags)
+                    self._collect_system_metrics(self._config.host, db, tags)
+
                 if self._config.dbm_enabled:
                     dbm_tags = list(set(self.service_check_tags) | set(tags))
                     self._statement_metrics.run_job_loop(dbm_tags)
@@ -179,6 +198,7 @@ class MySql(AgentCheck):
                 raise e
             finally:
                 self._conn = None
+                self._report_warnings()
 
     def cancel(self):
         self._statement_samples.cancel()
@@ -320,14 +340,13 @@ class MySql(AgentCheck):
             self.log.debug("Collecting Galera Metrics.")
             metrics.update(GALERA_VARS)
 
-        self.performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
         above_560 = self.version.version_compatible((5, 6, 0))
         if (
             is_affirmative(self._config.options.get('extra_performance_metrics', False))
             and above_560
             and self.performance_schema_enabled
         ):
-            # report avg query response time per schema to Datadog
+            # report size of schemas in MiB to Datadog
             results['perf_digest_95th_percentile_avg_us'] = self._get_query_exec_time_95th_us(db)
             results['query_run_time_avg'] = self._query_exec_time_per_schema(db)
             metrics.update(PERFORMANCE_VARS)
@@ -336,6 +355,20 @@ class MySql(AgentCheck):
             # report avg query response time per schema to Datadog
             results['information_schema_size'] = self._query_size_per_schema(db)
             metrics.update(SCHEMA_VARS)
+
+        if is_affirmative(self._config.options.get('table_size_metrics', False)):
+            # report size of tables in MiB to Datadog
+            (table_index_size, table_data_size) = self._query_size_per_table(db)
+            results['information_table_index_size'] = table_index_size
+            results['information_table_data_size'] = table_data_size
+            metrics.update(TABLE_VARS)
+
+        if is_affirmative(self._config.options.get('system_table_size_metrics', False)):
+            # report size of tables in MiB to Datadog
+            (table_index_size, table_data_size) = self._query_size_per_table(db, system_tables=True)
+            results['information_table_index_size'] = table_index_size
+            results['information_table_data_size'] = table_data_size
+            metrics.update(TABLE_VARS)
 
         if is_affirmative(self._config.options.get('replication', self._config.dbm_enabled)):
             if self.performance_schema_enabled and self._is_group_replication_active(db):
@@ -588,7 +621,12 @@ class MySql(AgentCheck):
         for tag, value in collect_all_scalars(variable, db_results):
             metric_tags = list(tags)
             if tag:
-                metric_tags.append(tag)
+                if "," in tag:
+                    t_split = tag.split(",")
+                    for t in t_split:
+                        metric_tags.append(t)
+                else:
+                    metric_tags.append(tag)
             if value is not None:
                 if metric_type == RATE:
                     self.rate(metric_name, value, tags=metric_tags, hostname=self.resolved_hostname)
@@ -917,7 +955,38 @@ class MySql(AgentCheck):
 
                 return schema_query_avg_run_time
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("Avg exec time performance metrics unavailable at this time: %s", e)
+            self.warning("Size of schemas metrics unavailable at this time: %s", e)
+
+        return {}
+
+    def _query_size_per_table(self, db, system_tables=False):
+        try:
+            with closing(db.cursor()) as cursor:
+                if system_tables:
+                    cursor.execute(SQL_QUERY_SYSTEM_TABLE_SIZE)
+                else:
+                    cursor.execute(SQL_QUERY_TABLE_SIZE)
+
+                if cursor.rowcount < 1:
+                    self.warning("Failed to fetch records from the information schema 'tables' table.")
+                    return None
+
+                table_index_size = {}
+                table_data_size = {}
+                for row in cursor.fetchall():
+                    table_schema = str(row[0])
+                    table_name = str(row[1])
+                    index_size = float(row[2])
+                    data_size = float(row[3])
+
+                    # set the tag as the dictionary key
+                    table_index_size["schema:{},table:{}".format(table_schema, table_name)] = index_size
+                    table_data_size["schema:{},table:{}".format(table_schema, table_name)] = data_size
+
+                return table_index_size, table_data_size
+        except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
+            self.warning("Size of tables metrics unavailable at this time: %s", e)
+
             return None
 
     def _query_size_per_schema(self, db):
@@ -972,3 +1041,15 @@ class MySql(AgentCheck):
             self._qcache_hits = int(results['Qcache_hits'])
             self._qcache_inserts = int(results['Qcache_inserts'])
             self._qcache_not_cached = int(results['Qcache_not_cached'])
+
+    def record_warning(self, code, message):
+        # type: (DatabaseConfigurationError, str) -> None
+        self._warnings_by_code[code] = message
+
+    def _report_warnings(self):
+        messages = self._warnings_by_code.values()
+        # Reset the warnings for the next check run
+        self._warnings_by_code = {}
+
+        for warning in messages:
+            self.warning(warning)

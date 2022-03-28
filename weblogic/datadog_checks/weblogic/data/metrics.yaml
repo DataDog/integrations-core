@@ -20,6 +20,7 @@ jmx_metrics:
       attribute:
         CompletedRequestCount:
           alias: weblogic.threadpool_runtime.completed_requests
+          metric_type: monotonic_count
         ExecuteThreadIdleCount:
           metric_type: gauge
           alias: weblogic.threadpool_runtime.execute_threads_idle
@@ -85,6 +86,7 @@ jmx_metrics:
       attribute:
         CompletedRequests:
           alias: weblogic.work_manager_runtime.requests_completed
+          metric_type: monotonic_count
         PendingRequests:
           alias: weblogic.work_manager_runtime.requests_pending
         StuckThreadCount:
@@ -95,16 +97,21 @@ jmx_metrics:
       attribute:
         AcceptCount:
           alias: weblogic.server_channel_runtime.sockets_accepted
+          metric_type: monotonic_count
         ConnectionsCount:
           alias: weblogic.server_channel_runtime.connections_active
         BytesReceivedCount:
           alias: weblogic.server_channel_runtime.bytes_received
+          metric_type: monotonic_count
         BytesSentCount:
           alias: weblogic.server_channel_runtime.bytes_sent
+          metric_type: monotonic_count
         MessagesReceivedCount:
           alias: weblogic.server_channel_runtime.messages_received
+          metric_type: monotonic_count
         MessagesSentCount:
           alias: weblogic.server_channel_runtime.messages_sent
+          metric_type: monotonic_count
   - include:
       domain: com.bea
       bean_regex: com.bea:ServerRuntime=([-_.\w]+),Name=([\[\-_/.\]\w]+),ApplicationRuntime=([-_.\w]+),Type=ServletRuntime,WebAppComponentRuntime=([-_/.\w]+)
@@ -112,6 +119,9 @@ jmx_metrics:
         ExecutionTimeHigh:
           metric_type: monotonic_count
           alias: weblogic.servlet_runtime.exec_time_high
+        ExecutionTimeTotal:
+          metric_type: monotonic_count
+          alias: weblogic.servlet_runtime.exec_time_total
         ExecutionTimeLow:
           alias: weblogic.servlet_runtime.exec_time_low
         ReloadTotalCount:

@@ -14,7 +14,7 @@
             "prefix": "kube_cluster_name"
         }
     ],
-    "title": "[WIP] Kubernetes Cluster Overview Dashboard",
+    "title": "Kubernetes Cluster Overview Dashboard",
     "widgets": [
         {
             "definition": {

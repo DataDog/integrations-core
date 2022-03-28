@@ -1,0 +1,14 @@
+version: '3'
+services:
+  fdb-coordinator:
+    container_name: fdb-coordinator
+    build:
+      context: .
+      dockerfile: Dockerfile.fdb-tls
+    environment:
+      FDB_COORDINATOR: fdb-coordinator
+      FDB_NETWORKING_MODE: container
+      FDB_COORDINATOR_PORT: 4600:tls
+      FDB_PORT: 4600:tls
+    ports:
+      - 4600:4600/tcp
