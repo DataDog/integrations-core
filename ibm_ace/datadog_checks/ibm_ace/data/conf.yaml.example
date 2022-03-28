@@ -24,12 +24,12 @@ instances:
     mq_port: 1414
 
     ## @param channel - string - required
-    ## The IBM MQ channel with which to use for subscriptions.
+    ## The IBM MQ channel to use for subscriptions.
     #
     channel: <CHANNEL>
 
     ## @param queue_manager - string - required
-    ## The IBM MQ queue manager with which to use.
+    ## The IBM MQ queue manager to use.
     #
     queue_manager: <QUEUE_MANAGER>
 
@@ -44,57 +44,57 @@ instances:
     # mq_password: <MQ_PASSWORD>
 
     ## @param resource_statistics - boolean - optional - default: true
-    ## Whether or not collect resource statistics.
+    ## Whether to collect resource statistics.
     #
     # resource_statistics: true
 
     ## @param message_flows - boolean - optional - default: true
-    ## Whether or not collect information about message flows.
+    ## Whether to collect information about message flows.
     #
     # message_flows: true
 
     ## @param persist_connections - boolean - optional - default: false
-    ## Whether or not to keep connections open rather than disconnecting after every check run.
+    ## Whether to keep connections open rather than disconnecting after every check run.
     #
     # persist_connections: false
 
     ## @param mqcd_version - integer - optional - default: 9
-    ## The channel definition version with which to use. Supported values are 1 to 9 (inclusive).
+    ## The channel definition version to use. Supported values are 1 to 9 (inclusive).
     ## If you're having connection issues make sure it matches your IBM MQ version.
-    ## TLS encryption requires MQCD of version at least 7.
+    ## TLS encryption requires at least version 7 of MQCD.
     #
     # mqcd_version: 9
 
     ## @param tls_auth - boolean - optional - default: false
-    ## Whether or not to use TLS auth while connecting to the channel.
+    ## Whether to use TLS auth while connecting to the channel.
     #
     # tls_auth: false
 
     ## @param tls_cipher_spec - string - optional - default: TLS_RSA_WITH_AES_256_CBC_SHA
-    ## The TLS cipher to use. It should match the value of the channels SSLCIPH attribute.
+    ## The TLS cipher to use. It should match the value of the channel's SSLCIPH attribute.
     #
     # tls_cipher_spec: TLS_RSA_WITH_AES_256_CBC_SHA
 
     ## @param tls_key_repository_location - string - optional - default: /var/mqm/tls-db/client/KeyringClient
-    ## It specifies the location of the key database file in which keys and certificates are stored.
-    ## The key database file must have a file name of the form zzz.kdb, where zzz is user-selectable.
+    ## The location of the key database file in which keys and certificates are stored.
+    ## The key database file must have a file extension of `.kdb`.
     ## The KeyRepository field contains the path to this file, along with the file name stem
     ## (all characters in the file name up to but not including the final .kdb).
     ## Each key database file has an associated password stash file. This holds encoded passwords that are used to
     ## allow programmatic access to the key database. The password stash file must reside in the same directory and
-    ## have the same file stem as the key database, and must end with the suffix .sth.
+    ## have the same file stem as the key database, and must end with the extension `.sth`.
     #
     # tls_key_repository_location: /var/mqm/tls-db/client/KeyringClient
 
     ## @param tls_certificate_label - string - optional
-    ## Certificate label used for tls connection.
+    ## Certificate label used for TLS connection.
     #
     # tls_certificate_label: <TLS_CERTIFICATE_LABEL>
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
-    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    ## Learn more about tagging at https://docs.datadoghq.com/getting_started/tagging
     #
     # tags:
     #   - <KEY_1>:<VALUE_1>
@@ -108,15 +108,15 @@ instances:
     # service: <SERVICE>
 
     ## @param min_collection_interval - number - optional - default: 15
-    ## This changes the collection interval of the check. For more information, see:
+    ## The collection interval of the check. For more information, see:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     # min_collection_interval: 15
 
     ## @param empty_default_hostname - boolean - optional - default: false
-    ## This forces the check to send metrics with no hostname.
+    ## Forces the check to send metrics with no hostname.
     ##
-    ## This is useful for cluster-level checks.
+    ## Useful for cluster-level checks.
     #
     # empty_default_hostname: false
 
