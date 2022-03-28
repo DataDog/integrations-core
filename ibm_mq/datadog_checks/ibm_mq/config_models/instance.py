@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2022-present
+# (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -60,9 +60,9 @@ class InstanceConfig(BaseModel):
     ssl_cipher_spec: Optional[str]
     ssl_key_repository_location: Optional[str] = Field(None, min_length=1)
     tags: Optional[Sequence[str]]
-    timeout: Optional[float]
+    timeout: Optional[int]
     try_normal_connection: Optional[bool]
-    username: Optional[str]
+    username: Optional[str] = Field(None, min_length=1)
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):
