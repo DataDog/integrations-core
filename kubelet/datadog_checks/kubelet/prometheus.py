@@ -427,7 +427,7 @@ class CadvisorPrometheusScraperMixin(object):
             metric.samples[i] = (
                 sample[self.SAMPLE_NAME],
                 sample[self.SAMPLE_LABELS],
-                sample[self.SAMPLE_VALUE] * 10.0 ** 9,
+                sample[self.SAMPLE_VALUE] * 10.0**9,
             )
         self._process_container_metric('rate', metric_name, metric, scraper_config)
 
