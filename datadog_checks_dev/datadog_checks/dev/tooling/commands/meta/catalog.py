@@ -35,7 +35,7 @@ CSV_COLUMNS = [
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Create a catalog with information about integrations')
-@click.argument('checks', nargs=-1, autocompletion=complete_valid_checks, required=True)
+@click.argument('checks', nargs=-1, shell_complete=complete_valid_checks, required=True)
 @click.option(
     '-f',
     '--file',

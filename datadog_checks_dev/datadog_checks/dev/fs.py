@@ -27,7 +27,6 @@ if PY3:
         with open(file, 'w', encoding=encoding) as f:
             f.writelines(lines)
 
-
 else:
 
     def write_file(file, contents, encoding='utf-8'):

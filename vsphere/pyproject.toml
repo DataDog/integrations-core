@@ -38,7 +38,7 @@ dynamic = [
 [project.optional-dependencies]
 deps = [
     "futures==3.3.0; python_version < '3.0'",
-    "pyvmomi==v7.0.2",
+    "pyvmomi==7.0.3",
 ]
 
 [project.urls]

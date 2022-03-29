@@ -277,6 +277,7 @@ If you are connecting to Oracle Database using JDBC, you also need to specify `j
 ```
 
 For more information about connecting to the Oracle Database through TCPS on JDBC, see the official [Oracle whitepaper][17].
+
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 

@@ -11,7 +11,6 @@ try:
         def create_scraper(self, config):
             return OpenMetricsCompatibilityScraper(self, self.get_config_with_defaults(config))
 
-
 except Exception:
     pass
 

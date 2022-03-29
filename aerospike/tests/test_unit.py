@@ -174,7 +174,7 @@ def test_collect_latencies_parser(aggregator):
 
     for metric_type in ['read', 'udf']:
         for i in range(17):
-            bucket = 2 ** i
+            bucket = 2**i
             aggregator.assert_metric(
                 'aerospike.namespace.latency.{}'.format(metric_type),
                 tags=['namespace:{}'.format('test'), 'tag:value', 'bucket:{}'.format(str(bucket))],

@@ -40,7 +40,7 @@ ALLOWED_MONITOR_TYPES = [
     context_settings=CONTEXT_SETTINGS,
     short_help='Validate recommended monitor definition JSON files',
 )
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 def recommended_monitors(check):
     """Validate all recommended monitors definition files.
 
