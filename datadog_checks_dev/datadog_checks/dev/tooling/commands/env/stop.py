@@ -13,8 +13,8 @@ from ..console import CONTEXT_SETTINGS, DEFAULT_INDENT, abort, echo_failure, ech
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Stop environments.')
-@click.argument('check', autocompletion=complete_active_checks)
-@click.argument('env', autocompletion=complete_configured_envs, required=False)
+@click.argument('check', shell_complete=complete_active_checks)
+@click.argument('env', shell_complete=complete_configured_envs, required=False)
 def stop(check, env):
     """Stop environments, use "all" as check argument to stop everything."""
     all_checks = check == 'all'

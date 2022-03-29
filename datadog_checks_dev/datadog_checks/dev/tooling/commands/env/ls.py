@@ -10,7 +10,7 @@ from ..console import CONTEXT_SETTINGS, echo_info, echo_success, echo_warning
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='List active or available environments')
-@click.argument('checks', nargs=-1, autocompletion=complete_testable_checks)
+@click.argument('checks', nargs=-1, shell_complete=complete_testable_checks)
 def ls(checks):
     """List active or available environments."""
     if checks:

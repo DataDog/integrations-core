@@ -239,7 +239,7 @@ class FargateCheck(AgentCheck):
                     try:
                         t_delta = int((parser.isoparse(t1) - parser.isoparse(t0)).total_seconds())
                         # Simplified formula for cpu_percent where system_delta = t_delta * active_cpus * (10 ** 9)
-                        cpu_percent = (cpu_delta / (t_delta * (10 ** 9))) * 100.0
+                        cpu_percent = (cpu_delta / (t_delta * (10**9))) * 100.0
                         cpu_percent = round_value(cpu_percent, 2)
                         self.gauge('ecs.fargate.cpu.percent', cpu_percent, tags)
                     except ValueError:

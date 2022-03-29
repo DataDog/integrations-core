@@ -49,7 +49,7 @@ INVALID_END_RE = re.compile(r"^_+|_+$")
 
 
 @click.command('service-checks', context_settings=CONTEXT_SETTINGS, short_help='Validate `service_checks.json` files')
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 @click.option('--sync', is_flag=True, help='Generate example configuration files based on specifications')
 def service_checks(check, sync):
     """Validate all `service_checks.json` files.
