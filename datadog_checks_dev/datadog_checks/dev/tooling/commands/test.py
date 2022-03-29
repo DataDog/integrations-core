@@ -26,7 +26,7 @@ def display_envs(check_envs):
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Run tests')
-@click.argument('checks', autocompletion=complete_testable_checks, nargs=-1)
+@click.argument('checks', shell_complete=complete_testable_checks, nargs=-1)
 @click.option('--format-style', '-fs', is_flag=True, help='Run only the code style formatter')
 @click.option('--style', '-s', is_flag=True, help='Run only style checks')
 @click.option('--bench', '-b', is_flag=True, help='Run only benchmarks')

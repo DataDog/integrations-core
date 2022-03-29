@@ -416,7 +416,7 @@ class AerospikeCheck(AgentCheck):
                     latencies = bucket_vals.split(',')
                     if latencies and len(latencies) == 17:
                         for i in range(len(latencies)):
-                            bucket = 2 ** i
+                            bucket = 2**i
                             tags = namespace_tags + ['bucket:{}'.format(bucket)]
                             latency_name = metric_name
                             self.send(NAMESPACE_LATENCY_METRIC_TYPE, latency_name, latencies[i], tags)

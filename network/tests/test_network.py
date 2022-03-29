@@ -64,7 +64,6 @@ if PY3:
     def decode_string(s):
         return s.decode(ESCAPE_ENCODING)
 
-
 else:
     ESCAPE_ENCODING = 'string-escape'
 

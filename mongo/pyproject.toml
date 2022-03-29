@@ -37,7 +37,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "pymongo==3.11.4",
+    "pymongo==3.12.3",
 ]
 
 [project.urls]
