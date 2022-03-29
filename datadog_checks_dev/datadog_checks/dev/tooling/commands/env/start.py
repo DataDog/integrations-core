@@ -20,8 +20,8 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Start an environment')
-@click.argument('check', autocompletion=complete_testable_checks)
-@click.argument('env', autocompletion=complete_envs)
+@click.argument('check', shell_complete=complete_testable_checks)
+@click.argument('env', shell_complete=complete_envs)
 @click.option(
     '--agent',
     '-a',
