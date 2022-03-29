@@ -53,7 +53,7 @@ def test_gssapi(kafka_instance, dd_run_check):
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
     # assert the check doesn't fail with:
     # Exception: Could not find main GSSAPI shared library.
-    with pytest.raises(Exception, match='^There was a problem collecting'):
+    with pytest.raises(Exception, match='check_version'):
         dd_run_check(kafka_consumer_check)
 
 
