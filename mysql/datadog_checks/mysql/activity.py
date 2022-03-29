@@ -69,7 +69,7 @@ FROM
         SELECT
             MAX(waits_b.EVENT_ID)
         FROM performance_schema.threads AS thread_b
-            LEFT JOIN performance_schema.events_waits_current AS waits_b ON waits_b.thread_id = waits_b.thread_id
+            LEFT JOIN performance_schema.events_waits_current AS waits_b ON waits_b.thread_id = thread_b.thread_id
         WHERE
             thread_b.processlist_state IS NOT NULL AND
             thread_b.processlist_command != 'Sleep' AND
@@ -200,7 +200,7 @@ class MySQLActivity(DBMAsyncJob):
     def _sort_key(row):
         # type: (Dict[str]) -> int
         # value is in picoseconds
-        return row.get('event_timer_start') or time.time_ns() * 1000
+        return row.get('event_timer_start') or int(round(time.time() * 1e12))
 
     def _obfuscate_and_sanitize_row(self, row):
         # type: (Dict[str]) -> Dict[str]

@@ -216,18 +216,20 @@ def test_get_estimated_row_size_bytes(dbm_instance, file):
 
 
 def _new_time():
-    # picoseconds
-    return int(round(datetime(2021, 9, 23, 23, 21, 21, 669330).timestamp() * 1e12))
+    return _create_time_in_picoseconds(datetime(2021, 9, 23, 23, 21, 21, 669330))
 
 
 def _old_time():
-    # picoseconds
-    return int(round(datetime(2021, 9, 22, 22, 21, 21, 669330).timestamp() * 1e12))
+    return _create_time_in_picoseconds(datetime(2021, 9, 22, 22, 21, 21, 669330))
 
 
 def _older_time():
-    # picoseconds
-    return int(round(datetime(2021, 9, 20, 23, 21, 21, 669330).timestamp() * 1e12))
+    return _create_time_in_picoseconds(datetime(2021, 9, 20, 23, 21, 21, 669330))
+
+
+def _create_time_in_picoseconds(date_obj):
+    time_milli = int(time.mktime(date_obj.utctimetuple()) * 1000 + date_obj.microsecond / 1000)
+    return int(round(time_milli * 1e9))
 
 
 @pytest.mark.parametrize(
