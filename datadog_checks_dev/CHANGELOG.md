@@ -1,5 +1,11 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 16.1.0 / 2022-03-29
+
+* [Added] Add new README for Tile-only integrations. See [#11712](https://github.com/DataDog/integrations-core/pull/11712).
+* [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
+* [Fixed] Cap the version of virtualenv. See [#11742](https://github.com/DataDog/integrations-core/pull/11742).
+
 ## 16.0.0 / 2022-03-25
 
 * [Added] Add `metric_patterns` to base template. See [#11696](https://github.com/DataDog/integrations-core/pull/11696).
