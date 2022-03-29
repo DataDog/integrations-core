@@ -51,7 +51,10 @@ def test_gssapi(kafka_instance, dd_run_check):
     instance['security_protocol'] = 'SASL_PLAINTEXT'
     instance['sasl_kerberos_service_name'] = 'kafka'
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
-    dd_run_check(kafka_consumer_check)
+    # assert the check doesn't fail with:
+    # Exception: Could not find main GSSAPI shared library.
+    with pytest.raises(Exception, match='^NoBrokersAvailable'):
+        dd_run_check(kafka_consumer_check)
 
 
 @pytest.mark.unit
