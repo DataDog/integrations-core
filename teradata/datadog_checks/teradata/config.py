@@ -11,14 +11,11 @@ class TeradataConfig(object):
         self.account = instance.get('account')
         self.username = instance.get('username')
         self.password = instance.get('password')
-        self.db = instance.get('database')
+        self.database = instance.get('database')
         self.collect_res_usage = is_affirmative(instance.get('collect_res_usage'))
         self.https_port = int(instance.get('https_port', 443))
         self.ssl_mode = instance.get('ssl_mode', 'PREFER')
         self.ssl_protocol = instance.get('ssl_protocol', 'TLSv1.2')
-        self.auth_data = instance.get('auth_data')
         self.auth_mechanism = instance.get('auth_mechanism')
         self.tags = instance.get('tags', [])
-
-    def get(self, option):
-        return option
+        self.auth_data = instance.get('auth_data')

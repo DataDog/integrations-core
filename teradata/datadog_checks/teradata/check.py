@@ -45,7 +45,7 @@ class TeradataCheck(AgentCheck):
             self._execute_query_raw,
             queries=manager_queries,
             tags=self._tags,
-            error_handler=self.executor_error_handler,
+            error_handler=self._executor_error_handler,
         )
         self.check_initializations.append(self._query_manager.compile_queries)
 
@@ -72,7 +72,7 @@ class TeradataCheck(AgentCheck):
 
     def _execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:
-            query = query.format(self.config.db)
+            query = query.format(self.config.database)
             cursor.execute(query)
             if cursor.rowcount < 1:
                 self.log.warning('Failed to fetch records from query: `%s`.', query)
@@ -100,15 +100,16 @@ class TeradataCheck(AgentCheck):
         if TERADATASQL_IMPORT_ERROR:
             self.log.error(
                 'Teradata SQL Driver module is unavailable. Please double check your installation and refer to the '
-                'Datadog documentation for more information.'
+                'Datadog documentation for more information. %s',
+                TERADATASQL_IMPORT_ERROR,
             )
-            self._connection_errors += 1
-            raise ImportError(TERADATASQL_IMPORT_ERROR)
+            raise TERADATASQL_IMPORT_ERROR
         else:
             self.log.debug('Connecting to Teradata...')
-            validated_conn_params = self._validate_conn_params()
 
-            if validated_conn_params:
+            validated_config = self._validate_config() and self._validate_conn_params()
+
+            if validated_config:
                 conn_params = self._build_connect_params()
                 try:
                     conn = teradatasql.connect(json.dumps(conn_params))
@@ -185,7 +186,7 @@ class TeradataCheck(AgentCheck):
         return {
             'host': self.config.server,
             'account': self.config.account,
-            'database': self.config.db,
+            'database': self.config.database,
             'dbs_port': str(self.config.port),
             'logmech': self.config.auth_mechanism,
             'logdata': self.config.auth_data,
@@ -196,7 +197,7 @@ class TeradataCheck(AgentCheck):
             'sslprotocol': self.config.ssl_protocol,
         }
 
-    def executor_error_handler(self, error):
+    def _executor_error_handler(self, error):
         self._query_errors += 1
         if self._connection:
             try:
@@ -206,3 +207,13 @@ class TeradataCheck(AgentCheck):
         self._connection = None
 
         return error
+
+    def _validate_config(self):
+        if not self.config.server:
+            raise ConfigurationError("Server must be specified.")
+            return False
+        if not self.config.database:
+            raise ConfigurationError("Database must be specified")
+            return False
+
+        return True
