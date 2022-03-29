@@ -9,7 +9,7 @@ MONOTONIC = "monotonic_count"
 PROC_NAME = 'mysqld'
 
 DBM_MIGRATED_METRICS = {
-    'Connections': ('mysql.net.connections', RATE),
+    'Connections': ('mysql.net.connections', GAUGE),
 }
 
 # Vars found in "SHOW STATUS;"
