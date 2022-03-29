@@ -161,7 +161,7 @@ class MySQLActivity(DBMAsyncJob):
                 tags=self._tags + self._check._get_debug_tags(),
             )
 
-    @tracked_method(agent_check_getter=agent_check_getter)
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_active_connections(self, cursor):
         # type: (pymysql.cursor) -> List[Dict[str]]
         self._log.debug("Running query [%s]", CONNECTIONS_QUERY)
@@ -170,12 +170,11 @@ class MySQLActivity(DBMAsyncJob):
         self._log.debug("Loaded [%s] current connections", len(rows))
         return rows
 
-    @tracked_method(agent_check_getter=agent_check_getter)
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_activity(self, cursor):
         # type: (pymysql.cursor) -> List[Dict[str]]
-        query = self._get_query_from_version(self._db_version)
         try:
-            cursor.execute(query)
+            cursor.execute(ACTIVITY_QUERY)
             return cursor.fetchall()
         except (pymysql.err.OperationalError, pymysql.err.InternalError) as e:
             self._log.error("Failed to collect activity, this is likely due to a setup error | err=[%s]", e)
@@ -249,17 +248,6 @@ class MySQLActivity(DBMAsyncJob):
             "mysql_activity": active_sessions,
             "mysql_connections": active_connections,
         }
-
-    @staticmethod
-    def _get_query_from_version(version):
-        # type: (MySQLVersion) -> str
-        # Note, future iterations will have version specific queries
-        if (
-            version == MySQLVersion.VERSION_80
-            or version == MySQLVersion.VERSION_57
-            or version == MySQLVersion.VERSION_56
-        ):
-            return ACTIVITY_QUERY
 
     @staticmethod
     def _json_event_encoding(o):
