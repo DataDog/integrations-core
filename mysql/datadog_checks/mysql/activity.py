@@ -42,14 +42,17 @@ SELECT
     thread_a.processlist_db,
     thread_a.processlist_command,
     thread_a.processlist_state,
-    thread_a.processlist_info AS SQL_TEXT,
+    thread_a.processlist_info AS sql_text,
     statement.timer_start AS event_timer_start,
     statement.timer_end AS event_timer_end,
     statement.lock_time,
     statement.current_schema,
     COALESCE(
-        IF(thread_a.processlist_state = 'User sleep', 'User sleep', 
+        IF(thread_a.processlist_state = 'User sleep', 'User sleep',
         IF(waits_a.event_id = waits_a.end_event_id, 'CPU', waits_a.event_name)), 'CPU') AS wait_event,
+    waits_a.event_id,
+    waits_a.end_event_id,
+    waits_a.event_name,
     waits_a.timer_start AS wait_timer_start,
     waits_a.timer_end AS wait_timer_end,
     waits_a.object_schema,
@@ -148,17 +151,15 @@ class MySQLActivity(DBMAsyncJob):
         with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
             connections = self._get_active_connections(cursor)
             rows = self._get_activity(cursor)
-            if not rows:
-                return
             rows = self._normalize_rows(rows)
             event = self._create_activity_event(rows, connections)
             payload = json.dumps(event, default=self._json_event_encoding)
             self._check.database_monitoring_query_activity(payload)
-        self._check.histogram(
-            "dd.mysql.activity.collect_activity.payload_size",
-            len(payload),
-            tags=self._tags + self._check._get_debug_tags(),
-        )
+            self._check.histogram(
+                "dd.mysql.activity.collect_activity.payload_size",
+                len(payload),
+                tags=self._tags + self._check._get_debug_tags(),
+            )
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_active_connections(self, cursor):
@@ -177,9 +178,9 @@ class MySQLActivity(DBMAsyncJob):
             cursor.execute(query)
             return cursor.fetchall()
         except (pymysql.err.OperationalError, pymysql.err.InternalError) as e:
-            self._log.error('Failed to collect activity, this is likely due to a setup error | err=[%s]', e)
+            self._log.error("Failed to collect activity, this is likely due to a setup error | err=[%s]", e)
         except Exception as e:
-            self._log.error('Failed to collect activity | err=[%s]', e)
+            self._log.error("Failed to collect activity | err=[%s]", e)
         return []
 
     def _normalize_rows(self, rows):
@@ -198,17 +199,18 @@ class MySQLActivity(DBMAsyncJob):
     @staticmethod
     def _sort_key(row):
         # type: (Dict[str]) -> int
-        return row.get('event_timer_start') or int(round(time.time() * 1e12))
+        # value is in picoseconds
+        return row.get('event_timer_start') or time.time_ns() * 1000
 
     def _obfuscate_and_sanitize_row(self, row):
         # type: (Dict[str]) -> Dict[str]
         row = self._sanitize_row(row)
-        if 'sql_text' not in row:
+        if "sql_text" not in row:
             return row
         try:
-            self._finalize_row(row, obfuscate_sql_with_metadata(row['sql_text'], self._obfuscator_options))
+            self._finalize_row(row, obfuscate_sql_with_metadata(row["sql_text"], self._obfuscator_options))
         except Exception as e:
-            row['sql_text'] = 'ERROR: failed to obfuscate'
+            row["sql_text"] = "ERROR: failed to obfuscate"
             self._log.debug("Failed to obfuscate | err=[%s]", e)
         return row
 
@@ -220,14 +222,14 @@ class MySQLActivity(DBMAsyncJob):
     @staticmethod
     def _finalize_row(row, statement):
         # type: (Dict[str], Dict[str]) -> None
-        obfuscated_statement = statement['query']
-        row['sql_text'] = obfuscated_statement
-        row['query_signature'] = compute_sql_signature(obfuscated_statement)
+        obfuscated_statement = statement["query"]
+        row["sql_text"] = obfuscated_statement
+        row["query_signature"] = compute_sql_signature(obfuscated_statement)
 
-        metadata = statement['metadata']
-        row['dd_commands'] = metadata.get('commands', None)
-        row['dd_tables'] = metadata.get('tables', None)
-        row['dd_comments'] = metadata.get('comments', None)
+        metadata = statement["metadata"]
+        row["dd_commands"] = metadata.get("commands", None)
+        row["dd_tables"] = metadata.get("tables", None)
+        row["dd_comments"] = metadata.get("comments", None)
 
     @staticmethod
     def _get_estimated_row_size_bytes(row):
@@ -251,14 +253,18 @@ class MySQLActivity(DBMAsyncJob):
     @staticmethod
     def _get_query_from_version(version):
         # type: (MySQLVersion) -> str
-        if version == MySQLVersion.VERSION_80 or version == MySQLVersion.VERSION_57:
+        # Note, future iterations will have version specific queries
+        if (
+            version == MySQLVersion.VERSION_80
+            or version == MySQLVersion.VERSION_57
+            or version == MySQLVersion.VERSION_56
+        ):
             return ACTIVITY_QUERY
-        raise Exception('Active sessions is not supported for this version=[{}]'.format(version))
 
     @staticmethod
     def _json_event_encoding(o):
-        # We have a similar event encoder in the base check, but to iterate quickly,
-        # we create a custom one here that parses differently and handles types unique to MySQL rows.
+        # We have a similar event encoder in the base check, but to iterate quickly and support types unique to
+        # MySQL, we create a custom one here.
         if isinstance(o, decimal.Decimal):
             return float(o)
         if isinstance(o, (datetime.date, datetime.datetime)):
