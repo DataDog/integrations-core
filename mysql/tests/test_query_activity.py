@@ -94,9 +94,11 @@ def test_collect_activity(aggregator, dbm_instance, dd_run_check):
     assert blocked_row['processlist_state'] == 'executing'
     assert blocked_row['processlist_command'] == 'Query'
     assert blocked_row['sql_text'] == query
-    assert blocked_row['wait_event'] == 'CPU'
+    assert blocked_row['wait_event'] == 'wait/io/table/sql/handler'
     assert blocked_row['thread_id'], "missing thread id"
     assert blocked_row['processlist_id'], "missing processlist id"
+    assert blocked_row['wait_timer_start'], "missing wait timer start"
+    assert blocked_row['wait_timer_end'], "missing wait timer end"
     assert blocked_row['event_timer_start'], "missing event timer start"
     assert blocked_row['event_timer_end'], "missing event timer end"
     assert blocked_row['lock_time'], "missing lock time"
