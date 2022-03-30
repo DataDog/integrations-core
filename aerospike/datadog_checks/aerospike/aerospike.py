@@ -444,6 +444,9 @@ class AerospikeCheck(AgentCheck):
             if line.startswith("error-"):
                 continue
 
+            if not data:
+                break
+
             timestamp = re.match(r'(\d+:\d+:\d+)', line)
             if timestamp:
                 metric_values = line.split(",")[1:]
