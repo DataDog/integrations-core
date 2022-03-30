@@ -98,7 +98,7 @@ def test_connection_uses_tls():
 
 
 @pytest.mark.parametrize(
-    "data, calls",
+    "data, calls_count",
     [
         pytest.param(
             [
