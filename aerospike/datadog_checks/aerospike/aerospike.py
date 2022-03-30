@@ -444,9 +444,6 @@ class AerospikeCheck(AgentCheck):
             if line.startswith("error-"):
                 continue
 
-            if not data:
-                break
-
             timestamp = re.match(r'(\d+:\d+:\d+)', line)
             if timestamp:
                 metric_values = line.split(",")[1:]
@@ -482,7 +479,6 @@ class AerospikeCheck(AgentCheck):
                     self.send(NAMESPACE_LATENCY_METRIC_TYPE, metric_names[i], metric_values[i], namespace_tags)
             else:
                 self.log.debug("Got unexpected latency buckets: %s", ns_latencies)
-
 
     def collect_throughput(self, namespaces):
         """

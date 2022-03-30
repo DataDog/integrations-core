@@ -97,29 +97,56 @@ def test_connection_uses_tls():
         assert client.called_with({'host': check._host, 'tls': tls_config})
 
 
-def test_collect_latency_parser(aggregator):
+@pytest.mark.parametrize(
+    "data, calls",
+    [
+        pytest.param(
+            [
+                'error-no-data-yet-or-back-too-small',
+                'batch-index:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                '{ns-1}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                '{ns-1}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                '{ns-2_foo}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                '{ns-2_foo}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                'error-no-data-yet-or-back-too-small',
+                'error-no-data-yet-or-back-too-small',
+            ],
+            20,
+            id="Last line has no data",
+        ),
+        pytest.param(
+            [
+                'error-no-data-yet-or-back-too-small',
+                'batch-index:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                '{ns-1}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                '{ns-1}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                '{ns-1}-query:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                '{ns-2_foo}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                '{ns-2_foo}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                'error-no-data-yet-or-back-too-small',
+                'error-no-data-yet-or-back-too-small',
+                '{ns-2_foo}-query:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+            ],
+            28,
+            id="Last line has data",
+        ),
+    ],
+)
+def test_collect_latency_parser(aggregator, data, calls_count):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
-    check.get_info = mock.MagicMock(
-        return_value=[
-            'error-no-data-yet-or-back-too-small',
-            'batch-index:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-            '11:53:57,0.0,0.00,0.00,0.00',
-            '{ns-1}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-            '11:53:57,0.0,0.00,0.00,0.00',
-            '{ns-1}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-            '11:53:57,0.0,0.00,0.00,0.00',
-            '{ns-1}-query:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-            '11:53:57,0.0,0.00,0.00,0.00',
-            '{ns-2_foo}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-            '11:53:57,0.0,0.00,0.00,0.00',
-            '{ns-2_foo}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-            '11:53:57,0.0,0.00,0.00,0.00',
-            'error-no-data-yet-or-back-too-small',
-            'error-no-data-yet-or-back-too-small',
-            '{ns-2_foo}-query:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-            '11:53:57,0.0,0.00,0.00,0.00',
-        ]
-    )
+    check.get_info = mock.MagicMock(return_value=data)
     check.collect_latency(None)
 
     for ns in ['ns-1', 'ns-2_foo']:
@@ -129,6 +156,7 @@ def test_collect_latency_parser(aggregator):
             else:
                 aggregator.assert_metric(metric, tags=['namespace:{}'.format(ns), 'tag:value'])
 
+    check.send.assert_has_calls(calls_count)
     aggregator.assert_all_metrics_covered()
 
 
@@ -163,17 +191,39 @@ def test_collect_empty_data(aggregator):
     assert [] == check.get_info('sets/test/ci')
 
 
-def test_collect_latencies_parser(aggregator):
+@pytest.mark.parametrize(
+    "data, calls_count",
+    [
+        pytest.param(
+            [
+                'batch-index:',
+                '{test}-read:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
+                '0.00',
+                '{test}-write:',
+                '{test}-udf:msec,1.7,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
+                '0.00',
+                '{test}-query:',
+            ],
+            36,
+            id="Empty last line",
+        ),
+        pytest.param(
+            [
+                'batch-index:',
+                '{test}-read:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
+                '0.00',
+                '{test}-write:',
+                '{test}-udf:msec,1.7,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
+                '0.00',
+            ],
+            36,
+            id="Last line has data",
+        ),
+    ],
+)
+def test_collect_latencies_parser(aggregator, data, calls_count):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
-    check.get_info = mock.MagicMock(
-        return_value=[
-            'batch-index:',
-            '{test}-read:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00',
-            '{test}-write:',
-            '{test}-udf:msec,1.7,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00',
-            '{test}-query:',
-        ]
-    )
+    check.get_info = mock.MagicMock(return_value=data)
     check.collect_latencies(None)
 
     for metric_type in ['read', 'udf']:
@@ -194,4 +244,6 @@ def test_collect_latencies_parser(aggregator):
             'aerospike.namespace.latency.{}_ops_sec'.format(metric_type),
             tags=['namespace:{}'.format('test'), 'tag:value'],
         )
+
+    check.send.assert_has_calls(calls_count)
     aggregator.assert_all_metrics_covered()
