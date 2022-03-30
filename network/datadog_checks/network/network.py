@@ -253,6 +253,9 @@ class Network(AgentCheck):
         if self._collect_count_metrics:
             self.monotonic_count('{}.count'.format(metric), value, tags=tags)
 
+    def _submit_netmetric_gauge(self, metric, value, tags=None):
+        self.gauge(metric, value, tags=tags)
+
     def _submit_devicemetrics(self, iface, vals_by_metric, tags):
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
             # Skip this network interface.
@@ -532,7 +535,6 @@ class Network(AgentCheck):
                 'PassiveOpens': 'system.net.tcp.passive_opens',
                 'AttemptFails': 'system.net.tcp.attempt_fails',
                 'EstabResets': 'system.net.tcp.established_resets',
-                'CurrEstab': 'system.net.tcp.current_established',
                 'InErrs': 'system.net.tcp.in_errors',
                 'OutRsts': 'system.net.tcp.out_resets',
                 'InCsumErrors': 'system.net.tcp.in_csum_errors',
@@ -567,13 +569,24 @@ class Network(AgentCheck):
                 'InCsumErrors': 'system.net.udp.in_csum_errors',
             },
         }
+        nstat_metrics_gauge_names = {
+            'Tcp': {
+                'CurrEstab': 'system.net.tcp.current_established',
+            },
+        }
 
-        # Skip the first line, as it's junk
         for k in nstat_metrics_names:
             for met in nstat_metrics_names[k]:
                 if met in netstat_data.get(k, {}):
                     self._submit_netmetric(
                         nstat_metrics_names[k][met], self._parse_value(netstat_data[k][met]), tags=custom_tags
+                    )
+
+        for k in nstat_metrics_gauge_names:
+            for met in nstat_metrics_gauge_names[k]:
+                if met in netstat_data.get(k, {}):
+                    self._submit_netmetric_gauge(
+                        nstat_metrics_gauge_names[k][met], self._parse_value(netstat_data[k][met]), tags=custom_tags
                     )
 
         # Get the conntrack -S information

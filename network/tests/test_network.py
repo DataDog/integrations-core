@@ -105,7 +105,6 @@ PROC_NET_STATS = {
     'system.net.tcp.passive_opens.count': 4198200,
     'system.net.tcp.attempt_fails.count': 174,
     'system.net.tcp.established_resets.count': 761431,
-    'system.net.tcp.current_established.count': 59,
     'system.net.tcp.in_errors.count': 0,
     'system.net.tcp.out_resets.count': 792992,
     'system.net.tcp.in_csum_errors.count': 0,
