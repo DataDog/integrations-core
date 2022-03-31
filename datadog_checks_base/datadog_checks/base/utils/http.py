@@ -98,6 +98,7 @@ STANDARD_FIELDS = {
     'timeout': DEFAULT_TIMEOUT,
     'use_legacy_auth_encoding': True,
     'username': None,
+    'verify_intermediate_certs': True,
 }
 # For any known legacy fields that may be widespread
 DEFAULT_REMAPPED_FIELDS = {
@@ -156,6 +157,7 @@ class RequestsWrapper(object):
         'auth_token_handler',
         'request_size',
         'tls_protocols_allowed',
+        'verify_intermediate_certs',
     )
 
     def __init__(self, instance, init_config, remapper=None, logger=None):
@@ -319,6 +321,8 @@ class RequestsWrapper(object):
 
         self.request_size = int(float(config['request_size']) * KIBIBYTE)
 
+        self.verify_intermediate_certs = is_affirmative(config['verify_intermediate_certs'])
+
         self.tls_protocols_allowed = []
         for protocol in config['tls_protocols_allowed']:
             if protocol in SUPPORTED_PROTOCOL_VERSIONS:
@@ -439,6 +443,8 @@ class RequestsWrapper(object):
                 session = self.session
             request_method = getattr(session, method)
             session.mount(url, certadapter)
+            request_options = deepcopy(new_options)
+            request_options['verify'] = self.verify_intermediate_certs
             response = request_method(url, **new_options)
         return response
 
