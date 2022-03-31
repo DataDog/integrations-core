@@ -31,6 +31,7 @@ flup-py3,Vendor,BSD-3-Clause,Allan Saddi
 foundationdb,PyPI,Apache-2.0,FoundationDB
 futures,PyPI,PSF,Brian Quinlan
 gearman,PyPI,Apache-2.0,Matthew Tai
+gssapi,PyPI,ISC,The Python GSSAPI Team
 immutables,PyPI,Apache-2.0,MagicStack Inc
 in-toto,PyPI,Apache-2.0,New York University: Secure Systems Lab
 ipaddress,PyPI,PSF,Philipp Hagemeister

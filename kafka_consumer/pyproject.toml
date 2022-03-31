@@ -37,6 +37,8 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
+    "gssapi==1.6.1; python_version < '3.0'",
+    "gssapi==1.7.3; python_version > '3.0'",
     "kafka-python==2.0.2",
     "kazoo==2.8.0",
 ]
