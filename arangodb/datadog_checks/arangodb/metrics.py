@@ -117,7 +117,7 @@ METRIC_MAP = {
     'rocksdb_prunable_wal_files': 'rocksdb.prunable.wal.files',
     'rocksdb_size_all_mem_tables': 'rocksdb.size.all.mem.tables',
     'rocksdb_total_disk_space': 'rocksdb.total.disk.space',
-    # health: https://www.arangodb.com/docs/stable/http/administration-and-monitoring-metrics.html#health
+    # health:
     'arangodb_dropped_followers_total': 'health.dropped_followers.total',
     'arangodb_heartbeat_failures_total': 'health.heartbeat_failures.total',
     'arangodb_heartbeat_send_time_msec': 'health.heartbeat.sent.time',
