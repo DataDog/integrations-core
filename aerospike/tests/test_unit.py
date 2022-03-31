@@ -98,7 +98,7 @@ def test_connection_uses_tls():
 
 
 @pytest.mark.parametrize(
-    "data, calls_count",
+    "return_vals",
     [
         pytest.param(
             [
@@ -116,8 +116,7 @@ def test_connection_uses_tls():
                 'error-no-data-yet-or-back-too-small',
                 'error-no-data-yet-or-back-too-small',
             ],
-            20,
-            id="Last line has no data",
+            id="Last value no data",
         ),
         pytest.param(
             [
@@ -128,25 +127,18 @@ def test_connection_uses_tls():
                 '11:53:57,0.0,0.00,0.00,0.00',
                 '{ns-1}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
                 '11:53:57,0.0,0.00,0.00,0.00',
-                '{ns-1}-query:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-                '11:53:57,0.0,0.00,0.00,0.00',
                 '{ns-2_foo}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
                 '11:53:57,0.0,0.00,0.00,0.00',
                 '{ns-2_foo}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
                 '11:53:57,0.0,0.00,0.00,0.00',
-                'error-no-data-yet-or-back-too-small',
-                'error-no-data-yet-or-back-too-small',
-                '{ns-2_foo}-query:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-                '11:53:57,0.0,0.00,0.00,0.00',
             ],
-            28,
-            id="Last line has data",
+            id="Last value has data",
         ),
     ],
 )
-def test_collect_latency_parser(aggregator, data, calls_count):
+def test_collect_latency_parser(aggregator, return_vals):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
-    check.get_info = mock.MagicMock(return_value=data)
+    check.get_info = mock.MagicMock(return_value=return_vals)
     check.collect_latency(None)
 
     for ns in ['ns-1', 'ns-2_foo']:
@@ -155,8 +147,6 @@ def test_collect_latency_parser(aggregator, data, calls_count):
                 aggregator.assert_metric(metric, tags=['tag:value'])
             else:
                 aggregator.assert_metric(metric, tags=['namespace:{}'.format(ns), 'tag:value'])
-
-    check.send.assert_has_calls(calls_count)
     aggregator.assert_all_metrics_covered()
 
 
@@ -192,7 +182,7 @@ def test_collect_empty_data(aggregator):
 
 
 @pytest.mark.parametrize(
-    "data, calls_count",
+    "return_vals",
     [
         pytest.param(
             [
@@ -204,8 +194,7 @@ def test_collect_empty_data(aggregator):
                 '0.00',
                 '{test}-query:',
             ],
-            36,
-            id="Empty last line",
+            id="Last value empty data",
         ),
         pytest.param(
             [
@@ -213,17 +202,18 @@ def test_collect_empty_data(aggregator):
                 '{test}-read:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
                 '0.00',
                 '{test}-write:',
+                '{test}-query:',
                 '{test}-udf:msec,1.7,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
                 '0.00',
             ],
-            36,
-            id="Last line has data",
+            id="Last value has data",
         ),
     ],
 )
-def test_collect_latencies_parser(aggregator, data, calls_count):
+def test_collect_latencies_parser(aggregator, return_vals):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
-    check.get_info = mock.MagicMock(return_value=data)
+    check.get_info = mock.MagicMock(return_value=return_vals)
+
     check.collect_latencies(None)
 
     for metric_type in ['read', 'udf']:
@@ -244,6 +234,4 @@ def test_collect_latencies_parser(aggregator, data, calls_count):
             'aerospike.namespace.latency.{}_ops_sec'.format(metric_type),
             tags=['namespace:{}'.format('test'), 'tag:value'],
         )
-
-    check.send.assert_has_calls(calls_count)
     aggregator.assert_all_metrics_covered()
