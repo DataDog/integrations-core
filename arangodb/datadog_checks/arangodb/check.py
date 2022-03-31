@@ -24,9 +24,6 @@ class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         self.get_mode_tag()
         self.get_id_tag()
 
-        # http://localhost:8529/_admin/metrics/v2
-        # TODO: Get tag from non-Prometheus port
-
     def get_default_config(self):
         default_config = {
             'openmetrics_endpoint': self.openmetrics_endpoint,
