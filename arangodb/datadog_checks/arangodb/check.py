@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from urllib.parse import urlparse
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
-from urllib.parse import urlparse
 
 from .config_models import ConfigMixin
 from .metrics import METRIC_MAP, construct_metrics_config
