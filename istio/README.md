@@ -28,7 +28,7 @@ If you want to monitor the Envoy proxies in Istio, configure the [Envoy integrat
 ##### Data plane vs control plane
 The Istio integration has two key components for how it collects the prometheus formatted Istio metrics. This corresponds to the [Istio architecture][24] split between its data plane (the `istio-proxy` sidecar containers) and the control plane (the `istiod` service managing the proxies). These are both ran as `istio` Agent checks, however have different responsibilities and configuration methods.
 
-To monitor the Istio data plane the Agent comes with an [`istio.d/auto_conf.yaml`][9] file to automatically setup the monitoring for the `istio-proxy` sidecar containers. The Agent will initialize this check for each sidecar container that it discovers automatically. This portion reports the `istio.mesh.*` metrics with respect to the data exposed by each of these sidecar containers. To customize this portion of the integration see the [example configuration file][8] and set the `istio_mesh_endpoint` accordingly.
+To monitor the Istio data plane the Agent comes with an [`istio.d/auto_conf.yaml`][9] file to automatically setup the monitoring for the `istio-proxy` sidecar containers. The Agent initializes this check for each sidecar container that it discovers automatically. This portion reports the `istio.mesh.*` metrics with respect to the data exposed by each of these sidecar containers. To customize this portion of the integration see the [example configuration file][8] and set the `istio_mesh_endpoint` accordingly.
 
 To monitor the Istio control plane and report the remaining `mixer`, `galley`, `pilot`, and `citadel` metrics the Agent needs to be configured to monitor the `istiod` service.
 
@@ -46,7 +46,7 @@ ad.datadoghq.com/endpoints.instances: |
        }
      ]
 ```
-The method for appling these annotations will vary depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][23] used. Consult the Istio docs for the proper method to apply these Service Annotations.
+The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][23] used. Consult the Istio docs for the proper method to apply these Service Annotations.
 
 ##### Control plane configuration
 To monitor the `istiod` control plane in Istio `v1.5+`, apply the follow Autodiscovery Annotations on the pod for the Deployment `istiod` in the `istio-system` namespace:
@@ -62,7 +62,7 @@ ad.datadoghq.com/discovery.instances: |
        }
      ]
 ```
-The method for appling these annotations will vary depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][23] used. Consult the Istio docs for the proper method to apply these Pod Annotations.
+The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][23] used. Consult the Istio docs for the proper method to apply these Pod Annotations.
 
 These annotations reference `discovery` as the `<CONTAINER_IDENTIFIER>` in the annotations to match the default container name of the pods for the `istiod` deployment. If your container name is different adjust accordingly.
 
