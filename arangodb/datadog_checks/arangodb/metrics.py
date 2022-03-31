@@ -13,8 +13,6 @@ METRIC_MAP = {
     'arangodb_agency_read_no_leader_total': 'agency.read.no_leader.total',
     'arangodb_agency_read_ok_total': 'agency.read.ok.total',
     'arangodb_agency_supervision_failed_server_total': 'agency.supervision.failed.server.total',
-    'arangodb_agency_supervision_runtime_msec': 'agency.supervision.runtime',
-    'arangodb_agency_supervision_runtime_wait_for_replication_msec': 'agency.supervision.runtime.wait.for.replication',
     'arangodb_agency_write_hist': 'agency.write',
     'arangodb_agency_write_no_leader_total': 'agency.write.no_leader.total',
     'arangodb_agency_write_ok_total': 'agency.write.ok.total',

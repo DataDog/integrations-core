@@ -4,9 +4,9 @@
   "manifest_version": "1.0.0",
   "name": "arangodb",
   "metric_prefix": "arangodb.",
-  "metric_to_check": "",
+  "metric_to_check": "arangodb.process.system_time",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Track metrics for your ArangoDB configuration.",
   "guid": "ba1fc676-d785-4805-a08b-cb0c244def82",
   "support": "core",
   "supported_os": [
