@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 25.2.0-beta.1 / 2022-03-31
+
+* [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
+* [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
+
 ## 25.1.0 / 2022-03-16
 
 * [Added] Add `metric_patterns` options to filter all metric submission with a list of regexes. See [#11508](https://github.com/DataDog/integrations-core/pull/11508).
