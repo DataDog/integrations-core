@@ -16,7 +16,8 @@
   ],
   "public_title": "ArangoDB",
   "categories": [
-    ""
+    "data store",
+    "log collection"
   ],
   "type": "check",
   "is_public": false,
@@ -29,7 +30,9 @@
     "monitors": {},
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "arangodb"
+    },
     "metrics_metadata": "metadata.csv"
   }
 }

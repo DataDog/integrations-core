@@ -8,3 +8,8 @@ files:
   - template: instances
     options:
     - template: instances/openmetrics
+  - template: logs
+    example:
+      - type: file
+        path: /var/log/arangodb3/arangod.log
+        source: arangodb

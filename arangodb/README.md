@@ -11,7 +11,6 @@ Follow the instructions below to install and configure this check for an Agent r
 ### Installation
 
 The ArangoDB check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
 
 ### Configuration
 
@@ -28,6 +27,27 @@ No additional installation is needed on your server.
 ### Metrics
 
 See [metadata.csv][7] for a list of metrics provided by this check.
+
+### Log collection
+
+_Available for Agent versions >6.0_
+
+ArangoDB logs contain [many possible options][10] for log verbosity and output files. Datadog's integration pipeline supports the default conversion pattern.
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Uncomment and edit the logs configuration block in your `arangodb.d/conf.yaml` file. 
+
+   ```yaml
+   logs:
+      - type: file
+        path: /var/log/arangodb3/arangod.log
+        source: arangodb
+   ```
 
 ### Events
 
@@ -53,3 +73,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/check/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/check/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://www.arangodb.com/docs/3.8/programs-arangod-log.html
