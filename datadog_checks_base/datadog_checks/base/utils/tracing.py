@@ -11,9 +11,12 @@ from ..config import is_affirmative
 
 try:
     import datadog_agent
+
+    INTEGRATION_TRACING = is_affirmative(datadog_agent.get_config('integration_tracing'))
 except ImportError:
     # Integration Tracing is only available with Agent 6
     datadog_agent = None
+    INTEGRATION_TRACING = False
 
 EXCLUDED_MODULES = ['threading']
 
@@ -41,9 +44,8 @@ def traced(fn):
             return fn(self, *args, **kwargs)
 
         trace_check = is_affirmative(self.init_config.get('trace_check'))
-        integration_tracing = is_affirmative(datadog_agent.get_config('integration_tracing'))
 
-        if integration_tracing and trace_check:
+        if INTEGRATION_TRACING and trace_check:
             try:
                 from ddtrace import patch_all, tracer
 
@@ -96,7 +98,7 @@ def tracing_method(f, tracer):
 
 
 def traced_class(cls):
-    if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true':
+    if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true' or INTEGRATION_TRACING:
         try:
             from ddtrace import patch_all, tracer
 
