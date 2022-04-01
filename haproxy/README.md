@@ -59,7 +59,7 @@ To configure this check for an Agent running on a host:
      #
      openmetrics_endpoint: http://localhost:<PORT>/metrics
    ```
-   **Note**: The `use_openmetrics` option uses [OpenMetrics v2][26] for metric collection, which requires Agent v7.35+ or [enabling Python 3](27) in Agent v6.35+. For hosts that are unable to use Python 3 or are on Agent v7.34 and below, use the OpenMetrics v1 implementation or the [socket-based legacy integration](#using-the-stats-endpoint). 
+   **Note**: The `use_openmetrics` option uses [OpenMetrics v2][26] for metric collection, which requires Agent v7.35+ or [enabling Python 3][27] in Agent v6.35+. For hosts that are unable to use Python 3 or are on Agent v7.34 and below, use the OpenMetrics v1 implementation or the [socket-based legacy integration](#using-the-stats-endpoint). 
 
    To view configuration options for the legacy implementation, see the [sample haproxy.d/conf.yaml][25] file for Agent v7.34.
 
@@ -330,7 +330,6 @@ Need help? Contact [Datadog support][20].
 - [How to collect HAProxy metrics][22]
 - [Monitor HAProxy with Datadog][23]
 - [HA Proxy Multi Process Configuration][24]
-- [How to collect HAProxy metrics][22]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/haproxy/images/haproxy-dash.png
 [2]: https://app.datadoghq.com/account/settings#agent
