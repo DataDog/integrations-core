@@ -59,7 +59,7 @@ To configure this check for an Agent running on a host:
      #
      openmetrics_endpoint: http://localhost:<PORT>/metrics
    ```
-   **NOTE**: The `use_openmetrics` option uses [OpenMetrics V2][26] for metric collection, which requires Python 3 and Agent 7.35+. For hosts unable to use Python 3 or are on Agent 7.34 and below, use the OpenMetrics V1 implementation or the [socket-based legacy integration](#using-the-stats-endpoint). 
+   **NOTE**: The `use_openmetrics` option uses [OpenMetrics V2][26] for metric collection, which requires Agent 7.35+ or [enabling Python 3](27) in Agent 6.35+. For hosts unable to use Python 3 or are on Agent 7.34 and below, use the OpenMetrics V1 implementation or the [socket-based legacy integration](#using-the-stats-endpoint). 
 
    To view configuration options for the legacy implementation, see the [sample haproxy.d/conf.yaml][25] file for Agent 7.34.
 
@@ -358,3 +358,4 @@ Need help? Contact [Datadog support][20].
 [24]: https://docs.datadoghq.com/integrations/faq/haproxy-multi-process/
 [25]: https://github.com/DataDog/integrations-core/blob/7.34.x/haproxy/datadog_checks/haproxy/data/conf.yaml.example
 [26]: https://datadoghq.dev/integrations-core/base/openmetrics/
+[27]: https://docs.datadoghq.com/agent/guide/agent-v6-python-3/?tab=helm#use-python-3-with-datadog-agent-v6
