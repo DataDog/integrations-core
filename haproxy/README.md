@@ -37,7 +37,7 @@ The recommended way to set up this integration is by enabling the Prometheus end
 ##### Metric collection
 To configure this check for an Agent running on a host:
 
-1. Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your HAProxy metrics. See the [sample haproxy.d/conf.yaml][8] for all available configuration options.
+1. Edit the `haproxy.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your HAProxy metrics. See the [sample haproxy.d/conf.yaml][8] for all available configuration options.
 
    ```yaml  
    instances:
@@ -59,9 +59,9 @@ To configure this check for an Agent running on a host:
      #
      openmetrics_endpoint: http://localhost:<PORT>/metrics
    ```
-   **NOTE**: The `use_openmetrics` option uses [OpenMetrics V2][26] for metric collection, which requires Agent 7.35+ or [enabling Python 3](27) in Agent 6.35+. For hosts unable to use Python 3 or are on Agent 7.34 and below, use the OpenMetrics V1 implementation or the [socket-based legacy integration](#using-the-stats-endpoint). 
+   **Note**: The `use_openmetrics` option uses [OpenMetrics v2][26] for metric collection, which requires Agent v7.35+ or [enabling Python 3](27) in Agent v6.35+. For hosts that are unable to use Python 3 or are on Agent v7.34 and below, use the OpenMetrics v1 implementation or the [socket-based legacy integration](#using-the-stats-endpoint). 
 
-   To view configuration options for the legacy implementation, see the [sample haproxy.d/conf.yaml][25] file for Agent 7.34.
+   To view configuration options for the legacy implementation, see the [sample haproxy.d/conf.yaml][25] file for Agent v7.34.
 
 
 3. [Restart the Agent][6].
