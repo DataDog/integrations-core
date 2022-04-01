@@ -12,6 +12,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.time import ensure_aware_datetime
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.ibm_mq import IbmMqCheck
 from datadog_checks.ibm_mq.collectors import ChannelMetricCollector, QueueMetricCollector
 
 from . import common
@@ -67,6 +68,28 @@ def test_unknown_service_check(aggregator, get_check, instance, caplog, dd_run_c
         for channel in channels:
             channel_tags = tags + ['channel:{}'.format(channel)]
             aggregator.assert_service_check('ibm_mq.channel', check.UNKNOWN, tags=channel_tags, count=1)
+
+
+def test_check_cant_connect(aggregator, get_check, instance, dd_run_check):
+    instance['queue_manager'] = "not_real"
+
+    with pytest.raises(Exception, match=r'MQI Error'):
+        check = get_check(instance)
+        dd_run_check(check)
+
+        tags = [
+            'connection_name:{}({})'.format(common.HOST, common.PORT),
+            'foo:bar',
+            'port:{}'.format(common.PORT),
+            'queue_manager:not_real',
+            'channel:{}'.format(common.CHANNEL),
+        ]
+        hostname = common.HOST
+
+        aggregator.assert_service_check(IbmMqCheck.SERVICE_CHECK, check.CRITICAL, tags=tags, count=1, hostname=hostname)
+        aggregator.assert_service_check(
+            ChannelMetricCollector.CHANNEL_SERVICE_CHECK, check.CRITICAL, tags=tags, count=1, hostname=hostname
+        )
 
 
 def test_errors_are_logged(get_check, instance, caplog, dd_run_check):
