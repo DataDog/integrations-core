@@ -37,7 +37,7 @@ The recommended way to set up this integration is by enabling the Prometheus end
 ##### Metric collection
 To configure this check for an Agent running on a host:
 
-1. Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your HAProxy metrics. See the [sample haproxy.d/conf.yaml][27] for all available configuration options.
+1. Edit the `haproxy.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your HAProxy metrics. See the [sample haproxy.d/conf.yaml][8] for all available configuration options.
 
    ```yaml  
    instances:
@@ -59,7 +59,12 @@ To configure this check for an Agent running on a host:
      #
      openmetrics_endpoint: http://localhost:<PORT>/metrics
    ```
-2. [Restart the Agent][6].
+   **Note**: The `use_openmetrics` option uses [OpenMetrics v2][26] for metric collection, which requires Agent v7.35+ or [enabling Python 3](27) in Agent v6.35+. For hosts that are unable to use Python 3 or are on Agent v7.34 and below, use the OpenMetrics v1 implementation or the [socket-based legacy integration](#using-the-stats-endpoint). 
+
+   To view configuration options for the legacy implementation, see the [sample haproxy.d/conf.yaml][25] file for Agent v7.34.
+
+
+3. [Restart the Agent][6].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
@@ -78,10 +83,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
-   
-**NOTE**: The `use_openmetrics` option uses [OpenMetrics V2][26] for metric collection, which requires Python 3. For hosts unable to use Python 3, use the OpenMetrics V1 implementation or the [socket-based legacy integration](#using-the-stats-endpoint). 
-
-To view configuration options for the OpenMetrics V1 implementation see this [conf.yaml.example][25] file.
 
 
 #### Using the stats endpoint
@@ -357,4 +358,4 @@ Need help? Contact [Datadog support][20].
 [24]: https://docs.datadoghq.com/integrations/faq/haproxy-multi-process/
 [25]: https://github.com/DataDog/integrations-core/blob/7.34.x/haproxy/datadog_checks/haproxy/data/conf.yaml.example
 [26]: https://datadoghq.dev/integrations-core/base/openmetrics/
-[27]: https://github.com/DataDog/integrations-core/blob/master/haproxy/datadog_checks/haproxy/data/conf.yaml.example
+[27]: https://docs.datadoghq.com/agent/guide/agent-v6-python-3/?tab=helm#use-python-3-with-datadog-agent-v6
