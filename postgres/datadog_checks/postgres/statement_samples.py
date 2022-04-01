@@ -75,12 +75,13 @@ PG_STAT_ACTIVITY_COLS = [
 ]
 
 PG_BLOCKING_PIDS_FUNC = ",pg_blocking_pids(pid) as blocking_pids"
+CURRENT_TIME_FUNC = "clock_timestamp() as now,"
 
 PG_STAT_ACTIVITY_QUERY = re.sub(
     r'\s+',
     ' ',
     """
-    SELECT {pg_stat_activity_cols} {pg_blocking_func} FROM {pg_stat_activity_view}
+    SELECT {current_time_func} {pg_stat_activity_cols} {pg_blocking_func} FROM {pg_stat_activity_view}
     WHERE coalesce(TRIM(query), '') != ''
     AND query_start IS NOT NULL
     {extra_filters}
@@ -236,12 +237,17 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_new_pg_stat_activity(self, available_activity_columns):
         start_time = time.time()
         extra_filters, params = self._get_extra_filters_and_params(filter_stale_idle_conn=True)
+        report_activity = self._report_activity_event()
+        cur_time_func = ""
         blocking_func = ""
         # minimum version for pg_blocking_pids function is v9.6
         # only call pg_blocking_pids as often as we collect activity snapshots
-        if self._check.version >= V9_6 and self._report_activity_event():
+        if self._check.version >= V9_6 and report_activity:
             blocking_func = PG_BLOCKING_PIDS_FUNC
+        if report_activity:
+            cur_time_func = CURRENT_TIME_FUNC
         query = PG_STAT_ACTIVITY_QUERY.format(
+            current_time_func=cur_time_func,
             pg_stat_activity_cols=', '.join(available_activity_columns),
             pg_blocking_func=blocking_func,
             pg_stat_activity_view=self._config.pg_stat_activity_view,
