@@ -61,7 +61,8 @@ SELECT
     waits_a.object_type,
     waits_a.source,
     socket.ip,
-    socket.port
+    socket.port,
+    socket.event_name AS socket_event_name
 FROM
     performance_schema.threads AS thread_a
     LEFT JOIN performance_schema.events_waits_current AS waits_a ON waits_a.thread_id = thread_a.thread_id AND
@@ -164,7 +165,7 @@ class MySQLActivity(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_active_connections(self, cursor):
         # type: (pymysql.cursor) -> List[Dict[str]]
-        self._log.debug("Running query [%s]", CONNECTIONS_QUERY)
+        self._log.debug("Running connections query [%s]", CONNECTIONS_QUERY)
         cursor.execute(CONNECTIONS_QUERY)
         rows = cursor.fetchall()
         self._log.debug("Loaded [%s] current connections", len(rows))
@@ -173,14 +174,9 @@ class MySQLActivity(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_activity(self, cursor):
         # type: (pymysql.cursor) -> List[Dict[str]]
-        try:
-            cursor.execute(ACTIVITY_QUERY)
-            return cursor.fetchall()
-        except (pymysql.err.OperationalError, pymysql.err.InternalError) as e:
-            self._log.error("Failed to collect activity, this is likely due to a setup error | err=[%s]", e)
-        except Exception as e:
-            self._log.error("Failed to collect activity | err=[%s]", e)
-        return []
+        self._log.debug("Running activity query [%s]", ACTIVITY_QUERY)
+        cursor.execute(ACTIVITY_QUERY)
+        return cursor.fetchall()
 
     def _normalize_rows(self, rows):
         # type: (List[Dict[str]]) -> List[Dict[str]]

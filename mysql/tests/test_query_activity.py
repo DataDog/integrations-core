@@ -91,9 +91,9 @@ def test_collect_activity(aggregator, dbm_instance, dd_run_check):
                 break
     assert blocked_row is not None, "should have activity for fred's query"
     assert blocked_row['processlist_user'] == 'fred'
-    assert blocked_row['processlist_state'] == 'executing'
     assert blocked_row['processlist_command'] == 'Query'
     assert blocked_row['sql_text'] == query
+    assert blocked_row['processlist_state'], "missing state"
     assert blocked_row['wait_event'] == 'wait/io/table/sql/handler'
     assert blocked_row['thread_id'], "missing thread id"
     assert blocked_row['processlist_id'], "missing processlist id"
@@ -113,7 +113,7 @@ def test_collect_activity(aggregator, dbm_instance, dd_run_check):
 
     assert fred_conn is not None
     assert fred_conn['connections'] == 1
-    assert fred_conn['processlist_state'] == 'executing'
+    assert fred_conn['processlist_state'], "missing state"
 
 
 @pytest.mark.integration
@@ -183,21 +183,6 @@ def test_activity_metadata(aggregator, dd_run_check, dbm_instance, datadog_agent
     assert activity['dd_tables'] == expected_metadata_payload['tables']
     assert activity['dd_commands'] == expected_metadata_payload['commands']
     assert activity['dd_comments'] == expected_metadata_payload['comments']
-
-
-@pytest.mark.parametrize(
-    "version,expected_query",
-    [
-        (MySQLVersion.VERSION_80, ACTIVITY_QUERY),
-        (MySQLVersion.VERSION_57, ACTIVITY_QUERY),
-        (MySQLVersion.VERSION_56, ACTIVITY_QUERY),
-    ],
-)
-def test_query_by_version(dbm_instance, version, expected_query):
-    # Future iterations will have version specific queries
-    check = MySql(CHECK_NAME, {}, [dbm_instance])
-    query = check._query_activity._get_query_from_version(version)
-    assert query == expected_query
 
 
 @pytest.mark.parametrize(
