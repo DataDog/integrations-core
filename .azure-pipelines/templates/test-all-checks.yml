@@ -225,6 +225,9 @@ jobs:
     - checkName: hudi
       displayName: Hudi
       os: linux
+    - checkName: ibm_ace
+      displayName: IBM ACE
+      os: linux
     - checkName: ibm_db2
       displayName: IBM Db2
       os: linux

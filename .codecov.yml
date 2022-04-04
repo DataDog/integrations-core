@@ -226,6 +226,10 @@ coverage:
         target: 75
         flags:
         - hazelcast
+      IBM_ACE:
+        target: 75
+        flags:
+        - ibm_ace
       IBM_Db2:
         target: 75
         flags:
@@ -864,6 +868,11 @@ flags:
     paths:
     - http_check/datadog_checks/http_check
     - http_check/tests
+  ibm_ace:
+    carryforward: true
+    paths:
+    - ibm_ace/datadog_checks/ibm_ace
+    - ibm_ace/tests
   ibm_db2:
     carryforward: true
     paths:
