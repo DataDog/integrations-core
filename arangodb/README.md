@@ -6,7 +6,7 @@ This check monitors [ArangoDB][1] through the Datadog Agent.
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] to apply these instructions.
 
 ### Installation
 
@@ -14,7 +14,7 @@ The ArangoDB check is included in the [Datadog Agent][2] package.
 
 ### Configuration
 
-1. Edit the `arangodb.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your arangodb performance data. See the [sample arangodb.d/conf.yaml][4] for all available configuration options.
+1. Edit the `arangodb.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your ArangoDB performance data. See the [sample arangodb.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
 
@@ -32,7 +32,7 @@ See [metadata.csv][7] for a list of metrics provided by this check.
 
 _Available for Agent versions >6.0_
 
-ArangoDB logs contain [many possible options][10] for log verbosity and output files. Datadog's integration pipeline supports the default conversion pattern.
+ArangoDB logs contain [many options][10] for log verbosity and output files. Datadog's integration pipeline supports the default conversion pattern.
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
 
@@ -40,7 +40,7 @@ ArangoDB logs contain [many possible options][10] for log verbosity and output f
    logs_enabled: true
    ```
 
-2. Uncomment and edit the logs configuration block in your `arangodb.d/conf.yaml` file. 
+2. Uncomment and edit the logs configuration block in your `arangodb.d/conf.yaml` file:
 
    ```yaml
    logs:
@@ -55,13 +55,11 @@ The ArangoDB integration does not include any events.
 
 ### Service Checks
 
-The ArangoDB integration does not include any service checks.
-
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog Support][9].
 
 
 [1]: https://www.arangodb.com/
