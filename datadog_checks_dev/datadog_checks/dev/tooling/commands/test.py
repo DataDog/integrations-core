@@ -246,13 +246,22 @@ def test(
                 if errors:
                     abort(f'\nError collecting base package dependencies: {errors}')
 
-                spec_set = list(check_base_dependencies['datadog-checks-base'].keys())[0]
-
-                spec = get_next(spec_set) if spec_set else None
-                if spec is None or spec.operator != '>=':
+                ##Test Start
+                spec = check_base_dependencies[check]
+                if spec is None:
                     abort(f'\nFailed to determine minimum version of package `datadog_checks_base`: {spec}')
+                    
+                version = spec.split('>=')[-1]
+                ##Test End
+                ##Ori Start
+                # spec_set = list(check_base_dependencies['datadog-checks-base'].keys())[0]
 
-                version = spec.version
+                # spec = get_next(spec_set) if spec_set else None
+                # if spec is None or spec.operator != '>=':
+                #     abort(f'\nFailed to determine minimum version of package `datadog_checks_base`: {spec}')
+
+                # version = spec.version
+                ##Ori End
                 env['TOX_FORCE_INSTALL'] = f"datadog_checks_base[deps]=={version}"
             elif force_base_unpinned and not base_or_dev:
                 env['TOX_FORCE_UNPINNED'] = "datadog_checks_base"
