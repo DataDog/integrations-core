@@ -82,11 +82,13 @@ instances:
     ## key: Path to a key file.
     ## cert: Path to a cert file.
     ## ca: Path to a CA bundle file.
+    ## check_hostname: Set to false to ignore the strict relationship between the certificate and the hostname.
     #
     # ssl:
     #   key: <KEY_FILE_PATH>
     #   cert: <CERT_FILE_PATH>
     #   ca: <CA_PATH_FILE>
+    #   check_hostname: true
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.

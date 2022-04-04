@@ -91,6 +91,7 @@ files:
               key: Path to a key file.
               cert: Path to a cert file.
               ca: Path to a CA bundle file.
+              check_hostname: Set to false to ignore the strict relationship between the certificate and the hostname.
             value:
               type: object
               properties:
@@ -100,10 +101,13 @@ files:
                   type: string
                 - name: ca
                   type: string
+                - name: check_hostname
+                  type: boolean
               example:
                 key: <KEY_FILE_PATH>
                 cert: <CERT_FILE_PATH>
                 ca: <CA_PATH_FILE>
+                check_hostname: true
           - template: instances/db
             overrides:
               custom_queries.value.example:
