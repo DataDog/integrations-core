@@ -191,9 +191,9 @@ files:
         value:
           example: False
           type: boolean
-      - name: try_normal_connection
+      - name: try_basic_auth
         description: |
-          Whether or not to try a normal connection before SSL when `ssl_auth` is enabled.
+          Whether or not to try connecting with basic authentication before SSL when `ssl_auth` is enabled.
 
           WARNING: There is a known issue with the client library in which disabling
           this option has the potential to cause a memory leak.

@@ -61,7 +61,7 @@ class InstanceConfig(BaseModel):
     ssl_key_repository_location: Optional[str] = Field(None, min_length=1)
     tags: Optional[Sequence[str]]
     timeout: Optional[int]
-    try_normal_connection: Optional[bool]
+    try_basic_auth: Optional[bool]
     username: Optional[str] = Field(None, min_length=1)
 
     @root_validator(pre=True)

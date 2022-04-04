@@ -126,7 +126,7 @@ def instance_timeout(field, value):
     return 5
 
 
-def instance_try_normal_connection(field, value):
+def instance_try_basic_auth(field, value):
     return True
 
 

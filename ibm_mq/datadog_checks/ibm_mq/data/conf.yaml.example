@@ -169,13 +169,13 @@ instances:
     #
     # ssl_auth: false
 
-    ## @param try_normal_connection - boolean - optional - default: true
-    ## Whether or not to try a normal connection before SSL when `ssl_auth` is enabled.
+    ## @param try_basic_auth - boolean - optional - default: true
+    ## Whether or not to try connecting with basic authentication before SSL when `ssl_auth` is enabled.
     ##
     ## WARNING: There is a known issue with the client library in which disabling
     ## this option has the potential to cause a memory leak.
     #
-    # try_normal_connection: false
+    # try_basic_auth: false
 
     ## @param ssl_cipher_spec - string - optional - default: TLS_RSA_WITH_AES_256_CBC_SHA
     ## The ssl cipher to use. It should match the value of the channels SSLCIPH attribute.
