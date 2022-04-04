@@ -29,7 +29,7 @@ def get_queue_manager_connection(config, logger):
                 get_normal_connection(config, logger)
             except pymqi.MQMIError as e:
                 logger.debug(
-                    "Tried normal connection before SSL connection to ensure channel exists."
+                    "Tried basic authentication before SSL connection to ensure channel exists."
                     "This is expected to fail with SSL or host unavailable errors. It failed with: %s",
                     e,
                 )
