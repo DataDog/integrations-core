@@ -65,6 +65,8 @@ SELECT
     socket.event_name AS socket_event_name
 FROM
     performance_schema.threads AS thread_a
+    -- events_waits_current can have multiple rows per thread, thus we use EVENT_ID to identify the row we want to use.
+    -- Additionally, we want the row with the highest EVENT_ID which reflects the most recent and current wait.
     LEFT JOIN performance_schema.events_waits_current AS waits_a ON waits_a.thread_id = thread_a.thread_id AND
     waits_a.event_id IN(
         SELECT
