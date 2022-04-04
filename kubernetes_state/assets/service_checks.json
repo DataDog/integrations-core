@@ -89,10 +89,28 @@
             "critical"
         ],
         "groups": [
-            "host",
-            "node"
+           "kube_cluster_name",
+           "kube_namespace",
+           "kube_cronjob"
         ],
         "name": "CronJob next schedule",
         "description": "Returns `CRITICAL` if a cron job scheduled time is in the past. Returns `UNKNOWN` if the scheduled time is unknown. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.22.0",
+        "integration": "Kubernetes",
+        "check": "kubernetes_state.job.complete",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+           "kube_cluster_name",
+           "kube_namespace",
+           "kube_cronjob",
+           "kube_job"
+        ],
+        "name": "Job completion status",
+        "description": " Returns `CRITICAL` if a job failed. Returns `OK` otherwise."
     }
 ]
