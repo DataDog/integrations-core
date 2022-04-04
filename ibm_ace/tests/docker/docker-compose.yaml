@@ -24,7 +24,7 @@ services:
     - ibm-ace-mq
   ibm-ace-mq:
     container_name: ibm-ace-mq
-    image: ibmcom/mq:9.2.4.0-r1
+    image: ibmcom/mq:${IBM_MQ_VERSION}
     environment:
     - MQ_QMGR_NAME=QM1
     - LICENSE=accept
