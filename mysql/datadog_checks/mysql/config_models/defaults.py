@@ -94,6 +94,10 @@ def instance_queries(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_query_activity(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_query_metrics(field, value):
     return get_default_field_value(field, value)
 
