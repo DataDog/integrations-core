@@ -191,6 +191,16 @@ files:
         value:
           example: False
           type: boolean
+      - name: try_basic_auth
+        description: |
+          Whether or not to try connecting with just username and password before SSL when `ssl_auth` is enabled.
+
+          WARNING: There is a known issue with the client library in which disabling
+          this option has the potential to cause a memory leak.
+        value:
+          example: false
+          type: boolean
+          display_default: true
       - name: ssl_cipher_spec
         type: string
         description: The ssl cipher to use. It should match the value of the channels SSLCIPH attribute.
