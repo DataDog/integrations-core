@@ -117,7 +117,7 @@ class MySQLActivity(DBMAsyncJob):
             check,
             run_sync=is_affirmative(config.activity_config.get("run_sync", False)),
             enabled=is_affirmative(config.activity_config.get("enabled", True)),
-            expected_db_exceptions=(),
+            expected_db_exceptions=(pymysql.err.OperationalError, pymysql.err.InternalError),
             min_collection_interval=config.min_collection_interval,
             config_host=config.host,
             dbms="mysql",
