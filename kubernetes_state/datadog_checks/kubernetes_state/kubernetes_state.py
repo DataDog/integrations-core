@@ -95,9 +95,18 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_persistentvolume_status_phase': {
                 'metric_name': 'persistentvolumes.by_phase',
                 'allowed_labels': ['storageclass', 'phase'],
+                'label_mapper_override': {
+                    'phase': 'phase'
+                },  # prevent kube_labels_mapper from converting the persistentvolume phase into pod_phase
             },
             'kube_service_spec_type': {'metric_name': 'service.count', 'allowed_labels': ['namespace', 'type']},
-            'kube_namespace_status_phase': {'metric_name': 'namespace.count', 'allowed_labels': ['phase']},
+            'kube_namespace_status_phase': {
+                'metric_name': 'namespace.count',
+                'allowed_labels': ['phase'],
+                'label_mapper_override': {
+                    'phase': 'phase'
+                },  # prevent kube_labels_mapper from converting the namespace phase tag into pod_phase
+            },
             'kube_replicaset_owner': {
                 'metric_name': 'replicaset.count',
                 'allowed_labels': ['namespace', 'owner_name', 'owner_kind'],
@@ -900,13 +909,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         object_counter = Counter()
 
         for sample in metric.samples:
-            tags = []
-            for l in config['allowed_labels']:
-                tag = self._label_to_tag(l, sample[self.SAMPLE_LABELS], scraper_config)
-                if tag is None:
-                    tag = self._format_tag(l, "unknown", scraper_config)
-                tags.append(tag)
-            tags += scraper_config['custom_tags']
+            tags = self._tags_for_count(sample, config, scraper_config)
             object_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
         for tags, count in iteritems(object_counter):
@@ -919,19 +922,31 @@ class KubernetesState(OpenMetricsBaseCheck):
         object_counter = Counter()
 
         for sample in metric.samples:
-            tags = []
-            for l in config['allowed_labels']:
-                tag = self._label_to_tag(l, sample[self.SAMPLE_LABELS], scraper_config)
-                if tag is None:
-                    tag = self._format_tag(l, "unknown", scraper_config)
-                tags.append(tag)
-            tags += scraper_config['custom_tags']
+            tags = self._tags_for_count(sample, config, scraper_config)
             object_counter[tuple(sorted(tags))] += 1
 
         for tags, count in iteritems(object_counter):
             self.gauge(metric_name, count, tags=list(tags))
 
-    def _build_tags(self, label_name, label_value, scraper_config, hostname=None):
+    def _tags_for_count(self, sample, count_config, scraper_config):
+        """
+        Extracts tags for object count elements.
+        """
+        tags = []
+        for l in count_config['allowed_labels']:
+            value = sample[self.SAMPLE_LABELS].get(l, None)
+            if not value:
+                tag = self._format_tag(l, "unknown", scraper_config)
+                tags.append(tag)
+                continue
+            l_mapper_override = count_config.get('label_mapper_override', None)
+            allowed_tags = self._build_tags(l, value, scraper_config, l_mapper_override=l_mapper_override)
+            if allowed_tags:
+                tags += allowed_tags
+        tags += scraper_config['custom_tags']
+        return tags
+
+    def _build_tags(self, label_name, label_value, scraper_config, hostname=None, l_mapper_override=None):
         """
         Build a list of formatted tags from `label_name` parameter. It also depend of the
         check configuration ('keep_ksm_labels' parameter)
@@ -941,6 +956,9 @@ class KubernetesState(OpenMetricsBaseCheck):
         tag_name = scraper_config['labels_mapper'].get(label_name, label_name)
         # then try to use the kube_labels_mapper
         kube_tag_name = kube_labels_mapper.get(tag_name, tag_name)
+        # try label mapper override
+        if l_mapper_override:
+            kube_tag_name = l_mapper_override.get(tag_name, tag_name)
         label_value = to_string(label_value).lower()
         tags.append('{}:{}'.format(to_string(kube_tag_name), label_value))
         if self.keep_ksm_labels and (kube_tag_name != tag_name):
