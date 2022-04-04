@@ -55,4 +55,4 @@ class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         if response.json()['code'] == 200:
             self.base_tags.append('id:{}'.format(response.json()['id']))
         else:
-            self.log.debug("Unable to get server id. This happens when not running in cluster mode. skipping `id` tag.")
+            self.log.debug("Unable to get server id. Server is not running in cluster mode. Skipping `id` tag.")
