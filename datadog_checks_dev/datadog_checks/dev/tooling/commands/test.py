@@ -10,7 +10,7 @@ from ..._env import DDTRACE_OPTIONS_LIST, E2E_PARENT_PYTHON, SKIP_ENVIRONMENT
 from ...ci import get_ci_env_vars, running_on_ci
 from ...fs import chdir, file_exists, remove_path
 from ...subprocess import run_command
-from ...utils import ON_WINDOWS, get_next
+from ...utils import ON_WINDOWS
 from ..constants import get_root
 from ..dependencies import read_check_base_dependencies
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
@@ -246,13 +246,12 @@ def test(
                 if errors:
                     abort(f'\nError collecting base package dependencies: {errors}')
 
-                spec_set = list(check_base_dependencies['datadog-checks-base'].keys())[0]
-
-                spec = get_next(spec_set) if spec_set else None
-                if spec is None or spec.operator != '>=':
+                spec = check_base_dependencies[check]
+                if spec is None:
                     abort(f'\nFailed to determine minimum version of package `datadog_checks_base`: {spec}')
 
-                version = spec.version
+                version = spec.split('>=')[-1]
+
                 env['TOX_FORCE_INSTALL'] = f"datadog_checks_base[deps]=={version}"
             elif force_base_unpinned and not base_or_dev:
                 env['TOX_FORCE_UNPINNED'] = "datadog_checks_base"
