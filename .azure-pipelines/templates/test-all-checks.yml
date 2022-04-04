@@ -475,6 +475,9 @@ jobs:
     - checkName: tomcat
       displayName: Tomcat
       os: linux
+    - checkName: traffic_server
+      displayName: Traffic Server
+      os: linux
     - checkName: twemproxy
       displayName: Twemproxy
       os: linux

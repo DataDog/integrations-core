@@ -1,5 +1,19 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 16.1.0 / 2022-03-29
+
+* [Added] Add new README for Tile-only integrations. See [#11712](https://github.com/DataDog/integrations-core/pull/11712).
+* [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
+* [Fixed] Cap the version of virtualenv. See [#11742](https://github.com/DataDog/integrations-core/pull/11742).
+
+## 16.0.0 / 2022-03-25
+
+* [Added] Add `metric_patterns` to base template. See [#11696](https://github.com/DataDog/integrations-core/pull/11696).
+* [Fixed] Update check template README. See [#11719](https://github.com/DataDog/integrations-core/pull/11719).
+* [Fixed] Better logging and usability of ddev 'generate-traps-db'. See [#11544](https://github.com/DataDog/integrations-core/pull/11544).
+* [Fixed] Remove check options from jmx template. See [#11686](https://github.com/DataDog/integrations-core/pull/11686).
+* [Changed] Refactor dependency tooling. See [#11720](https://github.com/DataDog/integrations-core/pull/11720).
+
 ## 15.11.0 / 2022-03-16
 
 * [Added] Add more allowed recommended monitor types. See [#11669](https://github.com/DataDog/integrations-core/pull/11669).

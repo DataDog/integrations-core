@@ -163,6 +163,17 @@ class SqlserverActivity(DBMAsyncJob):
             if estimated_size > max_bytes_limit:
                 # query results are pre-sorted
                 # so once we hit the max bytes limit, return
+                self.check.histogram(
+                    "dd.sqlserver.activity.collect_activity.max_bytes.rows_dropped",
+                    len(normalized_rows) - len(rows),
+                    **self.check.debug_stats_kwargs()
+                )
+                self.check.warning(
+                    "Exceeded the limit of activity rows captured (%s of %s rows included). "
+                    "Database load may be under-reported as a result.",
+                    len(normalized_rows),
+                    len(rows),
+                )
                 return normalized_rows
             normalized_rows.append(row)
         return normalized_rows
@@ -193,7 +204,12 @@ class SqlserverActivity(DBMAsyncJob):
         if 'text' not in row:
             return row
         try:
-            obfuscated_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)['query']
+            statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
+            obfuscated_statement = statement['query']
+            metadata = statement['metadata']
+            row['dd_commands'] = metadata.get('commands', None)
+            row['dd_tables'] = metadata.get('tables', None)
+            row['dd_comments'] = metadata.get('comments', None)
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
         except Exception as e:
             # obfuscation errors are relatively common so only log them during debugging

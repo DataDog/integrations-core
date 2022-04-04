@@ -14,7 +14,7 @@ PRERELEASE = '0.0.1'
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Tag the git repo with the current release of a check')
-@click.argument('check', autocompletion=complete_valid_checks)
+@click.argument('check', shell_complete=complete_valid_checks)
 @click.argument('version', required=False)
 @click.option('--push/--no-push', default=True)
 @click.option('--dry-run', '-n', is_flag=True)
@@ -55,6 +55,7 @@ def tag(check, version, push, dry_run, skip_prerelease):
 
         if skip_prerelease and version == PRERELEASE:
             echo_warning('skipping prerelease version')
+            version = None
             continue
 
         # get the tag name

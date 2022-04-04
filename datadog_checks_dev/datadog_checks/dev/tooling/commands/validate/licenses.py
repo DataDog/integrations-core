@@ -24,6 +24,8 @@ EXPLICIT_LICENSES = {
     'adodbapi': ['LGPL-2.1-only'],
     # https://github.com/rthalley/dnspython/blob/master/LICENSE
     'dnspython': ['ISC'],
+    # https://github.com/pythongssapi/python-gssapi/blob/main/LICENSE.txt
+    'gssapi': ['ISC'],
     # https://github.com/cannatag/ldap3/blob/dev/COPYING.txt
     'ldap3': ['LGPL-3.0-only'],
     # https://github.com/paramiko/paramiko/blob/master/LICENSE

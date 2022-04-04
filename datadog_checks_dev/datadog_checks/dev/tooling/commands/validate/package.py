@@ -36,7 +36,7 @@ def read_project_name(check_name):
 
 
 @click.command('package', context_settings=CONTEXT_SETTINGS, short_help='Validate Python package metadata')
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 def package(check):
     """Validate all files for Python package metadata.
 

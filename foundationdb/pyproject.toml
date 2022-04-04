@@ -37,7 +37,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "foundationdb==6.3.22; python_version > '3.0'",
+    "foundationdb==6.3.24; python_version > '3.0'",
 ]
 
 [project.urls]

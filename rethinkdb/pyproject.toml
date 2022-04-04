@@ -37,7 +37,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "rethinkdb==2.4.4",
+    "rethinkdb==2.4.8",
 ]
 
 [project.urls]

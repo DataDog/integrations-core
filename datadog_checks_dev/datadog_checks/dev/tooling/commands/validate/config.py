@@ -34,7 +34,7 @@ TEMPLATES = ['default', 'openmetrics_legacy', 'openmetrics', 'jmx']
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate default configuration files')
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 @click.option('--sync', '-s', is_flag=True, help='Generate example configuration files based on specifications')
 @click.option('--verbose', '-v', is_flag=True, help='Verbose mode')
 @click.pass_context

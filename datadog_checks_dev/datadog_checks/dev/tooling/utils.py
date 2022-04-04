@@ -16,6 +16,7 @@ import semver
 import tomli
 import tomli_w
 import yaml
+from packaging.specifiers import SpecifierSet
 
 from ..fs import dir_exists, file_exists, read_file, read_file_lines, write_file
 from .catalog_const import (
@@ -81,13 +82,23 @@ def is_package(d):
 def normalize_project_name(project_name):
     # https://www.python.org/dev/peps/pep-0508/#names
     if not re.search('^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$', project_name, re.IGNORECASE):
-        raise ValueError(
-            'Required field `project.name` must only contain ASCII letters/digits, '
-            'underscores, hyphens, and periods.'
-        )
+        raise ValueError('Project name must only contain ASCII letters/digits, underscores, hyphens, and periods.')
 
     # https://www.python.org/dev/peps/pep-0503/#normalized-names
     return re.sub(r'[-_.]+', '-', project_name).lower()
+
+
+def get_normalized_dependency(requirement):
+    requirement.name = normalize_project_name(requirement.name)
+
+    if requirement.specifier:
+        requirement.specifier = SpecifierSet(str(requirement.specifier).lower())
+
+    if requirement.extras:
+        requirement.extras = {normalize_project_name(extra) for extra in requirement.extras}
+
+    # All TOML writers use double quotes, so allow direct writing or copy/pasting to avoid escaping
+    return str(requirement).replace('"', "'")
 
 
 def normalize_package_name(package_name):

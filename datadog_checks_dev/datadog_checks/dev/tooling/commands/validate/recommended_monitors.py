@@ -40,7 +40,7 @@ ALLOWED_MONITOR_TYPES = [
     context_settings=CONTEXT_SETTINGS,
     short_help='Validate recommended monitor definition JSON files',
 )
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 def recommended_monitors(check):
     """Validate all recommended monitors definition files.
 
@@ -130,8 +130,15 @@ def recommended_monitors(check):
                 monitor_name = decoded.get('name').lower()
                 if not (check_name in monitor_name or display_name in monitor_name):
                     file_failed = True
+                    if check_name == display_name:
+                        error_msg = f":{check_name}"
+                    else:
+                        error_msg = f". Either: {check_name} or {display_name}"
                     display_queue.append(
-                        (echo_failure, f"    {monitor_filename} name must contain the integration name"),
+                        (
+                            echo_failure,
+                            f"    {monitor_filename} `name` field must contain the integration name{error_msg}",
+                        ),
                     )
 
             if file_failed:
