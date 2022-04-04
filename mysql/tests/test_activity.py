@@ -12,7 +12,7 @@ import pytest
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.mysql import MySql
-from datadog_checks.mysql.activity import ACTIVITY_QUERY, MySQLActivity, MySQLVersion
+from datadog_checks.mysql.activity import MySQLActivity
 
 from .common import CHECK_NAME, HOST, PORT
 
