@@ -69,6 +69,8 @@ def test_collect_activity(aggregator, dbm_instance, dd_run_check):
     bob_conn.close()
     fred_conn.close()
 
+    executor.shutdown()
+
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert len(dbm_activity) == 1, "should have collected exactly one activity payload"
 
@@ -169,7 +171,7 @@ def test_activity_metadata(aggregator, dd_run_check, dbm_instance, datadog_agent
     bob_conn.commit()
     bob_conn.close()
     fred_conn.close()
-    executor.shutdown(wait=True)
+    executor.shutdown()
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert dbm_activity, "should have collected at least one activity"

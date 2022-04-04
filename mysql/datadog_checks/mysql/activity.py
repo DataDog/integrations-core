@@ -76,7 +76,6 @@ FROM
         WHERE
             thread_b.processlist_state IS NOT NULL AND
             thread_b.processlist_command != 'Sleep' AND
-            thread_b.processlist_command != 'Daemon' AND
             thread_b.processlist_id != connection_id()
         GROUP BY thread_b.thread_id)
     LEFT JOIN performance_schema.events_statements_current AS statement ON statement.thread_id = thread_a.thread_id
@@ -84,7 +83,6 @@ FROM
 WHERE
     thread_a.processlist_state IS NOT NULL AND
     thread_a.processlist_command != 'Sleep' AND
-    thread_a.processlist_command != 'Daemon' AND
     thread_a.processlist_id != CONNECTION_ID()
 """
 
