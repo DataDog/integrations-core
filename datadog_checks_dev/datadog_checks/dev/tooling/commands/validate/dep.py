@@ -140,7 +140,7 @@ def verify_dependency(source, name, python_versions, file):
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Verify dependencies across all checks')
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 @click.option(
     '--require-base-check-version', is_flag=True, help='Require specific version for datadog-checks-base requirement'
 )

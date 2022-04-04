@@ -37,7 +37,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "scandir==1.8",
+    "scandir==1.10.0",
 ]
 
 [project.urls]

@@ -55,7 +55,7 @@ def validate_import(filepath, check, autofix):
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate proper base imports')
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 @click.option('--autofix', is_flag=True, help='Apply suggested fix')
 @click.pass_context
 def imports(ctx, check, autofix):

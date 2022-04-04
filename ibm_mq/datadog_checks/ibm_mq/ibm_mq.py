@@ -58,6 +58,12 @@ class IbmMqCheck(AgentCheck):
             self.service_check(
                 self.SERVICE_CHECK, AgentCheck.CRITICAL, self._config.tags, hostname=self._config.hostname
             )
+            self.service_check(
+                QueueMetricCollector.QUEUE_MANAGER_SERVICE_CHECK,
+                AgentCheck.CRITICAL,
+                self._config.tags,
+                hostname=self._config.hostname,
+            )
             raise
 
         self._collect_metadata(queue_manager)

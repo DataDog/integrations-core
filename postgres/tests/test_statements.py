@@ -11,6 +11,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 import mock
 import psycopg2
 import pytest
+from dateutil import parser
 from semver import VersionInfo
 from six import string_types
 
@@ -644,7 +645,7 @@ def test_statement_metadata(
                 'query_signature': '9382c42e92099c04',
                 'statement': "BEGIN TRANSACTION; SELECT city FROM persons WHERE city = 'hello';",
             },
-            ["xact_start", "query_start", "pid", "client_port", "client_addr", "backend_type", "blocking_pids"],
+            ["now", "xact_start", "query_start", "pid", "client_port", "client_addr", "backend_type", "blocking_pids"],
             {
                 'usename': 'bob',
                 'state': 'active',
@@ -734,6 +735,9 @@ def test_activity_snapshot_collection(
                 expected_keys.remove('blocking_pids')
         for val in expected_keys:
             assert val in bobs_query
+
+        # assert that the current timestamp is being collected as an ISO timestamp with TZ info
+        assert parser.isoparse(bobs_query['now']).tzinfo, "current timestamp not formatted correctly"
 
         if 'blocking_pids' in expected_keys:
             # if we are collecting pg blocking information, then

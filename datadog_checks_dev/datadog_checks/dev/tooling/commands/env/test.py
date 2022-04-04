@@ -14,7 +14,7 @@ from .stop import stop
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Test an environment')
-@click.argument('checks', autocompletion=complete_active_checks, nargs=-1)
+@click.argument('checks', shell_complete=complete_active_checks, nargs=-1)
 @click.option(
     '--agent',
     '-a',

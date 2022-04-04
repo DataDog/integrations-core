@@ -43,6 +43,9 @@ assets/               @DataDog/agent-integrations
 /eks_fargate/                             @DataDog/container-integrations @DataDog/agent-integrations
 /eks_fargate/*.md                         @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /eks_fargate/manifest.json                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/helm/                                    @DataDog/container-integrations @DataDog/agent-integrations
+/helm/*.md                                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/helm/manifest.json                       @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kube_apiserver_metrics/                  @DataDog/container-integrations @DataDog/agent-integrations
 /kube_apiserver_metrics/*.md              @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kube_apiserver_metrics/manifest.json     @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation

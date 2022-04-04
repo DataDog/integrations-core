@@ -45,7 +45,7 @@ PROCESS_OPTIONS = {"sort", "graph_options", "view_options", "filter", "selected_
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate saved view files')
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 def saved_views(check):
     """Validates saved view files
 

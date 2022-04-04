@@ -98,6 +98,7 @@ class Ssl(BaseModel):
 
     ca: Optional[str]
     cert: Optional[str]
+    check_hostname: Optional[bool]
     key: Optional[str]
 
 

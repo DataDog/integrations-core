@@ -119,7 +119,7 @@ def validate_use_http_wrapper(check):
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate usage of http wrapper')
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 def http(check):
     """Validate all integrations for usage of http wrapper."""
 

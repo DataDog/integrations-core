@@ -25,6 +25,7 @@ METRICS = [
     'cluster_checks.busyness',
     'cluster_checks.configs_dangling',
     'cluster_checks.configs_dispatched',
+    'cluster_checks.configs_info',
     'cluster_checks.failed_stats_collection',
     'cluster_checks.nodes_reporting',
     'cluster_checks.rebalancing_decisions',

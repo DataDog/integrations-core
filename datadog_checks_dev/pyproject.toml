@@ -58,7 +58,7 @@ cli = [
     "atomicwrites",
     "beautifulsoup4>=4.9.3",
     "build>=0.7.0",
-    "click~=8.0",
+    "click~=8.1",
     "codespell",
     "colorama",
     "datamodel-code-generator~=0.11.4",
@@ -79,7 +79,7 @@ cli = [
     "tomli-w>=1.0.0",
     "tox>=3.12.1",
     "twine>=1.11.0",
-    "virtualenv>=20.5.0",
+    "virtualenv>=20.5.0,<20.14.0",
     # TODO: Remove once every check has a pyproject.toml
     "setuptools>=38.6.0",
     "wheel>=0.31.0",

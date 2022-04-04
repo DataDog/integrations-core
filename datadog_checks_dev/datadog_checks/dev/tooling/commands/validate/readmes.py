@@ -26,7 +26,7 @@ DOCS_LINK_FORMAT_URL = (
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate README.md files')
 @click.pass_context
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 @click.option('--format-links', '-fl', is_flag=True, help='Automatically format links')
 def readmes(ctx, check, format_links):
     """Validates README files.
