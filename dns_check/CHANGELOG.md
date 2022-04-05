@@ -1,5 +1,9 @@
 # CHANGELOG - dns_check
 
+## 2.3.0 / 2022-04-05
+
+* [Added] Add metric_patterns options to filter all metric submission with a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+
 ## 2.2.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11339](https://github.com/DataDog/integrations-core/pull/11339).
