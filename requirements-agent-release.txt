@@ -81,7 +81,7 @@ datadog-kube-scheduler==4.1.0
 datadog-kubelet==7.3.0
 datadog-kubernetes-state==7.1.0
 datadog-kyototycoon==2.1.0
-datadog-lighttpd==3.0.0
+datadog-lighttpd==3.1.0
 datadog-linkerd==3.0.0
 datadog-linux-proc-extras==2.2.0; sys_platform == 'linux2'
 datadog-mapr==1.8.0; sys_platform == 'linux2'
