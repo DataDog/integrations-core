@@ -140,7 +140,7 @@ datadog-system-swap==1.14.0
 datadog-tcp-check==4.4.0
 datadog-teamcity==2.1.0
 datadog-tenable==1.4.0
-datadog-tls==2.7.0
+datadog-tls==2.8.0
 datadog-tokumx==3.1.1
 datadog-tomcat==1.11.0
 datadog-traffic-server==1.0.0
