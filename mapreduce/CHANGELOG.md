@@ -1,5 +1,10 @@
 # CHANGELOG - mapreduce
 
+## 3.1.0 / 2022-04-05
+
+* [Added] Add metric_patterns options to filter all metric submission with a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+
 ## 3.0.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11393](https://github.com/DataDog/integrations-core/pull/11393).
