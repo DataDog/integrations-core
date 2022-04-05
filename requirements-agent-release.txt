@@ -109,7 +109,7 @@ datadog-pgbouncer==4.2.0; sys_platform != 'win32'
 datadog-php-fpm==2.1.0
 datadog-postfix==1.12.0; sys_platform != 'win32'
 datadog-postgres==12.3.0
-datadog-powerdns-recursor==2.0.0
+datadog-powerdns-recursor==2.1.0
 datadog-presto==2.6.0
 datadog-process==2.2.0
 datadog-prometheus==3.4.0
