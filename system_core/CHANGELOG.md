@@ -1,5 +1,9 @@
 # CHANGELOG - system_core
 
+## 1.13.0 / 2022-04-05
+
+* [Added] Add metric_patterns options to filter all metric submission with a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+
 ## 1.12.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11442](https://github.com/DataDog/integrations-core/pull/11442).
