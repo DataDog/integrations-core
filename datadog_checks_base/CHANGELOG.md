@@ -1,5 +1,12 @@
 # CHANGELOG - datadog_checks_base
 
+## 25.2.0 / 2022-04-05
+
+* [Added] Add integration_tracing option. See [#11761](https://github.com/DataDog/integrations-core/pull/11761).
+* [Added] Add gssapi as a dependency. See [#11725](https://github.com/DataDog/integrations-core/pull/11725).
+* [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
+* [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
+
 ## 25.1.0 / 2022-03-16
 
 * [Added] Add `metric_patterns` options to filter all metric submission with a list of regexes. See [#11508](https://github.com/DataDog/integrations-core/pull/11508).
