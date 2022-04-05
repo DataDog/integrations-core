@@ -1,5 +1,9 @@
 # CHANGELOG - ignite
 
+## 2.2.1 / 2022-04-05
+
+* [Fixed] Remove check options from jmx template. See [#11686](https://github.com/DataDog/integrations-core/pull/11686).
+
 ## 2.2.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11372](https://github.com/DataDog/integrations-core/pull/11372).
