@@ -157,4 +157,4 @@ datadog-windows-performance-counters==1.2.0; sys_platform == 'win32'
 datadog-windows-service==4.2.0; sys_platform == 'win32'
 datadog-wmi-check==1.15.0; sys_platform == 'win32'
 datadog-yarn==4.1.0
-datadog-zk==4.1.0; sys_platform != 'win32'
+datadog-zk==4.2.0; sys_platform != 'win32'
