@@ -1,5 +1,9 @@
 # CHANGELOG - activemq
 
+## 2.3.1 / 2022-04-05
+
+* [Fixed] Remove check options from jmx template. See [#11686](https://github.com/DataDog/integrations-core/pull/11686).
+
 ## 2.3.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11309](https://github.com/DataDog/integrations-core/pull/11309).
