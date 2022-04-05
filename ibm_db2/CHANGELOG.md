@@ -1,5 +1,9 @@
 # CHANGELOG - IBM Db2
 
+## 1.11.0 / 2022-04-05
+
+* [Added] Add metric_patterns options to filter all metric submission with a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+
 ## 1.10.1 / 2022-03-01
 
 * [Fixed] Set enum of security option. See [#11584](https://github.com/DataDog/integrations-core/pull/11584).
