@@ -87,7 +87,7 @@ Resources:
       ContainerDefinitions:
         - Name: datadog-agent
           Image: 'gcr.io/datadoghq/agent:latest'
-          Cpu: 100
+          Cpu: 10
           Memory: 256MB
 ```
 
