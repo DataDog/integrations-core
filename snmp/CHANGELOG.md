@@ -1,5 +1,11 @@
 # CHANGELOG - snmp
 
+## 5.7.0 / 2022-04-05
+
+* [Added] Add metric_patterns options to filter all metric submission with a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
+* [Fixed] Add `min_collection_interval` to snmp `init_config`. See [#11543](https://github.com/DataDog/integrations-core/pull/11543).
+
 ## 5.6.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11432](https://github.com/DataDog/integrations-core/pull/11432).
