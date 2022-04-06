@@ -3,7 +3,7 @@
 ## 7.3.0 / 2022-04-05
 
 * [Added] Collect liveness and readiness probe metrics. See [#11682](https://github.com/DataDog/integrations-core/pull/11682).
-* [Added] Add metric_patterns options to filter all metric submission with a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 * [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
 * [Fixed] Add pleg metrics. See [#11616](https://github.com/DataDog/integrations-core/pull/11616).
 * [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).

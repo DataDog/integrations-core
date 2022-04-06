@@ -5,7 +5,7 @@
 * [Added] Add MySQL Active Sessions. See [#11709](https://github.com/DataDog/integrations-core/pull/11709).
 * [Added] Adds check_hostname parameter To MySQL. See [#11713](https://github.com/DataDog/integrations-core/pull/11713).
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
-* [Added] Add metric_patterns options to filter all metric submission with a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 * [Added] Include SQL metadata in FQT. See [#11644](https://github.com/DataDog/integrations-core/pull/11644).
 * [Added] Enable SQL metadata collection by default. See [#11604](https://github.com/DataDog/integrations-core/pull/11604).
 

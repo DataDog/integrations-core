@@ -3,7 +3,7 @@
 ## 7.1.0 / 2022-04-05
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
-* [Added] Add metric_patterns options to filter all metric submission with a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 * [Added] Add `kube_cronjob` tag to job metrics when applicable. See [#11692](https://github.com/DataDog/integrations-core/pull/11692).
 * [Fixed] Add `kube_namespace` tag to object count metrics. See [#11734](https://github.com/DataDog/integrations-core/pull/11734).
 * [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
