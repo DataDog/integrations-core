@@ -4,7 +4,7 @@
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
 * [Added] Add metric_patterns options to filter all metric submission with a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
-* [Fixed] Bug fix: fix postgres activity inflated query durations. See [#11765](https://github.com/DataDog/integrations-core/pull/11765).
+* [Fixed] Fix postgres activity inflated query durations. See [#11765](https://github.com/DataDog/integrations-core/pull/11765).
 
 ## 12.2.0 / 2022-03-15
 

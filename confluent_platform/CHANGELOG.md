@@ -3,7 +3,7 @@
 ## 1.8.1 / 2022-04-05
 
 * [Fixed] Remove check options from jmx template. See [#11686](https://github.com/DataDog/integrations-core/pull/11686).
-* [Fixed] remove duplicate bean. See [#11609](https://github.com/DataDog/integrations-core/pull/11609).
+* [Fixed] Remove duplicate bean. See [#11609](https://github.com/DataDog/integrations-core/pull/11609).
 
 ## 1.8.0 / 2022-02-19
 
