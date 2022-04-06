@@ -10,6 +10,7 @@ import time
 from datetime import datetime
 
 import requests
+from requests import Response
 from six import PY2, string_types
 from six.moves.urllib.parse import urlparse
 
@@ -104,7 +105,7 @@ class HTTPCheck(AgentCheck):
         tags_list.append("instance:{}".format(instance_name))
         service_checks = []
         service_checks_tags = self._get_service_checks_tags(instance)
-        r = None
+        r = None  # type: Response
         try:
             parsed_uri = urlparse(addr)
             self.log.debug("Connecting to %s", addr)
