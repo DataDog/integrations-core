@@ -6,7 +6,7 @@
 * [Added] Add metric_patterns options to filter all metric submission with a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 * [Fixed] Document TLS options. See [#11714](https://github.com/DataDog/integrations-core/pull/11714).
 * [Fixed] Remap `check_hostname` to `tls_validate_hostname` . See [#11706](https://github.com/DataDog/integrations-core/pull/11706).
-* [Fixed] http to fail more gracefully. See [#11615](https://github.com/DataDog/integrations-core/pull/11615).
+* [Fixed] Fail more gracefully. See [#11615](https://github.com/DataDog/integrations-core/pull/11615).
 
 ## 7.0.1 / 2022-03-02
 
