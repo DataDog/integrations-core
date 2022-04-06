@@ -26,6 +26,7 @@ IntegrationMetadata = namedtuple("IntegrationMetadata", ["version", "root_layout
 # Integrations released for the last time by a revoked developper but not shipped anymore.
 EXCLUDED_INTEGRATIONS = [
     "datadog-docker-daemon",
+    "datadog-dd-cluster-agent",  # excluding this since actual integration is called `datadog-cluster-agent`
 ]
 
 
