@@ -27,12 +27,11 @@ IntegrationMetadata = namedtuple("IntegrationMetadata", ["version", "root_layout
 EXCLUDED_INTEGRATIONS = [
     "datadog-docker-daemon",
     "datadog-dd-cluster-agent",  # excluding this since actual integration is called `datadog-cluster-agent`
+    "datadog-kubernetes",  # excluding this since `kubernetes` check is Agent v5 only
 ]
 
 # Specific integration versions released for the last time by a revoked developer but not shipped anymore.
-EXCLUDED_INTEGRATION_VERSION = [
-    'simple/datadog-ibm-mq/datadog_ibm_mq-4.1.0rc1-py2.py3-none-any.whl'
-]
+EXCLUDED_INTEGRATION_VERSION = ["simple/datadog-ibm-mq/datadog_ibm_mq-4.1.0rc1-py2.py3-none-any.whl"]
 
 
 def delete_files(files):
