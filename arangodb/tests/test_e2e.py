@@ -9,13 +9,11 @@ from .common import METRICS, OPTIONAL_METRICS
 @pytest.mark.e2e
 def test_check_ok(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
-    base_tags = ['endpoint:http://localhost:8529/_admin/metrics/v2']
+    base_tags = ['endpoint:http://localhost:8529/_admin/metrics/v2', 'server_mode:default']
     for metric in METRICS:
         if metric in OPTIONAL_METRICS:
             aggregator.assert_metric(metric, at_least=0)
-            for tag in base_tags:
-                aggregator.assert_metric_has_tag(metric, tag)
         else:
             aggregator.assert_metric(metric, at_least=1)
-            for tag in base_tags:
-                aggregator.assert_metric_has_tag(metric, tag)
+        for tag in base_tags:
+            aggregator.assert_metric_has_tag(metric, tag)

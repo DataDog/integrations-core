@@ -1,24 +1,28 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import os
 from typing import Any, Dict
 
+import mock
 import pytest
 
 from datadog_checks.arangodb import ArangodbCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import METRICS
 
 
 @pytest.mark.integration
-def test_check(aggregator, instance, mock_agent_data, dd_run_check):
+def test_check(aggregator, instance, dd_run_check):
     # type: (AggregatorStub, Dict[str, Any]) -> None
     check = ArangodbCheck('arangodb', {}, [instance])
     dd_run_check(check)
-    base_tags = ['endpoint:http://localhost:8529/_admin/metrics/v2']
+    base_tags = ['endpoint:http://localhost:8529/_admin/metrics/v2', 'server_mode:default']
+
+    aggregator.assert_service_check('arangodb.openmetrics.health', ArangodbCheck.OK, count=1)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     for metric in METRICS:
         aggregator.assert_metric(metric)
@@ -26,3 +30,52 @@ def test_check(aggregator, instance, mock_agent_data, dd_run_check):
             aggregator.assert_metric_has_tag(metric, tag)
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.integration
+def test_invalid_endpoint(aggregator, instance_invalid_endpoint, dd_run_check):
+    # type: (AggregatorStub, Dict[str, Any]) -> None
+    check = ArangodbCheck('arangodb', {}, [instance_invalid_endpoint])
+    with pytest.raises(Exception):
+        dd_run_check(check)
+
+
+@pytest.mark.parametrize(
+    'condition, base_tags',
+    [
+        pytest.param(
+            'valid_id_mode',
+            ['endpoint:http://localhost:8529/_admin/metrics/v2', 'server_mode:default', 'server_id:1'],
+            id="valid id and valid mode",
+        ),
+        pytest.param(
+            'invalid_mode_valid_id',
+            ['endpoint:http://localhost:8529/_admin/metrics/v2', 'server_id:1'],
+            id="invalid mode but valid id",
+        ),
+        pytest.param(
+            'valid_mode_invalid_id',
+            ['endpoint:http://localhost:8529/_admin/metrics/v2', 'server_mode:default'],
+            id="valid mode but invalid id",
+        ),
+        pytest.param(
+            'invalid_mode_invalid_id',
+            ['endpoint:http://localhost:8529/_admin/metrics/v2'],
+            id="invalid mode and invalid id",
+        ),
+    ],
+)
+def test_valid_mode_tag(instance, dd_run_check, aggregator, condition, base_tags):
+    check = ArangodbCheck('arangodb', {}, [instance])
+
+    def mock_requests_get(url, *args, **kwargs):
+        fixture = url.rsplit('/', 1)[-1]
+        return MockResponse(file_path=os.path.join(os.path.dirname(__file__), 'fixtures', condition, fixture))
+
+    with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        dd_run_check(check)
+
+    for metric in METRICS:
+        aggregator.assert_metric(metric)
+        for tag in base_tags:
+            aggregator.assert_metric_has_tag(metric, tag)
