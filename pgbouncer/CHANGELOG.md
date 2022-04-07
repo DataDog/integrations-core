@@ -1,5 +1,9 @@
 # CHANGELOG - pgbouncer
 
+## 4.2.0 / 2022-04-05
+
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+
 ## 4.1.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11414](https://github.com/DataDog/integrations-core/pull/11414).

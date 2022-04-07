@@ -1,5 +1,13 @@
 # CHANGELOG - http_check
 
+## 7.1.0 / 2022-04-05
+
+* [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Fixed] Document TLS options. See [#11714](https://github.com/DataDog/integrations-core/pull/11714).
+* [Fixed] Remap `check_hostname` to `tls_validate_hostname` . See [#11706](https://github.com/DataDog/integrations-core/pull/11706).
+* [Fixed] Fail more gracefully. See [#11615](https://github.com/DataDog/integrations-core/pull/11615).
+
 ## 7.0.1 / 2022-03-02
 
 * [Fixed] Avoid reading response content unless necessary. See [#11590](https://github.com/DataDog/integrations-core/pull/11590).

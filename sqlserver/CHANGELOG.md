@@ -1,5 +1,15 @@
 # CHANGELOG - sqlserver
 
+## 7.6.0 / 2022-04-05
+
+* [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Added] Add request_status in sqlserver activity query. See [#11699](https://github.com/DataDog/integrations-core/pull/11699).
+* [Added] Add SQL metadata to SQL Server activity events. See [#11689](https://github.com/DataDog/integrations-core/pull/11689).
+* [Added] Add a log line when activity limit is reached. See [#11661](https://github.com/DataDog/integrations-core/pull/11661).
+* [Fixed] Gracefully handle inaccessible database for `sqlserver.files.*`. See [#11711](https://github.com/DataDog/integrations-core/pull/11711).
+* [Fixed] Fix SQL Server false configuration error. See [#11664](https://github.com/DataDog/integrations-core/pull/11664).
+
 ## 7.5.0 / 2022-03-15
 
 * [Added] Enable SQL metadata collection by default. See [#11606](https://github.com/DataDog/integrations-core/pull/11606).
