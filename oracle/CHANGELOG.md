@@ -1,8 +1,12 @@
 # CHANGELOG - oracle
 
+## 3.9.0 / 2022-04-05
+
+* [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
+
 ## 3.8.0 / 2022-03-25
 
-* [Added] Add metric_patterns options to filter all metric submission with a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 * [Fixed] Properly report a critical service check status if connection to database fails using the Oracle client. See [#11691](https://github.com/DataDog/integrations-core/pull/11691).
 * [Fixed] Fix validation for the `protocol` param. See [#11675](https://github.com/DataDog/integrations-core/pull/11675).
 

@@ -1,5 +1,10 @@
 # CHANGELOG - iis
 
+## 2.16.0 / 2022-04-05
+
+* [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+
 ## 2.15.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11373](https://github.com/DataDog/integrations-core/pull/11373).

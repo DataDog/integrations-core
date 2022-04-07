@@ -1,5 +1,9 @@
 # CHANGELOG - VoltDB
 
+## 2.1.0 / 2022-04-05
+
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+
 ## 2.0.1 / 2022-03-15
 
 * [Fixed] Pass Delta flag to calls to Statistics. See [#11655](https://github.com/DataDog/integrations-core/pull/11655). Thanks [ssomagani](https://github.com/ssomagani).
