@@ -31,7 +31,10 @@ EXCLUDED_INTEGRATIONS = [
 ]
 
 # Specific integration versions released for the last time by a revoked developer but not shipped anymore.
-EXCLUDED_INTEGRATION_VERSION = ["simple/datadog-ibm-mq/datadog_ibm_mq-4.1.0rc1-py2.py3-none-any.whl"]
+EXCLUDED_INTEGRATION_VERSION = [
+    "simple/datadog-ibm-mq/datadog_ibm_mq-4.1.0rc1-py2.py3-none-any.whl",
+    "simple/datadog-network/datadog_network-9.1.1rc1-py2.py3-none-any.whl",
+]
 
 
 def delete_files(files):
