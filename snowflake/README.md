@@ -117,6 +117,25 @@ datadog-agent integration install datadog-snowflake==2.0.1
 
 3. [Restart the Agent][6].
 
+#### Collecting data for multiple environments
+
+If you want to collect data for multiple Snowflake environments, add each environment as an instance in your `snowflake.d/conf.yaml` file. For example, if you needed to collect data for two users named `DATADOG_SYSADMIN` and `DATADOG_USER`:
+
+```yaml
+instances:
+  - account: example-inc
+    username: DATADOG_SYSADMIN
+    password: '<PASSWORD>'
+    role: SYSADMIN
+    database: EXAMPLE-INC
+
+  - account: example-inc
+    username: DATADOG_USER
+    password: '<PASSWORD>'
+    role: DATADOG_USER
+    database: EXAMPLE-INC
+```
+
 #### Proxy configuration
 
 Snowflake recommends setting [environment variables for proxy configuration][7].
