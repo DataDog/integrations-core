@@ -47,22 +47,34 @@ class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         """
         Get the tag for the mode of the server.
         """
-        response = self.http.get(self.base_url + self.SERVER_MODE_ENDPOINT)
+        tag_endpoint = self.base_url + self.SERVER_MODE_ENDPOINT
 
-        if response.json()['code'] == 200:
-            return 'server_mode:{}'.format(response.json()['mode'])
-        else:
+        try:
+            response = self.http.get(tag_endpoint)
+
+            if response.json()['code'] == 200:
+                return 'server_mode:{}'.format(response.json()['mode'])
+
             self.log.debug("Unable to get server mode, skipping `server_mode` tag.")
-            return None
+        except Exception as e:
+            self.log.debug("Unable to query {}, received error: {}".format(tag_endpoint, e))
+
+        return None
 
     def get_server_id_tag(self):
         """
         Get the tag for the server id of the server in a cluster.
         """
-        response = self.http.get(self.base_url + self.SERVER_ID_ENDPOINT)
+        tag_endpoint = self.base_url + self.SERVER_ID_ENDPOINT
 
-        if response.json()['code'] == 200:
-            return 'server_id:{}'.format(response.json()['id'])
+        try:
+            response = self.http.get(tag_endpoint)
 
-        else:
+            if response.json()['code'] == 200:
+                return 'server_id:{}'.format(response.json()['id'])
+
             self.log.debug("Unable to get server id. Server is not running in cluster mode. Skipping `server_id` tag.")
+        except Exception as e:
+            self.log.debug("Unable to query {}, received error: {}".format(tag_endpoint, e))
+
+        return None
