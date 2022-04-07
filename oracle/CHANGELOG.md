@@ -1,5 +1,9 @@
 # CHANGELOG - oracle
 
+## 3.9.1 / 2022-04-07
+
+* [Fixed] Fix protocol validation. See [#11791](https://github.com/DataDog/integrations-core/pull/11791).
+
 ## 3.9.0 / 2022-04-05
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
