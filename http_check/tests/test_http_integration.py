@@ -9,6 +9,7 @@ from collections import OrderedDict
 
 import mock
 import pytest
+from six import PY2
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.http_check import HTTPCheck
@@ -37,6 +38,24 @@ def test_check_cert_expiration_up(http_check):
     assert status == AgentCheck.OK
     assert days_left > 0
     assert seconds_left > 0
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_cert_expiration_no_cert(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    instance = {'url': 'https://valid.mock/'}
+
+    with mock.patch('ssl.SSLSocket.getpeercert', return_value={}):
+
+        status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
+        assert status == AgentCheck.UNKNOWN
+        expected_msg = 'KeyError(\'notAfter\')'
+        if PY2:
+            expected_msg = (
+                'ValueError(\'empty or no certificate, match_hostname needs a SSL socket '
+                'or SSL context with either CERT_OPTIONAL or CERT_REQUIRED\',)'
+            )
+        assert msg == expected_msg
 
 
 @pytest.mark.usefixtures("dd_environment")
