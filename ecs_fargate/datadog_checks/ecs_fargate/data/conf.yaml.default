@@ -1,6 +1,3 @@
-ad_identifiers:
-  - _ecs_fargate
-
 ## All options defined here are available to all instances.
 #
 init_config:
@@ -36,6 +33,13 @@ init_config:
     ## The timeout for connecting to services.
     #
     # timeout: 10
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
 
 ## Every instance is scheduled independent of the others.
 #
@@ -217,6 +221,8 @@ instances:
 
     ## @param aws_host - string - optional
     ## If your services require AWS Signature Version 4 signing, set the host.
+    ## This only needs the hostname and does not require the protocol (HTTP, HTTPS, and more).
+    ## For example, if connecting to https://us-east-1.amazonaws.com/, set `aws_host` to `us-east-1.amazonaws.com`.
     ##
     ## Note: This setting is not necessary for official integrations.
     ##
@@ -271,6 +277,20 @@ instances:
     #
     # tls_ca_cert: <CA_CERT_PATH>
 
+    ## @param tls_protocols_allowed - list of strings - optional
+    ## The expected versions of TLS/SSL when fetching intermediate certificates.
+    ## Only `SSLv3`, `TLSv1.2`, `TLSv1.3` are allowed by default. The possible values are:
+    ##   SSLv3
+    ##   TLSv1
+    ##   TLSv1.1
+    ##   TLSv1.2
+    ##   TLSv1.3
+    #
+    # tls_protocols_allowed:
+    #   - SSLv3
+    #   - TLSv1.2
+    #   - TLSv1.3
+
     ## @param headers - mapping - optional
     ## The headers parameter allows you to send specific headers with every request.
     ## You can use it for explicitly specifying the host header or adding headers for
@@ -306,6 +326,11 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
@@ -316,8 +341,47 @@ instances:
     #
     # persist_connections: false
 
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
     ## @param min_collection_interval - number - optional - default: 20
     ## This changes the collection interval of the check. For more information, see:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     min_collection_interval: 20
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
