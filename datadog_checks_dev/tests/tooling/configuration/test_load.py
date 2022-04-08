@@ -248,6 +248,21 @@ def test_example_file_name_autodiscovery_incorrect():
     assert 'test, file #1: Example file name `test.yaml.example` should be `auto_conf.yaml`' in spec.errors
 
 
+def test_example_file_name_core_check_incorrect():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: conf.yaml.default
+          example_name: test.yaml.example
+        """
+    )
+    spec.load()
+
+    assert 'test, file #1: Example file name `test.yaml.example` should be `conf.yaml.default`' in spec.errors
+
+
 def test_example_file_name_standard_default():
     spec = get_spec(
         """
@@ -274,6 +289,20 @@ def test_example_file_name_autodiscovery_default():
     spec.load()
 
     assert spec.data['files'][0]['example_name'] == 'auto_conf.yaml'
+
+
+def test_example_file_name_core_check_default():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: conf.yaml.default
+        """
+    )
+    spec.load()
+
+    assert spec.data['files'][0]['example_name'] == 'conf.yaml.default'
 
 
 def test_no_options():
