@@ -182,9 +182,10 @@ def test_collect_empty_data(aggregator):
 
 
 @pytest.mark.parametrize(
-    "return_vals",
+    "expected_metrics, return_vals",
     [
         pytest.param(
+            ['read', 'udf'],
             [
                 'batch-index:',
                 '{test}-read:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
@@ -197,6 +198,7 @@ def test_collect_empty_data(aggregator):
             id="Last value empty data",
         ),
         pytest.param(
+            ['read', 'udf'],
             [
                 'batch-index:',
                 '{test}-read:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
@@ -209,23 +211,19 @@ def test_collect_empty_data(aggregator):
             id="Last value has data",
         ),
         pytest.param(
-            [
-                '{test}-read:23:50:28-GMT,ops/sec,>1ms,>8ms,>64ms;23:50:58,0.0,0.00,0.00,0.00;'
-                '23:51:28,0.0,0.00,0.00,0.00;23:51:58,0.0,0.00,0.00,0.00;23:52:28,0.0,0.00,0.00,0.00;'
-                '23:52:58,0.0,0.00,0.00,0.00;23:53:28,0.0,0.00,0.00,0.00;23:53:58,0.0,0.00,0.00,0.00;'
-                '23:54:28,0.0,0.00,0.00,0.00;23:54:58,0.0,0.00,0.00,0.00'
-            ],
+            ['read', 'udf'],
+            ['{test}-read:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'],
             id="only read data",
         ),
     ],
 )
-def test_collect_latencies_parser(aggregator, return_vals):
+def test_collect_latencies_parser(aggregator, expected_metrics, return_vals):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
     check.get_info = mock.MagicMock(return_value=return_vals)
 
     check.collect_latencies(None)
 
-    for metric_type in ['read', 'udf']:
+    for metric_type in expected_metrics:
         for i in range(17):
             bucket = 2**i
             aggregator.assert_metric(
