@@ -38,8 +38,9 @@ Every file has 3 possible attributes:
 
 - `name` - This is the name of the file the Agent will look for (**REQUIRED**)
 - `example_name` - This is the name of the example file the Agent will ship. If none is provided, the
-  default will be `conf.yaml.example`. The exception is auto-discovery files, which are also named
-  `auto_conf.yaml`.
+  default will be `conf.yaml.example`. The exceptions are:
+  - Auto-discovery files, which are named `auto_conf.yaml`
+  - Python-based core check default files, which are named `conf.yaml.default`
 - `options` - A list of [options](#options) (**REQUIRED**)
 
 ### Options
@@ -141,7 +142,6 @@ It also respects a few extra fields under the `value` attribute of each option:
 
 Use the `--sync` flag of the [config validation command](../ddev/cli.md#ddev-validate-config) to render the example configuration files.
 
-**Note:** Python-based core checks contain a `conf.yaml.default` file that do not use the configuration specification files. These files must be updated manually.
 
 ## Data model consumer
 
