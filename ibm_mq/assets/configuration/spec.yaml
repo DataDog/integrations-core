@@ -109,8 +109,8 @@ files:
         description: |
           Autodiscover channels to monitor. This finds all discoverable channels.
 
-          Note: autodiscovered channels are in addition to the ones provided in `channels`,
-          and these channels will only report their statuses but not property metrics.
+          Note: autodiscovered channels are in addition to the ones provided in `channels`.
+          Disabling this option will stop autodiscovery only for status metrics but not for property metrics.
         value:
           example: true
           type: boolean
