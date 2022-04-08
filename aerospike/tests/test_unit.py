@@ -213,6 +213,7 @@ def test_collect_empty_data(aggregator):
         pytest.param(
             ['read'],
             [
+                'batch-index:',
                 '{test}-read:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,',
                 '0.00',
             ],
