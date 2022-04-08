@@ -142,7 +142,6 @@ It also respects a few extra fields under the `value` attribute of each option:
 
 Use the `--sync` flag of the [config validation command](../ddev/cli.md#ddev-validate-config) to render the example configuration files.
 
-
 ## Data model consumer
 
 The [model consumer][config-spec-model-consumer] uses each spec to render the [pydantic](https://github.com/samuelcolvin/pydantic) models
