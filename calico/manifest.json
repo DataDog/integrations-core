@@ -13,7 +13,7 @@
   "public_title": "calico",
   "categories": ["metrics", "network", "security", "log collection"],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "calico",
   "assets": {
     "configuration": {
