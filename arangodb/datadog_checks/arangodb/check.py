@@ -57,7 +57,7 @@ class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
             self.log.debug("Unable to get server mode, skipping `server_mode` tag.")
         except Exception as e:
-            self.log.debug("Unable to query {}, received error: {}".format(tag_endpoint, e))
+            self.log.debug("Unable to query %s, received error: %s", tag_endpoint, e)
 
         return None
 
@@ -75,6 +75,6 @@ class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
             self.log.debug("Unable to get server id. Server is not running in cluster mode. Skipping `server_id` tag.")
         except Exception as e:
-            self.log.debug("Unable to query {}, received error: {}".format(tag_endpoint, e))
+            self.log.debug("Unable to query %s, received error: %s", tag_endpoint, e)
 
         return None

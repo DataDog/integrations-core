@@ -16,23 +16,6 @@ from .common import METRICS
 
 
 @pytest.mark.integration
-def test_check(aggregator, instance, dd_run_check):
-    # type: (AggregatorStub, Dict[str, Any]) -> None
-    check = ArangodbCheck('arangodb', {}, [instance])
-    dd_run_check(check)
-    base_tags = ['endpoint:http://localhost:8529/_admin/metrics/v2', 'server_mode:default']
-
-    aggregator.assert_service_check('arangodb.openmetrics.health', ArangodbCheck.OK, count=1)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    for metric in METRICS:
-        aggregator.assert_metric(metric)
-        for tag in base_tags:
-            aggregator.assert_metric_has_tag(metric, tag)
-
-    aggregator.assert_all_metrics_covered()
-
-
-@pytest.mark.integration
 def test_invalid_endpoint(aggregator, instance_invalid_endpoint, dd_run_check):
     # type: (AggregatorStub, Dict[str, Any]) -> None
     check = ArangodbCheck('arangodb', {}, [instance_invalid_endpoint])
@@ -40,6 +23,7 @@ def test_invalid_endpoint(aggregator, instance_invalid_endpoint, dd_run_check):
         dd_run_check(check)
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     'condition, base_tags',
     [
@@ -65,7 +49,7 @@ def test_invalid_endpoint(aggregator, instance_invalid_endpoint, dd_run_check):
         ),
     ],
 )
-def test_valid_mode_tag(instance, dd_run_check, aggregator, condition, base_tags):
+def test_check(instance, dd_run_check, aggregator, condition, base_tags):
     check = ArangodbCheck('arangodb', {}, [instance])
 
     def mock_requests_get(url, *args, **kwargs):
@@ -75,7 +59,11 @@ def test_valid_mode_tag(instance, dd_run_check, aggregator, condition, base_tags
     with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
         dd_run_check(check)
 
+    aggregator.assert_service_check('arangodb.openmetrics.health', ArangodbCheck.OK, count=1)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     for metric in METRICS:
         aggregator.assert_metric(metric)
         for tag in base_tags:
             aggregator.assert_metric_has_tag(metric, tag)
+
+    aggregator.assert_all_metrics_covered()
