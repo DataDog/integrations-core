@@ -12,6 +12,10 @@ WHERE q.`ro` > ROUND(.95*@rownum)
 ORDER BY `percentile` ASC
 LIMIT 1"""
 
+SQL_QUERY_TABLE_ROWS_STATS = """\
+SELECT   table_schema, table_name, rows_read, rows_changed
+FROM     information_schema.table_statistics"""
+
 SQL_QUERY_SCHEMA_SIZE = """\
 SELECT   table_schema, IFNULL(SUM(data_length+index_length)/1024/1024,0) AS total_mb
 FROM     information_schema.tables

@@ -37,7 +37,8 @@ from .const import (
     SCHEMA_VARS,
     STATUS_VARS,
     SYNTHETIC_VARS,
-    TABLE_ROWS_VARS,
+    TABLE_ROWS_STATS_VARS,
+    TABLE_VARS,
     VARIABLES_VARS,
 )
 from .innodb_metrics import InnoDBMetrics
@@ -50,7 +51,9 @@ from .queries import (
     SQL_INNODB_ENGINES,
     SQL_PROCESS_LIST,
     SQL_QUERY_SCHEMA_SIZE,
+    SQL_QUERY_SYSTEM_TABLE_SIZE,
     SQL_QUERY_TABLE_ROWS_STATS,
+    SQL_QUERY_TABLE_SIZE,
     SQL_REPLICATION_ROLE_AWS_AURORA,
     SQL_SERVER_ID_AWS_AURORA,
     SQL_WORKER_THREADS,
@@ -103,7 +106,7 @@ class MySql(AgentCheck):
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
         self.performance_schema_enabled = None
-        self.events_wait_current_enabled = None
+        self.userstat_enabled = None
         self._warnings_by_code = {}
         self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
@@ -151,23 +154,14 @@ class MySql(AgentCheck):
 
         return self.performance_schema_enabled
 
-    def _check_events_wait_current_enabled(self, db):
-        if not self._check_performance_schema_enabled(db):
-            self.log.debug('`performance_schema` is required to enable `events_waits_current`')
-            return
-        if self.events_wait_current_enabled is None:
+    def check_userstat_enabled(self, db):
+        if self.userstat_enabled is None:
             with closing(db.cursor()) as cursor:
-                cursor.execute(
-                    """\
-                    SELECT
-                        NAME,
-                        ENABLED
-                    FROM performance_schema.setup_consumers WHERE NAME = 'events_waits_current'
-                    """
-                )
+                cursor.execute("SHOW VARIABLES LIKE 'userstat'")
                 results = dict(cursor.fetchall())
-                self.events_wait_current_enabled = self._get_variable_enabled(results, 'events_waits_current')
-        return self.events_wait_current_enabled
+                self.userstat_enabled = self._get_variable_enabled(results, 'userstat')
+
+        return self.userstat_enabled
 
     def resolve_db_host(self):
         return agent_host_resolver(self._config.host)
@@ -200,7 +194,8 @@ class MySql(AgentCheck):
                 if self._get_is_aurora(db):
                     tags = tags + self._get_runtime_aurora_tags(db)
 
-                self._check_database_configuration(db)
+                self.check_performance_schema_enabled(db)
+                self.check_userstat_enabled(db)
 
                 # Metric collection
                 if not self._config.only_custom_queries:
@@ -383,7 +378,21 @@ class MySql(AgentCheck):
             results['information_schema_size'] = self._query_size_per_schema(db)
             metrics.update(SCHEMA_VARS)
 
-        if is_affirmative(self._config.options.get('table_rows_stats_metrics', False)):
+        if is_affirmative(self._config.options.get('table_rows_stats_metrics', False)) and self.userstat_enabled:
+            # report size of tables in MiB to Datadog
+            (rows_read_total, rows_changed_total) = self._query_rows_stats_per_table(db)
+            results['information_table_rows_read_total'] = rows_read_total
+            results['information_table_rows_changed_total'] = rows_changed_total
+            metrics.update(TABLE_ROWS_STATS_VARS)
+
+        if is_affirmative(self._config.options.get('table_size_metrics', False)):
+            # report size of tables in MiB to Datadog
+            (table_index_size, table_data_size) = self._query_size_per_table(db)
+            results['information_table_index_size'] = table_index_size
+            results['information_table_data_size'] = table_data_size
+            metrics.update(TABLE_VARS)
+
+        if is_affirmative(self._config.options.get('system_table_size_metrics', False)):
             # report size of tables in MiB to Datadog
             (rows_read_total, rows_changed_total) = self._query_rows_stats_per_table(db)
             results['information_table_rows_read_total'] = rows_read_total
@@ -1047,13 +1056,14 @@ class MySql(AgentCheck):
                 table_rows_read_total = {}
                 table_rows_changed_total = {}
                 for row in cursor.fetchall():
-                    table_name = str(row[0])
-                    rows_read_total = long(row[1])
-                    rows_changed_total = long(row[2])
+                    table_schema = str(row[0])
+                    table_name = str(row[1])
+                    rows_read_total = long(row[2])
+                    rows_changed_total = long(row[3])
 
                     # set the tag as the dictionary key
-                    table_rows_read_total["schema:{0}".format(table_name)] = rows_read_total
-                    table_rows_changed_total["schema:{0}".format(table_name)] = rows_changed_total
+                    table_rows_read_total["schema:{},table:{}".format(table_schema, table_name)] = rows_read_total
+                    table_rows_changed_total["schema:{},table:{}".format(table_schema, table_name)] = rows_changed_total
 
                 return table_rows_read_total, table_rows_changed_total
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
