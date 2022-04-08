@@ -25,31 +25,33 @@ If you want to monitor the Envoy proxies in Istio, configure the [Envoy integrat
 ### Configuration
 
 #### Metric collection
-##### Data plane vs control plane
-The Istio integration has two key components for how it collects the prometheus formatted Istio metrics. This corresponds to the [Istio architecture][24] split between its data plane (the `istio-proxy` sidecar containers) and the control plane (the `istiod` service managing the proxies). These are both ran as `istio` Agent checks, however have different responsibilities and configuration methods.
+The Istio integration has two key components for how it collects the prometheus formatted Istio metrics. This corresponds to the [Istio architecture][23] split between its data plane (the `istio-proxy` sidecar containers) and the control plane (the `istiod` service managing the proxies). These are both ran as `istio` Agent checks, however have different responsibilities and configuration methods.
 
-To monitor the Istio data plane the Agent comes with an [`istio.d/auto_conf.yaml`][9] file to automatically setup the monitoring for the `istio-proxy` sidecar containers. The Agent initializes this check for each sidecar container that it discovers automatically. This portion reports the `istio.mesh.*` metrics with respect to the data exposed by each of these sidecar containers. To customize this portion of the integration see the [example configuration file][8] and set the `istio_mesh_endpoint` accordingly.
+##### Data plane configuration
+To monitor the Istio data plane the Agent comes with an [`istio.d/auto_conf.yaml`][9] file to automatically setup the monitoring for each of the `istio-proxy` sidecar containers. The Agent initializes this check for each sidecar container that it discovers automatically. This portion reports the `istio.mesh.*` metrics with respect to the data exposed by each of these sidecar containers.
 
-To monitor the Istio control plane and report the remaining `mixer`, `galley`, `pilot`, and `citadel` metrics the Agent needs to be configured to monitor the `istiod` service.
-
-##### Control plane configuration
-To monitor the `istiod` control plane in Istio `v1.5+`, first enable the [Endpoint Check][22] feature between your Agent and Cluster Agent. Once that is enabled apply the follow Autodiscovery Annotations on the Service `istiod` in the `istio-system` namespace:
-
+To customize this portion of the integration create an equivalent [configuration file][24] for Istio. This should have the `ad_identifiers` and `istio_mesh_endpoint` set appropriately to setup the integration when an `istio-proxy` sidecar container is discovered. Refer to the existing [`istio.d/auto_conf.yaml`][9] as well as the [example configuration file][8] for all available configuration options. When customizing, set the `exclude_labels` to the following configuration:
 ```yaml
-ad.datadoghq.com/endpoints.check_names: '["istio"]'
-ad.datadoghq.com/endpoints.init_configs: '[{}]'
-ad.datadoghq.com/endpoints.instances: |
-     [
-       {
-         "istiod_endpoint": "http://%%host%%:15014/metrics",
-         "use_openmetrics": "true"
-       }
-     ]
+    exclude_labels:
+      - source_version
+      - destination_version
+      - source_canonical_revision
+      - destination_canonical_revision
+      - source_principal
+      - destination_principal
+      - source_cluster
+      - destination_cluster
+      - source_canonical_service
+      - destination_canonical_service
+      - source_workload_namespace
+      - destination_workload_namespace
+      - request_protocol
+      - connection_security_policy
 ```
-The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][23] used. Consult the Istio docs for the proper method to apply these Service Annotations.
+These excluded labels are set in the existing `istio.d/auto_conf.yaml` file.
 
 ##### Control plane configuration
-To monitor the `istiod` control plane in Istio `v1.5+`, apply the follow Autodiscovery Annotations on the pod for the Deployment `istiod` in the `istio-system` namespace:
+To monitor the Istio control plane and report the remaining `mixer`, `galley`, `pilot`, and `citadel` metrics the Agent needs to be configured to monitor the `istiod` deployment. In Istio `v1.5+`, apply the follow Autodiscovery Annotations as pod annotations for the deployment `istiod` in the `istio-system` namespace:
 
 ```yaml
 ad.datadoghq.com/discovery.check_names: '["istio"]'
@@ -62,9 +64,9 @@ ad.datadoghq.com/discovery.instances: |
        }
      ]
 ```
-The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][23] used. Consult the Istio docs for the proper method to apply these Pod Annotations.
+The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][22] used. Consult the Istio docs for the proper method to apply these pod annotations.
 
-These annotations reference `discovery` as the `<CONTAINER_IDENTIFIER>` in the annotations to match the default container name of the pods for the `istiod` deployment. If your container name is different adjust accordingly.
+These annotations reference `discovery` as the `<CONTAINER_IDENTIFIER>` to match the default container name of the pods for the `istiod` deployment. If your container name is different adjust accordingly.
 
 ##### OpenMetrics V2 vs OpenMetrics V1
 <div class="alert alert-warning">
@@ -239,6 +241,6 @@ Additional helpful documentation, links, and articles:
 [19]: https://www.datadoghq.com/blog/istio-metrics/
 [20]: https://docs.datadoghq.com/integrations/openmetrics/
 [21]: https://github.com/DataDog/integrations-core/blob/7.32.x/istio/datadog_checks/istio/data/conf.yaml.example
-[22]: https://docs.datadoghq.com/agent/cluster_agent/endpointschecks
-[23]: https://istio.io/latest/docs/setup/install/
-[24]: https://istio.io/latest/docs/ops/deployment/architecture/
+[22]: https://istio.io/latest/docs/setup/install/
+[23]: https://istio.io/latest/docs/ops/deployment/architecture/
+[24]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=file#configuration
