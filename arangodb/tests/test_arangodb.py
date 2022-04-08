@@ -22,18 +22,6 @@ def test_invalid_endpoint(aggregator, instance_invalid_endpoint, dd_run_check):
 
 
 @pytest.mark.integration
-def test_unavailable_endpoint(aggregator, instance, dd_run_check):
-    check = ArangodbCheck('arangodb', {}, [instance])
-
-    def mock_requests_get(url, *args, **kwargs):
-        return MockResponse(status_code=500)
-
-    with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
-        with pytest.raises(Exception):
-            dd_run_check(check)
-
-
-@pytest.mark.integration
 @pytest.mark.parametrize(
     'tag_condition, base_tags',
     [
