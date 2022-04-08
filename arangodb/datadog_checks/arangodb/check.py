@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from urllib.parse import urlparse
 
+from requests import HTTPError
+
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
 from .config_models import ConfigMixin
@@ -51,10 +53,12 @@ class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
         try:
             response = self.http.get(tag_endpoint)
+            response.raise_for_status()
 
             if response.json()['code'] == 200:
                 return 'server_mode:{}'.format(response.json()['mode'])
 
+        except HTTPError:
             self.log.debug("Unable to get server mode, skipping `server_mode` tag.")
         except Exception as e:
             self.log.debug("Unable to query %s, received error: %s", tag_endpoint, e)
@@ -69,10 +73,12 @@ class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
         try:
             response = self.http.get(tag_endpoint)
+            response.raise_for_status()
 
             if response.json()['code'] == 200:
                 return 'server_id:{}'.format(response.json()['id'])
 
+        except HTTPError:
             self.log.debug("Unable to get server id. Server is not running in cluster mode. Skipping `server_id` tag.")
         except Exception as e:
             self.log.debug("Unable to query %s, received error: %s", tag_endpoint, e)

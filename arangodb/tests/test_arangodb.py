@@ -2,13 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from typing import Any, Dict
 
 import mock
 import pytest
+from requests import HTTPError
 
 from datadog_checks.arangodb import ArangodbCheck
-from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -17,15 +16,23 @@ from .common import METRICS
 
 @pytest.mark.integration
 def test_invalid_endpoint(aggregator, instance_invalid_endpoint, dd_run_check):
-    # type: (AggregatorStub, Dict[str, Any]) -> None
     check = ArangodbCheck('arangodb', {}, [instance_invalid_endpoint])
     with pytest.raises(Exception):
         dd_run_check(check)
 
 
 @pytest.mark.integration
+def test_unavailable_endpoint(aggregator, instance, dd_run_check):
+    check = ArangodbCheck('arangodb', {}, [instance])
+    with mock.patch('requests.get', side_effect=MockResponse(status_code=401), autospec=True):
+        with pytest.raises(HTTPError):
+            dd_run_check(check)
+    aggregator.assert_service_check('arangodb.openmetrics.health', ArangodbCheck.ERROR, count=1)
+
+
+@pytest.mark.integration
 @pytest.mark.parametrize(
-    'condition, base_tags',
+    'tag_condition, base_tags',
     [
         pytest.param(
             'valid_id_mode',
@@ -49,12 +56,12 @@ def test_invalid_endpoint(aggregator, instance_invalid_endpoint, dd_run_check):
         ),
     ],
 )
-def test_check(instance, dd_run_check, aggregator, condition, base_tags):
+def test_check(instance, dd_run_check, aggregator, tag_condition, base_tags):
     check = ArangodbCheck('arangodb', {}, [instance])
 
     def mock_requests_get(url, *args, **kwargs):
         fixture = url.rsplit('/', 1)[-1]
-        return MockResponse(file_path=os.path.join(os.path.dirname(__file__), 'fixtures', condition, fixture))
+        return MockResponse(file_path=os.path.join(os.path.dirname(__file__), 'fixtures', tag_condition, fixture))
 
     with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
         dd_run_check(check)
