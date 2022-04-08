@@ -668,7 +668,9 @@ class TestTags:
             pytest.param([r'.*'], [], [], id='exclude everything'),
             pytest.param([r'.*'], ['hello'], [], id='exclude everything one include'),
             pytest.param([], ['hello'], ['hello'], id='include string'),
-            pytest.param([], [r'^ns\.my_(me|test)tric*'], ['my_metric', 'my_metric_count'], id='include multiple matches'),
+            pytest.param(
+                [], [r'^ns\.my_(me|test)tric*'], ['my_metric', 'my_metric_count'], id='include multiple matches'
+            ),
             pytest.param([r'my_metric_count'], [r'my_metric*'], ['my_metric', 'test.my_metric1'], id='match both'),
             pytest.param([r'my_metric_count'], [r'my_metric_count'], [], id='duplicate'),
             pytest.param(
