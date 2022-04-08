@@ -1718,11 +1718,11 @@ def test_generic_host_resources(aggregator):
         aggregator.assert_metric('snmp.hrStorageAllocationFailures', count=1, tags=tags)
 
     processors = [
-        '1.3.6.1.3.81.16',
-        '1.3.6.1.3.95.73.140.186.121.144.199',
+        ('1.3.6.1.3.81.16', 5),
+        ('1.3.6.1.3.95.73.140.186.121.144.199', 10),
     ]
-    for proc in processors:
-        tags = common_tags + ['processorid:{}'.format(proc)]
+    for proc, deviceid in processors:
+        tags = common_tags + ['processorid:{}'.format(proc), 'deviceid:{}'.format(deviceid)]
         aggregator.assert_metric('snmp.hrProcessorLoad', count=1, tags=tags)
 
     aggregator.assert_all_metrics_covered()
