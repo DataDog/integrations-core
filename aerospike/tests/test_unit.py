@@ -211,8 +211,11 @@ def test_collect_empty_data(aggregator):
             id="Last value has data",
         ),
         pytest.param(
-            ['read', 'udf'],
-            ['{test}-read:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'],
+            ['read'],
+            [
+                '{test}-read:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,',
+                '0.00',
+            ],
             id="only read data",
         ),
     ],
