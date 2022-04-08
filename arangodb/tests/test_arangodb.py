@@ -18,7 +18,7 @@ def test_invalid_endpoint(aggregator, instance_invalid_endpoint, dd_run_check):
     check = ArangodbCheck('arangodb', {}, [instance_invalid_endpoint])
     with pytest.raises(Exception):
         dd_run_check(check)
-    aggregator.assert_service_check('arangodb.openmetrics.health', ArangodbCheck.ERROR, count=1)
+    aggregator.assert_service_check('arangodb.openmetrics.health', ArangodbCheck.CRITICAL, count=1)
 
 
 @pytest.mark.integration
