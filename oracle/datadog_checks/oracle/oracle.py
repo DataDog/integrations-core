@@ -154,7 +154,7 @@ class Oracle(AgentCheck):
 
     @property
     def _connection(self):
-        """ Creates a connection or raises an exception """
+        """Creates a connection or raises an exception"""
         if self._cached_connection is None:
             if self.can_use_oracle_client():
                 self._cached_connection = self._oracle_client_connect()

@@ -3,11 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 
-try:
-    from contextlib import ExitStack
-except ImportError:
-    from contextlib2 import ExitStack
-
 import mock
 
 from datadog_checks.base.utils.db import Query, QueryManager

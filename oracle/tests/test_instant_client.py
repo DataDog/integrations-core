@@ -1,16 +1,9 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import copy
-
-import pytest
-
-try:
-    from contextlib import ExitStack
-except ImportError:
-    from contextlib2 import ExitStack
 
 import mock
+import pytest
 
 from datadog_checks.oracle import Oracle
 

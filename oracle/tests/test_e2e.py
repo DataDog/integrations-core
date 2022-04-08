@@ -4,8 +4,6 @@
 
 import pytest
 
-from datadog_checks.oracle import Oracle
-
 METRICS = [
     'oracle.tablespace.used',
     # ProcessMetrics
