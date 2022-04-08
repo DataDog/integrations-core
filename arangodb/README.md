@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [ArangoDB][1] through the Datadog Agent.
+This check monitors [ArangoDB][1] through the Datadog Agent. ArangoDB 3.8 and above are supported.
 
 ## Setup
 

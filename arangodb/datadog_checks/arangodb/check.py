@@ -26,14 +26,12 @@ class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     def refresh_scrapers(self):
         base_tags = []
+        server_tags = {'mode': self.SERVER_MODE_ENDPOINT, 'id': self.SERVER_ID_ENDPOINT}
 
-        server_mode = self.get_server_mode_tag()
-        if server_mode:
-            base_tags.append(server_mode)
-
-        server_id = self.get_server_id_tag()
-        if server_id:
-            base_tags.append(server_id)
+        for tag_name, endpoint in server_tags.items():
+            tag = self.get_server_tag(tag_name, endpoint)
+            if tag:
+                base_tags.append(tag)
 
         self.set_dynamic_tags(*base_tags)
 
@@ -45,41 +43,23 @@ class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
         return default_config
 
-    def get_server_mode_tag(self):
+    def get_server_tag(self, tag_name, endpoint):
         """
-        Get the tag for the mode of the server.
+        Get the tag for the the server.
         """
-        tag_endpoint = self.base_url + self.SERVER_MODE_ENDPOINT
+        tag_endpoint = self.base_url + endpoint
 
         try:
             response = self.http.get(tag_endpoint)
             response.raise_for_status()
 
-                return 'server_mode:{}'.format(response.json()['mode'])
+            return 'server_{}:{}'.format(tag_name, response.json()[tag_name])
 
         except HTTPError:
-            self.log.debug("Unable to get server mode, skipping `server_mode` tag.")
+            self.log.debug("Unable to get server %s, skipping `server_%s` tag.", tag_name, tag_name)
         except Exception as e:
-            self.log.debug("Unable to query `%s` to collect `server_mode` tag, received error: %s", tag_endpoint, e)
-
-        return None
-
-    def get_server_id_tag(self):
-        """
-        Get the tag for the server id of the server in a cluster.
-        """
-        tag_endpoint = self.base_url + self.SERVER_ID_ENDPOINT
-
-        try:
-            response = self.http.get(tag_endpoint)
-            response.raise_for_status()
-
-            if response.json()['code'] == 200:
-                return 'server_id:{}'.format(response.json()['id'])
-
-        except HTTPError:
-            self.log.debug("Unable to get server id. Server is not running in cluster mode. Skipping `server_id` tag.")
-        except Exception as e:
-            self.log.debug("Unable to query %s to collect `server_id` tag, received error: %s", tag_endpoint, e)
+            self.log.debug(
+                "Unable to query `%s` to collect `server_%s` tag, received error: %s", tag_endpoint, tag_name, e
+            )
 
         return None
