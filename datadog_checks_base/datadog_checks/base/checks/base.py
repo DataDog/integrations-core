@@ -655,12 +655,13 @@ class AgentCheck(object):
             # ignore metric sample
             return
 
+        name = self._format_namespace(name, raw)
+        if not self.should_send_metric(name):
+            return
+
         tags = self._normalize_tags_type(tags or [], device_name, name)
         if hostname is None:
             hostname = ''
-
-        if not self.should_send_metric(name):
-            return
 
         if self.metric_limiter:
             if mtype in ONE_PER_CONTEXT_METRIC_TYPES:
@@ -684,9 +685,7 @@ class AgentCheck(object):
             self.warning(err_msg)
             return
 
-        aggregator.submit_metric(
-            self, self.check_id, mtype, self._format_namespace(name, raw), value, tags, hostname, flush_first_value
-        )
+        aggregator.submit_metric(self, self.check_id, mtype, name, value, tags, hostname, flush_first_value)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
         # type: (str, float, Sequence[str], str, str, bool) -> None

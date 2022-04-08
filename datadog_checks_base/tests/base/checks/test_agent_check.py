@@ -668,7 +668,9 @@ class TestTags:
             pytest.param([r'.*'], [], [], id='exclude everything'),
             pytest.param([r'.*'], ['hello'], [], id='exclude everything one include'),
             pytest.param([], ['hello'], ['hello'], id='include string'),
-            pytest.param([], [r'^my_(me|test)tric*'], ['my_metric', 'my_metric_count'], id='include multiple matches'),
+            pytest.param(
+                [], [r'^ns\.my_(me|test)tric*'], ['my_metric', 'my_metric_count'], id='include multiple matches'
+            ),
             pytest.param([r'my_metric_count'], [r'my_metric*'], ['my_metric', 'test.my_metric1'], id='match both'),
             pytest.param([r'my_metric_count'], [r'my_metric_count'], [], id='duplicate'),
             pytest.param(
@@ -697,6 +699,7 @@ class TestTags:
             }
         }
         check = AgentCheck('myintegration', {}, [instance])
+        check.__NAMESPACE__ = 'ns'
         check.gauge('my_metric', 0)
         check.count('my_metric_count', 0)
         check.count('test.my_metric1', 1)
@@ -704,9 +707,9 @@ class TestTags:
         check.service_check('test.can_check', status=AgentCheck.OK)
 
         for metric_name in expected_metrics:
-            aggregator.assert_metric(metric_name, count=1)
+            aggregator.assert_metric('ns.{}'.format(metric_name), count=1)
 
-        aggregator.assert_service_check('test.can_check', status=AgentCheck.OK)
+        aggregator.assert_service_check('ns.test.can_check', status=AgentCheck.OK)
         aggregator.assert_all_metrics_covered()
 
     @pytest.mark.parametrize(
