@@ -314,7 +314,7 @@ class HTTPCheck(AgentCheck):
             cert = ssl_sock.getpeercert()
             exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
         except Exception as e:
-            msg = str(e)
+            msg = repr(e)
             if any(word in msg for word in ['expired', 'expiration']):
                 self.log.debug("error: %s. Cert might be expired.", e)
                 return AgentCheck.CRITICAL, 0, 0, msg
