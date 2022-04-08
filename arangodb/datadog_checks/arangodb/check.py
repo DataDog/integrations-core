@@ -55,13 +55,12 @@ class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             response = self.http.get(tag_endpoint)
             response.raise_for_status()
 
-            if response.json()['code'] == 200:
                 return 'server_mode:{}'.format(response.json()['mode'])
 
         except HTTPError:
             self.log.debug("Unable to get server mode, skipping `server_mode` tag.")
         except Exception as e:
-            self.log.debug("Unable to query %s, received error: %s", tag_endpoint, e)
+            self.log.debug("Unable to query `%s` to collect `server_mode` tag, received error: %s", tag_endpoint, e)
 
         return None
 
@@ -81,6 +80,6 @@ class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         except HTTPError:
             self.log.debug("Unable to get server id. Server is not running in cluster mode. Skipping `server_id` tag.")
         except Exception as e:
-            self.log.debug("Unable to query %s, received error: %s", tag_endpoint, e)
+            self.log.debug("Unable to query %s to collect `server_id` tag, received error: %s", tag_endpoint, e)
 
         return None
