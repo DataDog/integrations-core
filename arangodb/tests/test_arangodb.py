@@ -57,7 +57,12 @@ def test_check(instance, dd_run_check, aggregator, tag_condition, base_tags):
     with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
         dd_run_check(check)
 
-    aggregator.assert_service_check('arangodb.openmetrics.health', ArangodbCheck.OK, count=1)
+    aggregator.assert_service_check(
+        'arangodb.openmetrics.health',
+        ArangodbCheck.OK,
+        count=1,
+        tags=['endpoint:http://localhost:8529/_admin/metrics/v2'],
+    )
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     for metric in METRICS:
         aggregator.assert_metric(metric)

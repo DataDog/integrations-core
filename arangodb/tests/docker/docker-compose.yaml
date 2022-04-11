@@ -6,7 +6,5 @@ services:
     image: arangodb:${ARANGODB_VERSION}
     environment:
       - ARANGO_ROOT_PASSWORD=password
-    expose:
-      - "8529"
     ports:
       - "8529:8529"

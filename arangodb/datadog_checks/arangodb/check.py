@@ -8,27 +8,27 @@ from requests import HTTPError
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
 from .config_models import ConfigMixin
-from .metrics import METRIC_MAP, construct_metrics_config
+from .metrics import METRIC_MAP
 
 
 class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'arangodb'
     SERVER_MODE_ENDPOINT = '/_admin/server/mode'
     SERVER_ID_ENDPOINT = '/_admin/server/id'
+    SERVER_TAGS = {'mode': SERVER_MODE_ENDPOINT, 'id': SERVER_ID_ENDPOINT}
 
     def __init__(self, name, init_config, instances):
 
         super(ArangodbCheck, self).__init__(name, init_config, instances)
         self.openmetrics_endpoint = self.instance.get('openmetrics_endpoint')
-        self.base_url = "{}://{}".format(
-            urlparse(self.openmetrics_endpoint).scheme, urlparse(self.openmetrics_endpoint).netloc
-        )
+        self.scheme = urlparse(self.openmetrics_endpoint).scheme
+        self.netloc = urlparse(self.openmetrics_endpoint).netloc
+        self.base_url = "{}://{}".format(self.scheme, self.netloc)
 
     def refresh_scrapers(self):
         base_tags = []
-        server_tags = {'mode': self.SERVER_MODE_ENDPOINT, 'id': self.SERVER_ID_ENDPOINT}
 
-        for tag_name, endpoint in server_tags.items():
+        for tag_name, endpoint in self.SERVER_TAGS.items():
             tag = self.get_server_tag(tag_name, endpoint)
             if tag:
                 base_tags.append(tag)
@@ -38,7 +38,7 @@ class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     def get_default_config(self):
         default_config = {
             'openmetrics_endpoint': self.openmetrics_endpoint,
-            'metrics': construct_metrics_config(METRIC_MAP, {}),
+            'metrics': METRIC_MAP,
         }
 
         return default_config
