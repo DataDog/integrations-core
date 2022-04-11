@@ -15,6 +15,7 @@ from typing import Any, Callable, Dict, List, Tuple
 
 from cachetools import TTLCache
 
+from ..common import to_native_string
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.types import Transformer
@@ -186,12 +187,10 @@ def obfuscate_sql_with_metadata(query, options=None):
         return {'query': '', 'metadata': {}}
 
     statement = datadog_agent.obfuscate_sql(query, options)
-
-    # The `obfuscate_sql` testing stub returns bytes from the encoder, so we have to handle that here.
+    statement = to_native_string(statement.strip())
+    # The `obfuscate_sql` testing stub returns bytes, so we have to handle that here.
     # The actual `obfuscate_sql` method in the agent's Go code returns a JSON string.
-    if isinstance(statement, str) and not statement.startswith('{'):
-        return {'query': statement, 'metadata': {}}
-    if isinstance(statement, bytes) and not statement.startswith(b'{'):
+    if not statement.startswith('{'):
         return {'query': statement, 'metadata': {}}
 
     statement_with_metadata = json.loads(statement)

@@ -88,6 +88,14 @@ class TestDBExcepption(BaseException):
             },
         ),
         (
+            "  {\"query\":\"SELECT * FROM datadog\",\"metadata\":{\"tables_csv\":\"datadog\",\"commands\":[\"SELECT\"],"
+            "\"comments\":null}}          ",
+            {
+                'query': 'SELECT * FROM datadog',
+                'metadata': {'commands': ['SELECT'], 'comments': None, 'tables': ['datadog']},
+            },
+        ),
+        (
             "{\"query\":\"SELECT * FROM datadog WHERE age = (SELECT AVG(age) FROM datadog2)\",\"metadata\":{"
             "\"tables_csv\":\"    datadog,  datadog2      \",\"commands\":[\"SELECT\",\"SELECT\"],\"comments\":[\"-- "
             "Test comment\"]}}",
