@@ -1,5 +1,9 @@
 # CHANGELOG - vsphere
 
+## 6.1.1 / 2022-04-11
+
+* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11800](https://github.com/DataDog/integrations-core/pull/11800).
+
 ## 6.1.0 / 2022-04-05
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
