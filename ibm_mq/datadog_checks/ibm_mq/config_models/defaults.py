@@ -31,7 +31,7 @@ def instance_channels(field, value):
 
 
 def instance_collect_reset_queue_metrics(field, value):
-    return False
+    return True
 
 
 def instance_collect_statistics_metrics(field, value):
