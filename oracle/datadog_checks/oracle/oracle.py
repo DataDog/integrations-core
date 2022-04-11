@@ -154,16 +154,10 @@ class Oracle(AgentCheck):
 
     @property
     def _connection(self):
+        """Creates a connection or raises an exception"""
         if self._cached_connection is None:
             if self.can_use_oracle_client():
-                dsn = self._get_dsn()
-                self.log.debug("Connecting via Oracle Instant Client with DSN: %s", dsn)
-                try:
-                    self._cached_connection = cx_Oracle.connect(user=self._user, password=self._password, dsn=dsn)
-                    self.log.debug("Connected to Oracle DB using Oracle Instant Client")
-                except cx_Oracle.DatabaseError as e:
-                    self._connection_errors += 1
-                    self.log.error("Failed to connect to Oracle DB using Oracle Instant Client, error: %s", str(e))
+                self._cached_connection = self._oracle_client_connect()
             elif JDBC_IMPORT_ERROR:
                 self._connection_errors += 1
                 self.log.error(
@@ -187,6 +181,18 @@ class Oracle(AgentCheck):
         else:
             self.log.debug('Running cx_Oracle version %s', cx_Oracle.version)
             return True
+
+    def _oracle_client_connect(self):
+        dsn = self._get_dsn()
+        self.log.debug("Connecting via Oracle Instant Client with DSN: %s", dsn)
+        try:
+            connection = cx_Oracle.connect(user=self._user, password=self._password, dsn=dsn)
+            self.log.debug("Connected to Oracle DB using Oracle Instant Client")
+            return connection
+        except cx_Oracle.DatabaseError as e:
+            self._connection_errors += 1
+            self.log.error("Failed to connect to Oracle DB using Oracle Instant Client, error: %s", str(e))
+            raise
 
     def _get_dsn(self):
         host = self._server
