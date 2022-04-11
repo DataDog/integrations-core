@@ -1,5 +1,9 @@
 # CHANGELOG - kubelet
 
+## 7.3.1 / 2022-04-11
+
+* [Fixed] Handle probe metrics when the endpoint is not available (k8s < 1.15). See [#11807](https://github.com/DataDog/integrations-core/pull/11807).
+
 ## 7.3.0 / 2022-04-05
 
 * [Added] Collect liveness and readiness probe metrics. See [#11682](https://github.com/DataDog/integrations-core/pull/11682).
