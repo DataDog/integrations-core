@@ -185,22 +185,18 @@ def obfuscate_sql_with_metadata(query, options=None):
     if not query:
         return {'query': '', 'metadata': {}}
 
-    def _load_metadata(statement):
-        try:
-            statement_with_metadata = json.loads(statement)
-            metadata = statement_with_metadata.get('metadata', {})
-            tables = metadata.pop('tables_csv', None)
-            tables = [table.strip() for table in tables.split(',') if table != ''] if tables else None
-            statement_with_metadata['metadata']['tables'] = tables
-            return statement_with_metadata
-        except ValueError:
-            # Assume we're running against an older agent and return the obfuscated query without metadata.
-            return {'query': statement, 'metadata': {}}
+    statement = datadog_agent.obfuscate_sql(query, options)
+    if isinstance(statement, str) and not statement.startswith('{'):
+        return {'query': statement, 'metadata': {}}
+    elif isinstance(statement, bytes) and not statement.startswith(b'{'):
+        return {'query': statement, 'metadata': {}}
 
-    obfuscated_statement = datadog_agent.obfuscate_sql(query, options)
-    if options and json.loads(options).get('return_json_metadata', False):
-        return _load_metadata(obfuscated_statement)
-    return {'query': obfuscated_statement, 'metadata': {}}
+    statement_with_metadata = json.loads(statement)
+    metadata = statement_with_metadata.get('metadata', {})
+    tables = metadata.pop('tables_csv', None)
+    tables = [table.strip() for table in tables.split(',') if table != ''] if tables else None
+    statement_with_metadata['metadata']['tables'] = tables
+    return statement_with_metadata
 
 
 class DBMAsyncJob(object):
