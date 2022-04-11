@@ -187,9 +187,9 @@ def obfuscate_sql_with_metadata(query, options=None):
         return {'query': '', 'metadata': {}}
 
     statement = datadog_agent.obfuscate_sql(query, options)
-    statement = to_native_string(statement.strip())
     # The `obfuscate_sql` testing stub returns bytes, so we have to handle that here.
     # The actual `obfuscate_sql` method in the agent's Go code returns a JSON string.
+    statement = to_native_string(statement.strip())
     if not statement.startswith('{'):
         return {'query': statement, 'metadata': {}}
 
