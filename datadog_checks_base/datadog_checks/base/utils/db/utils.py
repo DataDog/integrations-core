@@ -186,9 +186,7 @@ def obfuscate_sql_with_metadata(query, options=None):
         return {'query': '', 'metadata': {}}
 
     statement = datadog_agent.obfuscate_sql(query, options)
-    if isinstance(statement, str) and not statement.startswith('{'):
-        return {'query': statement, 'metadata': {}}
-    elif isinstance(statement, bytes) and not statement.startswith(b'{'):
+    if not statement.startswith('{'):
         return {'query': statement, 'metadata': {}}
 
     statement_with_metadata = json.loads(statement)
