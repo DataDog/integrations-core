@@ -194,8 +194,9 @@ def obfuscate_sql_with_metadata(query, options=None):
 
     # Older agents may not have the new metadata API which returns a JSON string, so we must support cases where
     # newer integrations are running on an older agent. We use this "shortcut" to determine if we've received
-    # a JSON string to avoid throwing excessive exceptions because we found that orjson leaks memory.
-    # Note, this condition is only relevant for integrations running on agent versions < 7.34
+    # a JSON string to avoid throwing excessive exceptions. We found that orjson leaks memory when failing
+    # to parse these strings which are not valid json. Note, this condition is only relevant for integrations
+    # running on agent versions < 7.34
     if not statement.startswith('{'):
         return {'query': statement, 'metadata': {}}
 
