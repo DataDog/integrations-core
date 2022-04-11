@@ -1,5 +1,9 @@
 # CHANGELOG - ECS Fargate
 
+## 3.1.1 / 2022-04-11
+
+* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11800](https://github.com/DataDog/integrations-core/pull/11800).
+
 ## 3.1.0 / 2022-04-05
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
