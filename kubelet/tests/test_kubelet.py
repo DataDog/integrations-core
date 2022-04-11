@@ -10,6 +10,7 @@ from collections import defaultdict
 import mock
 import pytest
 import requests
+import requests_mock
 from six import iteritems
 
 from datadog_checks.base.checks.kubelet_base.base import KubeletCredentials
@@ -321,7 +322,14 @@ def tagger():
     return tagger
 
 
-def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_1_14, stats_summary_fail=False, pod_list='pods.json'):
+def mock_kubelet_check(
+    monkeypatch,
+    instances,
+    kube_version=KUBE_1_14,
+    stats_summary_fail=False,
+    pod_list='pods.json',
+    probes_available=None,
+):
     """
     Returns a check that uses mocked data for responses from prometheus endpoints, pod list,
     and node spec.
@@ -338,6 +346,8 @@ def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_1_14, stats_sum
         )
     monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
     monkeypatch.setattr(check, 'compute_pod_expiration_datetime', mock.Mock(return_value=None))
+    if probes_available:
+        monkeypatch.setattr(check, '_probes_available', mock.Mock(return_value=True))
 
     def mocked_poll(cadvisor_response, kubelet_response):
         def _mocked_poll(*args, **kwargs):
@@ -1270,7 +1280,7 @@ def test_probe_metrics(monkeypatch, aggregator, tagger):
     tagger.reset()
     tagger.set_tags(PROBE_TAGS)
 
-    check = mock_kubelet_check(monkeypatch, [{}], pod_list='pod_list_probes.json')
+    check = mock_kubelet_check(monkeypatch, [{}], pod_list='pod_list_probes.json', probes_available=True)
     check.check({'cadvisor_metrics_endpoint': '', 'kubelet_metrics_endpoint': ''})
     check._perform_kubelet_check.assert_called_once()
 
@@ -1345,3 +1355,62 @@ def test_probe_metrics(monkeypatch, aggregator, tagger):
         1686298,
         ['kube_container_name:dnsmasq', 'kube_namespace:kube-system', 'pod_name:kube-dns-c598bd956-wgf4n'],
     )
+
+
+@pytest.fixture()
+def mock_request():
+    with requests_mock.Mocker() as m:
+        yield m
+
+
+def test_detect_probes(monkeypatch, mock_request):
+    mock_request.head('http://kubelet:10250/metrics/probes', status_code=200)
+    check = mock_kubelet_check(monkeypatch, [{}])
+    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    assert available is True
+    assert check._probes_available is True
+    assert mock_request.call_count == 1
+
+
+def test_detect_probes_cached(monkeypatch, mock_request):
+    mock_request.head('http://kubelet:10250/metrics/probes', status_code=200)
+    check = mock_kubelet_check(monkeypatch, [{}])
+    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    assert available is True
+    assert check._probes_available is True
+    assert mock_request.call_count == 1
+    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    assert available is True
+    assert check._probes_available is True
+    assert mock_request.call_count == 1
+
+
+def test_detect_probes_404(monkeypatch, mock_request):
+    mock_request.head('http://kubelet:10250/metrics/probes', status_code=404)
+    check = mock_kubelet_check(monkeypatch, [{}])
+    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    assert available is False
+    assert check._probes_available is False
+    assert mock_request.call_count == 1
+
+
+def test_detect_probes_404_cached(monkeypatch, mock_request):
+    mock_request.head('http://kubelet:10250/metrics/probes', status_code=404)
+    check = mock_kubelet_check(monkeypatch, [{}])
+    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    assert available is False
+    assert check._probes_available is False
+    assert mock_request.call_count == 1
+    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    assert available is False
+    assert check._probes_available is False
+    assert mock_request.call_count == 1
+
+
+def test_detect_probes_req_exception(monkeypatch, mock_request):
+    mock_request.head('http://kubelet:10250/metrics/probes', exc=requests.exceptions.ConnectTimeout)
+    check = mock_kubelet_check(monkeypatch, [{}])
+    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    assert available is False
+    assert check._probes_available is None
+    assert mock_request.call_count == 1

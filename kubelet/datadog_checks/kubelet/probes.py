@@ -5,6 +5,8 @@ from __future__ import division
 
 from copy import deepcopy
 
+import requests
+
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.utils.tagging import tagger
 
@@ -20,6 +22,7 @@ class ProbesPrometheusScraperMixin(object):
     def __init__(self, *args, **kwargs):
         super(ProbesPrometheusScraperMixin, self).__init__(*args, **kwargs)
 
+        self._probes_available = None
         self.PROBES_METRIC_TRANSFORMERS = {
             'prober_probe_total': self.prober_probe_total,
         }
@@ -40,6 +43,21 @@ class ProbesPrometheusScraperMixin(object):
             }
         )
         return probes_instance
+
+    def detect_probes(self, url):
+        """
+        Whether the probe metrics endpoint is available (k8s 1.15+).
+        :return: false if the endpoint throws a 404, true otherwise.
+        """
+        if self._probes_available is not None:
+            return self._probes_available
+        try:
+            r = requests.head(url, timeout=5)
+        except Exception as e:
+            self.log.debug("Unable to collect query probes endpoint: %s", e)
+            return False
+        self._probes_available = r.status_code != 404
+        return self._probes_available
 
     def prober_probe_total(self, metric, scraper_config):
         for sample in metric.samples:
