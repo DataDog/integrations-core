@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 25.2.1 / 2022-04-11
+
+* [Fixed] Fix `metric_patterns` option to support namespaces. See [#11795](https://github.com/DataDog/integrations-core/pull/11795).
+
 ## 25.2.0 / 2022-04-05
 
 * [Added] Add integration_tracing option. See [#11761](https://github.com/DataDog/integrations-core/pull/11761).
