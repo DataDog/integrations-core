@@ -2,7 +2,7 @@
 
 ## 7.3.1 / 2022-04-11
 
-* [Fixed] Handle probe metrics when the endpoint is not available (k8s < 1.15). See [#11807](https://github.com/DataDog/integrations-core/pull/11807).
+* [Fixed] Handle probe metrics when the endpoint is not available (Kubernetes < 1.15). See [#11807](https://github.com/DataDog/integrations-core/pull/11807).
 
 ## 7.3.0 / 2022-04-05
 
