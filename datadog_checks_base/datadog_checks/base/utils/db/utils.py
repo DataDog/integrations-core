@@ -191,6 +191,12 @@ def obfuscate_sql_with_metadata(query, options=None):
     # The `obfuscate_sql` testing stub returns bytes, so we have to handle that here.
     # The actual `obfuscate_sql` method in the agent's Go code returns a JSON string.
     statement = to_native_string(statement.strip())
+
+    # Older agents may not have the new metadata API which returns a JSON string, so we must support cases where
+    # newer integrations are running on an older agent. In the past, we used to attempt JSON deserialization
+    # and used exceptions here as a way to control the flow. We found that this increased memory usage due to the
+    # amount of exceptions being thrown. Now, we use this "shortcut" to determine if we've received a JSON string
+    # to avoid throwing excessive amounts of exceptions.
     if not statement.startswith('{'):
         return {'query': statement, 'metadata': {}}
 

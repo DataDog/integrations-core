@@ -17,6 +17,7 @@ from datadog_checks.base.utils.db.utils import (
     obfuscate_sql_with_metadata,
     resolve_db_host,
 )
+from datadog_checks.base.utils.serialization import json
 
 
 @pytest.mark.parametrize(
@@ -80,14 +81,19 @@ class TestDBExcepption(BaseException):
     "obfuscator_return_value,expected_value",
     [
         (
-            "{\"query\":\"SELECT * FROM datadog\",\"metadata\":{\"tables_csv\":\"datadog\",\"commands\":[\"SELECT\"],"
-            "\"comments\":null}}",
+            json.dumps(
+                {
+                    'query': 'SELECT * FROM datadog',
+                    'metadata': {'tables_csv': 'datadog,', 'commands': ['SELECT'], 'comments': None},
+                }
+            ),
             {
                 'query': 'SELECT * FROM datadog',
                 'metadata': {'commands': ['SELECT'], 'comments': None, 'tables': ['datadog']},
             },
         ),
         (
+            # Whitespace test
             "  {\"query\":\"SELECT * FROM datadog\",\"metadata\":{\"tables_csv\":\"datadog\",\"commands\":[\"SELECT\"],"
             "\"comments\":null}}          ",
             {
@@ -96,9 +102,16 @@ class TestDBExcepption(BaseException):
             },
         ),
         (
-            "{\"query\":\"SELECT * FROM datadog WHERE age = (SELECT AVG(age) FROM datadog2)\",\"metadata\":{"
-            "\"tables_csv\":\"    datadog,  datadog2      \",\"commands\":[\"SELECT\",\"SELECT\"],\"comments\":[\"-- "
-            "Test comment\"]}}",
+            json.dumps(
+                {
+                    'query': 'SELECT * FROM datadog WHERE age = (SELECT AVG(age) FROM datadog2)',
+                    'metadata': {
+                        'tables_csv': '    datadog,  datadog2      ',
+                        'commands': ['SELECT', 'SELECT'],
+                        'comments': ['-- Test comment'],
+                    },
+                }
+            ),
             {
                 'query': 'SELECT * FROM datadog WHERE age = (SELECT AVG(age) FROM datadog2)',
                 'metadata': {
@@ -109,7 +122,12 @@ class TestDBExcepption(BaseException):
             },
         ),
         (
-            "{\"query\":\"COMMIT\",\"metadata\":{\"tables_csv\":\"\",\"commands\":[\"COMMIT\"],\"comments\":null}}",
+            json.dumps(
+                {
+                    'query': 'COMMIT',
+                    'metadata': {'tables_csv': '', 'commands': ['COMMIT'], 'comments': None},
+                }
+            ),
             {
                 'query': 'COMMIT',
                 'metadata': {'commands': ['COMMIT'], 'comments': None, 'tables': None},
