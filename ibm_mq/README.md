@@ -158,6 +158,8 @@ No commands have a syntax error.
 All valid MQSC commands were processed.
 ```
 
+**Note**: The Datadog Agent will attempt to collect metrics for [reset queue statistics][14] (`MQCMD_RESET_Q_STATS`) by default. These metrics will require granting further `+chg` permissions to the `datadog` user in order to collect these metrics. Collecting reset queue statistics performance data will also **reset** the performance data.
+
 ### Configuration
 
 <!-- xxx tabs xxx -->
@@ -263,7 +265,19 @@ See [service_checks.json][11] for a list of service checks provided by this inte
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][12].
+### Reset Queue Statistics `MQRC_NOT_AUTHORIZED` Permission Warning
+If you are getting the following warning:
+
+```
+Warning: Error getting pcf queue reset metrics for SAMPLE.QUEUE.1: MQI Error. Comp: 2, Reason 2035: FAILED: MQRC_NOT_AUTHORIZED
+```
+
+This is due to the `datadog` user not having the `+chg` permission to collect reset queue metrics. To fix this, you can either give `+chg` permissions to the `datadog` user [using `setmqaut`][15] and collect queue reset metrics, or you can disable the `collect_reset_queue_metrics`:
+```yaml
+    collect_reset_queue_metrics: false
+```
+
+Need further help? Contact [Datadog support][12].
 
 ## Further Reading
 
@@ -284,3 +298,5 @@ Additional helpful documentation, links, and articles:
 [11]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/assets/service_checks.json
 [12]: https://docs.datadoghq.com/help/
 [13]: https://www.datadoghq.com/blog/monitor-ibmmq-with-datadog
+[14]: https://www.ibm.com/docs/en/ibm-mq/9.1?topic=formats-reset-queue-statistics
+[15]: https://www.ibm.com/docs/en/ibm-mq/9.2?topic=reference-setmqaut-grant-revoke-authority
