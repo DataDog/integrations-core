@@ -236,6 +236,56 @@ def test_set_up_query_manager_7_4_hostname(instance):
     assert len(check._query_manager.queries) == 10
 
 
+def test_set_up_query_manager_7_4_queries_list(instance):
+    instance = {
+        **instance,
+        **{
+            'queries': [
+                {'name': 'disk_usage'},
+                {'name': 'cpu_usage'},
+                {'name': 'job_memory_usage'},
+                {'name': 'memory_info'},
+                {'name': 'subsystem'},
+                {'name': 'job_queue'},
+                {'name': 'message_queue_info'},
+            ]
+        },
+    }
+    check = IbmICheck('ibm_i', {}, [instance])
+    check.log = mock.MagicMock()
+    check.load_configuration_models()
+    with mock.patch('datadog_checks.ibm_i.IbmICheck.fetch_system_info', return_value=SystemInfo("host", 7, 4)):
+        check.set_up_query_manager()
+    assert check._query_manager is not None
+    # disk usage counts like 2, the rest (6 queries) count as 1
+    assert len(check._query_manager.queries) == 6 + 2
+
+
+def test_set_up_query_manager_7_2_queries_list(instance):
+    instance = {
+        **instance,
+        **{
+            'queries': [
+                {'name': 'disk_usage'},
+                {'name': 'cpu_usage'},
+                {'name': 'job_memory_usage'},
+                {'name': 'memory_info'},
+                {'name': 'subsystem'},
+                {'name': 'job_queue'},
+                {'name': 'message_queue_info'},
+            ]
+        },
+    }
+    check = IbmICheck('ibm_i', {}, [instance])
+    check.log = mock.MagicMock()
+    check.load_configuration_models()
+    with mock.patch('datadog_checks.ibm_i.IbmICheck.fetch_system_info', return_value=SystemInfo("host", 7, 2)):
+        check.set_up_query_manager()
+    assert check._query_manager is not None
+    # disk_usage counts like 1, subsystem like 0 (not available on 7.2), the rest (5 queries) count as 1
+    assert len(check._query_manager.queries) == 5 + 0 + 1
+
+
 def test_check_no_query_manager(aggregator, instance):
     check = IbmICheck('ibm_i', {}, [instance])
     check.log = mock.MagicMock()
