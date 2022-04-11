@@ -1,5 +1,9 @@
 # CHANGELOG - http_check
 
+## 7.1.1 / 2022-04-11
+
+* [Fixed] Improve service check message when cert is not found. See [#11793](https://github.com/DataDog/integrations-core/pull/11793).
+
 ## 7.1.0 / 2022-04-05
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
