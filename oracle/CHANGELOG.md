@@ -1,5 +1,9 @@
 # CHANGELOG - oracle
 
+## 3.9.2 / 2022-04-11
+
+* [Fixed] Ensure connect raises exception on failure. See [#11787](https://github.com/DataDog/integrations-core/pull/11787).
+
 ## 3.9.1 / 2022-04-07
 
 * [Fixed] Fix protocol validation. See [#11791](https://github.com/DataDog/integrations-core/pull/11791).
