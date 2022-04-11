@@ -15,11 +15,12 @@ from typing import Any, Callable, Dict, List, Tuple
 
 from cachetools import TTLCache
 
-from ..common import to_native_string
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.types import Transformer
 from datadog_checks.base.utils.serialization import json
+
+from ..common import to_native_string
 
 try:
     import datadog_agent
