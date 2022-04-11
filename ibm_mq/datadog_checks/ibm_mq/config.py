@@ -86,7 +86,7 @@ class IBMMQConfig:
             instance.get('collect_statistics_metrics', False)
         )  # type: bool
         self.collect_reset_queue_metrics = is_affirmative(
-            instance.get('collect_reset_queue_metrics', False)
+            instance.get('collect_reset_queue_metrics', True)
         )
         if int(self.auto_discover_queues) + int(bool(self.queue_patterns)) + int(bool(self.queue_regex)) > 1:
             self.log.warning(

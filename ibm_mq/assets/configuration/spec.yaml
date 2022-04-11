@@ -162,7 +162,7 @@ files:
           permissions. More information found here:
           https://www.ibm.com/docs/en/ibm-mq/9.1?topic=formats-reset-queue-statistics
         value:
-          example: false
+          example: true
           type: boolean
       - name: mqcd_version
         description: |
