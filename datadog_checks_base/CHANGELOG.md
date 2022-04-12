@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 23.7.7 / 2022-04-12
+
+* [Fixed] Fix obfuscate_sql_with_metadata wrapper memory usage. See [#11815](https://github.com/DataDog/integrations-core/pull/11815).
+
 ## 23.7.6 / 2022-02-03
 
 * [Fixed] Update obfuscator wrapper to return empty string. See [#11277](https://github.com/DataDog/integrations-core/pull/11277).
