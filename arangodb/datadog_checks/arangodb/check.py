@@ -21,9 +21,8 @@ class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
         super(ArangodbCheck, self).__init__(name, init_config, instances)
         self.openmetrics_endpoint = self.instance.get('openmetrics_endpoint')
-        self.scheme = urlparse(self.openmetrics_endpoint).scheme
-        self.netloc = urlparse(self.openmetrics_endpoint).netloc
-        self.base_url = "{}://{}".format(self.scheme, self.netloc)
+        parsed_endpoint = urlparse(self.openmetrics_endpoint)
+        self.base_url = "{}://{}".format(parsed_endpoint.scheme, parsed_endpoint.netloc)
 
     def refresh_scrapers(self):
         base_tags = []
