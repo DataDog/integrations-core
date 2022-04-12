@@ -265,7 +265,7 @@ See [service_checks.json][11] for a list of service checks provided by this inte
 
 ## Troubleshooting
 
-### Reset Queue Statistics `MQRC_NOT_AUTHORIZED` Permission Warning
+### Reset queue statistics MQRC_NOT_AUTHORIZED permission warning
 If you are getting the following warning:
 
 ```
