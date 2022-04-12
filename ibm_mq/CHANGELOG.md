@@ -1,5 +1,8 @@
 # CHANGELOG - IBM MQ
 
+## 3.21.1-rc.1 / 2022-04-12
+
+
 ## 3.21.0 / 2022-04-05
 
 * [Added] Add option to not try normal connection. See [#11748](https://github.com/DataDog/integrations-core/pull/11748).
