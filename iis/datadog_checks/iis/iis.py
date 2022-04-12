@@ -21,7 +21,6 @@ DEFAULT_COUNTERS = [
     ["Web Service", None, "Post Requests/sec", "iis.httpd_request_method.post", "gauge"],
     ["Web Service", None, "Head Requests/sec", "iis.httpd_request_method.head", "gauge"],
     ["Web Service", None, "Put Requests/sec", "iis.httpd_request_method.put", "gauge"],
-    ["Web Service", None, "Patch Requests/sec", "iis.httpd_request_method.patch", "gauge"],
     ["Web Service", None, "Delete Requests/sec", "iis.httpd_request_method.delete", "gauge"],
     ["Web Service", None, "Options Requests/sec", "iis.httpd_request_method.options", "gauge"],
     ["Web Service", None, "Trace Requests/sec", "iis.httpd_request_method.trace", "gauge"],
