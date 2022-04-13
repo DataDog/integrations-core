@@ -98,7 +98,7 @@ class Subscription(ABC):
         if self._sub is None:
             sub = pymqi.Subscription(self.check.queue_manager)
             # https://dsuch.github.io/pymqi/examples.html#how-to-subscribe-to-topics-and-avoid-mqrc-sub-already-exists-at-the-same-time
-            self.check.log.info('Subscribing to topic string: %s', self.TOPIC_STRING)
+            self.check.log.debug('Subscribing to `%s` topic string: %s.', self.TYPE, self.TOPIC_STRING)
             sub.sub(
                 sub_name=self.name,
                 topic_string=self.TOPIC_STRING,
@@ -112,8 +112,12 @@ class Subscription(ABC):
 
     def disconnect(self):
         if self._sub is not None:
-            self._sub.close(sub_close_options=pymqi.CMQC.MQCO_KEEP_SUB, close_sub_queue=True)
-            self._sub = None
+            try:
+                self._sub.close(sub_close_options=pymqi.CMQC.MQCO_KEEP_SUB, close_sub_queue=True)
+                self._sub = None
+            except pymqi.MQMIError as e:
+                self.check.log.warning('Problem closing subscription connection. %s', str(e))
+                self._submit_health_status(self, ServiceCheck.WARNING, self.tags)
 
     def _submit_health_status(self, status, tags):
         self.check.service_check('mq.subscription', status, tags=tags)
