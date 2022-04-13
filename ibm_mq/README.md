@@ -263,13 +263,14 @@ See [service_checks.json][11] for a list of service checks provided by this inte
 
 ## Troubleshooting
 
-### High resource utilisation
-IBM MQ check performs queries on the server, some times these queries can be expensive and cause a degradation on the check.
-If you observe that the check is taking a long time to execute or that is consuming many resources on your host you
-may try reducing the scope of the check by:
+### High resource utilization
+The IBM MQ check performs queries on the server, sometimes these queries can be expensive and cause a degradation on the check.
 
-* If you are using `auto_discover_queues` try using `queue_patterns` or `queue_regex` instead to only discover certain queues. This is particularly relevant if your system creates dynamic queues.
-* If you are autodiscovering queues with `queue_patterns` or `queue_regex` try tigheting the pattern or regex so it matches _less_ queues.
+If you observe that the check is taking a long time to execute or that is consuming many resources on your host,
+you can potentially reduce the scope of the check by trying the following:
+
+* If you are using `auto_discover_queues`, try using `queue_patterns` or `queue_regex` instead to only discover certain queues. This is particularly relevant if your system creates dynamic queues.
+* If you are autodiscovering queues with `queue_patterns` or `queue_regex`, try tightening the pattern or regex so it matches _less_ queues.
 * Disable `auto_discover_channels` if you have too many channels.
 * Disable `collect_statistics_metrics`.
 
