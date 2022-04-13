@@ -36,5 +36,6 @@ def test_critical_service_check(dd_agent_check, instance, global_tags):
         for subscription_type in ('resource_statistics', 'message_flows'):
             tags = [f'subscription:{subscription_type}', *global_tags]
             aggregator.assert_service_check('ibm_ace.mq.subscription', ServiceCheck.CRITICAL, tags=tags)
+        aggregator.assert_service_check('ibm_ace.mq.can_connect', ServiceCheck.CRITICAL, tags=global_tags)
     finally:
         subprocess.check_call(['docker', 'start', 'ibm-ace-mq'])
