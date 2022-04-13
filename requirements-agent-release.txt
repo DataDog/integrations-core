@@ -11,6 +11,7 @@ datadog-avi-vantage==3.1.0
 datadog-azure-iot-edge==3.1.0
 datadog-btrfs==1.14.0; sys_platform != 'win32'
 datadog-cacti==1.11.0; sys_platform == 'linux2'
+datadog-calico==0.0.1
 datadog-cassandra-nodetool==1.11.0
 datadog-cassandra==1.15.1
 datadog-ceph==2.7.0; sys_platform != 'win32'
@@ -44,6 +45,7 @@ datadog-exchange-server==1.13.0; sys_platform == 'win32'
 datadog-external-dns==2.1.0
 datadog-flink==1.4.0
 datadog-fluentd==2.1.0
+datadog-foundationdb==1.1.0
 datadog-gearmand==2.3.0; sys_platform != 'win32'
 datadog-gitlab-runner==3.1.0
 datadog-gitlab==5.1.0
@@ -60,6 +62,7 @@ datadog-hivemq==1.6.1
 datadog-http-check==7.1.1
 datadog-hudi==2.1.1
 datadog-hyperv==1.7.0; sys_platform == 'win32'
+datadog-ibm-ace==1.0.0
 datadog-ibm-db2==1.11.0
 datadog-ibm-i==1.3.0
 datadog-ibm-mq==3.21.0
