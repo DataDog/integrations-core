@@ -333,9 +333,14 @@ class KubeletCheck(
             'kubelet_metrics_endpoint', urljoin(endpoint, KUBELET_METRICS_PATH)
         )
 
-        self.probes_scraper_config['prometheus_url'] = instance.get(
-            'probes_metrics_endpoint', urljoin(endpoint, PROBES_METRICS_PATH)
-        )
+        probes_metrics_endpoint = urljoin(endpoint, PROBES_METRICS_PATH)
+        if self.detect_probes(probes_metrics_endpoint):
+            self.probes_scraper_config['prometheus_url'] = instance.get(
+                'probes_metrics_endpoint', probes_metrics_endpoint
+            )
+        else:
+            # Disable probe metrics collection (k8s 1.15+ required)
+            self.probes_scraper_config['prometheus_url'] = ''
 
         # Kubelet credentials handling
         self.kubelet_credentials.configure_scraper(self.cadvisor_scraper_config)
