@@ -3,14 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Callable, Dict, List, Sequence
 
-from datadog_checks_base.datadog_checks.base.types import ServiceCheckStatus
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, to_string
 from datadog_checks.base.log import CheckLoggingAdapter
-from datadog_checks.ibm_mq.config import IBMMQConfig
+from datadog_checks.base.types import ServiceCheckStatus
 
 from .. import metrics
+from ..config import IBMMQConfig
 
 try:
     import pymqi
