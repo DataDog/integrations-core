@@ -125,7 +125,7 @@ Run the task as a service for your cluster:
 aws ecs run-task --cluster <CLUSTER_NAME> \
 --network-configuration "awsvpcConfiguration={subnets=["<PRIVATE_SUBNET>"],securityGroups=["<SECURITY_GROUP>"]}" \
 --task-definition arn:aws:ecs:us-east-1:<AWS_ACCOUNT_NUMBER>:task-definition/<TASK_NAME>:1 \
---region <AWS_REGION> --launch-type FARGATE --platform-version 1.1.0
+--region <AWS_REGION> --launch-type FARGATE --platform-version 1.4.0
 ```
 
 ##### Web UI
