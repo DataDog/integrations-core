@@ -1,13 +1,12 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Callable, Dict, List, Sequence
+from typing import Callable, Dict, List
 
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, to_string
 from datadog_checks.base.log import CheckLoggingAdapter
-from datadog_checks.base.types import ServiceCheckStatus
 
 from .. import metrics
 from ..config import IBMMQConfig
@@ -45,8 +44,8 @@ class ChannelMetricCollector(object):
     def __init__(
         self,
         config,  # type: IBMMQConfig
-        service_check,  # type: Callable[[str, ServiceCheckStatus, Sequence[str], str, str, bool], None]
-        gauge,  # type: Callable[[str, float, Sequence[str], str, str, bool], None]
+        service_check,  # type: Callable
+        gauge,  # type: Callable
         log,  # type: CheckLoggingAdapter
     ):
         self.config = config
