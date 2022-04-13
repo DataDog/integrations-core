@@ -83,7 +83,7 @@ class IbmAceCheck(AgentCheck, ConfigMixin):
                 self.service_check('mq.can_connect', ServiceCheck.OK, tags=self._tags)
             except Exception as e:
                 self.service_check('mq.can_connect', ServiceCheck.CRITICAL, tags=self._tags)
-                raise Exception(
+                self.log.error(
                     'Error encountered while connecting to Queue Manager: {}.'.format(self.config.queue_manager), str(e)
                 )
 
