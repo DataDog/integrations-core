@@ -4,6 +4,7 @@
 import pymqi
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.constants import ServiceCheck
 
 from .config_models import ConfigMixin
 from .subscription import FlowMonitoringSubscription, ResourceStatisticsSubscription
@@ -77,7 +78,15 @@ class IbmAceCheck(AgentCheck, ConfigMixin):
                 self.config.channel,
                 self.config.mq_user,
             )
-            queue_manager.connect_with_options(self.config.queue_manager, **self._connection_options)
+            try:
+                queue_manager.connect_with_options(self.config.queue_manager, **self._connection_options)
+                self.service_check('mq.can_connect', ServiceCheck.OK, tags=self._tags)
+            except Exception as e:
+                self.service_check('mq.can_connect', ServiceCheck.CRITICAL, tags=self._tags)
+                raise Exception(
+                    'Error encountered while connecting to Queue Manager: {}.'.format(self.config.queue_manager), str(e)
+                )
+
             self._queue_manager = queue_manager
 
         return self._queue_manager

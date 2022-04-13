@@ -16,5 +16,20 @@
         ],
         "name": "MQ topic subscription health",
         "description": "Returns `CRITICAL` if the subscription encounters an error, `WARNING` if no messages are available, or `OK` otherwise."
+    },{
+        "agent_version": "7.36.0",
+        "integration": "IBM ACE",
+        "check": "ibm_ace.mq.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "mq_server",
+            "mq_port"
+        ],
+        "name": "MQ connection health",
+        "description": "Returns `CRITICAL` if the check encounters an error connecting to the MQ Queue Manager or `OK` otherwise."
     }
 ]
