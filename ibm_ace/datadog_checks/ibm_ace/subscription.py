@@ -179,7 +179,7 @@ class FlowMonitoringSubscription(Subscription):
             for name, data in message['WMQIStatisticsAccounting'].items():
                 statistics = get_statistics(name)
                 if statistics is None:
-                    self.check.log.debug('Not collecting flow statistic group: %s', name)
+                    self.check.log.debug('Not collecting flow statistic group: %s. No statistics found.', name)
                     continue
 
                 statistics.submit(self.check, data, self.tags)
