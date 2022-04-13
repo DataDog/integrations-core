@@ -131,7 +131,7 @@ instances:
     ## you can specify the `schemas` attribute and provide a list of schemas to use for filtering.
     ##
     ## Size metrics are collected only for ordinary tables. Index metrics are collected only for user indexes. Lock
-    ## metrics are are collected for all relation types (table, index , view, etc.). The rest of the metrics are
+    ## metrics are collected for all relation types (table, index , view, etc.). The rest of the metrics are
     ## collected only for user tables.
     ## To track lock metrics for relations of a specific kind only, specify the `relkind` attribute
     ## as a list of the options:
