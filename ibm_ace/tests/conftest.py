@@ -11,7 +11,7 @@ from . import common
 
 
 @pytest.fixture(scope='session')
-def dd_environment(instance_no_subscriptions):
+def dd_environment(instance):
     with docker_run(
         common.COMPOSE_FILE,
         build=True,
@@ -21,7 +21,7 @@ def dd_environment(instance_no_subscriptions):
             'ACE_SERVER_NAME': common.ACE_SERVER_NAME,
         },
     ):
-        yield instance_no_subscriptions, common.E2E_METADATA
+        yield instance, common.E2E_METADATA
 
 
 @pytest.fixture(scope='session')
