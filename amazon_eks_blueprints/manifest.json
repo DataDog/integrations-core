@@ -6,7 +6,7 @@
   "metric_prefix": "amazon_eks_blueprints.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "Amazon EKS Blueprints is a framework that consolidates cluster configuration and deployment tools.",
+  "short_description": "Amazon EKS Blueprints consolidates cluster configuration and deployment tools.",
   "guid": "8d904f9b-718b-4f43-aef9-6bf7dcc465b9",
   "support": "core",
   "supported_os": [
