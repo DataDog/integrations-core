@@ -83,6 +83,9 @@ def test_metrics_with_fixtures(mock_results, aggregator, dd_run_check, instance_
     for m in metrics:
         aggregator.assert_metric(m['name'], tags=m['tags'], metric_type=m['type'])
 
-    aggregator.assert_all_metrics_covered()
+    # Ensure we're mapping the response correctly
+    aggregator.assert_metric('voltdb.memory.tuple_count', value=2847267.0)
+    aggregator.assert_metric('voltdb.memory.java.max_heap', value=531998.0)
 
+    aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
