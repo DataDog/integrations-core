@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 8.2.1 / 2022-04-14
+
+* [Fixed] Update base version. See [#11825](https://github.com/DataDog/integrations-core/pull/11825).
+
 ## 8.2.0 / 2022-04-05
 
 * [Added] Add MySQL Active Sessions. See [#11709](https://github.com/DataDog/integrations-core/pull/11709).
