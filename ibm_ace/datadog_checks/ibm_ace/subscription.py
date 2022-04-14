@@ -112,12 +112,8 @@ class Subscription(ABC):
 
     def disconnect(self):
         if self._sub is not None:
-            try:
-                self._sub.close(sub_close_options=pymqi.CMQC.MQCO_KEEP_SUB, close_sub_queue=True)
-                self._sub = None
-            except pymqi.MQMIError as e:
-                self.check.log.warning('Problem closing subscription connection. %s', str(e))
-                self._submit_health_status(self, ServiceCheck.WARNING, self.tags)
+            self._sub.close(sub_close_options=pymqi.CMQC.MQCO_KEEP_SUB, close_sub_queue=True)
+            self._sub = None
 
     def _submit_health_status(self, status, tags):
         self.check.service_check('mq.subscription', status, tags=tags)
