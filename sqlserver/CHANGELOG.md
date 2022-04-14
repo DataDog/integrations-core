@@ -2,7 +2,7 @@
 
 ## 7.6.1 / 2022-04-14
 
-* [Fixed] sqlserver: Update base version. See [#11826](https://github.com/DataDog/integrations-core/pull/11826).
+* [Fixed] Update base version. See [#11826](https://github.com/DataDog/integrations-core/pull/11826).
 
 ## 7.6.0 / 2022-04-05
 
