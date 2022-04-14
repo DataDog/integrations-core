@@ -38,8 +38,9 @@ Every file has 3 possible attributes:
 
 - `name` - This is the name of the file the Agent will look for (**REQUIRED**)
 - `example_name` - This is the name of the example file the Agent will ship. If none is provided, the
-  default will be `conf.yaml.example`. The exception is auto-discovery files, which are also named
-  `auto_conf.yaml`.
+  default will be `conf.yaml.example`. The exceptions are as follows:
+  - Auto-discovery files, which are named `auto_conf.yaml`
+  - Python-based core check default files, which are named `conf.yaml.default`
 - `options` - A list of [options](#options) (**REQUIRED**)
 
 ### Options
