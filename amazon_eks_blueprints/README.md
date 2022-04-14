@@ -93,13 +93,14 @@ Monitoring EKS requires that you set up one of the following Datadog integration
 - [AWS EC2][8]
 
 Also set up the integrations for any other AWS services that you are running with EKS, such as [ELB][5].
+
 ## Data Collected
 
 ### Log collection
 
 _Available for Agent versions >6.0_
 
-See the [Kubernetes Log Collection][1] documentation.
+See [Kubernetes Log Collection][1].
 
 ## Troubleshooting
 
