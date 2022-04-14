@@ -101,7 +101,7 @@ class Oracle(AgentCheck):
         if not self._server or not self._user:
             raise ConfigurationError("Oracle host and user are needed")
 
-        if self._protocol.upper() not in VALID_PROTOCOLS:
+        if not self._protocol or self._protocol.upper() not in VALID_PROTOCOLS:
             raise ConfigurationError("Protocol %s is not valid, must either be TCP or TCPS" % self._protocol)
 
         if self._jdbc_driver and self._protocol.upper() == PROTOCOL_TCPS:
