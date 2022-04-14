@@ -1,5 +1,9 @@
 # CHANGELOG - VoltDB
 
+## 2.1.1 / 2022-04-14
+
+* [Fixed] Fix mapping of columns and use delta=1 where required. See [#11775](https://github.com/DataDog/integrations-core/pull/11775). Thanks [kjmadscience](https://github.com/kjmadscience).
+
 ## 2.1.0 / 2022-04-05
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
