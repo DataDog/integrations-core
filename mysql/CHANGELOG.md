@@ -2,7 +2,7 @@
 
 ## 8.2.1 / 2022-04-14
 
-* [Fixed] mysql: Update base version. See [#11825](https://github.com/DataDog/integrations-core/pull/11825).
+* [Fixed] Update base version. See [#11825](https://github.com/DataDog/integrations-core/pull/11825).
 
 ## 8.2.0 / 2022-04-05
 
