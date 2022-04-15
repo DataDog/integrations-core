@@ -75,9 +75,6 @@ def test_openmetrics_e2e(dd_agent_check, instance_openmetrics_v2):
     version_parts = [int(p) for p in VERSION.split('.')]
 
     aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
-    # tags = instance_openmetrics_v2.get('tags')
-    # extra_tags = ["endpoint:{}".format(instance_openmetrics_v2.get("openmetrics_endpoint"))]
-    # tags += extra_tags
 
     for metric in EXPECTED_PROMETHEUS_METRICS:
         aggregator.assert_metric(metric)
