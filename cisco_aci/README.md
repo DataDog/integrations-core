@@ -94,6 +94,14 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 ## Troubleshooting
 
+### Missing `cisco_aci.tenant.*` metrics
+If you are missing `cisco_aci.tenant.*` metrics, you can run the `test/cisco_aci_query.py` script to manually query the tenant endpoint.
+
+Modify the `apic_url`, `apic_username`, and `apic_password` to your configuration information, and input the `api_url` for the tenant URL.
+
+You can verify that the output you get from cURLing the endpoint matches any of the metrics collected in `datadog_checks/cisco_aci/aci_metrics.py`.
+
+
 Need help? Contact [Datadog support][9].
 
 [1]: https://app.datadoghq.com/account/settings#agent
