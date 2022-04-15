@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
-from copy import deepcopy
 
 import mock
 import pytest
@@ -74,17 +73,21 @@ def test_e2e(dd_agent_check, instance):
 @pytest.mark.e2e
 def test_openmetrics_e2e(dd_agent_check, instance_openmetrics_v2):
     version_parts = [int(p) for p in VERSION.split('.')]
-    metrics = deepcopy(EXPECTED_PROMETHEUS_METRICS)
-
-    if version_parts >= [5, 6]:
-        metrics.update(deepcopy(EXPECTED_PROMETHEUS_METRICS_5_6))
 
     aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
-    tags = instance_openmetrics_v2.get('tags')
-    extra_tags = ["endpoint:{}".format(instance_openmetrics_v2.get("openmetrics_endpoint"))]
-    tags += extra_tags
-    for metric in metrics:
+    # tags = instance_openmetrics_v2.get('tags')
+    # extra_tags = ["endpoint:{}".format(instance_openmetrics_v2.get("openmetrics_endpoint"))]
+    # tags += extra_tags
+
+    for metric in EXPECTED_PROMETHEUS_METRICS:
         aggregator.assert_metric(metric)
+
+    if version_parts >= [5, 6]:
+        for metric in EXPECTED_PROMETHEUS_METRICS_5_6:
+            aggregator.assert_metric(metric)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def _test_check(aggregator):
