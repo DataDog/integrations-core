@@ -178,16 +178,16 @@ files:
           example: 2
       - name: timeout
         description: |
-          Amount of second before timing out.
+          Amount of second before timing out. Default of 5 for Python version of this check.
         value:
           type: integer
-          example: 5
+          example: 2
       - name: retries
         description: |
-          Amount of retries before failure.
+          Amount of retries before failure. Default of 5 for Python version of this check.
         value:
           type: integer
-          example: 5
+          example: 3
       - name: loader
         enabled: true
         description: |
