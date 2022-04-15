@@ -6,11 +6,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
-from .config_models import ConfigMixin
 from .metrics import METRIC_MAP
 
 
-class AerospikeCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
+class AerospikeCheckV2(OpenMetricsBaseCheckV2):
 
     __NAMESPACE__ = 'aerospike'
 

@@ -377,7 +377,6 @@ files:
         timeout.description: |
           The timeout for accessing services
           Read timeout in seconds when using Legacy.
-        # metrics.name: openmetrics_metrics # rename to permit validation alongside existing metrics parameter
     - name: host
       description: | 
         (Legacy) Aerospike host to connect to.
