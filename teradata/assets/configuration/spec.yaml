@@ -107,9 +107,7 @@ files:
         For example:
         auth_data: user1@ESDOM.ESDEV.TDAT@@mypassword
 
-        `auth_data` for the LDAP mechanism can contain spaces, commas, and single quotes. When specifying
-        this parameter for LDAP in a JDBC connection URL, the `auth_data` parameter should be enclosed in single quotes.
-        Within the quoted string, a double-single quote can be used to represent an instance of a single quote.
+        `auth_data` for the LDAP mechanism can contain spaces, commas, and single quotes.
         When specifying this parameter with a DataSource, no special processing is required.
         For example:
         auth_data: 'authcid=username password=userpassword'

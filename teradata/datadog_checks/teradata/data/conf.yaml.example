@@ -58,7 +58,7 @@ instances:
     database: system
 
     ## @param collect_res_usage - boolean - optional - default: true
-    ## Collect metrics from the SPMA Resource Table
+    ## Collect metrics from the SPMA Resource Table.
     #
     # collect_res_usage: true
 
@@ -74,8 +74,7 @@ instances:
     ## * Disable
     ## * Prefer
     ## * Require
-    ## * Verify-CA
-    ## * Verify-Full
+    ## Note: Verify-CA and Verify-Full are currently not available.
     #
     # ssl_mode: <SSL_MODE>
 
@@ -84,25 +83,12 @@ instances:
     #
     # ssl_protocol: <SSL_PROTOCOL>
 
-    ## @param ssl_ca - string - optional - default: /path/to/ssl_ca_dir
-    ## The full path of the directory containing the root certificates for trusted CAs. If `ssl_mode` is not set to
-    ## `Verify-CA` or `Verify-Full`, `ssl_ca` path or `ssl_ca_path` file name will be ignored.
-    #
-    # ssl_ca: /path/to/ssl_ca_dir
-
-    ## @param ssl_ca_path - string - optional - default: /path/to/ssl_ca_file/ca.pem
-    ## The full path and name of a .pem file containing one or more certificates for
-    ## trusted Root and Intermediate CAs. If `ssl_mode` is not set to `Verify-CA` or `Verify-Full`,
-    ## `ssl_ca` path or `ssl_ca_path` file name will be ignored.
-    #
-    # ssl_ca_path: /path/to/ssl_ca_file/ca.pem
-
     ## @param auth_mechanism - string - optional
     ## The authentication mechanism for connecting to the Teradata data source. If no value is provided, the defined
     ## local default mechanism is used, otherwise the default mechanism defined by the database is used.
     ##
     ## Valid options are:
-    ## * TD2 - Selects Teradata 2 authentication mechanism. Username and password are required.
+    ## * TD2 - Selects Teradata 2 authentication mechanism. Username and password are required. (Default)
     ## * TDNEGO - Selects the Authentication Mechanism automatically based on the policy without user involvement.
     ## * LDAP - Selects LDAP as the authentication mechanism. Specify the username and password using the `auth_data`
     ##          configuration option.
@@ -128,9 +114,7 @@ instances:
     ## For example:
     ## auth_data: user1@ESDOM.ESDEV.TDAT@@mypassword
     ##
-    ## `auth_data` for the LDAP mechanism can contain spaces, commas, and single quotes. When specifying
-    ## this parameter for LDAP in a JDBC connection URL, the `auth_data` parameter should be enclosed in single quotes.
-    ## Within the quoted string, a double-single quote can be used to represent an instance of a single quote.
+    ## `auth_data` for the LDAP mechanism can contain spaces, commas, and single quotes.
     ## When specifying this parameter with a DataSource, no special processing is required.
     ## For example:
     ## auth_data: 'authcid=username password=userpassword'
@@ -214,3 +198,13 @@ instances:
 #
 # empty_default_hostname: false
 
+## @param metric_patterns - mapping - optional
+## A mapping of metrics to include or exclude, with each entry being a regular expression.
+##
+## Metrics defined in `exclude` will take precedence in case of overlap.
+#
+# metric_patterns:
+#   include:
+#   - <INCLUDE_REGEX>
+#   exclude:
+#   - <EXCLUDE_REGEX>

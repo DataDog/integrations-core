@@ -46,14 +46,6 @@ def instance_port(field, value):
     return 1025
 
 
-def instance_ssl_ca(field, value):
-    return '/path/to/ssl_ca_dir'
-
-
-def instance_ssl_ca_path(field, value):
-    return '/path/to/ssl_ca_file/ca.pem'
-
-
 def instance_ssl_mode(field, value):
     return 'Prefer'
 

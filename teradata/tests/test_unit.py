@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import logging
-import re
-import sys
 import time
 
 import mock
@@ -15,11 +13,10 @@ try:
 except ImportError:
     from contextlib2 import ExitStack
 
+from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.teradata.check import TeradataCheck
 
-from .common import CHECK_NAME, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY
-
-EXPECTED_TAGS = ["teradata_server:localhost", "teradata_port:1025", "td_env:dev"]
+from .common import CHECK_NAME, EXPECTED_TAGS, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY
 
 
 @pytest.mark.parametrize(
@@ -239,7 +236,7 @@ EXPECTED_TAGS = ["teradata_server:localhost", "teradata_port:1025", "td_env:dev"
         ),
     ],
 )
-def test__connect(test_instance, dd_run_check, aggregator, expected_tags, conn_params):
+def test_connect(test_instance, dd_run_check, aggregator, expected_tags, conn_params):
     check = TeradataCheck(CHECK_NAME, {}, [test_instance])
     conn = mock.MagicMock()
     cursor = conn.cursor()
@@ -260,20 +257,8 @@ def test__connect(test_instance, dd_run_check, aggregator, expected_tags, conn_p
         assert check._connection == conn
 
     teradatasql.connect.assert_called_with(json.dumps(conn_params))
-    aggregator.assert_service_check(SERVICE_CHECK_CONNECT, check.OK, tags=expected_tags)
-    aggregator.assert_service_check(SERVICE_CHECK_QUERY, check.OK, tags=expected_tags)
-
-
-def test_import_error(dd_run_check, aggregator, instance, caplog):
-    caplog.clear()
-    caplog.set_level(logging.ERROR)
-    check = TeradataCheck(CHECK_NAME, {}, [instance])
-
-    with mock.patch.dict(sys.modules, {'teradatasql': None}):
-        with pytest.raises(Exception, match="ModuleNotFoundError: No module named 'teradatasql'"):
-            dd_run_check(check)
-
-        assert check._connection is None
+    aggregator.assert_service_check(SERVICE_CHECK_CONNECT, ServiceCheck.OK, tags=expected_tags)
+    aggregator.assert_service_check(SERVICE_CHECK_QUERY, ServiceCheck.OK, tags=expected_tags)
 
 
 def test_connection_errors(dd_run_check, aggregator, instance, caplog):
@@ -299,8 +284,8 @@ def test_connection_errors(dd_run_check, aggregator, instance, caplog):
             assert check._connection_errors > 0
             assert check._query_errors < 0
 
-            aggregator.assert_service_check(SERVICE_CHECK_CONNECT, check.CRITICAL, tags=EXPECTED_TAGS)
-            aggregator.assert_service_check(SERVICE_CHECK_QUERY, check.CRITICAL, tags=EXPECTED_TAGS)
+            aggregator.assert_service_check(SERVICE_CHECK_CONNECT, ServiceCheck.CRITICAL, tags=EXPECTED_TAGS)
+            aggregator.assert_service_check(SERVICE_CHECK_QUERY, ServiceCheck.CRITICAL, tags=EXPECTED_TAGS)
 
 
 def test_query_errors(dd_run_check, aggregator, instance):
@@ -324,8 +309,8 @@ def test_query_errors(dd_run_check, aggregator, instance):
     assert check._connection_errors < 1
     assert check._query_errors > 0
 
-    aggregator.assert_service_check(SERVICE_CHECK_CONNECT, check.OK, tags=EXPECTED_TAGS)
-    aggregator.assert_service_check(SERVICE_CHECK_QUERY, check.CRITICAL, tags=EXPECTED_TAGS)
+    aggregator.assert_service_check(SERVICE_CHECK_CONNECT, ServiceCheck.OK, tags=EXPECTED_TAGS)
+    aggregator.assert_service_check(SERVICE_CHECK_QUERY, ServiceCheck.CRITICAL, tags=EXPECTED_TAGS)
 
 
 def test_no_rows_returned(dd_run_check, aggregator, instance, caplog):
@@ -352,8 +337,8 @@ def test_no_rows_returned(dd_run_check, aggregator, instance, caplog):
     assert check._connection_errors < 1
     assert check._query_errors > 0
     assert "Failed to fetch records from query:" in caplog.text
-    aggregator.assert_service_check(SERVICE_CHECK_CONNECT, check.OK, tags=EXPECTED_TAGS)
-    aggregator.assert_service_check(SERVICE_CHECK_QUERY, check.CRITICAL, tags=EXPECTED_TAGS)
+    aggregator.assert_service_check(SERVICE_CHECK_CONNECT, ServiceCheck.OK, tags=EXPECTED_TAGS)
+    aggregator.assert_service_check(SERVICE_CHECK_QUERY, ServiceCheck.CRITICAL, tags=EXPECTED_TAGS)
 
 
 current_time = int(time.time())
@@ -390,62 +375,3 @@ def test_validate_timestamp(caplog, instance, row, expected):
         assert expected == row
     except Exception:
         assert expected in caplog.text
-
-
-@pytest.mark.parametrize(
-    "test_instance, missing_config, is_valid",
-    [
-        pytest.param(
-            {"server": "localhost", "username": "dd_user", "password": "db_pass"},
-            "database",
-            False,
-            id="Invalid config: Missing database",
-        ),
-        pytest.param(
-            {"database": "main_db", "username": "dd_user", "password": "db_pass"},
-            "server",
-            False,
-            id="Invalid config: Missing server",
-        ),
-        pytest.param(
-            {"server": "localhost", "database": "test_db", "username": "dd_user", "password": "db_pass"},
-            "",
-            True,
-            id="Valid config: Server and database specified",
-        ),
-    ],
-)
-def test_config(dd_run_check, aggregator, test_instance, missing_config, is_valid):
-    check = TeradataCheck(CHECK_NAME, {}, [test_instance])
-    conn = mock.MagicMock()
-    cursor = conn.cursor()
-    cursor.rowcount = float('+inf')
-
-    teradatasql = mock.MagicMock()
-    teradatasql.connect.return_value = conn
-
-    mocks = [
-        ('datadog_checks.teradata.check.teradatasql', teradatasql),
-        ('datadog_checks.teradata.check.TERADATASQL_IMPORT_ERROR', None),
-    ]
-
-    with ExitStack() as stack:
-        for mock_call in mocks:
-            stack.enter_context(mock.patch(*mock_call))
-
-        if not is_valid:
-            with pytest.raises(
-                Exception,
-                match=re.compile(
-                    "ConfigurationError: Detected 1 error while loading configuration model `InstanceConfig`:\\n.*({})"
-                    "\\n.*field required".format(missing_config)
-                ),
-            ):
-                dd_run_check(check)
-        else:
-            try:
-                dd_run_check(check)
-                aggregator.assert_service_check(SERVICE_CHECK_CONNECT, check.OK, count=1)
-                aggregator.assert_service_check(SERVICE_CHECK_QUERY, check.OK, count=1)
-            except AssertionError as e:
-                raise AssertionError(e)

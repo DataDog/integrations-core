@@ -6,12 +6,11 @@
 # https://docs.teradata.com/r/Teradata-VantageTM-Data-Dictionary/July-2021/Views-Reference/AllSpaceV-X
 DISK_SPACE = {
     "name": "disk_space",
-    "query": "SELECT Vproc, TRIM(BOTH FROM DatabaseName), TRIM(BOTH FROM AccountName), TRIM(BOTH FROM TableName), "
+    "query": "SELECT TRIM(BOTH FROM DatabaseName), TRIM(BOTH FROM AccountName), TRIM(BOTH FROM TableName), "
     "MaxPerm, MaxSpool, MaxTemp, CurrentPerm, CurrentSpool, CurrentPersistentSpool, CurrentTemp, PeakPerm, "
     "PeakSpool, PeakPersistentSpool, PeakTemp, MaxProfileSpool, MaxProfileTemp, AllocatedPerm, AllocatedSpool,"
     "AllocatedTemp, PermSkew, SpoolSkew, TempSkew FROM DBC.AllSpaceV WHERE DatabaseName='{}';",
     "columns": [
-        {"name": "td_vproc", "type": "tag"},
         {"name": "td_database", "type": "tag"},
         {"name": "td_account", "type": "tag"},
         {"name": "td_table", "type": "tag"},
@@ -41,13 +40,11 @@ DISK_SPACE = {
 # https://docs.teradata.com/r/Teradata-VantageTM-Data-Dictionary/July-2021/Views-Reference/AMPUsageV-X
 AMP_USAGE = {
     "name": "amp_usage",
-    "query": "SELECT TRIM(BOTH FROM AccountName), TRIM(BOTH FROM UserName), Vproc, TRIM(BOTH FROM VprocType), CpuTime,"
+    "query": "SELECT TRIM(BOTH FROM AccountName), TRIM(BOTH FROM UserName), CpuTime,"
     "DiskIO, CPUTimeNorm FROM DBC.AMPUsageV;",
     "columns": [
         {"name": "td_account", "type": "tag"},
         {"name": "td_user", "type": "tag"},
-        {"name": "td_vproc", "type": "tag"},
-        {"name": "td_vproc_type", "type": "tag"},
         {"name": "amp.cpu_time", "type": "gauge"},
         {"name": "amp.disk_io", "type": "gauge"},
         {"name": "amp.cpu_time_norm", "type": "gauge"},

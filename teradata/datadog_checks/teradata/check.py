@@ -14,17 +14,19 @@ except ImportError as e:
     TERADATASQL_IMPORT_ERROR = e
 
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.utils.db import QueryManager
 
 from .config import TeradataConfig
 from .queries import COLLECT_RES_USAGE, DEFAULT_QUERIES
 
+SERVICE_CHECK_CONNECT = 'can_connect'
+SERVICE_CHECK_QUERY = 'can_query'
+
 
 class TeradataCheck(AgentCheck):
     __NAMESPACE__ = 'teradata'
-    SERVICE_CHECK_CONNECT = 'can_connect'
-    SERVICE_CHECK_QUERY = 'can_query'
 
     def __init__(self, name, init_config, instances):
         super(TeradataCheck, self).__init__(name, init_config, instances)
@@ -57,18 +59,19 @@ class TeradataCheck(AgentCheck):
         self._query_errors = 0
 
         with self.connect() as conn:
-            self._connection = conn
-            self._query_manager.execute()
+            if conn:
+                self._connection = conn
+                self._query_manager.execute()
 
         if self._connection_errors:
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags)
+            self.service_check(SERVICE_CHECK_CONNECT, ServiceCheck.CRITICAL, tags=self._tags)
         else:
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
+            self.service_check(SERVICE_CHECK_CONNECT, ServiceCheck.OK, tags=self._tags)
 
         if self._query_errors:
-            self.service_check(self.SERVICE_CHECK_QUERY, self.CRITICAL, tags=self._tags)
+            self.service_check(SERVICE_CHECK_QUERY, ServiceCheck.CRITICAL, tags=self._tags)
         else:
-            self.service_check(self.SERVICE_CHECK_QUERY, self.OK, tags=self._tags)
+            self.service_check(SERVICE_CHECK_QUERY, ServiceCheck.OK, tags=self._tags)
 
     def _execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:
@@ -77,27 +80,30 @@ class TeradataCheck(AgentCheck):
             if cursor.rowcount < 1:
                 self.log.warning('Failed to fetch records from query: `%s`.', query)
                 self._query_errors += 1
+                return None
             else:
                 for row in cursor.fetchall():
                     try:
                         yield self._validate_timestamp(row, query)
-                    except Exception as e:
-                        self.log.debug('Unable to validate Resource Usage View timestamps: %s', e)
-                        self._query_errors += 1
+                    except Exception:
+                        self.log.debug('Unable to validate Resource Usage View timestamps, skipping row.')
                         yield row
+
+    def _executor_error_handler(self, error):
+        self._query_errors += 1
+        if self._connection:
+            try:
+                self._connection.close()
+            except Exception as e:
+                self.log.warning("Couldn't close the connection after a query failure: %s", str(e))
+        self._connection = None
+        return error
 
     @contextmanager
     def connect(self):
-        try:
-            return self._connect()
-        except Exception as e:
-            self._connection_errors += 1
-            self.log.error('Failed to connect to Teradata database. %s', e)
-            raise e
-
-    def _connect(self):
         conn = None
         if TERADATASQL_IMPORT_ERROR:
+            self._connection_errors += 1
             self.log.error(
                 'Teradata SQL Driver module is unavailable. Please double check your installation and refer to the '
                 'Datadog documentation for more information. %s',
@@ -106,81 +112,19 @@ class TeradataCheck(AgentCheck):
             raise TERADATASQL_IMPORT_ERROR
         else:
             self.log.debug('Connecting to Teradata...')
+            conn_params = self._build_connect_params()
 
-            validated_config = self._validate_config() and self._validate_conn_params()
-
-            if validated_config:
-                conn_params = self._build_connect_params()
-                try:
-                    conn = teradatasql.connect(json.dumps(conn_params))
-                    self.log.debug('Connected to Teradata.')
-                    yield conn
-                except Exception as e:
-                    self.log.exception('Unable to connect to Teradata. %s.', e)
-                    self._connection_errors += 1
-                    raise e
-                finally:
-                    if conn:
-                        conn.close()
-            else:
-                self.log.exception('Unable to connect to Teradata. Check the configuration.')
-                self._connection_errors += 1
-
-    def _validate_conn_params(self):
-        credentials_optional = ['JWT', 'KRB5', 'LDAP', 'TDNEGO']
-        valid_ssl_modes = ['ALLOW', 'DISABLE', 'PREFER', 'REQUIRE']
-        valid_auth_mechs = ['TD2', 'TDNEGO', 'LDAP', 'KRB5', 'JWT']
-
-        if self.config.auth_mechanism and self.config.auth_mechanism.upper() not in credentials_optional:
-            if not self.config.username or not self.config.password:
-                raise ConfigurationError('`username` and `password` are required.')
-                return False
-
-        if self.config.auth_mechanism is not None and self.config.auth_mechanism.upper() not in valid_auth_mechs:
-            raise ConfigurationError(
-                'Specified `auth_mechanism`: %s is not a valid option. Specify one of "TD2",'
-                '"TDNEGO", "LDAP", "KRB5" or "JWT". '
-                'Refer to the Datadog documentation for more information.'
-            )
-            return False
-
-        if self.config.ssl_mode is not None and self.config.ssl_mode.upper() not in valid_ssl_modes:
-            raise ConfigurationError(
-                'Specified `ssl_mode`: %s is not a valid option. Specify one of "ALLOW", "DISABLE",'
-                '"PREFER", or "REQUIRE". Refer to the Datadog documentation for more information.'
-            )
-            return False
-
-        return True
-
-    def _validate_timestamp(self, row, query):
-        if 'DBC.ResSpmaView' in query:
-            now = time.time()
-            row_ts = row[0]
-            if type(row_ts) is not int:
-                msg = "Timestamp `{}` is invalid. Skipping row.".format(row_ts)
-                self.log.warning(msg)
-                self._query_errors += 1
-                raise Exception(msg)
-            else:
-
-                diff = now - row_ts
-                # Valid metrics should be no more than 10 min in the future or 1h in the past
-                if (diff > 3600) or (diff < -600):
-                    msg = 'Resource Usage stats are invalid. {}'
-                    if diff > 3600:
-                        msg = msg.format(
-                            'Row timestamp is more than 1h in the past. Is `SPMA` Resource Usage Logging enabled?'
-                        )
-                    elif diff < -600:
-                        msg = msg.format(
-                            'Row timestamp is more than 10 min in the future. Try checking system time settings.'
-                        )
-                    self.log.warning(msg)
-                    self._query_errors += 1
-                    raise Exception(msg)
-
-        return row
+            try:
+                conn = teradatasql.connect(json.dumps(conn_params))
+                self.log.debug('Connected to Teradata.')
+                yield conn
+            except Exception as e:
+                self.service_check(SERVICE_CHECK_CONNECT, ServiceCheck.CRITICAL, tags=self._tags)
+                self.log.error('Unable to connect to Teradata. %s.', e)
+                raise
+            finally:
+                if conn:
+                    conn.close()
 
     def _build_connect_params(self):
         return {
@@ -197,23 +141,29 @@ class TeradataCheck(AgentCheck):
             'sslprotocol': self.config.ssl_protocol,
         }
 
-    def _executor_error_handler(self, error):
-        self._query_errors += 1
-        if self._connection:
-            try:
-                self._connection.close()
-            except Exception as e:
-                self.log.warning("Couldn't close the connection after a query failure: %s", str(e))
-        self._connection = None
-
-        return error
-
-    def _validate_config(self):
-        if not self.config.server:
-            raise ConfigurationError("Server must be specified.")
-            return False
-        if not self.config.database:
-            raise ConfigurationError("Database must be specified")
-            return False
-
-        return True
+    def _validate_timestamp(self, row, query):
+        if 'DBC.ResSpmaView' in query:
+            now = time.time()
+            row_ts = row[0]
+            if type(row_ts) is not int:
+                msg = 'Timestamp `{}` is invalid. Skipping row.'.format(row_ts)
+                self.log.warning(msg)
+                self._query_errors += 1
+                raise Exception(msg)
+            else:
+                diff = now - row_ts
+                # Valid metrics should be no more than 10 min in the future or 1h in the past
+                if (diff > 3600) or (diff < -600):
+                    msg = 'Resource Usage stats are invalid. {}'
+                    if diff > 3600:
+                        msg = msg.format(
+                            'Row timestamp is more than 1h in the past. Is `SPMA` Resource Usage Logging enabled?'
+                        )
+                    elif diff < -600:
+                        msg = msg.format(
+                            'Row timestamp is more than 10 min in the future. Try checking system time settings.'
+                        )
+                    self.log.warning(msg)
+                    self._query_errors += 1
+                    raise Exception(msg)
+        return row

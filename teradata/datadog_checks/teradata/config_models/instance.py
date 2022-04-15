@@ -32,8 +32,6 @@ class InstanceConfig(BaseModel):
     password: Optional[str]
     port: Optional[str]
     server: str
-    ssl_ca: Optional[str]
-    ssl_ca_path: Optional[str]
     ssl_mode: Optional[str]
     ssl_protocol: Optional[str]
     username: Optional[str]

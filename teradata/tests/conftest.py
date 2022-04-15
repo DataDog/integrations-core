@@ -20,7 +20,7 @@ HERE = get_here()
 
 
 CONFIG = {
-    'server': 'localhost',
+    'server': 'tdserver',
     'username': 'datadog',
     'password': 'td_datadog',
     'database': 'AdventureWorksDW',
@@ -39,6 +39,35 @@ E2E_CONFIG = {
 }
 
 
+@pytest.fixture(scope='session')
+def dd_environment(instance):
+    yield instance
+
+
+@pytest.fixture(scope='session')
+def instance():
+    return deepcopy(CONFIG)
+
+
+@pytest.fixture
+def bad_instance():
+    bad_config = deepcopy(CONFIG)
+    bad_config['server'] = 'localhost'
+    return bad_config
+
+
+@pytest.fixture()
+def mock_cursor():
+    with mock.patch('datadog_checks.teradata.check.teradatasql') as teradatasql:
+        cursor = mock.MagicMock(name='cursor')
+        connect = mock.MagicMock(name='connect', cursor=lambda: cursor)
+        teradatasql.connect.return_value = connect
+        cursor.execute = lambda x: setattr(cursor, 'mock_last_query', x)  # noqa
+        cursor.rowcount = float('+inf')
+        cursor.fetchall = lambda: _mock_execute(cursor.mock_last_query)
+        yield
+
+
 def _mock_execute(query):
     table = TABLE_EXTRACTION_PATTERN.search(query).groups()[0].lower()
     file = os.path.join(HERE, 'fixtures', table + '.csv')
@@ -53,35 +82,6 @@ def _mock_execute(query):
                 if col == '':
                     line[idx] = None
             yield line
-
-
-@pytest.fixture(scope='session')
-def dd_environment():
-    yield E2E_CONFIG
-
-
-@pytest.fixture(scope='session')
-def instance():
-    return deepcopy(CONFIG)
-
-
-@pytest.fixture
-def bad_instance():
-    bad_config = deepcopy(CONFIG)
-    bad_config['server'] = 'fakeserver.com'
-    return bad_config
-
-
-@pytest.fixture()
-def mock_cursor():
-    with mock.patch('datadog_checks.teradata.check.teradatasql') as teradatasql:
-        cursor = mock.MagicMock(name='cursor')
-        connect = mock.MagicMock(name='connect', cursor=lambda: cursor)
-        teradatasql.connect.return_value = connect
-        cursor.execute = lambda x: setattr(cursor, 'mock_last_query', x)  # noqa
-        cursor.rowcount = float('+inf')
-        cursor.fetchall = lambda: _mock_execute(cursor.mock_last_query)
-        yield
 
 
 @pytest.fixture()
