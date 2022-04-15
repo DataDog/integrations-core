@@ -13,7 +13,45 @@ COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 # get_docker_hostname is still useful to test locally.
 HOST = "127.0.0.1"
 PORT = 3000
+EXPORTER_PORT = 9145
 VERSION = os.environ.get('AEROSPIKE_VERSION')
+
+OPEN_METRICS_V2_INSTANCE = {
+    'openmetrics_endpoint': 'http://{}:{}/metrics'.format(HOST, EXPORTER_PORT),
+    'tags': ['openmetrics_instance'],
+}
+
+EXPECTED_PROMETHEUS_METRICS = {
+    'aerospike.namespace.client_delete_error.count': 'monotonic_count',
+    'aerospike.namespace.client_read_error.count': 'monotonic_count',
+    'aerospike.namespace.client_udf_error.count': 'monotonic_count',
+    'aerospike.namespace.clock_skew_stop_writes': 'gauge',
+    'aerospike.namespace.dead_partitions': 'gauge',
+    'aerospike.namespace.device_available_pct': 'gauge',
+    'aerospike.namespace.hwm_breached': 'gauge',
+    'aerospike.namespace.memory_free_pct': 'gauge',
+    'aerospike.namespace.memory_used_bytes': 'gauge',
+    'aerospike.namespace.scan_aggr_error.count': 'monotonic_count',
+    'aerospike.namespace.scan_basic_error.count': 'monotonic_count',
+    'aerospike.namespace.scan_ops_bg_error.count': 'monotonic_count',
+    'aerospike.namespace.scan_udf_bg_error.count': 'monotonic_count',
+    'aerospike.namespace.stop_writes': 'gauge',
+    'aerospike.namespace.storage_engine_file_write_q': 'gauge',
+    'aerospike.namespace.unavailable_partitions': 'gauge',
+    'aerospike.node_stats.batch_index_error.count': 'monotonic_count',
+    'aerospike.node_stats.client_connections': 'gauge',
+    'aerospike.node_stats.cluster_size': 'gauge',
+    'aerospike.node_stats.heap_efficiency_pct': 'gauge',
+    'aerospike.node_stats.rw_in_progress': 'gauge',
+    'aerospike.node_stats.system_free_mem_pct': 'gauge',
+    'aerospike.namespace.storage_engine_file_defrag_q': 'gauge',
+}
+
+EXPECTED_PROMETHEUS_METRICS_5_6 = {
+    'aerospike.node_stats.client_connections_opened.count': 'monotonic_count',
+    'aerospike.node_stats.fabric_connections_opened.count': 'monotonic_count',
+    'aerospike.node_stats.heartbeat_connections_opened.count': 'monotonic_count',
+}
 
 NAMESPACE_METRICS = [
     'objects',
