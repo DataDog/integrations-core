@@ -438,7 +438,6 @@ files:
         example:
           - migrate_rx_objs
           - migrate_tx_objs
-      display_priority: 1
     - name: namespaces
       hidden: true
       description: All namespaces are collected by default. If you want to collect specific namespaces specify them here.
@@ -449,7 +448,6 @@ files:
         example:
           - example_namespace
           - another_example_namespace
-      display_priority: 1
     - name: datacenters
       hidden: true
       description: |
@@ -464,7 +462,6 @@ files:
         example:
           - example_datacenter
           - another_example_datacenter
-      display_priority: 1
     - name: namespace_metrics
       hidden: true
       description: |
@@ -485,7 +482,6 @@ files:
           - migrate-rx-partitions-remaining
           - migrate-tx-partitions-initial
           - migrate-tx-partitions-remaining
-      display_priority: 1
     - name: datacenter_metrics
       hidden: true
       description: |
