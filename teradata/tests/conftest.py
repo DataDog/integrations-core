@@ -46,7 +46,10 @@ E2E_CONFIG = {
 def dd_environment(e2e_instance, instance):
     if USE_TD_SANDBOX:
         if not TERADATA_SERVER or not TERADATA_DD_USER or not TERADATA_DD_PW:
-            raise Exception("Please set TERADATA_SERVER, TERADATA_DD_USER, TERADATA_DD_PW environment variables to valid Teradata sandbox credentials.")
+            raise Exception(
+                "Please set TERADATA_SERVER, TERADATA_DD_USER, TERADATA_DD_PW environment variables to valid "
+                "Teradata sandbox credentials."
+            )
         else:
             dd_instance = e2e_instance
             e2e_metadata = E2E_METADATA
