@@ -461,6 +461,7 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
         'code=performance-schema-not-enabled host=stubbed.hostname'
     ]
 
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
@@ -558,7 +559,9 @@ def test_statement_reported_hostname(
     dd_run_check(mysql_check)
 
     samples = aggregator.get_event_platform_events("dbm-samples")
-    matching_samples = [s for s in samples if s['db']['query_signature'] == query_signature and s.get('dbm_type') != 'fqt']
+    matching_samples = [
+        s for s in samples if s['db']['query_signature'] == query_signature and s.get('dbm_type') != 'fqt'
+    ]
     assert len(matching_samples) == 1
     sample = matching_samples[0]
 
