@@ -24,8 +24,8 @@ files:
       description: |
         Specifies the Teradata database port number
       value:
-        type: string
-        default: 1025
+        type: integer
+        example: 1025
     - name: username
       description: Username for the Datadog-Teradata check user.
       value:
@@ -55,9 +55,8 @@ files:
     - name: https_port
       description: The port number used for making TLS connections to the Teradata database.
       value:
-        type: string
-        example: <PORT>
-        default: 443
+        type: integer
+        example: 443
     - name: ssl_mode
       description: |
         The SSL mode used for making TLS connections to the Teradata database.
@@ -115,5 +114,5 @@ files:
         auth_data: username@@userpassword
       value:
         type: string
-  - template: instances/db
-  - template: instances/default
+    - template: instances/db
+    - template: instances/default

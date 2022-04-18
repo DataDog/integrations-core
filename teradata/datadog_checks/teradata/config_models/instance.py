@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Any, Mapping, Optional, Sequence
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -17,6 +17,23 @@ from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
 from . import defaults, validators
+
+
+class CustomQuery(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    columns: Optional[Sequence[Mapping[str, Any]]]
+    query: Optional[str]
+    tags: Optional[Sequence[str]]
+
+
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
 
 
 class InstanceConfig(BaseModel):
@@ -27,13 +44,22 @@ class InstanceConfig(BaseModel):
     auth_data: Optional[str]
     auth_mechanism: Optional[str]
     collect_res_usage: Optional[bool]
+    custom_queries: Optional[Sequence[CustomQuery]]
     database: str
-    https_port: Optional[str]
+    disable_generic_tags: Optional[bool]
+    empty_default_hostname: Optional[bool]
+    https_port: Optional[int]
+    metric_patterns: Optional[MetricPatterns]
+    min_collection_interval: Optional[float]
+    only_custom_queries: Optional[bool]
     password: Optional[str]
-    port: Optional[str]
+    port: Optional[int]
     server: str
+    service: Optional[str]
     ssl_mode: Optional[str]
     ssl_protocol: Optional[str]
+    tags: Optional[Sequence[str]]
+    use_global_custom_queries: Optional[str]
     username: Optional[str]
 
     @root_validator(pre=True)

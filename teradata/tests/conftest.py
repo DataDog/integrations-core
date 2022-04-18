@@ -5,7 +5,9 @@ import csv
 import json
 import os
 import re
+import sys
 import time
+from contextlib import contextmanager
 from copy import deepcopy
 
 import mock
@@ -18,6 +20,7 @@ from .common import TERADATA_DD_PW, TERADATA_DD_USER, TERADATA_SERVER
 TABLE_EXTRACTION_PATTERN = re.compile(r'SELECT .* FROM \w+\.(\w+)')
 HERE = get_here()
 
+sys.modules['teradatasql'] = mock.MagicMock()
 
 CONFIG = {
     'server': 'tdserver',
@@ -56,16 +59,39 @@ def bad_instance():
     return bad_config
 
 
-@pytest.fixture()
-def mock_cursor():
-    with mock.patch('datadog_checks.teradata.check.teradatasql') as teradatasql:
-        cursor = mock.MagicMock(name='cursor')
-        connect = mock.MagicMock(name='connect', cursor=lambda: cursor)
-        teradatasql.connect.return_value = connect
-        cursor.execute = lambda x: setattr(cursor, 'mock_last_query', x)  # noqa
-        cursor.rowcount = float('+inf')
-        cursor.fetchall = lambda: _mock_execute(cursor.mock_last_query)
-        yield
+@pytest.fixture
+def cursor_factory():
+    """
+    This cursor factory fixture yields a mock cursor returned from the mock `teradatasql.connect` connection.
+    If the factory receives the argument `exception=True`, it raises an Exception side effect from
+    the mock `teradatasql.connect` connection.
+    """
+
+    @contextmanager
+    def _cursor(exception=False):
+        with mock.patch('datadog_checks.teradata.check.teradatasql') as teradatasql:
+            cursor = mock.MagicMock(name='cursor')
+
+            if exception:
+                connect = mock.MagicMock(
+                    name='connect',
+                    cursor=lambda: cursor,
+                    side_effect=Exception(
+                        'Unable to connect to Teradata. [Version 17.10.0.11] [Session 0] '
+                        '[Teradata SQL Driver] Failed to connect to localhost'
+                    ),
+                )
+                teradatasql.connect.side_effect = connect
+            else:
+                connect = mock.MagicMock(name='connect', cursor=lambda: cursor)
+                teradatasql.connect.return_value = connect
+
+            cursor.execute = lambda x: setattr(cursor, 'mock_last_query', x)  # noqa
+            cursor.rowcount = float('+inf')
+            cursor.fetchall = lambda: _mock_execute(cursor.mock_last_query)
+            yield
+
+    yield _cursor
 
 
 def _mock_execute(query):

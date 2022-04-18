@@ -9,10 +9,10 @@ from .common import SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, instance):
-    expected_tags = ['teradata_server:localhost:1025']
+def test_e2e(dd_agent_check, aggregator, instance):
+    expected_tags = ['td_env:dev', 'teradata_port:1025', 'teradata_server:tdserver']
 
     with pytest.raises(Exception, match="ModuleNotFoundError: No module named 'teradatasql'"):
-        aggregator = dd_agent_check(instance)
-        aggregator.assert_service_check(SERVICE_CHECK_CONNECT, ServiceCheck.OK, tags=expected_tags)
-        aggregator.assert_service_check(SERVICE_CHECK_QUERY, ServiceCheck.OK, tags=expected_tags)
+        dd_agent_check(instance)
+    aggregator.assert_service_check(SERVICE_CHECK_CONNECT, ServiceCheck.CRITICAL, count=1, tags=expected_tags)
+    aggregator.assert_service_check(SERVICE_CHECK_QUERY, count=0)

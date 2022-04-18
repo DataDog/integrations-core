@@ -34,8 +34,32 @@ def instance_collect_res_usage(field, value):
     return False
 
 
+def instance_custom_queries(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_disable_generic_tags(field, value):
+    return False
+
+
+def instance_empty_default_hostname(field, value):
+    return False
+
+
 def instance_https_port(field, value):
     return 443
+
+
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_min_collection_interval(field, value):
+    return 15
+
+
+def instance_only_custom_queries(field, value):
+    return False
 
 
 def instance_password(field, value):
@@ -46,12 +70,24 @@ def instance_port(field, value):
     return 1025
 
 
+def instance_service(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_ssl_mode(field, value):
     return 'Prefer'
 
 
 def instance_ssl_protocol(field, value):
     return 'TLSv1.2'
+
+
+def instance_tags(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_use_global_custom_queries(field, value):
+    return 'true'
 
 
 def instance_username(field, value):
