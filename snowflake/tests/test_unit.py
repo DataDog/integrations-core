@@ -214,7 +214,7 @@ def test_default_metric_groups(instance):
     assert check._config.metric_groups == [
         'snowflake.query',
         'snowflake.billing',
-        'snowflake.storage',
+        'snowflake.storage.database',
         'snowflake.logins',
     ]
 
