@@ -95,12 +95,24 @@ RESOURCE_USAGE = {
         {"name": "process.blocked", "type": "gauge"},
         {"name": "process.ready", "type": "gauge"},
         {"name": "process.ready_max", "type": "gauge"},
-        {"name": "process.cpu_idle", "type": "gauge"},
-        {"name": "process.cpu_io_wait", "type": "gauge"},
-        {"name": "process.cpu_serv", "type": "gauge"},
-        {"name": "process.cpu_exec", "type": "gauge"},
+        {"name": "process.cpu_idle_cs", "type": "source"},
+        {"name": "process.cpu_io_wait_cs", "type": "source"},
+        {"name": "process.cpu_serv_cs", "type": "source"},
+        {"name": "process.cpu_exec_cs", "type": "source"},
         {"name": "process.cpu_throttle", "type": "gauge"},
-        {"name": "process.cpu_throttle_time", "type": "gauge"},
+        {"name": "process.cpu_throttle_time_cs", "type": "source"},
+    ],
+    # convert centiseconds to milliseconds
+    "extras": [
+        {"name": "process.cpu_idle", "expression": "process.cpu_idle_cs * 10", "submit_type": "gauge"},
+        {"name": "process.cpu_io_wait", "expression": "process.cpu_io_wait_cs * 10", "submit_type": "gauge"},
+        {"name": "process.cpu_serv", "expression": "process.cpu_serv_cs * 10", "submit_type": "gauge"},
+        {"name": "process.cpu_exec", "expression": "process.cpu_exec_cs * 10", "submit_type": "gauge"},
+        {
+            "name": "process.cpu_throttle_time",
+            "expression": "process.cpu_throttle_time_cs * 10",
+            "submit_type": "gauge",
+        },
     ],
 }
 

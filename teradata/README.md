@@ -15,22 +15,32 @@ No additional installation is needed on your server.
 
 #### Prepare Teradata
 
-1. Download and install the [Teradata JDBC Driver][10] for your system from the Teradata downloads page.
+1. Download and install the [Teradata SQL Driver for Python][10] using the embedded agent pip command for your [operating system][11]:
+
+**Linux**
+```
+sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install teradatasql
+```
+
+**Windows**
+```
+%PROGRAMFILES%\Datadog\"Datadog Agent"\embedded<PYTHON_MAJOR_VERSION>\python -m pip install teradatasql
+```
 2. Create a read-only `datadog` user with proper access to your Teradata Database. Start a `BTEQ` session on your Teradata Database:
 
 ```shell
 CREATE USER "datadog" AS PASSWORD="<PASSWORD>";
 ```
 
-Optional, but recommended: Create and/or grant a role to the `datadog` user designated for read-only monitoring purposes. 
+Optional, but strongly recommended: Create and/or grant a role to the `datadog` user designated for read-only monitoring purposes. 
 
 ```shell
 GRANT "<READ_ONLY_ROLE>" TO "datadog"; 
 ```
 
-The Teradata system grants the `SELECT` privilege to PUBLIC on most [Data Dictionary views][11] by default. All Teradata Database users have `PUBLIC` privileges.
+The Teradata system grants the `SELECT` privilege to PUBLIC on most [Data Dictionary views][12] by default. All Teradata Database users have `PUBLIC` privileges.
 
-3. To collect resource usage metrics, enable the [SPMA Resource Usage Table][12]. This can be done using the [`ctl` Teradata Utility][13]:
+3. To collect resource usage metrics, enable the [SPMA Resource Usage Table][13]. This can be done using the [`ctl` Teradata Utility][14]:
 
 ```shell
 # Start ctl session
@@ -46,7 +56,7 @@ SPMA=yes
 write
 ```
 
-Note: The SPMA Resource Table logs statistics every 10 minutes by default. This can be configured in the `rss` screen using `ctl`. Resource Usage logging may impact database performance. To reduce the frequency of Resource Usage logging, increase the logging interval of the `Node Logging Rate` setting. See the Teradata [documentation][14] for more information on Resource Usage Logging.
+Note: The SPMA Resource Table logs statistics every 10 minutes by default. This can be configured in the `rss` screen using `ctl`. Resource Usage logging may impact database performance. To reduce the frequency of Resource Usage logging, increase the logging interval of the `Node Logging Rate` setting. See the Teradata [documentation][15] for more information on Resource Usage Logging.
 
 
 ### Configuration
@@ -87,8 +97,9 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/check/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/check/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
-[10]: https://downloads.teradata.com/download/connectivity/jdbc-driver
-[11]: https://docs.teradata.com/r/Teradata-VantageTM-Data-Dictionary/July-2021/Data-Dictionary-Views/Access-to-Data-Dictionary-Views/Default-PUBLIC-Privileges-for-Views
-[12]: https://docs.teradata.com/r/Teradata-VantageTM-Resource-Usage-Macros-and-Tables/July-2021/ResUsageSpma-Table
-[13]: https://docs.teradata.com/r/Teradata-VantageTM-Database-Utilities/July-2021/Control-GDO-Editor-ctl/Ctl-Commands/SCREEN
-[14]: https://docs.teradata.com/r/Teradata-VantageTM-Resource-Usage-Macros-and-Tables/July-2021/Planning-Your-Resource-Usage-Data/Resource-Usage-Logging
+[10]: https://github.com/Teradata/python-driver#Installation
+[11]: https://docs.datadoghq.com/developers/guide/custom-python-package/?tab=linux#pagetitle 
+[12]:https://docs.teradata.com/r/Teradata-VantageTM-Data-Dictionary/July-2021/Data-Dictionary-Views/Access-to-Data-Dictionary-Views/Default-PUBLIC-Privileges-for-Views
+[13]: https://docs.teradata.com/r/Teradata-VantageTM-Resource-Usage-Macros-and-Tables/July-2021/ResUsageSpma-Table
+[14]: https://docs.teradata.com/r/Teradata-VantageTM-Database-Utilities/July-2021/Control-GDO-Editor-ctl/Ctl-Commands/SCREEN
+[15]: https://docs.teradata.com/r/Teradata-VantageTM-Resource-Usage-Macros-and-Tables/July-2021/Planning-Your-Resource-Usage-Data/Resource-Usage-Logging

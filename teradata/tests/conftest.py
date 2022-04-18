@@ -15,7 +15,7 @@ import pytest
 
 from datadog_checks.dev import get_here
 
-from .common import TERADATA_DD_PW, TERADATA_DD_USER, TERADATA_SERVER
+from .common import E2E_METADATA, TERADATA_DD_PW, TERADATA_DD_USER, TERADATA_SERVER, USE_TD_SANDBOX
 
 TABLE_EXTRACTION_PATTERN = re.compile(r'SELECT .* FROM \w+\.(\w+)')
 HERE = get_here()
@@ -43,8 +43,18 @@ E2E_CONFIG = {
 
 
 @pytest.fixture(scope='session')
-def dd_environment(instance):
-    yield instance
+def dd_environment(e2e_instance, instance):
+    if USE_TD_SANDBOX:
+        if not TERADATA_SERVER or not TERADATA_DD_USER or not TERADATA_DD_PW:
+            raise Exception("Please set TERADATA_SERVER, TERADATA_DD_USER, TERADATA_DD_PW environment variables to valid Teradata sandbox credentials.")
+        else:
+            dd_instance = e2e_instance
+            e2e_metadata = E2E_METADATA
+    else:
+        dd_instance = instance
+        e2e_metadata = {}
+
+    yield dd_instance, e2e_metadata
 
 
 @pytest.fixture(scope='session')
@@ -57,6 +67,11 @@ def bad_instance():
     bad_config = deepcopy(CONFIG)
     bad_config['server'] = 'localhost'
     return bad_config
+
+
+@pytest.fixture(scope='session')
+def e2e_instance():
+    return deepcopy(E2E_CONFIG)
 
 
 @pytest.fixture

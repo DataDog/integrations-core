@@ -12,7 +12,7 @@
             "ok",
             "critical"
         ],
-        "name": "Can Connect",
+        "name": "Teradata Connection Health",
         "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Teradata instance. Returns `OK` otherwise."
     },{
         "agent_version": "7.37.0",
@@ -27,7 +27,7 @@
             "ok",
             "critical"
         ],
-        "name": "Can Connect",
+        "name": "Teradata Query Health",
         "description": "Returns `CRITICAL` if the Agent is unable to query the monitored Teradata instance. Returns `OK` otherwise."
     }
 ]

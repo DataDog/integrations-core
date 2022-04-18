@@ -189,25 +189,25 @@
     "name": "teradata.process.cpu_idle",
     "type": 0,
     "tags": ["teradata_server:tdserver", "teradata_port:1025"],
-    "value": 233395.0
+    "value": 2.333952333952334e+59
   },
   {
     "name": "teradata.process.cpu_io_wait",
     "type": 0,
     "tags": ["teradata_server:tdserver", "teradata_port:1025"],
-    "value": 254.0
+    "value": 2.5425425425425424e+29
   },
   {
     "name": "teradata.process.cpu_serv",
     "type": 0,
     "tags": ["teradata_server:tdserver", "teradata_port:1025"],
-    "value": 2580.0
+    "value": 2.5802580258025803e+39
   },
   {
     "name": "teradata.process.cpu_exec",
     "type": 0,
     "tags": ["teradata_server:tdserver", "teradata_port:1025"],
-    "value": 3755.0
+    "value": 3.7553755375537554e+39
   },
   {
     "name": "teradata.process.cpu_throttle",
