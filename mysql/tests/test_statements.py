@@ -461,7 +461,8 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
         'code=performance-schema-not-enabled host=stubbed.hostname'
     ]
 
-
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
     "metadata,expected_metadata_payload",
     [
@@ -525,6 +526,53 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agen
     metric = matching_metrics[0]
     assert metric['dd_tables'] == expected_metadata_payload['tables']
     assert metric['dd_commands'] == expected_metadata_payload['commands']
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "set_reported_hostname,expected_reported_hostname",
+    [
+        (True, 'bob_hostname_override'),
+        (False, 'stubbed.hostname'),
+    ],
+)
+def test_statement_reported_hostname(
+    aggregator, dd_run_check, dbm_instance, datadog_agent, set_reported_hostname, expected_reported_hostname
+):
+    if set_reported_hostname:
+        dbm_instance['reported_hostname'] = expected_reported_hostname
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    test_query = 'select * from information_schema.processlist where state in (\'starting\')'
+    query_signature = 'ad8e9c25d71690f7'
+
+    def run_query(q):
+        with mysql_check._connect() as db:
+            with closing(db.cursor()) as cursor:
+                cursor.execute(q)
+
+    run_query(test_query)
+    dd_run_check(mysql_check)
+    run_query(test_query)
+    dd_run_check(mysql_check)
+
+    samples = aggregator.get_event_platform_events("dbm-samples")
+    matching_samples = [s for s in samples if s['db']['query_signature'] == query_signature and s.get('dbm_type') != 'fqt']
+    assert len(matching_samples) == 1
+    sample = matching_samples[0]
+
+    assert sample['host'] == expected_reported_hostname
+
+    matching_fqt = [s for s in samples if s['db']['query_signature'] == query_signature and s.get('dbm_type') == 'fqt']
+    assert len(matching_fqt) == 1
+    fqt = matching_fqt[0]
+    assert fqt['host'] == expected_reported_hostname
+
+    metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(metrics) == 1
+    metric = metrics[0]
+    assert metric['host'] == expected_reported_hostname
 
 
 @pytest.mark.integration

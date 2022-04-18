@@ -234,7 +234,7 @@ class MySQLActivity(DBMAsyncJob):
     def _create_activity_event(self, active_sessions, active_connections):
         # type: (List[Dict[str]], List[Dict[str]]) -> Dict[str]
         return {
-            "host": self._db_hostname,
+            "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "mysql",
             "dbm_type": "activity",

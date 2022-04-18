@@ -47,29 +47,9 @@ def test_collect_activity(aggregator, dbm_instance, dd_run_check):
 
     query = 'SELECT id, name FROM testdb.users FOR UPDATE'
     query_signature = 'aca1be410fbadb61'
+    blocking_query = 'SELECT id FROM testdb.users FOR UPDATE'
 
-    def _run_query(conn, _query):
-        conn.cursor().execute(_query)
-
-    def _run_blocking(conn):
-        conn.begin()
-        conn.cursor().execute("SELECT id FROM testdb.users FOR UPDATE")
-
-    bob_conn = _get_conn_for_user('bob')
-    fred_conn = _get_conn_for_user('fred')
-
-    executor = concurrent.futures.thread.ThreadPoolExecutor(1)
-    # bob's query will block until the TX is completed
-    executor.submit(_run_blocking, bob_conn)
-    # fred's query will get blocked by bob's TX
-    executor.submit(_run_query, fred_conn, query)
-
-    dd_run_check(check)
-    bob_conn.commit()
-    bob_conn.close()
-    fred_conn.close()
-
-    executor.shutdown()
+    _run_blocking_simulation(query, blocking_query, check, dd_run_check)
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert len(dbm_activity) == 1, "should have collected exactly one activity payload"
@@ -116,6 +96,34 @@ def test_collect_activity(aggregator, dbm_instance, dd_run_check):
     assert fred_conn is not None
     assert fred_conn['connections'] == 1
     assert fred_conn['processlist_state'], "missing state"
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "set_reported_hostname,expected_reported_hostname",
+    [
+        (True, 'fred_hostname_override'),
+        (False, 'stubbed.hostname'),
+    ],
+)
+def test_activity_reported_hostname(
+    aggregator, dbm_instance, dd_run_check, set_reported_hostname, expected_reported_hostname
+):
+    if set_reported_hostname:
+        dbm_instance['reported_hostname'] = expected_reported_hostname
+    check = MySql(CHECK_NAME, {}, [dbm_instance])
+
+    query = 'SELECT id, name FROM testdb.users FOR UPDATE'
+    blocking_query = "SELECT id FROM testdb.users FOR UPDATE"
+
+    _run_blocking_simulation(query, blocking_query, check, dd_run_check)
+
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    assert len(dbm_activity) == 1, "should have collected exactly one activity payload"
+
+    activity = dbm_activity[0]
+    assert activity['host'] == expected_reported_hostname
 
 
 @pytest.mark.integration
@@ -202,6 +210,31 @@ def test_get_estimated_row_size_bytes(dbm_instance, file):
     for a in test_activity:
         computed_size += check._query_activity._get_estimated_row_size_bytes(a)
     assert abs((actual_size - computed_size) / float(actual_size)) <= 0.10
+
+
+def _run_blocking_simulation(query, blocking_query, check, dd_run_check):
+    def _run_query(conn, _query):
+        conn.cursor().execute(_query)
+
+    def _run_blocking(conn):
+        conn.begin()
+        conn.cursor().execute(blocking_query)
+
+    bob_conn = _get_conn_for_user('bob')
+    fred_conn = _get_conn_for_user('fred')
+
+    executor = concurrent.futures.thread.ThreadPoolExecutor(1)
+    # bob's query will block until the TX is completed
+    executor.submit(_run_blocking, bob_conn)
+    # fred's query will get blocked by bob's TX
+    executor.submit(_run_query, fred_conn, query)
+
+    dd_run_check(check)
+    bob_conn.commit()
+    bob_conn.close()
+    fred_conn.close()
+
+    executor.shutdown()
 
 
 def _new_time():
