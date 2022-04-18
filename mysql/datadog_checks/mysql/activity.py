@@ -117,7 +117,7 @@ class MySQLActivity(DBMAsyncJob):
             enabled=is_affirmative(config.activity_config.get("enabled", True)),
             expected_db_exceptions=(pymysql.err.OperationalError, pymysql.err.InternalError),
             min_collection_interval=config.min_collection_interval,
-            config_host=config.host,
+            config_host=check.resolved_hostname,
             dbms="mysql",
             rate_limit=1 / float(self.collection_interval),
             job_name="query-activity",
