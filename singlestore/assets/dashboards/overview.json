@@ -53,7 +53,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "This dashboard provides a high-level view of your SingleStore metrics and troubleshoot performance issues, including:\n- Any issues due to resource utilization\n- Spikes in connections\n- A high-level overview of query performance",
+                            "content": "This dashboard provides a high-level view of your SingleStore metrics and can help you troubleshoot performance issues, including:\n- Any issues due to resource utilization\n- Spikes in connections\n- A high-level overview of query performance",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
