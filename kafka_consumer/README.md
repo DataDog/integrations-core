@@ -101,7 +101,6 @@ sudo systemctl restart datadog-agent.service
 sudo service datadog-agent restart
 ```
 
-
 ## Further Reading
 
 - [Monitoring Kafka performance metrics][13]
