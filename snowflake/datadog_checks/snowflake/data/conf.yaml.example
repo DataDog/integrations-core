@@ -151,8 +151,8 @@ instances:
     ##
     ##   - snowflake.query (enabled by default)
     ##   - snowflake.billing (enabled by default)
-    ##   - snowflake.storage (enabled by default)
-    ##   - snowflake.storage.database
+    ##   - snowflake.storage
+    ##   - snowflake.storage.database (enabled by default)
     ##   - snowflake.storage.table
     ##   - snowflake.logins (enabled by default)
     ##   - snowflake.data_transfer
@@ -163,7 +163,7 @@ instances:
     # metric_groups:
     #   - snowflake.query
     #   - snowflake.billing
-    #   - snowflake.storage
+    #   - snowflake.storage.database
     #   - snowflake.logins
 
     ## @param aggregate_last_24_hours - boolean - optional - default: false

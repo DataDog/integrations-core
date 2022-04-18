@@ -148,8 +148,8 @@ files:
 
             - snowflake.query (enabled by default)
             - snowflake.billing (enabled by default)
-            - snowflake.storage (enabled by default)
-            - snowflake.storage.database
+            - snowflake.storage
+            - snowflake.storage.database (enabled by default)
             - snowflake.storage.table
             - snowflake.logins (enabled by default)
             - snowflake.data_transfer
@@ -163,7 +163,7 @@ files:
           example:
             - snowflake.query
             - snowflake.billing
-            - snowflake.storage
+            - snowflake.storage.database
             - snowflake.logins
       - name: aggregate_last_24_hours
         description: |

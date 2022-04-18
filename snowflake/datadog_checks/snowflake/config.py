@@ -15,7 +15,7 @@ class Config(object):
     DEFAULT_METRIC_GROUP = [
         'snowflake.query',
         'snowflake.billing',
-        'snowflake.storage',
+        'snowflake.storage.database',
         'snowflake.logins',
     ]
 
