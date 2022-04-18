@@ -45,35 +45,6 @@ For containerized environments, see the [Autodiscovery with JMX][7] guide.
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
-#### Authentication
-
-The Kafka consumer check supports the following security protocols and SASL authentication mechanisms:
-
-**Security Protocols**
-* PLAINTEXT (default)
-* SSL
-* SASL_PLAINTEXT
-* SASL_SSL
-
-**SASL Authentication Mechanisms**
-* PLAIN
-* GSSAPI (Kerberos)
-* OAUTHBEARER
-* SCRAM-SHA-256
-* SCRAM-SHA-512
-
-**Troubleshooting Kerberos GSSAPI Authentication**
-
-Depending on your Kafka cluster's Kerberos setup, you may need to configure the following:
-
-* Configure a Kafka client to connect to the Kafka broker. The Kafka client should be added as a Kerberos principal and added to a Kerberos keytab.
-* TLS certificate to authenticate a secure connection to the Kafka broker
-  * If JKS keystore is used, a certificate needs to be exported from the keystore and the file path should be configured with the `tls_cert` or `tls_ca_cert` options. 
-  * If a private key is required to authenticate the certificate, it should be configured with the `tls_private_key` option. If applicable, the private key password should be configured with the `tls_private_key_password`. 
-* `KRB5_CLIENT_KTNAME` environment variable pointing to the Kafka client's Kerberos keytab location if it differs from the default path (i.e. `KRB5_CLIENT_KTNAME=/etc/krb5.keytab`)
-* `KRB5CCNAME` environment variable pointing to the Kafka client's Kerberos credentials ticket cache if it differs from the default path (i.e. `KRB5CCNAME=/tmp/krb5cc_xxx`)
-
-
 ### Validation
 
 [Run the Agent's status subcommand][8] and look for `kafka_consumer` under the Checks section.
@@ -97,6 +68,39 @@ The Kafka-consumer check does not include any service checks.
 
 - [Troubleshooting and Deep Dive for Kafka][10]
 - [Agent failed to retrieve RMIServer stub][11]
+
+**Kerberos GSSAPI Authentication**
+
+Depending on your Kafka cluster's Kerberos setup, you may need to configure the following:
+
+* Configure a Kafka client for the Datadog Agent to connect to the Kafka broker. The Kafka client should be added as a Kerberos principal and added to a Kerberos keytab.
+* TLS certificate to authenticate a secure connection to the Kafka broker
+  * If JKS keystore is used, a certificate needs to be exported from the keystore and the file path should be configured with the `tls_cert` or `tls_ca_cert` options, as applicable. 
+  * If a private key is required to authenticate the certificate, it should be configured with the `tls_private_key` option. If applicable, the private key password should be configured with the `tls_private_key_password`. 
+* `KRB5_CLIENT_KTNAME` environment variable pointing to the Kafka client's Kerberos keytab location if it differs from the default path (i.e. `KRB5_CLIENT_KTNAME=/etc/krb5.keytab`)
+* `KRB5CCNAME` environment variable pointing to the Kafka client's Kerberos credentials ticket cache if it differs from the default path (i.e. `KRB5CCNAME=/tmp/krb5cc_xxx`)
+* If the Datadog Agent is unable to access the environment variables, configure the environment variables in a Datadog Agent service configuration override file:
+
+**Linux**
+1. Configure the environment variables in an environment file.
+   For example: `/path/to/environment/file`
+  ```
+  KRB5_CLIENT_KTNAME=/etc/krb5.keytab
+  KRB5CCNAME=/tmp/krb5cc_xxx
+  ```
+2. Create a Datadog Agent service configuration override file: `sudo systemctl edit datadog-agent.service`
+3. Configure the following in the override file:
+  ```
+  [Service]
+  EnvironmentFile=/path/to/environment/file
+  ```
+4. Run the following commands to reload the systemd daemon, datadog-agent service, and datadog agent:
+```
+sudo systemctl daemon-reload
+sudo systemctl restart datadog-agent.service
+sudo service datadog-agent restart
+```
+
 
 ## Further Reading
 
