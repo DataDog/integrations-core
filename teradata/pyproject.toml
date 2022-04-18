@@ -10,6 +10,7 @@ name = "datadog-teradata"
 description = "The Teradata check"
 readme = "README.md"
 license = "BSD-3-Clause"
+requires-python = ">=3.8"
 keywords = [
     "datadog",
     "datadog agent",
