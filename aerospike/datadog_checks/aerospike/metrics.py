@@ -13,7 +13,6 @@ METRIC_MAP = {
     # pmem only avalable when configured:
     # https://github.com/aerospike/aerospike-prometheus-exporter/issues/20#issuecomment-634476536
     'aerospike_namespace_pmem_available_pct': 'namespace.pmem_available_pct',
-    'aerospike_namespace_stop_writes': 'namespace.stop_writes',
     'aerospike_namespace_unavailable_partitions': 'namespace.unavailable_partitions',
     'aerospike_node_stats_client_connections': 'node_stats.client_connections',
     'aerospike_node_stats_client_connections_opened': 'node_stats.client_connections_opened',
