@@ -21,7 +21,7 @@ class AerospikeCheckV2(OpenMetricsBaseCheckV2):
         if 'metrics' in self.instance:
             # AerospikeCheck has a 'metrics' parameter which should be warned against using with openmetrics_endpoint
             self.warning(
-                "Do not use 'metrics' parameter 'openmetrics_endpoint'. "
+                "Do not use 'metrics' parameter with 'openmetrics_endpoint'. "
                 "Use 'extra_metrics' or 'exclude_metrics*' settings instead."
             )
 

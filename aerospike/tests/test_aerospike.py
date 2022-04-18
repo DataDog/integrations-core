@@ -87,6 +87,18 @@ def test_openmetrics_e2e(dd_agent_check, instance_openmetrics_v2):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
+@requires_py3
+@pytest.mark.integration
+def test_metrics_warning(dd_run_check, instance_openmetrics_v2):
+    instance_openmetrics_v2['metrics'] = ['migrate_rx_objs', 'migrate_tx_objs']
+    check = AerospikeCheck('aerospike', {}, [instance_openmetrics_v2])
+    dd_run_check(check)
+
+    is_warning = any("Do not use 'metrics' parameter with 'openmetrics_endpoint'." in s for s in check.warnings)
+
+    assert is_warning
+
+
 def _test_check(aggregator):
     version_parts = [int(p) for p in VERSION.split('.')]
 
