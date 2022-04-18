@@ -348,7 +348,7 @@ def test_statement_metadata(
     ],
 )
 def test_statement_reported_hostname(
-    aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, set_reported_hostname, expected_reported_hostname
+    aggregator, dd_run_check, dbm_instance, bob_conn, set_reported_hostname, expected_reported_hostname
 ):
     if set_reported_hostname:
         dbm_instance['reported_hostname'] = expected_reported_hostname
