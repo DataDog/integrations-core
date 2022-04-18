@@ -26,5 +26,11 @@ def test_openmetricsv2_check(aggregator, dd_run_check, instance_openmetrics_v2, 
     for metric_name in EXPECTED_PROMETHEUS_METRICS + EXPECTED_PROMETHEUS_METRICS_5_6:
         aggregator.assert_metric(metric_name)
 
+        aggregator.assert_metric_has_tag(
+            metric_name, 'endpoint:{}'.format(instance_openmetrics_v2.get('openmetrics_endpoint'))
+        )
+        aggregator.assert_metric_has_tag(metric_name, 'aerospike_cluster:null')
+        aggregator.assert_metric_has_tag(metric_name, 'aerospike_service:192.168.32.3:3000')
+
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)

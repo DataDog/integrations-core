@@ -84,7 +84,7 @@ def test_openmetrics_e2e(dd_agent_check, instance_openmetrics_v2):
             aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def _test_check(aggregator):
