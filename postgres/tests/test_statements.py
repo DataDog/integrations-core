@@ -653,21 +653,35 @@ def test_statement_reported_hostname(
     # If the query changes, the query_signatures for both will need to be updated as well.
     query = "SELECT city FROM persons WHERE city = 'hello'"
     # Samples will match to the non normalized query signature
-    query_signature = 'd69a53d89c75f135'
-    normalized_query_signature = 'ce10a2b41983551c'
+    query_signature = 'ca85e8d659051b3a'
+    normalized_query = 'SELECT city FROM persons WHERE city = ?'
+
+    def _obfuscate_sql(query, options=None):
+        if query.startswith('SELECT city FROM persons WHERE city'):
+            return json.dumps({'query': normalized_query, 'metadata': {}})
+        return json.dumps({'query': query, 'metadata': {}})
 
     check = integration_check(dbm_instance)
     check._connect()
     conn = psycopg2.connect(host=HOST, dbname="datadog_test", user="bob", password="bob")
     cursor = conn.cursor()
 
-    cursor.execute(query,)
-    check.check(dbm_instance)
-    cursor.execute(query,)
-    check.check(dbm_instance)
+    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        cursor.execute(
+            query,
+        )
+        check.check(dbm_instance)
+        cursor.execute(
+            query,
+        )
+        check.check(dbm_instance)
 
     samples = aggregator.get_event_platform_events("dbm-samples")
-    matching_samples = [s for s in samples if s['db']['query_signature'] == query_signature]
+    matching_samples = [
+        s for s in samples if s.get('dbm_type') != 'fqt' and s['db']['query_signature'] == query_signature
+    ]
     assert len(matching_samples) == 1
     sample = matching_samples[0]
     assert sample['host'] == expected_reported_hostname
@@ -678,7 +692,7 @@ def test_statement_reported_hostname(
         return False
 
     fqt_samples = [
-        s for s in samples if s.get('dbm_type') == 'fqt' and s['db']['query_signature'] == normalized_query_signature
+        s for s in samples if s.get('dbm_type') == 'fqt' and s['db']['query_signature'] == query_signature
     ]
     assert len(fqt_samples) == 1
     fqt = fqt_samples[0]
