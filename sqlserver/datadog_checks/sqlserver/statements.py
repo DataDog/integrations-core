@@ -419,7 +419,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 if 'database_name' in row:
                     tags += ["db:{}".format(row['database_name'])]
                 yield {
-                    "host": self._db_hostname,
+                    "host": self.check.resolved_hostname,
                     "ddagentversion": datadog_agent.get_version(),
                     "ddsource": "sqlserver",
                     "ddtags": ",".join(tags),

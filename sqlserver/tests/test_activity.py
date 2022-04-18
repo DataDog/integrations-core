@@ -54,42 +54,10 @@ def dbm_instance(instance_docker):
 @pytest.mark.parametrize("use_autocommit", [True, False])
 def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_instance, use_autocommit):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
     query = "SELECT * FROM ϑings"
     blocking_query = "INSERT INTO ϑings WITH (TABLOCK, HOLDLOCK) (name) VALUES ('puppy')"
-    fred_conn = _get_conn_for_user(instance_docker, "fred", _autocommit=use_autocommit)
-    bob_conn = _get_conn_for_user(instance_docker, "bob")
-
-    def run_test_query(c, q):
-        cur = c.cursor()
-        cur.execute("USE {}".format("datadog_test"))
-        cur.execute(q)
-
-    # bob's query blocks until the tx is completed
-    run_test_query(bob_conn, blocking_query)
-
-    # fred's query will get blocked by bob, so it needs
-    # to be run asynchronously
-    executor = concurrent.futures.ThreadPoolExecutor(1)
-    f_q = executor.submit(run_test_query, fred_conn, query)
-    while not f_q.running():
-        if f_q.done():
-            break
-        print("waiting on fred's query to execute")
-        time.sleep(1)
-
-    # both queries were kicked off, so run the check
-    dd_run_check(check)
-    # commit and close bob's transaction
-    bob_conn.commit()
-    bob_conn.close()
-
-    while not f_q.done():
-        print("blocking query finished, waiting for fred's query to complete")
-        time.sleep(1)
-    # clean up fred's connection
-    # and shutdown executor
-    fred_conn.close()
-    executor.shutdown(wait=True)
+    _run_blocking_simulation(query, blocking_query, check, dd_run_check, instance_docker, use_autocommit)
 
     expected_instance_tags = set(dbm_instance.get('tags', []))
 
@@ -230,6 +198,69 @@ def test_activity_metadata(
     assert activity['dd_tables'] == expected_metadata_payload['tables']
     assert activity['dd_commands'] == expected_metadata_payload['commands']
     assert activity['dd_comments'] == expected_metadata_payload['comments']
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "set_reported_hostname,expected_reported_hostname",
+    [
+        (True, 'fred_hostname_override'),
+        (False, 'stubbed.hostname'),
+    ],
+)
+def test_activity_reported_hostname(
+    aggregator, instance_docker, dd_run_check, dbm_instance, set_reported_hostname, expected_reported_hostname
+):
+    if set_reported_hostname:
+        dbm_instance['reported_hostname'] = expected_reported_hostname
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    query = "SELECT * FROM ϑings"
+    blocking_query = "INSERT INTO ϑings WITH (TABLOCK, HOLDLOCK) (name) VALUES ('puppy')"
+    _run_blocking_simulation(query, blocking_query, check, dd_run_check, instance_docker)
+
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    assert len(dbm_activity) == 1, "should have collected exactly one dbm-activity payload"
+    event = dbm_activity[0]
+    assert event['host'] == expected_reported_hostname
+
+
+def _run_blocking_simulation(query, blocking_query, check, dd_run_check, instance_docker, auto_commit=False):
+    fred_conn = _get_conn_for_user(instance_docker, "fred", _autocommit=auto_commit)
+    bob_conn = _get_conn_for_user(instance_docker, "bob")
+
+    def run_test_query(c, q):
+        cur = c.cursor()
+        cur.execute("USE {}".format("datadog_test"))
+        cur.execute(q)
+
+    # bob's query blocks until the tx is completed
+    run_test_query(bob_conn, blocking_query)
+
+    # fred's query will get blocked by bob, so it needs
+    # to be run asynchronously
+    executor = concurrent.futures.ThreadPoolExecutor(1)
+    f_q = executor.submit(run_test_query, fred_conn, query)
+    while not f_q.running():
+        if f_q.done():
+            break
+        print("waiting on fred's query to execute")
+        time.sleep(1)
+
+    # both queries were kicked off, so run the check
+    dd_run_check(check)
+    # commit and close bob's transaction
+    bob_conn.commit()
+    bob_conn.close()
+
+    while not f_q.done():
+        print("blocking query finished, waiting for fred's query to complete")
+        time.sleep(1)
+    # clean up fred's connection
+    # and shutdown executor
+    fred_conn.close()
+    executor.shutdown(wait=True)
 
 
 def new_time():

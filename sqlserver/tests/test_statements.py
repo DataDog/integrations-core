@@ -340,6 +340,49 @@ def test_statement_metadata(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "set_reported_hostname,expected_reported_hostname",
+    [
+        (True, 'bob_hostname_override'),
+        (False, 'stubbed.hostname'),
+    ],
+)
+def test_statement_reported_hostname(
+    aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, set_reported_hostname, expected_reported_hostname
+):
+    if set_reported_hostname:
+        dbm_instance['reported_hostname'] = expected_reported_hostname
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    query = "select * from sys.databases"
+    query_signature = '6d1d070f9b6c5647'
+
+    bob_conn.execute_with_retries(query)
+    dd_run_check(check)
+    bob_conn.execute_with_retries(query)
+    dd_run_check(check)
+
+    samples = aggregator.get_event_platform_events("dbm-samples")
+    assert samples, "should have collected at least one sample"
+
+    matching_samples = [s for s in samples if s['db']['query_signature'] == query_signature and s['dbm_type'] == 'plan']
+    assert len(matching_samples) == 1
+    sample = matching_samples[0]
+    assert sample['host'] == expected_reported_hostname
+
+    matching_fqt = [s for s in samples if s.get('dbm_type') == 'fqt' and s['db']['query_signature'] == query_signature]
+    assert len(matching_fqt) == 1
+    fqt = matching_fqt[0]
+    assert fqt['host'] == expected_reported_hostname
+
+    metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert metrics, "should have collected metrics"
+    metric = metrics[0]
+    assert metric['host'] == expected_reported_hostname
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
     now = time.time()
     test_query = "select * from sys.databases"
