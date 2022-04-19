@@ -56,7 +56,6 @@ class TeradataCheck(AgentCheck, ConfigMixin):
         self.check_initializations.append(self.initialize_config)
         self.check_initializations.append(self._query_manager.compile_queries)
 
-        self._connection_errors = 0
         self._query_errors = 0
 
     def check(self, _):
@@ -87,16 +86,15 @@ class TeradataCheck(AgentCheck, ConfigMixin):
             query = query.format(self.config.database)
             cursor.execute(query)
             if cursor.rowcount < 1:
-                self.service_check(SERVICE_CHECK_QUERY, ServiceCheck.CRITICAL, tags=self._tags)
+                self._query_errors += 1
                 self.log.warning('Failed to fetch records from query: `%s`.', query)
                 return None
-            else:
-                for row in cursor.fetchall():
-                    try:
-                        yield self._timestamp_validator(row, query)
-                    except Exception:
-                        self.log.debug('Unable to validate Resource Usage View timestamp, skipping row.')
-                        yield row
+            for row in cursor.fetchall():
+                try:
+                    yield self._timestamp_validator(row, query)
+                except Exception:
+                    self.log.debug('Unable to validate Resource Usage View timestamp, skipping row.')
+                    yield row
 
     def _executor_error_handler(self, error):
         self._query_errors += 1
@@ -110,7 +108,6 @@ class TeradataCheck(AgentCheck, ConfigMixin):
 
     @contextmanager
     def connect(self):
-        # How to handle service checks when exceptions get raised
         conn = None
         if TERADATASQL_IMPORT_ERROR:
             self.service_check(SERVICE_CHECK_CONNECT, ServiceCheck.CRITICAL, tags=self._tags)
@@ -120,26 +117,22 @@ class TeradataCheck(AgentCheck, ConfigMixin):
                 TERADATASQL_IMPORT_ERROR,
             )
             raise TERADATASQL_IMPORT_ERROR
-        else:
-            self.log.debug('Connecting to Teradata...')
-            try:
-                conn = teradatasql.connect(json.dumps(self._connect_params))
-                self.log.debug('Connected to Teradata.')
-                yield conn
-            except Exception as e:
-                self.service_check(SERVICE_CHECK_CONNECT, ServiceCheck.CRITICAL, tags=self._tags)
-                self.log.error('Unable to connect to Teradata. %s.', e)
-                raise e
-            finally:
-                if conn:
-                    conn.close()
+        self.log.info('Connecting to Teradata...')
+        try:
+            conn = teradatasql.connect(json.dumps(self._connect_params))
+            self.log.info('Connected to Teradata.')
+            yield conn
+        except Exception as e:
+            self.service_check(SERVICE_CHECK_CONNECT, ServiceCheck.CRITICAL, tags=self._tags)
+            self.log.error('Unable to connect to Teradata. %s.', e)
+            raise e
+        finally:
+            if conn:
+                conn.close()
 
     def submit_health_checks(self):
         connect_status = ServiceCheck.OK
         query_status = ServiceCheck.OK
-
-        if self._connection_errors:
-            connect_status = ServiceCheck.CRITICAL
 
         if self._query_errors:
             query_status = ServiceCheck.CRITICAL
@@ -157,20 +150,19 @@ class TeradataCheck(AgentCheck, ConfigMixin):
                 self.log.warning(msg)
                 self._query_errors += 1
                 return []
-            else:
-                diff = now - row_ts
-                # Valid metrics should be no more than 10 min in the future or 1h in the past
-                if (diff > 3600) or (diff < -600):
-                    msg = 'Resource Usage stats are invalid. {}'
-                    if diff > 3600:
-                        msg = msg.format(
-                            'Row timestamp is more than 1h in the past. Is `SPMA` Resource Usage Logging enabled?'
-                        )
-                    elif diff < -600:
-                        msg = msg.format(
-                            'Row timestamp is more than 10 min in the future. Try checking system time settings.'
-                        )
-                    self.log.warning(msg)
-                    self._query_errors += 1
-                    return []
+            diff = now - row_ts
+            # Valid metrics should be no more than 10 min in the future or 1h in the past
+            if (diff > 3600) or (diff < -600):
+                msg = 'Resource Usage stats are invalid. {}'
+                if diff > 3600:
+                    msg = msg.format(
+                        'Row timestamp is more than 1h in the past. Is `SPMA` Resource Usage Logging enabled?'
+                    )
+                elif diff < -600:
+                    msg = msg.format(
+                        'Row timestamp is more than 10 min in the future. Try checking system time settings.'
+                    )
+                self.log.warning(msg)
+                self._query_errors += 1
+                return []
         return row

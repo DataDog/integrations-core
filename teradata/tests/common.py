@@ -2,19 +2,47 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+from datadog_checks.dev import get_here
+from datadog_checks.dev.ci import running_on_ci
+from datadog_checks.dev.utils import get_tox_env
+
+HERE = get_here()
 CHECK_NAME = 'teradata'
+TOX_ENV = get_tox_env()
+ON_CI = running_on_ci()
 
 TERADATA_SERVER = os.environ.get('TERADATA_SERVER')
 TERADATA_DD_USER = os.environ.get('TERADATA_DD_USER')
 TERADATA_DD_PW = os.environ.get('TERADATA_DD_PW')
 USE_TD_SANDBOX = os.environ.get('USE_TD_SANDBOX')
 
+TABLE_EXTRACTION_PATTERN = re.compile(r'SELECT .* FROM \w+\.(\w+)')
+
 SERVICE_CHECK_CONNECT = 'teradata.can_connect'
 SERVICE_CHECK_QUERY = 'teradata.can_query'
 
 EXPECTED_TAGS = ["teradata_server:tdserver", "teradata_port:1025", "td_env:dev"]
+
+CONFIG = {
+    'server': 'tdserver',
+    'username': 'datadog',
+    'password': 'td_datadog',
+    'database': 'AdventureWorksDW',
+    'use_tls': False,
+    'collect_res_usage': True,
+    'tags': ['td_env:dev'],
+}
+
+E2E_CONFIG = {
+    'server': TERADATA_SERVER,
+    'username': TERADATA_DD_USER,
+    'password': TERADATA_DD_PW,
+    'database': 'AdventureWorksDW',
+    'use_tls': False,
+    'collect_res_usage': True,
+}
 
 E2E_METADATA = {
     'start_commands': [

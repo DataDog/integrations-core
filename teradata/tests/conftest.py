@@ -4,7 +4,6 @@
 import csv
 import json
 import os
-import re
 import sys
 import time
 from contextlib import contextmanager
@@ -13,33 +12,19 @@ from copy import deepcopy
 import mock
 import pytest
 
-from datadog_checks.dev import get_here
-
-from .common import E2E_METADATA, TERADATA_DD_PW, TERADATA_DD_USER, TERADATA_SERVER, USE_TD_SANDBOX
-
-TABLE_EXTRACTION_PATTERN = re.compile(r'SELECT .* FROM \w+\.(\w+)')
-HERE = get_here()
+from .common import (
+    CONFIG,
+    E2E_CONFIG,
+    E2E_METADATA,
+    HERE,
+    TABLE_EXTRACTION_PATTERN,
+    TERADATA_DD_PW,
+    TERADATA_DD_USER,
+    TERADATA_SERVER,
+    USE_TD_SANDBOX,
+)
 
 sys.modules['teradatasql'] = mock.MagicMock()
-
-CONFIG = {
-    'server': 'tdserver',
-    'username': 'datadog',
-    'password': 'td_datadog',
-    'database': 'AdventureWorksDW',
-    'use_tls': False,
-    'collect_res_usage': True,
-    'tags': ['td_env:dev'],
-}
-
-E2E_CONFIG = {
-    'server': TERADATA_SERVER,
-    'username': TERADATA_DD_USER,
-    'password': TERADATA_DD_PW,
-    'database': 'AdventureWorksDW',
-    'use_tls': False,
-    'collect_res_usage': True,
-}
 
 
 @pytest.fixture(scope='session')

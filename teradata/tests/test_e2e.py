@@ -4,13 +4,17 @@
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.ci import running_on_ci
-from datadog_checks.dev.utils import get_tox_env
 
-from .common import EXPECTED_METRICS, EXPECTED_TAGS, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY, TERADATA_SERVER
+from .common import (
+    EXPECTED_METRICS,
+    EXPECTED_TAGS,
+    ON_CI,
+    SERVICE_CHECK_CONNECT,
+    SERVICE_CHECK_QUERY,
+    TERADATA_SERVER,
+    TOX_ENV,
+)
 
-TOX_ENV = get_tox_env()
-ON_CI = running_on_ci()
 skip_on_ci = pytest.mark.skipif(
     ON_CI and TOX_ENV != 'py38-sandbox', reason='Do not run E2E test on sandbox environment'
 )
@@ -48,5 +52,6 @@ def test_e2e_sandbox(dd_agent_check, aggregator, instance):
             aggregator.assert_metric(metric, at_least=0, tags=global_tags)
         for tag in global_tags:
             aggregator.assert_metric_has_tag(metric, tag)
+    # assert can_query service check at_least=0 to account for potential clock drift in sandbox VM
     aggregator.assert_service_check(SERVICE_CHECK_CONNECT, ServiceCheck.OK, count=1, tags=global_tags)
     aggregator.assert_service_check(SERVICE_CHECK_QUERY, ServiceCheck.OK, at_least=0, tags=global_tags)

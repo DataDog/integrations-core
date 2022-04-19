@@ -281,11 +281,8 @@ def test_connection_errors(dd_run_check, aggregator, instance, caplog):
         with pytest.raises(Exception, match="Exception: teradatasql.OperationalError"):
             dd_run_check(check)
 
-            assert check._connection_errors > 0
-            assert check._query_errors < 0
-
-            aggregator.assert_service_check(SERVICE_CHECK_CONNECT, ServiceCheck.CRITICAL, tags=EXPECTED_TAGS)
-            aggregator.assert_service_check(SERVICE_CHECK_QUERY, ServiceCheck.CRITICAL, tags=EXPECTED_TAGS)
+        aggregator.assert_service_check(SERVICE_CHECK_CONNECT, ServiceCheck.CRITICAL, tags=EXPECTED_TAGS)
+        aggregator.assert_service_check(SERVICE_CHECK_QUERY, count=0)
 
 
 def test_query_errors(dd_run_check, aggregator, instance):
@@ -306,7 +303,6 @@ def test_query_errors(dd_run_check, aggregator, instance):
             stack.enter_context(mock.patch(*mock_call))
         dd_run_check(check)
 
-    assert check._connection_errors < 1
     assert check._query_errors > 0
 
     aggregator.assert_service_check(SERVICE_CHECK_CONNECT, ServiceCheck.OK, tags=EXPECTED_TAGS)
