@@ -19,7 +19,6 @@ files:
         specify the DBC name.
       value:
         type: string
-        example: <IP>
     - name: port
       description: |
         Specifies the Teradata database port number
@@ -45,13 +44,13 @@ files:
         The name of the database to access.
       value:
         type: string
-        example: system
     - name: collect_res_usage
       description: Collect metrics from the SPMA Resource Table.
       value:
         type: boolean
         default: false
         example: true
+        display_default: false
     - name: https_port
       description: The port number used for making TLS connections to the Teradata database.
       value:

@@ -30,7 +30,7 @@ instances:
     ## The IP address or FQDN (fully qualified domain name) of the Teradata database server. If `use_odbc` is enabled,
     ## specify the DBC name.
     #
-  - server: <IP>
+  - server: <SERVER>
 
     ## @param port - integer - optional - default: 1025
     ## Specifies the Teradata database port number
@@ -55,9 +55,9 @@ instances:
     ## @param database - string - required
     ## The name of the database to access.
     #
-    database: system
+    database: <DATABASE>
 
-    ## @param collect_res_usage - boolean - optional - default: true
+    ## @param collect_res_usage - boolean - optional - default: false
     ## Collect metrics from the SPMA Resource Table.
     #
     # collect_res_usage: true
