@@ -113,7 +113,6 @@ class SqlserverActivity(DBMAsyncJob):
             enabled=is_affirmative(check.activity_config.get('enabled', True)),
             expected_db_exceptions=(),
             min_collection_interval=check.min_collection_interval,
-            config_host=check.resolved_hostname,
             dbms="sqlserver",
             rate_limit=1 / float(collection_interval),
             job_name="query-activity",
