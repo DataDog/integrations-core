@@ -146,7 +146,7 @@ def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_in
     aggregator.assert_metric(
         "dd.sqlserver.operation.time",
         tags=['agent_hostname:stubbed.hostname', 'operation:collect_activity']
-             + _expected_dbm_instance_tags(dbm_instance),
+        + _expected_dbm_instance_tags(dbm_instance),
     )
 
 
@@ -253,8 +253,7 @@ def test_activity_reported_hostname(
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert dbm_activity, "should have at least one activity"
-    event = dbm_activity[0]
-    assert event['host'] == expected_hostname
+    assert dbm_activity[0]['host'] == expected_hostname
 
 
 def new_time():

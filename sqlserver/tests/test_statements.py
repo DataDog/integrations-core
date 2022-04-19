@@ -354,40 +354,20 @@ def test_statement_reported_hostname(
         dbm_instance['reported_hostname'] = expected_hostname
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
-    query = "select * from sys.databases"
-    query_signature = '6d1d070f9b6c5647'
-
-    def _run_query():
-        bob_conn.execute_with_retries(query)
-
-    def _obfuscate_sql(sql_query, options=None):
-        return json.dumps({'query': sql_query, 'metadata': {}})
-
-    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
-    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
-        mock_agent.side_effect = _obfuscate_sql
-        _run_query()
-        dd_run_check(check)
-        _run_query()
-        dd_run_check(check)
+    dd_run_check(check)
+    dd_run_check(check)
 
     samples = aggregator.get_event_platform_events("dbm-samples")
     assert samples, "should have collected at least one sample"
+    assert samples[0]['host'] == expected_hostname
 
-    matching_samples = [s for s in samples if s['db']['query_signature'] == query_signature and s['dbm_type'] == 'plan']
-    assert len(matching_samples) == 1
-    sample = matching_samples[0]
-    assert sample['host'] == expected_hostname
-
-    matching_fqt = [s for s in samples if s.get('dbm_type') == 'fqt' and s['db']['query_signature'] == query_signature]
-    assert len(matching_fqt) == 1
-    fqt = matching_fqt[0]
-    assert fqt['host'] == expected_hostname
+    fqt_samples = [s for s in samples if s.get('dbm_type') == 'fqt']
+    assert fqt_samples, "should have collected at least one fqt sample"
+    assert fqt_samples[0]['host'] == expected_hostname
 
     metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert metrics, "should have collected metrics"
-    metric = metrics[0]
-    assert metric['host'] == expected_hostname
+    assert metrics[0]['host'] == expected_hostname
 
 
 @pytest.mark.integration
