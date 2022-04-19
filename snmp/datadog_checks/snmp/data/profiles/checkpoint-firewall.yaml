@@ -11,6 +11,7 @@ extends:
   - _generic-tcp.yaml
   - _generic-udp.yaml
   - _generic-ip.yaml
+  - _checkpoint-firewall-cpu-memory.yaml
 
 device:
   vendor: "checkpoint"
