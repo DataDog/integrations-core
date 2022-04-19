@@ -532,57 +532,33 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agen
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
-    "set_reported_hostname,expected_reported_hostname",
+    "reported_hostname,expected_hostname",
     [
-        (True, 'bob_hostname_override'),
-        (False, 'stubbed.hostname'),
+        (None, 'stubbed.hostname'),
+        ('override.hostname', 'override.hostname'),
     ],
 )
 def test_statement_reported_hostname(
-    aggregator, dd_run_check, dbm_instance, datadog_agent, set_reported_hostname, expected_reported_hostname
+    aggregator, dd_run_check, dbm_instance, datadog_agent, reported_hostname, expected_hostname
 ):
-    if set_reported_hostname:
-        dbm_instance['reported_hostname'] = expected_reported_hostname
+    if reported_hostname:
+        dbm_instance['reported_hostname'] = expected_hostname
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
-    test_query = 'select * from information_schema.processlist where state in (\'starting\')'
-    query_signature = '94caeb4c54f97849'
-    normalized_query = 'SELECT * FROM `information_schema` . `processlist` where state in ( ? )'
-
-    def obfuscate_sql(query, options=None):
-        if 'WHERE `state`' in query:
-            return json.dumps({'query': normalized_query, 'metadata': {}})
-        return json.dumps({'query': query, 'metadata': {}})
-
-    def run_query(q):
-        with mysql_check._connect() as db:
-            with closing(db.cursor()) as cursor:
-                cursor.execute(q)
-
-    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
-        mock_agent.side_effect = obfuscate_sql
-        run_query(test_query)
-        dd_run_check(mysql_check)
-        run_query(test_query)
-        dd_run_check(mysql_check)
+    dd_run_check(mysql_check)
+    dd_run_check(mysql_check)
 
     samples = aggregator.get_event_platform_events("dbm-samples")
-    matching_samples = [
-        s for s in samples if s['db']['query_signature'] == query_signature and s.get('dbm_type') != 'fqt'
-    ]
-    assert len(matching_samples) == 1
-    sample = matching_samples[0]
-    assert sample['host'] == expected_reported_hostname
+    assert samples, "should have at least one sample"
+    assert samples[0]['host'] == expected_hostname
 
-    matching_fqt = [s for s in samples if s['db']['query_signature'] == query_signature and s.get('dbm_type') == 'fqt']
-    assert len(matching_fqt) == 1
-    fqt = matching_fqt[0]
-    assert fqt['host'] == expected_reported_hostname
+    fqt_samples = [s for s in samples if s.get('dbm_type') == 'fqt']
+    assert fqt_samples, "should have at least one fqt sample"
+    assert fqt_samples[0]['host'] == expected_hostname
 
     metrics = aggregator.get_event_platform_events("dbm-metrics")
-    assert len(metrics) == 1
-    metric = metrics[0]
-    assert metric['host'] == expected_reported_hostname
+    assert metrics, "should have at least one metric"
+    assert metrics[0]['host'] == expected_hostname
 
 
 @pytest.mark.integration
