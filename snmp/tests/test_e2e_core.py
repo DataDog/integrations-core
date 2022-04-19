@@ -97,6 +97,51 @@ def assert_apc_ups_metrics(dd_agent_check, config):
     aggregator.assert_all_metrics_covered()
 
 
+def test_e2e_memory_cpu_f5_big_ip(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    config['init_config']['loader'] = 'core'
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'f5-big-ip',
+        }
+    )
+    # run a rate check, will execute two check runs to evaluate rate metrics
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
+
+    tags = [
+        'device_namespace:default',
+        'device_vendor:f5',
+        'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
+        'snmp_profile:f5-big-ip',
+    ]
+    tags += ['snmp_device:{}'.format(instance['ip_address'])]
+
+    common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
+
+    memory_metrics = ['memory.total', 'memory.used']
+
+    for metric in memory_metrics:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric),
+            metric_type=aggregator.GAUGE,
+            tags=tags,
+            count=2,
+        )
+
+    cpu_metrics = ['cpu.usage']
+    cpu_indexes = ['0', '1']
+    for metric in cpu_metrics:
+        for cpu_index in cpu_indexes:
+            cpu_tags = tags + ['cpu:{}'.format(cpu_index)]
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric),
+                metric_type=aggregator.GAUGE,
+                tags=cpu_tags,
+                count=2,
+            )
+
+
 def test_e2e_core_discovery(dd_agent_check):
     config = common.generate_container_profile_config_with_ad('apc_ups')
     config['init_config']['loader'] = 'core'

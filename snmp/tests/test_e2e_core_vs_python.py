@@ -24,6 +24,16 @@ ASSERT_VALUE_METRICS = [
     'datadog.snmp.submitted_metrics',
 ]
 
+# Profiles may contain symbols declared twice with different names and the same OID
+# Python check does handles one single metric name per OID symbol
+SKIPPED_CORE_ONLY_METRICS = [
+    'snmp.memory.total',
+    'snmp.memory.used',
+    'snmp.memory.free',
+    'snmp.memory.usage',
+    'snmp.cpu.usage',
+]
+
 SKIPPED_TAGS = ['loader']
 
 CORE_ONLY_TAGS = ['device_namespace:default']
@@ -47,7 +57,15 @@ def test_e2e_v3_version_autodetection(dd_agent_check):
             'community_string': '',
         }
     )
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=515 + 5)
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=SKIPPED_CORE_ONLY_METRICS,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_v3_explicit_version(dd_agent_check):
@@ -64,7 +82,15 @@ def test_e2e_v3_explicit_version(dd_agent_check):
             'community_string': '',
         }
     )
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=515 + 5)
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=SKIPPED_CORE_ONLY_METRICS,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_v3_md5_aes(dd_agent_check):
@@ -81,7 +107,16 @@ def test_e2e_v3_md5_aes(dd_agent_check):
             'community_string': '',
         }
     )
-    assert_python_vs_core(dd_agent_check, config)
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_v3_md5_aes256_blumenthal(dd_agent_check):
@@ -98,7 +133,16 @@ def test_e2e_v3_md5_aes256_blumenthal(dd_agent_check):
             'community_string': '',
         }
     )
-    assert_python_vs_core(dd_agent_check, config)
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_v3_md5_aes256_reeder(dd_agent_check):
@@ -119,7 +163,16 @@ def test_e2e_v3_md5_aes256_reeder(dd_agent_check):
             'community_string': '',
         }
     )
-    assert_python_vs_core(dd_agent_check, config)
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_regex_match(dd_agent_check):
@@ -252,8 +305,18 @@ def test_e2e_profile_arista(dd_agent_check):
 
 
 def test_e2e_profile_aruba(dd_agent_check):
-    config = common.generate_container_profile_config('aruba')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=67 + 5)
+    config = common.generate_container_profile_config("aruba")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        expected_total_count=67 + 5,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_profile_chatsworth_pdu(dd_agent_check):
@@ -262,23 +325,61 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
 
 
 def test_e2e_profile_checkpoint_firewall(dd_agent_check):
-    config = common.generate_container_profile_config('checkpoint-firewall')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=301 + 5)
+    config = common.generate_container_profile_config("checkpoint-firewall")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        expected_total_count=301 + 5,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_profile_cisco_3850(dd_agent_check):
-    config = common.generate_container_profile_config('cisco-3850')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=5108 + 5)
+    config = common.generate_container_profile_config("cisco-3850")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        expected_total_count=5108 + 5,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_profile_cisco_asa(dd_agent_check):
-    config = common.generate_container_profile_config('cisco-asa')
-    assert_python_vs_core(dd_agent_check, config)
+    config = common.generate_container_profile_config("cisco-asa")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_profile_cisco_asa_5525(dd_agent_check):
-    config = common.generate_container_profile_config('cisco-asa-5525')
-    assert_python_vs_core(dd_agent_check, config)
+    config = common.generate_container_profile_config("cisco-asa-5525")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_profile_cisco_catalyst(dd_agent_check):
@@ -292,8 +393,17 @@ def test_e2e_profile_cisco_csr1000v(dd_agent_check):
 
 
 def test_e2e_profile_cisco_nexus(dd_agent_check):
-    config = common.generate_container_profile_config('cisco-nexus')
-    assert_python_vs_core(dd_agent_check, config)
+    config = common.generate_container_profile_config("cisco-nexus")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_profile_cisco_icm(dd_agent_check):
@@ -320,13 +430,31 @@ def test_e2e_profile_dell_poweredge(dd_agent_check):
 
 
 def test_e2e_profile_f5_big_ip(dd_agent_check):
-    config = common.generate_container_profile_config('f5-big-ip')
-    assert_python_vs_core(dd_agent_check, config)
+    config = common.generate_container_profile_config("f5-big-ip")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_profile_fortinet_fortigate(dd_agent_check):
-    config = common.generate_container_profile_config('fortinet-fortigate')
-    assert_python_vs_core(dd_agent_check, config)
+    config = common.generate_container_profile_config("fortinet-fortigate")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_profile_generic_router(dd_agent_check):
