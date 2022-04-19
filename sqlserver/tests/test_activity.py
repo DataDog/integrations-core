@@ -205,7 +205,7 @@ def test_activity_metadata(
 @pytest.mark.parametrize(
     "set_reported_hostname,expected_reported_hostname",
     [
-        (True, 'fred_hostname_override'),
+        (True, 'override.hostname'),
         (False, 'stubbed.hostname'),
     ],
 )
