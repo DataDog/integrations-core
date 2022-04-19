@@ -159,7 +159,6 @@ class PostgresStatementSamples(DBMAsyncJob):
             enabled=is_affirmative(config.statement_samples_config.get('enabled', True)),
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
-            config_host=check.resolved_hostname,
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
             job_name="query-samples",
             shutdown_callback=shutdown_callback,
