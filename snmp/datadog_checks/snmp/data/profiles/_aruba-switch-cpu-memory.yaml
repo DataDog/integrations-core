@@ -13,10 +13,6 @@ metrics:
         # core check only
         name: cpu.usage
     metric_tags:
-      - tag: processor_index
-        column:
-          OID: 1.3.6.1.4.1.14823.2.2.1.2.1.13.1.1
-          name: sysExtProcessorID
       - tag: cpu
         index: 1
 
@@ -37,9 +33,5 @@ metrics:
         name: memory.used
         scale_factor: 1000
     metric_tags:
-      - tag: memory_index
-        column:
-          OID: 1.3.6.1.4.1.14823.2.2.1.2.1.15.1.1
-          name: sysExtMemoryIndex
       - tag: mem
         index: 1
