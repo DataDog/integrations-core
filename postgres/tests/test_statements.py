@@ -627,7 +627,6 @@ def test_statement_metadata(
     assert metric['dd_commands'] == expected_metadata_payload['commands']
 
 
-@pytest.mark.parametrize("pg_stat_statements_view", ["pg_stat_statements", "datadog.pg_stat_statements()"])
 @pytest.mark.parametrize(
     "reported_hostname,expected_hostname",
     [
@@ -640,11 +639,9 @@ def test_statement_reported_hostname(
     integration_check,
     dbm_instance,
     datadog_agent,
-    pg_stat_statements_view,
     reported_hostname,
     expected_hostname,
 ):
-    dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     dbm_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     if reported_hostname:
@@ -658,11 +655,6 @@ def test_statement_reported_hostname(
     samples = aggregator.get_event_platform_events("dbm-samples")
     assert samples, "should have collected at least one sample"
     assert samples[0]['host'] == expected_hostname
-
-    if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_statements_view == "pg_stat_statements":
-        # cannot catch any queries from other users
-        # only can see own queries
-        return False
 
     fqt_samples = [s for s in samples if s.get('dbm_type') == 'fqt']
     assert fqt_samples, "should have collected at least one fqt sample"
@@ -864,12 +856,6 @@ def test_activity_reported_hostname(
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert dbm_activity, "should have at least one activity sample"
-
-    if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
-        # cannot catch any queries from other users
-        # only can see own queries
-        return
-
     assert dbm_activity[0]['host'] == expected_hostname
 
 
