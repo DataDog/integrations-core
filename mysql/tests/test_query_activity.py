@@ -127,9 +127,7 @@ def test_collect_activity(aggregator, dbm_instance, dd_run_check):
         ('override.hostname', 'override.hostname'),
     ],
 )
-def test_activity_reported_hostname(
-    aggregator, dbm_instance, dd_run_check, reported_hostname, expected_hostname
-):
+def test_activity_reported_hostname(aggregator, dbm_instance, dd_run_check, reported_hostname, expected_hostname):
     if reported_hostname:
         dbm_instance['reported_hostname'] = expected_hostname
     check = MySql(CHECK_NAME, {}, [dbm_instance])
