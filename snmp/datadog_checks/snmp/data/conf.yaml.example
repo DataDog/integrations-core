@@ -149,15 +149,15 @@ instances:
     #
     # snmp_version: 2
 
-    ## @param timeout - integer - optional - default: 5
-    ## Amount of second before timing out.
+    ## @param timeout - integer - optional - default: 2
+    ## Amount of second before timing out. Default of 5 for Python version of this check.
     #
-    # timeout: 5
+    # timeout: 2
 
-    ## @param retries - integer - optional - default: 5
-    ## Amount of retries before failure.
+    ## @param retries - integer - optional - default: 3
+    ## Amount of retries before failure. Default of 5 for Python version of this check.
     #
-    # retries: 5
+    # retries: 3
 
     ## @param loader - string - optional - default: python
     ## Check loader to use. Available loaders:
