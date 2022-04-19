@@ -546,7 +546,7 @@ def test_statement_reported_hostname(
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     test_query = 'select * from information_schema.processlist where state in (\'starting\')'
-    query_signature = 'ad8e9c25d71690f7'
+    query_signature = '82cab8a2f6c362d7'
 
     def run_query(q):
         with mysql_check._connect() as db:
@@ -564,7 +564,6 @@ def test_statement_reported_hostname(
     ]
     assert len(matching_samples) == 1
     sample = matching_samples[0]
-
     assert sample['host'] == expected_reported_hostname
 
     matching_fqt = [s for s in samples if s['db']['query_signature'] == query_signature and s.get('dbm_type') == 'fqt']
