@@ -18,37 +18,37 @@ from .common import CHECK_NAME, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY
 
 
 @pytest.mark.parametrize(
-    "test_instance, err_msg, is_valid",
+    'test_instance, err_msg, is_valid',
     [
         pytest.param(
-            {"server": "localhost", "username": "dd_user", "password": "db_pass"},
+            {'server': 'localhost', 'username': 'dd_user', 'password': 'db_pass'},
             re.compile(
-                "ConfigurationError: Detected 1 error while loading configuration model `InstanceConfig`:"
-                "\\n.*(database)\\n.*field required"
+                'ConfigurationError: Detected 1 error while loading configuration model `InstanceConfig`:'
+                '\\n.*(database)\\n.*field required'
             ),
             False,
-            id="Invalid config: missing database",
+            id='Invalid config: missing database',
         ),
         pytest.param(
-            {"database": "main_db", "username": "dd_user", "password": "db_pass"},
+            {'database': 'main_db', 'username': 'dd_user', 'password': 'db_pass'},
             re.compile(
-                "ConfigurationError: Detected 1 error while loading configuration model `InstanceConfig`:\\n.*(server)"
-                "\\n.*field required"
+                'ConfigurationError: Detected 1 error while loading configuration model `InstanceConfig`:\\n.*(server)'
+                '\\n.*field required'
             ),
             False,
-            id="Invalid config: missing server",
+            id='Invalid config: missing server',
         ),
         pytest.param(
-            {"server": "localhost", "database": "test_db", "username": "dd_user", "password": "db_pass"},
-            "",
+            {'server': 'localhost', 'database': 'test_db', 'username': 'dd_user', 'password': 'db_pass'},
+            '',
             True,
-            id="Valid config: Server and database specified",
+            id='Valid config: Server and database specified',
         ),
         pytest.param(
             {'server': 'tdserver', 'database': 'db', 'auth_mechanism': 'JWT'},
-            "`auth_data` is required for auth_mechanism: JWT",
+            '`auth_data` is required for auth_mechanism: JWT',
             False,
-            id="JWT auth: missing auth_data",
+            id='JWT auth: missing auth_data',
         ),
         pytest.param(
             {
@@ -60,13 +60,13 @@ from .common import CHECK_NAME, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY
             },
             '',
             True,
-            id="JWT auth: valid config",
+            id='JWT auth: valid config',
         ),
         pytest.param(
             {'server': 'tdserver', 'database': 'db', 'auth_mechanism': 'KRB5'},
-            "`auth_data` is required for auth_mechanism: KRB5",
+            '`auth_data` is required for auth_mechanism: KRB5',
             False,
-            id="KRB5 auth: missing auth_data",
+            id='KRB5 auth: missing auth_data',
         ),
         pytest.param(
             {
@@ -77,31 +77,31 @@ from .common import CHECK_NAME, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY
             },
             '',
             True,
-            id="KRB5 auth: valid config",
+            id='KRB5 auth: valid config',
         ),
         pytest.param(
             {'server': 'tdserver', 'database': 'db', 'auth_mechanism': 'LDAP'},
-            "`auth_data` is required for auth_mechanism: LDAP",
+            '`auth_data` is required for auth_mechanism: LDAP',
             False,
-            id="LDAP auth: missing auth_data",
+            id='LDAP auth: missing auth_data',
         ),
         pytest.param(
             {'server': 'tdserver', 'database': 'db', 'auth_mechanism': 'LDAP', 'auth_data': 'username@@userpassword'},
             '',
             True,
-            id="LDAP auth: valid config",
+            id='LDAP auth: valid config',
         ),
         pytest.param(
             {'server': 'tdserver', 'database': 'db', 'auth_mechanism': 'TDNEGO'},
             '',
             True,
-            id="TDNEGO auth: no auth_data - valid config",
+            id='TDNEGO auth: no auth_data - valid config',
         ),
         pytest.param(
             {'server': 'tdserver', 'database': 'db', 'auth_mechanism': 'TDNEGO', 'auth_data': 'username@@userpassword'},
             '',
             True,
-            id="TDNEGO auth: auth_data - valid config",
+            id='TDNEGO auth: auth_data - valid config',
         ),
         pytest.param(
             {
@@ -113,7 +113,7 @@ from .common import CHECK_NAME, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY
             },
             '',
             True,
-            id="TDNEGO auth: username/pass - valid config",
+            id='TDNEGO auth: username/pass - valid config',
         ),
         pytest.param(
             {
@@ -125,38 +125,38 @@ from .common import CHECK_NAME, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY
             },
             '',
             True,
-            id="SSL auth: custom https_port - valid config",
+            id='SSL auth: custom https_port - valid config',
         ),
-        pytest.param({'server': 'tdserver', 'database': 'db'}, '', True, id="SSL auth: PREFER - default valid config"),
+        pytest.param({'server': 'tdserver', 'database': 'db'}, '', True, id='SSL auth: PREFER - default valid config'),
         pytest.param(
             {'server': 'tdserver', 'database': 'db', 'ssl_mode': 'REQUIRE', 'username': 'bob', 'password': 'pass123'},
             '',
             True,
-            id="SSL auth: REQUIRE - valid config",
+            id='SSL auth: REQUIRE - valid config',
         ),
         pytest.param(
             {'server': 'tdserver', 'database': 'db', 'ssl_mode': 'ALLOW', 'username': 'bob', 'password': 'pass123'},
             '',
             True,
-            id="SSL auth: ALLOW - valid config",
+            id='SSL auth: ALLOW - valid config',
         ),
         pytest.param(
             {'server': 'tdserver', 'database': 'db', 'ssl_mode': 'DISABLE', 'username': 'bob', 'password': 'pass123'},
             '',
             True,
-            id="SSL auth: DISABLE - valid config",
+            id='SSL auth: DISABLE - valid config',
         ),
         pytest.param(
             {'server': 'tdserver', 'database': 'db', 'ssl_mode': 'WRONG', 'username': 'bob', 'password': 'pass123'},
             'Specified `ssl_mode`: WRONG is not a valid option',
             False,
-            id="SSL auth: invalid mode",
+            id='SSL auth: invalid mode',
         ),
         pytest.param(
             {'server': 'tdserver', 'database': 'db', 'ssl_mode': 'VERIFY-CA', 'username': 'bob', 'password': 'pass123'},
             'Specified `ssl_mode`: VERIFY-CA is not a valid option',
             False,
-            id="SSL auth: invalid unsupported mode",
+            id='SSL auth: invalid unsupported mode',
         ),
     ],
 )

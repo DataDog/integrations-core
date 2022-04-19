@@ -4,6 +4,7 @@
 import json
 import time
 from contextlib import closing, contextmanager
+from copy import deepcopy
 
 try:
     import teradatasql
@@ -33,18 +34,12 @@ class TeradataCheck(AgentCheck, ConfigMixin):
 
         self._connect_params = None
         self._connection = None
+        self._tags = None
+        self._query_errors = 0
 
-        self._tags = [
-            'teradata_server:{}'.format(self.instance.get('server')),
-            'teradata_port:{}'.format(self.instance.get('port', 1025)),
-        ]
-        self._tags.extend(self.instance.get('tags', []))
-
-        manager_queries = []
+        manager_queries = deepcopy(DEFAULT_QUERIES)
         if is_affirmative(self.instance.get('collect_res_usage', False)):
             manager_queries.extend(COLLECT_RES_USAGE)
-        else:
-            manager_queries.extend(DEFAULT_QUERIES)
 
         self._query_manager = QueryManager(
             self,
@@ -56,8 +51,6 @@ class TeradataCheck(AgentCheck, ConfigMixin):
         self.check_initializations.append(self.initialize_config)
         self.check_initializations.append(self._query_manager.compile_queries)
 
-        self._query_errors = 0
-
     def check(self, _):
         with self.connect() as conn:
             if conn:
@@ -67,19 +60,29 @@ class TeradataCheck(AgentCheck, ConfigMixin):
         self.submit_health_checks()
 
     def initialize_config(self):
-        self._connect_params = {
-            'host': self.config.server,
-            'account': self.config.account if self.config.account else None,
-            'database': self.config.database,
-            'dbs_port': str(self.config.port),
-            'logmech': self.config.auth_mechanism.upper() if self.config.auth_mechanism else None,
-            'logdata': self.config.auth_data if self.config.auth_data else None,
-            'user': self.config.username if self.config.username else None,
-            'password': self.config.password if self.config.password else None,
-            'https_port': str(self.config.https_port) if self.config.https_port else '443',
-            'sslmode': self.config.ssl_mode.upper() if self.config.ssl_mode else 'PREFER',
-            'sslprotocol': self.config.ssl_protocol if self.config.ssl_protocol else 'TLSv1.2',
-        }
+        self._connect_params = json.dumps(
+            {
+                'host': self.config.server,
+                'account': self.config.account,
+                'database': self.config.database,
+                'dbs_port': str(self.config.port),
+                'logmech': self.config.auth_mechanism.upper(),
+                'logdata': self.config.auth_data,
+                'user': self.config.username,
+                'password': self.config.password,
+                'https_port': str(self.config.https_port),
+                'sslmode': self.config.ssl_mode.upper(),
+                'sslprotocol': self.config.ssl_protocol,
+            }
+        )
+
+        global_tags = [
+            'teradata_server:{}'.format(self.instance.get('server')),
+            'teradata_port:{}'.format(self.instance.get('port', 1025)),
+        ]
+        self._tags = list(self.config.tags)
+        self._tags.extend(global_tags)
+        self._query_manager.tags = self._tags
 
     def _execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:
@@ -119,7 +122,7 @@ class TeradataCheck(AgentCheck, ConfigMixin):
             raise TERADATASQL_IMPORT_ERROR
         self.log.info('Connecting to Teradata...')
         try:
-            conn = teradatasql.connect(json.dumps(self._connect_params))
+            conn = teradatasql.connect(self._connect_params)
             self.log.info('Connected to Teradata.')
             yield conn
         except Exception as e:
