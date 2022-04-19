@@ -145,31 +145,31 @@ instances:
     #
     # extra_metrics: []
 
-    ## @param exclude_metrics - list of strings - optional
-    ## A list of metrics to exclude, with each entry being either
+    ## @param ignore_metrics - list of strings - optional
+    ## A list of metrics to ignore, with each entry being either
     ## the exact metric name or a regular expression.
-    ## In order to exclude all metrics but the ones matching a specific filter,
+    ## In order to ignore all metrics but the ones matching a specific filter,
     ## you can use a negative lookahead regex like:
     ##   - ^(?!foo).*$
     #
-    # exclude_metrics: []
+    # ignore_metrics: []
 
-    ## @param exclude_metrics_by_labels - mapping - optional
+    ## @param ignore_metrics_by_labels - mapping - optional
     ## A mapping of labels where metrics with matching label name and values are ignored. To match
     ## all values of a label, set it to `true`.
     ##
     ## Note: Labels filtering happens before `rename_labels`.
     ##
-    ## For example, the following configuration instructs the check to exclude all metrics with
+    ## For example, the following configuration instructs the check to ignore all metrics with
     ## a label `worker` or a label `pid` with the value of either `23` or `42`.
     ##
-    ##   exclude_metrics_by_labels:
+    ##   ignore_metrics_by_labels:
     ##     worker: true
     ##     pid:
     ##     - '23'
     ##     - '42'
     #
-    # exclude_metrics_by_labels: {}
+    # ignore_metrics_by_labels: {}
 
     ## @param exclude_labels - list of strings - optional
     ## A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
