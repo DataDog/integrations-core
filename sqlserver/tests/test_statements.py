@@ -343,12 +343,12 @@ def test_statement_metadata(
 @pytest.mark.parametrize(
     "set_reported_hostname,expected_reported_hostname",
     [
-        (True, 'bob_hostname_override'),
+        (True, 'override.hostname'),
         (False, 'stubbed.hostname'),
     ],
 )
 def test_statement_reported_hostname(
-    aggregator, dd_run_check, dbm_instance, bob_conn, set_reported_hostname, expected_reported_hostname
+    aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, set_reported_hostname, expected_reported_hostname
 ):
     if set_reported_hostname:
         dbm_instance['reported_hostname'] = expected_reported_hostname
@@ -357,10 +357,19 @@ def test_statement_reported_hostname(
     query = "select * from sys.databases"
     query_signature = '6d1d070f9b6c5647'
 
-    bob_conn.execute_with_retries(query)
-    dd_run_check(check)
-    bob_conn.execute_with_retries(query)
-    dd_run_check(check)
+    def _run_query():
+        bob_conn.execute_with_retries(query)
+
+    def _obfuscate_sql(sql_query, options=None):
+        return json.dumps({'query': sql_query, 'metadata': {}})
+
+    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        _run_query()
+        dd_run_check(check)
+        _run_query()
+        dd_run_check(check)
 
     samples = aggregator.get_event_platform_events("dbm-samples")
     assert samples, "should have collected at least one sample"
