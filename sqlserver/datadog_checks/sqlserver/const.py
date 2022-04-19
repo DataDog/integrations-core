@@ -41,7 +41,7 @@ INSTANCE_METRICS = [
     ('sqlserver.stats.procs_blocked', 'Processes blocked', ''),  # LARGE_RAWCOUNT
     ('sqlserver.temp_tables_active', 'Active Temp Tables', ''),
     ('sqlserver.temp_tables_creation_rate', 'Temp Tables Creation Rate', ''),
-    ('sqlserver.deadlocks', 'Number of Deadlocks/sec', ''),
+    ('sqlserver.deadlocks_rate', 'Number of Deadlocks/sec', ''),
     # SQLServer:Access Methods
     ('sqlserver.access.page_splits', 'Page Splits/sec', ''),  # BULK_COUNT
     ('sqlserver.access.full_scans_rate', 'Full Scans/sec', ''),
