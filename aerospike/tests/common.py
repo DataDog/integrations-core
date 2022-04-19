@@ -53,6 +53,19 @@ EXPECTED_PROMETHEUS_METRICS_5_6 = [
     'aerospike.node_stats.heartbeat_connections_opened.count',
 ]
 
+PROMETHEUS_XDR_METRICS = [
+    'aerospike.xdr.abandoned.count',
+    'aerospike.xdr.lag',
+    'aerospike.xdr.lap_us',
+    'aerospike.xdr.latency_ms',
+    'aerospike.xdr.recoveries.count',
+    'aerospike.xdr.recoveries_pending',
+    'aerospike.xdr.retry_conn_reset.count',
+    'aerospike.xdr.retry_dest.count',
+    'aerospike.xdr.retry_no_node.count',
+    'aerospike.xdr.success.count',
+]
+
 NAMESPACE_METRICS = [
     'objects',
     'hwm_breached',

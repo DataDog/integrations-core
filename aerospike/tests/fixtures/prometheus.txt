@@ -79,3 +79,33 @@ aerospike_node_stats_rw_in_progress{cluster_name="null",service="192.168.32.3:30
 # HELP aerospike_node_stats_system_free_mem_pct system free mem pct
 # TYPE aerospike_node_stats_system_free_mem_pct gauge
 aerospike_node_stats_system_free_mem_pct{cluster_name="null",service="192.168.32.3:3000"} 91
+# HELP aerospike_xdr_abandoned abandoned
+# TYPE aerospike_xdr_abandoned counter
+aerospike_xdr_abandoned{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 0
+# HELP aerospike_xdr_lag lag
+# TYPE aerospike_xdr_lag gauge
+aerospike_xdr_lag{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 0
+# HELP aerospike_xdr_lap_us lap us
+# TYPE aerospike_xdr_lap_us gauge
+aerospike_xdr_lap_us{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 82542
+# HELP aerospike_xdr_latency_ms latency ms
+# TYPE aerospike_xdr_latency_ms gauge
+aerospike_xdr_latency_ms{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 0
+# HELP aerospike_xdr_recoveries recoveries
+# TYPE aerospike_xdr_recoveries counter
+aerospike_xdr_recoveries{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 4096
+# HELP aerospike_xdr_recoveries_pending recoveries pending
+# TYPE aerospike_xdr_recoveries_pending gauge
+aerospike_xdr_recoveries_pending{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 0
+# HELP aerospike_xdr_retry_conn_reset retry conn reset
+# TYPE aerospike_xdr_retry_conn_reset counter
+aerospike_xdr_retry_conn_reset{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 0
+# HELP aerospike_xdr_retry_dest retry dest
+# TYPE aerospike_xdr_retry_dest counter
+aerospike_xdr_retry_dest{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 0
+# HELP aerospike_xdr_retry_no_node retry no node
+# TYPE aerospike_xdr_retry_no_node counter
+aerospike_xdr_retry_no_node{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 0
+# HELP aerospike_xdr_success success
+# TYPE aerospike_xdr_success counter
+aerospike_xdr_success{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 1
