@@ -636,13 +636,13 @@ def test_statement_metadata(
     ],
 )
 def test_statement_reported_hostname(
-        aggregator,
-        integration_check,
-        dbm_instance,
-        datadog_agent,
-        pg_stat_statements_view,
-        set_reported_hostname,
-        expected_reported_hostname
+    aggregator,
+    integration_check,
+    dbm_instance,
+    datadog_agent,
+    pg_stat_statements_view,
+    set_reported_hostname,
+    expected_reported_hostname,
 ):
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     dbm_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
@@ -691,9 +691,7 @@ def test_statement_reported_hostname(
         # only can see own queries
         return False
 
-    fqt_samples = [
-        s for s in samples if s.get('dbm_type') == 'fqt' and s['db']['query_signature'] == query_signature
-    ]
+    fqt_samples = [s for s in samples if s.get('dbm_type') == 'fqt' and s['db']['query_signature'] == query_signature]
     assert len(fqt_samples) == 1
     fqt = fqt_samples[0]
     assert fqt['host'] == expected_reported_hostname
@@ -879,13 +877,13 @@ def test_activity_snapshot_collection(
     ],
 )
 def test_activity_reported_hostname(
-        aggregator,
-        integration_check,
-        dbm_instance,
-        datadog_agent,
-        pg_stat_activity_view,
-        set_reported_hostname,
-        expected_reported_hostname
+    aggregator,
+    integration_check,
+    dbm_instance,
+    datadog_agent,
+    pg_stat_activity_view,
+    set_reported_hostname,
+    expected_reported_hostname,
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     if set_reported_hostname:
@@ -925,7 +923,9 @@ def test_activity_reported_hostname(
         blocking_conn.cursor().execute(blocking_query)
         # ... now execute the test query
         wait(conn)
-        conn.cursor().execute(query,)
+        conn.cursor().execute(
+            query,
+        )
         check.check(dbm_instance)
         dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
 
