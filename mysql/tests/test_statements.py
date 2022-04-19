@@ -546,17 +546,25 @@ def test_statement_reported_hostname(
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     test_query = 'select * from information_schema.processlist where state in (\'starting\')'
-    query_signature = '82cab8a2f6c362d7'
+    query_signature = '94caeb4c54f97849'
+    normalized_query = 'SELECT * FROM `information_schema` . `processlist` where state in ( ? )'
+
+    def obfuscate_sql(query, options=None):
+        if 'WHERE `state`' in query:
+            return json.dumps({'query': normalized_query, 'metadata': {}})
+        return json.dumps({'query': query, 'metadata': {}})
 
     def run_query(q):
         with mysql_check._connect() as db:
             with closing(db.cursor()) as cursor:
                 cursor.execute(q)
 
-    run_query(test_query)
-    dd_run_check(mysql_check)
-    run_query(test_query)
-    dd_run_check(mysql_check)
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+        run_query(test_query)
+        dd_run_check(mysql_check)
+        run_query(test_query)
+        dd_run_check(mysql_check)
 
     samples = aggregator.get_event_platform_events("dbm-samples")
     matching_samples = [
