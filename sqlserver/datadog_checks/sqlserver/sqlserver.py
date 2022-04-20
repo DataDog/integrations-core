@@ -55,6 +55,7 @@ from .const import (
     VALID_METRIC_TYPES,
 )
 from .metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
+from .queries import QUERY_SERVER_STATIC_INFO
 from .utils import set_default_driver_conf
 
 try:
@@ -104,7 +105,9 @@ class SQLServer(AgentCheck):
 
         # use QueryManager to process custom queries
         self.tags = self.instance.get("tags", [])
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self.tags)
+        self._query_manager = QueryManager(
+            self, self.execute_query_raw, queries=[QUERY_SERVER_STATIC_INFO], tags=self.tags
+        )
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self._query_manager.compile_queries)
         self.check_initializations.append(self.initialize_connection)
