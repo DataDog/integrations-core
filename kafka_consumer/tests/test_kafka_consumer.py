@@ -20,7 +20,7 @@ pytestmark = pytest.mark.skipif(
 
 BROKER_METRICS = ['kafka.broker_offset']
 
-CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
+CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag', "kafka.consumer_lag_seconds"]
 
 
 @pytest.mark.unit
