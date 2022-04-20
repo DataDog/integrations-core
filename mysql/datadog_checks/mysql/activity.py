@@ -117,7 +117,6 @@ class MySQLActivity(DBMAsyncJob):
             enabled=is_affirmative(config.activity_config.get("enabled", True)),
             expected_db_exceptions=(pymysql.err.OperationalError, pymysql.err.InternalError),
             min_collection_interval=config.min_collection_interval,
-            config_host=config.host,
             dbms="mysql",
             rate_limit=1 / float(self.collection_interval),
             job_name="query-activity",
@@ -234,7 +233,7 @@ class MySQLActivity(DBMAsyncJob):
     def _create_activity_event(self, active_sessions, active_connections):
         # type: (List[Dict[str]], List[Dict[str]]) -> Dict[str]
         return {
-            "host": self._db_hostname,
+            "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "mysql",
             "dbm_type": "activity",

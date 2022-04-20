@@ -462,6 +462,8 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
     ]
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
     "metadata,expected_metadata_payload",
     [
@@ -525,6 +527,37 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agen
     metric = matching_metrics[0]
     assert metric['dd_tables'] == expected_metadata_payload['tables']
     assert metric['dd_commands'] == expected_metadata_payload['commands']
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "reported_hostname,expected_hostname",
+    [
+        (None, 'stubbed.hostname'),
+        ('override.hostname', 'override.hostname'),
+    ],
+)
+def test_statement_reported_hostname(
+    aggregator, dd_run_check, dbm_instance, datadog_agent, reported_hostname, expected_hostname
+):
+    dbm_instance['reported_hostname'] = reported_hostname
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    dd_run_check(mysql_check)
+    dd_run_check(mysql_check)
+
+    samples = aggregator.get_event_platform_events("dbm-samples")
+    assert samples, "should have at least one sample"
+    assert samples[0]['host'] == expected_hostname
+
+    fqt_samples = [s for s in samples if s.get('dbm_type') == 'fqt']
+    assert fqt_samples, "should have at least one fqt sample"
+    assert fqt_samples[0]['host'] == expected_hostname
+
+    metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert metrics, "should have at least one metric"
+    assert metrics[0]['host'] == expected_hostname
 
 
 @pytest.mark.integration
