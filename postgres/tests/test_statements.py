@@ -644,8 +644,7 @@ def test_statement_reported_hostname(
 ):
     dbm_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
-    if reported_hostname:
-        dbm_instance['reported_hostname'] = expected_hostname
+    dbm_instance['reported_hostname'] = reported_hostname
 
     check = integration_check(dbm_instance)
 
@@ -846,8 +845,7 @@ def test_activity_reported_hostname(
     reported_hostname,
     expected_hostname,
 ):
-    if reported_hostname:
-        dbm_instance['reported_hostname'] = expected_hostname
+    dbm_instance['reported_hostname'] = reported_hostname
     check = integration_check(dbm_instance)
     check._connect()
 
