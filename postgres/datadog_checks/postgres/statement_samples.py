@@ -159,7 +159,6 @@ class PostgresStatementSamples(DBMAsyncJob):
             enabled=is_affirmative(config.statement_samples_config.get('enabled', True)),
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
-            config_host=config.host,
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
             job_name="query-samples",
             shutdown_callback=shutdown_callback,
@@ -607,7 +606,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         statement_plan_sig = (row['query_signature'], plan_signature)
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
             event = {
-                "host": self._db_hostname,
+                "host": self._check.resolved_hostname,
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "postgres",
                 "ddtags": ",".join(self._dbtags(row['datname'])),
@@ -687,7 +686,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         if len(active_sessions) > self._activity_max_rows:
             active_sessions = self._truncate_activity_rows(active_sessions, self._activity_max_rows)
         event = {
-            "host": self._db_hostname,
+            "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "postgres",
             "dbm_type": "activity",

@@ -107,7 +107,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
             enabled=is_affirmative(config.statement_metrics_config.get('enabled', True)),
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
             min_collection_interval=config.min_collection_interval,
-            config_host=config.host,
             dbms="postgres",
             rate_limit=1 / float(collection_interval),
             job_name="query-metrics",
