@@ -156,7 +156,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             enabled=is_affirmative(check.statement_metrics_config.get('enabled', True)),
             expected_db_exceptions=(),
             min_collection_interval=check.min_collection_interval,
-            config_host=check.resolved_hostname,
             dbms="sqlserver",
             rate_limit=1 / float(collection_interval),
             job_name="query-metrics",
@@ -419,7 +418,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 if 'database_name' in row:
                     tags += ["db:{}".format(row['database_name'])]
                 yield {
-                    "host": self._db_hostname,
+                    "host": self.check.resolved_hostname,
                     "ddagentversion": datadog_agent.get_version(),
                     "ddsource": "sqlserver",
                     "ddtags": ",".join(tags),

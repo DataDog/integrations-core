@@ -232,6 +232,29 @@ def test_activity_metadata(
     assert activity['dd_comments'] == expected_metadata_payload['comments']
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "reported_hostname,expected_hostname",
+    [
+        (None, 'stubbed.hostname'),
+        ('override.hostname', 'override.hostname'),
+    ],
+)
+def test_activity_reported_hostname(
+    aggregator, instance_docker, dd_run_check, dbm_instance, reported_hostname, expected_hostname
+):
+    dbm_instance['reported_hostname'] = reported_hostname
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    assert dbm_activity, "should have at least one activity"
+    assert dbm_activity[0]['host'] == expected_hostname
+
+
 def new_time():
     return datetime.datetime(2021, 9, 23, 23, 21, 21, 669330)
 
