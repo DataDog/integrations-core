@@ -25,7 +25,7 @@ class QueryExecutor(object):
         error_handler=None,  # type: Callable[[str], str]
         hostname=None,  # type: str
         logger=None,
-    ) -> None:
+    ):  # type: (...) -> QueryExecutor
         self.executor = executor  # type: QueriesExecutor
         self.submitter = submitter  # type: QueriesSubmitter
         for submission_method in SUBMISSION_METHODS.keys():
