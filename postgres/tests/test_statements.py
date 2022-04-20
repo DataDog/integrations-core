@@ -627,6 +627,43 @@ def test_statement_metadata(
     assert metric['dd_commands'] == expected_metadata_payload['commands']
 
 
+@pytest.mark.parametrize(
+    "reported_hostname,expected_hostname",
+    [
+        (None, 'stubbed.hostname'),
+        ('override.hostname', 'override.hostname'),
+    ],
+)
+def test_statement_reported_hostname(
+    aggregator,
+    integration_check,
+    dbm_instance,
+    datadog_agent,
+    reported_hostname,
+    expected_hostname,
+):
+    dbm_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    dbm_instance['reported_hostname'] = reported_hostname
+
+    check = integration_check(dbm_instance)
+
+    check.check(dbm_instance)
+    check.check(dbm_instance)
+
+    samples = aggregator.get_event_platform_events("dbm-samples")
+    assert samples, "should have collected at least one sample"
+    assert samples[0]['host'] == expected_hostname
+
+    fqt_samples = [s for s in samples if s.get('dbm_type') == 'fqt']
+    assert fqt_samples, "should have collected at least one fqt sample"
+    assert fqt_samples[0]['host'] == expected_hostname
+
+    metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert metrics, "should have collected metrics"
+    assert metrics[0]['host'] == expected_hostname
+
+
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
 @pytest.mark.parametrize(
     "user,password,dbname,query,blocking_query,arg,expected_out,expected_keys,expected_conn_out",
@@ -791,6 +828,33 @@ def test_activity_snapshot_collection(
     finally:
         conn.close()
         blocking_conn.close()
+
+
+@pytest.mark.parametrize(
+    "reported_hostname,expected_hostname",
+    [
+        (None, 'stubbed.hostname'),
+        ('override.hostname', 'override.hostname'),
+    ],
+)
+def test_activity_reported_hostname(
+    aggregator,
+    integration_check,
+    dbm_instance,
+    datadog_agent,
+    reported_hostname,
+    expected_hostname,
+):
+    dbm_instance['reported_hostname'] = reported_hostname
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    check.check(dbm_instance)
+    check.check(dbm_instance)
+
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    assert dbm_activity, "should have at least one activity sample"
+    assert dbm_activity[0]['host'] == expected_hostname
 
 
 def new_time():
