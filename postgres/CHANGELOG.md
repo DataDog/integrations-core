@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 12.3.2 / 2022-04-20
+
+* [Fixed] Fix activity and sample host reporting. See [#11855](https://github.com/DataDog/integrations-core/pull/11855).
+
 ## 12.3.1 / 2022-04-14
 
 * [Fixed] Update base version. See [#11824](https://github.com/DataDog/integrations-core/pull/11824).
