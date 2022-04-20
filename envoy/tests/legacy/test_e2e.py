@@ -234,6 +234,22 @@ METRICS = [
     'envoy.vhost.vcluster.upstream_rq_retry_success',
     'envoy.vhost.vcluster.upstream_rq_timeout',
     'envoy.vhost.vcluster.upstream_rq_total',
+    "cluster.outlier_detection.ejections_enforced_total",
+    "cluster.outlier_detection.ejections_active",
+    "cluster.outlier_detection.ejections_overflow",
+    "cluster.outlier_detection.ejections_enforced_consecutive_5xx",
+    "cluster.outlier_detection.ejections_enforced_success_rate",
+    "cluster.outlier_detection.ejections_detected_success_rate",
+    "cluster.outlier_detection.ejections_enforced_consecutive_gateway_failure",
+    "cluster.outlier_detection.ejections_detected_consecutive_gateway_failure",
+    "cluster.outlier_detection.ejections_enforced_consecutive_local_origin_failure",
+    "cluster.outlier_detection.ejections_detected_consecutive_local_origin_failure",
+    "cluster.outlier_detection.ejections_enforced_local_origin_success_rate",
+    "cluster.outlier_detection.ejections_detected_local_origin_success_rate",
+    "cluster.outlier_detection.ejections_enforced_failure_percentage",
+    "cluster.outlier_detection.ejections_detected_failure_percentage",
+    "cluster.outlier_detection.ejections_enforced_failure_percentage_local_origin",
+    "cluster.outlier_detection.ejections_detected_failure_percentage_local_origin",
 ]
 
 # Metrics only available in our API v2 environment
