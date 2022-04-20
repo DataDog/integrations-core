@@ -542,6 +542,7 @@ ADDITIONAL_METRICS_POST_2_0 = {
     'elasticsearch.indices.request_cache.evictions': ('rate', 'indices.request_cache.evictions'),
     'elasticsearch.indices.request_cache.evictions.count': ('monotonic_count', 'indices.request_cache.evictions'),
     'elasticsearch.indices.request_cache.hit_count': ('rate', 'indices.request_cache.hit_count'),
+    'elasticsearch.indices.request_cache.hit_count.count': ('monotonic_count', 'indices.request_cache.hit_count'),
     'elasticsearch.indices.request_cache.miss_count': ('rate', 'indices.request_cache.miss_count'),
     'elasticsearch.indices.request_cache.miss_count.count': ('monotonic_count', 'indices.request_cache.miss_count'),
 }
