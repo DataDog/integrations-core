@@ -350,8 +350,7 @@ def test_statement_metadata(
 def test_statement_reported_hostname(
     aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, reported_hostname, expected_hostname
 ):
-    if reported_hostname:
-        dbm_instance['reported_hostname'] = expected_hostname
+    dbm_instance['reported_hostname'] = reported_hostname
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     dd_run_check(check)

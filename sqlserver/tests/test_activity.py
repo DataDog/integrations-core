@@ -244,8 +244,7 @@ def test_activity_metadata(
 def test_activity_reported_hostname(
     aggregator, instance_docker, dd_run_check, dbm_instance, reported_hostname, expected_hostname
 ):
-    if expected_hostname:
-        dbm_instance['reported_hostname'] = expected_hostname
+    dbm_instance['reported_hostname'] = reported_hostname
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     dd_run_check(check)
