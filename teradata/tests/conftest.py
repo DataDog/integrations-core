@@ -4,7 +4,6 @@
 import csv
 import json
 import os
-import sys
 import time
 from contextlib import contextmanager
 from copy import deepcopy
@@ -24,8 +23,6 @@ from .common import (
     USE_TD_SANDBOX,
 )
 
-sys.modules['teradatasql'] = mock.MagicMock()
-
 
 @pytest.fixture(scope='session')
 def dd_environment(e2e_instance, instance):
@@ -35,14 +32,9 @@ def dd_environment(e2e_instance, instance):
                 'Please set TERADATA_SERVER, TERADATA_DD_USER, TERADATA_DD_PW environment variables to valid '
                 'Teradata sandbox credentials.'
             )
-        else:
-            dd_instance = e2e_instance
-            e2e_metadata = E2E_METADATA
+        yield e2e_instance, E2E_METADATA
     else:
-        dd_instance = instance
-        e2e_metadata = {}
-
-    yield dd_instance, e2e_metadata
+        yield instance, E2E_METADATA
 
 
 @pytest.fixture(scope='session')

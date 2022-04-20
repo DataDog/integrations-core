@@ -23,7 +23,7 @@ skip_on_ci = pytest.mark.skipif(
 @pytest.mark.skipif(TOX_ENV == 'py38-sandbox', reason='Test only available for py38 environment')
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, aggregator, instance):
-    with pytest.raises(Exception, match="ModuleNotFoundError: No module named 'teradatasql'"):
+    with pytest.raises(Exception, match="Hostname lookup failed"):
         dd_agent_check(instance)
     aggregator.assert_service_check(SERVICE_CHECK_CONNECT, ServiceCheck.CRITICAL, count=1, tags=EXPECTED_TAGS)
     aggregator.assert_service_check(SERVICE_CHECK_QUERY, count=0)

@@ -261,26 +261,11 @@ def test_connect(test_instance, dd_run_check, aggregator, expected_tags, conn_pa
     aggregator.assert_service_check(SERVICE_CHECK_QUERY, ServiceCheck.OK, tags=expected_tags)
 
 
-def test_connection_errors(dd_run_check, aggregator, instance, caplog):
-    caplog.clear()
-    caplog.set_level(logging.ERROR)
-    check = TeradataCheck(CHECK_NAME, {}, [instance])
-
-    conn = mock.Mock(side_effect=Exception("teradatasql.OperationalError"))
-    teradatasql = mock.MagicMock()
-    teradatasql.connect.side_effect = conn
-
-    mocks = [
-        ('datadog_checks.teradata.check.teradatasql', teradatasql),
-        ('datadog_checks.teradata.check.TERADATASQL_IMPORT_ERROR', None),
-    ]
-
-    with ExitStack() as stack:
-        for mock_call in mocks:
-            stack.enter_context(mock.patch(*mock_call))
-        with pytest.raises(Exception, match="Exception: teradatasql.OperationalError"):
+def test_connection_errors(cursor_factory, dd_run_check, aggregator, instance, caplog):
+    with cursor_factory(exception=True):
+        check = TeradataCheck(CHECK_NAME, {}, [instance])
+        with pytest.raises(Exception, match="Exception: Unable to connect to Teradata."):
             dd_run_check(check)
-
         aggregator.assert_service_check(SERVICE_CHECK_CONNECT, ServiceCheck.CRITICAL, tags=EXPECTED_TAGS)
         aggregator.assert_service_check(SERVICE_CHECK_QUERY, count=0)
 

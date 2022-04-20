@@ -46,7 +46,7 @@ E2E_CONFIG = {
 
 E2E_METADATA = {
     'start_commands': [
-        '/opt/datadog-agent/embedded/bin/pip install teradatasql',
+        'pip install teradatasql',
     ]
 }
 
