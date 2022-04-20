@@ -121,6 +121,27 @@ def test_collect_activity(aggregator, dbm_instance, dd_run_check):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
+    "reported_hostname,expected_hostname",
+    [
+        (None, 'stubbed.hostname'),
+        ('override.hostname', 'override.hostname'),
+    ],
+)
+def test_activity_reported_hostname(aggregator, dbm_instance, dd_run_check, reported_hostname, expected_hostname):
+    dbm_instance['reported_hostname'] = reported_hostname
+    check = MySql(CHECK_NAME, {}, [dbm_instance])
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    assert dbm_activity, "should have at least one activity sample"
+    assert dbm_activity[0]['host'] == expected_hostname
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
     "metadata,expected_metadata_payload",
     [
         (
