@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 7.6.2 / 2022-04-20
+
+* [Fixed] Fix activity and plan host reporting. See [#11853](https://github.com/DataDog/integrations-core/pull/11853).
+
 ## 7.6.1 / 2022-04-14
 
 * [Fixed] Update base version. See [#11826](https://github.com/DataDog/integrations-core/pull/11826).
