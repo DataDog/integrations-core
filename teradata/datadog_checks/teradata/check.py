@@ -101,12 +101,6 @@ class TeradataCheck(AgentCheck, ConfigMixin):
 
     def _executor_error_handler(self, error):
         self._query_errors += 1
-        if self._connection:
-            try:
-                self._connection.close()
-            except Exception as e:
-                self.log.warning("Couldn't close the connection after a query failure: %s", str(e))
-        self._connection = None
         return error
 
     @contextmanager
@@ -120,7 +114,7 @@ class TeradataCheck(AgentCheck, ConfigMixin):
                 TERADATASQL_IMPORT_ERROR,
             )
             raise TERADATASQL_IMPORT_ERROR
-        self.log.info('Connecting to Teradata...')
+        self.log.info('Connecting to Teradata database %s on server %s.', self.config.database, self.config.server)
         try:
             conn = teradatasql.connect(self._connect_params)
             self.log.info('Connected to Teradata.')

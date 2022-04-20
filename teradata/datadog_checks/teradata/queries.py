@@ -6,10 +6,10 @@
 # https://docs.teradata.com/r/Teradata-VantageTM-Data-Dictionary/July-2021/Views-Reference/AllSpaceV-X
 DISK_SPACE = {
     'name': 'disk_space',
-    'query': 'SELECT TRIM(BOTH FROM DatabaseName), TRIM(BOTH FROM AccountName), TRIM(BOTH FROM TableName), '
-    'MaxPerm, MaxSpool, MaxTemp, CurrentPerm, CurrentSpool, CurrentPersistentSpool, CurrentTemp, PeakPerm, '
-    'PeakSpool, PeakPersistentSpool, PeakTemp, MaxProfileSpool, MaxProfileTemp, AllocatedPerm, AllocatedSpool,'
-    'AllocatedTemp, PermSkew, SpoolSkew, TempSkew FROM DBC.AllSpaceV WHERE DatabaseName="{}";',
+    'query': "SELECT TRIM(BOTH FROM DatabaseName), TRIM(BOTH FROM AccountName), TRIM(BOTH FROM TableName), "
+    "MaxPerm, MaxSpool, MaxTemp, CurrentPerm, CurrentSpool, CurrentPersistentSpool, CurrentTemp, PeakPerm, "
+    "PeakSpool, PeakPersistentSpool, PeakTemp, MaxProfileSpool, MaxProfileTemp, AllocatedPerm, AllocatedSpool,"
+    "AllocatedTemp, PermSkew, SpoolSkew, TempSkew FROM DBC.AllSpaceV WHERE DatabaseName='{}';",
     'columns': [
         {'name': 'td_database', 'type': 'tag'},
         {'name': 'td_account', 'type': 'tag'},

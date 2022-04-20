@@ -30,6 +30,7 @@ files:
       value:
         type: string
     - name: password
+      secret: true
       description: Password for the Datadog-Teradata check user.
       value:
         type: string
@@ -90,6 +91,7 @@ files:
       value:
         type: string
     - name: auth_data
+      secret: true
       description: |
         Specifies additional data needed by a logon authentication mechanism, such as a secure token,
         Distinguished Name, or a domain/realm name. `auth_data` values are specific to each logon mechanism.
