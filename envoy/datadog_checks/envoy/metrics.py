@@ -331,6 +331,22 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_server_initialization_time_ms': 'server.initialization_time_ms',
     'envoy_workers_watchdog_miss': 'workers.watchdog_miss',
     'envoy_workers_watchdog_mega_miss': 'workers.watchdog_mega_miss',
+    'envoy_cluster_outlier_detection_ejections_enforced_total': 'cluster.outlier_detection.ejections_enforced_total',
+    'envoy_cluster_outlier_detection_ejections_active': 'cluster.outlier_detection.ejections_active',
+    'envoy_cluster_outlier_detection_ejections_overflow': 'cluster.outlier_detection.ejections_overflow',
+    'envoy_cluster_outlier_detection_ejections_enforced_consecutive_5xx': 'cluster.outlier_detection.ejections_enforced_consecutive_5xx',
+    'envoy_cluster_outlier_detection_ejections_enforced_success_rate': 'cluster.outlier_detection.ejections_enforced_success_rate',
+    'envoy_cluster_outlier_detection_ejections_detected_success_rate': 'cluster.outlier_detection.ejections_detected_success_rate',
+    'envoy_cluster_outlier_detection_ejections_enforced_consecutive_gateway_failure': 'cluster.outlier_detection.ejections_enforced_consecutive_gateway_failure',
+    'envoy_cluster_outlier_detection_ejections_detected_consecutive_gateway_failure': 'cluster.outlier_detection.ejections_detected_consecutive_gateway_failure',
+    'envoy_cluster_outlier_detection_ejections_enforced_consecutive_local_origin_failure': 'cluster.outlier_detection.ejections_enforced_consecutive_local_origin_failure',
+    'envoy_cluster_outlier_detection_ejections_detected_consecutive_local_origin_failure': 'cluster.outlier_detection.ejections_detected_consecutive_local_origin_failure',
+    'envoy_cluster_outlier_detection_ejections_enforced_local_origin_success_rate': 'cluster.outlier_detection.ejections_enforced_local_origin_success_rate',
+    'envoy_cluster_outlier_detection_ejections_detected_local_origin_success_rate': 'cluster.outlier_detection.ejections_detected_local_origin_success_rate',
+    'envoy_cluster_outlier_detection_ejections_enforced_failure_percentage': 'cluster.outlier_detection.ejections_enforced_failure_percentage',
+    'envoy_cluster_outlier_detection_ejections_detected_failure_percentage': 'cluster.outlier_detection.ejections_detected_failure_percentage',
+    'envoy_cluster_outlier_detection_ejections_enforced_failure_percentage_local_origin': 'cluster.outlier_detection.ejections_enforced_failure_percentage_local_origin',
+    'envoy_cluster_outlier_detection_ejections_detected_failure_percentage_local_origin': 'cluster.outlier_detection.ejections_detected_failure_percentage_local_origin',
 }
 
 # fmt: off
