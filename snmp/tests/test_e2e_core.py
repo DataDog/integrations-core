@@ -276,7 +276,9 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
     dev_metrics = ['devStatus', 'devClientCount']
     dev_tags = ['product:MR16-HW', 'network:L_NETWORK', 'mac_address:0x02020066f57f'] + common_tags
     for metric in dev_metrics:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=dev_tags, count=2, device='Gymnasium')
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=dev_tags, count=2, device='Gymnasium'
+        )
 
     if_tags = ['interface:wifi0', 'index:4', 'mac_address:0x02020066f500'] + common_tags
     if_metrics = ['devInterfaceSentPkts', 'devInterfaceRecvPkts', 'devInterfaceSentBytes', 'devInterfaceRecvBytes']
@@ -286,9 +288,7 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
     # IF-MIB
     if_tags = ['interface:eth0'] + common_tags
     for metric in metrics.IF_COUNTS:
-        aggregator.assert_metric(
-            'snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=if_tags, count=1
-        )
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=if_tags, count=1)
 
     for metric in metrics.IF_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=2)
