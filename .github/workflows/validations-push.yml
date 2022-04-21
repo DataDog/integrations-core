@@ -1,0 +1,10 @@
+name: validations-push
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    uses: ./.github/workflow/validations.yml

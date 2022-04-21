@@ -1,12 +1,11 @@
 name: validations
 
 on:
-  push:
-    branches:
-    - master
-  pull_request:
-    branches:
-    - master
+  workflow_call:
+    inputs:
+      check:
+        type: string
+        default: ""
 
 jobs:
   build:
@@ -35,7 +34,7 @@ jobs:
 
     - name: Run agent requirements validation
       run: |
-        ddev validate agent-reqs changed
+        ddev validate agent-reqs ${{ inputs.check }}
 
     - name: Run CI validation
       run: |
@@ -43,11 +42,11 @@ jobs:
 
     - name: Run configuration validation
       run: |
-        ddev validate config changed
+        ddev validate config ${{ inputs.check }}
 
     - name: Run dashboard validation
       run: |
-        ddev validate dashboards changed
+        ddev validate dashboards ${{ inputs.check }}
 
     - name: Run dependency validation
       run: |
@@ -55,23 +54,23 @@ jobs:
 
     - name: Run HTTP wrapper validation
       run: |
-        ddev validate http changed
+        ddev validate http ${{ inputs.check }}
 
     - name: Run imports validation
       run: |
-        ddev validate imports changed
+        ddev validate imports ${{ inputs.check }}
 
     - name: Run integration style and best practices validation
       run: |
-        ddev validate integration-style changed --verbose
+        ddev validate integration-style ${{ inputs.check }} --verbose
 
     - name: Run JMX metrics validation
       run: |
-        ddev validate jmx-metrics changed
+        ddev validate jmx-metrics ${{ inputs.check }}
 
     - name: Run legacy signature validation
       run: |
-        ddev validate legacy-signature changed
+        ddev validate legacy-signature ${{ inputs.check }}
 
     - name: Run licenses validation
       run: |
@@ -79,35 +78,35 @@ jobs:
 
     - name: Run manifest validation
       run: |
-        ddev validate manifest changed
+        ddev validate manifest ${{ inputs.check }}
 
     - name: Run metadata validation
       run: |
-        ddev validate metadata changed
+        ddev validate metadata ${{ inputs.check }}
 
     - name: Run models validation
       run: |
-        ddev validate models changed
+        ddev validate models ${{ inputs.check }}
         
     - name: Run package validation
       run: |
-        ddev validate package changed
+        ddev validate package ${{ inputs.check }}
         
     - name: Run readmes validation
       run: |
-        ddev validate readmes changed
+        ddev validate readmes ${{ inputs.check }}
 
     - name: Run recommended monitors validation
       run: |
-        ddev validate recommended-monitors changed
+        ddev validate recommended-monitors ${{ inputs.check }}
 
     - name: Run saved views validation
       run: |
-        ddev validate saved-views changed
+        ddev validate saved-views ${{ inputs.check }}
 
     - name: Run service checks validation
       run: |
-        ddev validate service-checks changed
+        ddev validate service-checks ${{ inputs.check }}
 
     - name: Comment PR on failure
       if: ${{ failure() && github.event.pull_request.merged != true }}

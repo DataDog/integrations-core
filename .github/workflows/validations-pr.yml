@@ -1,0 +1,12 @@
+name: validations-pr
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    uses: ./.github/workflow/validations.yml
+    with:
+      check: changed
