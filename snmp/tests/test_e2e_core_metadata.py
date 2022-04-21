@@ -215,7 +215,7 @@ def test_e2e_core_metadata_cisco_3850(dd_agent_check):
         u'device_id': u'default:' + device_ip,
         u'id_tags': [u'interface:Gi0/0'],
         u'index': 1,
-        u'mac_address': u'0x000000000000',
+        u'mac_address': u'00:00:00:00:00:00',
         u'name': u'Gi0/0',
         u'oper_status': 2,
     }
