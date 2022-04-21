@@ -125,6 +125,10 @@ class Oracle(AgentCheck):
 
     def handle_query_error(self, error):
         self._query_errors += 1
+        if self._cached_connection is None:
+            self.log.debug("Couldn't close the connection after a query failure because there was no connection")
+            return error
+
         try:
             self._cached_connection.close()
         except Exception as e:
