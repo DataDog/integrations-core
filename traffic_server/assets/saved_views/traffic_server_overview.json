@@ -1,4 +1,4 @@
-{ 
+{
     "name": "Traffic Server logger overview",
     "type": "logs",
     "page": "analytics",
@@ -18,4 +18,4 @@
       "limit": "50",
       "widget": "timeseries"
     }
-  }
+}
