@@ -46,6 +46,10 @@ def instance_empty_default_hostname(field, value):
     return False
 
 
+def instance_enable_table_tags(field, value):
+    return False
+
+
 def instance_https_port(field, value):
     return 443
 
@@ -80,6 +84,10 @@ def instance_ssl_mode(field, value):
 
 def instance_ssl_protocol(field, value):
     return 'TLSv1.2'
+
+
+def instance_tables(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_tags(field, value):

@@ -3,14 +3,49 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 # Database and Table Disk Space
-# https://docs.teradata.com/r/Teradata-VantageTM-Data-Dictionary/July-2021/Views-Reference/AllSpaceV-X
+# https://docs.teradata.com/r/Teradata-VantageTM-Data-Dictionary/July-2021/Views-Reference/DiskSpaceV-X
 DISK_SPACE = {
     'name': 'disk_space',
-    'query': "SELECT TRIM(BOTH FROM DatabaseName), TRIM(BOTH FROM AccountName), TRIM(BOTH FROM TableName), "
+    'query': "SELECT Vproc, TRIM(BOTH FROM DatabaseName), TRIM(BOTH FROM AccountName), "
+    "MaxPerm, MaxSpool, MaxTemp, CurrentPerm, CurrentSpool, CurrentPersistentSpool, CurrentTemp, PeakPerm, "
+    "PeakSpool, PeakPersistentSpool, PeakTemp, MaxProfileSpool, MaxProfileTemp, AllocatedPerm, AllocatedSpool,"
+    "AllocatedTemp, PermSkew, SpoolSkew, TempSkew FROM DBC.DiskSpaceV WHERE DatabaseName='{}';",
+    'columns': [
+        {'name': 'td_amp', 'type': 'tag'},
+        {'name': 'td_database', 'type': 'tag'},
+        {'name': 'td_account', 'type': 'tag'},
+        {'name': 'disk_space.max_perm.total', 'type': 'gauge'},
+        {'name': 'disk_space.max_spool.total', 'type': 'gauge'},
+        {'name': 'disk_space.max_temp.total', 'type': 'gauge'},
+        {'name': 'disk_space.curr_perm.total', 'type': 'gauge'},
+        {'name': 'disk_space.curr_spool.total', 'type': 'gauge'},
+        {'name': 'disk_space.curr_persist_spool.total', 'type': 'gauge'},
+        {'name': 'disk_space.curr_temp.total', 'type': 'gauge'},
+        {'name': 'disk_space.peak_perm.total', 'type': 'gauge'},
+        {'name': 'disk_space.peak_spool.total', 'type': 'gauge'},
+        {'name': 'disk_space.peak_persist_spool.total', 'type': 'gauge'},
+        {'name': 'disk_space.peak_temp.total', 'type': 'gauge'},
+        {'name': 'disk_space.max_prof_spool.total', 'type': 'gauge'},
+        {'name': 'disk_space.max_prof_temp.total', 'type': 'gauge'},
+        {'name': 'disk_space.alloc_perm.total', 'type': 'gauge'},
+        {'name': 'disk_space.alloc_spool.total', 'type': 'gauge'},
+        {'name': 'disk_space.alloc_temp.total', 'type': 'gauge'},
+        {'name': 'disk_space.perm_skew.total', 'type': 'gauge'},
+        {'name': 'disk_space.spool_skew.total', 'type': 'gauge'},
+        {'name': 'disk_space.temp_skew.total', 'type': 'gauge'},
+    ],
+}
+
+# Database and Table Disk Space
+# https://docs.teradata.com/r/Teradata-VantageTM-Data-Dictionary/July-2021/Views-Reference/ALLSpaceV-X
+ALL_SPACE = {
+    'name': 'all_space',
+    'query': "SELECT Vproc, TRIM(BOTH FROM DatabaseName), TRIM(BOTH FROM AccountName), TRIM(BOTH FROM TableName), "
     "MaxPerm, MaxSpool, MaxTemp, CurrentPerm, CurrentSpool, CurrentPersistentSpool, CurrentTemp, PeakPerm, "
     "PeakSpool, PeakPersistentSpool, PeakTemp, MaxProfileSpool, MaxProfileTemp, AllocatedPerm, AllocatedSpool,"
     "AllocatedTemp, PermSkew, SpoolSkew, TempSkew FROM DBC.AllSpaceV WHERE DatabaseName='{}';",
     'columns': [
+        {'name': 'td_amp', 'type': 'tag'},
         {'name': 'td_database', 'type': 'tag'},
         {'name': 'td_account', 'type': 'tag'},
         {'name': 'td_table', 'type': 'tag'},
@@ -40,9 +75,10 @@ DISK_SPACE = {
 # https://docs.teradata.com/r/Teradata-VantageTM-Data-Dictionary/July-2021/Views-Reference/AMPUsageV-X
 AMP_USAGE = {
     'name': 'amp_usage',
-    'query': 'SELECT TRIM(BOTH FROM AccountName), TRIM(BOTH FROM UserName), CpuTime,'
+    'query': 'SELECT Vproc, TRIM(BOTH FROM AccountName), TRIM(BOTH FROM UserName), CpuTime,'
     'DiskIO, CPUTimeNorm FROM DBC.AMPUsageV;',
     'columns': [
+        {'name': 'td_amp', 'type': 'tag'},
         {'name': 'td_account', 'type': 'tag'},
         {'name': 'td_user', 'type': 'tag'},
         {'name': 'amp.cpu_time', 'type': 'gauge'},
@@ -119,3 +155,5 @@ RESOURCE_USAGE = {
 DEFAULT_QUERIES = [DISK_SPACE, AMP_USAGE]
 
 COLLECT_RES_USAGE = [RESOURCE_USAGE]
+
+COLLECT_ALL_SPACE = [ALL_SPACE]

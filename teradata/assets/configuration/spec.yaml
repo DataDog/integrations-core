@@ -45,6 +45,43 @@ files:
         The name of the database to access.
       value:
         type: string
+    - name: tables
+      description: |
+        Database tables to collect. If specifying a list of tables, the check will collect all disk metrics from
+        specified tables. If specifying a mapping, the available options are `include` and `exclude`. `include` will
+        collect all disk metrics from the specified tables. `exclude` will exclude collection of disk metrics from
+        specified tables. The check will exclude disk metric collection from a specified table if there is overlap.
+      value:
+        anyOf:
+        - type: array
+          items:
+            type: string
+        - type: object
+          properties:
+            - name: include
+              type: array
+              items:
+                type: string
+            - name: exclude
+              type: array
+              items:
+                type: string
+        example:
+          include:
+            - <TABLE_1>
+            - <TABLE_2>
+          exclude:
+            - <TABLE_3>
+    - name: enable_table_tags
+      description: |
+        Whether or not to collect disk space metrics aggregated by tables. If this option is enabled,
+        Disk Space metrics will be collected for each included table specified in the `tables` option, or
+        all tables if the `tables` option is not configured. Each metric will be tagged with `td_table`.
+      value:
+        type: boolean
+        default: false
+        example: true
+        display_default: false
     - name: collect_res_usage
       description: Collect metrics from the SPMA Resource Table.
       value:

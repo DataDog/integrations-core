@@ -324,19 +324,17 @@ current_time = int(time.time())
 
 
 @pytest.mark.parametrize(
-    'row, expected, query, msg',
+    'row, expected, msg',
     [
         pytest.param(
             [current_time, 200.5],
             [current_time, 200.5],
-            "SELECT TOP 1 TheTimestamp, FileLockBlocks FROM DBC.ResSpmaView ORDER BY TheTimestamp DESC;",
             None,
             id="Valid ts: current timestamp",
         ),
         pytest.param(
             [1648093966, 193.0],
             [],
-            "SELECT TOP 1 TheTimestamp, FileLockBlocks FROM DBC.ResSpmaView ORDER BY TheTimestamp DESC;",
             "Resource Usage stats are invalid. Row timestamp is more than 1h in the past. "
             "Is `SPMA` Resource Usage Logging enabled?",
             id="Invalid ts: old timestamp",
@@ -344,38 +342,20 @@ current_time = int(time.time())
         pytest.param(
             [current_time + 800, 300.3],
             [],
-            "SELECT TOP 1 TheTimestamp, FileLockBlocks FROM DBC.ResSpmaView ORDER BY TheTimestamp DESC;",
             "Row timestamp is more than 10 min in the future. Try checking system time settings.",
             id="Invalid ts: future timestamp",
         ),
         pytest.param(
             ["Not a timestamp", 500],
             [],
-            "SELECT TOP 1 TheTimestamp, FileLockBlocks FROM DBC.ResSpmaView ORDER BY TheTimestamp DESC;",
             "Returned timestamp `Not a timestamp` is invalid.",
             id="Invalid ts: timestamp not integer",
         ),
-        pytest.param(
-            ['AdventureWorksDW', '$M00ADMR', 'DimCurrency', 0, 0],
-            ['AdventureWorksDW', '$M00ADMR', 'DimCurrency', 0, 0],
-            "SELECT TRIM(BOTH FROM DatabaseName), TRIM(BOTH FROM AccountName), TRIM(BOTH FROM TableName), "
-            "MaxPerm, MaxSpool FROM DBC.AllSpaceV;",
-            None,
-            id="Valid ts: validation not needed for disk space table",
-        ),
-        pytest.param(
-            ['DBC', 'DBADMIN', 6.98, 22182, 280.177195739746],
-            ['DBC', 'DBADMIN', 6.98, 22182, 280.177195739746],
-            "SELECT TRIM(BOTH FROM AccountName), TRIM(BOTH FROM UserName), CpuTime,"
-            "DiskIO, CPUTimeNorm FROM DBC.AMPUsageV;",
-            None,
-            id="Valid ts: validation not needed for AMP usage table",
-        ),
     ],
 )
-def test_timestamp_validator(caplog, instance, row, expected, query, msg):
+def test_timestamp_validator(caplog, instance, row, expected, msg):
     check = TeradataCheck(CHECK_NAME, {}, [instance])
-    result = check._timestamp_validator(row, query)
+    result = check._timestamp_validator(row)
     assert result == expected
     if msg:
         assert msg in caplog.text

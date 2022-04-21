@@ -107,7 +107,7 @@ def _mock_execute(query):
 
 @pytest.fixture()
 def expected_metrics():
-    file_names = ['allspacev.json', 'ampusagev.json', 'resspmaview.json']
+    file_names = ['allspacev.json', 'ampusagev.json', 'diskspacev.json', 'resspmaview.json']
     metrics = []
     for file_name in file_names:
         with open(os.path.join(HERE, 'results', file_name), 'r') as f:

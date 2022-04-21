@@ -3,6 +3,79 @@
     "name": "teradata.amp.cpu_time",
     "type": 0,
     "tags": [
+      "td_amp:1",
+      "td_account:DBC",
+      "td_user:DBADMIN",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 7.175999999999999
+  },
+  {
+    "name": "teradata.amp.disk_io",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:DBC",
+      "td_user:DBADMIN",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 22943.0
+  },
+  {
+    "name": "teradata.amp.cpu_time_norm",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:DBC",
+      "td_user:DBADMIN",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 288.04463562011716
+  },
+  {
+    "name": "teradata.amp.cpu_time",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:DBC",
+      "td_user:DATADOG",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 1438.779999999861
+  },
+  {
+    "name": "teradata.amp.disk_io",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:DBC",
+      "td_user:DATADOG",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 9288279.0
+  },
+  {
+    "name": "teradata.amp.cpu_time_norm",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:DBC",
+      "td_user:DATADOG",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 57752.6283218328
+  },
+  {
+    "name": "teradata.amp.cpu_time",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
       "td_account:DBC",
       "td_user:DBADMIN",
       "teradata_server:tdserver",
@@ -14,6 +87,7 @@
     "name": "teradata.amp.disk_io",
     "type": 0,
     "tags": [
+      "td_amp:0",
       "td_account:DBC",
       "td_user:DBADMIN",
       "teradata_server:tdserver",
@@ -25,61 +99,67 @@
     "name": "teradata.amp.cpu_time_norm",
     "type": 0,
     "tags": [
+      "td_amp:0",
       "td_account:DBC",
       "td_user:DBADMIN",
       "teradata_server:tdserver",
       "teradata_port:1025"
     ],
-    "value": 280.177195739746
+    "value": 280.17719573974614
   },
   {
     "name": "teradata.amp.cpu_time",
     "type": 0,
     "tags": [
+      "td_amp:1",
       "td_account:DBC",
       "td_user:DATADOG",
       "teradata_server:tdserver",
       "teradata_port:1025"
     ],
-    "value": 682.903999999998
+    "value": 1408.5479999998834
   },
   {
     "name": "teradata.amp.disk_io",
     "type": 0,
     "tags": [
+      "td_amp:1",
       "td_account:DBC",
       "td_user:DATADOG",
       "teradata_server:tdserver",
       "teradata_port:1025"
     ],
-    "value": 3973897.0
+    "value": 8851378.0
   },
   {
     "name": "teradata.amp.cpu_time_norm",
     "type": 0,
     "tags": [
+      "td_amp:1",
       "td_account:DBC",
       "td_user:DATADOG",
       "teradata_server:tdserver",
       "teradata_port:1025"
     ],
-    "value": 27411.7661431884
+    "value": 56539.11586028585
   },
   {
     "name": "teradata.amp.cpu_time",
     "type": 0,
     "tags": [
+      "td_amp:1",
       "td_account:DBC",
       "td_user:TDWM",
       "teradata_server:tdserver",
       "teradata_port:1025"
     ],
-    "value": 225.455999999997
+    "value": 314.93199999999894
   },
   {
     "name": "teradata.amp.disk_io",
     "type": 0,
     "tags": [
+      "td_amp:1",
       "td_account:DBC",
       "td_user:TDWM",
       "teradata_server:tdserver",
@@ -91,83 +171,199 @@
     "name": "teradata.amp.cpu_time_norm",
     "type": 0,
     "tags": [
+      "td_amp:1",
       "td_account:DBC",
       "td_user:TDWM",
       "teradata_server:tdserver",
       "teradata_port:1025"
     ],
-    "value": 9049.80370239244
+    "value": 12641.370287780719
   },
   {
     "name": "teradata.amp.cpu_time",
     "type": 0,
     "tags": [
+      "td_amp:0",
       "td_account:None",
       "td_user:DBC",
       "teradata_server:tdserver",
       "teradata_port:1025"
     ],
-    "value": 0.012
+    "value": 0.036000000000000004
   },
   {
     "name": "teradata.amp.disk_io",
     "type": 0,
     "tags": [
+      "td_amp:0",
       "td_account:None",
       "td_user:DBC",
       "teradata_server:tdserver",
       "teradata_port:1025"
     ],
-    "value": 14.0
+    "value": 35.0
   },
   {
     "name": "teradata.amp.cpu_time_norm",
     "type": 0,
     "tags": [
+      "td_amp:0",
       "td_account:None",
       "td_user:DBC",
       "teradata_server:tdserver",
       "teradata_port:1025"
     ],
-    "value": 0.481679992675781
+    "value": 1.445039978027344
   },
   {
     "name": "teradata.amp.cpu_time",
     "type": 0,
     "tags": [
+      "td_amp:0",
       "td_account:DBC",
-      "td_user:DBC",
+      "td_user:TDWM",
       "teradata_server:tdserver",
       "teradata_port:1025"
     ],
-    "value": 2190.34
+    "value": 303.91200000000066
   },
   {
     "name": "teradata.amp.disk_io",
     "type": 0,
     "tags": [
+      "td_amp:0",
       "td_account:DBC",
-      "td_user:DBC",
+      "td_user:TDWM",
       "teradata_server:tdserver",
       "teradata_port:1025"
     ],
-    "value": 1677818.0
+    "value": 0.0
   },
   {
     "name": "teradata.amp.cpu_time_norm",
     "type": 0,
     "tags": [
+      "td_amp:0",
       "td_account:DBC",
-      "td_user:DBC",
+      "td_user:TDWM",
       "teradata_server:tdserver",
       "teradata_port:1025"
     ],
-    "value": 87920.2462631225
+    "value": 12199.027494506863
   },
   {
     "name": "teradata.amp.cpu_time",
     "type": 0,
     "tags": [
+      "td_amp:1",
+      "td_account:None",
+      "td_user:DBC",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0.07600000000000001
+  },
+  {
+    "name": "teradata.amp.disk_io",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:None",
+      "td_user:DBC",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 55.0
+  },
+  {
+    "name": "teradata.amp.cpu_time_norm",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:None",
+      "td_user:DBC",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 3.0506399536132816
+  },
+  {
+    "name": "teradata.amp.cpu_time",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:DBC",
+      "td_user:SYSDBA",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0.34
+  },
+  {
+    "name": "teradata.amp.disk_io",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:DBC",
+      "td_user:SYSDBA",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 1403.0
+  },
+  {
+    "name": "teradata.amp.cpu_time_norm",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:DBC",
+      "td_user:SYSDBA",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 13.64759979248047
+  },
+  {
+    "name": "teradata.amp.cpu_time",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:DBC",
+      "td_user:DBC",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 2193.987999999999
+  },
+  {
+    "name": "teradata.amp.disk_io",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:DBC",
+      "td_user:DBC",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 1709794.0
+  },
+  {
+    "name": "teradata.amp.cpu_time_norm",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:DBC",
+      "td_user:DBC",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 88066.67698089595
+  },
+  {
+    "name": "teradata.amp.cpu_time",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
       "td_account:DBC",
       "td_user:SYSDBA",
       "teradata_server:tdserver",
@@ -179,6 +375,7 @@
     "name": "teradata.amp.disk_io",
     "type": 0,
     "tags": [
+      "td_amp:0",
       "td_account:DBC",
       "td_user:SYSDBA",
       "teradata_server:tdserver",
@@ -190,28 +387,103 @@
     "name": "teradata.amp.cpu_time_norm",
     "type": 0,
     "tags": [
+      "td_amp:0",
       "td_account:DBC",
       "td_user:SYSDBA",
       "teradata_server:tdserver",
       "teradata_port:1025"
     ],
-    "value": 19.9094396972656
+    "value": 19.909439697265626
   },
   {
     "name": "teradata.amp.cpu_time",
     "type": 0,
     "tags": [
-      "td_account:$M00ADMR",
-      "td_user:BOB",
+      "td_amp:0",
+      "td_account:DBC",
+      "td_user:DBC",
       "teradata_server:tdserver",
       "teradata_port:1025"
     ],
-    "value": 210.564
+    "value": 2190.4759999999983
   },
   {
     "name": "teradata.amp.disk_io",
     "type": 0,
     "tags": [
+      "td_amp:0",
+      "td_account:DBC",
+      "td_user:DBC",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 1678380.0
+  },
+  {
+    "name": "teradata.amp.cpu_time_norm",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:DBC",
+      "td_user:DBC",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 87925.70530303949
+  },
+  {
+    "name": "teradata.amp.cpu_time",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_user:BOB",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 210.08800000000002
+  },
+  {
+    "name": "teradata.amp.disk_io",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_user:BOB",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 178909.0
+  },
+  {
+    "name": "teradata.amp.cpu_time_norm",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_user:BOB",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 8432.932191772461
+  },
+  {
+    "name": "teradata.amp.cpu_time",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_user:BOB",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 210.56399999999996
+  },
+  {
+    "name": "teradata.amp.disk_io",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
       "td_account:$M00ADMR",
       "td_user:BOB",
       "teradata_server:tdserver",
@@ -223,11 +495,12 @@
     "name": "teradata.amp.cpu_time_norm",
     "type": 0,
     "tags": [
+      "td_amp:0",
       "td_account:$M00ADMR",
       "td_user:BOB",
       "teradata_server:tdserver",
       "teradata_port:1025"
     ],
-    "value": 8452.03883148193
+    "value": 8452.038831481932
   }
 ]

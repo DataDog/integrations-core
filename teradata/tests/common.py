@@ -30,8 +30,8 @@ CONFIG = {
     'username': 'datadog',
     'password': 'td_datadog',
     'database': 'AdventureWorksDW',
-    'use_tls': False,
     'collect_res_usage': True,
+    'enable_table_tags': True,
     'tags': ['td_env:dev'],
 }
 
@@ -40,8 +40,8 @@ E2E_CONFIG = {
     'username': TERADATA_DD_USER,
     'password': TERADATA_DD_PW,
     'database': 'AdventureWorksDW',
-    'use_tls': False,
     'collect_res_usage': True,
+    'enable_table_tags': True,
 }
 
 E2E_METADATA = {
@@ -51,6 +51,25 @@ E2E_METADATA = {
 }
 
 EXPECTED_METRICS = [
+    'teradata.disk_space.max_perm.total',
+    'teradata.disk_space.max_spool.total',
+    'teradata.disk_space.max_temp.total',
+    'teradata.disk_space.curr_perm.total',
+    'teradata.disk_space.curr_spool.total',
+    'teradata.disk_space.curr_persist_spool.total',
+    'teradata.disk_space.curr_temp.total',
+    'teradata.disk_space.peak_perm.total',
+    'teradata.disk_space.peak_spool.total',
+    'teradata.disk_space.peak_persist_spool.total',
+    'teradata.disk_space.peak_temp.total',
+    'teradata.disk_space.max_prof_spool.total',
+    'teradata.disk_space.max_prof_temp.total',
+    'teradata.disk_space.alloc_perm.total',
+    'teradata.disk_space.alloc_spool.total',
+    'teradata.disk_space.alloc_temp.total',
+    'teradata.disk_space.perm_skew.total',
+    'teradata.disk_space.spool_skew.total',
+    'teradata.disk_space.temp_skew.total',
     'teradata.disk_space.max_perm',
     'teradata.disk_space.max_spool',
     'teradata.disk_space.max_temp',
