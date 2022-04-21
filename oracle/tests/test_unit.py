@@ -18,8 +18,11 @@ def test_bad_connection_emits_critical_service_check(aggregator, dd_run_check, b
     """
     Test the right service check is sent upon _get_connection failures
     """
+    instance = copy.deepcopy(bad_instance)
+    instance.update({'tags': ['optional:tag1']})
+    oracle_check = Oracle(CHECK_NAME, {}, [instance])
     expected_tags = ['server:localhost:1521', 'optional:tag1']
-    oracle_check = Oracle(CHECK_NAME, {}, [bad_instance])
+
     dd_run_check(oracle_check)
     aggregator.assert_service_check("oracle.can_connect", Oracle.CRITICAL, count=1, tags=expected_tags)
     aggregator.assert_service_check("oracle.can_query", Oracle.CRITICAL, count=1, tags=expected_tags)
