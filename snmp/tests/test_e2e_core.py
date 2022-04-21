@@ -262,39 +262,42 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
     # run a rate check, will execute two check runs to evaluate rate metrics
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
-    common_tags = common.CHECK_TAGS + [
+    ip_address = get_container_ip(SNMP_CONTAINER_NAME)
+    common_tags = [
         'snmp_profile:meraki-cloud-controller',
         'snmp_host:dashboard.meraki.com',
         'device_vendor:meraki',
+        'device_namespace:default',
+        'snmp_device:' + ip_address,
     ]
 
-    common.assert_common_metrics(aggregator, common_tags)
+    common.assert_common_metrics(aggregator, tags=common_tags, is_e2e=True, loader='core')
 
     dev_metrics = ['devStatus', 'devClientCount']
-    dev_tags = ['device:Gymnasium', 'product:MR16-HW', 'network:L_NETWORK', 'mac_address:0x02020066f57f'] + common_tags
+    dev_tags = ['product:MR16-HW', 'network:L_NETWORK', 'mac_address:0x02020066f57f'] + common_tags
     for metric in dev_metrics:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=dev_tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=dev_tags, count=2, device='Gymnasium')
 
     if_tags = ['interface:wifi0', 'index:4', 'mac_address:0x02020066f500'] + common_tags
     if_metrics = ['devInterfaceSentPkts', 'devInterfaceRecvPkts', 'devInterfaceSentBytes', 'devInterfaceRecvBytes']
     for metric in if_metrics:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=2)
 
     # IF-MIB
     if_tags = ['interface:eth0'] + common_tags
     for metric in metrics.IF_COUNTS:
         aggregator.assert_metric(
-            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags, count=1
+            'snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=if_tags, count=1
         )
 
     for metric in metrics.IF_GAUGES:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=2)
 
     for metric in metrics.IF_RATES:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
 
     for metric in metrics.IF_BANDWIDTH_USAGE:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
 
-    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=2, tags=common_tags)
     aggregator.assert_all_metrics_covered()
