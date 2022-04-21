@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import logging
-import time
 
 import mock
 import pytest
@@ -318,46 +317,3 @@ def test_no_rows_returned(dd_run_check, aggregator, instance, caplog):
     assert "Failed to fetch records from query:" in caplog.text
     aggregator.assert_service_check(SERVICE_CHECK_CONNECT, ServiceCheck.OK, tags=EXPECTED_TAGS)
     aggregator.assert_service_check(SERVICE_CHECK_QUERY, ServiceCheck.CRITICAL, tags=EXPECTED_TAGS)
-
-
-current_time = int(time.time())
-
-
-@pytest.mark.parametrize(
-    'row, expected, msg',
-    [
-        pytest.param(
-            [current_time, 200.5],
-            [current_time, 200.5],
-            None,
-            id="Valid ts: current timestamp",
-        ),
-        pytest.param(
-            [1648093966, 193.0],
-            [],
-            "Resource Usage stats are invalid. Row timestamp is more than 1h in the past. "
-            "Is `SPMA` Resource Usage Logging enabled?",
-            id="Invalid ts: old timestamp",
-        ),
-        pytest.param(
-            [current_time + 800, 300.3],
-            [],
-            "Row timestamp is more than 10 min in the future. Try checking system time settings.",
-            id="Invalid ts: future timestamp",
-        ),
-        pytest.param(
-            ["Not a timestamp", 500],
-            [],
-            "Returned timestamp `Not a timestamp` is invalid.",
-            id="Invalid ts: timestamp not integer",
-        ),
-    ],
-)
-def test_timestamp_validator(caplog, instance, row, expected, msg):
-    check = TeradataCheck(CHECK_NAME, {}, [instance])
-    result = check._timestamp_validator(row)
-    assert result == expected
-    if msg:
-        assert msg in caplog.text
-    else:
-        assert not caplog.text

@@ -6,14 +6,14 @@
 # https://docs.teradata.com/r/Teradata-VantageTM-Data-Dictionary/July-2021/Views-Reference/DiskSpaceV-X
 DISK_SPACE = {
     'name': 'disk_space',
-    'query': "SELECT Vproc, TRIM(BOTH FROM DatabaseName), TRIM(BOTH FROM AccountName), "
+    'query': "SELECT Vproc, TRIM(BOTH FROM AccountName), TRIM(BOTH FROM DatabaseName), "
     "MaxPerm, MaxSpool, MaxTemp, CurrentPerm, CurrentSpool, CurrentPersistentSpool, CurrentTemp, PeakPerm, "
     "PeakSpool, PeakPersistentSpool, PeakTemp, MaxProfileSpool, MaxProfileTemp, AllocatedPerm, AllocatedSpool,"
     "AllocatedTemp, PermSkew, SpoolSkew, TempSkew FROM DBC.DiskSpaceV WHERE DatabaseName='{}';",
     'columns': [
         {'name': 'td_amp', 'type': 'tag'},
-        {'name': 'td_database', 'type': 'tag'},
         {'name': 'td_account', 'type': 'tag'},
+        {'name': 'td_database', 'type': 'tag'},
         {'name': 'disk_space.max_perm.total', 'type': 'gauge'},
         {'name': 'disk_space.max_spool.total', 'type': 'gauge'},
         {'name': 'disk_space.max_temp.total', 'type': 'gauge'},
@@ -40,14 +40,14 @@ DISK_SPACE = {
 # https://docs.teradata.com/r/Teradata-VantageTM-Data-Dictionary/July-2021/Views-Reference/ALLSpaceV-X
 ALL_SPACE = {
     'name': 'all_space',
-    'query': "SELECT Vproc, TRIM(BOTH FROM DatabaseName), TRIM(BOTH FROM AccountName), TRIM(BOTH FROM TableName), "
+    'query': "SELECT Vproc, TRIM(BOTH FROM AccountName), TRIM(BOTH FROM DatabaseName), TRIM(BOTH FROM TableName), "
     "MaxPerm, MaxSpool, MaxTemp, CurrentPerm, CurrentSpool, CurrentPersistentSpool, CurrentTemp, PeakPerm, "
     "PeakSpool, PeakPersistentSpool, PeakTemp, MaxProfileSpool, MaxProfileTemp, AllocatedPerm, AllocatedSpool,"
     "AllocatedTemp, PermSkew, SpoolSkew, TempSkew FROM DBC.AllSpaceV WHERE DatabaseName='{}';",
     'columns': [
         {'name': 'td_amp', 'type': 'tag'},
-        {'name': 'td_database', 'type': 'tag'},
         {'name': 'td_account', 'type': 'tag'},
+        {'name': 'td_database', 'type': 'tag'},
         {'name': 'td_table', 'type': 'tag'},
         {'name': 'disk_space.max_perm', 'type': 'gauge'},
         {'name': 'disk_space.max_spool', 'type': 'gauge'},

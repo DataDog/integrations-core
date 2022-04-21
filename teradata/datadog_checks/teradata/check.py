@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
-import time
 from contextlib import closing, contextmanager
 from copy import deepcopy
 
@@ -14,13 +13,13 @@ except ImportError as e:
     teradatasql = None
     TERADATASQL_IMPORT_ERROR = e
 
-
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.utils.db import QueryManager
 
 from .config_models import ConfigMixin
 from .queries import COLLECT_ALL_SPACE, COLLECT_RES_USAGE, DEFAULT_QUERIES
+from .utils import create_tables_filter, filter_tables, tags_cleaner, timestamp_validator
 
 SERVICE_CHECK_CONNECT = 'can_connect'
 SERVICE_CHECK_QUERY = 'can_query'
@@ -87,7 +86,7 @@ class TeradataCheck(AgentCheck, ConfigMixin):
         self._tags.extend(global_tags)
         self._query_manager.tags = self._tags
 
-        self._tables_filter = self._create_tables_filter()
+        self._tables_filter = create_tables_filter(self)
 
     def _execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:
@@ -101,7 +100,7 @@ class TeradataCheck(AgentCheck, ConfigMixin):
                 try:
                     yield self._queries_handler(row, query)
                 except Exception as e:
-                    self.log.debug('Unable to process row, skipping row. %s', e)
+                    self.log.debug('Unable to process row returned from query "%s", skipping row %s. %s', query, row, e)
                     yield row
 
     def _executor_error_handler(self, error):
@@ -147,77 +146,19 @@ class TeradataCheck(AgentCheck, ConfigMixin):
         Perform timestamp validation and filter tables.
         Only rows returned from the Resource Usage table include timestamps.
         Only rows returned from the AllSpaceV table (disk space) tag by table.
+        Handle empty tags
         """
         processed_row = row
         if 'DBC.ResSpmaView' in query:
-            processed_row = self._timestamp_validator(row)
+            processed_row = timestamp_validator(self, row)
+            return processed_row
 
-        if 'TableName' in query and is_affirmative(self.config.enable_table_tags):
-            processed_row = self._filter_tables(row)
+        if 'DBC.AllSpaceV' in query and is_affirmative(self.config.enable_table_tags):
+            processed_row = filter_tables(self, row)
+
+        if processed_row:
+            rows_w_cleaned_tags = tags_cleaner(self, processed_row, query)
+            processed_row = rows_w_cleaned_tags
+
+        self.log.trace('Row processor returned: %s. \nFrom query: "%s"', processed_row, query)
         return processed_row
-
-    def _filter_tables(self, row):
-        tables_to_collect, tables_to_exclude = self._tables_filter
-        table_name = row[3]
-
-        if not tables_to_collect and not tables_to_exclude:
-            return row
-        if table_name in tables_to_exclude:
-            return []
-        if table_name in tables_to_collect:
-            return row
-        return []
-
-    def _create_tables_filter(self):
-        """
-        List of strings
-        Mapping of `include` (list of strings) and `exclude` (list of strings)
-        """
-        tables_to_collect = set()
-        tables_to_exclude = set()
-
-        tables = self.config.tables
-
-        if isinstance(tables, list):
-            tables_to_collect = set(tables)
-
-        if isinstance(tables, dict):
-            include_tables = tables.get('include')
-            exclude_tables = tables.get('exclude')
-
-            if include_tables and exclude_tables:
-                for table in include_tables:
-                    if table not in exclude_tables:
-                        tables_to_collect.add(table)
-                tables_to_exclude = set(exclude_tables)
-                return tables_to_collect, tables_to_exclude
-
-            if include_tables:
-                tables_to_collect = set(include_tables)
-
-            if exclude_tables:
-                tables_to_exclude = set(exclude_tables)
-
-        return tables_to_collect, tables_to_exclude
-
-    def _timestamp_validator(self, row):
-        # Only rows returned from the Resource Usage table include timestamps
-        now = time.time()
-        row_ts = row[0]
-        if type(row_ts) is not int:
-            msg = 'Returned timestamp `{}` is invalid.'.format(row_ts)
-            self.log.warning(msg)
-            self._query_errors += 1
-            return []
-        diff = now - row_ts
-        # Valid metrics should be no more than 10 min in the future or 1h in the past
-        if (diff > 3600) or (diff < -600):
-            msg = 'Resource Usage stats are invalid. {}'
-            if diff > 3600:
-                msg = msg.format('Row timestamp is more than 1h in the past. Is `SPMA` Resource Usage Logging enabled?')
-            elif diff < -600:
-                msg = msg.format('Row timestamp is more than 10 min in the future. Try checking system time settings.')
-            self.log.warning(msg)
-            self._query_errors += 1
-            return []
-        return row
