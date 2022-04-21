@@ -274,13 +274,13 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
     common.assert_common_metrics(aggregator, tags=common_tags, is_e2e=True, loader='core')
 
     dev_metrics = ['devStatus', 'devClientCount']
-    dev_tags = ['product:MR16-HW', 'network:L_NETWORK', 'mac_address:0x02020066f57f'] + common_tags
+    dev_tags = ['product:MR16-HW', 'network:L_NETWORK', 'mac_address:02:02:00:66:f5:7f'] + common_tags
     for metric in dev_metrics:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=dev_tags, count=2, device='Gymnasium'
         )
 
-    if_tags = ['interface:wifi0', 'index:4', 'mac_address:0x02020066f500'] + common_tags
+    if_tags = ['interface:wifi0', 'index:4', 'mac_address:02:02:00:66:f5:00'] + common_tags
     if_metrics = ['devInterfaceSentPkts', 'devInterfaceRecvPkts', 'devInterfaceSentBytes', 'devInterfaceRecvBytes']
     for metric in if_metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=2)
