@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import itertools
+import threading
 from contextlib import closing
 
 import cx_Oracle
@@ -80,6 +81,11 @@ class Oracle(AgentCheck):
 
         self._query_errors = 0
         self._connection_errors = 0
+        # When using JDBC connection and multiple instances of the check
+        # It causes the following error
+        # Native Library .../_jpype.cpython-38-x86_64-linux-gnu.so already loaded in another classloader
+        # To prevent it we're adding a lock over jpype operations
+        self.jdbc_lock = threading.Lock()
 
     def _fix_custom_queries(self):
         """
@@ -230,15 +236,15 @@ class Oracle(AgentCheck):
 
         self.log.debug("Connecting via JDBC with connection string: %s", connect_string)
         try:
-            if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
-                jpype.attachThreadToJVM()
-                jpype.java.lang.Thread.currentThread().setContextClassLoader(
-                    jpype.java.lang.ClassLoader.getSystemClassLoader()
+            with self.jdbc_lock:
+                if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
+                    jpype.attachThreadToJVM()
+                    jpype.java.lang.Thread.currentThread().setContextClassLoader(
+                        jpype.java.lang.ClassLoader.getSystemClassLoader()
+                    )
+                connection = jdb.connect(
+                    self.ORACLE_DRIVER_CLASS, connect_string, jdbc_connect_properties, self._jdbc_driver
                 )
-
-            connection = jdb.connect(
-                self.ORACLE_DRIVER_CLASS, connect_string, jdbc_connect_properties, self._jdbc_driver
-            )
             self.log.debug("Connected to Oracle DB using JDBC connector")
             return connection
         except Exception as e:
