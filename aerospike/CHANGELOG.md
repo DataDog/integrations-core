@@ -1,5 +1,9 @@
 # CHANGELOG - Aerospike
 
+## 1.11.1-beta.1 / 2022-04-21
+
+* [Fixed] Fix broken latency metric collection. See [#11752](https://github.com/DataDog/integrations-core/pull/11752).
+
 ## 1.11.0 / 2021-04-06 / Agent 7.28.0
 
 * [Added] Support XDR metrics for Aerospike Enterprise 5.0+. See [#8696](https://github.com/DataDog/integrations-core/pull/8696).
