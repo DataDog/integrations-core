@@ -419,12 +419,15 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
 
     @staticmethod
-    def _to_active_session(row):
+    def _to_active_session(row, track_activity_query_size):
         if row['state'] is not None and row['state'] != 'idle':
             # Create an active_row, for each session by
             # 1. Removing all null key/value pairs and the original query
             # 2. if row['statement'] is none, replace with ERROR: failed to obfuscate so we can still collect activity
             active_row = {key: val for key, val in row.items() if val is not None and key != 'query'}
+            active_row['query_truncated'] = PostgresStatementSamples._get_truncation_state(
+                track_activity_query_size, row['query']
+            ).value
             if row['statement'] is None:
                 active_row['statement'] = "ERROR: failed to obfuscate"
             return active_row
@@ -680,7 +683,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._time_since_last_activity_event = time.time()
         active_sessions = []
         for row in rows:
-            active_row = self._to_active_session(row)
+            active_row = self._to_active_session(row, self._get_track_activity_query_size())
             if active_row:
                 active_sessions.append(active_row)
         if len(active_sessions) > self._activity_max_rows:
