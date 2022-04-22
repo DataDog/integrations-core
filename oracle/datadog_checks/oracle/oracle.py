@@ -32,6 +32,12 @@ PROTOCOL_TCPS = 'TCPS'
 VALID_PROTOCOLS = [PROTOCOL_TCP, PROTOCOL_TCPS]
 VALID_TRUSTSTORE_TYPES = ['JKS', 'SSO', 'PKCS12']
 
+# When using JDBC connection and multiple instances of the check
+# It causes the following error
+# Native Library .../_jpype.cpython-38-x86_64-linux-gnu.so already loaded in another classloader
+# To prevent it we're adding a lock over jpype operations
+jdbc_lock = threading.Lock()
+
 
 class Oracle(AgentCheck):
     __NAMESPACE__ = 'oracle'
@@ -81,11 +87,6 @@ class Oracle(AgentCheck):
 
         self._query_errors = 0
         self._connection_errors = 0
-        # When using JDBC connection and multiple instances of the check
-        # It causes the following error
-        # Native Library .../_jpype.cpython-38-x86_64-linux-gnu.so already loaded in another classloader
-        # To prevent it we're adding a lock over jpype operations
-        self.jdbc_lock = threading.Lock()
 
     def _fix_custom_queries(self):
         """
@@ -236,7 +237,7 @@ class Oracle(AgentCheck):
 
         self.log.debug("Connecting via JDBC with connection string: %s", connect_string)
         try:
-            with self.jdbc_lock:
+            with jdbc_lock:
                 if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
                     jpype.attachThreadToJVM()
                     jpype.java.lang.Thread.currentThread().setContextClassLoader(
