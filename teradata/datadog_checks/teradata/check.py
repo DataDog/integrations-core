@@ -4,6 +4,7 @@
 import json
 from contextlib import closing, contextmanager
 from copy import deepcopy
+from typing import Any, AnyStr, Iterable, Iterator, Sequence
 
 try:
     import teradatasql
@@ -19,7 +20,7 @@ from datadog_checks.base.utils.db import QueryManager
 
 from .config_models import ConfigMixin
 from .queries import COLLECT_ALL_SPACE, COLLECT_RES_USAGE, DEFAULT_QUERIES
-from .utils import create_tables_filter, filter_tables, tags_cleaner, timestamp_validator
+from .utils import create_tables_filter, filter_tables, tags_normalizer, timestamp_validator
 
 SERVICE_CHECK_CONNECT = 'can_connect'
 SERVICE_CHECK_QUERY = 'can_query'
@@ -54,6 +55,7 @@ class TeradataCheck(AgentCheck, ConfigMixin):
         self.check_initializations.append(self._query_manager.compile_queries)
 
     def check(self, _):
+        # type: (Any) -> None
         with self.connect() as conn:
             if conn:
                 self._connection = conn
@@ -62,6 +64,7 @@ class TeradataCheck(AgentCheck, ConfigMixin):
         self.submit_health_checks()
 
     def initialize_config(self):
+        # type: (Any) -> None
         self._connect_params = json.dumps(
             {
                 'host': self.config.server,
@@ -89,6 +92,7 @@ class TeradataCheck(AgentCheck, ConfigMixin):
         self._tables_filter = create_tables_filter(self)
 
     def _execute_query_raw(self, query):
+        # type: (AnyStr) -> Iterable[Sequence]
         with closing(self._connection.cursor()) as cursor:
             query = query.format(self.config.database)
             cursor.execute(query)
@@ -98,17 +102,19 @@ class TeradataCheck(AgentCheck, ConfigMixin):
                 return None
             for row in cursor.fetchall():
                 try:
-                    yield self._queries_handler(row, query)
+                    yield self._queries_processor(row, query)
                 except Exception as e:
                     self.log.debug('Unable to process row returned from query "%s", skipping row %s. %s', query, row, e)
                     yield row
 
     def _executor_error_handler(self, error):
+        # type: (AnyStr) -> AnyStr
         self._query_errors += 1
         return error
 
     @contextmanager
     def connect(self):
+        # type: () -> Iterator[teradatasql.connection]
         conn = None
         if TERADATASQL_IMPORT_ERROR:
             self.service_check(SERVICE_CHECK_CONNECT, ServiceCheck.CRITICAL, tags=self._tags)
@@ -132,6 +138,7 @@ class TeradataCheck(AgentCheck, ConfigMixin):
                 conn.close()
 
     def submit_health_checks(self):
+        # type: () -> None
         connect_status = ServiceCheck.OK
         query_status = ServiceCheck.OK
 
@@ -141,24 +148,25 @@ class TeradataCheck(AgentCheck, ConfigMixin):
         self.service_check(SERVICE_CHECK_CONNECT, connect_status, tags=self._tags)
         self.service_check(SERVICE_CHECK_QUERY, query_status, tags=self._tags)
 
-    def _queries_handler(self, row, query):
+    def _queries_processor(self, row, query):
+        # type: (Sequence, AnyStr) -> Sequence
         """
-        Perform timestamp validation and filter tables.
-        Only rows returned from the Resource Usage table include timestamps.
-        Only rows returned from the AllSpaceV table (disk space) tag by table.
-        Handle empty tags
+        Validate timestamps, filter tables, and normalize empty tags.
         """
-        processed_row = row
+        unprocessed_row = row
+        # Only Resource Usage rows include timestamps and also do not include tags.
         if 'DBC.ResSpmaView' in query:
-            processed_row = timestamp_validator(self, row)
+            processed_row = timestamp_validator(self, unprocessed_row)
             return processed_row
 
+        # Only AllSpaceV rows include table tags
         if 'DBC.AllSpaceV' in query and is_affirmative(self.config.enable_table_tags):
-            processed_row = filter_tables(self, row)
-
-        if processed_row:
-            rows_w_cleaned_tags = tags_cleaner(self, processed_row, query)
-            processed_row = rows_w_cleaned_tags
-
+            tables_filtered_row = filter_tables(self, unprocessed_row)
+            if tables_filtered_row:
+                processed_row = tags_normalizer(self, tables_filtered_row, query)
+                return processed_row
+            # Discard row if empty (table is filtered out)
+            return []
+        processed_row = tags_normalizer(self, unprocessed_row, query)
         self.log.trace('Row processor returned: %s. \nFrom query: "%s"', processed_row, query)
         return processed_row

@@ -2,56 +2,59 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
+from typing import Any, AnyStr, Sequence, Set, Tuple
+
+from datadog_checks.teradata.config_models.instance import Table
 
 
 def filter_tables(self, row):
+    # type: (Any, Sequence) -> Sequence
     tables_to_collect, tables_to_exclude = self._tables_filter
     table_name = row[3]
-
+    # No tables filter
     if not tables_to_collect and not tables_to_exclude:
         return row
+    # Table filtered out
     if table_name in tables_to_exclude:
         return []
+    # Table included
     if table_name in tables_to_collect:
         return row
+    # Table excluded
     return []
 
 
 def create_tables_filter(self):
-    """
-    List of strings
-    Mapping of `include` (list of strings) and `exclude` (list of strings)
-    """
+    # type: (Any) -> Tuple[Set, Set]
+
     tables_to_collect = set()
     tables_to_exclude = set()
 
     tables = self.config.tables
 
-    if isinstance(tables, list):
+    if isinstance(tables, tuple):
         tables_to_collect = set(tables)
+        return tables_to_collect, tables_to_exclude
 
-    if isinstance(tables, dict):
-        include_tables = tables.get('include')
-        exclude_tables = tables.get('exclude')
-
-        if include_tables and exclude_tables:
-            for table in include_tables:
-                if table not in exclude_tables:
+    if isinstance(tables, Table):
+        if tables.include and tables.exclude:
+            for table in tables.include:
+                if table not in tables.exclude:
                     tables_to_collect.add(table)
-            tables_to_exclude = set(exclude_tables)
+            tables_to_exclude = set(tables.exclude)
             return tables_to_collect, tables_to_exclude
 
-        if include_tables:
-            tables_to_collect = set(include_tables)
+        if tables.include:
+            tables_to_collect = set(tables.include)
 
-        if exclude_tables:
-            tables_to_exclude = set(exclude_tables)
+        if tables.exclude:
+            tables_to_exclude = set(tables.exclude)
 
-    return tables_to_collect, tables_to_exclude
+        return (tables_to_collect, tables_to_exclude)
 
 
 def timestamp_validator(self, row):
-    # Only rows returned from the Resource Usage table include timestamps
+    # type: (Any, Sequence) -> Sequence
     now = time.time()
     row_ts = row[0]
     if type(row_ts) is not int:
@@ -73,38 +76,24 @@ def timestamp_validator(self, row):
     return row
 
 
-def tags_cleaner(self, row, query):
-    column_tags = [
-        {
-            "stats_name": "DBC.DiskSpaceV",
-            "tags": [
-                {"name": "td_amp", "col": row[0]},
-                {"name": "td_account", "col": row[1]},
-                {"name": "td_database", "col": row[2]},
-            ],
-        },
+def tags_normalizer(self, row, query):
+    # type: (Any, Sequence, AnyStr) -> Sequence
+    base_tags = [{"name": "td_amp", "col": row[0]}, {"name": "td_account", "col": row[1]}]
+    tags_map = [
+        {"stats_name": "DBC.DiskSpaceV", "tags": base_tags + [{"name": "td_database", "col": row[2]}]},
         {
             "stats_name": "DBC.AllSpaceV",
-            "tags": [
-                {"name": "td_amp", "col": row[0]},
-                {"name": "td_account", "col": row[1]},
-                {"name": "td_database", "col": row[2]},
-                {"name": "td_table", "col": row[3]},
-            ],
+            "tags": base_tags + [{"name": "td_database", "col": row[2]}, {"name": "td_table", "col": row[3]}],
         },
         {
             "stats_name": "DBC.AMPUsageV",
-            "tags": [
-                {"name": "td_amp", "col": row[0]},
-                {"name": "td_account", "col": row[1]},
-                {"name": "td_user", "col": row[2]},
-            ],
+            "tags": base_tags + [{"name": "td_user", "col": row[2]}],
         },
     ]
 
-    for stat in column_tags:
-        if stat['stats_name'] in query:
-            for idx, tag in enumerate(stat['tags']):
+    for stats_type in tags_map:
+        if stats_type['stats_name'] in query:
+            for idx, tag in enumerate(stats_type['tags']):
                 # tag value may be type int
                 if not len(str(tag['col'])):
                     row[idx] = "undefined"

@@ -317,3 +317,43 @@ def test_no_rows_returned(dd_run_check, aggregator, instance, caplog):
     assert "Failed to fetch records from query:" in caplog.text
     aggregator.assert_service_check(SERVICE_CHECK_CONNECT, ServiceCheck.OK, tags=EXPECTED_TAGS)
     aggregator.assert_service_check(SERVICE_CHECK_QUERY, ServiceCheck.CRITICAL, tags=EXPECTED_TAGS)
+
+
+@pytest.mark.parametrize(
+    'config, expected',
+    [
+        pytest.param(['table1', 'table2'], ({'table1', 'table2'}, set()), id="Tables filter list"),
+        pytest.param(
+            {'include': ['tablea', 'tableb']}, ({'tablea', 'tableb'}, set()), id="Tables filter map: include only"
+        ),
+        pytest.param(
+            {'exclude': ['tablec', 'tabled']}, (set(), {'tablec', 'tabled'}), id="Tables filter map: exclude only"
+        ),
+        pytest.param(
+            {'include': ['table_foo', 'table_bar'], 'exclude': ['table_zip', 'table_zap']},
+            ({'table_foo', 'table_bar'}, {'table_zip', 'table_zap'}),
+            id="Tables filter map: include and exclude",
+        ),
+        pytest.param(
+            {'include': ['table_foo', 'table_bar'], 'exclude': ['table_foo', 'table_zap']},
+            ({'table_bar'}, {'table_foo', 'table_zap'}),
+            id="Tables filter map: exclusion overlap",
+        ),
+        pytest.param(
+            {'include': ['table_foo', 'table_bar', 'table_foo'], 'exclude': ['table_b', 'table_zap']},
+            ({'table_foo', 'table_bar'}, {'table_b', 'table_zap'}),
+            id="Tables filter map: duplicate table in include",
+        ),
+        pytest.param(
+            {'include': ['table_foo', 'table_bar'], 'exclude': ['table_d', 'table_zap', 'table_zap']},
+            ({'table_foo', 'table_bar'}, {'table_d', 'table_zap'}),
+            id="Tables filter map: duplicate table in exclude",
+        ),
+    ],
+)
+def test_tables_filter(cursor_factory, config, expected, instance, dd_run_check, aggregator):
+    instance['tables'] = config
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    with cursor_factory():
+        dd_run_check(check)
+    assert check._tables_filter == expected
