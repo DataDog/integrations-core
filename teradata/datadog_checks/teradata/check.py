@@ -57,6 +57,8 @@ class TeradataCheck(AgentCheck, ConfigMixin):
 
     def check(self, _):
         # type: (Any) -> None
+        self._query_errors = 0
+
         try:
             with self.connect() as conn:
                 if conn:
