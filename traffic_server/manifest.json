@@ -31,7 +31,10 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "dashboards": {},
-    "monitors": {},
+    "monitors": {
+      "[Traffic Server] 4xx Errors higher than usual": "assets/monitors/4xx.json",
+      "[Traffic Server] 5xx Errors higher than usual": "assets/monitors/5xx.json"
+    },
     "saved_views": {
       "traffic_server_error_logs": "assets/saved_views/traffic_server_error_logs.json",
       "traffic_server_overview": "assets/saved_views/traffic_server_overview.json",
