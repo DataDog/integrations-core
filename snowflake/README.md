@@ -147,7 +147,7 @@ These variables also impact every requests from integrations, including orchestr
 
 #### Private connectivity to Snowflake configuration
 
-If you have [private connectivity][9], such as [AWS PrivateLink][10], enabled in Snowflake, you can configure the Snowflake integration by updating the `account` configuration option to be in the following format:
+If [private connectivity][9] (such as [AWS PrivateLink][10]) is enabled in Snowflake, you can configure the Snowflake integration by updating the `account` configuration option to the following format:
 
   ```yaml
         - account: <ACCOUNT>.<REGION_ID>.privatelink
