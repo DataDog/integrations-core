@@ -76,7 +76,7 @@ def timestamp_validator(self, row):
     return row
 
 
-def tags_normalizer(self, row, query):
+def tags_normalizer(self, row, query_name):
     # type: (Any, Sequence, AnyStr) -> Sequence
     base_tags = [{"name": "td_amp", "col": row[0]}, {"name": "td_account", "col": row[1]}]
     tags_map = [
@@ -92,7 +92,7 @@ def tags_normalizer(self, row, query):
     ]
 
     for stats_type in tags_map:
-        if stats_type['stats_name'] in query:
+        if query_name == stats_type['stats_name']:
             for idx, tag in enumerate(stats_type['tags']):
                 # tag value may be type int
                 if not len(str(tag['col'])):

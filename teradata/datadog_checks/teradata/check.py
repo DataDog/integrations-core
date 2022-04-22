@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import re
 from contextlib import closing, contextmanager
 from copy import deepcopy
 from typing import Any, AnyStr, Iterable, Iterator, Sequence
@@ -34,7 +35,7 @@ class TeradataCheck(AgentCheck, ConfigMixin):
 
         self._connect_params = None
         self._connection = None
-        self._tags = None
+        self._tags = []
         self._query_errors = 0
         self._tables_filter = None
 
@@ -104,10 +105,13 @@ class TeradataCheck(AgentCheck, ConfigMixin):
                 self.log.warning('Failed to fetch records from query: `%s`.', query)
                 return None
             for row in cursor.fetchall():
+                query_name = re.search(r'(DBC.[^\s]+)', query).group(1)
                 try:
-                    yield self._queries_processor(row, query)
+                    yield self._queries_processor(row, query_name)
                 except Exception as e:
-                    self.log.debug('Unable to process row returned from query "%s", skipping row %s. %s', query, row, e)
+                    self.log.debug(
+                        'Unable to process row returned from query "%s", skipping row %s. %s', query_name, row, e
+                    )
                     yield row
 
     def _executor_error_handler(self, error):
@@ -146,25 +150,29 @@ class TeradataCheck(AgentCheck, ConfigMixin):
         self.service_check(SERVICE_CHECK_QUERY, query_status, tags=self._tags)
         self.service_check(SERVICE_CHECK_CONNECT, connect_status, tags=self._tags)
 
-    def _queries_processor(self, row, query):
+    def _queries_processor(self, row, query_name):
         # type: (Sequence, AnyStr) -> Sequence
         """
         Validate timestamps, filter tables, and normalize empty tags.
         """
         unprocessed_row = row
         # Only Resource Usage rows include timestamps and also do not include tags.
-        if 'DBC.ResSpmaView' in query:
+        if query_name == 'DBC.ResSpmaView':
             processed_row = timestamp_validator(self, unprocessed_row)
             return processed_row
 
         # Only AllSpaceV rows include table tags
-        if 'DBC.AllSpaceV' in query and is_affirmative(self.config.collect_table_disk_metrics) and self._tables_filter:
+        if (
+            query_name == 'DBC.AllSpaceV'
+            and is_affirmative(self.config.collect_table_disk_metrics)
+            and self._tables_filter
+        ):
             tables_filtered_row = filter_tables(self, unprocessed_row)
             if tables_filtered_row:
-                processed_row = tags_normalizer(self, tables_filtered_row, query)
+                processed_row = tags_normalizer(self, tables_filtered_row, query_name)
                 return processed_row
             # Discard row if empty (table is filtered out)
             return tables_filtered_row
-        processed_row = tags_normalizer(self, unprocessed_row, query)
-        self.log.trace('Row processor returned: %s. \nFrom query: "%s"', processed_row, query)
+        processed_row = tags_normalizer(self, unprocessed_row, query_name)
+        self.log.trace('Row processor returned: %s. \nFrom query: "%s"', processed_row, query_name)
         return processed_row
