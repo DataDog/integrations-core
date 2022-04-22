@@ -35,7 +35,7 @@ files:
           For more information on Snowflake account names,
           see https://docs.snowflake.com/en/user-guide/connecting.html#your-snowflake-account-name
 
-          If you are using private connectivity to Snowflake, your account name should be in the following format:
+          If you are using private connectivity with Snowflake, your account name should be in the following format:
             account: <ACCOUNT>.<REGION_ID>.privatelink
         value:
           type: string
