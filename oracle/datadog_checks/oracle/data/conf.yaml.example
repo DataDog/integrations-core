@@ -2,6 +2,12 @@
 #
 init_config:
 
+    ## @param cache_connection - boolean - optional - default: true
+    ## Cache DB connection between check runs. Set this to False if you set multiple instances of this check
+    ## using JDBC connection.
+    #
+    # cache_connection: true
+
     ## @param global_custom_queries - list of mappings - optional
     ## See `custom_queries` defined below.
     ##

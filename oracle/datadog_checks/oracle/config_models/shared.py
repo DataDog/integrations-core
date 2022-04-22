@@ -23,6 +23,7 @@ class SharedConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    cache_connection: Optional[bool]
     global_custom_queries: Optional[Sequence[Mapping[str, Any]]]
     service: Optional[str]
 

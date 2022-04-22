@@ -10,6 +10,10 @@
 from datadog_checks.base.utils.models.fields import get_default_field_value
 
 
+def shared_cache_connection(field, value):
+    return True
+
+
 def shared_global_custom_queries(field, value):
     return get_default_field_value(field, value)
 
