@@ -8,6 +8,9 @@ on:
     branches:
     - master
 
+env:
+  CHANGED: ${{ github.event_name == 'pull_request' && 'changed' || '' }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -33,14 +36,9 @@ jobs:
         ddev config set repos.core .
         ddev config set repo core
 
-    - name: Set CHANGED
-      if: github.event_name == 'pull_request'
-      run: |
-          echo CHANGED=changed >> $GITHUB_ENV
-
     - name: Run agent requirements validation
       run: |
-        ddev validate agent-reqs ${{ env.CHANGED }}
+        ddev validate agent-reqs $CHANGED
 
     - name: Run CI validation
       run: |
@@ -48,11 +46,11 @@ jobs:
 
     - name: Run configuration validation
       run: |
-        ddev validate config ${{ env.CHANGED }}
+        ddev validate config $CHANGED
 
     - name: Run dashboard validation
       run: |
-        ddev validate dashboards ${{ env.CHANGED }}
+        ddev validate dashboards $CHANGED
 
     - name: Run dependency validation
       run: |
@@ -60,23 +58,23 @@ jobs:
 
     - name: Run HTTP wrapper validation
       run: |
-        ddev validate http ${{ env.CHANGED }}
+        ddev validate http $CHANGED
 
     - name: Run imports validation
       run: |
-        ddev validate imports ${{ env.CHANGED }}
+        ddev validate imports $CHANGED
 
     - name: Run integration style and best practices validation
       run: |
-        ddev validate integration-style ${{ env.CHANGED }} --verbose
+        ddev validate integration-style $CHANGED --verbose
 
     - name: Run JMX metrics validation
       run: |
-        ddev validate jmx-metrics ${{ env.CHANGED }}
+        ddev validate jmx-metrics $CHANGED
 
     - name: Run legacy signature validation
       run: |
-        ddev validate legacy-signature ${{ env.CHANGED }}
+        ddev validate legacy-signature $CHANGED
 
     - name: Run licenses validation
       run: |
@@ -84,35 +82,35 @@ jobs:
 
     - name: Run manifest validation
       run: |
-        ddev validate manifest ${{ env.CHANGED }}
+        ddev validate manifest $CHANGED
 
     - name: Run metadata validation
       run: |
-        ddev validate metadata ${{ env.CHANGED }}
+        ddev validate metadata $CHANGED
 
     - name: Run models validation
       run: |
-        ddev validate models ${{ env.CHANGED }}
+        ddev validate models $CHANGED
         
     - name: Run package validation
       run: |
-        ddev validate package ${{ env.CHANGED }}
+        ddev validate package $CHANGED
         
     - name: Run readmes validation
       run: |
-        ddev validate readmes ${{ env.CHANGED }}
+        ddev validate readmes $CHANGED
 
     - name: Run recommended monitors validation
       run: |
-        ddev validate recommended-monitors ${{ env.CHANGED }}
+        ddev validate recommended-monitors $CHANGED
 
     - name: Run saved views validation
       run: |
-        ddev validate saved-views ${{ env.CHANGED }}
+        ddev validate saved-views $CHANGED
 
     - name: Run service checks validation
       run: |
-        ddev validate service-checks ${{ env.CHANGED }}
+        ddev validate service-checks $CHANGED
 
     - name: Comment PR on failure
       if: ${{ failure() && github.event.pull_request.merged != true }}
