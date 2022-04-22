@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
+from copy import deepcopy
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.ci import running_on_ci
@@ -50,7 +51,7 @@ E2E_METADATA = {
     ]
 }
 
-EXPECTED_METRICS = [
+DEFAULT_METRICS = [
     'teradata.disk_space.max_perm.total',
     'teradata.disk_space.max_spool.total',
     'teradata.disk_space.max_temp.total',
@@ -70,28 +71,12 @@ EXPECTED_METRICS = [
     'teradata.disk_space.perm_skew.total',
     'teradata.disk_space.spool_skew.total',
     'teradata.disk_space.temp_skew.total',
-    'teradata.disk_space.max_perm',
-    'teradata.disk_space.max_spool',
-    'teradata.disk_space.max_temp',
-    'teradata.disk_space.curr_perm',
-    'teradata.disk_space.curr_spool',
-    'teradata.disk_space.curr_persist_spool',
-    'teradata.disk_space.curr_temp',
-    'teradata.disk_space.peak_perm',
-    'teradata.disk_space.peak_spool',
-    'teradata.disk_space.peak_persist_spool',
-    'teradata.disk_space.peak_temp',
-    'teradata.disk_space.max_prof_spool',
-    'teradata.disk_space.max_prof_temp',
-    'teradata.disk_space.alloc_perm',
-    'teradata.disk_space.alloc_spool',
-    'teradata.disk_space.alloc_temp',
-    'teradata.disk_space.perm_skew',
-    'teradata.disk_space.spool_skew',
-    'teradata.disk_space.temp_skew',
     'teradata.amp.cpu_time',
     'teradata.amp.disk_io',
     'teradata.amp.cpu_time_norm',
+]
+
+RES_USAGE_METRICS = [
     'teradata.file_lock.blocks',
     'teradata.file_lock.deadlocks',
     'teradata.file_lock.enters',
@@ -130,3 +115,33 @@ EXPECTED_METRICS = [
     'teradata.process.cpu_throttle',
     'teradata.process.cpu_throttle_time',
 ]
+
+TABLE_DISK_METRICS = [
+    'teradata.disk_space.max_perm',
+    'teradata.disk_space.max_spool',
+    'teradata.disk_space.max_temp',
+    'teradata.disk_space.curr_perm',
+    'teradata.disk_space.curr_spool',
+    'teradata.disk_space.curr_persist_spool',
+    'teradata.disk_space.curr_temp',
+    'teradata.disk_space.peak_perm',
+    'teradata.disk_space.peak_spool',
+    'teradata.disk_space.peak_persist_spool',
+    'teradata.disk_space.peak_temp',
+    'teradata.disk_space.max_prof_spool',
+    'teradata.disk_space.max_prof_temp',
+    'teradata.disk_space.alloc_perm',
+    'teradata.disk_space.alloc_spool',
+    'teradata.disk_space.alloc_temp',
+    'teradata.disk_space.perm_skew',
+    'teradata.disk_space.spool_skew',
+    'teradata.disk_space.temp_skew',
+]
+
+E2E_EXCLUDE_METRICS = [
+    'teradata.disk_space.max_prof_spool.total',
+    'teradata.disk_space.max_prof_temp.total',
+]
+
+EXPECTED_METRICS = deepcopy(DEFAULT_METRICS)
+EXPECTED_METRICS += RES_USAGE_METRICS + TABLE_DISK_METRICS

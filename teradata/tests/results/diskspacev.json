@@ -132,6 +132,54 @@
     "value": 0
   },
   {
+    "name": "teradata.disk_space.max_prof_spool.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.max_prof_temp.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.max_prof_spool.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.max_prof_temp.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
     "name": "teradata.disk_space.alloc_perm.total",
     "type": 0,
     "tags": [

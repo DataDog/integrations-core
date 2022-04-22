@@ -15,7 +15,7 @@ except ImportError:
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.teradata.check import TeradataCheck
 
-from .common import CHECK_NAME, EXPECTED_TAGS, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY
+from .common import CHECK_NAME, EXPECTED_TAGS, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY, TABLE_DISK_METRICS
 
 
 @pytest.mark.parametrize(
@@ -322,33 +322,41 @@ def test_no_rows_returned(dd_run_check, aggregator, instance, caplog):
 @pytest.mark.parametrize(
     'config, expected',
     [
-        pytest.param(['table1', 'table2'], ({'table1', 'table2'}, set()), id="Tables filter list"),
+        pytest.param(['DimDate', 'DimSalesReason'], ({'DimDate', 'DimSalesReason'}, set()), id="Tables filter list"),
         pytest.param(
-            {'include': ['tablea', 'tableb']}, ({'tablea', 'tableb'}, set()), id="Tables filter map: include only"
+            {'include': ['DimScenario', 'DimCustomer']},
+            ({'DimScenario', 'DimCustomer'}, set()),
+            id="Tables filter map: include only",
         ),
         pytest.param(
-            {'exclude': ['tablec', 'tabled']}, (set(), {'tablec', 'tabled'}), id="Tables filter map: exclude only"
+            {'exclude': ['DimCustomer', 'DimDepartmentGroup']},
+            (set(), {'DimCustomer', 'DimDepartmentGroup'}),
+            id="Tables filter map: exclude only",
         ),
         pytest.param(
-            {'include': ['table_foo', 'table_bar'], 'exclude': ['table_zip', 'table_zap']},
-            ({'table_foo', 'table_bar'}, {'table_zip', 'table_zap'}),
+            {'include': ['DimCustomer', 'DimDepartmentGroup'], 'exclude': ['DimGeography', 'DimEmployee']},
+            ({'DimCustomer', 'DimDepartmentGroup'}, {'DimGeography', 'DimEmployee'}),
             id="Tables filter map: include and exclude",
         ),
         pytest.param(
-            {'include': ['table_foo', 'table_bar'], 'exclude': ['table_foo', 'table_zap']},
-            ({'table_bar'}, {'table_foo', 'table_zap'}),
+            {'include': ['DimCurrency', 'DimEmployee'], 'exclude': ['DimCurrency', 'DimCustomer']},
+            ({'DimEmployee'}, {'DimCurrency', 'DimCustomer'}),
             id="Tables filter map: exclusion overlap",
         ),
         pytest.param(
-            {'include': ['table_foo', 'table_bar', 'table_foo'], 'exclude': ['table_b', 'table_zap']},
-            ({'table_foo', 'table_bar'}, {'table_b', 'table_zap'}),
+            {
+                'include': ['DimDepartmentGroup', 'DimCustomer', 'DimDepartmentGroup'],
+                'exclude': ['DimGeography', 'DimEmployee'],
+            },
+            ({'DimDepartmentGroup', 'DimCustomer'}, {'DimGeography', 'DimEmployee'}),
             id="Tables filter map: duplicate table in include",
         ),
         pytest.param(
-            {'include': ['table_foo', 'table_bar'], 'exclude': ['table_d', 'table_zap', 'table_zap']},
-            ({'table_foo', 'table_bar'}, {'table_d', 'table_zap'}),
+            {'include': ['DimSalesReason', 'DimScenario'], 'exclude': ['DimGeography', 'DimCustomer', 'DimCustomer']},
+            ({'DimSalesReason', 'DimScenario'}, {'DimGeography', 'DimCustomer'}),
             id="Tables filter map: duplicate table in exclude",
         ),
+        pytest.param([], (set(), set()), id="No tables filter: collect all tables"),
     ],
 )
 def test_tables_filter(cursor_factory, config, expected, instance, dd_run_check, aggregator):
@@ -356,4 +364,19 @@ def test_tables_filter(cursor_factory, config, expected, instance, dd_run_check,
     check = TeradataCheck(CHECK_NAME, {}, [instance])
     with cursor_factory():
         dd_run_check(check)
+    tag_template = 'td_table:{}'
+    for metric in TABLE_DISK_METRICS:
+        if isinstance(config, list):
+            if not config:
+                aggregator.assert_metric_has_tag_prefix(metric, 'td_table', at_least=1)
+            for include_table in config:
+                aggregator.assert_metric_has_tag(metric, tag_template.format(include_table), at_least=1)
+                aggregator.assert_metric_has_tag(metric, tag_template.format("DimOrganization"), count=0)
+        else:
+            for include_table in expected[0]:
+                aggregator.assert_metric_has_tag(metric, tag_template.format(include_table), at_least=1)
+            for exclude_table in expected[1]:
+                aggregator.assert_metric_has_tag(metric, tag_template.format(exclude_table), count=0)
+            aggregator.assert_metric_has_tag(metric, tag_template.format("DimOrganization"), count=0)
+
     assert check._tables_filter == expected
