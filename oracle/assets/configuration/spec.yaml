@@ -4,6 +4,13 @@ files:
   options:
   - template: init_config
     options:
+    - name: cache_connection
+      description: |
+        Cache DB connection between check runs. Set this to False if you set multiple instances of this check
+        using JDBC connection.
+      value:
+        type: boolean
+        example: True
     - template: init_config/db
     - template: init_config/default
   - template: instances

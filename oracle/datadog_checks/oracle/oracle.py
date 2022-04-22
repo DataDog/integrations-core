@@ -8,7 +8,7 @@ from contextlib import closing
 import cx_Oracle
 from six import PY2
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
@@ -32,11 +32,32 @@ PROTOCOL_TCPS = 'TCPS'
 VALID_PROTOCOLS = [PROTOCOL_TCP, PROTOCOL_TCPS]
 VALID_TRUSTSTORE_TYPES = ['JKS', 'SSO', 'PKCS12']
 
-# When using JDBC connection and multiple instances of the check
-# It causes the following error
-# Native Library .../_jpype.cpython-38-x86_64-linux-gnu.so already loaded in another classloader
-# To prevent it we're adding a lock over jpype operations
+
+def can_use_oracle_client():
+    try:
+        # Check if the instantclient is available
+        cx_Oracle.clientversion()
+        return True
+    except cx_Oracle.DatabaseError:
+        # Fallback to JDBC
+        return False
+
+
 jdbc_lock = threading.Lock()
+
+
+class JDBCLock:
+    # When using JDBC connection and multiple instances of the check
+    # It causes the following error
+    # Native Library .../_jpype.cpython-38-x86_64-linux-gnu.so already loaded in another classloader
+    # To prevent it we're adding a lock over jpype operations
+    def __enter__(self):
+        if not (can_use_oracle_client() or JDBC_IMPORT_ERROR):
+            return jdbc_lock.acquire()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if jdbc_lock.locked():
+            return jdbc_lock.release()
 
 
 class Oracle(AgentCheck):
@@ -61,6 +82,7 @@ class Oracle(AgentCheck):
         self._jdbc_truststore_type = self.instance.get('jdbc_truststore_type')
         self._jdbc_truststore_password = self.instance.get('jdbc_truststore_password', '')
         self._tags = self.instance.get('tags') or []
+        self._cache_connection = is_affirmative(init_config.get('cache_connection', True))
         self._service_check_tags = ['server:{}'.format(self._server)]
         self._service_check_tags.extend(self._tags)
 
@@ -132,17 +154,18 @@ class Oracle(AgentCheck):
 
     def handle_query_error(self, error):
         self._query_errors += 1
-        if self._cached_connection is None:
-            self.log.debug("Couldn't close the connection after a query failure because there was no connection")
-            return error
+        self._close_connection()
+        return error
 
+    def _close_connection(self):
+        if self._cache_connection is None:
+            self.log.debug("Couldn't close the connection after a query failure because there was no connection")
+            return
         try:
             self._cached_connection.close()
         except Exception as e:
             self.log.warning("Couldn't close the connection after a query failure: %s", str(e))
         self._cached_connection = None
-
-        return error
 
     def check(self, _):
         if self.instance.get('user'):
@@ -151,7 +174,10 @@ class Oracle(AgentCheck):
         self._query_errors = 0
         self._connection_errors = 0
 
-        self._query_manager.execute()
+        with JDBCLock():
+            self._query_manager.execute()
+            if not self._cache_connection:
+                self._close_connection()
 
         if self._query_errors:
             self.service_check(self.SERVICE_CHECK_CAN_QUERY, self.CRITICAL, tags=self._service_check_tags)
@@ -167,31 +193,22 @@ class Oracle(AgentCheck):
     def _connection(self):
         """Creates a connection or raises an exception"""
         if self._cached_connection is None:
-            if self.can_use_oracle_client():
+            if can_use_oracle_client():
+                self.log.debug('Running cx_Oracle version %s', cx_Oracle.version)
                 self._cached_connection = self._oracle_client_connect()
-            elif JDBC_IMPORT_ERROR:
-                self._connection_errors += 1
-                self.log.error(
-                    "Oracle client is unavailable and the integration is unable to import JDBC libraries. You may not "
-                    "have the Microsoft Visual C++ Runtime 2015 installed on your system. Please double check your "
-                    "installation and refer to the Datadog documentation for more information."
-                )
-                raise JDBC_IMPORT_ERROR
             else:
-                self._cached_connection = self._jdbc_connect()
+                self.log.debug('Oracle instant client unavailable, falling back to JDBC')
+                if JDBC_IMPORT_ERROR:
+                    self._connection_errors += 1
+                    self.log.error(
+                        "Oracle client is unavailable and the integration is unable to import JDBC libraries. "
+                        "You may not  have the Microsoft Visual C++ Runtime 2015 installed on your system. Please"
+                        " double check your installation and refer to the Datadog documentation for more information."
+                    )
+                    raise JDBC_IMPORT_ERROR
+                else:
+                    self._cached_connection = self._jdbc_connect()
         return self._cached_connection
-
-    def can_use_oracle_client(self):
-        try:
-            # Check if the instantclient is available
-            cx_Oracle.clientversion()
-        except cx_Oracle.DatabaseError as e:
-            # Fallback to JDBC
-            self.log.debug('Oracle instant client unavailable, falling back to JDBC: %s', e)
-            return False
-        else:
-            self.log.debug('Running cx_Oracle version %s', cx_Oracle.version)
-            return True
 
     def _oracle_client_connect(self):
         dsn = self._get_dsn()
@@ -237,15 +254,14 @@ class Oracle(AgentCheck):
 
         self.log.debug("Connecting via JDBC with connection string: %s", connect_string)
         try:
-            with jdbc_lock:
-                if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
-                    jpype.attachThreadToJVM()
-                    jpype.java.lang.Thread.currentThread().setContextClassLoader(
-                        jpype.java.lang.ClassLoader.getSystemClassLoader()
-                    )
-                connection = jdb.connect(
-                    self.ORACLE_DRIVER_CLASS, connect_string, jdbc_connect_properties, self._jdbc_driver
+            if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
+                jpype.attachThreadToJVM()
+                jpype.java.lang.Thread.currentThread().setContextClassLoader(
+                    jpype.java.lang.ClassLoader.getSystemClassLoader()
                 )
+            connection = jdb.connect(
+                self.ORACLE_DRIVER_CLASS, connect_string, jdbc_connect_properties, self._jdbc_driver
+            )
             self.log.debug("Connected to Oracle DB using JDBC connector")
             return connection
         except Exception as e:
