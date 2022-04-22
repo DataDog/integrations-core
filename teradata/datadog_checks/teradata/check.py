@@ -39,9 +39,9 @@ class TeradataCheck(AgentCheck, ConfigMixin):
         self._tables_filter = None
 
         manager_queries = deepcopy(DEFAULT_QUERIES)
-        if is_affirmative(self.instance.get('collect_res_usage', False)):
+        if is_affirmative(self.instance.get('collect_res_usage_metrics', False)):
             manager_queries.extend(COLLECT_RES_USAGE)
-        if is_affirmative(self.instance.get('enable_table_tags', False)):
+        if is_affirmative(self.instance.get('collect_table_disk_metrics', False)):
             manager_queries.extend(COLLECT_ALL_SPACE)
 
         self._query_manager = QueryManager(
@@ -56,12 +56,15 @@ class TeradataCheck(AgentCheck, ConfigMixin):
 
     def check(self, _):
         # type: (Any) -> None
-        with self.connect() as conn:
-            if conn:
-                self._connection = conn
-                self._query_manager.execute()
-
-        self.submit_health_checks()
+        try:
+            with self.connect() as conn:
+                if conn:
+                    self._connection = conn
+                    self._query_manager.execute()
+            self.submit_health_checks()
+        except Exception as e:
+            self.service_check(SERVICE_CHECK_CONNECT, ServiceCheck.CRITICAL, tags=self._tags)
+            raise e
 
     def initialize_config(self):
         # type: (Any) -> None
@@ -117,7 +120,6 @@ class TeradataCheck(AgentCheck, ConfigMixin):
         # type: () -> Iterator[teradatasql.connection]
         conn = None
         if TERADATASQL_IMPORT_ERROR:
-            self.service_check(SERVICE_CHECK_CONNECT, ServiceCheck.CRITICAL, tags=self._tags)
             self.log.error(
                 'Teradata SQL Driver module is unavailable. Please double check your installation and refer to the '
                 'Datadog documentation for more information. %s',
@@ -130,7 +132,6 @@ class TeradataCheck(AgentCheck, ConfigMixin):
             self.log.info('Connected to Teradata.')
             yield conn
         except Exception as e:
-            self.service_check(SERVICE_CHECK_CONNECT, ServiceCheck.CRITICAL, tags=self._tags)
             self.log.error('Unable to connect to Teradata. %s.', e)
             raise e
         finally:
@@ -140,13 +141,10 @@ class TeradataCheck(AgentCheck, ConfigMixin):
     def submit_health_checks(self):
         # type: () -> None
         connect_status = ServiceCheck.OK
-        query_status = ServiceCheck.OK
+        query_status = ServiceCheck.CRITICAL if self._query_errors else ServiceCheck.OK
 
-        if self._query_errors:
-            query_status = ServiceCheck.CRITICAL
-
-        self.service_check(SERVICE_CHECK_CONNECT, connect_status, tags=self._tags)
         self.service_check(SERVICE_CHECK_QUERY, query_status, tags=self._tags)
+        self.service_check(SERVICE_CHECK_CONNECT, connect_status, tags=self._tags)
 
     def _queries_processor(self, row, query):
         # type: (Sequence, AnyStr) -> Sequence
@@ -160,13 +158,13 @@ class TeradataCheck(AgentCheck, ConfigMixin):
             return processed_row
 
         # Only AllSpaceV rows include table tags
-        if 'DBC.AllSpaceV' in query and is_affirmative(self.config.enable_table_tags):
+        if 'DBC.AllSpaceV' in query and is_affirmative(self.config.collect_table_disk_metrics) and self._tables_filter:
             tables_filtered_row = filter_tables(self, unprocessed_row)
             if tables_filtered_row:
                 processed_row = tags_normalizer(self, tables_filtered_row, query)
                 return processed_row
             # Discard row if empty (table is filtered out)
-            return []
+            return tables_filtered_row
         processed_row = tags_normalizer(self, unprocessed_row, query)
         self.log.trace('Row processor returned: %s. \nFrom query: "%s"', processed_row, query)
         return processed_row

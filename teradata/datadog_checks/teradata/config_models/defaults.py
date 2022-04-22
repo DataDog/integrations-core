@@ -30,7 +30,11 @@ def instance_auth_mechanism(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_collect_res_usage(field, value):
+def instance_collect_res_usage_metrics(field, value):
+    return False
+
+
+def instance_collect_table_disk_metrics(field, value):
     return False
 
 
@@ -43,10 +47,6 @@ def instance_disable_generic_tags(field, value):
 
 
 def instance_empty_default_hostname(field, value):
-    return False
-
-
-def instance_enable_table_tags(field, value):
     return False
 
 

@@ -72,7 +72,7 @@ files:
             - <TABLE_2>
           exclude:
             - <TABLE_3>
-    - name: enable_table_tags
+    - name: collect_table_disk_metrics
       description: |
         Whether or not to collect disk space metrics aggregated by tables. If this option is enabled,
         Disk Space metrics will be collected for each included table specified in the `tables` option, or
@@ -82,7 +82,7 @@ files:
         default: false
         example: true
         display_default: false
-    - name: collect_res_usage
+    - name: collect_res_usage_metrics
       description: Collect metrics from the SPMA Resource Table.
       value:
         type: boolean

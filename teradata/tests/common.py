@@ -30,8 +30,8 @@ CONFIG = {
     'username': 'datadog',
     'password': 'td_datadog',
     'database': 'AdventureWorksDW',
-    'collect_res_usage': True,
-    'enable_table_tags': True,
+    'collect_res_usage_metrics': True,
+    'collect_table_disk_metrics': True,
     'tags': ['td_env:dev'],
 }
 
@@ -40,8 +40,8 @@ E2E_CONFIG = {
     'username': TERADATA_DD_USER,
     'password': TERADATA_DD_PW,
     'database': 'AdventureWorksDW',
-    'collect_res_usage': True,
-    'enable_table_tags': True,
+    'collect_res_usage_metrics': True,
+    'collect_table_disk_metrics': True,
 }
 
 E2E_METADATA = {

@@ -53,3 +53,4 @@ def test_critical_service_check_connect(cursor_factory, dd_run_check, aggregator
         tags=['teradata_server:localhost', 'teradata_port:1025', 'td_env:dev'],
     )
     aggregator.assert_service_check(SERVICE_CHECK_QUERY, count=0)
+    aggregator.assert_service_check(SERVICE_CHECK_CONNECT, count=1)

@@ -11,7 +11,6 @@ Follow the instructions below to install and configure this check for an Agent r
 ### Installation
 
 The Teradata check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
 
 #### Prepare Teradata
 
@@ -56,8 +55,34 @@ SPMA=yes
 write
 ```
 
-Note: The SPMA Resource Table logs statistics every 10 minutes by default. This can be configured in the `rss` screen using `ctl`. Resource Usage logging may impact database performance. To reduce the frequency of Resource Usage logging, increase the logging interval of the `Node Logging Rate` setting. See the Teradata [documentation][15] for more information on Resource Usage Logging.
+Note: The SPMA Resource Table logs statistics every 10 minutes by default. The logging interval can be configured in the `rss` screen using `ctl`. Resource Usage logging may impact database performance. To reduce the frequency of Resource Usage logging, increase the logging interval of the `Node Logging Rate` setting. See the Teradata [documentation][15] for more information on Resource Usage Logging.
 
+4. The Teradata integration collects disk space metrics from the DBC.DiskSpaceV system view by default. To collect additional disk space metrics on your database tables, enable the `collect_table_disk_metrics` option. 
+
+```
+collect_table_disk_metrics: true
+```
+
+To filter the monitored tables, configure the `tables` option:
+
+Specify tables to monitor with a list:
+
+```
+tables:
+    - <TABLE_1>
+    - <TABLE_2>
+```
+
+Customize your monitored tables by specifying a map with the `include` and `exclude` options:
+
+```
+tables:
+    include:
+        - <TABLE_1>
+        - <TABLE_2>
+    exclude:
+        - <TABLE_3>
+```
 
 ### Configuration
 
