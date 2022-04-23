@@ -23,7 +23,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 
-from .util import DatabaseConfigurationError, warning_with_tags
+from .util import DatabaseConfigurationError, StatementTruncationState, warning_with_tags
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
@@ -210,15 +210,6 @@ PYMYSQL_MISSING_EXPLAIN_STATEMENT_PROC_ERRORS = frozenset(
         pymysql.constants.ER.PROCACCESS_DENIED_ERROR,
     }
 )
-
-
-class StatementTruncationState(Enum):
-    """
-    Denotes the various possible states of a statement's truncation
-    """
-
-    truncated = 'truncated'
-    not_truncated = 'not_truncated'
 
 
 class DBExplainErrorCode(Enum):

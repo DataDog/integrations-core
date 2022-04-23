@@ -20,3 +20,12 @@ def warning_with_tags(warning_message, *args, **kwargs):
     return "{msg}\n{tags}".format(
         msg=warning_message, tags=" ".join('{key}={value}'.format(key=k, value=v) for k, v in sorted(kwargs.items()))
     )
+
+
+class StatementTruncationState(Enum):
+    """
+    Denotes the various possible states of a statement's truncation
+    """
+
+    truncated = 'truncated'
+    not_truncated = 'not_truncated'

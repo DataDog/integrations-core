@@ -6,6 +6,7 @@ from enum import Enum
 from typing import Dict, List
 
 import pymysql
+from six import PY2
 
 from datadog_checks.base import is_affirmative, to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
@@ -13,10 +14,23 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_m
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
+from .util import StatementTruncationState
+
 try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
+
+
+# according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
+# character is 6 bytes
+MAX_CHARACTER_SIZE_IN_BYTES = 6
+
+
+# the max for processlist_info is hardcoded to 1024 until this bug gets addressed:
+# https://bugs.mysql.com/bug.php?id=76956
+MAX_PROCESSLIST_INFO_LENGTH = 1024
+
 
 CONNECTIONS_QUERY = """\
 SELECT
@@ -183,6 +197,8 @@ class MySQLActivity(DBMAsyncJob):
         normalized_rows = []
         estimated_size = 0
         for row in rows:
+            if row["sql_text"] is not None:
+                row["query_truncated"] = self._get_truncation_state(row["sql_text"]).value
             row = self._obfuscate_and_sanitize_row(row)
             estimated_size += self._get_estimated_row_size_bytes(row)
             if estimated_size > MySQLActivity.MAX_PAYLOAD_BYTES:
@@ -273,3 +289,12 @@ class MySQLActivity(DBMAsyncJob):
                 self._log.debug("Failed to close db connection | err=[%s]", e)
             finally:
                 self._db = None
+
+    @staticmethod
+    def _get_truncation_state(statement):
+        statement_bytes = bytes(statement) if PY2 else bytes(statement, "utf-8")
+        # Compare the length of the statement with the max length for processlist info.
+        # One caveat is that if a statement's length happens to be equal to the threshold below
+        # but isn't actually truncated, this would falsely report it as a truncated statement
+        truncated = len(statement_bytes) >= MAX_PROCESSLIST_INFO_LENGTH - (MAX_CHARACTER_SIZE_IN_BYTES + 1)
+        return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
