@@ -411,7 +411,7 @@ spec:
 
 ## Events collection
 
-To collect events from your AWS EKS Fargate API server, run a [Datadog Cluster Agent within your EKS cluster][#running-the-cluster-agent-or-the-cluster-checks-runner] and [Enable Event collection for your Cluster Agent][19].
+To collect events from your AWS EKS Fargate API server, run a [Datadog Cluster Agent within your EKS cluster](#running-the-cluster-agent-or-the-cluster-checks-runner) and [Enable Event collection for your Cluster Agent][19].
 
 Optionally, deploy cluster check runners in addition to setting up the Datadog Cluster Agent to enable cluster checks.
 
