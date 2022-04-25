@@ -5,7 +5,6 @@
 ## Overview
 
 The Apache check tracks requests per second, bytes served, number of worker threads, service uptime, and more.
-*Test change
 
 ## Setup
 
