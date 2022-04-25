@@ -1,7 +1,7 @@
 {
     "author_name": "Datadog",
     "title": "Containers - Overview",
-    "description": "The Container dashboard enables you to get an overview of the statuses of the containers running in your cluster regardless of the runtime used to start them. It includes a view of how many containers are running per image over time, and a list of the top images that the containers are running. \n\nFurther reading on Container monitoring:\n\n- [Datadog's Container integration docs](https://docs.datadoghq.com/integrations/container/) \n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "description": "The Container dashboard enables you to get an overview of the status of the containers running in your cluster regardless of the runtime used to start them. It includes a view of how many containers are running per image over time, and a list of the top images that the containers are running. \n\nFurther reading on Container monitoring:\n\n- [Datadog's Container integration docs](https://docs.datadoghq.com/integrations/container/) \n\nClone this template dashboard to make changes and add your own graph widgets.",
     "widgets": [
         {
             "id": 15,
