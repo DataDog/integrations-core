@@ -4,16 +4,16 @@
 
 ## Overview
 
-Podman container runtime is supported thanks to the [Agent Check: Container][2]
-This check reports a set of metrics about any running containers, regardless of the runtime used to start them.
+Podman container runtime is supported by the [container Agent check][2].
+This check reports a set of metrics on any running containers, regardless of the runtime used to start them.
 
-**NOTE**: The `container` check report standardized metrics for all containers found on the system, regardless of the container runtime.
+**NOTE**: The `container` check report standardizes metrics for all containers found on the system, regardless of the container runtime.
 
 ## Setup
 
 ### Installation
 
-Monitoring containers managed by [Podman][1], rely on the the [Agent Check: Container][2], its installation is describe [here][3].
+To monitor containers managed by [Podman][1], see the [installation instructions][3] for the [container Agent check][2].
 
 ## Data Collected
 
