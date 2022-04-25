@@ -64,9 +64,7 @@ def dbm_instance(instance_complex):
         ),
     ],
 )
-def test_collect_activity(
-    aggregator, dbm_instance, dd_run_check, query, query_signature, expected_query_truncated
-):
+def test_collect_activity(aggregator, dbm_instance, dd_run_check, query, query_signature, expected_query_truncated):
     check = MySql(CHECK_NAME, {}, [dbm_instance])
 
     blocking_query = 'SELECT id FROM testdb.users FOR UPDATE'
