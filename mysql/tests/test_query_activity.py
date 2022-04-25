@@ -5,17 +5,19 @@ import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
 from datetime import datetime
+from os import environ
 
 import mock
 import pymysql
 import pytest
+from pkg_resources import parse_version
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.activity import MySQLActivity
 from datadog_checks.mysql.util import StatementTruncationState
 
-from .common import CHECK_NAME, HOST, PORT
+from .common import CHECK_NAME, HOST, MYSQL_VERSION_PARSED, PORT
 
 ACTIVITY_JSON_PLANS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "activity")
 
@@ -44,10 +46,9 @@ def dbm_instance(instance_complex):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
-    "query,expected_sql_text,query_signature,expected_query_truncated",
+    "query,query_signature,expected_query_truncated",
     [
         (
-            'SELECT id, name FROM testdb.users FOR UPDATE',
             'SELECT id, name FROM testdb.users FOR UPDATE',
             'aca1be410fbadb61',
             StatementTruncationState.not_truncated.value,
@@ -56,23 +57,13 @@ def dbm_instance(instance_complex):
             'SELECT id, {} FROM testdb.users FOR UPDATE'.format(
                 ", ".join("name as name{}".format(i) for i in range(254))
             ),
-            'SELECT id, name as name0, name as name1, name as name2, name as name3, name as name4, name as name5, '
-            'name as name6, name as name7, name as name8, name as name9, name as name10, name as name11, name as '
-            'name12, name as name13, name as name14, name as name15, name as name16, name as name17, name as name18, '
-            'name as name19, name as name20, name as name21, name as name22, name as name23, name as name24, name as '
-            'name25, name as name26, name as name27, name as name28, name as name29, name as name30, name as name31, '
-            'name as name32, name as name33, name as name34, name as name35, name as name36, name as name37, name as '
-            'name38, name as name39, name as name40, name as name41, name as name42, name as name43, name as name44, '
-            'name as name45, name as name46, name as name47, name as name48, name as name49, name as name50, name as '
-            'name51, name as name52, name as name53, name as name54, name as name55, name as name56, name as name57, '
-            'name as name58, name as name59, name as name60, name as name61, name as name62, name as name63,',
-            'aa0c97b99c3aba6f',
+            '63bd1fd025c7f7fb' if MYSQL_VERSION_PARSED > parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb' else '4a12d7afe06cf40',
             StatementTruncationState.truncated.value,
         ),
     ],
 )
 def test_collect_activity(
-    aggregator, dbm_instance, dd_run_check, query, query_signature, expected_sql_text, expected_query_truncated
+    aggregator, dbm_instance, dd_run_check, query, query_signature, expected_query_truncated
 ):
     check = MySql(CHECK_NAME, {}, [dbm_instance])
 
@@ -124,6 +115,16 @@ def test_collect_activity(
     assert blocked_row is not None, "should have activity for fred's query"
     assert blocked_row['processlist_user'] == 'fred'
     assert blocked_row['processlist_command'] == 'Query'
+    # The expected sql text for long queries depends on the mysql version/flavor which have different
+    # sql text length limits
+    expected_sql_text = (
+        query[:1021] + '...'
+        if len(query) > 1024
+           and (MYSQL_VERSION_PARSED == parse_version('5.6') or environ.get('MYSQL_FLAVOR') == 'mariadb')
+        else query[:4093] + '...'
+        if len(query) > 4096
+        else query
+    )
     assert blocked_row['sql_text'] == expected_sql_text
     assert blocked_row['processlist_state'], "missing state"
     assert blocked_row['wait_event'] == 'wait/io/table/sql/handler'

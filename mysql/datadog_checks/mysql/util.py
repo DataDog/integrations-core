@@ -29,3 +29,11 @@ class StatementTruncationState(Enum):
 
     truncated = 'truncated'
     not_truncated = 'not_truncated'
+
+
+def get_truncation_state(statement):
+    # Mysql adds 3 dots at the end of truncated statements so we use this to check if
+    # a statement is truncated
+    truncated = statement[-3:] == '...'
+    return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
+
