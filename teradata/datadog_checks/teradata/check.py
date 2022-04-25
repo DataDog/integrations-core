@@ -21,7 +21,7 @@ from datadog_checks.base.utils.db import QueryManager
 
 from .config_models import ConfigMixin
 from .queries import COLLECT_ALL_SPACE, COLLECT_RES_USAGE, DEFAULT_QUERIES
-from .utils import create_tables_filter, filter_tables, tags_normalizer, timestamp_validator
+from .utils import create_tables_filter, filter_tables, submit_version, tags_normalizer, timestamp_validator
 
 SERVICE_CHECK_CONNECT = 'can_connect'
 SERVICE_CHECK_QUERY = 'can_query'
@@ -158,6 +158,12 @@ class TeradataCheck(AgentCheck, ConfigMixin):
         Validate timestamps, filter tables, and normalize empty tags.
         """
         unprocessed_row = row
+
+        # Return database version immediately
+        if query_name == 'DBC.DBCInfoV':
+            submit_version(self, row)
+            return unprocessed_row
+
         # Only Resource Usage rows include timestamps and also do not include tags.
         if query_name == 'DBC.ResSpmaView':
             processed_row = timestamp_validator(self, unprocessed_row)

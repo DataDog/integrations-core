@@ -152,7 +152,13 @@ RESOURCE_USAGE = {
     ],
 }
 
-DEFAULT_QUERIES = [DISK_SPACE, AMP_USAGE]
+TERADATA_VERSION = {
+    'name': 'teradata_version',
+    'query': "SELECT InfoData FROM DBC.DBCInfoV WHERE InfoKey='VERSION';",
+    'columns': [{'name': 'teradata_version', 'type': 'source'}],
+}
+
+DEFAULT_QUERIES = [DISK_SPACE, AMP_USAGE, TERADATA_VERSION]
 
 COLLECT_RES_USAGE = [RESOURCE_USAGE]
 

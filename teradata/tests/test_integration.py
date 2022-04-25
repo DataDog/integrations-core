@@ -54,3 +54,24 @@ def test_critical_service_check_connect(cursor_factory, dd_run_check, aggregator
     )
     aggregator.assert_service_check(SERVICE_CHECK_QUERY, count=0)
     aggregator.assert_service_check(SERVICE_CHECK_CONNECT, count=1)
+
+
+def test_version_metadata(cursor_factory, aggregator, instance, datadog_agent, dd_run_check):
+    with cursor_factory():
+        check = TeradataCheck(CHECK_NAME, {}, [instance])
+        check.check_id = 'test:123'
+        raw_version = '17.10.03.01'
+        major, minor, maintenance, patch = raw_version.split('.')
+
+        version_metadata = {
+            'version.scheme': 'semver',
+            'version.maintenance': maintenance,
+            'version.major': major,
+            'version.minor': minor,
+            'version.patch': patch,
+            'version.raw': raw_version,
+        }
+
+        dd_run_check(check)
+
+        datadog_agent.assert_metadata('test:123', version_metadata)
