@@ -3,10 +3,10 @@ name: validations
 on:
   push:
     branches:
-    - nathan.pezzotti/github-validations-workflow-fix
+    - master
   pull_request:
     branches:
-    - nathan.pezzotti/github-validations-workflow-fix
+    - master
 
 env:
   CHANGED: ${{ github.event_name == 'pull_request' && 'changed' || '' }}
