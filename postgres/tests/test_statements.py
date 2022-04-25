@@ -681,6 +681,53 @@ def test_statement_reported_hostname(
                 'state': 'active',
                 'query_signature': '9382c42e92099c04',
                 'statement': "BEGIN TRANSACTION; SELECT city FROM persons WHERE city = 'hello';",
+                'query_truncated': StatementTruncationState.not_truncated.value,
+            },
+            ["now", "xact_start", "query_start", "pid", "client_port", "client_addr", "backend_type", "blocking_pids"],
+            {
+                'usename': 'bob',
+                'state': 'active',
+                'application_name': '',
+                'datname': 'datadog_test',
+                'connections': 1,
+            },
+        ),
+        (
+            "bob",
+            "bob",
+            "datadog_test",
+            "BEGIN TRANSACTION; SELECT city as city0, city as city1, city as city2, city as city3, "
+            "city as city4, city as city5, city as city6, city as city7, city as city8, city as city9, "
+            "city as city10, city as city11, city as city12, city as city13, city as city14, city as city15, "
+            "city as city16, city as city17, city as city18, city as city19, city as city20, city as city21, "
+            "city as city22, city as city23, city as city24, city as city25, city as city26, city as city27, "
+            "city as city28, city as city29, city as city30, city as city31, city as city32, city as city33, "
+            "city as city34, city as city35, city as city36, city as city37, city as city38, city as city39, "
+            "city as city40, city as city41, city as city42, city as city43, city as city44, city as city45, "
+            "city as city46, city as city47, city as city48, city as city49, city as city50, city as city51, "
+            "city as city52, city as city53, city as city54, city as city55, city as city56, city as city57, "
+            "city as city58, city as city59, city as city60, city as city61 "
+            "FROM persons WHERE city = %s;",
+            "LOCK TABLE persons IN ACCESS EXCLUSIVE MODE",
+            "hello",
+            {
+                'datname': 'datadog_test',
+                'usename': 'bob',
+                'state': 'active',
+                'query_signature': 'e1429b86c013a78e',
+                'statement': "BEGIN TRANSACTION; SELECT city as city0, city as city1, city as city2, city as city3, "
+                "city as city4, city as city5, city as city6, city as city7, city as city8, city as city9, "
+                "city as city10, city as city11, city as city12, city as city13, city as city14, city as city15, "
+                "city as city16, city as city17, city as city18, city as city19, city as city20, city as city21, "
+                "city as city22, city as city23, city as city24, city as city25, city as city26, city as city27, "
+                "city as city28, city as city29, city as city30, city as city31, city as city32, city as city33, "
+                "city as city34, city as city35, city as city36, city as city37, city as city38, city as city39, "
+                "city as city40, city as city41, city as city42, city as city43, city as city44, city as city45, "
+                "city as city46, city as city47, city as city48, city as city49, city as city50, city as city51, "
+                "city as city52, city as city53, city as city54, city as city55, city as city56, city as city57, "
+                "city as city58, city as city59, city as city60, city as city61 "
+                "FROM persons WHE",
+                'query_truncated': StatementTruncationState.truncated.value,
             },
             ["now", "xact_start", "query_start", "pid", "client_port", "client_addr", "backend_type", "blocking_pids"],
             {
