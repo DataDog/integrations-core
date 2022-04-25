@@ -17,8 +17,7 @@
   "public_title": "Teradata",
   "categories": [
     "log collection",
-    "database",
-    "datastore"
+    "data store"
   ],
   "type": "check",
   "is_public": false,
