@@ -20,7 +20,6 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
-
 CONNECTIONS_QUERY = """\
 SELECT
     processlist_user,
