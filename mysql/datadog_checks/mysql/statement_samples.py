@@ -736,7 +736,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         returns: An execution plan, otherwise it returns a list of error ExplainStates
         rtype: Optional[Dict], List[ExplainState]
         """
-        if self._get_truncation_state(statement) == StatementTruncationState.truncated:
+        if get_truncation_state(statement) == StatementTruncationState.truncated:
             error_state = ExplainState(
                 strategy=None,
                 error_code=DBExplainErrorCode.query_truncated,
