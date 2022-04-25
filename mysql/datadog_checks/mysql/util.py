@@ -36,4 +36,3 @@ def get_truncation_state(statement):
     # a statement is truncated
     truncated = statement[-3:] == '...'
     return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
-

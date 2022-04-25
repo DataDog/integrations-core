@@ -57,7 +57,9 @@ def dbm_instance(instance_complex):
             'SELECT id, {} FROM testdb.users FOR UPDATE'.format(
                 ", ".join("name as name{}".format(i) for i in range(254))
             ),
-            '63bd1fd025c7f7fb' if MYSQL_VERSION_PARSED > parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb' else '4a12d7afe06cf40',
+            '63bd1fd025c7f7fb'
+            if MYSQL_VERSION_PARSED > parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb'
+            else '4a12d7afe06cf40',
             StatementTruncationState.truncated.value,
         ),
     ],
@@ -120,7 +122,7 @@ def test_collect_activity(
     expected_sql_text = (
         query[:1021] + '...'
         if len(query) > 1024
-           and (MYSQL_VERSION_PARSED == parse_version('5.6') or environ.get('MYSQL_FLAVOR') == 'mariadb')
+        and (MYSQL_VERSION_PARSED == parse_version('5.6') or environ.get('MYSQL_FLAVOR') == 'mariadb')
         else query[:4093] + '...'
         if len(query) > 4096
         else query
