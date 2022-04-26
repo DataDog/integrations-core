@@ -500,3 +500,17 @@ def test_standalone(instance_integration, aggregator, check, dd_run_check):
         check_submission_type=True,
     )
     assert len(aggregator._events) == 0
+
+
+def test_user_pass_options(check, instance_user, dd_run_check):
+    instance_user['options'] = {
+        'authSource': '$external',
+        'authMechanism': 'PLAIN',
+        'username': instance_user['username'],
+        'password': instance_user['password'],
+    }
+    check = check(instance_user)
+
+    with mock_pymongo("standalone"):
+        # ensure we don't get a pymongo exception saying `Unknown option username`
+        dd_run_check(check, extract_message=True)
