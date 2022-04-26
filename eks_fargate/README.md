@@ -324,7 +324,7 @@ Datadog Agent v6.19+ supports live processes in the EKS Fargate integration. Liv
 
 ### Kubernetes resources view
 
-To collect Kubernetes resource views, you need a [Cluster Agent setup][#running-the-cluster-agent-or-the-cluster-checks-runner].
+To collect Kubernetes resource views, you need a [Cluster Agent setup](#running-the-cluster-agent-or-the-cluster-checks-runner).
 
 ## Log collection
 
