@@ -15,7 +15,7 @@
     "windows"
   ],
   "process_signatures": [
-    "traffic_server", "traffic_manager", "trafficserver"
+    "traffic_cop", "traffic_manager", "traffic_server", "trafficserver start"
   ],
   "public_title": "Traffic Server",
   "categories": [
@@ -31,7 +31,10 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "dashboards": {},
-    "monitors": {},
+    "monitors": {
+      "[Traffic Server] 4xx Errors higher than usual": "assets/monitors/4xx.json",
+      "[Traffic Server] 5xx Errors higher than usual": "assets/monitors/5xx.json"
+    },
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
     "logs": {

@@ -22,6 +22,23 @@ stats_over_http.so
 
 1. Edit the `traffic_server.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Traffic Server performance data. See the [sample traffic_server.d/conf.yaml][4] for all available configuration options.
 
+**Note**: When using the default [configuration file][4], not all metrics are collected by default.
+
+Comment out the `metric_patterns` option to collect all available metrics, or edit it to collect a different subset of metrics:
+
+```
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    ## Comment out this option to collect all available metrics.
+    #
+    metric_patterns:
+      include:
+         - <METRIC_1>
+         - <METRIC_2>
+```
+
 2. [Restart the Agent][5].
 
 ### Validation

@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 3.7.0 / 2022-04-11
+
+* [Added] Update downloader to use v4 root layout. See [#11779](https://github.com/DataDog/integrations-core/pull/11779).
+
 ## 3.6.0 / 2022-02-24
 
 * [Added] Add --ignore-python-version flag. See [#11568](https://github.com/DataDog/integrations-core/pull/11568).

@@ -70,7 +70,6 @@ class MySQLStatementMetrics(DBMAsyncJob):
             enabled=is_affirmative(config.statement_metrics_config.get('enabled', True)),
             expected_db_exceptions=(pymysql.err.DatabaseError,),
             min_collection_interval=config.min_collection_interval,
-            config_host=config.host,
             dbms="mysql",
             job_name="statement-metrics",
             shutdown_callback=self._close_db_conn,

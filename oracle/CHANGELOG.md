@@ -1,5 +1,9 @@
 # CHANGELOG - oracle
 
+## 3.9.3 / 2022-04-14
+
+* [Fixed] Handle NoneType protocol validation. See [#11837](https://github.com/DataDog/integrations-core/pull/11837).
+
 ## 3.9.2 / 2022-04-11
 
 * [Fixed] Ensure connect raises exception on failure. See [#11787](https://github.com/DataDog/integrations-core/pull/11787).

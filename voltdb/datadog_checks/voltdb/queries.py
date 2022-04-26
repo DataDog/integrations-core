@@ -27,14 +27,14 @@ MemoryMetrics = {
         {'name': 'memory.rss', 'type': 'gauge'},
         {'name': 'memory.java.used', 'type': 'gauge'},
         {'name': 'memory.java.unused', 'type': 'gauge'},
-        {'name': 'memory.java.max_heap', 'type': 'gauge'},
         {'name': 'memory.tuple_data', 'type': 'gauge'},
         {'name': 'memory.tuple_allocated', 'type': 'gauge'},
-        {'name': 'memory.tuple_count', 'type': 'gauge'},
         {'name': 'memory.index', 'type': 'gauge'},
         {'name': 'memory.string', 'type': 'gauge'},
+        {'name': 'memory.tuple_count', 'type': 'gauge'},
         {'name': 'memory.pooled', 'type': 'gauge'},
         {'name': 'memory.physical', 'type': 'gauge'},
+        {'name': 'memory.java.max_heap', 'type': 'gauge'},
     ],
 }
 
@@ -142,7 +142,7 @@ LatencyMetrics = {
 # One row per server.
 GCMetrics = {
     'name': 'gc',
-    'query': '@Statistics:[GC]',
+    'query': '@Statistics:[GC, 1]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -329,7 +329,7 @@ IdleTimeMetrics = {
 # One row per procedure, summarized across the cluster.
 ProcedureOutputMetrics = {
     'name': 'procedureoutput',
-    'query': '@Statistics:[PROCEDUREOUTPUT, 1]',
+    'query': '@Statistics:[PROCEDUREOUTPUT]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'procedure', 'type': 'tag'},
@@ -347,7 +347,7 @@ ProcedureOutputMetrics = {
 # One row per procedure, summarized across the cluster.
 ProcedureProfileMetrics = {
     'name': 'procedureprofile',
-    'query': '@Statistics:[PROCEDUREPROFILE, 1]',
+    'query': '@Statistics:[PROCEDUREPROFILE]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'procedure', 'type': 'tag'},

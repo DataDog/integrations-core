@@ -31,7 +31,6 @@ METRICS_CONFIG = {
                 'Post Requests/sec': {'metric_name': 'httpd_request_method.post'},
                 'Head Requests/sec': {'metric_name': 'httpd_request_method.head'},
                 'Put Requests/sec': {'metric_name': 'httpd_request_method.put'},
-                'Patch Requests/sec': {'metric_name': 'httpd_request_method.patch'},
                 'Delete Requests/sec': {'metric_name': 'httpd_request_method.delete'},
                 'Options Requests/sec': {'metric_name': 'httpd_request_method.options'},
                 'Trace Requests/sec': {'metric_name': 'httpd_request_method.trace'},

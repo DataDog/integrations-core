@@ -340,6 +340,37 @@ def test_statement_metadata(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "reported_hostname,expected_hostname",
+    [
+        (None, 'stubbed.hostname'),
+        ('override.hostname', 'override.hostname'),
+    ],
+)
+def test_statement_reported_hostname(
+    aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, reported_hostname, expected_hostname
+):
+    dbm_instance['reported_hostname'] = reported_hostname
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    samples = aggregator.get_event_platform_events("dbm-samples")
+    assert samples, "should have collected at least one sample"
+    assert samples[0]['host'] == expected_hostname
+
+    fqt_samples = [s for s in samples if s.get('dbm_type') == 'fqt']
+    assert fqt_samples, "should have collected at least one fqt sample"
+    assert fqt_samples[0]['host'] == expected_hostname
+
+    metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert metrics, "should have collected metrics"
+    assert metrics[0]['host'] == expected_hostname
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
     now = time.time()
     test_query = "select * from sys.databases"

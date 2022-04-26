@@ -113,7 +113,6 @@ class SqlserverActivity(DBMAsyncJob):
             enabled=is_affirmative(check.activity_config.get('enabled', True)),
             expected_db_exceptions=(),
             min_collection_interval=check.min_collection_interval,
-            config_host=check.resolved_hostname,
             dbms="sqlserver",
             rate_limit=1 / float(collection_interval),
             job_name="query-activity",
@@ -237,7 +236,7 @@ class SqlserverActivity(DBMAsyncJob):
 
     def _create_activity_event(self, active_sessions, active_connections):
         event = {
-            "host": self._db_hostname,
+            "host": self.check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": "activity",

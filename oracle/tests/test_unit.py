@@ -232,3 +232,21 @@ def test_bad_connection_emits_critical_service_check(aggregator, dd_run_check, b
     oracle_check = Oracle(CHECK_NAME, {}, [bad_instance])
     dd_run_check(oracle_check)
     aggregator.assert_service_check("oracle.can_connect", Oracle.CRITICAL)
+
+
+def test_handle_query_error_when_not_connected_does_no_fail(instance):
+    oracle_check = Oracle(CHECK_NAME, {}, [instance])
+
+    error = oracle_check.handle_query_error('foo')
+    assert error == 'foo'
+
+
+def test_handle_query_error_when_connected_disconnects_and_resets_connection(instance):
+    oracle_check = Oracle(CHECK_NAME, {}, [instance])
+    cached_connection = mock.Mock()
+    oracle_check._cached_connection = cached_connection
+
+    error = oracle_check.handle_query_error('foo')
+    assert error == 'foo'
+    assert oracle_check._cached_connection is None
+    cached_connection.assert_has_calls([mock.call.close()])

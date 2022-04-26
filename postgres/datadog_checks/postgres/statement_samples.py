@@ -159,7 +159,6 @@ class PostgresStatementSamples(DBMAsyncJob):
             enabled=is_affirmative(config.statement_samples_config.get('enabled', True)),
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
-            config_host=config.host,
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
             job_name="query-samples",
             shutdown_callback=shutdown_callback,
@@ -420,12 +419,15 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
 
     @staticmethod
-    def _to_active_session(row):
+    def _to_active_session(row, track_activity_query_size):
         if row['state'] is not None and row['state'] != 'idle':
             # Create an active_row, for each session by
             # 1. Removing all null key/value pairs and the original query
             # 2. if row['statement'] is none, replace with ERROR: failed to obfuscate so we can still collect activity
             active_row = {key: val for key, val in row.items() if val is not None and key != 'query'}
+            active_row['query_truncated'] = PostgresStatementSamples._get_truncation_state(
+                track_activity_query_size, row['query']
+            ).value
             if row['statement'] is None:
                 active_row['statement'] = "ERROR: failed to obfuscate"
             return active_row
@@ -607,7 +609,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         statement_plan_sig = (row['query_signature'], plan_signature)
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
             event = {
-                "host": self._db_hostname,
+                "host": self._check.resolved_hostname,
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "postgres",
                 "ddtags": ",".join(self._dbtags(row['datname'])),
@@ -681,13 +683,13 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._time_since_last_activity_event = time.time()
         active_sessions = []
         for row in rows:
-            active_row = self._to_active_session(row)
+            active_row = self._to_active_session(row, self._get_track_activity_query_size())
             if active_row:
                 active_sessions.append(active_row)
         if len(active_sessions) > self._activity_max_rows:
             active_sessions = self._truncate_activity_rows(active_sessions, self._activity_max_rows)
         event = {
-            "host": self._db_hostname,
+            "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "postgres",
             "dbm_type": "activity",

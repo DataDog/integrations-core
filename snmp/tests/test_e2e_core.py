@@ -97,6 +97,51 @@ def assert_apc_ups_metrics(dd_agent_check, config):
     aggregator.assert_all_metrics_covered()
 
 
+def test_e2e_memory_cpu_f5_big_ip(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    config['init_config']['loader'] = 'core'
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'f5-big-ip',
+        }
+    )
+    # run a rate check, will execute two check runs to evaluate rate metrics
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
+
+    tags = [
+        'device_namespace:default',
+        'device_vendor:f5',
+        'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
+        'snmp_profile:f5-big-ip',
+    ]
+    tags += ['snmp_device:{}'.format(instance['ip_address'])]
+
+    common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
+
+    memory_metrics = ['memory.total', 'memory.used']
+
+    for metric in memory_metrics:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric),
+            metric_type=aggregator.GAUGE,
+            tags=tags,
+            count=2,
+        )
+
+    cpu_metrics = ['cpu.usage']
+    cpu_indexes = ['0', '1']
+    for metric in cpu_metrics:
+        for cpu_index in cpu_indexes:
+            cpu_tags = tags + ['cpu:{}'.format(cpu_index)]
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric),
+                metric_type=aggregator.GAUGE,
+                tags=cpu_tags,
+                count=2,
+            )
+
+
 def test_e2e_core_discovery(dd_agent_check):
     config = common.generate_container_profile_config_with_ad('apc_ups')
     config['init_config']['loader'] = 'core'
@@ -203,3 +248,56 @@ def test_e2e_regex_match(dd_agent_check):
             'device_namespace:default',
         ],
     )
+
+
+def test_e2e_meraki_cloud_controller(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    config['init_config']['loader'] = 'core'
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'meraki-cloud-controller',
+        }
+    )
+    # run a rate check, will execute two check runs to evaluate rate metrics
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
+
+    ip_address = get_container_ip(SNMP_CONTAINER_NAME)
+    common_tags = [
+        'snmp_profile:meraki-cloud-controller',
+        'snmp_host:dashboard.meraki.com',
+        'device_vendor:meraki',
+        'device_namespace:default',
+        'snmp_device:' + ip_address,
+    ]
+
+    common.assert_common_metrics(aggregator, tags=common_tags, is_e2e=True, loader='core')
+
+    dev_metrics = ['devStatus', 'devClientCount']
+    dev_tags = ['product:MR16-HW', 'network:L_NETWORK', 'mac_address:02:02:00:66:f5:7f'] + common_tags
+    for metric in dev_metrics:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=dev_tags, count=2, device='Gymnasium'
+        )
+
+    if_tags = ['interface:wifi0', 'index:4', 'mac_address:02:02:00:66:f5:00'] + common_tags
+    if_metrics = ['devInterfaceSentPkts', 'devInterfaceRecvPkts', 'devInterfaceSentBytes', 'devInterfaceRecvBytes']
+    for metric in if_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=2)
+
+    # IF-MIB
+    if_tags = ['interface:eth0'] + common_tags
+    for metric in metrics.IF_COUNTS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=if_tags, count=1)
+
+    for metric in metrics.IF_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=2)
+
+    for metric in metrics.IF_RATES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
+
+    for metric in metrics.IF_BANDWIDTH_USAGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=2, tags=common_tags)
+    aggregator.assert_all_metrics_covered()

@@ -98,7 +98,7 @@ class Subscription(ABC):
         if self._sub is None:
             sub = pymqi.Subscription(self.check.queue_manager)
             # https://dsuch.github.io/pymqi/examples.html#how-to-subscribe-to-topics-and-avoid-mqrc-sub-already-exists-at-the-same-time
-            self.check.log.info('Subscribing to topic string: %s', self.TOPIC_STRING)
+            self.check.log.debug('Subscribing to `%s` topic string: %s.', self.TYPE, self.TOPIC_STRING)
             sub.sub(
                 sub_name=self.name,
                 topic_string=self.TOPIC_STRING,
@@ -179,7 +179,11 @@ class FlowMonitoringSubscription(Subscription):
             for name, data in message['WMQIStatisticsAccounting'].items():
                 statistics = get_statistics(name)
                 if statistics is None:
-                    self.check.log.debug('Not collecting flow statistic group: %s', name)
+                    self.check.log.debug(
+                        'Not collecting flow statistic group: %s. Refer to the Datadog IBM ACE documentation for '
+                        'list of collected metrics.',
+                        name,
+                    )
                     continue
 
                 statistics.submit(self.check, data, self.tags)
