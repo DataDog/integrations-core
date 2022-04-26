@@ -8,13 +8,27 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.time import get_precise_time
 
+# For Linux and python 3 on Windows
+if "inet_pton" in socket.__dict__:
 
-def is_ipv6(addr):
-    try:
-        socket.inet_pton(socket.AF_INET6, addr)
-        return True
-    except socket.error:
-        return False
+    def is_ipv6(addr):
+        try:
+            socket.inet_pton(socket.AF_INET6, addr)
+            return True
+        except socket.error:
+            return False
+
+
+# Only for python 2 on Windows
+else:
+
+    import re
+
+    def is_ipv6(addr):
+        if re.match(r'^[0-9a-f:]+$', addr):
+            return True
+        else:
+            return False
 
 
 class TCPCheck(AgentCheck):
@@ -88,7 +102,7 @@ class TCPCheck(AgentCheck):
 
     def resolve_ips(self):
         self._addrs = [
-            sockaddr[0] for (_, _, _, _, sockaddr) in socket.getaddrinfo(self.host, self.port, proto=socket.IPPROTO_TCP)
+            sockaddr[0] for (_, _, _, _, sockaddr) in socket.getaddrinfo(self.host, self.port, 0, 0, socket.IPPROTO_TCP)
         ]
         if not self.multiple_ips:
             self._addrs = self._addrs[:1]
