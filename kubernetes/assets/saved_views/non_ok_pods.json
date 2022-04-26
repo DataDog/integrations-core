@@ -1,0 +1,32 @@
+{
+  "name": "Pods with non OK statuses by Cluster",
+  "page": "container_orchestration_pods",
+  "type": "container",
+  "options": {
+    "container_orchestration_pods": {
+      "palette": "hostmap_blues",
+      "tab": "overview",
+      "metric": "pod.uptime",
+      "showNogroupObjects": false,
+      "groups": [
+        {
+          "kind": "tag",
+          "value": "kube_cluster_name"
+        }
+      ],
+      "query": "-pod_status:(running OR completed)",
+      "view": "pod",
+      "columns": [
+        "name",
+        "status",
+        "namespace",
+        "age",
+        "ready",
+        "restarts",
+        "cpu_usage_percent",
+        "memory_usage_percent"
+      ],
+      "paletteFlip": false
+    }
+  }
+}

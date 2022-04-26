@@ -45,6 +45,9 @@
       "Kubernetes Clusters Overview": "assets/dashboards/kubernetes_clusters.json"
     },
     "service_checks": "assets/service_checks.json",
+    "saved_views": {
+      "Pods with non OK statuses by Cluster": "assets/saved_views/non_ok_pods.json"
+    },
     "logs": {},
     "metrics_metadata": "metadata.csv"
   }
