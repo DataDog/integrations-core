@@ -222,3 +222,69 @@ ReplicationUsage = {
         {'name': 'replication.bytes_transferred.sum', 'type': 'gauge'},
     ],
 }
+
+
+# https://docs.snowflake.com/en/sql-reference/organization-usage/contract_items.html
+ContractItems = {
+    'name': 'contract.metrics',
+     'query': (
+        'select contract_item, contract_number, '
+        'sum(amount), avg(amount) from replication_usage_history '
+        'where start_date >= DATEADD(hour, -24, current_timestamp()) group by 1, 2;'
+    ),
+    'columns': [
+        {'name': 'contract_item', 'type': 'tag'},
+        {'name': 'contract_number', 'type': 'tag'},
+        {'name': 'contract.amount.avg', 'type': 'gauge'},
+        {'name': 'contract.amount.sum', 'type': 'gauge'},
+    ],
+}
+# https://docs.snowflake.com/en/sql-reference/organization-usage/data_transfer_history.html
+# https://docs.snowflake.com/en/sql-reference/organization-usage/rate_sheet_daily.html
+# https://docs.snowflake.com/en/sql-reference/organization-usage/remaining_balance_daily.html
+# https://docs.snowflake.com/en/sql-reference/organization-usage/storage_daily_history.html
+
+# https://docs.snowflake.com/en/sql-reference/organization-usage/metering_daily_history.html
+OrganizationCreditUsage = {
+    'name': 'organization.billing.metrics',
+    'query': (
+        'select ORGANIZATION_NAME, ACCOUNT_NAME, SERVICE_TYPE, '
+        'sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), '
+        'sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), '
+        'sum(abs(CREDITS_ADJUSTMENT_CLOUD_SERVICES)), avg(abs(CREDITS_ADJUSTMENT_CLOUD_SERVICES))'
+        'sum(CREDITS_USED), avg(CREDITS_USED), sum(CREDITS_BILLED), avg(CREDITS_BILLED) from METERING_DAILY_HISTORY '
+        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1, 2, 3;'
+    ),
+    'columns': [
+        {'name': 'service_type', 'type': 'tag'},
+        {'name': 'account_name', 'type': 'tag'},
+        {'name': 'service', 'type': 'tag'},
+        {'name': 'organization.billing.virtual_warehouse.sum', 'type': 'gauge'},
+        {'name': 'organization.billing.virtual_warehouse.avg', 'type': 'gauge'},
+        {'name': 'organization.billing.cloud_service.sum', 'type': 'gauge'},
+        {'name': 'organization.billing.cloud_service.avg', 'type': 'gauge'},
+        {'name': 'organization.billing.cloud_service_adjustment.sum', 'type': 'gauge'},
+        {'name': 'organization.billing.cloud_service_adjustment.avg', 'type': 'gauge'},
+        {'name': 'organization.billing.total_credit.sum', 'type': 'gauge'},
+        {'name': 'organization.billing.total_credit.avg', 'type': 'gauge'},
+        {'name': 'organization.billing.total_credits_billed.sum', 'type': 'gauge'},
+        {'name': 'organization.billing.total_credits_billed.avg', 'type': 'gauge'},
+    ],
+}
+
+# https://docs.snowflake.com/en/sql-reference/organization-usage/usage_in_currency_daily.html
+CurrencyUsage = {
+    'name': 'organization.billing.currency.metrics',
+     'query': (
+        'select ORGANIZATION_NAME, CONTRACT_NUMBER, ORGANIZATION_NAME, SERVICE_LEVEL '
+        'sum(amount), avg(amount) from replication_usage_history '
+        'where start_date >= DATEADD(hour, -24, current_timestamp()) group by 1;'
+    ),
+    'columns': [
+        {'name': 'contract_item', 'type': 'tag'},
+        {'name': 'contract_number', 'type': 'tag'},
+        {'name': 'currency', 'type': 'tag'},
+        {'name': 'contract.amount.avg', 'type': 'gauge'},
+        {'name': 'contract.amount.sum', 'type': 'gauge'},
+    ],
+}

@@ -13,7 +13,7 @@ from datadog_checks.base.utils.db import QueryManager
 from . import queries
 from .config import Config
 
-METRIC_GROUPS = {
+ACCOUNT_USAGE_METRIC_GROUPS = {
     'snowflake.query': [queries.WarehouseLoad, queries.QueryHistory],
     'snowflake.billing': [queries.CreditUsage, queries.WarehouseCreditUsage],
     'snowflake.storage': [queries.StorageUsageMetrics],
@@ -24,6 +24,10 @@ METRIC_GROUPS = {
     'snowflake.auto_recluster': [queries.AutoReclusterHistory],
     'snowflake.pipe': [queries.PipeHistory],
     'snowflake.replication': [queries.ReplicationUsage],
+}
+
+ORGANIZATION_USAGE_METRIC_GROUPS = {
+    'snowflake.contracts': [queries.ContractItems]
 }
 
 
@@ -60,7 +64,10 @@ class SnowflakeCheck(AgentCheck):
                 'Snowflake `role` is set as `ACCOUNTADMIN` which should be used cautiously, '
                 'refer to docs about custom roles.'
             )
-
+        if self._config.account == 'ORGANIZATION_USAGE':
+            self.metric_groups = ORGANIZATION_USAGE_METRIC_GROUPS
+        else:
+            self.metric_groups = ACCOUNT_USAGE_METRIC_GROUPS
         self.metric_queries = []
         self.errors = []
         for mgroup in self._config.metric_groups:
