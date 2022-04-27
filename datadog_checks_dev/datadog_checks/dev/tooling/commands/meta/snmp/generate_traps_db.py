@@ -30,10 +30,6 @@ class VariableNotDefinedException(Exception):
 class MultipleTypeDefintionsException(Exception):
     pass
 
-
-class NoTypeDefinitionException(Exception):
-    pass
-
 @click.command(
     context_settings=CONTEXT_SETTINGS,
     short_help='Generate a traps database that can be used by the '
@@ -351,36 +347,38 @@ def get_metadata(var_name, mib_name, search_locations=None):
     enum = file_content[var_name].get('syntax', {}).get('constraints', {}).get('enumeration', {})
 
     if not enum:
-        # if there is no enum in-line, check for type definition and enum in the MIB
+        # if there is no enum in-line, check for type definition and enum in the same MIB
         var_type = file_content[var_name].get('syntax', {}).get('type', '')
-        if var_type in file_content.keys():
-            enum = file_content[var_type].get('type', {}).get('constraints', {}).get('enumeration', {})
-        elif var_type:
-            # if there is no enum in the MIB, check for type definition and enum in imported MIBs
-            imported_mibs = [k for k, v in file_content.get('imports', {}) if var_name in v]
-            # if it is not an imported type, we are done
-            if len(imported_mibs) == 0:
-                return {}
-            # if there are more than one MIBs this could come from, spit out a warning and ignore potential enums
-            if len(imported_mibs) > 1:
-                echo_warning(
-                            "Variable {} references a type called {} that is imported from multiple MIBs {}. "
-                            "Enum definitions for this variable will be ignored.".format(var_name, var_type, imported_mibs)
-                        )
+        # if var_type in file_content.keys():
+        #     enum = file_content[var_type].get('type', {}).get('constraints', {}).get('enumeration', {})
+        # if there is no enum in the same mib, follow the MIB tree back until the original definition is found
+        if var_type:
             try:
-                enum = get_imported_enum(var_type, imported_mibs[0], search_locations)
-            except NoTypeDefinitionException:
+                #imported_mib_name = get_import_mib(var_type, mib_name, search_locations)
+                enum = get_imported_enum(var_type, mib_name, search_locations)
+            except VariableNotDefinedException:
                 echo_warning(
-                            "Variable {} is of imported type {}, but the definition is not found in the imported MIB {}. "
-                            "Enum definitions for this variable will be unavailable.".format(var_name, var_type, imported_mibs[0])
+                            "Variable {} is of imported type {}, but the definition cannot be found. "
+                            "Enum definitions for this variable will be unavailable.".format(var_name, var_type)
                         )
             except MissingMIBException:
                 echo_warning(
-                            "Variable {} references a type called {} that is expected to be defined in MIB {} but is not. "
-                            "Enum definitions for this variable will be unavailable.".format(var_name, var_type, imported_mibs[0])
+                            "Variable {} references a type called {}, but the defining MIB is missing. "
+                            "Enum definitions for this variable will be unavailable.".format(var_name, var_type)
+                        )
+            except MultipleTypeDefintionsException:
+                echo_warning(
+                            "Variable {} references a type called {}, but this symbol is imported from multiple MIBs. "
+                            "Enum definitions for this variable will be unavailable.".format(var_name, var_type)
                         )
 
-    return file_content[var_name]['oid'], file_content[var_name].get('description', ''), enum
+    # swap keys and values for easier
+    # parsing agent side
+    parsed_enum = {}
+    for k, v in enum.items():
+        parsed_enum[v] = k
+
+    return file_content[var_name]['oid'], file_content[var_name].get('description', ''), parsed_enum
 
 
 @lru_cache(maxsize=None)
@@ -391,6 +389,45 @@ def get_imported_enum(var_name, mib_name, search_locations=None):
     :param search_locations: Tuple of path to directories containing json-compiled MIB files
     :return: The oid and the description of the variable.
     """
+    enum = {}
+    while mib_name and var_name and not enum:
+        for location in search_locations:
+            file_name = os.path.join(location, mib_name + '.json')
+            if os.path.isfile(file_name):
+                break
+        else:
+            raise MissingMIBException()
+
+        with open(file_name, 'r') as f:
+            file_content = json.load(f)
+
+        # if the variable name is not defined in the file
+        # we expect it to be, search imports for another MIB
+        if var_name not in file_content:
+            try:
+                mib_name = get_import_mib(var_name, mib_name, search_locations)
+            except MultipleTypeDefintionsException:
+                raise MultipleTypeDefintionsException()
+            except MissingMIBException:
+                raise MissingMIBException()
+            continue
+
+        enum = file_content[var_name].get('type', {}).get('constraints', {}).get('enumeration', {})
+        # update variable to the type name in case we have to go another layer down
+        var_name = file_content[var_name].get('type', {}).get('type', '')
+
+    return enum
+
+@lru_cache(maxsize=None)
+def get_import_mib(var_name, mib_name, search_locations=None):
+    """
+    Returns the name of the MIB a variable is imported from.
+    :param var_name: Name of the variable to search for
+    :param mib_name: Name of the MIB to look at
+    :param search_locations: Tuple of path to directories containing json-compiled MIB files
+    :return: The name of the MIB file the variable is imported from, or an exception if it's
+    not found or if it's found in multiple MIBs
+    """
     for location in search_locations:
         file_name = os.path.join(location, mib_name + '.json')
         if os.path.isfile(file_name):
@@ -399,11 +436,15 @@ def get_imported_enum(var_name, mib_name, search_locations=None):
         return MissingMIBException
 
     with open(file_name, 'r') as f:
-        file_content = json.load(f)
+            file_content = json.load(f)
 
-    # if the variable name is not defined in the file
-    # we expect it to be, raise an exception
-    if var_name not in file_content:
-        return NoTypeDefinitionException()
+    # search imports for var_name
+    imported_mibs = [k for k, v in file_content.get('imports', {}).items() if var_name in v]
+    # if it does not exist, return an empty string, this could be an error or valid in the case of base types
+    if len(imported_mibs) == 0:
+        return ''
+    # if there are more than one MIBs this could come from, raise an exception
+    if len(imported_mibs) > 1:
+        raise MultipleTypeDefintionsException()
 
-    return file_content[var_name].get('type', {}).get('constraints', {}).get('enumeration', {})
+    return imported_mibs[0]
