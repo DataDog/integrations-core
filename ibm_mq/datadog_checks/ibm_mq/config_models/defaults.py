@@ -30,6 +30,10 @@ def instance_channels(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_collect_reset_queue_metrics(field, value):
+    return True
+
+
 def instance_collect_statistics_metrics(field, value):
     return False
 

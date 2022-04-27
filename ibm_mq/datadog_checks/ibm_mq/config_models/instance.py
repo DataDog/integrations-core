@@ -36,6 +36,7 @@ class InstanceConfig(BaseModel):
     channel: str = Field(..., min_length=1)
     channel_status_mapping: Optional[Mapping[str, Any]]
     channels: Optional[Sequence[str]]
+    collect_reset_queue_metrics: Optional[bool]
     collect_statistics_metrics: Optional[bool]
     connection_name: Optional[str] = Field(None, min_length=1)
     convert_endianness: Optional[bool]
