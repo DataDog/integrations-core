@@ -50,19 +50,6 @@ instances:
     #
   - openmetrics_endpoint: http://127.0.0.1:9145/metrics
 
-    ## @param host - string - optional - default: localhost
-    ## (Legacy) Aerospike host to connect to.
-    ##
-    ## Note: See the configuration options specific to the legacy check here: 
-    ## http://github.com/DataDog/integrations-core/blob/7.35.x/aerospike/datadog_checks/aerospike/data/conf.yaml.example
-    #
-    # host: localhost
-
-    ## @param port - integer - optional - default: 3000
-    ## (Legacy) Aerospike port to connect to.
-    #
-    # port: 3000
-
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.
     ## All configuration options will use the prefix-less name.
@@ -348,12 +335,12 @@ instances:
     # use_legacy_auth_encoding: true
 
     ## @param username - string - optional
-    ## The username to use if services are behind basic or digest auth or db user to authenticate (Legacy).
+    ## The username to use if services are behind basic or digest auth.
     #
     # username: <USERNAME>
 
     ## @param password - string - optional
-    ## The password to use if services are behind basic or NTLM auth, or the password for db username (Legacy).
+    ## The password to use if services are behind basic or NTLM auth.
     #
     # password: <PASSWORD>
 
@@ -544,8 +531,9 @@ instances:
     #   X-Auth-Token: <AUTH_TOKEN>
 
     ## @param timeout - number - optional - default: 10
-    ## The timeout for accessing services
-    ## Read timeout in seconds when using Legacy.
+    ## The timeout for accessing services.
+    ##
+    ## This overrides the `timeout` setting in `init_config`.
     #
     # timeout: 10
 
