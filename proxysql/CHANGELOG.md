@@ -1,5 +1,9 @@
 # CHANGELOG - ProxySQL
 
+## 3.6.0 / 2022-04-27
+
+* [Added] add a new metric on backends count and status for proxysql. See [#11812](https://github.com/DataDog/integrations-core/pull/11812). Thanks [aymeric-ledizes](https://github.com/aymeric-ledizes).
+
 ## 3.5.0 / 2022-04-05
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
