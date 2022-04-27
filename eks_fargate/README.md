@@ -167,7 +167,7 @@ You have two options for this to work properly:
 * Use an hardcoded token value (`clusterAgent.token` in Helm, `credentials.token` in the Datadog Operator); convenient, but less secure.
 * Use a manually-created secret (`clusterAgent.tokenExistingSecret` in Helm, not available in the Datadog Operator) and replicate it in all namespaces where Fargate tasks need to be monitored; secure, but requires extra operations.
 
-If the EKS cluster runs only Fargate workloads, you need a standalone Cluster Agent deployment. 
+If the EKS cluster runs only Fargate workloads, you need a standalone Cluster Agent deployment. And, as described above, choose one of the two options for making the token reachable.
 
 Use the following Helm `values.yaml`:
 
@@ -182,7 +182,6 @@ clusterAgent:
   replicas: 2
 ```
 
-**Note:** Be just as specific with managing your Cluster Agent token.
 
 In both cases, you need to change the Datadog Agent sidecar manifest in order to allow communication with the Cluster Agent:
 
