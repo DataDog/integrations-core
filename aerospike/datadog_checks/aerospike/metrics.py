@@ -24,6 +24,7 @@ METRIC_MAP = {
     'aerospike_namespace_client_delete_error': 'namespace.client_delete_error',
     'aerospike_namespace_client_read_error': 'namespace.client_read_error',
     'aerospike_namespace_client_udf_error': 'namespace.client_udf_error',
+    'aerospike_namespace_client_write_error': 'namespace.client_write_error',
     # index_flash_alloc_pct only available in ee configured with index-type flash:
     # https://docs.aerospike.com/reference/metrics#index_flash_alloc_pct
     'aerospike_namespace_index_flash_alloc_pct': 'namespace.index_flash_alloc_pct',

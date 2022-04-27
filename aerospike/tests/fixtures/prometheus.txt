@@ -7,6 +7,9 @@ aerospike_namespace_client_read_error{cluster_name="null",ns="test",service="192
 # HELP aerospike_namespace_client_udf_error client udf error
 # TYPE aerospike_namespace_client_udf_error counter
 aerospike_namespace_client_udf_error{cluster_name="null",ns="test",service="192.168.32.3:3000"} 0
+# HELP aerospike_namespace_client_write_error client write error
+# TYPE aerospike_namespace_client_write_error counter
+aerospike_namespace_client_write_error{cluster_name="null",ns="test",service="192.168.32.3:3000"} 0
 # HELP aerospike_namespace_clock_skew_stop_writes clock skew stop writes
 # TYPE aerospike_namespace_clock_skew_stop_writes gauge
 aerospike_namespace_clock_skew_stop_writes{cluster_name="null",ns="test",service="192.168.32.3:3000"} 0

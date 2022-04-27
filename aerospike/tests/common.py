@@ -25,6 +25,7 @@ EXPECTED_PROMETHEUS_METRICS = [
     'aerospike.namespace.client_delete_error.count',
     'aerospike.namespace.client_read_error.count',
     'aerospike.namespace.client_udf_error.count',
+    'aerospike.namespace.client_write_error.count',
     'aerospike.namespace.clock_skew_stop_writes',
     'aerospike.namespace.dead_partitions',
     'aerospike.namespace.device_available_pct',
