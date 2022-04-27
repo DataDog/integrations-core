@@ -16,7 +16,7 @@ PORT = 3000
 EXPORTER_PORT = 9145
 VERSION = os.environ.get('AEROSPIKE_VERSION')
 
-OPEN_METRICS_V2_INSTANCE = {
+OPENMETRICS_V2_INSTANCE = {
     'openmetrics_endpoint': 'http://{}:{}/metrics'.format(HOST, EXPORTER_PORT),
     'tags': ['openmetrics_instance'],
 }

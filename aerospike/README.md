@@ -121,4 +121,4 @@ Need help? Contact [Datadog support][9].
 [10]: https://github.com/aerospike/aerospike-prometheus-exporter
 [11]: https://docs.aerospike.com/monitorstack/new/installing-components
 [12]: https://docs.datadoghq.com/integrations/openmetrics/
-[13]: https://github.com/DataDog/integrations-core/blob/7.35.x/aerospike/datadog_checks/aerospike/data/conf.yaml.example
+[13]: https://github.com/DataDog/integrations-core/blob/7.36.x/aerospike/datadog_checks/aerospike/data/conf.yaml.example
