@@ -345,17 +345,12 @@ def get_metadata(var_name, mib_name, search_locations=None):
 
     # grab enum if it exists in-line
     enum = file_content[var_name].get('syntax', {}).get('constraints', {}).get('enumeration', {})
-
+    # if there is no enum in-line, check for type definition and enum in the same MIB and its imports
     if not enum:
-        # if there is no enum in-line, check for type definition and enum in the same MIB
         var_type = file_content[var_name].get('syntax', {}).get('type', '')
-        # if var_type in file_content.keys():
-        #     enum = file_content[var_type].get('type', {}).get('constraints', {}).get('enumeration', {})
-        # if there is no enum in the same mib, follow the MIB tree back until the original definition is found
         if var_type:
             try:
-                #imported_mib_name = get_import_mib(var_type, mib_name, search_locations)
-                enum = get_imported_enum(var_type, mib_name, search_locations)
+                enum = get_enum(var_type, mib_name, search_locations)
             except VariableNotDefinedException:
                 echo_warning(
                             "Variable {} is of imported type {}, but the definition cannot be found. "
@@ -382,9 +377,9 @@ def get_metadata(var_name, mib_name, search_locations=None):
 
 
 @lru_cache(maxsize=None)
-def get_imported_enum(var_name, mib_name, search_locations=None):
+def get_enum(var_name, mib_name, search_locations=None):
     """
-    Returns the enum of a given variable and a MIB name, even if the enum is not defined in-line.
+    Returns the enum of a given variable, even if the enum is not defined in-line or the same MIB.
     :param var_name: Name of the variable to search for
     :param search_locations: Tuple of path to directories containing json-compiled MIB files
     :return: The oid and the description of the variable.
