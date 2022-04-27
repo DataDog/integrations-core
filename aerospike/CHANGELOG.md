@@ -1,5 +1,8 @@
 # CHANGELOG - Aerospike
 
+## 1.15.1-beta.1 / 2022-04-27
+
+
 ## 1.15.0 / 2022-04-05
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
