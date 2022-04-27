@@ -40,6 +40,7 @@ class AirflowCheck(AgentCheck):
         else:
             self._submit_healthy_metrics_stable(resp, tags)
 
+        self.log.debug("Connecting to aerospike")
         self.service_check('airflow.can_connect', can_connect_status, tags=tags)
         self.gauge('airflow.can_connect', int(can_connect_status == AgentCheck.OK), tags=tags)
 
