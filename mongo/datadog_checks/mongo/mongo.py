@@ -84,7 +84,7 @@ class MongoDb(AgentCheck):
         if self._api_client is None:
             try:
                 self._api_client = MongoApi(self._config, self.log)
-                self.log.debug("Connected!")
+                self.log.debug("Connected to mongo!")
             except Exception:
                 self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
                 raise

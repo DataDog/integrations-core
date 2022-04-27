@@ -1,5 +1,8 @@
 # CHANGELOG - mongo
 
+## 3.2.2-beta.1 / 2022-04-27
+
+
 ## 3.2.1 / 2022-04-26
 
 * [Fixed] Fix passing in username and password as options. See [#11525](https://github.com/DataDog/integrations-core/pull/11525).
