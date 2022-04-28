@@ -577,19 +577,19 @@ class Network(AgentCheck):
             count += 1
         self.log.debug("tracked %s network ena metrics for interface %s", count, iface)
 
-    def _submit_ethtool_metrics(self, iface, ethtool_metrics, tags):
+    def _submit_ethtool_metrics(self, iface, ethtool_metrics, base_tags):
         if not ethtool_metrics:
             return
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
             # Skip this network interface.
             return
 
-        metric_tags = [] if tags is None else tags[:]
-        metric_tags.append('device:{}'.format(iface))
+        base_tags_with_device = [] if base_tags is None else base_tags[:]
+        base_tags_with_device.append('device:{}'.format(iface))
 
         count = 0
-        for ethtool_name, metric_map in iteritems(ethtool_metrics):
-            tags = metric_tags + [ethtool_name]
+        for ethtool_tag, metric_map in iteritems(ethtool_metrics):
+            tags = base_tags_with_device + [ethtool_tag]
             for metric, val in iteritems(metric_map):
                 self.monotonic_count('system.net.%s' % metric, val, tags=tags)
                 count += 1
