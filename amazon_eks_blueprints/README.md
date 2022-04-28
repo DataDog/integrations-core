@@ -96,11 +96,6 @@ Also set up the integrations for any other AWS services that you are running wit
 
 ## Data Collected
 
-### Log collection
-
-_Available for Agent versions >6.0_
-
-See [Kubernetes Log Collection][1].
 
 ## Troubleshooting
 

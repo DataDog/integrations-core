@@ -10,11 +10,6 @@ Because Datadog already integrates with Kubernetes, it is ready-made to monitor 
 
 Additionally, OKE node pools are supported.
 
-### Log collection
-
-_Available for Agent versions >6.0_
-
-[Set up log collection][1] for your containers.
 
 ## Troubleshooting
 
