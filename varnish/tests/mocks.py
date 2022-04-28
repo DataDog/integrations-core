@@ -22,7 +22,7 @@ def debug_health_mock(*args, **kwargs):
 
 
 # Varnish >= 4.x && <= 5.x varnishadm output
-def backend_list_mock(*args, **kwargs):
+def backend_list_mock_v4(*args, **kwargs):
     if common.VARNISHADM_PATH in args[0]:
         fpath = os.path.join(common.FIXTURE_DIR, "backend_list_output")
         with open(fpath) as f:
