@@ -15,8 +15,7 @@ files:
     - name: server
       required: true
       description: |
-        The IP address or FQDN (fully qualified domain name) of the Teradata database server. If `use_odbc` is enabled,
-        specify the DBC name.
+        The IP address or FQDN (fully qualified domain name) of the Teradata database server.
       value:
         type: string
     - name: port
@@ -74,21 +73,18 @@ files:
             - <TABLE_3>
     - name: collect_table_disk_metrics
       description: |
-        Whether or not to collect disk space metrics aggregated by tables. If this option is enabled,
-        Disk Space metrics will be collected for each included table specified in the `tables` option, or
-        all tables if the `tables` option is not configured. Each metric will be tagged with `td_table`.
+        Whether or not to collect table-specific disk space metrics from the DBC.AllSpaceV view.
+        If this option is enabled, Disk Space metrics will be collected for each included table specified in the
+        `tables` option, or all tables if the `tables` option is not configured.
+        Each metric will be tagged with `td_table`.
       value:
         type: boolean
-        default: false
-        example: true
-        display_default: false
+        example: false
     - name: collect_res_usage_metrics
-      description: Collect metrics from the SPMA Resource Table.
+      description: Collect metrics from the SPMA Resource Usage View.
       value:
         type: boolean
-        default: false
-        example: true
-        display_default: false
+        example: false
     - name: https_port
       description: The port number used for making TLS connections to the Teradata database.
       value:
@@ -105,12 +101,12 @@ files:
         Note: Verify-CA and Verify-Full are currently not available.
       value:
         type: string
-        default: Prefer
+        example: Prefer
     - name: ssl_protocol
       description: Specifies the TLS protocol for HTTPS/TLS connections. Currently, only TLSv1.2 is supported.
       value:
         type: string
-        default: TLSv1.2
+        example: TLSv1.2
     - name: auth_mechanism
       description: |
         The authentication mechanism for connecting to the Teradata data source. If no value is provided, the defined

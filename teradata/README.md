@@ -31,7 +31,7 @@ sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install teradatasql
 CREATE USER "datadog" AS PASSWORD="<PASSWORD>";
 ```
 
-Optional, but strongly recommended: Create and/or grant a role to the `datadog` user designated for read-only monitoring purposes. 
+Optional, but strongly recommended: Grant a new or existing role to the `datadog` user designated for read-only monitoring purposes. 
 
 ```shell
 GRANT "<READ_ONLY_ROLE>" TO "datadog"; 
@@ -39,7 +39,7 @@ GRANT "<READ_ONLY_ROLE>" TO "datadog";
 
 The Teradata system grants the `SELECT` privilege to PUBLIC on most [Data Dictionary views][12] by default. All Teradata Database users have `PUBLIC` privileges.
 
-3. To collect resource usage metrics, enable the [SPMA Resource Usage Table][13]. This can be done using the [`ctl` Teradata Utility][14]:
+3. To collect resource usage metrics, enable the [SPMA Resource Usage Table][13]. This is done with the [`ctl` Teradata Utility][14]:
 
 ```shell
 # Start ctl session

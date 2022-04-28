@@ -27,8 +27,7 @@ init_config:
 instances:
 
     ## @param server - string - required
-    ## The IP address or FQDN (fully qualified domain name) of the Teradata database server. If `use_odbc` is enabled,
-    ## specify the DBC name.
+    ## The IP address or FQDN (fully qualified domain name) of the Teradata database server.
     #
   - server: <SERVER>
 
@@ -71,23 +70,24 @@ instances:
     #   - <TABLE_3>
 
     ## @param collect_table_disk_metrics - boolean - optional - default: false
-    ## Whether or not to collect disk space metrics aggregated by tables. If this option is enabled,
-    ## Disk Space metrics will be collected for each included table specified in the `tables` option, or
-    ## all tables if the `tables` option is not configured. Each metric will be tagged with `td_table`.
+    ## Whether or not to collect table-specific disk space metrics from the DBC.AllSpaceV view.
+    ## If this option is enabled, Disk Space metrics will be collected for each included table specified in the
+    ## `tables` option, or all tables if the `tables` option is not configured.
+    ## Each metric will be tagged with `td_table`.
     #
-    # collect_table_disk_metrics: true
+    # collect_table_disk_metrics: false
 
     ## @param collect_res_usage_metrics - boolean - optional - default: false
-    ## Collect metrics from the SPMA Resource Table.
+    ## Collect metrics from the SPMA Resource Usage View.
     #
-    # collect_res_usage_metrics: true
+    # collect_res_usage_metrics: false
 
     ## @param https_port - integer - optional - default: 443
     ## The port number used for making TLS connections to the Teradata database.
     #
     # https_port: 443
 
-    ## @param ssl_mode - string - optional
+    ## @param ssl_mode - string - optional - default: Prefer
     ## The SSL mode used for making TLS connections to the Teradata database.
     ## Valid options are:
     ## * Allow
@@ -96,12 +96,12 @@ instances:
     ## * Require
     ## Note: Verify-CA and Verify-Full are currently not available.
     #
-    # ssl_mode: <SSL_MODE>
+    # ssl_mode: Prefer
 
-    ## @param ssl_protocol - string - optional
+    ## @param ssl_protocol - string - optional - default: TLSv1.2
     ## Specifies the TLS protocol for HTTPS/TLS connections. Currently, only TLSv1.2 is supported.
     #
-    # ssl_protocol: <SSL_PROTOCOL>
+    # ssl_protocol: TLSv1.2
 
     ## @param auth_mechanism - string - optional
     ## The authentication mechanism for connecting to the Teradata data source. If no value is provided, the defined

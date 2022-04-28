@@ -88,7 +88,7 @@ AMP_USAGE = {
 }
 
 # Requires enabling the Resource Usage Table, ResUsageSpma:
-# https://docs.teradata.com/r/Teradata-VantageTM-Resource-Usage-Macros-and-Tables/July-2021/ResUsageSpma-Table
+# https://docs.teradata.com/r/Teradata-VantageTM-Resource-Usage-Macros-and-Tables/July-2021/ResUsageSpma-Table/Statistics-Columns
 RESOURCE_USAGE = {
     'name': 'resource_usage',
     'query': 'SELECT TOP 1 TheTimestamp, FileLockBlocks, FileLockDeadlocks, FileLockEnters, DBLockBlocks, '
