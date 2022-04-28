@@ -18,13 +18,6 @@ class AerospikeCheckV2(OpenMetricsBaseCheckV2):
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
 
-        if 'metrics' in self.instance:
-            # AerospikeCheck has a 'metrics' parameter which should be warned against using with openmetrics_endpoint
-            self.warning(
-                "Do not use 'metrics' parameter with 'openmetrics_endpoint'. "
-                "Use 'extra_metrics' or 'exclude_metrics*' settings instead."
-            )
-
     def get_default_config(self):
         return {
             'metrics': [METRIC_MAP],
