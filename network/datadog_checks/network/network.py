@@ -1448,9 +1448,9 @@ class Network(AgentCheck):
         if 'queue_' not in stat_name:
             return None, None
         parts = stat_name.split('_')
-        queue_index = parts.index('queue')
-        if queue_index + 1 > len(parts):
+        if 'queue' not in parts:
             return None, None
+        queue_index = parts.index('queue')
         queue_num = parts[queue_index + 1]
         if not queue_num.isdigit():
             return None, None
