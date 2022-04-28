@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "## SingleStore\n\nThis dashboard provides a high-level view of your SingleStore metrics and can help you troubleshoot performance issues. For further reading on SingleStore:\n- [Datadog's SingleStore integration docs](https://github.com/DataDog/integrations-core/tree/master/singlestore)\n- [SingleStore docs](https://www.singlestore.com/)",
+    "description": "## SingleStore\n\nThis dashboard provides a high-level view of your SingleStore metrics and can help you troubleshoot performance issues. For further reading on SingleStore:\n- [Datadog's SingleStore integration docs](https://docs.datadoghq.com/integrations/singlestore/)\n- [SingleStore docs](https://www.singlestore.com/)",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -74,7 +74,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "For further reading on SingleStore:\n- [Datadog's SingleStore integration docs](https://github.com/DataDog/integrations-core/tree/master/singlestore)\n- [SingleStore docs](https://www.singlestore.com/)\n",
+                            "content": "For further reading on SingleStore:\n- [Datadog's SingleStore integration docs](https://docs.datadoghq.com/integrations/singlestore/)\n- [SingleStore docs](https://www.singlestore.com/)\n",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
