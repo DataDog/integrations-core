@@ -1094,7 +1094,19 @@ def test_parse_queue_num(check):
     assert queue_name == 'queue:10'
     assert metric_name == 'tx_doorbells'
 
+    queue_name, metric_name = check._parse_ethtool_queue_num('aqueue_10_tx_doorbells')
+    assert queue_name is None
+    assert metric_name is None
+
     queue_name, metric_name = check._parse_ethtool_queue_num('tx_doorbells_queue_')
+    assert queue_name is None
+    assert metric_name is None
+
+    queue_name, metric_name = check._parse_ethtool_queue_num('tx_doorbells_bqueue_')
+    assert queue_name is None
+    assert metric_name is None
+
+    queue_name, metric_name = check._parse_ethtool_queue_num('tx_doorbells_queue')
     assert queue_name is None
     assert metric_name is None
 
@@ -1116,6 +1128,10 @@ def test_parse_cpu_num(check):
     cpu_name, metric_name = check._parse_ethtool_cpu_num('cpu431_rx_bytes')
     assert cpu_name == 'cpu:431'
     assert metric_name == 'rx_bytes'
+
+    cpu_name, metric_name = check._parse_ethtool_cpu_num('acpu431_rx_bytes')
+    assert cpu_name is None
+    assert metric_name is None
 
     cpu_name, metric_name = check._parse_ethtool_cpu_num('cpu_rx_bytes')
     assert cpu_name is None
