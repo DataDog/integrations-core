@@ -13,12 +13,11 @@ Additionally, OKE node pools are supported.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][2].
+Need help? Contact [Datadog support][1].
 
 ## Further Reading
 
-- [How to monitor OKE with Datadog][3]
+- [How to monitor OKE with Datadog][2]
 
-[1]: https://docs.datadoghq.com/agent/kubernetes/log
-[2]: https://docs.datadoghq.com/help/
-[3]: https://www.datadoghq.com/blog/monitor-oracle-kubernetes-engine/
+[1]: https://docs.datadoghq.com/help/
+[2]: https://www.datadoghq.com/blog/monitor-oracle-kubernetes-engine/
