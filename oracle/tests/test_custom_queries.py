@@ -13,33 +13,16 @@ from .common import CHECK_NAME
 pytestmark = pytest.mark.unit
 
 
-def test__check_only_custom_queries(instance):
+@pytest.mark.parametrize('only_custom_queries, expected_default_queries', [(True, 0), (False, 3)])
+def test_if_only_custom_queries_default_queries_are_not_set(instance, only_custom_queries, expected_default_queries):
     """
-    Test the default metrics are not called when only_custom queries set to true
+    Test the default metrics are not called or not depending on where or not only_custom_queries is set
     """
-    instance['only_custom_queries'] = True
+    instance['only_custom_queries'] = only_custom_queries
 
     check = Oracle(CHECK_NAME, {}, [instance])
 
-    assert check._query_manager.queries == []
-
-
-def test__check_only_custom_queries_not_set(instance):
-    """
-    Test the default metrics are called when only_custom queries is not set
-    """
-    instance['only_custom_queries'] = False
-
-    check = Oracle(CHECK_NAME, {}, [instance])
-
-    assert check._query_manager.queries != []
-
-
-def __test__check_only_custom_queries_set_false(check):
-    """
-    Test the default metrics are called when only_custom queries is set to False
-    """
-    assert check._query_manager.queries != []
+    assert len(check._query_manager.queries) == expected_default_queries
 
 
 def test_custom_queries(aggregator, check):
