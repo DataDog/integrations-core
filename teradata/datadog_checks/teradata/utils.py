@@ -5,6 +5,7 @@ import time
 from typing import Any, AnyStr, Sequence, Set, Tuple
 
 from datadog_checks.teradata.config_models.instance import Table
+from datadog_checks.base import AgentCheck
 
 
 def filter_tables(self, row):
@@ -99,7 +100,7 @@ def tags_normalizer(self, row, query_name):
                     row[idx] = "undefined"
     return row
 
-
+@AgentCheck.metadata_entrypoint
 def submit_version(self, row):
     # type (Any) -> None
     """
