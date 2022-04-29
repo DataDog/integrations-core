@@ -21,8 +21,6 @@ init_config:
     #     tags: <TAGS>
 
 ## Every instance is scheduled independent of the others.
-##
-## Note: All '%' characters must be escaped as '%%'
 #
 instances:
 

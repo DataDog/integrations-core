@@ -7,10 +7,6 @@ files:
     - template: init_config/default
     - template: init_config/db
   - template: instances
-    description: |
-      Every instance is scheduled independent of the others.
-
-      Note: All '%' characters must be escaped as '%%'
     options:
     - name: server
       required: true
@@ -102,6 +98,11 @@ files:
       value:
         type: string
         example: Prefer
+        enum:
+        - Allow
+        - Disable
+        - Prefer
+        - Require
     - name: ssl_protocol
       description: Specifies the TLS protocol for HTTPS/TLS connections. Currently, only TLSv1.2 is supported.
       value:
@@ -123,6 +124,12 @@ files:
                 Specify the JSON Web Token using the `auth_data` configuration option.
       value:
         type: string
+        enum:
+        - TD2
+        - TDNEGO
+        - LDAP
+        - KRB5
+        - JWT
     - name: auth_data
       secret: true
       description: |

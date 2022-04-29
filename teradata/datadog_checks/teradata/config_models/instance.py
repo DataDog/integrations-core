@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence, Union
+from typing import Any, Literal, Mapping, Optional, Sequence, Union
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -50,7 +50,7 @@ class InstanceConfig(BaseModel):
 
     account: Optional[str]
     auth_data: Optional[str]
-    auth_mechanism: Optional[str]
+    auth_mechanism: Optional[Literal['TD2', 'TDNEGO', 'LDAP', 'KRB5', 'JWT']]
     collect_res_usage_metrics: Optional[bool]
     collect_table_disk_metrics: Optional[bool]
     custom_queries: Optional[Sequence[CustomQuery]]
@@ -65,7 +65,7 @@ class InstanceConfig(BaseModel):
     port: Optional[int]
     server: str
     service: Optional[str]
-    ssl_mode: Optional[str]
+    ssl_mode: Optional[Literal['Allow', 'Disable', 'Prefer', 'Require']]
     ssl_protocol: Optional[str]
     tables: Optional[Union[Sequence[str], Table]]
     tags: Optional[Sequence[str]]
