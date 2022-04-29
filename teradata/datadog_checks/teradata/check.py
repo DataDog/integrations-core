@@ -77,12 +77,12 @@ class TeradataCheck(AgentCheck, ConfigMixin):
                 'account': self.config.account,
                 'database': self.config.database,
                 'dbs_port': str(self.config.port),
-                'logmech': self.config.auth_mechanism.upper(),
+                'logmech': self.config.auth_mechanism,
                 'logdata': self.config.auth_data,
                 'user': self.config.username,
                 'password': self.config.password,
                 'https_port': str(self.config.https_port),
-                'sslmode': self.config.ssl_mode.upper(),
+                'sslmode': self.config.ssl_mode,
                 'sslprotocol': self.config.ssl_protocol,
             }
         )

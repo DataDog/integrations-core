@@ -12,21 +12,6 @@ def initialize_instance(values, **kwargs):
         if not values.get('username') or not values.get('password'):
             raise ValueError('`username` and `password` are required.')
 
-    if values.get('auth_mechanism') and values.get('auth_mechanism').upper() not in VALID_AUTH_MECHS:
-        raise ValueError(
-            'Specified `auth_mechanism`: {} is not a valid option. Specify one of "TD2",'
-            '"TDNEGO", "LDAP", "KRB5" or "JWT". '
-            'Refer to the Datadog documentation for more information.'.format(values.get('auth_mechanism'))
-        )
-
-    if values.get('ssl_mode') and values.get('ssl_mode').upper() not in VALID_SSL_MODES:
-        raise ValueError(
-            'Specified `ssl_mode`: {} is not a valid option. Specify one of "ALLOW", "DISABLE",'
-            '"PREFER", or "REQUIRE". Refer to the Datadog documentation for more information.'.format(
-                values.get('ssl_mode')
-            )
-        )
-
     if (
         not values.get('auth_data')
         and (auth_mechanism := values.get('auth_mechanism'))
