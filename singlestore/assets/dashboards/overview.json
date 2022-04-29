@@ -852,7 +852,7 @@
                     {
                         "definition": {
                             "background_color": "orange",
-                            "content": "The top 5 nodes that are using the most memory of the host ",
+                            "content": "The top 10 nodes that are using the most memory of the host ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
