@@ -1,6 +1,6 @@
 {
   "name": "Pods with non OK statuses by Cluster",
-  "query": "",
+  "query": "Filter by: -pod_status:(running OR completed)",
   "page": "container_orchestration_pods",
   "type": "container",
   "options": {
