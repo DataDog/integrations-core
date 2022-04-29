@@ -17,14 +17,17 @@ The Teradata check is included in the [Datadog Agent][2] package.
 1. Download and install the [Teradata SQL Driver for Python][10] using the embedded agent pip command for your [operating system][11]:
 
 **Linux**
+
 ```
 sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install teradatasql
 ```
 
 **Windows**
+
 ```
 %PROGRAMFILES%\Datadog\"Datadog Agent"\embedded<PYTHON_MAJOR_VERSION>\python -m pip install teradatasql
 ```
+
 2. Create a read-only `datadog` user with proper access to your Teradata Database. Start a `BTEQ` session on your Teradata Database:
 
 ```shell
