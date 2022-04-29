@@ -11,6 +11,7 @@ from os import geteuid
 from six import PY3, iteritems
 from six.moves import filter
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
@@ -43,6 +44,45 @@ class Varnish(AgentCheck):
 
     # Output of varnishstat -V : `varnishstat (varnish-4.1.1 revision 66bb824)`
     version_pattern = re.compile(r'(\d+\.\d+\.\d+)')
+
+    def __init__(self, name, init_config, instances):
+        super(Varnish, self).__init__(name, init_config, instances)
+        self.custom_tags = list(set(self.instance.get('tags', [])))
+
+        # Split the varnishstat command so that additional arguments can be passed in
+        # In order to support monitoring a Varnish instance which is running as a Docker
+        # container we need to wrap commands (varnishstat, varnishadm) with scripts which
+        # perform a docker exec on the running container. This works fine when running a
+        # single container on the host but breaks down when attempting to use the auto
+        # discovery feature. This change allows for passing in additional parameters to
+        # the script (i.e. %%host%%) so that the command is properly formatted and the
+        # desired container is queried.
+        self.varnishstat_path = self.instance.get('varnishstat', '').split()
+
+        self.varnishadm = self.instance.get("varnishadm", None)
+        # Split the varnishadm command so that additional arguments can be passed in
+        # In order to support monitoring a Varnish instance which is running as a Docker
+        # container we need to wrap commands (varnishstat, varnishadm) with scripts which
+        # perform a docker exec on the running container. This works fine when running a
+        # single container on the host but breaks down when attempting to use the auto
+        # discovery feature. This change allows for passing in additional parameters to
+        # the script (i.e. %%host%%) so that the command is properly formatted and the
+        # desired container is queried.
+        self.varnishadm_path = self.instance.get('varnishadm', '').split()
+        self.secretfile_path = self.instance.get('secretfile', '/etc/varnish/secret')
+
+        self.daemon_host = self.instance.get('daemon_host', 'localhost')
+        self.daemon_port = self.instance.get('daemon_port', '6082')
+
+        self.name = self.instance.get('name')
+        self.metrics_filter = self.instance.get("metrics_filter", [])
+        self.check_initializations.append(self.validate_config)
+
+    def validate_config(self):
+        if self.instance.get("varnishstat", None) is None:
+            raise ConfigurationError("varnishstat is not configured")
+        if not isinstance(self.metrics_filter, list):
+            raise ConfigurationError("The parameter 'metrics_filter' must be a list")
 
     # XML parsing bits, a.k.a. Kafka in Code
     def _reset(self):
@@ -85,88 +125,25 @@ class Varnish(AgentCheck):
             else:
                 self._current_str = data
 
-    def check(self, instance):
-        # Not configured? Not a problem.
-        if instance.get("varnishstat", None) is None:
-            raise Exception("varnishstat is not configured")
-        custom_tags = instance.get('tags', [])
-        if custom_tags is None:
-            custom_tags = []
-        else:
-            custom_tags = list(set(custom_tags))
-        # Split the varnishstat command so that additional arguments can be passed in
-        # In order to support monitoring a Varnish instance which is running as a Docker
-        # container we need to wrap commands (varnishstat, varnishadm) with scripts which
-        # perform a docker exec on the running container. This works fine when running a
-        # single container on the host but breaks down when attempting to use the auto
-        # discovery feature. This change allows for passing in additional parameters to
-        # the script (i.e. %%host%%) so that the command is properly formatted and the
-        # desired container is queried.
-        varnishstat_path = instance.get('varnishstat', '').split()
-        name = instance.get('name')
-        metrics_filter = instance.get("metrics_filter", [])
-        if not isinstance(metrics_filter, list):
-            raise Exception("The parameter 'metrics_filter' must be a list")
-
+    def check(self, _):
         # Get version and version-specific args from varnishstat -V.
-        version, varnishstat_format = self._get_version_info(varnishstat_path)
-
-        cmd = varnishstat_path + [self.VARNISHSTAT_FORMAT_OPTION[varnishstat_format]]
-        for metric in metrics_filter:
-            cmd.extend(["-f", metric])
-
-        if name is not None:
-            cmd.extend(['-n', name])
-            tags = custom_tags + [u'varnish_name:%s' % name]
-        else:
-            tags = custom_tags + [u'varnish_name:default']
-
-        output, _, _ = get_subprocess_output(cmd, self.log)
-
-        self._parse_varnishstat(output, varnishstat_format, tags)
+        version, varnishstat_format = self._get_version_info()
+        varnish_stats_raw, tags = self._get_varnish_stats(varnishstat_format)
+        self._parse_varnishstat(varnish_stats_raw, varnishstat_format, tags)
 
         # Parse service checks from varnishadm.
-        if instance.get("varnishadm", None):
-            # Split the varnishadm command so that additional arguments can be passed in
-            # In order to support monitoring a Varnish instance which is running as a Docker
-            # container we need to wrap commands (varnishstat, varnishadm) with scripts which
-            # perform a docker exec on the running container. This works fine when running a
-            # single container on the host but breaks down when attempting to use the auto
-            # discovery feature. This change allows for passing in additional parameters to
-            # the script (i.e. %%host%%) so that the command is properly formatted and the
-            # desired container is queried.
-            varnishadm_path = instance.get('varnishadm', '').split()
-            secretfile_path = instance.get('secretfile', '/etc/varnish/secret')
+        backends_by_status = None
+        if self.varnishadm is not None:
+            varnish_adm_raw = self._get_varnish_adm(version)
+            if varnish_adm_raw:
+                backends_by_status = self._parse_varnishadm(varnish_adm_raw)
+                self._submit_backend_service_checks(backends_by_status)
+        else:
+            self.log.debug("Not collecting varnishadm because varnishadm is not set")
 
-            daemon_host = instance.get('daemon_host', 'localhost')
-            daemon_port = instance.get('daemon_port', '6082')
-
-            cmd = []
-            if geteuid() != 0:
-                cmd.append('sudo')
-
-            if version < LooseVersion('4.1.0'):
-                cmd.extend(varnishadm_path + ['-S', secretfile_path, 'debug.health'])
-            else:
-                cmd.extend(
-                    varnishadm_path
-                    + ['-T', '{}:{}'.format(daemon_host, daemon_port), '-S', secretfile_path, 'backend.list', '-p']
-                )
-
-            try:
-                output, err, _ = get_subprocess_output(cmd, self.log)
-            except OSError as e:
-                self.log.error("There was an error running varnishadm. Make sure 'sudo' is available. %s", e)
-                output = None
-            if err:
-                self.log.error('Error getting service check from varnishadm: %s', err)
-
-            if output:
-                self._parse_varnishadm(output, custom_tags)
-
-    def _get_version_info(self, varnishstat_path):
+    def _get_version_info(self):
         # Get the varnish version from varnishstat
-        output, error, _ = get_subprocess_output(varnishstat_path + ["-V"], self.log, raise_on_empty_output=False)
+        output, error, _ = get_subprocess_output(self.varnishstat_path + ["-V"], self.log, raise_on_empty_output=False)
 
         # Assumptions regarding varnish's version
         varnishstat_format = "json"
@@ -202,6 +179,20 @@ class Varnish(AgentCheck):
             varnishstat_format = "xml"
 
         return version, varnishstat_format
+
+    def _get_varnish_stats(self, varnishstat_format):
+        cmd = self.varnishstat_path + [self.VARNISHSTAT_FORMAT_OPTION[varnishstat_format]]
+        for metric in self.metrics_filter:
+            cmd.extend(["-f", metric])
+
+        if self.name is not None:
+            cmd.extend(['-n', self.name])
+            tags = self.custom_tags + [u'varnish_name:%s' % self.name]
+        else:
+            tags = self.custom_tags + [u'varnish_name:default']
+
+        output, _, _ = get_subprocess_output(cmd, self.log)
+        return output, tags
 
     def _parse_varnishstat(self, output, varnishstat_format, tags=None):
         """
@@ -267,7 +258,37 @@ class Varnish(AgentCheck):
                     self.log.debug("Varnish (rate) %s %d", metric_name, int(gauge_val))
                     self.rate(metric_name, float(gauge_val), tags=tags)
 
-    def _parse_varnishadm(self, output, tags):
+    def _get_varnish_adm(self, version):
+        cmd = []
+        if geteuid() != 0:
+            cmd.append('sudo')
+
+        if version < LooseVersion('4.1.0'):
+            cmd.extend(self.varnishadm_path + ['-S', self.secretfile_path, 'debug.health'])
+        else:
+            cmd.extend(
+                self.varnishadm_path
+                + [
+                    '-T',
+                    '{}:{}'.format(self.daemon_host, self.daemon_port),
+                    '-S',
+                    self.secretfile_path,
+                    'backend.list',
+                    '-p',
+                ]
+            )
+
+        err, output = None, None
+        try:
+            output, err, _ = get_subprocess_output(cmd, self.log, raise_on_empty_output=False)
+        except OSError as e:
+            self.log.error("There was an error running varnishadm. Make sure 'sudo' is available. %s", e)
+            output = None
+        if err or not output:
+            self.log.error('Error getting service check from varnishadm: %s', repr(err))
+        return output
+
+    def _parse_varnishadm(self, output):
         """Parse out service checks from varnishadm.
 
         Example output:
@@ -339,9 +360,14 @@ class Varnish(AgentCheck):
 
                 if backend is not None:
                     backends_by_status[status].append((backend, message))
+        return backends_by_status
+
+    def _submit_backend_service_checks(self, backends_by_status):
+        if backends_by_status is None:
+            return
 
         for status, backends in iteritems(backends_by_status):
             check_status = BackendStatus.to_check_status(status)
             for backend, message in backends:
-                service_checks_tags = ['backend:%s' % backend] + tags
+                service_checks_tags = ['backend:%s' % backend] + self.custom_tags
                 self.service_check(self.SERVICE_CHECK_NAME, check_status, tags=service_checks_tags, message=message)
