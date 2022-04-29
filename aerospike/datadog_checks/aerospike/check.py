@@ -1,7 +1,4 @@
 # (C) Datadog, Inc. 2022-present
-# (C) 2018 Aerospike, Inc.
-# (C) 2017 Red Sift
-# (C) 2015 Pippio, Inc. All rights reserved.
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import OpenMetricsBaseCheckV2
