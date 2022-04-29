@@ -77,8 +77,8 @@ Depending on your Kafka cluster's Kerberos setup, you may need to configure the 
 * TLS certificate to authenticate a secure connection to the Kafka broker.
   * If JKS keystore is used, a certificate needs to be exported from the keystore and the file path should be configured with the applicable `tls_cert` and/or `tls_ca_cert` options. 
   * If a private key is required to authenticate the certificate, it should be configured with the `tls_private_key` option. If applicable, the private key password should be configured with the `tls_private_key_password`. 
-* `KRB5_CLIENT_KTNAME` environment variable pointing to the Kafka client's Kerberos keytab location if it differs from the default path (i.e. `KRB5_CLIENT_KTNAME=/etc/krb5.keytab`)
-* `KRB5CCNAME` environment variable pointing to the Kafka client's Kerberos credentials ticket cache if it differs from the default path (i.e. `KRB5CCNAME=/tmp/krb5cc_xxx`)
+* `KRB5_CLIENT_KTNAME` environment variable pointing to the Kafka client's Kerberos keytab location if it differs from the default path (for example, `KRB5_CLIENT_KTNAME=/etc/krb5.keytab`)
+* `KRB5CCNAME` environment variable pointing to the Kafka client's Kerberos credentials ticket cache if it differs from the default path (for example, `KRB5CCNAME=/tmp/krb5cc_xxx`)
 * If the Datadog Agent is unable to access the environment variables, configure the environment variables in a Datadog Agent service configuration override file for your operating system. For example, in a Linux `systemd` environment: 
 
 **Linux Systemd**
@@ -100,7 +100,7 @@ Depending on your Kafka cluster's Kerberos setup, you may need to configure the 
   EnvironmentFile=/path/to/environment/file
   ```
 
-4. Run the following commands to reload the systemd daemon, datadog-agent service, and datadog agent:
+4. Run the following commands to reload the systemd daemon, datadog-agent service, and Datadog Agent:
 
 ```
 sudo systemctl daemon-reload
