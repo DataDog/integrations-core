@@ -18,8 +18,7 @@
   "categories": [
     "aws",
     "containers",
-    "orchestration",
-    "log collection"
+    "orchestration"
   ],
   "type": "check",
   "is_public": true,
