@@ -100,6 +100,7 @@ class HTTPCheck(AgentCheck):
 
         # Store tags in a temporary list so that we don't modify the global tags data structure
         tags_list = list(tags)
+        tags_list.append('status_code:{}'.format(http_response_status_code))
         tags_list.append('url:{}'.format(addr))
         instance_name = self.normalize_tag(instance['name'])
         tags_list.append("instance:{}".format(instance_name))
