@@ -24,7 +24,7 @@ def create_query_executor(*args, **kwargs):
 def test_multiple_query_executor_simple(aggregator):
     check = AgentCheck('test', {}, [{}])
     qe1 = QueryExecutor(
-        mock_executor([1, 2, "hello"]),
+        mock_executor([[1, 2, "hello"]]),
         check,
         [
             {
@@ -39,16 +39,13 @@ def test_multiple_query_executor_simple(aggregator):
         ],
     )
     qe2 = QueryExecutor(
-        mock_executor(["2015-04-01", 1500]),
+        mock_executor([["2015-04-01", 1500]]),
         check,
         [
             {
                 'name': 'query1',
                 'query': 'select date(), column from table',
-                'columns': [
-                    {'name': 'date', 'type': 'tag'},
-                    {'name': 'test.table.column', 'type': 'count'},
-                ],
+                'columns': [{'name': 'date', 'type': 'tag'}, {'name': 'test.table.column', 'type': 'count'}],
             }
         ],
     )
@@ -69,7 +66,7 @@ def test_multiple_query_executor_simple(aggregator):
 
     aggregator.assert_metric(
         'test.column.2',
-        1,
+        2,
         metric_type=aggregator.GAUGE,
         tags=['column_3:hello'],
         hostname=None,
@@ -77,8 +74,8 @@ def test_multiple_query_executor_simple(aggregator):
 
     aggregator.assert_metric(
         'test.table.column',
-        1,
-        metric_type=aggregator.GAUGE,
+        1500,
+        metric_type=aggregator.COUNT,
         tags=['date:2015-04-01'],
         hostname=None,
     )
