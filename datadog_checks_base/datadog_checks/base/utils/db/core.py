@@ -16,6 +16,12 @@ from .utils import SUBMISSION_METHODS, create_submission_transformer
 
 
 class QueryExecutor(object):
+    """
+    QueryExecutor is a lower-level implementation of QueryManager which supports multiple instances
+    per AgentCheck. It is used to execute queries via the `executor` parameter and submit resulting
+    telemetry via the `submitter` parameter.
+    """
+
     def __init__(
         self,
         executor,  # type: QueriesExecutor
