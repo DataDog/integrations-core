@@ -5,6 +5,7 @@
 import json
 import os
 from functools import lru_cache
+from typing import NamedTuple
 
 import click
 import yaml
@@ -29,6 +30,17 @@ class VariableNotDefinedException(Exception):
 
 class MultipleTypeDefintionsException(Exception):
     pass
+
+
+class VarMetadata(NamedTuple):
+    """
+    VarMetadata holds metadata related
+    to a trap variable.
+    """
+    oid: str
+    description: str
+    enum: dict
+
 
 @click.command(
     context_settings=CONTEXT_SETTINGS,
@@ -289,7 +301,7 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
             for trap_var in trap.get('objects', []):
                 try:
                     var_name, mib_name = trap_var['object'], trap_var['module']
-                    var_oid, var_descr, var_enum = get_metadata(
+                    var_metadata = get_var_metadata(
                         var_name,
                         mib_name,
                         search_locations=(os.path.dirname(compiled_mib_file), compiled_mibs_sources),
@@ -308,11 +320,11 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
                     )
                     continue
                 var_name = trap_var['object']
-                trap_db["vars"][var_oid] = {"name": var_name}
+                trap_db["vars"][var_metadata.oid] = {"name": var_name}
                 if not no_descr:
-                    trap_db["vars"][var_oid]["descr"] = trap_descr
-                if var_enum:
-                    trap_db["vars"][var_oid]["enum"] = var_enum
+                    trap_db["vars"][var_metadata.oid]["descr"] = var_metadata.description
+                if var_metadata.enum:
+                    trap_db["vars"][var_metadata.oid]["enum"] = var_metadata.enum
 
         if trap_db['traps']:
             mib_name = file_content['meta']['module']
@@ -322,7 +334,7 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
 
 
 @lru_cache(maxsize=None)
-def get_metadata(var_name, mib_name, search_locations=None):
+def get_var_metadata(var_name, mib_name, search_locations=None):
     """
     Returns the oid, description, enumeration of a given variable and a MIB name.
     :param var_name: Name of the variable to search for
@@ -351,11 +363,6 @@ def get_metadata(var_name, mib_name, search_locations=None):
         if var_type:
             try:
                 enum = get_enum(var_type, mib_name, search_locations)
-            except VariableNotDefinedException:
-                echo_warning(
-                            "Variable {} is of imported type {}, but the definition cannot be found. "
-                            "Enum definitions for this variable will be unavailable.".format(var_name, var_type)
-                        )
             except MissingMIBException:
                 echo_warning(
                             "Variable {} references a type called {}, but the defining MIB is missing. "
@@ -373,7 +380,11 @@ def get_metadata(var_name, mib_name, search_locations=None):
     for k, v in enum.items():
         parsed_enum[v] = k
 
-    return file_content[var_name]['oid'], file_content[var_name].get('description', ''), parsed_enum
+    return VarMetadata(
+        file_content[var_name]['oid'],
+        file_content[var_name].get('description', ''),
+        parsed_enum
+    )
 
 
 @lru_cache(maxsize=None)
