@@ -95,6 +95,7 @@ assets/               @DataDog/agent-integrations
 /snmp_*/                                                           @DataDog/infrastructure-integrations @DataDog/agent-integrations
 /snmp_*/*.md                                                       @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
 /datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp/ @DataDog/infrastructure-integrations @DataDog/agent-integrations
+/docs/developer/tutorials/snmp/                                    @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
 
 # Agent Platform
 /disk/                                    @DataDog/agent-integrations @DataDog/agent-platform
