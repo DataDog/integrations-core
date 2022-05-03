@@ -23,6 +23,7 @@ from .common import (
     CONFIG_HTTP_NO_REDIRECTS,
     CONFIG_SSL_ONLY,
     CONFIG_UNORMALIZED_INSTANCE_NAME,
+    CONFIG_WEAK_CIPHERS,
     FAKE_CERT,
     HERE,
 )
@@ -454,3 +455,16 @@ def test_tls_config_ok(dd_run_check, instance, check_hostname):
     )
     tls_context = check.get_tls_context()
     assert tls_context.check_hostname is check_hostname
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_weak_ciphers_adapter(aggregator, http_check, dd_run_check):
+
+    # ensure running the check with the adapter doesn't throw an exception
+    instance = CONFIG_WEAK_CIPHERS['instances'][0]
+    http_check.check(instance)
+
+    url_tag = ['url:{}'.format(instance.get('url'))]
+    instance_tag = ['instance:{}'.format(instance.get('name'))]
+
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=url_tag + instance_tag, count=1)

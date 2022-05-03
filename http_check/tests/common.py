@@ -194,6 +194,8 @@ CONFIG_DONT_CHECK_EXP = {
     'instances': [{'name': 'simple_config', 'url': 'https://expired.mock', 'check_certificate_expiration': False}]
 }
 
+CONFIG_WEAK_CIPHERS = {'instances': [{'name': 'simple_config', 'weakciphers': True, 'url': 'https://valid.mock'}]}
+
 CONFIG_HTTP_NO_REDIRECTS = {
     'instances': [
         {
