@@ -26,7 +26,6 @@ Config = namedtuple(
         'tags',
         'ssl_expire',
         'instance_ca_certs',
-        'weakcipher',
         'check_hostname',
         'stream',
     ],
@@ -65,7 +64,6 @@ def from_instance(instance, default_ca_certs=None):
     include_content = is_affirmative(instance.get('include_content', False))
     ssl_expire = is_affirmative(instance.get('check_certificate_expiration', True))
     instance_ca_certs = instance.get('tls_ca_cert', instance.get('ca_certs', default_ca_certs))
-    weakcipher = is_affirmative(instance.get('weakciphers', False))
     check_hostname = is_affirmative(instance.get('check_hostname', True))
     stream = is_affirmative(instance.get('stream', False))
 
@@ -84,7 +82,6 @@ def from_instance(instance, default_ca_certs=None):
         tags,
         ssl_expire,
         instance_ca_certs,
-        weakcipher,
         check_hostname,
         stream,
     )
