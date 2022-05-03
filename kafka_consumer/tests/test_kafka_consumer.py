@@ -127,14 +127,16 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, kafka_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.read_persistent_cache', mocked_read_persistent_cache)
 def test_check_kafka(aggregator, kafka_instance, dd_run_check):
     """
     Testing Kafka_consumer check.
     """
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
-    dd_run_check(kafka_consumer_check)
-    assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
+    with mock.patch(
+        'datadog_checks.kafka_consumer.new_kafka_consumer.read_persistent_cache', mocked_read_persistent_cache
+    ):
+        kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
+        dd_run_check(kafka_consumer_check)
+        assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
 
 
 @pytest.mark.integration
@@ -194,24 +196,28 @@ def test_consumer_config_error(caplog, dd_run_check):
 @pytest.mark.skipif(is_legacy_check(), reason="This test does not apply to the legacy check.")
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.read_persistent_cache', mocked_read_persistent_cache)
 def test_no_topics(aggregator, kafka_instance, dd_run_check):
-    kafka_instance['consumer_groups'] = {'my_consumer': {}}
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
-    dd_run_check(kafka_consumer_check)
+    with mock.patch(
+        'datadog_checks.kafka_consumer.new_kafka_consumer.read_persistent_cache', mocked_read_persistent_cache
+    ):
+        kafka_instance['consumer_groups'] = {'my_consumer': {}}
+        kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
+        dd_run_check(kafka_consumer_check)
 
-    assert_check_kafka(aggregator, {'my_consumer': {'marvel': [0]}})
+        assert_check_kafka(aggregator, {'my_consumer': {'marvel': [0]}})
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.read_persistent_cache', mocked_read_persistent_cache)
 def test_no_partitions(aggregator, kafka_instance, dd_run_check):
-    kafka_instance['consumer_groups'] = {'my_consumer': {'marvel': []}}
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
-    dd_run_check(kafka_consumer_check)
+    with mock.patch(
+        'datadog_checks.kafka_consumer.new_kafka_consumer.read_persistent_cache', mocked_read_persistent_cache
+    ):
+        kafka_instance['consumer_groups'] = {'my_consumer': {'marvel': []}}
+        kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
+        dd_run_check(kafka_consumer_check)
 
-    assert_check_kafka(aggregator, {'my_consumer': {'marvel': [0]}})
+        assert_check_kafka(aggregator, {'my_consumer': {'marvel': [0]}})
 
 
 @pytest.mark.skipif(os.environ.get('KAFKA_VERSION', '').startswith('0.9'), reason='Old Kafka version')
