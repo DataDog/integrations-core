@@ -32,7 +32,7 @@ TYPES_DEPS = [
     'types-python-dateutil==2.8.2',
     'types_requests==2.25.11',
     'types_six==1.16.2',
-    "types-simplejson==3.17.5",
+    'types-simplejson==3.17.5',
 ]
 PYDANTIC_DEP = 'pydantic==1.8.2'  # Keep in sync with: /datadog_checks_base/requirements.in
 
