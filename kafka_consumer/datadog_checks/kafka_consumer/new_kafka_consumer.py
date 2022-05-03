@@ -11,11 +11,12 @@ from kafka.structs import TopicPartition
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 
+from datadog_checks.kafka_consumer.datadog_agent import read_persistent_cache, write_persistent_cache
+
 from .constants import BROKER_REQUESTS_BATCH_SIZE, KAFKA_INTERNAL_TOPICS
 from six.moves import cPickle as pickle
 
 MAX_TIMESTAMPS = 1000
-BROKER_TIMESTAMPS_FILENAME = '/tmp/broker_timestamps'
 
 class NewKafkaConsumerCheck(object):
     """
@@ -28,7 +29,7 @@ class NewKafkaConsumerCheck(object):
         self._parent_check = parent_check
         self._broker_requests_batch_size = self.instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
         self._kafka_client = None
-        self._broker_timestamps_filename = BROKER_TIMESTAMPS_FILENAME + self.instance.get('kafka_connect_str')
+        self._broker_timestamp_cache_key = 'broker_timestamps' + self.instance.get('kafka_connect_str', "")
 
     def __getattr__(self, item):
         try:
@@ -98,27 +99,15 @@ class NewKafkaConsumerCheck(object):
         self._collect_broker_metadata()
 
     def _load_broker_timestamps(self):
-        """Loads broker timestamps from disk."""
+        """Loads broker timestamps from persistant cache."""
         self._broker_timestamps = defaultdict(dict)
         try:
-            with open(self._broker_timestamps_filename, 'rb') as f:
-                self._broker_timestamps.update(pickle.load(f))  # use update since defaultdict does not pickle
+            self._broker_timestamps.update(pickle.loads(read_persistent_cache(self._broker_timestamp_cache_key)))  # use update since defaultdict does not pickle
         except Exception:
-            # file may be corrupted from agent restart during writing
-            # remove the file, it will be created again further down
-            self.log.warning('Could not read broker timestamps on disk. Removing file...')
-            try:
-                os.remove(self._broker_timestamps_filename)
-            except OSError:
-                self.log.exception('Error removing broker timestamps file %s', self._broker_timestamps_filename)
-                pass
+            self.log.warning('Could not read broker timestamps from cache')
 
     def _save_broker_timestamps(self):
-        try:
-            with open(self._broker_timestamps_filename, 'wb') as f:
-                pickle.dump(self._broker_timestamps, f)
-        except Exception:
-            self.log.exception('Could not write the broker timestamps on the disk')
+        write_persistent_cache(self._broker_timestamp_cache_key, pickle.dumps(self._broker_timestamps))
 
     def _create_kafka_admin_client(self, api_version):
         """Return a KafkaAdminClient."""

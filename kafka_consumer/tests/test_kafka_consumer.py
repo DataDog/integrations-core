@@ -6,6 +6,8 @@ import os
 
 import mock
 import pytest
+import pickle
+from collections import defaultdict
 
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.legacy_0_10_2 import LegacyKafkaCheck_0_10_2
@@ -20,8 +22,16 @@ pytestmark = pytest.mark.skipif(
 
 BROKER_METRICS = ['kafka.broker_offset']
 
-CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag', "kafka.consumer_lag_seconds"]
+CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
+if not is_legacy_check():
+    CONSUMER_METRICS.append("kafka.consumer_lag_seconds")
 
+
+def mocked_read_persistent_cache(cache_key):
+    cached_offsets = defaultdict(dict)
+    cached_offsets[("marvel", 0)][25] = 150
+    cached_offsets[("marvel", 0)][45] = 250
+    return pickle.dumps(cached_offsets)
 
 @pytest.mark.unit
 def test_uses_legacy_implementation_when_legacy_version_specified(kafka_instance):
@@ -42,6 +52,20 @@ def test_uses_new_implementation_when_new_version_specified(kafka_instance):
 
     assert isinstance(kafka_consumer_check.sub_check, NewKafkaConsumerCheck)
 
+
+@pytest.mark.unit
+def test_get_interpolated_timestamp(kafka_instance):
+    instance = copy.deepcopy(kafka_instance)
+    instance['kafka_client_api_version'] = '0.10.2'
+    instance['sasl_kerberos_service_name'] = 'kafka'
+    check = KafkaCheck('kafka_consumer', {}, [instance])
+    check._init_check_based_on_kafka_version()
+    # at offset 0, time is 100s, at offset 10, time is 200sec.
+    # by interpolation, at offset 5, time should be 150sec.
+    assert check.sub_check._get_interpolated_timestamp({0: 100, 10: 200}, 5) == 150
+    assert check.sub_check._get_interpolated_timestamp({10: 100, 20: 200}, 5) == 50
+    assert check.sub_check._get_interpolated_timestamp({0: 100, 10: 200}, 15) == 250
+    assert check.sub_check._get_interpolated_timestamp({10: 200}, 15) is None
 
 @pytest.mark.unit
 def test_gssapi(kafka_instance, dd_run_check):
@@ -101,13 +125,13 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, kafka_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.read_persistent_cache', mocked_read_persistent_cache)
 def test_check_kafka(aggregator, kafka_instance, dd_run_check):
     """
     Testing Kafka_consumer check.
     """
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
     dd_run_check(kafka_consumer_check)
-
     assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
 
 
@@ -168,6 +192,7 @@ def test_consumer_config_error(caplog, dd_run_check):
 @pytest.mark.skipif(is_legacy_check(), reason="This test does not apply to the legacy check.")
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.read_persistent_cache', mocked_read_persistent_cache)
 def test_no_topics(aggregator, kafka_instance, dd_run_check):
     kafka_instance['consumer_groups'] = {'my_consumer': {}}
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
@@ -178,6 +203,7 @@ def test_no_topics(aggregator, kafka_instance, dd_run_check):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.read_persistent_cache', mocked_read_persistent_cache)
 def test_no_partitions(aggregator, kafka_instance, dd_run_check):
     kafka_instance['consumer_groups'] = {'my_consumer': {'marvel': []}}
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
