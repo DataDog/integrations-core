@@ -14,7 +14,7 @@
             "prefix": null
         }
     ],
-    "title": "CouchDB - Overview",
+    "title": "CouchDB (v1) - Overview",
     "widgets": [
         {
             "definition": {
@@ -582,7 +582,7 @@
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "q": "avg:couchdb.by_db.doc_count{$couchdb} * 1024"
+                        "q": "avg:couchdb.by_db.doc_count{$couchdb}"
                     }
                 ],
                 "time": {
@@ -747,7 +747,7 @@
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "q": "avg:couchdb.couchdb.database_writes{$couchdb}*1024"
+                        "q": "avg:couchdb.couchdb.database_writes{$couchdb}"
                     }
                 ],
                 "time": {
@@ -773,7 +773,7 @@
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "q": "avg:couchdb.couchdb.database_reads{$couchdb}*1024"
+                        "q": "avg:couchdb.couchdb.database_reads{$couchdb}"
                     }
                 ],
                 "time": {

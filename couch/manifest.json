@@ -39,7 +39,8 @@
     },
     "monitors": {},
     "dashboards": {
-      "couchdb": "assets/dashboards/overview.json"
+      "couchdb": "assets/dashboards/CouchDB-overview_dashboard.json",
+      "couchdb-v1": "assets/dashboards/CouchDBv1-overview_dashboard.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {
