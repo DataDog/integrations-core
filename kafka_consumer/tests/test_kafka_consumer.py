@@ -3,11 +3,11 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 import os
+import pickle
+from collections import defaultdict
 
 import mock
 import pytest
-import pickle
-from collections import defaultdict
 
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.legacy_0_10_2 import LegacyKafkaCheck_0_10_2
@@ -32,6 +32,7 @@ def mocked_read_persistent_cache(cache_key):
     cached_offsets[("marvel", 0)][25] = 150
     cached_offsets[("marvel", 0)][45] = 250
     return pickle.dumps(cached_offsets)
+
 
 @pytest.mark.unit
 def test_uses_legacy_implementation_when_legacy_version_specified(kafka_instance):
@@ -66,6 +67,7 @@ def test_get_interpolated_timestamp(kafka_instance):
     assert check.sub_check._get_interpolated_timestamp({10: 100, 20: 200}, 5) == 50
     assert check.sub_check._get_interpolated_timestamp({0: 100, 10: 200}, 15) == 250
     assert check.sub_check._get_interpolated_timestamp({10: 200}, 15) is None
+
 
 @pytest.mark.unit
 def test_gssapi(kafka_instance, dd_run_check):

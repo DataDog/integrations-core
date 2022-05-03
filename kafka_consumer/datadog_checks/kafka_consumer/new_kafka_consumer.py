@@ -3,20 +3,19 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from collections import defaultdict
 from time import time
-import os
 
 from kafka import errors as kafka_errors
 from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
 from kafka.structs import TopicPartition
+from six.moves import cPickle as pickle
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-
 from datadog_checks.kafka_consumer.datadog_agent import read_persistent_cache, write_persistent_cache
 
 from .constants import BROKER_REQUESTS_BATCH_SIZE, KAFKA_INTERNAL_TOPICS
-from six.moves import cPickle as pickle
 
 MAX_TIMESTAMPS = 1000
+
 
 class NewKafkaConsumerCheck(object):
     """
@@ -102,7 +101,9 @@ class NewKafkaConsumerCheck(object):
         """Loads broker timestamps from persistant cache."""
         self._broker_timestamps = defaultdict(dict)
         try:
-            self._broker_timestamps.update(pickle.loads(read_persistent_cache(self._broker_timestamp_cache_key)))  # use update since defaultdict does not pickle
+            self._broker_timestamps.update(
+                pickle.loads(read_persistent_cache(self._broker_timestamp_cache_key))
+            )  # use update since defaultdict does not pickle
         except Exception:
             self.log.warning('Could not read broker timestamps from cache')
 
@@ -280,9 +281,10 @@ class NewKafkaConsumerCheck(object):
                 if reported_contexts >= contexts_limit:
                     continue
                 timestamps = self._broker_timestamps[(topic, partition)]
+                # producer_timestamp is set in the same check, so it should never be None
                 producer_timestamp = timestamps[producer_offset]
                 consumer_timestamp = self._get_interpolated_timestamp(timestamps, consumer_offset)
-                if consumer_timestamp is None:
+                if consumer_timestamp is None or producer_timestamp is None:
                     continue
                 lag = consumer_timestamp - producer_timestamp
                 self.gauge('consumer_lag_seconds', lag, tags=consumer_group_tags)
@@ -303,7 +305,7 @@ class NewKafkaConsumerCheck(object):
 
     def _get_interpolated_timestamp(self, timestamps, offset):
         if offset in timestamps:
-            return timestamps[offset], True
+            return timestamps[offset]
         offsets = timestamps.keys()
         try:
             # Get the most close saved offsets to the consumer_offset
