@@ -252,6 +252,20 @@ instances:
         #
         # collection_interval: 10
 
+    ## Configure collection of AlwaysOn monitoring
+    #
+    query_alwayson:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of AlwaysOn. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the AlwaysOn collection interval in seconds.
+        #
+        # collection_interval: 10
+
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
     #
@@ -396,17 +410,6 @@ instances:
     ## getting mixed with other integraton tags.
     #
     disable_generic_tags: true
-
-    ## @param metric_patterns - mapping - optional
-    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
-    ##
-    ## Metrics defined in `exclude` will take precedence in case of overlap.
-    #
-    # metric_patterns:
-    #   include:
-    #   - <INCLUDE_REGEX>
-    #   exclude:
-    #   - <EXCLUDE_REGEX>
 
 ## Log Section
 ##

@@ -268,7 +268,6 @@ files:
             type: boolean
             example: True
           hidden: true
-
     - name: query_activity
       description: Configure collection of active sessions monitoring
       options:
@@ -284,6 +283,21 @@ files:
             different DMV tables such as `dm_exec_requests`, `dm_exec_sessions`, and `dm_exec_sql_text`.
             If a non-default value is chosen, then that exact same value must be used for *every* check instance.
             Running different instances with different collection intervals is not supported.
+          value:
+            type: number
+            example: 10
+    - name: query_alwayson
+      description: Configure collection of AlwaysOn monitoring
+      options:
+        - name: enabled
+          description: |
+            Enable collection of AlwaysOn. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the AlwaysOn collection interval in seconds.
           value:
             type: number
             example: 10

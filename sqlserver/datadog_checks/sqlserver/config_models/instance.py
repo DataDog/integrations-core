@@ -28,14 +28,6 @@ class CustomQuery(BaseModel):
     tags: Optional[Sequence[str]]
 
 
-class MetricPatterns(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
-
-
 class ObfuscatorOptions(BaseModel):
     class Config:
         allow_mutation = False
@@ -48,6 +40,14 @@ class ObfuscatorOptions(BaseModel):
 
 
 class QueryActivity(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collection_interval: Optional[float]
+    enabled: Optional[bool]
+
+
+class QueryAlwayson(BaseModel):
     class Config:
         allow_mutation = False
 
@@ -98,7 +98,6 @@ class InstanceConfig(BaseModel):
     include_instance_metrics: Optional[bool]
     include_master_files_metrics: Optional[bool]
     include_task_scheduler_metrics: Optional[bool]
-    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     obfuscator_options: Optional[ObfuscatorOptions]
     only_custom_queries: Optional[bool]
@@ -107,6 +106,7 @@ class InstanceConfig(BaseModel):
     proc_only_if: Optional[str]
     proc_only_if_database: Optional[str]
     query_activity: Optional[QueryActivity]
+    query_alwayson: Optional[QueryAlwayson]
     query_metrics: Optional[QueryMetrics]
     reported_hostname: Optional[str]
     service: Optional[str]
