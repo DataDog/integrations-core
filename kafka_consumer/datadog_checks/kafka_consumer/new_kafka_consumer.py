@@ -1,13 +1,13 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import json
 from collections import defaultdict
 from time import time
 
 from kafka import errors as kafka_errors
 from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
 from kafka.structs import TopicPartition
-from six.moves import cPickle as pickle
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.kafka_consumer.datadog_agent import read_persistent_cache, write_persistent_cache
@@ -98,17 +98,17 @@ class NewKafkaConsumerCheck(object):
         self._collect_broker_metadata()
 
     def _load_broker_timestamps(self):
-        """Loads broker timestamps from persistant cache."""
+        """Loads broker timestamps from persistent cache."""
         self._broker_timestamps = defaultdict(dict)
         try:
-            self._broker_timestamps.update(
-                pickle.loads(read_persistent_cache(self._broker_timestamp_cache_key))
-            )  # use update since defaultdict does not pickle
-        except Exception:
-            self.log.warning('Could not read broker timestamps from cache')
+            for topic_partition, content in json.loads(read_persistent_cache(self._broker_timestamp_cache_key)).items():
+                for offset, timestamp in content.items():
+                    self._broker_timestamps[topic_partition][int(offset)] = timestamp
+        except Exception as e:
+            self.log.warning('Could not read broker timestamps from cache' + str(e))
 
     def _save_broker_timestamps(self):
-        write_persistent_cache(self._broker_timestamp_cache_key, pickle.dumps(self._broker_timestamps))
+        write_persistent_cache(self._broker_timestamp_cache_key, json.dumps(self._broker_timestamps))
 
     def _create_kafka_admin_client(self, api_version):
         """Return a KafkaAdminClient."""
@@ -192,7 +192,7 @@ class NewKafkaConsumerCheck(object):
                 error_type = kafka_errors.for_code(error_code)
                 if error_type is kafka_errors.NoError:
                     self._highwater_offsets[(topic, partition)] = offsets[0]
-                    timestamps = self._broker_timestamps[(topic, partition)]
+                    timestamps = self._broker_timestamps["{}_{}".format(topic, partition)]
                     timestamps[offsets[0]] = time()
                     # If there's too many timestamps, we delete the oldest
                     if len(timestamps) > MAX_TIMESTAMPS:
@@ -280,13 +280,13 @@ class NewKafkaConsumerCheck(object):
 
                 if reported_contexts >= contexts_limit:
                     continue
-                timestamps = self._broker_timestamps[(topic, partition)]
+                timestamps = self._broker_timestamps["{}_{}".format(topic, partition)]
                 # producer_timestamp is set in the same check, so it should never be None
                 producer_timestamp = timestamps[producer_offset]
                 consumer_timestamp = self._get_interpolated_timestamp(timestamps, consumer_offset)
                 if consumer_timestamp is None or producer_timestamp is None:
                     continue
-                lag = consumer_timestamp - producer_timestamp
+                lag = producer_timestamp - consumer_timestamp
                 self.gauge('consumer_lag_seconds', lag, tags=consumer_group_tags)
                 reported_contexts += 1
             else:
