@@ -87,18 +87,24 @@ class MongoConfig(object):
         self.metric_tags = self._compute_metric_tags()
 
     def _get_clean_server_name(self):
-        if not self.server:
-            server = build_connection_string(
-                self.hosts,
-                username=self.username,
-                password=self.password,
-                scheme=self.scheme,
-                database=self.db_name,
-                options=self.additional_options,
-            )
-        else:
-            server = self.server
-        return parse_mongo_uri(server, sanitize_username=bool(self.ssl_params))[4]
+        try:
+            if not self.server:
+                server = build_connection_string(
+                    self.hosts,
+                    username=self.username,
+                    password=self.password,
+                    scheme=self.scheme,
+                    database=self.db_name,
+                    options=self.additional_options,
+                )
+            else:
+                server = self.server
+
+            self.log.debug("Parsing mongo uri with server: %s", server)
+            return parse_mongo_uri(server, sanitize_username=bool(self.ssl_params))[4]
+        except Exception as e:
+            self.log.exception(e)
+            raise ConfigurationError("Could not build a mongo uri with the given hosts: %s" % self.hosts)
 
     def _compute_service_check_tags(self):
         main_host = self.hosts[0]
