@@ -45,3 +45,4 @@ QUERY_HISTORY = [
         Decimal('0.000000'),
     )
 ]
+USAGE_IN_CURRENCY_DAILY = [('test', 'ORGANIZATION', 'Standard', 'dollar', Decimal('0.4'), Decimal('0.7'))]

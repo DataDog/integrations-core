@@ -27,7 +27,8 @@ ACCOUNT_USAGE_METRIC_GROUPS = {
 }
 
 ORGANIZATION_USAGE_METRIC_GROUPS = {
-    'snowflake.contracts': [queries.ContractItems]
+    'snowflake.contracts': [queries.ContractItems],
+    'organization.billing_currency.metrics': [queries.CurrencyUsage],
 }
 
 
@@ -73,11 +74,11 @@ class SnowflakeCheck(AgentCheck):
         for mgroup in self._config.metric_groups:
             try:
                 if not self._config.aggregate_last_24_hours:
-                    for query in range(len(METRIC_GROUPS[mgroup])):
-                        METRIC_GROUPS[mgroup][query]['query'] = METRIC_GROUPS[mgroup][query]['query'].replace(
+                    for query in range(len(self.metric_groups[mgroup])):
+                        self.metric_groups[mgroup][query]['query'] = self.metric_groups[mgroup][query]['query'].replace(
                             'DATEADD(hour, -24, current_timestamp())', 'date_trunc(day, current_date)'
                         )
-                self.metric_queries.extend(METRIC_GROUPS[mgroup])
+                self.metric_queries.extend(self.metric_groups[mgroup])
             except KeyError:
                 self.errors.append(mgroup)
 

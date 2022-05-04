@@ -227,7 +227,7 @@ ReplicationUsage = {
 # https://docs.snowflake.com/en/sql-reference/organization-usage/contract_items.html
 ContractItems = {
     'name': 'contract.metrics',
-     'query': (
+    'query': (
         'select contract_item, contract_number, '
         'sum(amount), avg(amount) from replication_usage_history '
         'where start_date >= DATEADD(hour, -24, current_timestamp()) group by 1, 2;'
@@ -274,15 +274,16 @@ OrganizationCreditUsage = {
 
 # https://docs.snowflake.com/en/sql-reference/organization-usage/usage_in_currency_daily.html
 CurrencyUsage = {
-    'name': 'organization.billing.currency.metrics',
-     'query': (
-        'select ORGANIZATION_NAME, CONTRACT_NUMBER, ORGANIZATION_NAME, SERVICE_LEVEL '
-        'sum(amount), avg(amount) from replication_usage_history '
-        'where start_date >= DATEADD(hour, -24, current_timestamp()) group by 1;'
+    'name': 'organization.billing_currency.metrics',
+    'query': (
+        'select ACCOUNT_NAME, ORGANIZATION_NAME, SERVICE_LEVEL, CURRENCY'
+        'sum(amount), avg(amount) from USAGE_IN_CURRENCY_DAILY '
+        'where start_date >= DATEADD(hour, -24, current_timestamp()) group by 1, 2, 3, 4;'
     ),
     'columns': [
-        {'name': 'contract_item', 'type': 'tag'},
-        {'name': 'contract_number', 'type': 'tag'},
+        {'name': 'billing_account', 'type': 'tag'},
+        {'name': 'organization', 'type': 'tag'},
+        {'name': 'service_level', 'type': 'tag'},
         {'name': 'currency', 'type': 'tag'},
         {'name': 'contract.amount.avg', 'type': 'gauge'},
         {'name': 'contract.amount.sum', 'type': 'gauge'},
