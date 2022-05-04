@@ -37,15 +37,16 @@ The Helm integration does not include any events.
 
 ### Service Checks
 
-The Helm integration does not include any service checks.
+See [service_checks.json][5] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][5].
+Need help? Contact [Datadog support][6].
 
 
 [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [2]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [4]: https://github.com/DataDog/integrations-core/blob/master/helm/metadata.csv
-[5]: https://docs.datadoghq.com/help/
+[5]: https://github.com/DataDog/integrations-core/blob/master/helm/assets/service_checks.json
+[6]: https://docs.datadoghq.com/help/
