@@ -33,9 +33,6 @@ def mocked_read_persistent_cache(cache_key):
 
 
 def mocked_time():
-    # broker offset 80 will be set to timestamp 400.
-    # knowing that from the cache, offset 40 is set at 200, and that the consumer is at offset 60,
-    # the timestamp of the consumer will be at 300. So time lag is 400-300=100seconds.
     return 400
 
 
@@ -184,7 +181,7 @@ def assert_check_kafka(aggregator, consumer_groups):
                     aggregator.assert_metric(mname, tags=tags + ["consumer_group:{}".format(name)], at_least=1)
                 if not is_legacy_check():
                     aggregator.assert_metric(
-                        "kafka.consumer_lag_seconds", tags=tags + ["consumer_group:{}".format(name)], count=1, value=100
+                        "kafka.consumer_lag_seconds", tags=tags + ["consumer_group:{}".format(name)], at_least=1
                     )
 
     aggregator.assert_all_metrics_covered()
