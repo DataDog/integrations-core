@@ -33,7 +33,14 @@ See [metadata.csv][4] for a list of metrics provided by this check.
 
 ### Events
 
-The Helm integration does not include any events.
+This check emits events when the `collect_events` option is set to true (it's
+disabled by default).
+
+When the option is enabled, the check emits events when:
+- A new release has been deployed.
+- A release has been deleted.
+- A release has been upgraded (new revision).
+- There's a status change (from "deployed" to "superseded"), etc.
 
 ### Service Checks
 
