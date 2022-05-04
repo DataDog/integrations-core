@@ -316,3 +316,46 @@ cluster_checks_configs_info{check_id="http_check:kubernetes:c964669d244288ea",jo
 cluster_checks_configs_info{check_id="http_check:nginx 1:c89937d23c8b01a0",join_leader="true",node="datadog-clusterchecks-779dfcd7bf-jm4mz"} 1
 cluster_checks_configs_info{check_id="http_check:nginx 2:89d07d5d897f5241",join_leader="true",node="datadog-clusterchecks-779dfcd7bf-hxjwg"} 1
 cluster_checks_configs_info{check_id="http_check:nginx 3:8f889113ed52b58e",join_leader="true",node="datadog-clusterchecks-779dfcd7bf-hxjwg"} 1
+# HELP autodiscovery_errors Number of Autodiscovery errors by provider.
+# TYPE autodiscovery_errors gauge
+autodiscovery_errors{provider="kubernetes-services"} 1
+autodiscovery_errors{provider="file"} 0
+# HELP autodiscovery_watched_resources Number of resources watched in Autodiscovery by listener and kind.
+# TYPE autodiscovery_watched_resources gauge
+autodiscovery_watched_resources{kind="k8s_endpoint",listener="kube_endpoints"} 6
+autodiscovery_watched_resources{kind="k8s_service",listener="kube_endpoints"} 6
+autodiscovery_watched_resources{kind="k8s_service",listener="kube_services"} 4
+# HELP autodiscovery_poll_duration Poll duration distribution by config provider (in seconds).
+# TYPE autodiscovery_poll_duration histogram
+autodiscovery_poll_duration_bucket{provider="kubernetes-endpoints",le="0.005"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-endpoints",le="0.01"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-endpoints",le="0.025"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-endpoints",le="0.05"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-endpoints",le="0.1"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-endpoints",le="0.25"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-endpoints",le="0.5"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-endpoints",le="1"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-endpoints",le="2.5"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-endpoints",le="5"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-endpoints",le="10"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-endpoints",le="+Inf"} 3
+autodiscovery_poll_duration_sum{provider="kubernetes-endpoints"} 0.0066547590000000005
+autodiscovery_poll_duration_count{provider="kubernetes-endpoints"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-services",le="0.005"} 2
+autodiscovery_poll_duration_bucket{provider="kubernetes-services",le="0.01"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-services",le="0.025"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-services",le="0.05"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-services",le="0.1"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-services",le="0.25"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-services",le="0.5"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-services",le="1"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-services",le="2.5"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-services",le="5"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-services",le="10"} 3
+autodiscovery_poll_duration_bucket{provider="kubernetes-services",le="+Inf"} 3
+autodiscovery_poll_duration_sum{provider="kubernetes-services"} 0.013881554
+autodiscovery_poll_duration_count{provider="kubernetes-services"} 3
+# HELP endpoint_checks_configs_dispatched Number of endpoint check configurations dispatched, by node.
+# TYPE endpoint_checks_configs_dispatched gauge
+endpoint_checks_configs_dispatched{join_leader="true",node="gke-ahmed-default-pool-4658d5d4-80fn"} 2
+endpoint_checks_configs_dispatched{join_leader="true",node="gke-ahmed-default-pool-4658d5d4-sv26"} 1

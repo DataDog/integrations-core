@@ -34,7 +34,7 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.cpu.usage',
 ]
 
-SKIPPED_TAGS = ['loader']
+DEFAULT_TAGS_TO_SKIP = ['loader']
 
 CORE_ONLY_TAGS = ['device_namespace:default']
 
@@ -484,7 +484,7 @@ def test_e2e_profile_isilon(dd_agent_check):
 
 def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
     config = common.generate_container_profile_config('meraki-cloud-controller')
-    assert_python_vs_core(dd_agent_check, config)
+    assert_python_vs_core(dd_agent_check, config, tags_to_skip=['mac_address'])
 
 
 def test_e2e_profile_netapp(dd_agent_check):
@@ -518,6 +518,7 @@ def assert_python_vs_core(
     config,
     expected_total_count=None,
     metrics_to_skip=None,
+    tags_to_skip=None,
     assert_count=True,
     assert_value_metrics=ASSERT_VALUE_METRICS,
     rate=True,
@@ -530,6 +531,8 @@ def assert_python_vs_core(
     core_config['init_config']['loader'] = 'core'
     core_config['init_config']['collect_device_metadata'] = 'false'
     metrics_to_skip = metrics_to_skip or []
+    tags_to_skip = tags_to_skip or []
+    tags_to_skip += DEFAULT_TAGS_TO_SKIP
 
     # building expected metrics (python)
     aggregator = dd_agent_check(python_config, rate=rate, pause=pause, times=times)
@@ -538,7 +541,7 @@ def assert_python_vs_core(
         for stub in metrics:
             if stub.name in metrics_to_skip:
                 continue
-            stub = normalize_stub_metric(stub)
+            stub = normalize_stub_metric(stub, tags_to_skip)
             python_metrics[(stub.name, stub.type, tuple(sorted(list(stub.tags) + CORE_ONLY_TAGS)))].append(stub)
 
     python_service_checks = defaultdict(list)
@@ -559,7 +562,7 @@ def assert_python_vs_core(
         for stub in aggregator_metrics[metric_name]:
             if stub.name in metrics_to_skip:
                 continue
-            aggregator._metrics[metric_name].append(normalize_stub_metric(stub))
+            aggregator._metrics[metric_name].append(normalize_stub_metric(stub, tags_to_skip))
 
     core_metrics = defaultdict(list)
     for _, metrics in aggregator._metrics.items():
@@ -598,8 +601,8 @@ def assert_python_vs_core(
             assert expected_total_count == total_count_corecheck
 
 
-def normalize_stub_metric(stub):
-    tags = [t for t in stub.tags if not is_skipped_tag(t)]  # Remove skipped tag
+def normalize_stub_metric(stub, tags_to_skip):
+    tags = [t for t in stub.tags if not is_skipped_tag(t, tags_to_skip)]  # Remove skipped tag
     return MetricStub(
         stub.name,
         stub.type,
@@ -610,8 +613,8 @@ def normalize_stub_metric(stub):
     )
 
 
-def is_skipped_tag(tag):
-    for skipped_tag in SKIPPED_TAGS:
+def is_skipped_tag(tag, tags_to_skip):
+    for skipped_tag in tags_to_skip:
         if tag.startswith('{}:'.format(skipped_tag)):
             return True
     return False

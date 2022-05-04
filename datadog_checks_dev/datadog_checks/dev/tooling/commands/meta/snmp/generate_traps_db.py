@@ -226,7 +226,11 @@ def write_compact_trap_db(trap_db_per_mib, output_file, use_json=False):
             if trap_oid in compact_db["traps"] and trap["name"] != compact_db["traps"][trap_oid]["name"]:
                 echo_warning(
                     "Found name conflict for trap OID {}, ({}::{} != {}::{}). Will ignore".format(
-                        trap_oid, mib, trap['name'], compact_db["traps"]['mib'], compact_db["traps"][trap_oid]["name"]
+                        trap_oid,
+                        mib,
+                        trap['name'],
+                        compact_db["traps"][trap_oid]["mib"],
+                        compact_db["traps"][trap_oid]["name"],
                     )
                 )
                 conflict_oids.add(trap_oid)

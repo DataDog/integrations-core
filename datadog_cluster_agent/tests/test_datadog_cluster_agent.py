@@ -45,6 +45,11 @@ METRICS = [
     'go.goroutines',
     'go.memstats.alloc_bytes',
     'go.threads',
+    'endpoint_checks.configs_dispatched',
+    'autodiscovery.poll_duration.count',
+    'autodiscovery.poll_duration.sum',
+    'autodiscovery.watched_resources',
+    'autodiscovery.errors',
 ]
 
 

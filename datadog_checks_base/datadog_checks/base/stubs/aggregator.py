@@ -351,7 +351,7 @@ class AggregatorStub(object):
 
             candidates.append(metric)
 
-        expected_metric = MetricStub(name, metric_type, value, tags, hostname, device, flush_first_value)
+        expected_metric = MetricStub(name, metric_type, value, expected_tags, hostname, device, flush_first_value)
 
         if value is not None and candidates and all(self.is_aggregate(m.type) for m in candidates):
             got = sum(m.value for m in candidates)

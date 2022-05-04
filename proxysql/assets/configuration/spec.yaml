@@ -68,5 +68,6 @@ files:
           - connection_pool_metrics
           - users_metrics
           - memory_metrics
+          - backends_metrics
           - query_rules_metrics
     - template: instances/default

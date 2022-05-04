@@ -45,27 +45,24 @@ The next section will describe the process for preparing the patch release candi
 There are two main cases where the release manager will have to release integrations off of the release branch: the freeze has lifted and changes to an integration have been merged after freeze and before a bugfix for an RC, or a [patch release](#patches) is required. To release an integration off of the release branch, perform the following steps:
 
 1. Cherry-pick the bugfix commit to the [release branch](pre-release.md#branch).
-2. Release the integration.
+
+2. Prepare the release of the integration.
     - Create a branch based off of the release branch. 
     - Run the [integration release](../integration-release.md#new-integrations) command on that branch.
     - Make a pull request with that branch, then merge it to the release branch.
     - Note: if there are multiple integrations to release, do not use `ddev release make all --exclude <INTGS>`. Once `master` is unfrozen, releasing `all` may result in unwanted and unshipped changes to the release branch if new changes are introduced. Use `ddev release make check1 check2` instead if releasing `check1` and `check2`.
 
-    !!! important
-        Remember to trigger the release pipeline and build the wheel. You can do so by [tagging the release](../../ddev/cli.md#ddev-release-tag):
+3. Releases from the `master` branch automatically trigger the release pipeline when the PRs are merged in. If you're releasing from a release branch however, you have to manually trigger the release pipeline by [tagging the release](../../ddev/cli.md#ddev-release-tag):
 
             `ddev release tag <INTEGRATION>`
 
-        Note: only release PRs merged to master automatically build a wheel.
+4. Pull the latest release branch so your branch has the bugfix commit and release commit.
 
+5. [Tag](pre-release.md#tag) the branch with the new bumped version `<MAJOR>.<MINOR>.<PATCH>-rc.1`.
 
-3. Then pull the latest release branch so your branch has both the bugfix commit and release commit.
-
-4. [Tag](pre-release.md#tag) the branch with the new bumped version `<MAJOR>.<MINOR>.<PATCH>-rc.1`.
-
-5. After the release has been made, make a PR to `master` with the updates to `CHANGELOG.md`, [agent release requirements](https://github.com/DataDog/integrations-core/blob/master/requirements-agent-release.txt), and `__about__.py` of the integrations that were released on the release branch. Do not include the change to the in-toto file. If the current version of `__about__.py` is higher on master than the release branch, then **only** update the `CHANGELOG.md` in this PR.
+6. After the release has been made, make a PR to `master` with the updates to `CHANGELOG.md`, [agent release requirements](https://github.com/DataDog/integrations-core/blob/master/requirements-agent-release.txt), and `__about__.py` of the integrations that were released on the release branch. Do not include the change to the in-toto file. If the current version of `__about__.py` is higher on `master` than in the release branch, **only update** the `CHANGELOG.md` in this PR.
 
     !!! important
         Do not merge this PR unless the release tag from the previous PR has been pushed or the release pipeline will incorrectly attempt to release from `master`.
 
-6. Finally, if a patch release was performed, follow the same steps to [finalize the release](#finalize).
+7. Finally, if a patch release was performed, follow the same steps to [finalize the release](#finalize).
