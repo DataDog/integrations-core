@@ -1,12 +1,5 @@
 # CHANGELOG - oracle
 
-## 3.9.4-beta.2 / 2022-04-22
-
-
-## 3.9.4-beta / 2022-04-21
-
-* [Fixed] Do not close closed connection. See [#11874](https://github.com/DataDog/integrations-core/pull/11874).
-
 ## 3.9.3 / 2022-04-14
 
 * [Fixed] Handle NoneType protocol validation. See [#11837](https://github.com/DataDog/integrations-core/pull/11837).
