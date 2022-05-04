@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 name = "datadog-windows-service"
 description = "The Windows Service check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause"
 keywords = [
     "datadog",
     "datadog agent",

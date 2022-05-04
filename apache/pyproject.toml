@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 name = "datadog-apache"
 description = "The Apache check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause"
 keywords = [
     "datadog",
     "datadog agent",
