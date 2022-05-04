@@ -164,6 +164,8 @@ def test_check_kafka_metrics_limit(aggregator, kafka_instance, dd_run_check):
 
 
 @pytest.mark.e2e
+@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.read_persistent_cache', mocked_read_persistent_cache)
+@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.time', mocked_time)
 def test_e2e(dd_agent_check, kafka_instance):
     aggregator = dd_agent_check(kafka_instance)
 
