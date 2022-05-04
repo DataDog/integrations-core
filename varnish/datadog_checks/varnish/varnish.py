@@ -171,12 +171,13 @@ class Varnish(AgentCheck):
                     + ['-T', '{}:{}'.format(daemon_host, daemon_port), '-S', secretfile_path, 'backend.list', '-p']
                 )
 
+            err, output = None, None
             try:
-                output, err, _ = get_subprocess_output(cmd, self.log)
+                output, err, _ = get_subprocess_output(cmd, self.log, raise_on_empty_output=False)
             except OSError as e:
                 self.log.error("There was an error running varnishadm. Make sure 'sudo' is available. %s", e)
                 output = None
-            if err:
+            if err or not output:
                 self.log.error('Error getting service check from varnishadm: %s', err)
 
             if output:

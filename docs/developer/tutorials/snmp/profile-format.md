@@ -551,7 +551,7 @@ metadata:
         value: "dell"
 ```
 
-Supported resources and fields can be found here: [payload.go](https://github.com/DataDog/datadog-agent/blob/main/pkg/collector/corechecks/snmp/metadata/payload.go)
+Supported resources and fields can be found here: [payload.go](https://github.com/DataDog/datadog-agent/blob/main/pkg/collector/corechecks/snmp/internal/metadata/payload.go)
 
 #### Value from a static value
 
