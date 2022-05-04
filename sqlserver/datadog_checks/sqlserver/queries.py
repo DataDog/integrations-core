@@ -19,5 +19,5 @@ QUERY_SERVER_STATIC_INFO = {
         {'name': 'server.virtual_memory', 'type': 'gauge'},
         {'name': 'server.committed_memory', 'type': 'gauge'},
         {'name': 'server.target_memory', 'type': 'gauge'},
-    ]
+    ],
 }

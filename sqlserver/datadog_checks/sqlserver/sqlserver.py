@@ -14,7 +14,7 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
@@ -42,6 +42,7 @@ from .const import (
     DATABASE_SERVICE_CHECK_NAME,
     DBM_MIGRATED_METRICS,
     DEFAULT_AUTODISCOVERY_INTERVAL,
+    ENGINE_EDITION_SQL_DATABASE,
     FCI_METRICS,
     INSTANCE_METRICS,
     INSTANCE_METRICS_TOTAL,
@@ -88,6 +89,7 @@ class SQLServer(AgentCheck):
         self.instance_per_type_metrics = defaultdict(set)
         self.do_check = True
 
+        self.tags = self.instance.get("tags", [])
         self.reported_hostname = self.instance.get('reported_hostname')
         self.autodiscovery = is_affirmative(self.instance.get('database_autodiscovery'))
         self.autodiscovery_include = self.instance.get('autodiscovery_include', ['.*'])
@@ -103,11 +105,14 @@ class SQLServer(AgentCheck):
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
         self.custom_metrics = init_config.get('custom_metrics', [])
 
-        # use QueryManager to process custom queries
-        self.tags = self.instance.get("tags", [])
-        self._query_manager = QueryManager(
+        # Query declarations
+        self.server_state_queries = QueryExecutor(
             self, self.execute_query_raw, queries=[QUERY_SERVER_STATIC_INFO], tags=self.tags
         )
+        self.check_initializations.append(self.server_state_queries.compile_queries)
+
+        # use QueryManager to process custom queries
+        self._query_manager = QueryManager(self, self.execute_query_raw, tags=self.tags)
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self._query_manager.compile_queries)
         self.check_initializations.append(self.initialize_connection)
@@ -201,6 +206,16 @@ class SQLServer(AgentCheck):
                     results = cursor.fetchall()
                     if results and len(results) > 0 and len(results[0]) > 0 and results[0][0]:
                         self.static_info_cache["version"] = results[0][0]
+                    else:
+                        self.log.warning("failed to load version static information due to empty results")
+        # todo: refactor this
+        if 'engine_edition' not in self.static_info_cache:
+            with self.connection.open_managed_default_connection():
+                with self.connection.get_managed_cursor() as cursor:
+                    cursor.execute("SELECT ServerProperty('EngineEdition')")
+                    results = cursor.fetchall()
+                    if results and len(results) > 0 and len(results[0]) > 0 and results[0][0]:
+                        self.static_info_cache["engine_edition"] = results[0][0]
                     else:
                         self.log.warning("failed to load version static information due to empty results")
 
@@ -655,6 +670,11 @@ class SQLServer(AgentCheck):
             with self.connection.get_managed_cursor() as cursor:
                 cursor.execute("SET NOCOUNT ON")
             try:
+                # Server state queries require VIEW SERVER STATE permissions, which some managed database
+                # versions do not support.
+                if self.static_info_cache.get('engine_edition') not in (ENGINE_EDITION_SQL_DATABASE,):
+                    self.server_state_queries.execute()
+
                 # reuse connection for any custom queries
                 self._query_manager.execute()
             finally:
