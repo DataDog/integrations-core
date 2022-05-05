@@ -103,8 +103,7 @@ class MongoConfig(object):
             self.log.debug("Parsing mongo uri with server: %s", server)
             return parse_mongo_uri(server, sanitize_username=bool(self.ssl_params))[4]
         except Exception as e:
-            self.log.exception(e)
-            raise ConfigurationError("Could not build a mongo uri with the given hosts: %s" % self.hosts)
+            raise ConfigurationError("Could not build a mongo uri with the given hosts: %s. Error: %s" % (self.hosts, repr(e)))
 
     def _compute_service_check_tags(self):
         main_host = self.hosts[0]
