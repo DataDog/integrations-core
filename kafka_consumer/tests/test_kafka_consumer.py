@@ -10,6 +10,7 @@ import mock
 import pytest
 
 from datadog_checks.kafka_consumer import KafkaCheck
+from datadog_checks.kafka_consumer.datadog_agent import write_persistent_cache
 from datadog_checks.kafka_consumer.legacy_0_10_2 import LegacyKafkaCheck_0_10_2
 from datadog_checks.kafka_consumer.new_kafka_consumer import NewKafkaConsumerCheck
 
@@ -164,9 +165,8 @@ def test_check_kafka_metrics_limit(aggregator, kafka_instance, dd_run_check):
 
 
 @pytest.mark.e2e
-@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.read_persistent_cache', mocked_read_persistent_cache)
-@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.time', mocked_time)
 def test_e2e(dd_agent_check, kafka_instance):
+    write_persistent_cache("broker_timestampsoptional:tag1", mocked_read_persistent_cache(""))
     aggregator = dd_agent_check(kafka_instance)
 
     assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
