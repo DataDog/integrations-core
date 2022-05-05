@@ -85,7 +85,7 @@ json = [
 ]
 kube = [
     "kubernetes==18.20.0; python_version < '3.0'",
-    "kubernetes==23.3.0; python_version > '3.0'",
+    "kubernetes==22.6.0; python_version > '3.0'",
 ]
 
 [project.urls]
