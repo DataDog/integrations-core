@@ -10,7 +10,7 @@ PERF_COUNTER_BULK_COUNT = 272696576
 PERF_COUNTER_LARGE_RAWCOUNT = 65792
 
 # Engine Editions; see:
-# https://docs.microsoft.com/en-us/sql/t-sql/functions/serverproperty-transact-sql?redirectedfrom=MSDN&view=sql-server-ver15
+# https://docs.microsoft.com/en-us/sql/t-sql/functions/serverproperty-transact-sql
 ENGINE_EDITION_PERSONAL = 1
 ENGINE_EDITION_STANDARD = 2
 ENGINE_EDITION_ENTERPRISE = 3

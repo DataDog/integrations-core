@@ -107,12 +107,12 @@ class SQLServer(AgentCheck):
 
         # Query declarations
         self.server_state_queries = QueryExecutor(
-            self, self.execute_query_raw, queries=[QUERY_SERVER_STATIC_INFO], tags=self.tags
+            self, self.execute_query_raw, queries=[QUERY_SERVER_STATIC_INFO], tags=self.tags, hostname=self.resolved_hostname
         )
         self.check_initializations.append(self.server_state_queries.compile_queries)
 
         # use QueryManager to process custom queries
-        self._query_manager = QueryManager(self, self.execute_query_raw, tags=self.tags)
+        self._query_manager = QueryManager(self, self.execute_query_raw, tags=self.tags, self.resolved_hostname)
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self._query_manager.compile_queries)
         self.check_initializations.append(self.initialize_connection)
@@ -216,6 +216,15 @@ class SQLServer(AgentCheck):
                     results = cursor.fetchall()
                     if results and len(results) > 0 and len(results[0]) > 0 and results[0][0]:
                         self.static_info_cache["engine_edition"] = results[0][0]
+                    else:
+                        self.log.warning("failed to load version static information due to empty results")
+        if 'is_amazon_rds' not in self.static_info_cache:
+            with self.connection.open_managed_default_connection():
+                with self.connection.get_managed_cursor() as cursor:
+                    cursor.execute("SELECT CASE WHEN DB_ID('rdsadmin') IS NULL THEN 0 ELSE 1 END")
+                    results = cursor.fetchall()
+                    if results and len(results) > 0 and len(results[0]) > 0 and results[0][0]:
+                        self.static_info_cache["engine_edition"] = results[0][0] == 1
                     else:
                         self.log.warning("failed to load version static information due to empty results")
 
@@ -672,7 +681,9 @@ class SQLServer(AgentCheck):
             try:
                 # Server state queries require VIEW SERVER STATE permissions, which some managed database
                 # versions do not support.
-                if self.static_info_cache.get('engine_edition') not in (ENGINE_EDITION_SQL_DATABASE,):
+                if self.static_info_cache.get('engine_edition') not in [
+                    ENGINE_EDITION_SQL_DATABASE,
+                ] and not self.static_info_cache.get('is_amazon_rds'):
                     self.server_state_queries.execute()
 
                 # reuse connection for any custom queries
