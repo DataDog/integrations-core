@@ -32,7 +32,7 @@ from ..types import (
 from ..utils.agent.utils import should_profile_memory
 from ..utils.common import ensure_bytes, to_native_string
 from ..utils.http import RequestsWrapper
-from ..utils.limiter import Limiter
+from ..utils.limiter import MetricLimiter
 from ..utils.metadata import MetadataManager
 from ..utils.secrets import SecretsSanitizer
 from ..utils.tagging import GENERIC_TAGS
@@ -72,8 +72,6 @@ if not PY2:
 if TYPE_CHECKING:
     import ssl
 
-# Metric types for which it's only useful to submit once per set of tags
-ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
 TYPO_SIMILARITY_THRESHOLD = 0.95
 
 
@@ -142,14 +140,10 @@ class AgentCheck(object):
     MULTIPLE_UNDERSCORE_CLEANUP = re.compile(br'__+')
     DOT_UNDERSCORE_CLEANUP = re.compile(br'_*\._*')
 
-    # allows to set a limit on the number of metric name and tags combination
-    # this check can send per run. This is useful for checks that have an unbounded
-    # number of tag values that depend on the input payload.
-    # The logic counts one set of tags per gauge/rate/monotonic_count call, and de-duplicates
-    # sets of tags for other metric types. The first N sets of tags in submission order will
-    # be sent to the aggregator, the rest are dropped. The state is reset after each run.
-    # See https://github.com/DataDog/integrations-core/pull/2093 for more information.
-    DEFAULT_METRIC_LIMIT = 0
+    # Number of allowed unique metric names
+    METRIC_LIMIT_NAMES = MetricLimiter.DEFAULT_LIMIT_NAMES
+    # Number of allowed tag sets per metric name
+    METRIC_LIMIT_TAG_SETS = MetricLimiter.DEFAULT_LIMIT_TAG_SETS
 
     # Allow tracing for classic integrations
     def __init_subclass__(cls, *args, **kwargs):
@@ -277,8 +271,8 @@ class AgentCheck(object):
             ),
         }  # type: Dict[str, Tuple[bool, str]]
 
-        # Setup metric limits
-        self.metric_limiter = self._get_metric_limiter(self.name, instance=self.instance)
+        # Lazily setup metric limits to rely on configuration validation
+        self._metric_limiter = None  # type: Optional[MetricLimiter]
 
         # Lazily load and validate config
         self._config_model_instance = None  # type: Any
@@ -315,48 +309,12 @@ class AgentCheck(object):
 
         return None
 
-    def _get_metric_limiter(self, name, instance=None):
-        # type: (str, InstanceType) -> Optional[Limiter]
-        limit = self._get_metric_limit(instance=instance)
+    @property
+    def metric_limiter(self):
+        if self._metric_limiter is None:
+            self._metric_limiter = MetricLimiter(self)
 
-        if limit > 0:
-            return Limiter(name, 'metrics', limit, self.warning)
-
-        return None
-
-    def _get_metric_limit(self, instance=None):
-        # type: (InstanceType) -> int
-        if instance is None:
-            # NOTE: Agent 6+ will now always pass an instance when calling into a check, but we still need to
-            # account for this case due to some tests not always passing an instance on init.
-            self.log.debug(
-                "No instance provided (this is deprecated!). Reverting to the default metric limit: %s",
-                self.DEFAULT_METRIC_LIMIT,
-            )
-            return self.DEFAULT_METRIC_LIMIT
-
-        max_returned_metrics = instance.get('max_returned_metrics', self.DEFAULT_METRIC_LIMIT)
-
-        try:
-            limit = int(max_returned_metrics)
-        except (ValueError, TypeError):
-            self.warning(
-                "Configured 'max_returned_metrics' cannot be interpreted as an integer: %s. "
-                "Reverting to the default limit: %s",
-                max_returned_metrics,
-                self.DEFAULT_METRIC_LIMIT,
-            )
-            return self.DEFAULT_METRIC_LIMIT
-
-        # Do not allow to disable limiting if the class has set a non-zero default value.
-        if limit == 0 and self.DEFAULT_METRIC_LIMIT > 0:
-            self.warning(
-                "Setting 'max_returned_metrics' to zero is not allowed. Reverting to the default metric limit: %s",
-                self.DEFAULT_METRIC_LIMIT,
-            )
-            return self.DEFAULT_METRIC_LIMIT
-
-        return limit
+        return self._metric_limiter
 
     @staticmethod
     def load_config(yaml_str):
@@ -570,10 +528,6 @@ class AgentCheck(object):
         else:
             return sanitizer.sanitize(text)
 
-    def _context_uid(self, mtype, name, tags=None, hostname=None):
-        # type: (int, str, Sequence[str], str) -> str
-        return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
-
     def submit_histogram_bucket(
         self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, raw=False, flush_first_value=False
     ):
@@ -663,16 +617,8 @@ class AgentCheck(object):
         if hostname is None:
             hostname = ''
 
-        if self.metric_limiter:
-            if mtype in ONE_PER_CONTEXT_METRIC_TYPES:
-                # Fast path for gauges, rates, monotonic counters, assume one set of tags per call
-                if self.metric_limiter.is_reached():
-                    return
-            else:
-                # Other metric types have a legit use case for several calls per set of tags, track unique sets of tags
-                context = self._context_uid(mtype, name, tags, hostname)
-                if self.metric_limiter.is_reached(context):
-                    return
+        if self.metric_limiter.is_reached(hostname, name, tags):
+            return
 
         try:
             value = float(value)
@@ -1125,18 +1071,11 @@ class AgentCheck(object):
             tb = self.sanitize(traceback.format_exc())
             result = json.dumps([{'message': message, 'traceback': tb}])
         finally:
-            if self.metric_limiter:
-                if is_affirmative(self.debug_metrics.get('metric_contexts', False)):
-                    debug_metrics = self.metric_limiter.get_debug_metrics()
+            if self.metric_limiter.debugging:
+                with self.metric_limiter.disable_limits():
+                    self.metric_limiter.submit_debug_metrics()
 
-                    # Reset so we can actually submit the metrics
-                    self.metric_limiter.reset()
-
-                    tags = self.get_debug_metric_tags()
-                    for metric_name, value in debug_metrics:
-                        self.gauge(metric_name, value, tags=tags, raw=True)
-
-                self.metric_limiter.reset()
+            self.metric_limiter.reset()
 
         return result
 

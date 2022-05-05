@@ -775,145 +775,203 @@ class TestTags:
         assert expected_log in caplog.text
 
 
-class LimitedCheck(AgentCheck):
-    DEFAULT_METRIC_LIMIT = 10
-
-    def check(self, _):
-        for i in range(5):
-            self.gauge('foo', i)
-
-
 class TestLimits:
-    def test_context_uid(self, aggregator):
-        check = LimitedCheck()
+    def test_single_host(self, aggregator, dd_run_check):
+        class LimitedCheck(AgentCheck):
+            METRIC_LIMIT_NAMES = 1
+            METRIC_LIMIT_TAG_SETS = 1
 
-        # Test stability of the hash against tag ordering
-        uid = check._context_uid(aggregator.GAUGE, "test.metric", ["one", "two"], None)
-        assert uid == check._context_uid(aggregator.GAUGE, "test.metric", ["one", "two"], None)
-        assert uid == check._context_uid(aggregator.GAUGE, "test.metric", ["two", "one"], None)
+            def check(self, _):
+                for i in range(10):
+                    metric_name = 'test.metric{}'.format(i)
+                    self.gauge(metric_name, 0, tags=['foo', 'bar', 'baz'])
+                    self.gauge(metric_name, 0, tags=['baz', 'bar', 'foo'])
 
-        # Test all fields impact the hash
-        assert uid != check._context_uid(aggregator.RATE, "test.metric", ["one", "two"], None)
-        assert uid != check._context_uid(aggregator.GAUGE, "test.metric2", ["one", "two"], None)
-        assert uid != check._context_uid(aggregator.GAUGE, "test.metric", ["two"], None)
-        assert uid != check._context_uid(aggregator.GAUGE, "test.metric", ["one", "two"], "host")
-
-    def test_metric_limit_gauges(self, aggregator):
-        check = LimitedCheck()
-        assert check.get_warnings() == []
-
-        for _ in range(0, 10):
-            check.gauge("metric", 0)
-        assert len(check.get_warnings()) == 0
-        assert len(aggregator.metrics("metric")) == 10
-
-        for _ in range(0, 10):
-            check.gauge("metric", 0)
-        assert len(check.get_warnings()) == 1
-        assert len(aggregator.metrics("metric")) == 10
-
-    def test_metric_limit_count(self, aggregator):
-        check = LimitedCheck()
-        assert check.get_warnings() == []
-
-        # Multiple calls for a single set of (metric_name, tags) should not trigger
-        for _ in range(0, 20):
-            check.count("metric", 0, hostname="host-single")
-        assert len(check.get_warnings()) == 0
-        assert len(aggregator.metrics("metric")) == 20
-
-        # Multiple sets of tags should trigger
-        # Only 9 new sets of tags should pass through
-        for i in range(0, 20):
-            check.count("metric", 0, hostname="host-{}".format(i))
-        assert len(check.get_warnings()) == 1
-        assert len(aggregator.metrics("metric")) == 29
-
-    def test_metric_limit_instance_config(self, aggregator):
-        instances = [{"max_returned_metrics": 42}]
-        check = AgentCheck("test", {}, instances)
-        assert check.get_warnings() == []
-
-        for _ in range(0, 42):
-            check.gauge("metric", 0)
-        assert len(check.get_warnings()) == 0
-        assert len(aggregator.metrics("metric")) == 42
-
-        check.gauge("metric", 0)
-        assert len(check.get_warnings()) == 1
-        assert len(aggregator.metrics("metric")) == 42
-
-    def test_metric_limit_instance_config_zero_limited(self, aggregator):
-        instances = [{"max_returned_metrics": 0}]
-        check = LimitedCheck("test", {}, instances)
-        assert len(check.get_warnings()) == 1
-
-        for _ in range(0, 42):
-            check.gauge("metric", 0)
-        assert len(check.get_warnings()) == 1  # get_warnings resets the array
-        assert len(aggregator.metrics("metric")) == 10
-
-    def test_metric_limit_instance_config_zero_unlimited(self, aggregator):
-        instances = [{"max_returned_metrics": 0}]
-        check = AgentCheck("test", {}, instances)
-        assert len(check.get_warnings()) == 0
-
-        for _ in range(0, 42):
-            check.gauge("metric", 0)
-        assert len(check.get_warnings()) == 0  # get_warnings resets the array
-        assert len(aggregator.metrics("metric")) == 42
-
-    def test_metric_limit_instance_config_string(self, aggregator):
-        instances = [{"max_returned_metrics": "4"}]
-        check = AgentCheck("test", {}, instances)
-        assert check.get_warnings() == []
-
-        for _ in range(0, 4):
-            check.gauge("metric", 0)
-        assert len(check.get_warnings()) == 0
-        assert len(aggregator.metrics("metric")) == 4
-
-        check.gauge("metric", 0)
-        assert len(check.get_warnings()) == 1
-        assert len(aggregator.metrics("metric")) == 4
-
-    @pytest.mark.parametrize(
-        "max_returned_metrics",
-        (
-            pytest.param("I am not a int-convertible string", id="value-error"),
-            pytest.param(None, id="type-error-1"),
-            pytest.param(["A list is not an int"], id="type-error-2"),
-        ),
-    )
-    def test_metric_limit_instance_config_invalid_int(self, aggregator, max_returned_metrics):
-        instances = [{"max_returned_metrics": max_returned_metrics}]
-        check = LimitedCheck("test", {}, instances)
-        assert len(check.get_warnings()) == 1
-
-        # Should have fell back to the default metric limit.
-        for _ in range(12):
-            check.gauge("metric", 0)
-        assert len(aggregator.metrics("metric")) == 10
-
-    def test_debug_metrics_under_limit(self, aggregator, dd_run_check):
-        instance = {'debug_metrics': {'metric_contexts': True}}
-        check = LimitedCheck('test', {}, [instance])
+        check = LimitedCheck('test', {}, [{}])
+        check.check_id = 'test:id'
         dd_run_check(check)
 
-        assert len(check.get_warnings()) == 0
-        assert len(aggregator.metrics('foo')) == 5
-        aggregator.assert_metric('datadog.agent.metrics.contexts.limit', 10)
-        aggregator.assert_metric('datadog.agent.metrics.contexts.total', 5)
+        assert check.get_warnings() == [
+            'Check `test` instance `test:id` on host `stubbed.hostname` has reached the limit of unique metric names',
+            'Metric `test.metric0` for check `test` instance `test:id` on host `stubbed.hostname` has reached the '
+            'limit of tag sets',
+        ]
+        assert len(aggregator.metrics('test.metric0')) == 1
+        assert len(aggregator.metrics('test.metric1')) == 0
 
-    def test_debug_metrics_over_limit(self, aggregator, dd_run_check):
-        instance = {'debug_metrics': {'metric_contexts': True}, 'max_returned_metrics': 3}
-        check = LimitedCheck('test', {}, [instance])
+    def test_multiple_hosts(self, aggregator, dd_run_check):
+        class LimitedCheck(AgentCheck):
+            METRIC_LIMIT_NAMES = 1
+            METRIC_LIMIT_TAG_SETS = 1
+
+            def check(self, _):
+                for i in range(10):
+                    metric_name = 'test.metric{}'.format(i)
+                    self.gauge(metric_name, 0, tags=['foo', 'bar', 'baz'])
+                    self.gauge(metric_name, 0, tags=['baz', 'bar', 'foo'])
+                    self.gauge(metric_name, 0, tags=['foo', 'bar', 'baz'], hostname='foo.bar')
+                    self.gauge(metric_name, 0, tags=['baz', 'bar', 'foo'], hostname='foo.bar')
+
+        check = LimitedCheck('test', {}, [{}])
+        check.check_id = 'test:id'
         dd_run_check(check)
 
-        assert len(check.get_warnings()) == 1
-        assert len(aggregator.metrics('foo')) == 3
-        aggregator.assert_metric('datadog.agent.metrics.contexts.limit', 3)
-        aggregator.assert_metric('datadog.agent.metrics.contexts.total', 5)
+        assert check.get_warnings() == [
+            'Check `test` instance `test:id` on host `stubbed.hostname` has reached the limit of unique metric names',
+            'Metric `test.metric0` for check `test` instance `test:id` on host `stubbed.hostname` has reached the '
+            'limit of tag sets',
+            'Check `test` instance `test:id` on host `foo.bar` has reached the limit of unique metric names',
+            'Metric `test.metric0` for check `test` instance `test:id` on host `foo.bar` has reached the '
+            'limit of tag sets',
+        ]
+        assert len(aggregator.metrics('test.metric0')) == 2
+        assert len(aggregator.metrics('test.metric1')) == 0
+
+    def test_config(self, aggregator, dd_run_check):
+        class LimitedCheck(AgentCheck):
+            def check(self, _):
+                for i in range(10):
+                    metric_name = 'test.metric{}'.format(i)
+                    self.gauge(metric_name, 0, tags=['foo', 'bar', 'baz'])
+                    self.gauge(metric_name, 0, tags=['baz', 'bar', 'foo'])
+
+        check = LimitedCheck('test', {}, [{'metric_limits': {'names': '1', 'tag_sets': '1'}}])
+        check.check_id = 'test:id'
+        dd_run_check(check)
+
+        assert check.get_warnings() == [
+            'Check `test` instance `test:id` on host `stubbed.hostname` has reached the limit of unique metric names',
+            'Metric `test.metric0` for check `test` instance `test:id` on host `stubbed.hostname` has reached the '
+            'limit of tag sets',
+        ]
+        assert len(aggregator.metrics('test.metric0')) == 1
+        assert len(aggregator.metrics('test.metric1')) == 0
+
+    def test_config_legacy_override(self, aggregator, dd_run_check):
+        class LimitedCheck(AgentCheck):
+            def check(self, _):
+                for i in range(10):
+                    metric_name = 'test.metric{}'.format(i)
+                    self.gauge(metric_name, 0, tags=['foo', 'bar', 'baz'])
+                    self.gauge(metric_name, 0, tags=['baz', 'bar', 'foo'])
+
+        check = LimitedCheck(
+            'test', {}, [{'metric_limits': {'names': '1', 'tag_sets': '9000'}, 'max_returned_metrics': '1'}]
+        )
+        check.check_id = 'test:id'
+        dd_run_check(check)
+
+        assert check.get_warnings() == [
+            'Check `test` instance `test:id` on host `stubbed.hostname` has reached the limit of unique metric names',
+            'Metric `test.metric0` for check `test` instance `test:id` on host `stubbed.hostname` has reached the '
+            'limit of tag sets',
+        ]
+        assert len(aggregator.metrics('test.metric0')) == 1
+        assert len(aggregator.metrics('test.metric1')) == 0
+
+    def test_default_persistence(self, aggregator, dd_run_check):
+        tags = ['foo', 'bar', 'baz']
+
+        class LimitedCheck(AgentCheck):
+            METRIC_LIMIT_NAMES = 1
+            METRIC_LIMIT_TAG_SETS = 1
+
+            def check(self, _):
+                for i in range(10):
+                    metric_name = 'test.metric{}'.format(i)
+                    self.gauge(metric_name, 0, tags=tags)
+                    self.gauge(metric_name, 0, tags=tags[::-1])
+
+        check = LimitedCheck('test', {}, [{}])
+        check.check_id = 'test:id'
+        dd_run_check(check)
+
+        assert check.get_warnings() == [
+            'Check `test` instance `test:id` on host `stubbed.hostname` has reached the limit of unique metric names',
+            'Metric `test.metric0` for check `test` instance `test:id` on host `stubbed.hostname` has reached the '
+            'limit of tag sets',
+        ]
+        assert len(aggregator.metrics('test.metric0')) == 1
+        assert len(aggregator.metrics('test.metric1')) == 0
+
+        tags.pop()
+        aggregator.reset()
+        dd_run_check(check)
+
+        assert check.get_warnings() == [
+            'Check `test` instance `test:id` on host `stubbed.hostname` has reached the limit of unique metric names',
+            'Metric `test.metric0` for check `test` instance `test:id` on host `stubbed.hostname` has reached the '
+            'limit of tag sets',
+        ]
+        assert len(aggregator.metrics('test.metric0')) == 0
+        assert len(aggregator.metrics('test.metric1')) == 0
+
+    def test_no_persistence(self, aggregator, dd_run_check):
+        tags = ['foo', 'bar', 'baz']
+
+        class LimitedCheck(AgentCheck):
+            METRIC_LIMIT_NAMES = 1
+            METRIC_LIMIT_TAG_SETS = 1
+
+            def check(self, _):
+                for i in range(10):
+                    metric_name = 'test.metric{}'.format(i)
+                    self.gauge(metric_name, 0, tags=tags)
+                    self.gauge(metric_name, 0, tags=tags[::-1])
+
+        check = LimitedCheck('test', {}, [{'metric_limits': {'persist': False}}])
+        check.check_id = 'test:id'
+        dd_run_check(check)
+
+        assert check.get_warnings() == [
+            'Check `test` instance `test:id` on host `stubbed.hostname` has reached the limit of unique metric names',
+            'Metric `test.metric0` for check `test` instance `test:id` on host `stubbed.hostname` has reached the '
+            'limit of tag sets',
+        ]
+        assert len(aggregator.metrics('test.metric0')) == 1
+        assert len(aggregator.metrics('test.metric1')) == 0
+
+        tags.pop()
+        aggregator.reset()
+        dd_run_check(check)
+
+        assert check.get_warnings() == [
+            'Check `test` instance `test:id` on host `stubbed.hostname` has reached the limit of unique metric names',
+            'Metric `test.metric0` for check `test` instance `test:id` on host `stubbed.hostname` has reached the '
+            'limit of tag sets',
+        ]
+        assert len(aggregator.metrics('test.metric0')) == 1
+        assert len(aggregator.metrics('test.metric1')) == 0
+
+    def test_debug_metrics(self, aggregator, dd_run_check):
+        class LimitedCheck(AgentCheck):
+            METRIC_LIMIT_NAMES = 1
+            METRIC_LIMIT_TAG_SETS = 1
+
+            def check(self, _):
+                for i in range(10):
+                    metric_name = 'test.metric{}'.format(i)
+                    self.gauge(metric_name, 0, tags=['foo', 'bar'])
+                    self.gauge(metric_name, 0, tags=['foo', 'bar', 'baz'])
+
+        check = LimitedCheck('test', {}, [{'debug_metrics': {'metric_limits': True}, 'tags': ['foo:bar']}])
+        check.check_id = 'test:id'
+        dd_run_check(check)
+
+        assert len(check.get_warnings()) == 11
+        assert len(aggregator.metrics('test.metric1')) == 0
+        assert len(aggregator.metrics('test.metric0')) == 1
+        aggregator.assert_metric('test.metric0', 0, tags=['foo', 'bar'])
+
+        global_tags = ['check_name:test', 'check_version:0.0.0', 'foo:bar']
+        aggregator.assert_metric('datadog.agent.metrics.limits.names.total', 1, tags=global_tags)
+        aggregator.assert_metric('datadog.agent.metrics.limits.tag_sets.total', 1, tags=global_tags)
+        aggregator.assert_metric('datadog.agent.metrics.limits.names.current', 10, tags=global_tags)
+
+        for j in range(1, 10):
+            tags = ['metric_name:test.metric{}'.format(j)]
+            tags.extend(global_tags)
+            aggregator.assert_metric('datadog.agent.metrics.limits.tag_sets.current', 2, tags=tags)
 
 
 class TestCheckInitializations:

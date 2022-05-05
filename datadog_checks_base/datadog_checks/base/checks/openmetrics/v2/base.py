@@ -29,10 +29,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
       - bar
       - foo
     ```
-
     """
-
-    DEFAULT_METRIC_LIMIT = 2000
 
     # Allow tracing for openmetrics integrations
     def __init_subclass__(cls, **kwargs):

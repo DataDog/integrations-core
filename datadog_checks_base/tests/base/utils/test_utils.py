@@ -6,13 +6,11 @@
 
 from decimal import ROUND_HALF_DOWN
 
-import mock
 import pytest
 from six import PY2, PY3
 
 from datadog_checks.base.utils.common import ensure_bytes, ensure_unicode, pattern_filter, round_value, to_native_string
 from datadog_checks.base.utils.containers import hash_mutable, iter_unique
-from datadog_checks.base.utils.limiter import Limiter
 from datadog_checks.base.utils.secrets import SecretsSanitizer
 
 
@@ -64,58 +62,6 @@ class TestPatternFilter:
             Item('def'),
             Item('abcdef'),
         ]
-
-
-class TestLimiter:
-    def test_no_uid(self):
-        warning = mock.MagicMock()
-        limiter = Limiter("my_check", "names", 10, warning_func=warning)
-        for _ in range(0, 10):
-            assert limiter.is_reached() is False
-        assert limiter.get_status() == (10, 10, False)
-
-        # Reach limit
-        assert limiter.is_reached() is True
-        assert limiter.get_status() == (11, 10, True)
-
-        # Make sure warning is only sent once
-        assert limiter.is_reached() is True
-        warning.assert_called_once_with("Check %s exceeded limit of %s %s, ignoring next ones", "my_check", 10, "names")
-
-    def test_with_uid(self):
-        warning = mock.MagicMock()
-        limiter = Limiter("my_check", "names", 10, warning_func=warning)
-        for _ in range(0, 20):
-            assert limiter.is_reached("dummy1") is False
-        assert limiter.get_status() == (1, 10, False)
-
-        for _ in range(0, 20):
-            assert limiter.is_reached("dummy2") is False
-        assert limiter.get_status() == (2, 10, False)
-        warning.assert_not_called()
-
-    def test_mixed(self):
-        limiter = Limiter("my_check", "names", 10)
-
-        for _ in range(0, 20):
-            assert limiter.is_reached("dummy1") is False
-        assert limiter.get_status() == (1, 10, False)
-
-        for _ in range(0, 5):
-            assert limiter.is_reached() is False
-        assert limiter.get_status() == (6, 10, False)
-
-    def test_reset(self):
-        limiter = Limiter("my_check", "names", 10)
-
-        for _ in range(1, 20):
-            limiter.is_reached("dummy1")
-        assert limiter.get_status() == (1, 10, False)
-
-        limiter.reset()
-        assert limiter.get_status() == (0, 10, False)
-        assert limiter.is_reached("dummy1") is False
-        assert limiter.get_status() == (1, 10, False)
 
 
 class TestRounding:
