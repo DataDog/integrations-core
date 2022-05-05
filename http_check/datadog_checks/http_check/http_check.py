@@ -16,7 +16,6 @@ from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ensure_unicode
 
-from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
 from .config import DEFAULT_EXPECTED_CODE, from_instance
 from .utils import get_ca_certs_path
 
@@ -80,7 +79,6 @@ class HTTPCheck(AgentCheck):
             tags,
             ssl_expire,
             instance_ca_certs,
-            weakcipher,
             check_hostname,
             stream,
         ) = from_instance(instance, self.ca_certs)
@@ -110,14 +108,6 @@ class HTTPCheck(AgentCheck):
             parsed_uri = urlparse(addr)
             self.log.debug("Connecting to %s", addr)
             self.http.session.trust_env = False
-            if weakcipher:
-                base_addr = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
-                self.http.session.mount(base_addr, WeakCiphersAdapter())
-                self.log.debug(
-                    "Weak Ciphers will be used for %s. Supported Cipherlist: %s",
-                    base_addr,
-                    WeakCiphersHTTPSConnection.SUPPORTED_CIPHERS,
-                )
 
             # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
             if method.upper() in DATA_METHODS and not headers.get('Content-Type'):
