@@ -21,4 +21,11 @@ files:
       value:
         type: string
     - template: instances/http
+      overrides:
+        username.description: |
+          The username to use if services are behind basic or digest auth.
+          In the case of SaaS version this is your Prisma Cloud API access key ID.
+        password.description: |
+          The password to use if services are behind basic or NTLM auth.
+          In the case of SaaS version this is your Prisma Cloud Secret Key.
     - template: instances/default

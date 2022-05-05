@@ -1,0 +1,32 @@
+{
+  "display_name": "amazon_eks_blueprints",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "amazon_eks_blueprints",
+  "metric_prefix": "amazon_eks_blueprints.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "Amazon EKS Blueprints consolidates cluster configuration and deployment tools.",
+  "guid": "8d904f9b-718b-4f43-aef9-6bf7dcc465b9",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog Blueprints Add-on",
+  "categories": [
+    "aws",
+    "containers",
+    "orchestration"
+  ],
+  "type": "check",
+  "is_public": true,
+  "integration_id": "amazon-eks-blueprints",
+  "assets": {
+    "dashboards": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {}
+  }
+}

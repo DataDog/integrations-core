@@ -13,6 +13,8 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_m
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
+from .util import get_truncation_state
+
 try:
     import datadog_agent
 except ImportError:
@@ -42,7 +44,7 @@ SELECT
     thread_a.processlist_db,
     thread_a.processlist_command,
     thread_a.processlist_state,
-    thread_a.processlist_info AS sql_text,
+    statement.sql_text,
     statement.timer_start AS event_timer_start,
     statement.timer_end AS event_timer_end,
     statement.lock_time,
@@ -183,6 +185,8 @@ class MySQLActivity(DBMAsyncJob):
         normalized_rows = []
         estimated_size = 0
         for row in rows:
+            if row["sql_text"] is not None:
+                row["query_truncated"] = get_truncation_state(row["sql_text"]).value
             row = self._obfuscate_and_sanitize_row(row)
             estimated_size += self._get_estimated_row_size_bytes(row)
             if estimated_size > MySQLActivity.MAX_PAYLOAD_BYTES:
