@@ -166,13 +166,11 @@ def test_check_kafka_metrics_limit(aggregator, kafka_instance, dd_run_check):
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, kafka_instance):
-    write_persistent_cache("broker_timestampsoptional:tag1", mocked_read_persistent_cache(""))
     aggregator = dd_agent_check(kafka_instance)
+    assert_check_kafka(aggregator, kafka_instance['consumer_groups'], e2e=True)
 
-    assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
 
-
-def assert_check_kafka(aggregator, consumer_groups):
+def assert_check_kafka(aggregator, consumer_groups, e2e=False):
     for name, consumer_group in consumer_groups.items():
         for topic, partitions in consumer_group.items():
             for partition in partitions:
@@ -181,7 +179,10 @@ def assert_check_kafka(aggregator, consumer_groups):
                     aggregator.assert_metric(mname, tags=tags, at_least=1)
                 for mname in CONSUMER_METRICS:
                     aggregator.assert_metric(mname, tags=tags + ["consumer_group:{}".format(name)], at_least=1)
-                if not is_legacy_check():
+                if not is_legacy_check() and not e2e:
+                    # in the e2e test, Kafka is not actively receiving data. So we never populate the broker
+                    # timestamps with more than one timestamp. So we can't interpolate to get the consumer
+                    # timestamp.
                     aggregator.assert_metric(
                         "kafka.consumer_lag_seconds", tags=tags + ["consumer_group:{}".format(name)], at_least=1
                     )
