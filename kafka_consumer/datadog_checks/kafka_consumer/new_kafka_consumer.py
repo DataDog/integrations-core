@@ -28,7 +28,7 @@ class NewKafkaConsumerCheck(object):
         self._parent_check = parent_check
         self._broker_requests_batch_size = self.instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
         self._kafka_client = None
-        self._broker_timestamp_cache_key = 'broker_timestamps' + self.instance.get('kafka_connect_str', "")
+        self._broker_timestamp_cache_key = 'broker_timestamps' + "".join(sorted(self._custom_tags))
 
     def __getattr__(self, item):
         try:
