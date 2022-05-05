@@ -4,8 +4,8 @@
 
 import json
 import os
-from functools import lru_cache
 from collections import namedtuple
+from functools import lru_cache
 
 import click
 import yaml
