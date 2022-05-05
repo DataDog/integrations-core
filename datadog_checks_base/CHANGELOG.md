@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 25.3.1 / 2022-05-05
+
+* [Fixed] Fallback Kubernetes client version to 22.6 to avoid failures on non-standard POD conditions. See [#11928](https://github.com/DataDog/integrations-core/pull/11928).
+
 ## 25.3.0 / 2022-04-28
 
 * [Added] Upgrade `orjson` dependency. See [#11843](https://github.com/DataDog/integrations-core/pull/11843).
