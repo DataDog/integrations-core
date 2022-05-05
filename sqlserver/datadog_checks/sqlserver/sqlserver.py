@@ -105,24 +105,6 @@ class SQLServer(AgentCheck):
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
         self.custom_metrics = init_config.get('custom_metrics', [])
 
-        # Query declarations
-        self.server_state_queries = QueryExecutor(
-            self,
-            self.execute_query_raw,
-            queries=[QUERY_SERVER_STATIC_INFO],
-            tags=self.tags,
-            hostname=self.resolved_hostname,
-        )
-        self.check_initializations.append(self.server_state_queries.compile_queries)
-
-        # use QueryManager to process custom queries
-        self._query_manager = QueryManager(
-            self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
-        )
-        self.check_initializations.append(self.config_checks)
-        self.check_initializations.append(self._query_manager.compile_queries)
-        self.check_initializations.append(self.initialize_connection)
-
         # DBM
         self.dbm_enabled = self.instance.get('dbm', False)
         self.statement_metrics_config = self.instance.get('query_metrics', {}) or {}
@@ -155,6 +137,24 @@ class SQLServer(AgentCheck):
             # cache these for a full day
             ttl=60 * 60 * 24,
         )
+
+        # Query declarations
+        self.server_state_queries = QueryExecutor(
+            self.execute_query_raw,
+            self,
+            queries=[QUERY_SERVER_STATIC_INFO],
+            tags=self.tags,
+            hostname=self.resolved_hostname,
+        )
+        self.check_initializations.append(self.server_state_queries.compile_queries)
+
+        # use QueryManager to process custom queries
+        self._query_manager = QueryManager(
+            self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
+        )
+        self.check_initializations.append(self.config_checks)
+        self.check_initializations.append(self._query_manager.compile_queries)
+        self.check_initializations.append(self.initialize_connection)
 
     def cancel(self):
         self.statement_metrics.cancel()
