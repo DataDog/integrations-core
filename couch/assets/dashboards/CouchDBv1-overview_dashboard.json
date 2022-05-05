@@ -33,7 +33,7 @@
                 "time": {
                     "live_span": "4h"
                 },
-                "title": "HTTP Request Rate",
+                "title": "HTTP request rate",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries"
@@ -561,7 +561,7 @@
                 "time": {
                     "live_span": "4h"
                 },
-                "title": "Unauthorized login attempt",
+                "title": "Unauthorized login attempts",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries"
