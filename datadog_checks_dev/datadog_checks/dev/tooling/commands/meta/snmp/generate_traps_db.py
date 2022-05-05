@@ -5,7 +5,7 @@
 import json
 import os
 from functools import lru_cache
-from typing import NamedTuple
+from collections import namedtuple
 
 import click
 import yaml
@@ -32,15 +32,8 @@ class MultipleTypeDefintionsException(Exception):
     pass
 
 
-class VarMetadata(NamedTuple):
-    """
-    VarMetadata holds metadata related
-    to a trap variable.
-    """
-
-    oid: str
-    description: str
-    enum: dict
+# namedtuple definition for trap variable metadata
+VarMetadata = namedtuple('VarMetadata', ['oid', 'description', 'enum'])
 
 
 @click.command(
