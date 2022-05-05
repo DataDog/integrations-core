@@ -37,6 +37,7 @@ class VarMetadata(NamedTuple):
     VarMetadata holds metadata related
     to a trap variable.
     """
+
     oid: str
     description: str
     enum: dict
@@ -365,14 +366,14 @@ def get_var_metadata(var_name, mib_name, search_locations=None):
                 enum = get_enum(var_type, mib_name, search_locations)
             except MissingMIBException:
                 echo_warning(
-                        "Variable {} references a type called {}, but the defining MIB is missing. "
-                        "Enum definitions for this variable will be unavailable.".format(var_name, var_type)
-                    )
+                    "Variable {} references a type called {}, but the defining MIB is missing. "
+                    "Enum definitions for this variable will be unavailable.".format(var_name, var_type)
+                )
             except MultipleTypeDefintionsException:
                 echo_warning(
-                        "Variable {} references a type called {}, but this symbol is imported from multiple MIBs. "
-                        "Enum definitions for this variable will be unavailable.".format(var_name, var_type)
-                    )
+                    "Variable {} references a type called {}, but this symbol is imported from multiple MIBs. "
+                    "Enum definitions for this variable will be unavailable.".format(var_name, var_type)
+                )
 
     # swap keys and values for easier
     # parsing agent side
@@ -380,11 +381,7 @@ def get_var_metadata(var_name, mib_name, search_locations=None):
     for k, v in enum.items():
         parsed_enum[v] = k
 
-    return VarMetadata(
-        file_content[var_name]['oid'],
-        file_content[var_name].get('description', ''),
-        parsed_enum
-    )
+    return VarMetadata(file_content[var_name]['oid'], file_content[var_name].get('description', ''), parsed_enum)
 
 
 @lru_cache(maxsize=None)
