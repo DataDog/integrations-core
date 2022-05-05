@@ -39,6 +39,15 @@ files:
       description: Password for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
       value:
         type: string
+    - name: server_version
+      description: |
+        Server version year of sqlserver the agent will connect to. 
+        Important for validating connection string attributes for older sqlserver versions.
+        
+        Defaults to `2019`.
+      value:
+        type: string
+        example: "2019"
     - name: database
       description: |
         Database name to query.  Not compatible with `database_autodiscovery`.

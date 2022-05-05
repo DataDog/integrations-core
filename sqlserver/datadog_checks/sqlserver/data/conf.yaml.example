@@ -51,6 +51,14 @@ instances:
     #
     # password: <PASSWORD>
 
+    ## @param server_version - string - optional - default: 2019
+    ## Server version year of sqlserver the agent will connect to. 
+    ## Important for validating connection string attributes for older sqlserver versions.
+    ##
+    ## Defaults to `2019`.
+    #
+    # server_version: '2019'
+
     ## @param database - string - optional - default: master
     ## Database name to query.  Not compatible with `database_autodiscovery`.
     #
