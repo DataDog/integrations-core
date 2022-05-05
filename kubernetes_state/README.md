@@ -33,7 +33,7 @@ The Kubernetes-state check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][6] for a list of service checks provided by this integration.
+See [../kubernetes/service_checks.json][6] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
