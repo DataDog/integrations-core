@@ -218,19 +218,10 @@ class SQLServer(AgentCheck):
         if 'engine_edition' not in self.static_info_cache:
             with self.connection.open_managed_default_connection():
                 with self.connection.get_managed_cursor() as cursor:
-                    cursor.execute("SELECT ServerProperty('EngineEdition')")
-                    results = cursor.fetchall()
-                    if results and len(results) > 0 and len(results[0]) > 0 and results[0][0]:
-                        self.static_info_cache["engine_edition"] = results[0][0]
-                    else:
-                        self.log.warning("failed to load version static information due to empty results")
-        if 'is_amazon_rds' not in self.static_info_cache:
-            with self.connection.open_managed_default_connection():
-                with self.connection.get_managed_cursor() as cursor:
-                    cursor.execute("SELECT CASE WHEN DB_ID('rdsadmin') IS NULL THEN 0 ELSE 1 END")
-                    results = cursor.fetchall()
-                    if results and len(results) > 0 and len(results[0]) > 0 and results[0][0]:
-                        self.static_info_cache["engine_edition"] = results[0][0] == 1
+                    cursor.execute("SELECT CAST(ServerProperty('EngineEdition') AS INT) AS Edition")
+                    result = cursor.fetchone()
+                    if result:
+                        self.static_info_cache["engine_edition"] = result
                     else:
                         self.log.warning("failed to load version static information due to empty results")
 
@@ -689,7 +680,7 @@ class SQLServer(AgentCheck):
                 # versions do not support.
                 if self.static_info_cache.get('engine_edition') not in [
                     ENGINE_EDITION_SQL_DATABASE,
-                ] and not self.static_info_cache.get('is_amazon_rds'):
+                ]:
                     self.server_state_queries.execute()
 
                 # reuse connection for any custom queries
