@@ -365,14 +365,14 @@ def get_var_metadata(var_name, mib_name, search_locations=None):
                 enum = get_enum(var_type, mib_name, search_locations)
             except MissingMIBException:
                 echo_warning(
-                            "Variable {} references a type called {}, but the defining MIB is missing. "
-                            "Enum definitions for this variable will be unavailable.".format(var_name, var_type)
-                        )
+                        "Variable {} references a type called {}, but the defining MIB is missing. "
+                        "Enum definitions for this variable will be unavailable.".format(var_name, var_type)
+                    )
             except MultipleTypeDefintionsException:
                 echo_warning(
-                            "Variable {} references a type called {}, but this symbol is imported from multiple MIBs. "
-                            "Enum definitions for this variable will be unavailable.".format(var_name, var_type)
-                        )
+                        "Variable {} references a type called {}, but this symbol is imported from multiple MIBs. "
+                        "Enum definitions for this variable will be unavailable.".format(var_name, var_type)
+                    )
 
     # swap keys and values for easier
     # parsing agent side
@@ -424,6 +424,7 @@ def get_enum(var_name, mib_name, search_locations=None):
 
     return enum
 
+
 @lru_cache(maxsize=None)
 def get_import_mib(var_name, mib_name, search_locations=None):
     """
@@ -442,7 +443,7 @@ def get_import_mib(var_name, mib_name, search_locations=None):
         return MissingMIBException
 
     with open(file_name, 'r') as f:
-            file_content = json.load(f)
+        file_content = json.load(f)
 
     # search imports for var_name
     imported_mibs = [k for k, v in file_content.get('imports', {}).items() if var_name in v]
