@@ -26,7 +26,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
+    "dashboards": {
+      "ArangoDB Overview": "assets/dashboards/arangodb_overview.json"
+    },
     "monitors": {},
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
