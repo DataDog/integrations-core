@@ -76,6 +76,7 @@ class Varnish(AgentCheck):
 
         self.name = self.instance.get('name')
         self.metrics_filter = self.instance.get("metrics_filter", [])
+        self.tags = self.custom_tags + [u'varnish_name:%s' % (self.name if self.name is not None else 'default')]
         self.check_initializations.append(self.validate_config)
 
     def validate_config(self):
@@ -125,50 +126,39 @@ class Varnish(AgentCheck):
             else:
                 self._current_str = data
 
-    def check(self, instance):
+    def check(self, _):
         # Get version and version-specific args from varnishstat -V.
         version, varnishstat_format = self._get_version_info(self.varnishstat_path)
 
         cmd = self.varnishstat_path + [self.VARNISHSTAT_FORMAT_OPTION[varnishstat_format]]
         for metric in self.metrics_filter:
             cmd.extend(["-f", metric])
-
         if self.name is not None:
             cmd.extend(['-n', self.name])
-            tags = self.custom_tags + [u'varnish_name:%s' % self.name]
-        else:
-            tags = self.custom_tags + [u'varnish_name:default']
 
         output, _, _ = get_subprocess_output(cmd, self.log)
 
-        self._parse_varnishstat(output, varnishstat_format, tags)
+        self._parse_varnishstat(output, varnishstat_format, self.tags)
 
         # Parse service checks from varnishadm.
-        if instance.get("varnishadm", None):
-            # Split the varnishadm command so that additional arguments can be passed in
-            # In order to support monitoring a Varnish instance which is running as a Docker
-            # container we need to wrap commands (varnishstat, varnishadm) with scripts which
-            # perform a docker exec on the running container. This works fine when running a
-            # single container on the host but breaks down when attempting to use the auto
-            # discovery feature. This change allows for passing in additional parameters to
-            # the script (i.e. %%host%%) so that the command is properly formatted and the
-            # desired container is queried.
-            varnishadm_path = instance.get('varnishadm', '').split()
-            secretfile_path = instance.get('secretfile', '/etc/varnish/secret')
-
-            daemon_host = instance.get('daemon_host', 'localhost')
-            daemon_port = instance.get('daemon_port', '6082')
-
+        if self.varnishadm:
             cmd = []
             if geteuid() != 0:
                 cmd.append('sudo')
 
             if version < LooseVersion('4.1.0'):
-                cmd.extend(varnishadm_path + ['-S', secretfile_path, 'debug.health'])
+                cmd.extend(self.varnishadm_path + ['-S', self.secretfile_path, 'debug.health'])
             else:
                 cmd.extend(
-                    varnishadm_path
-                    + ['-T', '{}:{}'.format(daemon_host, daemon_port), '-S', secretfile_path, 'backend.list', '-p']
+                    self.varnishadm_path
+                    + [
+                        '-T',
+                        '{}:{}'.format(self.daemon_host, self.daemon_port),
+                        '-S',
+                        self.secretfile_path,
+                        'backend.list',
+                        '-p',
+                    ]
                 )
 
             err, output = None, None
