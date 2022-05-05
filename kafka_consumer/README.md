@@ -79,9 +79,9 @@ Depending on your Kafka cluster's Kerberos setup, you may need to configure the 
   * If a private key is required to authenticate the certificate, it should be configured with the `tls_private_key` option. If applicable, the private key password should be configured with the `tls_private_key_password`. 
 * `KRB5_CLIENT_KTNAME` environment variable pointing to the Kafka client's Kerberos keytab location if it differs from the default path (for example, `KRB5_CLIENT_KTNAME=/etc/krb5.keytab`)
 * `KRB5CCNAME` environment variable pointing to the Kafka client's Kerberos credentials ticket cache if it differs from the default path (for example, `KRB5CCNAME=/tmp/krb5cc_xxx`)
-* If the Datadog Agent is unable to access the environment variables, configure the environment variables in a Datadog Agent service configuration override file for your operating system. For example, in a Linux `systemd` environment: 
+* If the Datadog Agent is unable to access the environment variables, configure the environment variables in a Datadog Agent service configuration override file for your operating system. The procedure for modifying the Datadog Agent service unit file may vary for different Linux operating systems. For example, in a Linux `systemd` environment: 
 
-**Linux Systemd**
+**Linux Systemd Example**
 
 1. Configure the environment variables in an environment file.
    For example: `/path/to/environment/file`
