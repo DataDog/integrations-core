@@ -107,12 +107,18 @@ class SQLServer(AgentCheck):
 
         # Query declarations
         self.server_state_queries = QueryExecutor(
-            self, self.execute_query_raw, queries=[QUERY_SERVER_STATIC_INFO], tags=self.tags, hostname=self.resolved_hostname
+            self,
+            self.execute_query_raw,
+            queries=[QUERY_SERVER_STATIC_INFO],
+            tags=self.tags,
+            hostname=self.resolved_hostname,
         )
         self.check_initializations.append(self.server_state_queries.compile_queries)
 
         # use QueryManager to process custom queries
-        self._query_manager = QueryManager(self, self.execute_query_raw, tags=self.tags, self.resolved_hostname)
+        self._query_manager = QueryManager(
+            self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
+        )
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self._query_manager.compile_queries)
         self.check_initializations.append(self.initialize_connection)
