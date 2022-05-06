@@ -138,6 +138,8 @@ def test_istio_agent(aggregator, dd_run_check, mock_http_response):
                 'destination_workload_namespace',
                 'request_protocol',
                 'connection_security_policy',
+                'destination_service',
+                'source_workload'
             ],
         ),
         (["foo"], ["foo"]),
