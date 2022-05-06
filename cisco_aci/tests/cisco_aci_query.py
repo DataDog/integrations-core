@@ -1,4 +1,5 @@
 import json
+
 import requests
 
 # This is a python script that you can use to query a specific
@@ -14,7 +15,7 @@ api_path = str.format('/api/mo/uni/tn-{}.json?rsp-subtree-include=stats,no-scope
 
 
 def apic_login(apic, username, password):
-    """ APIC login and return session cookie """
+    """APIC login and return session cookie"""
     apic_cookie = {}
     credentials = {'aaaUser': {'attributes': {'name': username, 'pwd': password}}}
     json_credentials = json.dumps(credentials)
@@ -29,7 +30,7 @@ def apic_login(apic, username, password):
 
 
 def apic_query(apic, path, cookie):
-    """ APIC 'GET' query and return response """
+    """APIC 'GET' query and return response"""
     base_url = 'https://' + apic + path
 
     get_response = requests.get(base_url, cookies=cookie, verify=False)
@@ -38,7 +39,7 @@ def apic_query(apic, path, cookie):
 
 
 def apic_logout(apic, cookie):
-    """ APIC logout and return response """
+    """APIC logout and return response"""
     base_url = 'https://' + apic + '/api/aaaLogout.json'
 
     post_response = requests.post(base_url, cookies=cookie, verify=False)
