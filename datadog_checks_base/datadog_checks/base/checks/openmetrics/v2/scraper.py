@@ -4,7 +4,7 @@
 import fnmatch
 import inspect
 import re
-from copy import deepcopy, copy
+from copy import copy, deepcopy
 from itertools import chain
 from math import isinf, isnan
 from typing import List
