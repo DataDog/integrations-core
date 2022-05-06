@@ -214,7 +214,7 @@ reminder-image-builder:
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
   only:
     changes:
-      - .gitlab/reminder/**
+      - .gitlab/reminder/**/*
     refs:
       - master
   script:
@@ -229,8 +229,8 @@ tagger-image-builder:
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
   only:
     changes:
-      - .gitlab/tagger/**
-      - datadog_checks_dev/**
+      - .gitlab/tagger/**/*
+      - datadog_checks_dev/**/*
     refs:
       - master
   script:
@@ -245,7 +245,7 @@ validate-log-intgs-builder:
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
   only:
     changes:
-      - .gitlab/validate-logs-intgs/**
+      - .gitlab/validate-logs-intgs/**/*
     refs:
       - master
   script:
@@ -260,7 +260,7 @@ validate-agent-build-builder:
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
   only:
     changes:
-      - .gitlab/validate-agent-build/**
+      - .gitlab/validate-agent-build/**/*
     refs:
       - master
   script:

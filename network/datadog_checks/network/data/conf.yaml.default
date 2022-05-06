@@ -118,6 +118,22 @@ instances:
     #
     # collect_aws_ena_metrics: false
 
+    ## @param collect_ethtool_metrics - boolean - optional - default: false
+    ## Linux only.
+    ## Enable collection of ethtool statistics for network interfaces.
+    ## This will collect per queue and per cpu metrics depending on the driver.
+    ##
+    ## The queue and cpu will be used as a tag when submitting metrics.
+    ## For example, 'queue_0_tx_cnt' will be submitted as 'system.net.ena.queue.tx_cnt' with tag 'queue:0'
+    ##
+    ## Currently supported drivers:
+    ## - ena
+    ## - virtio_net
+    ## - hv_netvsc
+    ## - gve
+    #
+    # collect_ethtool_metrics: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

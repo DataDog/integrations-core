@@ -12,7 +12,7 @@ INSTANCE_MULTIPLE = {'multiple_ips': True}
 INSTANCE_MULTIPLE.update(INSTANCE)
 
 INSTANCE_IPV6 = {
-    'host': 'app.datadoghq.com',
+    'host': 'app.datad0g.com',
     'port': 80,
     'timeout': 1.5,
     'name': 'UpService',
