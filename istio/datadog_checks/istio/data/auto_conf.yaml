@@ -1,3 +1,8 @@
+## @param ad_identifiers - list of strings - required
+## A list of container identifiers that are used by Autodiscovery to identify
+## which container the check should be run against. For more information, see:
+## https://docs.datadoghq.com/agent/guide/ad_identifiers/
+#
 ad_identifiers:
   - proxyv2
   - proxyv2-rhel8
@@ -15,10 +20,10 @@ instances:
     #
   - send_histograms_buckets: true
 
-    ## @param istio_mesh_endpoint - string - optional
+    ## @param istio_mesh_endpoint - string - optional - default: http://%%host%%:15090/stats/prometheus
     ## To enable Istio metrics you must specify the url exposing the API.
     #
-    istio_mesh_endpoint: http://%%host%%:15090/stats/prometheus
+    # istio_mesh_endpoint: http://%%host%%:15090/stats/prometheus
 
     ## @param exclude_labels - list of strings - optional
     ## A list of labels to be excluded
@@ -38,3 +43,6 @@ instances:
       - destination_workload_namespace
       - request_protocol
       - connection_security_policy
+      - endpoint
+      - destination_service
+      - source_workload
