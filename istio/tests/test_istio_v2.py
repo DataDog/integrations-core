@@ -139,7 +139,7 @@ def test_istio_agent(aggregator, dd_run_check, mock_http_response):
                 'request_protocol',
                 'connection_security_policy',
                 'destination_service',
-                'source_workload'
+                'source_workload',
             ],
         ),
         (["foo"], ["foo"]),
