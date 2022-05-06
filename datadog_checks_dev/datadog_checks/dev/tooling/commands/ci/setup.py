@@ -14,7 +14,7 @@ from ...constants import get_root
 from ...testing import get_tox_envs
 from ..console import CONTEXT_SETTINGS, echo_debug, echo_info
 
-COMPOSE_VERSION = 'v2.3.4'
+COMPOSE_VERSION = 'v2.3.5'
 COMPOSE_RELEASES_URL = f'https://github.com/docker/compose/releases/download/{COMPOSE_VERSION}/'
 
 
