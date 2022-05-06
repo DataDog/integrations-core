@@ -282,10 +282,32 @@ CurrencyUsage = {
     ),
     'columns': [
         {'name': 'billing_account', 'type': 'tag'},
-        {'name': 'organization', 'type': 'tag'},
+        {'name': 'organization_name', 'type': 'tag'},
         {'name': 'service_level', 'type': 'tag'},
         {'name': 'currency', 'type': 'tag'},
         {'name': 'contract.amount.avg', 'type': 'gauge'},
         {'name': 'contract.amount.sum', 'type': 'gauge'},
+    ],
+}
+
+
+# https://docs.snowflake.com/en/sql-reference/organization-usage/warehouse_metering_history.html
+OrgWarehouseCreditUsage = {
+    'name': 'organization.billings.warehouse.metrics',
+    'query': (
+        'select WAREHOUSE_NAME, ACCOUNT_NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), '
+        'sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), '
+        'sum(CREDITS_USED), avg(CREDITS_USED) from WAREHOUSE_METERING_HISTORY '
+        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1, 2;'
+    ),
+    'columns': [
+        {'name': 'warehouse', 'type': 'tag'},
+        {'name': 'organization.billing_account', 'type': 'tag'},
+        {'name': 'organization.billing.warehouse.virtual_warehouse.sum', 'type': 'gauge'},
+        {'name': 'organization.billing.warehouse.virtual_warehouse.avg', 'type': 'gauge'},
+        {'name': 'organization.billing.warehouse.cloud_service.sum', 'type': 'gauge'},
+        {'name': 'organization.billing.warehouse.cloud_service.avg', 'type': 'gauge'},
+        {'name': 'organization.billing.warehouse.total_credit.sum', 'type': 'gauge'},
+        {'name': 'organization.billing.warehouse.total_credit.avg', 'type': 'gauge'},
     ],
 }

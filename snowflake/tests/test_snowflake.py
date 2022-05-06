@@ -163,11 +163,11 @@ def test_currency_usage(dd_run_check, aggregator, instance):
     # type: (Callable[[SnowflakeCheck], None], AggregatorStub, Dict[str, Any]) -> None
 
     expected_currency_metrics = [
-        ('test', 'ORGANIZATION', 'Standard', 'dollar', Decimal('0.4'), Decimal('0.7')),
+        ('test', 'ORGANIZATION','Standard', 'dollar', Decimal('0.4'), Decimal('0.7')),
     ]
     expected_tags = EXPECTED_TAGS + [
         'billing_account:test',
-        'organization:ORGANIZATION',
+        'organization_name:ORGANIZATION',
         'service_level:Standard',
         'currency:dollar',
     ]

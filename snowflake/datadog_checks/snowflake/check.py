@@ -28,7 +28,8 @@ ACCOUNT_USAGE_METRIC_GROUPS = {
 
 ORGANIZATION_USAGE_METRIC_GROUPS = {
     'snowflake.contracts': [queries.ContractItems],
-    'organization.billing_currency.metrics': [queries.CurrencyUsage],
+    'snowflake.organization.billing_currency.metrics': [queries.CurrencyUsage],
+    'snowflake.organization.billings.warehouse.metrics': [queries.OrgWarehouseCreditUsage],
 }
 
 
