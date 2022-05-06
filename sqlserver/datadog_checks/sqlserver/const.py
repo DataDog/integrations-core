@@ -21,6 +21,9 @@ ENGINE_EDITION_AZURE_MANAGED_INSTANCE = 8
 ENGINE_EDITION_AZURE_SQL_EDGE = 9
 ENGINE_EDITION_AZURE_SYNAPSE_SERVERLESS_POOL = 11
 
+STATIC_INFO_VERSION = 'version'
+STATIC_INFO_ENGINE_EDITION = 'engine_edition'
+
 # Metric discovery queries
 COUNTER_TYPE_QUERY = """select distinct cntr_type
                         from sys.dm_os_performance_counters
