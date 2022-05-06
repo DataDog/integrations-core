@@ -23,7 +23,7 @@ instances:
     ## @param istio_mesh_endpoint - string - optional - default: http://%%host%%:15090/stats/prometheus
     ## To enable Istio metrics you must specify the url exposing the API.
     #
-    # istio_mesh_endpoint: http://%%host%%:15090/stats/prometheus
+    istio_mesh_endpoint: http://%%host%%:15090/stats/prometheus
 
     ## @param exclude_labels - list of strings - optional
     ## A list of labels to be excluded
