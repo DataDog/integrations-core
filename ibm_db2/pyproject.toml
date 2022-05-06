@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 name = "datadog-ibm-db2"
 description = "The IBM Db2 check"
 readme = "README.md"
-license = "BSD-3-Clause"
+license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",

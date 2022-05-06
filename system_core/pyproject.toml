@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 name = "datadog-system-core"
 description = "The System Core check"
 readme = "README.md"
-license = "BSD-3-Clause"
+license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
