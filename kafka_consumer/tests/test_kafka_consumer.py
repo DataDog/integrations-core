@@ -10,7 +10,6 @@ import mock
 import pytest
 
 from datadog_checks.kafka_consumer import KafkaCheck
-from datadog_checks.kafka_consumer.datadog_agent import write_persistent_cache
 from datadog_checks.kafka_consumer.legacy_0_10_2 import LegacyKafkaCheck_0_10_2
 from datadog_checks.kafka_consumer.new_kafka_consumer import NewKafkaConsumerCheck
 
