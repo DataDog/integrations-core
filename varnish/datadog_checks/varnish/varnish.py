@@ -130,7 +130,6 @@ class Varnish(AgentCheck):
         cmd = self.varnishstat_path + [self.VARNISHSTAT_FORMAT_OPTION[varnishstat_format]]
         for metric in self.metrics_filter:
             cmd.extend(["-f", metric])
-
         if self.name is not None:
             cmd.extend(['-n', self.name])
 
@@ -144,8 +143,7 @@ class Varnish(AgentCheck):
         self._parse_varnishstat(varnish_stats_raw, varnishstat_format)
 
         # Parse service checks from varnishadm.
-        backends_by_status = None
-        if self.varnishadm is not None:
+        if self.varnishadm:
             varnish_adm_raw = self._get_varnish_adm(version)
             if varnish_adm_raw:
                 backends_by_status = self._parse_varnishadm(varnish_adm_raw)
@@ -180,7 +178,7 @@ class Varnish(AgentCheck):
             self.log.error("There was an error running varnishadm. Make sure 'sudo' is available. %s", e)
             output = None
         if err or not output:
-            self.log.error('Error getting service check from varnishadm: %s', repr(err))
+            self.log.error('Error getting service check from varnishadm: %s', err)
         return output
 
     def _get_version_info(self):
