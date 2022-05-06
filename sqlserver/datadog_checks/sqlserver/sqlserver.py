@@ -18,9 +18,9 @@ from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
+from datadog_checks.sqlserver.alwayson import SqlserverAlwaysOn
 from datadog_checks.sqlserver.metrics import SqlFileStats
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
-from datadog_checks.sqlserver.alwayson import SqlserverAlwaysOn
 
 try:
     import datadog_agent
