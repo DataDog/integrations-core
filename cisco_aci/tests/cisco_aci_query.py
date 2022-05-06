@@ -1,11 +1,16 @@
 import json
 import requests
 
+# This is a python script that you can use to query a specific
+# tenant metric endpoint and includes the login and logout requests.
+# You can change the parameters below for your configuration and tenant to query.
+
 # Edit this section
-apic_url = 'URL.com'
-apic_username = 'USERNAME'
-apic_password = 'PASSWORD'
-api_path = '/api/mo/uni/tn-infra.json?rsp-subtree-include=stats,no-scoped'  # This queries the `infra` tenant
+apic_url = 'sandboxapicdc.cisco.com'
+apic_username = 'admin'
+apic_password = '!v3G@!4@Y'
+tenant = 'infra'
+api_path = str.format('/api/mo/uni/tn-{}.json?rsp-subtree-include=stats,no-scoped', tenant)
 
 
 def apic_login(apic, username, password):
@@ -47,4 +52,4 @@ logout_response = apic_logout(apic=apic_url, cookie=apic_cookie)
 
 response_json = json.loads(response.text)
 
-print(response_json)
+print(json.dumps(response_json, indent=2, sort_keys=True))
