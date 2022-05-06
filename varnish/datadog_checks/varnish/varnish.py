@@ -126,6 +126,17 @@ class Varnish(AgentCheck):
             else:
                 self._current_str = data
 
+    def _get_varnish_stats(self, varnishstat_format):
+        cmd = self.varnishstat_path + [self.VARNISHSTAT_FORMAT_OPTION[varnishstat_format]]
+        for metric in self.metrics_filter:
+            cmd.extend(["-f", metric])
+
+        if self.name is not None:
+            cmd.extend(['-n', self.name])
+
+        output, _, _ = get_subprocess_output(cmd, self.log)
+        return output
+
     def check(self, _):
         # Get version and version-specific args from varnishstat -V.
         version, varnishstat_format = self._get_version_info()
@@ -141,6 +152,36 @@ class Varnish(AgentCheck):
                 self._submit_backend_service_checks(backends_by_status)
         else:
             self.log.debug("Not collecting varnishadm because varnishadm is not set")
+
+    def _get_varnish_adm(self, version):
+        cmd = []
+        if geteuid() != 0:
+            cmd.append('sudo')
+
+        if version < LooseVersion('4.1.0'):
+            cmd.extend(self.varnishadm_path + ['-S', self.secretfile_path, 'debug.health'])
+        else:
+            cmd.extend(
+                self.varnishadm_path
+                + [
+                    '-T',
+                    '{}:{}'.format(self.daemon_host, self.daemon_port),
+                    '-S',
+                    self.secretfile_path,
+                    'backend.list',
+                    '-p',
+                ]
+            )
+
+        err, output = None, None
+        try:
+            output, err, _ = get_subprocess_output(cmd, self.log, raise_on_empty_output=False)
+        except OSError as e:
+            self.log.error("There was an error running varnishadm. Make sure 'sudo' is available. %s", e)
+            output = None
+        if err or not output:
+            self.log.error('Error getting service check from varnishadm: %s', repr(err))
+        return output
 
     def _get_version_info(self):
         # Get the varnish version from varnishstat
@@ -180,17 +221,6 @@ class Varnish(AgentCheck):
             varnishstat_format = "xml"
 
         return version, varnishstat_format
-
-    def _get_varnish_stats(self, varnishstat_format):
-        cmd = self.varnishstat_path + [self.VARNISHSTAT_FORMAT_OPTION[varnishstat_format]]
-        for metric in self.metrics_filter:
-            cmd.extend(["-f", metric])
-
-        if self.name is not None:
-            cmd.extend(['-n', self.name])
-
-        output, _, _ = get_subprocess_output(cmd, self.log)
-        return output
 
     def _parse_varnishstat(self, output, varnishstat_format):
         """
@@ -254,36 +284,6 @@ class Varnish(AgentCheck):
                     # col 3 has a rate (since restart)
                     self.log.debug("Varnish (rate) %s %d", metric_name, int(gauge_val))
                     self.rate(metric_name, float(gauge_val), tags=self.tags)
-
-    def _get_varnish_adm(self, version):
-        cmd = []
-        if geteuid() != 0:
-            cmd.append('sudo')
-
-        if version < LooseVersion('4.1.0'):
-            cmd.extend(self.varnishadm_path + ['-S', self.secretfile_path, 'debug.health'])
-        else:
-            cmd.extend(
-                self.varnishadm_path
-                + [
-                    '-T',
-                    '{}:{}'.format(self.daemon_host, self.daemon_port),
-                    '-S',
-                    self.secretfile_path,
-                    'backend.list',
-                    '-p',
-                ]
-            )
-
-        err, output = None, None
-        try:
-            output, err, _ = get_subprocess_output(cmd, self.log, raise_on_empty_output=False)
-        except OSError as e:
-            self.log.error("There was an error running varnishadm. Make sure 'sudo' is available. %s", e)
-            output = None
-        if err or not output:
-            self.log.error('Error getting service check from varnishadm: %s', repr(err))
-        return output
 
     def _parse_varnishadm(self, output):
         """Parse out service checks from varnishadm.
