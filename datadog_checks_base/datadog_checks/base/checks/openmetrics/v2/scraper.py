@@ -4,9 +4,10 @@
 import fnmatch
 import inspect
 import re
-from copy import deepcopy
+from copy import deepcopy, copy
 from itertools import chain
 from math import isinf, isnan
+from typing import List
 
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_metric_families_strict
 from prometheus_client.parser import text_fd_to_metric_families as parse_metric_families
@@ -174,8 +175,7 @@ class OpenMetricsScraper:
                         f'Label `{label}` of setting `exclude_metrics_by_labels` must be an array or set to `true`'
                     )
 
-        custom_tags = config.get('tags', [])
-        custom_tags.append(f'endpoint:{self.endpoint}')
+        custom_tags = config.get('tags', [])  # type: List[str]
         if not isinstance(custom_tags, list):
             raise ConfigurationError('Setting `tags` must be an array')
 
@@ -191,11 +191,14 @@ class OpenMetricsScraper:
         ignore_tags = config.get('ignore_tags', [])
         if ignore_tags:
             ignored_tags_re = re.compile('|'.join(set(ignore_tags)))
-            custom_tags = {tag for tag in custom_tags if not ignored_tags_re.search(tag)}
+            custom_tags = [tag for tag in custom_tags if not ignored_tags_re.search(tag)]
+
+        self.static_tags = copy(custom_tags)
+        if is_affirmative(self.config.get('tag_by_endpoint', True)):
+            self.static_tags.append(f'endpoint:{self.endpoint}')
 
         # These will be applied only to service checks
-        self.static_tags = tuple(custom_tags)
-
+        self.static_tags = tuple(self.static_tags)
         # These will be applied to everything except service checks
         self.tags = self.static_tags
 
