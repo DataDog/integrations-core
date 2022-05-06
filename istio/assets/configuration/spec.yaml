@@ -86,6 +86,7 @@ files:
         description: To enable Istio metrics you must specify the url exposing the API.
         enabled: true
         value:
+          display_default: null
           example: http://%%host%%:15090/stats/prometheus
           type: string
       - name: exclude_labels
