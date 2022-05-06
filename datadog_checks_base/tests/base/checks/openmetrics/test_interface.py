@@ -47,9 +47,7 @@ def test_ignore_tags_excludes_default_tags(aggregator, dd_run_check, mock_http_r
     check = get_check({'metrics': ['.+'], 'ignore_tags': ['endpoint']})
     dd_run_check(check)
 
-    aggregator.assert_metric(
-        'test.go_memstats_alloc_bytes', 6396288, metric_type=aggregator.GAUGE, tags=['foo:baz']
-    )
+    aggregator.assert_metric('test.go_memstats_alloc_bytes', 6396288, metric_type=aggregator.GAUGE, tags=['foo:baz'])
 
 
 def test_service_check_dynamic_tags(aggregator, dd_run_check, mock_http_response):

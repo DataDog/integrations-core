@@ -44,6 +44,7 @@ def test_defaults(dd_run_check):
 
     assert not check.warnings
 
+
 def test_errors_shared_config(dd_run_check):
     init_config = {'timeout': 'foo'}
     instance = {}
