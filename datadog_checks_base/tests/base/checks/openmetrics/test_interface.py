@@ -36,6 +36,22 @@ def test_default_config(aggregator, dd_run_check, mock_http_response):
     aggregator.assert_all_metrics_covered()
 
 
+def test_exclude_labels_does_not_exclude_default_tags(aggregator, dd_run_check, mock_http_response):
+    mock_http_response(
+        """
+        # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+        # TYPE go_memstats_alloc_bytes gauge
+        go_memstats_alloc_bytes{foo="baz"} 6.396288e+06
+        """
+    )
+    check = get_check({'metrics': ['.+'], 'exclude_labels': ['endpoint']})
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'test.go_memstats_alloc_bytes', 6396288, metric_type=aggregator.GAUGE, tags=['endpoint:test', 'foo:baz']
+    )
+
+
 def test_service_check_dynamic_tags(aggregator, dd_run_check, mock_http_response):
     mock_http_response(
         """
