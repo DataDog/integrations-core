@@ -5,7 +5,7 @@ import requests
 # tenant metric endpoint and includes the login and logout requests.
 # You can change the parameters below for your configuration and tenant to query.
 
-# Edit this section
+# Edit this section. Below is a sample config using the public sandbox:
 apic_url = 'sandboxapicdc.cisco.com'
 apic_username = 'admin'
 apic_password = '!v3G@!4@Y'
