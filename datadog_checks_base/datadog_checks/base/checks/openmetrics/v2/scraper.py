@@ -175,6 +175,7 @@ class OpenMetricsScraper:
                     )
 
         custom_tags = config.get('tags', [])
+        custom_tags.append(f'endpoint:{self.endpoint}')
         if not isinstance(custom_tags, list):
             raise ConfigurationError('Setting `tags` must be an array')
 
@@ -190,12 +191,10 @@ class OpenMetricsScraper:
         ignore_tags = config.get('ignore_tags', [])
         if ignore_tags:
             ignored_tags_re = re.compile('|'.join(set(ignore_tags)))
-            custom_tags = [tag for tag in custom_tags if not ignored_tags_re.search(tag)]
+            custom_tags = {tag for tag in custom_tags if not ignored_tags_re.search(tag)}
 
         # These will be applied only to service checks
-        self.static_tags = [f'endpoint:{self.endpoint}']
-        self.static_tags.extend(custom_tags)
-        self.static_tags = tuple(self.static_tags)
+        self.static_tags = tuple(custom_tags)
 
         # These will be applied to everything except service checks
         self.tags = self.static_tags
