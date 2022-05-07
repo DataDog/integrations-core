@@ -272,7 +272,14 @@ class ComposeFileDown(LazyFunction):
         self.check = check
         if using_legacy_docker_compose():
             self.command = [
-                'docker-compose', '-f', self.compose_file, 'down', '--volumes', '--remove-orphans', '-t', '0'
+                'docker-compose',
+                '-f',
+                self.compose_file,
+                'down',
+                '--volumes',
+                '--remove-orphans',
+                '-t',
+                '0',
             ]
         else:
             self.command = [

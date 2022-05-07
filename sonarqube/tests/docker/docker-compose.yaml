@@ -32,7 +32,6 @@ services:
     # https://github.com/SonarSource/docker-sonarqube/issues/83
     command: >-
       -Dsonar.ce.javaOpts="
-      -X
       -Dcom.sun.management.jmxremote
       -Dcom.sun.management.jmxremote.authenticate=false
       -Dcom.sun.management.jmxremote.local.only=false
