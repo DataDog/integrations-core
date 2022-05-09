@@ -48,7 +48,6 @@ To customize the data plane portion of the integration, create an equivalent [co
       - request_protocol
       - connection_security_policy
 ```
-These excluded labels are set in the existing `istio.d/auto_conf.yaml` file.
 
 ##### Control plane configuration
 To monitor the Istio control plane and report the `mixer`, `galley`, `pilot`, and `citadel` metrics, you must configure the Agent to monitor the `istiod` deployment. In Istio `v1.5+`, apply the following Autodiscovery Annotations as pod annotations for the deployment `istiod` in the `istio-system` namespace:
