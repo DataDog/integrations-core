@@ -6819,7 +6819,7 @@ webhooks:
           values:
           - "default"
 ---
-apiVersion: networking.istio.io/v1beta1
+apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
   name: stats-filter-1.11
@@ -6941,7 +6941,7 @@ spec:
                     local:
                       inline_string: envoy.wasm.stats
 ---
-apiVersion: networking.istio.io/v1beta1
+apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
   name: stats-filter-1.12
@@ -7063,7 +7063,7 @@ spec:
                     local:
                       inline_string: envoy.wasm.stats
 ---
-apiVersion: networking.istio.io/v1beta1
+apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
   name: stats-filter-1.13
@@ -7185,7 +7185,7 @@ spec:
                     local:
                       inline_string: envoy.wasm.stats
 ---
-apiVersion: networking.istio.io/v1beta1
+apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
   name: tcp-stats-filter-1.11
@@ -7299,7 +7299,7 @@ spec:
                     local:
                       inline_string: "envoy.wasm.stats"
 ---
-apiVersion: networking.istio.io/v1beta1
+apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
   name: tcp-stats-filter-1.12
@@ -7413,7 +7413,7 @@ spec:
                     local:
                       inline_string: "envoy.wasm.stats"
 ---
-apiVersion: networking.istio.io/v1beta1
+apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
   name: tcp-stats-filter-1.13
@@ -12053,3 +12053,4 @@ spec:
         - name: storage-volume
           emptyDir:
             {}
+---
