@@ -41,7 +41,7 @@ class InstanceConfig(BaseModel):
     mq_port: int
     mq_server: str = Field(..., min_length=1)
     mq_user: Optional[str] = Field(None, min_length=1)
-    mqcd_version: Optional[Literal[1, 2, 3, 4, 5, 6, 7, 8, 9]]
+    mqcd_version: Optional[Literal['1', '2', '3', '4', '5', '6', '7', '8', '9']]
     persist_connections: Optional[bool]
     queue_manager: str = Field(..., min_length=1)
     resource_statistics: Optional[bool]
