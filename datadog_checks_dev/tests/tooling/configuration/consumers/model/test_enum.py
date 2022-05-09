@@ -72,7 +72,7 @@ def test_enum_of_strings():
     instace_model_expected_contents = normalize_yaml(
         """
         from __future__ import annotations
-        
+
         from typing import Literal, Optional
 
         from pydantic import BaseModel, root_validator, validator
@@ -86,27 +86,27 @@ def test_enum_of_strings():
         class InstanceConfig(BaseModel):
             class Config:
                 allow_mutation = False
-        
+
             my_str: Optional[Literal['a', 'b', 'c']]
-        
+
             @root_validator(pre=True)
             def _initial_validation(cls, values):
                 return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
-        
+
             @validator('*', pre=True, always=True)
             def _ensure_defaults(cls, v, field):
                 if v is not None or field.required:
                     return v
-        
+
                 return getattr(defaults, f'instance_{field.name}')(field, v)
-        
+
             @validator('*')
             def _run_validations(cls, v, field):
                 if not v:
                     return v
-        
+
                 return getattr(validators, f'instance_{field.name}', identity)(v, field=field)
-        
+
             @root_validator(pre=False)
             def _final_validation(cls, values):
                 return validation.core.finalize_config(getattr(validators, 'finalize_instance', identity)(values))
