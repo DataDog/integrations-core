@@ -43,7 +43,7 @@ from .const import (
     DATABASE_SERVICE_CHECK_NAME,
     DBM_MIGRATED_METRICS,
     DEFAULT_AUTODISCOVERY_INTERVAL,
-    FCI_METRICS,
+    FC_METRICS,
     INSTANCE_METRICS,
     INSTANCE_METRICS_TOTAL,
     PERF_AVERAGE_BULK,
@@ -369,6 +369,28 @@ class SQLServer(AgentCheck):
             cfg = {'name': name, 'column': column, 'tags': tags, 'hostname': self.resolved_hostname}
             metrics_to_collect.append(SqlFileStats(cfg, None, getattr(self, metric_type), column, self.log))
 
+        include_fc_metrics = is_affirmative(
+            self.instance.get('include_fci_metrics', self.instance.get('include_fc_metrics', False))
+        )
+        fc_tags = []
+        # Load FC metrics
+        if include_fc_metrics:
+            with self.connection.get_managed_cursor() as cursor:
+                cursor.execute("SELECT cluster_name FROM sys.dm_hadr_cluster")
+                fc_rows = cursor.fetchall()
+                if fc_rows:
+                    # Cluster name can be empty string, in which case we'll want to drop the tag
+                    cluster_name = fc_rows[0][0] if fc_rows[0][0] else None
+                    fc_tags.append('failover_cluster:{}'.format(cluster_name))
+            for name, table, column in FC_METRICS:
+                cfg = {
+                    'name': name,
+                    'table': table,
+                    'column': column,
+                    'tags': tags + fc_tags,
+                }
+                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+
         # Load AlwaysOn metrics
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
             for name, table, column in AO_METRICS + AO_METRICS_PRIMARY + AO_METRICS_SECONDARY:
@@ -378,21 +400,11 @@ class SQLServer(AgentCheck):
                     'table': table,
                     'column': column,
                     'instance_name': db_name,
-                    'tags': tags,
+                    # Availability Groups can be used with Failover Clustering
+                    'tags': tags + fc_tags if include_fc_metrics else tags,
                     'ao_database': self.instance.get('ao_database', None),
                     'availability_group': self.instance.get('availability_group', None),
                     'only_emit_local': is_affirmative(self.instance.get('only_emit_local', False)),
-                }
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
-        # Load FCI metrics
-        if is_affirmative(self.instance.get('include_fci_metrics', False)):
-            for name, table, column in FCI_METRICS:
-                cfg = {
-                    'name': name,
-                    'table': table,
-                    'column': column,
-                    'tags': tags,
                 }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
@@ -600,7 +612,7 @@ class SQLServer(AgentCheck):
             if self.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
-                self.alwayson.run_job_loop(self.tags)
+                # self.alwayson.run_job_loop(self.tags)
 
         else:
             self.log.debug("Skipping check")

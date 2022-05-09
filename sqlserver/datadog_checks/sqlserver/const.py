@@ -83,6 +83,13 @@ INSTANCE_METRICS_TOTAL = [
 AO_METRICS = [
     ('sqlserver.ao.ag_sync_health', 'sys.dm_hadr_availability_group_states', 'synchronization_health'),
     ('sqlserver.ao.replica_sync_state', 'sys.dm_hadr_database_replica_states', 'synchronization_state'),
+    ('sqlserver.ao.log_send_queue_size', 'sys.dm_hadr_database_replica_states', 'log_send_queue_size'),
+    ('sqlserver.ao.log_send_rate', 'sys.dm_hadr_database_replica_states', 'log_send_rate'),
+    ('sqlserver.ao.redo_queue_size', 'sys.dm_hadr_database_replica_states', 'redo_queue_size'),
+    ('sqlserver.ao.redo_rate', 'sys.dm_hadr_database_replica_states', 'redo_rate'),
+    ('sqlserver.ao.low_water_mark_for_ghosts', 'sys.dm_hadr_database_replica_states', 'low_water_mark_for_ghosts'),
+    ('sqlserver.ao.filestream_send_rate', 'sys.dm_hadr_database_replica_states', 'filestream_send_rate'),
+    ('sqlserver.ao.secondary_lag_seconds', 'sys.dm_hadr_database_replica_states', 'secondary_lag_seconds'),
     ('sqlserver.ao.replica_failover_mode', 'sys.availability_replicas', 'failover_mode'),
     ('sqlserver.ao.replica_failover_readiness', 'sys.availability_replicas', 'is_failover_ready'),
 ]
@@ -95,14 +102,18 @@ AO_METRICS_SECONDARY = [
     ('sqlserver.ao.secondary_replica_health', 'sys.dm_hadr_availability_group_states', 'secondary_recovery_health'),
 ]
 
-# AlwaysOn metrics for Failover Cluster Instances (FCI).
-# This is in a separate category than other AlwaysOn metrics
-# because FCI specifies a different SQLServer setup
+# AlwaysOn metrics for Failover Clusters (FC).
+# This is in a separate category than other AlwaysOn metrics because FC specifies a different SQLServer setup
 # compared to Availability Groups (AG).
 # datadog metric name, sql table, column name
 # FCI status enum:
 #   0 = Up, 1 = Down, 2 = Paused, 3 = Joining, -1 = Unknown
-FCI_METRICS = [
+FC_METRICS = [
+    ('sqlserver.fc.quorum_type', 'sys.dm_hadr_cluster', 'quorum_type'),
+    ('sqlserver.fc.quorum_state', 'sys.dm_hadr_cluster', 'quorum_state'),
+    ('sqlserver.fc.member.type', 'sys.dm_hadr_cluster_members', 'member_type'),
+    ('sqlserver.fc.member.state', 'sys.dm_hadr_cluster_members', 'member_state'),
+    ('sqlserver.fc.member.number_of_quorum_votes', 'sys.dm_hadr_cluster_members', 'number_of_quorum_votes'),
     ('sqlserver.fci.status', 'sys.dm_os_cluster_nodes', 'status'),
     ('sqlserver.fci.is_current_owner', 'sys.dm_os_cluster_nodes', 'is_current_owner'),
 ]

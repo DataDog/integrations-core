@@ -110,7 +110,7 @@ def instance_include_db_fragmentation_metrics(field, value):
     return False
 
 
-def instance_include_fci_metrics(field, value):
+def instance_include_fc_metrics(field, value):
     return False
 
 
