@@ -50,7 +50,7 @@ def test_invalid_oauth(oauth_instance):
 
     # Test oauth without token
     no_token_config = copy.deepcopy(INVALID_CONFIG)
-    no_token_config['user'] = "test_user"
+    no_token_config['username'] = "test_user"
     with pytest.raises(Exception, match='If using OAuth, you must specify a `token` or a `token_path`'):
         SnowflakeCheck(CHECK_NAME, {}, [no_token_config])
 
@@ -315,7 +315,7 @@ def test_emit_non_generic_tags_when_disabled(instance):
 def test_aggregate_last_24_hours_queries(aggregate_last_24_hours, expected_query):
     inst = {
         'metric_groups': ['snowflake.replication'],
-        'user': 'user',
+        'username': 'user',
         'password': 'password',
         'account': 'account',
         'role': 'role',
