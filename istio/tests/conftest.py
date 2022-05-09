@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import time
 from copy import deepcopy
 
 import pytest
@@ -33,34 +32,35 @@ def instance_openmetrics_v2(dd_get_state):
 
 def setup_istio():
     run_command(
-        [
-            "curl",
-            "-o",
-            "istio.tar.gz",
-            "-L",
-            "https://github.com/istio/istio/releases/download/1.13.3/istio-1.13.3-linux-arm64.tar.gz",
-        ]
+        ["curl", "-L", "https://istio.io/downloadIstio", "|", "ISTIO_VERSION=1.13.3", "TARGET_ARCH=x86_64", "sh", "-"]
     )
-    run_command(["tar", "xf", "istio.tar.gz"])
-    run_command(["kubectl", "create", "ns", "istio-system"])
-    # Istio directory name
-    istio = "istio-{}".format(VERSION)
-    # Install demo profile
-    run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "demo_profile.yaml")])
-    # Wait for istio deployments
-    time.sleep(15.0)
-    run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "demo_profile2.yaml")])
-    run_command(
-        ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "istio-system", "--timeout=300s"]
-    )
-    # Enable sidecar injection
-    run_command(["kubectl", "label", "namespace", "default", "istio-injection=enabled"])
-    # Install sample application
-    run_command(["kubectl", "apply", "-f", opj(istio, "samples", "bookinfo", "platform", "kube", "bookinfo.yaml")])
-    run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s"])
 
-    run_command(["kubectl", "apply", "-f", opj(istio, "samples", "bookinfo", "networking", "bookinfo-gateway.yaml")])
+    run_command(["/istio-1.13.3/bin/istioctl", "install", "--set", "profile=demo", "-y"])
+    run_command(["kubectl", "label", "namespace", "default", "istio-injection=enabled"])
+    run_command(["kubectl", "apply", "-f", "/istio-1.13.3/samples/bookinfo/platform/kube/bookinfo.yaml"])
     run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s"])
+    run_command(["kubectl", "apply", "-f", "samples/bookinfo/networking/bookinfo-gateway.yaml"])
+    run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s"])
+    # run_command(["tar", "xf", "istio.tar.gz"])
+    # run_command(["kubectl", "create", "ns", "istio-system"])
+    # # Istio directory name
+    # istio = "istio-{}".format(VERSION)
+    # # Install demo profile
+    # run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "demo_profile.yaml")])
+    # # Wait for istio deployments
+    # time.sleep(15.0)
+    # run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "demo_profile2.yaml")])
+    # run_command(
+    # ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "istio-system", "--timeout=300s"]
+    # )
+    # # Enable sidecar injection
+    # run_command(["kubectl", "label", "namespace", "default", "istio-injection=enabled"])
+    # # Install sample application
+    # run_command(["kubectl", "apply", "-f", opj(istio, "samples", "bookinfo", "platform", "kube", "bookinfo.yaml")])
+    # run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s"])
+
+    # run_command(["kubectl", "apply", "-f", opj(istio, "samples", "bookinfo", "networking", "bookinfo-gateway.yaml")])
+    # run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s"])
 
 
 @pytest.fixture(scope='session')
