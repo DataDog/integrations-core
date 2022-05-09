@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import time
 from copy import deepcopy
 
 import pytest
-import time
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
