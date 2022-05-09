@@ -17,6 +17,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from sqlserver.datadog_checks.sqlserver.const import STATIC_INFO_VERSION
 
 try:
     import datadog_agent
@@ -293,7 +294,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'min_collection_interval': self.collection_interval,
             'tags': self.check.tags,
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
-            'sqlserver_version': self.check.static_info_cache.get("version", ""),
+            'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'ddagentversion': datadog_agent.get_version(),
             'ddagenthostname': self._check.agent_hostname,
         }
