@@ -18,7 +18,8 @@ except ImportError:
 
 
 HERE = get_here()
-VERSION = os.environ.get("ISTIO_VERSION")
+VERSION = "1.13.3"
+# VERSION = os.environ.get("ISTIO_VERSION")
 opj = os.path.join
 
 
@@ -36,9 +37,7 @@ def setup_istio():
             "-o",
             "istio.tar.gz",
             "-L",
-            "https://github.com/istio/istio/releases/download/{version}/istio-{version}-linux.tar.gz".format(
-                version=VERSION
-            ),
+            "https://github.com/istio/istio/releases/download/1.13.3/istio-1.13.3-linux-amd64.tar.gz",
         ]
     )
     run_command(["tar", "xf", "istio.tar.gz"])
