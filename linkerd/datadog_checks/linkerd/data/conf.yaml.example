@@ -132,7 +132,8 @@ instances:
     ##
     ## Note: Labels filtering happens before `rename_labels`.
     #
-    # exclude_labels: []
+    exclude_labels:
+      - destination_service
 
     ## @param include_labels - list of strings - optional
     ## A list of labels to include. May be used in conjunction with `exclude_labels`.
