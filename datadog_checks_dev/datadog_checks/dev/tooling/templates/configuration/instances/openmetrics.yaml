@@ -171,6 +171,7 @@
   value:
     type: boolean
     example: False
+    display_default: False
 - name: exclude_labels
   description: |
     A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
