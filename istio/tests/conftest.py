@@ -32,7 +32,8 @@ def instance_openmetrics_v2(dd_get_state):
 
 def setup_istio():
     run_command(
-        ["curl", "-L", "https://istio.io/downloadIstio", "|", "ISTIO_VERSION=1.13.3", "TARGET_ARCH=x86_64", "sh", "-"]
+        # ["curl", "-L", "https://istio.io/downloadIstio", "|", "ISTIO_VERSION=1.13.3", "TARGET_ARCH=x86_64", "sh", "-"]
+        ["curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.13.3 TARGET_ARCH=x86_64 sh -"]
     )
 
     run_command(["/istio-1.13.3/bin/istioctl", "install", "--set", "profile=demo", "-y"])
