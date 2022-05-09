@@ -13,7 +13,7 @@ files:
             This implementation supports only Istio 1.5. Use `istiod_endpoint` or `istio_mesh_endpoint`.
           value:
             example: true
-            display_default: true
+            display_default: False
             type: boolean
           enabled: true
         - name: istiod_endpoint
@@ -75,11 +75,14 @@ files:
       options: []
     - template: instances
       options:
-      - name: send_histograms_buckets
-        description: Set send_histograms_buckets to true to send the histograms bucket from Istio.
-        required: true
+      - name: use_openmetrics
+        description: |
+          Use the latest OpenMetrics implementation for more features and better performance.
+          This implementation supports only Istio 1.5. Use `istiod_endpoint` or `istio_mesh_endpoint`.
+        enabled: true
         value:
           example: true
+          display_default: true
           type: boolean
       - name: istio_mesh_endpoint
         description: To enable Istio metrics you must specify the url exposing the API.
@@ -88,6 +91,12 @@ files:
           display_default: null
           example: http://%%host%%:15090/stats/prometheus
           type: string
+      - name: tag_by_endpoint
+        description: Wether to include an endpoint tag or not.
+        enabled: true
+        value:
+          type: boolean
+          example: True
       - name: exclude_labels
         description: A list of labels to be excluded
         enabled: true

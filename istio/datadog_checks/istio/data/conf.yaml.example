@@ -45,7 +45,7 @@ init_config:
 #
 instances:
 
-    ## @param use_openmetrics - boolean - optional - default: true
+    ## @param use_openmetrics - boolean - optional - default: false
     ## Use the latest OpenMetrics implementation for more features and better performance.
     ## This implementation supports only Istio 1.5. Use `istiod_endpoint` or `istio_mesh_endpoint`.
     #
