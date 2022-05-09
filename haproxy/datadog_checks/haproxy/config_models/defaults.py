@@ -342,6 +342,10 @@ def instance_status_check(field, value):
     return False
 
 
+def instance_tag_by_endpoint(field, value):
+    return False
+
+
 def instance_tag_service_check_by_host(field, value):
     return False
 

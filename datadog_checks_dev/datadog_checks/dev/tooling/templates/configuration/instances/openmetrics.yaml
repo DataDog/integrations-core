@@ -165,6 +165,12 @@
       - type: array
         items:
           type: string
+- name: tag_by_endpoint
+  description: Wether to include an endpoint tag or not.
+  hidden: true
+  value:
+    type: boolean
+    example: False
 - name: exclude_labels
   description: |
     A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.

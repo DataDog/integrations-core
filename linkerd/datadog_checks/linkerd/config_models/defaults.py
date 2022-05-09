@@ -294,6 +294,10 @@ def instance_skip_proxy(field, value):
     return False
 
 
+def instance_tag_by_endpoint(field, value):
+    return False
+
+
 def instance_tags(field, value):
     return get_default_field_value(field, value)
 

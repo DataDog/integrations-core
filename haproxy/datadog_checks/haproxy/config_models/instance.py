@@ -176,6 +176,7 @@ class InstanceConfig(BaseModel):
     skip_proxy: Optional[bool]
     startup_grace_seconds: Optional[float]
     status_check: Optional[bool]
+    tag_by_endpoint: Optional[bool]
     tag_service_check_by_host: Optional[bool]
     tags: Optional[Sequence[str]]
     tags_regex: Optional[str]
