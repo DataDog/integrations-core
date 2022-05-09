@@ -108,11 +108,11 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            name: "airflow.pool.open_slots"
            tags:
              pool_name: "$1"
-         - match: "pool.queued_slots.*"
+         - match: "airflow.pool.queued_slots.*"
            name: "airflow.pool.queued_slots"
            tags:
              pool_name: "$1"
-         - match: "pool.running_slots.*"
+         - match: "airflow.pool.running_slots.*"
            name: "airflow.pool.running_slots"
            tags:
              pool_name: "$1"
@@ -155,11 +155,11 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            name: "airflow.dagrun.schedule_delay"
            tags:
              dag_id: "$1"
-         - match: 'scheduler.tasks.running'
+         - match: 'airflow.scheduler.tasks.running'
            name: "airflow.scheduler.tasks.running"
-         - match: 'scheduler.tasks.starving'
+         - match: 'airflow.scheduler.tasks.starving'
            name: "airflow.scheduler.tasks.starving"
-         - match: sla_email_notification_failure
+         - match: airflow.sla_email_notification_failure
            name: 'airflow.sla_email_notification_failure'
          - match: 'airflow\.task_removed_from_dag\.(.*)'
            match_type: "regex"
@@ -175,16 +175,16 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            name: "airflow.task.instance_created"
            tags:
              task_class: "$1"
-         - match: "ti.start.*.*"
+         - match: "airflow.ti.start.*.*"
            name: "airflow.ti.start"
            tags:
-             dagid: "$1"
-             taskid: "$2"
-         - match: "ti.finish.*.*.*"
+             dag_id: "$1"
+             task_id: "$2"
+         - match: "airflow.ti.finish.*.*.*"
            name: "airflow.ti.finish"
            tags:
-             dagid: "$1"
-             taskid: "$2"
+             dag_id: "$1"
+             task_id: "$2"
              state: "$3"
    ```
 
