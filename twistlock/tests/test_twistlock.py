@@ -89,31 +89,6 @@ def test_config_project(aggregator, instance, fixture_group):
         aggregator.assert_metric_has_tag(metric, project_tag)
 
 
-def mock_pagination(fixture_group1, fixture_group2):
-    def get_twice():
-        mock_get_factory(fixture_group1)
-        mock_get_factory(fixture_group2)
-
-    return get_twice()
-
-
-def mock_twistlock_check(monkeypatch, instances, fixture_group):
-    check = TwistlockCheck('twistlock', {}, instances)
-    monkeypatch.setattr(check, '_retrieve_json', mock.Mock(side_effect=mock_get_factory(fixture_group)))
-    return check
-
-
-@pytest.mark.parametrize('fixture_group1', ['twistlock_pg1'])
-def test_pagination(monkeypatch, aggregator, instance, fixture_group1):
-    # mock that two requests get made but with different output
-    # assert that each result is different
-    # assert that the final result is res1 + res2
-    check = mock_twistlock_check(monkeypatch, [instance], fixture_group1)
-    check.check(instance)
-
-    assert check._retrieve_json.call_count == 10
-
-
 def test_err_response(aggregator, instance):
 
     check = TwistlockCheck('twistlock', {}, [instance])
