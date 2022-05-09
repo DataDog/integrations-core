@@ -5,6 +5,7 @@ import os
 from copy import deepcopy
 
 import pytest
+import time
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
@@ -37,7 +38,7 @@ def setup_istio():
             "-o",
             "istio.tar.gz",
             "-L",
-            "https://github.com/istio/istio/releases/download/1.13.3/istio-1.13.3-linux-amd64.tar.gz",
+            "https://github.com/istio/istio/releases/download/1.13.3/istio-1.13.3-linux-arm64.tar.gz",
         ]
     )
     run_command(["tar", "xf", "istio.tar.gz"])
@@ -47,6 +48,8 @@ def setup_istio():
     # Install demo profile
     run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "demo_profile.yaml")])
     # Wait for istio deployments
+    time.sleep(15.0)
+    run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "demo_profile2.yaml")])
     run_command(
         ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "istio-system", "--timeout=300s"]
     )
