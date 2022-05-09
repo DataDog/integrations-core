@@ -171,6 +171,11 @@ instances:
     #
     # exclude_metrics_by_labels: {}
 
+    ## @param tag_by_endpoint - boolean - optional - default: false
+    ## Wether to include an endpoint tag or not.
+    #
+    tag_by_endpoint: false
+
     ## @param exclude_labels - list of strings - optional
     ## A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
     ## May be used in conjunction with `include_labels`.
