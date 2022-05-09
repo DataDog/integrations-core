@@ -24,6 +24,8 @@ If you want to monitor the Envoy proxies in Istio, configure the [Envoy integrat
 
 ### Configuration
 
+Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [Agent's configuration directory][7]) to connect to Istio. See the [sample istio.d/conf.yaml][8] for all available configuration options.
+
 #### Metric collection
 There are two key components involved in setting up the Istio integration to collect the Prometheus-formatted Istio metrics. Aligning with the [Istio architecture][23], there is the **data plane** (the `istio-proxy` sidecar containers) and the **control plane** (the `istiod` service managing the proxies). These are both run as `istio` Agent checks, but have different responsibilities, and they are  configured separately, as described below.
 
