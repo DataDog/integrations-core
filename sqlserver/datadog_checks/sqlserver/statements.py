@@ -17,12 +17,13 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
-from sqlserver.datadog_checks.sqlserver.const import STATIC_INFO_VERSION
 
 try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
+
+from .const import STATIC_INFO_VERSION
 
 DEFAULT_COLLECTION_INTERVAL = 10
 
