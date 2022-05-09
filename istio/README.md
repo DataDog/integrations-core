@@ -25,12 +25,12 @@ If you want to monitor the Envoy proxies in Istio, configure the [Envoy integrat
 ### Configuration
 
 #### Metric collection
-The Istio integration has two key components for how it collects the prometheus formatted Istio metrics. This corresponds to the [Istio architecture][23] split between its data plane (the `istio-proxy` sidecar containers) and the control plane (the `istiod` service managing the proxies). These are both ran as `istio` Agent checks, however have different responsibilities and configuration methods.
+There are two key components involved in setting up the Istio integration to collect the Prometheus-formatted Istio metrics. Aligning with the [Istio architecture][23], there is the **data plane** (the `istio-proxy` sidecar containers) and the **control plane** (the `istiod` service managing the proxies). These are both run as `istio` Agent checks, but have different responsibilities, and they are  configured separately, as described below.
 
 ##### Data plane configuration
-To monitor the Istio data plane the Agent comes with an [`istio.d/auto_conf.yaml`][9] file to automatically setup the monitoring for each of the `istio-proxy` sidecar containers. The Agent initializes this check for each sidecar container that it discovers automatically. This portion reports the `istio.mesh.*` metrics with respect to the data exposed by each of these sidecar containers.
+To monitor the Istio data plane, the Agent includes an [`istio.d/auto_conf.yaml`][9] file to automatically set up the monitoring for each of the `istio-proxy` sidecar containers. The Agent initializes this check for each sidecar container that it detects automatically. This configuration enables the reporting of `istio.mesh.*` metrics for the data exposed by each of these sidecar containers.
 
-To customize this portion of the integration create an equivalent [configuration file][24] for Istio. This should have the `ad_identifiers` and `istio_mesh_endpoint` set appropriately to setup the integration when an `istio-proxy` sidecar container is discovered. Refer to the existing [`istio.d/auto_conf.yaml`][9] as well as the [example configuration file][8] for all available configuration options. When customizing, set the `exclude_labels` to the following configuration:
+To customize the data plane portion of the integration, create an equivalent [configuration file][24] for Istio. Set `ad_identifiers` and `istio_mesh_endpoint` appropriately to set up the integration when an `istio-proxy` sidecar container is discovered. Refer to the provided [`istio.d/auto_conf.yaml`][9] and the [example configuration file][8] for all available configuration options. When you customize, set the `exclude_labels` to the following configuration:
 ```yaml
     exclude_labels:
       - source_version
@@ -51,7 +51,7 @@ To customize this portion of the integration create an equivalent [configuration
 These excluded labels are set in the existing `istio.d/auto_conf.yaml` file.
 
 ##### Control plane configuration
-To monitor the Istio control plane and report the remaining `mixer`, `galley`, `pilot`, and `citadel` metrics the Agent needs to be configured to monitor the `istiod` deployment. In Istio `v1.5+`, apply the follow Autodiscovery Annotations as pod annotations for the deployment `istiod` in the `istio-system` namespace:
+To monitor the Istio control plane and report the `mixer`, `galley`, `pilot`, and `citadel` metrics, you must configure the Agent to monitor the `istiod` deployment. In Istio `v1.5+`, apply the following Autodiscovery Annotations as pod annotations for the deployment `istiod` in the `istio-system` namespace:
 
 ```yaml
 ad.datadoghq.com/discovery.check_names: '["istio"]'
@@ -66,7 +66,7 @@ ad.datadoghq.com/discovery.instances: |
 ```
 The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][22] used. Consult the Istio docs for the proper method to apply these pod annotations.
 
-These annotations reference `discovery` as the `<CONTAINER_IDENTIFIER>` to match the default container name of the pods for the `istiod` deployment. If your container name is different adjust accordingly.
+These annotations reference `discovery` as the `<CONTAINER_IDENTIFIER>` to match the default container name of the pods for the `istiod` deployment. If your container name is different, adjust accordingly.
 
 ##### OpenMetrics V2 vs OpenMetrics V1
 <div class="alert alert-warning">
