@@ -61,8 +61,8 @@ cli = [
     "click~=8.1",
     "codespell",
     "colorama",
-    "datamodel-code-generator~=0.11.4",
-    "docker-compose>=1.25",
+    "datamodel-code-generator~=0.12.0",
+    "hatch>=1.0.0",
     "in-toto>=0.4.2",
     "jsonschema",
     "markdown",
@@ -93,6 +93,9 @@ datadog_checks = "datadog_checks.dev.plugin.pytest"
 
 [project.entry-points.tox]
 datadog_checks = "datadog_checks.dev.plugin.tox"
+
+[project.entry-points.hatch]
+datadog_checks = "datadog_checks.dev.plugin.hatch"
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"

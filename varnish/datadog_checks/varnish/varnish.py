@@ -96,15 +96,15 @@ class Varnish(AgentCheck):
     def _start_element(self, name, attrs):
         self._current_element = name
 
-    def _end_element(self, name, tags):
+    def _end_element(self, name):
         if name == "stat":
             m_name = self.normalize(self._current_metric)
             if self._current_type in ("a", "c"):
-                self.rate(m_name, long(self._current_value), tags=tags)
+                self.rate(m_name, long(self._current_value), tags=self.tags)
             elif self._current_type in ("i", "g"):
-                self.gauge(m_name, long(self._current_value), tags=tags)
+                self.gauge(m_name, long(self._current_value), tags=self.tags)
                 if 'n_purges' in m_name:
-                    self.rate('varnish.n_purgesps', long(self._current_value), tags=tags)
+                    self.rate('varnish.n_purgesps', long(self._current_value), tags=self.tags)
             else:
                 # Unsupported data type, ignore
                 self._reset()
@@ -138,7 +138,7 @@ class Varnish(AgentCheck):
 
         output, _, _ = get_subprocess_output(cmd, self.log)
 
-        self._parse_varnishstat(output, varnishstat_format, self.tags)
+        self._parse_varnishstat(output, varnishstat_format)
 
         # Parse service checks from varnishadm.
         if self.varnishadm:
@@ -171,7 +171,7 @@ class Varnish(AgentCheck):
                 self.log.error('Error getting service check from varnishadm: %s', err)
 
             if output:
-                self._parse_varnishadm(output, self.custom_tags)
+                self._parse_varnishadm(output)
 
     def _get_version_info(self, varnishstat_path):
         # Get the varnish version from varnishstat
@@ -212,7 +212,7 @@ class Varnish(AgentCheck):
 
         return version, varnishstat_format
 
-    def _parse_varnishstat(self, output, varnishstat_format, tags=None):
+    def _parse_varnishstat(self, output, varnishstat_format):
         """
         The text option (-1) is not reliable enough when counters get large.
         VBE.media_video_prd_services_01(10.93.67.16,,8080).happy18446744073709551615
@@ -222,13 +222,12 @@ class Varnish(AgentCheck):
 
         Bitmaps are not supported.
         """
-        tags = tags or []
         # FIXME: this check is processing an unbounded amount of data
         # we should explicitly list the metrics we want to get from the check
         if varnishstat_format == "xml":
             p = xml.parsers.expat.ParserCreate()
             p.StartElementHandler = self._start_element
-            p.EndElementHandler = lambda name: self._end_element(name, tags)
+            p.EndElementHandler = lambda name: self._end_element(name)
             p.CharacterDataHandler = self._char_data
             self._reset()
             p.Parse(output, True)
@@ -247,11 +246,11 @@ class Varnish(AgentCheck):
                 value = metric.get("value", 0)
 
                 if metric.get("flag") in ("a", "c"):
-                    self.rate(metric_name, long(value), tags=tags)
+                    self.rate(metric_name, long(value), tags=self.tags)
                 elif metric.get("flag") in ("g", "i"):
-                    self.gauge(metric_name, long(value), tags=tags)
+                    self.gauge(metric_name, long(value), tags=self.tags)
                     if 'n_purges' in self.normalize(name, prefix="varnish"):
-                        self.rate('varnish.n_purgesps', long(value), tags=tags)
+                        self.rate('varnish.n_purgesps', long(value), tags=self.tags)
                 elif 'flag' not in metric:
                     self.log.warning("Could not determine the type of metric %s, skipping submission", metric_name)
                     self.log.debug("Raw metric %s is missing the `flag` field", str(metric))
@@ -268,15 +267,15 @@ class Varnish(AgentCheck):
                 if rate_val.lower() in ("nan", "."):
                     # col 2 matters
                     self.log.debug("Varnish (gauge) %s %d", metric_name, int(gauge_val))
-                    self.gauge(metric_name, int(gauge_val), tags=tags)
+                    self.gauge(metric_name, int(gauge_val), tags=self.tags)
                     if 'n_purges' in metric_name:
-                        self.rate('varnish.n_purgesps', float(gauge_val), tags=tags)
+                        self.rate('varnish.n_purgesps', float(gauge_val), tags=self.tags)
                 else:
                     # col 3 has a rate (since restart)
                     self.log.debug("Varnish (rate) %s %d", metric_name, int(gauge_val))
-                    self.rate(metric_name, float(gauge_val), tags=tags)
+                    self.rate(metric_name, float(gauge_val), tags=self.tags)
 
-    def _parse_varnishadm(self, output, tags):
+    def _parse_varnishadm(self, output):
         """Parse out service checks from varnishadm.
 
         Example output:
@@ -352,5 +351,5 @@ class Varnish(AgentCheck):
         for status, backends in iteritems(backends_by_status):
             check_status = BackendStatus.to_check_status(status)
             for backend, message in backends:
-                service_checks_tags = ['backend:%s' % backend] + tags
+                service_checks_tags = ['backend:%s' % backend] + self.custom_tags
                 self.service_check(self.SERVICE_CHECK_NAME, check_status, tags=service_checks_tags, message=message)
