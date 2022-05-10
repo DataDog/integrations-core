@@ -416,8 +416,6 @@ def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, 
     sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
     dd_run_check(sqlserver_check)
     seen_databases = set()
-    # import pdb
-    # pdb.set_trace()
     for m in aggregator.metrics("sqlserver.database.avg_fragmentation_in_percent"):
         tags_by_key = {k: v for k, v in [t.split(':') for t in m.tags]}
         seen_databases.add(tags_by_key['database_name'])
