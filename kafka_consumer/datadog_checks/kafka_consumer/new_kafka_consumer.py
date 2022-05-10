@@ -104,8 +104,8 @@ class NewKafkaConsumerCheck(object):
             for topic_partition, content in json.loads(read_persistent_cache(self._broker_timestamp_cache_key)).items():
                 for offset, timestamp in content.items():
                     self._broker_timestamps[topic_partition][int(offset)] = timestamp
-        except Exception:
-            self.log.warning('Could not read broker timestamps from cache')
+        except Exception as e:
+            self.log.warning('Could not read broker timestamps from cache: %s', str(e))
 
     def _save_broker_timestamps(self):
         write_persistent_cache(self._broker_timestamp_cache_key, json.dumps(self._broker_timestamps))
