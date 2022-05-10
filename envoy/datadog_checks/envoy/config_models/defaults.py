@@ -259,7 +259,7 @@ def instance_stats_url(field, value):
 
 
 def instance_tag_by_endpoint(field, value):
-    return False
+    return True
 
 
 def instance_tags(field, value):
