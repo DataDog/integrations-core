@@ -90,6 +90,16 @@ class PostgresConfig:
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.statement_activity_config = instance.get('query_activity', {}) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
+        self.cloud_metadata = {}
+        aws = instance.get('aws', {})
+        gcp = instance.get('gcp', {})
+        azure = instance.get('azure', {})
+        if aws:
+            self.cloud_metadata.update({'aws': aws})
+        if gcp:
+            self.cloud_metadata.update({'gcp': gcp})
+        if azure:
+            self.cloud_metadata.update({'azure': azure})
         obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
         self.obfuscator_options = {
             # Valid values for this can be found at
