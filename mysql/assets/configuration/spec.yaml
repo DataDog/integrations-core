@@ -284,7 +284,7 @@ files:
 
               - name: table_rows_stats_metrics
                 description: |
-                  These metrics are reported if `userstat` is enabled in the MySQL instance
+                  These metrics are reported if you have a Percona MySQL instance with `userstat` enabled
                   Set to `true` to collect table stats metrics.
                   Metrics provided by the options:
                     - mysql.info.table.rows.read (total per table)
