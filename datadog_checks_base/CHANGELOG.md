@@ -1,5 +1,21 @@
 # CHANGELOG - datadog_checks_base
 
+## 25.4.0 / 2022-05-10
+
+* [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
+* [Added] Refactor the QueryManager to support multiple instances in checks. See [#11869](https://github.com/DataDog/integrations-core/pull/11869).
+* [Added] Upgrade `orjson` dependency. See [#11843](https://github.com/DataDog/integrations-core/pull/11843).
+* [Added] Upgrade `orjson` dependency. See [#11843](https://github.com/DataDog/integrations-core/pull/11843).
+* [Fixed] Fix incorrect OpenMetrics V2 check exposition format HTTP header. See [#11899](https://github.com/DataDog/integrations-core/pull/11899). Thanks [jalaziz](https://github.com/jalaziz).
+* [Fixed] Allow tags that are just a value with no key. See [#11973](https://github.com/DataDog/integrations-core/pull/11973).
+* [Fixed] Add the ability to exclude endpoint tag. See [#11956](https://github.com/DataDog/integrations-core/pull/11956).
+* [Fixed] Don't pin urllib3. See [#11944](https://github.com/DataDog/integrations-core/pull/11944).
+* [Fixed] Fallback Kubernetes client version to 22.6 to avoid failures on non-standard POD conditions. See [#11928](https://github.com/DataDog/integrations-core/pull/11928).
+* [Fixed] Fix obfuscate_sql_with_metadata wrapper memory usage. See [#11815](https://github.com/DataDog/integrations-core/pull/11815).
+* [Fixed] Fix obfuscate_sql_with_metadata wrapper memory usage. See [#11815](https://github.com/DataDog/integrations-core/pull/11815).
+* [Fixed] Fix `metric_patterns` option to support namespaces. See [#11795](https://github.com/DataDog/integrations-core/pull/11795).
+* [Fixed] Fix `metric_patterns` option to support namespaces. See [#11795](https://github.com/DataDog/integrations-core/pull/11795).
+
 ## 25.3.0 / 2022-04-28
 
 * [Added] Upgrade `orjson` dependency. See [#11843](https://github.com/DataDog/integrations-core/pull/11843).
