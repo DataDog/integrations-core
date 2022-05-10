@@ -58,6 +58,10 @@ def instance_bearer_token_path(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_bearer_token_refresh_interval(field, value):
+    return 60
+
+
 def instance_connect_timeout(field, value):
     return get_default_field_value(field, value)
 
