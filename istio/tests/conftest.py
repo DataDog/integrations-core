@@ -41,11 +41,10 @@ def setup_istio():
             ),
         ]
     )
-    istio = "istio-{}".format(VERSION)
     run_command(["tar", "xf", "istio.tar.gz"])
     run_command(["kubectl", "create", "ns", "istio-system"])
     # Istio directory name
-
+    istio = "istio-{}".format(VERSION)
     # Install demo profile
     run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "demo_profile.yaml")])
     # Wait for istio deployments
