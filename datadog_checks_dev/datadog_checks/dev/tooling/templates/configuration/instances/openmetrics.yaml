@@ -166,7 +166,7 @@
         items:
           type: string
 - name: tag_by_endpoint
-  description: Wether to include an endpoint tag or not.
+  description: Whether to include an endpoint tag or not.
   hidden: true
   value:
     type: boolean
