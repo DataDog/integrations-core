@@ -21,7 +21,7 @@ instance = {
 instance_new = {
     'openmetrics_endpoint': 'http://localhost:10249/metrics',
     'namespace': 'openmetrics',
-    'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1'],
+    'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1', 'counter2'],
     'collect_histogram_buckets': True,
 }
 
@@ -117,6 +117,11 @@ def test_linkerd_v2_new(aggregator, dd_run_check):
     )
     aggregator.assert_metric(
         '{}.counter1.count'.format(CHECK_NAME),
+        tags=['endpoint:http://localhost:10249/metrics', 'node:host2'],
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
+    aggregator.assert_metric(
+        '{}.counter2.count'.format(CHECK_NAME),
         tags=['endpoint:http://localhost:10249/metrics', 'node:host2'],
         metric_type=aggregator.MONOTONIC_COUNT,
     )

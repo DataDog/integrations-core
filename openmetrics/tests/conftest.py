@@ -31,6 +31,8 @@ def poll_mock(mock_http_response):
     g2.labels(matched_label="foobar", node="host2", timestamp="123").set(12.2)
     c1 = Counter('counter1', 'hits', ['node'], registry=registry)
     c1.labels(node="host2").inc(42)
+    c2 = Counter('counter2_total', 'hits total', ['node'], registry=registry)
+    c2.labels(node="host2").inc(42)
     g3 = Gauge('metric3', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
     g3.labels(matched_label="foobar", node="host2", timestamp="456").set(float('inf'))
 
