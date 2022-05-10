@@ -36,6 +36,8 @@ If you're running Varnish 4.1+, add the `dd-agent` system user to the Varnish gr
 sudo usermod -G varnish -a dd-agent
 ```
 
+If you use a `secretfile`, you must ensure it is readable by the `dd-agent` user.
+
 ##### Metric collection
 
 1. Edit the `varnish.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample varnish.d/conf.yaml][4] for all available configuration options.
