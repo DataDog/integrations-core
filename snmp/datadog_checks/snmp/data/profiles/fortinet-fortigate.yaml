@@ -6,6 +6,7 @@ extends:
   - _base.yaml
   - _generic-if.yaml
   - _fortinet-fortigate-cpu-memory.yaml
+  - _fortinet-fortigate-vpn-tunnel.yaml
 
 device:
   vendor: "fortinet"
