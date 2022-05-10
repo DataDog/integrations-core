@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import time
 from copy import deepcopy
 
 import pytest
@@ -48,8 +47,6 @@ def setup_istio():
 
     # Install demo profile
     run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "demo_profile.yaml")])
-    time.sleep(60)
-    run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "demo_profile2.yaml")])
     # Wait for istio deployments
     run_command(
         ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "istio-system", "--timeout=300s"]
@@ -70,7 +67,7 @@ def dd_environment(dd_save_state):
         with ExitStack() as stack:
             if VERSION == '1.13.3':
                 istiod_host, istiod_port = stack.enter_context(
-                    port_forward(kubeconfig, 'istio-system', 8080, 'deployment', 'istiod')
+                    port_forward(kubeconfig, 'istio-system', 15014, 'deployment', 'istiod')
                 )
 
                 istiod_endpoint = 'http://{}:{}/metrics'.format(istiod_host, istiod_port)

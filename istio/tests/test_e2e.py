@@ -14,6 +14,11 @@ INTERMITTENT_METRICS = [
     'istio.pilot.mcp_sink.recv_failures_total',
     'istio.galley.validation.passed',
     'istio.pilot.rds_expired_nonce',
+    'istio.galley.validation.config_update_error.count',
+    'istio.galley.validation.config_update_error',
+    'istio.pilot.conflict.outbound_listener.http_over_https',
+    'istio.pilot.xds.eds_all_locality_endpoints',
+    'istio.pilot.xds.eds_instances',
 ]
 
 
