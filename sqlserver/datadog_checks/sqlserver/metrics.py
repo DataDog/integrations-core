@@ -806,7 +806,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
     DEFAULT_METRIC_TYPE = 'gauge'
 
     QUERY_BASE = (
-        "select DB_NAME(database_id) as database_name, OBJECT_NAME(object_id) as object_name, "
+        "select DB_NAME(database_id) as database_name, OBJECT_NAME(object_id, database_id) as object_name, "
         "index_id, partition_number, fragment_count, avg_fragment_size_in_pages, "
         "avg_fragmentation_in_percent "
         "from {table} (DB_ID('{{db}}'),null,null,null,null) "
