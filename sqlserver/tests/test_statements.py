@@ -352,7 +352,7 @@ def test_statement_metadata(
         },
         {
             'aws': {
-                'hostname': 'foo.aws.com',
+                'instance_endpoint': 'foo.aws.com',
             },
             'azure': {
                 'product': 'flexible_server',

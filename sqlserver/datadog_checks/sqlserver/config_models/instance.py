@@ -23,7 +23,7 @@ class Aws(BaseModel):
     class Config:
         allow_mutation = False
 
-    hostname: Optional[str]
+    instance_endpoint: Optional[str]
 
 
 class Azure(BaseModel):

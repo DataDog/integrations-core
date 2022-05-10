@@ -254,19 +254,19 @@ instances:
 
     ## Provide the following if you are instrumenting a managed AWS database. Requires `dbm:true`.
     ##
-    ## Requires setting the field `hostname`, which should be equal to the Endpoint.Address of the instance
+    ## Requires setting the field `instance_endpoint`, which should be equal to the Endpoint.Address of the instance
     ## the agent is connecting to. Note, if the `host` field is already equal to the instance's Endpoint.Address value, 
     ## then setting this configuration is not necessary.
     #
     aws:
 
-        ## @param hostname - string - optional - default: foo.bar.us-east-1.rds.amazonaws.com
+        ## @param instance_endpoint - string - optional - default: foo.bar.us-east-1.rds.amazonaws.com
         ## Equal to the Endpoint.Address of the instance the agent is connecting to.
         ##
         ## For more information on instance endpoints, 
         ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
         #
-        # hostname: foo.bar.us-east-1.rds.amazonaws.com
+        # instance_endpoint: foo.bar.us-east-1.rds.amazonaws.com
 
     ## Provide the following if you are instrumenting a managed GCP database. Requires `dbm:true`.
     #
