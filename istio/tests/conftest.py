@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import time
 from copy import deepcopy
 
 import pytest
@@ -47,6 +48,8 @@ def setup_istio():
 
     # Install demo profile
     run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "demo_profile.yaml")])
+    time.sleep(60)
+    run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "demo_profile2.yaml")])
     # Wait for istio deployments
     run_command(
         ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "istio-system", "--timeout=300s"]
