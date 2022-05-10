@@ -36,7 +36,7 @@ If you're running Varnish 4.1+, add the `dd-agent` system user to the Varnish gr
 sudo usermod -G varnish -a dd-agent
 ```
 
-If you are going to be using a `secretfile` you need to ensure it is readable by the `dd-agent` user.
+If you use a `secretfile`, you must ensure it is readable by the `dd-agent` user.
 
 ##### Metric collection
 
