@@ -287,85 +287,69 @@ files:
           value:
             type: number
             example: 10
+
     - name: aws
       description: |
         Provide the following if you are instrumenting a managed AWS database. Requires `dbm:true`.
         
         Requires setting the field `hostname`, which should be equal to the Endpoint.Address of the instance
-        the agent is connecting to. For example:
-        aws:
-          - hostname: foo.bar.us-east-1.rds.amazonaws.com
-        
-        Note, if the `host` field is already equal to the instance's Endpoint.Address value, then setting 
-        this configuration is not necessary.
-        
-        For more information on instance endpoints, 
-        see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
-      value:
-        type: array
-        items:
-          anyOf:
-            - type: string
-            - type: object
-          properties:
-            - name: hostname
-              type: string
-          example:
-            - hostname: foo.bar.us-east-1.rds.amazonaws.com
+        the agent is connecting to. Note, if the `host` field is already equal to the instance's Endpoint.Address value, 
+        then setting this configuration is not necessary.
+      options:
+        - name: hostname
+          description: |
+            Equal to the Endpoint.Address of the instance the agent is connecting to.
+            
+            For more information on instance endpoints, 
+            see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
+          value:
+            type: string
+            example: foo.bar.us-east-1.rds.amazonaws.com
+
     - name: gcp
       description: |
         Provide the following if you are instrumenting a managed GCP database. Requires `dbm:true`.
-        
-        Requires setting the following fields:
-        
-        `project_id` the resources's project https://cloud.google.com/resource-manager/docs/creating-managing-projects
-        `instance_id` the resource's id https://cloud.google.com/sql/docs/mysql/instance-settings#instance-id-2ndgen
-        
-        For example:
-        gcp:
-          - project_id: foo-project
-          - instance_id: foo-database
-      value:
-        type: array
-        items:
-          anyOf:
-            - type: string
-            - type: object
-          properties:
-            - name: project_id
-              type: string
-            - name: instance_id
-              type: string
-          example:
-            - project_id: foo-project
-            - instance_id: foo-database
+      options:
+        - name: project_id
+          description: |
+            Equal to the GCP resource's project id.
+            
+            For more information on project ids,
+            See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+          value:
+            type: string
+            example: foo-project
+        - name: instance_id
+          description: |
+            Equal to the GCP resource's instance id.
+            
+            For more information on instance ids,
+            See the GCP docs https://cloud.google.com/sql/docs/mysql/instance-settings#instance-id-2ndgen
+          value:
+            type: string
+            example: foo-database
+
     - name: azure
       description: |
         Provide the following if you are instrumenting a managed Azure database. Requires `dbm:true`.
-        
-        Requires setting the following fields:
-        
-        `product` the managed azure DB product. Acceptable values are `flexible_server` or `single_server`. 
-        `name` the name of the database.
-        
-        For example:
-        azure:
-          - product: flexible_server
-          - name: foo.bar.database
-      value:
-        type: array
-        items:
-          anyOf:
-            - type: string
-            - type: object
-          properties:
-            - name: product
-              type: string
-            - name: name
-              type: string
-          example:
-            - product: flexible_server
-            - name: foo.bar.database
+      options:
+        - name: product
+          description: |
+            Equal to the managed Azure DB product. 
+            
+            Acceptable values are:
+              - `flexible_server` 
+              - `single_server`
+          value:
+            type: string
+            example: flexible_server
+        - name: name
+          description: |
+            Equal to the name of the database.
+          value:
+            type: string
+            example: foo.database
+
     - name: obfuscator_options
       description: |
         Configure how the SQL obfuscator behaves.
