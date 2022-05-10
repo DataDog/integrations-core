@@ -15,40 +15,32 @@ AG_QUERY = re.sub(
     " ",
     """\
 SELECT
-    AG.group_id AS availability_group_id,
-    AG.name AS availability_group,
+    AG.group_id AS availability_group,
     AG.failure_condition_level,
     AG.automated_backup_preference,
     AG.required_synchronized_secondaries_to_commit,
-    AR.replica_server_name,
-    AR.availability_mode,
-    AR.failover_mode,
     AR.session_timeout,
     AR.primary_role_allow_connections,
     AR.secondary_role_allow_connections,
     AR.create_date AS replica_create_date,
     AR.modify_date AS replica_modified_date,
-    ADC.database_name,
+    DRS.replica_id,
     DRS.database_id,
-    DRS.is_primary_replica,
-    DRS.synchronization_state,
-    DRS.database_state,
     DRS.is_suspended,
     DRS.suspend_reason,
     DRS.recovery_lsn,
     DRS.truncation_lsn,
     DRS.last_received_time,
-    DRS.last_hardened_time
+    DRS.last_hardened_time,
+    FC.cluster_name
 FROM
     sys.availability_groups AS AG
-    JOIN sys.availability_replicas AS AR ON AG.group_id = AR.group_id
-    JOIN sys.availability_databases_cluster AS ADC ON AG.group_id = ADC.group_id
-    JOIN sys.dm_hadr_database_replica_states AS DRS ON AG.group_id = DRS.group_id
+    INNER JOIN sys.availability_replicas AS AR ON AG.group_id = AR.group_id
+    INNER JOIN sys.availability_databases_cluster AS ADC ON AG.group_id = ADC.group_id
+    INNER JOIN sys.dm_hadr_database_replica_states AS DRS ON AG.group_id = DRS.group_id
         AND ADC.group_database_id = DRS.group_database_id
         AND AR.replica_id = DRS.replica_id
-    -- We prioritize these rows because it indicates where data loss could potentially be the greatest
-    -- in the event of a failover.
-    ORDER BY DRS.log_send_queue_size + DRS.redo_queue_size DESC
+    CROSS APPLY (SELECT cluster_name FROM sys.dm_hadr_cluster) AS FC
 """,
 ).strip()
 

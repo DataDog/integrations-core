@@ -56,7 +56,7 @@ from .const import (
 )
 from .metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
 from .queries import (
-    QUERY_AVAILABILITY_GROUP_REPLICA_STATES,
+    QUERY_AVAILABILITY_GROUPS,
     QUERY_FAILOVER_CLUSTER,
     QUERY_FAILOVER_CLUSTER_INSTANCE,
     QUERY_FAILOVER_CLUSTER_MEMBER,
@@ -148,7 +148,7 @@ class SQLServer(AgentCheck):
         self._availability_group_queries = QueryExecutor(
             self.execute_query_raw,
             self,
-            queries=[QUERY_AVAILABILITY_GROUP_REPLICA_STATES],
+            queries=[QUERY_AVAILABILITY_GROUPS],
             tags=self.tags,
             hostname=self.resolved_hostname,
         )
