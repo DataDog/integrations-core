@@ -22,9 +22,13 @@ INTERMITTENT_METRICS = [
     "istio.pilot.k8s.cfg_events",
     "istio.pilot.k8s.cfg_events.count",
     "istio.sidecar_injection.requests_total",
+    "istio.sidecar_injection.requests.count",
     "istio.sidecar_injection.success_total",
+    "istio.sidecar_injection.success.count"
     "istio.sidecar_injection.failure_total",
+    "istio.sidecar_injection.failure.count",
     "istio.sidecar_injection.skip_total",
+    "istio.sidecar_injection.skip.count",
 ]
 
 
