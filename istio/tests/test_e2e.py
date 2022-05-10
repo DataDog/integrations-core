@@ -21,6 +21,9 @@ INTERMITTENT_METRICS = [
     'istio.pilot.xds.eds_instances',
     "istio.pilot.k8s.cfg_events",
     "istio.sidecar_injection.requests_total",
+    "istio.sidecar_injection.success_total",
+    "istio.sidecar_injection.failure_total",
+    "istio.sidecar_injection.skip_total",
 ]
 
 
