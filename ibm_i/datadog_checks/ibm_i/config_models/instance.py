@@ -43,16 +43,16 @@ class InstanceConfig(BaseModel):
     driver: Optional[str]
     empty_default_hostname: Optional[bool]
     hostname: Optional[str] = Field(None, max_length=255, min_length=1)
-    job_query_timeout: Optional[int] = Field(None, gt=0.0)
+    job_query_timeout: Optional[int] = Field(None, gt=0)
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     password: Optional[str]
     queries: Optional[Sequence[Query]]
-    query_timeout: Optional[int] = Field(None, gt=0.0)
+    query_timeout: Optional[int] = Field(None, gt=0)
     service: Optional[str]
-    severity_threshold: Optional[int] = Field(None, ge=0.0, le=99.0)
+    severity_threshold: Optional[int] = Field(None, ge=0, le=99)
     system: Optional[str]
-    system_mq_query_timeout: Optional[int] = Field(None, gt=0.0)
+    system_mq_query_timeout: Optional[int] = Field(None, gt=0)
     tags: Optional[Sequence[str]]
     username: Optional[str]
 
