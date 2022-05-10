@@ -14,7 +14,7 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
@@ -43,7 +43,6 @@ from .const import (
     DATABASE_SERVICE_CHECK_NAME,
     DBM_MIGRATED_METRICS,
     DEFAULT_AUTODISCOVERY_INTERVAL,
-    FC_METRICS,
     INSTANCE_METRICS,
     INSTANCE_METRICS_TOTAL,
     PERF_AVERAGE_BULK,
@@ -56,6 +55,12 @@ from .const import (
     VALID_METRIC_TYPES,
 )
 from .metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
+from .queries import (
+    QUERY_FAILOVER_CLUSTER,
+    QUERY_FAILOVER_CLUSTER_MEMBER,
+    QUERY_FAILOVER_CLUSTER_INSTANCE,
+    QUERY_AVAILABILITY_GROUP_REPLICA_STATES,
+)
 from .utils import set_default_driver_conf
 
 try:
@@ -88,6 +93,7 @@ class SQLServer(AgentCheck):
         self.instance_per_type_metrics = defaultdict(set)
         self.do_check = True
 
+        self.tags = self.instance.get("tags", [])
         self.reported_hostname = self.instance.get('reported_hostname')
         self.autodiscovery = is_affirmative(self.instance.get('database_autodiscovery'))
         self.autodiscovery_include = self.instance.get('autodiscovery_include', ['.*'])
@@ -102,13 +108,6 @@ class SQLServer(AgentCheck):
         self.proc = self.instance.get('stored_procedure')
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
         self.custom_metrics = init_config.get('custom_metrics', [])
-
-        # use QueryManager to process custom queries
-        self.tags = self.instance.get("tags", [])
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self.tags)
-        self.check_initializations.append(self.config_checks)
-        self.check_initializations.append(self._query_manager.compile_queries)
-        self.check_initializations.append(self.initialize_connection)
 
         # DBM
         self.dbm_enabled = self.instance.get('dbm', False)
@@ -144,6 +143,32 @@ class SQLServer(AgentCheck):
             # cache these for a full day
             ttl=60 * 60 * 24,
         )
+
+        # Query declarations
+        self._availability_group_queries = QueryExecutor(
+            self.execute_query_raw,
+            self,
+            queries=[QUERY_AVAILABILITY_GROUP_REPLICA_STATES],
+            tags=self.tags,
+            hostname=self.resolved_hostname,
+        )
+        self.check_initializations.append(self._availability_group_queries.compile_queries)
+        self._failover_cluster_queries = QueryExecutor(
+            self.execute_query_raw,
+            self,
+            queries=[QUERY_FAILOVER_CLUSTER, QUERY_FAILOVER_CLUSTER_MEMBER, QUERY_FAILOVER_CLUSTER_INSTANCE],
+            tags=self.tags,
+            hostname=self.resolved_hostname,
+        )
+        self.check_initializations.append(self._failover_cluster_queries.compile_queries)
+
+        # use QueryManager to process custom queries
+        self._query_manager = QueryManager(
+            self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
+        )
+        self.check_initializations.append(self.config_checks)
+        self.check_initializations.append(self._query_manager.compile_queries)
+        self.check_initializations.append(self.initialize_connection)
 
     def cancel(self):
         self.statement_metrics.cancel()
@@ -369,28 +394,6 @@ class SQLServer(AgentCheck):
             cfg = {'name': name, 'column': column, 'tags': tags, 'hostname': self.resolved_hostname}
             metrics_to_collect.append(SqlFileStats(cfg, None, getattr(self, metric_type), column, self.log))
 
-        include_fc_metrics = is_affirmative(
-            self.instance.get('include_fci_metrics', self.instance.get('include_fc_metrics', False))
-        )
-        fc_tags = []
-        # Load FC metrics
-        if include_fc_metrics:
-            with self.connection.get_managed_cursor() as cursor:
-                cursor.execute("SELECT cluster_name FROM sys.dm_hadr_cluster")
-                fc_rows = cursor.fetchall()
-                if fc_rows:
-                    # Cluster name can be empty string, in which case we'll want to drop the tag
-                    cluster_name = fc_rows[0][0] if fc_rows[0][0] else None
-                    fc_tags.append('failover_cluster:{}'.format(cluster_name))
-            for name, table, column in FC_METRICS:
-                cfg = {
-                    'name': name,
-                    'table': table,
-                    'column': column,
-                    'tags': tags + fc_tags,
-                }
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
         # Load AlwaysOn metrics
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
             for name, table, column in AO_METRICS + AO_METRICS_PRIMARY + AO_METRICS_SECONDARY:
@@ -400,8 +403,7 @@ class SQLServer(AgentCheck):
                     'table': table,
                     'column': column,
                     'instance_name': db_name,
-                    # Availability Groups can be used with Failover Clustering
-                    'tags': tags + fc_tags if include_fc_metrics else tags,
+                    'tags': tags,
                     'ao_database': self.instance.get('ao_database', None),
                     'availability_group': self.instance.get('availability_group', None),
                     'only_emit_local': is_affirmative(self.instance.get('only_emit_local', False)),
@@ -668,6 +670,12 @@ class SQLServer(AgentCheck):
             with self.connection.get_managed_cursor() as cursor:
                 cursor.execute("SET NOCOUNT ON")
             try:
+                if is_affirmative(self.instance.get('include_ao_metrics', False)):
+                    self._availability_group_queries.execute()
+                if is_affirmative(
+                    self.instance.get('include_fci_metrics', self.instance.get('include_fc_metrics', False))
+                ):
+                    self._failover_cluster_queries.execute()
                 # reuse connection for any custom queries
                 self._query_manager.execute()
             finally:
