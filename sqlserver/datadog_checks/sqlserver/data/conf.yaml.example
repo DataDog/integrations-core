@@ -252,6 +252,52 @@ instances:
         #
         # collection_interval: 10
 
+    ## @param aws - (list of string or mapping) - optional
+    ## Provide the following if you are instrumenting a managed AWS database. Requires `dbm:true`.
+    ##
+    ## Requires setting the field `hostname`, which should be equal to the Endpoint.Address of the instance
+    ## the agent is connecting to. For example:
+    ## aws:
+    ##   - hostname: foo.bar.us-east-1.rds.amazonaws.com
+    ##
+    ## Note, if the `host` field is already equal to the instance's Endpoint.Address value, then setting 
+    ## this configuration is not necessary.
+    ##
+    ## For more information on instance endpoints, 
+    ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
+    #
+    # aws: []
+
+    ## @param gcp - (list of string or mapping) - optional
+    ## Provide the following if you are instrumenting a managed GCP database. Requires `dbm:true`.
+    ##
+    ## Requires setting the following fields:
+    ##
+    ## `project_id` the resources's project https://cloud.google.com/resource-manager/docs/creating-managing-projects
+    ## `instance_id` the resource's id https://cloud.google.com/sql/docs/mysql/instance-settings#instance-id-2ndgen
+    ##
+    ## For example:
+    ## gcp:
+    ##   - project_id: foo-project
+    ##   - instance_id: foo-database
+    #
+    # gcp: []
+
+    ## @param azure - (list of string or mapping) - optional
+    ## Provide the following if you are instrumenting a managed Azure database. Requires `dbm:true`.
+    ##
+    ## Requires setting the following fields:
+    ##
+    ## `product` the managed azure DB product. Acceptable values are `flexible_server` or `single_server`. 
+    ## `name` the name of the database.
+    ##
+    ## For example:
+    ## azure:
+    ##   - product: flexible_server
+    ##   - name: foo.bar.database
+    #
+    # azure: []
+
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
     #

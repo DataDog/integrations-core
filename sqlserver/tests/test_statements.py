@@ -341,6 +341,73 @@ def test_statement_metadata(
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
+    "cloud_metadata",
+    [
+        {},
+        {
+            'azure': {
+                'product': 'flexible_server',
+                'name': 'test-server',
+            },
+        },
+        {
+            'aws': {
+                'hostname': 'foo.aws.com',
+            },
+            'azure': {
+                'product': 'flexible_server',
+                'name': 'test-server',
+            },
+        },
+        {
+            'gcp': {
+                'project_id': 'foo-project',
+                'instance_id': 'bar',
+                'extra_field': 'included',
+            },
+        },
+    ],
+)
+def test_statement_cloud_metadata(
+        aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, cloud_metadata
+):
+    if cloud_metadata:
+        for k, v in cloud_metadata.items():
+            dbm_instance[k] = v
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    query = 'SELECT * FROM ϑings'
+
+    def _run_query():
+        bob_conn.execute_with_retries(query, (), database="datadog_test")
+
+    # the check must be run three times:
+    # 1) set _last_stats_query_time (this needs to happen before the 1st test queries to ensure the query time
+    # interval is correct)
+    # 2) load the test queries into the StatementMetrics state
+    # 3) emit the query metrics based on the diff of current and last state
+    _run_query()
+    dd_run_check(check)
+    _run_query()
+    dd_run_check(check)
+    aggregator.reset()
+    _run_query()
+    dd_run_check(check)
+
+    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(dbm_metrics) == 1, "should have collected exactly one metrics payload"
+    payload = dbm_metrics[0]
+    # host metadata
+    assert payload['sqlserver_version'].startswith("Microsoft SQL Server"), "invalid version"
+    assert payload['host'] == "stubbed.hostname", "wrong hostname"
+    assert payload['ddagenthostname'] == datadog_agent.get_hostname()
+    # cloud metadata
+    assert payload['cloud_metadata'] == cloud_metadata, "wrong cloud_metadata"
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
     "reported_hostname,expected_hostname",
     [
         (None, 'stubbed.hostname'),
