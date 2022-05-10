@@ -417,6 +417,60 @@ instances:
         #
         # collection_interval: 10
 
+## Provide the following if you are instrumenting a managed AWS database. Requires `dbm:true`.
+##
+## Requires setting the field `instance_endpoint`, which should be equal to the Endpoint.Address of the instance
+## the agent is connecting to. Note, if the `host` field is already equal to the instance's Endpoint.Address value, 
+## then setting this configuration is not necessary.
+#
+aws:
+
+    ## @param instance_endpoint - string - optional - default: foo.bar.us-east-1.rds.amazonaws.com
+    ## Equal to the Endpoint.Address of the instance the agent is connecting to.
+    ##
+    ## For more information on instance endpoints, 
+    ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
+    #
+    # instance_endpoint: foo.bar.us-east-1.rds.amazonaws.com
+
+## Provide the following if you are instrumenting a managed GCP database. Requires `dbm:true`.
+#
+gcp:
+
+    ## @param project_id - string - optional - default: foo-project
+    ## Equal to the GCP resource's project id.
+    ##
+    ## For more information on project ids,
+    ## See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+    #
+    # project_id: foo-project
+
+    ## @param instance_id - string - optional - default: foo-database
+    ## Equal to the GCP resource's instance id.
+    ##
+    ## For more information on instance ids,
+    ## See the GCP docs https://cloud.google.com/sql/docs/mysql/instance-settings#instance-id-2ndgen
+    #
+    # instance_id: foo-database
+
+## Provide the following if you are instrumenting a managed Azure database. Requires `dbm:true`.
+#
+azure:
+
+    ## @param product - string - optional - default: flexible_server
+    ## Equal to the managed Azure DB product. 
+    ##
+    ## Acceptable values are:
+    ##   - `flexible_server` 
+    ##   - `single_server`
+    #
+    # product: flexible_server
+
+    ## @param name - string - optional - default: foo.database
+    ## Equal to the name of the database.
+    #
+    # name: foo.database
+
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
     #
