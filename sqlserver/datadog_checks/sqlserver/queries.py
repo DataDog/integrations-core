@@ -85,7 +85,7 @@ QUERY_AVAILABILITY_GROUP_REPLICA_STATES = {
             FC.cluster_name
         FROM sys.dm_hadr_database_replica_states AS DRS
         INNER JOIN sys.availability_groups AS AG ON DRS.group_id = AG.group_id
-        INNER JOIN sys.availability_replicas AS AR ON DRS.group_id = AR.group_id AND DRS.replica_id = AR.replica_id 
+        INNER JOIN sys.availability_replicas AS AR ON DRS.group_id = AR.group_id AND DRS.replica_id = AR.replica_id
         CROSS APPLY (SELECT cluster_name FROM sys.dm_hadr_cluster) AS FC
     """.strip(),
     'columns': [

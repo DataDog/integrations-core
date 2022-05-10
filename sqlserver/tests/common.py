@@ -16,7 +16,6 @@ from datadog_checks.sqlserver.const import (
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DBM_MIGRATED_METRICS,
-    FC_METRICS,
     INSTANCE_METRICS,
     INSTANCE_METRICS_TOTAL,
     TASK_SCHEDULER_METRICS,
@@ -44,6 +43,7 @@ HERE = get_here()
 CHECK_NAME = "sqlserver"
 
 CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.db.commit_table_entries', 'sqlserver.exec.in_progress']
+FC_METRICS = ['sqlserver.fci.status', 'sqlserver.fci.is_current_owner']
 EXPECTED_DEFAULT_METRICS = [
     m[0]
     for m in chain(
