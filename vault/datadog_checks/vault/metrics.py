@@ -121,6 +121,7 @@ METRIC_MAP = {
     'vault_replication_merkleDiff': 'replication.merkleDiff',
     'vault_replication_merkleSync': 'replication.merkleSync',
     'vault_replication_merkle_commit_index': 'replication.merkle.commit_index',
+    'vault_replication_wal_gc': 'replication.wal.gc',
     'vault_replication_wal_last_wal': 'replication.wal.last_wal',
     'vault_replication_wal_last_dr_wal': 'replication.wal.last_dr_wal',
     'vault_replication_wal_last_performance_wal': 'replication.wal.last_performance_wal',
