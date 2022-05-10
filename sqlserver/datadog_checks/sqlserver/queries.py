@@ -74,6 +74,9 @@ QUERY_AVAILABILITY_GROUP_REPLICA_STATES = {
         SELECT
             DRS.group_id,
             DRS.replica_id,
+            DRS.database_id,
+            DRS.is_primary_replica,
+            DRS.synchronization_state_desc,
             DRS.log_send_queue_size,
             DRS.log_send_rate,
             DRS.redo_queue_size,
@@ -82,15 +85,24 @@ QUERY_AVAILABILITY_GROUP_REPLICA_STATES = {
             DRS.filestream_send_rate,
             DRS.secondary_lag_seconds,
             AG.name,
+            AR.replica_server_name,
+            AR.failover_mode_desc,
+            ADC.database_name,
             FC.cluster_name
         FROM sys.dm_hadr_database_replica_states AS DRS
         INNER JOIN sys.availability_groups AS AG ON DRS.group_id = AG.group_id
         INNER JOIN sys.availability_replicas AS AR ON DRS.group_id = AR.group_id AND DRS.replica_id = AR.replica_id
+        INNER JOIN sys.availability_databases_cluster AS ADC ON DRS.group_id = ADC.group_id 
+            AND DRS.group_database_id = ADC.group_database_id
         CROSS APPLY (SELECT cluster_name FROM sys.dm_hadr_cluster) AS FC
     """.strip(),
     'columns': [
+        # DRS - sys.dm_hadr_database_replica_states
         {'name': 'availability_group', 'type': 'tag'},
         {'name': 'replica_id', 'type': 'tag'},
+        {'name': 'database_id', 'type': 'tag'},
+        {'name': 'ao.is_primary_replica', 'type': 'gauge'},
+        {'name': 'synchronization_state_desc', 'type': 'tag'},
         {'name': 'ao.log_send_queue_size', 'type': 'gauge'},
         {'name': 'ao.log_send_rate', 'type': 'gauge'},
         {'name': 'ao.redo_queue_size', 'type': 'gauge'},
@@ -98,7 +110,14 @@ QUERY_AVAILABILITY_GROUP_REPLICA_STATES = {
         {'name': 'ao.low_water_mark_for_ghosts', 'type': 'gauge'},
         {'name': 'ao.filestream_send_rate', 'type': 'gauge'},
         {'name': 'ao.secondary_lag_seconds', 'type': 'gauge'},
+        # AG - sys.availability_groups
         {'name': 'availability_group_name', 'type': 'tag'},
+        # AR - sys.availability_replicas
+        {'name': 'replica_server_name', 'type': 'tag'},
+        {'name': 'failover_mode_desc', 'type': 'tag'},
+        # ADC - sys.availability_databases_cluster
+        {'name': 'database_name', 'type': 'tag'},
+        # FC - sys.dm_hadr_cluster
         {'name': 'failover_cluster', 'type': 'tag'},
     ],
 }
