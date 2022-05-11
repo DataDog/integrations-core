@@ -103,7 +103,7 @@ def test_legacy_service_checks(legacy_instance, aggregator, dd_run_check):
 @pytest.mark.integration
 def test_followers(aggregator, dd_run_check):
     urls = []
-    result = run_command('docker-compose -f {} ps -q'.format(COMPOSE_FILE), capture='out', check=True)
+    result = run_command('docker compose -f {} ps -q'.format(COMPOSE_FILE), capture='out', check=True)
     container_ids = result.stdout.splitlines()
 
     for container_id in container_ids:

@@ -105,6 +105,7 @@ class InstanceConfig(BaseModel):
     aws_service: Optional[str]
     bearer_token_auth: Optional[Union[bool, str]]
     bearer_token_path: Optional[str]
+    bearer_token_refresh_interval: Optional[int]
     cache_metric_wildcards: Optional[bool]
     cache_shared_labels: Optional[bool]
     collect_counters_with_distributions: Optional[bool]

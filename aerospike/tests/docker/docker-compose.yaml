@@ -6,3 +6,11 @@ services:
     image: aerospike/aerospike-server:${AEROSPIKE_VERSION}
     ports:
       - "3000:3000"
+  aerospike-prometheus-exporter:
+    container_name: aerospike-prometheus-exporter
+    image: aerospike/aerospike-prometheus-exporter:${AEROSPIKE_EXPORTER_VERSION}
+    ports:
+      - "9145:9145"
+    environment:
+      AS_HOST: aerospike
+      AS_PORT: 3000

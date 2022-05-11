@@ -6,7 +6,7 @@ import click
 from .... import EnvVars
 from ...e2e import create_interface, get_configured_envs
 from ...e2e.agent import DEFAULT_PYTHON_VERSION
-from ...testing import complete_active_checks, get_tox_envs
+from ...testing import complete_active_checks, get_test_envs
 from ..console import CONTEXT_SETTINGS, DEBUG_OUTPUT, echo_info, echo_warning
 from ..test import test as test_command
 from .start import start
@@ -51,7 +51,7 @@ def test(
     ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memory, junit, ddtrace, test_filter, changed
 ):
     """Test an environment."""
-    check_envs = get_tox_envs(checks, e2e_tests_only=True, changed_only=changed)
+    check_envs = get_test_envs(checks, e2e_tests_only=True, changed_only=changed)
     tests_ran = False
 
     # If no checks or a subset of checks are specified it means we're testing what has changed compared
