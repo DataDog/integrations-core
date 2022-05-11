@@ -266,6 +266,14 @@ def get_tox_file(check_name):
     return os.path.join(get_root(), check_name, 'tox.ini')
 
 
+def get_hatch_file(check_name):
+    return os.path.join(get_root(), check_name, 'hatch.toml')
+
+
+def is_testable_check(check_name):
+    return file_exists(get_tox_file(check_name)) or file_exists(get_hatch_file(check_name))
+
+
 def get_extra_license_files():
     for path in os.listdir(get_root()):
         if not file_exists(get_manifest_file(path)):
@@ -415,7 +423,7 @@ def get_valid_integrations():
 
 
 def get_testable_checks():
-    return {path for path in os.listdir(get_root()) if file_exists(get_tox_file(path))}
+    return {path for path in os.listdir(get_root()) if is_testable_check(path)}
 
 
 def get_metric_sources():
