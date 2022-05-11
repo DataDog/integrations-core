@@ -346,8 +346,7 @@ def test_statement_metadata(
         {},
         {
             'azure': {
-                'product': 'flexible_server',
-                'name': 'test-server',
+                'managed_instance_name': 'my-instance',
             },
         },
         {
@@ -355,8 +354,7 @@ def test_statement_metadata(
                 'instance_endpoint': 'foo.aws.com',
             },
             'azure': {
-                'product': 'flexible_server',
-                'name': 'test-server',
+                'managed_instance_name': 'my-instance',
             },
         },
         {
