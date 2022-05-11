@@ -13,7 +13,7 @@ files:
             This implementation supports only Istio 1.5. Use `istiod_endpoint` or `istio_mesh_endpoint`.
           value:
             example: true
-            display_default: False
+            display_default: false
             type: boolean
           enabled: true
         - name: istiod_endpoint
