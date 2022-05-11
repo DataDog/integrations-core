@@ -252,9 +252,7 @@ def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instanc
         },
     ],
 )
-def test_statement_metrics_cloud_metadata(
-        aggregator, dd_run_check, dbm_instance, cloud_metadata, datadog_agent
-):
+def test_statement_metrics_cloud_metadata(aggregator, dd_run_check, dbm_instance, cloud_metadata, datadog_agent):
     if cloud_metadata:
         for k, v in cloud_metadata.items():
             dbm_instance[k] = v
