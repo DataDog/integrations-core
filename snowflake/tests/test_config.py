@@ -43,6 +43,7 @@ def test_authenticator_option_fail(options):
         pytest.param({'authenticator': 'snowflake_jwt', 'private_key_path': '/path/to/key'}, id='key pair auth'),
         pytest.param({'authenticator': 'oauth', 'token_path': '/path/to/token'}, id='token path'),
         pytest.param({'authenticator': 'oauth', 'token': 'mytoken'}, id='token'),
+        pytest.param({'only_custom_queries': True, 'metric_groups': []}, id='valid only_custom_queries'),
     ],
 )
 def test_authenticator_option_pass(options):
