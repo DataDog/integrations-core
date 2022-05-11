@@ -206,8 +206,8 @@ def test_statement_metrics(
         {},
         {
             'azure': {
-                'product': 'flexible_server',
-                'name': 'test-server',
+                'deployment_type': 'flexible_server',
+                'database_name': 'test-server',
             },
         },
         {
@@ -215,8 +215,8 @@ def test_statement_metrics(
                 'instance_endpoint': 'foo.aws.com',
             },
             'azure': {
-                'product': 'flexible_server',
-                'name': 'test-server',
+                'deployment_type': 'flexible_server',
+                'database_name': 'test-server',
             },
         },
         {
