@@ -126,7 +126,7 @@ instances:
     # exclude_metrics_by_labels: {}
 
     ## @param tag_by_endpoint - boolean - optional - default: true
-    ## Whether to include an endpoint tag or not.
+    ## Whether to include an endpoint tag.
     #
     tag_by_endpoint: false
 
