@@ -230,8 +230,8 @@ def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instanc
         {},
         {
             'azure': {
-                'product': 'flexible_server',
-                'name': 'test-server',
+                'deployment_type': 'flexible_server',
+                'database_name': 'test-server',
             },
         },
         {
@@ -239,8 +239,8 @@ def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instanc
                 'instance_endpoint': 'foo.aws.com',
             },
             'azure': {
-                'product': 'flexible_server',
-                'name': 'test-server',
+                'deployment_type': 'flexible_server',
+                'database_name': 'test-server',
             },
         },
         {
