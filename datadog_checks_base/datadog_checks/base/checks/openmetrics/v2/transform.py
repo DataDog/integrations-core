@@ -29,6 +29,7 @@ class MetricTransformer:
         self.non_cumulative_histogram_buckets = self.histogram_buckets_as_distributions or is_affirmative(
             config.get('non_cumulative_histogram_buckets', False)
         )
+        self.legacy_counters = is_affirmative(config.get('legacy_counters', False))
 
         # Accessible to every transformer
         self.global_options = {
@@ -56,7 +57,11 @@ class MetricTransformer:
                     raise_from(type(e)(error), None)
 
     def get(self, metric):
-        metric_name = metric.name
+
+        if self.legacy_counters and metric.type == 'counter' and metric.samples[0].name.endswith('_total'):
+            metric_name = metric.samples[0].name
+        else:
+            metric_name = metric.name
 
         transformer_data = self.transformer_data.get(metric_name)
         if transformer_data is not None:
@@ -152,7 +157,10 @@ def get_native_transformer(check, metric_name, modifiers, global_options):
     """
     transformer = None
 
-    def native(metric, sample_data, runtime_data):
+    if is_affirmative(check.instance.get('legacy_counters', False)):
+        modifiers.update({'legacy_counters': True})
+
+    def native(metric, sample_data, runtime_data, modifiers=modifiers):
         nonlocal transformer
         if transformer is None:
             transformer = NATIVE_TRANSFORMERS[metric.type](check, metric_name, modifiers, global_options)
@@ -168,7 +176,10 @@ def get_native_dynamic_transformer(check, metric_name, modifiers, global_options
     """
     cached_transformers = {}
 
-    def native_dynamic(metric, sample_data, runtime_data):
+    if is_affirmative(check.instance.get('legacy_counters', False)):
+        modifiers.update({'legacy_counters': True})
+
+    def native_dynamic(metric, sample_data, runtime_data, modifiers=modifiers):
         transformer = cached_transformers.get(metric.type)
         if transformer is None:
             transformer = NATIVE_TRANSFORMERS[metric.type](check, metric_name, modifiers, global_options)

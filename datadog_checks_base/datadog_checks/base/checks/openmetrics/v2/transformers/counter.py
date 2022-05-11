@@ -11,11 +11,13 @@ def get_counter(check, metric_name, modifiers, global_options):
     monotonic_count_method = check.monotonic_count
     metric_name = f'{metric_name}.count'
 
-    def counter(metric, sample_data, runtime_data):
+    def counter(metric, sample_data, runtime_data, metric_name=metric_name, modifiers=modifiers):
         flush_first_value = runtime_data['flush_first_value']
 
         for sample, tags, hostname in sample_data:
             if sample.name.endswith('_total'):
+                if modifiers.get('legacy_counters'):
+                    metric_name = sample.name
                 monotonic_count_method(
                     metric_name,
                     sample.value,
