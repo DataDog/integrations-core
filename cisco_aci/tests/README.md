@@ -1,6 +1,6 @@
 ## How to test cisco_aci
 
-It is not possible to test this integration with a simple docker-compose environment on which to run the agent. This document lists some of the available options to test this integration. Note that installing a real cisco ACI environment is not feasible as it requires a custom hardware setup.
+It is not possible to test this integration with a simple `docker compose` environment on which to run the agent. This document lists some of the available options to test this integration. Note that installing a real cisco ACI environment is not feasible as it requires a custom hardware setup.
 
 ### Unit tests
 
