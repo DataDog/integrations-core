@@ -16,7 +16,15 @@ from .common import CHECK_NAME
         pytest.param({'token': 'mytoken'}, id='wrong parameters'),
         pytest.param({'authenticator': 'unknown'}, id='wrong authenticator'),
         pytest.param({'password': 'pass', 'private_key_password': 'pass'}, id='missing private_key_path'),
-        pytest.param({'only_custom_queries': True, 'metric_groups': ['snowflake.billing']}, id='incompatible options'),
+        pytest.param(
+            {
+                'only_custom_queries': True,
+                'username': 'test',
+                'password': 'test',
+                'metric_groups': ['snowflake.billing'],
+            },
+            id='incompatible options',
+        ),
     ],
 )
 def test_authenticator_option_fail(options):
@@ -43,6 +51,16 @@ def test_authenticator_option_fail(options):
         pytest.param({'authenticator': 'snowflake_jwt', 'private_key_path': '/path/to/key'}, id='key pair auth'),
         pytest.param({'authenticator': 'oauth', 'token_path': '/path/to/token'}, id='token path'),
         pytest.param({'authenticator': 'oauth', 'token': 'mytoken'}, id='token'),
+        pytest.param(
+            {
+                'only_custom_queries': True,
+                'username': 'test',
+                'password': 'test',
+                'metric_groups': [],
+                'custom_queries': [{}],
+            },
+            id='valid only_custom_queries',
+        ),
     ],
 )
 def test_authenticator_option_pass(options):
