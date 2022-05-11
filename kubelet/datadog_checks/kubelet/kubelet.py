@@ -12,6 +12,7 @@ from copy import deepcopy
 import requests
 from kubeutil import get_connection_info
 from six import iteritems
+from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials, urljoin
@@ -89,14 +90,6 @@ DEFAULT_HISTOGRAMS = {
     'kubelet_pleg_relist_interval_seconds': 'kubelet.pleg.relist_interval',
 }
 
-DEPRECATED_HISTOGRAMS = {
-    'rest_client_request_latency_seconds': 'rest.client.latency',
-}
-
-NEW_1_14_HISTOGRAMS = {
-    'rest_client_request_duration_seconds': 'rest.client.latency',
-}
-
 DEFAULT_SUMMARIES = {}
 
 DEPRECATED_SUMMARIES = {
@@ -166,6 +159,8 @@ class KubeletCheck(
     def __init__(self, name, init_config, instances):
         self.KUBELET_METRIC_TRANSFORMERS = {
             'kubelet_container_log_filesystem_used_bytes': self.kubelet_container_log_filesystem_used_bytes,
+            'rest_client_request_latency_seconds': self.rest_client_latency,
+            'rest_client_request_duration_seconds': self.rest_client_latency,
         }
 
         self.NAMESPACE = 'kubernetes'
@@ -249,8 +244,6 @@ class KubeletCheck(
                     DEPRECATED_GAUGES,
                     NEW_1_14_GAUGES,
                     DEFAULT_HISTOGRAMS,
-                    DEPRECATED_HISTOGRAMS,
-                    NEW_1_14_HISTOGRAMS,
                     DEFAULT_SUMMARIES,
                     DEPRECATED_SUMMARIES,
                     NEW_1_14_SUMMARIES,
@@ -718,3 +711,16 @@ class KubeletCheck(
                 )
 
         self.gauge(metric_name, sample[self.SAMPLE_VALUE], tags + self.instance_tags)
+
+    def rest_client_latency(self, metric, scraper_config):
+        for sample in metric.samples:
+            try:
+                sample.labels['url'] = self._sanitize_url_label(sample.labels['url'])
+            except KeyError:
+                pass
+        return self.submit_openmetric("rest.client.latency", metric, scraper_config)
+
+    @staticmethod
+    def _sanitize_url_label(url):
+        u = urlparse(url)
+        return u.path
