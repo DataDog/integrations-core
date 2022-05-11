@@ -1,13 +1,15 @@
 import re
+import time
 
 from datadog_checks.base import is_affirmative
-from datadog_checks.base.utils.db.utils import DBMAsyncJob
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
-# try:
-#     import datadog_agent
-# except ImportError:
-#     from ..stubs import datadog_agent
+try:
+    import datadog_agent
+except ImportError:
+    from ..stubs import datadog_agent
 
 
 AG_QUERY = re.sub(
@@ -90,8 +92,11 @@ class SqlserverAlwaysOn(DBMAsyncJob):
         # raw connection. adodbapi and pyodbc modules are thread safe, but connections are not.
         with self.check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self.check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
-                self._get_availability_groups(cursor)
-                # TODO...
+                rows = self._get_availability_groups(cursor)
+                rows = self._estimate_size_and_truncate_rows(rows)
+                event = self._create_alwayson_event(rows)
+                _ = json.dumps(event, default=default_json_event_encoding)
+                # TODO: Figure out where the payload should go
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_availability_groups(self, cursor):
@@ -100,6 +105,43 @@ class SqlserverAlwaysOn(DBMAsyncJob):
         rows = self._construct_row_dicts(cursor)
         self.log.debug("Loaded SQL Server availability groups len(rows)=[%s]", len(rows))
         return rows
+
+    def _estimate_size_and_truncate_rows(self, rows):
+        output = []
+        estimated_size = 0
+        for row in rows:
+            estimated_size += self._get_estimated_row_size_bytes(row)
+            if estimated_size > SqlserverAlwaysOn.MAX_PAYLOAD_BYTES:
+                self.check.histogram(
+                    "dd.sqlserver.alwayson.collect_alwayson.max_bytes.rows_dropped",
+                    len(output) - len(rows),
+                    **self.check.debug_stats_kwargs()
+                )
+                self.check.warning(
+                    "Exceeded the limit of AlwaysOn rows captured (%s of %s rows included). "
+                    "Availability groups may be under-reported as a result.",
+                    len(output),
+                    len(rows),
+                )
+                return output
+            output.append(row)
+        return output
+
+    @staticmethod
+    def _get_estimated_row_size_bytes(row):
+        return len(str(row))
+
+    def _create_alwayson_event(self, rows):
+        return {
+            "host": self.check.resolved_hostname,
+            "ddagentversion": datadog_agent.get_version(),
+            "ddsource": "sqlserver",
+            "dbm_type": "alwayson",
+            "collection_interval": self.collection_interval,
+            "ddtags": self.check.tags,
+            "timestamp": time.time() * 1000,
+            "sqlserver_alwayson": rows,
+        }
 
     @staticmethod
     def _construct_row_dicts(cursor):
