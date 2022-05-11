@@ -16,7 +16,7 @@ def test_e2e(dd_agent_check, instance):
         aggregator.assert_metric(metric)
 
     # caddy can't mock HTTP query strings, so read/write metrics default to system/stats metrics
-    for metric in READ_WRITE_METRICS:
+    for metric in BLOCKSIZE_METRICS + READ_WRITE_METRICS:
         aggregator.assert_metric(metric, count=0)
 
     aggregator.assert_service_check('silk.can_connect', SilkCheck.OK)
