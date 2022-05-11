@@ -23,7 +23,7 @@ HERE = path.dirname(path.abspath(__file__))
 
 def setup_calico():
     # Deploy calico
-    # Pinning the test manifests to v3.22. v3.23 deprecated a metric that we check for `felix_active_local_tags`
+    # Pinned the test manifests to v3.22. v3.23 deprecated a metric that we check for `felix_active_local_tags`
     # https://projectcalico.docs.tigera.io/archive/v3.22/reference/felix/prometheus
     run_command(["kubectl", "apply", "-f", "https://projectcalico.docs.tigera.io/archive/v3.22/manifests/calico.yaml"])
 
