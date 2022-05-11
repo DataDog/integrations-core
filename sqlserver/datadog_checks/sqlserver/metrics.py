@@ -9,6 +9,7 @@ from __future__ import division
 from collections import defaultdict
 from functools import partial
 
+from datadog_checks.base import ensure_unicode
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.time import get_precise_time
 
@@ -806,7 +807,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
     DEFAULT_METRIC_TYPE = 'gauge'
 
     QUERY_BASE = (
-        "select DB_NAME(database_id) as database_name, OBJECT_NAME(object_id) as object_name, "
+        "select DB_NAME(database_id) as database_name, OBJECT_NAME(object_id, database_id) as object_name, "
         "index_id, partition_number, fragment_count, avg_fragment_size_in_pages, "
         "avg_fragmentation_in_percent "
         "from {table} (DB_ID('{{db}}'),null,null,null,null) "
@@ -870,14 +871,13 @@ class SqlDbFragmentation(BaseSqlServerMetric):
                 continue
 
             metric_tags = [
-                'database_name:{}'.format(str(self.instance)),
-                'object_name:{}'.format(str(object_name)),
-                'index_id:{}'.format(str(index_id)),
+                u'database_name:{}'.format(ensure_unicode(self.instance)),
+                u'object_name:{}'.format(ensure_unicode(object_name)),
+                u'index_id:{}'.format(ensure_unicode(index_id)),
             ]
 
             metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.datadog_name)
-            self.report_function(metric_name, column_val, tags=metric_tags)
+            self.report_function(self.datadog_name, column_val, tags=metric_tags)
 
 
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-hadr-database-replica-states-transact-sql?view=sql-server-ver15
