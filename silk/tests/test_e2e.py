@@ -12,7 +12,7 @@ from .common import BLOCKSIZE_METRICS, METRICS, READ_WRITE_METRICS
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance)
-    for metric in METRICS + BLOCKSIZE_METRICS:
+    for metric in METRICS:
         aggregator.assert_metric(metric)
 
     # caddy can't mock HTTP query strings, so read/write metrics default to system/stats metrics
