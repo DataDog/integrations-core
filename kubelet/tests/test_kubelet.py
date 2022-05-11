@@ -1452,3 +1452,12 @@ def test_detect_probes_req_exception(monkeypatch, mock_request):
     assert available is False
     assert check._probes_available is None
     assert mock_request.call_count == 1
+
+
+def test_sanitize_url_label():
+    input = (
+        "https://35.242.243.158/api/v1/namespaces/%7Bnamespace%7D/configmaps"
+        + "?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D"
+    )
+    expected = "/api/v1/namespaces/%7Bnamespace%7D/configmaps"
+    assert KubeletCheck._sanitize_url_label(input) == expected
