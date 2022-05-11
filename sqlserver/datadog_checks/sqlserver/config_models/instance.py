@@ -30,9 +30,8 @@ class Azure(BaseModel):
     class Config:
         allow_mutation = False
 
-    managed_instance_name: Optional[str]
-    sql_database_name: Optional[str]
-    vm_name: Optional[str]
+    database_name: Optional[str]
+    deployment_type: Optional[str]
 
 
 class CustomQuery(BaseModel):

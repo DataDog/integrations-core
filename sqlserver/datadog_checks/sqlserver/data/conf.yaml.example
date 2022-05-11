@@ -308,20 +308,23 @@ instances:
     #
     azure:
 
-        ## @param managed_instance_name - string - optional - default: my-managed-instance
-        ## Equal to the name of the managed SQL instance.
+        ## @param deployment_type - string - optional - default: sql_database
+        ## Equal to the deployment type for the managed database. 
+        ##
+        ## Acceptable values are:
+        ##   - `sql_database` 
+        ##   - `managed_instance`
+        ##   - `virtual_machine`
+        ##
+        ## For more information on deployment types, see the Azure
+        ## docs https://docs.microsoft.com/en-us/azure/azure-sql/azure-sql-iaas-vs-paas-what-is-overview?view=azuresql
         #
-        # managed_instance_name: my-managed-instance
+        # deployment_type: sql_database
 
-        ## @param sql_database_name - string - optional - default: my-sql-database
-        ## Equal to the name of the Azure SQL database
+        ## @param database_name - string - optional - default: my-sqlserver-instance
+        ## Equal to the name of the SQL Database, Managed Instance (SQL MI) or virtual machine.
         #
-        # sql_database_name: my-sql-database
-
-        ## @param vm_name - string - optional - default: my-sql-database
-        ## Equal to the name of the name of the virtual machine where SQLServer is running.
-        #
-        # vm_name: my-sql-database
+        # database_name: my-sqlserver-instance
 
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.

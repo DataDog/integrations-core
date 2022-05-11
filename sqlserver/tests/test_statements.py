@@ -346,7 +346,8 @@ def test_statement_metadata(
         {},
         {
             'azure': {
-                'managed_instance_name': 'my-instance',
+                'deployment_type': 'managed_instance',
+                'database_name': 'my-instance',
             },
         },
         {
@@ -354,7 +355,8 @@ def test_statement_metadata(
                 'instance_endpoint': 'foo.aws.com',
             },
             'azure': {
-                'managed_instance_name': 'my-instance',
+                'deployment_type': 'managed_instance',
+                'database_name': 'my-instance',
             },
         },
         {
