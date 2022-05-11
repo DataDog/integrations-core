@@ -14,6 +14,9 @@ files:
         exclude_labels.enabled: true
         exclude_labels.value.example:
           - destination_service
+        tag_by_endpoint.example: false
+        tag_by_endpoint.hidden: false
+        tag_by_endpoint.enabled: true
     - template: instances/openmetrics_legacy_base
       hidden: true
       overrides:
