@@ -43,6 +43,14 @@ HERE = get_here()
 CHECK_NAME = "sqlserver"
 
 CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.db.commit_table_entries', 'sqlserver.exec.in_progress']
+SERVER_METRICS = [
+    'sqlserver.server.committed_memory',
+    'sqlserver.server.cpu_count',
+    'sqlserver.server.physical_memory',
+    'sqlserver.server.target_memory',
+    'sqlserver.server.uptime',
+    'sqlserver.server.virtual_memory',
+]
 FC_METRICS = ['sqlserver.fci.status', 'sqlserver.fci.is_current_owner']
 EXPECTED_DEFAULT_METRICS = [
     m[0]
@@ -53,7 +61,7 @@ EXPECTED_DEFAULT_METRICS = [
         DATABASE_METRICS,
         DATABASE_FILES_IO,
     )
-]
+] + SERVER_METRICS
 EXPECTED_METRICS = (
     EXPECTED_DEFAULT_METRICS
     + [

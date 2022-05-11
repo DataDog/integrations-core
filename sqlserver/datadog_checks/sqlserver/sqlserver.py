@@ -43,6 +43,7 @@ from .const import (
     DATABASE_SERVICE_CHECK_NAME,
     DBM_MIGRATED_METRICS,
     DEFAULT_AUTODISCOVERY_INTERVAL,
+    ENGINE_EDITION_SQL_DATABASE,
     INSTANCE_METRICS,
     INSTANCE_METRICS_TOTAL,
     PERF_AVERAGE_BULK,
@@ -51,6 +52,8 @@ from .const import (
     PERF_LARGE_RAW_BASE,
     PERF_RAW_LARGE_FRACTION,
     SERVICE_CHECK_NAME,
+    STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_VERSION,
     TASK_SCHEDULER_METRICS,
     VALID_METRIC_TYPES,
 )
@@ -60,6 +63,7 @@ from .queries import (
     QUERY_FAILOVER_CLUSTER,
     QUERY_FAILOVER_CLUSTER_INSTANCE,
     QUERY_FAILOVER_CLUSTER_MEMBER,
+    QUERY_SERVER_STATIC_INFO,
 )
 from .utils import set_default_driver_conf
 
@@ -161,6 +165,14 @@ class SQLServer(AgentCheck):
             hostname=self.resolved_hostname,
         )
         self.check_initializations.append(self._failover_cluster_queries.compile_queries)
+        self.server_state_queries = QueryExecutor(
+            self.execute_query_raw,
+            self,
+            queries=[QUERY_SERVER_STATIC_INFO],
+            tags=self.tags,
+            hostname=self.resolved_hostname,
+        )
+        self.check_initializations.append(self.server_state_queries.compile_queries)
 
         # use QueryManager to process custom queries
         self._query_manager = QueryManager(
@@ -219,15 +231,23 @@ class SQLServer(AgentCheck):
         return self._resolved_hostname
 
     def load_static_information(self):
-        if 'version' not in self.static_info_cache:
+        if len({STATIC_INFO_VERSION, STATIC_INFO_ENGINE_EDITION} - set(self.static_info_cache.keys())) > 0:
             with self.connection.open_managed_default_connection():
                 with self.connection.get_managed_cursor() as cursor:
-                    cursor.execute("select @@version")
-                    results = cursor.fetchall()
-                    if results and len(results) > 0 and len(results[0]) > 0 and results[0][0]:
-                        self.static_info_cache["version"] = results[0][0]
-                    else:
-                        self.log.warning("failed to load version static information due to empty results")
+                    if STATIC_INFO_VERSION not in self.static_info_cache:
+                        cursor.execute("select @@version")
+                        results = cursor.fetchall()
+                        if results and len(results) > 0 and len(results[0]) > 0 and results[0][0]:
+                            self.static_info_cache[STATIC_INFO_VERSION] = results[0][0]
+                        else:
+                            self.log.warning("failed to load version static information due to empty results")
+                    if STATIC_INFO_ENGINE_EDITION not in self.static_info_cache:
+                        cursor.execute("SELECT CAST(ServerProperty('EngineEdition') AS INT) AS Edition")
+                        result = cursor.fetchone()
+                        if result:
+                            self.static_info_cache[STATIC_INFO_ENGINE_EDITION] = result
+                        else:
+                            self.log.warning("failed to load version static information due to empty results")
 
     def debug_tags(self):
         return self.tags + ['agent_hostname:{}'.format(self.agent_hostname)]
@@ -676,6 +696,13 @@ class SQLServer(AgentCheck):
                     self.instance.get('include_fci_metrics', self.instance.get('include_fc_metrics', False))
                 ):
                     self._failover_cluster_queries.execute()
+                # Server state queries require VIEW SERVER STATE permissions, which some managed database
+                # versions do not support.
+                if self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION) not in [
+                    ENGINE_EDITION_SQL_DATABASE,
+                ]:
+                    self.server_state_queries.execute()
+
                 # reuse connection for any custom queries
                 self._query_manager.execute()
             finally:
