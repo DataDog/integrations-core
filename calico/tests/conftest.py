@@ -23,10 +23,12 @@ HERE = path.dirname(path.abspath(__file__))
 
 def setup_calico():
     # Deploy calico
-    run_command(["kubectl", "apply", "-f", "https://docs.projectcalico.org/manifests/calico.yaml"])
+    run_command(["kubectl", "apply", "-f", "https://projectcalico.docs.tigera.io/archive/v3.22/manifests/calico.yaml"])
 
     # Install calicoctl as a pod
-    run_command(["kubectl", "apply", "-f", "https://docs.projectcalico.org/manifests/calicoctl.yaml"])
+    run_command(
+        ["kubectl", "apply", "-f", "https://projectcalico.docs.tigera.io/archive/v3.22/manifests/calicoctl.yaml"]
+    )
 
     # Create felix metrics service
     run_command(["kubectl", "apply", "-f", path.join(HERE, 'felix-service.yaml')])
