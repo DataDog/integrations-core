@@ -28,6 +28,14 @@ class CustomQuery(BaseModel):
     tags: Optional[Sequence[str]]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class ObfuscatorOptions(BaseModel):
     class Config:
         allow_mutation = False
@@ -98,6 +106,7 @@ class InstanceConfig(BaseModel):
     include_instance_metrics: Optional[bool]
     include_master_files_metrics: Optional[bool]
     include_task_scheduler_metrics: Optional[bool]
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     obfuscator_options: Optional[ObfuscatorOptions]
     only_custom_queries: Optional[bool]
