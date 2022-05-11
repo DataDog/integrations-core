@@ -459,6 +459,7 @@ files:
             Acceptable values are:
               - `flexible_server` 
               - `single_server`
+              - `virtual_machine`
             
             For more information on deployment types, 
             see the Azure docs https://docs.microsoft.com/en-us/azure/postgresql/overview-postgres-choose-server-options
