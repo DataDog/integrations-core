@@ -219,12 +219,14 @@ class OpenMetricsScraper:
         if is_affirmative(config.get('use_latest_spec', False)):
             self.parse_metric_families = parse_metric_families_strict
             # https://github.com/prometheus/client_python/blob/v0.9.0/prometheus_client/openmetrics/exposition.py#L7
-            self.http.options['headers'].setdefault(
-                'Accept', 'application/openmetrics-text; version=0.0.1; charset=utf-8'
-            )
+            accept_header = 'application/openmetrics-text; version=0.0.1; charset=utf-8'
         else:
             self.parse_metric_families = parse_metric_families
-            self.http.options['headers'].setdefault('Accept', 'text/plain')
+            accept_header = 'text/plain'
+
+        # Request the appropriate exposition format
+        if self.http.options['headers'].get('Accept') == '*/*':
+            self.http.options['headers']['Accept'] = accept_header
 
         self.use_process_start_time = is_affirmative(config.get('use_process_start_time'))
 

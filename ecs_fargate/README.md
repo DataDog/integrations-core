@@ -86,7 +86,7 @@ Resources:
       Memory: 1GB
       ContainerDefinitions:
         - Name: datadog-agent
-          Image: 'gcr.io/datadoghq/agent:latest'
+          Image: 'public.ecr.aws/datadog/agent:latest'
           Cpu: 100
           Memory: 256MB
 ```
