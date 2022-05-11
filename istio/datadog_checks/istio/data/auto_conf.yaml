@@ -29,7 +29,7 @@ instances:
     ## @param tag_by_endpoint - boolean - optional - default: true
     ## Wether to include an endpoint tag or not.
     #
-    tag_by_endpoint: true
+    tag_by_endpoint: false
 
     ## @param exclude_labels - list of strings - optional
     ## A list of labels to be excluded

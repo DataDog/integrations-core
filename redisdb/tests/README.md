@@ -49,18 +49,18 @@ This is how a fixture orchestrating Redis instances looks like:
 ```python
 @pytest.fixture(scope="session")
 def redis_auth():
-    # omitted docker-compose invokation setup here ...
+    # omitted `docker compose` invokation setup here ...
     subprocess.check_call(args + ["up", "-d"], env=env)
     yield
     subprocess.check_call(args + ["down"], env=env)
 ```
 
-the basic concept is that `docker-compose up` is run right after the fixture
+the basic concept is that `docker compose up` is run right after the fixture
 is made available to the test function (it blocks on `yield`). When the test
-has done, `yield` unblocks and `docker-compose down` is called. Notice the
+has done, `yield` unblocks and `docker compose down` is called. Notice the
 `scope=session` argument passed to the fixture decorator, it allows the
 `yield` to block only once for **all the tests** , unblocking only after the
-last test: this is useful to avoid having `docker-compose up` and `down`
+last test: this is useful to avoid having `docker compose up` and `down`
 called at every test. One caveat with this approach is that if you have data
 in Redis, some test might operate on a dirty database - this is not an issue
 in this case but something to keep in mind when using `scope=session`.

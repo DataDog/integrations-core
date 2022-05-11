@@ -16,7 +16,7 @@ def dd_environment():
     """
     Start a cluster with one master, one replica and one unhealthy replica and
     stop it after the tests are done.
-    If there's any problem executing docker-compose, let the exception bubble
+    If there's any problem executing `docker compose`, let the exception bubble
     up.
     """
     if not FLUENTD_IMAGE_TAG:

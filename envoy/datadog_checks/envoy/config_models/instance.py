@@ -132,6 +132,7 @@ class InstanceConfig(BaseModel):
     share_labels: Optional[Mapping[str, Union[bool, ShareLabel]]]
     skip_proxy: Optional[bool]
     stats_url: Optional[str]
+    tag_by_endpoint: Optional[bool]
     tags: Optional[Sequence[str]]
     telemetry: Optional[bool]
     timeout: Optional[float]

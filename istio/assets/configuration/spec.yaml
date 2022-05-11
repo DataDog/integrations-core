@@ -96,7 +96,8 @@ files:
         enabled: true
         value:
           type: boolean
-          example: True
+          example: False
+          display_default: True
       - name: exclude_labels
         description: A list of labels to be excluded
         enabled: true
