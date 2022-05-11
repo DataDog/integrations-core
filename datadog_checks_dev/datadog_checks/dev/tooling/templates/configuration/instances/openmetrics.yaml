@@ -131,6 +131,13 @@
             - name: type
               type: string
             additionalProperties: true
+- name: legacy_counters
+  description: |
+    Whether or not to enable OpenMetrics v2 backwards-compatible collection of legacy counter names ending with the
+    `_total` suffix.
+  value:
+    example: false
+    type: boolean
 - name: exclude_metrics
   description: |
     A list of metrics to exclude, with each entry being either

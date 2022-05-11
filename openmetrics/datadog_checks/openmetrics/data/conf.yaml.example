@@ -145,6 +145,12 @@ instances:
     #
     # extra_metrics: []
 
+    ## @param legacy_counters - boolean - optional - default: false
+    ## Whether or not to enable OpenMetrics v2 backwards-compatible collection of legacy counter names ending with the
+    ## `_total` suffix.
+    #
+    # legacy_counters: false
+
     ## @param exclude_metrics - list of strings - optional
     ## A list of metrics to exclude, with each entry being either
     ## the exact metric name or a regular expression.
