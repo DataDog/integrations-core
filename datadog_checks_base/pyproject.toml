@@ -50,13 +50,13 @@ deps = [
     "ipaddress==1.0.23; python_version < '3.0'",
     "jellyfish==0.9.0; python_version > '3.0'",
     "prometheus-client==0.12.0; python_version < '3.0'",
-    "prometheus-client==0.13.1; python_version > '3.0'",
+    "prometheus-client==0.14.1; python_version > '3.0'",
     "protobuf==3.17.3; python_version < '3.0'",
-    "protobuf==3.19.4; python_version > '3.0'",
+    "protobuf==3.20.1; python_version > '3.0'",
     "pydantic==1.9.0; python_version > '3.0'",
     "python-dateutil==2.8.2",
     "pywin32==228; sys_platform == 'win32' and python_version < '3.0'",
-    "pywin32==303; sys_platform == 'win32' and python_version > '3.0'",
+    "pywin32==304; sys_platform == 'win32' and python_version > '3.0'",
     "pyyaml==5.4.1",
     "requests-toolbelt==0.9.1",
     "requests-unixsocket==0.3.0",
@@ -71,7 +71,7 @@ deps = [
 http = [
     "aws-requests-auth==0.4.3",
     "botocore==1.20.112; python_version < '3.0'",
-    "botocore==1.24.25; python_version > '3.0'",
+    "botocore==1.25.8; python_version > '3.0'",
     "pyjwt==1.7.1; python_version < '3.0'",
     "pyjwt==2.3.0; python_version > '3.0'",
     "pysocks==1.7.1",
@@ -81,7 +81,7 @@ http = [
     "win-inet-pton==1.1.0; sys_platform == 'win32' and python_version < '3.0'",
 ]
 json = [
-    "orjson==3.6.7; python_version > '3.0'",
+    "orjson==3.6.8; python_version > '3.0'",
 ]
 kube = [
     "kubernetes==18.20.0; python_version < '3.0'",
