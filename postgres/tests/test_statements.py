@@ -228,9 +228,7 @@ def test_statement_metrics(
         },
     ],
 )
-def test_statement_metrics_cloud_metadata(
-        aggregator, integration_check, dbm_instance, cloud_metadata, datadog_agent
-):
+def test_statement_metrics_cloud_metadata(aggregator, integration_check, dbm_instance, cloud_metadata, datadog_agent):
     dbm_instance['pg_stat_statements_view'] = "pg_stat_statements"
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
