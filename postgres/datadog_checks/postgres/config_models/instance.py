@@ -30,8 +30,8 @@ class Azure(BaseModel):
     class Config:
         allow_mutation = False
 
-    name: Optional[str]
-    product: Optional[str]
+    database_name: Optional[str]
+    deployment_type: Optional[str]
 
 
 class Gcp(BaseModel):
