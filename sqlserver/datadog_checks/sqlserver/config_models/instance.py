@@ -55,14 +55,6 @@ class QueryActivity(BaseModel):
     enabled: Optional[bool]
 
 
-class QueryAlwayson(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    collection_interval: Optional[float]
-    enabled: Optional[bool]
-
-
 class QueryMetrics(BaseModel):
     class Config:
         allow_mutation = False
@@ -115,7 +107,6 @@ class InstanceConfig(BaseModel):
     proc_only_if: Optional[str]
     proc_only_if_database: Optional[str]
     query_activity: Optional[QueryActivity]
-    query_alwayson: Optional[QueryAlwayson]
     query_metrics: Optional[QueryMetrics]
     reported_hostname: Optional[str]
     service: Optional[str]

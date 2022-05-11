@@ -18,7 +18,6 @@ from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
-from datadog_checks.sqlserver.alwayson import SqlserverAlwaysOn
 from datadog_checks.sqlserver.metrics import SqlFileStats
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 
@@ -119,8 +118,6 @@ class SQLServer(AgentCheck):
         self.statement_metrics = SqlserverStatementMetrics(self)
         self.activity_config = self.instance.get('query_activity', {}) or {}
         self.activity = SqlserverActivity(self)
-        self.alwayson_config = self.instance.get('query_alwayson', {}) or {}
-        self.alwayson = SqlserverAlwaysOn(self)
         obfuscator_options_config = self.instance.get('obfuscator_options', {}) or {}
         self.obfuscator_options = to_native_string(
             json.dumps(
@@ -634,7 +631,6 @@ class SQLServer(AgentCheck):
             if self.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
-                # self.alwayson.run_job_loop(self.tags)
 
         else:
             self.log.debug("Skipping check")
