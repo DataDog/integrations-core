@@ -9,6 +9,22 @@ PERF_AVERAGE_BULK = 1073874176
 PERF_COUNTER_BULK_COUNT = 272696576
 PERF_COUNTER_LARGE_RAWCOUNT = 65792
 
+# Engine Editions; see:
+# https://docs.microsoft.com/en-us/sql/t-sql/functions/serverproperty-transact-sql
+ENGINE_EDITION_PERSONAL = 1
+ENGINE_EDITION_STANDARD = 2
+ENGINE_EDITION_ENTERPRISE = 3
+ENGINE_EDITION_EXPRESS = 4
+ENGINE_EDITION_SQL_DATABASE = 5
+ENGINE_EDITION_AZURE_SYNAPSE_ANALYTICS = 6
+ENGINE_EDITION_AZURE_MANAGED_INSTANCE = 8
+ENGINE_EDITION_AZURE_SQL_EDGE = 9
+ENGINE_EDITION_AZURE_SYNAPSE_SERVERLESS_POOL = 11
+
+# Keys of the static info cache, used to cache server info which does not change
+STATIC_INFO_VERSION = 'version'
+STATIC_INFO_ENGINE_EDITION = 'engine_edition'
+
 # Metric discovery queries
 COUNTER_TYPE_QUERY = """select distinct cntr_type
                         from sys.dm_os_performance_counters

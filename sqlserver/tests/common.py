@@ -44,6 +44,14 @@ HERE = get_here()
 CHECK_NAME = "sqlserver"
 
 CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.db.commit_table_entries', 'sqlserver.exec.in_progress']
+SERVER_METRICS = [
+    'sqlserver.server.committed_memory',
+    'sqlserver.server.cpu_count',
+    'sqlserver.server.physical_memory',
+    'sqlserver.server.target_memory',
+    'sqlserver.server.uptime',
+    'sqlserver.server.virtual_memory',
+]
 EXPECTED_DEFAULT_METRICS = [
     m[0]
     for m in chain(
@@ -53,7 +61,7 @@ EXPECTED_DEFAULT_METRICS = [
         DATABASE_METRICS,
         DATABASE_FILES_IO,
     )
-]
+] + SERVER_METRICS
 EXPECTED_METRICS = (
     EXPECTED_DEFAULT_METRICS
     + [
@@ -159,7 +167,7 @@ INIT_CONFIG_ALT_TABLES = {
 }
 
 
-def assert_metrics(aggregator, expected_tags, dbm_enabled=False):
+def assert_metrics(aggregator, expected_tags, dbm_enabled=False, hostname=None, database_autodiscovery=False):
     """
     Boilerplate asserting all the expected metrics and service checks.
     Make sure ALL custom metric is tagged by database.
@@ -170,7 +178,10 @@ def assert_metrics(aggregator, expected_tags, dbm_enabled=False):
         dbm_excluded_metrics = [m[0] for m in DBM_MIGRATED_METRICS]
         expected_metrics = [m for m in EXPECTED_METRICS if m not in dbm_excluded_metrics]
     for mname in expected_metrics:
-        aggregator.assert_metric(mname)
+        assert hostname is not None, "hostname must be explicitly specified for all metrics"
+        aggregator.assert_metric(mname, hostname=hostname)
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=expected_tags)
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_no_duplicate_metrics()
+    if not database_autodiscovery:
+        # if we're autodiscovering other databases then there will be duplicate metrics, one per database
+        aggregator.assert_no_duplicate_metrics()

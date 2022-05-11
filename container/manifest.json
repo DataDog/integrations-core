@@ -22,7 +22,9 @@
   "integration_id": "container",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Containers": "assets/dashboards/containers.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {},
     "metrics_metadata": "metadata.csv"

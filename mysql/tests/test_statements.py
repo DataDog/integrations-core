@@ -39,6 +39,8 @@ def dbm_instance(instance_complex):
     instance_complex['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
     # set a very small collection interval so the tests go fast
     instance_complex['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    # don't need query activity for these tests
+    instance_complex['query_activity'] = {'enabled': False}
     return instance_complex
 
 
@@ -460,6 +462,8 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
     ]
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
     "metadata,expected_metadata_payload",
     [
@@ -474,7 +478,6 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
     ],
 )
 def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload):
-    dbm_instance['obfuscator_options'] = {'collect_metadata': True}
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     test_query = '''
@@ -499,21 +502,22 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agen
         mock_agent.side_effect = obfuscate_sql
         run_query(test_query)
         dd_run_check(mysql_check)
+        run_query(test_query)
+        dd_run_check(mysql_check)
 
     samples = aggregator.get_event_platform_events("dbm-samples")
-    matching = [s for s in samples if s['db']['query_signature'] == query_signature]
+    matching = [s for s in samples if s['db']['query_signature'] == query_signature and s.get('dbm_type') != 'fqt']
     assert len(matching) == 1
-
     sample = matching[0]
     assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
     assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
     assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
 
-    # Run the query and check a second time so statement metrics are computed from the previous run
-    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
-        mock_agent.side_effect = obfuscate_sql
-        run_query(test_query)
-        dd_run_check(mysql_check)
+    fqt_samples = [s for s in samples if s['db']['query_signature'] == query_signature and s.get('dbm_type') == 'fqt']
+    assert len(fqt_samples) == 1
+    fqt = fqt_samples[0]
+    assert fqt['db']['metadata']['tables'] == expected_metadata_payload['tables']
+    assert fqt['db']['metadata']['commands'] == expected_metadata_payload['commands']
 
     metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(metrics) == 1
@@ -523,6 +527,37 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agen
     metric = matching_metrics[0]
     assert metric['dd_tables'] == expected_metadata_payload['tables']
     assert metric['dd_commands'] == expected_metadata_payload['commands']
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "reported_hostname,expected_hostname",
+    [
+        (None, 'stubbed.hostname'),
+        ('override.hostname', 'override.hostname'),
+    ],
+)
+def test_statement_reported_hostname(
+    aggregator, dd_run_check, dbm_instance, datadog_agent, reported_hostname, expected_hostname
+):
+    dbm_instance['reported_hostname'] = reported_hostname
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    dd_run_check(mysql_check)
+    dd_run_check(mysql_check)
+
+    samples = aggregator.get_event_platform_events("dbm-samples")
+    assert samples, "should have at least one sample"
+    assert samples[0]['host'] == expected_hostname
+
+    fqt_samples = [s for s in samples if s.get('dbm_type') == 'fqt']
+    assert fqt_samples, "should have at least one fqt sample"
+    assert fqt_samples[0]['host'] == expected_hostname
+
+    metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert metrics, "should have at least one metric"
+    assert metrics[0]['host'] == expected_hostname
 
 
 @pytest.mark.integration

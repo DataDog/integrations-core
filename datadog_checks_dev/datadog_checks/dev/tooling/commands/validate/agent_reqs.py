@@ -16,7 +16,7 @@ from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, ech
     context_settings=CONTEXT_SETTINGS,
     short_help="Verify that the checks versions are in sync with the requirements-agent-release.txt file",
 )
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 def agent_reqs(check):
     """Verify that the checks versions are in sync with the requirements-agent-release.txt file.
 

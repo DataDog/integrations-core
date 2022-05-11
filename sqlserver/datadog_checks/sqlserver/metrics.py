@@ -9,6 +9,7 @@ from __future__ import division
 from collections import defaultdict
 from functools import partial
 
+from datadog_checks.base import ensure_unicode
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.time import get_precise_time
 
@@ -42,7 +43,10 @@ class BaseSqlServerMetric(object):
         self.datadog_name = cfg_instance['name']
         self.sql_name = cfg_instance.get('counter_name', '')
         self.base_name = base_name
-        self.report_function = partial(report_function, raw=True)
+        partial_kwargs = {}
+        if 'hostname' in cfg_instance:
+            partial_kwargs['hostname'] = cfg_instance['hostname']
+        self.report_function = partial(report_function, raw=True, **partial_kwargs)
         self.instance = cfg_instance.get('instance_name', '')
         self.object_name = cfg_instance.get('object_name', '')
         self.tags = cfg_instance.get('tags', [])
@@ -640,18 +644,21 @@ class SqlFileStats(BaseSqlServerMetric):
 
             for db in databases:
                 # use statements need to be executed separate from select queries
-                ctx = construct_use_statement(db)
-                logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
-                cursor.execute(ctx)
-                logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
-                cursor.execute(query)
-                data = cursor.fetchall()
-
-                columns = [i[0] for i in cursor.description]
-                for r in data:
-                    rows.append(r)
-
-                logger.debug("%s: received %d rows and %d columns for db %s", cls.__name__, len(data), len(columns), db)
+                try:
+                    ctx = construct_use_statement(db)
+                    logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
+                    cursor.execute(ctx)
+                    logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
+                    cursor.execute(query)
+                    data = cursor.fetchall()
+                    columns = [i[0] for i in cursor.description]
+                    for r in data:
+                        rows.append(r)
+                    logger.debug(
+                        "%s: received %d rows and %d columns for db %s", cls.__name__, len(data), len(columns), db
+                    )
+                except Exception as e:
+                    logger.warning("failed to fetch SQLFileStats from db %s due to Error: %s", db, e)
 
             # reset back to previous db
             logger.debug("%s: reverting cursor context via use statement to %s", cls.__name__, current_db)
@@ -800,7 +807,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
     DEFAULT_METRIC_TYPE = 'gauge'
 
     QUERY_BASE = (
-        "select DB_NAME(database_id) as database_name, OBJECT_NAME(object_id) as object_name, "
+        "select DB_NAME(database_id) as database_name, OBJECT_NAME(object_id, database_id) as object_name, "
         "index_id, partition_number, fragment_count, avg_fragment_size_in_pages, "
         "avg_fragmentation_in_percent "
         "from {table} (DB_ID('{{db}}'),null,null,null,null) "
@@ -864,14 +871,13 @@ class SqlDbFragmentation(BaseSqlServerMetric):
                 continue
 
             metric_tags = [
-                'database_name:{}'.format(str(self.instance)),
-                'object_name:{}'.format(str(object_name)),
-                'index_id:{}'.format(str(index_id)),
+                u'database_name:{}'.format(ensure_unicode(self.instance)),
+                u'object_name:{}'.format(ensure_unicode(object_name)),
+                u'index_id:{}'.format(ensure_unicode(index_id)),
             ]
 
             metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.datadog_name)
-            self.report_function(metric_name, column_val, tags=metric_tags)
+            self.report_function(self.datadog_name, column_val, tags=metric_tags)
 
 
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-hadr-database-replica-states-transact-sql?view=sql-server-ver15

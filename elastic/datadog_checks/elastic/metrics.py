@@ -288,6 +288,21 @@ STATS_METRICS = {
     'elasticsearch.fs.total.available_in_bytes': ('gauge', 'fs.total.available_in_bytes'),
 }
 
+ADDITIONAL_METRICS_POST_7_9_0 = {
+    'elasticsearch.indexing_pressure.memory.current.coordinating_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.current.coordinating_in_bytes',
+    ),
+    'elasticsearch.indexing_pressure.memory.current.primary_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.current.primary_in_bytes',
+    ),
+    'elasticsearch.indexing_pressure.memory.current.replica_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.current.replica_in_bytes',
+    ),
+}
+
 ADDITIONAL_METRICS_POST_7_2_0 = {
     'elasticsearch.refresh.external.total': ('gauge', 'indices.refresh.external_total'),
     'elasticsearch.refresh.external.total.time': (
@@ -527,6 +542,7 @@ ADDITIONAL_METRICS_POST_2_0 = {
     'elasticsearch.indices.request_cache.evictions': ('rate', 'indices.request_cache.evictions'),
     'elasticsearch.indices.request_cache.evictions.count': ('monotonic_count', 'indices.request_cache.evictions'),
     'elasticsearch.indices.request_cache.hit_count': ('rate', 'indices.request_cache.hit_count'),
+    'elasticsearch.indices.request_cache.hit_count.count': ('monotonic_count', 'indices.request_cache.hit_count'),
     'elasticsearch.indices.request_cache.miss_count': ('rate', 'indices.request_cache.miss_count'),
     'elasticsearch.indices.request_cache.miss_count.count': ('monotonic_count', 'indices.request_cache.miss_count'),
 }
@@ -716,6 +732,9 @@ def stats_for_version(version, jvm_rate=False):
 
     if version >= [7, 2, 0]:
         metrics.update(ADDITIONAL_METRICS_POST_7_2_0)
+
+    if version >= [7, 9, 0]:
+        metrics.update(ADDITIONAL_METRICS_POST_7_9_0)
 
     return metrics
 

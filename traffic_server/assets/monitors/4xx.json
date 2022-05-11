@@ -1,0 +1,32 @@
+{
+    "name": "[Traffic Server] 4xx Errors higher than usual",
+    "type": "query alert",
+    "query": "avg(last_1h):anomalies(avg:traffic_server.process.http.code.4xx_responses{*} by {code}, 'basic', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true') >= 1",
+    "message": "Number of 4xx errors on Traffic Server is at {{value}} which is higher than usual.",
+    "tags": [
+        "integration:traffic_server"
+    ],
+    "options": {
+        "notify_audit": false,
+        "locked": false,
+        "timeout_h": 0,
+        "new_host_delay": 300,
+        "require_full_window": false,
+        "notify_no_data": false,
+        "renotify_interval": 0,
+        "escalation_message": "",
+        "no_data_timeframe": null,
+        "include_tags": true,
+        "thresholds": {
+            "critical": 1,
+            "critical_recovery": 0
+        },
+        "threshold_windows": {
+            "trigger_window": "last_15m",
+            "recovery_window": "last_15m"
+        }
+    },
+    "recommended_monitor_metadata": {
+        "description": "Notifies when Traffic Server 4xx errors are higher than usual"
+    }
+}

@@ -1,5 +1,11 @@
 # CHANGELOG - Kube-dns
 
+## 3.1.0 / 2022-04-05
+
+* [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+
 ## 3.0.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11382](https://github.com/DataDog/integrations-core/pull/11382).
@@ -7,7 +13,7 @@
 * [Fixed] Add k8s-dns-kube-dns as default AD identifier. See [#11269](https://github.com/DataDog/integrations-core/pull/11269).
 * [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
 
-## 2.5.1 / 2022-01-18
+## 2.5.1 / 2022-01-18 / Agent 7.34.0
 
 * [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
 

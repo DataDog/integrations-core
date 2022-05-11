@@ -1,5 +1,14 @@
 # CHANGELOG - Snowflake
 
+## 4.3.0 / 2022-04-05
+
+* [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+
+## 4.2.1 / 2022-03-10
+
+* [Fixed] Convert private key password into string instead of byte. See [#11648](https://github.com/DataDog/integrations-core/pull/11648).
+
 ## 4.2.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11433](https://github.com/DataDog/integrations-core/pull/11433).

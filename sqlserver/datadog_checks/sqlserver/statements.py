@@ -23,6 +23,8 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
+from .const import STATIC_INFO_VERSION
+
 DEFAULT_COLLECTION_INTERVAL = 10
 
 SQL_SERVER_QUERY_METRICS_COLUMNS = [
@@ -156,7 +158,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             enabled=is_affirmative(check.statement_metrics_config.get('enabled', True)),
             expected_db_exceptions=(),
             min_collection_interval=check.min_collection_interval,
-            config_host=check.resolved_hostname,
             dbms="sqlserver",
             rate_limit=1 / float(collection_interval),
             job_name="query-metrics",
@@ -294,7 +295,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'min_collection_interval': self.collection_interval,
             'tags': self.check.tags,
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
-            'sqlserver_version': self.check.static_info_cache.get("version", ""),
+            'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'ddagentversion': datadog_agent.get_version(),
             'ddagenthostname': self._check.agent_hostname,
         }
@@ -358,6 +359,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     "query_signature": row['query_signature'],
                     "user": row.get('user_name', None),
                     "statement": row['text'],
+                    "metadata": {
+                        "tables": row['dd_tables'],
+                        "commands": row['dd_commands'],
+                    },
                 },
                 'sqlserver': {
                     'query_hash': row['query_hash'],
@@ -415,7 +420,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 if 'database_name' in row:
                     tags += ["db:{}".format(row['database_name'])]
                 yield {
-                    "host": self._db_hostname,
+                    "host": self.check.resolved_hostname,
                     "ddagentversion": datadog_agent.get_version(),
                     "ddsource": "sqlserver",
                     "ddtags": ",".join(tags),
@@ -441,5 +446,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         'query_hash': row['query_hash'],
                         'query_plan_hash': row['query_plan_hash'],
                         'plan_handle': row['plan_handle'],
+                        'execution_count': row.get('execution_count', None),
+                        'total_elapsed_time': row.get('total_elapsed_time', None),
                     },
                 }

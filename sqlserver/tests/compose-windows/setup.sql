@@ -32,6 +32,19 @@ EXEC sp_addrolemember 'db_datareader', 'fred'
 EXEC sp_addrolemember 'db_datawriter', 'bob'
 GO
 
+-- create an offline database to have an unavailable database to test with
+CREATE DATABASE unavailable_db;
+GO
+ALTER DATABASE unavailable_db SET OFFLINE;
+GO
+
+-- create a a restricted database to ensure the agent gracefully handles not being able to connect
+-- to it
+CREATE DATABASE restricted_db;
+GO
+ALTER DATABASE restricted_db SET RESTRICTED_USER
+GO
+
 -- create test procedure for metrics loading feature
 USE master;
 GO

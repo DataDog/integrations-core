@@ -150,7 +150,7 @@ files:
         you can specify the `schemas` attribute and provide a list of schemas to use for filtering.
 
         Size metrics are collected only for ordinary tables. Index metrics are collected only for user indexes. Lock
-        metrics are are collected for all relation types (table, index , view, etc.). The rest of the metrics are
+        metrics are collected for all relation types (table, index , view, etc.). The rest of the metrics are
         collected only for user tables.
         To track lock metrics for relations of a specific kind only, specify the `relkind` attribute
         as a list of the options:
@@ -406,11 +406,11 @@ files:
             example: false
         - name: collect_metadata
           description: |
-            Set to `true` to enable the collection of metadata in your SQL statements.
+            Set to `false` to disable the collection of metadata in your SQL statements.
             Metadata includes things such as tables, commands, and comments.
           value:
             type: boolean
-            example: false
+            example: true
         - name: collect_tables
           description: |
             Set to `false` to disable the collection of tables in your SQL statements.

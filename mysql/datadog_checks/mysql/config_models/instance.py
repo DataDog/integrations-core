@@ -28,6 +28,14 @@ class CustomQuery(BaseModel):
     tags: Optional[Sequence[str]]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class ObfuscatorOptions(BaseModel):
     class Config:
         allow_mutation = False
@@ -54,6 +62,14 @@ class Options(BaseModel):
     schema_size_metrics: Optional[bool]
     system_table_size_metrics: Optional[bool]
     table_size_metrics: Optional[bool]
+
+
+class QueryActivity(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collection_interval: Optional[float]
+    enabled: Optional[bool]
 
 
 class QueryMetrics(BaseModel):
@@ -90,6 +106,7 @@ class Ssl(BaseModel):
 
     ca: Optional[str]
     cert: Optional[str]
+    check_hostname: Optional[bool]
     key: Optional[str]
 
 
@@ -108,6 +125,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     host: Optional[str]
     max_custom_queries: Optional[int]
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     obfuscator_options: Optional[ObfuscatorOptions]
     only_custom_queries: Optional[bool]
@@ -115,6 +133,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str]
     port: Optional[float]
     queries: Optional[Sequence[Mapping[str, Any]]]
+    query_activity: Optional[QueryActivity]
     query_metrics: Optional[QueryMetrics]
     query_samples: Optional[QuerySamples]
     reported_hostname: Optional[str]

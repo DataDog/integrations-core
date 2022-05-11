@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import platform
+import re
+import socket
 from copy import deepcopy
 
 import mock
@@ -115,9 +118,14 @@ def test_multiple(aggregator):
     instance['ip_cache_duration'] = 0
     check = TCPCheck(common.CHECK_NAME, {}, [instance])
 
-    with mock.patch('socket.gethostbyname_ex', return_value=[None, None, ['ip1', 'ip2', 'ip3']]), mock.patch.object(
-        check, 'connect', wraps=check.connect
-    ) as connect:
+    with mock.patch(
+        'socket.getaddrinfo',
+        return_value=[
+            (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip1', 80)),
+            (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip2', 80, 0, 0)),
+            (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip3', 80, 0, 0)),
+        ],
+    ), mock.patch.object(check, 'connect', wraps=check.connect) as connect:
         connect.side_effect = [None, Exception(), None] * 2
         expected_tags = ['foo:bar', 'target_host:datadoghq.com', 'port:80', 'instance:multiple']
 
@@ -133,3 +141,44 @@ def test_multiple(aggregator):
 
     aggregator.assert_all_metrics_covered()
     assert len(aggregator.service_checks('tcp.can_connect')) == 6
+
+
+def has_ipv6_connectivity():
+    try:
+        for sockaddr in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET6, 0, socket.IPPROTO_TCP):
+            if not sockaddr[0].startswith('fe80:'):
+                return True
+        return False
+    except socket.gaierror:
+        return False
+
+
+def test_ipv6(aggregator, check):
+    """
+    Service expected to be up
+    """
+    instance = deepcopy(common.INSTANCE_IPV6)
+    check = TCPCheck(common.CHECK_NAME, {}, [instance])
+    check.check(instance)
+
+    nb_ipv4, nb_ipv6 = 0, 0
+    for addr in check.addrs:
+        expected_tags = ["instance:UpService", "target_host:app.datad0g.com", "port:80", "foo:bar"]
+        expected_tags.append("address:{}".format(addr))
+        if re.match(r'^[0-9a-f:]+$', addr):
+            nb_ipv6 += 1
+            if has_ipv6_connectivity():
+                aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
+                aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
+            else:
+                aggregator.assert_service_check('tcp.can_connect', status=check.CRITICAL, tags=expected_tags)
+                aggregator.assert_metric('network.tcp.can_connect', value=0, tags=expected_tags)
+        else:
+            nb_ipv4 += 1
+            aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
+            aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
+    assert nb_ipv4 == 3
+    # The Windows CI machine doesn't return IPv6
+    assert nb_ipv6 == 3 or platform.system() == 'Windows' and nb_ipv6 == 0
+    aggregator.assert_all_metrics_covered()
+    assert len(aggregator.service_checks('tcp.can_connect')) == nb_ipv4 + nb_ipv6

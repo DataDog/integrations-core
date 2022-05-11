@@ -57,7 +57,10 @@ class QueueMetricCollector(object):
                 # so we don't collect those metrics from those queues
                 if queue_name not in self.config.DISALLOWED_QUEUES:
                     self.get_pcf_queue_status_metrics(queue_manager, queue_name, queue_tags)
-                    self.get_pcf_queue_reset_metrics(queue_manager, queue_name, queue_tags)
+
+                    # if collect queue reset metrics is disabled, skip this
+                    if self.config.collect_reset_queue_metrics:
+                        self.get_pcf_queue_reset_metrics(queue_manager, queue_name, queue_tags)
                 self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags, hostname=self.config.hostname)
             except Exception as e:
                 self.warning('Cannot connect to queue %s: %s', queue_name, e)
@@ -81,6 +84,9 @@ class QueueMetricCollector(object):
                 for queue in discovered_queues:
                     if queue_pattern.match(queue):
                         keep_queues.add(queue)
+            self.log.debug(
+                "%s of the %s discovered queues match the queue_regex", len(keep_queues), len(discovered_queues)
+            )
             discovered_queues = keep_queues
 
         discovered_queues.update(self.user_provided_queues)
@@ -219,11 +225,10 @@ class QueueMetricCollector(object):
                                 self.send_metric(GAUGE, metric_name, metric_value, tags=tags)
                             else:
                                 msg = """
-                                    Unable to get {}, turn on queue level monitoring to access these metrics for {}.
-                                    Check `DISPLAY QSTATUS({}) MONITOR`. Returned result: {}.
+                                    Unable to get %s. Turn on queue level monitoring to access these metrics for %s.
+                                    Check `DISPLAY QSTATUS(%s) MONITOR`.
                                     """
-                                msg.format(metric_name, queue_name, queue_name, metric_value)
-                                self.log.debug(msg)
+                                self.log.debug(msg, metric_name, queue_name, queue_name)
                         else:
                             failure_value = values['failure']
                             pymqi_value = values['pymqi_value']

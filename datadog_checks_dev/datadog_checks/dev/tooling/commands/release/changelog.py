@@ -21,9 +21,10 @@ ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, autho
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Update the changelog for a check')
-@click.argument('check', autocompletion=complete_testable_checks, callback=validate_check_arg)
+@click.argument('check', shell_complete=complete_testable_checks, callback=validate_check_arg)
 @click.argument('version')
 @click.argument('old_version', required=False)
+@click.option('--end')
 @click.option('--initial', is_flag=True)
 @click.option('--organization', '-r', default='DataDog')
 @click.option('--quiet', '-q', is_flag=True)
@@ -38,6 +39,7 @@ def changelog(
     check,
     version,
     old_version,
+    end,
     initial,
     quiet,
     dry_run,
@@ -74,7 +76,7 @@ def changelog(
     target_tag = get_release_tag_string(check, cur_version)
 
     # get the diff from HEAD
-    diff_lines = get_commits_since(check, None if initial else target_tag, exclude_branch=exclude_branch)
+    diff_lines = get_commits_since(check, None if initial else target_tag, end=end, exclude_branch=exclude_branch)
 
     # for each PR get the title, we'll use it to populate the changelog
     pr_numbers = parse_pr_numbers(diff_lines)

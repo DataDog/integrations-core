@@ -1,5 +1,11 @@
 # CHANGELOG - network
 
+## 2.7.0 / 2022-04-05
+
+* [Added] Add IP and TCP metric collection. See [#11170](https://github.com/DataDog/integrations-core/pull/11170).
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
+
 ## 2.6.0 / 2022-02-19
 
 * [Added] Collect additional iface metrics: mtu, num tx/rx queue and tx queue length. See [#11156](https://github.com/DataDog/integrations-core/pull/11156).
@@ -7,7 +13,7 @@
 * [Added] Upgrade psutil to 5.9.0. See [#11139](https://github.com/DataDog/integrations-core/pull/11139).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
 
-## 2.5.0 / 2022-01-08
+## 2.5.0 / 2022-01-08 / Agent 7.34.0
 
 * [Added] Add saturation metrics for network. See [#10551](https://github.com/DataDog/integrations-core/pull/10551). Thanks [luhenry](https://github.com/luhenry).
 * [Added] Collect additional TcpExt metrics. See [#10844](https://github.com/DataDog/integrations-core/pull/10844).

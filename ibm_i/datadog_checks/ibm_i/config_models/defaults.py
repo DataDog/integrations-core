@@ -38,12 +38,30 @@ def instance_job_query_timeout(field, value):
     return 240
 
 
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_min_collection_interval(field, value):
     return 15
 
 
 def instance_password(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_queries(field, value):
+    return [
+        {'name': 'disk_usage'},
+        {'name': 'cpu_usage'},
+        {'name': 'jobq_job_status'},
+        {'name': 'active_job_status'},
+        {'name': 'job_memory_usage'},
+        {'name': 'memory_info'},
+        {'name': 'subsystem'},
+        {'name': 'job_queue'},
+        {'name': 'message_queue_info'},
+    ]
 
 
 def instance_query_timeout(field, value):

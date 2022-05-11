@@ -107,7 +107,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
             enabled=is_affirmative(config.statement_metrics_config.get('enabled', True)),
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
             min_collection_interval=config.min_collection_interval,
-            config_host=config.host,
             dbms="postgres",
             rate_limit=1 / float(collection_interval),
             job_name="query-metrics",
@@ -378,6 +377,10 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     "instance": row['datname'],
                     "query_signature": row['query_signature'],
                     "statement": row['query'],
+                    "metadata": {
+                        "tables": row['dd_tables'],
+                        "commands": row['dd_commands'],
+                    },
                 },
                 "postgres": {
                     "datname": row["datname"],

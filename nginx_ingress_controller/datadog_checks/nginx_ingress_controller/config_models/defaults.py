@@ -58,6 +58,10 @@ def instance_bearer_token_path(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_bearer_token_refresh_interval(field, value):
+    return 60
+
+
 def instance_collect_nginx_histograms(field, value):
     return False
 
@@ -148,6 +152,10 @@ def instance_labels_mapper(field, value):
 
 def instance_log_requests(field, value):
     return False
+
+
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_metrics(field, value):

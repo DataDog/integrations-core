@@ -8,7 +8,7 @@ build-backend = "hatchling.build"
 name = "datadog-pulsar"
 description = "The pulsar check"
 readme = "README.md"
-license = "BSD-3-Clause"
+license = {text = "BSD-3-Clause"}
 requires-python = ">=3.8"
 keywords = [
     "datadog",
@@ -28,7 +28,7 @@ classifiers = [
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=23.7.0",
+    "datadog-checks-base>=25.1.0",
 ]
 dynamic = [
     "version",

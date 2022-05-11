@@ -1,0 +1,2 @@
+# https://www.ibm.com/docs/en/app-connect/12.0?topic=mq-connecting-secured-queue-manager
+mq::mqCredentials admin passw0rd

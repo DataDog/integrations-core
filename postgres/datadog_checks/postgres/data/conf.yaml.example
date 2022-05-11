@@ -131,7 +131,7 @@ instances:
     ## you can specify the `schemas` attribute and provide a list of schemas to use for filtering.
     ##
     ## Size metrics are collected only for ordinary tables. Index metrics are collected only for user indexes. Lock
-    ## metrics are are collected for all relation types (table, index , view, etc.). The rest of the metrics are
+    ## metrics are collected for all relation types (table, index , view, etc.). The rest of the metrics are
     ## collected only for user tables.
     ## To track lock metrics for relations of a specific kind only, specify the `relkind` attribute
     ## as a list of the options:
@@ -342,11 +342,11 @@ instances:
         #
         # replace_digits: false
 
-        ## @param collect_metadata - boolean - optional - default: false
-        ## Set to `true` to enable the collection of metadata in your SQL statements.
+        ## @param collect_metadata - boolean - optional - default: true
+        ## Set to `false` to disable the collection of metadata in your SQL statements.
         ## Metadata includes things such as tables, commands, and comments.
         #
-        # collect_metadata: false
+        # collect_metadata: true
 
         ## @param collect_tables - boolean - optional - default: true
         ## Set to `false` to disable the collection of tables in your SQL statements.
@@ -401,6 +401,17 @@ instances:
     ## The integration will stop sending server tag as is reduntant with host tag
     #
     disable_generic_tags: true
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
 
 ## Log Section
 ##

@@ -19,15 +19,21 @@ FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
 
 # Style deps:
 # We pin deps in order to make CI more stable/reliable.
-ISORT_DEP = 'isort==5.10.0'
-BLACK_DEP = 'black==21.10b0'
+ISORT_DEP = 'isort==5.10.1'
+BLACK_DEP = 'black==22.3.0'
 FLAKE8_DEP = 'flake8==4.0.1'
-FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==21.9.2'
+FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==22.1.11'
 FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.6.0'
 # TODO: remove extra when we drop Python 2
 MYPY_DEP = 'mypy[python2]==0.910'
 # TODO: when we drop Python 2 and replace with --install-types --non-interactive
-TYPES_DEPS = ['types-PyYAML==5.4.10', 'types-python-dateutil==2.8.2', 'types_requests==2.25.11', 'types_six==1.16.2']
+TYPES_DEPS = [
+    'types-PyYAML==5.4.10',
+    'types-python-dateutil==2.8.2',
+    'types_requests==2.25.11',
+    'types_six==1.16.2',
+    'types-simplejson==3.17.5',
+]
 PYDANTIC_DEP = 'pydantic==1.8.2'  # Keep in sync with: /datadog_checks_base/requirements.in
 
 

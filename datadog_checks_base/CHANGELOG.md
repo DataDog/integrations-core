@@ -1,5 +1,38 @@
 # CHANGELOG - datadog_checks_base
 
+## 25.4.0 / 2022-05-10
+
+* [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
+* [Added] Refactor the QueryManager to support multiple instances in checks. See [#11869](https://github.com/DataDog/integrations-core/pull/11869).
+* [Fixed] Fix incorrect OpenMetrics V2 check exposition format HTTP header. See [#11899](https://github.com/DataDog/integrations-core/pull/11899). Thanks [jalaziz](https://github.com/jalaziz).
+* [Fixed] Allow tags that are just a value with no key. See [#11973](https://github.com/DataDog/integrations-core/pull/11973).
+* [Fixed] Add the ability to exclude endpoint tag. See [#11956](https://github.com/DataDog/integrations-core/pull/11956).
+* [Fixed] Don't pin urllib3. See [#11944](https://github.com/DataDog/integrations-core/pull/11944).
+
+## 25.3.0 / 2022-04-28
+
+* [Added] Upgrade `orjson` dependency. See [#11843](https://github.com/DataDog/integrations-core/pull/11843).
+
+## 25.2.2 / 2022-04-12
+
+* [Fixed] Fix obfuscate_sql_with_metadata wrapper memory usage. See [#11815](https://github.com/DataDog/integrations-core/pull/11815).
+
+## 25.2.1 / 2022-04-11
+
+* [Fixed] Fix `metric_patterns` option to support namespaces. See [#11795](https://github.com/DataDog/integrations-core/pull/11795).
+
+## 25.2.0 / 2022-04-05
+
+* [Added] Add integration_tracing option. See [#11761](https://github.com/DataDog/integrations-core/pull/11761).
+* [Added] Add gssapi as a dependency. See [#11725](https://github.com/DataDog/integrations-core/pull/11725).
+* [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
+* [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
+
+## 25.1.0 / 2022-03-16
+
+* [Added] Add `metric_patterns` options to filter all metric submission by a list of regexes. See [#11508](https://github.com/DataDog/integrations-core/pull/11508).
+* [Added] Upgrade `requests` dependency. See [#11603](https://github.com/DataDog/integrations-core/pull/11603).
+
 ## 25.0.1 / 2022-02-24
 
 * [Fixed] Properly raise scraper error in OpenMetrics v2. See [#11564](https://github.com/DataDog/integrations-core/pull/11564).
@@ -21,7 +54,7 @@
 * [Added] Upgrade psutil to 5.9.0. See [#11139](https://github.com/DataDog/integrations-core/pull/11139).
 * [Changed] Add tls_protocols_allowed configuration option. See [#11237](https://github.com/DataDog/integrations-core/pull/11237).
 
-## 23.7.6 / 2022-02-03
+## 23.7.6 / 2022-02-03 / Agent 7.34.0
 
 * [Fixed] Update obfuscator wrapper to return empty string. See [#11277](https://github.com/DataDog/integrations-core/pull/11277).
 

@@ -17,15 +17,16 @@ from .show import changes
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Release one or more checks')
-@click.argument('checks', autocompletion=complete_valid_checks, nargs=-1, required=True)
+@click.argument('checks', shell_complete=complete_valid_checks, nargs=-1, required=True)
 @click.option('--version')
+@click.option('--end')
 @click.option('--new', 'initial_release', is_flag=True, help='Ensure versions are at 1.0.0')
 @click.option('--skip-sign', is_flag=True, help='Skip the signing of release metadata')
 @click.option('--sign-only', is_flag=True, help='Only sign release metadata')
 @click.option('--exclude', help='Comma-separated list of checks to skip')
 @click.option('--allow-master', is_flag=True, help='Allow ddev to commit directly to master. Forbidden for core.')
 @click.pass_context
-def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude, allow_master):
+def make(ctx, checks, version, end, initial_release, skip_sign, sign_only, exclude, allow_master):
     """Perform a set of operations needed to release checks:
 
     \b
@@ -117,7 +118,7 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude, a
                 else:
                     abort(f'Current version is {cur_version}, cannot bump to {version}')
         else:
-            cur_version, changelog_types = ctx.invoke(changes, check=check, dry_run=True)
+            cur_version, changelog_types = ctx.invoke(changes, check=check, end=end, dry_run=True)
             echo_debug(f'Current version: {cur_version}. Changes: {changelog_types}')
             if not changelog_types:
                 echo_warning(f'No changes for {check}, skipping...')
@@ -142,6 +143,7 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude, a
             check=check,
             version=version,
             old_version=cur_version,
+            end=end,
             initial=initial_release,
             quiet=True,
             dry_run=False,

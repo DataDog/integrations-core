@@ -29,6 +29,25 @@ No additional installation is needed on your server.
 
 See [metadata.csv][7] for a list of metrics provided by this check.
 
+
+### Log collection
+
+1. The Pulsar log integration supports Pulsar's [default log format][10]. Clone and edit the [integration pipeline][11] if you have a different format.
+
+2. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+   ```yaml
+   logs_enabled: true
+   ```
+
+3. Uncomment and edit the logs configuration block in your `pulsar.d/conf.yaml` file. Change the path parameter value based on your environment. See the [sample pulsar.d/conf.yaml][4] for all available configuration options.
+   ```yaml
+    logs:
+      - type: file
+        path: /pulsar/logs/pulsar.log
+        source: pulsar
+   ```
+4. [Restart the Agent][5]
+
 ### Events
 
 The Pulsar integration does not include any events.
@@ -51,3 +70,5 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/pulsar/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/pulsar/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://pulsar.apache.org/docs/en/reference-configuration/#log4j
+[11]: https://docs.datadoghq.com/logs/processing/#integration-pipelines

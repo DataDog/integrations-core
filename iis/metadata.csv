@@ -12,7 +12,6 @@ iis.httpd_request_method.get,gauge,,request,second,The number of GET requests pe
 iis.httpd_request_method.post,gauge,,request,second,The number of POST requests per second,0,iis,requests http post,
 iis.httpd_request_method.head,gauge,,request,second,The number of HEAD requests per second,0,iis,requests http head,
 iis.httpd_request_method.put,gauge,,request,second,The number of PUT requests per second,0,iis,requests http put,
-iis.httpd_request_method.patch,gauge,,request,second,The number of PATCH requests per second,0,iis,requests http patch,
 iis.httpd_request_method.delete,gauge,,request,second,The number of DELETE requests per second,0,iis,requests http delete,
 iis.httpd_request_method.options,gauge,,request,second,The number of OPTIONS requests per second,0,iis,requests http options,
 iis.httpd_request_method.trace,gauge,,request,second,The number of TRACE requests per second,0,iis,requests http trace,

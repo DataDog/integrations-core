@@ -27,7 +27,13 @@ def build_connection_string(hosts, scheme, username=None, password=None, databas
         netloc = host
 
     path_params = ""
-    query = urlencode(options or {})
+    url_options = dict(options)
+    if "username" in url_options:
+        url_options.pop("username")
+    if "password" in url_options:
+        url_options.pop("password")
+
+    query = urlencode(url_options or {})
     fragment = ""
 
     return urlunparse([scheme, netloc, path, path_params, query, fragment])

@@ -47,7 +47,7 @@ instances:
   - proc_name: <YOUR_APP_NAME>
 ```
 
-2. [Restart the Agent][8] to begin sending Gunicorn metrics to Datadog.
+3. [Restart the Agent][8] to begin sending Gunicorn metrics to Datadog.
 
 #### Log collection
 

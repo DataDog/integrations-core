@@ -91,6 +91,7 @@ files:
               key: Path to a key file.
               cert: Path to a cert file.
               ca: Path to a CA bundle file.
+              check_hostname: Set to false to ignore the strict relationship between the certificate and the hostname.
             value:
               type: object
               properties:
@@ -100,10 +101,13 @@ files:
                   type: string
                 - name: ca
                   type: string
+                - name: check_hostname
+                  type: boolean
               example:
                 key: <KEY_FILE_PATH>
                 cert: <CERT_FILE_PATH>
                 ca: <CA_PATH_FILE>
+                check_hostname: true
           - template: instances/db
             overrides:
               custom_queries.value.example:
@@ -436,6 +440,21 @@ files:
                 value:
                   type: integer
                   example: 300
+          - name: query_activity
+            description: Configure collection of active sessions monitoring
+            options:
+              - name: enabled
+                description: |
+                  Enable collection of active sessions. Requires `dbm: true`.
+                value:
+                  type: boolean
+                  example: true
+              - name: collection_interval
+                description: |
+                  Set the activity collection interval (in seconds).
+                value:
+                  type: number
+                  example: 10
           - name: obfuscator_options
             description: |
               Configure how the SQL obfuscator behaves.
@@ -450,11 +469,11 @@ files:
                   example: false
               - name: collect_metadata
                 description: |
-                  Set to `true` to enable the collection of metadata in your SQL statements.
+                  Set to `false` to disable the collection of metadata in your SQL statements.
                   Metadata includes things such as tables, commands, and comments.
                 value:
                   type: boolean
-                  example: false
+                  example: true
               - name: collect_tables
                 description: |
                   Set to `false` to disable the collection of tables in your SQL statements.

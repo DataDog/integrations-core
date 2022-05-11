@@ -1,5 +1,10 @@
 # CHANGELOG - CoreDNS
 
+## 2.1.0 / 2022-04-05
+
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+
 ## 2.0.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11332](https://github.com/DataDog/integrations-core/pull/11332).
@@ -11,7 +16,7 @@
 * [Fixed] Fix example config. See [#11109](https://github.com/DataDog/integrations-core/pull/11109).
 * [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
 
-## 1.11.4 / 2022-01-27
+## 1.11.4 / 2022-01-27 / Agent 7.34.0
 
 * [Fixed] Fix license header dates. See [#11200](https://github.com/DataDog/integrations-core/pull/11200).
 

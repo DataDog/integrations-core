@@ -14,6 +14,10 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_auto_discover_channels(field, value):
+    return True
+
+
 def instance_auto_discover_queues(field, value):
     return False
 
@@ -24,6 +28,10 @@ def instance_channel_status_mapping(field, value):
 
 def instance_channels(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_collect_reset_queue_metrics(field, value):
+    return True
 
 
 def instance_collect_statistics_metrics(field, value):
@@ -48,6 +56,10 @@ def instance_empty_default_hostname(field, value):
 
 def instance_host(field, value):
     return 'localhost'
+
+
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_min_collection_interval(field, value):
@@ -116,6 +128,10 @@ def instance_tags(field, value):
 
 def instance_timeout(field, value):
     return 5
+
+
+def instance_try_basic_auth(field, value):
+    return True
 
 
 def instance_username(field, value):

@@ -1,0 +1,17 @@
+[
+    {
+        "agent_version": "7.36.0",
+        "integration": "Traffic Server",
+        "groups": [
+            "host",
+            "traffic_server_url"
+        ],
+        "check": "traffic_server.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Traffic Server instance. Returns `OK` otherwise."
+    }
+]

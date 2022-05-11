@@ -638,15 +638,141 @@ class TestTags:
     @pytest.mark.parametrize(
         "disable_generic_tags, expected_tags",
         [
-            pytest.param(False, {"foo:bar", "cluster:my_cluster"}),
-            pytest.param(True, {"foo:bar", "myintegration_cluster:my_cluster"}),
+            pytest.param(False, {"foo:bar", "cluster:my_cluster", "version", "bar"}),
+            pytest.param(True, {"foo:bar", "myintegration_cluster:my_cluster", "myintegration_version", "bar"}),
         ],
     )
     def test_generic_tags(self, disable_generic_tags, expected_tags):
         instance = {'disable_generic_tags': disable_generic_tags}
         check = AgentCheck('myintegration', {}, [instance])
-        tags = check._normalize_tags_type(tags=["foo:bar", "cluster:my_cluster"])
+        tags = check._normalize_tags_type(tags=["foo:bar", "cluster:my_cluster", "version", "bar"])
         assert set(tags) == expected_tags
+
+    @pytest.mark.parametrize(
+        "exclude_metrics_filters, include_metrics_filters, expected_metrics",
+        [
+            pytest.param(['hello'], [], ['my_metric', 'my_metric_count', 'test.my_metric1'], id='exclude string'),
+            pytest.param([r'my_metric_*'], [], ['hello'], id='exclude multiple matches glob'),
+            pytest.param(
+                [],
+                [r'my_metricw*'],
+                ['my_metric', 'my_metric_count', 'test.my_metric1'],
+                id='include multiple matches glob',
+            ),
+            pytest.param(
+                [r'my_metrics'],
+                [],
+                ['my_metric', 'my_metric_count', 'hello', 'test.my_metric1'],
+                id='exclude no matches',
+            ),
+            pytest.param([r'.*'], [], [], id='exclude everything'),
+            pytest.param([r'.*'], ['hello'], [], id='exclude everything one include'),
+            pytest.param([], ['hello'], ['hello'], id='include string'),
+            pytest.param(
+                [], [r'^ns\.my_(me|test)tric*'], ['my_metric', 'my_metric_count'], id='include multiple matches'
+            ),
+            pytest.param([r'my_metric_count'], [r'my_metric*'], ['my_metric', 'test.my_metric1'], id='match both'),
+            pytest.param([r'my_metric_count'], [r'my_metric_count'], [], id='duplicate'),
+            pytest.param(
+                [],
+                ['metric'],
+                ['my_metric', 'my_metric_count', 'test.my_metric1'],
+                id='include multiple matches inside',
+            ),
+            pytest.param(['my_metric_count'], ['hello'], ['hello'], id='include exclude'),
+            pytest.param(
+                [r'testing'], [r'.*'], ['my_metric', 'my_metric_count', 'hello', 'test.my_metric1'], id='include all'
+            ),
+            pytest.param(
+                [r'test\.my_metric([0-9]{1})'],
+                [],
+                [r'my_metric', r'my_metric_count', 'hello'],
+                id='include all but regex',
+            ),
+        ],
+    )
+    def test_metrics_filters(self, exclude_metrics_filters, include_metrics_filters, expected_metrics, aggregator):
+        instance = {
+            'metric_patterns': {
+                'exclude': exclude_metrics_filters,
+                'include': include_metrics_filters,
+            }
+        }
+        check = AgentCheck('myintegration', {}, [instance])
+        check.__NAMESPACE__ = 'ns'
+        check.gauge('my_metric', 0)
+        check.count('my_metric_count', 0)
+        check.count('test.my_metric1', 1)
+        check.monotonic_count('hello', 0)
+        check.service_check('test.can_check', status=AgentCheck.OK)
+
+        for metric_name in expected_metrics:
+            aggregator.assert_metric('ns.{}'.format(metric_name), count=1)
+
+        aggregator.assert_service_check('ns.test.can_check', status=AgentCheck.OK)
+        aggregator.assert_all_metrics_covered()
+
+    @pytest.mark.parametrize(
+        "exclude_metrics_filters, include_metrics_filters, expected_error",
+        [
+            pytest.param(
+                'metric', [], r'^Setting `exclude` of `metric_patterns` must be an array', id='exclude not list'
+            ),
+            pytest.param(
+                [], 'metric', r'^Setting `include` of `metric_patterns` must be an array', id='include not list'
+            ),
+            pytest.param(
+                ['metric_one', 1000],
+                [],
+                r'^Entry #2 of setting `exclude` of `metric_patterns` must be a string',
+                id='exclude bad element',
+            ),
+            pytest.param(
+                [],
+                [10, 'metric_one'],
+                r'^Entry #1 of setting `include` of `metric_patterns` must be a string',
+                id='include bad element',
+            ),
+        ],
+    )
+    def test_metrics_filter_invalid(self, aggregator, exclude_metrics_filters, include_metrics_filters, expected_error):
+        instance = {
+            'metric_patterns': {
+                'exclude': exclude_metrics_filters,
+                'include': include_metrics_filters,
+            }
+        }
+        with pytest.raises(Exception, match=expected_error):
+            AgentCheck('myintegration', {}, [instance])
+
+    @pytest.mark.parametrize(
+        "exclude_metrics_filters, include_metrics_filters, expected_log",
+        [
+            pytest.param(
+                [''],
+                [],
+                'Entry #1 of setting `exclude` of `metric_patterns` must not be empty, ignoring',
+                id='empty exclude',
+            ),
+            pytest.param(
+                [],
+                [''],
+                'Entry #1 of setting `include` of `metric_patterns` must not be empty, ignoring',
+                id='empty include',
+            ),
+        ],
+    )
+    def test_metrics_filter_warnings(self, caplog, exclude_metrics_filters, include_metrics_filters, expected_log):
+        instance = {
+            'metric_patterns': {
+                'exclude': exclude_metrics_filters,
+                'include': include_metrics_filters,
+            }
+        }
+        caplog.clear()
+        caplog.set_level(logging.DEBUG)
+        AgentCheck('myintegration', {}, [instance])
+        assert expected_log in caplog.text
 
 
 class LimitedCheck(AgentCheck):

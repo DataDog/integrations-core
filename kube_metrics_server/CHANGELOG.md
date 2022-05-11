@@ -1,12 +1,17 @@
 # CHANGELOG - Kube Metrics Server
 
+## 2.1.0 / 2022-04-05
+
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+
 ## 2.0.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11383](https://github.com/DataDog/integrations-core/pull/11383).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
 * [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
 
-## 1.4.1 / 2022-01-18
+## 1.4.1 / 2022-01-18 / Agent 7.34.0
 
 * [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
 

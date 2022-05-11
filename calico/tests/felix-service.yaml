@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: felix-metrics-svc
+  namespace: kube-system
+spec:
+  type: NodePort
+  selector:
+    k8s-app: calico-node
+  ports:
+    - port: 9091
+      targetPort: 9091

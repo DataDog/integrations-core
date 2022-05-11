@@ -1,5 +1,35 @@
 # CHANGELOG - sqlserver
 
+## 7.6.1 / 2022-04-14
+
+* [Fixed] Update base version. See [#11826](https://github.com/DataDog/integrations-core/pull/11826).
+
+## 7.6.0 / 2022-04-05
+
+* [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Added] Add request_status in sqlserver activity query. See [#11699](https://github.com/DataDog/integrations-core/pull/11699).
+* [Added] Add SQL metadata to SQL Server activity events. See [#11689](https://github.com/DataDog/integrations-core/pull/11689).
+* [Added] Add a log line when activity limit is reached. See [#11661](https://github.com/DataDog/integrations-core/pull/11661).
+* [Fixed] Gracefully handle inaccessible database for `sqlserver.files.*`. See [#11711](https://github.com/DataDog/integrations-core/pull/11711).
+* [Fixed] Fix SQL Server false configuration error. See [#11664](https://github.com/DataDog/integrations-core/pull/11664).
+
+## 7.5.0 / 2022-03-15
+
+* [Added] Enable SQL metadata collection by default. See [#11606](https://github.com/DataDog/integrations-core/pull/11606).
+* [Fixed] Include SQL metadata in FQT. See [#11641](https://github.com/DataDog/integrations-core/pull/11641).
+
+## 7.4.0 / 2022-03-15
+
+* [Added] Add execution_count and total_elapsed_time fields to SQLServer Samples. See [#11652](https://github.com/DataDog/integrations-core/pull/11652).
+
+## 7.3.0 / 2022-03-14
+
+* [Added] Add missing wait_resource column for activity collections. See [#11638](https://github.com/DataDog/integrations-core/pull/11638).
+* [Fixed] Fix service check failures on auto discovered dbs failing full check execution. See [#11563](https://github.com/DataDog/integrations-core/pull/11563).
+* [Fixed] Use remote hostname on all metrics when DBM is enabled. See [#11634](https://github.com/DataDog/integrations-core/pull/11634).
+* [Fixed] Fix SQLServer activity query, only query for load not transactions. See [#11629](https://github.com/DataDog/integrations-core/pull/11629).
+
 ## 7.2.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11437](https://github.com/DataDog/integrations-core/pull/11437).
@@ -12,7 +42,7 @@
 * [Added] Add recovery_model_desc tag for sqlserver database metrics. See [#11210](https://github.com/DataDog/integrations-core/pull/11210). Thanks [lowlydba](https://github.com/lowlydba).
 * [Fixed] Disable modified rowcounts in result sets for all connections. See [#11486](https://github.com/DataDog/integrations-core/pull/11486).
 
-## 7.0.3 / 2022-02-03
+## 7.0.3 / 2022-02-03 / Agent 7.34.0
 
 * [Fixed] Update base version. See [#11287](https://github.com/DataDog/integrations-core/pull/11287).
 

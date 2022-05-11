@@ -1,11 +1,16 @@
 # CHANGELOG - redisdb
 
+## 4.5.0 / 2022-04-05
+
+* [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+
 ## 4.4.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11424](https://github.com/DataDog/integrations-core/pull/11424).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
 
-## 4.3.2 / 2022-02-01
+## 4.3.2 / 2022-02-01 / Agent 7.34.0
 
 * [Fixed] Bump redis dependency to 4.0.2. See [#11247](https://github.com/DataDog/integrations-core/pull/11247).
 

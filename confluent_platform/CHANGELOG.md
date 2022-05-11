@@ -1,5 +1,10 @@
 # CHANGELOG - Confluent Platform
 
+## 1.8.1 / 2022-04-05
+
+* [Fixed] Remove check options from jmx template. See [#11686](https://github.com/DataDog/integrations-core/pull/11686).
+* [Fixed] Remove duplicate bean. See [#11609](https://github.com/DataDog/integrations-core/pull/11609).
+
 ## 1.8.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11330](https://github.com/DataDog/integrations-core/pull/11330).
@@ -7,7 +12,7 @@
 * [Added] Add Broker-Zookeeper latency metric. See [#11080](https://github.com/DataDog/integrations-core/pull/11080). Thanks [abraham-leal](https://github.com/abraham-leal).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
 
-## 1.7.1 / 2022-01-13
+## 1.7.1 / 2022-01-13 / Agent 7.34.0
 
 * [Fixed] Remove duplicated entries. See [#11095](https://github.com/DataDog/integrations-core/pull/11095).
 

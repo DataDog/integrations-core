@@ -82,11 +82,13 @@ instances:
     ## key: Path to a key file.
     ## cert: Path to a cert file.
     ## ca: Path to a CA bundle file.
+    ## check_hostname: Set to false to ignore the strict relationship between the certificate and the hostname.
     #
     # ssl:
     #   key: <KEY_FILE_PATH>
     #   cert: <CERT_FILE_PATH>
     #   ca: <CA_PATH_FILE>
+    #   check_hostname: true
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
@@ -401,6 +403,20 @@ instances:
         #
         # collection_strategy_cache_ttl: 300
 
+    ## Configure collection of active sessions monitoring
+    #
+    query_activity:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of active sessions. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the activity collection interval (in seconds).
+        #
+        # collection_interval: 10
+
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
     #
@@ -412,11 +428,11 @@ instances:
         #
         # replace_digits: false
 
-        ## @param collect_metadata - boolean - optional - default: false
-        ## Set to `true` to enable the collection of metadata in your SQL statements.
+        ## @param collect_metadata - boolean - optional - default: true
+        ## Set to `false` to disable the collection of metadata in your SQL statements.
         ## Metadata includes things such as tables, commands, and comments.
         #
-        # collect_metadata: false
+        # collect_metadata: true
 
         ## @param collect_tables - boolean - optional - default: true
         ## Set to `false` to disable the collection of tables in your SQL statements.
@@ -472,6 +488,17 @@ instances:
     ## other integrations tags.
     #
     disable_generic_tags: true
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
 
 ## Log Section
 ##

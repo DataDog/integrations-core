@@ -129,10 +129,16 @@ def create_template_files(template_name, new_root, config, read=False):
     for root, _, template_files in os.walk(template_root):
         for template_file in template_files:
             if not template_file.endswith(('.pyc', '.pyo')):
-                # Use a special README for the marketplace/partner support_type integrations
-                if template_file == 'README.md' and config.get('support_type') == 'partner':
-                    template_path = path_join(TEMPLATES_DIR, 'marketplace/', 'README.md')
-                    file_path = path_join("/", config.get('check_name'), "README.md")
+                if template_file == 'README.md' and config.get('support_type') in ('partner', 'contrib'):
+                    # Custom README for the marketplace/partner support_type integrations
+                    if config.get('support_type') == 'partner':
+                        template_path = path_join(TEMPLATES_DIR, 'marketplace/', 'README.md')
+                        file_path = path_join("/", config.get('check_name'), "README.md")
+
+                    # Custom README for tile apps
+                    elif config.get('support_type') == 'contrib' and config.get('manifest_v2'):
+                        template_path = path_join(TEMPLATES_DIR, 'tile_v2/', 'README.md')
+                        file_path = path_join("/", config.get('check_name'), "README.md")
 
                 # Use a special readme file for media carousel information
                 # .gitkeep currently only used for images, but double check anyway

@@ -1,11 +1,17 @@
 # CHANGELOG - snmp
 
+## 5.7.0 / 2022-04-05
+
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
+* [Fixed] Add `min_collection_interval` to snmp `init_config`. See [#11543](https://github.com/DataDog/integrations-core/pull/11543).
+
 ## 5.6.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11432](https://github.com/DataDog/integrations-core/pull/11432).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
 
-## 5.5.0 / 2022-01-08
+## 5.5.0 / 2022-01-08 / Agent 7.34.0
 
 * [Added] Add `sysMultiHostCpuUsageRatio` to BIG-IP profile. See [#10924](https://github.com/DataDog/integrations-core/pull/10924). Thanks [kei6u](https://github.com/kei6u).
 * [Added] Add profile metadata for Isilon. See [#11022](https://github.com/DataDog/integrations-core/pull/11022).

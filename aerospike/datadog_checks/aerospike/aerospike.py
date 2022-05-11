@@ -10,9 +10,9 @@ import re
 from collections import defaultdict
 from typing import List
 
-from six import iteritems
+from six import PY2, iteritems
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
 
 try:
@@ -70,6 +70,28 @@ def parse_namespace(data, namespace, secondary):
 
 
 class AerospikeCheck(AgentCheck):
+    """
+    This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
+    """
+
+    def __new__(cls, name, init_config, instances):
+        instance = instances[0]
+
+        if 'openmetrics_endpoint' in instance:
+            if PY2:
+                raise ConfigurationError(
+                    "This version of the integration is only available when using py3. "
+                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
+                    "for more information or use the older style config."
+                )
+            # TODO: when we drop Python 2 move this import up top
+            from .check import AerospikeCheckV2
+
+            return AerospikeCheckV2(name, init_config, instances)
+
+        else:
+            return super(AerospikeCheck, cls).__new__(cls)
+
     def __init__(self, name, init_config, instances):
         super(AerospikeCheck, self).__init__(name, init_config, instances)
 
@@ -394,9 +416,6 @@ class AerospikeCheck(AgentCheck):
         while data:
             line = data.pop(0)
 
-            if not data:
-                break
-
             ns, metric_name = self.get_metric_name(line)
             if metric_name is None:
                 return
@@ -416,7 +435,7 @@ class AerospikeCheck(AgentCheck):
                     latencies = bucket_vals.split(',')
                     if latencies and len(latencies) == 17:
                         for i in range(len(latencies)):
-                            bucket = 2 ** i
+                            bucket = 2**i
                             tags = namespace_tags + ['bucket:{}'.format(bucket)]
                             latency_name = metric_name
                             self.send(NAMESPACE_LATENCY_METRIC_TYPE, latency_name, latencies[i], tags)
@@ -446,9 +465,6 @@ class AerospikeCheck(AgentCheck):
 
             if line.startswith("error-"):
                 continue
-
-            if not data:
-                break
 
             timestamp = re.match(r'(\d+:\d+:\d+)', line)
             if timestamp:
@@ -483,6 +499,8 @@ class AerospikeCheck(AgentCheck):
             if len(metric_names) == len(metric_values):
                 for i in range(len(metric_names)):
                     self.send(NAMESPACE_LATENCY_METRIC_TYPE, metric_names[i], metric_values[i], namespace_tags)
+            else:
+                self.log.debug("Got unexpected latency buckets: %s", ns_latencies)
 
     def collect_throughput(self, namespaces):
         """

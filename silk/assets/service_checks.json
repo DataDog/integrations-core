@@ -13,7 +13,7 @@
             "warning"
         ],
         "name": "Silk system state",
-        "description": "Returns `WARNING` if the check cannot access the system state but connects to endpoint, and `CRITICAL` if endpoint is inaccessible. Returns `OK` if ONLINE, `UNKNOWN` if endpoint is unaccessible."
+        "description": "Returns `CRITICAL` if the system is degraded, `WARNING` if the system is offline. Returns `OK` if ONLINE, `UNKNOWN` if the endpoint is is inaccessible."
     },
     {
         "agent_version": "7.35.0",
@@ -24,12 +24,10 @@
         "check": "silk.server.state",
         "statuses": [
             "ok",
-            "critical",
-            "unknown",
-            "warning"
+            "unknown"
         ],
         "name": "Silk servers state",
-        "description": "Returns `WARNING` if the check cannot access the system's server state but connects to endpoint, and `CRITICAL` if endpoint is inaccessible. Returns `OK` if ONLINE, `UNKNOWN` if endpoint is unaccessible. Tagged by `server_name`."
+        "description": "Returns `OK` if the server is ONLINE, `UNKNOWN` if the endpoint is inaccessible or returns a non-OK status. Tagged by `server_name`."
     },
     {
       "agent_version": "7.35.0",
@@ -40,9 +38,10 @@
       "check": "silk.can_connect",
       "statuses": [
           "ok",
-          "critical"
+          "critical",
+          "warning"
       ],
       "name": "Can connect",
-      "description": "Returns `CRITICAL` if check cannot access stats endpoints. Returns `OK` otherwise."
+      "description": "Returns `CRITICAL` if check cannot access stats endpoints, `WARNING` if an error response is encountered. Returns `OK` otherwise."
   }
 ]

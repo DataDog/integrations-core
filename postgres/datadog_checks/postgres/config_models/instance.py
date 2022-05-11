@@ -19,6 +19,14 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class ObfuscatorOptions(BaseModel):
     class Config:
         allow_mutation = False
@@ -93,6 +101,7 @@ class InstanceConfig(BaseModel):
     host: str
     ignore_databases: Optional[Sequence[str]]
     max_relations: Optional[int]
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     obfuscator_options: Optional[ObfuscatorOptions]
     password: Optional[str]

@@ -25,6 +25,7 @@ METRICS = [
     'cluster_checks.busyness',
     'cluster_checks.configs_dangling',
     'cluster_checks.configs_dispatched',
+    'cluster_checks.configs_info',
     'cluster_checks.failed_stats_collection',
     'cluster_checks.nodes_reporting',
     'cluster_checks.rebalancing_decisions',
@@ -44,6 +45,11 @@ METRICS = [
     'go.goroutines',
     'go.memstats.alloc_bytes',
     'go.threads',
+    'endpoint_checks.configs_dispatched',
+    'autodiscovery.poll_duration.count',
+    'autodiscovery.poll_duration.sum',
+    'autodiscovery.watched_resources',
+    'autodiscovery.errors',
 ]
 
 

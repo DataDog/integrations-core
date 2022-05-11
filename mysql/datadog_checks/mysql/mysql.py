@@ -16,11 +16,13 @@ from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 
+from .activity import MySQLActivity
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
 from .config import MySQLConfig
 from .const import (
     BINLOG_VARS,
     COUNT,
+    DBM_MIGRATED_METRICS,
     GALERA_VARS,
     GAUGE,
     GROUP_REPLICATION_VARS,
@@ -105,6 +107,7 @@ class MySql(AgentCheck):
         self._warnings_by_code = {}
         self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
+        self._query_activity = MySQLActivity(self, self._config, self._get_connection_args())
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
@@ -186,6 +189,7 @@ class MySql(AgentCheck):
                     dbm_tags = list(set(self.service_check_tags) | set(tags))
                     self._statement_metrics.run_job_loop(dbm_tags)
                     self._statement_samples.run_job_loop(dbm_tags)
+                    self._query_activity.run_job_loop(dbm_tags)
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -203,6 +207,7 @@ class MySql(AgentCheck):
     def cancel(self):
         self._statement_samples.cancel()
         self._statement_metrics.cancel()
+        self._query_activity.cancel()
 
     def _set_qcache_stats(self):
         host_key = self._get_host_key()
@@ -290,6 +295,9 @@ class MySql(AgentCheck):
 
         # Get aggregate of all VARS we want to collect
         metrics = STATUS_VARS
+
+        if not self._config.dbm_enabled:
+            metrics.update(DBM_MIGRATED_METRICS)
 
         # collect results from db
         results = self._get_stats_from_status(db)

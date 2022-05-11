@@ -27,6 +27,14 @@ class AuthToken(BaseModel):
     writer: Optional[Mapping[str, Any]]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class Proxy(BaseModel):
     class Config:
         allow_mutation = False
@@ -63,6 +71,7 @@ class InstanceConfig(BaseModel):
     kerberos_keytab: Optional[str]
     kerberos_principal: Optional[str]
     log_requests: Optional[bool]
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     ntlm_domain: Optional[str]
     password: Optional[str]
@@ -70,7 +79,7 @@ class InstanceConfig(BaseModel):
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
     request_size: Optional[float]
-    results_per_page: Optional[int] = Field(None, le=5000.0)
+    results_per_page: Optional[int] = Field(None, le=5000)
     service: Optional[str]
     skip_proxy: Optional[bool]
     tags: Optional[Sequence[str]]

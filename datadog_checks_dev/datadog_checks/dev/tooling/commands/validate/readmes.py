@@ -26,7 +26,7 @@ DOCS_LINK_FORMAT_URL = (
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate README.md files')
 @click.pass_context
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 @click.option('--format-links', '-fl', is_flag=True, help='Automatically format links')
 def readmes(ctx, check, format_links):
     """Validates README files.
@@ -141,9 +141,8 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
 def get_ascii_enforcement_error_lines(contents):
     errors_lines = []
     for i, line in enumerate(contents.splitlines()):
-        # Ignore new line
-        line = line[:-1]
-
+        # Don't print newlines
+        line = line.rstrip('\n')
         invalid_code_unit_indices = []
         indicator_code_units = []
         for code_unit in line:

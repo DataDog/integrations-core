@@ -23,7 +23,16 @@ from ..console import (
 
 REQUIRED_ATTRIBUTES = {'name', 'type', 'query', 'message', 'tags', 'options', 'recommended_monitor_metadata'}
 EXTRA_NOT_ALLOWED_FIELDS = ['id']
-ALLOWED_MONITOR_TYPES = ['query alert', 'event alert', 'service check']
+ALLOWED_MONITOR_TYPES = [
+    'audit alert',
+    'event alert',
+    'event-v2 alert',
+    'log alert',
+    'query alert',
+    'rum alert',
+    'service check',
+    'trace-analytics alert',
+]
 
 
 @click.command(
@@ -31,7 +40,7 @@ ALLOWED_MONITOR_TYPES = ['query alert', 'event alert', 'service check']
     context_settings=CONTEXT_SETTINGS,
     short_help='Validate recommended monitor definition JSON files',
 )
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 def recommended_monitors(check):
     """Validate all recommended monitors definition files.
 
@@ -121,8 +130,15 @@ def recommended_monitors(check):
                 monitor_name = decoded.get('name').lower()
                 if not (check_name in monitor_name or display_name in monitor_name):
                     file_failed = True
+                    if check_name == display_name:
+                        error_msg = f":{check_name}"
+                    else:
+                        error_msg = f". Either: {check_name} or {display_name}"
                     display_queue.append(
-                        (echo_failure, f"    {monitor_filename} name must contain the integration name"),
+                        (
+                            echo_failure,
+                            f"    {monitor_filename} `name` field must contain the integration name{error_msg}",
+                        ),
                     )
 
             if file_failed:

@@ -59,6 +59,14 @@ metadata:
   name: datadog-agent
 rules:
   - apiGroups:
+    - ""
+    resources:
+    - nodes
+    - namespaces
+    verbs:
+    - get
+    - list
+  - apiGroups:
       - ""
     resources:
       - nodes/metrics
@@ -124,13 +132,13 @@ spec:
          value: "datadoghq.com"
        - name: DD_EKS_FARGATE
          value: "true"
+       - name: DD_CLUSTER_NAME
+         value: "<CLUSTER_NAME>"
        - name: DD_KUBERNETES_KUBELET_NODENAME
          valueFrom:
            fieldRef:
              apiVersion: v1
              fieldPath: spec.nodeName
-       - name: DD_TAGS
-         value: "kube_cluster_name:<CLUSTER_NAME>"
       resources:
           requests:
             memory: "256Mi"
@@ -142,7 +150,54 @@ spec:
 
 **Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][14].
 
-**Note**: Add your desired `kube_cluster_name:<CLUSTER_NAME>` to the list of `DD_TAGS` to ensure your metrics are tagged by your desired cluster. You can append additional tags here as space separated `<KEY>:<VALUE>` tags.
+**Note**: Add your desired `kube_cluster_name:<CLUSTER_NAME>` to the list of `DD_TAGS` to ensure your metrics are tagged by your desired cluster. You can append additional tags here as space separated `<KEY>:<VALUE>` tags. For Agents `7.34+` and `6.34+`, this is not required. Instead, set the `DD_CLUSTER_NAME` environment variable.
+
+#### Running the Cluster Agent or the Cluster Checks Runner
+
+Datadog recommends you run the Cluster Agent to access features such as [events collection][29], [Kubernetes resources view][30], and [cluster checks][31].
+
+When using EKS Fargate, there are two possible scenarios depending on whether or not the EKS cluster is running mixed workloads (Fargate/non-Fargate).
+
+If the EKS cluster runs Fargate and non-Fargate workloads, and you want to monitor the non-Fargate workload through Node Agent DaemonSet, add the Cluster Agent/Cluster Checks Runner to this deployment. For more information, see the [Cluster Agent Setup][25].
+
+The Cluster Agent token must be reachable from the Fargate tasks you want to monitor. If you are using the Helm Chart or Datadog Operator, this is not reachable by default because a secret in the target namespace is created.
+
+You have two options for this to work properly:
+
+* Use an hardcoded token value (`clusterAgent.token` in Helm, `credentials.token` in the Datadog Operator); convenient, but less secure.
+* Use a manually-created secret (`clusterAgent.tokenExistingSecret` in Helm, not available in the Datadog Operator) and replicate it in all namespaces where Fargate tasks need to be monitored; secure, but requires extra operations.
+
+If the EKS cluster runs only Fargate workloads, you need a standalone Cluster Agent deployment. And, as described above, choose one of the two options for making the token reachable.
+
+Use the following Helm `values.yaml`:
+
+```yaml
+datadog:
+  apiKey: <YOUR_DATADOG_API_KEY>
+  clusterName: <CLUSTER_NAME>
+agents:
+  enabled: false
+clusterAgent:
+  enabled: true
+  replicas: 2
+```
+
+
+In both cases, you need to change the Datadog Agent sidecar manifest in order to allow communication with the Cluster Agent:
+
+```yaml
+       env:
+        - name: DD_CLUSTER_AGENT_ENABLED
+          value: "true"
+        - name: DD_CLUSTER_AGENT_AUTH_TOKEN
+          value: <hardcoded token value> # Use valueFrom: if you're using a secret
+        - name: DD_CLUSTER_AGENT_URL
+          value: https://<CLUSTER_AGENT_SERVICE_NAME>.<CLUSTER_AGENT_SERVICE_NAMESPACE>.svc.cluster.local:5005
+        - name: DD_ORCHESTRATOR_EXPLORER_ENABLED # Required to get Kubernetes resources view
+          value: "true"
+        - name: DD_CLUSTER_NAME
+          value: <CLUSTER_NAME>
+```
 
 ## Metrics collection
 
@@ -201,11 +256,11 @@ spec:
 **Notes**:
 
 - Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][14].
-- Container metrics are not available in Fargate because the `cgroups` volume from the host can't be mounted into the Agent. The [Live Containers][19] view reports 0 for CPU and Memory.
+- Container metrics are not available in Fargate because the `cgroups` volume from the host can't be mounted into the Agent. The [Live Containers][17] view reports 0 for CPU and Memory.
 
 ### DogStatsD
 
-Set up the container port `8125` over your Agent container to forward [DogStatsD metrics][17] from your application container to Datadog.
+Set up the container port `8125` over your Agent container to forward [DogStatsD metrics][18] from your application container to Datadog.
 
 ```yaml
 apiVersion: apps/v1
@@ -265,6 +320,10 @@ Datadog Agent v6.19+ supports live containers in the EKS Fargate integration. Li
 ### Live processes
 
 Datadog Agent v6.19+ supports live processes in the EKS Fargate integration. Live processes appear on the [Processes][20] page. To enable live processes, [enable shareProcessNamespace in the pod spec][21].
+
+### Kubernetes resources view
+
+To collect Kubernetes resource views, you need a [Cluster Agent setup](#running-the-cluster-agent-or-the-cluster-checks-runner).
 
 ## Log collection
 
@@ -351,10 +410,7 @@ spec:
 
 ## Events collection
 
-To collect events from your AWS EKS Fargate API server, run a Datadog Cluster Agent over an AWS EKS EC2 pod within your Kubernetes cluster:
-
-1. [Setup the Datadog Cluster Agent][25].
-2. [Enable Event collection for your Cluster Agent][19].
+To collect events from your AWS EKS Fargate API server, run a [Datadog Cluster Agent within your EKS cluster](#running-the-cluster-agent-or-the-cluster-checks-runner) and [Enable Event collection for your Cluster Agent][19].
 
 Optionally, deploy cluster check runners in addition to setting up the Datadog Cluster Agent to enable cluster checks.
 
@@ -428,3 +484,6 @@ Need help? Contact [Datadog support][20].
 [26]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#process-collection
 [27]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
 [28]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
+[29]: https://docs.datadoghq.com/agent/kubernetes/?tab=helm#event-collection
+[30]: https://docs.datadoghq.com/infrastructure/livecontainers/#kubernetes-resources-view
+[31]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/#overview

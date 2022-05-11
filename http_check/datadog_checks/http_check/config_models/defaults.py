@@ -54,10 +54,6 @@ def instance_check_certificate_expiration(field, value):
     return True
 
 
-def instance_check_hostname(field, value):
-    return True
-
-
 def instance_collect_response_time(field, value):
     return True
 
@@ -146,6 +142,10 @@ def instance_method(field, value):
     return 'get'
 
 
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_min_collection_interval(field, value):
     return 15
 
@@ -226,12 +226,20 @@ def instance_tls_private_key(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_tls_private_key_password(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_tls_protocols_allowed(field, value):
     return get_default_field_value(field, value)
 
 
 def instance_tls_use_host_header(field, value):
     return False
+
+
+def instance_tls_validate_hostname(field, value):
+    return True
 
 
 def instance_tls_verify(field, value):

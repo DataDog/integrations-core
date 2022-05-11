@@ -1,12 +1,18 @@
 # CHANGELOG - elastic
 
+## 5.1.0 / 2022-04-05
+
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Added] Add new Elastic metric indexing-pressure. See [#10758](https://github.com/DataDog/integrations-core/pull/10758).
+* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+
 ## 5.0.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11344](https://github.com/DataDog/integrations-core/pull/11344).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
 * [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
 
-## 4.0.1 / 2022-01-13
+## 4.0.1 / 2022-01-13 / Agent 7.34.0
 
 * [Fixed] Validate custom query column type. See [#11106](https://github.com/DataDog/integrations-core/pull/11106).
 * [Fixed] Continue other custom queries when one fails. See [#11105](https://github.com/DataDog/integrations-core/pull/11105).

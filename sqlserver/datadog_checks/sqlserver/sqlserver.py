@@ -14,7 +14,7 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
@@ -42,6 +42,7 @@ from .const import (
     DATABASE_SERVICE_CHECK_NAME,
     DBM_MIGRATED_METRICS,
     DEFAULT_AUTODISCOVERY_INTERVAL,
+    ENGINE_EDITION_SQL_DATABASE,
     FCI_METRICS,
     INSTANCE_METRICS,
     INSTANCE_METRICS_TOTAL,
@@ -51,10 +52,13 @@ from .const import (
     PERF_LARGE_RAW_BASE,
     PERF_RAW_LARGE_FRACTION,
     SERVICE_CHECK_NAME,
+    STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_VERSION,
     TASK_SCHEDULER_METRICS,
     VALID_METRIC_TYPES,
 )
 from .metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
+from .queries import QUERY_SERVER_STATIC_INFO
 from .utils import set_default_driver_conf
 
 try:
@@ -87,6 +91,7 @@ class SQLServer(AgentCheck):
         self.instance_per_type_metrics = defaultdict(set)
         self.do_check = True
 
+        self.tags = self.instance.get("tags", [])
         self.reported_hostname = self.instance.get('reported_hostname')
         self.autodiscovery = is_affirmative(self.instance.get('database_autodiscovery'))
         self.autodiscovery_include = self.instance.get('autodiscovery_include', ['.*'])
@@ -102,13 +107,6 @@ class SQLServer(AgentCheck):
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
         self.custom_metrics = init_config.get('custom_metrics', [])
 
-        # use QueryManager to process custom queries
-        self.tags = self.instance.get("tags", [])
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self.tags)
-        self.check_initializations.append(self.config_checks)
-        self.check_initializations.append(self._query_manager.compile_queries)
-        self.check_initializations.append(self.initialize_connection)
-
         # DBM
         self.dbm_enabled = self.instance.get('dbm', False)
         self.statement_metrics_config = self.instance.get('query_metrics', {}) or {}
@@ -122,11 +120,16 @@ class SQLServer(AgentCheck):
                     # Valid values for this can be found at
                     # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/database.md#connection-level-attributes
                     'dbms': 'mssql',
-                    'replace_digits': obfuscator_options_config.get('replace_digits', False),
-                    'return_json_metadata': obfuscator_options_config.get('collect_metadata', False),
-                    'table_names': obfuscator_options_config.get('collect_tables', True),
-                    'collect_commands': obfuscator_options_config.get('collect_commands', True),
-                    'collect_comments': obfuscator_options_config.get('collect_comments', True),
+                    'replace_digits': is_affirmative(
+                        obfuscator_options_config.get(
+                            'replace_digits',
+                            obfuscator_options_config.get('quantize_sql_tables', False),
+                        )
+                    ),
+                    'return_json_metadata': is_affirmative(obfuscator_options_config.get('collect_metadata', True)),
+                    'table_names': is_affirmative(obfuscator_options_config.get('collect_tables', True)),
+                    'collect_commands': is_affirmative(obfuscator_options_config.get('collect_commands', True)),
+                    'collect_comments': is_affirmative(obfuscator_options_config.get('collect_comments', True)),
                 }
             )
         )
@@ -136,6 +139,24 @@ class SQLServer(AgentCheck):
             # cache these for a full day
             ttl=60 * 60 * 24,
         )
+
+        # Query declarations
+        self.server_state_queries = QueryExecutor(
+            self.execute_query_raw,
+            self,
+            queries=[QUERY_SERVER_STATIC_INFO],
+            tags=self.tags,
+            hostname=self.resolved_hostname,
+        )
+        self.check_initializations.append(self.server_state_queries.compile_queries)
+
+        # use QueryManager to process custom queries
+        self._query_manager = QueryManager(
+            self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
+        )
+        self.check_initializations.append(self.config_checks)
+        self.check_initializations.append(self._query_manager.compile_queries)
+        self.check_initializations.append(self.initialize_connection)
 
     def cancel(self):
         self.statement_metrics.cancel()
@@ -186,15 +207,23 @@ class SQLServer(AgentCheck):
         return self._resolved_hostname
 
     def load_static_information(self):
-        if 'version' not in self.static_info_cache:
+        if len({STATIC_INFO_VERSION, STATIC_INFO_ENGINE_EDITION} - set(self.static_info_cache.keys())) > 0:
             with self.connection.open_managed_default_connection():
                 with self.connection.get_managed_cursor() as cursor:
-                    cursor.execute("select @@version")
-                    results = cursor.fetchall()
-                    if results and len(results) > 0 and len(results[0]) > 0 and results[0][0]:
-                        self.static_info_cache["version"] = results[0][0]
-                    else:
-                        self.log.warning("failed to load version static information due to empty results")
+                    if STATIC_INFO_VERSION not in self.static_info_cache:
+                        cursor.execute("select @@version")
+                        results = cursor.fetchall()
+                        if results and len(results) > 0 and len(results[0]) > 0 and results[0][0]:
+                            self.static_info_cache[STATIC_INFO_VERSION] = results[0][0]
+                        else:
+                            self.log.warning("failed to load version static information due to empty results")
+                    if STATIC_INFO_ENGINE_EDITION not in self.static_info_cache:
+                        cursor.execute("SELECT CAST(ServerProperty('EngineEdition') AS INT) AS Edition")
+                        result = cursor.fetchone()
+                        if result:
+                            self.static_info_cache[STATIC_INFO_ENGINE_EDITION] = result
+                        else:
+                            self.log.warning("failed to load version static information due to empty results")
 
     def debug_tags(self):
         return self.tags + ['agent_hostname:{}'.format(self.agent_hostname)]
@@ -358,8 +387,7 @@ class SQLServer(AgentCheck):
 
         # Load database files
         for name, column, metric_type in DATABASE_FILES_IO:
-            cfg = {'name': name, 'column': column, 'tags': tags}
-
+            cfg = {'name': name, 'column': column, 'tags': tags, 'hostname': self.resolved_hostname}
             metrics_to_collect.append(SqlFileStats(cfg, None, getattr(self, metric_type), column, self.log))
 
         # Load AlwaysOn metrics
@@ -570,6 +598,8 @@ class SQLServer(AgentCheck):
             metric_type_str, cls = metrics.TABLE_MAPPING[table]
             metric_type = getattr(self, metric_type_str)
 
+        cfg_inst['hostname'] = self.resolved_hostname
+
         return cls(cfg_inst, base_name, metric_type, column, self.log)
 
     def check(self, _):
@@ -582,7 +612,12 @@ class SQLServer(AgentCheck):
             if self.autodiscovery and self.autodiscovery_db_service_check:
                 for db_name in self.databases:
                     if db_name != self.connection.DEFAULT_DATABASE:
-                        self.connection.check_database_conns(db_name)
+                        try:
+                            self.connection.check_database_conns(db_name)
+                        except Exception as e:
+                            # service_check errors on auto discovered databases should not abort the check
+                            self.log.warning("failed service check for auto discovered database: %s", e)
+
             if self.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
@@ -641,6 +676,13 @@ class SQLServer(AgentCheck):
             with self.connection.get_managed_cursor() as cursor:
                 cursor.execute("SET NOCOUNT ON")
             try:
+                # Server state queries require VIEW SERVER STATE permissions, which some managed database
+                # versions do not support.
+                if self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION) not in [
+                    ENGINE_EDITION_SQL_DATABASE,
+                ]:
+                    self.server_state_queries.execute()
+
                 # reuse connection for any custom queries
                 self._query_manager.execute()
             finally:

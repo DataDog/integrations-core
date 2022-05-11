@@ -178,6 +178,10 @@ def instance_log_requests(field, value):
     return False
 
 
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_metrics(field, value):
     return get_default_field_value(field, value)
 
@@ -252,6 +256,10 @@ def instance_skip_proxy(field, value):
 
 def instance_stats_url(field, value):
     return 'http://localhost:80/stats'
+
+
+def instance_tag_by_endpoint(field, value):
+    return True
 
 
 def instance_tags(field, value):

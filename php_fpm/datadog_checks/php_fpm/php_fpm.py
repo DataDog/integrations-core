@@ -116,7 +116,7 @@ class PHPFPMCheck(AgentCheck):
                     # 503s originated here: https://github.com/php/php-src/blob/d84ef96/sapi/fpm/fpm/fpm_status.c#L96
                     if resp.status_code == 503 and i < max_attempts - 1:
                         # retry
-                        time.sleep(2 ** i + random.random())
+                        time.sleep(2**i + random.random())
                         continue
 
                     resp.raise_for_status()

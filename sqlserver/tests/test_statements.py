@@ -65,7 +65,7 @@ def dbm_instance(instance_docker):
         ],
     ],
 )
-def test_get_available_query_metrics_columns(aggregator, dbm_instance, expected_columns, available_columns):
+def test_get_available_query_metrics_columns(dbm_instance, expected_columns, available_columns):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     check.initialize_connection()
     _conn_key_prefix = "dbm-"
@@ -289,12 +289,12 @@ def test_statement_metrics_and_plans(
 def test_statement_metadata(
     aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, metadata, expected_metadata_payload
 ):
-    dbm_instance['obfuscator_options'] = {'collect_metadata': True}
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     query = '''
     -- Test comment
     select * from sys.databases'''
+    query_signature = 'ee1663c796378ab0'
 
     def _run_query():
         bob_conn.execute_with_retries(query)
@@ -313,24 +313,60 @@ def test_statement_metadata(
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     assert dbm_samples, "should have collected at least one sample"
 
-    matching = [
-        s for s in dbm_samples if 'select * from sys.databases' in s['db']['statement'] and s['dbm_type'] == 'plan'
-    ]
+    matching = [s for s in dbm_samples if s['db']['query_signature'] == query_signature and s['dbm_type'] == 'plan']
     assert len(matching) == 1
-
     sample = matching[0]
     assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
     assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
     assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
 
+    fqt_samples = [
+        s for s in dbm_samples if s.get('dbm_type') == 'fqt' and s['db']['query_signature'] == query_signature
+    ]
+    assert len(fqt_samples) == 1
+    fqt = fqt_samples[0]
+    assert fqt['db']['metadata']['tables'] == expected_metadata_payload['tables']
+    assert fqt['db']['metadata']['commands'] == expected_metadata_payload['commands']
+
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1
     metric = dbm_metrics[0]
-    matching_metrics = [m for m in metric['sqlserver_rows'] if 'select * from sys.databases' in m['text']]
+    matching_metrics = [m for m in metric['sqlserver_rows'] if m['query_signature'] == query_signature]
     assert len(matching_metrics) == 1
     metric = matching_metrics[0]
     assert metric['dd_tables'] == expected_metadata_payload['tables']
     assert metric['dd_commands'] == expected_metadata_payload['commands']
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "reported_hostname,expected_hostname",
+    [
+        (None, 'stubbed.hostname'),
+        ('override.hostname', 'override.hostname'),
+    ],
+)
+def test_statement_reported_hostname(
+    aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, reported_hostname, expected_hostname
+):
+    dbm_instance['reported_hostname'] = reported_hostname
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    samples = aggregator.get_event_platform_events("dbm-samples")
+    assert samples, "should have collected at least one sample"
+    assert samples[0]['host'] == expected_hostname
+
+    fqt_samples = [s for s in samples if s.get('dbm_type') == 'fqt']
+    assert fqt_samples, "should have collected at least one fqt sample"
+    assert fqt_samples[0]['host'] == expected_hostname
+
+    metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert metrics, "should have collected metrics"
+    assert metrics[0]['host'] == expected_hostname
 
 
 @pytest.mark.integration

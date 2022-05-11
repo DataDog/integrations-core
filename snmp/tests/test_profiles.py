@@ -299,9 +299,7 @@ def test_f5(aggregator):
         'sysMultiHostCpuSoftirq',
         'sysMultiHostCpuIowait',
     ]
-    cpu_gauges = [
-        'sysMultiHostCpuUsageRatio',
-    ]
+    cpu_gauges = ['sysMultiHostCpuUsageRatio', 'cpu.usage']
 
     interfaces = [
         ('1.0', 'desc2'),

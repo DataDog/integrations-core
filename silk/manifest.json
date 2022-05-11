@@ -21,13 +21,15 @@
     "provisioning"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "silk",
   "assets": {
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
+    "dashboards": {
+      "Silk - Overview": "assets/dashboards/silk_overview.json"
+    },
     "monitors": {
       "Latency high": "assets/recommended_monitors/latency_high.json"
     },

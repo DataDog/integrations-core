@@ -9,19 +9,19 @@ import click
 import pyperclip
 
 from ....ci import running_on_ci
-from ....fs import dir_exists, file_exists, path_join
+from ....fs import dir_exists, path_join
 from ....utils import ON_WINDOWS
 from ...e2e import E2E_SUPPORTED_TYPES, derive_interface, start_environment, stop_environment
 from ...e2e.agent import DEFAULT_PYTHON_VERSION, DEFAULT_SAMPLING_COLLECTION_INTERVAL
 from ...git import get_current_branch
-from ...testing import complete_envs, get_available_tox_envs, get_tox_env_python_version
-from ...utils import complete_testable_checks, get_tox_file
+from ...testing import complete_envs, get_available_envs, get_tox_env_python_version
+from ...utils import complete_testable_checks, is_testable_check
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Start an environment')
-@click.argument('check', autocompletion=complete_testable_checks)
-@click.argument('env', autocompletion=complete_envs)
+@click.argument('check', shell_complete=complete_testable_checks)
+@click.argument('env', shell_complete=complete_envs)
 @click.option(
     '--agent',
     '-a',
@@ -111,7 +111,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
 
 
 def _start_environment(ctx, base, check, env, python, org_name, profile_memory, agent, env_vars, dogstatsd, dev, on_ci):
-    if not file_exists(get_tox_file(check)):
+    if not is_testable_check(check):
         abort(f'`{check}` is not a testable check.')
 
     base_package = _get_base_package(base, ctx)
@@ -309,7 +309,7 @@ def _get_base_package(base, ctx):
 
 
 def _check_env(check, env):
-    envs = get_available_tox_envs(check, e2e_only=True)
+    envs = get_available_envs(check, e2e_only=True)
 
     if env not in envs:
         echo_failure(f'`{env}` is not an available environment.')

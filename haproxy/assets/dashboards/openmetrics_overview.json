@@ -1,0 +1,944 @@
+{
+    "author_name": "Datadog",
+    "description": "This dashboard displays an overview of your HAProxy frontend and backend servers, helping you spot issues like rising error rates or disparities between your frontend and backend traffic. For more information, see:\n\n- [Monitoring HAProxy performance metrics](https://www.datadoghq.com/blog/monitoring-haproxy-performance-metrics/)\n\n- [Using built-in and third-party tools to collect HAProxy metrics](https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/)\n\n- [Monitor HAProxy with Datadog](https://www.datadoghq.com/blog/monitor-haproxy-with-datadog/)\n\n- [Datadog's HAProxy documentation](https://docs.datadoghq.com/integrations/haproxy/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "free",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "host",
+            "prefix": "host"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "server",
+            "prefix": "server"
+        }
+    ],
+    "title": "HAProxy - Overview (OpenMetrics)",
+    "widgets": [
+        {
+            "definition": {
+                "sizing": "zoom",
+                "type": "image",
+                "url": "/static/images/logos/haproxy_large.svg"
+            },
+            "id": 7906823952620176,
+            "layout": {
+                "height": 10,
+                "width": 22,
+                "x": 1,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Overview",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 1670817401901694,
+            "layout": {
+                "height": 5,
+                "width": 34,
+                "x": 25,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Frontend summary",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 6367862546049054,
+            "layout": {
+                "height": 5,
+                "width": 34,
+                "x": 61,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "content": "This dashboard displays an overview of your HAProxy frontend and backend servers, helping you spot issues like rising error rates or disparities between your frontend and backend traffic. For more information, see:\n\n- [Monitoring HAProxy performance metrics](https://www.datadoghq.com/blog/monitoring-haproxy-performance-metrics/)\n\n- [Using built-in and third-party tools to collect HAProxy metrics](https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/)\n\n- [Monitor HAProxy with Datadog](https://www.datadoghq.com/blog/monitor-haproxy-with-datadog/)\n\n- [Datadog's HAProxy documentation](https://docs.datadoghq.com/integrations/haproxy/)",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 7019022853471122,
+            "layout": {
+                "height": 32,
+                "width": 22,
+                "x": 1,
+                "y": 12
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Backend summary",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 285102860584710,
+            "layout": {
+                "height": 5,
+                "width": 34,
+                "x": 97,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Logs",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 1681328205677784,
+            "layout": {
+                "height": 5,
+                "width": 40,
+                "x": 133,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "columns": [
+                    "core_host",
+                    "core_service"
+                ],
+                "indexes": [],
+                "message_display": "expanded-md",
+                "query": "source:haproxy $host",
+                "show_date_column": true,
+                "show_message_column": true,
+                "sort": {
+                    "column": "time",
+                    "order": "desc"
+                },
+                "title": "",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "log_stream"
+            },
+            "id": 7188504879419712,
+            "layout": {
+                "height": 95,
+                "width": 40,
+                "x": 133,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "sum:haproxy.frontend.bytes.out.count{$host}.as_count(), sum:haproxy.frontend.bytes.in.count{$host}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Frontend Network Traffic over $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 1667831665415876,
+            "layout": {
+                "height": 14,
+                "width": 34,
+                "x": 61,
+                "y": 22
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "sum:haproxy.backend.bytes.out.count{$host}.as_count(), sum:haproxy.backend.bytes.in.count{$host}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Backend Network Traffic over $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 8245783160162922,
+            "layout": {
+                "height": 14,
+                "width": 34,
+                "x": 97,
+                "y": 18
+            }
+        },
+        {
+            "definition": {
+                "check": "haproxy.openmetrics.health",
+                "group_by": [],
+                "grouping": "cluster",
+                "tags": [
+                    "$host"
+                ],
+                "title": "HAProxy instances",
+                "title_align": "center",
+                "title_size": "16",
+                "type": "check_status"
+            },
+            "id": 4169637288037666,
+            "layout": {
+                "height": 10,
+                "width": 16,
+                "x": 25,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "sum:haproxy.frontend.requests.denied.count{$host}.as_count(), sum:haproxy.frontend.responses.denied.count{$host}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Frontend Denials over $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 7775600249141322,
+            "layout": {
+                "height": 14,
+                "width": 34,
+                "x": 61,
+                "y": 52
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "sum:haproxy.backend.requests.denied.count{$host}.as_count(), sum:haproxy.backend.responses.denied.count{$host}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Backend Denials over $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 8014776548151764,
+            "layout": {
+                "height": 14,
+                "width": 34,
+                "x": 97,
+                "y": 48
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "sum:haproxy.frontend.http.requests.count{$host}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Frontend Requests over $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 637220061129026,
+            "layout": {
+                "height": 14,
+                "width": 34,
+                "x": 61,
+                "y": 37
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "sum:haproxy.backend.http.requests.count{$host}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Backend Requests over $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 8256840699408368,
+            "layout": {
+                "height": 14,
+                "width": 34,
+                "x": 97,
+                "y": 33
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "last",
+                        "conditional_formats": [
+                            {
+                                "comparator": "<=",
+                                "palette": "white_on_red",
+                                "value": 0
+                            },
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_green",
+                                "value": 0
+                            }
+                        ],
+                        "q": "sum:haproxy.backend.active.servers{$host}"
+                    }
+                ],
+                "title": "Backend Active Servers over $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 5433110435521948,
+            "layout": {
+                "height": 10,
+                "width": 16,
+                "x": 97,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "sum:haproxy.server.connection.attempts.count{$host,$server}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Number of connection attempts over $host,$server",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 5392577958274092,
+            "layout": {
+                "height": 14,
+                "width": 34,
+                "x": 25,
+                "y": 36
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "For every HAProxy session, two connections are consumed - one for the client to HAProxy, and the other for HAProxy to your backend. Ultimately, the maximum number of connections HAProxy can handle is limited by your configuration and platform.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 1491535632730454,
+            "layout": {
+                "height": 16,
+                "width": 23,
+                "x": 1,
+                "y": 45
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "sum:haproxy.server.sessions.count{$host,$server}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Number of sessions over $host,$server",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 2327095902756738,
+            "layout": {
+                "height": 14,
+                "width": 34,
+                "x": 25,
+                "y": 51
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": "<=",
+                                "palette": "white_on_yellow",
+                                "value": 0
+                            },
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_green",
+                                "value": 0
+                            }
+                        ],
+                        "q": "sum:haproxy.backend.backup.servers{$host}"
+                    }
+                ],
+                "title": "Backend Backup Servers over $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 4603448120285298,
+            "layout": {
+                "height": 10,
+                "width": 16,
+                "x": 115,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Server summary",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 1445453484681880,
+            "layout": {
+                "height": 5,
+                "width": 34,
+                "x": 25,
+                "y": 30
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "sum:haproxy.process.pool.used.bytes{$host}"
+                    }
+                ],
+                "title": "Memory allocated in pool over $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 6058004249676484,
+            "layout": {
+                "height": 10,
+                "width": 16,
+                "x": 43,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Observing traffic volume over time is essential to determine if changes to your network infrastructure are needed. A 10Mb/s pipe might work for a startup with less traffic, but is insufficient for larger traffic volumes. Tracking HAProxy\u2019s network usage will empower you to scale your infrastructure with your ever-changing needs.",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 5170941912880754,
+            "layout": {
+                "height": 14,
+                "width": 34,
+                "x": 61,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "HTTP Responses details",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 8311598273739750,
+            "layout": {
+                "height": 5,
+                "width": 106,
+                "x": 25,
+                "y": 67
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "sum:haproxy.frontend.http.responses.count{$host,code:3xx}.as_count(), sum:haproxy.backend.http.responses.count{$host,code:3xx}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "F&B HTTP 3xx codes over $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 8098043543265454,
+            "layout": {
+                "height": 14,
+                "width": 34,
+                "x": 97,
+                "y": 73
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "sum:haproxy.frontend.http.responses.count{$host,code:4xx}.as_count(), sum:haproxy.backend.http.responses.count{$host,code:4xx}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "F&B HTTP 4xx codes over $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 1610959407550360,
+            "layout": {
+                "height": 14,
+                "width": 34,
+                "x": 25,
+                "y": 88
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "sum:haproxy.frontend.http.responses.count{$host,code:5xx}.as_count(), sum:haproxy.backend.http.responses.count{$host,code:5xx}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "F&B HTTP 5xx codes over $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 4480310645955248,
+            "layout": {
+                "height": 14,
+                "width": 34,
+                "x": 61,
+                "y": 88
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "sum:haproxy.frontend.http.responses.count{$host,code:1xx}.as_count(), sum:haproxy.backend.http.responses.count{$host,code:1xx}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "F&B HTTP 1xx codes over $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 1537232308961756,
+            "layout": {
+                "height": 14,
+                "width": 34,
+                "x": 25,
+                "y": 73
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "sum:haproxy.frontend.http.responses.count{$host,code:2xx}.as_count(), sum:haproxy.backend.http.responses.count{$host,code:2xx}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "F&B HTTP 2xx codes over $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 1792604632215100,
+            "layout": {
+                "height": 14,
+                "width": 34,
+                "x": 61,
+                "y": 73
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "sum:haproxy.frontend.request.errors.count{$host}.as_count(), sum:haproxy.backend.response.errors.count{$host}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "F&B Errors",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 7539983606386288,
+            "layout": {
+                "height": 14,
+                "width": 34,
+                "x": 97,
+                "y": 88
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "HAProxy exposes the number of responses by HTTP status code. Ideally, all responses forwarded by HAProxy would be class 2xx codes, so an unexpected surge in the number of other code classes could be a sign of trouble.\n\nCorrelating the denial metrics with the response code data can shed light on the cause of an increase in error codes. No change in denials coupled with an increase in the number of 404 responses could point to a misconfigured application or unruly client.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 899809019765442,
+            "layout": {
+                "height": 29,
+                "width": 23,
+                "x": 1,
+                "y": 73
+            }
+        },
+        {
+            "definition": {
+                "autoscale": false,
+                "custom_unit": "%",
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": "<",
+                                "palette": "white_on_red",
+                                "value": 90
+                            },
+                            {
+                                "comparator": "<",
+                                "palette": "white_on_yellow",
+                                "value": 99
+                            },
+                            {
+                                "comparator": ">=",
+                                "palette": "white_on_green",
+                                "value": 99
+                            }
+                        ],
+                        "q": "(sum:haproxy.frontend.http.responses.count{$host,code:2xx}.as_count()/(sum:haproxy.frontend.http.responses.count{$host,code:1xx}.as_count()+sum:haproxy.frontend.http.responses.count{$host,code:2xx}.as_count()+sum:haproxy.frontend.http.responses.count{$host,code:3xx}.as_count()+sum:haproxy.frontend.http.responses.count{$host,code:4xx}.as_count()+sum:haproxy.frontend.http.responses.count{$host,code:5xx}.as_count()))*100"
+                    }
+                ],
+                "title": "Frontend 2xx% over $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 1898914845436390,
+            "layout": {
+                "height": 10,
+                "width": 16,
+                "x": 25,
+                "y": 18
+            }
+        },
+        {
+            "definition": {
+                "autoscale": false,
+                "custom_unit": "%",
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": "<",
+                                "palette": "white_on_red",
+                                "value": 90
+                            },
+                            {
+                                "comparator": "<",
+                                "palette": "white_on_yellow",
+                                "value": 99
+                            },
+                            {
+                                "comparator": ">=",
+                                "palette": "white_on_green",
+                                "value": 99
+                            }
+                        ],
+                        "q": "(sum:haproxy.frontend.http.responses.count{$host,code:2xx}.as_count()/(sum:haproxy.frontend.http.responses.count{$host,code:1xx}.as_count()+sum:haproxy.frontend.http.responses.count{$host,code:2xx}.as_count()+sum:haproxy.frontend.http.responses.count{$host,code:3xx}.as_count()+sum:haproxy.frontend.http.responses.count{$host,code:4xx}.as_count()+sum:haproxy.frontend.http.responses.count{$host,code:5xx}.as_count()))*100"
+                    }
+                ],
+                "title": "Backend 2xx% over $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 1010745428765062,
+            "layout": {
+                "height": 10,
+                "width": 16,
+                "x": 43,
+                "y": 18
+            }
+        }
+    ]
+}

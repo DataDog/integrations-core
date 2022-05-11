@@ -22,7 +22,12 @@ def assert_metrics(aggregator):
     # type: (AggregatorStub) -> None
     for metric_names, tagnames in common.METRICS:
         for metric_name in metric_names:
-            aggregator.assert_metric(metric_name)
+            if metric_name.startswith('voltdb.procedure.'):
+                at_least = 0
+            else:
+                at_least = 1
+
+            aggregator.assert_metric(metric_name, at_least=at_least)
             for m in aggregator.metrics(metric_name):
                 metric_tagnames = {tag.split(':')[0] for tag in set(m.tags + common.COMMON_TAGS)}
                 assert set(tagnames) <= set(metric_tagnames)

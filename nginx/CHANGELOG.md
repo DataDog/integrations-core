@@ -1,5 +1,10 @@
 # CHANGELOG - nginx
 
+## 5.3.0 / 2022-04-05
+
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+
 ## 5.2.1 / 2022-02-24
 
 * [Fixed] Adjust endpoint detection logic for warn log. See [#11567](https://github.com/DataDog/integrations-core/pull/11567).
@@ -14,7 +19,7 @@
 * [Added] Allow for percentile aggregations for NGINX integration response time metrics. See [#11252](https://github.com/DataDog/integrations-core/pull/11252).
 * [Fixed] Instruct the user to fix the error. See [#11107](https://github.com/DataDog/integrations-core/pull/11107).
 
-## 5.0.0 / 2022-01-08
+## 5.0.0 / 2022-01-08 / Agent 7.34.0
 
 * [Added] Add option to dynamically determine what APIs to query for metrics. See [#10815](https://github.com/DataDog/integrations-core/pull/10815).
 * [Fixed] Bump base package. See [#11061](https://github.com/DataDog/integrations-core/pull/11061).
