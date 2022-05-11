@@ -3,10 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ....fs import file_exists
 from ...e2e.config import locate_config_file
 from ...testing import complete_active_checks, complete_configured_envs
-from ...utils import get_tox_file
+from ...utils import is_testable_check
 from ..console import CONTEXT_SETTINGS, abort, echo_failure
 
 
@@ -17,7 +16,7 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure
 @click.pass_context
 def edit(ctx, check, env, editor):
     """Start an environment."""
-    if not file_exists(get_tox_file(check)):
+    if not is_testable_check(check):
         abort(f'`{check}` is not a testable check.')
 
     config_file = locate_config_file(check, env)

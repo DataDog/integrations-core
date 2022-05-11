@@ -414,3 +414,17 @@ class TestShareLabels:
             ),
         ):
             dd_run_check(check, extract_message=True)
+
+
+class TestUseLatestSpec:
+    def test_strict_latest_spec(self, dd_run_check):
+        check = get_check({'use_latest_spec': True})
+        check.configure_scrapers()
+        scraper = check.scrapers['test']
+        assert scraper.http.options['headers']['Accept'] == 'application/openmetrics-text; version=0.0.1; charset=utf-8'
+
+    def test_plain_text_spec(self, dd_run_check):
+        check = get_check({'use_latest_spec': False})
+        check.configure_scrapers()
+        scraper = check.scrapers['test']
+        assert scraper.http.options['headers']['Accept'] == 'text/plain'

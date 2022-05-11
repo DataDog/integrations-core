@@ -23,6 +23,8 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
+from .const import STATIC_INFO_VERSION
+
 DEFAULT_COLLECTION_INTERVAL = 10
 
 SQL_SERVER_QUERY_METRICS_COLUMNS = [
@@ -293,7 +295,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'min_collection_interval': self.collection_interval,
             'tags': self.check.tags,
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
-            'sqlserver_version': self.check.static_info_cache.get("version", ""),
+            'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'ddagentversion': datadog_agent.get_version(),
             'ddagenthostname': self._check.agent_hostname,
         }

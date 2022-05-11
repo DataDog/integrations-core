@@ -65,9 +65,9 @@ def setup_istio():
 def dd_environment(dd_save_state):
     with kind_run(conditions=[setup_istio]) as kubeconfig:
         with ExitStack() as stack:
-            if VERSION == '1.5.1':
+            if VERSION == '1.13.3':
                 istiod_host, istiod_port = stack.enter_context(
-                    port_forward(kubeconfig, 'istio-system', 8080, 'deployment', 'istiod')
+                    port_forward(kubeconfig, 'istio-system', 15014, 'deployment', 'istiod')
                 )
 
                 istiod_endpoint = 'http://{}:{}/metrics'.format(istiod_host, istiod_port)
