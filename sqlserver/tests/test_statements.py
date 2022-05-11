@@ -368,9 +368,7 @@ def test_statement_metadata(
         },
     ],
 )
-def test_statement_cloud_metadata(
-        aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, cloud_metadata
-):
+def test_statement_cloud_metadata(aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, cloud_metadata):
     if cloud_metadata:
         for k, v in cloud_metadata.items():
             dbm_instance[k] = v
