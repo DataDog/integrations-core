@@ -290,65 +290,83 @@ files:
 
     - name: aws
       description: |
-        Provide the following if you are instrumenting a managed AWS database. Requires `dbm:true`.
+        This block defines the configuration for AWS RDS and Aurora instances. 
         
-        Requires setting the field `instance_endpoint`, which should be equal to the Endpoint.Address of the instance
-        the agent is connecting to. Note, if the `host` field is already equal to the instance's Endpoint.Address value, 
-        then setting this configuration is not necessary.
+        Complete this section if you have installed the Datadog AWS Integration 
+        (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
+        with SQL Server integration telemetry.
+        
+        These values are only applied when `dbm: true` option is set.
       options:
         - name: instance_endpoint
           description: |
-            Equal to the Endpoint.Address of the instance the agent is connecting to.
+            Equal to the Endpoint.Address of the instance the agent is connecting to. 
+            This value is optional if the value of `host` is already configured to the instance endpoint.
             
             For more information on instance endpoints, 
             see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
           value:
             type: string
-            example: foo.bar.us-east-1.rds.amazonaws.com
+            example: mydb–instance.cfxgae8cilcf.us-east-1.rds.amazonaws.com
 
     - name: gcp
       description: |
-        Provide the following if you are instrumenting a managed GCP database. Requires `dbm:true`.
+        This block defines the configuration for Google Cloud SQL instances.
+        
+        Complete this section if you have installed the Datadog GCP Integration 
+        (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
+        with SQL Server integration telemetry.
+
+        These values are only applied when `dbm: true` option is set.
       options:
         - name: project_id
           description: |
-            Equal to the GCP resource's project id.
+            Equal to the GCP resource's project ID.
             
-            For more information on project ids,
+            For more information on project IDs,
             See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
           value:
             type: string
             example: foo-project
         - name: instance_id
           description: |
-            Equal to the GCP resource's instance id.
+            Equal to the GCP resource's instance ID.
             
-            For more information on instance ids,
-            See the GCP docs https://cloud.google.com/sql/docs/mysql/instance-settings#instance-id-2ndgen
+            For more information on instance IDs,
+            See the GCP docs https://cloud.google.com/sql/docs/sqlserver/instance-settings#instance-id-2ndgen
           value:
             type: string
             example: foo-database
 
     - name: azure
       description: |
-        Provide the following if you are instrumenting a managed Azure database. Requires `dbm:true`.
+        This block defines the configuration for Azure Managed Instance, Azure SQL Database or 
+        SQLServer on Virtual Machines.
+        
+        Complete this section if you have installed the Datadog Azure Integration 
+        (https://docs.datadoghq.com/integrations/azure) to enrich instances 
+        with SQL Server integration telemetry.
+
+        These values are only applied when `dbm: true` option is set.
       options:
-        - name: product
+        - name: managed_instance_name
           description: |
-            Equal to the managed Azure DB product. 
-            
-            Acceptable values are:
-              - `flexible_server` 
-              - `single_server`
+            Equal to the name of the managed SQL instance.
           value:
             type: string
-            example: flexible_server
-        - name: name
+            example: my-managed-instance
+        - name: sql_database_name
           description: |
-            Equal to the name of the database.
+            Equal to the name of the Azure SQL database
           value:
             type: string
-            example: foo.database
+            example: my-sql-database
+        - name: vm_name
+          description: |
+            Equal to the name of the name of the virtual machine where SQLServer is running.
+          value:
+            type: string
+            example: my-sql-database
 
     - name: obfuscator_options
       description: |
