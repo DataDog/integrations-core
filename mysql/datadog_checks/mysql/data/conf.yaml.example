@@ -485,10 +485,10 @@ azure:
     #
     # deployment_type: flexible_server
 
-    ## @param database_name - string - optional - default: mysql-database
+    ## @param name - string - optional - default: mysql-database
     ## Equal to the name of the Azure MySQL database instance.
     #
-    # database_name: mysql-database
+    # name: mysql-database
 
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.

@@ -529,7 +529,7 @@ files:
             value:
               type: string
               example: flexible_server
-          - name: database_name
+          - name: name
             description: |
               Equal to the name of the Azure MySQL database instance.
             value:
