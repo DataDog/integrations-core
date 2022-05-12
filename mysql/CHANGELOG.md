@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 8.2.2 / 2022-04-20
+
+* [Fixed] Fix activity host reporting. See [#11854](https://github.com/DataDog/integrations-core/pull/11854).
+
 ## 8.2.1 / 2022-04-14
 
 * [Fixed] Update base version. See [#11825](https://github.com/DataDog/integrations-core/pull/11825).
