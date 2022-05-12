@@ -181,7 +181,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
 
         result = run_command(check_command, capture=True)
 
-        matches = re.findall(AGENT_COLLECTOR_SEPARATOR + r'\n(.*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
+        matches = re.findall(r'\n(.*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
 
         if not matches:
             raise ValueError(
@@ -192,7 +192,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
 
         for raw_json in matches:
             try:
-                collector = json.loads(raw_json)
+                collector = json.loads(result)
             except Exception as e:
                 raise Exception("Error loading json: {}\nCollector Json Output:\n{}".format(e, raw_json))
             replay_check_run(collector, aggregator, datadog_agent)
