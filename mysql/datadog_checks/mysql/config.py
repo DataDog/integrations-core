@@ -40,6 +40,16 @@ class MySQLConfig(object):
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         self.activity_config = instance.get('query_activity', {}) or {}
+        self.cloud_metadata = {}
+        aws = instance.get('aws', {})
+        gcp = instance.get('gcp', {})
+        azure = instance.get('azure', {})
+        if aws:
+            self.cloud_metadata.update({'aws': aws})
+        if gcp:
+            self.cloud_metadata.update({'gcp': gcp})
+        if azure:
+            self.cloud_metadata.update({'azure': azure})
         self.min_collection_interval = instance.get('min_collection_interval', 15)
         self.only_custom_queries = is_affirmative(instance.get('only_custom_queries', False))
         obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
