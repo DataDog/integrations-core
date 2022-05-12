@@ -294,6 +294,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
             'tags': self.check.tags,
+            'cloud_metadata': self.check.cloud_metadata,
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
             'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'ddagentversion': datadog_agent.get_version(),

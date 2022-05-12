@@ -291,6 +291,89 @@ files:
           value:
             type: number
             example: 10
+
+    - name: aws
+      description: |
+        This block defines the configuration for AWS RDS and Aurora instances. 
+        
+        Complete this section if you have installed the Datadog AWS Integration 
+        (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
+        with SQL Server integration telemetry.
+        
+        These values are only applied when `dbm: true` option is set.
+      options:
+        - name: instance_endpoint
+          description: |
+            Equal to the Endpoint.Address of the instance the agent is connecting to. 
+            This value is optional if the value of `host` is already configured to the instance endpoint.
+            
+            For more information on instance endpoints, 
+            see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
+          value:
+            type: string
+            example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+
+    - name: gcp
+      description: |
+        This block defines the configuration for Google Cloud SQL instances.
+        
+        Complete this section if you have installed the Datadog GCP Integration 
+        (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
+        with SQL Server integration telemetry.
+
+        These values are only applied when `dbm: true` option is set.
+      options:
+        - name: project_id
+          description: |
+            Equal to the GCP resource's project ID.
+            
+            For more information on project IDs,
+            See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+          value:
+            type: string
+            example: foo-project
+        - name: instance_id
+          description: |
+            Equal to the GCP resource's instance ID.
+            
+            For more information on instance IDs,
+            See the GCP docs https://cloud.google.com/sql/docs/sqlserver/instance-settings#instance-id-2ndgen
+          value:
+            type: string
+            example: foo-database
+
+    - name: azure
+      description: |
+        This block defines the configuration for Azure Managed Instance, Azure SQL Database or 
+        SQLServer on Virtual Machines.
+        
+        Complete this section if you have installed the Datadog Azure Integration 
+        (https://docs.datadoghq.com/integrations/azure) to enrich instances 
+        with SQL Server integration telemetry.
+
+        These values are only applied when `dbm: true` option is set.
+      options:
+        - name: deployment_type
+          description: |
+            Equal to the deployment type for the managed database. 
+            
+            Acceptable values are:
+              - `sql_database` 
+              - `managed_instance`
+              - `virtual_machine`
+            
+            For more information on deployment types, see the Azure
+            docs https://docs.microsoft.com/en-us/azure/azure-sql/azure-sql-iaas-vs-paas-what-is-overview?view=azuresql
+          value:
+            type: string
+            example: sql_database
+        - name: name
+          description: |
+            Equal to the name of the SQL Database, Managed Instance (SQL MI) or virtual machine.
+          value:
+            type: string
+            example: my-sqlserver-instance
+
     - name: obfuscator_options
       description: |
         Configure how the SQL obfuscator behaves.

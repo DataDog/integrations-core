@@ -113,6 +113,16 @@ class SQLServer(AgentCheck):
         self.statement_metrics = SqlserverStatementMetrics(self)
         self.activity_config = self.instance.get('query_activity', {}) or {}
         self.activity = SqlserverActivity(self)
+        self.cloud_metadata = {}
+        aws = self.instance.get('aws', {})
+        gcp = self.instance.get('gcp', {})
+        azure = self.instance.get('azure', {})
+        if aws:
+            self.cloud_metadata.update({'aws': aws})
+        if gcp:
+            self.cloud_metadata.update({'gcp': gcp})
+        if azure:
+            self.cloud_metadata.update({'azure': azure})
         obfuscator_options_config = self.instance.get('obfuscator_options', {}) or {}
         self.obfuscator_options = to_native_string(
             json.dumps(
