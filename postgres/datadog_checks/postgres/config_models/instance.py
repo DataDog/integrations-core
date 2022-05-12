@@ -19,6 +19,29 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class Aws(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    instance_endpoint: Optional[str]
+
+
+class Azure(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    deployment_type: Optional[str]
+    name: Optional[str]
+
+
+class Gcp(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    instance_id: Optional[str]
+    project_id: Optional[str]
+
+
 class MetricPatterns(BaseModel):
     class Config:
         allow_mutation = False
@@ -84,6 +107,8 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     application_name: Optional[str]
+    aws: Optional[Aws]
+    azure: Optional[Azure]
     collect_activity_metrics: Optional[bool]
     collect_bloat_metrics: Optional[bool]
     collect_count_metrics: Optional[bool]
@@ -98,6 +123,7 @@ class InstanceConfig(BaseModel):
     dbstrict: Optional[bool]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
+    gcp: Optional[Gcp]
     host: str
     ignore_databases: Optional[Sequence[str]]
     max_relations: Optional[int]
