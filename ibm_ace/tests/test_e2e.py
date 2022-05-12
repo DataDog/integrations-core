@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import subprocess
-
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
@@ -27,14 +25,3 @@ def test(dd_agent_check, instance, global_tags):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(metadata_metrics, check_metric_type=False)
-
-
-def test_critical_service_check(dd_agent_check, instance, global_tags):
-    subprocess.check_call(['docker', 'stop', 'ibm-ace-mq'])
-    try:
-        aggregator = dd_agent_check(instance)
-        for subscription_type in ('resource_statistics', 'message_flows'):
-            tags = [f'subscription:{subscription_type}', *global_tags]
-            aggregator.assert_service_check('ibm_ace.mq.subscription', ServiceCheck.CRITICAL, tags=tags)
-    finally:
-        subprocess.check_call(['docker', 'start', 'ibm-ace-mq'])
