@@ -180,7 +180,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
 
         result = run_command(check_command, capture=True)
 
-        matches = re.findall(r'\n(.*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
+        matches = re.findall(r'(.*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
 
         if not matches:
             raise ValueError(
