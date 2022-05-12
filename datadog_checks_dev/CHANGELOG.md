@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 16.2.1 / 2022-05-12
+
+* [Fixed] Fix `enabled` for parent options. See [#11707](https://github.com/DataDog/integrations-core/pull/11707).
+* [Fixed] Don't look for `=== JSON ===` in e2e output. See [#12004](https://github.com/DataDog/integrations-core/pull/12004).
+
 ## 16.2.0 / 2022-05-11
 
 * [Added] Resolve integer enums when generating SNMP traps DB. See [#11911](https://github.com/DataDog/integrations-core/pull/11911).
