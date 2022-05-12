@@ -51,7 +51,6 @@ SERVER_METRICS = [
     'sqlserver.server.uptime',
     'sqlserver.server.virtual_memory',
 ]
-FC_METRICS = ['sqlserver.fci.status', 'sqlserver.fci.is_current_owner']
 EXPECTED_DEFAULT_METRICS = [
     m[0]
     for m in chain(
@@ -79,7 +78,31 @@ DBM_MIGRATED_METRICS_NAMES = set(m[0] for m in DBM_MIGRATED_METRICS)
 
 EXPECTED_METRICS_DBM_ENABLED = [m for m in EXPECTED_METRICS if m not in DBM_MIGRATED_METRICS_NAMES]
 
-UNEXPECTED_METRICS = [m[0] for m in FC_METRICS]
+EXPECTED_FC_METRICS = [
+    'sqlserver.fc.quorum_type',
+    'sqlserver.fc.quorum_state',
+    'sqlserver.fc.member.type',
+    'sqlserver.fc.member.state',
+    'sqlserver.fc.member.number_of_quorum_votes',
+]
+UNEXPECTED_FC_METRICS = [
+    'sqlserver.fci.status',
+    'sqlserver.fci.is_current_owner',
+]
+
+# These AO metrics are collected using the new QueryExecutor API instead of BaseSqlServerMetric.
+EXPECTED_QUERY_EXECUTOR_AO_METRICS_PRIMARY = [
+    'sqlserver.ao.low_water_mark_for_ghosts',
+    'sqlserver.ao.secondary_lag_seconds',
+]
+EXPECTED_QUERY_EXECUTOR_AO_METRICS_SECONDARY = [
+    'sqlserver.ao.log_send_queue_size',
+    'sqlserver.ao.log_send_rate',
+    'sqlserver.ao.redo_queue_size',
+    'sqlserver.ao.redo_rate',
+    'sqlserver.ao.filestream_send_rate',
+]
+EXPECTED_QUERY_EXECUTOR_AO_METRICS_COMMON = ['sqlserver.ao.is_primary_replica']
 
 EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in AO_METRICS_PRIMARY]
 EXPECTED_AO_METRICS_SECONDARY = [m[0] for m in AO_METRICS_SECONDARY]

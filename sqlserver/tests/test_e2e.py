@@ -11,8 +11,12 @@ from .common import (
     EXPECTED_AO_METRICS_COMMON,
     EXPECTED_AO_METRICS_PRIMARY,
     EXPECTED_AO_METRICS_SECONDARY,
+    EXPECTED_FC_METRICS,
     EXPECTED_METRICS_DBM_ENABLED,
-    UNEXPECTED_METRICS,
+    EXPECTED_QUERY_EXECUTOR_AO_METRICS_COMMON,
+    EXPECTED_QUERY_EXECUTOR_AO_METRICS_PRIMARY,
+    EXPECTED_QUERY_EXECUTOR_AO_METRICS_SECONDARY,
+    UNEXPECTED_FC_METRICS,
 )
 from .utils import always_on, not_windows_ado, not_windows_ci
 
@@ -21,55 +25,71 @@ try:
 except ImportError:
     pyodbc = None
 
-
 pytestmark = pytest.mark.e2e
 
 
 @not_windows_ci
 @always_on
-def test_check_ao_e2e_primary(dd_agent_check, init_config, instance_ao_docker_primary):
+def test_ao_primary_replica(dd_agent_check, init_config, instance_ao_docker_primary):
     aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_ao_docker_primary]})
 
-    for mname in EXPECTED_AO_METRICS_PRIMARY + EXPECTED_AO_METRICS_COMMON:
-        aggregator.assert_metric(mname)
+    # Metrics that are expected to be collected from the primary replica, this includes
+    # metrics for secondary replicas.
+    for metric in (
+        EXPECTED_AO_METRICS_PRIMARY
+        + EXPECTED_QUERY_EXECUTOR_AO_METRICS_PRIMARY
+        + EXPECTED_AO_METRICS_COMMON
+        + EXPECTED_QUERY_EXECUTOR_AO_METRICS_COMMON
+        + EXPECTED_QUERY_EXECUTOR_AO_METRICS_SECONDARY
+        + EXPECTED_FC_METRICS
+    ):
+        aggregator.assert_metric(metric)
 
-    for mname in EXPECTED_AO_METRICS_SECONDARY:
-        aggregator.assert_metric(mname, count=0)
+    # Metrics that can only be collected from the secondary replica, regardless
+    # of being connected to the primary replica.
+    for metric in EXPECTED_AO_METRICS_SECONDARY:
+        aggregator.assert_metric(metric, count=0)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
 
 
 @not_windows_ci
 @always_on
-def test_check_ao_primary_local_only(dd_agent_check, init_config, instance_ao_docker_primary_local_only):
+def test_ao_local_primary_replica_only(dd_agent_check, init_config, instance_ao_docker_primary_local_only):
     aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_ao_docker_primary_local_only]})
 
-    for mname in EXPECTED_AO_METRICS_PRIMARY + EXPECTED_AO_METRICS_COMMON:
-        aggregator.assert_metric(mname, count=1)
-    for mname in EXPECTED_AO_METRICS_SECONDARY:
-        aggregator.assert_metric(mname, count=0)
+    for metric in EXPECTED_AO_METRICS_PRIMARY + EXPECTED_AO_METRICS_COMMON:
+        aggregator.assert_metric(metric, count=1)
+    for metric in EXPECTED_AO_METRICS_SECONDARY:
+        aggregator.assert_metric(metric, count=0)
 
 
 @not_windows_ci
 @always_on
-def test_check_ao_primary_non_exist_ag(dd_agent_check, init_config, instance_ao_docker_primary_non_existing_ag):
+def test_ao_primary_with_non_exist_ag(dd_agent_check, init_config, instance_ao_docker_primary_non_existing_ag):
     aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_ao_docker_primary_non_existing_ag]})
 
-    for mname in EXPECTED_AO_METRICS_PRIMARY + EXPECTED_AO_METRICS_COMMON:
-        aggregator.assert_metric(mname, count=0)
-    for mname in EXPECTED_AO_METRICS_SECONDARY:
-        aggregator.assert_metric(mname, count=0)
+    for metric in EXPECTED_AO_METRICS_PRIMARY + EXPECTED_AO_METRICS_COMMON:
+        aggregator.assert_metric(metric, count=0)
+    for metric in EXPECTED_AO_METRICS_SECONDARY:
+        aggregator.assert_metric(metric, count=0)
 
 
 @not_windows_ci
 @always_on
-def test_check_ao_secondary(dd_agent_check, init_config, instance_ao_docker_secondary):
+def test_ao_secondary_replica(dd_agent_check, init_config, instance_ao_docker_secondary):
     aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_ao_docker_secondary]})
 
-    for mname in EXPECTED_AO_METRICS_SECONDARY + EXPECTED_AO_METRICS_COMMON:
-        aggregator.assert_metric(mname)
-    for mname in EXPECTED_AO_METRICS_PRIMARY:
-        aggregator.assert_metric(mname, count=0)
+    for metric in (
+        EXPECTED_AO_METRICS_SECONDARY
+        + EXPECTED_QUERY_EXECUTOR_AO_METRICS_SECONDARY
+        + EXPECTED_AO_METRICS_COMMON
+        + EXPECTED_QUERY_EXECUTOR_AO_METRICS_COMMON
+        + EXPECTED_FC_METRICS
+    ):
+        aggregator.assert_metric(metric)
+    for metric in EXPECTED_AO_METRICS_PRIMARY + EXPECTED_QUERY_EXECUTOR_AO_METRICS_PRIMARY:
+        aggregator.assert_metric(metric, count=0)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
 
@@ -95,7 +115,7 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
     # Our test environment does not have failover clustering enabled, so these metrics are not expected.
     # To test them follow this guide:
     # https://cloud.google.com/compute/docs/instances/sql-server/configure-failover-cluster-instance
-    for mname in UNEXPECTED_METRICS:
+    for mname in UNEXPECTED_FC_METRICS:
         aggregator.assert_metric(mname, count=0)
 
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
