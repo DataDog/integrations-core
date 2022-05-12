@@ -39,7 +39,7 @@ def test_config(dd_run_check, aggregator, expected_res_stats, expected_msg_flows
     if not expected_res_stats and not expected_msg_flows:
         assert len(check._subscriptions) == 0
     if expected_res_stats and expected_msg_flows:
-        assert len(check._subscriptions) == 0
+        assert len(check._subscriptions) == 2
         assert isinstance(check._subscriptions[0], ResourceStatisticsSubscription)
         assert isinstance(check._subscriptions[1], FlowMonitoringSubscription)
     if expected_res_stats and not expected_msg_flows:
