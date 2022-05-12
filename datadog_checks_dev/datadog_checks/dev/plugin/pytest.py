@@ -185,7 +185,8 @@ def dd_agent_check(request, aggregator, datadog_agent):
         if not matches:
             raise ValueError(
                 '{}{}\nCould not find valid check output'.format(
-                    result.stdout, result.stderr,
+                    result.stdout,
+                    result.stderr,
                 )
             )
 
