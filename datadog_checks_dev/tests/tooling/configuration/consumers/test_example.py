@@ -1584,3 +1584,133 @@ def test_option_multiple_instances_defined():
             # bar: <BAR>
         """
     )
+
+
+def test_parent_option_disabled():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: instances
+            options:
+            - name: enabled_option
+              required: true
+              description: Description of enabled option
+              value:
+                type: boolean
+                example: true
+            - name: parent_option
+              description: Description of parent option
+              options:
+              - name: sub_option_1
+                description: words
+                value:
+                  type: boolean
+                  example: true
+              - name: sub_option_2
+                description: words
+                value:
+                  type: string
+                  example: foo.bar_none
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## Every instance is scheduled independent of the others.
+        #
+        instances:
+
+            ## @param enabled_option - boolean - required
+            ## Description of enabled option
+            #
+          - enabled_option: true
+
+            ## Description of parent option
+            #
+            # parent_option:
+
+                ## @param sub_option_1 - boolean - optional - default: true
+                ## words
+                #
+                # sub_option_1: true
+
+                ## @param sub_option_2 - string - optional - default: foo.bar_none
+                ## words
+                #
+                # sub_option_2: foo.bar_none
+        """
+    )
+
+
+def test_parent_option_enabled():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: instances
+            options:
+            - name: enabled_option
+              required: true
+              description: Description of enabled option
+              value:
+                type: boolean
+                example: true
+            - name: parent_option
+              enabled: true
+              description: Description of parent option
+              options:
+              - name: enabled_sub_option
+                enabled: true
+                description: words
+                value:
+                  type: boolean
+                  example: true
+              - name: disabled_sub_option
+                description: words
+                value:
+                  type: string
+                  example: foo.bar_none
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## Every instance is scheduled independent of the others.
+        #
+        instances:
+
+            ## @param enabled_option - boolean - required
+            ## Description of enabled option
+            #
+          - enabled_option: true
+
+            ## Description of parent option
+            #
+            parent_option:
+
+                ## @param enabled_sub_option - boolean - optional - default: true
+                ## words
+                #
+                enabled_sub_option: true
+
+                ## @param disabled_sub_option - string - optional - default: foo.bar_none
+                ## words
+                #
+                # disabled_sub_option: foo.bar_none
+        """
+    )
