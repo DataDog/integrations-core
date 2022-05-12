@@ -363,7 +363,7 @@ files:
           value:
             type: string
             example: sql_database
-        - name: database_name
+        - name: name
           description: |
             Equal to the name of the SQL Database, Managed Instance (SQL MI) or virtual machine.
           value:
