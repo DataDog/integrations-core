@@ -22,7 +22,7 @@ QUERY_SERVER_STATIC_INFO = {
     ],
 }
 
-QUERY_FAILOVER_CLUSTER = {
+QUERY_AO_FAILOVER_CLUSTER = {
     'name': 'sys.dm_hadr_cluster',
     'query': """
         SELECT
@@ -35,14 +35,14 @@ QUERY_FAILOVER_CLUSTER = {
     """.strip(),
     'columns': [
         {'name': 'failover_cluster', 'type': 'tag'},
-        {'name': 'fc.quorum_type', 'type': 'gauge'},
+        {'name': 'ao.quorum_type', 'type': 'gauge'},
         {'name': 'quorum_type_desc', 'type': 'tag'},
-        {'name': 'fc.quorum_state', 'type': 'gauge'},
+        {'name': 'ao.quorum_state', 'type': 'gauge'},
         {'name': 'quorum_state_desc', 'type': 'tag'},
     ],
 }
 
-QUERY_FAILOVER_CLUSTER_MEMBER = {
+QUERY_AO_FAILOVER_CLUSTER_MEMBER = {
     'name': 'sys.dm_hadr_cluster_members',
     'query': """
         SELECT
@@ -58,37 +58,16 @@ QUERY_FAILOVER_CLUSTER_MEMBER = {
     """.strip(),
     'columns': [
         {'name': 'member_name', 'type': 'tag'},
-        {'name': 'fc.member.type', 'type': 'gauge'},
+        {'name': 'ao.member.type', 'type': 'gauge'},
         {'name': 'member_type_desc', 'type': 'tag'},
-        {'name': 'fc.member.state', 'type': 'gauge'},
+        {'name': 'ao.member.state', 'type': 'gauge'},
         {'name': 'member_state_desc', 'type': 'tag'},
-        {'name': 'fc.member.number_of_quorum_votes', 'type': 'gauge'},
+        {'name': 'ao.member.number_of_quorum_votes', 'type': 'gauge'},
         {'name': 'failover_cluster', 'type': 'tag'},
     ],
 }
 
-QUERY_FAILOVER_CLUSTER_INSTANCE = {
-    'name': 'sys.dm_os_cluster_nodes',
-    'query': """
-        SELECT
-            NodeName AS node_name,
-            status,
-            status_description,
-            is_current_owner,
-            FC.cluster_name
-        FROM sys.dm_os_cluster_nodes
-        CROSS APPLY (SELECT cluster_name FROM sys.dm_hadr_cluster) AS FC
-    """.strip(),
-    'columns': [
-        {'name': 'node_name', 'type': 'tag'},
-        {'name': 'fci.status', 'type': 'gauge'},
-        {'name': 'status_desc', 'type': 'tag'},
-        {'name': 'fci.is_current_owner', 'type': 'gauge'},
-        {'name': 'failover_cluster', 'type': 'tag'},
-    ],
-}
-
-QUERY_AVAILABILITY_GROUPS = {
+QUERY_AO_AVAILABILITY_GROUPS = {
     'name': 'sys.availability_groups',
     'query': """
         SELECT
@@ -144,6 +123,27 @@ QUERY_AVAILABILITY_GROUPS = {
         {'name': 'ao.filestream_send_rate', 'type': 'gauge'},
         {'name': 'ao.secondary_lag_seconds', 'type': 'gauge'},
         # FC - sys.dm_hadr_cluster
+        {'name': 'failover_cluster', 'type': 'tag'},
+    ],
+}
+
+QUERY_FAILOVER_CLUSTER_INSTANCE = {
+    'name': 'sys.dm_os_cluster_nodes',
+    'query': """
+        SELECT
+            NodeName AS node_name,
+            status,
+            status_description,
+            is_current_owner,
+            FC.cluster_name
+        FROM sys.dm_os_cluster_nodes
+        CROSS APPLY (SELECT cluster_name FROM sys.dm_hadr_cluster) AS FC
+    """.strip(),
+    'columns': [
+        {'name': 'node_name', 'type': 'tag'},
+        {'name': 'fci.status', 'type': 'gauge'},
+        {'name': 'status_desc', 'type': 'tag'},
+        {'name': 'fci.is_current_owner', 'type': 'gauge'},
         {'name': 'failover_cluster', 'type': 'tag'},
     ],
 }

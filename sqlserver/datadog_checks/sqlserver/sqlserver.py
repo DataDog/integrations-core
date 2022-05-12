@@ -58,10 +58,10 @@ from .const import (
 )
 from .metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
 from .queries import (
-    QUERY_AVAILABILITY_GROUPS,
-    QUERY_FAILOVER_CLUSTER,
+    QUERY_AO_AVAILABILITY_GROUPS,
+    QUERY_AO_FAILOVER_CLUSTER,
+    QUERY_AO_FAILOVER_CLUSTER_MEMBER,
     QUERY_FAILOVER_CLUSTER_INSTANCE,
-    QUERY_FAILOVER_CLUSTER_MEMBER,
     QUERY_SERVER_STATIC_INFO,
 )
 from .utils import set_default_driver_conf
@@ -146,18 +146,18 @@ class SQLServer(AgentCheck):
         )
 
         # Query declarations
-        self._availability_group_queries = QueryExecutor(
+        self._alwayson_queries = QueryExecutor(
             self.execute_query_raw,
             self,
-            queries=[QUERY_AVAILABILITY_GROUPS],
+            queries=[QUERY_AO_AVAILABILITY_GROUPS, QUERY_AO_FAILOVER_CLUSTER, QUERY_AO_FAILOVER_CLUSTER_MEMBER],
             tags=self.tags,
             hostname=self.resolved_hostname,
         )
-        self.check_initializations.append(self._availability_group_queries.compile_queries)
+        self.check_initializations.append(self._alwayson_queries.compile_queries)
         self._failover_cluster_queries = QueryExecutor(
             self.execute_query_raw,
             self,
-            queries=[QUERY_FAILOVER_CLUSTER, QUERY_FAILOVER_CLUSTER_MEMBER, QUERY_FAILOVER_CLUSTER_INSTANCE],
+            queries=[QUERY_FAILOVER_CLUSTER_INSTANCE],
             tags=self.tags,
             hostname=self.resolved_hostname,
         )
@@ -687,10 +687,8 @@ class SQLServer(AgentCheck):
                 cursor.execute("SET NOCOUNT ON")
             try:
                 if is_affirmative(self.instance.get('include_ao_metrics', False)):
-                    self._availability_group_queries.execute()
-                if is_affirmative(
-                    self.instance.get('include_fci_metrics', self.instance.get('include_fc_metrics', False))
-                ):
+                    self._alwayson_queries.execute()
+                if is_affirmative(self.instance.get('include_fci_metrics', False)):
                     self._failover_cluster_queries.execute()
                 # Server state queries require VIEW SERVER STATE permissions, which some managed database
                 # versions do not support.

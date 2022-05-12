@@ -78,18 +78,6 @@ DBM_MIGRATED_METRICS_NAMES = set(m[0] for m in DBM_MIGRATED_METRICS)
 
 EXPECTED_METRICS_DBM_ENABLED = [m for m in EXPECTED_METRICS if m not in DBM_MIGRATED_METRICS_NAMES]
 
-EXPECTED_FC_METRICS = [
-    'sqlserver.fc.quorum_type',
-    'sqlserver.fc.quorum_state',
-    'sqlserver.fc.member.type',
-    'sqlserver.fc.member.state',
-    'sqlserver.fc.member.number_of_quorum_votes',
-]
-UNEXPECTED_FC_METRICS = [
-    'sqlserver.fci.status',
-    'sqlserver.fci.is_current_owner',
-]
-
 # These AO metrics are collected using the new QueryExecutor API instead of BaseSqlServerMetric.
 EXPECTED_QUERY_EXECUTOR_AO_METRICS_PRIMARY = [
     'sqlserver.ao.low_water_mark_for_ghosts',
@@ -102,7 +90,21 @@ EXPECTED_QUERY_EXECUTOR_AO_METRICS_SECONDARY = [
     'sqlserver.ao.redo_rate',
     'sqlserver.ao.filestream_send_rate',
 ]
-EXPECTED_QUERY_EXECUTOR_AO_METRICS_COMMON = ['sqlserver.ao.is_primary_replica']
+EXPECTED_QUERY_EXECUTOR_AO_METRICS_COMMON = [
+    'sqlserver.ao.is_primary_replica',
+    'sqlserver.ao.quorum_type',
+    'sqlserver.ao.quorum_state',
+    'sqlserver.ao.member.type',
+    'sqlserver.ao.member.state',
+]
+# Our test environment does not have failover clustering enabled, so these metrics are not expected.
+# To test them follow this guide:
+# https://cloud.google.com/compute/docs/instances/sql-server/configure-failover-cluster-instance
+UNEXPECTED_QUERY_EXECUTOR_AO_METRICS = ['sqlserver.ao.member.number_of_quorum_votes']
+UNEXPECTED_FCI_METRICS = [
+    'sqlserver.fci.status',
+    'sqlserver.fci.is_current_owner',
+]
 
 EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in AO_METRICS_PRIMARY]
 EXPECTED_AO_METRICS_SECONDARY = [m[0] for m in AO_METRICS_SECONDARY]
@@ -121,7 +123,7 @@ INSTANCE_SQL.update(
         'driver': '{ODBC Driver 17 for SQL Server}',
         'include_task_scheduler_metrics': True,
         'include_db_fragmentation_metrics': True,
-        'include_fc_metrics': True,
+        'include_fci_metrics': True,
         'include_ao_metrics': False,
         'include_master_files_metrics': True,
         'disable_generic_tags': True,

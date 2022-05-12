@@ -140,9 +140,9 @@ files:
       value:
         type: boolean
         example: false
-    - name: include_fc_metrics
+    - name: include_fci_metrics
       description: |
-        Include Failover Cluster metrics. Note that these metrics
+        Include Failover Cluster Instance metrics. Note that these metrics
         requires a SQLServer set up with Failover Clustering enabled.
       value:
         type: boolean

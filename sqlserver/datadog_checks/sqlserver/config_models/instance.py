@@ -94,7 +94,7 @@ class InstanceConfig(BaseModel):
     ignore_missing_database: Optional[bool]
     include_ao_metrics: Optional[bool]
     include_db_fragmentation_metrics: Optional[bool]
-    include_fc_metrics: Optional[bool]
+    include_fci_metrics: Optional[bool]
     include_instance_metrics: Optional[bool]
     include_master_files_metrics: Optional[bool]
     include_task_scheduler_metrics: Optional[bool]
