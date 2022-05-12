@@ -210,7 +210,7 @@ instances:
 
     ## Configure collection of query metrics
     #
-    query_metrics:
+    # query_metrics:
 
         ## @param enabled - boolean - optional - default: true
         ## Enable collection of query metrics. Requires `dbm: true`.
@@ -237,7 +237,7 @@ instances:
 
     ## Configure collection of active sessions monitoring
     #
-    query_activity:
+    # query_activity:
 
         ## @param enabled - boolean - optional - default: true
         ## Enable collection of active sessions. Requires `dbm: true`.
@@ -255,7 +255,7 @@ instances:
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
     #
-    obfuscator_options:
+    # obfuscator_options:
 
         ## @param replace_digits - boolean - optional - default: false
         ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
