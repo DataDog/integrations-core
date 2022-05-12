@@ -5,7 +5,9 @@ from mock import patch
 
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 
-FIXTURE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', '..', 'fixtures', 'bearer_tokens')
+FIXTURE_PATH = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), '..', '..', '..', '..', 'fixtures', 'bearer_tokens'
+)
 
 
 class TestSignature:

@@ -25,8 +25,8 @@ from datadog_checks.dev import get_here
 from datadog_checks.dev.http import MockResponse
 
 text_content_type = 'text/plain; version=0.0.4'
-FIXTURE_PATH = os.path.abspath(os.path.join(get_here(), '..', '..', '..', 'fixtures', 'prometheus'))
-TOKENS_PATH = os.path.abspath(os.path.join(get_here(), '..', '..', '..', 'fixtures', 'bearer_tokens'))
+FIXTURE_PATH = os.path.abspath(os.path.join(get_here(), '..', '..', '..', '..', 'fixtures', 'prometheus'))
+TOKENS_PATH = os.path.abspath(os.path.join(get_here(), '..', '..', '..', '..', 'fixtures', 'bearer_tokens'))
 
 FAKE_ENDPOINT = 'http://fake.endpoint:10055/metrics'
 
