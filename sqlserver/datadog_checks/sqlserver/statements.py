@@ -51,26 +51,24 @@ STATEMENT_METRICS_QUERY = """\
 with qstats as (
     select TOP {limit} query_hash, query_plan_hash, last_execution_time, plan_handle,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
-           (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'user_id') as user_id,
            {query_metrics_columns}
     from sys.dm_exec_query_stats
     where last_execution_time > dateadd(second, -?, getdate())
 ),
 qstats_aggr as (
     select query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
-       D.name as database_name, U.name as user_name, max(plan_handle) as plan_handle,
+       D.name as database_name, max(plan_handle) as plan_handle,
     {query_metrics_column_sums}
     from qstats S
     left join sys.databases D on S.dbid = D.database_id
-    left join sys.sysusers U on S.user_id = U.uid
-    group by query_hash, query_plan_hash, S.dbid, D.name, U.name
+    group by query_hash, query_plan_hash, S.dbid, D.name
 )
 select text, * from qstats_aggr
     cross apply sys.dm_exec_sql_text(plan_handle)
 """
 
 # This query is an optimized version of the statement metrics query
-# which removes the additional aggregate dimensions user and database.
+# which removes the additional database aggregate dimension
 STATEMENT_METRICS_QUERY_NO_AGGREGATES = """\
 with qstats_aggr as (
     select TOP {limit} query_hash, query_plan_hash, max(plan_handle) as plan_handle,
@@ -96,7 +94,6 @@ def _row_key(row):
     """
     return (
         row.get('database_name'),
-        row.get('user_name'),
         row['query_signature'],
         row['query_hash'],
         row['query_plan_hash'],
@@ -357,7 +354,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 "db": {
                     "instance": row.get('database_name', None),
                     "query_signature": row['query_signature'],
-                    "user": row.get('user_name', None),
                     "statement": row['text'],
                     "metadata": {
                         "tables": row['dd_tables'],
@@ -434,7 +430,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                             "collection_errors": collection_errors,
                         },
                         "query_signature": row['query_signature'],
-                        "user": row.get("user_name", None),
                         "statement": row['text'],
                         "metadata": {
                             "tables": row['dd_tables'],
