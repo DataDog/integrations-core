@@ -16,7 +16,6 @@
   ],
   "public_title": "Teradata",
   "categories": [
-    "log collection",
     "data store"
   ],
   "type": "check",

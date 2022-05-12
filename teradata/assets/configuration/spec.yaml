@@ -157,8 +157,3 @@ files:
         type: string
     - template: instances/db
     - template: instances/default
-  - template: logs
-    example:
-      - type: file
-        source: teradata
-        path: /var/log/messages
