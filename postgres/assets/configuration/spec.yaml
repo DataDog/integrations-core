@@ -412,7 +412,7 @@ files:
             see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
           value:
             type: string
-            example: mydb–instance.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+            example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
 
     - name: gcp
       description: |
