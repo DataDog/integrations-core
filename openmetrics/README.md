@@ -26,7 +26,9 @@ For each instance the following parameters are required:
 | `namespace`      | The namespace to prepend to all metrics.                                                                                                                                                                                                                                 |
 | `metrics`        | A list of metrics to retrieve as custom metrics. Add each metric to the list as `metric_name` or `metric_name: renamed` to rename it. The metrics are interpreted as regular expressions. Use `.*` as a wildcard (`metric.*`) to fetch all matching metrics. **Note**: Regular expressions can potentially send a lot of custom metrics. |
 
-**Note**: This is a new default OpenMetrics check example. If you previously implemented this integration, see the [legacy example][5].
+**Note**: This is a new default OpenMetrics check example as of Datadog Agent version 7.32.0. If you previously implemented this integration, see the [legacy example][5].
+
+**Note**: Starting in Datadog Agent v7.32.0, in adherence to the [OpenMetrics specification standard][11], counter names ending in `_total` must be specified without the `_total` suffix. For example, to collect `promhttp_metric_handler_requests_total`, specify the metric name `promhttp_metric_handler_requests`. This submits to Datadog the metric name appended with `.count`, `promhttp_metric_handler_requests.count`.
 
 **Note**: This check has a limit of 2000 metrics per instance. The number of returned metrics is indicated when running the Datadog Agent [status command][6]. You can specify the metrics you are interested in by editing the configuration. To learn how to customize the metrics to collect, see the [Prometheus and OpenMetrics Metrics Collection][7] for more detailed instructions. If you need to monitor more metrics, contact [Datadog support][8].
 
@@ -75,3 +77,4 @@ Need help? Contact [Datadog support][8].
 [8]: https://docs.datadoghq.com/help/
 [9]: https://docs.datadoghq.com/agent/openmetrics/
 [10]: https://docs.datadoghq.com/developers/openmetrics/
+[11]: https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
