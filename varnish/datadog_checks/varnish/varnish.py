@@ -76,6 +76,7 @@ class Varnish(AgentCheck):
 
         self.name = self.instance.get('name')
         self.metrics_filter = self.instance.get("metrics_filter", [])
+        self.tags = self.custom_tags + [u'varnish_name:%s' % (self.name if self.name is not None else 'default')]
         self.check_initializations.append(self.validate_config)
 
     def validate_config(self):
@@ -95,15 +96,15 @@ class Varnish(AgentCheck):
     def _start_element(self, name, attrs):
         self._current_element = name
 
-    def _end_element(self, name, tags):
+    def _end_element(self, name):
         if name == "stat":
             m_name = self.normalize(self._current_metric)
             if self._current_type in ("a", "c"):
-                self.rate(m_name, long(self._current_value), tags=tags)
+                self.rate(m_name, long(self._current_value), tags=self.tags)
             elif self._current_type in ("i", "g"):
-                self.gauge(m_name, long(self._current_value), tags=tags)
+                self.gauge(m_name, long(self._current_value), tags=self.tags)
                 if 'n_purges' in m_name:
-                    self.rate('varnish.n_purgesps', long(self._current_value), tags=tags)
+                    self.rate('varnish.n_purgesps', long(self._current_value), tags=self.tags)
             else:
                 # Unsupported data type, ignore
                 self._reset()
@@ -125,21 +126,60 @@ class Varnish(AgentCheck):
             else:
                 self._current_str = data
 
+    def _get_varnish_stats(self, varnishstat_format):
+        cmd = self.varnishstat_path + [self.VARNISHSTAT_FORMAT_OPTION[varnishstat_format]]
+        for metric in self.metrics_filter:
+            cmd.extend(["-f", metric])
+        if self.name is not None:
+            cmd.extend(['-n', self.name])
+
+        output, _, _ = get_subprocess_output(cmd, self.log)
+        return output
+
     def check(self, _):
         # Get version and version-specific args from varnishstat -V.
         version, varnishstat_format = self._get_version_info()
-        varnish_stats_raw, tags = self._get_varnish_stats(varnishstat_format)
-        self._parse_varnishstat(varnish_stats_raw, varnishstat_format, tags)
+        varnish_stats_raw = self._get_varnish_stats(varnishstat_format)
+        self._parse_varnishstat(varnish_stats_raw, varnishstat_format)
 
         # Parse service checks from varnishadm.
-        backends_by_status = None
-        if self.varnishadm is not None:
+        if self.varnishadm:
             varnish_adm_raw = self._get_varnish_adm(version)
             if varnish_adm_raw:
                 backends_by_status = self._parse_varnishadm(varnish_adm_raw)
                 self._submit_backend_service_checks(backends_by_status)
         else:
             self.log.debug("Not collecting varnishadm because varnishadm is not set")
+
+    def _get_varnish_adm(self, version):
+        cmd = []
+        if geteuid() != 0:
+            cmd.append('sudo')
+
+        if version < LooseVersion('4.1.0'):
+            cmd.extend(self.varnishadm_path + ['-S', self.secretfile_path, 'debug.health'])
+        else:
+            cmd.extend(
+                self.varnishadm_path
+                + [
+                    '-T',
+                    '{}:{}'.format(self.daemon_host, self.daemon_port),
+                    '-S',
+                    self.secretfile_path,
+                    'backend.list',
+                    '-p',
+                ]
+            )
+
+        err, output = None, None
+        try:
+            output, err, _ = get_subprocess_output(cmd, self.log, raise_on_empty_output=False)
+        except OSError as e:
+            self.log.error("There was an error running varnishadm. Make sure 'sudo' is available. %s", e)
+            output = None
+        if err or not output:
+            self.log.error('Error getting service check from varnishadm: %s', err)
+        return output
 
     def _get_version_info(self):
         # Get the varnish version from varnishstat
@@ -180,21 +220,7 @@ class Varnish(AgentCheck):
 
         return version, varnishstat_format
 
-    def _get_varnish_stats(self, varnishstat_format):
-        cmd = self.varnishstat_path + [self.VARNISHSTAT_FORMAT_OPTION[varnishstat_format]]
-        for metric in self.metrics_filter:
-            cmd.extend(["-f", metric])
-
-        if self.name is not None:
-            cmd.extend(['-n', self.name])
-            tags = self.custom_tags + [u'varnish_name:%s' % self.name]
-        else:
-            tags = self.custom_tags + [u'varnish_name:default']
-
-        output, _, _ = get_subprocess_output(cmd, self.log)
-        return output, tags
-
-    def _parse_varnishstat(self, output, varnishstat_format, tags=None):
+    def _parse_varnishstat(self, output, varnishstat_format):
         """
         The text option (-1) is not reliable enough when counters get large.
         VBE.media_video_prd_services_01(10.93.67.16,,8080).happy18446744073709551615
@@ -204,13 +230,12 @@ class Varnish(AgentCheck):
 
         Bitmaps are not supported.
         """
-        tags = tags or []
         # FIXME: this check is processing an unbounded amount of data
         # we should explicitly list the metrics we want to get from the check
         if varnishstat_format == "xml":
             p = xml.parsers.expat.ParserCreate()
             p.StartElementHandler = self._start_element
-            p.EndElementHandler = lambda name: self._end_element(name, tags)
+            p.EndElementHandler = lambda name: self._end_element(name)
             p.CharacterDataHandler = self._char_data
             self._reset()
             p.Parse(output, True)
@@ -229,11 +254,11 @@ class Varnish(AgentCheck):
                 value = metric.get("value", 0)
 
                 if metric.get("flag") in ("a", "c"):
-                    self.rate(metric_name, long(value), tags=tags)
+                    self.rate(metric_name, long(value), tags=self.tags)
                 elif metric.get("flag") in ("g", "i"):
-                    self.gauge(metric_name, long(value), tags=tags)
+                    self.gauge(metric_name, long(value), tags=self.tags)
                     if 'n_purges' in self.normalize(name, prefix="varnish"):
-                        self.rate('varnish.n_purgesps', long(value), tags=tags)
+                        self.rate('varnish.n_purgesps', long(value), tags=self.tags)
                 elif 'flag' not in metric:
                     self.log.warning("Could not determine the type of metric %s, skipping submission", metric_name)
                     self.log.debug("Raw metric %s is missing the `flag` field", str(metric))
@@ -250,43 +275,13 @@ class Varnish(AgentCheck):
                 if rate_val.lower() in ("nan", "."):
                     # col 2 matters
                     self.log.debug("Varnish (gauge) %s %d", metric_name, int(gauge_val))
-                    self.gauge(metric_name, int(gauge_val), tags=tags)
+                    self.gauge(metric_name, int(gauge_val), tags=self.tags)
                     if 'n_purges' in metric_name:
-                        self.rate('varnish.n_purgesps', float(gauge_val), tags=tags)
+                        self.rate('varnish.n_purgesps', float(gauge_val), tags=self.tags)
                 else:
                     # col 3 has a rate (since restart)
                     self.log.debug("Varnish (rate) %s %d", metric_name, int(gauge_val))
-                    self.rate(metric_name, float(gauge_val), tags=tags)
-
-    def _get_varnish_adm(self, version):
-        cmd = []
-        if geteuid() != 0:
-            cmd.append('sudo')
-
-        if version < LooseVersion('4.1.0'):
-            cmd.extend(self.varnishadm_path + ['-S', self.secretfile_path, 'debug.health'])
-        else:
-            cmd.extend(
-                self.varnishadm_path
-                + [
-                    '-T',
-                    '{}:{}'.format(self.daemon_host, self.daemon_port),
-                    '-S',
-                    self.secretfile_path,
-                    'backend.list',
-                    '-p',
-                ]
-            )
-
-        err, output = None, None
-        try:
-            output, err, _ = get_subprocess_output(cmd, self.log, raise_on_empty_output=False)
-        except OSError as e:
-            self.log.error("There was an error running varnishadm. Make sure 'sudo' is available. %s", e)
-            output = None
-        if err or not output:
-            self.log.error('Error getting service check from varnishadm: %s', repr(err))
-        return output
+                    self.rate(metric_name, float(gauge_val), tags=self.tags)
 
     def _parse_varnishadm(self, output):
         """Parse out service checks from varnishadm.

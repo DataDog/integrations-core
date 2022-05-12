@@ -1,0 +1,33 @@
+[
+    {
+        "agent_version": "7.37.0",
+        "integration": "Teradata",
+        "groups": [
+            "host",
+            "teradata_server",
+            "teradata_port"
+        ],
+        "check": "teradata.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Teradata Connection Health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Teradata instance. Returns `OK` otherwise."
+    },{
+        "agent_version": "7.37.0",
+        "integration": "Teradata",
+        "groups": [
+            "host",
+            "teradata_server",
+            "teradata_port"
+        ],
+        "check": "teradata.can_query",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Teradata Query Health",
+        "description": "Returns `CRITICAL` if the Agent is unable to query the monitored Teradata instance. Returns `OK` otherwise."
+    }
+]

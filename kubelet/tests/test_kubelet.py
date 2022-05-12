@@ -1276,6 +1276,44 @@ def test_ignore_namespace_for_volume_metrics(monkeypatch):
         assert metric in metrics_reported
 
 
+def test_filter_and_send_gauge_sample_included(monkeypatch, aggregator):
+    check = mock_kubelet_check(monkeypatch, [{}])
+    attrs = {'is_excluded.return_value': False, 'get_cid_by_labels.return_value': 'id'}
+    check.pod_list_utils = mock.Mock(**attrs)
+    check.instance_tags = ['k:v']
+
+    check._filter_and_send_gauge_sample('kubernetes.gauge', ('gauge_name', {"lk": "lv"}, 1))
+
+    aggregator.assert_metric('kubernetes.gauge', 1, ['k:v'])
+
+
+def test_filter_and_send_gauge_sample_excluded(monkeypatch, aggregator):
+    check = mock_kubelet_check(monkeypatch, [{}])
+    attrs = {'is_excluded.return_value': True, 'get_cid_by_labels.return_value': 'id'}
+    check.pod_list_utils = mock.Mock(**attrs)
+    check.instance_tags = ['k:v']
+
+    check._filter_and_send_gauge_sample('kubernetes.gauge', ('gauge_name', {"lk": "lv"}, 1))
+
+    assert 'kubernetes.gauge' not in aggregator.metric_names
+
+
+def test__filter_and_send_gauge_sample_tagger(monkeypatch, aggregator, tagger):
+    tagger.reset()
+    tagger.set_tags({'id': ['container_tag_k:container_tag_v']})
+
+    check = mock_kubelet_check(monkeypatch, [{}])
+    attrs = {'is_excluded.return_value': False, 'get_cid_by_labels.return_value': 'id'}
+    check.pod_list_utils = mock.Mock(**attrs)
+    check.instance_tags = ['instance_tags_k:instance_tags_v']
+
+    check._filter_and_send_gauge_sample('kubernetes.gauge', ('gauge_name', {"lk": "lv"}, 1))
+
+    aggregator.assert_metric(
+        'kubernetes.gauge', 1, ['container_tag_k:container_tag_v', 'instance_tags_k:instance_tags_v']
+    )
+
+
 def test_probe_metrics(monkeypatch, aggregator, tagger):
     tagger.reset()
     tagger.set_tags(PROBE_TAGS)
@@ -1414,3 +1452,12 @@ def test_detect_probes_req_exception(monkeypatch, mock_request):
     assert available is False
     assert check._probes_available is None
     assert mock_request.call_count == 1
+
+
+def test_sanitize_url_label():
+    input = (
+        "https://35.242.243.158/api/v1/namespaces/%7Bnamespace%7D/configmaps"
+        + "?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D"
+    )
+    expected = "/api/v1/namespaces/%7Bnamespace%7D/configmaps"
+    assert KubeletCheck._sanitize_url_label(input) == expected

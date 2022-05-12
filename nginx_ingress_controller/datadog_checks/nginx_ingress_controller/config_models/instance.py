@@ -79,6 +79,7 @@ class InstanceConfig(BaseModel):
     aws_service: Optional[str]
     bearer_token_auth: Optional[Union[bool, str]]
     bearer_token_path: Optional[str]
+    bearer_token_refresh_interval: Optional[int]
     collect_nginx_histograms: Optional[bool]
     connect_timeout: Optional[float]
     disable_generic_tags: Optional[bool]

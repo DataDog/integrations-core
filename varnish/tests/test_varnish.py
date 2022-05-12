@@ -31,9 +31,9 @@ def test_check(aggregator, instance, dd_run_check):
 
 def test_inclusion_filter(aggregator, instance, dd_run_check):
     instance['metrics_filter'] = ['SMA.*']
+
     check = Varnish(common.CHECK_NAME, {}, [instance])
     dd_run_check(check)
-
     for mname in common.COMMON_METRICS:
         if 'SMA.' in mname:
             aggregator.assert_metric(mname, count=1, tags=['varnish_cluster:webs', 'varnish_name:default'])
@@ -43,9 +43,9 @@ def test_inclusion_filter(aggregator, instance, dd_run_check):
 
 def test_exclusion_filter(aggregator, instance, dd_run_check):
     instance['metrics_filter'] = ['^SMA.Transient.c_req']
+
     check = Varnish(common.CHECK_NAME, {}, [instance])
     dd_run_check(check)
-
     for mname in common.COMMON_METRICS:
         if 'SMA.Transient.c_req' in mname:
             aggregator.assert_metric(mname, count=0, tags=['varnish_cluster:webs', 'varnish_name:default'])

@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools; python_version < '3.0'",
+    "setuptools<61",
 ]
 build-backend = "hatchling.build"
 
@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 name = "datadog-sqlserver"
 description = "The SQL Server check"
 readme = "README.md"
-license = "BSD-3-Clause"
+license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -29,7 +29,7 @@ classifiers = [
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=25.2.2",
+    "datadog-checks-base>=25.4.0",
 ]
 dynamic = [
     "version",
@@ -42,7 +42,7 @@ deps = [
     "pyodbc==4.0.32",
     "pyro4==4.82; sys_platform == 'win32'",
     "pywin32==228; sys_platform == 'win32' and python_version < '3.0'",
-    "pywin32==303; sys_platform == 'win32' and python_version > '3.0'",
+    "pywin32==304; sys_platform == 'win32' and python_version > '3.0'",
     "selectors34==1.2; sys_platform == 'win32' and python_version < '3.0'",
     "serpent==1.28; sys_platform == 'win32' and python_version < '3.0'",
     "serpent==1.40; sys_platform == 'win32' and python_version > '3.0'",

@@ -258,6 +258,10 @@ def instance_stats_url(field, value):
     return 'http://localhost:80/stats'
 
 
+def instance_tag_by_endpoint(field, value):
+    return True
+
+
 def instance_tags(field, value):
     return get_default_field_value(field, value)
 
