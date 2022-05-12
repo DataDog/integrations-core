@@ -398,10 +398,10 @@ instances:
         #
         # deployment_type: flexible_server
 
-        ## @param database_name - string - optional - default: my-postgres-database
+        ## @param name - string - optional - default: my-postgres-database
         ## Equal to the name of the Azure PostgreSQL database.
         #
-        # database_name: my-postgres-database
+        # name: my-postgres-database
 
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
