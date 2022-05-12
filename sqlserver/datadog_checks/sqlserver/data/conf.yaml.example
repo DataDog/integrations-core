@@ -262,14 +262,14 @@ instances:
     #
     aws:
 
-        ## @param instance_endpoint - string - optional - default: mydb–instance.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+        ## @param instance_endpoint - string - optional - default: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
         ## Equal to the Endpoint.Address of the instance the agent is connecting to. 
         ## This value is optional if the value of `host` is already configured to the instance endpoint.
         ##
         ## For more information on instance endpoints, 
         ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
         #
-        # instance_endpoint: "mydb\u2013instance.cfxgae8cilcf.us-east-1.rds.amazonaws.com"
+        # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
 
     ## This block defines the configuration for Google Cloud SQL instances.
     ##
