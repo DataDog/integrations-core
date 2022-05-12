@@ -126,10 +126,7 @@ class Varnish(AgentCheck):
             else:
                 self._current_str = data
 
-    def check(self, _):
-        # Get version and version-specific args from varnishstat -V.
-        version, varnishstat_format = self._get_version_info(self.varnishstat_path)
-
+    def _get_varnish_stats(self, varnishstat_format):
         cmd = self.varnishstat_path + [self.VARNISHSTAT_FORMAT_OPTION[varnishstat_format]]
         for metric in self.metrics_filter:
             cmd.extend(["-f", metric])
@@ -137,45 +134,56 @@ class Varnish(AgentCheck):
             cmd.extend(['-n', self.name])
 
         output, _, _ = get_subprocess_output(cmd, self.log)
+        return output
 
-        self._parse_varnishstat(output, varnishstat_format)
+    def check(self, _):
+        # Get version and version-specific args from varnishstat -V.
+        version, varnishstat_format = self._get_version_info()
+        varnish_stats_raw = self._get_varnish_stats(varnishstat_format)
+        self._parse_varnishstat(varnish_stats_raw, varnishstat_format)
 
         # Parse service checks from varnishadm.
         if self.varnishadm:
-            cmd = []
-            if geteuid() != 0:
-                cmd.append('sudo')
+            varnish_adm_raw = self._get_varnish_adm(version)
+            if varnish_adm_raw:
+                backends_by_status = self._parse_varnishadm(varnish_adm_raw)
+                self._submit_backend_service_checks(backends_by_status)
+        else:
+            self.log.debug("Not collecting varnishadm because varnishadm is not set")
 
-            if version < LooseVersion('4.1.0'):
-                cmd.extend(self.varnishadm_path + ['-S', self.secretfile_path, 'debug.health'])
-            else:
-                cmd.extend(
-                    self.varnishadm_path
-                    + [
-                        '-T',
-                        '{}:{}'.format(self.daemon_host, self.daemon_port),
-                        '-S',
-                        self.secretfile_path,
-                        'backend.list',
-                        '-p',
-                    ]
-                )
+    def _get_varnish_adm(self, version):
+        cmd = []
+        if geteuid() != 0:
+            cmd.append('sudo')
 
-            err, output = None, None
-            try:
-                output, err, _ = get_subprocess_output(cmd, self.log, raise_on_empty_output=False)
-            except OSError as e:
-                self.log.error("There was an error running varnishadm. Make sure 'sudo' is available. %s", e)
-                output = None
-            if err or not output:
-                self.log.error('Error getting service check from varnishadm: %s', err)
+        if version < LooseVersion('4.1.0'):
+            cmd.extend(self.varnishadm_path + ['-S', self.secretfile_path, 'debug.health'])
+        else:
+            cmd.extend(
+                self.varnishadm_path
+                + [
+                    '-T',
+                    '{}:{}'.format(self.daemon_host, self.daemon_port),
+                    '-S',
+                    self.secretfile_path,
+                    'backend.list',
+                    '-p',
+                ]
+            )
 
-            if output:
-                self._parse_varnishadm(output)
+        err, output = None, None
+        try:
+            output, err, _ = get_subprocess_output(cmd, self.log, raise_on_empty_output=False)
+        except OSError as e:
+            self.log.error("There was an error running varnishadm. Make sure 'sudo' is available. %s", e)
+            output = None
+        if err or not output:
+            self.log.error('Error getting service check from varnishadm: %s', err)
+        return output
 
-    def _get_version_info(self, varnishstat_path):
+    def _get_version_info(self):
         # Get the varnish version from varnishstat
-        output, error, _ = get_subprocess_output(varnishstat_path + ["-V"], self.log, raise_on_empty_output=False)
+        output, error, _ = get_subprocess_output(self.varnishstat_path + ["-V"], self.log, raise_on_empty_output=False)
 
         # Assumptions regarding varnish's version
         varnishstat_format = "json"
@@ -347,6 +355,11 @@ class Varnish(AgentCheck):
 
                 if backend is not None:
                     backends_by_status[status].append((backend, message))
+        return backends_by_status
+
+    def _submit_backend_service_checks(self, backends_by_status):
+        if backends_by_status is None:
+            return
 
         for status, backends in iteritems(backends_by_status):
             check_status = BackendStatus.to_check_status(status)
