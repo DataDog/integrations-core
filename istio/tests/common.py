@@ -56,6 +56,8 @@ CONFIG_EXCLUDE_LABELS = [
     "destination_workload_namespace",
     "request_protocol",
     "connection_security_policy",
+    "destination_service",
+    "source_workload",
 ]
 
 LEGACY_MESH_METRICS = [

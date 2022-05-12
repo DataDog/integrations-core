@@ -45,7 +45,7 @@ init_config:
 #
 instances:
 
-    ## @param use_openmetrics - boolean - optional - default: true
+    ## @param use_openmetrics - boolean - optional - default: false
     ## Use the latest OpenMetrics implementation for more features and better performance.
     ## This implementation supports only Istio 1.5. Use `istiod_endpoint` or `istio_mesh_endpoint`.
     #
@@ -142,6 +142,11 @@ instances:
     #
     # exclude_metrics_by_labels: {}
 
+    ## @param tag_by_endpoint - boolean - optional - default: true
+    ## Whether to include an endpoint tag or not.
+    #
+    tag_by_endpoint: true
+
     ## @param exclude_labels - list of strings - optional
     ## A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
     ## May be used in conjunction with `include_labels`.
@@ -149,7 +154,23 @@ instances:
     ##
     ## Note: Labels filtering happens before `rename_labels`.
     #
-    # exclude_labels: []
+    exclude_labels:
+      - source_version
+      - destination_version
+      - source_canonical_revision
+      - destination_canonical_revision
+      - source_principal
+      - destination_principal
+      - source_cluster
+      - destination_cluster
+      - source_canonical_service
+      - destination_canonical_service
+      - source_workload_namespace
+      - destination_workload_namespace
+      - request_protocol
+      - connection_security_policy
+      - destination_service
+      - source_workload
 
     ## @param include_labels - list of strings - optional
     ## A list of labels to include. May be used in conjunction with `exclude_labels`.
