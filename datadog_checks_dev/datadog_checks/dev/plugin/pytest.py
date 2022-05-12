@@ -12,7 +12,6 @@ from typing import Dict, List, Optional, Tuple
 import pytest
 
 from .._env import (
-    AGENT_COLLECTOR_SEPARATOR,
     E2E_FIXTURE_NAME,
     E2E_PARENT_PYTHON,
     SKIP_ENVIRONMENT,
@@ -181,21 +180,11 @@ def dd_agent_check(request, aggregator, datadog_agent):
 
         result = run_command(check_command, capture=True)
 
-        matches = re.findall(AGENT_COLLECTOR_SEPARATOR + r'\n(.*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
-
-        if not matches:
-            raise ValueError(
-                '{}{}\nCould not find `{}` in the output'.format(
-                    result.stdout, result.stderr, AGENT_COLLECTOR_SEPARATOR
-                )
-            )
-
-        for raw_json in matches:
-            try:
-                collector = json.loads(raw_json)
-            except Exception as e:
-                raise Exception("Error loading json: {}\nCollector Json Output:\n{}".format(e, raw_json))
-            replay_check_run(collector, aggregator, datadog_agent)
+        try:
+            collector = json.loads(result.stdout)
+        except Exception as e:
+            raise Exception("Error loading json: {}\nCollector Json Output:\n{}".format(e, raw_json))
+        replay_check_run(collector, aggregator, datadog_agent)
 
         return aggregator
 
