@@ -59,6 +59,9 @@ files:
               - connection_security_policy
               - destination_service
               - source_workload
+            tag_by_endpoint.hidden: false
+            tag_by_endpoint.enabled: true
+            tag_by_endpoint.value.example: true
         - template: instances/openmetrics_legacy_base
           hidden: true
           overrides:
