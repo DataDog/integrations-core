@@ -9,6 +9,10 @@
 * [Fixed] Add the ability to exclude endpoint tag. See [#11956](https://github.com/DataDog/integrations-core/pull/11956).
 * [Fixed] Don't pin urllib3. See [#11944](https://github.com/DataDog/integrations-core/pull/11944).
 
+## 25.3.1 / 2022-05-05
+
+* [Fixed] Fallback Kubernetes client version to 22.6 to avoid failures on non-standard POD conditions. See [#11928](https://github.com/DataDog/integrations-core/pull/11928).
+
 ## 25.3.0 / 2022-04-28
 
 * [Added] Upgrade `orjson` dependency. See [#11843](https://github.com/DataDog/integrations-core/pull/11843).
