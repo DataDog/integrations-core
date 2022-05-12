@@ -159,7 +159,7 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            name: "airflow.scheduler.tasks.running"
          - match: 'airflow.scheduler.tasks.starving'
            name: "airflow.scheduler.tasks.starving"
-         - match: airflow.sla_email_notification_failure
+         - match: 'airflow.sla_email_notification_failure'
            name: 'airflow.sla_email_notification_failure'
          - match: 'airflow\.task_removed_from_dag\.(.*)'
            match_type: "regex"
