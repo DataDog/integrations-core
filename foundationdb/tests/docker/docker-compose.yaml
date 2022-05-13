@@ -29,6 +29,8 @@ services:
       FDB_COORDINATOR_PORT: 4500
   fdb-coordinator-tls:
     container_name: fdb-coordinator-tls
+    depends_on:
+      - fdb-coordinator
     build:
       context: .
       dockerfile: Dockerfile.fdb-tls

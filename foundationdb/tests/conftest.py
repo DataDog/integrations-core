@@ -48,15 +48,8 @@ E2E_METADATA = {
 @pytest.fixture(scope='session')
 def dd_environment():
     compose_file = os.path.join(HERE, 'docker', 'docker-compose.yaml')
-    with docker_run(compose_file=compose_file, conditions=[WaitFor(create_database)]):
+    with docker_run(compose_file=compose_file, conditions=[WaitFor(create_database), WaitFor(create_tls_database)]):
         yield E2E_CONFIG, E2E_METADATA
-
-
-# @pytest.fixture(scope='session')
-# def dd_tls_environment():
-#     compose_file = os.path.join(HERE, 'docker', 'docker-compose-tls.yaml')
-#     with docker_run(compose_file=compose_file, conditions=[WaitFor(create_tls_database)]):
-#         yield E2E_CONFIG, E2E_METADATA
 
 
 @pytest.fixture
