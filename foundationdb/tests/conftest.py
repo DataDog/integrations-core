@@ -4,45 +4,9 @@ import time
 
 import pytest
 
-from datadog_checks.dev import WaitFor, docker_run, get_here, run_command
+from datadog_checks.dev import WaitFor, docker_run, run_command
 
-dirname = os.path.dirname(__file__)
-HERE = get_here()
-
-CLUSTER_FILE = os.path.join(dirname, 'fdb.cluster')
-TLS_CERT_FILE = os.path.join(dirname, 'docker/tls/fdb.pem')
-TLS_KEY_FILE = os.path.join(dirname, 'docker/tls/private.key')
-
-
-INSTANCE = {
-    'cluster_file': CLUSTER_FILE,
-    'tls_certificate_file': TLS_CERT_FILE,
-    'tls_key_file': TLS_KEY_FILE,
-    'tls_verify_peers': 'Check.Valid=0',
-}
-
-E2E_INSTANCE = {
-    'cluster_file': '/fdb/fdb.cluster',
-    'tls_certificate_file': '/fdb/tls/fdb.pem',
-    'tls_key_file': '/fdb/tls/private.key',
-    'tls_verify_peers': 'Check.Valid=0',
-}
-
-
-E2E_CONFIG = {'init_config': {}, 'instances': [E2E_INSTANCE]}
-
-E2E_METADATA = {
-    'start_commands': [
-        'curl -o foundationdb-clients_6.3.23-1_amd64.deb '
-        '-L https://github.com/apple/foundationdb/releases/download/6.3.23/foundationdb-clients_6.3.23-1_amd64.deb',
-        'dpkg -i foundationdb-clients_6.3.23-1_amd64.deb',
-    ],
-    'docker_volumes': [
-        '{}:/fdb/fdb.cluster'.format(CLUSTER_FILE),
-        '{}:/fdb/tls/fdb.pem'.format(TLS_CERT_FILE),
-        '{}:/fdb/tls/private.key'.format(TLS_KEY_FILE),
-    ],
-}
+from .common import E2E_CONFIG, E2E_METADATA, HERE, INSTANCE
 
 
 @pytest.fixture(scope='session')
