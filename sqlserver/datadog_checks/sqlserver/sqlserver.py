@@ -148,11 +148,13 @@ class SQLServer(AgentCheck):
         # Query declarations
         check_queries = []
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
-            check_queries.extend([
-                QUERY_AO_AVAILABILITY_GROUPS,
-                QUERY_AO_FAILOVER_CLUSTER,
-                QUERY_AO_FAILOVER_CLUSTER_MEMBER,
-            ])
+            check_queries.extend(
+                [
+                    QUERY_AO_AVAILABILITY_GROUPS,
+                    QUERY_AO_FAILOVER_CLUSTER,
+                    QUERY_AO_FAILOVER_CLUSTER_MEMBER,
+                ]
+            )
         if is_affirmative(self.instance.get('include_fci_metrics', False)):
             check_queries.extend([QUERY_FAILOVER_CLUSTER_INSTANCE])
         self._check_queries = QueryExecutor(

@@ -55,7 +55,7 @@ QUERY_AO_FAILOVER_CLUSTER_MEMBER = {
             FC.cluster_name
         FROM sys.dm_hadr_cluster_members
         -- `sys.dm_hadr_cluster` does not have a related column to join on, this cross join will add the
-        -- `cluster_name` column to every row by multiplying all the rows in the left table against 
+        -- `cluster_name` column to every row by multiplying all the rows in the left table against
         -- all the rows in the right table. Note, there will only be one row from `sys.dm_hadr_cluster`.
         CROSS JOIN (SELECT TOP 1 cluster_name FROM sys.dm_hadr_cluster) AS FC
     """.strip(),
@@ -101,7 +101,7 @@ QUERY_AO_AVAILABILITY_GROUPS = {
                 AND ADC.group_database_id = DRS.group_database_id
                 AND AR.replica_id = DRS.replica_id
             -- `sys.dm_hadr_cluster` does not have a related column to join on, this cross join will add the
-            -- `cluster_name` column to every row by multiplying all the rows in the left table against 
+            -- `cluster_name` column to every row by multiplying all the rows in the left table against
             -- all the rows in the right table. Note, there will only be one row from `sys.dm_hadr_cluster`.
             CROSS JOIN (SELECT TOP 1 cluster_name FROM sys.dm_hadr_cluster) AS FC
     """.strip(),
@@ -144,7 +144,7 @@ QUERY_FAILOVER_CLUSTER_INSTANCE = {
             FC.cluster_name
         FROM sys.dm_os_cluster_nodes
         -- `sys.dm_hadr_cluster` does not have a related column to join on, this cross join will add the
-        -- `cluster_name` column to every row by multiplying all the rows in the left table against 
+        -- `cluster_name` column to every row by multiplying all the rows in the left table against
         -- all the rows in the right table. Note, there will only be one row from `sys.dm_hadr_cluster`.
         CROSS JOIN (SELECT TOP 1 cluster_name FROM sys.dm_hadr_cluster) AS FC
     """.strip(),
