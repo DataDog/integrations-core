@@ -574,7 +574,7 @@
     ## Replaces generic tag such as `server` with `mysql_server` to avoid getting it mixed with
     ## other integrations tags.
     #
-    # disable_generic_tags: true
+    disable_generic_tags: true
 
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.
