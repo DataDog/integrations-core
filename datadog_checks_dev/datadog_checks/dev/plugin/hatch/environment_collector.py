@@ -74,8 +74,8 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             scripts['dd-install-packages'] = install_commands
             env_config.setdefault('post-install-commands', []).insert(0, 'dd-install-packages')
 
-            scripts['dd-test'] = ['pytest -v --benchmark-skip']
-            scripts['dd-benchmark'] = ['pytest -v --benchmark-only --benchmark-cprofile=tottime']
+            scripts['dd-test'] = ['pytest -v --benchmark-skip {args:tests}']
+            scripts['dd-benchmark'] = ['pytest -v --benchmark-only --benchmark-cprofile=tottime {args:tests}']
 
             # Set defaults that will be called but allow users to override while
             # retaining access to them for reuse
