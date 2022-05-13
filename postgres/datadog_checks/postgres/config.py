@@ -100,7 +100,7 @@ class PostgresConfig:
                     'replace_digits', obfuscator_options_config.get('quantize_sql_tables', False)
                 )
             ),
-            'dollar_quoted_func': is_affirmative(obfuscator_options_config.get('dollar_quoted_func', False)),
+            'keep_dollar_quoted_func': is_affirmative(obfuscator_options_config.get('dollar_quoted_func', False)),
             'keep_sql_alias': is_affirmative(obfuscator_options_config.get('keep_sql_alias', False)),
             'return_json_metadata': is_affirmative(obfuscator_options_config.get('collect_metadata', True)),
             'table_names': is_affirmative(obfuscator_options_config.get('collect_tables', True)),
