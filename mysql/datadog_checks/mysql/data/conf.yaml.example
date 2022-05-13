@@ -1,6 +1,6 @@
 ## All options defined here are available to all instances.
 #
-# init_config:
+init_config:
 
     ## @param global_custom_queries - list of mappings - optional
     ## See `custom_queries` defined below.
@@ -22,7 +22,7 @@
 
 ## Every instance is scheduled independent of the others.
 #
-# instances:
+instances:
 
     ## @param host - string - optional
     ## MySQL host to connect to.
