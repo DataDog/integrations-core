@@ -81,8 +81,4 @@ def test_tls_integ(dd_run_check, aggregator, tls_instance):
     check = FoundationdbCheck('foundationdb', {}, [tls_instance])
     check.check(tls_instance)
 
-    for metric in METRICS:
-        aggregator.assert_metric(metric)
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check("foundationdb.can_connect", AgentCheck.OK)
