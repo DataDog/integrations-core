@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import time
 from os import path
 
 import pytest
-import time
 
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
