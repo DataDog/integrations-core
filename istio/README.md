@@ -27,12 +27,12 @@ If you want to monitor the Envoy proxies in Istio, configure the [Envoy integrat
 Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [Agent's configuration directory][7]) to connect to Istio. See the [sample istio.d/conf.yaml][8] for all available configuration options.
 
 #### Metric collection
-There are two key components involved in setting up the Istio integration to collect the Prometheus-formatted Istio metrics. Aligning with the [Istio architecture][23], there is the **data plane** (the `istio-proxy` sidecar containers) and the **control plane** (the `istiod` service managing the proxies). These are both run as `istio` Agent checks, but have different responsibilities, and they are  configured separately, as described below.
+To monitor the `istiod` deployment and `istio-proxy` in Istio `v1.5+` there are two key components involved to collect the Prometheus-formatted metrics. Aligning with the [Istio architecture][23], there is the **data plane** (the `istio-proxy` sidecar containers) and the **control plane** (the `istiod` service managing the proxies). These are both run as `istio` Agent checks, but have different responsibilities, and they are configured separately, as described below.
 
 ##### Data plane configuration
 To monitor the Istio data plane, the Agent includes an [`istio.d/auto_conf.yaml`][9] file to automatically set up the monitoring for each of the `istio-proxy` sidecar containers. The Agent initializes this check for each sidecar container that it detects automatically. This configuration enables the reporting of `istio.mesh.*` metrics for the data exposed by each of these sidecar containers.
 
-To customize the data plane portion of the integration, create an equivalent [configuration file][24] for Istio. Set `ad_identifiers` and `istio_mesh_endpoint` appropriately to set up the integration when an `istio-proxy` sidecar container is discovered. Refer to the provided [`istio.d/auto_conf.yaml`][9] and the [example configuration file][8] for all available configuration options. When you customize, set the `exclude_labels` to the following configuration:
+To customize the data plane portion of the integration, create an equivalent [configuration file][24] for Istio. Set `ad_identifiers` and `istio_mesh_endpoint` appropriately to set up the integration when an `istio-proxy` sidecar container is discovered. Refer to the provided [`istio.d/auto_conf.yaml`][9] and the [example configuration file][8] for all available configuration options. When you customize, set `use_openmetrics: true` and the `exclude_labels` to the following configuration:
 ```yaml
     exclude_labels:
       - source_version
