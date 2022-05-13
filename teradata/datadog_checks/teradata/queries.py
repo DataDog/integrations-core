@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# Database and Table Disk Space
+# Database Disk Space
 # https://docs.teradata.com/r/Teradata-VantageTM-Data-Dictionary/July-2021/Views-Reference/DiskSpaceV-X
 DISK_SPACE = {
     'name': 'disk_space',
@@ -37,7 +37,7 @@ DISK_SPACE = {
 }
 
 # Database and Table Disk Space
-# https://docs.teradata.com/r/Teradata-VantageTM-Data-Dictionary/July-2021/Views-Reference/ALLSpaceV-X
+# https://docs.teradata.com/r/Teradata-VantageTM-Data-Dictionary/July-2021/Views-Reference/AllSpaceV-X
 ALL_SPACE = {
     'name': 'all_space',
     'query': "SELECT Vproc, TRIM(BOTH FROM AccountName), TRIM(BOTH FROM DatabaseName), TRIM(BOTH FROM TableName), "
