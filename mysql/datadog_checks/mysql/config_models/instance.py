@@ -51,6 +51,14 @@ class Gcp(BaseModel):
     project_id: Optional[str]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class ObfuscatorOptions(BaseModel):
     class Config:
         allow_mutation = False
@@ -139,9 +147,13 @@ class InstanceConfig(BaseModel):
     custom_queries: Optional[Sequence[CustomQuery]]
     dbm: Optional[bool]
     defaults_file: Optional[str]
+    disable_generic_tags: Optional[bool]
+    empty_default_hostname: Optional[bool]
     gcp: Optional[Gcp]
     host: Optional[str]
     max_custom_queries: Optional[int]
+    metric_patterns: Optional[MetricPatterns]
+    min_collection_interval: Optional[float]
     obfuscator_options: Optional[ObfuscatorOptions]
     only_custom_queries: Optional[bool]
     options: Optional[Options]
@@ -152,8 +164,10 @@ class InstanceConfig(BaseModel):
     query_metrics: Optional[QueryMetrics]
     query_samples: Optional[QuerySamples]
     reported_hostname: Optional[str]
+    service: Optional[str]
     sock: Optional[str]
     ssl: Optional[Ssl]
+    tags: Optional[Sequence[str]]
     use_global_custom_queries: Optional[str]
     username: Optional[str]
 
