@@ -136,6 +136,7 @@ class SQLServer(AgentCheck):
                             obfuscator_options_config.get('quantize_sql_tables', False),
                         )
                     ),
+                    'keep_sql_alias': is_affirmative(obfuscator_options_config.get('keep_sql_alias', True)),
                     'return_json_metadata': is_affirmative(obfuscator_options_config.get('collect_metadata', True)),
                     'table_names': is_affirmative(obfuscator_options_config.get('collect_tables', True)),
                     'collect_commands': is_affirmative(obfuscator_options_config.get('collect_commands', True)),
