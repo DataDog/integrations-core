@@ -97,11 +97,10 @@ def test_get_statement_metrics_query_cached(aggregator, dbm_instance, caplog):
 
 
 test_statement_metrics_and_plans_parameterized = (
-    "database,plan_user,query,match_pattern,param_groups,disable_secondary_tags",
+    "database,query,match_pattern,param_groups,disable_secondary_tags",
     [
         [
             "datadog_test",
-            "dbo",
             "SELECT * FROM ϑings",
             r"SELECT \* FROM ϑings",
             ((),),
@@ -109,7 +108,6 @@ test_statement_metrics_and_plans_parameterized = (
         ],
         [
             "datadog_test",
-            "dbo",
             "SELECT * FROM ϑings where id = ?",
             r"\(@P1 \w+\)SELECT \* FROM ϑings where id = @P1",
             (
@@ -121,7 +119,6 @@ test_statement_metrics_and_plans_parameterized = (
         ],
         [
             "master",
-            None,
             "SELECT * FROM datadog_test.dbo.ϑings where id = ?",
             r"\(@P1 \w+\)SELECT \* FROM datadog_test.dbo.ϑings where id = @P1",
             (
@@ -133,7 +130,6 @@ test_statement_metrics_and_plans_parameterized = (
         ],
         [
             "datadog_test",
-            "dbo",
             "SELECT * FROM ϑings where id = ? and name = ?",
             r"\(@P1 \w+,@P2 (N)?VARCHAR\(\d+\)\)SELECT \* FROM ϑings where id = @P1 and name = @P2",
             (
@@ -145,7 +141,6 @@ test_statement_metrics_and_plans_parameterized = (
         ],
         [
             "datadog_test",
-            "dbo",
             "SELECT * FROM ϑings where id = ?",
             r"\(@P1 \w+\)SELECT \* FROM ϑings where id = @P1",
             (
@@ -168,7 +163,6 @@ def test_statement_metrics_and_plans(
     dbm_instance,
     bob_conn,
     database,
-    plan_user,
     query,
     param_groups,
     disable_secondary_tags,
@@ -226,10 +220,8 @@ def test_statement_metrics_and_plans(
         assert row['query_signature'], "missing query signature"
         if disable_secondary_tags:
             assert 'database_name' not in row
-            assert 'user_name' not in row
         else:
             assert row['database_name'] == database, "incorrect database_name"
-            assert row['user_name'] == plan_user, "incorrect user_name"
         for column in available_query_metrics_columns:
             assert column in row, "missing required metrics column {}".format(column)
             assert type(row[column]) in (float, int), "wrong type for metrics column {}".format(column)
