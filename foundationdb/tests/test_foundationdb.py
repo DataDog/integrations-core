@@ -154,10 +154,10 @@ def test_full(aggregator, instance):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_integ(aggregator, instance):
+def test_integ(dd_run_check, aggregator, instance):
     # type: (AggregatorStub, Dict[str, Any]) -> None
     check = FoundationdbCheck('foundationdb', {}, [instance])
-    check.check(instance)
+    dd_run_check(check)
 
     for metric in METRICS:
         aggregator.assert_metric(metric)
@@ -191,14 +191,14 @@ def test_custom_metrics(aggregator, instance):
 
 
 @pytest.mark.usefixtures("dd_tls_environment")
-def test_tls_integ(aggregator, instance):
+def test_tls_integ(dd_run_check, aggregator, instance):
     # type: (AggregatorStub, Dict[str, Any]) -> None
     # Update cluster file to specify the TLS container
     cur_dir = os.path.dirname(__file__)
     old_cluster = instance['cluster_file']
     instance['cluster_file'] = os.path.join(cur_dir, 'fdb-tls.cluster')
     check = FoundationdbCheck('foundationdb', {}, [instance])
-    check.check(instance)
+    dd_run_check(check)
 
     for metric in METRICS:
         aggregator.assert_metric(metric)
