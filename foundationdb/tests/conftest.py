@@ -15,12 +15,21 @@ TLS_KEY_FILE = os.path.join(dirname, 'docker/tls/private.key')
 
 
 INSTANCE = {
+    'cluster_file': CLUSTER_FILE,
+    'tls_certificate_file': TLS_CERT_FILE,
+    'tls_key_file': TLS_KEY_FILE,
+    'tls_verify_peers': 'Check.Valid=0',
+}
+
+E2E_INSTANCE = {
     'cluster_file': '/fdb/fdb.cluster',
     'tls_certificate_file': '/fdb/tls/fdb.pem',
     'tls_key_file': '/fdb/tls/private.key',
     'tls_verify_peers': 'Check.Valid=0',
 }
-CONFIG = {'init_config': {}, 'instances': [INSTANCE]}
+
+
+E2E_CONFIG = {'init_config': {}, 'instances': [E2E_INSTANCE]}
 
 E2E_METADATA = {
     'start_commands': [
@@ -40,14 +49,14 @@ E2E_METADATA = {
 def dd_environment():
     compose_file = os.path.join(HERE, 'docker', 'docker-compose.yaml')
     with docker_run(compose_file=compose_file, conditions=[WaitFor(create_database)]):
-        yield CONFIG, E2E_METADATA
+        yield E2E_CONFIG, E2E_METADATA
 
 
-@pytest.fixture(scope='session')
-def dd_tls_environment():
-    compose_file = os.path.join(HERE, 'docker', 'docker-compose-tls.yaml')
-    with docker_run(compose_file=compose_file, conditions=[WaitFor(create_tls_database)]):
-        yield CONFIG, E2E_METADATA
+# @pytest.fixture(scope='session')
+# def dd_tls_environment():
+#     compose_file = os.path.join(HERE, 'docker', 'docker-compose-tls.yaml')
+#     with docker_run(compose_file=compose_file, conditions=[WaitFor(create_tls_database)]):
+#         yield E2E_CONFIG, E2E_METADATA
 
 
 @pytest.fixture
