@@ -417,78 +417,78 @@ instances:
         #
         # collection_interval: 10
 
-## This block defines the configuration for AWS RDS and Aurora instances. 
-##
-## Complete this section if you have installed the Datadog AWS Integration 
-## (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
-## with MySQL integration telemetry.
-##
-## These values are only applied when `dbm: true` option is set.
-#
-# aws:
-
-    ## @param instance_endpoint - string - optional - default: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
-    ## Equal to the Endpoint.Address of the instance the agent is connecting to. 
-    ## This value is optional if the value of `host` is already configured to the instance endpoint.
+    ## This block defines the configuration for AWS RDS and Aurora instances. 
     ##
-    ## For more information on instance endpoints, 
-    ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
-    #
-    # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
-
-## This block defines the configuration for Google Cloud SQL instances.
-##
-## Complete this section if you have installed the Datadog GCP Integration 
-## (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
-## with MySQL integration telemetry.
-##
-## These values are only applied when `dbm: true` option is set.
-#
-# gcp:
-
-    ## @param project_id - string - optional - default: foo-project
-    ## Equal to the GCP resource's project ID.
+    ## Complete this section if you have installed the Datadog AWS Integration 
+    ## (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
+    ## with MySQL integration telemetry.
     ##
-    ## For more information on project IDs,
-    ## See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+    ## These values are only applied when `dbm: true` option is set.
     #
-    # project_id: foo-project
+    # aws:
 
-    ## @param instance_id - string - optional - default: foo-database
-    ## Equal to the GCP resource's instance ID.
+        ## @param instance_endpoint - string - optional - default: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+        ## Equal to the Endpoint.Address of the instance the agent is connecting to. 
+        ## This value is optional if the value of `host` is already configured to the instance endpoint.
+        ##
+        ## For more information on instance endpoints, 
+        ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
+        #
+        # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+
+    ## This block defines the configuration for Google Cloud SQL instances.
     ##
-    ## For more information on instance IDs,
-    ## See the GCP docs https://cloud.google.com/sql/docs/mysql/instance-settings#instance-id-2ndgen
-    #
-    # instance_id: foo-database
-
-## This block defines the configuration for Azure Database for MySQL.
-##
-## Complete this section if you have installed the Datadog Azure Integration 
-## (https://docs.datadoghq.com/integrations/azure) to enrich instances 
-## with MySQL integration telemetry.
-##
-## These values are only applied when `dbm: true` option is set.
-#
-# azure:
-
-    ## @param deployment_type - string - optional - default: flexible_server
-    ## Equal to the deployment type for the managed database. 
+    ## Complete this section if you have installed the Datadog GCP Integration 
+    ## (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
+    ## with MySQL integration telemetry.
     ##
-    ## Acceptable values are:
-    ##   - `flexible_server` 
-    ##   - `single_server`
-    ##   - `virtual_machine`
-    ##
-    ## For more information on deployment types, 
-    ## see the Azure docs https://docs.microsoft.com/en-us/azure/mysql/select-right-deployment-type
+    ## These values are only applied when `dbm: true` option is set.
     #
-    # deployment_type: flexible_server
+    # gcp:
 
-    ## @param name - string - optional - default: mysql-database
-    ## Equal to the name of the Azure MySQL database instance.
+        ## @param project_id - string - optional - default: foo-project
+        ## Equal to the GCP resource's project ID.
+        ##
+        ## For more information on project IDs,
+        ## See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+        #
+        # project_id: foo-project
+
+        ## @param instance_id - string - optional - default: foo-database
+        ## Equal to the GCP resource's instance ID.
+        ##
+        ## For more information on instance IDs,
+        ## See the GCP docs https://cloud.google.com/sql/docs/mysql/instance-settings#instance-id-2ndgen
+        #
+        # instance_id: foo-database
+
+    ## This block defines the configuration for Azure Database for MySQL.
+    ##
+    ## Complete this section if you have installed the Datadog Azure Integration 
+    ## (https://docs.datadoghq.com/integrations/azure) to enrich instances 
+    ## with MySQL integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
     #
-    # name: mysql-database
+    # azure:
+
+        ## @param deployment_type - string - optional - default: flexible_server
+        ## Equal to the deployment type for the managed database. 
+        ##
+        ## Acceptable values are:
+        ##   - `flexible_server` 
+        ##   - `single_server`
+        ##   - `virtual_machine`
+        ##
+        ## For more information on deployment types, 
+        ## see the Azure docs https://docs.microsoft.com/en-us/azure/mysql/select-right-deployment-type
+        #
+        # deployment_type: flexible_server
+
+        ## @param name - string - optional - default: mysql-database
+        ## Equal to the name of the Azure MySQL database instance.
+        #
+        # name: mysql-database
 
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
@@ -534,51 +534,51 @@ instances:
         #
         # keep_sql_alias: true
 
-    ## @param tags - list of strings - optional
-    ## A list of tags to attach to every metric and service check emitted by this instance.
-    ##
-    ## Learn more about tagging at https://docs.datadoghq.com/tagging
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
+## @param tags - list of strings - optional
+## A list of tags to attach to every metric and service check emitted by this instance.
+##
+## Learn more about tagging at https://docs.datadoghq.com/tagging
+#
+# tags:
+#   - <KEY_1>:<VALUE_1>
+#   - <KEY_2>:<VALUE_2>
 
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Overrides any `service` defined in the `init_config` section.
-    #
-    # service: <SERVICE>
+## @param service - string - optional
+## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+##
+## Overrides any `service` defined in the `init_config` section.
+#
+# service: <SERVICE>
 
-    ## @param min_collection_interval - number - optional - default: 15
-    ## This changes the collection interval of the check. For more information, see:
-    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
-    #
-    # min_collection_interval: 15
+## @param min_collection_interval - number - optional - default: 15
+## This changes the collection interval of the check. For more information, see:
+## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+#
+# min_collection_interval: 15
 
-    ## @param empty_default_hostname - boolean - optional - default: false
-    ## This forces the check to send metrics with no hostname.
-    ##
-    ## This is useful for cluster-level checks.
-    #
-    # empty_default_hostname: false
+## @param empty_default_hostname - boolean - optional - default: false
+## This forces the check to send metrics with no hostname.
+##
+## This is useful for cluster-level checks.
+#
+# empty_default_hostname: false
 
-    ## @param disable_generic_tags - boolean - optional - default: false
-    ## Replaces generic tag such as `server` with `mysql_server` to avoid getting it mixed with
-    ## other integrations tags.
-    #
-    disable_generic_tags: true
+## @param disable_generic_tags - boolean - optional - default: false
+## Replaces generic tag such as `server` with `mysql_server` to avoid getting it mixed with
+## other integrations tags.
+#
+disable_generic_tags: true
 
-    ## @param metric_patterns - mapping - optional
-    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
-    ##
-    ## Metrics defined in `exclude` will take precedence in case of overlap.
-    #
-    # metric_patterns:
-    #   include:
-    #   - <INCLUDE_REGEX>
-    #   exclude:
-    #   - <EXCLUDE_REGEX>
+## @param metric_patterns - mapping - optional
+## A mapping of metrics to include or exclude, with each entry being a regular expression.
+##
+## Metrics defined in `exclude` will take precedence in case of overlap.
+#
+# metric_patterns:
+#   include:
+#   - <INCLUDE_REGEX>
+#   exclude:
+#   - <EXCLUDE_REGEX>
 
 ## Log Section
 ##
