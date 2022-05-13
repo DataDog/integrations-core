@@ -17,7 +17,7 @@ INSTANCE = {
     'tls_verify_peers': 'Check.Valid=0',
 }
 
-TLS_INSTANCE ={
+TLS_INSTANCE = {
     'cluster_file': TLS_CLUSTER_FILE,
     'tls_certificate_file': TLS_CERT_FILE,
     'tls_key_file': TLS_KEY_FILE,

@@ -73,14 +73,13 @@ def test_custom_metrics(aggregator, instance):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_tls_integ(aggregator, tls_instance):
+def test_tls_integ(dd_run_check, aggregator, tls_instance):
     # type: (AggregatorStub, Dict[str, Any]) -> None
     check = FoundationdbCheck('foundationdb', {}, [tls_instance])
-    check.check(instance)
+    dd_run_check(check)
 
     for metric in METRICS:
         aggregator.assert_metric(metric)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check("foundationdb.can_connect", AgentCheck.OK)
-    instance['cluster_file'] = old_cluster

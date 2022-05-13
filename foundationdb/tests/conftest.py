@@ -6,7 +6,7 @@ import pytest
 
 from datadog_checks.dev import WaitFor, docker_run, run_command
 
-from .common import E2E_CONFIG, E2E_METADATA, HERE, INSTANCE, E2E_INSTANCE
+from .common import E2E_CONFIG, E2E_METADATA, HERE, INSTANCE, TLS_INSTANCE
 
 
 @pytest.fixture(scope='session')
@@ -20,9 +20,11 @@ def dd_environment():
 def instance():
     return INSTANCE
 
+
 @pytest.fixture
 def tls_instance():
     return TLS_INSTANCE
+
 
 def create_tls_database():
     create_database(True)
