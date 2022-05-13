@@ -29,14 +29,7 @@ class FoundationdbCheck(AgentCheck):
             fdb.options.set_tls_verify_peers(self.instance.get('tls_verify_peers').encode('latin-1'))
 
         if 'cluster_file' in self.instance:
-            try:
-                self._db = fdb.open(cluster_file=self.instance.get('cluster_file'))
-            except Exception as e:
-                raise Exception(
-                    "Error connecting to database with cluster_file: {}. {}".format(
-                        self.instance.get('cluster_file'), str(e)
-                    )
-                )
+            self._db = fdb.open(cluster_file=self.instance.get('cluster_file'))
         else:
             self._db = fdb.open()
 

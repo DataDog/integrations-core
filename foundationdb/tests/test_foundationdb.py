@@ -73,12 +73,9 @@ def test_custom_metrics(aggregator, instance):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_tls_integ(aggregator, instance):
+def test_tls_integ(aggregator, tls_instance):
     # type: (AggregatorStub, Dict[str, Any]) -> None
-    # Update cluster file to specify the TLS container
-    old_cluster = instance['cluster_file']
-    instance['cluster_file'] = '/fdb/fdb-tls.cluster'
-    check = FoundationdbCheck('foundationdb', {}, [instance])
+    check = FoundationdbCheck('foundationdb', {}, [tls_instance])
     check.check(instance)
 
     for metric in METRICS:

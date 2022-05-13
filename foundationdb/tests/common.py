@@ -17,6 +17,13 @@ INSTANCE = {
     'tls_verify_peers': 'Check.Valid=0',
 }
 
+TLS_INSTANCE ={
+    'cluster_file': TLS_CLUSTER_FILE,
+    'tls_certificate_file': TLS_CERT_FILE,
+    'tls_key_file': TLS_KEY_FILE,
+    'tls_verify_peers': 'Check.Valid=0',
+}
+
 E2E_INSTANCE = {
     'cluster_file': '/fdb/fdb.cluster',
     'tls_certificate_file': '/fdb/tls/fdb.pem',
