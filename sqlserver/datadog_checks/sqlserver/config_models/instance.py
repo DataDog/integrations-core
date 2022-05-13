@@ -136,6 +136,7 @@ class InstanceConfig(BaseModel):
     query_activity: Optional[QueryActivity]
     query_metrics: Optional[QueryMetrics]
     reported_hostname: Optional[str]
+    server_version: Optional[str]
     service: Optional[str]
     stored_procedure: Optional[str]
     tags: Optional[Sequence[str]]
