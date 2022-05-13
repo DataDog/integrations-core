@@ -234,6 +234,7 @@ After merging the release PR, the [build pipeline](../meta/cd.md) can fail under
 
       ```
       git tag <USERNAME>bootstrap-1.0.0 -m <USERNAME>bootstrap-1.0.0
+      git push origin <USERNAME>bootstrap-1.0.0
       ```
 
       The tag name is irrelevant, it just needs to look like an integration release. Gitlab doesn't sync
