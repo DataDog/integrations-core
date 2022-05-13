@@ -183,7 +183,7 @@ def instance_reported_hostname(field, value):
 
 
 def instance_server_version(field, value):
-    return '2019'
+    return '2014'
 
 
 def instance_service(field, value):
