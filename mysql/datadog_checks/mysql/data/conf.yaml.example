@@ -534,13 +534,6 @@ instances:
         #
         # keep_sql_alias: true
 
-        ## @param keep_dollar_quoted_func - boolean - optional - default: true
-        ## Set to `true` to prevent dollar quoted function strings (e.g. `$func$`) from being removed.
-        ## When not removed, the sql content of dollar quoted func strings will be obfuscated.
-        ## Only strings with the tag `$func$` are supported.
-        #
-        # keep_dollar_quoted_func: true
-
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
