@@ -26,6 +26,14 @@ def instance_additional_variable(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_aws(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_azure(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_charset(field, value):
     return get_default_field_value(field, value)
 
@@ -46,12 +54,20 @@ def instance_defaults_file(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_gcp(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_host(field, value):
     return get_default_field_value(field, value)
 
 
 def instance_max_custom_queries(field, value):
     return 20
+
+
+def instance_obfuscator_options(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_only_custom_queries(field, value):

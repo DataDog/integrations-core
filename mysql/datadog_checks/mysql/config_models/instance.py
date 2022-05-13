@@ -19,6 +19,21 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class Aws(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    instance_endpoint: Optional[str]
+
+
+class Azure(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    deployment_type: Optional[str]
+    name: Optional[str]
+
+
 class CustomQuery(BaseModel):
     class Config:
         allow_mutation = False
@@ -26,6 +41,26 @@ class CustomQuery(BaseModel):
     columns: Optional[Sequence[Mapping[str, Any]]]
     query: Optional[str]
     tags: Optional[Sequence[str]]
+
+
+class Gcp(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    instance_id: Optional[str]
+    project_id: Optional[str]
+
+
+class ObfuscatorOptions(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collect_commands: Optional[bool]
+    collect_comments: Optional[bool]
+    collect_metadata: Optional[bool]
+    collect_tables: Optional[bool]
+    keep_sql_alias: Optional[bool]
+    replace_digits: Optional[bool]
 
 
 class Options(BaseModel):
@@ -97,13 +132,17 @@ class InstanceConfig(BaseModel):
 
     additional_status: Optional[Sequence[Mapping[str, Any]]]
     additional_variable: Optional[Sequence[Mapping[str, Any]]]
+    aws: Optional[Aws]
+    azure: Optional[Azure]
     charset: Optional[str]
     connect_timeout: Optional[float]
     custom_queries: Optional[Sequence[CustomQuery]]
     dbm: Optional[bool]
     defaults_file: Optional[str]
+    gcp: Optional[Gcp]
     host: Optional[str]
     max_custom_queries: Optional[int]
+    obfuscator_options: Optional[ObfuscatorOptions]
     only_custom_queries: Optional[bool]
     options: Optional[Options]
     password: Optional[str]
