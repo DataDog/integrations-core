@@ -36,6 +36,7 @@ class InstanceConfig(BaseModel):
     collect_connection_queues: Optional[bool]
     collect_connection_state: Optional[bool]
     collect_count_metrics: Optional[bool]
+    collect_ethtool_metrics: Optional[bool]
     collect_rate_metrics: Optional[bool]
     combine_connection_states: Optional[bool]
     conntrack_path: Optional[str]

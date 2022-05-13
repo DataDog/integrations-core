@@ -50,6 +50,7 @@ SOLARIS_TCP_METRICS = [
 
 # constants for extracting ethtool data via ioctl
 SIOCETHTOOL = 0x8946
+ETHTOOL_GDRVINFO = 0x00000003
 ETHTOOL_GSTRINGS = 0x0000001B
 ETHTOOL_GSSET_INFO = 0x00000037
 ETHTOOL_GSTATS = 0x0000001D
@@ -66,6 +67,263 @@ ENA_METRIC_NAMES = [
     "linklocal_allowance_exceeded",
     "pps_allowance_exceeded",
 ]
+
+ETHTOOL_METRIC_NAMES = {
+    # Example ethtool -S iface with ena driver:
+    # queue_0_tx_cnt: 123665045
+    # queue_0_tx_bytes: 34567996008
+    # queue_0_tx_queue_stop: 0
+    # queue_0_tx_queue_wakeup: 0
+    # queue_0_tx_dma_mapping_err: 0
+    # queue_0_tx_linearize: 0
+    # queue_0_tx_linearize_failed: 0
+    # queue_0_tx_napi_comp: 131999879
+    # queue_0_tx_tx_poll: 131999896
+    # queue_0_tx_doorbells: 117093522
+    # queue_0_tx_prepare_ctx_err: 0
+    # queue_0_tx_bad_req_id: 0
+    # queue_0_tx_llq_buffer_copy: 87883427
+    # queue_0_tx_missed_tx: 0
+    # queue_0_tx_unmask_interrupt: 131999879
+    # queue_0_rx_cnt: 15934470
+    # queue_0_rx_bytes: 27955854239
+    # queue_0_rx_rx_copybreak_pkt: 8504787
+    # queue_0_rx_csum_good: 15923815
+    # queue_0_rx_refil_partial: 0
+    # queue_0_rx_bad_csum: 0
+    # queue_0_rx_page_alloc_fail: 0
+    # queue_0_rx_skb_alloc_fail: 0
+    # queue_0_rx_dma_mapping_err: 0
+    # queue_0_rx_bad_desc_num: 0
+    # queue_0_rx_bad_req_id: 0
+    # queue_0_rx_empty_rx_ring: 0
+    # queue_0_rx_csum_unchecked: 0
+    # queue_0_rx_xdp_aborted: 0
+    # queue_0_rx_xdp_drop: 0
+    # queue_0_rx_xdp_pass: 0
+    # queue_0_rx_xdp_tx: 0
+    # queue_0_rx_xdp_invalid: 0
+    # queue_0_rx_xdp_redirect: 0
+    'ena': [
+        "rx_bad_csum",
+        "rx_bad_desc_num",
+        "rx_bad_req_id",
+        "rx_bytes",
+        "rx_cnt",
+        "rx_csum_good",
+        "rx_csum_unchecked",
+        "rx_dma_mapping_err",
+        "rx_empty_rx_ring",
+        "rx_page_alloc_fail",
+        "rx_refil_partial",
+        "rx_rx_copybreak_pkt",
+        "rx_skb_alloc_fail",
+        "rx_xdp_aborted",
+        "rx_xdp_drop",
+        "rx_xdp_invalid",
+        "rx_xdp_pass",
+        "rx_xdp_redirect",
+        "rx_xdp_tx",
+        "tx_bad_req_id",
+        "tx_bytes",
+        "tx_cnt",
+        "tx_dma_mapping_err",
+        "tx_doorbells",
+        "tx_linearize",
+        "tx_linearize_failed",
+        "tx_llq_buffer_copy",
+        "tx_missed_tx",
+        "tx_napi_comp",
+        "tx_prepare_ctx_err",
+        "tx_queue_stop",
+        "tx_queue_wakeup",
+        "tx_tx_poll",
+        "tx_unmask_interrupt",
+    ],
+    # Example of output of ethtool -S iface with virtio driver:
+    # rx_queue_0_packets: 16591239
+    # rx_queue_0_bytes: 51217084980
+    # rx_queue_0_drops: 0
+    # rx_queue_0_xdp_packets: 0
+    # rx_queue_0_xdp_tx: 0
+    # rx_queue_0_xdp_redirects: 0
+    # rx_queue_0_xdp_drops: 0
+    # rx_queue_0_kicks: 408
+    # tx_queue_0_packets: 5246609
+    # tx_queue_0_bytes: 8455122678
+    # tx_queue_0_xdp_tx: 0
+    # tx_queue_0_xdp_tx_drops: 0
+    # tx_queue_0_kicks: 81
+    'virtio_net': [
+        "rx_drops",
+        "rx_kicks",
+        "rx_packets",
+        "rx_bytes",
+        "rx_xdp_drops",
+        "rx_xdp_packets",
+        "rx_xdp_redirects",
+        "rx_xdp_tx",
+        "tx_kicks",
+        "tx_packets",
+        "tx_bytes",
+        "tx_xdp_tx",
+        "tx_xdp_tx_drops",
+    ],
+    # Example of output of ethtool -S iface with hv_netvsc driver:
+    #  tx_queue_0_packets: 408
+    #  tx_queue_0_bytes: 62025
+    #  rx_queue_0_packets: 91312
+    #  rx_queue_0_bytes: 64734440
+    #  rx_queue_0_xdp_drop: 0
+    #  tx_queue_1_packets: 0
+    #  tx_queue_1_bytes: 0
+    #  rx_queue_1_packets: 90945
+    #  rx_queue_1_bytes: 66515649
+    #  rx_queue_1_xdp_drop: 0
+    #  cpu0_rx_packets: 90021
+    #  cpu0_rx_bytes: 60954160
+    #  cpu0_tx_packets: 2307011
+    #  cpu0_tx_bytes: 996614053
+    #  cpu0_vf_rx_packets: 762
+    #  cpu0_vf_rx_bytes: 1730037
+    #  cpu0_vf_tx_packets: 2307011
+    #  cpu0_vf_tx_bytes: 996614053
+    #  cpu1_rx_packets: 376562
+    #  cpu1_rx_bytes: 665669328
+    #  cpu1_tx_packets: 3176489
+    #  cpu1_tx_bytes: 436967327
+    #  cpu1_vf_rx_packets: 266749
+    #  cpu1_vf_rx_bytes: 593435159
+    #  cpu1_vf_tx_packets: 3176489
+    #  cpu1_vf_tx_bytes: 436967327
+    'hv_netvsc': [
+        # Per queue metrics
+        'tx_packets',
+        'tx_bytes',
+        'rx_packets',
+        'rx_bytes',
+        'rx_xdp_drop',
+        # Per cpu metrics
+        'vf_rx_packets',
+        'vf_rx_bytes',
+        'vf_tx_packets',
+        'vf_tx_bytes',
+    ],
+    # ethtool output on an instance with gvnic:
+    #      rx_packets: 584088
+    #      tx_packets: 17643
+    #      rx_bytes: 850689306
+    #      tx_bytes: 1420648
+    #      rx_dropped: 0
+    #      tx_dropped: 0
+    #      tx_timeouts: 0
+    #      rx_skb_alloc_fail: 0
+    #      rx_buf_alloc_fail: 0
+    #      rx_desc_err_dropped_pkt: 0
+    #      interface_up_cnt: 1
+    #      interface_down_cnt: 0
+    #      reset_cnt: 0
+    #      page_alloc_fail: 0
+    #      dma_mapping_error: 0
+    #      stats_report_trigger_cnt: 0
+    #      rx_posted_desc[0]: 1937
+    #      rx_completed_desc[0]: 913
+    #      rx_bytes[0]: 558287
+    #      rx_dropped_pkt[0]: 0
+    #      rx_copybreak_pkt[0]: 538
+    #      rx_copied_pkt[0]: 538
+    #      rx_queue_drop_cnt[0]: 0
+    #      rx_no_buffers_posted[0]: 0
+    #      rx_drops_packet_over_mru[0]: 0
+    #      rx_drops_invalid_checksum[0]: 0
+    #      rx_posted_desc[1]: 263357
+    #      rx_completed_desc[1]: 262333
+    #      rx_bytes[1]: 382572185
+    #      rx_dropped_pkt[1]: 0
+    #      rx_copybreak_pkt[1]: 1036
+    #      rx_copied_pkt[1]: 172309
+    #      rx_queue_drop_cnt[1]: 0
+    #      rx_no_buffers_posted[1]: 0
+    #      rx_drops_packet_over_mru[1]: 0
+    #      rx_drops_invalid_checksum[1]: 0
+    #      tx_posted_desc[0]: 2829
+    #      tx_completed_desc[0]: 2829
+    #      tx_bytes[0]: 221475
+    #      tx_wake[0]: 0
+    #      tx_stop[0]: 0
+    #      tx_event_counter[0]: 2829
+    #      tx_dma_mapping_error[0]: 0
+    #      tx_posted_desc[1]: 7051
+    #      tx_completed_desc[1]: 7051
+    #      tx_bytes[1]: 522327
+    #      tx_wake[1]: 0
+    #      tx_stop[1]: 0
+    #      tx_event_counter[1]: 7051
+    #      tx_dma_mapping_error[1]: 0
+    #      adminq_prod_cnt: 25
+    #      adminq_cmd_fail: 0
+    #      adminq_timeouts: 0
+    #      adminq_describe_device_cnt: 1
+    #      adminq_cfg_device_resources_cnt: 1
+    #      adminq_register_page_list_cnt: 8
+    #      adminq_unregister_page_list_cnt: 0
+    #      adminq_create_tx_queue_cnt: 4
+    #      adminq_create_rx_queue_cnt: 4
+    #      adminq_destroy_tx_queue_cnt: 0
+    #      adminq_destroy_rx_queue_cnt: 0
+    #      adminq_dcfg_device_resources_cnt: 0
+    #      adminq_set_driver_parameter_cnt: 0
+    #      adminq_report_stats_cnt: 1
+    #      adminq_report_link_speed_cnt: 6
+    'gve': [
+        'rx_posted_desc',
+        'rx_completed_desc',
+        'rx_bytes',
+        'rx_dropped_pkt',
+        'rx_copybreak_pkt',
+        'rx_copied_pkt',
+        'rx_queue_drop_cnt',
+        'rx_no_buffers_posted',
+        'rx_drops_packet_over_mru',
+        'rx_drops_invalid_checksum',
+        'tx_posted_desc',
+        'tx_completed_desc',
+        'tx_bytes',
+        'tx_wake',
+        'tx_stop',
+        'tx_event_counter',
+        'tx_dma_mapping_error',
+    ],
+}
+
+ETHTOOL_GLOBAL_METRIC_NAMES = {
+    'ena': [
+        'tx_timeout',
+        'suspend',
+        'resume',
+        'wd_expired',
+    ],
+    'hv_netvsc': [
+        'tx_scattered',
+        'tx_no_memory',
+        'tx_no_space',
+        'tx_too_big',
+        'tx_busy',
+        'tx_send_full',
+        'rx_comp_busy',
+        'rx_no_memory',
+        'stop_queue',
+        'wake_queue',
+    ],
+    'gve': [
+        'tx_timeouts',
+        'rx_skb_alloc_fail',
+        'rx_buf_alloc_fail',
+        'rx_desc_err_dropped_pkt',
+        'page_alloc_fail',
+        'dma_mapping_error',
+    ],
+}
 
 
 class Network(AgentCheck):
@@ -91,8 +349,13 @@ class Network(AgentCheck):
         self._collect_rate_metrics = instance.get('collect_rate_metrics', True)
         self._collect_count_metrics = instance.get('collect_count_metrics', False)
         self._collect_ena_metrics = instance.get('collect_aws_ena_metrics', False)
-        if fcntl is None and self._collect_ena_metrics:
-            raise ConfigurationError("fcntl not importable, collect_aws_ena_metrics should be disabled")
+        self._collect_ethtool_metrics = instance.get('collect_ethtool_metrics', False)
+
+        self._collect_ethtool_stats = self._collect_ena_metrics or self._collect_ethtool_metrics
+        if fcntl is None and self._collect_ethtool_stats:
+            raise ConfigurationError(
+                "fcntl not importable, collect_aws_ena_metrics and collect_ethtool_metrics should be disabled"
+            )
 
         # This decides whether we should split or combine connection states,
         # along with a few other things
@@ -295,9 +558,11 @@ class Network(AgentCheck):
         return expected_metrics
 
     def _submit_ena_metrics(self, iface, vals_by_metric, tags):
+        if not vals_by_metric:
+            return
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
             # Skip this network interface.
-            return False
+            return
 
         metric_tags = [] if tags is None else tags[:]
         metric_tags.append('device:{}'.format(iface))
@@ -311,6 +576,24 @@ class Network(AgentCheck):
             self.gauge('system.net.%s' % metric, val, tags=metric_tags)
             count += 1
         self.log.debug("tracked %s network ena metrics for interface %s", count, iface)
+
+    def _submit_ethtool_metrics(self, iface, ethtool_metrics, base_tags):
+        if not ethtool_metrics:
+            return
+        if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
+            # Skip this network interface.
+            return
+
+        base_tags_with_device = [] if base_tags is None else base_tags[:]
+        base_tags_with_device.append('device:{}'.format(iface))
+
+        count = 0
+        for ethtool_tag, metric_map in iteritems(ethtool_metrics):
+            tags = base_tags_with_device + [ethtool_tag]
+            for metric, val in iteritems(metric_map):
+                self.monotonic_count('system.net.%s' % metric, val, tags=tags)
+                count += 1
+        self.log.debug("tracked %s network ethtool metrics for interface %s", count, iface)
 
     def _parse_value(self, v):
         try:
@@ -472,12 +755,7 @@ class Network(AgentCheck):
                     'packets_out.error': self._parse_value(x[10]) + self._parse_value(x[11]),
                 }
                 self._submit_devicemetrics(iface, metrics, custom_tags)
-
-                # read ENA metrics, if configured and available
-                if self._collect_ena_metrics:
-                    ena_metrics = self._collect_ena(iface)
-                    if ena_metrics:
-                        self._submit_ena_metrics(iface, ena_metrics, custom_tags)
+                self._handle_ethtool_stats(iface, custom_tags)
 
         netstat_data = {}
         for f in ['netstat', 'snmp']:
@@ -1062,11 +1340,26 @@ class Network(AgentCheck):
 
             yield (state, fields[1], fields[2])
 
-    def _collect_ena(self, iface):
-        """
-        Collect ENA metrics for given interface.
+    def _handle_ethtool_stats(self, iface, custom_tags):
+        # read Ethtool metrics, if configured and available
+        if not self._collect_ethtool_stats:
+            return
+        driver_name, driver_version, ethtool_stats_names, ethtool_stats = self._fetch_ethtool_stats(iface)
+        tags = [] if custom_tags is None else custom_tags[:]
+        tags.append('driver_name:{}'.format(driver_name))
+        tags.append('driver_version:{}'.format(driver_version))
+        if self._collect_ena_metrics:
+            ena_metrics = self._get_ena_metrics(ethtool_stats_names, ethtool_stats)
+            self._submit_ena_metrics(iface, ena_metrics, tags)
+        if self._collect_ethtool_metrics:
+            ethtool_metrics = self._get_ethtool_metrics(driver_name, ethtool_stats_names, ethtool_stats)
+            self._submit_ethtool_metrics(iface, ethtool_metrics, tags)
 
-        ENA metrics are collected via the ioctl SIOCETHTOOL call. At the time of writing
+    def _fetch_ethtool_stats(self, iface):
+        """
+        Collect ethtool metrics for given interface.
+
+        Ethtool metrics are collected via the ioctl SIOCETHTOOL call. At the time of writing
         this method, there are no maintained Python libraries that do this. The solution
         is based on:
 
@@ -1076,16 +1369,18 @@ class Network(AgentCheck):
         ethtool_socket = None
         try:
             ethtool_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
-            return self._get_ena_metrics(iface, ethtool_socket)
+            driver_name, driver_version = self._get_ethtool_drvinfo(iface, ethtool_socket)
+            stats_names, stats = self._get_ethtool_stats(iface, ethtool_socket)
+            return driver_name, driver_version, stats_names, stats
         except OSError as e:
             # this will happen for interfaces that don't support SIOCETHTOOL - e.g. loopback or docker
-            self.log.debug('OSError while trying to collect ENA metrics for interface %s: %s', iface, str(e))
+            self.log.debug('OSError while trying to collect ethtool metrics for interface %s: %s', iface, str(e))
         except Exception:
-            self.log.exception('Unable to collect ENA metrics for interface %s', iface)
+            self.log.exception('Unable to collect ethtool metrics for interface %s', iface)
         finally:
             if ethtool_socket is not None:
                 ethtool_socket.close()
-        return {}
+        return (None, None, [], [])
 
     def _send_ethtool_ioctl(self, iface, sckt, data):
         """
@@ -1093,6 +1388,15 @@ class Network(AgentCheck):
         """
         ifr = struct.pack('16sP', iface.encode('utf-8'), data.buffer_info()[0])
         fcntl.ioctl(sckt.fileno(), SIOCETHTOOL, ifr)
+
+    def _byte_array_to_string(self, s):
+        """
+        Convert a byte array to string
+        b'hv_netvsc\x00\x00\x00\x00' -> 'hv_netvsc'
+        """
+        s = s.tobytes() if PY3 else s.tostring()
+        s = s.partition(b'\x00')[0].decode('utf-8')
+        return s
 
     def _get_ethtool_gstringset(self, iface, sckt):
         """
@@ -1111,16 +1415,21 @@ class Network(AgentCheck):
         all_names = []
         for i in range(sset_len):
             offset = 12 + ETH_GSTRING_LEN * i
-            s = strings[offset : offset + ETH_GSTRING_LEN]
-            s = s.tobytes() if PY3 else s.tostring()
-            s = s.partition(b'\x00')[0].decode('utf-8')
+            s = self._byte_array_to_string(strings[offset : offset + ETH_GSTRING_LEN])
             all_names.append(s)
         return all_names
 
-    def _get_ena_metrics(self, iface, sckt):
-        """
-        Get all ENA metrics specified in ENA_METRICS_NAMES list and their values from ethtool.
-        """
+    def _get_ethtool_drvinfo(self, iface, sckt):
+        drvinfo = array.array('B', struct.pack('I', ETHTOOL_GDRVINFO))
+        # Struct in
+        # https://github.com/torvalds/linux/blob/448f413a8bdc727d25d9a786ccbdb974fb85d973/include/uapi/linux/ethtool.h#L187-L200
+        drvinfo.extend([0] * (1 + 32 + 32 + 32 + 32 + 32 + 12 + 5))
+        self._send_ethtool_ioctl(iface, sckt, drvinfo)
+        driver_name = self._byte_array_to_string(drvinfo[4 : 4 + 32])
+        driver_version = self._byte_array_to_string(drvinfo[4 + 32 : 32 + 32])
+        return driver_name, driver_version
+
+    def _get_ethtool_stats(self, iface, sckt):
         stats_names = list(self._get_ethtool_gstringset(iface, sckt))
         stats_count = len(stats_names)
 
@@ -1128,12 +1437,101 @@ class Network(AgentCheck):
         # we need `stats_count * (length of uint64)` for the result
         stats.extend([0] * len(struct.pack('Q', 0)) * stats_count)
         self._send_ethtool_ioctl(iface, sckt, stats)
+        return stats_names, stats
 
+    def _parse_ethtool_queue_num(self, stat_name):
+        """
+        Extract the queue and the metric name from ethtool stat name:
+        queue_0_tx_cnt -> (queue:0, tx_cnt)
+        tx_queue_0_bytes -> (queue:0, tx_bytes)
+        """
+        if 'queue_' not in stat_name:
+            return None, None
+        parts = stat_name.split('_')
+        if 'queue' not in parts:
+            return None, None
+        queue_index = parts.index('queue')
+        queue_num = parts[queue_index + 1]
+        if not queue_num.isdigit():
+            return None, None
+        parts.pop(queue_index)
+        parts.pop(queue_index)
+        return 'queue:{}'.format(queue_num), '_'.join(parts)
+
+    def _parse_ethtool_queue_array(self, stat_name):
+        """
+        Extract the queue and the metric name from ethtool stat name:
+        tx_stop[0] -> (queue:0, tx_stop)
+        """
+        if '[' not in stat_name or not stat_name.endswith(']'):
+            return None, None
+        parts = stat_name.split('[')
+        if len(parts) != 2:
+            return None, None
+        metric_name = parts[0]
+        queue_num = parts[1][:-1]
+        if not queue_num.isdigit():
+            return None, None
+        return 'queue:{}'.format(queue_num), metric_name
+
+    def _parse_ethtool_cpu_num(self, stat_name):
+        """
+        Extract the cpu and the metric name from ethtool stat name:
+        cpu0_rx_bytes -> (cpu:0, rx_bytes)
+        """
+        if not stat_name.startswith('cpu'):
+            return None, None
+        parts = stat_name.split('_')
+        cpu_num = parts[0][3:]
+        if not cpu_num.isdigit():
+            return None, None
+        parts.pop(0)
+        return 'cpu:{}'.format(cpu_num), '_'.join(parts)
+
+    def _get_stat_value(self, stats, index):
+        offset = 8 + 8 * index
+        value = struct.unpack('Q', stats[offset : offset + 8])[0]
+        return value
+
+    def _get_ethtool_metrics(self, driver_name, stats_names, stats):
+        """
+        Get all ethtool metrics specified in ETHTOOL_METRIC_NAMES list and their values from ethtool.
+        We convert the queue and cpu number to a tag: queue_0_tx_cnt will be submitted as tx_cnt with the tag queue:0
+
+        Return [tag][metric] -> value
+        """
+        res = defaultdict(dict)
+        if driver_name not in ETHTOOL_METRIC_NAMES:
+            return res
+        ethtool_global_metrics = ETHTOOL_GLOBAL_METRIC_NAMES.get(driver_name, {})
+        for i, stat_name in enumerate(stats_names):
+            tag, metric_name = self._parse_ethtool_queue_num(stat_name)
+            metric_prefix = '.queue.'
+            if not tag:
+                tag, metric_name = self._parse_ethtool_cpu_num(stat_name)
+                metric_prefix = '.cpu.'
+            if not tag:
+                tag, metric_name = self._parse_ethtool_queue_array(stat_name)
+                metric_prefix = '.queue.'
+            if metric_name and metric_name not in ETHTOOL_METRIC_NAMES[driver_name]:
+                # A per queue/cpu metric was found but is not part of the collected metrics
+                continue
+            if not tag and stat_name in ethtool_global_metrics:
+                tag = 'global'
+                metric_prefix = '.'
+                metric_name = stat_name
+            if not tag:
+                continue
+            res[tag][driver_name + metric_prefix + metric_name] = self._get_stat_value(stats, i)
+        return res
+
+    def _get_ena_metrics(self, stats_names, stats):
+        """
+        Get all ENA metrics specified in ENA_METRICS_NAMES list and their values from ethtool.
+        """
         metrics = {}
         for i, stat_name in enumerate(stats_names):
             if stat_name in ENA_METRIC_NAMES:
-                offset = 8 + 8 * i
-                value = struct.unpack('Q', stats[offset : offset + 8])[0]
-                metrics[ENA_METRIC_PREFIX + stat_name] = value
+                metrics[ENA_METRIC_PREFIX + stat_name] = self._get_stat_value(stats, i)
 
         return metrics

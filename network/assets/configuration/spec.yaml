@@ -139,4 +139,22 @@ files:
               display_default: false
               example: false
               type: boolean
+          - name: collect_ethtool_metrics
+            description: |
+              Linux only.
+              Enable collection of ethtool statistics for network interfaces.
+              This will collect per queue and per cpu metrics depending on the driver.
+
+              The queue and cpu will be used as a tag when submitting metrics.
+              For example, 'queue_0_tx_cnt' will be submitted as 'system.net.ena.queue.tx_cnt' with tag 'queue:0'
+
+              Currently supported drivers:
+              - ena
+              - virtio_net
+              - hv_netvsc
+              - gve
+            value:
+              display_default: false
+              example: false
+              type: boolean
           - template: instances/default
