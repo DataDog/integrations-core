@@ -272,7 +272,6 @@ files:
             type: boolean
             example: True
           hidden: true
-
     - name: query_activity
       description: Configure collection of active sessions monitoring
       options:

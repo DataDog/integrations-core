@@ -111,18 +111,6 @@ AO_METRICS_SECONDARY = [
     ('sqlserver.ao.secondary_replica_health', 'sys.dm_hadr_availability_group_states', 'secondary_recovery_health'),
 ]
 
-# AlwaysOn metrics for Failover Cluster Instances (FCI).
-# This is in a separate category than other AlwaysOn metrics
-# because FCI specifies a different SQLServer setup
-# compared to Availability Groups (AG).
-# datadog metric name, sql table, column name
-# FCI status enum:
-#   0 = Up, 1 = Down, 2 = Paused, 3 = Joining, -1 = Unknown
-FCI_METRICS = [
-    ('sqlserver.fci.status', 'sys.dm_os_cluster_nodes', 'status'),
-    ('sqlserver.fci.is_current_owner', 'sys.dm_os_cluster_nodes', 'is_current_owner'),
-]
-
 # Non-performance table metrics - can be database specific
 # datadog metric name, sql table, column name
 TASK_SCHEDULER_METRICS = [

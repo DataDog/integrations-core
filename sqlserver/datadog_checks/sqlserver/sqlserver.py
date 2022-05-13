@@ -43,7 +43,6 @@ from .const import (
     DBM_MIGRATED_METRICS,
     DEFAULT_AUTODISCOVERY_INTERVAL,
     ENGINE_EDITION_SQL_DATABASE,
-    FCI_METRICS,
     INSTANCE_METRICS,
     INSTANCE_METRICS_TOTAL,
     PERF_AVERAGE_BULK,
@@ -58,7 +57,13 @@ from .const import (
     VALID_METRIC_TYPES,
 )
 from .metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
-from .queries import QUERY_SERVER_STATIC_INFO
+from .queries import (
+    QUERY_AO_AVAILABILITY_GROUPS,
+    QUERY_AO_FAILOVER_CLUSTER,
+    QUERY_AO_FAILOVER_CLUSTER_MEMBER,
+    QUERY_FAILOVER_CLUSTER_INSTANCE,
+    QUERY_SERVER_STATIC_INFO,
+)
 from .utils import set_default_driver_conf
 
 try:
@@ -152,6 +157,26 @@ class SQLServer(AgentCheck):
         )
 
         # Query declarations
+        check_queries = []
+        if is_affirmative(self.instance.get('include_ao_metrics', False)):
+            check_queries.extend(
+                [
+                    QUERY_AO_AVAILABILITY_GROUPS,
+                    QUERY_AO_FAILOVER_CLUSTER,
+                    QUERY_AO_FAILOVER_CLUSTER_MEMBER,
+                ]
+            )
+        if is_affirmative(self.instance.get('include_fci_metrics', False)):
+            check_queries.extend([QUERY_FAILOVER_CLUSTER_INSTANCE])
+        self._check_queries = QueryExecutor(
+            self.execute_query_raw,
+            self,
+            queries=check_queries,
+            tags=self.tags,
+            hostname=self.resolved_hostname,
+        )
+        self.check_initializations.append(self._check_queries.compile_queries)
+
         self.server_state_queries = QueryExecutor(
             self.execute_query_raw,
             self,
@@ -414,17 +439,6 @@ class SQLServer(AgentCheck):
                     'ao_database': self.instance.get('ao_database', None),
                     'availability_group': self.instance.get('availability_group', None),
                     'only_emit_local': is_affirmative(self.instance.get('only_emit_local', False)),
-                }
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
-        # Load FCI metrics
-        if is_affirmative(self.instance.get('include_fci_metrics', False)):
-            for name, table, column in FCI_METRICS:
-                cfg = {
-                    'name': name,
-                    'table': table,
-                    'column': column,
-                    'tags': tags,
                 }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
@@ -694,6 +708,7 @@ class SQLServer(AgentCheck):
                 ]:
                     self.server_state_queries.execute()
 
+                self._check_queries.execute()
                 # reuse connection for any custom queries
                 self._query_manager.execute()
             finally:
