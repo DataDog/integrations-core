@@ -489,7 +489,7 @@ variable to the new install as explained above.
 Ensure the displayed output matches the correct value.
 
     ```shell script
-      sudo -u dd-agent -- /opt/datadog-agent/embedded/bin/python -c "import os; print("JAVA_HOME:{}".format(os.environ.get("JAVA_HOME")))"
+      sudo -u dd-agent -- /opt/datadog-agent/embedded/bin/python -c "import os; print(\"JAVA_HOME:{}\".format(os.environ.get(\"JAVA_HOME\")))"
     ```
 
 Need help? Contact [Datadog support][16].
