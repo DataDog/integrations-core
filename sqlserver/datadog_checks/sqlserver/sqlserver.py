@@ -146,22 +146,24 @@ class SQLServer(AgentCheck):
         )
 
         # Query declarations
-        self._alwayson_queries = QueryExecutor(
+        check_queries = []
+        if is_affirmative(self.instance.get('include_ao_metrics', False)):
+            check_queries.extend([
+                QUERY_AO_AVAILABILITY_GROUPS,
+                QUERY_AO_FAILOVER_CLUSTER,
+                QUERY_AO_FAILOVER_CLUSTER_MEMBER,
+            ])
+        if is_affirmative(self.instance.get('include_fci_metrics', False)):
+            check_queries.extend([QUERY_FAILOVER_CLUSTER_INSTANCE])
+        self._check_queries = QueryExecutor(
             self.execute_query_raw,
             self,
-            queries=[QUERY_AO_AVAILABILITY_GROUPS, QUERY_AO_FAILOVER_CLUSTER, QUERY_AO_FAILOVER_CLUSTER_MEMBER],
+            queries=check_queries,
             tags=self.tags,
             hostname=self.resolved_hostname,
         )
-        self.check_initializations.append(self._alwayson_queries.compile_queries)
-        self._failover_cluster_queries = QueryExecutor(
-            self.execute_query_raw,
-            self,
-            queries=[QUERY_FAILOVER_CLUSTER_INSTANCE],
-            tags=self.tags,
-            hostname=self.resolved_hostname,
-        )
-        self.check_initializations.append(self._failover_cluster_queries.compile_queries)
+        self.check_initializations.append(self._check_queries.compile_queries)
+
         self.server_state_queries = QueryExecutor(
             self.execute_query_raw,
             self,
@@ -686,10 +688,6 @@ class SQLServer(AgentCheck):
             with self.connection.get_managed_cursor() as cursor:
                 cursor.execute("SET NOCOUNT ON")
             try:
-                if is_affirmative(self.instance.get('include_ao_metrics', False)):
-                    self._alwayson_queries.execute()
-                if is_affirmative(self.instance.get('include_fci_metrics', False)):
-                    self._failover_cluster_queries.execute()
                 # Server state queries require VIEW SERVER STATE permissions, which some managed database
                 # versions do not support.
                 if self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION) not in [
@@ -697,6 +695,7 @@ class SQLServer(AgentCheck):
                 ]:
                     self.server_state_queries.execute()
 
+                self._check_queries.execute()
                 # reuse connection for any custom queries
                 self._query_manager.execute()
             finally:
