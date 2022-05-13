@@ -58,6 +58,8 @@ class ObfuscatorOptions(BaseModel):
     collect_comments: Optional[bool]
     collect_metadata: Optional[bool]
     collect_tables: Optional[bool]
+    keep_dollar_quoted_func: Optional[bool]
+    keep_sql_alias: Optional[bool]
     replace_digits: Optional[bool]
 
 

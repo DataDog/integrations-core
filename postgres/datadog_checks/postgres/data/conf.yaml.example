@@ -440,6 +440,20 @@ instances:
         #
         # collect_comments: true
 
+        ## @param keep_sql_alias - boolean - optional - default: true
+        ## Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
+        ## `with select 1 as alias`, `select column as other_name`, or `select * from table t`.
+        ## When `true` these aliases will not be removed.
+        #
+        # keep_sql_alias: true
+
+        ## @param keep_dollar_quoted_func - boolean - optional - default: true
+        ## Set to `true` to prevent dollar quoted function strings (e.g. `$func$`) from being removed.
+        ## When not removed, the sql content of dollar quoted func strings will be obfuscated.
+        ## Only strings with the tag `$func$` are supported.
+        #
+        # keep_dollar_quoted_func: true
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
