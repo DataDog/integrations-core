@@ -76,7 +76,7 @@ def test_custom_metrics(aggregator, instance):
 def test_tls_integ(dd_run_check, aggregator, tls_instance):
     # type: (AggregatorStub, Dict[str, Any]) -> None
     check = FoundationdbCheck('foundationdb', {}, [tls_instance])
-    dd_run_check(check)
+    check.check(tls_instance)
 
     for metric in METRICS:
         aggregator.assert_metric(metric)
