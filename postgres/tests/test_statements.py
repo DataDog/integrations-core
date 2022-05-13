@@ -114,6 +114,8 @@ def test_statement_metrics(
     dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     connections = {}
 
+    dbm_instance['ignore_databases'] = []
+
     def _run_queries():
         for user, password, dbname, query, arg in SAMPLE_QUERIES:
             if dbname not in connections:
