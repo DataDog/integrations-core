@@ -5,6 +5,7 @@
 from os import path
 
 import pytest
+import time
 
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
@@ -43,6 +44,7 @@ def setup_calico():
         """kubectl exec -i -n kube-system calicoctl -- /calicoctl patch felixConfiguration
         default --patch '{"spec":{"prometheusMetricsEnabled": true}}'"""
     )
+    time.sleep(15)
 
 
 @pytest.fixture(scope='session')
