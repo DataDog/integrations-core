@@ -55,7 +55,7 @@ instances:
     ## Server version year of sqlserver the agent will connect to. 
     ## Important for validating connection string attributes for older sqlserver versions.
     ##
-    ## Defaults to `2019`.
+    ## This is required if connecting to a SQLServer instance older than 2014.
     #
     # server_version: '2019'
 

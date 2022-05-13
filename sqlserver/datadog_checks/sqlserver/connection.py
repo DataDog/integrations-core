@@ -110,7 +110,7 @@ class Connection(object):
     DEFAULT_DATABASE = 'master'
     DEFAULT_DRIVER = 'SQL Server'
     DEFAULT_DB_KEY = 'database'
-    DEFAULT_SQLSERVER_VERSION = "2019"
+    DEFAULT_SQLSERVER_VERSION = 1e9
     SQLSERVER_2014 = 2014
     PROC_GUARD_DB_KEY = 'proc_only_if_database'
 
