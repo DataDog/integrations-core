@@ -153,7 +153,7 @@ datadog-varnish==1.14.1
 datadog-vault==3.2.0
 datadog-vertica==3.3.1
 datadog-voltdb==2.1.2
-datadog-vsphere==6.1.1
+datadog-vsphere==6.1.2
 datadog-weblogic==1.1.1
 datadog-win32-event-log==2.13.0; sys_platform == 'win32'
 datadog-windows-performance-counters==1.2.0; sys_platform == 'win32'

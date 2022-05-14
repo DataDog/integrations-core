@@ -1,5 +1,9 @@
 # CHANGELOG - vsphere
 
+## 6.1.2 / 2022-05-14
+
+* [Fixed] Fix uncommented parent options. See [#12013](https://github.com/DataDog/integrations-core/pull/12013).
+
 ## 6.1.1 / 2022-04-11
 
 * [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11800](https://github.com/DataDog/integrations-core/pull/11800).
