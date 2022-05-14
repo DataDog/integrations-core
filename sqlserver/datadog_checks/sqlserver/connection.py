@@ -110,9 +110,11 @@ class Connection(object):
     DEFAULT_DATABASE = 'master'
     DEFAULT_DRIVER = 'SQL Server'
     DEFAULT_DB_KEY = 'database'
+    DEFAULT_SQLSERVER_VERSION = 1e9
+    SQLSERVER_2014 = 2014
     PROC_GUARD_DB_KEY = 'proc_only_if_database'
 
-    valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL', 'SQLNCLI11']
+    valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL', 'MSOLEDBSQL19', 'SQLNCLI11']
     default_adoprovider = 'SQLOLEDB'
 
     def __init__(self, init_config, instance_config, service_check_handler):
@@ -124,6 +126,7 @@ class Connection(object):
         self._conns = {}
         self.timeout = int(self.instance.get('command_timeout', self.DEFAULT_COMMAND_TIMEOUT))
         self.existing_databases = None
+        self.server_version = int(self.instance.get('server_version', self.DEFAULT_SQLSERVER_VERSION))
 
         self.adoprovider = self.default_adoprovider
 
@@ -437,17 +440,20 @@ class Connection(object):
         else:
             dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
 
-        conn_str = 'ConnectRetryCount=2;'
+        # The connection resiliency feature is supported on Microsoft Azure SQL Database
+        # and SQL Server 2014 (and later) server versions. See the SQLServer docs for more information
+        # https://docs.microsoft.com/en-us/sql/connect/odbc/connection-resiliency?view=sql-server-ver15
+        conn_str = ''
+        if self.server_version >= self.SQLSERVER_2014:
+            conn_str += 'ConnectRetryCount=2;'
         if dsn:
             conn_str += 'DSN={};'.format(dsn)
-
         if driver:
             conn_str += 'DRIVER={};'.format(driver)
         if host:
             conn_str += 'Server={};'.format(host)
         if database:
             conn_str += 'Database={};'.format(database)
-
         if username:
             conn_str += 'UID={};'.format(username)
         self.log.debug("Connection string (before password) %s", conn_str)
@@ -463,7 +469,10 @@ class Connection(object):
             _, host, username, password, database, _ = self._get_access_info(db_key, db_name)
 
         provider = self._get_adoprovider()
-        conn_str = 'ConnectRetryCount=2;Provider={};Data Source={};Initial Catalog={};'.format(provider, host, database)
+        retry_conn_count = ''
+        if self.server_version >= self.SQLSERVER_2014:
+            retry_conn_count = 'ConnectRetryCount=2;'
+        conn_str = '{}Provider={};Data Source={};Initial Catalog={};'.format(retry_conn_count, provider, host, database)
 
         if username:
             conn_str += 'User ID={};'.format(username)
