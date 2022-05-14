@@ -1,5 +1,10 @@
 # CHANGELOG - http_check
 
+## 8.0.0 / 2022-05-14
+
+* [Fixed] Don't pin urllib3. See [#11944](https://github.com/DataDog/integrations-core/pull/11944).
+* [Removed] Delete unused `weakciphers` option path. See [#11926](https://github.com/DataDog/integrations-core/pull/11926).
+
 ## 7.1.1 / 2022-04-11
 
 * [Fixed] Improve service check message when cert is not found. See [#11793](https://github.com/DataDog/integrations-core/pull/11793).
