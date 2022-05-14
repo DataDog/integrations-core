@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 2.15.0 / 2022-05-14
+
+* [Added] Add new lag in seconds metric. See [#11861](https://github.com/DataDog/integrations-core/pull/11861).
+
 ## 2.14.0 / 2022-04-05
 
 * [Added] Add gssapi as a dependency. See [#11725](https://github.com/DataDog/integrations-core/pull/11725).
