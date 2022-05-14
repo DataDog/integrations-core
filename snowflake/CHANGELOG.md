@@ -1,5 +1,11 @@
 # CHANGELOG - Snowflake
 
+## 4.3.1 / 2022-05-14
+
+* [Fixed] Properly validate `only_custom_queries`. See [#11992](https://github.com/DataDog/integrations-core/pull/11992).
+* [Fixed] Fix small typo in config option. See [#11990](https://github.com/DataDog/integrations-core/pull/11990).
+* [Fixed] Add section in docs about private link setup. See [#11883](https://github.com/DataDog/integrations-core/pull/11883).
+
 ## 4.3.0 / 2022-04-05
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
