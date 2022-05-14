@@ -1,5 +1,9 @@
 # CHANGELOG - Kube_controller_manager
 
+## 4.2.0 / 2022-05-14
+
+* [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
+
 ## 4.1.0 / 2022-04-05
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
