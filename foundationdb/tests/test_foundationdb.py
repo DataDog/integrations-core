@@ -79,7 +79,7 @@ def test_custom_metrics(aggregator, instance):
 
 @pytest.mark.skipif(TOX_ENV != 'py38-tls', reason="TLS FoundationDB cluster only.")
 @pytest.mark.usefixtures("dd_environment")
-def test_tls_integ(dd_run_check, aggregator, tls_instance):
+def test_tls_integ(aggregator, tls_instance):
     # type: (AggregatorStub, Dict[str, Any]) -> None
     check = FoundationdbCheck('foundationdb', {}, [tls_instance])
     check.check(tls_instance)
