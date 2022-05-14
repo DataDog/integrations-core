@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 3.2.2 / 2022-05-14
+
+* [Fixed] Capture badly formatted hosts. See [#11933](https://github.com/DataDog/integrations-core/pull/11933).
+
 ## 3.2.1 / 2022-04-26
 
 * [Fixed] Fix passing in username and password as options. See [#11525](https://github.com/DataDog/integrations-core/pull/11525).
