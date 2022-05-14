@@ -1,5 +1,12 @@
 # CHANGELOG - kubelet
 
+## 7.4.0 / 2022-05-14
+
+* [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
+* [Fixed] Fix kubernetes.memory.limits on kind clusters. See [#11914](https://github.com/DataDog/integrations-core/pull/11914).
+* [Fixed] Sanitize the `url` tag. See [#11989](https://github.com/DataDog/integrations-core/pull/11989).
+* [Fixed] Apply container filter to `kubernetes.kubelet.container.log_filesystem.used_bytes`. See [#11974](https://github.com/DataDog/integrations-core/pull/11974).
+
 ## 7.3.1 / 2022-04-11
 
 * [Fixed] Handle probe metrics when the endpoint is not available (Kubernetes < 1.15). See [#11807](https://github.com/DataDog/integrations-core/pull/11807).
