@@ -9,14 +9,19 @@ import pytest
 
 from datadog_checks.dev import WaitFor, docker_run, run_command
 
-from .common import E2E_CONFIG, E2E_METADATA, HERE, INSTANCE, TLS_INSTANCE
+from .common import E2E_CONFIG, E2E_METADATA, E2E_TLS_CONFIG, HERE, INSTANCE, TLS_INSTANCE, TOX_ENV
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    compose_file = os.path.join(HERE, 'docker', 'docker-compose.yaml')
-    with docker_run(compose_file=compose_file, conditions=[WaitFor(create_database), WaitFor(create_tls_database)]):
-        yield E2E_CONFIG, E2E_METADATA
+    if TOX_ENV == 'py38-tls':
+        compose_file = os.path.join(HERE, 'docker', 'docker-compose-tls.yaml')
+        with docker_run(compose_file=compose_file, conditions=[WaitFor(create_tls_database)]):
+            yield E2E_TLS_CONFIG, E2E_METADATA
+    else:
+        compose_file = os.path.join(HERE, 'docker', 'docker-compose.yaml')
+        with docker_run(compose_file=compose_file, conditions=[WaitFor(create_database)]):
+            yield E2E_CONFIG, E2E_METADATA
 
 
 @pytest.fixture

@@ -4,9 +4,12 @@
 import os
 
 from datadog_checks.dev import get_here
+from datadog_checks.dev.utils import get_tox_env
 
 dirname = os.path.dirname(__file__)
 HERE = get_here()
+
+TOX_ENV = get_tox_env()
 
 CLUSTER_FILE = os.path.join(dirname, 'fdb.cluster')
 TLS_CLUSTER_FILE = os.path.join(dirname, 'fdb-tls.cluster')
@@ -34,8 +37,17 @@ E2E_INSTANCE = {
     'tls_verify_peers': 'Check.Valid=0',
 }
 
+E2E_TLS_INSTANCE = {
+    'cluster_file': '/fdb/fdb-tls.cluster',
+    'tls_certificate_file': '/fdb/tls/fdb.pem',
+    'tls_key_file': '/fdb/tls/private.key',
+    'tls_verify_peers': 'Check.Valid=0',
+}
+
 
 E2E_CONFIG = {'init_config': {}, 'instances': [E2E_INSTANCE]}
+
+E2E_TLS_CONFIG = {'init_config': {}, 'instances': [E2E_TLS_INSTANCE]}
 
 E2E_METADATA = {
     'start_commands': [

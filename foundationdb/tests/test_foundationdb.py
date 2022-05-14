@@ -12,7 +12,7 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.foundationdb import FoundationdbCheck
 
-from .common import METRICS
+from .common import METRICS, TOX_ENV
 
 current_dir = dir_path = os.path.dirname(os.path.realpath(__file__)) + '/'
 
@@ -38,6 +38,7 @@ def test_full(aggregator, instance):
         aggregator.assert_service_check("foundationdb.can_connect", AgentCheck.OK)
 
 
+@pytest.mark.skipif(TOX_ENV == 'py38-tls', reason="Non-TLS FoundationDB cluster only.")
 @pytest.mark.usefixtures("dd_environment")
 def test_integ(aggregator, instance):
     # type: (AggregatorStub, Dict[str, Any]) -> None
@@ -51,6 +52,7 @@ def test_integ(aggregator, instance):
     aggregator.assert_service_check("foundationdb.can_connect", AgentCheck.OK)
 
 
+@pytest.mark.skipif(TOX_ENV == 'py38-tls', reason="Non-TLS FoundationDB cluster only.")
 @pytest.mark.usefixtures("dd_environment")
 def test_custom_metrics(aggregator, instance):
     # type: (AggregatorStub, Dict[str, Any]) -> None
@@ -75,10 +77,15 @@ def test_custom_metrics(aggregator, instance):
     del instance['custom_queries']
 
 
+@pytest.mark.skipif(TOX_ENV != 'py38-tls', reason="TLS FoundationDB cluster only.")
 @pytest.mark.usefixtures("dd_environment")
 def test_tls_integ(dd_run_check, aggregator, tls_instance):
     # type: (AggregatorStub, Dict[str, Any]) -> None
     check = FoundationdbCheck('foundationdb', {}, [tls_instance])
     check.check(tls_instance)
 
+    for metric in METRICS:
+        aggregator.assert_metric(metric)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check("foundationdb.can_connect", AgentCheck.OK)
