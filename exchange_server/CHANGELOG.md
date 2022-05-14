@@ -1,5 +1,9 @@
 # CHANGELOG - exchange_server
 
+## 1.13.1 / 2022-05-14
+
+* [Fixed] Update dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
+
 ## 1.13.0 / 2022-04-05
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
