@@ -1,5 +1,9 @@
 # CHANGELOG - Cloud Foundry API
 
+## 2.1.1 / 2022-05-15
+
+* [Fixed] Fix enumerated integer validation. See [#11964](https://github.com/DataDog/integrations-core/pull/11964).
+
 ## 2.1.0 / 2022-04-05
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
