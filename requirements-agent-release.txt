@@ -42,7 +42,7 @@ datadog-elastic==5.1.1
 datadog-envoy==2.1.0
 datadog-etcd==3.2.0
 datadog-exchange-server==1.13.1; sys_platform == 'win32'
-datadog-external-dns==2.1.0
+datadog-external-dns==2.2.0
 datadog-flink==1.4.0
 datadog-fluentd==2.1.0
 datadog-foundationdb==1.1.0
