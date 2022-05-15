@@ -1,5 +1,10 @@
 # CHANGELOG - oracle
 
+## 3.9.4 / 2022-05-15
+
+* [Fixed] Add a lock around jdbc connection. See [#11877](https://github.com/DataDog/integrations-core/pull/11877).
+* [Fixed] Do not close closed connection. See [#11874](https://github.com/DataDog/integrations-core/pull/11874).
+
 ## 3.9.3 / 2022-04-14
 
 * [Fixed] Handle NoneType protocol validation. See [#11837](https://github.com/DataDog/integrations-core/pull/11837).
