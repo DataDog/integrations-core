@@ -1,5 +1,9 @@
 # CHANGELOG - IBM MQ
 
+## 3.22.0 / 2022-05-15
+
+* [Added] Add `collect_reset_queue_metrics` option. See [#11818](https://github.com/DataDog/integrations-core/pull/11818).
+
 ## 3.21.0 / 2022-04-05
 
 * [Added] Add option to not try normal connection. See [#11748](https://github.com/DataDog/integrations-core/pull/11748).
