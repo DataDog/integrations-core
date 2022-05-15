@@ -1,5 +1,11 @@
 # CHANGELOG - varnish
 
+## 1.14.1 / 2022-05-15
+
+* [Fixed] Refactor methods. See [#11909](https://github.com/DataDog/integrations-core/pull/11909).
+* [Fixed] Adapt to new check signature. See [#11910](https://github.com/DataDog/integrations-core/pull/11910).
+* [Fixed] Do not raise exceptions on empty output of varnishadm. See [#11908](https://github.com/DataDog/integrations-core/pull/11908).
+
 ## 1.14.0 / 2022-04-05
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
