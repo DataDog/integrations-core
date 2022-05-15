@@ -6,10 +6,6 @@
 * [Added] Add support to ingest cloud_metadata for DBM host linking. See [#11987](https://github.com/DataDog/integrations-core/pull/11987).
 * [Added] Add query_truncated field on activity rows. See [#11885](https://github.com/DataDog/integrations-core/pull/11885).
 * [Fixed] Fix uncommented parent options. See [#12013](https://github.com/DataDog/integrations-core/pull/12013).
-* [Fixed] Fix activity and sample host reporting. See [#11855](https://github.com/DataDog/integrations-core/pull/11855).
-* [Fixed] Fix activity and sample host reporting. See [#11855](https://github.com/DataDog/integrations-core/pull/11855).
-* [Fixed] postgres: Update base version. See [#11824](https://github.com/DataDog/integrations-core/pull/11824).
-* [Fixed] postgres: Update base version. See [#11824](https://github.com/DataDog/integrations-core/pull/11824).
 
 ## 12.3.2 / 2022-04-20
 

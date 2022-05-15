@@ -10,10 +10,6 @@
 * [Fixed] Fix uncommented parent options. See [#12013](https://github.com/DataDog/integrations-core/pull/12013).
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
 * [Fixed] Fix missing object_name for index fragmentation metrics. See [#11986](https://github.com/DataDog/integrations-core/pull/11986).
-* [Fixed] Fix activity and plan host reporting. See [#11853](https://github.com/DataDog/integrations-core/pull/11853).
-* [Fixed] Fix activity and plan host reporting. See [#11853](https://github.com/DataDog/integrations-core/pull/11853).
-* [Fixed] sqlserver: Update base version. See [#11826](https://github.com/DataDog/integrations-core/pull/11826).
-* [Fixed] sqlserver: Update base version. See [#11826](https://github.com/DataDog/integrations-core/pull/11826).
 * [Changed] Remove execution plan `user_name` attribute. See [#12007](https://github.com/DataDog/integrations-core/pull/12007).
 
 ## 7.6.2 / 2022-04-20
