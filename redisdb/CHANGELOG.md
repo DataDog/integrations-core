@@ -1,5 +1,9 @@
 # CHANGELOG - redisdb
 
+## 4.5.1 / 2022-05-15
+
+* [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
+
 ## 4.5.0 / 2022-04-05
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
