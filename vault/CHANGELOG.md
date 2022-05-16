@@ -1,5 +1,8 @@
 # CHANGELOG - Vault
 
+## 3.2.1-beta.1 / 2022-05-16
+
+
 ## 3.2.0 / 2022-05-11
 
 * [Added] Add `vault.replication.wal.gc.*` metrics. See [#11984](https://github.com/DataDog/integrations-core/pull/11984).
