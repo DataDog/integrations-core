@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog-Cluster-Agent
 
+## 2.2.0 / 2022-05-15
+
+* [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
+* [Added] Add endpoint checks and AD metrics. See [#11782](https://github.com/DataDog/integrations-core/pull/11782).
+
 ## 2.1.0 / 2022-04-05
 
 * [Added] Collect datadog_cluster_agent.cluster_checks.configs_info metric. See [#11757](https://github.com/DataDog/integrations-core/pull/11757).

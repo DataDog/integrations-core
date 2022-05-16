@@ -1,5 +1,11 @@
 # CHANGELOG - OpenMetrics
 
+## 2.2.0 / 2022-05-15
+
+* [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
+* [Fixed] Don't tag by endpoint on default config. See [#11966](https://github.com/DataDog/integrations-core/pull/11966).
+* [Fixed] Fix incorrect OpenMetrics V2 check exposition format HTTP header. See [#11899](https://github.com/DataDog/integrations-core/pull/11899). Thanks [jalaziz](https://github.com/jalaziz).
+
 ## 2.1.0 / 2022-04-05
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).

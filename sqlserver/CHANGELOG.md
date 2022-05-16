@@ -1,5 +1,17 @@
 # CHANGELOG - sqlserver
 
+## 8.0.0 / 2022-05-15
+
+* [Added] Add AlwaysOn metrics. See [#11979](https://github.com/DataDog/integrations-core/pull/11979).
+* [Added] sqlserver: Add option to keep aliases in sql server (`keep_sql_alias`). See [#12020](https://github.com/DataDog/integrations-core/pull/12020).
+* [Added] Add support to ingest cloud_metadata for DBM host linking. See [#11982](https://github.com/DataDog/integrations-core/pull/11982).
+* [Added] Add static server OS metrics. See [#11864](https://github.com/DataDog/integrations-core/pull/11864).
+* [Fixed] Don't use connection resiliency for older versions of sqlserver and update valid driver list. See [#12026](https://github.com/DataDog/integrations-core/pull/12026).
+* [Fixed] Fix uncommented parent options. See [#12013](https://github.com/DataDog/integrations-core/pull/12013).
+* [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
+* [Fixed] Fix missing object_name for index fragmentation metrics. See [#11986](https://github.com/DataDog/integrations-core/pull/11986).
+* [Changed] Remove execution plan `user_name` attribute. See [#12007](https://github.com/DataDog/integrations-core/pull/12007).
+
 ## 7.6.2 / 2022-04-20
 
 * [Fixed] Fix activity and plan host reporting. See [#11853](https://github.com/DataDog/integrations-core/pull/11853).

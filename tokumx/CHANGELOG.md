@@ -1,5 +1,10 @@
 # CHANGELOG - tokumx
 
+## 3.2.0 / 2022-05-15
+
+* [Added] Add metric_patterns options to filter all metric submission with a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
+
 ## 3.1.1 / 2022-02-23
 
 * [Fixed] Properly indicate Python constraints. See [#11555](https://github.com/DataDog/integrations-core/pull/11555).

@@ -1,5 +1,9 @@
 # CHANGELOG - pgbouncer
 
+## 4.2.1 / 2022-05-15
+
+* [Fixed] Handle errors for individual rows. See [#11993](https://github.com/DataDog/integrations-core/pull/11993).
+
 ## 4.2.0 / 2022-04-05
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).

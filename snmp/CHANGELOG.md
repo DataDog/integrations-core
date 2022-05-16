@@ -1,5 +1,12 @@
 # CHANGELOG - snmp
 
+## 5.8.0 / 2022-05-15
+
+* [Added] Add memory and cpu abstract metrics. See [#11781](https://github.com/DataDog/integrations-core/pull/11781).
+* [Fixed] Fix meraki profile mac address. See [#11871](https://github.com/DataDog/integrations-core/pull/11871).
+* [Fixed] Add format mac_address to profile interface metadata. See [#11870](https://github.com/DataDog/integrations-core/pull/11870).
+* [Fixed] Updating check documentation for timeout and retries. See [#11848](https://github.com/DataDog/integrations-core/pull/11848).
+
 ## 5.7.0 / 2022-04-05
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).

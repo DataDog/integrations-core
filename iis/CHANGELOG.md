@@ -1,5 +1,9 @@
 # CHANGELOG - iis
 
+## 2.16.2 / 2022-05-15
+
+* [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
+
 ## 2.16.1 / 2022-05-04
 
 * [Fixed] Remove http patch requests per second metric. See [#11823](https://github.com/DataDog/integrations-core/pull/11823).
