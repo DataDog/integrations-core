@@ -195,7 +195,9 @@ class MySql(AgentCheck):
                     tags = tags + self._get_runtime_aurora_tags(db)
 
                 self.check_performance_schema_enabled(db)
-                self.check_userstat_enabled(db)
+
+                if self._config.table_rows_stats_enabled:
+                    self.check_userstat_enabled(db)
 
                 # Metric collection
                 if not self._config.only_custom_queries:
