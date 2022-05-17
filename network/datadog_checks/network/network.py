@@ -1423,7 +1423,9 @@ class Network(AgentCheck):
         drvinfo = array.array('B', struct.pack('I', ETHTOOL_GDRVINFO))
         # Struct in
         # https://github.com/torvalds/linux/blob/448f413a8bdc727d25d9a786ccbdb974fb85d973/include/uapi/linux/ethtool.h#L187-L200
-        drvinfo.extend([0] * (1 + 32 + 32 + 32 + 32 + 32 + 12 + 5))
+        # Total size: 196
+        # Same result as printf("%zu\n", sizeof(struct ethtool_drvinfo));
+        drvinfo.extend([0] * (4 + 32 + 32 + 32 + 32 + 32 + 12 + 5 * 4))
         self._send_ethtool_ioctl(iface, sckt, drvinfo)
         driver_name = self._byte_array_to_string(drvinfo[4 : 4 + 32])
         driver_version = self._byte_array_to_string(drvinfo[4 + 32 : 32 + 32])
