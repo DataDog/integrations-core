@@ -29,6 +29,14 @@ def test_check(aggregator, instance, dd_run_check):
     aggregator.assert_metrics_using_metadata(metadata_metrics, check_submission_type=True)
 
 
+def test_check_invalid_varnishadm(aggregator, instance, dd_run_check):
+    instance['varnishadm'] = 'invalid-thing'
+    check = Varnish(common.CHECK_NAME, {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_service_check(Varnish.SERVICE_CHECK_NAME, count=0)
+
+
 def test_inclusion_filter(aggregator, instance, dd_run_check):
     instance['metrics_filter'] = ['SMA.*']
 
