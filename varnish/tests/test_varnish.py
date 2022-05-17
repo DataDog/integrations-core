@@ -30,6 +30,7 @@ def test_check(aggregator, instance, dd_run_check):
 
 
 def test_check_invalid_varnishadm(aggregator, instance, dd_run_check):
+    # Note: this test may prompt you to enter a password when locally, if so, enter anything and it will pass
     instance['varnishadm'] = 'invalid-thing'
     check = Varnish(common.CHECK_NAME, {}, [instance])
     dd_run_check(check)
