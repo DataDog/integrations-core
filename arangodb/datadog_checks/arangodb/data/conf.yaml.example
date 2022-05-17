@@ -64,14 +64,14 @@ instances:
     ## 1. If the item is a string, then it represents the exposed metric name, and
     ##    the sent metric name will be identical. For example:
     ##
-    ##      metrics:
+    ##      extra_metrics:
     ##      - <METRIC_1>
     ##      - <METRIC_2>
     ## 2. If the item is a mapping, then the keys represent the exposed metric names.
     ##
     ##      a. If a value is a string, then it represents the sent metric name. For example:
     ##
-    ##           metrics:
+    ##           extra_metrics:
     ##           - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
     ##           - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
     ##      b. If a value is a mapping, then it must have a `name` and/or `type` key.
@@ -79,7 +79,7 @@ instances:
     ##         the metric should be handled, overriding any type information the endpoint
     ##         may provide. For example:
     ##
-    ##           metrics:
+    ##           extra_metrics:
     ##           - <EXPOSED_METRIC_1>:
     ##               name: <SENT_METRIC_1>
     ##               type: <METRIC_TYPE_1>
@@ -97,7 +97,7 @@ instances:
     ##
     ## Regular expressions may be used to match the exposed metric names, for example:
     ##
-    ##   metrics:
+    ##   extra_metrics:
     ##   - ^network_(ingress|egress)_.+
     ##   - .+:
     ##       type: gauge
