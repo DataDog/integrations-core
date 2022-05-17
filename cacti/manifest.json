@@ -13,7 +13,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Forward your Cacti RRDs to Datadog for richer alerting and beautiful graphing.",
+    "description": "Rich alerting and beautiful graphing for your Cacti RRDs.",
     "title": "Datadog-Cacti Integration",
     "media": []
   },
