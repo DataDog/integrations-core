@@ -1,5 +1,9 @@
 # CHANGELOG - istio
 
+## 4.2.1 / 2022-05-18
+
+* [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
+
 ## 4.2.0 / 2022-05-15
 
 * [Added] Add more tags to default exclude_labels and disable tag_by_endpoint in autoconf. See [#11953](https://github.com/DataDog/integrations-core/pull/11953).

@@ -1,5 +1,9 @@
 # CHANGELOG - Aerospike
 
+## 1.16.1 / 2022-05-18
+
+* [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
+
 ## 1.16.0 / 2022-05-15
 
 * [Added] Add OpenMetricsV2 Implementation. See [#11845](https://github.com/DataDog/integrations-core/pull/11845).
