@@ -190,4 +190,4 @@ def migrate_manifest(repo_name, integration, to_version):
             migrated_manifest.set_path(f"/pricing/{idx}/short_description", TODO_FILL_IN)
             migrated_manifest.set_path(f"/pricing/{idx}/includes_assets", True)
 
-    write_file(get_manifest_file(integration), f"{json.dumps(migrated_manifest, indent=2)}\n")
+    write_file(get_manifest_file(integration), json.dumps(migrated_manifest, indent=2))
