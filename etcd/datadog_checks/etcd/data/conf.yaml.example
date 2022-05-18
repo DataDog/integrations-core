@@ -47,7 +47,8 @@ instances:
 
   -
     ## @param use_preview - boolean - optional - default: true
-    ## Whether or not to preview the new version of the check supporting only ETCD 3+
+    ## Enable this option to run the Prometheus-based check of etcd.
+    ## Note: this requires etcd v3+.
     #
     # use_preview: true
 
