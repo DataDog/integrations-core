@@ -199,10 +199,11 @@ def test_check_skip_reset_queue_metrics(
     check = get_check(instance_collect_all)
     dd_run_check(check)
 
-    aggregator.assert_metric('ibm_mq.queue.high_q_depth', count=collect_reset_queue_metrics)
-    aggregator.assert_metric('ibm_mq.queue.msg_deq_count', count=collect_reset_queue_metrics)
-    aggregator.assert_metric('ibm_mq.queue.msg_enq_count', count=collect_reset_queue_metrics)
-    aggregator.assert_metric('ibm_mq.queue.time_since_reset', count=collect_reset_queue_metrics)
+    for metric, _ in common.RESET_QUEUE_METRICS:
+        if collect_reset_queue_metrics:
+            aggregator.assert_metric(metric, at_least=1)
+        else:
+            aggregator.assert_metric(metric, count=0)
 
 
 @pytest.mark.parametrize(
