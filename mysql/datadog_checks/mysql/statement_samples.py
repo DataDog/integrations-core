@@ -22,6 +22,7 @@ from datadog_checks.base.utils.db.utils import (
     obfuscate_sql_with_metadata,
 )
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.tracking import tracked_method
 
 from .util import DatabaseConfigurationError, StatementTruncationState, get_truncation_state, warning_with_tags
 
@@ -240,6 +241,10 @@ ExplainState = namedtuple('ExplainState', ['strategy', 'error_code', 'error_mess
 EMPTY_EXPLAIN_STATE = ExplainState(strategy=None, error_code=None, error_message=None)
 
 
+def agent_check_getter(self):
+    return self._check
+
+
 class MySQLStatementSamples(DBMAsyncJob):
     """
     Collects statement samples and execution plans.
@@ -402,6 +407,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             )
             raise
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_new_events_statements(self, events_statements_table, row_limit):
         # Select the most recent events with a bias towards events which have higher wait times
         start = time.time()
@@ -584,6 +590,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             except Exception:
                 self._log.debug("Failed to collect plan for statement", exc_info=1)
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_enabled_performance_schema_consumers(self):
         """
         Returns the list of available performance schema consumers
@@ -594,6 +601,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             self._cursor_run(cursor, ENABLED_STATEMENTS_CONSUMERS_QUERY)
             return set([r[0] for r in cursor.fetchall()])
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _enable_events_statements_consumers(self):
         """
         Enable events statements consumers
@@ -677,6 +685,7 @@ class MySQLStatementSamples(DBMAsyncJob):
     def run_job(self):
         self._collect_statement_samples()
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_statement_samples(self):
         self._read_version_info()
         self._log.debug("collecting statement samples")
@@ -851,6 +860,7 @@ class MySQLStatementSamples(DBMAsyncJob):
 
         return None, error_states
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _run_explain(self, schema, cursor, statement, obfuscated_statement):
         """
         Run the explain using the EXPLAIN statement
@@ -863,6 +873,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         )
         return cursor.fetchone()[0]
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _run_explain_procedure(self, schema, cursor, statement, obfuscated_statement):
         """
         Run the explain by calling the stored procedure if available.
@@ -891,6 +902,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                 )
             raise
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _run_fully_qualified_explain_procedure(self, schema, cursor, statement, obfuscated_statement):
         """
         Run the explain by calling the fully qualified stored procedure if available.

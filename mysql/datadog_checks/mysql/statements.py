@@ -16,6 +16,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.tracking import tracked_method
 
 from .util import DatabaseConfigurationError, warning_with_tags
 
@@ -51,6 +52,10 @@ def _row_key(row):
     :return: a tuple uniquely identifying this row
     """
     return row['schema_name'], row['query_signature']
+
+
+def agent_check_getter(self):
+    return self._check
 
 
 class MySQLStatementMetrics(DBMAsyncJob):
@@ -109,6 +114,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
     def run_job(self):
         self.collect_per_statement_metrics()
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def collect_per_statement_metrics(self):
         # Detect a database misconfiguration by checking if the performance schema is enabled since mysql
         # just returns no rows without errors if the performance schema is disabled
@@ -158,6 +164,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
         rows = self._state.compute_derivative_rows(monotonic_rows, METRICS_COLUMNS, key=_row_key)
         return rows
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _query_summary_per_statement(self):
         # type: () -> List[PyMysqlRow]
         """
