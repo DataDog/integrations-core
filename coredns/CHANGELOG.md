@@ -1,5 +1,9 @@
 # CHANGELOG - CoreDNS
 
+## 2.2.1 / 2022-05-18
+
+* [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
+
 ## 2.2.0 / 2022-05-15
 
 * [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
