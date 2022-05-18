@@ -24,6 +24,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
+from datadog_checks.base.utils.tracking import tracked_method
 
 from .util import DatabaseConfigurationError, warning_with_tags
 from .version_utils import V9_6
@@ -141,6 +142,10 @@ DEFAULT_COLLECTION_INTERVAL = 1
 DEFAULT_ACTIVITY_COLLECTION_INTERVAL = 10
 
 
+def agent_check_getter(self):
+    return self._check
+
+
 class PostgresStatementSamples(DBMAsyncJob):
     """
     Collects statement samples and execution plans.
@@ -218,6 +223,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             t.extend(self._tags_no_db)
         return t
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_active_connections(self):
         start_time = time.time()
         extra_filters, params = self._get_extra_filters_and_params()
@@ -233,6 +239,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return [dict(row) for row in rows]
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_new_pg_stat_activity(self, available_activity_columns):
         start_time = time.time()
         extra_filters, params = self._get_extra_filters_and_params(filter_stale_idle_conn=True)
@@ -267,6 +274,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._pg_stat_activity_cols = self._get_available_activity_columns(expected_cols)
         return self._pg_stat_activity_cols
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_available_activity_columns(self, all_expected_columns):
         with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             cursor.execute(
@@ -366,6 +374,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._tags_no_db = [t for t in self._tags if not t.startswith('db:')]
         self._collect_statement_samples()
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_statement_samples(self):
         start_time = time.time()
         pg_activity_cols = self._get_pg_stat_activity_cols_cached(PG_STAT_ACTIVITY_COLS)
@@ -496,6 +505,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         return db_explain_error, err
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
         with self._check._get_db(dbname).cursor() as cursor:
