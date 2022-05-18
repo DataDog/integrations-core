@@ -28,6 +28,19 @@ VAULT_VERSION = os.environ['VAULT_VERSION']
 
 AUTH_TYPE = os.environ['AUTH_TYPE']
 
+MERKLE_WAL_METRICS = [
+    'vault.vault.merkle.flushdirty',
+    'vault.vault.merkle.savecheckpoint',
+    'vault.vault.wal.deletewals',
+    'vault.vault.wal.persistwals',
+    'vault.vault.wal.flushready',
+]
+
+MERKLE_WAL_QUANTILES = [
+    'vault.vault.merkle.flushdirty',
+    'vault.vault.merkle.savecheckpoint',
+]
+
 
 def get_vault_server_config_file():
     if AUTH_TYPE == 'noauth':
