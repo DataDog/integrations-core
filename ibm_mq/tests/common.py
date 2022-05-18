@@ -275,7 +275,7 @@ METRICS = (
         ('ibm_mq.channel.channels', GAUGE),
         ('ibm_mq.channel.count', GAUGE),
     ]
-    + DEFAULT_QUEUE_METRICS
+    + QUEUE_METRICS
     + QUEUE_STATUS_METRICS
     + CHANNEL_METRICS
     + CHANNEL_STATUS_METRICS
