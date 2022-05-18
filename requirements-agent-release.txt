@@ -52,7 +52,7 @@ datadog-gitlab==5.2.0
 datadog-glusterfs==1.5.0; sys_platform == 'linux2'
 datadog-go-expvar==2.1.0
 datadog-gunicorn==2.3.0; sys_platform != 'win32'
-datadog-haproxy==4.3.0
+datadog-haproxy==4.3.1
 datadog-harbor==2.1.0
 datadog-hazelcast==2.0.1
 datadog-hdfs-datanode==3.1.0; sys_platform != 'win32'
