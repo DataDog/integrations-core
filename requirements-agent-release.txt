@@ -74,7 +74,7 @@ datadog-jboss-wildfly==2.0.1
 datadog-journald==1.1.0
 datadog-kafka-consumer==2.15.0
 datadog-kafka==2.12.1
-datadog-kong==2.1.0
+datadog-kong==2.1.1
 datadog-kube-apiserver-metrics==3.2.0
 datadog-kube-controller-manager==4.2.0
 datadog-kube-dns==3.2.0
