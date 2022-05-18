@@ -188,15 +188,22 @@ def test_check_all(aggregator, get_check, instance_collect_all, seed_data, dd_ru
     assert_all_metrics(aggregator)
 
 
-def test_check_skip_reset_queue_metrics(aggregator, get_check, instance_collect_all, seed_data, dd_run_check):
-    instance_collect_all['collect_reset_queue_metrics'] = False
+@pytest.mark.parametrize(
+    'collect_reset_queue_metrics',
+    [False, True],
+)
+def test_check_skip_reset_queue_metrics(
+    collect_reset_queue_metrics, aggregator, get_check, instance_collect_all, seed_data, dd_run_check
+):
+    instance_collect_all['collect_reset_queue_metrics'] = collect_reset_queue_metrics
     check = get_check(instance_collect_all)
     dd_run_check(check)
 
-    aggregator.assert_metric('ibm_mq.queue.high_q_depth', count=0)
-    aggregator.assert_metric('ibm_mq.queue.msg_deq_count', count=0)
-    aggregator.assert_metric('ibm_mq.queue.msg_enq_count', count=0)
-    aggregator.assert_metric('ibm_mq.queue.time_since_reset', count=0)
+    expected_count = int(collect_reset_queue_metrics)
+    aggregator.assert_metric('ibm_mq.queue.high_q_depth', count=expected_count)
+    aggregator.assert_metric('ibm_mq.queue.msg_deq_count', count=expected_count)
+    aggregator.assert_metric('ibm_mq.queue.msg_enq_count', count=expected_count)
+    aggregator.assert_metric('ibm_mq.queue.time_since_reset', count=expected_count)
 
 
 @pytest.mark.parametrize(
