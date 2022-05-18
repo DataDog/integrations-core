@@ -450,6 +450,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             return False
         return True
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _get_db_explain_setup_state(self, dbname):
         # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
         try:
@@ -505,7 +506,6 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         return db_explain_error, err
 
-    @tracked_method(agent_check_getter=agent_check_getter)
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
         with self._check._get_db(dbname).cursor() as cursor:
@@ -551,6 +551,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
         return plan_dict, explain_err_code, err_msg
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _run_explain_safe(self, dbname, statement, obfuscated_statement, query_signature):
         # type: (str, str, str, str) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[str]]
         if not self._can_explain_statement(obfuscated_statement):
