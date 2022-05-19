@@ -40,6 +40,7 @@ def test_new_check_test(integration_type, installable):
         )
         if installable:
             run_command([sys.executable, '-m', 'pip', 'install', check_path], capture=True, check=True)
+
             with chdir(check_path):
                 ignored_env_vars = [TESTING_PLUGIN, 'PYTEST_ADDOPTS']
                 ignored_env_vars.extend(ev for ev in os.environ if ev.startswith(E2E_PREFIX))
