@@ -63,7 +63,7 @@ qstats_aggr as (
     left join sys.databases D on S.dbid = D.database_id
     group by query_hash, query_plan_hash, S.dbid, D.name
 )
-select text, * from qstats_aggr
+select text, encrypted as is_encrypted, * from qstats_aggr
     cross apply sys.dm_exec_sql_text(plan_handle)
 """
 
@@ -77,12 +77,12 @@ with qstats_aggr as (
         where last_execution_time > dateadd(second, -?, getdate())
         group by query_hash, query_plan_hash
 )
-select text, * from qstats_aggr
+select text, encrypted as is_encrypted, * from qstats_aggr
     cross apply sys.dm_exec_sql_text(plan_handle)
 """
 
 PLAN_LOOKUP_QUERY = """\
-select cast(query_plan as nvarchar(max)) as query_plan
+select cast(query_plan as nvarchar(max)) as query_plan, encrypted as is_encrypted
 from sys.dm_exec_query_plan(CONVERT(varbinary(max), ?, 1))
 """
 
@@ -376,10 +376,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self.log.debug("Running query [%s] %s", PLAN_LOOKUP_QUERY, (plan_handle,))
         cursor.execute(PLAN_LOOKUP_QUERY, ("0x" + plan_handle,))
         result = cursor.fetchall()
-        if not result:
+        if not result or not result[0]:
             self.log.debug("failed to loan plan, it must have just been expired out of the plan cache")
-            return None
-        return result[0][0]
+            return None, None
+        return result[0]
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_plans(self, rows, cursor, deadline):
@@ -390,11 +390,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 return
             plan_key = (row['query_signature'], row['query_hash'], row['query_plan_hash'])
             if self._seen_plans_ratelimiter.acquire(plan_key):
-                raw_plan = self._load_plan(row['plan_handle'], cursor)
+                raw_plan, is_encrypted = self._load_plan(row['plan_handle'], cursor)
                 obfuscated_plan, collection_errors = None, None
 
                 try:
-                    obfuscated_plan = obfuscate_xml_plan(raw_plan, self.check.obfuscator_options)
+                    if raw_plan:
+                        obfuscated_plan = obfuscate_xml_plan(raw_plan, self.check.obfuscator_options)
                 except Exception as e:
                     self.log.debug(
                         (
@@ -429,9 +430,11 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                             "definition": obfuscated_plan,
                             "signature": row['query_plan_hash'],
                             "collection_errors": collection_errors,
+                            "is_encrypted": is_encrypted,
                         },
                         "query_signature": row['query_signature'],
                         "statement": row['text'],
+                        "is_statement_encrypted": row['is_encrypted'],
                         "metadata": {
                             "tables": row['dd_tables'],
                             "commands": row['dd_commands'],

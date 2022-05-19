@@ -66,6 +66,7 @@ BEGIN
 END;
 GO
 GRANT EXECUTE on pyStoredProc to datadog;
+GRANT EXECUTE on pyStoredProc to bob;
 GO
 
 CREATE PROCEDURE exampleProcWithoutNocount AS
@@ -79,4 +80,12 @@ BEGIN
 END;
 GO
 GRANT EXECUTE on exampleProcWithoutNocount to datadog;
+GRANT EXECUTE on exampleProcWithoutNocount to bob;
 GO
+
+CREATE OR ALTER PROCEDURE encryptedProc WITH ENCRYPTION AS
+BEGIN
+    select count(*) from sys.databases;
+END;
+GO
+GRANT EXECUTE on encryptedProc to bob;

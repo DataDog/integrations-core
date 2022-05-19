@@ -97,13 +97,14 @@ def test_get_statement_metrics_query_cached(aggregator, dbm_instance, caplog):
 
 
 test_statement_metrics_and_plans_parameterized = (
-    "database,query,match_pattern,param_groups,disable_secondary_tags",
+    "database,query,match_pattern,param_groups,is_encrypted,disable_secondary_tags",
     [
         [
             "datadog_test",
             "SELECT * FROM ϑings",
             r"SELECT \* FROM ϑings",
             ((),),
+            False,
             False,
         ],
         [
@@ -115,6 +116,7 @@ test_statement_metrics_and_plans_parameterized = (
                 (2,),
                 (3,),
             ),
+            False,
             False,
         ],
         [
@@ -127,6 +129,7 @@ test_statement_metrics_and_plans_parameterized = (
                 (3,),
             ),
             False,
+            False,
         ],
         [
             "datadog_test",
@@ -138,6 +141,7 @@ test_statement_metrics_and_plans_parameterized = (
                 (3, "bill"),
             ),
             False,
+            False,
         ],
         [
             "datadog_test",
@@ -148,7 +152,16 @@ test_statement_metrics_and_plans_parameterized = (
                 (2,),
                 (3,),
             ),
+            False,
             True,
+        ],
+        [
+            "master",
+            "EXEC encryptedProc",
+            None,
+            ((),),
+            True,
+            False,
         ],
     ],
 )
@@ -165,6 +178,7 @@ def test_statement_metrics_and_plans(
     database,
     query,
     param_groups,
+    is_encrypted,
     disable_secondary_tags,
     match_pattern,
     caplog,
@@ -212,12 +226,20 @@ def test_statement_metrics_and_plans(
     # metrics rows
     sqlserver_rows = payload.get('sqlserver_rows', [])
     assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
-    matching_rows = [r for r in sqlserver_rows if re.match(match_pattern, r['text'], re.IGNORECASE)]
+    if match_pattern:
+        matching_rows = [r for r in sqlserver_rows if re.match(match_pattern, r['text'], re.IGNORECASE)]
+    else:
+        matching_rows = [r for r in sqlserver_rows if not r['text']]
     assert len(matching_rows) >= 1, "expected at least one matching metrics row"
     total_execution_count = sum([r['execution_count'] for r in matching_rows])
     assert total_execution_count == len(param_groups), "wrong execution count"
     for row in matching_rows:
-        assert row['query_signature'], "missing query signature"
+        if is_encrypted:
+            # we get NULL text for encrypted statements so we have no calculated query signature
+            assert not row['query_signature']
+        else:
+            assert row['query_signature'], "missing query signature"
+        assert row['is_encrypted'] == is_encrypted
         if disable_secondary_tags:
             assert 'database_name' not in row
         else:
@@ -229,7 +251,10 @@ def test_statement_metrics_and_plans(
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     assert dbm_samples, "should have collected at least one sample"
 
-    matching_samples = [s for s in dbm_samples if re.match(match_pattern, s['db']['statement'], re.IGNORECASE)]
+    if match_pattern:
+        matching_samples = [s for s in dbm_samples if re.match(match_pattern, s['db']['statement'], re.IGNORECASE)]
+    else:
+        matching_samples = [s for s in dbm_samples if not s['db']['statement']]
     assert matching_samples, "should have collected some matching samples"
 
     # validate common host fields
@@ -244,15 +269,18 @@ def test_statement_metrics_and_plans(
                 set(event['ddtags'].split(',')) == expected_instance_tags_with_db
             ), "wrong instance tags for plan event"
 
-    plan_events = [s for s in dbm_samples if s['dbm_type'] == "plan"]
+    plan_events = [s for s in matching_samples if s['dbm_type'] == "plan"]
     assert plan_events, "should have collected some plans"
 
     for event in plan_events:
-        assert event['db']['plan']['definition'], "event plan definition missing"
-        parsed_plan = ET.fromstring(event['db']['plan']['definition'])
-        assert parsed_plan.tag.endswith("ShowPlanXML"), "plan does not match expected structure"
+        if is_encrypted:
+            assert not event['db']['plan']['definition']
+        else:
+            assert event['db']['plan']['definition'], "event plan definition missing"
+            parsed_plan = ET.fromstring(event['db']['plan']['definition'])
+            assert parsed_plan.tag.endswith("ShowPlanXML"), "plan does not match expected structure"
 
-    fqt_events = [s for s in dbm_samples if s['dbm_type'] == "fqt"]
+    fqt_events = [s for s in matching_samples if s['dbm_type'] == "fqt"]
     assert fqt_events, "should have collected some FQT events"
 
     # internal debug metrics

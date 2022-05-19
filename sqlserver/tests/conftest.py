@@ -172,6 +172,7 @@ class SelfHealingConnection:
         for attempt in range(retries):
             try:
                 logging.info("executing query with retries. query='%s' params=%s attempt=%s", query, params, attempt)
+
                 with self.conn.cursor() as cursor:
                     if database:
                         cursor.execute("USE {}".format(database))
