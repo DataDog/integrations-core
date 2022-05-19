@@ -52,10 +52,11 @@ def test_new_check_test(integration_type, installable):
             result = run_command(
                 [sys.executable, '-m', 'datadog_checks.dev', 'test', '-s', 'my_check'], capture=True, check=True
             )
+            print(result.stdout)
             # `ddev test` will not fail if the provided check name doesn't correspond to an existing integration.
             # Instead, it will log a message. So we test for that message to verify style checks ran at all.
             assert 'Nothing to test!' not in result.stdout
-
+            print(result.stdout)
             result = run_command(
                 [sys.executable, '-m', 'pip', 'uninstall', '-y', 'datadog-my-check'], capture=True, check=True
             )
@@ -63,6 +64,7 @@ def test_new_check_test(integration_type, installable):
             # could not be found). Instead, it will log a warning, so we test for that warning to verify the package was
             # successfully uninstalled.
             # See: https://github.com/pypa/pip/issues/3016
+            print(result.stdout)
             assert 'WARNING: Skipping' not in result.stdout
     finally:
         remove_path(check_path)
