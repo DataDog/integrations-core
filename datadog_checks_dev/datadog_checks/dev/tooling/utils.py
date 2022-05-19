@@ -288,6 +288,13 @@ def get_metadata_file(check_name):
     return os.path.join(get_root(), check_name, path)
 
 
+def get_display_name(check_name, manifest=None):
+    manifest = manifest or load_manifest(check_name)
+    return manifest.get('display_name') or manifest.get('assets', {}).get('integration', {}).get(
+        'source_type_name', check_name
+    )
+
+
 def get_jmx_metrics_file(check_name):
     path = os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'data', 'metrics.yaml')
     return path, file_exists(path)
