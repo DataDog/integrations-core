@@ -142,12 +142,12 @@ def remove_path(path):
         shutil.rmtree(path, ignore_errors=False)
     # TODO: Remove FileNotFoundError (and noqa: B014) when Python 2 is removed
     # In Python 3, IOError have been merged into OSError
-    except (FileNotFoundError, OSError) as e:  # noqa: B014
+    except (FileNotFoundError, OSError):  # noqa: B014
         try:
             os.remove(path)
         # TODO: Remove FileNotFoundError (and noqa: B014) when Python 2 is removed
         # In Python 3, IOError have been merged into OSError
-        except (FileNotFoundError, OSError, PermissionError) as e:  # noqa: B014
+        except (FileNotFoundError, OSError, PermissionError):  # noqa: B014
             pass
 
 
