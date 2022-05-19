@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "teradata",
   "metric_prefix": "teradata.",
-  "metric_to_check": "teradata.disk_space.curr_perm",
+  "metric_to_check": "teradata.disk_space.curr_perm.total",
   "creates_events": false,
   "short_description": "Monitor the health and performance of your Teradata Vantage Database.",
   "guid": "8205988e-888a-4d31-abf0-753720d772a7",
