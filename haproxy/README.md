@@ -81,9 +81,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 | `<INIT_CONFIG>`      | blank or `{}`                                                                           |
 | `<INSTANCE_CONFIG>`  | `{"openmetrics_endpoint": "http://%%host%%:<PORT>/metrics", "use_openmetrics": "true"}` |
 
-##### Kubernetes Deployment Example
+##### Kubernetes Deployment example
 
-Add the pod annotations under .spec.template.metadata for a Deployment:
+Add pod annotations under `.spec.template.metadata` for a Deployment:
 
 ```yaml
 apiVersion: apps/v1
