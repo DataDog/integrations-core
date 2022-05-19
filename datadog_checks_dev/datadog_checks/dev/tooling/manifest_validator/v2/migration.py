@@ -171,13 +171,8 @@ def migrate_manifest(repo_name, integration, to_version):
     # Write the manifest back to disk
     migrated_manifest.set_path("/classifier_tags", classifier_tags)
 
-    # Temporarily required official fields
-    if repo_name == "integrations-core":
-        migrated_manifest.set_path("/author/name", "Datadog")
-        migrated_manifest.set_path("/author/homepage", "https://www.datadoghq.com")
-        migrated_manifest.set_path("/author/sales_email", "info@datadoghq.com")
-    # Marketplace-only fields
-    elif repo_name == "marketplace":
+    # Marketplace-only fields:
+    if repo_name == "marketplace":
         migrated_manifest.set_path("/author/vendor_id", TODO_FILL_IN)
         migrated_manifest.set_path("/author/sales_email", loaded_manifest.get_path("/terms/legal_email"))
 
@@ -190,4 +185,4 @@ def migrate_manifest(repo_name, integration, to_version):
             migrated_manifest.set_path(f"/pricing/{idx}/short_description", TODO_FILL_IN)
             migrated_manifest.set_path(f"/pricing/{idx}/includes_assets", True)
 
-    write_file(get_manifest_file(integration), f"{json.dumps(migrated_manifest, indent=2)}\n")
+    write_file(get_manifest_file(integration), json.dumps(migrated_manifest, indent=2))

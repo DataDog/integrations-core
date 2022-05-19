@@ -7,7 +7,7 @@ import yaml
 from ....fs import file_exists, path_join, read_file, write_file
 from ...constants import get_root
 from ...testing import coverage_sources
-from ...utils import code_coverage_enabled, get_display_name, get_testable_checks
+from ...utils import code_coverage_enabled, get_testable_checks, load_manifest
 from ..console import (
     CONTEXT_SETTINGS,
     abort,
@@ -124,7 +124,9 @@ def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
         if check_name in cached_display_names:
             display_name = cached_display_names[check_name]
         else:
-            display_name = repo_data['display_name_overrides'].get(check_name, get_display_name(check_name))
+            display_name = repo_data['display_name_overrides'].get(
+                check_name, load_manifest(check_name).get('display_name', check_name)
+            )
             cached_display_names[check_name] = display_name
 
         job_name = get_attribute_from_job(job, 'displayName')
@@ -181,7 +183,7 @@ def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
                 job = {
                     'checkName': missing_check,
                     'displayName': repo_data['display_name_overrides'].get(
-                        missing_check, get_display_name(missing_check)
+                        missing_check, load_manifest(missing_check).get('display_name', missing_check)
                     ),
                     'os': 'linux',
                 }
@@ -273,7 +275,9 @@ def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_name
         if check_name in cached_display_names:
             display_name = cached_display_names[check_name].replace(' ', '_')
         else:
-            display_name = repo_data['display_name_overrides'].get(check_name, get_display_name(check_name))
+            display_name = repo_data['display_name_overrides'].get(
+                check_name, load_manifest(check_name).get('display_name', check_name)
+            )
             display_name = display_name.replace(' ', '_')
             cached_display_names[check_name] = display_name
 
@@ -309,7 +313,9 @@ def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_name
             echo_warning(message)
 
             for missing_check in sorted(missing_projects):
-                display_name = repo_data['display_name_overrides'].get(missing_check, get_display_name(missing_check))
+                display_name = repo_data['display_name_overrides'].get(
+                    missing_check, load_manifest(missing_check).get('display_name', missing_check)
+                )
                 projects[display_name] = {'target': 75, 'flags': [missing_check]}
                 echo_success(f'Added project `{display_name}`')
         else:
