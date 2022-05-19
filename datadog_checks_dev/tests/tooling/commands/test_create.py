@@ -68,7 +68,4 @@ def test_new_check_test(integration_type, installable):
     finally:
         for _ in range(5):
             time.sleep(5)
-            try:
-                remove_path(check_path)
-            except Exception:
-                pass
+            remove_path(check_path)
