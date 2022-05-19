@@ -40,7 +40,6 @@ def test_new_check_test(integration_type, installable):
         )
         if installable:
             result = run_command([sys.executable, '-m', 'pip', 'install', check_path], capture=True, check=True)
-            print(result.stdout)
             with chdir(check_path):
                 ignored_env_vars = [TESTING_PLUGIN, 'PYTEST_ADDOPTS']
                 ignored_env_vars.extend(ev for ev in os.environ if ev.startswith(E2E_PREFIX))
@@ -53,11 +52,9 @@ def test_new_check_test(integration_type, installable):
             result = run_command(
                 [sys.executable, '-m', 'datadog_checks.dev', 'test', '-s', 'my_check'], capture=True, check=True
             )
-            print(result.stdout)
             # `ddev test` will not fail if the provided check name doesn't correspond to an existing integration.
             # Instead, it will log a message. So we test for that message to verify style checks ran at all.
             assert 'Nothing to test!' not in result.stdout
-            print(result.stdout)
             result = run_command(
                 [sys.executable, '-m', 'pip', 'uninstall', '-y', 'datadog-my-check'], capture=True, check=True
             )
@@ -65,12 +62,10 @@ def test_new_check_test(integration_type, installable):
             # could not be found). Instead, it will log a warning, so we test for that warning to verify the package was
             # successfully uninstalled.
             # See: https://github.com/pypa/pip/issues/3016
-            print(result.stdout)
 
             assert 'WARNING: Skipping' not in result.stdout
-            print(result.stdout)
     finally:
-        for _ in range(10):
+        for _ in range(5):
             time.sleep(5)
             try:
                 remove_path(check_path)
