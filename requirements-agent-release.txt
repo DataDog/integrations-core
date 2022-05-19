@@ -6,6 +6,7 @@ datadog-airflow==3.1.0
 datadog-amazon-msk==3.1.2
 datadog-ambari==3.1.0; sys_platform != 'win32'
 datadog-apache==4.1.0
+datadog-arangodb==1.0.1
 datadog-aspdotnet==1.11.1; sys_platform == 'win32'
 datadog-avi-vantage==3.1.1
 datadog-azure-iot-edge==3.2.0
@@ -143,6 +144,7 @@ datadog-system-swap==1.14.0
 datadog-tcp-check==4.5.0
 datadog-teamcity==2.1.0
 datadog-tenable==1.4.0
+datadog-teradata==1.0.0
 datadog-tls==2.8.0
 datadog-tokumx==3.2.0
 datadog-tomcat==1.11.1
