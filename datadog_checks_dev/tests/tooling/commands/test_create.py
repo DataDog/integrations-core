@@ -39,7 +39,7 @@ def test_new_check_test(integration_type, installable):
             check=True,
         )
         if installable:
-            result = run_command([sys.executable, '-m', 'pip', 'install', check_path], capture=True, check=True)
+            run_command([sys.executable, '-m', 'pip', 'install', check_path], capture=True, check=True)
             with chdir(check_path):
                 ignored_env_vars = [TESTING_PLUGIN, 'PYTEST_ADDOPTS']
                 ignored_env_vars.extend(ev for ev in os.environ if ev.startswith(E2E_PREFIX))
@@ -55,6 +55,7 @@ def test_new_check_test(integration_type, installable):
             # `ddev test` will not fail if the provided check name doesn't correspond to an existing integration.
             # Instead, it will log a message. So we test for that message to verify style checks ran at all.
             assert 'Nothing to test!' not in result.stdout
+            
             result = run_command(
                 [sys.executable, '-m', 'pip', 'uninstall', '-y', 'datadog-my-check'], capture=True, check=True
             )
