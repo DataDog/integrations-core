@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import sys
+import time
 
 import pytest
 
@@ -65,6 +66,7 @@ def test_new_check_test(integration_type, installable):
             # successfully uninstalled.
             # See: https://github.com/pypa/pip/issues/3016
             print(result.stdout)
+            time.sleep(5)
             assert 'WARNING: Skipping' not in result.stdout
     finally:
         remove_path(check_path)
