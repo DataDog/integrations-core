@@ -78,6 +78,12 @@ from .common import CHECK_NAME, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY
             id='TD2 auth: missing username and password',
         ),
         pytest.param(
+            {'server': 'tdserver', 'database': 'db', 'auth_mechanism': 'TD2', 'username': 'test', 'password': 'test'},
+            '',
+            True,
+            id='TD2 auth: username and password valid',
+        ),
+        pytest.param(
             {
                 'server': 'tdserver',
                 'database': 'db',
