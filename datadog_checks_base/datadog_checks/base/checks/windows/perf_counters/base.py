@@ -5,6 +5,7 @@
 # type: ignore
 from collections import ChainMap
 from contextlib import contextmanager, suppress
+import time
 
 import pywintypes
 import win32pdh
@@ -12,18 +13,25 @@ import win32pdh
 from ....config import is_affirmative
 from ....errors import ConfigTypeError, ConfigurationError
 from ....utils.functions import raise_exception
+from ....utils.agent.common import METRIC_NAMESPACE_METRICS
 from ... import AgentCheck
 from .connection import Connection
 from .counter import PerfObject
+from datadog_checks.process.lock import ReadWriteLock
 
 
 class PerfCountersBaseCheck(AgentCheck):
     SERVICE_CHECK_HEALTH = 'windows.perf.health'
+    enum_object_list_lock = ReadWriteLock()
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
 
         self.enable_health_service_check = is_affirmative(self.instance.get('enable_health_service_check', True))
+
+        # 5 min default enum object list cache duration before refresh
+        self.enum_object_list_refresh_duration = self.instance.get('enum_object_list_cache_duration', 300)
+        self.last_enum_obj_list_refresh = 0
 
         # Prevent overriding an integration's defined namespace
         self.namespace = self.__NAMESPACE__ or self.instance.get('namespace', '')
@@ -47,19 +55,35 @@ class PerfCountersBaseCheck(AgentCheck):
         with self.adopt_namespace(self.namespace):
             self._query_counters()
 
+    def should_refresh_enum_obj_list(self):
+        now = time.time()
+        return now - self.last_enum_obj_list_refresh > self.enum_object_list_refresh_duration
+
     def _query_counters(self):
         # Refresh the list of performance objects, see:
         # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectitemsa#remarks
-        try:
-            # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectsa
-            # https://mhammond.github.io/pywin32/win32pdh__EnumObjects_meth.html
-            win32pdh.EnumObjects(None, self._connection.server, win32pdh.PERF_DETAIL_WIZARD, True)
-        except pywintypes.error as error:
-            message = 'Error refreshing performance objects: {}'.format(error.strerror)
-            self.submit_health_check(self.CRITICAL, message=message)
-            self.log.error(message)
 
-            return
+        if self.should_refresh_enum_obj_list():
+            with self.enum_object_list_lock.write_lock():
+                try:
+                    # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectsa
+                    # https://mhammond.github.io/pywin32/win32pdh__EnumObjects_meth.html
+                    start_timestamp = time.time()
+                    win32pdh.EnumObjects(None, self._connection.server, win32pdh.PERF_DETAIL_WIZARD, True)
+                    end_timestamp = time.time()
+
+                    duration = end_timestamp - start_timestamp
+                    if is_affirmative(self.debug_metrics.get('win32pdh_enum_obj_refresh_duration', False)):
+                        self.gauge('{}.win32pdh.enum_obj.refresh_duration'.format(METRIC_NAMESPACE_METRICS), duration)
+
+                    self.last_enum_obj_list_refresh = end_timestamp
+
+                except pywintypes.error as error:
+                    message = 'Error refreshing performance objects: {}'.format(error.strerror)
+                    self.submit_health_check(self.CRITICAL, message=message)
+                    self.log.error(message)
+
+                    return
 
         # Avoid collection of performance objects that failed to refresh
         collection_queue = []
