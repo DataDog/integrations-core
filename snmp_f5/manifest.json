@@ -1,0 +1,40 @@
+{
+  "display_name": "F5 Networks",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "snmp_f5",
+  "metric_to_check": [
+    "snmp.sysStatMemoryUsed",
+    "snmp.sysMultiHostCpuUser",
+    "snmp.sysTcpStatConnects"
+  ],
+  "creates_events": false,
+  "short_description": "Collect SNMP metrics from your F5 network devices.",
+  "guid": "e3ce21b2-a360-47ea-b7b2-1f746f98c1f3",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-F5 Networks",
+  "categories": [
+    "monitoring",
+    "notification",
+    "network",
+    "autodiscovery",
+    "snmp"
+  ],
+  "type": "check",
+  "is_public": true,
+  "integration_id": "snmp-f5",
+  "assets": {
+    "dashboards": {
+      "F5-Networks": "assets/dashboards/f5-networks.json"
+    },
+    "saved_views": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {}
+  }
+}
