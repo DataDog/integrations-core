@@ -64,7 +64,6 @@ def test_new_check_test(integration_type, installable):
             # could not be found). Instead, it will log a warning, so we test for that warning to verify the package was
             # successfully uninstalled.
             # See: https://github.com/pypa/pip/issues/3016
-
             assert 'WARNING: Skipping' not in result.stdout
     finally:
         for _ in range(5):
