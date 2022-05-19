@@ -39,14 +39,14 @@ def test_new_check_test(integration_type, installable):
             check=True,
         )
         if installable:
-            run_command([sys.executable, '-m', 'pip', 'install', check_path], capture=True, check=True)
-
+            result = run_command([sys.executable, '-m', 'pip', 'install', check_path], capture=True, check=True)
+            print(result.stdout)
             with chdir(check_path):
                 ignored_env_vars = [TESTING_PLUGIN, 'PYTEST_ADDOPTS']
                 ignored_env_vars.extend(ev for ev in os.environ if ev.startswith(E2E_PREFIX))
 
-                with EnvVars(ignore=ignored_env_vars):
-                    run_command([sys.executable, '-m', 'pytest'], capture=True, check=True)
+                # with EnvVars(ignore=ignored_env_vars):
+                #    #run_command([sys.executable, '-m', 'pytest'], capture=True, check=True)
 
             # We only run style checks on the generated integration. Running the entire test suite would result in tox
             # creating Python environments, which would be too slow with little benefits.
@@ -68,5 +68,6 @@ def test_new_check_test(integration_type, installable):
             print(result.stdout)
             time.sleep(5)
             assert 'WARNING: Skipping' not in result.stdout
+            print(result.stdout)
     finally:
         remove_path(check_path)
