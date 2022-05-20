@@ -1,5 +1,8 @@
 # CHANGELOG - datadog_checks_base
 
+## 25.4.2-beta.1 / 2022-05-20
+
+
 ## 25.4.1 / 2022-05-15
 
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
