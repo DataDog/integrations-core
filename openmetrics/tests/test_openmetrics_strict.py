@@ -9,7 +9,10 @@ from datadog_checks.openmetrics import OpenMetricsCheck
 
 from .common import CHECK_NAME
 
-pytestmark = pytest.mark.usefixtures("strict_poll_mock")
+pytestmark = [
+    pytest.mark.usefixtures("strict_poll_mock"),
+    pytest.mark.skipif(PY2, reason='Test only available on Python 3'),
+]
 
 instance_new_strict = {
     'openmetrics_endpoint': 'http://localhost:10249/metrics',
@@ -20,7 +23,6 @@ instance_new_strict = {
 }
 
 
-@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
 def test_linkerd_v2_new_strict(aggregator, dd_run_check, caplog):
     from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
 
