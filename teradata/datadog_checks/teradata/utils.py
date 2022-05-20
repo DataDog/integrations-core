@@ -100,17 +100,17 @@ def tags_normalizer(row, query_name):
 
 
 @AgentCheck.metadata_entrypoint
-def submit_version(check, row):
+def submit_version(self, row):
     # type (Any) -> None
     """
     Example version: 17.10.03.01
     https://docs.teradata.com/r/Teradata-VantageTM-Data-Dictionary/July-2021/Views-Reference/DBCInfoV/Example-Using-DBCInfoV
     """
-    try:
-        teradata_version = row[0]
+    # import pdb; pdb.set_trace()
+    teradata_version = row[0]
+
+    if teradata_version:
         version_parts = {
             name: part for name, part in zip(('major', 'minor', 'maintenance', 'patch'), teradata_version.split('.'))
         }
-        check.set_metadata('version', teradata_version, scheme='parts', final_scheme='semver', part_map=version_parts)
-    except Exception as e:
-        check.log.warning("Could not collect version info: %s", e)
+        self.set_metadata('version', teradata_version, scheme='parts', final_scheme='semver', part_map=version_parts)
