@@ -95,7 +95,7 @@ class TeradataCheck(AgentCheck, ConfigMixin):
         self._tags.extend(global_tags)
         self._query_manager.tags = self._tags
 
-        self._tables_filter = create_tables_filter(self.config.tables)
+        self._tables_filter = create_tables_filter(self)
 
     def _execute_query_raw(self, query):
         # type: (AnyStr) -> Iterable[Sequence]
