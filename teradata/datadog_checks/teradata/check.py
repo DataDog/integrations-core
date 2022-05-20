@@ -175,12 +175,12 @@ class TeradataCheck(AgentCheck, ConfigMixin):
             and is_affirmative(self.config.collect_table_disk_metrics)
             and self._tables_filter
         ):
-            tables_filtered_row = filter_tables(self._tables_filter, unprocessed_row)
+            tables_filtered_row = filter_tables(self, unprocessed_row)
             if tables_filtered_row:
-                processed_row = tags_normalizer(tables_filtered_row, query_name)
+                processed_row = tags_normalizer(self, tables_filtered_row, query_name)
                 return processed_row
             # Discard row if empty (table is filtered out)
             return tables_filtered_row
-        processed_row = tags_normalizer(unprocessed_row, query_name)
+        processed_row = tags_normalizer(self, unprocessed_row, query_name)
         self.log.trace('Row processor returned: %s. \nFrom query: "%s"', processed_row, query_name)
         return processed_row
