@@ -30,7 +30,7 @@ class PerfCountersBaseCheck(AgentCheck):
         self.enable_health_service_check = is_affirmative(self.instance.get('enable_health_service_check', True))
 
         # 5 min default enum object list cache duration before refresh
-        self.enum_object_list_refresh_duration = self.instance.get('enum_object_list_cache_duration', 300)
+        self.enum_object_list_refresh_duration = self.instance.get('enum_object_list_cache_duration', 15)
         self.last_enum_obj_list_refresh = 0
 
         # Prevent overriding an integration's defined namespace
