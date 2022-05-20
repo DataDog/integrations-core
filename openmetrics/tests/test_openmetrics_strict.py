@@ -22,7 +22,10 @@ instance_new_strict = {
 
 @pytest.mark.skipif(PY2, reason='Test only available on Python 3')
 def test_linkerd_v2_new_strict(aggregator, dd_run_check, caplog):
+    from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
+
     check = OpenMetricsCheck('openmetrics', {}, [instance_new_strict])
+    scraper = OpenMetricsScraper(check, instance_new_strict)
     dd_run_check(check)
 
     aggregator.assert_metric(
@@ -41,5 +44,7 @@ def test_linkerd_v2_new_strict(aggregator, dd_run_check, caplog):
         metric_type=aggregator.MONOTONIC_COUNT,
     )
     aggregator.assert_all_metrics_covered()
-    assert check.http.options['headers']['Accept'] == 'application/openmetrics-text; version=0.0.1; charset=utf-8'
+
+    assert check.http.options['headers']['Accept'] == '*/*'
+    assert scraper.http.options['headers']['Accept'] == 'application/openmetrics-text; version=0.0.1; charset=utf-8'
     assert caplog.text == ''
