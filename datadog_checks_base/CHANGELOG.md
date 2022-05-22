@@ -13,7 +13,7 @@
 * [Fixed] Add the ability to exclude endpoint tag. See [#11956](https://github.com/DataDog/integrations-core/pull/11956).
 * [Fixed] Don't pin urllib3. See [#11944](https://github.com/DataDog/integrations-core/pull/11944).
 
-## 25.3.1 / 2022-05-05
+## 25.3.1 / 2022-05-05 / Agent 7.36.0
 
 * [Fixed] Fallback Kubernetes client version to 22.6 to avoid failures on non-standard POD conditions. See [#11928](https://github.com/DataDog/integrations-core/pull/11928).
 
@@ -41,7 +41,7 @@
 * [Added] Add `metric_patterns` options to filter all metric submission by a list of regexes. See [#11508](https://github.com/DataDog/integrations-core/pull/11508).
 * [Added] Upgrade `requests` dependency. See [#11603](https://github.com/DataDog/integrations-core/pull/11603).
 
-## 25.0.1 / 2022-02-24
+## 25.0.1 / 2022-02-24 / Agent 7.35.0
 
 * [Fixed] Properly raise scraper error in OpenMetrics v2. See [#11564](https://github.com/DataDog/integrations-core/pull/11564).
 

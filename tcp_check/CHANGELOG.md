@@ -4,11 +4,11 @@
 
 * [Added] Add IPv6 support. See [#11740](https://github.com/DataDog/integrations-core/pull/11740).
 
-## 4.4.0 / 2022-04-05
+## 4.4.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 
-## 4.3.0 / 2022-02-19
+## 4.3.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11444](https://github.com/DataDog/integrations-core/pull/11444).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).

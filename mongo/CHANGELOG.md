@@ -8,13 +8,13 @@
 
 * [Fixed] Fix passing in username and password as options. See [#11525](https://github.com/DataDog/integrations-core/pull/11525).
 
-## 3.2.0 / 2022-04-05
+## 3.2.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 * [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
 
-## 3.1.0 / 2022-02-19
+## 3.1.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11399](https://github.com/DataDog/integrations-core/pull/11399).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).

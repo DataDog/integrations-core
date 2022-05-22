@@ -1,11 +1,11 @@
 # CHANGELOG - nginx
 
-## 5.3.0 / 2022-04-05
+## 5.3.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 * [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
 
-## 5.2.1 / 2022-02-24
+## 5.2.1 / 2022-02-24 / Agent 7.35.0
 
 * [Fixed] Adjust endpoint detection logic for warn log. See [#11567](https://github.com/DataDog/integrations-core/pull/11567).
 

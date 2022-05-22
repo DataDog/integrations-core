@@ -5,7 +5,7 @@
 * [Fixed] Don't pin urllib3. See [#11944](https://github.com/DataDog/integrations-core/pull/11944).
 * [Removed] Delete unused `weakciphers` option path. See [#11926](https://github.com/DataDog/integrations-core/pull/11926).
 
-## 7.1.1 / 2022-04-11
+## 7.1.1 / 2022-04-11 / Agent 7.36.0
 
 * [Fixed] Improve service check message when cert is not found. See [#11793](https://github.com/DataDog/integrations-core/pull/11793).
 
@@ -22,7 +22,7 @@
 * [Fixed] Avoid reading response content unless necessary. See [#11590](https://github.com/DataDog/integrations-core/pull/11590).
 * [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
 
-## 7.0.0 / 2022-03-02
+## 7.0.0 / 2022-03-02 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11365](https://github.com/DataDog/integrations-core/pull/11365).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
