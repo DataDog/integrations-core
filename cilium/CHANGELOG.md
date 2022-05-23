@@ -8,12 +8,12 @@
 
 * [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
 
-## 2.1.0 / 2022-04-05
+## 2.1.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 * [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
 
-## 2.0.0 / 2022-02-19
+## 2.0.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11324](https://github.com/DataDog/integrations-core/pull/11324).
 * [Added] Add new operator metrics. See [#11193](https://github.com/DataDog/integrations-core/pull/11193).

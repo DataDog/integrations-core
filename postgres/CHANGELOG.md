@@ -7,7 +7,7 @@
 * [Added] Add query_truncated field on activity rows. See [#11885](https://github.com/DataDog/integrations-core/pull/11885).
 * [Fixed] Fix uncommented parent options. See [#12013](https://github.com/DataDog/integrations-core/pull/12013).
 
-## 12.3.2 / 2022-04-20
+## 12.3.2 / 2022-04-20 / Agent 7.36.0
 
 * [Fixed] Fix activity and sample host reporting. See [#11855](https://github.com/DataDog/integrations-core/pull/11855).
 
@@ -26,7 +26,7 @@
 * [Added] Enable SQL metadata collection by default. See [#11602](https://github.com/DataDog/integrations-core/pull/11602).
 * [Fixed] Include SQL metadata in FQT. See [#11640](https://github.com/DataDog/integrations-core/pull/11640).
 
-## 12.1.1 / 2022-03-14
+## 12.1.1 / 2022-03-14 / Agent 7.35.0
 
 * [Fixed] Cache pg_stat_activity columns for sampling query. See [#11588](https://github.com/DataDog/integrations-core/pull/11588).
 

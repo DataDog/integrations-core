@@ -9,12 +9,12 @@
 * [Added] Add `vault.replication.wal.gc.*` metrics. See [#11984](https://github.com/DataDog/integrations-core/pull/11984).
 * [Fixed] Fix metric naming. See [#11847](https://github.com/DataDog/integrations-core/pull/11847).
 
-## 3.1.0 / 2022-04-05
+## 3.1.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 * [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
 
-## 3.0.2 / 2022-02-23
+## 3.0.2 / 2022-02-23 / Agent 7.35.0
 
 * [Fixed] Add OpenMetrics V2 service check to Vault. See [#11558](https://github.com/DataDog/integrations-core/pull/11558).
 

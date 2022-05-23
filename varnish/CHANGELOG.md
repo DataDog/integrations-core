@@ -6,11 +6,11 @@
 * [Fixed] Adapt to new check signature. See [#11910](https://github.com/DataDog/integrations-core/pull/11910).
 * [Fixed] Do not raise exceptions on empty output of varnishadm. See [#11908](https://github.com/DataDog/integrations-core/pull/11908).
 
-## 1.14.0 / 2022-04-05
+## 1.14.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 
-## 1.13.0 / 2022-02-19
+## 1.13.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11452](https://github.com/DataDog/integrations-core/pull/11452).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
