@@ -1,5 +1,9 @@
 # CHANGELOG - http_check
 
+## 8.0.1 / 2022-05-23
+
+* [Fixed] Clarify no cert service check message. See [#12064](https://github.com/DataDog/integrations-core/pull/12064).
+
 ## 8.0.0 / 2022-05-15
 
 * [Fixed] Don't pin urllib3. See [#11944](https://github.com/DataDog/integrations-core/pull/11944).
