@@ -4,7 +4,7 @@
 
 * [Fixed] Fix uncommented parent options. See [#12013](https://github.com/DataDog/integrations-core/pull/12013).
 
-## 6.1.1 / 2022-04-11
+## 6.1.1 / 2022-04-11 / Agent 7.36.0
 
 * [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11800](https://github.com/DataDog/integrations-core/pull/11800).
 
@@ -14,7 +14,7 @@
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 * [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
 
-## 6.0.0 / 2022-02-19
+## 6.0.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11456](https://github.com/DataDog/integrations-core/pull/11456).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).

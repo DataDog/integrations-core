@@ -5,7 +5,7 @@
 * [Fixed] Add a lock around jdbc connection. See [#11877](https://github.com/DataDog/integrations-core/pull/11877).
 * [Fixed] Do not close closed connection. See [#11874](https://github.com/DataDog/integrations-core/pull/11874).
 
-## 3.9.3 / 2022-04-14
+## 3.9.3 / 2022-04-14 / Agent 7.36.0
 
 * [Fixed] Handle NoneType protocol validation. See [#11837](https://github.com/DataDog/integrations-core/pull/11837).
 
@@ -27,7 +27,7 @@
 * [Fixed] Properly report a critical service check status if connection to database fails using the Oracle client. See [#11691](https://github.com/DataDog/integrations-core/pull/11691).
 * [Fixed] Fix validation for the `protocol` param. See [#11675](https://github.com/DataDog/integrations-core/pull/11675).
 
-## 3.7.0 / 2022-02-19
+## 3.7.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11410](https://github.com/DataDog/integrations-core/pull/11410).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).

@@ -5,7 +5,7 @@
 * [Added] Add metric_patterns options to filter all metric submission with a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 * [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
 
-## 3.1.1 / 2022-02-23
+## 3.1.1 / 2022-02-23 / Agent 7.35.0
 
 * [Fixed] Properly indicate Python constraints. See [#11555](https://github.com/DataDog/integrations-core/pull/11555).
 
