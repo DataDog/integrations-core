@@ -32,6 +32,24 @@ See [metadata.csv][7] for a list of metrics provided by this check.
 
 _Available for Agent versions >6.0_
 
+To collect logs from your ArangoDB instance, first make sure that your ArangoDB is configured to output logs to a file.
+For example, if using the `arangod.conf` file to configure your ArangoDB instance, you should include the following:
+
+```
+# ArangoDB configuration file
+#
+# Documentation:
+# https://www.arangodb.com/docs/stable/administration-configuration.html
+#
+
+...
+
+[log]
+file = /var/log/arangodb3/arangod.log 
+
+...
+```
+
 ArangoDB logs contain [many options][10] for log verbosity and output files. Datadog's integration pipeline supports the default conversion pattern.
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
