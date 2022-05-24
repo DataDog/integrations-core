@@ -390,7 +390,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 return
             plan_key = (row['query_signature'], row['query_hash'], row['query_plan_hash'])
             if self._seen_plans_ratelimiter.acquire(plan_key):
-                raw_plan, is_encrypted = self._load_plan(row['plan_handle'], cursor)
+                raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
                 obfuscated_plan, collection_errors = None, None
 
                 try:
@@ -430,11 +430,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                             "definition": obfuscated_plan,
                             "signature": row['query_plan_hash'],
                             "collection_errors": collection_errors,
-                            "is_encrypted": is_encrypted,
+
                         },
                         "query_signature": row['query_signature'],
                         "statement": row['text'],
-                        "is_statement_encrypted": row['is_encrypted'],
                         "metadata": {
                             "tables": row['dd_tables'],
                             "commands": row['dd_commands'],
@@ -442,6 +441,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         },
                     },
                     'sqlserver': {
+                        "is_plan_encrypted": is_plan_encrypted,
+                        "is_statement_encrypted": row['is_encrypted'],
                         'query_hash': row['query_hash'],
                         'query_plan_hash': row['query_plan_hash'],
                         'plan_handle': row['plan_handle'],
