@@ -23,6 +23,7 @@ Configure the Spark integration to monitor your Apache Spark Cluster on Databric
 3. Configure a new Databricks cluster with the cluster-scoped init script path using the UI, Databricks CLI, or invoking the Clusters API.
     - Set the `DD_API_KEY` environment variable in the cluster's Advanced Options with your Datadog API key.
     - Add `DD_ENV` environment variable under Advanced Options to add a global environment tag to better identify your clusters.
+    - If your using the Datadog EU site, please set `DD_SITE` to `datadoghq.eu
 
 
 #### Standard cluster
