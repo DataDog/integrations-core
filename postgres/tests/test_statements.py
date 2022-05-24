@@ -383,12 +383,6 @@ failed_explain_test_repeat_count = 5
             "datadog.explain_statement_noaccess",
             failed_explain_test_repeat_count,
         ),
-        (
-            "update persons set firstname=firstname where personid in (2, 1);" "select pg_sleep(1);",
-            "error:explain-database_error-<class 'psycopg2.errors.DatatypeMismatch'>",
-            None,
-            1,
-        ),
     ],
 )
 def test_failed_explain_handling(
