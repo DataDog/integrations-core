@@ -480,6 +480,17 @@ def test_failed_explain_handling(
             [],
         ),
         (
+            "bob",
+            "bob",
+            "datadog_test",
+            "update persons set firstname='firstname' where personid in (2, 1); select pg_sleep(%s);",
+            1,
+            "error:explain-database_error-<class 'psycopg2.errors.DatatypeMismatch'>",
+            [{'code': 'database_error', 'message': "<class 'psycopg2.errors.DatatypeMismatch'>"}],
+            StatementTruncationState.not_truncated.value,
+            [],
+        ),
+        (
             "dd_admin",
             "dd_admin",
             "dogs_nofunc",
