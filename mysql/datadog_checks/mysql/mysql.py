@@ -463,15 +463,19 @@ class MySql(AgentCheck):
                 cursor.execute(SQL_USER_CONNECTIONS)
                 connections = cursor.fetchall()
                 self.log.debug("Loaded [%s] user connections", len(connections))
-                # Emit the metrics now, so we're able to add: user, host, db, and state tags
-                for user, host, db, state, connections in connections:
-                    conn_tags = [
+                # Emit the metrics now, so we're able to add: user, db, and state tags
+                for user, db, state, connections in connections:
+                    conn_tags = self._config.tags + [
                         "user:{}".format(user),
-                        "host:{}".format(host),
                         "db:{}".format(db),
                         "state:{}".format(state),
                     ]
-                    self.gauge("mysql.performance.users_connected", connections, tags=conn_tags)
+                    self.gauge(
+                        "mysql.performance.users_connected",
+                        connections,
+                        tags=conn_tags,
+                        hostname=self.resolved_hostname,
+                    )
         except Exception as e:
             self.warning("Error occurred when querying for user connections: %s", e)
             return {}

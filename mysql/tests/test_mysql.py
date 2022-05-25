@@ -221,6 +221,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         + variables.SYNTHETIC_VARS
         + variables.STATEMENT_VARS
         + variables.TABLE_VARS
+        + variables.ACTIVITY_VARS
     )
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb':

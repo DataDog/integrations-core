@@ -16,7 +16,7 @@ mysql.innodb.mutex_spin_waits,gauge,,event,second,The rate of mutex spin waits.,
 mysql.innodb.os_log_fsyncs,gauge,,write,second,The rate of fsync writes to the log file.,0,mysql,log fsyncs,
 mysql.innodb.row_lock_time,gauge,,fraction,,Fraction of time spent (ms/s) acquiring row locks.,-1,mysql,row lock time,
 mysql.innodb.row_lock_waits,gauge,,event,second,The number of times per second a row lock had to be waited for.,0,mysql,innodb row lock waits,
-mysql.net.connections,rate,,connection,second,The rate of connections to the server.,0,mysql,conns per s,cpu
+mysql.net.connections,gauge,,connection,second,The rate of connections to the server.,0,mysql,conns per s,cpu
 mysql.net.max_connections,gauge,,connection,,The maximum number of connections that have been in use simultaneously since the server started.,-1,mysql,max used conn,
 mysql.net.max_connections_available,gauge,,connection,,The maximum permitted number of simultaneous client connections.,-1,mysql,max used conn avail,
 mysql.performance.com_delete,gauge,,query,second,The rate of delete statements.,0,mysql,deletes,

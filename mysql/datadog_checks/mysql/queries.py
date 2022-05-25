@@ -42,7 +42,6 @@ SQL_WORKER_THREADS = "SELECT THREAD_ID, NAME FROM performance_schema.threads WHE
 SQL_USER_CONNECTIONS = """\
 SELECT
     processlist_user,
-    processlist_host,
     processlist_db,
     processlist_state,
     COUNT(processlist_user) AS connections
@@ -51,7 +50,7 @@ FROM
 WHERE
     processlist_user IS NOT NULL AND
     processlist_state IS NOT NULL
-    GROUP BY processlist_user, processlist_host, processlist_db, processlist_state
+    GROUP BY processlist_user, processlist_db, processlist_state
 """
 
 SQL_PROCESS_LIST = "SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST WHERE COMMAND LIKE '%Binlog dump%'"
