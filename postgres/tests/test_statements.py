@@ -358,7 +358,12 @@ failed_explain_test_repeat_count = 5
 @pytest.mark.parametrize(
     "query,expected_error_tag,explain_function_override,expected_fail_count,skip_on_versions",
     [
-        ("select * from fake_table", "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>", None, 1, None),
+        (
+            "select * from fake_table", "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>",
+            None,
+            1,
+            None,
+        ),
         (
             "select * from fake_schema.fake_table",
             "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>",
@@ -391,8 +396,8 @@ failed_explain_test_repeat_count = 5
             "update persons set firstname='firstname' where personid in (2, 1); select pg_sleep(1);",
             "error:explain-database_error-<class 'psycopg2.errors.DatatypeMismatch'>",
             None,
-            1, 
-            [13,12,11,10,9],
+            1,
+            [13, 12, 11, 10, 9],
         ),
         (
             "update persons set firstname='firstname' where personid in (2, 1); select pg_sleep(1);",
@@ -444,10 +449,10 @@ def test_failed_explain_handling(
 
     if expected_error_tag is None:
         aggregator.assert_metric(
-        'dd.postgres.statement_samples.error',
-        count=failed_explain_test_repeat_count,
-        tags=None,
-        hostname='stubbed.hostname',
+            'dd.postgres.statement_samples.error',
+            count=failed_explain_test_repeat_count,
+            tags=None,
+            hostname='stubbed.hostname',
         )
     else:
         aggregator.assert_metric(
