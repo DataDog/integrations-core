@@ -16,7 +16,7 @@ mysql.innodb.mutex_spin_waits,gauge,,event,second,The rate of mutex spin waits.,
 mysql.innodb.os_log_fsyncs,gauge,,write,second,The rate of fsync writes to the log file.,0,mysql,log fsyncs,
 mysql.innodb.row_lock_time,gauge,,fraction,,Fraction of time spent (ms/s) acquiring row locks.,-1,mysql,row lock time,
 mysql.innodb.row_lock_waits,gauge,,event,second,The number of times per second a row lock had to be waited for.,0,mysql,innodb row lock waits,
-mysql.net.connections,gauge,,connection,second,The rate of connections to the server.,0,mysql,conns per s,cpu
+mysql.net.connections,rate,,connection,second,The rate of connections to the server.,0,mysql,conns per s,cpu
 mysql.net.max_connections,gauge,,connection,,The maximum number of connections that have been in use simultaneously since the server started.,-1,mysql,max used conn,
 mysql.net.max_connections_available,gauge,,connection,,The maximum permitted number of simultaneous client connections.,-1,mysql,max used conn avail,
 mysql.performance.com_delete,gauge,,query,second,The rate of delete statements.,0,mysql,deletes,
@@ -41,6 +41,7 @@ mysql.performance.slow_queries,gauge,,query,second,The rate of slow queries.,-1,
 mysql.performance.table_locks_waited,gauge,,,,The total number of times that a request for a table lock could not be granted immediately and a wait was needed.,-1,mysql,table locks waited,
 mysql.performance.table_locks_waited.rate,gauge,,,,"The rate of times that a request for a table lock could not be granted immediately and a wait was needed.",0,mysql,table locks waited rate,
 mysql.performance.threads_connected,gauge,,connection,,The number of currently open connections.,0,mysql,threads connected,cpu
+mysql.performance.users_connected,gauge,,connection,,The number of currently open user connections.,0,mysql,users connected,cpu
 mysql.performance.threads_running,gauge,,thread,,The number of threads that are not sleeping.,0,mysql,threads running,
 mysql.performance.cpu_time,gauge,,percent,,Percentage of CPU time spent by MySQL.,-1,mysql,cpu,cpu
 mysql.performance.user_time,gauge,,percent,,Percentage of CPU time spent in user space by MySQL.,-1,mysql,cpu user,

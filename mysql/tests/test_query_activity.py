@@ -105,18 +105,6 @@ def test_collect_activity(aggregator, dbm_instance, dd_run_check):
     assert blocked_row['event_timer_end'], "missing event timer end"
     assert blocked_row['lock_time'], "missing lock time"
 
-    connections = activity['mysql_connections']
-    assert len(connections) > 0, "expected to have active connections"
-    fred_conn = None
-    for conn in connections:
-        if conn['processlist_user'] == 'fred':
-            fred_conn = conn
-            break
-
-    assert fred_conn is not None
-    assert fred_conn['connections'] == 1
-    assert fred_conn['processlist_state'], "missing state"
-
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')

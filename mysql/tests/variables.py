@@ -242,6 +242,8 @@ OPTIONAL_INNODB_VARS = [
     'mysql.innodb.x_lock_spin_waits',
 ]
 
+ACTIVITY_VARS = ['mysql.performance.users_connected']
+
 PERFORMANCE_VARS = ['mysql.performance.query_run_time.avg', 'mysql.performance.digest_95th_percentile.avg_us']
 
 SCHEMA_VARS = ['mysql.info.schema.size']

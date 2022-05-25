@@ -41,7 +41,13 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS_MIN, count=1)
 
     # Test metrics
-    testable_metrics = variables.STATUS_VARS + variables.VARIABLES_VARS + variables.INNODB_VARS + variables.BINLOG_VARS
+    testable_metrics = (
+        variables.STATUS_VARS
+        + variables.VARIABLES_VARS
+        + variables.INNODB_VARS
+        + variables.BINLOG_VARS
+        + variables.ACTIVITY_VARS
+    )
 
     for mname in testable_metrics:
         aggregator.assert_metric(mname, at_least=1)
@@ -104,6 +110,7 @@ def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
         + variables.SYNTHETIC_VARS
         + variables.STATEMENT_VARS
         + variables.TABLE_VARS
+        + variables.ACTIVITY_VARS
     )
     if MYSQL_REPLICATION == 'group':
         testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
