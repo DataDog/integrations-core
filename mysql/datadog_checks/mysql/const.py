@@ -8,6 +8,10 @@ COUNT = "count"
 MONOTONIC = "monotonic_count"
 PROC_NAME = 'mysqld'
 
+DBM_MIGRATED_METRICS = {
+    'Connections': ('mysql.net.connections', GAUGE),
+}
+
 # Vars found in "SHOW STATUS;"
 STATUS_VARS = {
     # Command Metrics
@@ -26,7 +30,6 @@ STATUS_VARS = {
     'Com_delete_multi': ('mysql.performance.com_delete_multi', RATE),
     'Com_replace_select': ('mysql.performance.com_replace_select', RATE),
     # Connection Metrics
-    'Connections': ('mysql.net.connections', RATE),
     'Max_used_connections': ('mysql.net.max_connections', GAUGE),
     'Aborted_clients': ('mysql.net.aborted_clients', RATE),
     'Aborted_connects': ('mysql.net.aborted_connects', RATE),
