@@ -33,15 +33,22 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-'EOSQL'
     CREATE SCHEMA IF NOT EXISTS datadog;
     GRANT USAGE ON SCHEMA datadog TO datadog;
 
-    CREATE OR REPLACE FUNCTION datadog.explain_statement(l_query text, out explain JSON) RETURNS SETOF JSON AS
+    CREATE OR REPLACE FUNCTION datadog.explain_statement (
+      l_query text
+    )
+    RETURNS JSON AS
     $$
-      BEGIN
-          RETURN QUERY EXECUTE 'EXPLAIN (FORMAT JSON) ' || l_query;
-      END;
+    declare
+      plan json;
+    BEGIN
+      EXECUTE pg_catalog.concat('EXPLAIN (FORMAT JSON) ', l_query) INTO STRICT plan;
+      return plan;
+    END;
     $$
-    LANGUAGE plpgsql
+    LANGUAGE 'plpgsql'
     RETURNS NULL ON NULL INPUT
     SECURITY DEFINER;
+
 
     CREATE OR REPLACE FUNCTION datadog.pg_stat_activity() RETURNS SETOF pg_stat_activity AS
     $$ SELECT * FROM pg_catalog.pg_stat_activity; $$
