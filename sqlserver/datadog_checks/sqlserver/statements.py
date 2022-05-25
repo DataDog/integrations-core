@@ -430,7 +430,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                             "definition": obfuscated_plan,
                             "signature": row['query_plan_hash'],
                             "collection_errors": collection_errors,
-
                         },
                         "query_signature": row['query_signature'],
                         "statement": row['text'],
