@@ -442,19 +442,27 @@ def test_failed_explain_handling(
         expected_error_tag,
     ]
 
-    aggregator.assert_metric(
+    if expected_error_tag is None:
+        aggregator.assert_metric(
         'dd.postgres.statement_samples.error',
         count=failed_explain_test_repeat_count,
-        tags=expected_tags,
+        tags=None,
         hostname='stubbed.hostname',
-    )
+        )
+    else:
+        aggregator.assert_metric(
+            'dd.postgres.statement_samples.error',
+            count=failed_explain_test_repeat_count,
+            tags=expected_tags,
+            hostname='stubbed.hostname',
+        )
 
-    aggregator.assert_metric(
-        'dd.postgres.run_explain.error',
-        count=expected_fail_count,
-        tags=expected_tags,
-        hostname='stubbed.hostname',
-    )
+        aggregator.assert_metric(
+            'dd.postgres.run_explain.error',
+            count=expected_fail_count,
+            tags=expected_tags,
+            hostname='stubbed.hostname',
+        )
 
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
