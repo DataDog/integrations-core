@@ -359,7 +359,8 @@ failed_explain_test_repeat_count = 5
     "query,expected_error_tag,explain_function_override,expected_fail_count,skip_on_versions",
     [
         (
-            "select * from fake_table", "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>",
+            "select * from fake_table",
+            "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>",
             None,
             1,
             None,
@@ -416,7 +417,7 @@ def test_failed_explain_handling(
     expected_error_tag,
     explain_function_override,
     expected_fail_count,
-    skip_on_versions
+    skip_on_versions,
 ):
     dbname = "datadog_test"
     if explain_function_override:
