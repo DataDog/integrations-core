@@ -53,7 +53,7 @@ from .queries import (
     SQL_QUERY_TABLE_SIZE,
     SQL_REPLICATION_ROLE_AWS_AURORA,
     SQL_SERVER_ID_AWS_AURORA,
-    SQL_USER_CONNECTIONS,
+    SQL_USERS_CONNECTED,
     SQL_WORKER_THREADS,
     show_replica_status_query,
 )
@@ -459,8 +459,8 @@ class MySql(AgentCheck):
     def _collect_users_connected_metric(self, db):
         try:
             with closing(db.cursor()) as cursor:
-                self.log.debug("Running connections query [%s]", SQL_USER_CONNECTIONS)
-                cursor.execute(SQL_USER_CONNECTIONS)
+                self.log.debug("Running connections query [%s]", SQL_USERS_CONNECTED)
+                cursor.execute(SQL_USERS_CONNECTED)
                 connections = cursor.fetchall()
                 self.log.debug("Loaded [%s] user connections", len(connections))
                 # Emit the metrics now, so we're able to add: user, db, and state tags

@@ -39,7 +39,7 @@ GROUP BY schema_name"""
 
 SQL_WORKER_THREADS = "SELECT THREAD_ID, NAME FROM performance_schema.threads WHERE NAME LIKE '%worker'"
 
-SQL_USER_CONNECTIONS = """\
+SQL_USERS_CONNECTED = """\
 SELECT
     processlist_user,
     processlist_db,
