@@ -52,6 +52,7 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
         + variables.COMPLEX_INNODB_VARS
         + variables.SYSTEM_METRICS
         + variables.SYNTHETIC_VARS
+        + variables.ACTIVITY_VARS
     )
 
     _test_optional_metrics(aggregator, optional_metrics)
@@ -104,6 +105,7 @@ def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
         + variables.SYNTHETIC_VARS
         + variables.STATEMENT_VARS
         + variables.TABLE_VARS
+        + variables.ACTIVITY_VARS
     )
     if MYSQL_REPLICATION == 'group':
         testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
@@ -214,6 +216,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         + variables.SYNTHETIC_VARS
         + variables.STATEMENT_VARS
         + variables.TABLE_VARS
+        + variables.ACTIVITY_VARS
     )
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb':

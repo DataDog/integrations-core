@@ -20,21 +20,6 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
-CONNECTIONS_QUERY = """\
-SELECT
-    processlist_user,
-    processlist_host,
-    processlist_db,
-    processlist_state,
-    COUNT(processlist_user) AS connections
-FROM
-    performance_schema.threads
-WHERE
-    processlist_user IS NOT NULL AND
-    processlist_state IS NOT NULL
-    GROUP BY processlist_user, processlist_host, processlist_db, processlist_state
-"""
-
 ACTIVITY_QUERY = """\
 SELECT
     thread_a.thread_id,
@@ -151,10 +136,9 @@ class MySQLActivity(DBMAsyncJob):
     def _collect_activity(self):
         # type: () -> None
         with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
-            connections = self._get_active_connections(cursor)
             rows = self._get_activity(cursor)
             rows = self._normalize_rows(rows)
-            event = self._create_activity_event(rows, connections)
+            event = self._create_activity_event(rows)
             payload = json.dumps(event, default=self._json_event_encoding)
             self._check.database_monitoring_query_activity(payload)
             self._check.histogram(
@@ -162,15 +146,6 @@ class MySQLActivity(DBMAsyncJob):
                 len(payload),
                 tags=self._tags + self._check._get_debug_tags(),
             )
-
-    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _get_active_connections(self, cursor):
-        # type: (pymysql.cursor) -> List[Dict[str]]
-        self._log.debug("Running connections query [%s]", CONNECTIONS_QUERY)
-        cursor.execute(CONNECTIONS_QUERY)
-        rows = cursor.fetchall()
-        self._log.debug("Loaded [%s] current connections", len(rows))
-        return rows
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_activity(self, cursor):
@@ -234,8 +209,8 @@ class MySQLActivity(DBMAsyncJob):
         # type: (Dict[str]) -> int
         return len(str(row))
 
-    def _create_activity_event(self, active_sessions, active_connections):
-        # type: (List[Dict[str]], List[Dict[str]]) -> Dict[str]
+    def _create_activity_event(self, active_sessions):
+        # type: (List[Dict[str]]) -> Dict[str]
         return {
             "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
@@ -245,7 +220,6 @@ class MySQLActivity(DBMAsyncJob):
             "ddtags": self._tags,
             "timestamp": time.time() * 1000,
             "mysql_activity": active_sessions,
-            "mysql_connections": active_connections,
         }
 
     @staticmethod

@@ -22,7 +22,6 @@ from .config import MySQLConfig
 from .const import (
     BINLOG_VARS,
     COUNT,
-    DBM_MIGRATED_METRICS,
     GALERA_VARS,
     GAUGE,
     GROUP_REPLICATION_VARS,
@@ -54,6 +53,7 @@ from .queries import (
     SQL_QUERY_TABLE_SIZE,
     SQL_REPLICATION_ROLE_AWS_AURORA,
     SQL_SERVER_ID_AWS_AURORA,
+    SQL_USERS_CONNECTED,
     SQL_WORKER_THREADS,
     show_replica_status_query,
 )
@@ -296,9 +296,6 @@ class MySql(AgentCheck):
         # Get aggregate of all VARS we want to collect
         metrics = STATUS_VARS
 
-        if not self._config.dbm_enabled:
-            metrics.update(DBM_MIGRATED_METRICS)
-
         # collect results from db
         results = self._get_stats_from_status(db)
         results.update(self._get_stats_from_variables(db))
@@ -347,6 +344,9 @@ class MySql(AgentCheck):
             # already in result-set after 'SHOW STATUS' just add vars to collect
             self.log.debug("Collecting Galera Metrics.")
             metrics.update(GALERA_VARS)
+
+        if self.performance_schema_enabled:
+            self._collect_users_connected_metric(db)
 
         above_560 = self.version.version_compatible((5, 6, 0))
         if (
@@ -455,6 +455,30 @@ class MySql(AgentCheck):
                 self.warning(
                     "Maximum number (%s) of custom queries reached. Skipping the rest.", self._config.max_custom_queries
                 )
+
+    def _collect_users_connected_metric(self, db):
+        try:
+            with closing(db.cursor()) as cursor:
+                self.log.debug("Running connections query [%s]", SQL_USERS_CONNECTED)
+                cursor.execute(SQL_USERS_CONNECTED)
+                connections = cursor.fetchall()
+                self.log.debug("Loaded [%s] user connections", len(connections))
+                # Emit the metrics now, so we're able to add: user, db, and state tags
+                for user, db, state, connections in connections:
+                    conn_tags = self._config.tags + [
+                        "user:{}".format(user),
+                        "db:{}".format(db),
+                        "state:{}".format(state),
+                    ]
+                    self.gauge(
+                        "mysql.performance.users_connected",
+                        connections,
+                        tags=conn_tags,
+                        hostname=self.resolved_hostname,
+                    )
+        except Exception as e:
+            self.warning("Error occurred when querying for user connections: %s", e)
+            return {}
 
     def _collect_replication_metrics(self, db, results, above_560):
         # Get replica stats

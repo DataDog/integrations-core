@@ -41,6 +41,7 @@ mysql.performance.slow_queries,gauge,,query,second,The rate of slow queries.,-1,
 mysql.performance.table_locks_waited,gauge,,,,The total number of times that a request for a table lock could not be granted immediately and a wait was needed.,-1,mysql,table locks waited,
 mysql.performance.table_locks_waited.rate,gauge,,,,"The rate of times that a request for a table lock could not be granted immediately and a wait was needed.",0,mysql,table locks waited rate,
 mysql.performance.threads_connected,gauge,,connection,,The number of currently open connections.,0,mysql,threads connected,cpu
+mysql.performance.users_connected,gauge,,connection,,The number of currently open user connections.,0,mysql,users connected,cpu
 mysql.performance.threads_running,gauge,,thread,,The number of threads that are not sleeping.,0,mysql,threads running,
 mysql.performance.cpu_time,gauge,,percent,,Percentage of CPU time spent by MySQL.,-1,mysql,cpu,cpu
 mysql.performance.user_time,gauge,,percent,,Percentage of CPU time spent in user space by MySQL.,-1,mysql,cpu user,
