@@ -425,7 +425,7 @@ def test_failed_explain_handling(
     check = integration_check(dbm_instance)
     check._connect()
 
-    if skip_on_versions is not None and POSTGRES_VERSION in skip_on_versions:
+    if skip_on_versions is not None and check.version.major in skip_on_versions:
         pytest.skip("not relevant for postgres {version}")
 
     # run check so all internal state is correctly initialized
