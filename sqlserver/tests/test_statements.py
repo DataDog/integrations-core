@@ -275,14 +275,14 @@ def test_statement_metrics_and_plans(
     for event in plan_events:
         if is_encrypted:
             assert not event['db']['plan']['definition']
-            assert event['db']['sqlserver']['is_plan_encrypted']
-            assert event['db']['sqlserver']['is_statement_encrypted']
+            assert event['sqlserver']['is_plan_encrypted']
+            assert event['sqlserver']['is_statement_encrypted']
         else:
             assert event['db']['plan']['definition'], "event plan definition missing"
             parsed_plan = ET.fromstring(event['db']['plan']['definition'])
             assert parsed_plan.tag.endswith("ShowPlanXML"), "plan does not match expected structure"
-            assert not event['db']['sqlserver']['is_plan_encrypted']
-            assert not event['db']['sqlserver']['is_statement_encrypted']
+            assert not event['sqlserver']['is_plan_encrypted']
+            assert not event['sqlserver']['is_statement_encrypted']
 
     fqt_events = [s for s in matching_samples if s['dbm_type'] == "fqt"]
     assert fqt_events, "should have collected some FQT events"
