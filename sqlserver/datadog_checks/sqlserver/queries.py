@@ -156,3 +156,61 @@ QUERY_FAILOVER_CLUSTER_INSTANCE = {
         {'name': 'failover_cluster', 'type': 'tag'},
     ],
 }
+
+# dm_io_virtual_file_stats columns -> metric names
+_file_stats_column_name_to_metric_name = {
+    'size_on_disk_bytes': 'files.size_on_disk',
+    'num_of_reads': 'files.reads',
+    'num_of_bytes_read': 'files.read_bytes',
+    'io_stall_read_ms': 'files.read_io_stall',
+    'io_stall_queued_read_ms': 'files.read_io_stall_queued',
+    'num_of_writes': 'files.writes',
+    'num_of_bytes_written': 'files.written_bytes',
+    'io_stall_write_ms': 'files.write_io_stall',
+    'io_stall_queued_write_ms': 'files.write_io_stall_queued',
+    'io_stall': 'files.io_stall',
+}
+
+
+def get_query_file_stats(available_file_stats_columns):
+    """
+    Construct the dm_io_virtual_file_stats QueryExecutor configuration given the available
+    dm_io_virtual_file_stats columns.
+
+    :param available_file_stats_columns: all dm_io_virtual_file_stats columns available on the SQL Server instance
+    :return: a QueryExecutor query config object
+    """
+    file_stats_columns_sql = []
+    metric_columns = []
+    for column in sorted(_file_stats_column_name_to_metric_name.keys()):
+        if column not in available_file_stats_columns:
+            continue
+        file_stats_columns_sql.append("fs.{} AS {}".format(column, column))
+        metric_type = 'gauge' if column == 'size_on_disk_bytes' else 'monotonic_count'
+        metric_name = _file_stats_column_name_to_metric_name[column]
+        metric_columns.append({'name': metric_name, 'type': metric_type})
+
+    return {
+        'name': 'sys.dm_io_virtual_file_stats',
+        'query': """
+        SELECT
+            DB_NAME(fs.database_id) AS database_name,
+            mf.state_desc AS state_desc,
+            mf.name AS logical_name,
+            mf.physical_name AS physical_name,
+            {file_stats_columns_sql}
+        FROM sys.dm_io_virtual_file_stats(NULL, NULL) fs
+            LEFT JOIN sys.master_files mf
+                ON mf.database_id = fs.database_id
+                AND mf.file_id = fs.file_id;
+    """.strip().format(
+            file_stats_columns_sql=", ".join(file_stats_columns_sql)
+        ),
+        'columns': [
+            {'name': 'db', 'type': 'tag'},
+            {'name': 'state', 'type': 'tag'},
+            {'name': 'logical_name', 'type': 'tag'},
+            {'name': 'file_location', 'type': 'tag'},
+        ]
+        + metric_columns,
+    }

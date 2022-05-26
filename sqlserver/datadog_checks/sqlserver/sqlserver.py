@@ -18,7 +18,6 @@ from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
-from datadog_checks.sqlserver.metrics import SqlFileStats
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 
 try:
@@ -26,16 +25,15 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
-from . import metrics
-from .connection import Connection, SQLConnectionError
-from .const import (
+from datadog_checks.sqlserver import metrics
+from datadog_checks.sqlserver.connection import Connection, SQLConnectionError
+from datadog_checks.sqlserver.const import (
     AO_METRICS,
     AO_METRICS_PRIMARY,
     AO_METRICS_SECONDARY,
     AUTODISCOVERY_QUERY,
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
-    DATABASE_FILES_IO,
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
@@ -51,20 +49,22 @@ from .const import (
     PERF_LARGE_RAW_BASE,
     PERF_RAW_LARGE_FRACTION,
     SERVICE_CHECK_NAME,
+    STATIC_INFO_DM_VIRTUAL_FILE_STATS_COLUMNS,
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_VERSION,
     TASK_SCHEDULER_METRICS,
     VALID_METRIC_TYPES,
 )
-from .metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
-from .queries import (
+from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
+from datadog_checks.sqlserver.queries import (
     QUERY_AO_AVAILABILITY_GROUPS,
     QUERY_AO_FAILOVER_CLUSTER,
     QUERY_AO_FAILOVER_CLUSTER_MEMBER,
     QUERY_FAILOVER_CLUSTER_INSTANCE,
     QUERY_SERVER_STATIC_INFO,
+    get_query_file_stats,
 )
-from .utils import set_default_driver_conf
+from datadog_checks.sqlserver.utils import set_default_driver_conf
 
 try:
     import adodbapi
@@ -168,28 +168,21 @@ class SQLServer(AgentCheck):
             )
         if is_affirmative(self.instance.get('include_fci_metrics', False)):
             check_queries.extend([QUERY_FAILOVER_CLUSTER_INSTANCE])
-        self._check_queries = QueryExecutor(
-            self.execute_query_raw,
-            self,
-            queries=check_queries,
-            tags=self.tags,
-            hostname=self.resolved_hostname,
-        )
+        self._check_queries = self._new_query_executor(check_queries)
         self.check_initializations.append(self._check_queries.compile_queries)
 
-        self.server_state_queries = QueryExecutor(
-            self.execute_query_raw,
-            self,
-            queries=[QUERY_SERVER_STATIC_INFO],
-            tags=self.tags,
-            hostname=self.resolved_hostname,
-        )
+        self.server_state_queries = self._new_query_executor([QUERY_SERVER_STATIC_INFO])
         self.check_initializations.append(self.server_state_queries.compile_queries)
 
         # use QueryManager to process custom queries
         self._query_manager = QueryManager(
             self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
         )
+
+        # this query executor must be initialized after the connection is made
+        # as the query can vary depending on the state of the database
+        self.file_stats_queries = None
+
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self._query_manager.compile_queries)
         self.check_initializations.append(self.initialize_connection)
@@ -230,6 +223,15 @@ class SQLServer(AgentCheck):
         )
         return s_host, s_port
 
+    def _new_query_executor(self, queries):
+        return QueryExecutor(
+            self.execute_query_raw,
+            self,
+            queries=queries,
+            tags=self.tags,
+            hostname=self.resolved_hostname,
+        )
+
     @property
     def resolved_hostname(self):
         if self._resolved_hostname is None:
@@ -243,7 +245,9 @@ class SQLServer(AgentCheck):
         return self._resolved_hostname
 
     def load_static_information(self):
-        if len({STATIC_INFO_VERSION, STATIC_INFO_ENGINE_EDITION} - set(self.static_info_cache.keys())) > 0:
+        expected_keys = {STATIC_INFO_VERSION, STATIC_INFO_ENGINE_EDITION, STATIC_INFO_DM_VIRTUAL_FILE_STATS_COLUMNS}
+        missing_keys = expected_keys - set(self.static_info_cache.keys())
+        if missing_keys:
             with self.connection.open_managed_default_connection():
                 with self.connection.get_managed_cursor() as cursor:
                     if STATIC_INFO_VERSION not in self.static_info_cache:
@@ -260,6 +264,12 @@ class SQLServer(AgentCheck):
                             self.static_info_cache[STATIC_INFO_ENGINE_EDITION] = result
                         else:
                             self.log.warning("failed to load version static information due to empty results")
+                    if STATIC_INFO_DM_VIRTUAL_FILE_STATS_COLUMNS not in self.static_info_cache:
+                        try:
+                            columns = self._get_available_file_stats_columns(cursor)
+                            self.static_info_cache[STATIC_INFO_DM_VIRTUAL_FILE_STATS_COLUMNS] = columns
+                        except Exception:
+                            self.log.exception("failed to load available file_stats columns")
 
     def debug_tags(self):
         return self.tags + ['agent_hostname:{}'.format(self.agent_hostname)]
@@ -387,6 +397,17 @@ class SQLServer(AgentCheck):
                 return True
         return False
 
+    def _get_available_file_stats_columns(self, cursor):
+        """
+        Loads available sys.dm_io_virtual_file_stats columns
+        """
+        query = "select TOP 0 * from sys.dm_io_virtual_file_stats(NULL, NULL)"
+        self.log.debug("loading available sql file stats columns. running query: %s", query)
+        cursor.execute(query)
+        all_columns = set([i[0] for i in cursor.description])
+        self.log.debug("loaded available dm_io_virtual_file_stats: %s", all_columns)
+        return all_columns
+
     def _make_metric_list_to_collect(self, custom_metrics):
         """
         Store the list of metrics to collect by instance_key.
@@ -420,11 +441,6 @@ class SQLServer(AgentCheck):
             for db_name in db_names:
                 cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
-        # Load database files
-        for name, column, metric_type in DATABASE_FILES_IO:
-            cfg = {'name': name, 'column': column, 'tags': tags, 'hostname': self.resolved_hostname}
-            metrics_to_collect.append(SqlFileStats(cfg, None, getattr(self, metric_type), column, self.log))
 
         # Load AlwaysOn metrics
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
@@ -630,6 +646,7 @@ class SQLServer(AgentCheck):
     def check(self, _):
         if self.do_check:
             self.load_static_information()
+            self.init_file_stats_queries()
             if self.proc:
                 self.do_stored_procedure_check()
             else:
@@ -649,6 +666,23 @@ class SQLServer(AgentCheck):
 
         else:
             self.log.debug("Skipping check")
+
+    def init_file_stats_queries(self):
+        """
+        Initializes file stats queries
+        Depends on the static info cache being populated
+        """
+        if self.file_stats_queries:
+            return
+
+        file_stats_columns = self.static_info_cache.get(STATIC_INFO_DM_VIRTUAL_FILE_STATS_COLUMNS, None)
+        if not file_stats_columns:
+            self.log.warning("cannot initialize file_stats_query_executor because file_stats_columns are unknown")
+            return
+
+        self.file_stats_queries = self._new_query_executor([get_query_file_stats(file_stats_columns)])
+        self.file_stats_queries.compile_queries()
+        self.log.debug("initialized file_stats_query_executor. available columns: %s", file_stats_columns)
 
     def collect_metrics(self):
         """Fetch the metrics from all of the associated database tables."""
@@ -711,6 +745,8 @@ class SQLServer(AgentCheck):
                 self._check_queries.execute()
                 # reuse connection for any custom queries
                 self._query_manager.execute()
+                if self.file_stats_queries:
+                    self.file_stats_queries.execute()
             finally:
                 with self.connection.get_managed_cursor() as cursor:
                     cursor.execute("SET NOCOUNT OFF")
