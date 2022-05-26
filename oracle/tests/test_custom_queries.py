@@ -77,7 +77,7 @@ def test_custom_queries(aggregator, check):
     )
 
 
-def test_custom_queriess_multiple_results(aggregator, check):
+def test_custom_queries_multiple_results(aggregator, check):
     con = mock.MagicMock()
     cursor = mock.MagicMock()
     data = [["tag_value1", "1"], ["tag_value2", "2"]]
