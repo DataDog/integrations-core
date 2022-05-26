@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime
+import logging
 import re
 import select
 import time
@@ -425,8 +426,8 @@ def test_failed_explain_handling(
     check = integration_check(dbm_instance)
     check._connect()
 
-    if skip_on_versions is not None and check.version.major in skip_on_versions:
-        pytest.skip("not relevant for postgres {version}")
+    if skip_on_versions is not None and POSTGRES_VERSION in skip_on_versions:
+        pytest.skip("not relevant for postgres {version}".format(version=POSTGRES_VERSION))
 
     # run check so all internal state is correctly initialized
     check.check(dbm_instance)
