@@ -23,7 +23,9 @@
   "is_public": true,
   "integration_id": "helm",
   "assets": {
-    "dashboards": {},
+    "dashboards": {
+      "Helm - Overview": "assets/dashboards/overview.json"
+    },
     "monitors": {},
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
