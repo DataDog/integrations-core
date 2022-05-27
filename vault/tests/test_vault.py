@@ -366,8 +366,11 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
         assert_all_metrics(aggregator)
 
-    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-    def test_replication_dr_mode_collect_secondary(self, aggregator, dd_run_check, use_openmetrics):
+    @pytest.mark.parametrize(
+        'use_openmetrics, metric_collection',
+        [(True, 'OpenMetrics'), (False, 'Prometheus')]
+    )
+    def test_replication_dr_mode_collect_secondary(self, aggregator, dd_run_check, use_openmetrics, metric_collection):
         instance = {'use_openmetrics': use_openmetrics, 'collect_secondary_dr': True}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
@@ -398,7 +401,7 @@ class TestVault:
             dd_run_check(c)
             c.log.debug.assert_called_with(
                 "Detected vault in replication DR secondary mode but also detected that "
-                "`collect_secondary_dr` is enabled, Prometheus metric collection will still occur."
+                "`collect_secondary_dr` is enabled, %s metric collection will still occur." % metric_collection
             )
         aggregator.assert_metric('vault.is_leader', 1)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
