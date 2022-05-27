@@ -5,7 +5,7 @@
   "name": "helm",
   "metric_prefix": "helm.",
   "metric_to_check": "helm.release",
-  "creates_events": false,
+  "creates_events": true,
   "short_description": "Track your Helm deployments with Datadog",
   "guid": "7f57a1f2-6dc6-4029-ae9c-426238ea2f86",
   "support": "core",
