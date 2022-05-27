@@ -163,23 +163,67 @@ def test_currency_usage(dd_run_check, aggregator, instance):
     # type: (Callable[[SnowflakeCheck], None], AggregatorStub, Dict[str, Any]) -> None
 
     expected_currency_metrics = [
-        ('test', 'ORGANIZATION','Standard', 'dollar', Decimal('0.4'), Decimal('0.7')),
+        ('test', 'ORGANIZATION', 'Standard', Decimal('0.4'), Decimal('0.7')),
     ]
     expected_tags = EXPECTED_TAGS + [
         'billing_account:test',
         'organization_name:ORGANIZATION',
         'service_level:Standard',
-        'currency:dollar',
     ]
     with mock.patch(
         'datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_currency_metrics
     ):
         check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check._conn = mock.MagicMock()
-        check._query_manager.queries = [Query(queries.CurrencyUsage)]
+        check._query_manager.queries = [Query(queries.OrgCurrencyUsage)]
         dd_run_check(check)
     aggregator.assert_metric('snowflake.contract.amount.avg', value=0.4, tags=expected_tags)
     aggregator.assert_metric('snowflake.contract.amount.sum', value=0.7, count=1, tags=expected_tags)
+
+
+def test_warehouse_credit_usage(dd_run_check, aggregator, instance):
+    # type: (Callable[[SnowflakeCheck], None], AggregatorStub, Dict[str, Any]) -> None
+
+    expected_credit_usage_metrics = [
+        (
+            'test',
+            'account_name',
+            Decimal('300'),
+            Decimal('3.4'),
+            Decimal('902.49003'),
+            Decimal('4.9227'),
+            Decimal('212.43'),
+            Decimal('34.7'),
+        ),
+    ]
+    expected_tags = EXPECTED_TAGS + [
+        'warehouse:test', 'billing_account:account_name',
+    ]
+    with mock.patch(
+        'datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_credit_usage_metrics
+    ):
+        check = SnowflakeCheck(CHECK_NAME, {}, [instance])
+        check._conn = mock.MagicMock()
+        check._query_manager.queries = [Query(queries.OrgWarehouseCreditUsage)]
+        dd_run_check(check)
+    aggregator.assert_metric(
+        'snowflake.organization.billing.warehouse.virtual_warehouse.sum', value=300, tags=expected_tags
+    )
+    aggregator.assert_metric(
+        'snowflake.organization.billing.warehouse.virtual_warehouse.avg', value=3.4, tags=expected_tags
+    )
+    aggregator.assert_metric(
+        'snowflake.organization.billing.warehouse.cloud_service.sum', value=902.49003, tags=expected_tags
+    )
+    aggregator.assert_metric(
+        'snowflake.organization.billing.warehouse.cloud_service.avg', value=4.9227, tags=expected_tags
+    )
+    aggregator.assert_metric(
+        'snowflake.organization.billing.warehouse.total_credit.sum', value=212.43, tags=expected_tags
+    )
+    aggregator.assert_metric(
+        'snowflake.organization.billing.warehouse.total_credit.avg', value=34.7, tags=expected_tags
+    )
 
 
 def test_token_path(dd_run_check, aggregator):

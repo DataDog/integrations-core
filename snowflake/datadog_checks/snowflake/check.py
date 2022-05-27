@@ -27,9 +27,13 @@ ACCOUNT_USAGE_METRIC_GROUPS = {
 }
 
 ORGANIZATION_USAGE_METRIC_GROUPS = {
-    'snowflake.contracts': [queries.ContractItems],
-    'snowflake.organization.billing_currency.metrics': [queries.CurrencyUsage],
-    'snowflake.organization.billings.warehouse.metrics': [queries.OrgWarehouseCreditUsage],
+    'snowflake.organization.contracts': [queries.ContractItems],
+    'snowflake.organization.billing_currency': [queries.OrgCurrencyUsage],
+    'snowflake.organization.billings.warehouse': [queries.OrgWarehouseCreditUsage],
+    'snowflake.organization.storage': [queries.OrgStorageDaily],
+    'snowflake.organization.balance': [queries.OrgBalance],
+    'snowflake.organization.rate': [queries.OrgRateSheet],
+    'snowflake.organization.data_transfer': [queries.OrgDataTransfer],
 }
 
 
@@ -67,19 +71,19 @@ class SnowflakeCheck(AgentCheck):
                 'refer to docs about custom roles.'
             )
         if self._config.account == 'ORGANIZATION_USAGE':
-            self.metric_groups = ORGANIZATION_USAGE_METRIC_GROUPS
+            metric_groups = ORGANIZATION_USAGE_METRIC_GROUPS
         else:
-            self.metric_groups = ACCOUNT_USAGE_METRIC_GROUPS
+            metric_groups = ACCOUNT_USAGE_METRIC_GROUPS
         self.metric_queries = []
         self.errors = []
         for mgroup in self._config.metric_groups:
             try:
                 if not self._config.aggregate_last_24_hours:
-                    for query in range(len(self.metric_groups[mgroup])):
-                        self.metric_groups[mgroup][query]['query'] = self.metric_groups[mgroup][query]['query'].replace(
+                    for query in range(len(metric_groups[mgroup])):
+                        metric_groups[mgroup][query]['query'] = metric_groups[mgroup][query]['query'].replace(
                             'DATEADD(hour, -24, current_timestamp())', 'date_trunc(day, current_date)'
                         )
-                self.metric_queries.extend(self.metric_groups[mgroup])
+                self.metric_queries.extend(metric_groups[mgroup])
             except KeyError:
                 self.errors.append(mgroup)
 
