@@ -13,12 +13,10 @@
         "grouping": "cluster",
         "group_by": [
           "kube_cluster_name",
-          "datacenter",
           "helm_release"
         ],
         "tags": [
           "$kube_cluster_name",
-          "$datacenter",
           "$helm_release",
           "$helm_namespace"
         ]
@@ -37,7 +35,7 @@
         "title_size": "16",
         "title_align": "left",
         "type": "event_stream",
-        "query": "source:helm datacenter:$datacenter.value kube_cluster_name:$kube_cluster_name.value helm_release:$helm_release.value helm_status:$helm_status.value helm_namespace:$helm_namespace.value",
+        "query": "source:helm kube_cluster_name:$kube_cluster_name.value helm_release:$helm_release.value helm_status:$helm_status.value helm_namespace:$helm_namespace.value",
         "tags_execution": "and",
         "event_size": "l"
       },
@@ -74,7 +72,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "sum:helm.release{$datacenter,$kube_cluster_name,$helm_release,$helm_status,$helm_namespace} by {helm_status}",
+                "query": "sum:helm.release{$kube_cluster_name,$helm_release,$helm_status,$helm_namespace} by {helm_status}",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -101,24 +99,25 @@
         "title": "Helm releases (only shows 500)",
         "title_size": "16",
         "title_align": "left",
+        "time": {},
         "type": "query_table",
         "requests": [
           {
             "formulas": [
               {
-                "formula": "query1",
                 "conditional_formats": [],
+                "cell_display_mode": "bar",
+                "formula": "query1",
                 "limit": {
                   "count": 500,
                   "order": "desc"
-                },
-                "cell_display_mode": "bar"
+                }
               }
             ],
             "response_format": "scalar",
             "queries": [
               {
-                "query": "sum:helm.release{$datacenter,$kube_cluster_name,$helm_release,$helm_status,$helm_namespace,$helm_namespace} by {helm_chart_name,helm_chart_version,cluster_name,datacenter,helm_status,helm_revision,helm_release,helm_namespace}",
+                "query": "sum:helm.release{$kube_cluster_name,$helm_release,$helm_status,$helm_namespace,$helm_namespace} by {helm_chart_name,helm_chart_version,cluster_name,helm_status,helm_revision,helm_release,helm_namespace}",
                 "data_source": "metrics",
                 "name": "query1",
                 "aggregator": "avg"
@@ -137,12 +136,6 @@
     }
   ],
   "template_variables": [
-    {
-      "name": "datacenter",
-      "default": "*",
-      "prefix": "datacenter",
-      "available_values": []
-    },
     {
       "name": "kube_cluster_name",
       "default": "*",
