@@ -366,10 +366,7 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
         assert_all_metrics(aggregator)
 
-    @pytest.mark.parametrize(
-        'use_openmetrics, metric_collection',
-        [(True, 'OpenMetrics'), (False, 'Prometheus')]
-    )
+    @pytest.mark.parametrize('use_openmetrics, metric_collection', [(True, 'OpenMetrics'), (False, 'Prometheus')])
     def test_replication_dr_mode_collect_secondary(self, aggregator, dd_run_check, use_openmetrics, metric_collection):
         instance = {'use_openmetrics': use_openmetrics, 'collect_secondary_dr': True}
         instance.update(INSTANCES['main'])
