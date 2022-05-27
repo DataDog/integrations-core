@@ -1,5 +1,11 @@
 # CHANGELOG - Vault
 
+## 3.3.0-beta.2 / 2022-05-27
+
+* [Added] Add `vault.replication.wal.gc.*` metrics. See [#11984](https://github.com/DataDog/integrations-core/pull/11984).
+* [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
+* [Fixed] Fix metric naming. See [#11847](https://github.com/DataDog/integrations-core/pull/11847).
+
 ## 3.3.0-beta.1 / 2022-05-27
 
 
