@@ -33,8 +33,7 @@ See [metadata.csv][4] for a list of metrics provided by this check.
 
 ### Events
 
-This check emits events when the `collect_events` option is set to true (it's
-disabled by default).
+This check emits events when the `collect_events` option is set to `true`. The default is `false`.
 
 When the option is enabled, the check emits events when:
 - A new release has been deployed.
