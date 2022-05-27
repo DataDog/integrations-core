@@ -10,7 +10,6 @@ from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResp
 from kafka.structs import TopicPartition
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.kafka_consumer.datadog_agent import read_persistent_cache, write_persistent_cache
 
 from .constants import BROKER_REQUESTS_BATCH_SIZE, KAFKA_INTERNAL_TOPICS
 
@@ -101,14 +100,18 @@ class NewKafkaConsumerCheck(object):
         """Loads broker timestamps from persistent cache."""
         self._broker_timestamps = defaultdict(dict)
         try:
-            for topic_partition, content in json.loads(read_persistent_cache(self._broker_timestamp_cache_key)).items():
+            json_cache = self._read_persistent_cache()
+            for topic_partition, content in json.loads(json_cache).items():
                 for offset, timestamp in content.items():
                     self._broker_timestamps[topic_partition][int(offset)] = timestamp
         except Exception as e:
             self.log.warning('Could not read broker timestamps from cache: %s', str(e))
 
+    def _read_persistent_cache(self):
+        return self._parent_check.read_persistent_cache(self._broker_timestamp_cache_key)
+
     def _save_broker_timestamps(self):
-        write_persistent_cache(self._broker_timestamp_cache_key, json.dumps(self._broker_timestamps))
+        self._parent_check.write_persistent_cache(self._broker_timestamp_cache_key, json.dumps(self._broker_timestamps))
 
     def _create_kafka_admin_client(self, api_version):
         """Return a KafkaAdminClient."""
