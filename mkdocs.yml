@@ -80,9 +80,6 @@ nav:
     - Windows Event Log: architecture/win32_event_log.md
   - Process:
     - Integration release: process/integration-release.md
-    - Agent release:
-      - process/agent-release/pre-release.md
-      - process/agent-release/post-release.md
   - FAQ:
     - FAQ: faq/faq.md
     - Acknowledgements: faq/acknowledgements.md
