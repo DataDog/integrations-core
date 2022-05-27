@@ -21,6 +21,6 @@
     "new_group_delay": 60
   },
   "recommended_monitor_metadata": {
-    "description": "Get notified when the latest revision of a Helm release is on \"failed\" state."
+    "description": "Get notified when the latest revision of a Helm release is in \"failed\" state."
   }
 }
