@@ -31,7 +31,8 @@ files:
         type: string
     - name: collect_secondary_dr
       description: |
-        Enable this option to collect from the OpenMetrics endpoint of the secondary in a Vault replication cluster.
+        Enable this option to collect metrics from the OpenMetrics endpoint if the
+        connected instance is a secondary in a Vault replication cluster.
       value:
         example: false
         type: boolean
