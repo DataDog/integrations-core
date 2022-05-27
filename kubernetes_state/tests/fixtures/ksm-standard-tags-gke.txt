@@ -120,13 +120,13 @@ kube_daemonset_status_number_unavailable{namespace="default",daemonset="datadog-
 kube_daemonset_status_number_unavailable{namespace="kube-system",daemonset="fluentd-gcp-v3.1.1"} 0
 kube_daemonset_status_number_unavailable{namespace="kube-system",daemonset="metadata-proxy-v0.1"} 0
 kube_daemonset_status_number_unavailable{namespace="kube-system",daemonset="nvidia-gpu-device-plugin"} 0
-# HELP kube_daemonset_updated_number_scheduled The total number of nodes that are running updated daemon pod
-# TYPE kube_daemonset_updated_number_scheduled gauge
-kube_daemonset_updated_number_scheduled{namespace="default",daemonset="datadog-monitoring"} 3
-kube_daemonset_updated_number_scheduled{namespace="kube-system",daemonset="fluentd-gcp-v3.1.1"} 3
-kube_daemonset_updated_number_scheduled{namespace="kube-system",daemonset="metadata-proxy-v0.1"} 0
-kube_daemonset_updated_number_scheduled{namespace="kube-system",daemonset="nvidia-gpu-device-plugin"} 0
-kube_daemonset_updated_number_scheduled{namespace="kube-system",daemonset="prometheus-to-sd"} 3
+# HELP kube_daemonset_status_updated_number_scheduled The total number of nodes that are running updated daemon pod
+# TYPE kube_daemonset_status_updated_number_scheduled gauge
+kube_daemonset_status_updated_number_scheduled{namespace="default",daemonset="datadog-monitoring"} 3
+kube_daemonset_status_updated_number_scheduled{namespace="kube-system",daemonset="fluentd-gcp-v3.1.1"} 3
+kube_daemonset_status_updated_number_scheduled{namespace="kube-system",daemonset="metadata-proxy-v0.1"} 0
+kube_daemonset_status_updated_number_scheduled{namespace="kube-system",daemonset="nvidia-gpu-device-plugin"} 0
+kube_daemonset_status_updated_number_scheduled{namespace="kube-system",daemonset="prometheus-to-sd"} 3
 # HELP kube_daemonset_metadata_generation Sequence number representing a specific generation of the desired state.
 # TYPE kube_daemonset_metadata_generation gauge
 kube_daemonset_metadata_generation{namespace="default",daemonset="datadog-monitoring"} 5

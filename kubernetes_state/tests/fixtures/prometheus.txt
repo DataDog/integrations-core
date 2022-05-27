@@ -894,11 +894,14 @@ kube_resourcequota{namespace="default",resource="pods",resourcequota="custom-res
 # HELP kube_limitrange Information about limit range.
 # TYPE kube_limitrange gauge
 kube_limitrange{constraint="defaultRequest",limitrange="limits",namespace="default",resource="cpu",type="Container"} 0.1
-# HELP kube_daemonset_updated_number_scheduled The total number of nodes that are running updated daemon pod
+# HELP kube_daemonset_status_updated_number_scheduled The total number of nodes that are running updated daemon pod
+# TYPE kube_daemonset_status_updated_number_scheduled gauge
+kube_daemonset_status_updated_number_scheduled{namespace="kube-system",daemonset="kube-proxy",metricnameversion="new"} 3
+kube_daemonset_status_updated_number_scheduled{namespace="kube-system",daemonset="kube-svc-redirect",metricnameversion="new"} 3
+kube_daemonset_status_updated_number_scheduled{namespace="default",daemonset="dd-datadog",metricnameversion="new"} 3
+# HELP kube_daemonset_updated_number_scheduled The total number of nodes that are running updated daemon pod (legacy name)
 # TYPE kube_daemonset_updated_number_scheduled gauge
-kube_daemonset_updated_number_scheduled{namespace="kube-system",daemonset="kube-proxy"} 3
-kube_daemonset_updated_number_scheduled{namespace="kube-system",daemonset="kube-svc-redirect"} 3
-kube_daemonset_updated_number_scheduled{namespace="default",daemonset="dd-datadog"} 3
+kube_daemonset_updated_number_scheduled{namespace="default",daemonset="dd-datadog",metricnameversion="old"} 3
 # HELP kube_hpa_status_condition The condition of this autoscaler.
 # TYPE kube_hpa_status_condition gauge
 kube_hpa_status_condition{namespace="default",hpa="myhpa",condition="true",status="AbleToScale"} 1
