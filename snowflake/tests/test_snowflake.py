@@ -181,6 +181,52 @@ def test_currency_usage(dd_run_check, aggregator, instance):
     aggregator.assert_metric('snowflake.contract.amount.sum', value=0.7, count=1, tags=expected_tags)
 
 
+def test_organization_credit_usage(dd_run_check, aggregator, instance):
+    # type: (Callable[[SnowflakeCheck], None], AggregatorStub, Dict[str, Any]) -> None
+
+    expected_org_credit_usage_metrics = [
+        (
+            'account_name',
+            'Standard',
+            Decimal('300'),
+            Decimal('3.4'),
+            Decimal('902.49003'),
+            Decimal('4.9227'),
+            Decimal('212.43'),
+            Decimal('34.7'),
+            Decimal('342.8321'),
+            Decimal('1.7'),
+            Decimal('21.02'),
+            Decimal('2.9'),
+        ),
+    ]
+    expected_tags = EXPECTED_TAGS + [
+        'billing_account:account_name',
+        'service_type:Standard',
+    ]
+    with mock.patch(
+        'datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_org_credit_usage_metrics
+    ):
+        check = SnowflakeCheck(CHECK_NAME, {}, [instance])
+        check._conn = mock.MagicMock()
+        check._query_manager.queries = [Query(queries.OrgCreditUsage)]
+        dd_run_check(check)
+    aggregator.assert_metric('snowflake.organization.billing.compute.sum', value=300, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.billing.compute.avg', value=3.4, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.billing.cloud_service.sum', value=902.49003, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.billing.cloud_service.avg', value=4.9227, tags=expected_tags)
+    aggregator.assert_metric(
+        'snowflake.organization.billing.cloud_service_adjustment.sum', value=212.43, tags=expected_tags
+    )
+    aggregator.assert_metric(
+        'snowflake.organization.billing.cloud_service_adjustment.avg', value=34.7, tags=expected_tags
+    )
+    aggregator.assert_metric('snowflake.organization.billing.total_credit.sum', value=342.8321, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.billing.total_credit.avg', value=1.7, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.billing.total_credits_billed.sum', value=21.02, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.billing.total_credits_billed.avg', value=2.9, tags=expected_tags)
+
+
 def test_warehouse_credit_usage(dd_run_check, aggregator, instance):
     # type: (Callable[[SnowflakeCheck], None], AggregatorStub, Dict[str, Any]) -> None
 
@@ -197,7 +243,8 @@ def test_warehouse_credit_usage(dd_run_check, aggregator, instance):
         ),
     ]
     expected_tags = EXPECTED_TAGS + [
-        'warehouse:test', 'billing_account:account_name',
+        'warehouse:test',
+        'billing_account:account_name',
     ]
     with mock.patch(
         'datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_credit_usage_metrics

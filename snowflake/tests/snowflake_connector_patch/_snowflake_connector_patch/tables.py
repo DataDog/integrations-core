@@ -58,3 +58,20 @@ WAREHOUSE_METERING_HISTORY = [
         Decimal('34.7'),
     )
 ]
+
+METERING_DAILY_HISTORY = [
+    (
+        'account_name',
+        'Standard',
+        Decimal('300'),
+        Decimal('3.4'),
+        Decimal('902.49003'),
+        Decimal('4.9227'),
+        Decimal('212.43'),
+        Decimal('34.7'),
+        Decimal('342.8321'),
+        Decimal('1.7'),
+        Decimal('21.02'),
+        Decimal('2.9'),
+    ),
+]

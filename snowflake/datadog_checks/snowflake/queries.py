@@ -225,7 +225,7 @@ ReplicationUsage = {
 
 
 # https://docs.snowflake.com/en/sql-reference/organization-usage/contract_items.html
-ContractItems = {
+OrgContractItems = {
     'name': 'organization.contract.metrics',
     'query': (
         'select CONTRACT_NUMBER, CONTRACT_ITEM, '
@@ -242,22 +242,21 @@ ContractItems = {
 }
 
 # https://docs.snowflake.com/en/sql-reference/organization-usage/metering_daily_history.html
-OrganizationCreditUsage = {
+OrgCreditUsage = {
     'name': 'organization.billing.metrics',
     'query': (
-        'select ORGANIZATION_NAME, ACCOUNT_NAME, SERVICE_TYPE, '
+        'select ACCOUNT_NAME, SERVICE_TYPE, '
         'sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), '
         'sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), '
         'sum(abs(CREDITS_ADJUSTMENT_CLOUD_SERVICES)), avg(abs(CREDITS_ADJUSTMENT_CLOUD_SERVICES))'
         'sum(CREDITS_USED), avg(CREDITS_USED), sum(CREDITS_BILLED), avg(CREDITS_BILLED) from METERING_DAILY_HISTORY '
-        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1, 2, 3;'
+        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1, 2;'
     ),
     'columns': [
+        {'name': 'billing_account', 'type': 'tag'},
         {'name': 'service_type', 'type': 'tag'},
-        {'name': 'account_name', 'type': 'tag'},
-        {'name': 'service', 'type': 'tag'},
-        {'name': 'organization.billing.virtual_warehouse.sum', 'type': 'gauge'},
-        {'name': 'organization.billing.virtual_warehouse.avg', 'type': 'gauge'},
+        {'name': 'organization.billing.compute.sum', 'type': 'gauge'},
+        {'name': 'organization.billing.compute.avg', 'type': 'gauge'},
         {'name': 'organization.billing.cloud_service.sum', 'type': 'gauge'},
         {'name': 'organization.billing.cloud_service.avg', 'type': 'gauge'},
         {'name': 'organization.billing.cloud_service_adjustment.sum', 'type': 'gauge'},
