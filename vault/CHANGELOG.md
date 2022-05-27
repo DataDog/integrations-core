@@ -1,5 +1,9 @@
 # CHANGELOG - Vault
 
+## 3.3.0-beta.3 / 2022-05-27
+
+* [Fixed] Ensure vault_wal_gc_total is collected as gauge. See [#12036](https://github.com/DataDog/integrations-core/pull/12036).
+
 ## 3.3.0-beta.2 / 2022-05-27
 
 * [Added] Add `vault.replication.wal.gc.*` metrics. See [#11984](https://github.com/DataDog/integrations-core/pull/11984).
