@@ -2,7 +2,7 @@
   "name": "Helm release {{helm_namespace.name}}/{{helm_release.name}} failed on {{kube_cluster_name.name}}",
   "type": "service check",
   "query": "\"helm.release_state\".over(\"*\").by(\"helm_namespace\",\"helm_release\",\"helm_storage\",\"kube_cluster_name\").last(6).count_by_status()",
-  "message": "The helm release deployment {{helm_namespace.name}}/{{helm_release.name}} (using storage {{helm_storage.name}}) has failed on {{kube_cluster_name.name}}.",
+  "message": "The Helm release deployment {{helm_namespace.name}}/{{helm_release.name}} (using storage {{helm_storage.name}}) has failed on {{kube_cluster_name.name}}.",
   "tags": [
     "integration:helm"
   ],
