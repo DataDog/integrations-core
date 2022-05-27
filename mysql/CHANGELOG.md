@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 8.3.1 / 2022-05-27
+
+* [Fixed] Revert mysql.net.connections metric type. See [#12088](https://github.com/DataDog/integrations-core/pull/12088).
+
 ## 8.3.0 / 2022-05-15
 
 * [Added] Add option to keep aliases in mysql (`keep_sql_alias`). See [#12018](https://github.com/DataDog/integrations-core/pull/12018).
