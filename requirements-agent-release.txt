@@ -6,7 +6,7 @@ datadog-airflow==3.1.0
 datadog-amazon-msk==3.1.2
 datadog-ambari==3.1.0; sys_platform != 'win32'
 datadog-apache==4.1.0
-datadog-arangodb==1.0.1
+datadog-arangodb==1.1.0
 datadog-aspdotnet==1.11.1; sys_platform == 'win32'
 datadog-avi-vantage==3.1.1
 datadog-azure-iot-edge==3.2.0
@@ -96,7 +96,7 @@ datadog-mcache==3.2.0; sys_platform != 'win32'
 datadog-mesos-master==3.1.0; sys_platform != 'win32'
 datadog-mesos-slave==3.1.0; sys_platform != 'win32'
 datadog-mongo==3.2.2
-datadog-mysql==8.3.0
+datadog-mysql==8.3.1
 datadog-nagios==1.11.0
 datadog-network==2.7.0
 datadog-nfsstat==1.11.0; sys_platform == 'linux2'
