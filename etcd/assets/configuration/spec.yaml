@@ -10,7 +10,7 @@ files:
       - name: use_preview
         description: |
           Enable this option to run the Prometheus-based check of etcd.
-          Note: this requires etcd v3+.
+          Note: This requires etcd v3 or greater.
         value:
           type: boolean
           example: true
