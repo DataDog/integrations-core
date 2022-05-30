@@ -167,7 +167,7 @@ TAGS = {
     NAMESPACE + '.job.failed': ['job:hello', 'job_name:hello2', 'kube_job:hello2'],
     NAMESPACE + '.job.succeeded': ['job:hello', 'job_name:hello2', 'kube_job:hello2'],
     NAMESPACE + '.hpa.condition': ['namespace:default', 'hpa:myhpa', 'condition:true', 'status:abletoscale'],
-    NAMESPACE + '.daemonset.updated': ['metricnameversion:old', 'metricnameversion:new']
+    NAMESPACE + '.daemonset.updated': ['metricnameversion:old', 'metricnameversion:new'],
 }
 
 JOINED_METRICS = {
