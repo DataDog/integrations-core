@@ -71,6 +71,7 @@ class DirectoryCheck(AgentCheck):
         dirtags.extend(self._config.tags)
         directory_bytes = 0
         directory_files = 0
+        directory_folders = 0
         max_filegauge_balance = self._config.max_filegauge_count
         submit_histograms = self._config.submit_histograms
 
@@ -92,6 +93,7 @@ class DirectoryCheck(AgentCheck):
                     dirs[:] = [d for d in dirs if not self._config.exclude_dirs_pattern.search(d.path)]
                 else:
                     dirs[:] = [d for d in dirs if not self._config.exclude_dirs_pattern.search(d.name)]
+            directory_folders += len(dirs)
 
             if self._config.pattern is not None:
                 # Check if the path of the file relative to the directory
@@ -147,6 +149,8 @@ class DirectoryCheck(AgentCheck):
 
         # number of files
         self.gauge('system.disk.directory.files', directory_files, tags=dirtags)
+        # number of folders
+        self.gauge('system.disk.directory.folders', directory_folders, tags=dirtags)
 
         # total file size
         if not self._config.countonly:

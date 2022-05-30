@@ -28,6 +28,8 @@ def setup_module(module):
 
     # Create folder structure
     os.makedirs(str(temp_dir) + "/main/subfolder")
+    os.makedirs(str(temp_dir) + "/main/subfolder/subsubfolder")
+    os.makedirs(str(temp_dir) + "/main/othersubfolder")
     os.makedirs(str(temp_dir) + "/many/subfolder")
 
     # Create 10 files in main
@@ -82,7 +84,9 @@ def test_exclude_dirs(aggregator):
         dir_check = DirectoryCheck('directory', {}, [instance])
         dir_check.check(instance)
 
-    assert len(aggregator.metric_names) == 1
+    aggregator.assert_metric("system.disk.directory.folders", count=1, value=0)
+    aggregator.assert_metric("system.disk.directory.files", count=1, value=0)
+    aggregator.assert_all_metrics_covered()
 
 
 def test_directory_metrics(aggregator):
@@ -117,6 +121,11 @@ def test_directory_metrics(aggregator):
         else:
             # 12 files in 'temp_dir'
             aggregator.assert_metric("system.disk.directory.files", tags=dir_tags, count=1, value=12)
+
+        if config.get('recursive'):
+            aggregator.assert_metric("system.disk.directory.folders", tags=dir_tags, count=1, value=3)
+        else:
+            aggregator.assert_metric("system.disk.directory.folders", tags=dir_tags, count=1, value=2)
 
     # Raises when coverage < 100%
     aggregator.metrics_asserted_pct == 100.0
@@ -282,6 +291,7 @@ def test_omit_histograms(aggregator, dd_run_check):
 
     aggregator.assert_metric('system.disk.directory.bytes', count=1)
     aggregator.assert_metric('system.disk.directory.files', count=1)
+    aggregator.assert_metric('system.disk.directory.folders', count=1)
     aggregator.assert_metric('system.disk.directory.file.bytes', count=0)
     aggregator.assert_metric('system.disk.directory.file.modified_sec_ago', count=0)
     aggregator.assert_metric('system.disk.directory.file.created_sec_ago', count=0)
