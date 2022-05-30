@@ -72,6 +72,7 @@ SystemMetrics = {
                 'OpenFileForRead': {'name': 'file.open.read', 'type': 'gauge'},
                 'OpenFileForWrite': {'name': 'file.open.write', 'type': 'gauge'},
                 'PartMutation': {'name': 'query.mutation', 'type': 'gauge'},
+                'PartsActive': {'name': 'parts.active', 'type': 'gauge'},
                 'PartsCommitted': {'name': 'parts.committed', 'type': 'gauge'},
                 'PartsCompact': {'name': 'parts.compact', 'type': 'gauge'},
                 'PartsDeleteOnDestroy': {'name': 'parts.delete_on_destroy', 'type': 'gauge'},
