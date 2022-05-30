@@ -90,7 +90,6 @@ V_20_METRICS = [
     'clickhouse.selected.bytes.total',
 ]
 
-# This is not tested by our current envs.
 V_21_METRICS = [
     'clickhouse.ddl.max_processed',
     'clickhouse.parts.committed',
@@ -103,8 +102,14 @@ V_21_METRICS = [
     'clickhouse.parts.temporary',
 ]
 
-version_mapper = {'18': V_18_19_METRICS, '19': V_18_19_METRICS, '20': V_20_METRICS, '21': V_21_METRICS}
-
 
 def get_metrics(version):
-    return BASE_METRICS + version_mapper.get(version, [])
+    major_version = int(version.split('.')[0])
+    metrics = BASE_METRICS
+    if major_version >= 18:
+        metrics += V_18_19_METRICS
+    if major_version >= 20:
+        metrics += V_20_METRICS
+    if major_version >= 22:
+        metrics += V_21_METRICS
+    return metrics
