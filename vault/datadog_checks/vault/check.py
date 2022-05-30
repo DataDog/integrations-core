@@ -16,7 +16,7 @@ class VaultCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'vault'
 
     DEFAULT_METRIC_LIMIT = 0
-
+    CHECK_NAME = 'vault'
     EVENT_LEADER_CHANGE = 'leader_change'
     SERVICE_CHECK_CONNECT = 'can_connect'
     SERVICE_CHECK_UNSEALED = 'unsealed'
