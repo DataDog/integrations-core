@@ -3,9 +3,14 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from datadog_checks.exchange_server.metrics import METRICS_CONFIG
 
+CHECK_NAME = 'exchange_server'
 MINIMAL_INSTANCE = {'host': '.'}
 
-CHECK_NAME = 'exchange_server'
+INSTANCE = {
+    'host': '.',
+    'sites': ['Default Web Site', 'Exchange Back End', 'Non Existing Website'],
+    'app_pools': ['DefaultAppPool', 'MSExchangeServicesAppPool', 'Non Existing App Pool'],
+}
 
 DATABASE_INSTANCES = [
     'Information Store/_Total',
