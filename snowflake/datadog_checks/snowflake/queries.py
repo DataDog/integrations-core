@@ -235,9 +235,8 @@ OrgContractItems = {
     'columns': [
         {'name': 'contract_number', 'type': 'tag'},
         {'name': 'contract_item', 'type': 'tag'},
-        {'name': 'organization.contract_number', 'type': 'tag'},
-        {'name': 'organization.contract.amount.avg', 'type': 'gauge'},
         {'name': 'organization.contract.amount.sum', 'type': 'gauge'},
+        {'name': 'organization.contract.amount.avg', 'type': 'gauge'},
     ],
 }
 

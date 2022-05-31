@@ -75,3 +75,12 @@ METERING_DAILY_HISTORY = [
         Decimal('2.9'),
     ),
 ]
+
+CONTRACT_ITEMS = [
+    (
+        '4',
+        'contract',
+        Decimal('23'),
+        Decimal('2.1'),
+    ),
+]
