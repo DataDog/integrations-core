@@ -43,7 +43,13 @@ $ DYLD_LIBRARY_PATH=/opt/mqm/lib64 python -c 'import pymqi'
 ModuleNotFoundError: No module named 'pymqe'
 ```
 
-The workaround is to use a virtualenv, then set `DYLD_LIBRARY_PATH`, then import `pymqi`.
+The workaround is to use a virtualenv:
+1. Create a virtualenv
+2. Set `DYLD_LIBRARY_PATH`
+3. Install `pymqi`: `pip install pymqi`
+4. Re-install ddev in the virtual environment: `python -m pip install -e "path/to/datadog_checks_dev[cli]"`
+
+Now you should be able to start the ddev environment while in your virtual environment!
 
 This does not affect tox tests since virtualenv is used.
 
