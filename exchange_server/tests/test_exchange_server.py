@@ -37,6 +37,7 @@ def test_basic_check(aggregator, dd_run_check):
 
     assert aggregator.metrics_asserted_pct == 100.0
 
+
 # Minimal E2E testing
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, aggregator, instance):
