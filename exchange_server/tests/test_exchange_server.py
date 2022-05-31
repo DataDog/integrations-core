@@ -10,6 +10,8 @@ from datadog_checks.exchange_server.metrics import DEFAULT_COUNTERS
 
 from .common import CHECK_NAME, METRIC_INSTANCES, MINIMAL_INSTANCE
 
+from datadog_checks.base import AgentCheck
+
 pytestmark = [requires_py2, pytest.mark.usefixtures('pdh_mocks_fixture')]
 
 
@@ -34,3 +36,10 @@ def test_basic_check(aggregator, dd_run_check):
             aggregator.assert_metric(metric, tags=None, count=1)
 
     assert aggregator.metrics_asserted_pct == 100.0
+
+# Minimal E2E testing
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, aggregator, instance):
+    with pytest.raises(Exception):
+        dd_agent_check(instance, rate=True)
+    aggregator.assert_service_check("exchange.can_connect", AgentCheck.CRITICAL)
