@@ -1,3 +1,7 @@
+## Datadog Agent version [7.36.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7361)
+
+* MySQL [8.2.3](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+
 ## Datadog Agent version [7.36.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7360)
 
 * Active Directory [1.15.0](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md)
