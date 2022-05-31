@@ -14,6 +14,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from .constants import BROKER_REQUESTS_BATCH_SIZE, KAFKA_INTERNAL_TOPICS
 
 MAX_TIMESTAMPS = 1000
+BROKER_TIMESTAMP_CACHE_KEY = 'broker_timestamps'
 
 
 class NewKafkaConsumerCheck(object):
@@ -27,7 +28,6 @@ class NewKafkaConsumerCheck(object):
         self._parent_check = parent_check
         self._broker_requests_batch_size = self.instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
         self._kafka_client = None
-        self._broker_timestamp_cache_key = 'broker_timestamps' + "".join(sorted(self._custom_tags))
 
     def __getattr__(self, item):
         try:
@@ -108,10 +108,10 @@ class NewKafkaConsumerCheck(object):
             self.log.warning('Could not read broker timestamps from cache: %s', str(e))
 
     def _read_persistent_cache(self):
-        return self._parent_check.read_persistent_cache(self._broker_timestamp_cache_key)
+        return self._parent_check.read_persistent_cache(BROKER_TIMESTAMP_CACHE_KEY)
 
     def _save_broker_timestamps(self):
-        self._parent_check.write_persistent_cache(self._broker_timestamp_cache_key, json.dumps(self._broker_timestamps))
+        self._parent_check.write_persistent_cache(BROKER_TIMESTAMP_CACHE_KEY, json.dumps(self._broker_timestamps))
 
     def _create_kafka_admin_client(self, api_version):
         """Return a KafkaAdminClient."""
