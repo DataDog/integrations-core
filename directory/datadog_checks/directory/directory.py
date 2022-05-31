@@ -93,7 +93,7 @@ class DirectoryCheck(AgentCheck):
                     dirs[:] = [d for d in dirs if not self._config.exclude_dirs_pattern.search(d.path)]
                 else:
                     dirs[:] = [d for d in dirs if not self._config.exclude_dirs_pattern.search(d.name)]
-            directory_folders += len(dirs)
+            directory_folders += get_length(dirs)
 
             if self._config.pattern is not None:
                 # Check if the path of the file relative to the directory
