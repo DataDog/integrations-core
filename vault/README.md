@@ -190,6 +190,8 @@ Run the [Agent's status subcommand][13] and look for `vault` under the Checks se
 
 See [metadata.csv][14] for a list of metrics provided by this integration.
 
+**Note**: Version 3.4.0+ of this check uses [OpenMetrics][21] for metric collection, which requires Python 3. For hosts that are unable to use Python 3, or if you would like to use a legacy version of this check, set the value of `use_openmetrics` to `false` in the configuration.
+
 ### Events
 
 `vault.leader_change`:
@@ -232,3 +234,4 @@ Additional helpful documentation, links, and articles:
 [18]: https://www.datadoghq.com/blog/monitor-vault-metrics-and-logs/
 [19]: https://www.datadoghq.com/blog/vault-monitoring-tools
 [20]: https://www.datadoghq.com/blog/vault-monitoring-with-datadog
+[21]: https://docs.datadoghq.com/integrations/openmetrics/
