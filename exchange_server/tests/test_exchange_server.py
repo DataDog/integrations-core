@@ -5,7 +5,7 @@ import pytest
 from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.testing import requires_py2
+from datadog_checks.dev.testing import requires_py2, requires_py3
 from datadog_checks.exchange_server import ExchangeCheck
 from datadog_checks.exchange_server.metrics import DEFAULT_COUNTERS
 
@@ -39,7 +39,7 @@ def test_basic_check(aggregator, dd_run_check):
 
 # Minimal E2E testing
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, aggregator, instance):
-    with pytest.raises(Exception):
-        dd_agent_check(instance, rate=True)
-    aggregator.assert_service_check("exchange.can_connect", AgentCheck.CRITICAL)
+@requires_py3
+def test_e2e_py3(dd_agent_check, aggregator, instance):
+    aggregator = dd_agent_check(instance)
+    aggregator.assert_service_check('exchange.windows.perf.health', AgentCheck.CRITICAL)
