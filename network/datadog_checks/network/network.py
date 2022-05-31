@@ -6,12 +6,10 @@
 Collects network metrics.
 """
 
-import array
 import distutils.spawn
 import os
 import re
 import socket
-import struct
 from collections import defaultdict
 
 import psutil
@@ -22,21 +20,8 @@ from datadog_checks.base.utils.common import pattern_filter
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 
-from .const import (
-    BSD_TCP_METRICS,
-    ENA_METRIC_NAMES,
-    ENA_METRIC_PREFIX,
-    ETH_GSTRING_LEN,
-    ETH_SS_STATS,
-    ETHTOOL_GDRVINFO,
-    ETHTOOL_GLOBAL_METRIC_NAMES,
-    ETHTOOL_GSSET_INFO,
-    ETHTOOL_GSTATS,
-    ETHTOOL_GSTRINGS,
-    ETHTOOL_METRIC_NAMES,
-    SIOCETHTOOL,
-    SOLARIS_TCP_METRICS,
-)
+from . import ethtool
+from .const import BSD_TCP_METRICS, ENA_METRIC_NAMES, ENA_METRIC_PREFIX, SOLARIS_TCP_METRICS
 
 try:
     import datadog_agent
@@ -79,9 +64,15 @@ class Network(AgentCheck):
 
         self._collect_ethtool_stats = self._collect_ena_metrics or self._collect_ethtool_metrics
         if fcntl is None and self._collect_ethtool_stats:
-            raise ConfigurationError(
-                "fcntl not importable, collect_aws_ena_metrics and collect_ethtool_metrics should be disabled"
-            )
+            if Platform.is_windows():
+                raise ConfigurationError(
+                    "fcntl is not available on Windows, "
+                    "collect_aws_ena_metrics and collect_ethtool_metrics should be disabled"
+                )
+            else:
+                raise ConfigurationError(
+                    "fcntl not importable, collect_aws_ena_metrics and collect_ethtool_metrics should be disabled"
+                )
 
         # This decides whether we should split or combine connection states,
         # along with a few other things
@@ -1075,10 +1066,10 @@ class Network(AgentCheck):
         tags.append('driver_name:{}'.format(driver_name))
         tags.append('driver_version:{}'.format(driver_version))
         if self._collect_ena_metrics:
-            ena_metrics = self._get_ena_metrics(ethtool_stats_names, ethtool_stats)
+            ena_metrics = ethtool.get_ena_metrics(ethtool_stats_names, ethtool_stats)
             self._submit_ena_metrics(iface, ena_metrics, tags)
         if self._collect_ethtool_metrics:
-            ethtool_metrics = self._get_ethtool_metrics(driver_name, ethtool_stats_names, ethtool_stats)
+            ethtool_metrics = ethtool.get_ethtool_metrics(driver_name, ethtool_stats_names, ethtool_stats)
             self._submit_ethtool_metrics(iface, ethtool_metrics, tags)
 
     def _fetch_ethtool_stats(self, iface):
@@ -1095,8 +1086,8 @@ class Network(AgentCheck):
         ethtool_socket = None
         try:
             ethtool_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
-            driver_name, driver_version = self._get_ethtool_drvinfo(iface, ethtool_socket)
-            stats_names, stats = self._get_ethtool_stats(iface, ethtool_socket)
+            driver_name, driver_version = ethtool.get_ethtool_drvinfo(iface, ethtool_socket)
+            stats_names, stats = ethtool.get_ethtool_stats(iface, ethtool_socket)
             return driver_name, driver_version, stats_names, stats
         except OSError as e:
             # this will happen for interfaces that don't support SIOCETHTOOL - e.g. loopback or docker
@@ -1107,159 +1098,3 @@ class Network(AgentCheck):
             if ethtool_socket is not None:
                 ethtool_socket.close()
         return (None, None, [], [])
-
-    def _send_ethtool_ioctl(self, iface, sckt, data):
-        """
-        Send an ioctl SIOCETHTOOL call for given interface with given data.
-        """
-        ifr = struct.pack('16sP', iface.encode('utf-8'), data.buffer_info()[0])
-        fcntl.ioctl(sckt.fileno(), SIOCETHTOOL, ifr)
-
-    def _byte_array_to_string(self, s):
-        """
-        Convert a byte array to string
-        b'hv_netvsc\x00\x00\x00\x00' -> 'hv_netvsc'
-        """
-        s = s.tobytes() if PY3 else s.tostring()
-        s = s.partition(b'\x00')[0].decode('utf-8')
-        return s
-
-    def _get_ethtool_gstringset(self, iface, sckt):
-        """
-        Retrieve names of all ethtool stats for given interface.
-        """
-        sset_info = array.array('B', struct.pack('IIQI', ETHTOOL_GSSET_INFO, 0, 1 << ETH_SS_STATS, 0))
-        self._send_ethtool_ioctl(iface, sckt, sset_info)
-        sset_mask, sset_len = struct.unpack('8xQI', sset_info)
-        if sset_mask == 0:
-            sset_len = 0
-
-        strings = array.array('B', struct.pack('III', ETHTOOL_GSTRINGS, ETH_SS_STATS, sset_len))
-        strings.extend([0] * sset_len * ETH_GSTRING_LEN)
-        self._send_ethtool_ioctl(iface, sckt, strings)
-
-        all_names = []
-        for i in range(sset_len):
-            offset = 12 + ETH_GSTRING_LEN * i
-            s = self._byte_array_to_string(strings[offset : offset + ETH_GSTRING_LEN])
-            all_names.append(s)
-        return all_names
-
-    def _get_ethtool_drvinfo(self, iface, sckt):
-        drvinfo = array.array('B', struct.pack('I', ETHTOOL_GDRVINFO))
-        # Struct in
-        # https://github.com/torvalds/linux/blob/448f413a8bdc727d25d9a786ccbdb974fb85d973/include/uapi/linux/ethtool.h#L187-L200
-        # Total size: 196
-        # Same result as printf("%zu\n", sizeof(struct ethtool_drvinfo));
-        drvinfo.extend([0] * (4 + 32 + 32 + 32 + 32 + 32 + 12 + 5 * 4))
-        self._send_ethtool_ioctl(iface, sckt, drvinfo)
-        driver_name = self._byte_array_to_string(drvinfo[4 : 4 + 32])
-        driver_version = self._byte_array_to_string(drvinfo[4 + 32 : 32 + 32])
-        return driver_name, driver_version
-
-    def _get_ethtool_stats(self, iface, sckt):
-        stats_names = list(self._get_ethtool_gstringset(iface, sckt))
-        stats_count = len(stats_names)
-
-        stats = array.array('B', struct.pack('II', ETHTOOL_GSTATS, stats_count))
-        # we need `stats_count * (length of uint64)` for the result
-        stats.extend([0] * len(struct.pack('Q', 0)) * stats_count)
-        self._send_ethtool_ioctl(iface, sckt, stats)
-        return stats_names, stats
-
-    def _parse_ethtool_queue_num(self, stat_name):
-        """
-        Extract the queue and the metric name from ethtool stat name:
-        queue_0_tx_cnt -> (queue:0, tx_cnt)
-        tx_queue_0_bytes -> (queue:0, tx_bytes)
-        """
-        if 'queue_' not in stat_name:
-            return None, None
-        parts = stat_name.split('_')
-        if 'queue' not in parts:
-            return None, None
-        queue_index = parts.index('queue')
-        queue_num = parts[queue_index + 1]
-        if not queue_num.isdigit():
-            return None, None
-        parts.pop(queue_index)
-        parts.pop(queue_index)
-        return 'queue:{}'.format(queue_num), '_'.join(parts)
-
-    def _parse_ethtool_queue_array(self, stat_name):
-        """
-        Extract the queue and the metric name from ethtool stat name:
-        tx_stop[0] -> (queue:0, tx_stop)
-        """
-        if '[' not in stat_name or not stat_name.endswith(']'):
-            return None, None
-        parts = stat_name.split('[')
-        if len(parts) != 2:
-            return None, None
-        metric_name = parts[0]
-        queue_num = parts[1][:-1]
-        if not queue_num.isdigit():
-            return None, None
-        return 'queue:{}'.format(queue_num), metric_name
-
-    def _parse_ethtool_cpu_num(self, stat_name):
-        """
-        Extract the cpu and the metric name from ethtool stat name:
-        cpu0_rx_bytes -> (cpu:0, rx_bytes)
-        """
-        if not stat_name.startswith('cpu'):
-            return None, None
-        parts = stat_name.split('_')
-        cpu_num = parts[0][3:]
-        if not cpu_num.isdigit():
-            return None, None
-        parts.pop(0)
-        return 'cpu:{}'.format(cpu_num), '_'.join(parts)
-
-    def _get_stat_value(self, stats, index):
-        offset = 8 + 8 * index
-        value = struct.unpack('Q', stats[offset : offset + 8])[0]
-        return value
-
-    def _get_ethtool_metrics(self, driver_name, stats_names, stats):
-        """
-        Get all ethtool metrics specified in ETHTOOL_METRIC_NAMES list and their values from ethtool.
-        We convert the queue and cpu number to a tag: queue_0_tx_cnt will be submitted as tx_cnt with the tag queue:0
-
-        Return [tag][metric] -> value
-        """
-        res = defaultdict(dict)
-        if driver_name not in ETHTOOL_METRIC_NAMES:
-            return res
-        ethtool_global_metrics = ETHTOOL_GLOBAL_METRIC_NAMES.get(driver_name, {})
-        for i, stat_name in enumerate(stats_names):
-            tag, metric_name = self._parse_ethtool_queue_num(stat_name)
-            metric_prefix = '.queue.'
-            if not tag:
-                tag, metric_name = self._parse_ethtool_cpu_num(stat_name)
-                metric_prefix = '.cpu.'
-            if not tag:
-                tag, metric_name = self._parse_ethtool_queue_array(stat_name)
-                metric_prefix = '.queue.'
-            if metric_name and metric_name not in ETHTOOL_METRIC_NAMES[driver_name]:
-                # A per queue/cpu metric was found but is not part of the collected metrics
-                continue
-            if not tag and stat_name in ethtool_global_metrics:
-                tag = 'global'
-                metric_prefix = '.'
-                metric_name = stat_name
-            if not tag:
-                continue
-            res[tag][driver_name + metric_prefix + metric_name] = self._get_stat_value(stats, i)
-        return res
-
-    def _get_ena_metrics(self, stats_names, stats):
-        """
-        Get all ENA metrics specified in ENA_METRICS_NAMES list and their values from ethtool.
-        """
-        metrics = {}
-        for i, stat_name in enumerate(stats_names):
-            if stat_name in ENA_METRIC_NAMES:
-                metrics[ENA_METRIC_PREFIX + stat_name] = self._get_stat_value(stats, i)
-
-        return metrics
