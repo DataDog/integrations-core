@@ -190,9 +190,7 @@ Run the [Agent's status subcommand][13] and look for `vault` under the Checks se
 
 See [metadata.csv][14] for a list of metrics provided by this integration.
 
-#### Note
-
-The metrics starting with `vault.replication.fetchRemoteKeys`, `vault.replication.merkleDiff`, and `vault.replication.merkleSync` are not reported unless the replication is in an unhealthy state. 
+**Note:** Metrics starting with `vault.replication.fetchRemoteKeys`, `vault.replication.merkleDiff`, and `vault.replication.merkleSync` are not reported unless the replication is in an unhealthy state. 
 
 ### Events
 
