@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 2.15.1 / 2022-05-31
+
+* [Fixed] Does not fail reading and writing to cache when file is too long. See [#12109](https://github.com/DataDog/integrations-core/pull/12109).
+
 ## 2.15.0 / 2022-05-15
 
 * [Added] Add new lag in seconds metric. See [#11861](https://github.com/DataDog/integrations-core/pull/11861).
