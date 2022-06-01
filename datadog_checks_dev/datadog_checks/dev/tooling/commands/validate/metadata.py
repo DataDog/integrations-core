@@ -354,7 +354,9 @@ def metadata(check, check_duplicates, show_warnings):
         has_dos_line_endings = end_line_counts[b'\r\n'] or end_line_counts[b'\n\r'] or end_line_counts[b'\r']
         if has_dos_line_endings:
             errors = True
-            display_queue.append((echo_failure, f"{current_check} metadata has DOS line endings, convert them to UNIX"))
+            display_queue.append(
+                (echo_failure, f"{current_check} metadata has Windows line endings, convert them to UNIX")
+            )
 
         for line, row in read_metadata_rows(metadata_file):
             # determine if number of columns is complete by checking for None values (DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader) # noqa
