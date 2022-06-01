@@ -6,7 +6,6 @@ import re
 import mock
 import pytest
 import requests
-from six import PY2
 
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -367,8 +366,7 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
         assert_all_metrics(aggregator)
 
-    @pytest.mark.skipif(PY2, reason='Test only available on Python 3')
-    @pytest.mark.parametrize('use_openmetrics, metric_collection', [(True, 'OpenMetrics'), (False, 'Prometheus')])
+    @pytest.mark.parametrize('use_openmetrics, metric_collection', [(True, 'OpenMetrics'), (False, 'Prometheus')], indirect=True)
     def test_replication_dr_mode_collect_secondary(self, aggregator, dd_run_check, use_openmetrics, metric_collection):
         instance = {'use_openmetrics': use_openmetrics, 'collect_secondary_dr': True}
         instance.update(INSTANCES['main'])
