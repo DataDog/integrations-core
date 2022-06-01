@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime
-import logging
 import re
 import select
 import time
@@ -399,7 +398,7 @@ failed_explain_test_repeat_count = 5
             "error:explain-database_error-<class 'psycopg2.errors.DatatypeMismatch'>",
             None,
             1,
-            [13, 12, 11, 10, 9],
+            [13, 12, 11, 10, 95, 96],
         ),
         (
             "update persons set firstname='firstname' where personid in (2, 1); select pg_sleep(1);",
@@ -426,7 +425,7 @@ def test_failed_explain_handling(
     check = integration_check(dbm_instance)
     check._connect()
 
-    if skip_on_versions is not None and int(POSTGRES_VERSION) in skip_on_versions:
+    if skip_on_versions is not None and POSTGRES_VERSION in skip_on_versions:
         pytest.skip("not relevant for postgres {version}".format(version=POSTGRES_VERSION))
 
     # run check so all internal state is correctly initialized
