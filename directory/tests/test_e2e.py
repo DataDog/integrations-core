@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
 
@@ -16,3 +17,4 @@ def test_check(dd_agent_check):
         for submetric in ['avg', 'max', 'count', 'median', '95percentile']:
             aggregator.assert_metric('{}.{}'.format(metric, submetric), tags=common.EXPECTED_TAGS)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

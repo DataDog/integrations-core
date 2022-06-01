@@ -12,6 +12,7 @@ import pytest
 from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.dev.fs import create_file
 from datadog_checks.dev.fs import temp_dir as temp_directory
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.directory import DirectoryCheck
 
 from . import common
@@ -87,6 +88,7 @@ def test_exclude_dirs(aggregator):
     aggregator.assert_metric("system.disk.directory.folders", count=1, value=0)
     aggregator.assert_metric("system.disk.directory.files", count=1, value=0)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_directory_metrics(aggregator):
@@ -213,8 +215,8 @@ def test_file_metrics(aggregator):
         for mname in common.DIR_METRICS:
             aggregator.assert_metric(mname, tags=dir_tags, count=1)
 
-        # Raises when coverage < 100%
-        assert aggregator.metrics_asserted_pct == 100.0
+        aggregator.assert_all_metrics_covered()
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_file_metrics_many(aggregator):
@@ -297,6 +299,7 @@ def test_omit_histograms(aggregator, dd_run_check):
     aggregator.assert_metric('system.disk.directory.file.created_sec_ago', count=0)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_non_existent_directory(aggregator):
@@ -364,6 +367,7 @@ def test_no_recursive_symlink_loop(aggregator):
             aggregator.assert_metric(metric, count=1, tags=tags)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.parametrize(
