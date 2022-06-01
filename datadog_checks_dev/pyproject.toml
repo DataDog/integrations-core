@@ -118,3 +118,13 @@ include = [
 dev-mode-dirs = [
     ".",
 ]
+
+[tool.pytest.ini_options]
+markers = [
+    "conf",
+    "conf_consumer",
+    "conf_consumer_example",
+    "conf_consumer_model",
+    "conf_template",
+    "docker",
+]
