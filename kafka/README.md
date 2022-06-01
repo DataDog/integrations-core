@@ -170,7 +170,7 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 [14]: https://github.com/DataDog/integrations-core/blob/master/kafka/metadata.csv
 [15]: https://github.com/DataDog/integrations-core/blob/master/kafka/assets/service_checks.json
 [16]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka/
-[17]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub/
+[17]: https://docs.datadoghq.com/integrations/guide/agent-failed-to-retrieve-rmiserver-stub/
 [19]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
 [20]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
 [21]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
