@@ -394,9 +394,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        metric_collection = 'Prometheus'
-        if use_openmetrics:
-            metric_collection = 'OpenMetrics'
+        metric_collection = 'OpenMetrics' if use_openmetrics else 'Prometheus'
 
         with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
             dd_run_check(c)
