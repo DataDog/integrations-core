@@ -271,6 +271,24 @@ def check_duplicate_values(current_check, line, row, header_name, duplicates, fa
     return False
 
 
+def calculate_line_endings(path):
+    # order matters!
+    endings = [
+        b'\r\n',
+        b'\n\r',
+        b'\n',
+        b'\r',
+    ]
+    counts = dict.fromkeys(endings, 0)
+    with open(path, 'rb') as f:
+        for line in f:
+            for end_line in endings:
+                if line.endswith(end_line):
+                    counts[end_line] += 1
+                    break
+    return counts
+
+
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `metadata.csv` files')
 @click.option(
     '--check-duplicates', is_flag=True, help='Output warnings if there are duplicate short names and descriptions'
@@ -331,6 +349,12 @@ def metadata(check, check_duplicates, show_warnings):
             display_queue.append(
                 (echo_failure, f"{current_check} metadata file is empty. This file needs the header row at minimum")
             )
+
+        end_line_counts = calculate_line_endings(metadata_file)
+        has_dos_line_endings = end_line_counts[b'\r\n'] or end_line_counts[b'\n\r'] or end_line_counts[b'\r']
+        if has_dos_line_endings:
+            errors = True
+            display_queue.append((echo_failure, f"{current_check} metadata has DOS line endings, convert them to UNIX"))
 
         for line, row in read_metadata_rows(metadata_file):
             # determine if number of columns is complete by checking for None values (DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader) # noqa
