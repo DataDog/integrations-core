@@ -4,4 +4,4 @@ system.disk.directory.file.bytes,gauge,,byte,,Total size of the file,0,directory
 system.disk.directory.file.modified_sec_ago,gauge,,second,,Duration since last modification,0,directory,file_modif,
 system.disk.directory.file.created_sec_ago,gauge,,second,,Duration since creation,0,directory,file_created,
 system.disk.directory.files,gauge,,file,,Number of files in the directory,0,directory,file_number,
-system.disk.directory.folders,gauge,,file,Number of folders in the directory,0,directory,folders number
+system.disk.directory.folders,gauge,,file,,Number of folders in the directory,0,directory,folders number,
