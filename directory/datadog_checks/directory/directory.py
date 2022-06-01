@@ -1,10 +1,11 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from fnmatch import fnmatch
 from os.path import exists, join, relpath
 from time import time
-from typing import Any
+from typing import Any, List
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
@@ -85,7 +86,7 @@ class DirectoryCheck(AgentCheck):
         get_length = len
 
         for root, dirs, files in walker:
-            matched_files = []
+            matched_files = []  # type: List[os.DirEntry]
             adjust_max_filegauge = False
 
             if self._config.exclude_dirs_pattern is not None:
@@ -118,7 +119,9 @@ class DirectoryCheck(AgentCheck):
 
             for file_entry in matched_files:
                 try:
-                    file_stat = file_entry.stat(follow_symlinks=self._config.stat_follow_symlinks)
+                    file_stat = file_entry.stat(
+                        follow_symlinks=self._config.stat_follow_symlinks
+                    )  # type: os.stat_result
 
                 except OSError as ose:
                     self.warning('DirectoryCheck: could not stat file %s - %s', join(root, file_entry.name), ose)
@@ -146,6 +149,20 @@ class DirectoryCheck(AgentCheck):
                         )
             if adjust_max_filegauge:
                 max_filegauge_balance -= matched_files_length
+
+            if self._config.collect_folder_stats:
+                for folder_entry in dirs:
+                    folder_tags = ['{}:{}'.format(self._config.filetagname, join(root, folder_entry.name))]
+                    folder_tags.extend(dirtags)
+                    folder_stat = folder_entry.stat(
+                        follow_symlinks=self._config.stat_follow_symlinks
+                    )  # type: os.stat_result
+                    self.gauge(
+                        'system.disk.directory.folder.modified_sec_ago', time() - folder_stat.st_mtime, tags=folder_tags
+                    )
+                    self.gauge(
+                        'system.disk.directory.folder.created_sec_ago', time() - folder_stat.st_ctime, tags=folder_tags
+                    )
 
         # number of files
         self.gauge('system.disk.directory.files', directory_files, tags=dirtags)

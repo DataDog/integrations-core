@@ -14,6 +14,10 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_collect_folder_stats(field, value):
+    return False
+
+
 def instance_countonly(field, value):
     return False
 

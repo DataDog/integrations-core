@@ -42,6 +42,11 @@ instances:
     #
     # filegauges: false
 
+    ## @param collect_folder_stats - boolean - optional - default: false
+    ## When true it will also collect stats for for the folders.
+    #
+    # collect_folder_stats: false
+
     ## @param pattern - string - optional - default: *
     ## the `fnmatch` pattern to use when reading the "directory"'s files.
     ## The pattern is matched against the files' absolute paths and relative paths in "directory".

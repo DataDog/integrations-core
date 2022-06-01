@@ -25,6 +25,7 @@ class DirectoryConfig(object):
         self.dirtagname = instance.get('dirtagname', 'name')
         self.filetagname = instance.get('filetagname', 'filename')
         self.filegauges = is_affirmative(instance.get('filegauges', False))
+        self.collect_folder_stats = is_affirmative(instance.get('collect_folder_stats', False))
         self.countonly = is_affirmative(instance.get('countonly', False))
         self.ignore_missing = is_affirmative(instance.get('ignore_missing', False))
         self.follow_symlinks = is_affirmative(instance.get('follow_symlinks', True))

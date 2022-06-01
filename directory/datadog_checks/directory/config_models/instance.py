@@ -31,6 +31,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    collect_folder_stats: Optional[bool]
     countonly: Optional[bool]
     directory: str
     dirs_patterns_full: Optional[bool]
