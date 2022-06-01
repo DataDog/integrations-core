@@ -21,8 +21,10 @@ pytestmark = pytest.mark.usefixtures('dd_environment')
 
 
 class TestVault:
-    def test_bad_config(self, aggregator, dd_run_check):
-        instance = INSTANCES['invalid']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_bad_config(self, aggregator, dd_run_check, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['invalid'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         with pytest.raises(Exception):
@@ -304,8 +306,8 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.CRITICAL, count=1)
 
     def test_disable_legacy_cluster_tag(self, aggregator, dd_run_check, global_tags):
-        instance = INSTANCES['main']
-        instance['disable_legacy_cluster_tag'] = True
+        instance = {'disable_legacy_cluster_tag': True, 'use_openmetrics': False}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         # Keep a reference for use during mock
@@ -599,8 +601,10 @@ class TestVault:
         aggregator.assert_metric('vault.is_leader', 0)
 
     @pytest.mark.parametrize('status_code', [200, 429, 472, 473, 501, 503])
-    def test_sys_health_non_standard_status_codes(self, aggregator, dd_run_check, status_code):
-        instance = INSTANCES['main']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_sys_health_non_standard_status_codes(self, aggregator, dd_run_check, status_code, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         # Keep a reference for use during mock
@@ -707,6 +711,7 @@ class TestVault:
 
     @noauth_required
     def test_noauth_needed(self, aggregator, dd_run_check, no_token_instance, global_tags):
+        no_token_instance['use_openmetrics'] = False
         c = Vault(Vault.CHECK_NAME, {}, [no_token_instance])
         dd_run_check(c, extract_message=True)
 
