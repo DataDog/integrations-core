@@ -6,6 +6,7 @@ import re
 import mock
 import pytest
 import requests
+from six import PY2
 
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
