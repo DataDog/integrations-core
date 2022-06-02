@@ -425,7 +425,7 @@ def test_failed_explain_handling(
     check = integration_check(dbm_instance)
     check._connect()
 
-    if skip_on_versions is not None and POSTGRES_VERSION in skip_on_versions:
+    if skip_on_versions is not None and float(POSTGRES_VERSION) in skip_on_versions:
         pytest.skip("not relevant for postgres {version}".format(version=POSTGRES_VERSION))
 
     # run check so all internal state is correctly initialized
@@ -449,26 +449,20 @@ def test_failed_explain_handling(
     ]
 
     if expected_error_tag is None:
-        aggregator.assert_metric(
-            'dd.postgres.statement_samples.error',
-            count=failed_explain_test_repeat_count,
-            tags=None,
-            hostname='stubbed.hostname',
-        )
-    else:
-        aggregator.assert_metric(
-            'dd.postgres.statement_samples.error',
-            count=failed_explain_test_repeat_count,
-            tags=expected_tags,
-            hostname='stubbed.hostname',
-        )
+        expected_tags=None
+    aggregator.assert_metric(
+        'dd.postgres.statement_samples.error',
+        count=failed_explain_test_repeat_count,
+        tags=expected_tags,
+        hostname='stubbed.hostname',
+    )
 
-        aggregator.assert_metric(
-            'dd.postgres.run_explain.error',
-            count=expected_fail_count,
-            tags=expected_tags,
-            hostname='stubbed.hostname',
-        )
+    aggregator.assert_metric(
+        'dd.postgres.run_explain.error',
+        count=expected_fail_count,
+        tags=expected_tags,
+        hostname='stubbed.hostname',
+    )
 
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
