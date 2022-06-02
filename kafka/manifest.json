@@ -6,7 +6,6 @@
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
-    "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Collect metrics for producers/consumers, replication, lag, and more.",
     "title": "Kafka Integration",
