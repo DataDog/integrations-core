@@ -770,7 +770,8 @@ class TestVault:
             aggregator.assert_metric('vault.route.create.sum', tags=global_tags + ['mountpoint:foobar'])
             aggregator.assert_metric('vault.route.create.count', tags=global_tags + ['mountpoint:foobar'])
 
-        assert_all_metrics(aggregator)
+        aggregator.assert_all_metrics_covered()
+        aggregator.assert_no_duplicate_metrics()
 
 
 def assert_all_metrics(aggregator):
