@@ -51,6 +51,14 @@ GO
 GRANT EXECUTE on exampleProcWithoutNocount to datadog;
 GO
 
+CREATE OR ALTER PROCEDURE encryptedProc WITH ENCRYPTION AS
+BEGIN
+    select count(*) from sys.databases;
+END;
+GO
+GRANT EXECUTE on encryptedProc to bob;
+
+
 -- Create test database for integration tests.
 -- Only bob and fred have read/write access to this database.
 CREATE DATABASE datadog_test;
