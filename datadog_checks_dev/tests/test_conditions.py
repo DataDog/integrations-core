@@ -68,7 +68,7 @@ class TestCheckCommandOutput:
 
 
 class TestCheckDockerLogs:
-    pytestmark = [pytest.mark.docker, not_windows_ci]
+    pytestmark = [not_windows_ci]
 
     def test_no_matches(self):
         compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')
