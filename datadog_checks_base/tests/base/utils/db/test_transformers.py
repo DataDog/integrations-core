@@ -4,14 +4,11 @@
 import time
 from datetime import datetime, timedelta
 
-import pytest
 from dateutil.tz import gettz
 
 from datadog_checks.base.utils.time import UTC
 
 from .common import create_query_manager, mock_executor
-
-pytestmark = pytest.mark.db
 
 
 class TestColumnTransformers:

@@ -10,7 +10,6 @@ from .utils import get_check
 
 pytestmark = [
     requires_py3,
-    pytest.mark.openmetrics,
 ]
 
 
