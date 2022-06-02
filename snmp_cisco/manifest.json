@@ -16,11 +16,11 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Cisco Integration",
-  "categories": [ 
-    "monitoring", 
-    "notification", 
-    "network", 
+  "public_title": "Cisco Integration",
+  "categories": [
+    "monitoring",
+    "notification",
+    "network",
     "autodiscovery",
     "snmp"
   ],

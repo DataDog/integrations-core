@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Flink Integration",
+  "public_title": "Flink Integration",
   "categories": [
     "processing",
     "log collection"

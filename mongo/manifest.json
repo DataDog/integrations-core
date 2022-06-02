@@ -19,7 +19,7 @@
   "process_signatures": [
     "mongod"
   ],
-  "public_title": "Datadog-MongoDB Integration",
+  "public_title": "MongoDB Integration",
   "short_description": "Track read/write performance, most-used replicas, collection metrics, and more.",
   "support": "core",
   "supported_os": [

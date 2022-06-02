@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Vertica Integration",
+  "public_title": "Vertica Integration",
   "categories": [
     "data store",
     "log collection"

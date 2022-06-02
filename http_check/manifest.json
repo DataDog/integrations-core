@@ -15,7 +15,7 @@
   "metric_prefix": "network.",
   "metric_to_check": "network.http.response_time",
   "name": "http_check",
-  "public_title": "Datadog-HTTP Check Integration",
+  "public_title": "HTTP Check Integration",
   "short_description": "Monitor any HTTP service for bad responses, soon-to-expire SSL certs, and more.",
   "support": "core",
   "supported_os": [

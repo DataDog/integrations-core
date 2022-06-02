@@ -12,7 +12,7 @@
   "supported_os": [
     "linux"
   ],
-  "public_title": "Datadog-Systemd Integration",
+  "public_title": "Systemd Integration",
   "categories": [
     "os & system"
   ],
