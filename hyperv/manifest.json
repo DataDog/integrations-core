@@ -12,7 +12,7 @@
   "supported_os": [
     "windows"
   ],
-  "public_title": "Datadog-HyperV Integration",
+  "public_title": "HyperV Integration",
   "categories": [
     "azure",
     "cloud",
