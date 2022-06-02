@@ -26,7 +26,6 @@ V2_TO_V1_MAP = JSONDict(
     {
         "/manifest_version": SKIP_IF_FOUND,
         "/app_id": "/integration_id",
-        "/classifier_tags": [],
         "/display_on_public_website": "/is_public",
         "/tile": {},
         "/tile/overview": "README.md#Overview",
@@ -36,6 +35,7 @@ V2_TO_V1_MAP = JSONDict(
         "/tile/description": "/short_description",
         "/tile/title": "/public_title",
         "/tile/media": [],
+        "/tile/classifier_tags": [],
         "/author": {},
         "/author/homepage": "/author/homepage",
         "/author/name": "/author/name",
@@ -152,7 +152,7 @@ def migrate_manifest(repo_name, integration, to_version):
 
     # Update any previously skipped field in which we can use logic to assume the value of
     # Also iterate through any lists to include new/updated fields at each index of the list
-    migrated_manifest.set_path("/classifier_tags", TODO_FILL_IN)
+    migrated_manifest.set_path("/tile/classifier_tags", TODO_FILL_IN)
 
     # Retrieve and map all categories from other fields
     classifier_tags = []
@@ -169,7 +169,7 @@ def migrate_manifest(repo_name, integration, to_version):
             classifier_tags.append(category_tag)
 
     # Write the manifest back to disk
-    migrated_manifest.set_path("/classifier_tags", classifier_tags)
+    migrated_manifest.set_path("/tile/classifier_tags", classifier_tags)
 
     # Temporarily required official fields
     if repo_name == "integrations-core":
