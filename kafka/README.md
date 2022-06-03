@@ -154,10 +154,6 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 - [Collecting Kafka performance metrics][20]
 - [Monitoring Kafka with Datadog][21]
 
-## Support
-
-Need help? Contact [Datadog support][23].
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka/images/kafka_dashboard.png
 [2]: https://docs.datadoghq.com/integrations/java/
 [3]: https://docs.datadoghq.com/integrations/kafka/?tab=host#kafka-consumer-integration
@@ -179,4 +175,3 @@ Need help? Contact [Datadog support][23].
 [20]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
 [21]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
 [22]: https://raw.githubusercontent.com/DataDog/dd-agent/5.2.1/conf.d/kafka.yaml.example
-[23]: https://docs.datadoghq.com/help/
