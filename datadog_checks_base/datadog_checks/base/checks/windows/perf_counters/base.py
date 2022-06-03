@@ -41,8 +41,7 @@ class PerfCountersBaseCheck(AgentCheck):
         self.check_initializations.append(self.configure_perf_objects)
 
     def check(self, _):
-        self.submit_health_check(self.OK)
-        # self.query_counters()
+        self.query_counters()
 
     def query_counters(self):
         with self.adopt_namespace(self.namespace):
