@@ -1,51 +1,61 @@
 {
-  "categories": [
-    "containers",
-    "orchestration",
-    "configuration & deployment",
-    "notification",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": true,
-  "display_name": "Consul",
-  "guid": "ec1e9fac-a339-49a3-b501-60656d2a5671",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "consul.",
-  "metric_to_check": "consul.peers",
-  "name": "consul",
-  "process_signatures": [
-    "consul agent",
-    "consul_agent",
-    "consul-agent"
-  ],
-  "public_title": "Consul Integration",
-  "short_description": "Alert on Consul health checks, see service-to-node mappings, and much more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "consul",
+  "manifest_version": "2.0.0",
+  "app_uuid": "d0b52e9d-6594-4ff5-9b66-800943f75756",
+  "app_id": "consul",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Alert on Consul health checks, see service-to-node mappings, and much more.",
+    "title": "Consul Integration",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Containers",
+      "Category::Orchestration",
+      "Category::Configuration Deployment",
+      "Category::Notification",
+      "Category::Log Collection",
+      "Category::Autodiscovery"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Consul",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "consul.",
+        "check": "consul.peers",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "consul": "assets/dashboards/consul_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "consul"
-    },
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "consul_processes": "assets/saved_views/consul_processes.json"
+    },
+    "logs": {
+      "source": "consul"
     }
   }
 }
