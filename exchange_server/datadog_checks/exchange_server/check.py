@@ -5,14 +5,14 @@ from datadog_checks.base.checks.windows.perf_counters.base import PerfCountersBa
 from datadog_checks.base.checks.windows.perf_counters.counter import PerfObject
 from datadog_checks.base.checks.windows.perf_counters.transform import NATIVE_TRANSFORMERS
 
-# from .metrics import METRICS_CONFIG
+from .metrics import METRICS_CONFIG
 
 
 class ExchangeCheckV2(PerfCountersBaseCheckWithLegacySupport):
     __NAMESPACE__ = 'exchange'
 
     def get_default_config(self):
-        return {'metrics': {}}
+        return {'metrics': METRICS_CONFIG}
 
     def get_perf_object(self, connection, object_name, object_config, use_localized_counters, tags):
         if object_name == 'Processor':
