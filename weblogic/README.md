@@ -4,7 +4,7 @@
 
 Oracle WebLogic is a platform for developing, running and deploying enterprise Java applications both on-premises and in the cloud. It centralizes application services that include web server functionality, business components such as messaging, and access to backend enterprise systems such as databases. 
 
-The WebLogic integration enables you to:
+Oracle WebLogic monitoring with Datadog enables you to:
 - Gain awareness of increasing heap size in your Java Virtual Machine (JVM)
 - Track server response time
 - Monitor session details of web applications
