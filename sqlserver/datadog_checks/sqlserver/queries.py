@@ -157,34 +157,36 @@ QUERY_FAILOVER_CLUSTER_INSTANCE = {
     ],
 }
 
-# dm_io_virtual_file_stats columns -> metric names
-_file_stats_column_name_to_metric_name = {
-    'size_on_disk_bytes': 'files.size_on_disk',
-    'num_of_reads': 'files.reads',
-    'num_of_bytes_read': 'files.read_bytes',
-    'io_stall_read_ms': 'files.read_io_stall',
-    'io_stall_queued_read_ms': 'files.read_io_stall_queued',
-    'num_of_writes': 'files.writes',
-    'num_of_bytes_written': 'files.written_bytes',
-    'io_stall_write_ms': 'files.write_io_stall',
-    'io_stall_queued_write_ms': 'files.write_io_stall_queued',
-    'io_stall': 'files.io_stall',
-}
 
-
-def get_query_file_stats(available_file_stats_columns):
+def get_query_file_stats(sqlserver_major_version):
     """
-    Construct the dm_io_virtual_file_stats QueryExecutor configuration given the available
-    dm_io_virtual_file_stats columns.
+    Construct the dm_io_virtual_file_stats QueryExecutor configuration based on the SQL Server major version
 
-    :param available_file_stats_columns: all dm_io_virtual_file_stats columns available on the SQL Server instance
+    :param sqlserver_major_version: SQL Server major version (i.e. 2012, 2019, ...)
     :return: a QueryExecutor query config object
     """
+
+    _file_stats_column_name_to_metric_name = {
+        'size_on_disk_bytes': 'files.size_on_disk',
+        'num_of_reads': 'files.reads',
+        'num_of_bytes_read': 'files.read_bytes',
+        'io_stall_read_ms': 'files.read_io_stall',
+        'io_stall_queued_read_ms': 'files.read_io_stall_queued',
+        'num_of_writes': 'files.writes',
+        'num_of_bytes_written': 'files.written_bytes',
+        'io_stall_write_ms': 'files.write_io_stall',
+        'io_stall_queued_write_ms': 'files.write_io_stall_queued',
+        'io_stall': 'files.io_stall',
+    }
+
+    available_file_stats_columns = sorted(_file_stats_column_name_to_metric_name.keys())
+    if sqlserver_major_version <= 2012:
+        missing = {"io_stall_queued_read_ms", "io_stall_queued_write_ms"}
+        available_file_stats_columns = [c for c in available_file_stats_columns if c not in missing]
+
     file_stats_columns_sql = []
     metric_columns = []
-    for column in sorted(_file_stats_column_name_to_metric_name.keys()):
-        if column not in available_file_stats_columns:
-            continue
+    for column in available_file_stats_columns:
         file_stats_columns_sql.append("fs.{} AS {}".format(column, column))
         metric_type = 'gauge' if column == 'size_on_disk_bytes' else 'monotonic_count'
         metric_name = _file_stats_column_name_to_metric_name[column]

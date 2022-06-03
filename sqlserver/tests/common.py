@@ -20,7 +20,7 @@ from datadog_checks.sqlserver.const import (
     INSTANCE_METRICS_TOTAL,
     TASK_SCHEDULER_METRICS,
 )
-from datadog_checks.sqlserver.queries import _file_stats_column_name_to_metric_name, get_query_file_stats
+from datadog_checks.sqlserver.queries import get_query_file_stats
 
 
 def get_local_driver():
@@ -57,11 +57,7 @@ SQLSERVER_MAJOR_VERSION = int(os.environ.get('SQLSERVER_MAJOR_VERSION'))
 
 
 def get_expected_file_stats_metrics():
-    columns = _file_stats_column_name_to_metric_name.keys()
-    if SQLSERVER_MAJOR_VERSION <= 2012:
-        expected_missing_columns = {"io_stall_queued_read_ms", "io_stall_queued_write_ms"}
-        columns = [c for c in columns if c not in expected_missing_columns]
-    query_file_stats = get_query_file_stats(columns)
+    query_file_stats = get_query_file_stats(SQLSERVER_MAJOR_VERSION)
     return ["sqlserver." + c["name"] for c in query_file_stats["columns"] if c["type"] != "tag"]
 
 

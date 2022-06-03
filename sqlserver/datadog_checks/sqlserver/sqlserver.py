@@ -19,6 +19,7 @@ from datadog_checks.base.utils.db.utils import resolve_db_host
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
+from datadog_checks.sqlserver.utils import parse_sqlserver_major_version
 
 try:
     import datadog_agent
@@ -49,8 +50,8 @@ from datadog_checks.sqlserver.const import (
     PERF_LARGE_RAW_BASE,
     PERF_RAW_LARGE_FRACTION,
     SERVICE_CHECK_NAME,
-    STATIC_INFO_DM_VIRTUAL_FILE_STATS_COLUMNS,
     STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_VERSION,
     TASK_SCHEDULER_METRICS,
     VALID_METRIC_TYPES,
@@ -179,9 +180,7 @@ class SQLServer(AgentCheck):
             self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
         )
 
-        # this query executor must be initialized after the connection is made
-        # as the query can vary depending on the state of the database
-        self.file_stats_queries = None
+        self._dynamic_queries = None
 
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self._query_manager.compile_queries)
@@ -245,7 +244,7 @@ class SQLServer(AgentCheck):
         return self._resolved_hostname
 
     def load_static_information(self):
-        expected_keys = {STATIC_INFO_VERSION, STATIC_INFO_ENGINE_EDITION, STATIC_INFO_DM_VIRTUAL_FILE_STATS_COLUMNS}
+        expected_keys = {STATIC_INFO_VERSION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_ENGINE_EDITION}
         missing_keys = expected_keys - set(self.static_info_cache.keys())
         if missing_keys:
             with self.connection.open_managed_default_connection():
@@ -254,7 +253,11 @@ class SQLServer(AgentCheck):
                         cursor.execute("select @@version")
                         results = cursor.fetchall()
                         if results and len(results) > 0 and len(results[0]) > 0 and results[0][0]:
-                            self.static_info_cache[STATIC_INFO_VERSION] = results[0][0]
+                            version = results[0][0]
+                            self.static_info_cache[STATIC_INFO_VERSION] = version
+                            self.static_info_cache[STATIC_INFO_MAJOR_VERSION] = parse_sqlserver_major_version(version)
+                            if not self.static_info_cache[STATIC_INFO_MAJOR_VERSION]:
+                                self.log.warning("failed to parse SQL Server major version from version: %s", version)
                         else:
                             self.log.warning("failed to load version static information due to empty results")
                     if STATIC_INFO_ENGINE_EDITION not in self.static_info_cache:
@@ -264,12 +267,6 @@ class SQLServer(AgentCheck):
                             self.static_info_cache[STATIC_INFO_ENGINE_EDITION] = result
                         else:
                             self.log.warning("failed to load version static information due to empty results")
-                    if STATIC_INFO_DM_VIRTUAL_FILE_STATS_COLUMNS not in self.static_info_cache:
-                        try:
-                            columns = self._get_available_file_stats_columns(cursor)
-                            self.static_info_cache[STATIC_INFO_DM_VIRTUAL_FILE_STATS_COLUMNS] = columns
-                        except Exception:
-                            self.log.exception("failed to load available file_stats columns")
 
     def debug_tags(self):
         return self.tags + ['agent_hostname:{}'.format(self.agent_hostname)]
@@ -396,17 +393,6 @@ class SQLServer(AgentCheck):
                 self.databases = filtered_dbs
                 return True
         return False
-
-    def _get_available_file_stats_columns(self, cursor):
-        """
-        Loads available sys.dm_io_virtual_file_stats columns
-        """
-        query = "select TOP 0 * from sys.dm_io_virtual_file_stats(NULL, NULL)"
-        self.log.debug("loading available sql file stats columns. running query: %s", query)
-        cursor.execute(query)
-        all_columns = set([i[0] for i in cursor.description])
-        self.log.debug("loaded available dm_io_virtual_file_stats: %s", all_columns)
-        return all_columns
 
     def _make_metric_list_to_collect(self, custom_metrics):
         """
@@ -646,7 +632,6 @@ class SQLServer(AgentCheck):
     def check(self, _):
         if self.do_check:
             self.load_static_information()
-            self.init_file_stats_queries()
             if self.proc:
                 self.do_stored_procedure_check()
             else:
@@ -667,22 +652,24 @@ class SQLServer(AgentCheck):
         else:
             self.log.debug("Skipping check")
 
-    def init_file_stats_queries(self):
+    @property
+    def dynamic_queries(self):
         """
-        Initializes file stats queries
-        Depends on the static info cache being populated
+        Initializes dynamic queries which depend on static information loaded from the database
         """
-        if self.file_stats_queries:
-            return
+        if self._dynamic_queries:
+            return self._dynamic_queries
 
-        file_stats_columns = self.static_info_cache.get(STATIC_INFO_DM_VIRTUAL_FILE_STATS_COLUMNS, None)
-        if not file_stats_columns:
-            self.log.warning("cannot initialize file_stats_query_executor because file_stats_columns are unknown")
-            return
+        major_version = self.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
+        if not major_version:
+            self.log.warning("missing major_version, cannot initialize dynamic queries")
+            return None
 
-        self.file_stats_queries = self._new_query_executor([get_query_file_stats(file_stats_columns)])
-        self.file_stats_queries.compile_queries()
-        self.log.debug("initialized file_stats_query_executor. available columns: %s", file_stats_columns)
+        queries = [get_query_file_stats(major_version)]
+        self._dynamic_queries = self._new_query_executor(queries)
+        self._dynamic_queries.compile_queries()
+        self.log.debug("initialized dynamic queries")
+        return self._dynamic_queries
 
     def collect_metrics(self):
         """Fetch the metrics from all of the associated database tables."""
@@ -745,8 +732,8 @@ class SQLServer(AgentCheck):
                 self._check_queries.execute()
                 # reuse connection for any custom queries
                 self._query_manager.execute()
-                if self.file_stats_queries:
-                    self.file_stats_queries.execute()
+                if self.dynamic_queries:
+                    self.dynamic_queries.execute()
             finally:
                 with self.connection.get_managed_cursor() as cursor:
                     cursor.execute("SET NOCOUNT OFF")
