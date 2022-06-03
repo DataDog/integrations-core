@@ -50,7 +50,7 @@ class ExchangeCheckV2(PerfCountersBaseCheckWithLegacySupport):
                 },
             )
         else:
-            return TestPerfObject(connection, object_name, object_config, use_localized_counters, tags, {})
+            return TestPerfObject(self, connection, object_name, object_config, use_localized_counters, tags, {})
 
 
 class TestPerfObject(PerfObject):
