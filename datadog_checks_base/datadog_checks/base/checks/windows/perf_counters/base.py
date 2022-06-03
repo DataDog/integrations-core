@@ -38,7 +38,7 @@ class PerfCountersBaseCheck(AgentCheck):
         self._static_tags = None
 
         self.check_initializations.append(self.create_connection)
-        # self.check_initializations.append(self.configure_perf_objects)
+        self.check_initializations.append(self.configure_perf_objects)
 
     def check(self, _):
         self.query_counters()
