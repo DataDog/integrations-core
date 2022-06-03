@@ -1,37 +1,52 @@
 {
-  "categories": [
-    "os & system",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Exchange Server",
-  "guid": "7bc177b0-b07d-4a83-921f-9cd8deef039b",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "exchange.",
-  "metric_to_check": "exchange.processor.cpu_user",
-  "name": "exchange_server",
-  "public_title": "Microsoft Exchange Server Integration",
-  "short_description": "Collect and graph Microsoft Exchange Server metrics",
-  "support": "core",
-  "supported_os": [
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "exchange-server",
+  "manifest_version": "2.0.0",
+  "app_uuid": "e334d30a-a7df-4c06-9d1f-d8b6663df38a",
+  "app_id": "exchange-server",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect and graph Microsoft Exchange Server metrics",
+    "title": "Microsoft Exchange Server Integration",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Category::OS System",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Exchange Server",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "exchange.",
+        "check": "exchange.processor.cpu_user",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "Exchange Server Overview": "assets/dashboards/overview.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "exchange-server"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }
