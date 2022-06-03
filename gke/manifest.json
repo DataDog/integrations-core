@@ -1,36 +1,43 @@
 {
-  "display_name": "Google Kubernetes Engine",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "gke",
-  "metric_prefix": "gke.",
-  "metric_to_check": "",
-  "creates_events": false,
-  "short_description": "GKE is a platform for running and orchestrating containerized applications.",
-  "guid": "ba0ef5a7-4507-4c99-bfa6-ab8cdaed9b91",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Google Kubernetes Engine",
-  "categories": [
-    "containers",
-    "orchestration"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "gke",
+  "manifest_version": "2.0.0",
+  "app_uuid": "66d0227c-6e8f-4639-a0d9-aefb147da71d",
+  "app_id": "gke",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "GKE is a platform for running and orchestrating containerized applications.",
+    "title": "Google Kubernetes Engine",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Containers",
+      "Category::Orchestration"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "dashboards": {},
-    "monitors": {},
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "integration": {
+      "source_type_name": "Google Kubernetes Engine",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }
-
