@@ -63,7 +63,7 @@ V2_TO_V1_MAP = JSONDict(
 
 OS_TO_CLASSIFIER_TAGS = {
     "linux": "Supported OS::Linux",
-    "mac_os": "Supported OS::Mac OS",
+    "mac_os": "Supported OS::macOS",
     "windows": "Supported OS::Windows",
 }
 
