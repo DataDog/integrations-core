@@ -94,9 +94,7 @@ class PerfCountersBaseCheck(AgentCheck):
             try:
                 perf_object.collect()
             except Exception as e:
-                message = 'Error collecting query data for performance object `%s`: %s'.format(perf_object.name, e)
-                self.submit_health_check(self.CRITICAL, message=message)
-                self.log.error(message)
+                self.log.error('Error collecting query data for performance object `%s`: %s', perf_object.name, e)
 
         self.submit_health_check(self.OK)
 
