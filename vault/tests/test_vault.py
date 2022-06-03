@@ -696,28 +696,40 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=0)
 
     @auth_required
-    def test_auth_needed_but_no_token(self, aggregator, dd_run_check, instance, global_tags):
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_auth_needed_but_no_token(self, aggregator, dd_run_check, instance, global_tags, use_openmetrics):
         instance = instance()
-        instance['use_openmetrics'] = False
         instance['no_token'] = True
+        instance['use_openmetrics'] = use_openmetrics
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        with pytest.raises(Exception, match='^400 Client Error: Bad Request for url'):
+        with pytest.raises(Exception, match='400 Client Error: Bad Request for url'):
             dd_run_check(c, extract_message=True)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=0)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.WARNING, count=0)
-        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=1, tags=global_tags)
+
+        if use_openmetrics:
+            tags = global_tags + ['endpoint:{}/sys/metrics?format=prometheus'.format(instance['api_url'])]
+            aggregator.assert_service_check('vault.openmetrics.health', status=c.CRITICAL, count=1, tags=tags)
+        else:
+            aggregator.assert_service_check(
+                Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=1, tags=global_tags
+            )
 
     @noauth_required
-    def test_noauth_needed(self, aggregator, dd_run_check, no_token_instance, global_tags):
-        no_token_instance['use_openmetrics'] = False
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_noauth_needed(self, aggregator, dd_run_check, no_token_instance, global_tags, use_openmetrics):
+        no_token_instance['use_openmetrics'] = use_openmetrics
         c = Vault(Vault.CHECK_NAME, {}, [no_token_instance])
         dd_run_check(c, extract_message=True)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1, tags=global_tags)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.WARNING, count=0)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=0)
+
+        if use_openmetrics:
+            aggregator.assert_service_check('vault.openmetrics.health', status=c.CRITICAL, count=0)
 
     def test_route_transform(self, aggregator, no_token_instance, global_tags):
         no_token_instance['use_openmetrics'] = False
