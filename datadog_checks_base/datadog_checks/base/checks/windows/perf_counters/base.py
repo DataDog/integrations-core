@@ -41,7 +41,8 @@ class PerfCountersBaseCheck(AgentCheck):
         self.check_initializations.append(self.configure_perf_objects)
 
     def check(self, _):
-        self.query_counters()
+        self.submit_health_check(self.OK)
+        # self.query_counters()
 
     def query_counters(self):
         with self.adopt_namespace(self.namespace):
@@ -50,51 +51,51 @@ class PerfCountersBaseCheck(AgentCheck):
     def _query_counters(self):
         # Refresh the list of performance objects, see:
         # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectitemsa#remarks
-        # try:
-        #     # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectsa
-        #     # https://mhammond.github.io/pywin32/win32pdh__EnumObjects_meth.html
-        #     win32pdh.EnumObjects(None, self._connection.server, win32pdh.PERF_DETAIL_WIZARD, True)
-        # except pywintypes.error as error:
-        #     message = 'Error refreshing performance objects: {}'.format(error.strerror)
-        #     self.submit_health_check(self.CRITICAL, message=message)
-        #     self.log.error(message)
-        #
-        #     return
-        #
-        # # Avoid collection of performance objects that failed to refresh
-        # collection_queue = []
-        #
-        # for perf_object in self.perf_objects:
-        #     self.log.debug('Refreshing counters for performance object: %s', perf_object.name)
-        #     try:
-        #         perf_object.refresh()
-        #     except ConfigurationError as e:
-        #         # Counters are lazily configured and any errors should prevent check execution
-        #         exception_class = type(e)
-        #         message = str(e)
-        #         self.check_initializations.append(lambda: raise_exception(exception_class, message))
-        #         return
-        #     except Exception as e:
-        #         self.log.error('Error refreshing counters for performance object `%s`: %s', perf_object.name, e)
-        #     else:
-        #         collection_queue.append(perf_object)
-        #
-        # try:
-        #     # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhcollectquerydata
-        #     # https://mhammond.github.io/pywin32/win32pdh__CollectQueryData_meth.html
-        #     win32pdh.CollectQueryData(self._connection.query_handle)
-        # except pywintypes.error as error:
-        #     message = 'Error querying performance counters: {}'.format(error.strerror)
-        #     self.submit_health_check(self.CRITICAL, message=message)
-        #     self.log.error(message)
-        #     return
-        #
-        # for perf_object in collection_queue:
-        #     self.log.debug('Collecting query data for performance object: %s', perf_object.name)
-        #     try:
-        #         perf_object.collect()
-        #     except Exception as e:
-        #         self.log.error('Error collecting query data for performance object `%s`: %s', perf_object.name, e)
+        try:
+            # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectsa
+            # https://mhammond.github.io/pywin32/win32pdh__EnumObjects_meth.html
+            win32pdh.EnumObjects(None, self._connection.server, win32pdh.PERF_DETAIL_WIZARD, True)
+        except pywintypes.error as error:
+            message = 'Error refreshing performance objects: {}'.format(error.strerror)
+            self.submit_health_check(self.CRITICAL, message=message)
+            self.log.error(message)
+
+            return
+
+        # Avoid collection of performance objects that failed to refresh
+        collection_queue = []
+
+        for perf_object in self.perf_objects:
+            self.log.debug('Refreshing counters for performance object: %s', perf_object.name)
+            try:
+                perf_object.refresh()
+            except ConfigurationError as e:
+                # Counters are lazily configured and any errors should prevent check execution
+                exception_class = type(e)
+                message = str(e)
+                self.check_initializations.append(lambda: raise_exception(exception_class, message))
+                return
+            except Exception as e:
+                self.log.error('Error refreshing counters for performance object `%s`: %s', perf_object.name, e)
+            else:
+                collection_queue.append(perf_object)
+
+        try:
+            # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhcollectquerydata
+            # https://mhammond.github.io/pywin32/win32pdh__CollectQueryData_meth.html
+            win32pdh.CollectQueryData(self._connection.query_handle)
+        except pywintypes.error as error:
+            message = 'Error querying performance counters: {}'.format(error.strerror)
+            self.submit_health_check(self.CRITICAL, message=message)
+            self.log.error(message)
+            return
+
+        for perf_object in collection_queue:
+            self.log.debug('Collecting query data for performance object: %s', perf_object.name)
+            try:
+                perf_object.collect()
+            except Exception as e:
+                self.log.error('Error collecting query data for performance object `%s`: %s', perf_object.name, e)
 
         self.submit_health_check(self.OK)
 
