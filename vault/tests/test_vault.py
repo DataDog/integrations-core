@@ -14,7 +14,7 @@ from datadog_checks.vault.errors import ApiUnreachable
 from datadog_checks.vault.vault import Leader
 
 from .common import INSTANCES, MERKLE_WAL_METRICS, MERKLE_WAL_QUANTILES, auth_required, noauth_required
-from .utils import assert_all_metrics, get_response, iter_lines
+from .utils import assert_all_metrics, get_fixture_path
 
 pytestmark = pytest.mark.usefixtures('dd_environment')
 
@@ -656,48 +656,44 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.WARNING, count=0)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=0)
 
-    def test_route_transform(self, aggregator, no_token_instance, global_tags):
+    def test_route_transform(self, aggregator, no_token_instance, global_tags, mock_http_response):
         c = Vault(Vault.CHECK_NAME, {}, [no_token_instance])
 
         c.parse_config()
 
-        content = get_response('route_transform_metrics.txt')
+        mock_http_response(file_path=get_fixture_path('route_transform_metrics.txt'))
 
-        with mock.patch('datadog_checks.base.utils.http.requests') as r:
-            r.get.return_value = mock.MagicMock(status_code=200, content=content)
-            c.process(c._scraper_config, c._metric_transformers)
+        c.process(c._scraper_config, c._metric_transformers)
 
-            for quantile in [0.5, 0.9, 0.99]:
-                quantile_tag = 'quantile:{}'.format(quantile)
-                aggregator.assert_metric('vault.vault.route.rollback.sys.quantile', tags=global_tags + [quantile_tag])
-                aggregator.assert_metric(
-                    'vault.route.rollback.quantile', tags=global_tags + [quantile_tag, 'mountpoint:sys']
-                )
-                aggregator.assert_metric(
-                    'vault.route.rollback.quantile', tags=global_tags + [quantile_tag, 'mountpoint:sys']
-                )
-                aggregator.assert_metric(
-                    'vault.route.create.quantile', tags=global_tags + [quantile_tag, 'mountpoint:foobar']
-                )
+        for quantile in [0.5, 0.9, 0.99]:
+            quantile_tag = 'quantile:{}'.format(quantile)
+            aggregator.assert_metric('vault.vault.route.rollback.sys.quantile', tags=global_tags + [quantile_tag])
+            aggregator.assert_metric(
+                'vault.route.rollback.quantile', tags=global_tags + [quantile_tag, 'mountpoint:sys']
+            )
+            aggregator.assert_metric(
+                'vault.route.rollback.quantile', tags=global_tags + [quantile_tag, 'mountpoint:sys']
+            )
+            aggregator.assert_metric(
+                'vault.route.create.quantile', tags=global_tags + [quantile_tag, 'mountpoint:foobar']
+            )
 
-            aggregator.assert_metric('vault.vault.route.rollback.sys.sum', tags=global_tags)
-            aggregator.assert_metric('vault.vault.route.rollback.sys.count', tags=global_tags)
-            aggregator.assert_metric('vault.route.rollback.sum', tags=global_tags + ['mountpoint:sys'])
-            aggregator.assert_metric('vault.route.rollback.count', tags=global_tags + ['mountpoint:sys'])
-            aggregator.assert_metric('vault.route.create.sum', tags=global_tags + ['mountpoint:foobar'])
-            aggregator.assert_metric('vault.route.create.count', tags=global_tags + ['mountpoint:foobar'])
+        aggregator.assert_metric('vault.vault.route.rollback.sys.sum', tags=global_tags)
+        aggregator.assert_metric('vault.vault.route.rollback.sys.count', tags=global_tags)
+        aggregator.assert_metric('vault.route.rollback.sum', tags=global_tags + ['mountpoint:sys'])
+        aggregator.assert_metric('vault.route.rollback.count', tags=global_tags + ['mountpoint:sys'])
+        aggregator.assert_metric('vault.route.create.sum', tags=global_tags + ['mountpoint:foobar'])
+        aggregator.assert_metric('vault.route.create.count', tags=global_tags + ['mountpoint:foobar'])
 
         assert_all_metrics(aggregator)
 
-    def test_wal_merkle_metrics(self, aggregator, instance, dd_run_check, global_tags):
+    def test_wal_merkle_metrics(self, aggregator, instance, dd_run_check, global_tags, mock_http_response):
         instance = instance()
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         c.parse_config()
-        content = get_response('merkle_wal_metrics.txt')
+        mock_http_response(file_path=get_fixture_path('merkle_wal_metrics.txt'))
 
-        with mock.patch('datadog_checks.base.utils.http.requests') as r:
-            r.get.return_value = mock.MagicMock(status_code=200, content=content, iter_lines=iter_lines)
-            c.process(c._scraper_config, c._metric_transformers)
+        c.process(c._scraper_config, c._metric_transformers)
 
         for metric in MERKLE_WAL_METRICS:
             if metric in MERKLE_WAL_QUANTILES:

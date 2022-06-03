@@ -7,11 +7,9 @@ from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import HERE
 
-def get_response(filename):
-    metrics_file_path = os.path.join(HERE, 'fixtures', filename)
-    with open(metrics_file_path, 'r') as f:
-        response = f.read()
-    return response
+
+def get_fixture_path(filename):
+    return os.path.join(HERE, 'fixtures', filename)
 
 
 def assert_all_metrics(aggregator):

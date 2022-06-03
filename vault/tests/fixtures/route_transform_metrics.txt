@@ -11,4 +11,4 @@ vault_route_rollback_sys_{quantile="0.5"} 3
 vault_route_rollback_sys_{quantile="0.9"} 3
 vault_route_rollback_sys_{quantile="0.99"} 4
 vault_route_rollback_sys__sum 3.2827999591827393
-vault_route_rollback_sys__count 1'
+vault_route_rollback_sys__count 1
