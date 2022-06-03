@@ -4,7 +4,7 @@
 
 * [Fixed] Fix enumerated integer validation. See [#11964](https://github.com/DataDog/integrations-core/pull/11964).
 
-## 1.0.1 / 2022-04-14
+## 1.0.1 / 2022-04-14 / Agent 7.36.0
 
 * [Fixed] Enable py3 only. See [#11833](https://github.com/DataDog/integrations-core/pull/11833).
 

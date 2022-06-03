@@ -12,7 +12,7 @@
 * [Fixed] Fix missing object_name for index fragmentation metrics. See [#11986](https://github.com/DataDog/integrations-core/pull/11986).
 * [Changed] Remove execution plan `user_name` attribute. See [#12007](https://github.com/DataDog/integrations-core/pull/12007).
 
-## 7.6.2 / 2022-04-20
+## 7.6.2 / 2022-04-20 / Agent 7.36.0
 
 * [Fixed] Fix activity and plan host reporting. See [#11853](https://github.com/DataDog/integrations-core/pull/11853).
 
@@ -35,7 +35,7 @@
 * [Added] Enable SQL metadata collection by default. See [#11606](https://github.com/DataDog/integrations-core/pull/11606).
 * [Fixed] Include SQL metadata in FQT. See [#11641](https://github.com/DataDog/integrations-core/pull/11641).
 
-## 7.4.0 / 2022-03-15
+## 7.4.0 / 2022-03-15 / Agent 7.35.0
 
 * [Added] Add execution_count and total_elapsed_time fields to SQLServer Samples. See [#11652](https://github.com/DataDog/integrations-core/pull/11652).
 

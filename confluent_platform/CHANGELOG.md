@@ -1,11 +1,11 @@
 # CHANGELOG - Confluent Platform
 
-## 1.8.1 / 2022-04-05
+## 1.8.1 / 2022-04-05 / Agent 7.36.0
 
 * [Fixed] Remove check options from jmx template. See [#11686](https://github.com/DataDog/integrations-core/pull/11686).
 * [Fixed] Remove duplicate bean. See [#11609](https://github.com/DataDog/integrations-core/pull/11609).
 
-## 1.8.0 / 2022-02-19
+## 1.8.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11330](https://github.com/DataDog/integrations-core/pull/11330).
 * [Added] Include Consumer Group Metrics. See [#10900](https://github.com/DataDog/integrations-core/pull/10900). Thanks [brunodomenici](https://github.com/brunodomenici).

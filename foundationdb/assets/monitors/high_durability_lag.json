@@ -1,6 +1,6 @@
 {
     "name": "FoundationDB High Durability Lag",
-	"type": "event alert",
+	"type": "query alert",
 	"query": "avg(last_5m):avg:foundationdb.process.role.durability_lag.seconds{fdb_role:storage} by {fdb_process} > 60",
 	"message": "{{#is_alert}}\nThe storage process has very high durability lag - that is, the time it takes for data fetched by the storage server to be written to disk.\n{{/is_alert}}\n{{#is_warning}}\nThe storage process has higher than usual durability lag - that is, the time it takes for data fetched by the storage server to be written to disk.\n{{/is_warning}}\n\nThis may indicate that the database cluster cannot keep up with the workload. Sometimes, storage servers can also struggle if faced with a huge number of reads of the keys they store, preventing progress on writes.",
 	"tags": [

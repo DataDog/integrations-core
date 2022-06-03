@@ -49,7 +49,7 @@ def test_cert_expiration_no_cert(http_check):
 
         status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
         assert status == AgentCheck.UNKNOWN
-        expected_msg = 'KeyError(\'notAfter\')'
+        expected_msg = 'Exception(\'Empty or no certificate found.\')'
         if PY2:
             expected_msg = (
                 'ValueError(\'empty or no certificate, match_hostname needs a SSL socket '

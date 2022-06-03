@@ -1,12 +1,12 @@
 # CHANGELOG - network
 
-## 2.7.0 / 2022-04-05
+## 2.7.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Add IP and TCP metric collection. See [#11170](https://github.com/DataDog/integrations-core/pull/11170).
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 * [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
 
-## 2.6.0 / 2022-02-19
+## 2.6.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Collect additional iface metrics: mtu, num tx/rx queue and tx queue length. See [#11156](https://github.com/DataDog/integrations-core/pull/11156).
 * [Added] Add `pyproject.toml` file. See [#11402](https://github.com/DataDog/integrations-core/pull/11402).

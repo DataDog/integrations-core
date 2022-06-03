@@ -7,7 +7,7 @@
 * [Added] Add query_truncated field on activity rows. See [#11886](https://github.com/DataDog/integrations-core/pull/11886).
 * [Fixed] Fix uncommented parent options. See [#12013](https://github.com/DataDog/integrations-core/pull/12013).
 
-## 8.2.2 / 2022-04-20
+## 8.2.2 / 2022-04-20 / Agent 7.36.0
 
 * [Fixed] Fix activity host reporting. See [#11854](https://github.com/DataDog/integrations-core/pull/11854).
 
@@ -24,7 +24,7 @@
 * [Added] Include SQL metadata in FQT. See [#11644](https://github.com/DataDog/integrations-core/pull/11644).
 * [Added] Enable SQL metadata collection by default. See [#11604](https://github.com/DataDog/integrations-core/pull/11604).
 
-## 8.1.0 / 2022-02-19
+## 8.1.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11400](https://github.com/DataDog/integrations-core/pull/11400).
 * [Added] Add new metric for tables size. See [#10674](https://github.com/DataDog/integrations-core/pull/10674). Thanks [aymeric-ledizes](https://github.com/aymeric-ledizes).

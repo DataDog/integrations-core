@@ -1,11 +1,11 @@
 # CHANGELOG - SonarQube
 
-## 2.0.1 / 2022-04-05
+## 2.0.1 / 2022-04-05 / Agent 7.36.0
 
 * [Fixed] Remove check options from jmx template. See [#11686](https://github.com/DataDog/integrations-core/pull/11686).
 * [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
 
-## 2.0.0 / 2022-02-19
+## 2.0.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11435](https://github.com/DataDog/integrations-core/pull/11435).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).

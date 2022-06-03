@@ -44,6 +44,7 @@ KAFKA_E2E_METRICS = [
     "kafka.replication.offline_partitions_count",
     "kafka.replication.partition_count",
     "kafka.replication.under_replicated_partitions",
+    "kafka.replication.under_min_isr_partition_count",
     # Rates
     "kafka.messages_in.rate",
     "kafka.net.bytes_in.rate",

@@ -1,15 +1,19 @@
 # CHANGELOG - kafka_consumer
 
+## 2.15.1 / 2022-05-31
+
+* [Fixed] Does not fail reading and writing to cache when file is too long. See [#12109](https://github.com/DataDog/integrations-core/pull/12109).
+
 ## 2.15.0 / 2022-05-15
 
 * [Added] Add new lag in seconds metric. See [#11861](https://github.com/DataDog/integrations-core/pull/11861).
 
-## 2.14.0 / 2022-04-05
+## 2.14.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Add gssapi as a dependency. See [#11725](https://github.com/DataDog/integrations-core/pull/11725).
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 
-## 2.13.0 / 2022-02-19
+## 2.13.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11378](https://github.com/DataDog/integrations-core/pull/11378).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
