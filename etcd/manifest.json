@@ -1,41 +1,55 @@
 {
-  "categories": [
-    "orchestration",
-    "containers",
-    "configuration & deployment",
-    "autodiscovery",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "etcd",
-  "guid": "a1cfafdb-5d88-4ae1-acdc-6356df755b73",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "etcd.",
-  "metric_to_check": [
-    "etcd.store.watchers",
-    "etcd.server.has_leader"
-  ],
-  "name": "etcd",
-  "process_signatures": [
-    "etcd"
-  ],
-  "public_title": "etcd Integration",
-  "short_description": "Track writes, updates, deletes, inter-node latencies, and more Etcd metrics.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "etcd",
+  "manifest_version": "2.0.0",
+  "app_uuid": "7f16875b-4aa8-44e3-adff-63622c234253",
+  "app_id": "etcd",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track writes, updates, deletes, inter-node latencies, and more Etcd metrics.",
+    "title": "etcd Integration",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Orchestration",
+      "Category::Containers",
+      "Category::Configuration Deployment",
+      "Category::Autodiscovery",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "etcd",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "etcd.",
+        "check": [
+          "etcd.store.watchers",
+          "etcd.server.has_leader"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "Etcd Overview": "assets/dashboards/etcd_overview.json",
       "etcd-Screenboard": "assets/dashboards/etcd_2_overview.json"
@@ -44,10 +58,8 @@
       "etcd_overview": "assets/saved_views/etcd_overview.json",
       "etcd_processes": "assets/saved_views/etcd_processes.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "etcd"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }
