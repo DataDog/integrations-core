@@ -9,9 +9,11 @@ aliases:
 
 ## Why create an integration?
 
-[Custom Checks][1] are great for occasional reporting, or in cases where the data source is either unique or very limited. For more general use-cases - such as application frameworks, open source projects, or commonly-used software - it makes sense to write an integration.
+[Custom Checks][1] are great for occasional reporting, or in cases where the data source is either unique or very limited. For more general use-cases - such as application frameworks, open source projects, or commonly-used software - it makes sense to write an integration. If you need more help deciding between a Custom Check and an intergration, see [Custom check versus integration][5].
 
-Metrics reported from accepted integrations are not counted as custom metrics, and therefore don't impact your custom metric allocation. (Integrations that emit potentially unlimited metrics may still be considered custom.) Ensuring native support for Datadog reduces friction to adoption, and incentivizes people to use your product, service, or project. Also, being featured within the Datadog ecosystem is a great avenue for added visibility.
+After an integration is accepted into the Datadog ecosystem, metrics that it emits are no longer considered custom metrics, and do not count against your custom metric count. Ensuring native support for Datadog reduces friction to adoption, and incentivizes people to use your product, service, or project. Also, being featured within the Datadog ecosystem is a great avenue for added visibility.
+
+**Note**: Integrations that emit potentially unlimited metrics might still be considered custom.
 
 ### What's the process?
 
@@ -29,7 +31,15 @@ Going forward, you, as the author of the code, are the active maintainer of the 
 
 All of the details-including prerequisites, code examples, and more-are in the [Create a new integration][2] documentation.
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Datadog Learning Center: Introduction to Integrations][6]
+
 [1]: https://docs.datadoghq.com/developers/write_agent_check/
 [2]: https://docs.datadoghq.com/developers/integrations/new_check_howto/
 [3]: https://github.com/DataDog/integrations-extras
 [4]: https://docs.datadoghq.com/developers/office_hours/
+[5]: https://docs.datadoghq.com/developers/#custom-check-versus-integration
+[6]: https://learn.datadoghq.com/enrol/index.php?id=38

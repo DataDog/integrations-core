@@ -1,5 +1,5 @@
 ---
-title: Create a New Integration
+title: Create an Integration
 kind: documentation
 aliases:
   - /developers/integrations/integration_sdk/
@@ -8,57 +8,65 @@ aliases:
   - /guides/new_integration/
 ---
 
-To consider an Agent-based integration complete, and thus ready to be included in the core repository and bundled with the Agent package, several prerequisites must be met:
+If you need to send data to Datadog that isn't supported by the Agent or an existing agent integration, creating your own Datadog integration is a possible solution. To find out if it's the right solution for your use case, see [Creating your own solution][89].
 
-- A `README.md` file with the correct format and contents
-- A battery of tests verifying metrics collection
-- A `metadata.csv` file listing all of the collected metrics
-- A complete `manifest.json` file
-- If the integration collects Service Checks, the `service_checks.json` must be complete as well
+For a complete guide on creating a new integration, check out the Datadog Learning Center course, [Introduction to Integrations][90].
 
-These requirements are used during the code review process as a checklist. This documentation covers the requirements and implementation details for a brand new integration.
+TODO: Add information on the three different integration repos. From the learning lab:
+> The various Datadog Agent integrations fall into one of three categories: "core", "extras", or "marketplace". Core integrations are generally developed and maintained by Datadog directly. Extras integrations are developed and maintained by the community (this includes you). Marketplace integrations are developed and maintained by marketplace partners. The marketplace integrations repo is private, which is why you don't see a link to it here. The development process is similar to the one for "extras", but to release on the marketplace, you will need to become a marketplace partner.
 
 ## Prerequisites
 
 - Python 3.8+ needs to be available on your system; Python 2.7 is optional but recommended.
-- Docker to run the full test suite.
+- [Docker][91] to run the full test suite.
 
-Creating and activating [Python virtual environments][1] to isolate the development environment is good practice; however, it is not mandatory. For more information, see [Python for Agent Integration Development][2].
+## Set up your development environment
 
-## Setup
+1. Create the `dd` directory and clone the [`integrations-extras` repo][3].
+   
+   **Note**: The Datadog development toolkit expects you to work in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory neccessitates more configuration steps.
+   
+   To create the `dd` directory and clone the `datadog-extras` repo:
+    ```shell
+    mkdir $HOME/dd && cd $HOME/dd
+    git clone https://github.com/DataDog/integrations-extras.git
+    ```
 
-Clone the [integrations-extras repository][3]. By default, that tooling expects you to be working in the `$HOME/dd/` directory—this is optional and can be adjusted with configuration later.
+1. (Optional) It's good practice to set up a [Python virtual environment][1] to isolate your development environment:
 
-```shell
-mkdir $HOME/dd && cd $HOME/dd       # optional
-git clone https://github.com/DataDog/integrations-extras.git
-```
+   ```shell
+   cd $HOME/dd/integrations-extras
+   python -m venv venv
+   . venv/bin/activate
+   ```
 
-### Developer toolkit
+   **Tip**: To exit the virtual environment, run `deactivate`.
 
-The [Developer Toolkit][4] is comprehensive and includes a lot of functionality. Here's what you need to get started:
+1. Make sure the python `wheel` package is installed and up-to-date:
+   ```shell
+   pip install wheel
+   ```
 
-```bash
-pip3 install "datadog-checks-dev[cli]"
-```
+1. Install the [Developer Toolkit][4]:
+   ```bash
+   pip3 install "datadog-checks-dev[cli]"
+   ```
 
-If you chose to clone this repository to somewhere other than `$HOME/dd/`, you need to adjust the configuration file:
+1. (Optional) If you cloned the `integrations-extras` to somewhere other than `$HOME/dd/`, adjust the configuration file:
 
-```bash
-ddev config set extras "/path/to/integrations-extras"
-```
+   ```shell
+   ddev config set extras "/path/to/integrations-extras"
+   ```
 
-If you intend to work primarily on `integrations-extras`, set it as the default working repository:
+1. Set `integrations-extras` as the default working repo:
 
-```bash
-ddev config set repo extras
-```
+   ```shell
+   ddev config set repo extras
+   ```
 
-**Note**: If you do not do this step, use `-e` for every invocation to ensure the context is `integrations-extras`:
+   **Note**: If you're working in the core repo, use `core` instead of `extras`. If you need to switch contexts to run a single `ddev` command, you can use the `-e` option for `integrations-extras` or `-c` for integrations-core. For example, `ddev -e COMMAND [OPTIONS]`.
 
-```bash
-ddev -e COMMAND [OPTIONS]
-```
+You're ready to create your integration!   
 
 ## Scaffolding
 
@@ -438,6 +446,22 @@ For Agent versions >= 6.12:
 "C:\Program Files\Datadog\Datadog Agent\bin\agent.exe" integration install -w /path/to/wheel.whl
 ```
 
+## Integration publishing checklist
+
+After you complete your integration, refer back to this list to make sure you've got everything you need.
+
+To consider an Agent-based integration complete, and thus ready to be included in the core repository and bundled with the Agent package, several prerequisites must be met:
+
+- A `README.md` file with the correct format and contents
+- A battery of tests verifying metrics collection
+- A `metadata.csv` file listing all of the collected metrics
+- A complete `manifest.json` file
+- If the integration collects Service Checks, the `service_checks.json` must be complete as well
+
+These requirements are used during the code review process as a checklist. This documentation covers the requirements and implementation details for a brand new integration.
+
+
+[89]: https://docs.datadoghq.com/developers/#creating-your-own-solution
 [1]: https://virtualenv.pypa.io/en/stable
 [2]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/python.md
 [3]: https://github.com/DataDog/integrations-extras
@@ -454,3 +478,5 @@ For Agent versions >= 6.12:
 [14]: https://packaging.python.org/en/latest/tutorials/packaging-projects/
 [15]: https://docs.datadoghq.com/agent/
 [16]: https://datadoghq.dev/integrations-core/meta/config-specs/
+[90]: https://learn.datadoghq.com/course/view.php?id=38
+[91]: https://docs.docker.com/get-docker/
