@@ -50,7 +50,33 @@ class ExchangeCheckV2(PerfCountersBaseCheckWithLegacySupport):
                 },
             )
         else:
-            return super().get_perf_object(connection, object_name, object_config, use_localized_counters, tags)
+            return TestPerfObject(connection, object_name, object_config, use_localized_counters, tags, {})
+
+
+class TestPerfObject(PerfObject):
+    def __init__(
+        self,
+        check,
+        connection,
+        object_name,
+        object_config,
+        use_localized_counters,
+        tags,
+        aggregate_names,
+    ):
+        super().__init__(check, connection, object_name, object_config, use_localized_counters, tags)
+        self._aggregate_names = aggregate_names
+
+    def _configure_counters(self, available_counters, available_instances):
+        super()._configure_counters(None, available_instances)
+
+        for counter in self.counters:
+            if counter.name not in self._aggregate_names:
+                continue
+
+            counter.aggregate_transformer = NATIVE_TRANSFORMERS[counter.metric_type](
+                self.check, f'{self.metric_prefix}.{self._aggregate_names[counter.name]}', {}
+            )
 
 
 class CompatibilityPerfObject(PerfObject):
