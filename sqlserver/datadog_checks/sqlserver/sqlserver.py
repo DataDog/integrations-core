@@ -730,10 +730,10 @@ class SQLServer(AgentCheck):
                     self.server_state_queries.execute()
 
                 self._check_queries.execute()
-                # reuse connection for any custom queries
-                self._query_manager.execute()
                 if self.dynamic_queries:
                     self.dynamic_queries.execute()
+                # reuse connection for any custom queries
+                self._query_manager.execute()
             finally:
                 with self.connection.get_managed_cursor() as cursor:
                     cursor.execute("SET NOCOUNT OFF")
