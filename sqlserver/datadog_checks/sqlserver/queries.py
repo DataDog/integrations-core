@@ -187,24 +187,24 @@ def get_query_file_stats(sqlserver_major_version):
     sql_columns = []
     metric_columns = []
     for column in sorted(column_definitions.keys()):
-        sql_columns.append("fs.{} AS {}".format(column, column))
+        sql_columns.append("fs.{}".format(column))
         metric_columns.append(column_definitions[column])
 
     return {
         'name': 'sys.dm_io_virtual_file_stats',
         'query': """
         SELECT
-            DB_NAME(fs.database_id) AS database_name,
-            mf.state_desc AS state_desc,
-            mf.name AS logical_name,
-            mf.physical_name AS physical_name,
-            {columns}
+            DB_NAME(fs.database_id),
+            mf.state_desc,
+            mf.name,
+            mf.physical_name,
+            {sql_columns}
         FROM sys.dm_io_virtual_file_stats(NULL, NULL) fs
             LEFT JOIN sys.master_files mf
                 ON mf.database_id = fs.database_id
                 AND mf.file_id = fs.file_id;
     """.strip().format(
-            columns=", ".join(sql_columns)
+            sql_columns=", ".join(sql_columns)
         ),
         'columns': [
             {'name': 'db', 'type': 'tag'},
