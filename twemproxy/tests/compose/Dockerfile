@@ -35,15 +35,15 @@ RUN cd / && rm -rf nutcracker-0.3.0
 RUN mkdir -p /var/log/twemproxy
 
 # Set up run script
-ADD resources/run.sh /run.sh
+COPY resources/run.sh /run.sh
 RUN chmod 755 /run.sh
 
 # Copy confd files
-ADD resources/confd/conf.d/twemproxy.toml /etc/confd/conf.d/twemproxy.toml
-ADD resources/confd/templates/twemproxy.tmpl /etc/confd/templates/twemproxy.tmpl
+COPY resources/confd/conf.d/twemproxy.toml /etc/confd/conf.d/twemproxy.toml
+COPY resources/confd/templates/twemproxy.tmpl /etc/confd/templates/twemproxy.tmpl
 
 # Copy supervisord files
-ADD resources/supervisord.conf /etc/supervisor/supervisord.conf
+COPY resources/supervisord.conf /etc/supervisor/supervisord.conf
 
 EXPOSE 6000 6222
 

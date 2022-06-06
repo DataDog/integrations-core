@@ -37,7 +37,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "vertica-python==1.0.4",
+    "vertica-python==1.0.5",
 ]
 
 [project.urls]

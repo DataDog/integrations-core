@@ -37,7 +37,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "paramiko==2.10.3",
+    "paramiko==2.10.4",
 ]
 
 [project.urls]

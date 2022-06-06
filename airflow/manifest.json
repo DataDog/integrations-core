@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Airflow Integration",
+  "public_title": "Airflow Integration",
   "categories": [
     "processing",
     "log collection"

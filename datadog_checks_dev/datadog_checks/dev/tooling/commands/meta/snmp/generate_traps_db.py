@@ -4,6 +4,7 @@
 
 import json
 import os
+from collections import namedtuple
 from functools import lru_cache
 
 import click
@@ -25,6 +26,14 @@ class MissingMIBException(Exception):
 
 class VariableNotDefinedException(Exception):
     pass
+
+
+class MultipleTypeDefintionsException(Exception):
+    pass
+
+
+# namedtuple definition for trap variable metadata
+VarMetadata = namedtuple('VarMetadata', ['oid', 'description', 'enum'])
 
 
 @click.command(
@@ -286,7 +295,7 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
             for trap_var in trap.get('objects', []):
                 try:
                     var_name, mib_name = trap_var['object'], trap_var['module']
-                    var_oid, var_descr = get_oid_and_descr(
+                    var_metadata = get_var_metadata(
                         var_name,
                         mib_name,
                         search_locations=(os.path.dirname(compiled_mib_file), compiled_mibs_sources),
@@ -305,9 +314,11 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
                     )
                     continue
                 var_name = trap_var['object']
-                trap_db["vars"][var_oid] = {"name": var_name}
+                trap_db["vars"][var_metadata.oid] = {"name": var_name}
                 if not no_descr:
-                    trap_db["vars"][var_oid]["descr"] = trap_descr
+                    trap_db["vars"][var_metadata.oid]["descr"] = var_metadata.description
+                if var_metadata.enum:
+                    trap_db["vars"][var_metadata.oid]["enum"] = var_metadata.enum
 
         if trap_db['traps']:
             mib_name = file_content['meta']['module']
@@ -317,9 +328,9 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
 
 
 @lru_cache(maxsize=None)
-def get_oid_and_descr(var_name, mib_name, search_locations=None):
+def get_var_metadata(var_name, mib_name, search_locations=None):
     """
-    Returns the oid and the description of a given variable and a MIB name.
+    Returns the oid, description, enumeration of a given variable and a MIB name.
     :param var_name: Name of the variable to search for
     :param mib_name: Name of the MIB defining the variable
     :param search_locations: Tuple of path to directories containing json-compiled MIB files
@@ -337,4 +348,100 @@ def get_oid_and_descr(var_name, mib_name, search_locations=None):
 
     if var_name not in file_content:
         raise VariableNotDefinedException()
-    return file_content[var_name]['oid'], file_content[var_name].get('description', '')
+
+    # grab enum if it exists in-line
+    enum = file_content[var_name].get('syntax', {}).get('constraints', {}).get('enumeration', {})
+    # if there is no enum in-line, check for type definition and enum in the same MIB and its imports
+    if not enum:
+        var_type = file_content[var_name].get('syntax', {}).get('type', '')
+        if var_type:
+            try:
+                enum = get_enum(var_type, mib_name, search_locations)
+            except MissingMIBException:
+                echo_warning(
+                    "Variable {} references a type called {}, but the defining MIB is missing. "
+                    "Enum definitions for this variable will be unavailable.".format(var_name, var_type)
+                )
+            except MultipleTypeDefintionsException:
+                echo_warning(
+                    "Variable {} references a type called {}, but this symbol is imported from multiple MIBs. "
+                    "Enum definitions for this variable will be unavailable.".format(var_name, var_type)
+                )
+
+    # swap keys and values for easier
+    # parsing agent side
+    parsed_enum = {}
+    for k, v in enum.items():
+        parsed_enum[v] = k
+
+    return VarMetadata(file_content[var_name]['oid'], file_content[var_name].get('description', ''), parsed_enum)
+
+
+@lru_cache(maxsize=None)
+def get_enum(var_name, mib_name, search_locations=None):
+    """
+    Returns the enum of a given variable, even if the enum is not defined in-line or the same MIB.
+    :param var_name: Name of the variable to search for
+    :param search_locations: Tuple of path to directories containing json-compiled MIB files
+    :return: The oid and the description of the variable.
+    """
+    enum = {}
+    while mib_name and var_name and not enum:
+        for location in search_locations:
+            file_name = os.path.join(location, mib_name + '.json')
+            if os.path.isfile(file_name):
+                break
+        else:
+            raise MissingMIBException()
+
+        with open(file_name, 'r') as f:
+            file_content = json.load(f)
+
+        # if the variable name is not defined in the file
+        # we expect it to be, search imports for another MIB
+        if var_name not in file_content:
+            try:
+                mib_name = get_import_mib(var_name, mib_name, search_locations)
+            except MultipleTypeDefintionsException:
+                raise MultipleTypeDefintionsException()
+            except MissingMIBException:
+                raise MissingMIBException()
+            continue
+
+        enum = file_content[var_name].get('type', {}).get('constraints', {}).get('enumeration', {})
+        # update variable to the type name in case we have to go another layer down
+        var_name = file_content[var_name].get('type', {}).get('type', '')
+
+    return enum
+
+
+@lru_cache(maxsize=None)
+def get_import_mib(var_name, mib_name, search_locations=None):
+    """
+    Returns the name of the MIB a variable is imported from.
+    :param var_name: Name of the variable to search for
+    :param mib_name: Name of the MIB to look at
+    :param search_locations: Tuple of path to directories containing json-compiled MIB files
+    :return: The name of the MIB file the variable is imported from, or an exception if it's
+    not found or if it's found in multiple MIBs
+    """
+    for location in search_locations:
+        file_name = os.path.join(location, mib_name + '.json')
+        if os.path.isfile(file_name):
+            break
+    else:
+        return MissingMIBException
+
+    with open(file_name, 'r') as f:
+        file_content = json.load(f)
+
+    # search imports for var_name
+    imported_mibs = [k for k, v in file_content.get('imports', {}).items() if var_name in v]
+    # if it does not exist, return an empty string, this could be an error or valid in the case of base types
+    if len(imported_mibs) == 0:
+        return ''
+    # if there are more than one MIBs this could come from, raise an exception
+    if len(imported_mibs) > 1:
+        raise MultipleTypeDefintionsException()
+
+    return imported_mibs[0]

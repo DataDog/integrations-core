@@ -128,6 +128,15 @@ METRICS = [
     'arangodb.health.heartbeat.sent.time.bucket',
     'arangodb.health.heartbeat.sent.time.count',
     'arangodb.health.heartbeat.sent.time.sum',
+    'arangodb.connection_pool.connections.created.count',
+    'arangodb.connection_pool.connections.current',
+    'arangodb.connection_pool.lease_time.bucket',
+    'arangodb.connection_pool.lease_time.count',
+    'arangodb.connection_pool.lease_time.sum',
+    'arangodb.connection_pool.leases.failed.count',
+    'arangodb.connection_pool.leases.successful.count',
+    'arangodb.http2.connections.count',
+    'arangodb.vst.connections.count',
 ]
 
 OPTIONAL_METRICS = [

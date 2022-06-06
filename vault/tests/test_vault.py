@@ -366,6 +366,46 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
         assert_all_metrics(aggregator)
 
+    @pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True)
+    def test_replication_dr_mode_collect_secondary(self, aggregator, dd_run_check, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics, 'collect_secondary_dr': True}
+        instance.update(INSTANCES['main'])
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
+        c.log.debug = mock.MagicMock()
+        # Keep a reference for use during mock
+        requests_get = requests.get
+
+        def mock_requests_get(url, *args, **kwargs):
+            if url == instance['api_url'] + '/sys/health':
+                return MockResponse(
+                    json_data={
+                        'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
+                        'cluster_name': 'vault-cluster-f5f44063',
+                        'initialized': False,
+                        'replication_dr_mode': 'secondary',
+                        'replication_performance_mode': 'primary',
+                        'sealed': False,
+                        'server_time_utc': 1529357080,
+                        'standby': True,
+                        'performance_standby': False,
+                        'version': '0.10.2',
+                    },
+                    status_code=200,
+                )
+            return requests_get(url, *args, **kwargs)
+
+        metric_collection = 'OpenMetrics' if use_openmetrics else 'Prometheus'
+
+        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+            dd_run_check(c)
+            c.log.debug.assert_called_with(
+                "Detected vault in replication DR secondary mode but also detected that "
+                "`collect_secondary_dr` is enabled, %s metric collection will still occur." % metric_collection
+            )
+        aggregator.assert_metric('vault.is_leader', 1)
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
+        assert_all_metrics(aggregator)
+
     @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
     def test_replication_dr_mode_changed(self, aggregator, dd_run_check, use_openmetrics):
         instance = {'use_openmetrics': use_openmetrics}

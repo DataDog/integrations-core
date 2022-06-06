@@ -13,7 +13,7 @@ init_config:
     ## Those options are used when making vSphere REST API calls to retrieve vSphere tags
     ## when `collect_tags` instance config is enabled.
     #
-    rest_api_options:
+    # rest_api_options:
 
         ## @param proxy - mapping - optional
         ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
@@ -381,7 +381,7 @@ instances:
     ## The options are used when making vSphere REST API calls to retrieve vSphere tags
     ## when `collect_tags` instance config is enabled.
     #
-    rest_api_options:
+    # rest_api_options:
 
         ## @param proxy - mapping - optional
         ## This overrides the `proxy` setting in `init_config`.

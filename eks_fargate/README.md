@@ -109,6 +109,9 @@ metadata:
  name: "<APPLICATION_NAME>"
  namespace: default
 spec:
+ selector:
+   matchLabels:
+     app: "<APPLICATION_NAME>"
  replicas: 1
  template:
    metadata:
@@ -213,6 +216,9 @@ metadata:
  namespace: default
 spec:
  replicas: 1
+ selector:
+   matchLabels:
+     app: "<APPLICATION_NAME>"
  template:
    metadata:
      labels:
@@ -270,6 +276,9 @@ metadata:
  namespace: default
 spec:
  replicas: 1
+ selector:
+   matchLabels:
+     app: "<APPLICATION_NAME>"
  template:
    metadata:
      labels:
@@ -363,6 +372,9 @@ metadata:
  namespace: default
 spec:
  replicas: 1
+ selector:
+   matchLabels:
+     app: "<APPLICATION_NAME>"
  template:
    metadata:
      labels:
@@ -452,9 +464,11 @@ Need help? Contact [Datadog support][20].
 
 ## Further Reading
 
-- Blog post: [Key metrics for monitoring AWS Fargate][26]
-- Blog post: [How to collect metrics and logs from AWS Fargate workloads][27]
-- Blog post: [AWS Fargate monitoring with Datadog][28]
+Additional helpful documentation, links, and articles:
+
+- [Key metrics for monitoring AWS Fargate][32]
+- [How to collect metrics and logs from AWS Fargate workloads][27]
+- [AWS Fargate monitoring with Datadog][28]
 
 [1]: http://docs.datadoghq.com/integrations/ecs_fargate/
 [2]: http://docs.datadoghq.com/integrations/amazon_eks/
@@ -487,3 +501,4 @@ Need help? Contact [Datadog support][20].
 [29]: https://docs.datadoghq.com/agent/kubernetes/?tab=helm#event-collection
 [30]: https://docs.datadoghq.com/infrastructure/livecontainers/#kubernetes-resources-view
 [31]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/#overview
+[32]: https://www.datadoghq.com/blog/aws-fargate-metrics/

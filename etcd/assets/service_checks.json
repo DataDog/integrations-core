@@ -12,7 +12,7 @@
             "url"
         ],
         "name": "Can Connect",
-        "description": "Returns `CRITICAL` if unable to get metrics from etcd (timeout or non-200 HTTP code)"
+        "description": "Returns `CRITICAL` if unable to get metrics from etcd (timeout or non-200 HTTP code). This service check is only available on the legacy version of the etcd check."
     },
     {
         "agent_version": "5.21.0",
@@ -28,6 +28,21 @@
             "url"
         ],
         "name": "Healthy",
-        "description": "Returns `CRITICAL` when a member is unhealthy"
+        "description": "Returns `CRITICAL` when a member is unhealthy. This service check is only available on the legacy version of the etcd check."
+    },
+    {
+        "agent_version": "6.8.0",
+        "integration": "etcd",
+        "check": "etcd.prometheus.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "url"
+        ],
+        "name": "etcd prometheus health",
+        "description": "Returns `CRITICAL` if the check cannot access a metrics endpoint. Otherwise, returns `OK`. This service check is only available when `use_preview` is enabled."
     }
 ]

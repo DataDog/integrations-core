@@ -200,6 +200,75 @@ def test_statement_metrics(
         conn.close()
 
 
+@pytest.mark.parametrize(
+    "cloud_metadata",
+    [
+        {},
+        {
+            'azure': {
+                'deployment_type': 'flexible_server',
+                'database_name': 'test-server',
+            },
+        },
+        {
+            'aws': {
+                'instance_endpoint': 'foo.aws.com',
+            },
+            'azure': {
+                'deployment_type': 'flexible_server',
+                'database_name': 'test-server',
+            },
+        },
+        {
+            'gcp': {
+                'project_id': 'foo-project',
+                'instance_id': 'bar',
+                'extra_field': 'included',
+            },
+        },
+    ],
+)
+def test_statement_metrics_cloud_metadata(aggregator, integration_check, dbm_instance, cloud_metadata, datadog_agent):
+    dbm_instance['pg_stat_statements_view'] = "pg_stat_statements"
+    # don't need samples for this test
+    dbm_instance['query_samples'] = {'enabled': False}
+    # very low collection interval for test purposes
+    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    if cloud_metadata:
+        for k, v in cloud_metadata.items():
+            dbm_instance[k] = v
+    connections = {}
+
+    def _run_queries():
+        for user, password, dbname, query, arg in SAMPLE_QUERIES:
+            if dbname not in connections:
+                connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+            connections[dbname].cursor().execute(query, (arg,))
+
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    _run_queries()
+    check.check(dbm_instance)
+    _run_queries()
+    check.check(dbm_instance)
+
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(events) == 1, "should capture exactly one metrics payload"
+    event = events[0]
+
+    assert event['host'] == 'stubbed.hostname'
+    assert event['timestamp'] > 0
+    assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
+    assert event['ddagentversion'] == datadog_agent.get_version()
+    assert event['ddagenthostname'] == datadog_agent.get_hostname()
+    assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
+    assert event['cloud_metadata'] == cloud_metadata, "wrong cloud_metadata"
+
+    for conn in connections.values():
+        conn.close()
+
+
 def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_instance, datadog_agent):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}

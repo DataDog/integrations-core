@@ -406,3 +406,21 @@ def test_resolved_hostname(instance_docker, dbm_enabled, instance_host, reported
     instance_docker['reported_hostname'] = reported_hostname
     sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
     assert sqlserver_check.resolved_hostname == expected_hostname
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('database_autodiscovery', [True, False])
+def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, database_autodiscovery):
+    instance_docker['database_autodiscovery'] = database_autodiscovery
+    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    dd_run_check(sqlserver_check)
+    seen_databases = set()
+    for m in aggregator.metrics("sqlserver.database.avg_fragmentation_in_percent"):
+        tags_by_key = {k: v for k, v in [t.split(':') for t in m.tags]}
+        seen_databases.add(tags_by_key['database_name'])
+        assert tags_by_key['object_name'].lower() != 'none'
+
+    assert 'master' in seen_databases
+    if database_autodiscovery:
+        assert 'datadog_test' in seen_databases

@@ -29,7 +29,7 @@ classifiers = [
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=25.2.2",
+    "datadog-checks-base>=25.4.0",
 ]
 dynamic = [
     "version",
@@ -42,7 +42,7 @@ deps = [
     "pyodbc==4.0.32",
     "pyro4==4.82; sys_platform == 'win32'",
     "pywin32==228; sys_platform == 'win32' and python_version < '3.0'",
-    "pywin32==303; sys_platform == 'win32' and python_version > '3.0'",
+    "pywin32==304; sys_platform == 'win32' and python_version > '3.0'",
     "selectors34==1.2; sys_platform == 'win32' and python_version < '3.0'",
     "serpent==1.28; sys_platform == 'win32' and python_version < '3.0'",
     "serpent==1.40; sys_platform == 'win32' and python_version > '3.0'",

@@ -181,6 +181,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._metrics_collection_interval,
                 'tags': self._tags_no_db,
+                'cloud_metadata': self._config.cloud_metadata,
                 'postgres_rows': rows,
                 'postgres_version': self._payload_pg_version(),
                 'ddagentversion': datadog_agent.get_version(),

@@ -9,10 +9,12 @@ import logging
 import math
 import os
 import re
+import time
 
 import mock
 import pytest
 import requests
+from mock import patch
 from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, HistogramMetricFamily, SummaryMetricFamily
 from prometheus_client.samples import Sample
 from six import iteritems
@@ -23,7 +25,8 @@ from datadog_checks.dev import get_here
 from datadog_checks.dev.http import MockResponse
 
 text_content_type = 'text/plain; version=0.0.4'
-FIXTURE_PATH = os.path.abspath(os.path.join(get_here(), '..', '..', '..', 'fixtures', 'prometheus'))
+FIXTURE_PATH = os.path.abspath(os.path.join(get_here(), '..', '..', '..', '..', 'fixtures', 'prometheus'))
+TOKENS_PATH = os.path.abspath(os.path.join(get_here(), '..', '..', '..', '..', 'fixtures', 'bearer_tokens'))
 
 FAKE_ENDPOINT = 'http://fake.endpoint:10055/metrics'
 
@@ -2988,3 +2991,23 @@ def test_use_process_start_time(
             )
 
         expect_first_flush = True
+
+
+def test_refresh_bearer_token(text_data, mocked_openmetrics_check_factory):
+    instance = {
+        'prometheus_url': 'https://fake.endpoint:10055/metrics',
+        'metrics': [{'process_virtual_memory_bytes': 'process.vm.bytes'}],
+        "namespace": "default_namespace",
+        "bearer_token_auth": True,
+        "bearer_token_refresh_interval": 1,
+    }
+
+    with patch.object(OpenMetricsBaseCheck, 'KUBERNETES_TOKEN_PATH', os.path.join(TOKENS_PATH, 'default_token')):
+        check = mocked_openmetrics_check_factory(instance)
+        check.poll = mock.MagicMock(return_value=MockResponse(text_data, headers={'Content-Type': text_content_type}))
+        instance = check.get_scraper_config(instance)
+        assert instance['_bearer_token'] == 'my default token'
+        time.sleep(1.5)
+        with patch.object(OpenMetricsBaseCheck, 'KUBERNETES_TOKEN_PATH', os.path.join(TOKENS_PATH, 'custom_token')):
+            check.check(instance)
+            assert instance['_bearer_token'] == 'my custom token'

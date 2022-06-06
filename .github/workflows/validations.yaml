@@ -35,6 +35,8 @@ jobs:
       run: |
         ddev config set repos.core .
         ddev config set repo core
+        ddev config set orgs.ci.dd_url "https://app.datadoghq.com"
+        ddev config set org ci
 
     - name: Run agent requirements validation
       run: |

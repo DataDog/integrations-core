@@ -14,7 +14,7 @@
   "metric_prefix": "vault.",
   "metric_to_check": "vault.is_leader",
   "name": "vault",
-  "public_title": "Datadog-Vault Integration",
+  "public_title": "Vault Integration",
   "short_description": "Vault is a secrets management service application",
   "support": "core",
   "supported_os": [

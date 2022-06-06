@@ -28,6 +28,7 @@ def dd_environment():
     env = os.environ
     compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
     env['CONTAINER_PORT'] = common.PORT
+    env['CASSANDRA_SEEDS'] = '0.0.0.0'
 
     with docker_run(
         compose_file, service_name=common.CASSANDRA_CONTAINER_NAME, log_patterns=['Listening for thrift clients']

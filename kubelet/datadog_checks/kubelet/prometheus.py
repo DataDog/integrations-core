@@ -254,6 +254,25 @@ class CadvisorPrometheusScraperMixin(object):
                 # metric.Clear()  # Ignore this metric message
         return seen
 
+    @staticmethod
+    def _latest_value_by_context(metric, uid_from_labels):
+        """
+        Iterates over all metrics in a metric and keep the last value
+        matching the same uid. Modifies the metric family in place.
+        :param metric: prometheus metric family
+        :param uid_from_labels: function mapping a metric.label to a unique context id
+        :return: dict with uid as keys, metric object references as values
+        """
+        seen = {}
+        for sample in metric.samples:
+            uid = uid_from_labels(sample[OpenMetricsBaseCheck.SAMPLE_LABELS])
+            if not uid:
+                # TODO
+                # metric.Clear()  # Ignore this metric message
+                continue
+            seen[uid] = sample
+        return seen
+
     def _process_container_metric(self, type, metric_name, metric, scraper_config, labels=None):
         """
         Takes a simple metric about a container, reports it as a rate or gauge.
@@ -390,7 +409,7 @@ class CadvisorPrometheusScraperMixin(object):
         and optionally checks in the given cache if there's a usage
         for each sample in the metric and reports the usage_pct
         """
-        samples = self._sum_values_by_context(metric, self._get_entity_id_if_container_metric)
+        samples = self._latest_value_by_context(metric, self._get_entity_id_if_container_metric)
         for c_id, sample in iteritems(samples):
             limit = sample[self.SAMPLE_VALUE]
             pod_uid = self._get_pod_uid(sample[self.SAMPLE_LABELS])

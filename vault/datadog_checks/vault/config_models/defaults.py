@@ -74,6 +74,10 @@ def instance_collect_histogram_buckets(field, value):
     return True
 
 
+def instance_collect_secondary_dr(field, value):
+    return False
+
+
 def instance_connect_timeout(field, value):
     return get_default_field_value(field, value)
 
@@ -244,6 +248,10 @@ def instance_share_labels(field, value):
 
 def instance_skip_proxy(field, value):
     return False
+
+
+def instance_tag_by_endpoint(field, value):
+    return True
 
 
 def instance_tags(field, value):

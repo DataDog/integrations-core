@@ -1,5 +1,33 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 16.3.0 / 2022-06-02
+
+* [Added] Move v2 manifest field `classifier_tags` under `tile`. See [#12122](https://github.com/DataDog/integrations-core/pull/12122).
+* [Added] Upgrade Hatch to latest version. See [#12016](https://github.com/DataDog/integrations-core/pull/12016).
+* [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
+* [Fixed] Fix tooling for v2 manifests. See [#12040](https://github.com/DataDog/integrations-core/pull/12040).
+
+## 16.2.1 / 2022-05-12
+
+* [Fixed] Fix `enabled` for parent options. See [#11707](https://github.com/DataDog/integrations-core/pull/11707).
+* [Fixed] Don't look for `=== JSON ===` in e2e output. See [#12004](https://github.com/DataDog/integrations-core/pull/12004).
+
+## 16.2.0 / 2022-05-11
+
+* [Added] Resolve integer enums when generating SNMP traps DB. See [#11911](https://github.com/DataDog/integrations-core/pull/11911).
+* [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
+* [Added] Support Hatch for managing test environments. See [#11950](https://github.com/DataDog/integrations-core/pull/11950).
+* [Added] Assign `triage` team cards to Agent Platform. See [#11768](https://github.com/DataDog/integrations-core/pull/11768).
+* [Added] Update metadata.csv to require curated_metric column. See [#11770](https://github.com/DataDog/integrations-core/pull/11770).
+* [Added] Update style dependencies. See [#11764](https://github.com/DataDog/integrations-core/pull/11764).
+* [Added] Add gssapi as a dependency. See [#11725](https://github.com/DataDog/integrations-core/pull/11725).
+* [Fixed] Fix IBM ACE validation. See [#11964](https://github.com/DataDog/integrations-core/pull/11964).
+* [Fixed] Pin types-simplejson==3.17.5. See [#11923](https://github.com/DataDog/integrations-core/pull/11923).
+* [Fixed] Fix a keyerror in ddev generate-traps-db. See [#11892](https://github.com/DataDog/integrations-core/pull/11892).
+* [Fixed] Fix logic for loading minimum base package dependency for tests. See [#11771](https://github.com/DataDog/integrations-core/pull/11771).
+* [Fixed] Apply recent fix to new integration templates. See [#11751](https://github.com/DataDog/integrations-core/pull/11751).
+* [Fixed] Update error message in recommended monitor validation to include more context. See [#11750](https://github.com/DataDog/integrations-core/pull/11750).
+
 ## 16.1.0 / 2022-03-29
 
 * [Added] Add new README for Tile-only integrations. See [#11712](https://github.com/DataDog/integrations-core/pull/11712).

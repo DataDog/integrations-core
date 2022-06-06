@@ -145,7 +145,7 @@ files:
           example: false
       - name: metric_groups
         description: |
-          List Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.
+          List of Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.
 
           The available metric groups are:
 

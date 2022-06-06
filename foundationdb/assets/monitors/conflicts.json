@@ -1,6 +1,6 @@
 {
 	"name": "FoundationDB High Level of Conflicted Transactions",
-	"type": "event alert",
+	"type": "query alert",
 	"query": "avg(last_5m):100 * ( avg:foundationdb.workload.transactions.conflicted.hz{*} / avg:foundationdb.workload.transactions.started.hz{*} ) > 10",
 	"message": "A significant proportion of transactions started are ending up in a conflicted state. This may indicate a query design problem.",
 	"tags": [

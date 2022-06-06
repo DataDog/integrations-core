@@ -90,6 +90,16 @@ class PostgresConfig:
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.statement_activity_config = instance.get('query_activity', {}) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
+        self.cloud_metadata = {}
+        aws = instance.get('aws', {})
+        gcp = instance.get('gcp', {})
+        azure = instance.get('azure', {})
+        if aws:
+            self.cloud_metadata.update({'aws': aws})
+        if gcp:
+            self.cloud_metadata.update({'gcp': gcp})
+        if azure:
+            self.cloud_metadata.update({'azure': azure})
         obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
         self.obfuscator_options = {
             # Valid values for this can be found at
@@ -100,6 +110,8 @@ class PostgresConfig:
                     'replace_digits', obfuscator_options_config.get('quantize_sql_tables', False)
                 )
             ),
+            'dollar_quoted_func': is_affirmative(obfuscator_options_config.get('keep_dollar_quoted_func', True)),
+            'keep_sql_alias': is_affirmative(obfuscator_options_config.get('keep_sql_alias', True)),
             'return_json_metadata': is_affirmative(obfuscator_options_config.get('collect_metadata', True)),
             'table_names': is_affirmative(obfuscator_options_config.get('collect_tables', True)),
             'collect_commands': is_affirmative(obfuscator_options_config.get('collect_commands', True)),

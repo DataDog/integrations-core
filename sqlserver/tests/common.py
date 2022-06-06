@@ -16,7 +16,6 @@ from datadog_checks.sqlserver.const import (
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DBM_MIGRATED_METRICS,
-    FCI_METRICS,
     INSTANCE_METRICS,
     INSTANCE_METRICS_TOTAL,
     TASK_SCHEDULER_METRICS,
@@ -44,6 +43,14 @@ HERE = get_here()
 CHECK_NAME = "sqlserver"
 
 CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.db.commit_table_entries', 'sqlserver.exec.in_progress']
+SERVER_METRICS = [
+    'sqlserver.server.committed_memory',
+    'sqlserver.server.cpu_count',
+    'sqlserver.server.physical_memory',
+    'sqlserver.server.target_memory',
+    'sqlserver.server.uptime',
+    'sqlserver.server.virtual_memory',
+]
 EXPECTED_DEFAULT_METRICS = [
     m[0]
     for m in chain(
@@ -53,7 +60,7 @@ EXPECTED_DEFAULT_METRICS = [
         DATABASE_METRICS,
         DATABASE_FILES_IO,
     )
-]
+] + SERVER_METRICS
 EXPECTED_METRICS = (
     EXPECTED_DEFAULT_METRICS
     + [
@@ -71,7 +78,33 @@ DBM_MIGRATED_METRICS_NAMES = set(m[0] for m in DBM_MIGRATED_METRICS)
 
 EXPECTED_METRICS_DBM_ENABLED = [m for m in EXPECTED_METRICS if m not in DBM_MIGRATED_METRICS_NAMES]
 
-UNEXPECTED_METRICS = [m[0] for m in FCI_METRICS]
+# These AO metrics are collected using the new QueryExecutor API instead of BaseSqlServerMetric.
+EXPECTED_QUERY_EXECUTOR_AO_METRICS_PRIMARY = [
+    'sqlserver.ao.low_water_mark_for_ghosts',
+    'sqlserver.ao.secondary_lag_seconds',
+]
+EXPECTED_QUERY_EXECUTOR_AO_METRICS_SECONDARY = [
+    'sqlserver.ao.log_send_queue_size',
+    'sqlserver.ao.log_send_rate',
+    'sqlserver.ao.redo_queue_size',
+    'sqlserver.ao.redo_rate',
+    'sqlserver.ao.filestream_send_rate',
+]
+EXPECTED_QUERY_EXECUTOR_AO_METRICS_COMMON = [
+    'sqlserver.ao.is_primary_replica',
+    'sqlserver.ao.quorum_type',
+    'sqlserver.ao.quorum_state',
+    'sqlserver.ao.member.type',
+    'sqlserver.ao.member.state',
+]
+# Our test environment does not have failover clustering enabled, so these metrics are not expected.
+# To test them follow this guide:
+# https://cloud.google.com/compute/docs/instances/sql-server/configure-failover-cluster-instance
+UNEXPECTED_QUERY_EXECUTOR_AO_METRICS = ['sqlserver.ao.member.number_of_quorum_votes']
+UNEXPECTED_FCI_METRICS = [
+    'sqlserver.fci.status',
+    'sqlserver.fci.is_current_owner',
+]
 
 EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in AO_METRICS_PRIMARY]
 EXPECTED_AO_METRICS_SECONDARY = [m[0] for m in AO_METRICS_SECONDARY]

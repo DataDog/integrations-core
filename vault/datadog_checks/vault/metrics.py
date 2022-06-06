@@ -121,6 +121,7 @@ METRIC_MAP = {
     'vault_replication_merkleDiff': 'replication.merkleDiff',
     'vault_replication_merkleSync': 'replication.merkleSync',
     'vault_replication_merkle_commit_index': 'replication.merkle.commit_index',
+    'vault_replication_wal_gc': 'replication.wal.gc',
     'vault_replication_wal_last_wal': 'replication.wal.last_wal',
     'vault_replication_wal_last_dr_wal': 'replication.wal.last_dr_wal',
     'vault_replication_wal_last_performance_wal': 'replication.wal.last_performance_wal',
@@ -276,7 +277,7 @@ ROUTE_METRICS_TO_TRANSFORM = [
     'vault_route_rollback_',
 ]
 
-KNOWN_GAUGES = {'vault_runtime_free_count', 'vault_runtime_malloc_count'}
+KNOWN_GAUGES = {'vault_runtime_free_count', 'vault_runtime_malloc_count', 'vault_wal_gc_total'}
 
 
 def construct_metrics_config(metric_map, type_overrides):
@@ -285,7 +286,7 @@ def construct_metrics_config(metric_map, type_overrides):
     for raw_metric_name, metric_name in metric_map.items():
         if raw_metric_name in dynamic_metrics:
             continue
-        elif raw_metric_name.endswith('_total'):
+        elif raw_metric_name.endswith('_total') and raw_metric_name not in KNOWN_GAUGES:
             raw_metric_name = raw_metric_name[:-6]
             metric_name = metric_name[:-6]
         elif metric_name.endswith('.count') and raw_metric_name not in KNOWN_GAUGES:
