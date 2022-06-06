@@ -82,7 +82,7 @@ GO
 GRANT EXECUTE on exampleProcWithoutNocount to datadog;
 GO
 
-CREATE OR ALTER PROCEDURE encryptedProc WITH ENCRYPTION AS
+CREATE PROCEDURE encryptedProc WITH ENCRYPTION AS
 BEGIN
     select count(*) from sys.databases;
 END;

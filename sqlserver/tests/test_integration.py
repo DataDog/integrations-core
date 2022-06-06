@@ -92,7 +92,9 @@ def test_custom_metrics_object_name(aggregator, dd_run_check, init_config_object
     dd_run_check(sqlserver_check)
 
     aggregator.assert_metric('sqlserver.cache.hit_ratio', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
-    aggregator.assert_metric('sqlserver.active_requests', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
+    aggregator.assert_metric(
+        'sqlserver.broker_activation.tasks_running', tags=['optional:tag1', 'optional_tag:tag1'], count=1
+    )
 
 
 @pytest.mark.integration
