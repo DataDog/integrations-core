@@ -8,9 +8,7 @@ from datadog_checks.dev.testing import requires_py3
 
 from .utils import get_check
 
-pytestmark = [
-    requires_py3,
-]
+pytestmark = [requires_py3]
 
 
 test_use_process_start_time_data = """\
