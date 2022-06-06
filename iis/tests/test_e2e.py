@@ -13,3 +13,4 @@ from datadog_checks.iis import IIS
 def test_e2e_py3(dd_agent_check, aggregator, instance):
     aggregator = dd_agent_check(instance)
     aggregator.assert_service_check('iis.windows.perf.health', IIS.CRITICAL)
+    assert aggregator.metric_names == []
