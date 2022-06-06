@@ -166,31 +166,29 @@ def get_query_file_stats(sqlserver_major_version):
     :return: a QueryExecutor query config object
     """
 
-    _file_stats_column_name_to_metric_name = {
-        'size_on_disk_bytes': 'files.size_on_disk',
-        'num_of_reads': 'files.reads',
-        'num_of_bytes_read': 'files.read_bytes',
-        'io_stall_read_ms': 'files.read_io_stall',
-        'io_stall_queued_read_ms': 'files.read_io_stall_queued',
-        'num_of_writes': 'files.writes',
-        'num_of_bytes_written': 'files.written_bytes',
-        'io_stall_write_ms': 'files.write_io_stall',
-        'io_stall_queued_write_ms': 'files.write_io_stall_queued',
-        'io_stall': 'files.io_stall',
+    column_definitions = {
+        'size_on_disk_bytes': {'name': 'files.size_on_disk', 'type': 'gauge'},
+        'num_of_reads': {'name': 'files.reads', 'type': 'monotonic_count'},
+        'num_of_bytes_read': {'name': 'files.read_bytes', 'type': 'monotonic_count'},
+        'io_stall_read_ms': {'name': 'files.read_io_stall', 'type': 'monotonic_count'},
+        'io_stall_queued_read_ms': {'name': 'files.read_io_stall_queued', 'type': 'monotonic_count'},
+        'num_of_writes': {'name': 'files.writes', 'type': 'monotonic_count'},
+        'num_of_bytes_written': {'name': 'files.written_bytes', 'type': 'monotonic_count'},
+        'io_stall_write_ms': {'name': 'files.write_io_stall', 'type': 'monotonic_count'},
+        'io_stall_queued_write_ms': {'name': 'files.write_io_stall_queued', 'type': 'monotonic_count'},
+        'io_stall': {'name': 'files.io_stall', 'type': 'monotonic_count'},
     }
 
-    available_file_stats_columns = sorted(_file_stats_column_name_to_metric_name.keys())
     if sqlserver_major_version <= 2012:
-        missing = {"io_stall_queued_read_ms", "io_stall_queued_write_ms"}
-        available_file_stats_columns = [c for c in available_file_stats_columns if c not in missing]
+        column_definitions.pop("io_stall_queued_read_ms")
+        column_definitions.pop("io_stall_queued_write_ms")
 
-    file_stats_columns_sql = []
+    # sort columns to ensure a static column order
+    sql_columns = []
     metric_columns = []
-    for column in available_file_stats_columns:
-        file_stats_columns_sql.append("fs.{} AS {}".format(column, column))
-        metric_type = 'gauge' if column == 'size_on_disk_bytes' else 'monotonic_count'
-        metric_name = _file_stats_column_name_to_metric_name[column]
-        metric_columns.append({'name': metric_name, 'type': metric_type})
+    for column in sorted(column_definitions.keys()):
+        sql_columns.append("fs.{} AS {}".format(column, column))
+        metric_columns.append(column_definitions[column])
 
     return {
         'name': 'sys.dm_io_virtual_file_stats',
@@ -200,13 +198,13 @@ def get_query_file_stats(sqlserver_major_version):
             mf.state_desc AS state_desc,
             mf.name AS logical_name,
             mf.physical_name AS physical_name,
-            {file_stats_columns_sql}
+            {columns}
         FROM sys.dm_io_virtual_file_stats(NULL, NULL) fs
             LEFT JOIN sys.master_files mf
                 ON mf.database_id = fs.database_id
                 AND mf.file_id = fs.file_id;
     """.strip().format(
-            file_stats_columns_sql=", ".join(file_stats_columns_sql)
+            columns=", ".join(sql_columns)
         ),
         'columns': [
             {'name': 'db', 'type': 'tag'},
