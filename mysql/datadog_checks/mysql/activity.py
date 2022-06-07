@@ -13,7 +13,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_m
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
-from .util import get_truncation_state
+from .util import DatabaseConfigurationError, get_truncation_state, warning_with_tags
 
 try:
     import datadog_agent
@@ -67,7 +67,7 @@ SELECT
     socket.event_name AS socket_event_name
 FROM
     performance_schema.threads AS thread_a
-    LEFT JOIN performance_schema.events_waits_current AS waits_a ON waits_a.thread_id = thread_a.thread_id 
+    LEFT JOIN performance_schema.events_waits_current AS waits_a ON waits_a.thread_id = thread_a.thread_id
     LEFT JOIN performance_schema.events_statements_current AS statement ON statement.thread_id = thread_a.thread_id
     LEFT JOIN performance_schema.socket_instances AS socket ON socket.thread_id = thread_a.thread_id
 WHERE
@@ -137,6 +137,18 @@ class MySQLActivity(DBMAsyncJob):
 
     def run_job(self):
         # type: () -> None
+        # Detect a database misconfiguration by checking if `events-waits-current` is enabled.
+        if not self._check.events_wait_current_enabled:
+            self._check.record_warning(
+                DatabaseConfigurationError.events_waits_current_not_enabled,
+                warning_with_tags(
+                    'Unable to collect query activity because `performance-schema-consumer-events-waits-current` '
+                    'is not enabled.',
+                    code=DatabaseConfigurationError.events_waits_current_not_enabled.value,
+                    host=self._check.resolved_hostname,
+                ),
+            )
+            return
         self._check_version()
         self._collect_activity()
 
