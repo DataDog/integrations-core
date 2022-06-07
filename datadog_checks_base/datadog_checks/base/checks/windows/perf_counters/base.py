@@ -3,26 +3,25 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 # TODO: when we stop invoking Mypy with --py2, remove ignore and use f-strings
 # type: ignore
+import time
 from collections import ChainMap
 from contextlib import contextmanager, suppress
-import time
+from threading import Lock
 
 import pywintypes
 import win32pdh
 
 from ....config import is_affirmative
 from ....errors import ConfigTypeError, ConfigurationError
-from ....utils.functions import raise_exception
 from ....utils.agent.common import METRIC_NAMESPACE_METRICS
+from ....utils.functions import raise_exception
 from ... import AgentCheck
 from .connection import Connection
 from .counter import PerfObject
-from datadog_checks.process.lock import ReadWriteLock
 
 
 class PerfCountersBaseCheck(AgentCheck):
     SERVICE_CHECK_HEALTH = 'windows.perf.health'
-    enum_object_list_lock = ReadWriteLock()
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
@@ -64,7 +63,7 @@ class PerfCountersBaseCheck(AgentCheck):
         # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectitemsa#remarks
 
         if self.should_refresh_enum_obj_list():
-            with self.enum_object_list_lock.write_lock():
+            with self.nonblocking_lock():
                 try:
                     # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectsa
                     # https://mhammond.github.io/pywin32/win32pdh__EnumObjects_meth.html
@@ -177,6 +176,15 @@ class PerfCountersBaseCheck(AgentCheck):
             yield
         finally:
             self.__NAMESPACE__ = old_namespace
+
+    @contextmanager
+    def nonblocking_lock(self, lock=Lock()):
+        locked = lock.acquire(blocking=False)
+        try:
+            yield locked
+        finally:
+            if locked:
+                lock.release()
 
     def cancel(self):
         for perf_object in self.perf_objects:
