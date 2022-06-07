@@ -402,9 +402,9 @@ failed_explain_test_repeat_count = 5
         ),
         (
             "update persons set firstname='firstname' where personid in (2, 1); select pg_sleep(1);",
+            "error:explain-database_error-<class 'psycopg2.errors.InvalidCursorDefinition'>",
             None,
-            None,
-            0,
+            1,
             [14],
         ),
     ],
@@ -448,8 +448,6 @@ def test_failed_explain_handling(
         expected_error_tag,
     ]
 
-    if expected_error_tag is None:
-        expected_tags=None
     aggregator.assert_metric(
         'dd.postgres.statement_samples.error',
         count=failed_explain_test_repeat_count,
