@@ -52,7 +52,7 @@ CreditUsage = {
 
 # https://docs.snowflake.com/en/sql-reference/account-usage/warehouse_metering_history.html
 WarehouseCreditUsage = {
-    'name': 'billings.warehouse.metrics',
+    'name': 'billing.warehouse.metrics',
     'query': (
         'select WAREHOUSE_NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), '
         'sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), '
@@ -269,7 +269,7 @@ OrgCreditUsage = {
 
 # https://docs.snowflake.com/en/sql-reference/organization-usage/usage_in_currency_daily.html
 OrgCurrencyUsage = {
-    'name': 'organization.billing_currency.metrics',
+    'name': 'organization.billing.currency.metrics',
     'query': (
         'select ACCOUNT_NAME, ORGANIZATION_NAME, SERVICE_LEVEL'
         'sum(amount), avg(amount) from USAGE_IN_CURRENCY_DAILY '
@@ -287,7 +287,7 @@ OrgCurrencyUsage = {
 
 # https://docs.snowflake.com/en/sql-reference/organization-usage/warehouse_metering_history.html
 OrgWarehouseCreditUsage = {
-    'name': 'organization.billings.warehouse.metrics',
+    'name': 'organization.billing.warehouse.metrics',
     'query': (
         'select WAREHOUSE_NAME, ACCOUNT_NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), '
         'sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), '

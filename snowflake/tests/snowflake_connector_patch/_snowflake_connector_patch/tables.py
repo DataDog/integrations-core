@@ -84,3 +84,38 @@ CONTRACT_ITEMS = [
         Decimal('2.1'),
     ),
 ]
+
+STORAGE_DAILY_HISTORY = [
+    (
+        'account_name',
+        Decimal('4510'),
+        Decimal('349'),
+    ),
+]
+
+REMAINING_BALANCE_DAILY = [
+    (
+        'contract_num',
+        Decimal('23410'),
+        Decimal('814349'),
+        Decimal('-35435'),
+        Decimal('455435'),
+    ),
+]
+
+RATE_SHEET_DAILY = [
+    (
+        'contract_num',
+        'test_account',
+        'usage',
+        'service',
+        Decimal('312'),
+    ),
+]
+
+DATA_TRANSFER_DAILY_HISTORY = [
+    (
+        'test_account',
+        Decimal('13.56'),
+    ),
+]
