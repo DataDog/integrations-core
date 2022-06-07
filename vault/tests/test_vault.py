@@ -731,7 +731,7 @@ class TestVault:
         if use_openmetrics:
             aggregator.assert_service_check('vault.openmetrics.health', status=c.CRITICAL, count=0)
 
-    test_route_transform(self, aggregator, no_token_instance, global_tags, mock_http_response):
+    def test_route_transform(self, aggregator, no_token_instance, global_tags, mock_http_response):
         no_token_instance['use_openmetrics'] = False
         c = Vault(Vault.CHECK_NAME, {}, [no_token_instance])
 
