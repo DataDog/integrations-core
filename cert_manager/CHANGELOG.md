@@ -1,2 +1,1 @@
 # CHANGELOG - cert_manager
-

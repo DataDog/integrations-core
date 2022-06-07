@@ -1,44 +1,38 @@
-## All options defined here are available to all instances.
-#
 init_config:
 
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Additionally, this sets the default `service` for every log source.
-    #
-    # service: <SERVICE>
-
-## Every instance is scheduled independent of the others.
-#
 instances:
 
-  -
-    ## @param tags - list of strings - optional
-    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ## @param prometheus_url - string - required
+    ## The URL where your application cert-manager metrics are exposed by Prometheus.
+    #
+  - prometheus_url: http://localhost:9402/metrics
+
+    ## @param tags - list of key:value element - optional
+    ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
-    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
     #
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Overrides any `service` defined in the `init_config` section.
+    ## @param metrics - list of key:value element - optional
+    ## Metrics to be extracted from cert-manager
     #
-    # service: <SERVICE>
+    # metrics:
+    #   - "certmanager_certificate_ready_status": "certificate.ready_status"
+    #   - "<CERTMANAGER_METRIC_NAME>": "<DATADOG_METRIC_NAME>"
 
-    ## @param min_collection_interval - number - optional - default: 15
-    ## This changes the collection interval of the check. For more information, see:
-    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    ## @param type_overrides - list of key:value element - optional
+    ## Overrides the type of prometheus metrics /!\ All untyped metric will be ignored /!\
+    ## Valid prometheus types are : ['counter', 'gauge', 'summary', 'histogram']
+    ## You can use 'rate' if you want to get the derivative of a counter/gauge
     #
-    # min_collection_interval: 15
+    # type_overrides:
+    #   - "certmanager_certificate_ready_status": "gauge"
+    #   - "<CERTMANAGER_METRIC_NAME>": "<DATADOG_METRIC_TYPE>"
 
-    ## @param empty_default_hostname - boolean - optional - default: false
-    ## This forces the check to send metrics with no hostname.
-    ##
-    ## This is useful for cluster-level checks.
+    ## @param prometheus_timeout - integer - optional - default: 10
+    ## The timeout for connecting to the prometheus_url.
     #
-    # empty_default_hostname: false
+    # prometheus_timeout: 10

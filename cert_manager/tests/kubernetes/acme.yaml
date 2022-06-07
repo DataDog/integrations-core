@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: acme-test
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: pebble-test
+spec:
+  acme:
+    email: user@example.com
+    server: https://pebble.default.svc.cluster.local/dir
+    skipTLSVerify: true
+    privateKeySecretRef:
+      # Secret resource that will be used to store the account's private key.
+      name: example-issuer-account-key
+    # Add a single challenge solver, HTTP01 using nginx
+    solvers:
+      - http01:
+          ingress:
+            class: nginx
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: acme-cert
+  namespace: acme-test
+spec:
+  dnsNames:
+    - ingress-nginx-controller.ingress-nginx
+  secretName: acme-cert-secret
+  issuerRef:
+    name: pebble-test
+    kind: ClusterIssuer
