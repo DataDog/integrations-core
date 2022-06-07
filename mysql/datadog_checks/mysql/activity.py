@@ -44,17 +44,17 @@ SELECT
     thread_a.processlist_db,
     thread_a.processlist_command,
     thread_a.processlist_state,
-    COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) AS sql_text,
+    statement.sql_text,
     statement.timer_start AS event_timer_start,
     statement.timer_end AS event_timer_end,
     statement.lock_time,
     statement.current_schema,
-    waits_a.event_id,
-    waits_a.end_event_id,
     COALESCE(
         IF(thread_a.processlist_state = 'User sleep', 'User sleep',
-        IF(waits_a.event_id = waits_a.end_event_id, 'CPU', waits_a.event_name)), 'CPU') AS event_name,
-    waits_a.operation,
+        IF(waits_a.event_id = waits_a.end_event_id, 'CPU', waits_a.event_name)), 'CPU') AS wait_event,
+    waits_a.event_id,
+    waits_a.end_event_id,
+    waits_a.event_name,
     waits_a.timer_start AS wait_timer_start,
     waits_a.timer_end AS wait_timer_end,
     waits_a.object_schema,
@@ -67,18 +67,12 @@ SELECT
     socket.event_name AS socket_event_name
 FROM
     performance_schema.threads AS thread_a
-    LEFT JOIN performance_schema.events_waits_current AS waits_a ON waits_a.thread_id = thread_a.thread_id
-    LEFT JOIN performance_schema.events_statements_current AS statement ON statement.thread_id = thread_a.thread_id
-    LEFT JOIN performance_schema.socket_instances AS socket ON socket.thread_id = thread_a.thread_id
-WHERE
-    thread_a.processlist_state IS NOT NULL AND
-    thread_a.processlist_command != 'Sleep' AND
-    thread_a.processlist_id != CONNECTION_ID()AND
-     -- events_waits_current can have multiple rows per thread, thus we use EVENT_ID to identify the row we want to use.
+    -- events_waits_current can have multiple rows per thread, thus we use EVENT_ID to identify the row we want to use.
     -- Additionally, we want the row with the highest EVENT_ID which reflects the most recent and current wait.
+    LEFT JOIN performance_schema.events_waits_current AS waits_a ON waits_a.thread_id = thread_a.thread_id AND
     waits_a.event_id IN(
         SELECT
-            MAX(waits_b.event_id)
+            MAX(waits_b.EVENT_ID)
         FROM performance_schema.threads AS thread_b
             LEFT JOIN performance_schema.events_waits_current AS waits_b ON waits_b.thread_id = thread_b.thread_id
         WHERE
@@ -86,8 +80,12 @@ WHERE
             thread_b.processlist_command != 'Sleep' AND
             thread_b.processlist_id != connection_id()
         GROUP BY thread_b.thread_id)
-   AND waits_a.event_name != 'idle'
-   AND waits_a.operation != 'idle'
+    LEFT JOIN performance_schema.events_statements_current AS statement ON statement.thread_id = thread_a.thread_id
+    LEFT JOIN performance_schema.socket_instances AS socket ON socket.thread_id = thread_a.thread_id
+WHERE
+    thread_a.processlist_state IS NOT NULL AND
+    thread_a.processlist_command != 'Sleep' AND
+    thread_a.processlist_id != CONNECTION_ID()
 """
 
 
