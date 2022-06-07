@@ -780,4 +780,4 @@ class TestVault:
             aggregator.assert_metric('{}.sum'.format(metric), tags=global_tags)
             aggregator.assert_metric('{}.count'.format(metric), tags=global_tags)
 
-        assert_all_metrics(aggregator)
+        aggregator.assert_all_metrics_covered()
