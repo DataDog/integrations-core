@@ -1,14 +1,10 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
-
 from datadog_checks.dev import TempDir
 from datadog_checks.dev.fs import ensure_parent_dir_exists, path_join, write_file
 
 from .utils import get_spec
-
-pytestmark = pytest.mark.conf
 
 
 def test_cache():
