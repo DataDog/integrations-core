@@ -1,0 +1,35 @@
+{
+  "display_name": "cert_manager",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "cert_manager",
+  "metric_prefix": "cert_manager.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "17888d72-430b-4c0b-b557-e08fd96d4f1f",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "cert_manager",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "cert-manager",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}
