@@ -22,7 +22,6 @@ from .config import MySQLConfig
 from .const import (
     BINLOG_VARS,
     COUNT,
-    DBM_MIGRATED_METRICS,
     GALERA_VARS,
     GAUGE,
     GROUP_REPLICATION_VARS,
@@ -295,9 +294,6 @@ class MySql(AgentCheck):
 
         # Get aggregate of all VARS we want to collect
         metrics = STATUS_VARS
-
-        if not self._config.dbm_enabled:
-            metrics.update(DBM_MIGRATED_METRICS)
 
         # collect results from db
         results = self._get_stats_from_status(db)

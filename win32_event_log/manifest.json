@@ -16,7 +16,7 @@
   "manifest_version": "1.0.0",
   "metric_prefix": "win32_event_log.",
   "name": "win32_event_log",
-  "public_title": "Datadog-Win 32 event log Integration",
+  "public_title": "Win 32 event log Integration",
   "short_description": "Send Windows events to your Datadog event stream.",
   "support": "core",
   "supported_os": [

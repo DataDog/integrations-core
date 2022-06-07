@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-TLS Integration",
+  "public_title": "TLS Integration",
   "categories": [
     "network",
     "web",

@@ -10,7 +10,7 @@
   "supported_os": [
     "linux"
   ],
-  "public_title": "Datadog-TCP Queue Length Integration",
+  "public_title": "TCP Queue Length Integration",
   "categories": [
     "network"
   ],

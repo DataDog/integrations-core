@@ -6,7 +6,7 @@ datadog-airflow==3.1.0
 datadog-amazon-msk==3.1.2
 datadog-ambari==3.1.0; sys_platform != 'win32'
 datadog-apache==4.1.0
-datadog-arangodb==1.0.1
+datadog-arangodb==1.1.0
 datadog-aspdotnet==1.11.1; sys_platform == 'win32'
 datadog-avi-vantage==3.1.1
 datadog-azure-iot-edge==3.2.0
@@ -73,7 +73,7 @@ datadog-iis==2.16.2; sys_platform == 'win32'
 datadog-istio==4.2.1
 datadog-jboss-wildfly==2.0.1
 datadog-journald==1.1.0
-datadog-kafka-consumer==2.15.0
+datadog-kafka-consumer==2.15.1
 datadog-kafka==2.12.1
 datadog-kong==2.1.1
 datadog-kube-apiserver-metrics==3.2.0
@@ -148,11 +148,11 @@ datadog-teradata==1.0.0
 datadog-tls==2.8.0
 datadog-tokumx==3.2.0
 datadog-tomcat==1.11.1
-datadog-traffic-server==1.0.1
+datadog-traffic-server==1.0.2
 datadog-twemproxy==1.13.0
 datadog-twistlock==3.1.0
 datadog-varnish==1.14.1
-datadog-vault==3.2.1
+datadog-vault==3.3.0
 datadog-vertica==3.3.1
 datadog-voltdb==2.1.1
 datadog-vsphere==6.1.2

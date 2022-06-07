@@ -44,6 +44,8 @@ class MongoConfig(object):
         else:
             self.server = None
             self.hosts = instance.get('hosts', [])
+            if type(self.hosts) == str:
+                self.hosts = [self.hosts]
             self.username = instance.get('username')
             self.password = instance.get('password')
             # Deprecated

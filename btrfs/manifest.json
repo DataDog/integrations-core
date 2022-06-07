@@ -11,7 +11,7 @@
   "metric_prefix": "btrfs.",
   "metric_to_check": "system.disk.btrfs.total",
   "name": "btrfs",
-  "public_title": "Datadog-Btrfs Integration",
+  "public_title": "Btrfs Integration",
   "short_description": "Monitor usage on Btrfs volumes so you can respond before they fill up.",
   "support": "core",
   "supported_os": [

@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Kubernetes Scheduler Integration",
+  "public_title": "Kubernetes Scheduler Integration",
   "categories": [
     "orchestration",
     "containers",

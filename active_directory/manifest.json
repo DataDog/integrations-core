@@ -13,7 +13,7 @@
   "metric_prefix": "active_directory.",
   "metric_to_check": "active_directory.dra.inbound.objects.persec",
   "name": "active_directory",
-  "public_title": "Datadog-Active Directory Integration",
+  "public_title": "Active Directory Integration",
   "short_description": "Collect and graph Microsoft Active Directory metrics",
   "support": "core",
   "supported_os": [
@@ -26,9 +26,9 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {
-      "[Active Directory] Elevated LDAP binding duration for host {{host.name}}":"assets/monitors/ldap_binding.json",
-      "[Active Directory] Anomalous number of sessions for connected LDAP clients for host: {{host.name}}":"assets/monitors/ldap_client_sessions.json",
-      "[Active Directory] Anomalous number of successful LDAP bindings for host: {{host.name}}":"assets/monitors/ldap_binding_successful.json"
+      "[Active Directory] Elevated LDAP binding duration for host {{host.name}}": "assets/monitors/ldap_binding.json",
+      "[Active Directory] Anomalous number of sessions for connected LDAP clients for host: {{host.name}}": "assets/monitors/ldap_client_sessions.json",
+      "[Active Directory] Anomalous number of successful LDAP bindings for host: {{host.name}}": "assets/monitors/ldap_binding_successful.json"
     },
     "dashboards": {
       "Active Directory": "assets/dashboards/active_directory.json"

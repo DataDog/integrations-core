@@ -21,7 +21,7 @@
     "mesos-master.sh",
     "mesos-agent.sh"
   ],
-  "public_title": "Datadog-Mesos Master Integration",
+  "public_title": "Mesos Master Integration",
   "short_description": "Track cluster resource usage, master and slave counts, tasks statuses, and more.",
   "support": "core",
   "supported_os": [

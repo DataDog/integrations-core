@@ -65,7 +65,7 @@ class PerfCountersBaseCheck(AgentCheck):
         collection_queue = []
 
         for perf_object in self.perf_objects:
-            self.log.info('Refreshing counters for performance object: %s', perf_object.name)
+            self.log.debug('Refreshing counters for performance object: %s', perf_object.name)
             try:
                 perf_object.refresh()
             except ConfigurationError as e:
@@ -90,7 +90,7 @@ class PerfCountersBaseCheck(AgentCheck):
             return
 
         for perf_object in collection_queue:
-            self.log.info('Collecting query data for performance object: %s', perf_object.name)
+            self.log.debug('Collecting query data for performance object: %s', perf_object.name)
             try:
                 perf_object.collect()
             except Exception as e:

@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Cilium Integration",
+  "public_title": "Cilium Integration",
   "categories": [
     "containers",
     "network",

@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from email.errors import InvalidHeaderDefect
+from email.headerregistry import Address
 
 import click
 
@@ -84,6 +86,17 @@ def package(check):
                     )
                 )
 
+            # The emails of the authors must be valid
+            invalid_emails = _validate_emails(check)
+            if invalid_emails:
+                file_failed = True
+                display_queue.append(
+                    (
+                        echo_failure,
+                        f'   Invalid email(s) found in {check}/pyproject.toml: ' f'{", ".join(invalid_emails)}.',
+                    )
+                )
+
         if file_failed:
             failed_checks += 1
             # Display detailed info if file is invalid
@@ -100,3 +113,23 @@ def package(check):
     if failed_checks:
         echo_failure(f"{failed_checks} invalid files")
         abort()
+
+
+def _validate_emails(check_name):
+    """
+    Returns a list of invalid emails in the check's authors
+    """
+    if not has_project_file(check_name):
+        return []
+
+    authors = load_project_file_cached(check_name)['project']['authors']
+
+    invalid_emails = []
+    for author in authors:
+        if 'email' in author:
+            try:
+                Address(addr_spec=author['email'])
+            except InvalidHeaderDefect:
+                invalid_emails.append(author['email'])
+
+    return invalid_emails

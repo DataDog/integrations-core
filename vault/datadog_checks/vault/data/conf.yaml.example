@@ -62,6 +62,12 @@ instances:
     #
     api_url: http://localhost:8200/v1
 
+    ## @param collect_secondary_dr - boolean - optional - default: false
+    ## Enable this option to collect metrics from the OpenMetrics endpoint if the
+    ## connected instance is a secondary in a Vault replication cluster.
+    #
+    # collect_secondary_dr: false
+
     ## @param detect_leader - boolean - optional - default: false
     ## Whether or not this instance should report cluster leader change events.
     #
