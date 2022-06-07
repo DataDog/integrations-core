@@ -4,6 +4,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
+import copy
 import traceback
 from collections import defaultdict
 from contextlib import closing, contextmanager
@@ -293,7 +294,7 @@ class MySql(AgentCheck):
     def _collect_metrics(self, db, tags):
 
         # Get aggregate of all VARS we want to collect
-        metrics = STATUS_VARS
+        metrics = copy.deepcopy(STATUS_VARS)
 
         # collect results from db
         results = self._get_stats_from_status(db)
