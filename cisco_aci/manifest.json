@@ -12,7 +12,7 @@
   "metric_prefix": "cisco_aci.",
   "metric_to_check": "cisco_aci.fabric.node.health.cur",
   "name": "cisco_aci",
-  "public_title": "Datadog-CiscoACI Integration",
+  "public_title": "CiscoACI Integration",
   "short_description": "Track Cisco ACI performance and usage.",
   "support": "core",
   "supported_os": [

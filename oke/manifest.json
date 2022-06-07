@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Oracle Container Engine for Kubernetes Integration",
+  "public_title": "Oracle Container Engine for Kubernetes Integration",
   "categories": [
     "oracle",
     "containers",

@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Hive Integration",
+  "public_title": "Hive Integration",
   "categories": [
     "web",
     "log collection",

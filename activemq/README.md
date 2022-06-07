@@ -14,7 +14,7 @@ The ActiveMQ check collects metrics for brokers, queues, producers, consumers, a
 
 The Agent's ActiveMQ check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your ActiveMQ nodes.
 
-The check collects metrics through JMX, so you need a JVM on each node so the Agent can fork [jmxfetch][4]. Datadog recommends using an Oracle-provided JVM.
+The check collects metrics from JMX with [JMXFetch][4]. A JVM is needed on each node so the Agent can run JMXFetch. Datadog recommends using an Oracle-provided JVM.
 
 ### Configuration
 

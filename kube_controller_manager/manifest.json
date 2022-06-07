@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Kubernetes Controller Manager Integration",
+  "public_title": "Kubernetes Controller Manager Integration",
   "categories": [
     "orchestration",
     "containers"

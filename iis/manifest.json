@@ -13,7 +13,7 @@
   "metric_prefix": "iis.",
   "metric_to_check": "iis.uptime",
   "name": "iis",
-  "public_title": "Datadog-IIS Integration",
+  "public_title": "IIS Integration",
   "short_description": "Track total or per-site metrics and monitor each site's up/down status.",
   "support": "core",
   "supported_os": [

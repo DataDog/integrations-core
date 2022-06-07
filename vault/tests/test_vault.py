@@ -6,6 +6,7 @@ import re
 import mock
 import pytest
 import requests
+from six.moves.urllib.parse import urlparse
 
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.vault import Vault
@@ -20,8 +21,10 @@ pytestmark = pytest.mark.usefixtures('dd_environment')
 
 
 class TestVault:
-    def test_bad_config(self, aggregator, dd_run_check):
-        instance = INSTANCES['invalid']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_bad_config(self, aggregator, dd_run_check, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['invalid'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         with pytest.raises(Exception):
@@ -85,13 +88,24 @@ class TestVault:
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, tags=global_tags, count=1)
 
-    def test_service_check_connect_fail(self, aggregator, dd_run_check):
-        instance = INSTANCES['bad_url']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_service_check_connect_fail(self, aggregator, dd_run_check, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['bad_url'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
+
+        if use_openmetrics:
+            hostname = urlparse(instance['api_url']).hostname
+            expected_exception = r'Connection to {} timed out'.format(hostname)
+
+        else:
+            expected_exception = r'^Vault endpoint `{}.+?` timed out after 1\.0 seconds$'.format(
+                re.escape(instance['api_url'])
+            )
 
         with pytest.raises(
             Exception,
-            match=r'^Vault endpoint `{}.+?` timed out after 1\.0 seconds$'.format(re.escape(instance['api_url'])),
+            match=expected_exception,
         ):
             dd_run_check(c, extract_message=True)
 
@@ -103,7 +117,8 @@ class TestVault:
         )
 
     def test_service_check_500_fail(self, aggregator, dd_run_check, global_tags):
-        instance = INSTANCES['main']
+        instance = {'use_openmetrics': False}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         with mock.patch('requests.get', return_value=MockResponse(status_code=500)):
@@ -115,7 +130,8 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, tags=global_tags, count=1)
 
     def test_api_unreachable(self):
-        instance = INSTANCES['main']
+        instance = {'use_openmetrics': False}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         with pytest.raises(ApiUnreachable, match=r"Error accessing Vault endpoint.*"):
@@ -290,8 +306,8 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.CRITICAL, count=1)
 
     def test_disable_legacy_cluster_tag(self, aggregator, dd_run_check, global_tags):
-        instance = INSTANCES['main']
-        instance['disable_legacy_cluster_tag'] = True
+        instance = {'disable_legacy_cluster_tag': True, 'use_openmetrics': False}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         # Keep a reference for use during mock
@@ -458,8 +474,10 @@ class TestVault:
             assert_all_metrics(aggregator)
 
     @pytest.mark.parametrize("cluster", [True, False])
-    def test_event_leader_change(self, aggregator, dd_run_check, cluster):
-        instance = INSTANCES['main']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_event_leader_change(self, aggregator, dd_run_check, cluster, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         next_leader = None
         if cluster:
@@ -490,14 +508,14 @@ class TestVault:
         assert len(aggregator.events) > 0
 
         event = aggregator.events[0]
-        assert event['event_type'] == Vault.EVENT_LEADER_CHANGE
+        assert event['event_type'] == c.EVENT_LEADER_CHANGE
         assert event['msg_title'] == 'Leader change'
         if cluster:
             assert event['msg_text'] == 'Leader cluster address changed from `foo` to `bar`.'
         else:
             assert event['msg_text'] == 'Leader address changed from `foo` to `bar`.'
         assert event['alert_type'] == 'info'
-        assert event['source_type_name'] == Vault.CHECK_NAME
+        assert event['source_type_name'] == c.CHECK_NAME
         assert event['host'] == c.hostname
         assert 'is_leader:true' in event['tags']
         assert c._previous_leader == next_leader
@@ -583,8 +601,10 @@ class TestVault:
         aggregator.assert_metric('vault.is_leader', 0)
 
     @pytest.mark.parametrize('status_code', [200, 429, 472, 473, 501, 503])
-    def test_sys_health_non_standard_status_codes(self, aggregator, dd_run_check, status_code):
-        instance = INSTANCES['main']
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_sys_health_non_standard_status_codes(self, aggregator, dd_run_check, status_code, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         # Keep a reference for use during mock
@@ -637,6 +657,7 @@ class TestVault:
     @auth_required
     def test_token_renewal(self, caplog, aggregator, dd_run_check, instance, global_tags):
         instance = instance()
+        instance['use_openmetrics'] = False
         instance['token_renewal_wait'] = 1
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         renew_client_token = c.renew_client_token
@@ -675,20 +696,31 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=0)
 
     @auth_required
-    def test_auth_needed_but_no_token(self, aggregator, dd_run_check, instance, global_tags):
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_auth_needed_but_no_token(self, aggregator, dd_run_check, instance, global_tags, use_openmetrics):
         instance = instance()
         instance['no_token'] = True
+        instance['use_openmetrics'] = use_openmetrics
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        with pytest.raises(Exception, match='^400 Client Error: Bad Request for url'):
+        with pytest.raises(Exception, match='400 Client Error: Bad Request for url'):
             dd_run_check(c, extract_message=True)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=0)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.WARNING, count=0)
-        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=1, tags=global_tags)
+
+        if use_openmetrics:
+            tags = global_tags + ['endpoint:{}/sys/metrics?format=prometheus'.format(instance['api_url'])]
+            aggregator.assert_service_check('vault.openmetrics.health', status=c.CRITICAL, count=1, tags=tags)
+        else:
+            aggregator.assert_service_check(
+                Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=1, tags=global_tags
+            )
 
     @noauth_required
-    def test_noauth_needed(self, aggregator, dd_run_check, no_token_instance, global_tags):
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_noauth_needed(self, aggregator, dd_run_check, no_token_instance, global_tags, use_openmetrics):
+        no_token_instance['use_openmetrics'] = use_openmetrics
         c = Vault(Vault.CHECK_NAME, {}, [no_token_instance])
         dd_run_check(c, extract_message=True)
 
@@ -696,7 +728,11 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.WARNING, count=0)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=0)
 
-    def test_route_transform(self, aggregator, no_token_instance, global_tags, mock_http_response):
+        if use_openmetrics:
+            aggregator.assert_service_check('vault.openmetrics.health', status=c.CRITICAL, count=0)
+
+    test_route_transform(self, aggregator, no_token_instance, global_tags, mock_http_response):
+        no_token_instance['use_openmetrics'] = False
         c = Vault(Vault.CHECK_NAME, {}, [no_token_instance])
 
         c.parse_config()
@@ -725,7 +761,8 @@ class TestVault:
         aggregator.assert_metric('vault.route.create.sum', tags=global_tags + ['mountpoint:foobar'])
         aggregator.assert_metric('vault.route.create.count', tags=global_tags + ['mountpoint:foobar'])
 
-        assert_all_metrics(aggregator)
+        aggregator.assert_all_metrics_covered()
+        aggregator.assert_no_duplicate_metrics()
 
     def test_wal_merkle_metrics(self, aggregator, instance, dd_run_check, global_tags, mock_http_response):
         instance = instance()

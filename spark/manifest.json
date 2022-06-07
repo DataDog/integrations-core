@@ -13,7 +13,7 @@
   "metric_prefix": "spark.",
   "metric_to_check": "spark.job.count",
   "name": "spark",
-  "public_title": "Datadog-Spark Integration",
+  "public_title": "Spark Integration",
   "short_description": "Track failed task rates, shuffled bytes, and much more.",
   "support": "core",
   "supported_os": [
