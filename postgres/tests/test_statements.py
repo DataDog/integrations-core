@@ -356,32 +356,56 @@ failed_explain_test_repeat_count = 5
 
 
 @pytest.mark.parametrize(
-    "query,expected_error_tag,explain_function_override,expected_fail_count",
+    "query,expected_error_tag,explain_function_override,expected_fail_count,skip_on_versions",
     [
-        ("select * from fake_table", "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>", None, 1),
+        (
+            "select * from fake_table",
+            "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>",
+            None,
+            1,
+            None,
+        ),
         (
             "select * from fake_schema.fake_table",
             "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>",
             None,
             1,
+            None,
         ),
         (
             "select * from pg_settings where name = $1",
             "error:explain-database_error-<class 'psycopg2.errors.UndefinedParameter'>",
             None,
             1,
+            None,
         ),
         (
             "select * from pg_settings where name = 'this query is truncated' limi",
             "error:explain-database_error-<class 'psycopg2.errors.SyntaxError'>",
             None,
             1,
+            None,
         ),
         (
             "select * from persons",
             "error:explain-database_error-<class 'psycopg2.errors.InsufficientPrivilege'>",
             "datadog.explain_statement_noaccess",
             failed_explain_test_repeat_count,
+            None,
+        ),
+        (
+            "update persons set firstname='firstname' where personid in (2, 1); select pg_sleep(1);",
+            "error:explain-database_error-<class 'psycopg2.errors.DatatypeMismatch'>",
+            None,
+            1,
+            [13, 12.1, 11, 10, 9.5, 9.6],
+        ),
+        (
+            "update persons set firstname='firstname' where personid in (2, 1); select pg_sleep(1);",
+            "error:explain-database_error-<class 'psycopg2.errors.InvalidCursorDefinition'>",
+            None,
+            1,
+            [14],
         ),
     ],
 )
@@ -393,12 +417,16 @@ def test_failed_explain_handling(
     expected_error_tag,
     explain_function_override,
     expected_fail_count,
+    skip_on_versions,
 ):
     dbname = "datadog_test"
     if explain_function_override:
         dbm_instance['query_samples']['explain_function'] = explain_function_override
     check = integration_check(dbm_instance)
     check._connect()
+
+    if skip_on_versions is not None and float(POSTGRES_VERSION) in skip_on_versions:
+        pytest.skip("not relevant for postgres {version}".format(version=POSTGRES_VERSION))
 
     # run check so all internal state is correctly initialized
     check.check(dbm_instance)
