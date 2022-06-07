@@ -13,4 +13,4 @@ from datadog_checks.dev.testing import requires_py3
 def test_e2e_py3(dd_agent_check, aggregator, instance):
     aggregator = dd_agent_check(instance)
     aggregator.assert_service_check('exchange.windows.perf.health', AgentCheck.OK)
-    # assert aggregator.metric_names == []
+    assert aggregator.metric_names == []
