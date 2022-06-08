@@ -58,7 +58,7 @@
             "prefix": "@request.operation"
         }
     ],
-    "title": "Vault - Overview",
+    "title": "Vault - Overview (OpenMetricsV2)",
     "widgets": [
         {
             "definition": {
