@@ -223,7 +223,7 @@ for object_name, instances in (
     # ('Processor', [None]),
     # ('System', [None]),
     # ('Memory', [None]),
-    # ('Network Interface', ['AWS PV Network Device', 'isatap.{C7BAFAFE-DBF4-4C76-B406-8A25283E4CF9}']),
+    ('Network Interface', ['AWS PV Network Device', 'isatap.{C7BAFAFE-DBF4-4C76-B406-8A25283E4CF9}']),
     # ('TCPv6', []),
     # ('TCPv4', []),
     ('Netlogon', ['foo']),

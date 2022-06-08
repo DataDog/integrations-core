@@ -47,14 +47,14 @@ METRICS_CONFIG = {
     #         }
     #     ],
     # },
-    # 'Network Interface': {
-    #     'name': 'network',
-    #     'counters': [
-    #         {
-    #             'Packets Outbound Errors': 'outbound_errors',
-    #         }
-    #     ],
-    # },
+    'Network Interface': {
+        'name': 'network',
+        'counters': [
+            {
+                'Packets Outbound Errors': 'outbound_errors',
+            }
+        ],
+    },
     # 'TCPv6': {
     #     'name': 'network.tcpv6',
     #     'counters': [
