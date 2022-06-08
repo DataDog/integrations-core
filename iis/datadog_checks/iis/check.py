@@ -102,11 +102,11 @@ class CompatibilityPerfObject(PerfObject):
 
         super().refresh()
 
-        # for instance in sorted(self.instances_unseen):
-        #     tags = [f'{self.instance_type}:{instance}']
-        #     tags.extend(self.tags)
-        #     self.logger.warning('Did not get any data for expected %s: %s', self.instance_type, instance)
-        #     self.check.service_check(self.instance_service_check_name, ServiceCheck.CRITICAL, tags=tags)
+        for instance in sorted(self.instances_unseen):
+            tags = [f'{self.instance_type}:{instance}']
+            tags.extend(self.tags)
+            self.logger.warning('Did not get any data for expected %s: %s', self.instance_type, instance)
+            self.check.service_check(self.instance_service_check_name, ServiceCheck.CRITICAL, tags=tags)
 
     def _instance_excluded(self, instance):
         self.instances_unseen.discard(instance)
