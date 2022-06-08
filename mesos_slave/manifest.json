@@ -9,12 +9,12 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Track cluster resource usage, master and slave counts, tasks statuses, and more.",
-    "title": "Mesos Slave Integration",
+    "title": "Mesos Slave",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::macOS",
-      "Category::Configuration Deployment",
+      "Category::Configuration & Deployment",
       "Category::Containers",
       "Category::Orchestration",
       "Category::Log Collection"
