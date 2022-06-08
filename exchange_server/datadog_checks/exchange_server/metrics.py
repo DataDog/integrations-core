@@ -20,58 +20,58 @@ METRICS_CONFIG = {
             }
         ],
     },
-    'Processor': {
-        'name': 'processor',
-        'counters': [
-            {
-                '% Processor Time': {'name': 'cpu_time', 'aggregate': 'only'},
-                '% User Time': {'name': 'cpu_user', 'aggregate': 'only'},
-                '% Privileged Time': {'name': 'cpu_privileged', 'aggregate': 'only'},
-            }
-        ],
-    },
-    'System': {
-        'name': 'processor',
-        'counters': [
-            {
-                'Processor Queue Length': 'queue_length',
-            }
-        ],
-    },
-    'Memory': {
-        'name': 'memory',
-        'counters': [
-            {
-                'Available MBytes': 'available',
-                '% Committed Bytes In Use': 'committed',
-            }
-        ],
-    },
-    'Network Interface': {
-        'name': 'network',
-        'counters': [
-            {
-                'Packets Outbound Errors': 'outbound_errors',
-            }
-        ],
-    },
-    'TCPv6': {
-        'name': 'network.tcpv6',
-        'counters': [
-            {
-                'Connection Failures': 'connection_failures',
-                'Connections Reset': {'name': 'conns_reset', 'type': 'count'},
-            }
-        ],
-    },
-    'TCPv4': {
-        'name': 'network.tcpv4',
-        'counters': [
-            {
-                'Connections Reset': {'name': 'conns_reset', 'type': 'count'},
-            }
-        ],
-    },
+    # 'Processor': {
+    #     'name': 'processor',
+    #     'counters': [
+    #         {
+    #             '% Processor Time': {'name': 'cpu_time', 'aggregate': 'only'},
+    #             '% User Time': {'name': 'cpu_user', 'aggregate': 'only'},
+    #             '% Privileged Time': {'name': 'cpu_privileged', 'aggregate': 'only'},
+    #         }
+    #     ],
+    # },
+    # 'System': {
+    #     'name': 'processor',
+    #     'counters': [
+    #         {
+    #             'Processor Queue Length': 'queue_length',
+    #         }
+    #     ],
+    # },
+    # 'Memory': {
+    #     'name': 'memory',
+    #     'counters': [
+    #         {
+    #             'Available MBytes': 'available',
+    #             '% Committed Bytes In Use': 'committed',
+    #         }
+    #     ],
+    # },
+    # 'Network Interface': {
+    #     'name': 'network',
+    #     'counters': [
+    #         {
+    #             'Packets Outbound Errors': 'outbound_errors',
+    #         }
+    #     ],
+    # },
+    # 'TCPv6': {
+    #     'name': 'network.tcpv6',
+    #     'counters': [
+    #         {
+    #             'Connection Failures': 'connection_failures',
+    #             'Connections Reset': {'name': 'conns_reset', 'type': 'count'},
+    #         }
+    #     ],
+    # },
+    # 'TCPv4': {
+    #     'name': 'network.tcpv4',
+    #     'counters': [
+    #         {
+    #             'Connections Reset': {'name': 'conns_reset', 'type': 'count'},
+    #         }
+    #     ],
+    # },
     'Netlogon': {
         'name': 'netlogon',
         'counters': [
