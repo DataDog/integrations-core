@@ -163,9 +163,9 @@ instances:
     ##   - snowflake.replication
     ##
     ## When querying the ORGANIZATION_USAGE schema, the available metric groups are:
-    ##   - snowflake.organization.billing.warehouse (enabled by default)
-    ##   - snowflake.organization.billing.currency (enabled by default)
-    ##   - snowflake.organization.billing.credit
+    ##   - snowflake.organization.warehouse (enabled by default)
+    ##   - snowflake.organization.currency (enabled by default)
+    ##   - snowflake.organization.credit
     ##   - snowflake.organization.storage (enabled by default)
     ##   - snowflake.organization.contracts
     ##   - snowflake.organization.balance

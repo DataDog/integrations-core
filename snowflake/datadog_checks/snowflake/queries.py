@@ -242,7 +242,7 @@ OrgContractItems = {
 
 # https://docs.snowflake.com/en/sql-reference/organization-usage/metering_daily_history.html
 OrgCreditUsage = {
-    'name': 'organization.billing.metrics',
+    'name': 'organization.credit.metrics',
     'query': (
         'select ACCOUNT_NAME, SERVICE_TYPE, '
         'sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), '
@@ -254,22 +254,22 @@ OrgCreditUsage = {
     'columns': [
         {'name': 'billing_account', 'type': 'tag'},
         {'name': 'service_type', 'type': 'tag'},
-        {'name': 'organization.billing.compute.sum', 'type': 'gauge'},
-        {'name': 'organization.billing.compute.avg', 'type': 'gauge'},
-        {'name': 'organization.billing.cloud_service.sum', 'type': 'gauge'},
-        {'name': 'organization.billing.cloud_service.avg', 'type': 'gauge'},
-        {'name': 'organization.billing.cloud_service_adjustment.sum', 'type': 'gauge'},
-        {'name': 'organization.billing.cloud_service_adjustment.avg', 'type': 'gauge'},
-        {'name': 'organization.billing.total_credit.sum', 'type': 'gauge'},
-        {'name': 'organization.billing.total_credit.avg', 'type': 'gauge'},
-        {'name': 'organization.billing.total_credits_billed.sum', 'type': 'gauge'},
-        {'name': 'organization.billing.total_credits_billed.avg', 'type': 'gauge'},
+        {'name': 'organization.compute.sum', 'type': 'gauge'},
+        {'name': 'organization.compute.avg', 'type': 'gauge'},
+        {'name': 'organization.cloud_service.sum', 'type': 'gauge'},
+        {'name': 'organization.cloud_service.avg', 'type': 'gauge'},
+        {'name': 'organization.cloud_service_adjustment.sum', 'type': 'gauge'},
+        {'name': 'organization.cloud_service_adjustment.avg', 'type': 'gauge'},
+        {'name': 'organization.total_credit.sum', 'type': 'gauge'},
+        {'name': 'organization.total_credit.avg', 'type': 'gauge'},
+        {'name': 'organization.total_credits_billed.sum', 'type': 'gauge'},
+        {'name': 'organization.total_credits_billed.avg', 'type': 'gauge'},
     ],
 }
 
 # https://docs.snowflake.com/en/sql-reference/organization-usage/usage_in_currency_daily.html
 OrgCurrencyUsage = {
-    'name': 'organization.billing.currency.metrics',
+    'name': 'organization.currency.metrics',
     'query': (
         'select ACCOUNT_NAME, ORGANIZATION_NAME, SERVICE_LEVEL'
         'sum(amount), avg(amount) from USAGE_IN_CURRENCY_DAILY '
@@ -279,15 +279,15 @@ OrgCurrencyUsage = {
         {'name': 'billing_account', 'type': 'tag'},
         {'name': 'organization_name', 'type': 'tag'},
         {'name': 'service_level', 'type': 'tag'},
-        {'name': 'organization.billing.currency.amount.avg', 'type': 'gauge'},
-        {'name': 'organization.billing.currency.amount.sum', 'type': 'gauge'},
+        {'name': 'organization.currency.amount.avg', 'type': 'gauge'},
+        {'name': 'organization.currency.amount.sum', 'type': 'gauge'},
     ],
 }
 
 
 # https://docs.snowflake.com/en/sql-reference/organization-usage/warehouse_metering_history.html
 OrgWarehouseCreditUsage = {
-    'name': 'organization.billing.warehouse.metrics',
+    'name': 'organization.warehouse.metrics',
     'query': (
         'select WAREHOUSE_NAME, ACCOUNT_NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), '
         'sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), '
@@ -297,12 +297,12 @@ OrgWarehouseCreditUsage = {
     'columns': [
         {'name': 'warehouse', 'type': 'tag'},
         {'name': 'billing_account', 'type': 'tag'},
-        {'name': 'organization.billing.warehouse.virtual_warehouse.sum', 'type': 'gauge'},
-        {'name': 'organization.billing.warehouse.virtual_warehouse.avg', 'type': 'gauge'},
-        {'name': 'organization.billing.warehouse.cloud_service.sum', 'type': 'gauge'},
-        {'name': 'organization.billing.warehouse.cloud_service.avg', 'type': 'gauge'},
-        {'name': 'organization.billing.warehouse.total_credit.sum', 'type': 'gauge'},
-        {'name': 'organization.billing.warehouse.total_credit.avg', 'type': 'gauge'},
+        {'name': 'organization.warehouse.virtual_warehouse.sum', 'type': 'gauge'},
+        {'name': 'organization.warehouse.virtual_warehouse.avg', 'type': 'gauge'},
+        {'name': 'organization.warehouse.cloud_service.sum', 'type': 'gauge'},
+        {'name': 'organization.warehouse.cloud_service.avg', 'type': 'gauge'},
+        {'name': 'organization.warehouse.total_credit.sum', 'type': 'gauge'},
+        {'name': 'organization.warehouse.total_credit.avg', 'type': 'gauge'},
     ],
 }
 

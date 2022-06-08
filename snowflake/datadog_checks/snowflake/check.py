@@ -28,9 +28,9 @@ ACCOUNT_USAGE_METRIC_GROUPS = {
 
 ORGANIZATION_USAGE_METRIC_GROUPS = {
     'snowflake.organization.contracts': [queries.OrgContractItems],
-    'snowflake.organization.billing.credit': [queries.OrgCreditUsage],
-    'snowflake.organization.billing.currency': [queries.OrgCurrencyUsage],
-    'snowflake.organization.billing.warehouse': [queries.OrgWarehouseCreditUsage],
+    'snowflake.organization.credit': [queries.OrgCreditUsage],
+    'snowflake.organization.currency': [queries.OrgCurrencyUsage],
+    'snowflake.organization.warehouse': [queries.OrgWarehouseCreditUsage],
     'snowflake.organization.storage': [queries.OrgStorageDaily],
     'snowflake.organization.balance': [queries.OrgBalance],
     'snowflake.organization.rate': [queries.OrgRateSheet],
