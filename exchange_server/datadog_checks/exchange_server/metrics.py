@@ -30,23 +30,23 @@ METRICS_CONFIG = {
             }
         ],
     },
-    # 'System': {
-    #     'name': 'processor',
-    #     'counters': [
-    #         {
-    #             'Processor Queue Length': 'queue_length',
-    #         }
-    #     ],
-    # },
-    # 'Memory': {
-    #     'name': 'memory',
-    #     'counters': [
-    #         {
-    #             'Available MBytes': 'available',
-    #             '% Committed Bytes In Use': 'committed',
-    #         }
-    #     ],
-    # },
+    'System': {
+        'name': 'processor',
+        'counters': [
+            {
+                'Processor Queue Length': 'queue_length',
+            }
+        ],
+    },
+    'Memory': {
+        'name': 'memory',
+        'counters': [
+            {
+                'Available MBytes': 'available',
+                '% Committed Bytes In Use': 'committed',
+            }
+        ],
+    },
     'Network Interface': {
         'name': 'network',
         'counters': [
@@ -55,23 +55,23 @@ METRICS_CONFIG = {
             }
         ],
     },
-    # 'TCPv6': {
-    #     'name': 'network.tcpv6',
-    #     'counters': [
-    #         {
-    #             'Connection Failures': 'connection_failures',
-    #             'Connections Reset': {'name': 'conns_reset', 'type': 'count'},
-    #         }
-    #     ],
-    # },
-    # 'TCPv4': {
-    #     'name': 'network.tcpv4',
-    #     'counters': [
-    #         {
-    #             'Connections Reset': {'name': 'conns_reset', 'type': 'count'},
-    #         }
-    #     ],
-    # },
+    'TCPv6': {
+        'name': 'network.tcpv6',
+        'counters': [
+            {
+                'Connection Failures': 'connection_failures',
+                'Connections Reset': {'name': 'conns_reset', 'type': 'count'},
+            }
+        ],
+    },
+    'TCPv4': {
+        'name': 'network.tcpv4',
+        'counters': [
+            {
+                'Connections Reset': {'name': 'conns_reset', 'type': 'count'},
+            }
+        ],
+    },
     'Netlogon': {
         'name': 'netlogon',
         'counters': [

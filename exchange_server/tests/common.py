@@ -6,11 +6,7 @@ from datadog_checks.exchange_server.metrics import METRICS_CONFIG
 CHECK_NAME = 'exchange_server'
 MINIMAL_INSTANCE = {'host': '.'}
 
-INSTANCE = {
-    'host': '.',
-    'sites': ['Default Web Site', 'Exchange Back End', 'Non Existing Website'],
-    'app_pools': ['DefaultAppPool', 'MSExchangeServicesAppPool', 'Non Existing App Pool'],
-}
+INSTANCE = {'host': '.'}
 
 DATABASE_INSTANCES = [
     'Information Store/_Total',
@@ -221,11 +217,11 @@ for object_name, instances in (
     ('MSExchange ADAccess Domain Controllers', ['win-k2olfvr52p5.croissant.datad0g.com']),
     ('MSExchange ADAccess Processes', EXCHANGE_PROCESSES),
     ('Processor', [None]),
-    # ('System', [None]),
-    # ('Memory', [None]),
+    ('System', [None]),
+    ('Memory', [None]),
     ('Network Interface', ['AWS PV Network Device', 'isatap.{C7BAFAFE-DBF4-4C76-B406-8A25283E4CF9}']),
-    # ('TCPv6', []),
-    # ('TCPv4', []),
+    ('TCPv6', []),
+    ('TCPv4', []),
     ('Netlogon', ['foo']),
     ('MSExchange Database ==> Instances', DATABASE_INSTANCES),
     ('MSExchange Active Manager', [None]),
