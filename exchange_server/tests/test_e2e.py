@@ -18,7 +18,7 @@ def get_exchange_server_metrics():
             counters_config = config.get('counters', [])
             for _, entry in enumerate(counters_config, 1):
                 for _, counter_config in entry.items():
-                    metric_full_name = "{}.{}.{}".format(metric_namespace, metric_prefix,counter_config)
+                    metric_full_name = "{}.{}.{}".format(metric_namespace, metric_prefix, counter_config)
                     exchange_server_metrics.append(metric_full_name)
     return exchange_server_metrics
 
