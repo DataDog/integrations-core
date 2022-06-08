@@ -104,6 +104,7 @@ class MySql(AgentCheck):
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
         self.performance_schema_enabled = None
+        self.events_wait_current_enabled = None
         self._warnings_by_code = {}
         self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
@@ -138,7 +139,11 @@ class MySql(AgentCheck):
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
 
-    def check_performance_schema_enabled(self, db):
+    def _check_database_configuration(self, db):
+        self._check_performance_schema_enabled(db)
+        self._check_events_wait_current_enabled(db)
+
+    def _check_performance_schema_enabled(self, db):
         if self.performance_schema_enabled is None:
             with closing(db.cursor()) as cursor:
                 cursor.execute("SHOW VARIABLES LIKE 'performance_schema'")
@@ -146,6 +151,24 @@ class MySql(AgentCheck):
                 self.performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
 
         return self.performance_schema_enabled
+
+    def _check_events_wait_current_enabled(self, db):
+        if not self._check_performance_schema_enabled(db):
+            self.log.debug('`performance_schema` is required to enable `events_waits_current`')
+            return
+        if self.events_wait_current_enabled is None:
+            with closing(db.cursor()) as cursor:
+                cursor.execute(
+                    """\
+                    SELECT
+                        NAME,
+                        ENABLED
+                    FROM performance_schema.setup_consumers WHERE NAME = 'events_waits_current'
+                    """
+                )
+                results = dict(cursor.fetchall())
+                self.events_wait_current_enabled = self._get_variable_enabled(results, 'events_waits_current')
+        return self.events_wait_current_enabled
 
     def resolve_db_host(self):
         return agent_host_resolver(self._config.host)
@@ -178,7 +201,7 @@ class MySql(AgentCheck):
                 if self._get_is_aurora(db):
                     tags = tags + self._get_runtime_aurora_tags(db)
 
-                self.check_performance_schema_enabled(db)
+                self._check_database_configuration(db)
 
                 # Metric collection
                 if not self._config.only_custom_queries:
@@ -910,9 +933,10 @@ class MySql(AgentCheck):
     def _are_values_numeric(cls, array):
         return all(v.isdigit() for v in array)
 
-    def _get_variable_enabled(self, results, var):
+    @staticmethod
+    def _get_variable_enabled(results, var):
         enabled = collect_string(var, results)
-        return enabled and enabled.lower().strip() == 'on'
+        return enabled and is_affirmative(enabled.lower().strip())
 
     def _get_query_exec_time_95th_us(self, db):
         # Fetches the 95th percentile query execution time and returns the value
