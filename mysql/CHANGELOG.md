@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 8.3.3 / 2022-06-08
+
+* [Fixed] Stop query activity collection due to misconfiguration. See [#12343](https://github.com/DataDog/integrations-core/pull/12343).
+
 ## 8.3.2 / 2022-06-08
 
 * [Fixed] Fix race conditions when running many instances of the Agent. See [#12342](https://github.com/DataDog/integrations-core/pull/12342).
