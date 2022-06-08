@@ -4,7 +4,7 @@ While idle, Vault will provide very few metrics. Specifically, many of
 the metrics plotted in the default dashboard will have no data unless
 some activity is generated.
 
-Assuming the vault is being started with something like:
+Assuming you are testing vault using the token auth ddev environment:
 
 ```bash
 ddev env start vault py38-1.9.0-token-auth
