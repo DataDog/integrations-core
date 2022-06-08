@@ -9,7 +9,7 @@ from datadog_checks.dev.testing import requires_py3
 from datadog_checks.exchange_server.metrics import METRICS_CONFIG
 
 
-def get_exchange_server_metrics()
+def get_exchange_server_metrics():
     exchange_server_metrics = list([])
     metric_namespace = 'exchange'
     for object_name, config in METRICS_CONFIG.items():
