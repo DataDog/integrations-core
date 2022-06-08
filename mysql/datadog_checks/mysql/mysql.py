@@ -939,7 +939,7 @@ class MySql(AgentCheck):
     @staticmethod
     def _get_variable_enabled(results, var):
         enabled = collect_string(var, results)
-        return enabled and (enabled.lower().strip() == 'on' or enabled.lower().strip() == 'yes')
+        return enabled and is_affirmative(enabled.lower().strip())
 
     def _get_query_exec_time_95th_us(self, db):
         # Fetches the 95th percentile query execution time and returns the value
