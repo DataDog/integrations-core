@@ -220,7 +220,7 @@ PERFORMANCE_OBJECTS = {}
 for object_name, instances in (
     ('MSExchange ADAccess Domain Controllers', ['win-k2olfvr52p5.croissant.datad0g.com']),
     ('MSExchange ADAccess Processes', EXCHANGE_PROCESSES),
-    # ('Processor', [None]),
+    ('Processor', [None]),
     # ('System', [None]),
     # ('Memory', [None]),
     ('Network Interface', ['AWS PV Network Device', 'isatap.{C7BAFAFE-DBF4-4C76-B406-8A25283E4CF9}']),

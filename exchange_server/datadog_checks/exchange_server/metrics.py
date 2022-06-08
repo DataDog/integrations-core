@@ -20,16 +20,16 @@ METRICS_CONFIG = {
             }
         ],
     },
-    # 'Processor': {
-    #     'name': 'processor',
-    #     'counters': [
-    #         {
-    #             '% Processor Time': {'name': 'cpu_time', 'aggregate': 'only'},
-    #             '% User Time': {'name': 'cpu_user', 'aggregate': 'only'},
-    #             '% Privileged Time': {'name': 'cpu_privileged', 'aggregate': 'only'},
-    #         }
-    #     ],
-    # },
+    'Processor': {
+        'name': 'processor',
+        'counters': [
+            {
+                '% Processor Time': {'name': 'cpu_time', 'aggregate': 'only'},
+                '% User Time': {'name': 'cpu_user', 'aggregate': 'only'},
+                '% Privileged Time': {'name': 'cpu_privileged', 'aggregate': 'only'},
+            }
+        ],
+    },
     # 'System': {
     #     'name': 'processor',
     #     'counters': [
