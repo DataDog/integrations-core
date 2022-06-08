@@ -279,8 +279,8 @@ OrgCurrencyUsage = {
         {'name': 'billing_account', 'type': 'tag'},
         {'name': 'organization_name', 'type': 'tag'},
         {'name': 'service_level', 'type': 'tag'},
-        {'name': 'contract.amount.avg', 'type': 'gauge'},
-        {'name': 'contract.amount.sum', 'type': 'gauge'},
+        {'name': 'organization.billing.currency.amount.avg', 'type': 'gauge'},
+        {'name': 'organization.billing.currency.amount.sum', 'type': 'gauge'},
     ],
 }
 

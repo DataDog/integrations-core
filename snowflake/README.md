@@ -31,7 +31,7 @@ datadog-agent integration install datadog-snowflake==2.0.1
 
 1. Create a Datadog specific role and user to monitor Snowflake. In Snowflake, run the following to create a custom role with access to the ACCOUNT_USAGE schema.
 
-    Note: By default, this integration monitors the `SNOWFLAKE` database and `ACCOUNT_USAGE` schema.
+    Note: By default, this integration monitors the `SNOWFLAKE` database and `ACCOUNT_USAGE` schema. See "Collecting Organization Data" for information on how to monitor the `ORGANIZATION_USAGE` schema
     This database is available by default and only viewable by users in the `ACCOUNTADMIN` role or [any role granted by the ACCOUNTADMIN][4].
     
 
@@ -116,6 +116,15 @@ datadog-agent integration install datadog-snowflake==2.0.1
     <bold>Note</bold>: Snowflake ACCOUNT_USAGE views have a <a href="https://docs.snowflake.com/en/sql-reference/account-usage.html#data-latency">known latency</a> of 45 minutes to 3 hours.</div>
 
 3. [Restart the Agent][6].
+
+#### Collecting Organization Data
+
+By default, this integration monitors the `ACCOUNT_USAGE` schema, but can also monitor the `ORGANIZATION_USAGE` schema to monitor organization-level metrics. 
+
+    ```yaml
+       - schema: ORGANIZATION_USAGE
+         min_collection_interval: 3600
+    ```
 
 #### Collecting data for multiple environments
 
