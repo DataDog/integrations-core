@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 8.3.2 / 2022-06-08
+
+* [Fixed] Fix race conditions when running many instances of the Agent. See [#12342](https://github.com/DataDog/integrations-core/pull/12342).
+
 ## 8.3.1 / 2022-05-27
 
 * [Fixed] Revert mysql.net.connections metric type. See [#12088](https://github.com/DataDog/integrations-core/pull/12088).
