@@ -1,5 +1,12 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 16.3.0 / 2022-06-02
+
+* [Added] Move v2 manifest field `classifier_tags` under `tile`. See [#12122](https://github.com/DataDog/integrations-core/pull/12122).
+* [Added] Upgrade Hatch to latest version. See [#12016](https://github.com/DataDog/integrations-core/pull/12016).
+* [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
+* [Fixed] Fix tooling for v2 manifests. See [#12040](https://github.com/DataDog/integrations-core/pull/12040).
+
 ## 16.2.1 / 2022-05-12
 
 * [Fixed] Fix `enabled` for parent options. See [#11707](https://github.com/DataDog/integrations-core/pull/11707).

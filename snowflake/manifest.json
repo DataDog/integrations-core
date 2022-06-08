@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Snowflake Integration",
+  "public_title": "Snowflake Integration",
   "categories": [
     "cloud",
     "data store",

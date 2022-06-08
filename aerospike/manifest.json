@@ -12,7 +12,7 @@
   "supported_os": [
     "linux"
   ],
-  "public_title": "Datadog-Aerospike Integration",
+  "public_title": "Aerospike Integration",
   "categories": [
     "data store",
     "autodiscovery",

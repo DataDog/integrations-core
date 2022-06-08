@@ -18,7 +18,10 @@ from datadog_checks.dev.tooling.utils import (
     has_process_signature,
     has_saved_views,
     has_recommended_monitor,
-    is_tile_only, is_logs_only, get_available_recommended_monitors_integrations,
+    is_tile_only,
+    is_logs_only,
+    get_available_recommended_monitors_integrations,
+    is_manifest_v2,
 )
 
 MARKER = '<docs-insert-status>'
@@ -33,6 +36,7 @@ def patch(lines):
     new_lines = lines[:marker_index]
 
     for renderer in (
+        render_manifest_v2_progress,
         render_dashboard_progress,
         render_logs_progress,
         render_recommended_monitors_progress,
@@ -315,6 +319,29 @@ def render_recommended_monitors_progress():
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
     lines[4] = f'??? check "Completed {checks_with_rm}/{total_checks}"'
+    return lines
+
+
+def render_manifest_v2_progress():
+    valid_checks = get_valid_integrations()
+    total_checks = len(valid_checks)
+    checks_v2_manifest = 0
+
+    lines = ['## Manifest V2', '', None, '', '??? check "Completed"']
+
+    for check in valid_checks:
+        if is_manifest_v2(check):
+            checks_v2_manifest += 1
+            status = 'X'
+        else:
+            status = ' '
+
+        lines.append(f'    - [{status}] {check}')
+
+    percent = checks_v2_manifest / total_checks * 100
+    formatted_percent = f'{percent:.2f}'
+    lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_v2_manifest}/{total_checks}"'
     return lines
 
 

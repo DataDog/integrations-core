@@ -49,6 +49,15 @@ NEW_1_14_HISTOGRAMS = {
     'scheduler_binding_duration_seconds': 'binding_duration',
 }
 
+NEW_1_23_HISTOGRAMS = {
+    # (from 1.23) Number of attempts to successfully schedule a pod.
+    'scheduler_pod_scheduling_attempts': 'scheduling.pod.scheduling_attempts',
+    # (from 1.23) E2e latency for a pod being scheduled which may include multiple scheduling attempts.
+    'scheduler_pod_scheduling_duration_seconds': 'scheduling.pod.scheduling_duration',
+    # (from 1.23) Scheduling attempt latency in seconds (scheduling algorithm + binding).
+    'scheduler_scheduling_attempt_duration_seconds': 'scheduling.attempt_duration',
+}
+
 TRANSFORM_VALUE_HISTOGRAMS = {
     # (deprecated 1.14)Binding latency
     'scheduler_binding_latency_microseconds': 'binding_duration',
@@ -125,6 +134,7 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
                         DEFAULT_GAUGES,
                         DEFAULT_GO_METRICS,
                         DEPRECARED_SUMMARIES,
+                        NEW_1_23_HISTOGRAMS,
                     ],
                     'ignore_metrics': IGNORE_METRICS,
                 }

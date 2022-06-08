@@ -29,8 +29,6 @@ from datadog_checks.dev.fs import read_file, write_file
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import ON_WINDOWS
 
-pytestmark = pytest.mark.http
-
 DEFAULT_OPTIONS = {
     'auth': None,
     'cert': None,

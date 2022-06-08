@@ -13,8 +13,6 @@ from six import PY3
 
 from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
 
-pytestmark = pytest.mark.metadata
-
 SET_CHECK_METADATA_METHOD = 'datadog_checks.base.stubs.datadog_agent.set_check_metadata'
 GET_CONFIG_METHOD = 'datadog_checks.base.stubs.datadog_agent.get_config'
 

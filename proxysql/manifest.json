@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-ProxySQL Integration",
+  "public_title": "ProxySQL Integration",
   "categories": [
     "data store",
     "log collection",

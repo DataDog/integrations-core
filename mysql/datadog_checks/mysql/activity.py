@@ -44,17 +44,23 @@ SELECT
     thread_a.processlist_db,
     thread_a.processlist_command,
     thread_a.processlist_state,
-    statement.sql_text,
+    COALESCE(
+        COALESCE(statement.sql_text, thread_a.PROCESSLIST_info), thread_a.processlist_state) 
+            AS sql_text,
     statement.timer_start AS event_timer_start,
     statement.timer_end AS event_timer_end,
     statement.lock_time,
     statement.current_schema,
-    COALESCE(
-        IF(thread_a.processlist_state = 'User sleep', 'User sleep',
-        IF(waits_a.event_id = waits_a.end_event_id, 'CPU', waits_a.event_name)), 'CPU') AS wait_event,
-    waits_a.event_id,
+    MAX(waits_a.event_id) AS event_id,
     waits_a.end_event_id,
-    waits_a.event_name,
+    IF(waits_a.thread_id IS NULL, 
+        thread_a.processlist_state,
+        COALESCE(
+            IF(thread_a.processlist_state = 'User sleep', 'User sleep',
+            IF(waits_a.event_id = waits_a.end_event_id, 'CPU', waits_a.event_name)), 'CPU'
+        )
+    ) AS event_name,
+    waits_a.operation,
     waits_a.timer_start AS wait_timer_start,
     waits_a.timer_end AS wait_timer_end,
     waits_a.object_schema,
@@ -67,25 +73,49 @@ SELECT
     socket.event_name AS socket_event_name
 FROM
     performance_schema.threads AS thread_a
-    -- events_waits_current can have multiple rows per thread, thus we use EVENT_ID to identify the row we want to use.
-    -- Additionally, we want the row with the highest EVENT_ID which reflects the most recent and current wait.
-    LEFT JOIN performance_schema.events_waits_current AS waits_a ON waits_a.thread_id = thread_a.thread_id AND
-    waits_a.event_id IN(
-        SELECT
-            MAX(waits_b.EVENT_ID)
-        FROM performance_schema.threads AS thread_b
-            LEFT JOIN performance_schema.events_waits_current AS waits_b ON waits_b.thread_id = thread_b.thread_id
-        WHERE
-            thread_b.processlist_state IS NOT NULL AND
-            thread_b.processlist_command != 'Sleep' AND
-            thread_b.processlist_id != connection_id()
-        GROUP BY thread_b.thread_id)
+    LEFT JOIN performance_schema.events_waits_current AS waits_a ON waits_a.thread_id = thread_a.thread_id
     LEFT JOIN performance_schema.events_statements_current AS statement ON statement.thread_id = thread_a.thread_id
     LEFT JOIN performance_schema.socket_instances AS socket ON socket.thread_id = thread_a.thread_id
 WHERE
-    thread_a.processlist_state IS NOT NULL AND
-    thread_a.processlist_command != 'Sleep' AND
-    thread_a.processlist_id != CONNECTION_ID()
+    thread_a.processlist_state IS NOT NULL 
+    AND thread_a.processlist_command != 'Sleep' 
+    AND thread_a.processlist_id != CONNECTION_ID() 
+    AND thread_a.PROCESSLIST_COMMAND != 'Daemon'
+    AND (waits_a.EVENT_NAME != 'idle' OR waits_a.EVENT_NAME IS NULL) 
+    AND (waits_a.operation != 'idle' OR waits_a.operation IS NULL)
+GROUP BY
+    thread_a.thread_id,
+    thread_a.processlist_id,
+    thread_a.processlist_user,
+    thread_a.processlist_host,
+    thread_a.processlist_db,
+    thread_a.processlist_command,
+    thread_a.processlist_state,
+    COALESCE(
+        COALESCE(statement.sql_text, thread_a.PROCESSLIST_info), thread_a.processlist_state),
+    statement.timer_start,
+    statement.timer_end,
+    statement.lock_time,
+    statement.current_schema,
+    waits_a.end_event_id,
+    If(waits_a.thread_id IS NULL, 
+        thread_a.processlist_state, 
+        COALESCE(
+            IF(thread_a.processlist_state = 'User sleep', 'User sleep', 
+            IF(waits_a.event_id = waits_a.end_event_id, 'CPU', waits_a.event_name)), 'CPU'
+        )
+    ),
+    waits_a.operation,
+    waits_a.timer_start,
+    waits_a.timer_end,
+    waits_a.object_schema,
+    waits_a.object_name,
+    waits_a.index_name,
+    waits_a.object_type,
+    waits_a.source,
+    socket.ip,
+    socket.port,
+    socket.event_name;
 """
 
 

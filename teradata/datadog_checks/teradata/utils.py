@@ -8,9 +8,9 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.teradata.config_models.instance import Table
 
 
-def filter_tables(self, row):
+def filter_tables(tables_filter, row):
     # type: (Any, Sequence) -> Sequence
-    tables_to_collect, tables_to_exclude = self._tables_filter
+    tables_to_collect, tables_to_exclude = tables_filter
     table_name = row[3]
     # No tables filter
     if not tables_to_collect and not tables_to_exclude:
@@ -25,13 +25,11 @@ def filter_tables(self, row):
     return []
 
 
-def create_tables_filter(self):
+def create_tables_filter(tables):
     # type: (Any) -> Tuple[Set, Set]
 
     tables_to_collect = set()
     tables_to_exclude = set()
-
-    tables = self.config.tables
 
     if isinstance(tables, tuple):
         tables_to_collect = set(tables)
@@ -54,14 +52,14 @@ def create_tables_filter(self):
         return (tables_to_collect, tables_to_exclude)
 
 
-def timestamp_validator(self, row):
+def timestamp_validator(check, row):
     # type: (Any, Sequence) -> Sequence
     now = time.time()
     row_ts = row[0]
     if type(row_ts) is not int:
         msg = 'Returned timestamp `{}` is invalid.'.format(row_ts)
-        self.log.warning(msg)
-        self._query_errors += 1
+        check.log.warning(msg)
+        check._query_errors += 1
         return []
     diff = now - row_ts
     # Valid metrics should be no more than 10 min in the future or 1h in the past
@@ -71,13 +69,13 @@ def timestamp_validator(self, row):
             msg = msg.format('Row timestamp is more than 1h in the past. Is `SPMA` Resource Usage Logging enabled?')
         elif diff < -600:
             msg = msg.format('Row timestamp is more than 10 min in the future. Try checking system time settings.')
-        self.log.warning(msg)
-        self._query_errors += 1
+        check.log.warning(msg)
+        check._query_errors += 1
         return []
     return row
 
 
-def tags_normalizer(self, row, query_name):
+def tags_normalizer(row, query_name):
     # type: (Any, Sequence, AnyStr) -> Sequence
     base_tags = [{"name": "td_amp", "col": row[0]}, {"name": "td_account", "col": row[1]}]
     tags_map = [

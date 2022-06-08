@@ -156,3 +156,61 @@ QUERY_FAILOVER_CLUSTER_INSTANCE = {
         {'name': 'failover_cluster', 'type': 'tag'},
     ],
 }
+
+
+def get_query_file_stats(sqlserver_major_version):
+    """
+    Construct the dm_io_virtual_file_stats QueryExecutor configuration based on the SQL Server major version
+
+    :param sqlserver_major_version: SQL Server major version (i.e. 2012, 2019, ...)
+    :return: a QueryExecutor query config object
+    """
+
+    column_definitions = {
+        'size_on_disk_bytes': {'name': 'files.size_on_disk', 'type': 'gauge'},
+        'num_of_reads': {'name': 'files.reads', 'type': 'monotonic_count'},
+        'num_of_bytes_read': {'name': 'files.read_bytes', 'type': 'monotonic_count'},
+        'io_stall_read_ms': {'name': 'files.read_io_stall', 'type': 'monotonic_count'},
+        'io_stall_queued_read_ms': {'name': 'files.read_io_stall_queued', 'type': 'monotonic_count'},
+        'num_of_writes': {'name': 'files.writes', 'type': 'monotonic_count'},
+        'num_of_bytes_written': {'name': 'files.written_bytes', 'type': 'monotonic_count'},
+        'io_stall_write_ms': {'name': 'files.write_io_stall', 'type': 'monotonic_count'},
+        'io_stall_queued_write_ms': {'name': 'files.write_io_stall_queued', 'type': 'monotonic_count'},
+        'io_stall': {'name': 'files.io_stall', 'type': 'monotonic_count'},
+    }
+
+    if sqlserver_major_version <= 2012:
+        column_definitions.pop("io_stall_queued_read_ms")
+        column_definitions.pop("io_stall_queued_write_ms")
+
+    # sort columns to ensure a static column order
+    sql_columns = []
+    metric_columns = []
+    for column in sorted(column_definitions.keys()):
+        sql_columns.append("fs.{}".format(column))
+        metric_columns.append(column_definitions[column])
+
+    return {
+        'name': 'sys.dm_io_virtual_file_stats',
+        'query': """
+        SELECT
+            DB_NAME(fs.database_id),
+            mf.state_desc,
+            mf.name,
+            mf.physical_name,
+            {sql_columns}
+        FROM sys.dm_io_virtual_file_stats(NULL, NULL) fs
+            LEFT JOIN sys.master_files mf
+                ON mf.database_id = fs.database_id
+                AND mf.file_id = fs.file_id;
+    """.strip().format(
+            sql_columns=", ".join(sql_columns)
+        ),
+        'columns': [
+            {'name': 'db', 'type': 'tag'},
+            {'name': 'state', 'type': 'tag'},
+            {'name': 'logical_name', 'type': 'tag'},
+            {'name': 'file_location', 'type': 'tag'},
+        ]
+        + metric_columns,
+    }

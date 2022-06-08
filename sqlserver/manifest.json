@@ -12,7 +12,7 @@
   "metric_prefix": "sqlserver.",
   "metric_to_check": "sqlserver.stats.connections",
   "name": "sqlserver",
-  "public_title": "Datadog-SQL Server Integration",
+  "public_title": "SQL Server Integration",
   "short_description": "Collect important SQL Server performance and health metrics.",
   "support": "core",
   "supported_os": [

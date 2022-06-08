@@ -657,6 +657,23 @@ def has_recommended_monitor(check):
     return _has_asset_in_manifest(check, 'monitors')
 
 
+def is_manifest_v2(check):
+    """
+    Check if a manifest is version 2
+    Return True if the manifest exists AND its version is "2.0.0", False otherwise
+    """
+    manifest_file = get_manifest_file(check)
+    if not file_exists(manifest_file):
+        return False
+    try:
+        with open(manifest_file) as f:
+            manifest = json.loads(f.read())
+    except JSONDecodeError as e:
+        raise Exception("Cannot decode {}: {}".format(manifest_file, e))
+
+    return manifest.get("manifest_version") == "2.0.0"
+
+
 def _has_asset_in_manifest(check, asset):
     manifest_file = get_manifest_file(check)
     if not file_exists(manifest_file):

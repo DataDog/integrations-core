@@ -84,7 +84,7 @@ db.createUser({
 ```
 
 ##### Configure the agents
-You need to configure one agent for each member. See below for configuration options.
+You need to configure one check instance for each member. See below for configuration options.
 **Note**: Monitoring of arbiter nodes is not supported remotely as mentioned in [MongoDB documentation][3]. Yet, any status change of an arbiter node is reported by the Agent connected to the primary.
 
 <!-- xxz tab xxx -->

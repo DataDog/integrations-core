@@ -12,7 +12,7 @@
   "metric_prefix": "cacti.",
   "metric_to_check": "cacti.rrd.count",
   "name": "cacti",
-  "public_title": "Datadog-Cacti Integration",
+  "public_title": "Cacti Integration",
   "short_description": "Forward your Cacti RRDs to Datadog for richer alerting and beautiful graphing.",
   "support": "core",
   "supported_os": [

@@ -13,7 +13,7 @@
   "metric_prefix": "linkerd.",
   "metric_to_check": "linkerd.prometheus.health",
   "name": "linkerd",
-  "public_title": "Datadog-Linkerd Integration",
+  "public_title": "Linkerd Integration",
   "short_description": "Monitor your services health with metrics from linkerd.",
   "support": "core",
   "supported_os": [
