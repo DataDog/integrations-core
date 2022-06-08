@@ -9,12 +9,12 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Track cluster resource usage, master and slave counts, tasks statuses, and more.",
-    "title": "Mesos Master Integration",
+    "title": "Mesos Master",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::macOS",
-      "Category::Configuration Deployment",
+      "Category::Configuration & Deployment",
       "Category::Containers",
       "Category::Orchestration",
       "Category::Log Collection"
@@ -43,7 +43,11 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "mesos-master.sh",
+        "mesos-agent.sh"
+      ]
     },
     "saved_views": {
       "mesos-master_processes": "assets/saved_views/mesos-master_processes.json"
