@@ -15,7 +15,7 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Configuration Deployment",
+      "Category::Configuration & Deployment",
       "Category::Autodiscovery",
       "Category::Log Collection"
     ]
@@ -35,10 +35,6 @@
       },
       "events": {
         "creates_events": true
-      },
-      "metrics": {
-        "prefix": "teamcity.",
-        "metadata_path": "metadata.csv"
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
