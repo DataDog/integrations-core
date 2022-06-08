@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Alert on Consul health checks, see service-to-node mappings, and much more.",
-    "title": "Consul Integration",
+    "title": "Consul",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
@@ -17,7 +17,7 @@
       "Supported OS::Windows",
       "Category::Containers",
       "Category::Orchestration",
-      "Category::Configuration Deployment",
+      "Category::Configuration & Deployment",
       "Category::Notification",
       "Category::Log Collection",
       "Category::Autodiscovery"
@@ -46,7 +46,12 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "consul agent",
+        "consul_agent",
+        "consul-agent"
+      ]
     },
     "dashboards": {
       "consul": "assets/dashboards/consul_dashboard.json"
