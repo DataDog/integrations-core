@@ -34,7 +34,7 @@
     },
     "service_checks": "assets/service_checks.json",
     "logs": {
-      "source": "ibm-was"
+      "source": "ibm_was"
     },
     "metrics_metadata": "metadata.csv"
   }

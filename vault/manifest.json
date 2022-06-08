@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Vault is a secrets management service application",
-    "title": "Vault Integration",
+    "title": "Vault",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
