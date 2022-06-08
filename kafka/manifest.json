@@ -8,8 +8,8 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Collect metrics for producers/consumers, replication, lag, and more.",
-    "title": "Kafka Integration",
+    "description": "Collect metrics for producers and consumers, replication, max lag, and more.",
+    "title": "Kafka",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
@@ -44,7 +44,10 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "java kafka.kafka"
+      ]
     },
     "dashboards": {
       "kafka": "assets/dashboards/kafka_dashboard.json"
