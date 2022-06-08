@@ -16,7 +16,7 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Security",
-      "Category::Configuration Deployment",
+      "Category::Configuration & Deployment",
       "Category::Log Collection",
       "Category::Autodiscovery"
     ]
