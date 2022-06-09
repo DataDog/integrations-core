@@ -20,8 +20,8 @@ class Config(object):
     ]
 
     DEFAULT_ORG_METRIC_GROUPS = [
-        'snowflake.organization.billing.warehouse',
-        'snowflake.organization.billing.currency.',
+        'snowflake.organization.warehouse',
+        'snowflake.organization.currency',
         'snowflake.organization.storage',
     ]
 
