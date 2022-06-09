@@ -45,7 +45,7 @@ QUERY_HISTORY = [
         Decimal('0.000000'),
     )
 ]
-USAGE_IN_CURRENCY_DAILY = [('test', 'ORGANIZATION', 'Standard', Decimal('0.4'), Decimal('0.7'))]
+USAGE_IN_CURRENCY_DAILY = [('test', 'Standard', 'Compute', Decimal('0.4'), Decimal('0.7'))]
 WAREHOUSE_METERING_HISTORY = [
     (
         'test',

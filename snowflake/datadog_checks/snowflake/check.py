@@ -71,10 +71,11 @@ class SnowflakeCheck(AgentCheck):
                 'Snowflake `role` is set as `ACCOUNTADMIN` which should be used cautiously, '
                 'refer to docs about custom roles.'
             )
-        if self._config.account == 'ORGANIZATION_USAGE':
-            metric_groups = ORGANIZATION_USAGE_METRIC_GROUPS
-        else:
-            metric_groups = ACCOUNT_USAGE_METRIC_GROUPS
+        metric_groups = (
+            ORGANIZATION_USAGE_METRIC_GROUPS
+            if (self._config.schema == 'ORGANIZATION_USAGE')
+            else ACCOUNT_USAGE_METRIC_GROUPS
+        )
         self.metric_queries = []
         self.errors = []
         for mgroup in self._config.metric_groups:

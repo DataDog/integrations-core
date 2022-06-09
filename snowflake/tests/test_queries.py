@@ -158,12 +158,12 @@ def test_currency_usage(dd_run_check, aggregator, instance):
     # type: (Callable[[SnowflakeCheck], None], AggregatorStub, Dict[str, Any]) -> None
 
     expected_currency_metrics = [
-        ('test', 'ORGANIZATION', 'Standard', Decimal('0.4'), Decimal('0.7')),
+        ('test', 'Standard', 'Compute', Decimal('0.4'), Decimal('0.7')),
     ]
     expected_tags = EXPECTED_TAGS + [
         'billing_account:test',
-        'organization_name:ORGANIZATION',
         'service_level:Standard',
+        'usage_type:Compute',
     ]
     with mock.patch(
         'datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_currency_metrics
@@ -172,8 +172,10 @@ def test_currency_usage(dd_run_check, aggregator, instance):
         check._conn = mock.MagicMock()
         check._query_manager.queries = [Query(queries.OrgCurrencyUsage)]
         dd_run_check(check)
-    aggregator.assert_metric('snowflake.organization.currency.amount.avg', value=0.4, tags=expected_tags)
-    aggregator.assert_metric('snowflake.organization.currency.amount.sum', value=0.7, count=1, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.currency.usage', value=0.4, tags=expected_tags)
+    aggregator.assert_metric(
+        'snowflake.organization.currency.usage_in_currency', value=0.7, count=1, tags=expected_tags
+    )
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
 

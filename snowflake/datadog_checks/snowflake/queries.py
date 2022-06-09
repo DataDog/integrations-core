@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# https://docs.snowflak e.com/en/sql-reference/account-usage/storage_usage.html
+# https://docs.snowflake.com/en/sql-reference/account-usage/storage_usage.html
 StorageUsageMetrics = {
     'name': 'storage.metrics',
     'query': ('SELECT STORAGE_BYTES, STAGE_BYTES, FAILSAFE_BYTES from STORAGE_USAGE ORDER BY USAGE_DATE DESC LIMIT 1;'),
@@ -230,7 +230,7 @@ OrgContractItems = {
     'query': (
         'select CONTRACT_NUMBER, CONTRACT_ITEM, '
         'sum(AMOUNT), avg(AMOUNT) from CONTRACT_ITEMS '
-        'where start_date >= DATEADD(hour, -24, current_timestamp()) group by 1, 2;'
+        'where START_DATE >= DATEADD(hour, -48, current_timestamp()) group by 1, 2;'
     ),
     'columns': [
         {'name': 'contract_number', 'type': 'tag'},
@@ -247,9 +247,9 @@ OrgCreditUsage = {
         'select ACCOUNT_NAME, SERVICE_TYPE, '
         'sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), '
         'sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), '
-        'sum(abs(CREDITS_ADJUSTMENT_CLOUD_SERVICES)), avg(abs(CREDITS_ADJUSTMENT_CLOUD_SERVICES))'
+        'sum(abs(CREDITS_ADJUSTMENT_CLOUD_SERVICES)), avg(abs(CREDITS_ADJUSTMENT_CLOUD_SERVICES)), '
         'sum(CREDITS_USED), avg(CREDITS_USED), sum(CREDITS_BILLED), avg(CREDITS_BILLED) from METERING_DAILY_HISTORY '
-        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1, 2;'
+        'where USAGE_DATE  >= DATEADD(hour, -48, current_timestamp()) group by 1, 2;'
     ),
     'columns': [
         {'name': 'billing_account', 'type': 'tag'},
@@ -271,16 +271,16 @@ OrgCreditUsage = {
 OrgCurrencyUsage = {
     'name': 'organization.currency.metrics',
     'query': (
-        'select ACCOUNT_NAME, ORGANIZATION_NAME, SERVICE_LEVEL'
-        'sum(amount), avg(amount) from USAGE_IN_CURRENCY_DAILY '
-        'where start_date >= DATEADD(hour, -24, current_timestamp()) group by 1, 2, 3;'
+        'select ACCOUNT_NAME, SERVICE_LEVEL, USAGE_TYPE, '
+        'sum(abs(USAGE)), sum(abs(USAGE_IN_CURRENCY)) from USAGE_IN_CURRENCY_DAILY '
+        'where USAGE_DATE >= DATEADD(hour, -48, current_timestamp()) group by 1, 2, 3;'
     ),
     'columns': [
         {'name': 'billing_account', 'type': 'tag'},
-        {'name': 'organization_name', 'type': 'tag'},
         {'name': 'service_level', 'type': 'tag'},
-        {'name': 'organization.currency.amount.avg', 'type': 'gauge'},
-        {'name': 'organization.currency.amount.sum', 'type': 'gauge'},
+        {'name': 'usage_type', 'type': 'tag'},
+        {'name': 'organization.currency.usage', 'type': 'gauge'},
+        {'name': 'organization.currency.usage_in_currency', 'type': 'gauge'},
     ],
 }
 
@@ -292,7 +292,7 @@ OrgWarehouseCreditUsage = {
         'select WAREHOUSE_NAME, ACCOUNT_NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), '
         'sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), '
         'sum(CREDITS_USED), avg(CREDITS_USED) from WAREHOUSE_METERING_HISTORY '
-        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1, 2;'
+        'where start_time >= DATEADD(hour, -48, current_timestamp()) group by 1, 2;'
     ),
     'columns': [
         {'name': 'warehouse', 'type': 'tag'},
@@ -310,8 +310,8 @@ OrgWarehouseCreditUsage = {
 OrgStorageDaily = {
     'name': 'organization.storage.metrics',
     'query': (
-        'select ACCOUNT_NAME, AVERAGE_BYTES, sum(CREDITS) from STORAGE_DAILY_HISTORY '
-        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1;'
+        'select ACCOUNT_NAME, avg(AVERAGE_BYTES), sum(CREDITS) from STORAGE_DAILY_HISTORY '
+        'where USAGE_DATE >= DATEADD(hour, -48, current_timestamp()) group by 1;'
     ),
     'columns': [
         {'name': 'billing_account', 'type': 'tag'},
@@ -325,9 +325,9 @@ OrgStorageDaily = {
 OrgBalance = {
     'name': 'organization.balance.metrics',
     'query': (
-        'select CONTRACT_NUMBER, FREE_USAGE_BALANCE, CAPACITY_BALANCE, '
-        'ON_DEMAND_CONSUMPTION_BALANCE, ROLLOVER_BALANCE from REMAINING_BALANCE_DAILY '
-        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1;'
+        'select CONTRACT_NUMBER, sum(FREE_USAGE_BALANCE), sum(CAPACITY_BALANCE), '
+        'sum(ON_DEMAND_CONSUMPTION_BALANCE), sum(ROLLOVER_BALANCE) from REMAINING_BALANCE_DAILY '
+        'where DATE >= DATEADD(hour, -48, current_timestamp()) group by 1;'
     ),
     'columns': [
         {'name': 'contract_number', 'type': 'tag'},
@@ -342,9 +342,9 @@ OrgBalance = {
 OrgRateSheet = {
     'name': 'organization.rate.metrics',
     'query': (
-        'select CONTRACT_NUMBER, ACCOUNT_NAME, USAGE_TYPE, SERVICE_TYPE '
+        'select CONTRACT_NUMBER, ACCOUNT_NAME, USAGE_TYPE, SERVICE_TYPE, '
         'avg(EFFECTIVE_RATE) from RATE_SHEET_DAILY '
-        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1, 2, 3, 4;'
+        'where DATE >= DATEADD(hour, -48, current_timestamp()) group by 1, 2, 3, 4;'
     ),
     'columns': [
         {'name': 'contract_number', 'type': 'tag'},
@@ -360,7 +360,7 @@ OrgDataTransfer = {
     'name': 'organization.data_transfer.metrics',
     'query': (
         'select ACCOUNT_NAME, sum(TB_TRANSFERED) from DATA_TRANSFER_DAILY_HISTORY '
-        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1;'
+        'where USAGE_DATE >= DATEADD(hour, -48, current_timestamp()) group by 1;'
     ),
     'columns': [
         {'name': 'billing_account', 'type': 'tag'},
