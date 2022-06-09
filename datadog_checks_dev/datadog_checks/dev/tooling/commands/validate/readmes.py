@@ -119,7 +119,7 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
     for img_src in img_srcs:
         image_name = os.path.split(img_src)[-1]
         file_path = os.path.join(get_root(), integration, "images", image_name)
-        if img_src.startswith("https://raw.githubusercontent") or (img_src.startswith("images/") and allow_relative):
+        if img_src.startswith("https://raw.githubusercontent.com/DataDog") or (img_src.startswith("images/") and allow_relative):
             if not os.path.exists(file_path):
                 files_failed[readme_path] = True
                 display_queue.append(
