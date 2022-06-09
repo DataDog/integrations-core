@@ -5,9 +5,9 @@ mysql.info.table.rows.update,count,,row,,"Total number of rows changed per table
 mysql.info.table.index_size,gauge,,mebibyte,,"Size of tables index in MiB",0,mysql,mysql index table size,
 mysql.info.table.data_size,gauge,,mebibyte,,"Size of tables data in MiB",0,mysql,mysql data table size,memory
 mysql.galera.wsrep_cluster_size,gauge,,node,,The current number of nodes in the Galera cluster.,0,mysql,galera cluster size,
-mysql.innodb.buffer_pool_free,gauge,,page,,The number of free pages in the InnoDB Buffer Pool.,1,mysql,innodb buf pool free,
-mysql.innodb.buffer_pool_total,gauge,,page,,The total number of pages in the InnoDB Buffer Pool.,0,mysql,innodb buf pool total,
-mysql.innodb.buffer_pool_used,gauge,,page,,The number of used pages in the InnoDB Buffer Pool.,-1,mysql,innodb buf pool used,memory
+mysql.innodb.buffer_pool_free,gauge,,byte,,The number of free bytes in the InnoDB Buffer Pool.,1,mysql,innodb buf pool free,
+mysql.innodb.buffer_pool_total,gauge,,byte,,The total number of bytes in the InnoDB Buffer Pool.,0,mysql,innodb buf pool total,
+mysql.innodb.buffer_pool_used,gauge,,byte,,The number of used bytes in the InnoDB Buffer Pool.,-1,mysql,innodb buf pool used,memory
 mysql.innodb.buffer_pool_utilization,gauge,,fraction,,The utilization of the InnoDB Buffer Pool.,-1,mysql,innodb buf pool usage,memory
 mysql.innodb.current_row_locks,gauge,,lock,,The number of current row locks.,-1,mysql,current row locks,
 mysql.innodb.data_reads,gauge,,read,second,The rate of data reads.,0,mysql,data reads,

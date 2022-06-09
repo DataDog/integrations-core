@@ -107,6 +107,7 @@ class MySql(AgentCheck):
         self.check_initializations.append(self._config.configuration_checks)
         self.performance_schema_enabled = None
         self.userstat_enabled = None
+        self.events_wait_current_enabled = None
         self._warnings_by_code = {}
         self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
@@ -163,6 +164,24 @@ class MySql(AgentCheck):
 
         return self.userstat_enabled
 
+    def _check_events_wait_current_enabled(self, db):
+        if not self._check_performance_schema_enabled(db):
+            self.log.debug('`performance_schema` is required to enable `events_waits_current`')
+            return
+        if self.events_wait_current_enabled is None:
+            with closing(db.cursor()) as cursor:
+                cursor.execute(
+                    """\
+                    SELECT
+                        NAME,
+                        ENABLED
+                    FROM performance_schema.setup_consumers WHERE NAME = 'events_waits_current'
+                    """
+                )
+                results = dict(cursor.fetchall())
+                self.events_wait_current_enabled = self._get_variable_enabled(results, 'events_waits_current')
+        return self.events_wait_current_enabled
+
     def resolve_db_host(self):
         return agent_host_resolver(self._config.host)
 
@@ -194,7 +213,7 @@ class MySql(AgentCheck):
                 if self._get_is_aurora(db):
                     tags = tags + self._get_runtime_aurora_tags(db)
 
-                self.check_performance_schema_enabled(db)
+                self._check_database_configuration(db)
 
                 if self._config.table_rows_stats_enabled:
                     self.check_userstat_enabled(db)
@@ -396,10 +415,10 @@ class MySql(AgentCheck):
 
         if is_affirmative(self._config.options.get('system_table_size_metrics', False)):
             # report size of tables in MiB to Datadog
-            (rows_read_total, rows_changed_total) = self._query_rows_stats_per_table(db)
-            results['information_table_rows_read_total'] = rows_read_total
-            results['information_table_rows_changed_total'] = rows_changed_total
-            metrics.update(TABLE_ROWS_VARS)
+            (table_index_size, table_data_size) = self._query_size_per_table(db, system_tables=True)
+            results['information_table_index_size'] = table_index_size
+            results['information_table_data_size'] = table_data_size
+            metrics.update(TABLE_VARS)
 
         if is_affirmative(self._config.options.get('replication', self._config.dbm_enabled)):
             if self.performance_schema_enabled and self._is_group_replication_active(db):

@@ -251,9 +251,9 @@ PERFORMANCE_VARS = {
 
 SCHEMA_VARS = {'information_schema_size': ('mysql.info.schema.size', GAUGE)}
 
-TABLE_ROWS_VARS = {
-    'information_table_rows_read_total': ('mysql.info.table.rows.read', MONOTONIC),
-    'information_table_rows_changed_total': ('mysql.info.table.rows.changed', MONOTONIC),
+TABLE_VARS = {
+    'information_table_index_size': ('mysql.info.table.index_size', GAUGE),
+    'information_table_data_size': ('mysql.info.table.data_size', GAUGE),
 }
 
 TABLE_ROWS_STATS_VARS = {
