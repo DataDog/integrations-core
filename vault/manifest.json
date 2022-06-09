@@ -32,7 +32,7 @@
       "[Vault] S3 time to access secrets is high": "assets/monitors/vault_S3_time_high.json"
     },
     "dashboards": {
-      "Vault - Overview": "assets/dashboards/vault_overview_(legacy).json",
+      "Vault - Overview": "assets/dashboards/vault_overview_legacy.json",
       "Vault - Overview (OpenMetricsV2)": "assets/dashboards/vault_overview.json"
     },
     "saved_views": {
