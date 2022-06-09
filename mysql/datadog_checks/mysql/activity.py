@@ -59,7 +59,7 @@ SELECT
             IF(thread_a.processlist_state = 'User sleep', 'User sleep',
             IF(waits_a.event_id = waits_a.end_event_id, 'CPU', waits_a.event_name)), 'CPU'
         )
-    ) AS event_name,
+    ) AS wait_event,
     waits_a.operation,
     waits_a.timer_start AS wait_timer_start,
     waits_a.timer_end AS wait_timer_end,
