@@ -9,14 +9,14 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "IBM Websphere Application Server is a framework that hosts Java applications",
-    "title": "IBM WAS Integration",
+    "title": "IBM WAS",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Web",
-      "Category::OS System",
+      "Category::OS & System",
       "Category::Log Collection",
       "Category::Autodiscovery"
     ]
@@ -50,7 +50,7 @@
       "IBM_WAS": "assets/dashboards/overview.json"
     },
     "logs": {
-      "source": "ibm-was"
+      "source": "ibm_was"
     }
   }
 }
