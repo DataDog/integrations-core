@@ -256,6 +256,11 @@ TABLE_VARS = {
     'information_table_data_size': ('mysql.info.table.data_size', GAUGE),
 }
 
+TABLE_ROWS_STATS_VARS = {
+    'information_table_rows_read_total': ('mysql.info.table.rows.read', MONOTONIC),
+    'information_table_rows_changed_total': ('mysql.info.table.rows.changed', MONOTONIC),
+}
+
 # Vars found in "show slave status" or "show replication status" (depending on mysql version)
 REPLICA_VARS = {
     'Seconds_Behind_Source': [  # for 8 onwards
