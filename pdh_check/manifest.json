@@ -9,11 +9,11 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Collect and graph any Windows Performance Counters.",
-    "title": "PDH Check Integration",
+    "title": "PDH Check",
     "media": [],
     "classifier_tags": [
       "Supported OS::Windows",
-      "Category::OS System"
+      "Category::OS & System"
     ]
   },
   "author": {
