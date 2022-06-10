@@ -1,4 +1,4 @@
-name: cert_manager
+name: cert-manager
 files:
 - name: cert_manager.yaml
   options:
