@@ -41,7 +41,7 @@ files:
         example: false
         type: boolean
     - name: collect_folder_stats
-      description: When true it will also collect stats for for the folders.
+      description: When true it will also collect stats for for the folders (max 20 folders).
       value:
         example: false
         type: boolean

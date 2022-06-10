@@ -74,6 +74,7 @@ class DirectoryCheck(AgentCheck):
         directory_files = 0
         directory_folders = 0
         max_filegauge_balance = self._config.max_filegauge_count
+        max_foldergauge_balance = self._config.max_filegauge_count
         submit_histograms = self._config.submit_histograms
 
         # If we do not want to recursively search sub-directories only get the root.
@@ -152,6 +153,9 @@ class DirectoryCheck(AgentCheck):
 
             if self._config.collect_folder_stats:
                 for folder_entry in dirs:
+                    if max_foldergauge_balance == 0:
+                        continue
+                    max_foldergauge_balance -= 1
                     folder_tags = ['{}:{}'.format(self._config.filetagname, join(root, folder_entry.name))]
                     folder_tags.extend(dirtags)
                     folder_stat = folder_entry.stat(
