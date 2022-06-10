@@ -40,6 +40,7 @@
       },
       "metrics": {
         "prefix": "snmp.",
+        "check": "snmp.devices_monitored",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
