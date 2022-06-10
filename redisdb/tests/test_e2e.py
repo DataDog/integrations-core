@@ -92,8 +92,6 @@ def test_e2e(dd_agent_check, master_instance):
     if redis_version == 'latest' or int(redis_version) > 6:
         aggregator.assert_metric('redis.cpu.sys_main_thread', count=1, tags=tags)
         aggregator.assert_metric('redis.cpu.user_main_thread', count=1, tags=tags)
-        aggregator.assert_metric('redis.clients.recent_max_input_buffer', count=2, tags=tags)
-        aggregator.assert_metric('redis.clients.recent_max_output_buffer', count=2, tags=tags)
 
     assert_optional_slowlog_metrics(aggregator)
     aggregator.assert_all_metrics_covered()

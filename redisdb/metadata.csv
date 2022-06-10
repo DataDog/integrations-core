@@ -37,7 +37,7 @@ redis.mem.peak,gauge,,byte,,The peak amount of memory used by Redis.,-1,redis,me
 redis.mem.rss,gauge,,byte,,Amount of memory that Redis allocated as seen by the os.,-1,redis,mem rss,
 redis.mem.used,gauge,,byte,,Amount of memory allocated by Redis.,-1,redis,mem used,memory
 redis.mem.startup,gauge,,byte,,Amount of memory consumed by Redis at startup.,-1,redis,mem startup,
-redis.mem.overhead,gauge,,byte,,Sum of all overheads allocated by Redis for managing its internal datastructures.,-1,redis,mem overhead,
+redis.mem.overhead,gauge,,byte,,Sum of all overheads allocated by Redis for managing its internal datastructures [v>=4].,-1,redis,mem overhead,
 redis.net.clients,gauge,,connection,,The number of connected clients (excluding slaves).,0,redis,clients,cpu
 redis.net.commands,gauge,,command,,The number of commands processed by the server.,0,redis,net commands,
 redis.net.commands.instantaneous_ops_per_sec,gauge,,command,second,The number of commands processed by the server per second.,0,redis,net commands,cpu
