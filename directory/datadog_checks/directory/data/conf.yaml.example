@@ -43,7 +43,7 @@ instances:
     # filegauges: false
 
     ## @param collect_folder_stats - boolean - optional - default: false
-    ## When true it will also collect stats for for the folders.
+    ## When true it will also collect stats for for the folders (max 20 folders).
     #
     # collect_folder_stats: false
 
