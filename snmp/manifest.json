@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Collect SNMP metrics from your network devices.",
-    "title": "SNMP Integration",
+    "title": "SNMP",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
