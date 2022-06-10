@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Collect SNMP metrics from your Cisco network devices.",
-    "title": "Cisco Integration",
+    "title": "Cisco",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
