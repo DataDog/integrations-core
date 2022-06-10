@@ -67,28 +67,6 @@ def assert_common_metrics(aggregator):
 
     aggregator.assert_metric('redis.replication.delay', count=2)
 
-
-@pytest.mark.skipif(os.environ.get('REDIS_VERSION') != '3.2', reason='Test for redisdb v3.2')
-def test_e2e_v_3_2(dd_agent_check, master_instance):
-    aggregator = dd_agent_check(master_instance, rate=True)
-
-    assert_common_metrics(aggregator)
-
-    tags = ['redis_host:{}'.format(common.HOST), 'redis_port:6382', 'redis_role:master']
-    aggregator.assert_metric('redis.clients.biggest_input_buf', count=2, tags=tags)
-    aggregator.assert_metric('redis.clients.longest_output_list', count=2, tags=tags)
-
-    assert_optional_slowlog_metrics(aggregator)
-    assert_all(aggregator)
-
-
-@pytest.mark.skipif(os.environ.get('REDIS_VERSION') != '4.0', reason='Test for redisdb v4.0')
-def test_e2e_v_4_0(dd_agent_check, master_instance):
-    aggregator = dd_agent_check(master_instance, rate=True)
-
-    assert_common_metrics(aggregator)
-
-    tags = ['redis_host:{}'.format(common.HOST), 'redis_port:6382', 'redis_role:master']
     aggregator.assert_metric('redis.clients.biggest_input_buf', count=2, tags=tags)
     aggregator.assert_metric('redis.mem.overhead', count=2, tags=tags)
     aggregator.assert_metric('redis.clients.longest_output_list', count=2, tags=tags)
@@ -98,9 +76,6 @@ def test_e2e_v_4_0(dd_agent_check, master_instance):
     aggregator.assert_metric('redis.active_defrag.misses', count=2, tags=tags)
     aggregator.assert_metric('redis.active_defrag.key_hits', count=2, tags=tags)
     aggregator.assert_metric('redis.active_defrag.key_misses', count=2, tags=tags)
-
-    assert_optional_slowlog_metrics(aggregator)
-    assert_all(aggregator)
 
 
 @pytest.mark.skipif(os.environ.get('REDIS_VERSION') != 'latest', reason='Test for the latest redisdb version')
@@ -110,13 +85,6 @@ def test_e2e_v_latest(dd_agent_check, master_instance):
     assert_common_metrics(aggregator)
 
     tags = ['redis_host:{}'.format(common.HOST), 'redis_port:6382', 'redis_role:master']
-    aggregator.assert_metric('redis.mem.overhead', count=2, tags=tags)
-    aggregator.assert_metric('redis.mem.startup', count=2, tags=tags)
-    aggregator.assert_metric('redis.active_defrag.running', count=2, tags=tags)
-    aggregator.assert_metric('redis.active_defrag.hits', count=2, tags=tags)
-    aggregator.assert_metric('redis.active_defrag.misses', count=2, tags=tags)
-    aggregator.assert_metric('redis.active_defrag.key_hits', count=2, tags=tags)
-    aggregator.assert_metric('redis.active_defrag.key_misses', count=2, tags=tags)
     aggregator.assert_metric('redis.server.io_threads_active', count=2, tags=tags)
     aggregator.assert_metric('redis.stats.io_threaded_reads_processed', count=1, tags=tags)
     aggregator.assert_metric('redis.stats.io_threaded_writes_processed', count=1, tags=tags)
