@@ -138,7 +138,7 @@ def docker_run(
     """
     A convenient context manager for safely setting up and tearing down Docker environments.
 
-    - **compose_file** (_str_) - A path totests/base/utils/test_http.py a Docker compose file. A custom tear
+    - **compose_file** (_str_) - A path to a Docker compose file. A custom tear
       down is not required when using this.
     - **build** (_bool_) - Whether or not to build images for when `compose_file` is provided
     - **service_name** (_str_) - Optional name for when ``compose_file`` is provided
