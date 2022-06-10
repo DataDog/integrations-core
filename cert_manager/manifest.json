@@ -24,6 +24,9 @@
   "is_public": true,
   "integration_id": "cert-manager",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "dashboards": {
       "Cert-Manager Overview Dashboard": "assets/dashboards/certmanager_overview.json"
     },
