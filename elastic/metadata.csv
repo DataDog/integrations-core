@@ -72,6 +72,7 @@ elasticsearch.indexing.index.total,gauge,,document,,The total number of document
 elasticsearch.indexing.index.total.count,count,,document,,The total number of documents indexed to an index.,0,elasticsearch,total indexed,
 elasticsearch.indices.count,gauge,,index,,The number of indices in the cluster.,0,elasticsearch,number of indices,
 elasticsearch.indices.indexing.index_failed,gauge,,,,The number of failed indexing operations [v2.1+].,-1,elasticsearch,index fails,
+elasticsearch.indices.indexing.index_failed.count,count,,,,The number of failed indexing operations [v2.1+].,-1,elasticsearch,index fails,
 elasticsearch.indices.indexing.throttle_time,gauge,,millisecond,,The total time indexing waited due to throttling [v1.4.0+].,-1,elasticsearch,index fails,
 elasticsearch.indices.indexing.throttle_time.count,count,,millisecond,,The total time indexing waited due to throttling [v1.4.0+].,-1,elasticsearch,index fails,
 elasticsearch.indices.query_cache.cache_count,count,,,,[v2.0+].,0,elasticsearch,,
@@ -219,6 +220,7 @@ elasticsearch.thread_pool.force_merge.active,gauge,,thread,,The number of active
 elasticsearch.thread_pool.force_merge.threads,gauge,,thread,,The total number of threads for force merge operations [v2.1+].,0,elasticsearch,total force merge threads,
 elasticsearch.thread_pool.force_merge.queue,gauge,,thread,,The number of queued threads for force merge operations [v2.1+].,0,elasticsearch,rejected force merge threads,
 elasticsearch.thread_pool.force_merge.rejected,gauge,,thread,,The number of rejected threads for force merge operations [v2.1+].,0,elasticsearch,rejected force merge threads,
+elasticsearch.thread_pool.force_merge.rejected.count,count,,thread,,The number of rejected threads for force merge operations [v2.1+].,0,elasticsearch,rejected force merge threads,
 elasticsearch.thread_pool.generic.active,gauge,,thread,,The number of active threads in the generic pool.,0,elasticsearch,active generic threads,
 elasticsearch.thread_pool.generic.queue,gauge,,thread,,The number of queued threads in the generic pool.,0,elasticsearch,queued generic threads,
 elasticsearch.thread_pool.generic.threads,gauge,,thread,,The total number of threads in the generic pool.,0,elasticsearch,total generic threads,
@@ -299,6 +301,7 @@ elasticsearch.thread_pool.warmer.active,gauge,,thread,,The number of active thre
 elasticsearch.thread_pool.warmer.completed,gauge,,thread,,The number of completed threads in the warmer pool.,0,elasticsearch,completed warmer threads,
 elasticsearch.thread_pool.warmer.queue,gauge,,thread,,The number of queued threads in the warmer pool.,0,elasticsearch,queued warmer threads,
 elasticsearch.thread_pool.warmer.rejected,gauge,,thread,,The number of rejected threads in the warmer pool.,0,elasticsearch,rejected warmer threads,
+elasticsearch.thread_pool.warmer.rejected.count,count,,thread,,The number of rejected threads in the warmer pool.,0,elasticsearch,rejected warmer threads,
 elasticsearch.thread_pool.warmer.threads,gauge,,thread,,The total number of threads in the warmer pool.,0,elasticsearch,total warmer threads,
 elasticsearch.thread_pool.write.active,gauge,,thread,,The number of active threads in the write pool [v6.3+].,0,elasticsearch,active write threads,
 elasticsearch.thread_pool.write.queue,gauge,,thread,,The number of queued threads in the write pool [v6.3+].,0,elasticsearch,queued write threads,cpu|memory
