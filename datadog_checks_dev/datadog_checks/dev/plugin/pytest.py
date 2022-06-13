@@ -158,7 +158,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
             root = new_root
 
         python_path = os.environ[E2E_PARENT_PYTHON]
-        env = os.environ['TOX_ENV_NAME']
+        env = os.environ.get('TOX_ENV_NAME') or os.environ['HATCH_ENV_ACTIVE']
 
         check_command = [python_path, '-m', 'datadog_checks.dev', 'env', 'check', check, env, '--json']
 
