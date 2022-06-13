@@ -1,5 +1,8 @@
 # CHANGELOG - directory
 
+## 1.14.0-beta / 2022-06-13
+
+
 ## 1.13.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
