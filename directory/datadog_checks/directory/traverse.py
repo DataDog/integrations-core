@@ -3,15 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import platform
 import sys
-from os import DirEntry
-from typing import Iterator, List
+from typing import Iterator, List, Tuple
 
 import six
 from scandir import scandir
 
 
 def _walk(top, follow_symlinks):
-    # type: (str, bool) -> Iterator[(str, List[DirEntry], List[DirEntry])]
+    # type: (str, bool) -> Iterator[Tuple[str, List, List]]
     """Modified version of https://docs.python.org/3/library/os.html#os.scandir
     that returns https://docs.python.org/3/library/os.html#os.DirEntry for files
     directly to take advantage of possible cached os.stat calls.
