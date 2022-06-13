@@ -18,4 +18,21 @@ def test_check(dd_agent_check):
         for submetric in ['avg', 'max', 'count', 'median', '95percentile']:
             aggregator.assert_metric('{}.{}'.format(metric, submetric), tags=common.EXPECTED_TAGS)
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    exclude = [
+        'system.disk.directory.file.bytes.95percentile',
+        'system.disk.directory.file.bytes.avg',
+        'system.disk.directory.file.bytes.count',
+        'system.disk.directory.file.bytes.max',
+        'system.disk.directory.file.bytes.median',
+        'system.disk.directory.file.created_sec_ago.95percentile',
+        'system.disk.directory.file.created_sec_ago.avg',
+        'system.disk.directory.file.created_sec_ago.count',
+        'system.disk.directory.file.created_sec_ago.max',
+        'system.disk.directory.file.created_sec_ago.median',
+        'system.disk.directory.file.modified_sec_ago.95percentile',
+        'system.disk.directory.file.modified_sec_ago.avg',
+        'system.disk.directory.file.modified_sec_ago.count',
+        'system.disk.directory.file.modified_sec_ago.max',
+        'system.disk.directory.file.modified_sec_ago.median',
+    ]
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=exclude)
