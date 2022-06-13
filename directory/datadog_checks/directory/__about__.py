@@ -2,4 +2,4 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-__version__ = '1.14.0-beta'
+__version__ = '1.14.1-beta.1'
