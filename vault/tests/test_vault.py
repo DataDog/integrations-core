@@ -14,7 +14,8 @@ from datadog_checks.vault.common import DEFAULT_API_VERSION
 from datadog_checks.vault.errors import ApiUnreachable
 from datadog_checks.vault.vault import Leader
 
-from .common import INSTANCES, MERKLE_WAL_METRICS, MERKLE_WAL_QUANTILES, auth_required, noauth_required
+from .common import INSTANCES, auth_required, noauth_required
+from .metrics import MERKLE_WAL_METRICS, MERKLE_WAL_QUANTILES
 from .utils import assert_all_metrics, get_fixture_path
 
 pytestmark = pytest.mark.usefixtures('dd_environment')
