@@ -60,7 +60,7 @@ def test_invalid_oauth(oauth_instance):
         SnowflakeCheck(CHECK_NAME, {}, [oauth_inst])
 
 
-def test_read_token(oauth_instance, dd_run_check):
+def test_read_token(oauth_instance):
     oauth_token_path_inst = copy.deepcopy(oauth_instance)
     oauth_token_path_inst['token'] = None
     oauth_token_path_inst['token_path'] = os.path.join(os.path.dirname(__file__), 'keys', 'token')
