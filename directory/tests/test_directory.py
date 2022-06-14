@@ -296,7 +296,6 @@ def test_folder_metrics(aggregator):
         dir_check.check(config)
         dirtagname = config.get('dirtagname', "name")
         name = config.get('name', temp_dir + "/main")
-        filetagname = config.get('filetagname', "filename")
         dir_tags = [dirtagname + ":%s" % name, 'optional:tag1']
 
         # File metrics
@@ -304,7 +303,7 @@ def test_folder_metrics(aggregator):
             if config.get('pattern') != "file_*" or config.get('pattern') != "*.log":
                 # 2 '*.log' files in 'temp_dir'
                 for folder_name in ['subfolder', 'othersubfolder']:
-                    file_tag = [filetagname + ":%s" % os.path.normpath(temp_dir + "/main/" + folder_name)]
+                    file_tag = ["folder_name:%s" % os.path.normpath(temp_dir + "/main/" + folder_name)]
                     aggregator.assert_metric(mname, metric_type=aggregator.GAUGE, tags=dir_tags + file_tag, count=1)
 
         # Common metrics
