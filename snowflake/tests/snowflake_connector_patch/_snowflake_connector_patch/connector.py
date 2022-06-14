@@ -44,7 +44,12 @@ class Cursor(object):
         match = TABLE_PATTERN.search(query)
         if match:
             table_name = match.group(1)
-            self.__data = getattr(tables, table_name, [])
+            # look for ACCOUNT_NAME since some views have the same name in ACCOUNT_USAGE and ORGANIZATION_USAGE
+            table_prefix = ""
+            if "ACCOUNT_NAME" in query:
+                table_prefix = "ORGANIZATION"
+            table_attr = "{}_{}".formt(table_prefix, table_name)
+            self.__data = getattr(tables, table_attr, [])
         elif query == 'select current_version();':
             self.__data = [('4.30.2',)]
         else:

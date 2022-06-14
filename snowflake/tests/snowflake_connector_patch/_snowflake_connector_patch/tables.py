@@ -45,10 +45,10 @@ QUERY_HISTORY = [
         Decimal('0.000000'),
     )
 ]
-USAGE_IN_CURRENCY_DAILY = [
+ORGANIZATION_USAGE_IN_CURRENCY_DAILY = [
     ('test', 'Standard', 'Compute', Decimal('0.4'), Decimal('0.6'), Decimal('0.7'), Decimal('0.8'))
 ]
-WAREHOUSE_METERING_HISTORY = [
+ORGANIZATION_WAREHOUSE_METERING_HISTORY = [
     (
         'test',
         'account_name',
@@ -61,7 +61,7 @@ WAREHOUSE_METERING_HISTORY = [
     )
 ]
 
-METERING_DAILY_HISTORY = [
+ORGANIZATION_METERING_DAILY_HISTORY = [
     (
         'account_name',
         'Standard',
@@ -78,7 +78,7 @@ METERING_DAILY_HISTORY = [
     ),
 ]
 
-CONTRACT_ITEMS = [
+ORGANIZATION_CONTRACT_ITEMS = [
     (
         '4',
         'contract',
@@ -87,7 +87,7 @@ CONTRACT_ITEMS = [
     ),
 ]
 
-STORAGE_DAILY_HISTORY = [
+ORGANIZATION_STORAGE_DAILY_HISTORY = [
     (
         'account_name',
         Decimal('4510'),
@@ -96,7 +96,7 @@ STORAGE_DAILY_HISTORY = [
     ),
 ]
 
-REMAINING_BALANCE_DAILY = [
+ORGANIZATION_REMAINING_BALANCE_DAILY = [
     (
         'contract_num',
         Decimal('23410'),
@@ -106,7 +106,7 @@ REMAINING_BALANCE_DAILY = [
     ),
 ]
 
-RATE_SHEET_DAILY = [
+ORGANIZATION_RATE_SHEET_DAILY = [
     (
         'contract_num',
         'test_account',
@@ -116,7 +116,7 @@ RATE_SHEET_DAILY = [
     ),
 ]
 
-DATA_TRANSFER_DAILY_HISTORY = [
+ORGANIZATION_DATA_TRANSFER_DAILY_HISTORY = [
     (
         'test_account',
         Decimal('13.56'),
