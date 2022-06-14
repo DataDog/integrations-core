@@ -23,7 +23,7 @@
                 "banner_img": "https://static.datadoghq.com/static/images/logos/traffic-server_large.svg",
                 "layout_type": "ordered",
                 "show_title": false,
-                "title": "About WebLogic",
+                "title": "About Traffic Server",
                 "type": "group",
                 "widgets": [
                     {
