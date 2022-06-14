@@ -156,7 +156,7 @@ class DirectoryCheck(AgentCheck):
                     if max_foldergauge_balance == 0:
                         continue
                     max_foldergauge_balance -= 1
-                    folder_tags = ['{}:{}'.format(self._config.filetagname, join(root, folder_entry.name))]
+                    folder_tags = ['{}:{}'.format('folder_name', join(root, folder_entry.name))]
                     folder_tags.extend(dirtags)
                     folder_stat = folder_entry.stat(
                         follow_symlinks=self._config.stat_follow_symlinks

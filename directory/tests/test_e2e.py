@@ -14,8 +14,10 @@ def test_check(dd_agent_check):
     instance = common.get_config_stubs(".")[0]
     instance['collect_folder_stats'] = True
     aggregator = dd_agent_check(instance, rate=True)
-    for metric in common.DIR_METRICS + common.FOLDER_METRICS:
+    for metric in common.DIR_METRICS:
         aggregator.assert_metric(metric, tags=common.EXPECTED_TAGS)
+    for metric in common.FOLDER_METRICS:
+        aggregator.assert_metric(metric, tags=common.EXPECTED_TAGS + ['folder_name:/usr'])
     for metric in common.FILE_METRICS:
         for submetric in ['avg', 'max', 'count', 'median', '95percentile']:
             aggregator.assert_metric('{}.{}'.format(metric, submetric), tags=common.EXPECTED_TAGS)
