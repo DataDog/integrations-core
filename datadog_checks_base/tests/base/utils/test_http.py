@@ -2041,9 +2041,7 @@ class TestIntegration:
 class TestAIAChasing:
     def test_incomplete_chain(self):
         # Protocol 1.2 is allowed by default
-        http = RequestsWrapper(
-            {'tls_cert': '/etc/ssl/certs/ca-root.crt', 'tls_private_key': '/etc/ssl/certs/ca-root.key'}, {}
-        )
+        http = RequestsWrapper({}, {})
         http.get("https://badssl.test/")
 
     def test_cant_allow_unknown_protocol(self, caplog):
