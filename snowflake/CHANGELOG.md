@@ -1,5 +1,9 @@
 # CHANGELOG - Snowflake
 
+## 4.3.2 / 2022-06-15
+
+* [Fixed] Fix reading of `token_path` option. See [#12366](https://github.com/DataDog/integrations-core/pull/12366).
+
 ## 4.3.1 / 2022-05-15
 
 * [Fixed] Properly validate `only_custom_queries`. See [#11992](https://github.com/DataDog/integrations-core/pull/11992).
