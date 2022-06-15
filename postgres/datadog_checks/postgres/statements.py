@@ -47,6 +47,13 @@ DEFAULT_STATEMENTS_LIMIT = 10000
 # Required columns for the check to run
 PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({'calls', 'query', 'rows'})
 
+PG_STAT_STATEMENTS_TIMING_COLUMNS = frozenset(
+    {
+        'blk_read_time',
+        'blk_write_time',
+    }
+)
+
 PG_STAT_STATEMENTS_METRICS_COLUMNS = frozenset(
     {
         'calls',
@@ -77,7 +84,10 @@ PG_STAT_STATEMENTS_TAG_COLUMNS = frozenset(
 PG_STAT_STATEMENTS_OPTIONAL_COLUMNS = frozenset({'queryid'})
 
 PG_STAT_ALL_DESIRED_COLUMNS = (
-    PG_STAT_STATEMENTS_METRICS_COLUMNS | PG_STAT_STATEMENTS_TAG_COLUMNS | PG_STAT_STATEMENTS_OPTIONAL_COLUMNS
+    PG_STAT_STATEMENTS_METRICS_COLUMNS
+    | PG_STAT_STATEMENTS_TAG_COLUMNS
+    | PG_STAT_STATEMENTS_OPTIONAL_COLUMNS
+    | PG_STAT_STATEMENTS_TIMING_COLUMNS
 )
 
 
@@ -116,6 +126,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._config = config
         self._state = StatementMetrics()
         self._stat_column_cache = []
+        self._track_io_timing_cache = None
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
@@ -216,6 +227,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     hostname=self._check.resolved_hostname,
                 )
                 return []
+
+            if self._check.pg_settings.get("track_io_timing") != "on":
+                missing_columns -= PG_STAT_STATEMENTS_TIMING_COLUMNS
 
             query_columns = sorted(list(available_columns & PG_STAT_ALL_DESIRED_COLUMNS))
             params = ()
