@@ -1,6 +1,6 @@
 {
   "author_name": "Datadog",
-  "title": "Vault - Overview (legacy)",
+  "title": "Vault - Overview (Legacy)",
   "description": "## Vault\n\nThis dashboard provides a high-level overview of your Vault clusters so you can monitor its performance and cluster health.\n\n- [Official Vault integration docs](https://docs.datadoghq.com/integrations/vault/)\n- [Monitoring HashiCorp Vault with Datadog](https://www.datadoghq.com/blog/monitor-hashicorp-vault-with-datadog/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
   "layout_type": "ordered",
   "is_read_only": true,
