@@ -42,13 +42,13 @@ The instructions below show you how to configure the task using the [Amazon Web 
 ##### Web UI Task Definition
 
 1. Log in to your [AWS Web Console][1] and navigate to the ECS section.
-2. Click on **Task Definitions** in the left menu, then click the **Create new Task Definition** button or choose an existing Fargate task definition
+2. Click on **Task Definitions** in the left menu, then click the **Create new Task Definition** button or choose an existing Fargate task definition.
 3. For new task definitions:
     1. Select **Fargate** as the launch type, then click the **Next step** button.
     2. Enter a **Task Definition Name**, such as `my-app-and-datadog`.
     3. Select a task execution IAM role. See permission requirements in the [Create or Modify your IAM Policy](#create-or-modify-your-iam-policy) section below.
     4. Choose **Task memory** and **Task CPU** based on your needs.
-4. Click the **Add container** button to begin adding the Datadog agent container
+4. Click the **Add container** button to begin adding the Datadog Agent container.
     1. For **Container name** enter `datadog-agent`.
     2. For **Image** enter `public.ecr.aws/datadog/agent:latest`.
     3. For **Env Variables**, add the **Key** `DD_API_KEY` and enter your [Datadog API Key][2] as the value.
