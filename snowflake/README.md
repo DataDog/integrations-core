@@ -121,9 +121,13 @@ datadog-agent integration install datadog-snowflake==2.0.1
 
 By default, this integration monitors the `ACCOUNT_USAGE` schema, but can also monitor the `ORGANIZATION_USAGE` schema to monitor organization-level metrics. 
 
+To collect organization metrics, you can create configure the integration by changing the schema field to `ORGANIZATION_USAGE` and increasing the `min_collection_interval` to reduce the number of queries to Snowflake, as most organization queries have a latency of up to 24 hours.
+
+Note: To monitor organization metrics, your `user` must have the `ORGADMIN` role.
+
     ```yaml
        - schema: ORGANIZATION_USAGE
-         min_collection_interval: 3600
+         min_collection_interval: 43200
     ```
 
 #### Collecting data for multiple environments
