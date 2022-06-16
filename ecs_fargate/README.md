@@ -225,20 +225,16 @@ For environment variables available with the Docker Agent container, see the [Do
 | Environment Variable               | Description                                    |
 |------------------------------------|------------------------------------------------|
 | `DD_DOCKER_LABELS_AS_TAGS`         | Extract docker container labels                |
-| `DD_CONTAINER_LABELS_AS_TAGS`      | Extract container labels                       |
-| `DD_DOCKER_ENV_AS_TAGS`            | Extract docker container environment variables |
-| `DD_CONTAINER_ENV_AS_TAGS`         | Extract container environment variables        |
-| `DD_KUBERNETES_POD_LABELS_AS_TAGS` | Extract pod labels                             |
 | `DD_CHECKS_TAG_CARDINALITY`        | Add tags to check metrics                      |
 | `DD_DOGSTATSD_TAG_CARDINALITY`     | Add tags to custom metrics                     |
 
-For global tagging, it is recommended to use `DD_CONTAINER_LABELS_AS_TAGS`. With this method, the Agent pulls in tags from your container labels. This requires you to add the appropriate labels to your other containers. Labels can be added directly in the [task definition][15].
+For global tagging, it is recommended to use `DD_DOCKER_LABELS_AS_TAGS`. With this method, the Agent pulls in tags from your container labels. This requires you to add the appropriate labels to your other containers. Labels can be added directly in the [task definition][15].
 
 Format for the Agent container:
 
 ```json
 {
-  "name": "DD_CONTAINER_LABELS_AS_TAGS",
+  "name": "DD_DOCKER_LABELS_AS_TAGS",
   "value": "{\"<LABEL_NAME_TO_COLLECT>\":\"<TAG_KEY_FOR_DATADOG>\"}"
 }
 ```
@@ -247,7 +243,7 @@ Example for the Agent container:
 
 ```json
 {
-  "name": "DD_CONTAINER_LABELS_AS_TAGS",
+  "name": "DD_DOCKER_LABELS_AS_TAGS",
   "value": "{\"com.docker.compose.service\":\"service_name\"}"
 }
 ```
@@ -258,7 +254,7 @@ CloudFormation example (YAML):
       ContainerDefinitions:
         - #(...)
           Environment:
-            - Name: DD_CONTAINER_LABELS_AS_TAGS
+            - Name: DD_DOCKER_LABELS_AS_TAGS
               Value: "{\"com.docker.compose.service\":\"service_name\"}"
 ```
 
