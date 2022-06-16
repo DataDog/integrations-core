@@ -158,7 +158,7 @@ def test_currency_usage(dd_run_check, aggregator, instance):
     # type: (Callable[[SnowflakeCheck], None], AggregatorStub, Dict[str, Any]) -> None
 
     expected_currency_metrics = [
-        ('test', 'Standard', 'Compute', Decimal('0.4'), Decimal('0.6'), Decimal('0.7'), Decimal('0.8')),
+        ('test', 'Standard', 'Compute', Decimal('0.4'), Decimal('0.7')),
     ]
     expected_tags = EXPECTED_TAGS + [
         'billing_account:test',
@@ -172,13 +172,9 @@ def test_currency_usage(dd_run_check, aggregator, instance):
         check._conn = mock.MagicMock()
         check._query_manager.queries = [Query(queries.OrgCurrencyUsage)]
         dd_run_check(check)
-    aggregator.assert_metric('snowflake.organization.currency.usage.sum', value=0.4, tags=expected_tags)
-    aggregator.assert_metric('snowflake.organization.currency.usage.avg', value=0.6, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.currency.usage', value=0.4, tags=expected_tags)
     aggregator.assert_metric(
-        'snowflake.organization.currency.usage_in_currency.sum', value=0.7, count=1, tags=expected_tags
-    )
-    aggregator.assert_metric(
-        'snowflake.organization.currency.usage_in_currency.avg', value=0.8, count=1, tags=expected_tags
+        'snowflake.organization.currency.usage_in_currency', value=0.7, count=1, tags=expected_tags
     )
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
@@ -214,8 +210,8 @@ def test_org_credit_usage(dd_run_check, aggregator, instance):
         check._conn = mock.MagicMock()
         check._query_manager.queries = [Query(queries.OrgCreditUsage)]
         dd_run_check(check)
-    aggregator.assert_metric('snowflake.organization.compute.sum', value=300, tags=expected_tags)
-    aggregator.assert_metric('snowflake.organization.compute.avg', value=3.4, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.virtual_warehouse.sum', value=300, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.virtual_warehouse.avg', value=3.4, tags=expected_tags)
     aggregator.assert_metric('snowflake.organization.cloud_service.sum', value=902.49003, tags=expected_tags)
     aggregator.assert_metric('snowflake.organization.cloud_service.avg', value=4.9227, tags=expected_tags)
     aggregator.assert_metric('snowflake.organization.cloud_service_adjustment.sum', value=212.43, tags=expected_tags)
@@ -234,14 +230,13 @@ def test_org_contract_items(dd_run_check, aggregator, instance):
     expected_org_contract_metrics = [
         (
             '4',
-            'contract',
+            'Free Usage',
             Decimal('23'),
-            Decimal('2.1'),
         ),
     ]
     expected_tags = EXPECTED_TAGS + [
         'contract_number:4',
-        'contract_item:contract',
+        'contract_item:Free Usage',
     ]
     with mock.patch(
         'datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_org_contract_metrics
@@ -250,8 +245,7 @@ def test_org_contract_items(dd_run_check, aggregator, instance):
         check._conn = mock.MagicMock()
         check._query_manager.queries = [Query(queries.OrgContractItems)]
         dd_run_check(check)
-    aggregator.assert_metric('snowflake.organization.contract.amount.sum', value=23, tags=expected_tags)
-    aggregator.assert_metric('snowflake.organization.contract.amount.avg', value=2.1, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.contract.amount', value=23, tags=expected_tags)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
 
@@ -300,7 +294,6 @@ def test_org_storage_daily(dd_run_check, aggregator, instance):
             'account_name',
             Decimal('4510'),
             Decimal('349'),
-            Decimal('39'),
         ),
     ]
     expected_tags = EXPECTED_TAGS + [
@@ -314,8 +307,7 @@ def test_org_storage_daily(dd_run_check, aggregator, instance):
         check._query_manager.queries = [Query(queries.OrgStorageDaily)]
         dd_run_check(check)
     aggregator.assert_metric('snowflake.organization.storage.average_bytes', value=4510, tags=expected_tags)
-    aggregator.assert_metric('snowflake.organization.storage.credits.sum', value=349, tags=expected_tags)
-    aggregator.assert_metric('snowflake.organization.storage.credits.avg', value=39, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.storage.credits', value=349, tags=expected_tags)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
 
@@ -365,7 +357,7 @@ def test_org_data_transfer(dd_run_check, aggregator, instance):
         check._conn = mock.MagicMock()
         check._query_manager.queries = [Query(queries.OrgDataTransfer)]
         dd_run_check(check)
-    aggregator.assert_metric('snowflake.organization.data_transfer.tb_transfered', value=13.56, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.data_transfer.bytes_transferred', value=13.56, tags=expected_tags)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
 

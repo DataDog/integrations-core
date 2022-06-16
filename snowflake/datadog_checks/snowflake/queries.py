@@ -227,12 +227,11 @@ ReplicationUsage = {
 # https://docs.snowflake.com/en/sql-reference/organization-usage/contract_items.html
 OrgContractItems = {
     'name': 'organization.contract.metrics',
-    'query': ('select CONTRACT_NUMBER, CONTRACT_ITEM, sum(AMOUNT), avg(AMOUNT) from CONTRACT_ITEMS group by 1, 2;'),
+    'query': ('select CONTRACT_NUMBER, CONTRACT_ITEM, AMOUNT from CONTRACT_ITEMS group by 1, 2;'),
     'columns': [
         {'name': 'contract_number', 'type': 'tag'},
         {'name': 'contract_item', 'type': 'tag'},
-        {'name': 'organization.contract.amount.sum', 'type': 'gauge'},
-        {'name': 'organization.contract.amount.avg', 'type': 'gauge'},
+        {'name': 'organization.contract.amount', 'type': 'gauge'},
     ],
 }
 
@@ -245,13 +244,13 @@ OrgCreditUsage = {
         'sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), '
         'sum(CREDITS_ADJUSTMENT_CLOUD_SERVICES), avg(CREDITS_ADJUSTMENT_CLOUD_SERVICES), '
         'sum(CREDITS_USED), avg(CREDITS_USED), sum(CREDITS_BILLED), avg(CREDITS_BILLED) from METERING_DAILY_HISTORY '
-        'where USAGE_DATE >= DATEADD(hour, -48, current_timestamp()) group by 1, 2;'
+        'where USAGE_DATE = DATEADD(day, -1, current_date) group by 1, 2;'
     ),
     'columns': [
         {'name': 'billing_account', 'type': 'tag'},
         {'name': 'service_type', 'type': 'tag'},
-        {'name': 'organization.compute.sum', 'type': 'gauge'},
-        {'name': 'organization.compute.avg', 'type': 'gauge'},
+        {'name': 'organization.virtual_warehouse.sum', 'type': 'gauge'},
+        {'name': 'organization.virtual_warehouse.avg', 'type': 'gauge'},
         {'name': 'organization.cloud_service.sum', 'type': 'gauge'},
         {'name': 'organization.cloud_service.avg', 'type': 'gauge'},
         {'name': 'organization.cloud_service_adjustment.sum', 'type': 'gauge'},
@@ -268,17 +267,15 @@ OrgCurrencyUsage = {
     'name': 'organization.currency.metrics',
     'query': (
         'select ACCOUNT_NAME, SERVICE_LEVEL, USAGE_TYPE, '
-        'sum(USAGE), avg(USAGE), sum(USAGE_IN_CURRENCY), avg(USAGE_IN_CURRENCY) from USAGE_IN_CURRENCY_DAILY '
-        'where USAGE_DATE >= DATEADD(hour, -48, current_timestamp()) group by 1, 2, 3;'
+        'sum(USAGE), sum(USAGE_IN_CURRENCY) from USAGE_IN_CURRENCY_DAILY '
+        'where USAGE_DATE = DATEADD(day, -1, current_date) group by 1, 2, 3;'
     ),
     'columns': [
         {'name': 'billing_account', 'type': 'tag'},
         {'name': 'service_level', 'type': 'tag'},
         {'name': 'usage_type', 'type': 'tag'},
-        {'name': 'organization.currency.usage.sum', 'type': 'gauge'},
-        {'name': 'organization.currency.usage.avg', 'type': 'gauge'},
-        {'name': 'organization.currency.usage_in_currency.sum', 'type': 'gauge'},
-        {'name': 'organization.currency.usage_in_currency.avg', 'type': 'gauge'},
+        {'name': 'organization.currency.usage', 'type': 'gauge'},
+        {'name': 'organization.currency.usage_in_currency', 'type': 'gauge'},
     ],
 }
 
@@ -290,7 +287,7 @@ OrgWarehouseCreditUsage = {
         'select WAREHOUSE_NAME, ACCOUNT_NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), '
         'sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), '
         'sum(CREDITS_USED), avg(CREDITS_USED) from WAREHOUSE_METERING_HISTORY '
-        'where start_time >= DATEADD(hour, -48, current_timestamp()) group by 1, 2;'
+        'where start_time = DATEADD(day, -1, current_date) group by 1, 2;'
     ),
     'columns': [
         {'name': 'warehouse', 'type': 'tag'},
@@ -308,14 +305,13 @@ OrgWarehouseCreditUsage = {
 OrgStorageDaily = {
     'name': 'organization.storage.metrics',
     'query': (
-        'select ACCOUNT_NAME, avg(AVERAGE_BYTES), sum(CREDITS), avg(CREDITS) from STORAGE_DAILY_HISTORY '
-        'where USAGE_DATE >= DATEADD(hour, -48, current_timestamp()) group by 1;'
+        'select ACCOUNT_NAME, sum(AVERAGE_BYTES), sum(CREDITS) from STORAGE_DAILY_HISTORY '
+        'where USAGE_DATE = DATEADD(day, -1, current_date) group by 1;'
     ),
     'columns': [
         {'name': 'billing_account', 'type': 'tag'},
         {'name': 'organization.storage.average_bytes', 'type': 'gauge'},
-        {'name': 'organization.storage.credits.sum', 'type': 'gauge'},
-        {'name': 'organization.storage.credits.avg', 'type': 'gauge'},
+        {'name': 'organization.storage.credits', 'type': 'gauge'},
     ],
 }
 
@@ -326,7 +322,7 @@ OrgBalance = {
     'query': (
         'select CONTRACT_NUMBER, sum(FREE_USAGE_BALANCE), sum(CAPACITY_BALANCE), '
         'sum(ON_DEMAND_CONSUMPTION_BALANCE), sum(ROLLOVER_BALANCE) from REMAINING_BALANCE_DAILY '
-        'where DATE >= DATEADD(hour, -48, current_timestamp()) group by 1;'
+        'where DATE = DATEADD(day, -1, current_date) group by 1;'
     ),
     'columns': [
         {'name': 'contract_number', 'type': 'tag'},
@@ -342,8 +338,8 @@ OrgRateSheet = {
     'name': 'organization.rate.metrics',
     'query': (
         'select CONTRACT_NUMBER, ACCOUNT_NAME, USAGE_TYPE, SERVICE_TYPE, '
-        'avg(EFFECTIVE_RATE) from RATE_SHEET_DAILY '
-        'where DATE >= DATEADD(hour, -48, current_timestamp()) group by 1, 2, 3, 4;'
+        'sum(EFFECTIVE_RATE) from RATE_SHEET_DAILY '
+        'where DATE = DATEADD(day, -1, current_date) group by 1, 2, 3, 4;'
     ),
     'columns': [
         {'name': 'contract_number', 'type': 'tag'},
@@ -358,11 +354,10 @@ OrgRateSheet = {
 OrgDataTransfer = {
     'name': 'organization.data_transfer.metrics',
     'query': (
-        'select ACCOUNT_NAME, sum(TB_TRANSFERED) from DATA_TRANSFER_DAILY_HISTORY '
-        'where USAGE_DATE >= DATEADD(hour, -48, current_timestamp()) group by 1;'
+        'select ACCOUNT_NAME, BYTES_TRANSFERRED from DATA_TRANSFER_DAILY_HISTORY ORDER BY USAGE_DATE DESC LIMIT 1;'
     ),
     'columns': [
         {'name': 'billing_account', 'type': 'tag'},
-        {'name': 'organization.data_transfer.tb_transfered', 'type': 'gauge'},
+        {'name': 'organization.data_transfer.bytes_transferred', 'type': 'gauge'},
     ],
 }
