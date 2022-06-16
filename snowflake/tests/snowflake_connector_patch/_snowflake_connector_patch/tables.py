@@ -45,7 +45,7 @@ QUERY_HISTORY = [
         Decimal('0.000000'),
     )
 ]
-ORGANIZATION_USAGE_IN_CURRENCY_DAILY = [('test', 'Standard', 'Compute', Decimal('0.4'), Decimal('0.7'))]
+ORGANIZATION_USAGE_IN_CURRENCY_DAILY = [('test', 'Standard', 'Compute', 'USD', Decimal('0.4'), Decimal('0.7'))]
 ORGANIZATION_WAREHOUSE_METERING_HISTORY = [
     (
         'test',
@@ -80,6 +80,7 @@ ORGANIZATION_CONTRACT_ITEMS = [
     (
         Decimal('4'),
         'Free Usage',
+        'USD',
         Decimal('23'),
     ),
 ]
@@ -95,6 +96,7 @@ ORGANIZATION_STORAGE_DAILY_HISTORY = [
 ORGANIZATION_REMAINING_BALANCE_DAILY = [
     (
         Decimal('4'),
+        'USD',
         Decimal('23410'),
         Decimal('814349'),
         Decimal('35435'),
@@ -104,10 +106,11 @@ ORGANIZATION_REMAINING_BALANCE_DAILY = [
 
 ORGANIZATION_RATE_SHEET_DAILY = [
     (
-        'contract_num',
+        Decimal('3'),
         'test_account',
         'usage',
         'service',
+        'USD',
         Decimal('312'),
     ),
 ]

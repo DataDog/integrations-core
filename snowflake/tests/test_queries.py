@@ -158,12 +158,13 @@ def test_currency_usage(dd_run_check, aggregator, instance):
     # type: (Callable[[SnowflakeCheck], None], AggregatorStub, Dict[str, Any]) -> None
 
     expected_currency_metrics = [
-        ('test', 'Standard', 'Compute', Decimal('0.4'), Decimal('0.7')),
+        ('test', 'Standard', 'Compute', 'USD', Decimal('0.4'), Decimal('0.7')),
     ]
     expected_tags = EXPECTED_TAGS + [
         'billing_account:test',
         'service_level:Standard',
         'usage_type:Compute',
+        'currency:USD',
     ]
     with mock.patch(
         'datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_currency_metrics
@@ -231,12 +232,14 @@ def test_org_contract_items(dd_run_check, aggregator, instance):
         (
             Decimal('4'),
             'Free Usage',
+            'USD',
             Decimal('23'),
         ),
     ]
     expected_tags = EXPECTED_TAGS + [
         'contract_number:4',
         'contract_item:Free Usage',
+        'currency:USD',
     ]
     with mock.patch(
         'datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_org_contract_metrics
@@ -318,15 +321,14 @@ def test_org_balance(dd_run_check, aggregator, instance):
     expected_balance_metrics = [
         (
             Decimal('3'),
+            'USD',
             Decimal('23410'),
             Decimal('814349'),
             Decimal('-35435'),
             Decimal('455435'),
         ),
     ]
-    expected_tags = EXPECTED_TAGS + [
-        'contract_number:3',
-    ]
+    expected_tags = EXPECTED_TAGS + ['contract_number:3', 'currency:USD']
     with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_balance_metrics):
         check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check._conn = mock.MagicMock()
@@ -367,18 +369,20 @@ def test_org_rate_sheet(dd_run_check, aggregator, instance):
 
     expected_rate_metrics = [
         (
-            'contract_num',
+            Decimal('3'),
             'test_account',
             'usage',
             'service',
+            'USD',
             Decimal('312'),
         ),
     ]
     expected_tags = EXPECTED_TAGS + [
-        'contract_number:contract_num',
+        'contract_number:3',
         'billing_account:test_account',
         'usage_type:usage',
         'service_type:service',
+        'currency:USD',
     ]
     with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_rate_metrics):
         check = SnowflakeCheck(CHECK_NAME, {}, [instance])

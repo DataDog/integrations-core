@@ -227,10 +227,11 @@ ReplicationUsage = {
 # https://docs.snowflake.com/en/sql-reference/organization-usage/contract_items.html
 OrgContractItems = {
     'name': 'organization.contract.metrics',
-    'query': ('select CONTRACT_NUMBER, CONTRACT_ITEM, AMOUNT from CONTRACT_ITEMS group by 1, 2;'),
+    'query': ('select CONTRACT_NUMBER, CONTRACT_ITEM, CURRENCY, AMOUNT from CONTRACT_ITEMS group by 1, 2, 3;'),
     'columns': [
         {'name': 'contract_number', 'type': 'tag'},
         {'name': 'contract_item', 'type': 'tag'},
+        {'name': 'currency', 'type': 'tag'},
         {'name': 'organization.contract.amount', 'type': 'gauge'},
     ],
 }
@@ -266,14 +267,15 @@ OrgCreditUsage = {
 OrgCurrencyUsage = {
     'name': 'organization.currency.metrics',
     'query': (
-        'select ACCOUNT_NAME, SERVICE_LEVEL, USAGE_TYPE, '
+        'select ACCOUNT_NAME, SERVICE_LEVEL, USAGE_TYPE, CURRENCY, '
         'sum(USAGE), sum(USAGE_IN_CURRENCY) from USAGE_IN_CURRENCY_DAILY '
-        'where USAGE_DATE = DATEADD(day, -1, current_date) group by 1, 2, 3;'
+        'where USAGE_DATE = DATEADD(day, -1, current_date) group by 1, 2, 3, 4;'
     ),
     'columns': [
         {'name': 'billing_account', 'type': 'tag'},
         {'name': 'service_level', 'type': 'tag'},
         {'name': 'usage_type', 'type': 'tag'},
+        {'name': 'currency', 'type': 'tag'},
         {'name': 'organization.currency.usage', 'type': 'gauge'},
         {'name': 'organization.currency.usage_in_currency', 'type': 'gauge'},
     ],
@@ -320,12 +322,13 @@ OrgStorageDaily = {
 OrgBalance = {
     'name': 'organization.balance.metrics',
     'query': (
-        'select CONTRACT_NUMBER, sum(FREE_USAGE_BALANCE), sum(CAPACITY_BALANCE), '
+        'select CONTRACT_NUMBER, CURRENCY, sum(FREE_USAGE_BALANCE), sum(CAPACITY_BALANCE), '
         'sum(ON_DEMAND_CONSUMPTION_BALANCE), sum(ROLLOVER_BALANCE) from REMAINING_BALANCE_DAILY '
-        'where DATE = DATEADD(day, -1, current_date) group by 1;'
+        'where DATE = DATEADD(day, -1, current_date) group by 1, 2;'
     ),
     'columns': [
         {'name': 'contract_number', 'type': 'tag'},
+        {'name': 'currency', 'type': 'tag'},
         {'name': 'organization.balance.free_usage', 'type': 'gauge'},
         {'name': 'organization.balance.capacity', 'type': 'gauge'},
         {'name': 'organization.balance.on_demand_consumption', 'type': 'gauge'},
@@ -337,15 +340,16 @@ OrgBalance = {
 OrgRateSheet = {
     'name': 'organization.rate.metrics',
     'query': (
-        'select CONTRACT_NUMBER, ACCOUNT_NAME, USAGE_TYPE, SERVICE_TYPE, '
+        'select CONTRACT_NUMBER, ACCOUNT_NAME, USAGE_TYPE, SERVICE_TYPE, CURRENCY, '
         'sum(EFFECTIVE_RATE) from RATE_SHEET_DAILY '
-        'where DATE = DATEADD(day, -1, current_date) group by 1, 2, 3, 4;'
+        'where DATE = DATEADD(day, -1, current_date) group by 1, 2, 3, 4, 5;'
     ),
     'columns': [
         {'name': 'contract_number', 'type': 'tag'},
         {'name': 'billing_account', 'type': 'tag'},
         {'name': 'usage_type', 'type': 'tag'},
         {'name': 'service_type', 'type': 'tag'},
+        {'name': 'currency', 'type': 'tag'},
         {'name': 'organization.rate.effective_rate', 'type': 'gauge'},
     ],
 }
