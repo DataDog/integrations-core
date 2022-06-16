@@ -757,6 +757,46 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'cluster.ext_authz.ok': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ext_authz.error': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ext_authz.denied': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ext_authz.disabled': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ext_authz.failure_mode_allowed': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
     'cluster.ratelimit.ok': {
         'tags': (
             ('envoy_cluster', ),
@@ -774,6 +814,14 @@ METRICS = {
         'method': 'monotonic_count',
     },
     'cluster.ratelimit.over_limit': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ratelimit.failure_mode_allowed': {
         'tags': (
             ('envoy_cluster', ),
             (),
