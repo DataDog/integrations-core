@@ -78,7 +78,7 @@ ORGANIZATION_METERING_DAILY_HISTORY = [
 
 ORGANIZATION_CONTRACT_ITEMS = [
     (
-        '4',
+        Decimal('4'),
         'Free Usage',
         Decimal('23'),
     ),
@@ -94,10 +94,10 @@ ORGANIZATION_STORAGE_DAILY_HISTORY = [
 
 ORGANIZATION_REMAINING_BALANCE_DAILY = [
     (
-        'contract_num',
+        Decimal('4'),
         Decimal('23410'),
         Decimal('814349'),
-        Decimal('-35435'),
+        Decimal('35435'),
         Decimal('455435'),
     ),
 ]

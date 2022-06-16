@@ -229,7 +229,7 @@ def test_org_contract_items(dd_run_check, aggregator, instance):
 
     expected_org_contract_metrics = [
         (
-            '4',
+            Decimal('4'),
             'Free Usage',
             Decimal('23'),
         ),
@@ -317,7 +317,7 @@ def test_org_balance(dd_run_check, aggregator, instance):
 
     expected_balance_metrics = [
         (
-            'contract_num',
+            Decimal('3'),
             Decimal('23410'),
             Decimal('814349'),
             Decimal('-35435'),
@@ -325,7 +325,7 @@ def test_org_balance(dd_run_check, aggregator, instance):
         ),
     ]
     expected_tags = EXPECTED_TAGS + [
-        'contract_number:contract_num',
+        'contract_number:3',
     ]
     with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_balance_metrics):
         check = SnowflakeCheck(CHECK_NAME, {}, [instance])
