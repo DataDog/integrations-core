@@ -1,5 +1,15 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 16.4.0 / 2022-06-16
+
+* [Added] Emulate an Agent shutdown after every test that uses the `dd_run_check` fixture by default. See [#12371](https://github.com/DataDog/integrations-core/pull/12371).
+* [Added] Adjust description character limits in manifest. See [#12339](https://github.com/DataDog/integrations-core/pull/12339).
+* [Added] Include information about the manifest migration in the docs build. See [#12136](https://github.com/DataDog/integrations-core/pull/12136).
+* [Fixed] Properly support E2E testing for Hatch envs. See [#12362](https://github.com/DataDog/integrations-core/pull/12362).
+* [Fixed] Fix validation for readme images. See [#12351](https://github.com/DataDog/integrations-core/pull/12351).
+* [Fixed] Fix `Configuration & Deployment` tag for v2 manifest migration. See [#12348](https://github.com/DataDog/integrations-core/pull/12348).
+* [Fixed] Fix manifest migration of macOS tag. See [#12138](https://github.com/DataDog/integrations-core/pull/12138).
+
 ## 16.3.0 / 2022-06-02
 
 * [Added] Move v2 manifest field `classifier_tags` under `tile`. See [#12122](https://github.com/DataDog/integrations-core/pull/12122).
