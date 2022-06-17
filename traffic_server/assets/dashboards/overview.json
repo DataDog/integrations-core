@@ -264,29 +264,8 @@
                         "id": 8583460126414344,
                         "layout": {
                             "height": 2,
-                            "width": 8,
+                            "width": 6,
                             "x": 0,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "background_color": "blue",
-                            "content": "The number of client requests serviced by Traffic Server, which consists of success, error, redirect, and IMS responses. This also includes requests which were serviced through proxied origin connections as well as from the Traffic Server cache.",
-                            "font_size": "16",
-                            "has_padding": true,
-                            "show_tick": true,
-                            "text_align": "left",
-                            "tick_edge": "left",
-                            "tick_pos": "50%",
-                            "type": "note",
-                            "vertical_align": "center"
-                        },
-                        "id": 4670516588496838,
-                        "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 8,
                             "y": 0
                         }
                     },
@@ -332,29 +311,29 @@
                         "id": 1632800084344946,
                         "layout": {
                             "height": 2,
-                            "width": 8,
-                            "x": 0,
-                            "y": 2
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
                         }
                     },
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "This measures the number of 4xx HTTP responses ",
+                            "content": "This represents the number of client requests serviced by Traffic Server, which consists of success, error, redirect, and IMS responses. This also includes requests which were serviced through proxied origin connections as well as from the Traffic Server cache.",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": true,
                             "text_align": "left",
-                            "tick_edge": "left",
+                            "tick_edge": "top",
                             "tick_pos": "50%",
                             "type": "note",
                             "vertical_align": "top"
                         },
-                        "id": 8287269558180218,
+                        "id": 4670516588496838,
                         "layout": {
                             "height": 2,
-                            "width": 4,
-                            "x": 8,
+                            "width": 6,
+                            "x": 0,
                             "y": 2
                         }
                     },
@@ -400,37 +379,16 @@
                         "id": 2646228885108582,
                         "layout": {
                             "height": 2,
-                            "width": 8,
-                            "x": 0,
-                            "y": 4
-                        }
-                    },
-                    {
-                        "definition": {
-                            "background_color": "blue",
-                            "content": "This measures the number of 5xx HTTP responses ",
-                            "font_size": "16",
-                            "has_padding": true,
-                            "show_tick": true,
-                            "text_align": "left",
-                            "tick_edge": "left",
-                            "tick_pos": "50%",
-                            "type": "note",
-                            "vertical_align": "top"
-                        },
-                        "id": 1695886764255422,
-                        "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 8,
-                            "y": 4
+                            "width": 6,
+                            "x": 6,
+                            "y": 2
                         }
                     }
                 ]
             },
             "id": 141320549947732,
             "layout": {
-                "height": 7,
+                "height": 5,
                 "width": 12,
                 "x": 0,
                 "y": 5
@@ -553,7 +511,7 @@
                 "height": 3,
                 "width": 12,
                 "x": 0,
-                "y": 12
+                "y": 10
             }
         },
         {
@@ -759,7 +717,7 @@
                 "height": 5,
                 "width": 12,
                 "x": 0,
-                "y": 15
+                "y": 13
             }
         },
         {
@@ -871,7 +829,7 @@
                 "height": 3,
                 "width": 12,
                 "x": 0,
-                "y": 20
+                "y": 18
             }
         },
         {
@@ -935,7 +893,7 @@
                             "content": "The Traffic Server event loop executes any pending events and performs I/O operations on network connections.\n\nThe time spent in the event loop can correspond to latency as any network connection has at most one I/O operation per event loop.\n\nThese metrics represent information about event loops in the last 100s.",
                             "font_size": "14",
                             "has_padding": true,
-                            "show_tick": true,
+                            "show_tick": false,
                             "text_align": "left",
                             "tick_edge": "left",
                             "tick_pos": "50%",
@@ -1051,7 +1009,7 @@
                 "height": 5,
                 "width": 12,
                 "x": 0,
-                "y": 23
+                "y": 21
             }
         },
         {
@@ -1224,7 +1182,7 @@
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 28
+                "y": 26
             }
         },
         {
@@ -1250,7 +1208,7 @@
                         },
                         "id": 3998461154026384,
                         "layout": {
-                            "height": 2,
+                            "height": 1,
                             "width": 6,
                             "x": 0,
                             "y": 0
@@ -1271,7 +1229,7 @@
                         },
                         "id": 2783117881588878,
                         "layout": {
-                            "height": 2,
+                            "height": 1,
                             "width": 6,
                             "x": 6,
                             "y": 0
@@ -1321,7 +1279,7 @@
                             "height": 2,
                             "width": 6,
                             "x": 0,
-                            "y": 2
+                            "y": 1
                         }
                     },
                     {
@@ -1368,7 +1326,7 @@
                             "height": 2,
                             "width": 6,
                             "x": 6,
-                            "y": 2
+                            "y": 1
                         }
                     },
                     {
@@ -1415,7 +1373,7 @@
                             "height": 2,
                             "width": 6,
                             "x": 0,
-                            "y": 4
+                            "y": 3
                         }
                     },
                     {
@@ -1462,17 +1420,17 @@
                             "height": 2,
                             "width": 6,
                             "x": 6,
-                            "y": 4
+                            "y": 3
                         }
                     }
                 ]
             },
             "id": 7697260686395784,
             "layout": {
-                "height": 7,
+                "height": 6,
                 "width": 12,
                 "x": 0,
-                "y": 33
+                "y": 31
             }
         },
         {
@@ -1586,7 +1544,7 @@
                 "height": 3,
                 "width": 12,
                 "x": 0,
-                "y": 40
+                "y": 37
             }
         },
         {
@@ -1768,7 +1726,7 @@
                 "height": 5,
                 "width": 12,
                 "x": 0,
-                "y": 43
+                "y": 40
             }
         }
     ]
