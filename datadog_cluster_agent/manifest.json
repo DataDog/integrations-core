@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "datadog_cluster_agent",
   "metric_prefix": "datadog_cluster_agent.",
-  "metric_to_check": "datadog.cluster_agent.admission_webhooks.certificate_expiry",
+  "metric_to_check": "datadog.cluster_agent.api_requests",
   "creates_events": false,
   "short_description": "Tracks metrics of the Datadog Cluster Agent",
   "guid": "275fd66d-2440-44e5-ac30-461062cd2825",
