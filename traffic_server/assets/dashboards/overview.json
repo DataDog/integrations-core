@@ -272,7 +272,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "This represents the number of client requests serviced by Traffic Server, which consists of success, error, redirect, and IMS responses. This also includes requests which were serviced through proxied origin connections as well as from the Traffic Server cache.",
+                            "content": "The number of client requests serviced by Traffic Server, which consists of success, error, redirect, and IMS responses. This also includes requests which were serviced through proxied origin connections as well as from the Traffic Server cache.",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": true,
