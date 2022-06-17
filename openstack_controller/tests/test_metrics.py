@@ -5,6 +5,7 @@ import json
 import os
 
 import mock
+import pytest
 
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 
@@ -7120,3 +7121,51 @@ def test_scenario(make_request, aggregator):
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.parametrize(
+    'auth_tokens_path',
+    [
+        pytest.param('auth_tokens_multiple_roles_response.json', id='multiple roles'),
+        pytest.param('auth_tokens_no_role_response.json', id='no roles'),
+    ],
+)
+@mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request', side_effect=make_request_responses)
+def test_auth_tokens(make_request, aggregator, auth_tokens_path):
+    # Ensure that the check can collect data when multiple or no roles are defined
+    instance = common.MOCK_CONFIG["instances"][0]
+    init_config = common.MOCK_CONFIG['init_config']
+    check = OpenStackControllerCheck('openstack_controller', init_config, [instance])
+
+    auth_tokens_response_path = os.path.join(common.FIXTURES_DIR, auth_tokens_path)
+    with open(auth_tokens_response_path, 'r') as f:
+        auth_tokens_response = json.loads(f.read())
+        auth_tokens_response = MockHTTPResponse(
+            response_dict=auth_tokens_response, headers={'X-Subject-Token': 'fake_token'}
+        )
+
+    auth_projects_response_path = os.path.join(common.FIXTURES_DIR, "auth_projects_response.json")
+    with open(auth_projects_response_path, 'r') as f:
+        auth_projects_response = json.loads(f.read())
+
+    with mock.patch(
+        'datadog_checks.openstack_controller.api.Authenticator._post_auth_token', return_value=auth_tokens_response
+    ):
+        with mock.patch(
+            'datadog_checks.openstack_controller.api.Authenticator._get_auth_projects',
+            return_value=auth_projects_response,
+        ):
+            check.check(common.MOCK_CONFIG['instances'][0])
+            aggregator.assert_metric(
+                'openstack.nova.server.tx_errors',
+                value=0.0,
+                tags=[
+                    'nova_managed_server',
+                    'project_name:admin',
+                    'hypervisor:compute7.openstack.local',
+                    'server_name:finalDestination-4',
+                    'availability_zone:nova',
+                    'interface:tapb488fc1e-3e',
+                ],
+                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
+            )
