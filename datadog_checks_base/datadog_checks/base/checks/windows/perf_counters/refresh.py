@@ -41,6 +41,7 @@ class WindowsPerformanceObjectRefresher(threading.Thread):
                 if server in self.last_refresh and now - self.last_refresh[server] < self.INTERVAL:
                     continue
                 else:
+                    self.logger.info('Refreshing performance objects for server: %s', server)
                     try:
                         # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectsa
                         # https://mhammond.github.io/pywin32/win32pdh__EnumObjects_meth.html
@@ -50,7 +51,7 @@ class WindowsPerformanceObjectRefresher(threading.Thread):
                             'Error refreshing performance objects for server `%s`: %s', server, error.strerror
                         )
                     else:
-                        self.logger.info('Refreshing performance objects for server: %s', server)
+                        self.logger.info('Successfully refreshed performance objects for server: %s', server)
 
                     self.last_refresh[server] = now
 
