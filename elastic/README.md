@@ -351,8 +351,6 @@ By default, not all of the following metrics are sent by the Agent. To send all 
 - `index_stats` sends **elasticsearch.index.\*** metrics
 - `pending_task_stats` sends **elasticsearch.pending\_\*** metrics
 
-For version >=6.3.0, set `xpack.monitoring.collection.enabled` configuration to `true` in your Elasticsearch configuration in order to collect all `elasticsearch.thread_pool.write.*` metrics. See [Elasticsearch release notes - monitoring section][24].
-
 ### Metrics
 
 See [metadata.csv][25] for a list of metrics provided by this integration.
@@ -398,7 +396,6 @@ See [service_checks.json][26] for a list of service checks provided by this inte
 [21]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
 [22]: https://docs.datadoghq.com/agent/amazon_ecs/apm/?tab=ec2metadataendpoint#setup
 [23]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[24]: https://www.elastic.co/guide/en/elasticsearch/reference/6.3/release-notes-6.3.0.html
 [25]: https://github.com/DataDog/integrations-core/blob/master/elastic/metadata.csv
 [26]: https://github.com/DataDog/integrations-core/blob/master/elastic/assets/service_checks.json
 [27]: https://docs.datadoghq.com/integrations/faq/elastic-agent-can-t-connect/
