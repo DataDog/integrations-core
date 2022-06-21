@@ -84,10 +84,7 @@ PG_STAT_STATEMENTS_TAG_COLUMNS = frozenset(
 PG_STAT_STATEMENTS_OPTIONAL_COLUMNS = frozenset({'queryid'})
 
 PG_STAT_ALL_DESIRED_COLUMNS = (
-    PG_STAT_STATEMENTS_METRICS_COLUMNS
-    | PG_STAT_STATEMENTS_TAG_COLUMNS
-    | PG_STAT_STATEMENTS_OPTIONAL_COLUMNS
-    | PG_STAT_STATEMENTS_TIMING_COLUMNS
+    PG_STAT_STATEMENTS_METRICS_COLUMNS | PG_STAT_STATEMENTS_TAG_COLUMNS | PG_STAT_STATEMENTS_OPTIONAL_COLUMNS
 )
 
 
@@ -228,10 +225,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 )
                 return []
 
-            if self._check.pg_settings.get("track_io_timing") != "on":
-                missing_columns -= PG_STAT_STATEMENTS_TIMING_COLUMNS
+            desired_columns = PG_STAT_ALL_DESIRED_COLUMNS
 
-            query_columns = sorted(list(available_columns & PG_STAT_ALL_DESIRED_COLUMNS))
+            if self._check.pg_settings.get("track_io_timing") == "on":
+                desired_columns |= PG_STAT_STATEMENTS_TIMING_COLUMNS
+
+            query_columns = sorted(list(available_columns & desired_columns))
             params = ()
             filters = ""
             if self._config.dbstrict:
