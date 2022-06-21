@@ -94,8 +94,8 @@ Need help? Contact [Datadog support][6].
 
 [1]: https://opentelemetry.io/docs/collector/getting-started/
 [2]: https://app.datadoghq.com/organization-settings/api-keys
-[3]: https://docs.datadoghq.com/tracing/setup_overview/open_standards/#opentelemetry-collector-datadog-exporter
+[3]: https://docs.datadoghq.com/tracing/setup_overview/open_standards/otel_collector_datadog_exporter/
 [4]: https://github.com/open-telemetry/opentelemetry-collector/tree/master/receiver/hostmetricsreceiver
 [5]: https://github.com/DataDog/integrations-core/blob/master/opentelemetry/metadata.csv
 [6]: https://docs.datadoghq.com/help/
-[7]: https://docs.datadoghq.com/tracing/setup_overview/open_standards/#otlp-ingest-in-datadog-agent
+[7]: https://docs.datadoghq.com/tracing/setup_overview/open_standards/otlp_ingest_in_the_agent/
