@@ -2039,10 +2039,11 @@ class TestIntegration:
 
 
 class TestAIAChasing:
+    @pytest.mark.skip(reason="expired certified, reactivate test when certified valid again")
     def test_incomplete_chain(self):
         # Protocol 1.2 is allowed by default
         http = RequestsWrapper({}, {})
-        http.get("https://badssl.test/")
+        http.get("https://incomplete-chain.badssl.com")
 
     def test_cant_allow_unknown_protocol(self, caplog):
         with caplog.at_level(logging.WARNING):
