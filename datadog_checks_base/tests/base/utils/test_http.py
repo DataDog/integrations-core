@@ -2051,6 +2051,7 @@ class TestAIAChasing:
             assert "Unknown protocol `unknown` configured, ignoring it." in caplog.text
         caplog.clear()
 
+    @pytest.mark.skip(reason="expired certified, reactivate test when certified valid again")
     def test_protocol_allowed(self):
         http = RequestsWrapper({'tls_protocols_allowed': ['TLSv1.2']}, {})
         http.get("https://incomplete-chain.badssl.com/")
