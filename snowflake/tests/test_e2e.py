@@ -145,7 +145,7 @@ def test_org_usage_mock_data(dd_agent_check, datadog_agent, instance):
     ]
     aggregator.assert_metric('snowflake.organization.currency.usage', value=0.4, tags=EXPECTED_TAGS + currency_tags)
     aggregator.assert_metric(
-        'snowflake.organization.currency.usage_in_currency', value=0.7, count=1, tags=EXPECTED_TAGS + currency_tags
+        'snowflake.organization.currency.usage_in_currency', value=0.7, tags=EXPECTED_TAGS + currency_tags
     )
 
     credit_usage_tags = [
@@ -153,34 +153,36 @@ def test_org_usage_mock_data(dd_agent_check, datadog_agent, instance):
         'service_type:Standard',
     ]
     aggregator.assert_metric(
-        'snowflake.organization.virtual_warehouse.sum', value=300, tags=EXPECTED_TAGS + credit_usage_tags
+        'snowflake.organization.credit.virtual_warehouse.sum', value=300, tags=EXPECTED_TAGS + credit_usage_tags
     )
     aggregator.assert_metric(
-        'snowflake.organization.virtual_warehouse.avg', value=3.4, tags=EXPECTED_TAGS + credit_usage_tags
+        'snowflake.organization.credit.virtual_warehouse.avg', value=3.4, tags=EXPECTED_TAGS + credit_usage_tags
     )
     aggregator.assert_metric(
-        'snowflake.organization.cloud_service.sum', value=902.49003, tags=EXPECTED_TAGS + credit_usage_tags
+        'snowflake.organization.credit.cloud_service.sum', value=902.49003, tags=EXPECTED_TAGS + credit_usage_tags
     )
     aggregator.assert_metric(
-        'snowflake.organization.cloud_service.avg', value=4.9227, tags=EXPECTED_TAGS + credit_usage_tags
+        'snowflake.organization.credit.cloud_service.avg', value=4.9227, tags=EXPECTED_TAGS + credit_usage_tags
     )
     aggregator.assert_metric(
-        'snowflake.organization.cloud_service_adjustment.sum', value=212.43, tags=EXPECTED_TAGS + credit_usage_tags
+        'snowflake.organization.credit.cloud_service_adjustment.sum',
+        value=212.43,
+        tags=EXPECTED_TAGS + credit_usage_tags,
     )
     aggregator.assert_metric(
-        'snowflake.organization.cloud_service_adjustment.avg', value=34.7, tags=EXPECTED_TAGS + credit_usage_tags
+        'snowflake.organization.credit.cloud_service_adjustment.avg', value=34.7, tags=EXPECTED_TAGS + credit_usage_tags
     )
     aggregator.assert_metric(
-        'snowflake.organization.total_credit.sum', value=342.8321, tags=EXPECTED_TAGS + credit_usage_tags
+        'snowflake.organization.credit.total_credit.sum', value=342.8321, tags=EXPECTED_TAGS + credit_usage_tags
     )
     aggregator.assert_metric(
-        'snowflake.organization.total_credit.avg', value=1.7, tags=EXPECTED_TAGS + credit_usage_tags
+        'snowflake.organization.credit.total_credit.avg', value=1.7, tags=EXPECTED_TAGS + credit_usage_tags
     )
     aggregator.assert_metric(
-        'snowflake.organization.total_credits_billed.sum', value=21.02, tags=EXPECTED_TAGS + credit_usage_tags
+        'snowflake.organization.credit.total_credits_billed.sum', value=21.02, tags=EXPECTED_TAGS + credit_usage_tags
     )
     aggregator.assert_metric(
-        'snowflake.organization.total_credits_billed.avg', value=2.9, tags=EXPECTED_TAGS + credit_usage_tags
+        'snowflake.organization.credit.total_credits_billed.avg', value=2.9, tags=EXPECTED_TAGS + credit_usage_tags
     )
 
     contract_tags = [

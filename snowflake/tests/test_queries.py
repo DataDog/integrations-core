@@ -211,16 +211,20 @@ def test_org_credit_usage(dd_run_check, aggregator, instance):
         check._conn = mock.MagicMock()
         check._query_manager.queries = [Query(queries.OrgCreditUsage)]
         dd_run_check(check)
-    aggregator.assert_metric('snowflake.organization.virtual_warehouse.sum', value=300, tags=expected_tags)
-    aggregator.assert_metric('snowflake.organization.virtual_warehouse.avg', value=3.4, tags=expected_tags)
-    aggregator.assert_metric('snowflake.organization.cloud_service.sum', value=902.49003, tags=expected_tags)
-    aggregator.assert_metric('snowflake.organization.cloud_service.avg', value=4.9227, tags=expected_tags)
-    aggregator.assert_metric('snowflake.organization.cloud_service_adjustment.sum', value=212.43, tags=expected_tags)
-    aggregator.assert_metric('snowflake.organization.cloud_service_adjustment.avg', value=34.7, tags=expected_tags)
-    aggregator.assert_metric('snowflake.organization.total_credit.sum', value=342.8321, tags=expected_tags)
-    aggregator.assert_metric('snowflake.organization.total_credit.avg', value=1.7, tags=expected_tags)
-    aggregator.assert_metric('snowflake.organization.total_credits_billed.sum', value=21.02, tags=expected_tags)
-    aggregator.assert_metric('snowflake.organization.total_credits_billed.avg', value=2.9, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.credit.virtual_warehouse.sum', value=300, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.credit.virtual_warehouse.avg', value=3.4, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.credit.cloud_service.sum', value=902.49003, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.credit.cloud_service.avg', value=4.9227, tags=expected_tags)
+    aggregator.assert_metric(
+        'snowflake.organization.credit.cloud_service_adjustment.sum', value=212.43, tags=expected_tags
+    )
+    aggregator.assert_metric(
+        'snowflake.organization.credit.cloud_service_adjustment.avg', value=34.7, tags=expected_tags
+    )
+    aggregator.assert_metric('snowflake.organization.credit.total_credit.sum', value=342.8321, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.credit.total_credit.avg', value=1.7, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.credit.total_credits_billed.sum', value=21.02, tags=expected_tags)
+    aggregator.assert_metric('snowflake.organization.credit.total_credits_billed.avg', value=2.9, tags=expected_tags)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
 
