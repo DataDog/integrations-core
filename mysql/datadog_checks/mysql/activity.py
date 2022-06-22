@@ -45,7 +45,7 @@ SELECT
     thread_a.processlist_command,
     thread_a.processlist_state,
     COALESCE(
-        COALESCE(statement.sql_text, thread_a.PROCESSLIST_info), thread_a.processlist_state) 
+        COALESCE(statement.sql_text, thread_a.PROCESSLIST_info), thread_a.processlist_state)
             AS sql_text,
     statement.timer_start AS event_timer_start,
     statement.timer_end AS event_timer_end,
@@ -53,7 +53,7 @@ SELECT
     statement.current_schema,
     MAX(waits_a.event_id) AS event_id,
     waits_a.end_event_id,
-    IF(waits_a.thread_id IS NULL, 
+    IF(waits_a.thread_id IS NULL,
         thread_a.processlist_state,
         COALESCE(
             IF(thread_a.processlist_state = 'User sleep', 'User sleep',
@@ -77,11 +77,11 @@ FROM
     LEFT JOIN performance_schema.events_statements_current AS statement ON statement.thread_id = thread_a.thread_id
     LEFT JOIN performance_schema.socket_instances AS socket ON socket.thread_id = thread_a.thread_id
 WHERE
-    thread_a.processlist_state IS NOT NULL 
-    AND thread_a.processlist_command != 'Sleep' 
-    AND thread_a.processlist_id != CONNECTION_ID() 
+    thread_a.processlist_state IS NOT NULL
+    AND thread_a.processlist_command != 'Sleep'
+    AND thread_a.processlist_id != CONNECTION_ID()
     AND thread_a.PROCESSLIST_COMMAND != 'Daemon'
-    AND (waits_a.EVENT_NAME != 'idle' OR waits_a.EVENT_NAME IS NULL) 
+    AND (waits_a.EVENT_NAME != 'idle' OR waits_a.EVENT_NAME IS NULL)
     AND (waits_a.operation != 'idle' OR waits_a.operation IS NULL)
 GROUP BY
     thread_a.thread_id,
@@ -98,10 +98,10 @@ GROUP BY
     statement.lock_time,
     statement.current_schema,
     waits_a.end_event_id,
-    If(waits_a.thread_id IS NULL, 
-        thread_a.processlist_state, 
+    If(waits_a.thread_id IS NULL,
+        thread_a.processlist_state,
         COALESCE(
-            IF(thread_a.processlist_state = 'User sleep', 'User sleep', 
+            IF(thread_a.processlist_state = 'User sleep', 'User sleep',
             IF(waits_a.event_id = waits_a.end_event_id, 'CPU', waits_a.event_name)), 'CPU'
         )
     ),
