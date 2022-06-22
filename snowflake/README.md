@@ -139,15 +139,17 @@ Additionally, you can monitor both account and organization metrics at the same 
         username: DATADOG_ORG_ADMIN
         password: '<PASSWORD>'
         role: SYSADMIN
-        database: ORGANIZATION_USAGE
-        min_collection_interval: 3600
+        schema: ORGANIZATION_USAGE
+        database: SNOWFLAKE
+        min_collection_interval: 43200
 
       - account: example-inc
         username: DATADOG_ACCOUNT_ADMIN
         password: '<PASSWORD>'
         role: DATADOG_ADMIN
-        database: ACCOUNT_USAGE
-        min_collection_interval: 43200
+        schema: ACCOUNT_USAGE
+        database: SNOWFLAKE
+        min_collection_interval: 3600
     ```
 
 #### Collecting data for multiple environments
