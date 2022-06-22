@@ -67,7 +67,7 @@ files:
         description: |
           Name of the default schema to use for the database.
 
-          To collect organization level metrics, set this to ORGANIZATION_USAGE
+          To collect organization level metrics, set this to ORGANIZATION_USAGE.
         value:
           type: string
           example: ACCOUNT_USAGE
