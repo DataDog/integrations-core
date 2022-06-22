@@ -92,6 +92,8 @@ QUERY_AO_AVAILABILITY_GROUPS = {
             DRS.low_water_mark_for_ghosts,
             (DRS.filestream_send_rate * 1024) AS filestream_send_rate,
             DRS.secondary_lag_seconds,
+            DRS.is_suspended AS db_is_suspended,
+            LOWER(DRS.suspend_reason) AS db_suspended_reason,
             FC.cluster_name
         FROM
             sys.availability_groups AS AG
@@ -128,6 +130,8 @@ QUERY_AO_AVAILABILITY_GROUPS = {
         {'name': 'ao.low_water_mark_for_ghosts', 'type': 'gauge'},
         {'name': 'ao.filestream_send_rate', 'type': 'gauge'},
         {'name': 'ao.secondary_lag_seconds', 'type': 'gauge'},
+        {'name': 'ao.db_is_suspended', 'type': 'gauge'},
+        {'name': 'db_suspended_reason', 'type': 'tag'},
         # FC - sys.dm_hadr_cluster
         {'name': 'failover_cluster', 'type': 'tag'},
     ],
