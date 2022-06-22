@@ -514,11 +514,6 @@ instances:
     #
     # empty_default_hostname: false
 
-    ## @param health_url - string - optional - default: http://localhost:10256/healthz
-    ## URL for the kube-proxy health endpoint.
-    #
-    # health_url: http://localhost:10256/healthz
-
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.
     ##
@@ -529,3 +524,8 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
+
+    ## @param health_url - string - optional - default: http://localhost:10256/healthz
+    ## URL for the kube-proxy health endpoint.
+    #
+    # health_url: http://localhost:10256/healthz

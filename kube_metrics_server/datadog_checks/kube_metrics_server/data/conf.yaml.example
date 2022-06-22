@@ -521,11 +521,6 @@ instances:
     #
     # empty_default_hostname: false
 
-    ## @param health_url - string - optional - default: http://localhost:443/livez
-    ## URL for the kube-metrics-server health endpoint.
-    #
-    # health_url: http://localhost:443/livez
-
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.
     ##
@@ -536,3 +531,8 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
+
+    ## @param health_url - string - optional - default: http://localhost:443/livez
+    ## URL for the kube-metrics-server health endpoint.
+    #
+    # health_url: http://localhost:443/livez
