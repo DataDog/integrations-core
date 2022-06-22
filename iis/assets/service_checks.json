@@ -13,5 +13,20 @@
         ],
         "name": "Site Up",
         "description": "Returns `CRITICAL` if the uptime for a site is 0 and `OK` otherwise. The site uptime is collected via Windows Performance Data Helper using the 'Web Service(*)\\Service Uptime' counter"
+    },
+    {
+        "agent_version": "7.20.0",
+        "integration": "IIS",
+        "check": "iis.app_pool_up",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "site"
+        ],
+        "name": "App Pool Up",
+        "description": "Returns `CRITICAL` if the tagged app_pool is down and `OK` otherwise."
     }
 ]

@@ -4,6 +4,7 @@
 from __future__ import division
 
 import copy
+import time
 from fnmatch import translate
 from math import isinf, isnan
 from os.path import isfile
@@ -366,6 +367,13 @@ class OpenMetricsScraperMixin(object):
 
         # The service account bearer token to be used for authentication
         config['_bearer_token'] = self._get_bearer_token(config['bearer_token_auth'], config['bearer_token_path'])
+        config['_bearer_token_last_refresh'] = time.time()
+
+        # Refresh the bearer token every 60 seconds by default.
+        # Ref https://github.com/DataDog/datadog-agent/pull/11686
+        config['bearer_token_refresh_interval'] = instance.get(
+            'bearer_token_refresh_interval', default_instance.get('bearer_token_refresh_interval', 60)
+        )
 
         config['telemetry'] = is_affirmative(instance.get('telemetry', default_instance.get('telemetry', False)))
 
@@ -396,9 +404,11 @@ class OpenMetricsScraperMixin(object):
         """
         Get http handler for a specific scraper config.
         The http handler is cached using `prometheus_url` as key.
+        The http handler doesn't use the cache if a bearer token is used to allow refreshing it.
         """
         prometheus_url = scraper_config['prometheus_url']
-        if prometheus_url in self._http_handlers:
+        bearer_token = scraper_config['_bearer_token']
+        if prometheus_url in self._http_handlers and bearer_token is None:
             return self._http_handlers[prometheus_url]
 
         # TODO: Deprecate this behavior in Agent 8
@@ -556,6 +566,9 @@ class OpenMetricsScraperMixin(object):
         process_start_time = None
         if not scraper_config['_flush_first_value'] and scraper_config['use_process_start_time']:
             agent_start_time = datadog_agent.get_process_start_time()
+
+        if scraper_config['bearer_token_auth']:
+            self._refresh_bearer_token(scraper_config)
 
         for metric in self.scrape_metrics(scraper_config):
             if agent_start_time is not None:
@@ -1191,6 +1204,17 @@ class OpenMetricsScraperMixin(object):
         except Exception as err:
             self.log.error("Cannot get bearer token from path: %s - error: %s", path, err)
             raise
+
+    def _refresh_bearer_token(self, scraper_config):
+        """
+        Refreshes the bearer token if the refresh interval is elapsed.
+        """
+        now = time.time()
+        if now - scraper_config['_bearer_token_last_refresh'] > scraper_config['bearer_token_refresh_interval']:
+            scraper_config['_bearer_token'] = self._get_bearer_token(
+                scraper_config['bearer_token_auth'], scraper_config['bearer_token_path']
+            )
+            scraper_config['_bearer_token_last_refresh'] = now
 
     def _histogram_convert_values(self, metric_name, converter):
         def _convert(metric, scraper_config=None):

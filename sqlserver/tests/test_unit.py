@@ -13,7 +13,7 @@ from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.metrics import SqlMasterDatabaseFileStats
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
-from datadog_checks.sqlserver.utils import set_default_driver_conf
+from datadog_checks.sqlserver.utils import parse_sqlserver_major_version, set_default_driver_conf
 
 from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
 from .utils import windows_ci
@@ -232,4 +232,26 @@ def test_check_local(aggregator, dd_run_check, init_config, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     expected_tags = instance_docker.get('tags', []) + ['sqlserver_host:{}'.format(DOCKER_SERVER), 'db:master']
-    assert_metrics(aggregator, expected_tags)
+    assert_metrics(aggregator, expected_tags, hostname=sqlserver_check.resolved_hostname)
+
+
+SQL_SERVER_2012_VERSION_EXAMPLE = """\
+Microsoft SQL Server 2012 (SP3) (KB3072779) - 11.0.6020.0 (X64)
+    Oct 20 2015 15:36:27
+    Copyright (c) Microsoft Corporation
+    Express Edition (64-bit) on Windows NT 6.3 <X64> (Build 17763: ) (Hypervisor)
+"""
+
+SQL_SERVER_2019_VERSION_EXAMPLE = """\
+Microsoft SQL Server 2019 (RTM-CU12) (KB5004524) - 15.0.4153.1 (X64)
+    Jul 19 2021 15:37:34
+    Copyright (C) 2019 Microsoft Corporation
+    Standard Edition (64-bit) on Windows Server 2016 Datacenter 10.0 <X64> (Build 14393: ) (Hypervisor)
+"""
+
+
+@pytest.mark.parametrize(
+    "version,expected_major_version", [(SQL_SERVER_2012_VERSION_EXAMPLE, 2012), (SQL_SERVER_2019_VERSION_EXAMPLE, 2019)]
+)
+def test_parse_sqlserver_major_version(version, expected_major_version):
+    assert parse_sqlserver_major_version(version) == expected_major_version

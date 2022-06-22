@@ -1,6 +1,22 @@
 # CHANGELOG - IBM MQ
 
-## 3.19.1 / 2022-03-01
+## 3.22.0 / 2022-05-15
+
+* [Added] Add `collect_reset_queue_metrics` option. See [#11818](https://github.com/DataDog/integrations-core/pull/11818).
+
+## 3.21.0 / 2022-04-05 / Agent 7.36.0
+
+* [Added] Add option to not try normal connection. See [#11748](https://github.com/DataDog/integrations-core/pull/11748).
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Fixed] Report critical queue manager service check when connection fails. See [#11737](https://github.com/DataDog/integrations-core/pull/11737).
+
+## 3.20.0 / 2022-03-16
+
+* [Added] Add `auto_discover_channels` option. See [#11678](https://github.com/DataDog/integrations-core/pull/11678).
+* [Fixed] Ensure PCFExecute disconnects. See [#11677](https://github.com/DataDog/integrations-core/pull/11677).
+* [Fixed] Improve debug logs. See [#11637](https://github.com/DataDog/integrations-core/pull/11637).
+
+## 3.19.1 / 2022-03-01 / Agent 7.35.0
 
 * [Fixed] Fix unique list items and min mapping properties config validations . See [#11574](https://github.com/DataDog/integrations-core/pull/11574).
 

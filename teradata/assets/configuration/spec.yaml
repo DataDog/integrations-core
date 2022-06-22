@@ -1,0 +1,159 @@
+name: Teradata
+files:
+- name: teradata.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+    - template: init_config/db
+  - template: instances
+    options:
+    - name: server
+      required: true
+      description: |
+        The IP address or FQDN (fully qualified domain name) of the Teradata database server.
+      value:
+        type: string
+    - name: port
+      description: |
+        Specifies the Teradata database port number
+      value:
+        type: integer
+        example: 1025
+    - name: username
+      description: Username for the Datadog-Teradata check user.
+      value:
+        type: string
+    - name: password
+      secret: true
+      description: Password for the Datadog-Teradata check user.
+      value:
+        type: string
+    - name: account
+      description: |
+        The Datadog-Teradata check user's account string to use when logging into the database.
+      value:
+        type: string
+    - name: database
+      required: true
+      description: |
+        The name of the database to access.
+      value:
+        type: string
+    - name: tables
+      description: |
+        Database tables to collect. If specifying a list of tables, the check will collect all disk metrics from
+        specified tables. If specifying a mapping, the available options are `include` and `exclude`. `include` will
+        collect all disk metrics from the specified tables. `exclude` will exclude collection of disk metrics from
+        specified tables. The check will exclude disk metric collection from a specified table if there is overlap.
+      value:
+        anyOf:
+        - type: array
+          items:
+            type: string
+        - type: object
+          properties:
+            - name: include
+              type: array
+              items:
+                type: string
+            - name: exclude
+              type: array
+              items:
+                type: string
+        example:
+          include:
+            - <TABLE_1>
+            - <TABLE_2>
+          exclude:
+            - <TABLE_3>
+    - name: collect_table_disk_metrics
+      description: |
+        Whether or not to collect table-specific disk space metrics from the DBC.AllSpaceV view.
+        If this option is enabled, Disk Space metrics will be collected for each included table specified in the
+        `tables` option, or all tables if the `tables` option is not configured.
+        Each metric will be tagged with `td_table`.
+      value:
+        type: boolean
+        example: false
+    - name: collect_res_usage_metrics
+      description: Collect metrics from the SPMA Resource Usage View.
+      value:
+        type: boolean
+        example: false
+    - name: https_port
+      description: The port number used for making TLS connections to the Teradata database.
+      value:
+        type: integer
+        example: 443
+    - name: ssl_mode
+      description: |
+        The SSL mode used for making TLS connections to the Teradata database.
+        Valid options are:
+        * Allow
+        * Disable
+        * Prefer
+        * Require
+        Note: Verify-CA and Verify-Full are currently not available.
+      value:
+        type: string
+        example: Prefer
+        enum:
+        - Allow
+        - Disable
+        - Prefer
+        - Require
+    - name: ssl_protocol
+      description: Specifies the TLS protocol for HTTPS/TLS connections. Currently, only TLSv1.2 is supported.
+      value:
+        type: string
+        example: TLSv1.2
+    - name: auth_mechanism
+      description: |
+        The authentication mechanism for connecting to the Teradata data source. If no value is provided, the defined
+        local default mechanism is used, otherwise the default mechanism defined by the database is used.
+
+        Valid options are:
+        * TD2 - Selects Teradata 2 authentication mechanism. Username and password are required. (Default)
+        * TDNEGO - Selects the Authentication Mechanism automatically based on the policy without user involvement.
+        * LDAP - Selects LDAP as the authentication mechanism. Specify the username and password using the `auth_data`
+                 configuration option.
+        * KRB5 - Selects Kerberos as the authentication mechanism. Specify the username and password using the
+                 `auth_data` configuration option.
+        * JWT - Selects JWT as the authentication mechanism, available in Teradata Advanced SQL Engine 16.20+.
+                Specify the JSON Web Token using the `auth_data` configuration option.
+      value:
+        type: string
+        enum:
+        - TD2
+        - TDNEGO
+        - LDAP
+        - KRB5
+        - JWT
+    - name: auth_data
+      secret: true
+      description: |
+        Specifies additional data needed by a logon authentication mechanism, such as a secure token,
+        Distinguished Name, or a domain/realm name. `auth_data` values are specific to each logon mechanism.
+        `auth_data` is not used with the TD2 mechanism.
+
+        `auth_data` for the JWT mechanism contains token= followed by the JSON Web Token.
+        For example:
+        auth_data: token=dHkiOiJKV1QiLCJoI2tGIS42
+
+        `auth_data` for the KRB5 mechanism can contain the Kerberos username, instance, realm, and password.
+        Use is optional, the current user can logon without supplying this information.
+        The sequence @@ always precedes the password.
+        For example:
+        auth_data: user1@ESDOM.ESDEV.TDAT@@mypassword
+
+        `auth_data` for the LDAP mechanism can contain spaces, commas, and single quotes.
+        When specifying this parameter with a DataSource, no special processing is required.
+        For example:
+        auth_data: 'authcid=username password=userpassword'
+        or
+        auth_data: username@@userpassword
+      value:
+        type: string
+    - template: instances/db
+    - template: instances/default

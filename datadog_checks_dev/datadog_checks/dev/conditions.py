@@ -13,7 +13,7 @@ from six.moves.urllib.request import urlopen
 from .errors import RetryError
 from .structures import LazyFunction
 from .subprocess import run_command
-from .utils import file_exists
+from .utils import file_exists, using_legacy_docker_compose
 
 
 class WaitFor(LazyFunction):
@@ -176,7 +176,10 @@ class CheckDockerLogs(CheckCommandOutput):
         wait=1,  # type: int
     ):
         if file_exists(identifier):
-            command = ['docker-compose', '-f', identifier, 'logs']
+            if using_legacy_docker_compose():
+                command = ['docker-compose', '-f', identifier, 'logs']
+            else:
+                command = ['docker', 'compose', '-f', identifier, 'logs']
         else:
             command = ['docker', 'logs', identifier]
 

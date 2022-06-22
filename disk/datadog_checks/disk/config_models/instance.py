@@ -31,6 +31,14 @@ class CreateMount(BaseModel):
     user: Optional[str]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
@@ -46,6 +54,7 @@ class InstanceConfig(BaseModel):
     file_system_exclude: Optional[Sequence[str]]
     file_system_include: Optional[Sequence[str]]
     include_all_devices: Optional[bool]
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     min_disk_size: Optional[float]
     mount_point_exclude: Optional[Sequence[str]]

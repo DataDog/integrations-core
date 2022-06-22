@@ -5,6 +5,7 @@
 extends:
   - _base.yaml
   - _generic-if.yaml
+  - _fortinet-fortigate-cpu-memory.yaml
 
 device:
   vendor: "fortinet"

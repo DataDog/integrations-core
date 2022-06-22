@@ -13,7 +13,7 @@
   "manifest_version": "1.0.0",
   "metric_prefix": "windows_service.",
   "name": "windows_service",
-  "public_title": "Datadog-Windows Services Integration",
+  "public_title": "Windows Services Integration",
   "short_description": "Monitor the state of your Windows services.",
   "support": "core",
   "supported_os": [

@@ -25,15 +25,15 @@ The Windows Event Log check is included in the [Datadog Agent][1] package. There
 
 First ensure that you have set `logs_enabled: true` in your `datadog.yaml` file.
 
-To collect logs from specific Windows events, add the channels to the `conf.d/win32_event_log.d/conf.yaml` file manually, or use the Datadog Agent Manager. See the [Windows Event Logs documentation][13].
+To collect logs from specific Windows events, add channels to the `conf.d/win32_event_log.d/conf.yaml` file manually, or use the Datadog Agent Manager. See the [Windows Event Logs documentation][13].
 
-To see the channel list, run the following command in a PowerShell:
+To see a list of channels, run the following command in PowerShell:
 
 ```powershell
 Get-WinEvent -ListLog *
 ```
 
-To see the most active channels, run the following command in a PowerShell:
+To see the most active channels, run the following command in PowerShell:
 
 ```powershell
 Get-WinEvent -ListLog * | sort RecordCount -Descending
@@ -48,9 +48,18 @@ Circular 134217728 249896 Security
 
 The value under the column `LogName` is the name of the channel. In the above example, the channel name is `Security`.
 
-Then add the channels in your `win32_event_log.d/conf.yaml` configuration file:
+Add channels to the `logs` section of your `win32_event_log.d/conf.yaml` configuration file. Each channel also requires an entry in the `instances` section of the file. This example shows entries for the `Security` and `<CHANNEL_2>` channels:
 
 ```yaml
+init_config:
+instances:
+  - path: Security 
+    legacy_mode: false
+    filters: {}
+
+  - path: "<CHANNEL_2>" 
+    legacy_mode: false
+    filters: {}
 logs:
   - type: windows_event
     channel_path: Security
@@ -107,7 +116,7 @@ Double-check your filters' values with <code>Get-WmiObject</code> if the integra
     Some example filters:
     
     ```yaml
-    - type: windows_event
+      - type: windows_event
         channel_path: Security
         source: windows.events
         service: Windows       

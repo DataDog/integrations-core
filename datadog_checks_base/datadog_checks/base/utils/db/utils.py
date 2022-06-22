@@ -20,6 +20,8 @@ from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.types import Transformer
 from datadog_checks.base.utils.serialization import json
 
+from ..common import to_native_string
+
 try:
     import datadog_agent
 except ImportError:
@@ -185,22 +187,25 @@ def obfuscate_sql_with_metadata(query, options=None):
     if not query:
         return {'query': '', 'metadata': {}}
 
-    def _load_metadata(statement):
-        try:
-            statement_with_metadata = json.loads(statement)
-            metadata = statement_with_metadata.get('metadata', {})
-            tables = metadata.pop('tables_csv', None)
-            tables = [table.strip() for table in tables.split(',') if table != ''] if tables else None
-            statement_with_metadata['metadata']['tables'] = tables
-            return statement_with_metadata
-        except ValueError:
-            # Assume we're running against an older agent and return the obfuscated query without metadata.
-            return {'query': statement, 'metadata': {}}
+    statement = datadog_agent.obfuscate_sql(query, options)
+    # The `obfuscate_sql` testing stub returns bytes, so we have to handle that here.
+    # The actual `obfuscate_sql` method in the agent's Go code returns a JSON string.
+    statement = to_native_string(statement.strip())
 
-    obfuscated_statement = datadog_agent.obfuscate_sql(query, options)
-    if options and json.loads(options).get('return_json_metadata', False):
-        return _load_metadata(obfuscated_statement)
-    return {'query': obfuscated_statement, 'metadata': {}}
+    # Older agents may not have the new metadata API which returns a JSON string, so we must support cases where
+    # newer integrations are running on an older agent. We use this "shortcut" to determine if we've received
+    # a JSON string to avoid throwing excessive exceptions. We found that orjson leaks memory when failing
+    # to parse these strings which are not valid json. Note, this condition is only relevant for integrations
+    # running on agent versions < 7.34
+    if not statement.startswith('{'):
+        return {'query': statement, 'metadata': {}}
+
+    statement_with_metadata = json.loads(statement)
+    metadata = statement_with_metadata.get('metadata', {})
+    tables = metadata.pop('tables_csv', None)
+    tables = [table.strip() for table in tables.split(',') if table != ''] if tables else None
+    statement_with_metadata['metadata']['tables'] = tables
+    return statement_with_metadata
 
 
 class DBMAsyncJob(object):

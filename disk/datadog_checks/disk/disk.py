@@ -25,7 +25,6 @@ if platform.system() == 'Windows':
     def _base_device_name(device):
         return device.strip('\\').lower()
 
-
 else:
     IGNORE_CASE = 0
 

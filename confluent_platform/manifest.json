@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Confluent Platform Integration",
+  "public_title": "Confluent Platform Integration",
   "categories": [
     "processing",
     "messaging",

@@ -7,7 +7,7 @@ import snowflake.connector as sf
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
-from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
+from datadog_checks.base import AgentCheck, ConfigurationError, ensure_bytes, to_native_string
 from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
@@ -85,7 +85,7 @@ class SnowflakeCheck(AgentCheck):
     def read_token(self):
         if self._config.token_path:
             self.log.debug("Renewing Snowflake client token")
-            with open(self._config.token_path, 'rb', encoding="UTF-8") as f:
+            with open(self._config.token_path, 'rb') as f:
                 self._config.token = f.read()
 
         return self._config.token
@@ -96,7 +96,7 @@ class SnowflakeCheck(AgentCheck):
             # https://docs.snowflake.com/en/user-guide/python-connector-example.html#using-key-pair-authentication-key-pair-rotation
             with open(self._config.private_key_path, "rb") as key:
                 p_key = serialization.load_pem_private_key(
-                    key.read(), password=self._config.private_key_password, backend=default_backend()
+                    key.read(), password=ensure_bytes(self._config.private_key_password), backend=default_backend()
                 )
 
                 pkb = p_key.private_bytes(

@@ -21,7 +21,7 @@ ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, autho
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Update the changelog for a check')
-@click.argument('check', autocompletion=complete_testable_checks, callback=validate_check_arg)
+@click.argument('check', shell_complete=complete_testable_checks, callback=validate_check_arg)
 @click.argument('version')
 @click.argument('old_version', required=False)
 @click.option('--end')

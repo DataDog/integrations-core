@@ -58,7 +58,7 @@ To configure this check for an Agent running on a host:
     ```yaml  
         instances:
         
-            ## @param use_openmetrics - boolean - optional - default: true
+            ## @param use_openmetrics - boolean - optional - default: false
             ## Use the latest OpenMetrics V2 implementation for more features and better performance.
             ##
             ## Note: To see the configuration options for the legacy OpenMetrics implementation (Agent 7.33 or older),
@@ -114,21 +114,39 @@ Cilium contains two types of logs: `cilium-agent` and `cilium-operator`.
 
 For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
 
-##### Metric collection
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][7].
+
+##### To collect `cilium-agent` metrics and logs: 
+
+- Metric collection
 
 | Parameter            | Value                                                      |
 |----------------------|------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `cilium`                                                   |
+| `<INTEGRATION_NAME>` | `"cilium"`                                                 |
 | `<INIT_CONFIG>`      | blank or `{}`                                              |
-| `<INSTANCE_CONFIG>`  | `{"agent_endpoint": "http://%%host%%:9090/metrics", "use_openmetrics": True}`       |
+| `<INSTANCE_CONFIG>`  | `{"agent_endpoint": "http://%%host%%:9090/metrics", "use_openmetrics": "true"}` |
 
-##### Log collection
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][7].
+- Log collection
 
 | Parameter      | Value                                     |
 |----------------|-------------------------------------------|
 | `<LOG_CONFIG>` | `{"source": "cilium-agent", "service": "cilium-agent"}` |
+
+##### To collect `cilium-operator` metrics and logs: 
+
+- Metric collection
+
+| Parameter            | Value                                                      |
+|----------------------|------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `"cilium"`                                                 |
+| `<INIT_CONFIG>`      | blank or `{}`                                              |
+| `<INSTANCE_CONFIG>`  | `{"operator_endpoint": "http://%%host%%:6942/metrics", "use_openmetrics": "true"}` |
+
+- Log collection
+
+| Parameter      | Value                                     |
+|----------------|-------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "cilium-operator", "service": "cilium-operator"}` |
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->

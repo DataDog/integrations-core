@@ -27,6 +27,14 @@ class AuthToken(BaseModel):
     writer: Optional[Mapping[str, Any]]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class Proxy(BaseModel):
     class Config:
         allow_mutation = False
@@ -63,6 +71,7 @@ class InstanceConfig(BaseModel):
     log_requests: Optional[bool]
     max_dbs_per_check: Optional[int]
     max_nodes_per_check: Optional[int]
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     name: Optional[str]
     ntlm_domain: Optional[str]

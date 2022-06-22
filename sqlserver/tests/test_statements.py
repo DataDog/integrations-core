@@ -65,7 +65,7 @@ def dbm_instance(instance_docker):
         ],
     ],
 )
-def test_get_available_query_metrics_columns(aggregator, dbm_instance, expected_columns, available_columns):
+def test_get_available_query_metrics_columns(dbm_instance, expected_columns, available_columns):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     check.initialize_connection()
     _conn_key_prefix = "dbm-"
@@ -97,19 +97,18 @@ def test_get_statement_metrics_query_cached(aggregator, dbm_instance, caplog):
 
 
 test_statement_metrics_and_plans_parameterized = (
-    "database,plan_user,query,match_pattern,param_groups,disable_secondary_tags",
+    "database,query,match_pattern,param_groups,is_encrypted,disable_secondary_tags",
     [
         [
             "datadog_test",
-            "dbo",
             "SELECT * FROM ϑings",
             r"SELECT \* FROM ϑings",
             ((),),
             False,
+            False,
         ],
         [
             "datadog_test",
-            "dbo",
             "SELECT * FROM ϑings where id = ?",
             r"\(@P1 \w+\)SELECT \* FROM ϑings where id = @P1",
             (
@@ -118,10 +117,10 @@ test_statement_metrics_and_plans_parameterized = (
                 (3,),
             ),
             False,
+            False,
         ],
         [
             "master",
-            None,
             "SELECT * FROM datadog_test.dbo.ϑings where id = ?",
             r"\(@P1 \w+\)SELECT \* FROM datadog_test.dbo.ϑings where id = @P1",
             (
@@ -130,10 +129,10 @@ test_statement_metrics_and_plans_parameterized = (
                 (3,),
             ),
             False,
+            False,
         ],
         [
             "datadog_test",
-            "dbo",
             "SELECT * FROM ϑings where id = ? and name = ?",
             r"\(@P1 \w+,@P2 (N)?VARCHAR\(\d+\)\)SELECT \* FROM ϑings where id = @P1 and name = @P2",
             (
@@ -142,10 +141,10 @@ test_statement_metrics_and_plans_parameterized = (
                 (3, "bill"),
             ),
             False,
+            False,
         ],
         [
             "datadog_test",
-            "dbo",
             "SELECT * FROM ϑings where id = ?",
             r"\(@P1 \w+\)SELECT \* FROM ϑings where id = @P1",
             (
@@ -153,7 +152,16 @@ test_statement_metrics_and_plans_parameterized = (
                 (2,),
                 (3,),
             ),
+            False,
             True,
+        ],
+        [
+            "master",
+            "EXEC encryptedProc",
+            None,
+            ((),),
+            True,
+            False,
         ],
     ],
 )
@@ -168,9 +176,9 @@ def test_statement_metrics_and_plans(
     dbm_instance,
     bob_conn,
     database,
-    plan_user,
     query,
     param_groups,
+    is_encrypted,
     disable_secondary_tags,
     match_pattern,
     caplog,
@@ -218,18 +226,24 @@ def test_statement_metrics_and_plans(
     # metrics rows
     sqlserver_rows = payload.get('sqlserver_rows', [])
     assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
-    matching_rows = [r for r in sqlserver_rows if re.match(match_pattern, r['text'], re.IGNORECASE)]
+    if match_pattern:
+        matching_rows = [r for r in sqlserver_rows if re.match(match_pattern, r['text'], re.IGNORECASE)]
+    else:
+        matching_rows = [r for r in sqlserver_rows if not r['text']]
     assert len(matching_rows) >= 1, "expected at least one matching metrics row"
     total_execution_count = sum([r['execution_count'] for r in matching_rows])
     assert total_execution_count == len(param_groups), "wrong execution count"
     for row in matching_rows:
-        assert row['query_signature'], "missing query signature"
+        if is_encrypted:
+            # we get NULL text for encrypted statements so we have no calculated query signature
+            assert not row['query_signature']
+        else:
+            assert row['query_signature'], "missing query signature"
+        assert row['is_encrypted'] == is_encrypted
         if disable_secondary_tags:
             assert 'database_name' not in row
-            assert 'user_name' not in row
         else:
             assert row['database_name'] == database, "incorrect database_name"
-            assert row['user_name'] == plan_user, "incorrect user_name"
         for column in available_query_metrics_columns:
             assert column in row, "missing required metrics column {}".format(column)
             assert type(row[column]) in (float, int), "wrong type for metrics column {}".format(column)
@@ -237,7 +251,10 @@ def test_statement_metrics_and_plans(
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     assert dbm_samples, "should have collected at least one sample"
 
-    matching_samples = [s for s in dbm_samples if re.match(match_pattern, s['db']['statement'], re.IGNORECASE)]
+    if match_pattern:
+        matching_samples = [s for s in dbm_samples if re.match(match_pattern, s['db']['statement'], re.IGNORECASE)]
+    else:
+        matching_samples = [s for s in dbm_samples if not s['db']['statement']]
     assert matching_samples, "should have collected some matching samples"
 
     # validate common host fields
@@ -252,15 +269,22 @@ def test_statement_metrics_and_plans(
                 set(event['ddtags'].split(',')) == expected_instance_tags_with_db
             ), "wrong instance tags for plan event"
 
-    plan_events = [s for s in dbm_samples if s['dbm_type'] == "plan"]
+    plan_events = [s for s in matching_samples if s['dbm_type'] == "plan"]
     assert plan_events, "should have collected some plans"
 
     for event in plan_events:
-        assert event['db']['plan']['definition'], "event plan definition missing"
-        parsed_plan = ET.fromstring(event['db']['plan']['definition'])
-        assert parsed_plan.tag.endswith("ShowPlanXML"), "plan does not match expected structure"
+        if is_encrypted:
+            assert not event['db']['plan']['definition']
+            assert event['sqlserver']['is_plan_encrypted']
+            assert event['sqlserver']['is_statement_encrypted']
+        else:
+            assert event['db']['plan']['definition'], "event plan definition missing"
+            parsed_plan = ET.fromstring(event['db']['plan']['definition'])
+            assert parsed_plan.tag.endswith("ShowPlanXML"), "plan does not match expected structure"
+            assert not event['sqlserver']['is_plan_encrypted']
+            assert not event['sqlserver']['is_statement_encrypted']
 
-    fqt_events = [s for s in dbm_samples if s['dbm_type'] == "fqt"]
+    fqt_events = [s for s in matching_samples if s['dbm_type'] == "fqt"]
     assert fqt_events, "should have collected some FQT events"
 
     # internal debug metrics
@@ -294,6 +318,7 @@ def test_statement_metadata(
     query = '''
     -- Test comment
     select * from sys.databases'''
+    query_signature = 'ee1663c796378ab0'
 
     def _run_query():
         bob_conn.execute_with_retries(query)
@@ -312,24 +337,125 @@ def test_statement_metadata(
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     assert dbm_samples, "should have collected at least one sample"
 
-    matching = [
-        s for s in dbm_samples if 'select * from sys.databases' in s['db']['statement'] and s['dbm_type'] == 'plan'
-    ]
+    matching = [s for s in dbm_samples if s['db']['query_signature'] == query_signature and s['dbm_type'] == 'plan']
     assert len(matching) == 1
-
     sample = matching[0]
     assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
     assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
     assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
 
+    fqt_samples = [
+        s for s in dbm_samples if s.get('dbm_type') == 'fqt' and s['db']['query_signature'] == query_signature
+    ]
+    assert len(fqt_samples) == 1
+    fqt = fqt_samples[0]
+    assert fqt['db']['metadata']['tables'] == expected_metadata_payload['tables']
+    assert fqt['db']['metadata']['commands'] == expected_metadata_payload['commands']
+
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1
     metric = dbm_metrics[0]
-    matching_metrics = [m for m in metric['sqlserver_rows'] if 'select * from sys.databases' in m['text']]
+    matching_metrics = [m for m in metric['sqlserver_rows'] if m['query_signature'] == query_signature]
     assert len(matching_metrics) == 1
     metric = matching_metrics[0]
     assert metric['dd_tables'] == expected_metadata_payload['tables']
     assert metric['dd_commands'] == expected_metadata_payload['commands']
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "cloud_metadata",
+    [
+        {},
+        {
+            'azure': {
+                'deployment_type': 'managed_instance',
+                'database_name': 'my-instance',
+            },
+        },
+        {
+            'aws': {
+                'instance_endpoint': 'foo.aws.com',
+            },
+            'azure': {
+                'deployment_type': 'managed_instance',
+                'database_name': 'my-instance',
+            },
+        },
+        {
+            'gcp': {
+                'project_id': 'foo-project',
+                'instance_id': 'bar',
+                'extra_field': 'included',
+            },
+        },
+    ],
+)
+def test_statement_cloud_metadata(aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, cloud_metadata):
+    if cloud_metadata:
+        for k, v in cloud_metadata.items():
+            dbm_instance[k] = v
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    query = 'SELECT * FROM ϑings'
+
+    def _run_query():
+        bob_conn.execute_with_retries(query, (), database="datadog_test")
+
+    # the check must be run three times:
+    # 1) set _last_stats_query_time (this needs to happen before the 1st test queries to ensure the query time
+    # interval is correct)
+    # 2) load the test queries into the StatementMetrics state
+    # 3) emit the query metrics based on the diff of current and last state
+    _run_query()
+    dd_run_check(check)
+    _run_query()
+    dd_run_check(check)
+    aggregator.reset()
+    _run_query()
+    dd_run_check(check)
+
+    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(dbm_metrics) == 1, "should have collected exactly one metrics payload"
+    payload = dbm_metrics[0]
+    # host metadata
+    assert payload['sqlserver_version'].startswith("Microsoft SQL Server"), "invalid version"
+    assert payload['host'] == "stubbed.hostname", "wrong hostname"
+    assert payload['ddagenthostname'] == datadog_agent.get_hostname()
+    # cloud metadata
+    assert payload['cloud_metadata'] == cloud_metadata, "wrong cloud_metadata"
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "reported_hostname,expected_hostname",
+    [
+        (None, 'stubbed.hostname'),
+        ('override.hostname', 'override.hostname'),
+    ],
+)
+def test_statement_reported_hostname(
+    aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, reported_hostname, expected_hostname
+):
+    dbm_instance['reported_hostname'] = reported_hostname
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    samples = aggregator.get_event_platform_events("dbm-samples")
+    assert samples, "should have collected at least one sample"
+    assert samples[0]['host'] == expected_hostname
+
+    fqt_samples = [s for s in samples if s.get('dbm_type') == 'fqt']
+    assert fqt_samples, "should have collected at least one fqt sample"
+    assert fqt_samples[0]['host'] == expected_hostname
+
+    metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert metrics, "should have collected metrics"
+    assert metrics[0]['host'] == expected_hostname
 
 
 @pytest.mark.integration

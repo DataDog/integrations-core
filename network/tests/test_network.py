@@ -58,12 +58,71 @@ LINUX_SYS_NET_STATS = {
 }
 
 
+PROC_NET_STATS = {
+    'system.net.ip.in_receives': 159747123,
+    'system.net.ip.in_header_errors': 23,
+    'system.net.ip.in_addr_errors': 0,
+    'system.net.ip.in_unknown_protos': 0,
+    'system.net.ip.in_discards': 0,
+    'system.net.ip.in_delivers': 159745645,
+    'system.net.ip.out_requests': 162992767,
+    'system.net.ip.out_discards': 613,
+    'system.net.ip.out_no_routes': 0,
+    'system.net.ip.forwarded_datagrams': 1449,
+    'system.net.ip.reassembly_timeouts': 0,
+    'system.net.ip.reassembly_requests': 0,
+    'system.net.ip.reassembly_oks': 0,
+    'system.net.ip.reassembly_fails': 0,
+    'system.net.ip.fragmentation_oks': 0,
+    'system.net.ip.fragmentation_fails': 0,
+    'system.net.ip.fragmentation_creates': 0,
+    'system.net.ip.in_receives.count': 159747123,
+    'system.net.ip.in_header_errors.count': 23,
+    'system.net.ip.in_addr_errors.count': 0,
+    'system.net.ip.in_unknown_protos.count': 0,
+    'system.net.ip.in_discards.count': 0,
+    'system.net.ip.in_delivers.count': 159745645,
+    'system.net.ip.out_requests.count': 162992767,
+    'system.net.ip.out_discards.count': 613,
+    'system.net.ip.out_no_routes.count': 0,
+    'system.net.ip.forwarded_datagrams.count': 1449,
+    'system.net.ip.reassembly_timeouts.count': 0,
+    'system.net.ip.reassembly_requests.count': 0,
+    'system.net.ip.reassembly_oks.count': 0,
+    'system.net.ip.reassembly_fails.count': 0,
+    'system.net.ip.fragmentation_oks.count': 0,
+    'system.net.ip.fragmentation_fails.count': 0,
+    'system.net.ip.fragmentation_creates.count': 0,
+    'system.net.tcp.active_opens': 6828054,
+    'system.net.tcp.passive_opens': 4198200,
+    'system.net.tcp.attempt_fails': 174,
+    'system.net.tcp.established_resets': 761431,
+    'system.net.tcp.current_established': 59,
+    'system.net.tcp.in_errors': 0,
+    'system.net.tcp.out_resets': 792992,
+    'system.net.tcp.in_csum_errors': 0,
+    'system.net.tcp.active_opens.count': 6828054,
+    'system.net.tcp.passive_opens.count': 4198200,
+    'system.net.tcp.attempt_fails.count': 174,
+    'system.net.tcp.established_resets.count': 761431,
+    'system.net.tcp.in_errors.count': 0,
+    'system.net.tcp.out_resets.count': 792992,
+    'system.net.tcp.in_csum_errors.count': 0,
+    'system.net.ip.in_no_routes': 6,
+    'system.net.ip.in_truncated_pkts': 0,
+    'system.net.ip.in_csum_errors': 0,
+    'system.net.ip.reassembly_overlaps': 0,
+    'system.net.ip.in_no_routes.count': 6,
+    'system.net.ip.in_truncated_pkts.count': 0,
+    'system.net.ip.in_csum_errors.count': 0,
+    'system.net.ip.reassembly_overlaps.count': 0,
+}
+
 if PY3:
     ESCAPE_ENCODING = 'unicode-escape'
 
     def decode_string(s):
         return s.decode(ESCAPE_ENCODING)
-
 
 else:
     ESCAPE_ENCODING = 'string-escape'
@@ -170,6 +229,15 @@ def test_cx_state_mocked(is_linux, aggregator, check):
         check.check(instance)
         for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
             aggregator.assert_metric(metric, value=value)
+
+
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_proc_net_metrics(is_linux, aggregator, check):
+    check._get_net_proc_base_location = lambda x: FIXTURE_DIR
+    instance = {'collect_count_metrics': True}
+    check.check(instance)
+    for metric, value in iteritems(PROC_NET_STATS):
+        aggregator.assert_metric(metric, value=value)
 
 
 def test_add_conntrack_stats_metrics(aggregator, check):

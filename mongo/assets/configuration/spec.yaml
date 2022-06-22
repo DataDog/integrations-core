@@ -32,9 +32,11 @@ files:
       value:
         example:
         - <HOST>:<PORT>
-        type: array
-        items:
-          type: string
+        anyOf:
+          - type: string
+          - type: array
+            items:
+              type: string
     - name: username
       description: |
         The username to use for authentication.

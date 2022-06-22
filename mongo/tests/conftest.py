@@ -146,7 +146,7 @@ def setup_sharding(compose_file):
         if i == len(service_commands):
             time.sleep(10)
 
-        run_command(['docker-compose', '-f', compose_file, 'exec', '-T', service, 'sh', '-c', command], check=True)
+        run_command(['docker', 'compose', '-f', compose_file, 'exec', '-T', service, 'sh', '-c', command], check=True)
 
 
 class InitializeDB(LazyFunction):

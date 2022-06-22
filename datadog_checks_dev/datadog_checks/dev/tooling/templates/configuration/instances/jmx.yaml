@@ -127,4 +127,4 @@
     example: true
     type: boolean
 
-- template: instances/default
+- template: instances/all_integrations

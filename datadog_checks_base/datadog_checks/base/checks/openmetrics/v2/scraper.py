@@ -4,9 +4,10 @@
 import fnmatch
 import inspect
 import re
-from copy import deepcopy
+from copy import copy, deepcopy
 from itertools import chain
 from math import isinf, isnan
+from typing import List
 
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_metric_families_strict
 from prometheus_client.parser import text_fd_to_metric_families as parse_metric_families
@@ -174,7 +175,7 @@ class OpenMetricsScraper:
                         f'Label `{label}` of setting `exclude_metrics_by_labels` must be an array or set to `true`'
                     )
 
-        custom_tags = config.get('tags', [])
+        custom_tags = config.get('tags', [])  # type: List[str]
         if not isinstance(custom_tags, list):
             raise ConfigurationError('Setting `tags` must be an array')
 
@@ -192,11 +193,12 @@ class OpenMetricsScraper:
             ignored_tags_re = re.compile('|'.join(set(ignore_tags)))
             custom_tags = [tag for tag in custom_tags if not ignored_tags_re.search(tag)]
 
-        # These will be applied only to service checks
-        self.static_tags = [f'endpoint:{self.endpoint}']
-        self.static_tags.extend(custom_tags)
-        self.static_tags = tuple(self.static_tags)
+        self.static_tags = copy(custom_tags)
+        if is_affirmative(self.config.get('tag_by_endpoint', True)):
+            self.static_tags.append(f'endpoint:{self.endpoint}')
 
+        # These will be applied only to service checks
+        self.static_tags = tuple(self.static_tags)
         # These will be applied to everything except service checks
         self.tags = self.static_tags
 
@@ -217,12 +219,14 @@ class OpenMetricsScraper:
         if is_affirmative(config.get('use_latest_spec', False)):
             self.parse_metric_families = parse_metric_families_strict
             # https://github.com/prometheus/client_python/blob/v0.9.0/prometheus_client/openmetrics/exposition.py#L7
-            self.http.options['headers'].setdefault(
-                'Accept', 'application/openmetrics-text; version=0.0.1; charset=utf-8'
-            )
+            accept_header = 'application/openmetrics-text; version=0.0.1; charset=utf-8'
         else:
             self.parse_metric_families = parse_metric_families
-            self.http.options['headers'].setdefault('Accept', 'text/plain')
+            accept_header = 'text/plain'
+
+        # Request the appropriate exposition format
+        if self.http.options['headers'].get('Accept') == '*/*':
+            self.http.options['headers']['Accept'] = accept_header
 
         self.use_process_start_time = is_affirmative(config.get('use_process_start_time'))
 

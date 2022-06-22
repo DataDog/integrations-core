@@ -12,7 +12,7 @@
   "metric_prefix": "ntp.",
   "metric_to_check": "ntp.offset",
   "name": "ntp",
-  "public_title": "Datadog-NTP Integration",
+  "public_title": "NTP Integration",
   "short_description": "Get alerts when your hosts drift out of sync with your chosen NTP server.",
   "support": "core",
   "supported_os": [

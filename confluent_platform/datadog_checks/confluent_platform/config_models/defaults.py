@@ -30,10 +30,6 @@ def instance_collect_default_jvm_metrics(field, value):
     return True
 
 
-def instance_disable_generic_tags(field, value):
-    return False
-
-
 def instance_empty_default_hostname(field, value):
     return False
 

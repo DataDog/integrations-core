@@ -17,7 +17,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-RethinkDB Integration",
+  "public_title": "RethinkDB Integration",
   "categories": [
     "data store",
     "log collection"

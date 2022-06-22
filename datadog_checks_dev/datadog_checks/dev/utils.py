@@ -30,6 +30,10 @@ def get_tox_env():
     return os.environ['TOX_ENV_NAME']
 
 
+def using_legacy_docker_compose():
+    return os.environ.get('LEGACY_DOCKER_COMPOSE', 'false') == 'true'
+
+
 def ensure_bytes(s):
     if not isinstance(s, bytes):
         s = s.encode('utf-8')

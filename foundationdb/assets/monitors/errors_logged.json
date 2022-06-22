@@ -1,0 +1,54 @@
+{
+	"name": "FoundationDB Errors Logged",
+	"type": "log alert",
+	"query": "logs(\"service:foundationdb @Severity:>=40\").index(\"*\").rollup(\"count\").by(\"host\").last(\"10m\") > 3",
+	"message": "FoundationDB has logged errors. This indicates that one of the assumptions of the database has been violated; such situations are generally caused by hardware failures.",
+	"tags": [
+		"integration:fdb"
+	],
+	"options": {
+		"thresholds": {
+			"critical": 3,
+			"warning": 1,
+			"comparison": ">",
+			"period": {
+				"name": "10 minute average",
+				"value": "last_10m",
+				"text": "10 minutes",
+				"no_data_timeframe": 20,
+				"seconds": 600,
+				"digit": 10,
+				"unit": "minutes",
+				"tense": "last"
+			},
+			"timeAggregator": "avg"
+		},
+		"queryConfig": {
+			"indexes": [],
+			"track": "logs",
+			"queryIsFailed": false,
+			"queryString": "service:foundationdb @Severity:>=40",
+			"timeRange": {
+				"from": 1628061270003,
+				"to": 1628075670003,
+				"live": true
+			}
+		},
+		"enable_logs_sample": true,
+		"notify_audit": false,
+		"aggregation": {
+			"metric": "count",
+			"type": "count",
+			"groupBy": [
+				"core_host"
+			]
+		},
+		"restriction_query": null,
+		"escalation_message": "",
+		"groupby_simple_monitor": false,
+		"renotify_interval": 0
+	},
+	"recommended_monitor_metadata": {
+		"description": "Get notified when there is an error logged"
+	}
+}

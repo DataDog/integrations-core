@@ -10,7 +10,7 @@ from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_debug, echo_
 
 
 @click.command('eula', context_settings=CONTEXT_SETTINGS, short_help='Validate EULA files')
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 def eula(check):
     """Validate all EULA definition files.
 

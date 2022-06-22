@@ -56,7 +56,16 @@ def dd_environment(mock_local_kafka_hosts_dns, e2e_instance):
             'KAFKA_HOST': HOST_IP
         },
     ):
-        yield e2e_instance, {'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')]}
+        yield e2e_instance, E2E_METADATA
+
+
+E2E_METADATA = {
+    'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')],
+    'start_commands': [
+        'apt-get update',
+        'apt-get install -y build-essential',
+    ],
+}
 
 
 @pytest.fixture(scope='session')

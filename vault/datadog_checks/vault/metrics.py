@@ -107,20 +107,21 @@ METRIC_MAP = {
     'vault_runtime_total_gc_pause_ns': 'vault.runtime.total.gc.pause_ns',
     'vault_runtime_gc_pause_ns': 'vault.runtime.gc.pause_ns',
     'vault_runtime_total_gc_runs': 'vault.runtime.total.gc.runs',
-    'vault_merkle_flushdirty': 'vault.merkle.flushdirty',
-    'vault_merkle_savecheckpoint': 'vault.merkle.savecheckpoint',
-    'vault_wal_deletewals': 'vault.wal.deletewals',
+    'vault_merkle_flushDirty': 'vault.merkle.flushdirty',
+    'vault_merkle_saveCheckpoint': 'vault.merkle.savecheckpoint',
+    'vault_wal_deleteWALs': 'vault.wal.deletewals',
     'vault_wal_gc_deleted': 'vault.wal.gc.deleted',
     'vault_wal_gc_total': 'vault.wal.gc.total',
     'vault_wal_loadWAL': 'vault.wal.loadWAL',
-    'vault_wal_persistwals': 'vault.wal.persistwals',
-    'vault_wal_flushready': 'vault.wal.flushready',
+    'vault_wal_persistWALs': 'vault.wal.persistwals',
+    'vault_wal_flushReady': 'vault.wal.flushready',
     'vault_logshipper_streamWALs_missing_guard': 'logshipper.streamWALs.missing_guard',
     'vault_logshipper_streamWALs_guard_found': 'logshipper.streamWALs.guard_found',
     'vault_replication_fetchRemoteKeys': 'replication.fetchRemoteKeys',
     'vault_replication_merkleDiff': 'replication.merkleDiff',
     'vault_replication_merkleSync': 'replication.merkleSync',
     'vault_replication_merkle_commit_index': 'replication.merkle.commit_index',
+    'vault_replication_wal_gc': 'replication.wal.gc',
     'vault_replication_wal_last_wal': 'replication.wal.last_wal',
     'vault_replication_wal_last_dr_wal': 'replication.wal.last_dr_wal',
     'vault_replication_wal_last_performance_wal': 'replication.wal.last_performance_wal',
@@ -141,7 +142,7 @@ METRIC_MAP = {
     'vault_replication_rpc_client_fetch_keys': 'replication.rpc.client.fetch_keys',
     'vault_replication_rpc_client_forward': 'replication.rpc.client.forward',
     'vault_replication_rpc_client_guard_hash': 'replication.rpc.client.guard_hash',
-    'vault_replication_rpc_client_persist_alias': 'eplication.rpc.client.persist_alias',
+    'vault_replication_rpc_client_persist_alias': 'replication.rpc.client.persist_alias',
     'vault_replication_rpc_client_register_auth': 'replication.rpc.client.register_auth',
     'vault_replication_rpc_client_register_lease': 'replication.rpc.client.register_lease',
     'vault_replication_rpc_client_stream_wals': 'replication.rpc.client.stream_wals',
@@ -276,7 +277,7 @@ ROUTE_METRICS_TO_TRANSFORM = [
     'vault_route_rollback_',
 ]
 
-KNOWN_GAUGES = {'vault_runtime_free_count', 'vault_runtime_malloc_count'}
+KNOWN_GAUGES = {'vault_runtime_free_count', 'vault_runtime_malloc_count', 'vault_wal_gc_total'}
 
 
 def construct_metrics_config(metric_map, type_overrides):
@@ -285,7 +286,7 @@ def construct_metrics_config(metric_map, type_overrides):
     for raw_metric_name, metric_name in metric_map.items():
         if raw_metric_name in dynamic_metrics:
             continue
-        elif raw_metric_name.endswith('_total'):
+        elif raw_metric_name.endswith('_total') and raw_metric_name not in KNOWN_GAUGES:
             raw_metric_name = raw_metric_name[:-6]
             metric_name = metric_name[:-6]
         elif metric_name.endswith('.count') and raw_metric_name not in KNOWN_GAUGES:

@@ -13,7 +13,7 @@
   "metric_prefix": "statsd.",
   "metric_to_check": "statsd.counters.count",
   "name": "statsd",
-  "public_title": "Datadog-StatsD Integration",
+  "public_title": "StatsD Integration",
   "short_description": "Monitor the availability of StatsD servers and track metric counts.",
   "support": "core",
   "supported_os": [

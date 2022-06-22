@@ -12,7 +12,7 @@
   "supported_os": [
     "linux"
   ],
-  "public_title": "Datadog-OOM Kill Integration",
+  "public_title": "OOM Kill Integration",
   "categories": [
     "os & system"
   ],

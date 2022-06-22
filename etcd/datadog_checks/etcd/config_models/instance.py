@@ -50,6 +50,14 @@ class LabelJoins(BaseModel):
     target_metric: Optional[TargetMetric]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class Proxy(BaseModel):
     class Config:
         allow_mutation = False
@@ -71,6 +79,7 @@ class InstanceConfig(BaseModel):
     aws_service: Optional[str]
     bearer_token_auth: Optional[Union[bool, str]]
     bearer_token_path: Optional[str]
+    bearer_token_refresh_interval: Optional[int]
     connect_timeout: Optional[float]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
@@ -94,6 +103,7 @@ class InstanceConfig(BaseModel):
     labels_mapper: Optional[Mapping[str, Any]]
     leader_tag: Optional[bool]
     log_requests: Optional[bool]
+    metric_patterns: Optional[MetricPatterns]
     metrics: Optional[Sequence[Union[str, Mapping[str, str]]]]
     min_collection_interval: Optional[float]
     namespace: Optional[str]
