@@ -47,7 +47,7 @@ class Cursor(object):
             # look for ACCOUNT_NAME or CONTRACT_NUMBER since some views have
             # the same name in ACCOUNT_USAGE and ORGANIZATION_USAGE
             table_prefix = ""
-            if "ACCOUNT_NAME" or "CONTRACT_NUMBER" in query:
+            if "ACCOUNT_NAME" in query or "CONTRACT_NUMBER" in query:
                 table_prefix = "ORGANIZATION_"
             table_attr = "{}{}".format(table_prefix, table_name)
             self.__data = getattr(tables, table_attr, [])
