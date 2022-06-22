@@ -6,8 +6,6 @@ import os
 from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
-COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
-
 HOST = get_docker_hostname()
 PORT = 5433
 ID = 'datadog'
@@ -58,3 +56,14 @@ TLS_CONFIG_LEGACY = {
     'private_key': private_key,
     'ca_cert': CERTIFICATE_DIR,
 }
+
+
+def compose_file(vertica_version):
+    major_version = int(vertica_version.split('.', 1)[0])
+
+    if major_version < 10:
+        fname = 'docker-compose-9.yaml'
+    else:
+        fname = 'docker-compose.yaml'
+
+    return os.path.join(HERE, 'docker', fname)

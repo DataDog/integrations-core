@@ -18,7 +18,7 @@ from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.base.utils.containers import iter_unique
 
 from . import views
-from .utils import kilobytes_to_bytes, node_state_to_service_check
+from .utils import kilobytes_to_bytes, node_state_to_service_check, parse_major_version
 
 # Python 3 only
 PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)
@@ -104,6 +104,9 @@ class VerticaCheck(AgentCheck):
             self._connection = connection
         elif self._connection_load_balance or self._connection.closed():
             self._connection.reset_connection()
+
+    def _major_version(self):
+        return parse_major_version(self._connection.parameters['server_version'])
 
     def check(self, _):
         self._connect()
@@ -218,6 +221,11 @@ class VerticaCheck(AgentCheck):
 
     def query_projection_storage(self):
         # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/PROJECTION_STORAGE.htm
+
+        # Vertica v11 has removed some columns, skip these metrics until we implement them
+        if self._major_version() >= 11:
+            return
+
         projection_data = defaultdict(
             lambda: defaultdict(
                 lambda: defaultdict(
@@ -314,6 +322,11 @@ class VerticaCheck(AgentCheck):
 
     def query_storage_containers(self):
         # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/STORAGE_CONTAINERS.htm
+
+        # Vertica v11 has removed some columns, skip these metrics until we implement them
+        if self._major_version() >= 11:
+            return
+
         container_data = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: {'delete_vectors': 0})))
 
         for sc in self.iter_rows(views.StorageContainers):
