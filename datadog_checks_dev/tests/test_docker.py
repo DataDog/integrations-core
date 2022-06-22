@@ -3,14 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-import pytest
-
 from datadog_checks.dev.docker import compose_file_active, docker_run
 from datadog_checks.dev.subprocess import run_command
 
 from .common import not_windows_ci
 
-pytestmark = [pytest.mark.docker, not_windows_ci]
+pytestmark = [not_windows_ci]
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCKER_DIR = os.path.join(HERE, 'docker')
 
@@ -18,7 +16,7 @@ DOCKER_DIR = os.path.join(HERE, 'docker')
 class TestComposeFileActive:
     def test_down(self):
         compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')
-        run_command(['docker-compose', '-f', compose_file, 'down'], capture=True)
+        run_command(['docker', 'compose', '-f', compose_file, 'down'], capture=True)
 
         assert compose_file_active(compose_file) is False
 
@@ -26,10 +24,10 @@ class TestComposeFileActive:
         compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')
 
         try:
-            run_command(['docker-compose', '-f', compose_file, 'up', '-d'], check=True)
+            run_command(['docker', 'compose', '-f', compose_file, 'up', '-d'], check=True)
             assert compose_file_active(compose_file) is True
         finally:
-            run_command(['docker-compose', '-f', compose_file, 'down'], capture=True)
+            run_command(['docker', 'compose', '-f', compose_file, 'down'], capture=True)
 
 
 class TestDockerRun:
@@ -41,4 +39,4 @@ class TestDockerRun:
                 assert compose_file_active(compose_file) is True
             assert compose_file_active(compose_file) is False
         finally:
-            run_command(['docker-compose', '-f', compose_file, 'down'], capture=True)
+            run_command(['docker', 'compose', '-f', compose_file, 'down'], capture=True)

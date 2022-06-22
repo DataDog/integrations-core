@@ -2,7 +2,7 @@
 
 INSTANT_CLIENT_URL="https://ddintegrations.blob.core.windows.net/oracle/instantclient-basiclite-linux.x64-19.3.0.0.0dbru.zip"
 
-mkdir /opt/oracle
+mkdir -p /opt/oracle
 apt-get update
 apt-get install unzip
 

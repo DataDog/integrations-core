@@ -266,6 +266,14 @@ def get_tox_file(check_name):
     return os.path.join(get_root(), check_name, 'tox.ini')
 
 
+def get_hatch_file(check_name):
+    return os.path.join(get_root(), check_name, 'hatch.toml')
+
+
+def is_testable_check(check_name):
+    return file_exists(get_tox_file(check_name)) or file_exists(get_hatch_file(check_name))
+
+
 def get_extra_license_files():
     for path in os.listdir(get_root()):
         if not file_exists(get_manifest_file(path)):
@@ -278,6 +286,13 @@ def get_extra_license_files():
 def get_metadata_file(check_name):
     path = load_manifest(check_name).get('assets', {}).get("metrics_metadata", "metadata.csv")
     return os.path.join(get_root(), check_name, path)
+
+
+def get_display_name(check_name, manifest=None):
+    manifest = manifest or load_manifest(check_name)
+    return manifest.get('display_name') or manifest.get('assets', {}).get('integration', {}).get(
+        'source_type_name', check_name
+    )
 
 
 def get_jmx_metrics_file(check_name):
@@ -415,7 +430,7 @@ def get_valid_integrations():
 
 
 def get_testable_checks():
-    return {path for path in os.listdir(get_root()) if file_exists(get_tox_file(path))}
+    return {path for path in os.listdir(get_root()) if is_testable_check(path)}
 
 
 def get_metric_sources():
@@ -640,6 +655,23 @@ def has_saved_views(check):
 
 def has_recommended_monitor(check):
     return _has_asset_in_manifest(check, 'monitors')
+
+
+def is_manifest_v2(check):
+    """
+    Check if a manifest is version 2
+    Return True if the manifest exists AND its version is "2.0.0", False otherwise
+    """
+    manifest_file = get_manifest_file(check)
+    if not file_exists(manifest_file):
+        return False
+    try:
+        with open(manifest_file) as f:
+            manifest = json.loads(f.read())
+    except JSONDecodeError as e:
+        raise Exception("Cannot decode {}: {}".format(manifest_file, e))
+
+    return manifest.get("manifest_version") == "2.0.0"
 
 
 def _has_asset_in_manifest(check, asset):

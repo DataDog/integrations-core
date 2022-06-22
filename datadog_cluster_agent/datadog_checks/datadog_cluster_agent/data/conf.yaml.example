@@ -152,6 +152,11 @@ instances:
     #
     # bearer_token_path: <TOKEN_PATH>
 
+    ## @param bearer_token_refresh_interval - integer - optional - default: 60
+    ## The refresh interval to keep the bearer token up-to-date.
+    #
+    # bearer_token_refresh_interval: 60
+
     ## @param ignore_metrics - list of strings - optional
     ## A list of metrics to ignore, the "*" wildcard can be used to match multiple metric names.
     ## The wildcard matching is done via fnmatch, it locates a match anywhere in the string.

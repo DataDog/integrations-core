@@ -57,7 +57,10 @@ class QueueMetricCollector(object):
                 # so we don't collect those metrics from those queues
                 if queue_name not in self.config.DISALLOWED_QUEUES:
                     self.get_pcf_queue_status_metrics(queue_manager, queue_name, queue_tags)
-                    self.get_pcf_queue_reset_metrics(queue_manager, queue_name, queue_tags)
+
+                    # if collect queue reset metrics is disabled, skip this
+                    if self.config.collect_reset_queue_metrics:
+                        self.get_pcf_queue_reset_metrics(queue_manager, queue_name, queue_tags)
                 self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags, hostname=self.config.hostname)
             except Exception as e:
                 self.warning('Cannot connect to queue %s: %s', queue_name, e)

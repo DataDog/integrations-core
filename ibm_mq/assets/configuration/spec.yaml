@@ -109,8 +109,8 @@ files:
         description: |
           Autodiscover channels to monitor. This finds all discoverable channels.
 
-          Note: autodiscovered channels are in addition to the ones provided in `channels`,
-          and these channels will only report their statuses but not property metrics.
+          Note: autodiscovered channels are in addition to the ones provided in `channels`.
+          Disabling this option will stop autodiscovery only for status metrics but not for property metrics.
         value:
           example: true
           type: boolean
@@ -152,6 +152,17 @@ files:
             - queue statistics (MQCMD_STATISTICS_Q)
         value:
           example: false
+          type: boolean
+      - name: collect_reset_queue_metrics
+        description: |
+          Collect metrics from Reset Queue Statistics. Statistics collected are:
+            - reset queue statistics (MQCMD_RESET_Q_STATS)
+
+          Note: Collecting reset queue statistics will also reset the performance data and requires `+chg`
+          permissions. More information found here:
+          https://www.ibm.com/docs/en/ibm-mq/9.1?topic=formats-reset-queue-statistics
+        value:
+          example: true
           type: boolean
       - name: mqcd_version
         description: |

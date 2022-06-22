@@ -1,5 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 mysql.info.schema.size,gauge,,mebibyte,,"Size of schemas in MiB",0,mysql,mysql schema size,
+mysql.info.table.rows.read,count,,row,,"Total number of rows read per table (Percona userstat only)",0,mysql,mysql table rows read,
+mysql.info.table.rows.update,count,,row,,"Total number of rows changed per table (Percona userstat only)",0,mysql,mysql table rows changed,
 mysql.info.table.index_size,gauge,,mebibyte,,"Size of tables index in MiB",0,mysql,mysql index table size,
 mysql.info.table.data_size,gauge,,mebibyte,,"Size of tables data in MiB",0,mysql,mysql data table size,memory
 mysql.galera.wsrep_cluster_size,gauge,,node,,The current number of nodes in the Galera cluster.,0,mysql,galera cluster size,

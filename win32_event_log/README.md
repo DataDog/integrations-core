@@ -116,7 +116,7 @@ Double-check your filters' values with <code>Get-WmiObject</code> if the integra
     Some example filters:
     
     ```yaml
-    - type: windows_event
+      - type: windows_event
         channel_path: Security
         source: windows.events
         service: Windows       

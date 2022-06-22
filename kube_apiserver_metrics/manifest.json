@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Kubernetes API server metrics Integration",
+  "public_title": "Kubernetes API server metrics Integration",
   "categories": [
     "containers"
   ],

@@ -82,6 +82,9 @@ assets/               @DataDog/agent-integrations
 /openmetrics/                             @DataDog/container-integrations @DataDog/agent-integrations
 /openmetrics/*.md                         @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /openmetrics/manifest.json                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/podman/                                  @DataDog/container-integrations @DataDog/agent-integrations
+/podman/*.md                              @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/podman/manifest.json                     @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /tcp_queue_length/                        @DataDog/container-integrations @DataDog/agent-integrations
 /tcp_queue_length/*.md                    @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /tcp_queue_length/manifest.json           @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
@@ -92,6 +95,7 @@ assets/               @DataDog/agent-integrations
 /snmp_*/                                                           @DataDog/infrastructure-integrations @DataDog/agent-integrations
 /snmp_*/*.md                                                       @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
 /datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp/ @DataDog/infrastructure-integrations @DataDog/agent-integrations
+/docs/developer/tutorials/snmp/                                    @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
 
 # Agent Platform
 /disk/                                    @DataDog/agent-integrations @DataDog/agent-platform
@@ -127,9 +131,9 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 /mysql/                                             @DataDog/database-monitoring @DataDog/agent-integrations
 /mysql/*.md                                         @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /mysql/manifest.json                                @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
-/sqlserver/                                         @DataDog/agent-integrations @DataDog/database-monitoring
-/sqlserver/*.md                                     @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
-/sqlserver/manifest.json                            @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
+/sqlserver/                                         @DataDog/database-monitoring @DataDog/agent-integrations
+/sqlserver/*.md                                     @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/sqlserver/manifest.json                            @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /oracle/                                            @DataDog/agent-integrations @DataDog/database-monitoring
 /oracle/*.md                                        @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
 /oracle/manifest.json                               @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation

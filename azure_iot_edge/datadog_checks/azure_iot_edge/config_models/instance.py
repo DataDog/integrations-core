@@ -79,6 +79,7 @@ class InstanceConfig(BaseModel):
     aws_service: Optional[str]
     bearer_token_auth: Optional[Union[bool, str]]
     bearer_token_path: Optional[str]
+    bearer_token_refresh_interval: Optional[int]
     connect_timeout: Optional[float]
     disable_generic_tags: Optional[bool]
     edge_agent_prometheus_url: str

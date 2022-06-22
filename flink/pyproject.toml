@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools; python_version < '3.0'",
+    "setuptools<61",
 ]
 build-backend = "hatchling.build"
 
@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 name = "datadog-flink"
 description = "The flink check"
 readme = "README.md"
-license = "BSD-3-Clause"
+license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",

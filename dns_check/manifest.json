@@ -15,7 +15,7 @@
   "metric_prefix": "dns.",
   "metric_to_check": "dns.response_time",
   "name": "dns_check",
-  "public_title": "Datadog-DNS Check Integration",
+  "public_title": "DNS Check Integration",
   "short_description": "Monitor the resolvablity of and lookup times for any DNS record.",
   "support": "core",
   "supported_os": [

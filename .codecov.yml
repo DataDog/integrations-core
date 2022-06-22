@@ -518,6 +518,10 @@ coverage:
         target: 75
         flags:
         - teamcity
+      Teradata:
+        target: 75
+        flags:
+        - teradata
       TokuMX:
         target: 50
         flags:
@@ -1237,6 +1241,11 @@ flags:
     paths:
     - teamcity/datadog_checks/teamcity
     - teamcity/tests
+  teradata:
+    carryforward: true
+    paths:
+    - teradata/datadog_checks/teradata
+    - teradata/tests
   tls:
     carryforward: true
     paths:

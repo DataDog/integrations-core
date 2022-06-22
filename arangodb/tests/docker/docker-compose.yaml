@@ -4,6 +4,8 @@ services:
   arangodb:
     container_name: arangodb
     image: arangodb:${ARANGODB_VERSION}
+    volumes:
+      - ./arangodb3/arangod.conf:/etc/arangodb3/arangod.conf
     environment:
       - ARANGO_ROOT_PASSWORD=password
     ports:

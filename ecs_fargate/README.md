@@ -86,7 +86,7 @@ Resources:
       Memory: 1GB
       ContainerDefinitions:
         - Name: datadog-agent
-          Image: 'gcr.io/datadoghq/agent:latest'
+          Image: 'public.ecr.aws/datadog/agent:latest'
           Cpu: 100
           Memory: 256MB
 ```
@@ -261,7 +261,7 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
     This converts serialized JSON from the `log:` field into top-level fields. See the AWS sample [Parsing container stdout logs that are serialized JSON][26] for more details.
 
 2. Next, in the same Fargate task, define a log configuration with AWS FireLens as the log driver, and with data being output to Fluent Bit. Here is an example snippet of a task definition where the FireLens is the log driver, and it is outputting data to Fluent Bit:
-
+{{< site-region region="us" >}}
    ```json
    {
      "logConfiguration": {
@@ -280,6 +280,91 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
      }
    }
    ```
+{{< /site-region >}}
+   
+{{< site-region region="us3" >}}
+   ```json
+   {
+     "logConfiguration": {
+       "logDriver": "awsfirelens",
+       "options": {
+         "Name": "datadog",
+         "apikey": "<DATADOG_API_KEY>",
+         "Host": "http-intake.logs.us3.datadoghq.com",
+         "dd_service": "firelens-test",
+         "dd_source": "redis",
+         "dd_message_key": "log",
+         "dd_tags": "project:fluentbit",
+         "TLS": "on",
+         "provider": "ecs"
+       }
+     }
+   }
+   ```
+{{< /site-region >}}
+   
+{{< site-region region="us5" >}}
+   ```json
+   {
+     "logConfiguration": {
+       "logDriver": "awsfirelens",
+       "options": {
+         "Name": "datadog",
+         "apikey": "<DATADOG_API_KEY>",
+         "Host": "http-intake.logs.us5.datadoghq.com",
+         "dd_service": "firelens-test",
+         "dd_source": "redis",
+         "dd_message_key": "log",
+         "dd_tags": "project:fluentbit",
+         "TLS": "on",
+         "provider": "ecs"
+       }
+     }
+   }
+   ```
+{{< /site-region >}}
+   
+{{< site-region region="eu" >}}
+   ```json
+   {
+     "logConfiguration": {
+       "logDriver": "awsfirelens",
+       "options": {
+         "Name": "datadog",
+         "apikey": "<DATADOG_API_KEY>",
+         "Host": "http-intake.logs.datadoghq.eu",
+         "dd_service": "firelens-test",
+         "dd_source": "redis",
+         "dd_message_key": "log",
+         "dd_tags": "project:fluentbit",
+         "TLS": "on",
+         "provider": "ecs"
+       }
+     }
+   }
+   ```  
+{{< /site-region >}}
+
+{{< site-region region="gov" >}}
+   ```json
+   {
+     "logConfiguration": {
+       "logDriver": "awsfirelens",
+       "options": {
+         "Name": "datadog",
+         "apikey": "<DATADOG_API_KEY>",
+         "Host": "http-intake.logs.ddog-gov.datadoghq.com",
+         "dd_service": "firelens-test",
+         "dd_source": "redis",
+         "dd_message_key": "log",
+         "dd_tags": "project:fluentbit",
+         "TLS": "on",
+         "provider": "ecs"
+       }
+     }
+   }
+   ```  
+{{< /site-region >}}
 
     **Note**: If your organization is in Datadog EU site, use `http-intake.logs.datadoghq.eu` for the `Host` option instead. The full list of available parameters is described in the [Datadog Fluentbit documentation][27].
 
@@ -324,6 +409,7 @@ To use [AWS CloudFormation][10] templating, use the `AWS::ECS::TaskDefinition` r
 
 For example, to configure Fluent Bit to send logs to Datadog:
 
+{{< site-region region="us" >}}
 ```yaml
 Resources:
   ECSTDNJH3:
@@ -357,6 +443,151 @@ Resources:
               enable-ecs-log-metadata: true
           MemoryReservation: 50
 ```
+{{< /site-region >}}
+
+{{< site-region region="us3" >}}
+```yaml
+Resources:
+  ECSTDNJH3:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+          - FARGATE
+      Cpu: 256
+      Memory: 1GB
+      ContainerDefinitions:
+        - Name: tomcat-test
+          Image: 'tomcat:jdk8-adoptopenjdk-openj9'
+          LogConfiguration:
+            LogDriver: awsfirelens
+            Options:
+              Name: datadog
+              Host: http-intake.logs.us3.datadoghq.com
+              TLS: 'on'
+              dd_service: test-service
+              dd_source: test-source
+              provider: ecs
+              apikey: <API_KEY>
+          MemoryReservation: 500
+        - Name: log_router
+          Image: 'amazon/aws-for-fluent-bit:stable'
+          Essential: true
+          FirelensConfiguration:
+            Type: fluentbit
+            Options:
+              enable-ecs-log-metadata: true
+          MemoryReservation: 50
+```
+{{< /site-region >}}
+
+{{< site-region region="us5" >}}
+```yaml
+Resources:
+  ECSTDNJH3:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+          - FARGATE
+      Cpu: 256
+      Memory: 1GB
+      ContainerDefinitions:
+        - Name: tomcat-test
+          Image: 'tomcat:jdk8-adoptopenjdk-openj9'
+          LogConfiguration:
+            LogDriver: awsfirelens
+            Options:
+              Name: datadog
+              Host: http-intake.logs.us5.datadoghq.com
+              TLS: 'on'
+              dd_service: test-service
+              dd_source: test-source
+              provider: ecs
+              apikey: <API_KEY>
+          MemoryReservation: 500
+        - Name: log_router
+          Image: 'amazon/aws-for-fluent-bit:stable'
+          Essential: true
+          FirelensConfiguration:
+            Type: fluentbit
+            Options:
+              enable-ecs-log-metadata: true
+          MemoryReservation: 50
+```
+{{< /site-region >}}
+
+{{< site-region region="eu" >}}
+```yaml
+Resources:
+  ECSTDNJH3:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+          - FARGATE
+      Cpu: 256
+      Memory: 1GB
+      ContainerDefinitions:
+        - Name: tomcat-test
+          Image: 'tomcat:jdk8-adoptopenjdk-openj9'
+          LogConfiguration:
+            LogDriver: awsfirelens
+            Options:
+              Name: datadog
+              Host: http-intake.logs.datadoghq.eu
+              TLS: 'on'
+              dd_service: test-service
+              dd_source: test-source
+              provider: ecs
+              apikey: <API_KEY>
+          MemoryReservation: 500
+        - Name: log_router
+          Image: 'amazon/aws-for-fluent-bit:stable'
+          Essential: true
+          FirelensConfiguration:
+            Type: fluentbit
+            Options:
+              enable-ecs-log-metadata: true
+          MemoryReservation: 50
+```
+{{< /site-region >}}
+
+{{< site-region region="gov" >}}
+```yaml
+Resources:
+  ECSTDNJH3:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+          - FARGATE
+      Cpu: 256
+      Memory: 1GB
+      ContainerDefinitions:
+        - Name: tomcat-test
+          Image: 'tomcat:jdk8-adoptopenjdk-openj9'
+          LogConfiguration:
+            LogDriver: awsfirelens
+            Options:
+              Name: datadog
+              Host: http-intake.logs.ddog-gov.datadoghq.com
+              TLS: 'on'
+              dd_service: test-service
+              dd_source: test-source
+              provider: ecs
+              apikey: <API_KEY>
+          MemoryReservation: 500
+        - Name: log_router
+          Image: 'amazon/aws-for-fluent-bit:stable'
+          Essential: true
+          FirelensConfiguration:
+            Type: fluentbit
+            Options:
+              enable-ecs-log-metadata: true
+          MemoryReservation: 50
+```
+{{< /site-region >}}
 
 **Note**: Use a [TaskDefinition secret][11] to avoid exposing the `apikey` in plain text.
 

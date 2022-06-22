@@ -19,7 +19,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres.statement_samples import DBExplainError, StatementTruncationState
-from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS
+from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
 
 from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION
 
@@ -103,8 +103,15 @@ def test_statement_metrics_version(integration_check, dbm_instance, version, exp
 
 @pytest.mark.parametrize("dbstrict", [True, False])
 @pytest.mark.parametrize("pg_stat_statements_view", ["pg_stat_statements", "datadog.pg_stat_statements()"])
+@pytest.mark.parametrize("track_io_timing_enabled", [True, False])
 def test_statement_metrics(
-    aggregator, integration_check, dbm_instance, dbstrict, pg_stat_statements_view, datadog_agent
+    aggregator,
+    integration_check,
+    dbm_instance,
+    dbstrict,
+    pg_stat_statements_view,
+    datadog_agent,
+    track_io_timing_enabled,
 ):
     dbm_instance['dbstrict'] = dbstrict
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
@@ -122,6 +129,11 @@ def test_statement_metrics(
 
     check = integration_check(dbm_instance)
     check._connect()
+    check.check(dbm_instance)
+
+    # We can't change track_io_timing at runtime, but we can change what the integration thinks the runtime value is
+    # This must be done after the first check since postgres settings are loaded from the database then
+    check.pg_settings["track_io_timing"] = "on" if track_io_timing_enabled else "off"
 
     _run_queries()
     check.check(dbm_instance)
@@ -141,8 +153,8 @@ def test_statement_metrics(
         return True
 
     events = aggregator.get_event_platform_events("dbm-metrics")
-    assert len(events) == 1
-    event = events[0]
+    assert len(events) == 2
+    event = events[1]  # first item is from the initial dummy check to load pg_settings
 
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
@@ -175,6 +187,10 @@ def test_statement_metrics(
         assert row['query'] == expected_query[0:200], "query should be truncated when sending to metrics"
         available_columns = set(row.keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
+        if track_io_timing_enabled:
+            metric_columns |= PG_STAT_STATEMENTS_TIMING_COLUMNS
+        else:
+            assert (available_columns & PG_STAT_STATEMENTS_TIMING_COLUMNS) == set()
         for col in metric_columns:
             assert type(row[col]) in (float, int)
 
@@ -195,6 +211,75 @@ def test_statement_metrics(
             "db:" + fqt_event['postgres']['datname'],
             "rolname:" + fqt_event['postgres']['rolname'],
         }
+
+    for conn in connections.values():
+        conn.close()
+
+
+@pytest.mark.parametrize(
+    "cloud_metadata",
+    [
+        {},
+        {
+            'azure': {
+                'deployment_type': 'flexible_server',
+                'database_name': 'test-server',
+            },
+        },
+        {
+            'aws': {
+                'instance_endpoint': 'foo.aws.com',
+            },
+            'azure': {
+                'deployment_type': 'flexible_server',
+                'database_name': 'test-server',
+            },
+        },
+        {
+            'gcp': {
+                'project_id': 'foo-project',
+                'instance_id': 'bar',
+                'extra_field': 'included',
+            },
+        },
+    ],
+)
+def test_statement_metrics_cloud_metadata(aggregator, integration_check, dbm_instance, cloud_metadata, datadog_agent):
+    dbm_instance['pg_stat_statements_view'] = "pg_stat_statements"
+    # don't need samples for this test
+    dbm_instance['query_samples'] = {'enabled': False}
+    # very low collection interval for test purposes
+    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    if cloud_metadata:
+        for k, v in cloud_metadata.items():
+            dbm_instance[k] = v
+    connections = {}
+
+    def _run_queries():
+        for user, password, dbname, query, arg in SAMPLE_QUERIES:
+            if dbname not in connections:
+                connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+            connections[dbname].cursor().execute(query, (arg,))
+
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    _run_queries()
+    check.check(dbm_instance)
+    _run_queries()
+    check.check(dbm_instance)
+
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(events) == 1, "should capture exactly one metrics payload"
+    event = events[0]
+
+    assert event['host'] == 'stubbed.hostname'
+    assert event['timestamp'] > 0
+    assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
+    assert event['ddagentversion'] == datadog_agent.get_version()
+    assert event['ddagenthostname'] == datadog_agent.get_hostname()
+    assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
+    assert event['cloud_metadata'] == cloud_metadata, "wrong cloud_metadata"
 
     for conn in connections.values():
         conn.close()
@@ -287,32 +372,56 @@ failed_explain_test_repeat_count = 5
 
 
 @pytest.mark.parametrize(
-    "query,expected_error_tag,explain_function_override,expected_fail_count",
+    "query,expected_error_tag,explain_function_override,expected_fail_count,skip_on_versions",
     [
-        ("select * from fake_table", "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>", None, 1),
+        (
+            "select * from fake_table",
+            "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>",
+            None,
+            1,
+            None,
+        ),
         (
             "select * from fake_schema.fake_table",
             "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>",
             None,
             1,
+            None,
         ),
         (
             "select * from pg_settings where name = $1",
             "error:explain-database_error-<class 'psycopg2.errors.UndefinedParameter'>",
             None,
             1,
+            None,
         ),
         (
             "select * from pg_settings where name = 'this query is truncated' limi",
             "error:explain-database_error-<class 'psycopg2.errors.SyntaxError'>",
             None,
             1,
+            None,
         ),
         (
             "select * from persons",
             "error:explain-database_error-<class 'psycopg2.errors.InsufficientPrivilege'>",
             "datadog.explain_statement_noaccess",
             failed_explain_test_repeat_count,
+            None,
+        ),
+        (
+            "update persons set firstname='firstname' where personid in (2, 1); select pg_sleep(1);",
+            "error:explain-database_error-<class 'psycopg2.errors.DatatypeMismatch'>",
+            None,
+            1,
+            [13, 12.1, 11, 10, 9.5, 9.6],
+        ),
+        (
+            "update persons set firstname='firstname' where personid in (2, 1); select pg_sleep(1);",
+            "error:explain-database_error-<class 'psycopg2.errors.InvalidCursorDefinition'>",
+            None,
+            1,
+            [14],
         ),
     ],
 )
@@ -324,12 +433,16 @@ def test_failed_explain_handling(
     expected_error_tag,
     explain_function_override,
     expected_fail_count,
+    skip_on_versions,
 ):
     dbname = "datadog_test"
     if explain_function_override:
         dbm_instance['query_samples']['explain_function'] = explain_function_override
     check = integration_check(dbm_instance)
     check._connect()
+
+    if skip_on_versions is not None and float(POSTGRES_VERSION) in skip_on_versions:
+        pytest.skip("not relevant for postgres {version}".format(version=POSTGRES_VERSION))
 
     # run check so all internal state is correctly initialized
     check.check(dbm_instance)
@@ -681,6 +794,53 @@ def test_statement_reported_hostname(
                 'state': 'active',
                 'query_signature': '9382c42e92099c04',
                 'statement': "BEGIN TRANSACTION; SELECT city FROM persons WHERE city = 'hello';",
+                'query_truncated': StatementTruncationState.not_truncated.value,
+            },
+            ["now", "xact_start", "query_start", "pid", "client_port", "client_addr", "backend_type", "blocking_pids"],
+            {
+                'usename': 'bob',
+                'state': 'active',
+                'application_name': '',
+                'datname': 'datadog_test',
+                'connections': 1,
+            },
+        ),
+        (
+            "bob",
+            "bob",
+            "datadog_test",
+            "BEGIN TRANSACTION; SELECT city as city0, city as city1, city as city2, city as city3, "
+            "city as city4, city as city5, city as city6, city as city7, city as city8, city as city9, "
+            "city as city10, city as city11, city as city12, city as city13, city as city14, city as city15, "
+            "city as city16, city as city17, city as city18, city as city19, city as city20, city as city21, "
+            "city as city22, city as city23, city as city24, city as city25, city as city26, city as city27, "
+            "city as city28, city as city29, city as city30, city as city31, city as city32, city as city33, "
+            "city as city34, city as city35, city as city36, city as city37, city as city38, city as city39, "
+            "city as city40, city as city41, city as city42, city as city43, city as city44, city as city45, "
+            "city as city46, city as city47, city as city48, city as city49, city as city50, city as city51, "
+            "city as city52, city as city53, city as city54, city as city55, city as city56, city as city57, "
+            "city as city58, city as city59, city as city60, city as city61 "
+            "FROM persons WHERE city = %s;",
+            "LOCK TABLE persons IN ACCESS EXCLUSIVE MODE",
+            "hello",
+            {
+                'datname': 'datadog_test',
+                'usename': 'bob',
+                'state': 'active',
+                'query_signature': 'e1429b86c013a78e',
+                'statement': "BEGIN TRANSACTION; SELECT city as city0, city as city1, city as city2, city as city3, "
+                "city as city4, city as city5, city as city6, city as city7, city as city8, city as city9, "
+                "city as city10, city as city11, city as city12, city as city13, city as city14, city as city15, "
+                "city as city16, city as city17, city as city18, city as city19, city as city20, city as city21, "
+                "city as city22, city as city23, city as city24, city as city25, city as city26, city as city27, "
+                "city as city28, city as city29, city as city30, city as city31, city as city32, city as city33, "
+                "city as city34, city as city35, city as city36, city as city37, city as city38, city as city39, "
+                "city as city40, city as city41, city as city42, city as city43, city as city44, city as city45, "
+                "city as city46, city as city47, city as city48, city as city49, city as city50, city as city51, "
+                "city as city52, city as city53, city as city54, city as city55, city as city56, city as city57, "
+                "city as city58, city as city59, city as city60, city as city61 "
+                "FROM persons WHE",
+                'query_truncated': StatementTruncationState.truncated.value,
             },
             ["now", "xact_start", "query_start", "pid", "client_port", "client_addr", "backend_type", "blocking_pids"],
             {

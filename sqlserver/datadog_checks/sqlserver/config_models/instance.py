@@ -19,6 +19,21 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class Aws(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    instance_endpoint: Optional[str]
+
+
+class Azure(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    deployment_type: Optional[str]
+    name: Optional[str]
+
+
 class CustomQuery(BaseModel):
     class Config:
         allow_mutation = False
@@ -26,6 +41,14 @@ class CustomQuery(BaseModel):
     columns: Optional[Sequence[Mapping[str, Any]]]
     query: Optional[str]
     tags: Optional[Sequence[str]]
+
+
+class Gcp(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    instance_id: Optional[str]
+    project_id: Optional[str]
 
 
 class MetricPatterns(BaseModel):
@@ -44,6 +67,7 @@ class ObfuscatorOptions(BaseModel):
     collect_comments: Optional[bool]
     collect_metadata: Optional[bool]
     collect_tables: Optional[bool]
+    keep_sql_alias: Optional[bool]
     replace_digits: Optional[bool]
 
 
@@ -77,6 +101,8 @@ class InstanceConfig(BaseModel):
     autodiscovery_exclude: Optional[Sequence[str]]
     autodiscovery_include: Optional[Sequence[str]]
     availability_group: Optional[str]
+    aws: Optional[Aws]
+    azure: Optional[Azure]
     command_timeout: Optional[int]
     connection_string: Optional[str]
     connector: Optional[str]
@@ -90,6 +116,7 @@ class InstanceConfig(BaseModel):
     driver: Optional[str]
     dsn: Optional[str]
     empty_default_hostname: Optional[bool]
+    gcp: Optional[Gcp]
     host: str
     ignore_missing_database: Optional[bool]
     include_ao_metrics: Optional[bool]
@@ -109,6 +136,7 @@ class InstanceConfig(BaseModel):
     query_activity: Optional[QueryActivity]
     query_metrics: Optional[QueryMetrics]
     reported_hostname: Optional[str]
+    server_version: Optional[str]
     service: Optional[str]
     stored_procedure: Optional[str]
     tags: Optional[Sequence[str]]

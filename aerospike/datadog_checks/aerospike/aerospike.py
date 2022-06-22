@@ -10,9 +10,9 @@ import re
 from collections import defaultdict
 from typing import List
 
-from six import iteritems
+from six import PY2, iteritems
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
 
 try:
@@ -70,6 +70,28 @@ def parse_namespace(data, namespace, secondary):
 
 
 class AerospikeCheck(AgentCheck):
+    """
+    This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
+    """
+
+    def __new__(cls, name, init_config, instances):
+        instance = instances[0]
+
+        if 'openmetrics_endpoint' in instance:
+            if PY2:
+                raise ConfigurationError(
+                    "This version of the integration is only available when using py3. "
+                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
+                    "for more information or use the older style config."
+                )
+            # TODO: when we drop Python 2 move this import up top
+            from .check import AerospikeCheckV2
+
+            return AerospikeCheckV2(name, init_config, instances)
+
+        else:
+            return super(AerospikeCheck, cls).__new__(cls)
+
     def __init__(self, name, init_config, instances):
         super(AerospikeCheck, self).__init__(name, init_config, instances)
 

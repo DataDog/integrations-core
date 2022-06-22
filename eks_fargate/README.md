@@ -109,6 +109,9 @@ metadata:
  name: "<APPLICATION_NAME>"
  namespace: default
 spec:
+ selector:
+   matchLabels:
+     app: "<APPLICATION_NAME>"
  replicas: 1
  template:
    metadata:
@@ -167,7 +170,7 @@ You have two options for this to work properly:
 * Use an hardcoded token value (`clusterAgent.token` in Helm, `credentials.token` in the Datadog Operator); convenient, but less secure.
 * Use a manually-created secret (`clusterAgent.tokenExistingSecret` in Helm, not available in the Datadog Operator) and replicate it in all namespaces where Fargate tasks need to be monitored; secure, but requires extra operations.
 
-If the EKS cluster runs only Fargate workloads, you need a standalone Cluster Agent deployment. 
+If the EKS cluster runs only Fargate workloads, you need a standalone Cluster Agent deployment. And, as described above, choose one of the two options for making the token reachable.
 
 Use the following Helm `values.yaml`:
 
@@ -182,7 +185,6 @@ clusterAgent:
   replicas: 2
 ```
 
-**Note:** Be just as specific with managing your Cluster Agent token.
 
 In both cases, you need to change the Datadog Agent sidecar manifest in order to allow communication with the Cluster Agent:
 
@@ -214,6 +216,9 @@ metadata:
  namespace: default
 spec:
  replicas: 1
+ selector:
+   matchLabels:
+     app: "<APPLICATION_NAME>"
  template:
    metadata:
      labels:
@@ -271,6 +276,9 @@ metadata:
  namespace: default
 spec:
  replicas: 1
+ selector:
+   matchLabels:
+     app: "<APPLICATION_NAME>"
  template:
    metadata:
      labels:
@@ -324,7 +332,7 @@ Datadog Agent v6.19+ supports live processes in the EKS Fargate integration. Liv
 
 ### Kubernetes resources view
 
-To collect Kubernetes resource views, you need a [Cluster Agent setup][#running-the-cluster-agent-or-the-cluster-checks-runner].
+To collect Kubernetes resource views, you need a [Cluster Agent setup](#running-the-cluster-agent-or-the-cluster-checks-runner).
 
 ## Log collection
 
@@ -364,6 +372,9 @@ metadata:
  namespace: default
 spec:
  replicas: 1
+ selector:
+   matchLabels:
+     app: "<APPLICATION_NAME>"
  template:
    metadata:
      labels:
@@ -411,7 +422,7 @@ spec:
 
 ## Events collection
 
-To collect events from your AWS EKS Fargate API server, run a [Datadog Cluster Agent within your EKS cluster][#running-the-cluster-agent-or-the-cluster-checks-runner] and [Enable Event collection for your Cluster Agent][19].
+To collect events from your AWS EKS Fargate API server, run a [Datadog Cluster Agent within your EKS cluster](#running-the-cluster-agent-or-the-cluster-checks-runner) and [Enable Event collection for your Cluster Agent][19].
 
 Optionally, deploy cluster check runners in addition to setting up the Datadog Cluster Agent to enable cluster checks.
 
@@ -453,9 +464,11 @@ Need help? Contact [Datadog support][20].
 
 ## Further Reading
 
-- Blog post: [Key metrics for monitoring AWS Fargate][26]
-- Blog post: [How to collect metrics and logs from AWS Fargate workloads][27]
-- Blog post: [AWS Fargate monitoring with Datadog][28]
+Additional helpful documentation, links, and articles:
+
+- [Key metrics for monitoring AWS Fargate][32]
+- [How to collect metrics and logs from AWS Fargate workloads][27]
+- [AWS Fargate monitoring with Datadog][28]
 
 [1]: http://docs.datadoghq.com/integrations/ecs_fargate/
 [2]: http://docs.datadoghq.com/integrations/amazon_eks/
@@ -488,3 +501,4 @@ Need help? Contact [Datadog support][20].
 [29]: https://docs.datadoghq.com/agent/kubernetes/?tab=helm#event-collection
 [30]: https://docs.datadoghq.com/infrastructure/livecontainers/#kubernetes-resources-view
 [31]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/#overview
+[32]: https://www.datadoghq.com/blog/aws-fargate-metrics/

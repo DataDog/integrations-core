@@ -97,8 +97,8 @@ instances:
     ## @param auto_discover_channels - boolean - optional - default: true
     ## Autodiscover channels to monitor. This finds all discoverable channels.
     ##
-    ## Note: autodiscovered channels are in addition to the ones provided in `channels`,
-    ## and these channels will only report their statuses but not property metrics.
+    ## Note: autodiscovered channels are in addition to the ones provided in `channels`.
+    ## Disabling this option will stop autodiscovery only for status metrics but not for property metrics.
     #
     # auto_discover_channels: true
 
@@ -136,6 +136,16 @@ instances:
     ##   - queue statistics (MQCMD_STATISTICS_Q)
     #
     # collect_statistics_metrics: false
+
+    ## @param collect_reset_queue_metrics - boolean - optional - default: true
+    ## Collect metrics from Reset Queue Statistics. Statistics collected are:
+    ##   - reset queue statistics (MQCMD_RESET_Q_STATS)
+    ##
+    ## Note: Collecting reset queue statistics will also reset the performance data and requires `+chg`
+    ## permissions. More information found here:
+    ## https://www.ibm.com/docs/en/ibm-mq/9.1?topic=formats-reset-queue-statistics
+    #
+    # collect_reset_queue_metrics: true
 
     ## @param mqcd_version - number - optional - default: 6
     ## Which channel definition version to use. Supported values are 1 to 9 including.

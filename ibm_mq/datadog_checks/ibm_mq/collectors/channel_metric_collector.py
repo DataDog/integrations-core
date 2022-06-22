@@ -1,14 +1,15 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Dict, List
+from typing import Callable, Dict, List
 
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, to_string
-from datadog_checks.ibm_mq.config import IBMMQConfig
+from datadog_checks.base.log import CheckLoggingAdapter
 
 from .. import metrics
+from ..config import IBMMQConfig
 
 try:
     import pymqi
@@ -40,15 +41,48 @@ class ChannelMetricCollector(object):
 
     CHANNEL_COUNT_CHECK = 'ibm_mq.channel.count'
 
-    def __init__(self, config, service_check, gauge, log):
-        self.config = config  # type: IBMMQConfig
+    def __init__(
+        self,
+        config,  # type: IBMMQConfig
+        service_check,  # type: Callable
+        gauge,  # type: Callable
+        log,  # type: CheckLoggingAdapter
+    ):
+        self.config = config
         self.log = log
         self.service_check = service_check
         self.gauge = gauge
 
     def get_pcf_channel_metrics(self, queue_manager):
+        discovered_channels = self._discover_channels(queue_manager)
+        if discovered_channels:
+            num_channels = len(discovered_channels)
+            mname = '{}.channel.channels'.format(metrics.METRIC_PREFIX)
+            self.gauge(mname, num_channels, tags=self.config.tags_no_channel, hostname=self.config.hostname)
+
+            for channel_info in discovered_channels:
+                channel_name = to_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
+                channel_tags = self.config.tags_no_channel + ["channel:{}".format(channel_name)]
+                self._submit_metrics_from_properties(
+                    channel_info, channel_name, metrics.channel_metrics(), channel_tags
+                )
+
+        # Check specific channels
+        # If a channel is not discoverable, a user may want to check it specifically.
+        # Specific channels are checked first to send channel metrics and `ibm_mq.channel` service checks
+        # at the same time, but the end result is the same in any order.
+        for channel in self.config.channels:
+            self._submit_channel_status(queue_manager, channel, self.config.tags_no_channel)
+
+        # Grab all the discoverable channels
+        if self.config.auto_discover_channels:
+            self._submit_channel_status(queue_manager, '*', self.config.tags_no_channel)
+
+    def _discover_channels(self, queue_manager):
+        """Discover all channels"""
         args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: pymqi.ensure_bytes('*')}
         pcf = None
+        response = None
         try:
             pcf = pymqi.PCFExecute(
                 queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
@@ -61,32 +95,10 @@ class ChannelMetricCollector(object):
                 self.log.debug("There are no messages available for PCF channel")
             else:
                 self.log.warning("Error getting CHANNEL stats %s", e)
-        else:
-            channels = len(response)
-            mname = '{}.channel.channels'.format(metrics.METRIC_PREFIX)
-            self.gauge(mname, channels, tags=self.config.tags_no_channel, hostname=self.config.hostname)
-
-            for channel_info in response:
-                channel_name = to_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
-                channel_tags = self.config.tags_no_channel + ["channel:{}".format(channel_name)]
-
-                self._submit_metrics_from_properties(
-                    channel_info, channel_name, metrics.channel_metrics(), channel_tags
-                )
         finally:
             if pcf is not None:
                 pcf.disconnect()
-
-        # Check specific channels
-        # If a channel is not discoverable, a user may want to check it specifically.
-        # Specific channels are checked first to send channel metrics and `ibm_mq.channel` service checks
-        # at the same time, but the end result is the same in any order.
-        for channel in self.config.channels:
-            self._submit_channel_status(queue_manager, channel, self.config.tags_no_channel)
-
-        # Grab all the discoverable channels
-        if self.config.auto_discover_channels:
-            self._submit_channel_status(queue_manager, '*', self.config.tags_no_channel)
+        return response
 
     def _submit_channel_status(self, queue_manager, search_channel_name, tags, channels_to_skip=None):
         """Submit channel status

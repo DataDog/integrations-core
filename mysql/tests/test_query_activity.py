@@ -5,16 +5,19 @@ import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
 from datetime import datetime
+from os import environ
 
 import mock
 import pymysql
 import pytest
+from pkg_resources import parse_version
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.activity import MySQLActivity
+from datadog_checks.mysql.util import StatementTruncationState
 
-from .common import CHECK_NAME, HOST, PORT
+from .common import CHECK_NAME, HOST, MYSQL_VERSION_PARSED, PORT
 
 ACTIVITY_JSON_PLANS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "activity")
 
@@ -42,18 +45,36 @@ def dbm_instance(instance_complex):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_collect_activity(aggregator, dbm_instance, dd_run_check):
+@pytest.mark.parametrize(
+    "query,query_signature,expected_query_truncated",
+    [
+        (
+            'SELECT id, name FROM testdb.users FOR UPDATE',
+            'aca1be410fbadb61',
+            StatementTruncationState.not_truncated.value,
+        ),
+        (
+            'SELECT id, {} FROM testdb.users FOR UPDATE'.format(
+                ", ".join("name as name{}".format(i) for i in range(254))
+            ),
+            '63bd1fd025c7f7fb'
+            if MYSQL_VERSION_PARSED > parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb'
+            else '4a12d7afe06cf40',
+            StatementTruncationState.truncated.value,
+        ),
+    ],
+)
+def test_collect_activity(aggregator, dbm_instance, dd_run_check, query, query_signature, expected_query_truncated):
     check = MySql(CHECK_NAME, {}, [dbm_instance])
 
-    query = 'SELECT id, name FROM testdb.users FOR UPDATE'
-    query_signature = 'aca1be410fbadb61'
+    blocking_query = 'SELECT id FROM testdb.users FOR UPDATE'
 
     def _run_query(conn, _query):
         conn.cursor().execute(_query)
 
     def _run_blocking(conn):
         conn.begin()
-        conn.cursor().execute("SELECT id FROM testdb.users FOR UPDATE")
+        conn.cursor().execute(blocking_query)
 
     bob_conn = _get_conn_for_user('bob')
     fred_conn = _get_conn_for_user('fred')
@@ -94,7 +115,17 @@ def test_collect_activity(aggregator, dbm_instance, dd_run_check):
     assert blocked_row is not None, "should have activity for fred's query"
     assert blocked_row['processlist_user'] == 'fred'
     assert blocked_row['processlist_command'] == 'Query'
-    assert blocked_row['sql_text'] == query
+    # The expected sql text for long queries depends on the mysql version/flavor which have different
+    # sql text length limits
+    expected_sql_text = (
+        query[:1021] + '...'
+        if len(query) > 1024
+        and (MYSQL_VERSION_PARSED == parse_version('5.6') or environ.get('MYSQL_FLAVOR') == 'mariadb')
+        else query[:4093] + '...'
+        if len(query) > 4096
+        else query
+    )
+    assert blocked_row['sql_text'] == expected_sql_text
     assert blocked_row['processlist_state'], "missing state"
     assert blocked_row['wait_event'] == 'wait/io/table/sql/handler'
     assert blocked_row['thread_id'], "missing thread id"
@@ -104,6 +135,7 @@ def test_collect_activity(aggregator, dbm_instance, dd_run_check):
     assert blocked_row['event_timer_start'], "missing event timer start"
     assert blocked_row['event_timer_end'], "missing event timer end"
     assert blocked_row['lock_time'], "missing lock time"
+    assert blocked_row['query_truncated'] == expected_query_truncated
 
     connections = activity['mysql_connections']
     assert len(connections) > 0, "expected to have active connections"

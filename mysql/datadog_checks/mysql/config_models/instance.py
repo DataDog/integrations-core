@@ -19,6 +19,21 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class Aws(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    instance_endpoint: Optional[str]
+
+
+class Azure(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    deployment_type: Optional[str]
+    name: Optional[str]
+
+
 class CustomQuery(BaseModel):
     class Config:
         allow_mutation = False
@@ -26,6 +41,14 @@ class CustomQuery(BaseModel):
     columns: Optional[Sequence[Mapping[str, Any]]]
     query: Optional[str]
     tags: Optional[Sequence[str]]
+
+
+class Gcp(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    instance_id: Optional[str]
+    project_id: Optional[str]
 
 
 class MetricPatterns(BaseModel):
@@ -44,6 +67,7 @@ class ObfuscatorOptions(BaseModel):
     collect_comments: Optional[bool]
     collect_metadata: Optional[bool]
     collect_tables: Optional[bool]
+    keep_sql_alias: Optional[bool]
     replace_digits: Optional[bool]
 
 
@@ -61,6 +85,7 @@ class Options(BaseModel):
     replication_non_blocking_status: Optional[bool]
     schema_size_metrics: Optional[bool]
     system_table_size_metrics: Optional[bool]
+    table_rows_stats_metrics: Optional[bool]
     table_size_metrics: Optional[bool]
 
 
@@ -116,6 +141,8 @@ class InstanceConfig(BaseModel):
 
     additional_status: Optional[Sequence[Mapping[str, Any]]]
     additional_variable: Optional[Sequence[Mapping[str, Any]]]
+    aws: Optional[Aws]
+    azure: Optional[Azure]
     charset: Optional[str]
     connect_timeout: Optional[float]
     custom_queries: Optional[Sequence[CustomQuery]]
@@ -123,6 +150,7 @@ class InstanceConfig(BaseModel):
     defaults_file: Optional[str]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
+    gcp: Optional[Gcp]
     host: Optional[str]
     max_custom_queries: Optional[int]
     metric_patterns: Optional[MetricPatterns]

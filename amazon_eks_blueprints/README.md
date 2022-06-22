@@ -79,38 +79,31 @@ new blueprints.EksBlueprint(app, { id: '<eks cluster name>', addOns}, props)
 | `version`               | Version of the Datadog Helm chart                   | "2.28.13"                     |
 | `release`               | Name of the Helm release                            | "datadog"                     |
 | `repository`            | Repository of the Helm chart                        | "https://helm.datadoghq.com"  |
-| `values`                | Configuration values passed to the chart. [See options][3]. | {}                            |
+| `values`                | Configuration values passed to the chart. [See options][2]. | {}                            |
 
 
-See the [Datadog Helm chart][3] for all Agent configuration options. You can then pass these values using the `values` option.
+See the [Datadog Helm chart][2] for all Agent configuration options. You can then pass these values using the `values` option.
 
 ### Metric collection
 
 Monitoring EKS requires that you set up one of the following Datadog integrations:
 
-- [Kubernetes][6]
-- [AWS][7]
-- [AWS EC2][8]
+- [Kubernetes][4]
+- [AWS][5]
+- [AWS EC2][6]
 
-Also set up the integrations for any other AWS services that you are running with EKS, such as [ELB][5].
+Also set up the integrations for any other AWS services that you are running with EKS, such as [ELB][3].
 
 ## Data Collected
 
-### Log collection
-
-_Available for Agent versions >6.0_
-
-See [Kubernetes Log Collection][1].
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][2].
+Need help? Contact [Datadog support][1].
 
-[1]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset
-[2]: https://docs.datadoghq.com/help/
-[3]: https://github.com/DataDog/helm-charts/tree/main/charts/datadog#all-configuration-options
-[4]: https://docs.datadoghq.com/integrations/amazon_eks/
-[5]: https://docs.datadoghq.com/integrations/amazon_elb/
-[6]: https://docs.datadoghq.com/integrations/kubernetes/
-[7]: https://docs.datadoghq.com/integrations/amazon_web_services/
-[8]: https://docs.datadoghq.com/integrations/amazon_ec2/
+[1]: https://docs.datadoghq.com/help/
+[2]: https://github.com/DataDog/helm-charts/tree/main/charts/datadog#all-configuration-options
+[3]: https://docs.datadoghq.com/integrations/amazon_elb/
+[4]: https://docs.datadoghq.com/integrations/kubernetes/
+[5]: https://docs.datadoghq.com/integrations/amazon_web_services/
+[6]: https://docs.datadoghq.com/integrations/amazon_ec2/

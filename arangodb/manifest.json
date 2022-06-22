@@ -26,8 +26,13 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
-    "monitors": {},
+    "dashboards": {
+      "ArangoDB Overview": "assets/dashboards/arangodb_overview.json"
+    },
+    "monitors": {
+      "[ArangoDB] High server Kernel mode percentage usage": "assets/recommended_monitors/high_server_kernel_mode.json",
+      "[ArangoDB] High server User mode percentage usage": "assets/recommended_monitors/high_server_user_mode.json"
+    },
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
     "logs": {

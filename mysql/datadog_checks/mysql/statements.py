@@ -146,6 +146,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             'ddagentversion': datadog_agent.get_version(),
             'min_collection_interval': self._metric_collection_interval,
             'tags': self._tags,
+            'cloud_metadata': self._config.cloud_metadata,
             'mysql_rows': rows,
         }
         self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))

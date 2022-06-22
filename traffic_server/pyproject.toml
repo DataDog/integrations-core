@@ -8,7 +8,7 @@ build-backend = "hatchling.build"
 name = "datadog-traffic_server"
 description = "The Traffic Server check"
 readme = "README.md"
-license = "BSD-3-Clause"
+license = {text = "BSD-3-Clause"}
 requires-python = ">=3.8"
 keywords = [
     "datadog",

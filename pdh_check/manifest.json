@@ -10,7 +10,7 @@
   "manifest_version": "1.0.0",
   "metric_prefix": "pdh.",
   "name": "pdh_check",
-  "public_title": "Datadog-PDH Check Integration",
+  "public_title": "PDH Check Integration",
   "short_description": "Collect and graph any Windows Performance Counters.",
   "support": "core",
   "supported_os": [

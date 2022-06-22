@@ -29,6 +29,7 @@ class TrelloClient:
             'Database Monitoring': '60ec3d30532b9072b44d3900',
             'Integrations': '5ae1e3e2c81fff836d00497e',
             'Platform': '5d9b687492952e6578ecf04d',
+            'Triage': '5d9b687492952e6578ecf04d',  # unused
             'Networks': '5e1de8cf867357791ec5ee47',
             'Processes': '5aeca4c8621e4359b9cb9c27',
             'Trace': '5bcf3ffbe0651642ae029038',
@@ -43,6 +44,7 @@ class TrelloClient:
             'team/agent-apm': 'Trace',
             'team/agent-core': 'Core',
             'team/agent-platform': 'Platform',
+            'team/triage': 'Platform',
             'team/networks': 'Networks',
             'team/processes': 'Processes',
             'team/containers': 'Containers',
@@ -60,6 +62,7 @@ class TrelloClient:
             'team/agent-apm': 'agent-apm',
             'team/agent-core': 'agent-core',
             'team/agent-platform': 'agent-platform',
+            'team/triage': 'agent-platform',
             'team/networks': 'agent-network',
             'team/processes': 'processes',
             'team/containers': 'container-integrations',
@@ -79,6 +82,7 @@ class TrelloClient:
             'Integrations': '5e790ff25bd3dd48da67608d',
             'Database Monitoring': '60ec4973bd1b8652312af938',
             'Platform': '5e7910a45d711a6382f08bb9',
+            'Triage': '5e7910a45d711a6382f08bb9',  # unused
             'Networks': '5e79109821620a60014fc016',
             'Processes': '5e7910789f92a918152b700d',
             'Trace': '5c050640ecb34f0915ec589a',

@@ -91,7 +91,6 @@ tuf,PyPI,Apache-2.0,https://www.updateframework.com
 tuf,PyPI,MIT,https://www.updateframework.com
 typing,PyPI,PSF,"Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Ivan Levkivskyi"
 uptime,PyPI,BSD-2-Clause,Koen Crolla
-urllib3,PyPI,MIT,Andrey Petrov
 vertica-python,PyPI,Apache-2.0,"Justin Berka, Alex Kim, Siting Ren"
 win-inet-pton,PyPI,Unlicense,Ryan Vennell
 wrapt,PyPI,BSD-3-Clause,Graham Dumpleton

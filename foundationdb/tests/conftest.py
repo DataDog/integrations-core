@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2022-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
 import time
@@ -6,35 +9,29 @@ import pytest
 
 from datadog_checks.dev import WaitFor, docker_run, run_command
 
-dirname = os.path.dirname(__file__)
-
-INSTANCE = {
-    'cluster_file': os.path.join(dirname, 'fdb.cluster'),
-    'tls_certificate_file': os.path.join(dirname, 'docker/tls/fdb.pem'),
-    'tls_key_file': os.path.join(dirname, 'docker/tls/private.key'),
-    'tls_verify_peers': 'Check.Valid=0',
-}
-CONFIG = {'init_config': {}, 'instances': [INSTANCE]}
-HERE = os.path.dirname(os.path.abspath(__file__))
+from .common import E2E_CONFIG, E2E_METADATA, E2E_TLS_CONFIG, HERE, INSTANCE, TLS_INSTANCE, TOX_ENV
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    compose_file = os.path.join(HERE, 'docker', 'docker-compose.yaml')
-    with docker_run(compose_file=compose_file, conditions=[WaitFor(create_database)]):
-        yield CONFIG
-
-
-@pytest.fixture(scope='session')
-def dd_tls_environment():
-    compose_file = os.path.join(HERE, 'docker', 'docker-compose-tls.yaml')
-    with docker_run(compose_file=compose_file, conditions=[WaitFor(create_tls_database)]):
-        yield CONFIG
+    if TOX_ENV == 'py38-tls':
+        compose_file = os.path.join(HERE, 'docker', 'docker-compose-tls.yaml')
+        with docker_run(compose_file=compose_file, conditions=[WaitFor(create_tls_database)]):
+            yield E2E_TLS_CONFIG, E2E_METADATA
+    else:
+        compose_file = os.path.join(HERE, 'docker', 'docker-compose.yaml')
+        with docker_run(compose_file=compose_file, conditions=[WaitFor(create_database)]):
+            yield E2E_CONFIG, E2E_METADATA
 
 
 @pytest.fixture
 def instance():
     return INSTANCE
+
+
+@pytest.fixture
+def tls_instance():
+    return TLS_INSTANCE
 
 
 def create_tls_database():

@@ -14,7 +14,7 @@
   "metric_prefix": "system.",
   "metric_to_check": "system.core.user",
   "name": "system_core",
-  "public_title": "Datadog-System Core Integration",
+  "public_title": "System Core Integration",
   "short_description": "Collect the number of CPU cores and CPU times on a host",
   "support": "core",
   "supported_os": [

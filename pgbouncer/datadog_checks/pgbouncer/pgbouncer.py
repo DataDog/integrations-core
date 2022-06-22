@@ -67,15 +67,13 @@ class PgBouncer(AgentCheck):
                     try:
                         self.log.debug("Running query: %s", query)
                         cursor.execute(query)
-                        rows = cursor.fetchall()
+                        rows = self.iter_rows(cursor)
 
                     except Exception as e:
                         self.log.exception("Not all metrics may be available: %s", str(e))
 
                     else:
                         for row in rows:
-                            self.log.debug("Processing row: %r", row)
-
                             if 'key' in row:  # We are processing "config metrics"
                                 # Make a copy of the row to allow mutation
                                 # (a `psycopg2.lib.extras.DictRow` object doesn't accept a new key)
@@ -99,6 +97,22 @@ class PgBouncer(AgentCheck):
             self.log.exception("Connection error")
 
             raise ShouldRestartException
+
+    def iter_rows(self, cursor):
+        row_num = 0
+        rows = iter(cursor)
+        while True:
+            try:
+                row = next(rows)
+            except StopIteration:
+                break
+            except Exception as e:
+                self.log.error('Error processing row %d: %s', row_num, e)
+            else:
+                self.log.debug('Processing row: %r', row)
+                yield row
+
+            row_num += 1
 
     def _get_connect_kwargs(self):
         """

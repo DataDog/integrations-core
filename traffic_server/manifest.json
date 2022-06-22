@@ -15,7 +15,10 @@
     "windows"
   ],
   "process_signatures": [
-    "traffic_cop", "traffic_manager", "traffic_server", "trafficserver start"
+    "traffic_cop",
+    "traffic_manager",
+    "traffic_server",
+    "trafficserver start"
   ],
   "public_title": "Traffic Server",
   "categories": [
@@ -24,18 +27,24 @@
     "log collection"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "traffic-server",
   "assets": {
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
+    "dashboards": {
+      "Traffic Server - Overview": "assets/dashboards/overview.json"
+    },
     "monitors": {
       "[Traffic Server] 4xx Errors higher than usual": "assets/monitors/4xx.json",
       "[Traffic Server] 5xx Errors higher than usual": "assets/monitors/5xx.json"
     },
-    "saved_views": {},
+    "saved_views": {
+      "traffic_server_error_logs": "assets/saved_views/traffic_server_error_logs.json",
+      "traffic_server_overview": "assets/saved_views/traffic_server_overview.json",
+      "traffic_server_patterns": "assets/saved_views/traffic_server_error_patterns.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "traffic_server"

@@ -13,7 +13,7 @@
     "linux",
     "mac_os"
   ],
-  "public_title": "Datadog-Ambari Integration",
+  "public_title": "Ambari Integration",
   "categories": [
     "processing",
     "log collection",

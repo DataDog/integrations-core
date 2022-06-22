@@ -75,11 +75,39 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 ##### Metric collection
 
-| Parameter            | Value                                                                                 |
-|----------------------|---------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `haproxy`                                                                             |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                         |
-| `<INSTANCE_CONFIG>`  | `{"openmetrics_endpoint": "http://%%host%%:<PORT>/metrics", "use_openmetrics": True}` |
+| Parameter            | Value                                                                                   |
+|----------------------|-----------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `haproxy`                                                                               |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                           |
+| `<INSTANCE_CONFIG>`  | `{"openmetrics_endpoint": "http://%%host%%:<PORT>/metrics", "use_openmetrics": "true"}` |
+
+##### Kubernetes Deployment example
+
+Add pod annotations under `.spec.template.metadata` for a Deployment:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: haproxy
+spec:
+  template:
+    metadata:
+      labels:
+        name: haproxy
+      annotations:
+        ad.datadoghq.com/haproxy.check_names: '["haproxy"]'
+        ad.datadoghq.com/haproxy.init_configs: '[{}]'
+        ad.datadoghq.com/haproxy.instances: |
+          [
+            {
+              "openmetrics_endpoint": "http://%%host%%:<PORT>/metrics", "use_openmetrics": "true"
+            }
+          ]
+    spec:
+      containers:
+        - name: haproxy
+```
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->

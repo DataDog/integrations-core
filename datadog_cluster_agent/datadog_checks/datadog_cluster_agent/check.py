@@ -37,6 +37,10 @@ DEFAULT_METRICS = {
     'rate_limit_queries_remaining': 'datadog.rate_limit_queries.remaining',
     'rate_limit_queries_reset': 'datadog.rate_limit_queries.reset',
     'secret_backend__elapsed_ms': 'secret_backend.elapsed',
+    'endpoint_checks_configs_dispatched': 'endpoint_checks.configs_dispatched',
+    'autodiscovery_poll_duration': 'autodiscovery.poll_duration',
+    'autodiscovery_watched_resources': 'autodiscovery.watched_resources',
+    'autodiscovery_errors': 'autodiscovery.errors',
 }
 
 

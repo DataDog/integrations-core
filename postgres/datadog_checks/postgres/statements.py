@@ -47,6 +47,13 @@ DEFAULT_STATEMENTS_LIMIT = 10000
 # Required columns for the check to run
 PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({'calls', 'query', 'rows'})
 
+PG_STAT_STATEMENTS_TIMING_COLUMNS = frozenset(
+    {
+        'blk_read_time',
+        'blk_write_time',
+    }
+)
+
 PG_STAT_STATEMENTS_METRICS_COLUMNS = frozenset(
     {
         'calls',
@@ -116,6 +123,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._config = config
         self._state = StatementMetrics()
         self._stat_column_cache = []
+        self._track_io_timing_cache = None
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
@@ -181,6 +189,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._metrics_collection_interval,
                 'tags': self._tags_no_db,
+                'cloud_metadata': self._config.cloud_metadata,
                 'postgres_rows': rows,
                 'postgres_version': self._payload_pg_version(),
                 'ddagentversion': datadog_agent.get_version(),
@@ -216,7 +225,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 )
                 return []
 
-            query_columns = sorted(list(available_columns & PG_STAT_ALL_DESIRED_COLUMNS))
+            desired_columns = PG_STAT_ALL_DESIRED_COLUMNS
+
+            if self._check.pg_settings.get("track_io_timing") == "on":
+                desired_columns |= PG_STAT_STATEMENTS_TIMING_COLUMNS
+
+            query_columns = sorted(list(available_columns & desired_columns))
             params = ()
             filters = ""
             if self._config.dbstrict:

@@ -14,7 +14,7 @@
   "metric_prefix": "mesos.",
   "metric_to_check": "mesos.stats.uptime_secs",
   "name": "mesos_slave",
-  "public_title": "Datadog-Mesos Slave Integration",
+  "public_title": "Mesos Slave Integration",
   "short_description": "Track cluster resource usage, master and slave counts, tasks statuses, and more.",
   "support": "core",
   "supported_os": [

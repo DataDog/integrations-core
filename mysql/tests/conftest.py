@@ -128,12 +128,12 @@ def instance_additional_status():
         'disable_generic_tags': 'true',
         'additional_status': [
             {
-                'name': "innodb_rows_read",
+                'name': "Innodb_rows_read",
                 'metric_name': "mysql.innodb.rows_read",
                 'type': "rate",
             },
             {
-                'name': "row_lock_time",
+                'name': "Innodb_row_lock_time",
                 'metric_name': "mysql.innodb.row_lock_time",
                 'type': "rate",
             },

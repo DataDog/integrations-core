@@ -125,8 +125,7 @@ def assert_collection(aggregator, tags, use_openmetrics, runs=1):
 
     aggregator.assert_all_metrics_covered()
 
-    # TODO: Flip condition and modify `metadata.csv` when the new implementation is the default
-    if not use_openmetrics:
+    if use_openmetrics:
         aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, Vault.OK, count=runs)

@@ -12,6 +12,7 @@ from copy import deepcopy
 import requests
 from kubeutil import get_connection_info
 from six import iteritems
+from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials, urljoin
@@ -19,7 +20,13 @@ from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.tagging import tagger
 
 from .cadvisor import CadvisorScraper
-from .common import CADVISOR_DEFAULT_PORT, PodListUtils, replace_container_rt_prefix
+from .common import (
+    CADVISOR_DEFAULT_PORT,
+    PodListUtils,
+    get_container_label,
+    replace_container_rt_prefix,
+    tags_for_docker,
+)
 from .probes import ProbesPrometheusScraperMixin
 from .prometheus import CadvisorPrometheusScraperMixin
 from .summary import SummaryScraperMixin
@@ -75,21 +82,12 @@ DEPRECATED_GAUGES = {
 NEW_1_14_GAUGES = {
     'kubelet_runtime_operations_total': 'kubelet.runtime.operations',
     'kubelet_runtime_operations_errors_total': 'kubelet.runtime.errors',
-    'kubelet_container_log_filesystem_used_bytes': 'kubelet.container.log_filesystem.used_bytes',
 }
 
 DEFAULT_HISTOGRAMS = {
     'apiserver_client_certificate_expiration_seconds': 'apiserver.certificate.expiration',
     'kubelet_pleg_relist_duration_seconds': 'kubelet.pleg.relist_duration',
     'kubelet_pleg_relist_interval_seconds': 'kubelet.pleg.relist_interval',
-}
-
-DEPRECATED_HISTOGRAMS = {
-    'rest_client_request_latency_seconds': 'rest.client.latency',
-}
-
-NEW_1_14_HISTOGRAMS = {
-    'rest_client_request_duration_seconds': 'rest.client.latency',
 }
 
 DEFAULT_SUMMARIES = {}
@@ -159,6 +157,12 @@ class KubeletCheck(
     VOLUME_TAG_KEYS_TO_EXCLUDE = ['persistentvolumeclaim', 'pod_phase']
 
     def __init__(self, name, init_config, instances):
+        self.KUBELET_METRIC_TRANSFORMERS = {
+            'kubelet_container_log_filesystem_used_bytes': self.kubelet_container_log_filesystem_used_bytes,
+            'rest_client_request_latency_seconds': self.rest_client_latency,
+            'rest_client_request_duration_seconds': self.rest_client_latency,
+        }
+
         self.NAMESPACE = 'kubernetes'
         if instances is not None and len(instances) > 1:
             raise Exception('Kubelet check only supports one configured instance.')
@@ -213,6 +217,7 @@ class KubeletCheck(
         for d in [
             self.PROBES_METRIC_TRANSFORMERS,
             self.CADVISOR_METRIC_TRANSFORMERS,
+            self.KUBELET_METRIC_TRANSFORMERS,
             counter_transformers,
             histogram_transformers,
             volume_metric_transformers,
@@ -239,8 +244,6 @@ class KubeletCheck(
                     DEPRECATED_GAUGES,
                     NEW_1_14_GAUGES,
                     DEFAULT_HISTOGRAMS,
-                    DEPRECATED_HISTOGRAMS,
-                    NEW_1_14_HISTOGRAMS,
                     DEFAULT_SUMMARIES,
                     DEPRECATED_SUMMARIES,
                     NEW_1_14_SUMMARIES,
@@ -683,3 +686,41 @@ class KubeletCheck(
             pod_tags = self.pod_tags_by_pvc.get('{}/{}'.format(kube_ns, pvc_name), {})
             tags.extend(pod_tags)
             self.gauge(metric_name_with_namespace, val, tags=list(set(tags)), hostname=custom_hostname)
+
+    def kubelet_container_log_filesystem_used_bytes(self, metric, scraper_config):
+        metric_name = scraper_config['namespace'] + '.kubelet.container.log_filesystem.used_bytes'
+        for sample in metric.samples:
+            self._filter_and_send_gauge_sample(metric_name, sample)
+
+    def _filter_and_send_gauge_sample(self, metric_name, sample):
+        labels = sample[OpenMetricsBaseCheck.SAMPLE_LABELS]
+        container_id = self.pod_list_utils.get_cid_by_labels(labels)
+        tags = []
+        if container_id is not None:
+            if self.pod_list_utils.is_excluded(container_id):
+                return
+
+            tags = tags_for_docker(replace_container_rt_prefix(container_id), tagger.HIGH, True)
+            if not tags:
+                self.log.debug(
+                    "Tags not found for container: %s/%s/%s:%s",
+                    get_container_label(labels, 'namespace'),
+                    get_container_label(labels, 'pod'),
+                    get_container_label(labels, 'container'),
+                    container_id,
+                )
+
+        self.gauge(metric_name, sample[self.SAMPLE_VALUE], tags + self.instance_tags)
+
+    def rest_client_latency(self, metric, scraper_config):
+        for sample in metric.samples:
+            try:
+                sample.labels['url'] = self._sanitize_url_label(sample.labels['url'])
+            except KeyError:
+                pass
+        return self.submit_openmetric("rest.client.latency", metric, scraper_config)
+
+    @staticmethod
+    def _sanitize_url_label(url):
+        u = urlparse(url)
+        return u.path

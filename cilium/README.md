@@ -58,7 +58,7 @@ To configure this check for an Agent running on a host:
     ```yaml  
         instances:
         
-            ## @param use_openmetrics - boolean - optional - default: true
+            ## @param use_openmetrics - boolean - optional - default: false
             ## Use the latest OpenMetrics V2 implementation for more features and better performance.
             ##
             ## Note: To see the configuration options for the legacy OpenMetrics implementation (Agent 7.33 or older),

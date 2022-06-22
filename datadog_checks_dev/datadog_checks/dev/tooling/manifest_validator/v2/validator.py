@@ -43,16 +43,19 @@ class DisplayOnPublicValidator(BaseManifestValidator):
 
 class TileDescriptionValidator(BaseManifestValidator):
     DESCRIPTION_PATH = '/tile/description'
-    MAX_DESCRIPTION_LENGTH = 70
+    MAX_DESCRIPTION_LENGTH = 80
+    MAX_DESCRIPTION_LENGTH_MP = 70
 
     def validate(self, check_name, decoded, fix):
-        # The description for V2 manifests should not be longer than 70 characters to avoid being
-        # cut off or shortened on the UI
+        # The description for V2 manifests should not exceed the max
         tile_description = decoded.get_path(self.DESCRIPTION_PATH)
         current_length = len(tile_description)
-        if current_length > self.MAX_DESCRIPTION_LENGTH:
-            output = f'  The tile description is {current_length} characters long. It should be no longer than \
-{self.MAX_DESCRIPTION_LENGTH} characters.'
+        max_desc_length = self.MAX_DESCRIPTION_LENGTH_MP if self.is_marketplace else self.MAX_DESCRIPTION_LENGTH
+        if current_length > max_desc_length:
+            output = (
+                f'  The tile description is {current_length} characters long. It should be no longer than '
+                f'{self.MAX_DESCRIPTION_LENGTH} characters.'
+            )
             self.fail(output)
 
 

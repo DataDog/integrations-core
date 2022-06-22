@@ -23,18 +23,16 @@
     "log collection"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "foundationdb",
   "assets": {
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
     "dashboards": {
-      "FoundationDB Transactions and Workload": "assets/dashboards/foundationdb_transactions_and_workload.json",
-      "FoundationDB Queues": "assets/dashboards/foundationdb_queues.json",
-      "FoundationDB Machines and Processes": "assets/dashboards/foundationdb_machines_and_processes.json",
       "FoundationDB Latency Probe": "assets/dashboards/foundationdb_latency_probe.json",
-      "FoundationDB Size and Utilization": "assets/dashboards/foundationdb_size_and_utilization.json"
+      "FoundationDB Processes and Utilization": "assets/dashboards/foundationdb_processes_and_utilization.json",
+      "FoundationDB Transactions and Queues": "assets/dashboards/foundationdb_transactions_and_queues.json"
     },
     "monitors": {
       "FoundationDB Status Check": "assets/monitors/service_check.json",

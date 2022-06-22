@@ -47,7 +47,8 @@ instances:
 
   -
     ## @param use_preview - boolean - optional - default: true
-    ## Whether or not to preview the new version of the check supporting only ETCD 3+
+    ## Enable this option to run the Prometheus-based check of etcd.
+    ## Note: This requires etcd v3 or greater.
     #
     # use_preview: true
 
@@ -157,6 +158,11 @@ instances:
     ## Note: bearer_token_auth should be set to true to enable adding the token to HTTP headers for authentication.
     #
     # bearer_token_path: <TOKEN_PATH>
+
+    ## @param bearer_token_refresh_interval - integer - optional - default: 60
+    ## The refresh interval to keep the bearer token up-to-date.
+    #
+    # bearer_token_refresh_interval: 60
 
     ## @param ignore_metrics - list of strings - optional
     ## A list of metrics to ignore, the "*" wildcard can be used to match multiple metric names.

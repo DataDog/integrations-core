@@ -1,12 +1,20 @@
 # CHANGELOG - mongo
 
-## 3.2.0 / 2022-04-05
+## 3.2.2 / 2022-05-15
+
+* [Fixed] Capture badly formatted hosts. See [#11933](https://github.com/DataDog/integrations-core/pull/11933).
+
+## 3.2.1 / 2022-04-26
+
+* [Fixed] Fix passing in username and password as options. See [#11525](https://github.com/DataDog/integrations-core/pull/11525).
+
+## 3.2.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 * [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
 
-## 3.1.0 / 2022-02-19
+## 3.1.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11399](https://github.com/DataDog/integrations-core/pull/11399).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
@@ -174,17 +182,17 @@
 
 ## 1.7.0 / 2018-11-30 / Agent 6.8.0
 
-* [Added] Support Python 3. See [#2623][1].
-* [Fixed] Use raw string literals when \ is present. See [#2465][2].
+* [Added] Support Python 3. See [#2623](https://github.com/DataDog/integrations-core/pull/2623).
+* [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).
 
 ## 1.6.1 / 2018-09-04 / Agent 6.5.0
 
-* [Fixed] Add data files to the wheel package. See [#1727][3].
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
 
 ## 1.6.0 / 2018-06-13 / Agent 6.4.0
 
-* [Added] [mongo] allow disabling of replica access. See [#1516][4].
-* [Changed] [mongo] properly parse metric. See [#1498][5].
+* [Added] [mongo] allow disabling of replica access. See [#1516](https://github.com/DataDog/integrations-core/pull/1516).
+* [Changed] [mongo] properly parse metric. See [#1498](https://github.com/DataDog/integrations-core/pull/1498).
 
 ## 1.5.4 / Unreleased
 
@@ -197,63 +205,40 @@
 ## 1.5.2 / 2018-02-13
 
 * [DOC] Adding configuration for log collection in `conf.yaml`
-* [BUGFIX] Pass replica set metric collection if `replSetGetStatus` command not available. See [#1092][6]
+* [BUGFIX] Pass replica set metric collection if `replSetGetStatus` command not available. See [#1092](https://github.com/DataDog/integrations-core/issues/1092)
 
 ## 1.5.1 / 2018-01-10
 
-* [BUGFIX] Pass replica set metric collection if not running standalone instance instead of raising exception. See [#915][7]
+* [BUGFIX] Pass replica set metric collection if not running standalone instance instead of raising exception. See [#915](https://github.com/DataDog/integrations-core/issues/915)
 
 ## 1.5.0 / 2017-11-21
 
-* [FEATURE] Collect metrics about indexes usage. See [#823][8]
-* [IMPROVEMENT] Upgrading pymongo to version 3.5. See [#747][9]
-* [IMPROVEMENT] Filter out oplog entries without a timestamp. See [#406][10], thanks [@hindmanj][11]
+* [FEATURE] Collect metrics about indexes usage. See [#823](https://github.com/DataDog/integrations-core/issues/823)
+* [IMPROVEMENT] Upgrading pymongo to version 3.5. See [#747](https://github.com/DataDog/integrations-core/issues/747)
+* [IMPROVEMENT] Filter out oplog entries without a timestamp. See [#406](https://github.com/DataDog/integrations-core/issues/406), thanks [@hindmanj](https://github.com/hindmanj)
 
 ## 1.4.0 / 2017-10-10
 
-* [IMPROVEMENT] Started monitoring the wiredTiger cache page read/write statistics. See [#769][12] (Thanks [@dnavre][13])
+* [IMPROVEMENT] Started monitoring the wiredTiger cache page read/write statistics. See [#769](https://github.com/DataDog/integrations-core/issues/769) (Thanks [@dnavre](https://github.com/dnavre))
 
 ## 1.3.0 / 2017-08-28
 
-* [FEATURE] Add support for `authSource` parameter in mongo URL. See [#691][14]
-* [IMPROVEMENT] Simplify "system.namespaces" usage. See [#625][15], thanks [@dtbartle][16]
-* [BUGFIX] Don't overwrite the higher-level `cli`/`db` for replset stats. See [#627][17], thanks [@dtbartle][16]
+* [FEATURE] Add support for `authSource` parameter in mongo URL. See [#691](https://github.com/DataDog/integrations-core/issues/691)
+* [IMPROVEMENT] Simplify "system.namespaces" usage. See [#625](https://github.com/DataDog/integrations-core/issues/625), thanks [@dtbartle](https://github.com/dtbartle)
+* [BUGFIX] Don't overwrite the higher-level `cli`/`db` for replset stats. See [#627](https://github.com/DataDog/integrations-core/issues/627), thanks [@dtbartle](https://github.com/dtbartle)
 
 ## 1.2.0 / 2017-07-18
 
-* [IMPROVEMENT] Add support for `mongo.oplog.*` metrics for Mongo versions  3.x. See [#491][18]
+* [IMPROVEMENT] Add support for `mongo.oplog.*` metrics for Mongo versions  3.x. See [#491](https://github.com/DataDog/integrations-core/issues/491)
 
 ## 1.1.0 / 2017-06-05
 
-* [IMPROVEMENT] Set connectTimeout & serverSelectionTimeout to timeout in config. See [#352][19]
+* [IMPROVEMENT] Set connectTimeout & serverSelectionTimeout to timeout in config. See [#352](https://github.com/DataDog/integrations-core/issues/352)
 
 ## 1.0.1 / 2017-04-24
 
-* [BUGFIX] Redact username/password in logs, etc. See [#326][20] and [#347][21]
+* [BUGFIX] Redact username/password in logs, etc. See [#326](https://github.com/DataDog/integrations-core/issues/326) and [#347](https://github.com/DataDog/integrations-core/issues/347)
 
 ## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds mongo integration.
-
-<!--- The following link definition list is generated by PimpMyChangelog --->
-[1]: https://github.com/DataDog/integrations-core/pull/2623
-[2]: https://github.com/DataDog/integrations-core/pull/2465
-[3]: https://github.com/DataDog/integrations-core/pull/1727
-[4]: https://github.com/DataDog/integrations-core/pull/1516
-[5]: https://github.com/DataDog/integrations-core/pull/1498
-[6]: https://github.com/DataDog/integrations-core/issues/1092
-[7]: https://github.com/DataDog/integrations-core/issues/915
-[8]: https://github.com/DataDog/integrations-core/issues/823
-[9]: https://github.com/DataDog/integrations-core/issues/747
-[10]: https://github.com/DataDog/integrations-core/issues/406
-[11]: https://github.com/hindmanj
-[12]: https://github.com/DataDog/integrations-core/issues/769
-[13]: https://github.com/dnavre
-[14]: https://github.com/DataDog/integrations-core/issues/691
-[15]: https://github.com/DataDog/integrations-core/issues/625
-[16]: https://github.com/dtbartle
-[17]: https://github.com/DataDog/integrations-core/issues/627
-[18]: https://github.com/DataDog/integrations-core/issues/491
-[19]: https://github.com/DataDog/integrations-core/issues/352
-[20]: https://github.com/DataDog/integrations-core/issues/326
-[21]: https://github.com/DataDog/integrations-core/issues/347

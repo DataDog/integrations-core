@@ -13,7 +13,7 @@
   "metric_prefix": "riak.",
   "metric_to_check": "riak.memory_processes",
   "name": "riak",
-  "public_title": "Datadog-Riak Integration",
+  "public_title": "Riak Integration",
   "short_description": "Track node, vnode and ring performance metrics for RiakKV or RiakTS.",
   "support": "core",
   "supported_os": [

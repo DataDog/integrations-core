@@ -1,11 +1,16 @@
 # CHANGELOG - IBM i
 
-## 1.3.0 / 2022-04-05
+## 1.4.0 / 2022-05-15
+
+* [Added] Add option to select which queries to run. See [#11806](https://github.com/DataDog/integrations-core/pull/11806).
+* [Fixed] Fix enumerated integer validation. See [#11964](https://github.com/DataDog/integrations-core/pull/11964).
+
+## 1.3.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 
-## 1.2.0 / 2022-02-19
+## 1.2.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11369](https://github.com/DataDog/integrations-core/pull/11369).
 * [Added] Add detailed CPU usage and status metrics. See [#11081](https://github.com/DataDog/integrations-core/pull/11081).
