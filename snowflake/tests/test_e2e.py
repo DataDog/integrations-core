@@ -223,7 +223,7 @@ def test_org_usage_mock_data(dd_agent_check, datadog_agent, instance):
     )
     aggregator.assert_metric('snowflake.organization.storage.credits', value=349, tags=EXPECTED_TAGS + storage_tags)
 
-    balance_tags = ['contract_number:3', 'currency:USD']
+    balance_tags = ['contract_number:4', 'currency:USD']
     aggregator.assert_metric(
         'snowflake.organization.balance.free_usage', value=23410, tags=EXPECTED_TAGS + balance_tags
     )

@@ -99,7 +99,7 @@ ORGANIZATION_REMAINING_BALANCE_DAILY = [
         'USD',
         Decimal('23410'),
         Decimal('814349'),
-        Decimal('35435'),
+        Decimal('-35435'),
         Decimal('455435'),
     ),
 ]

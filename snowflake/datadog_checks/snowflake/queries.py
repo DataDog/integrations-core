@@ -227,7 +227,7 @@ ReplicationUsage = {
 # https://docs.snowflake.com/en/sql-reference/organization-usage/contract_items.html
 OrgContractItems = {
     'name': 'organization.contract.metrics',
-    'query': ('select CONTRACT_NUMBER, CONTRACT_ITEM, CURRENCY, AMOUNT from CONTRACT_ITEMS group by 1, 2, 3;'),
+    'query': ('select CONTRACT_NUMBER, CONTRACT_ITEM, CURRENCY, sum(AMOUNT) from CONTRACT_ITEMS group by 1, 2, 3;'),
     'columns': [
         {'name': 'contract_number', 'type': 'tag'},
         {'name': 'contract_item', 'type': 'tag'},
