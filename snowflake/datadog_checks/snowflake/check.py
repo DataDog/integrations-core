@@ -90,7 +90,11 @@ class SnowflakeCheck(AgentCheck):
                 self.errors.append(mgroup)
 
         if self.errors:
-            self.log.warning('Invalid metric_groups forfound in snowflake conf.yaml: %s', (', '.join(self.errors)))
+            self.log.warning(
+                'Invalid metric_groups for `%s` found in snowflake conf.yaml: %s',
+                self._config.schema,
+                (', '.join(self.errors)),
+            )
         if not self.metric_queries and not self._config.custom_queries_defined:
             raise ConfigurationError(
                 'No valid metric_groups for `{}` or custom query configured, please list at least one.'.format(

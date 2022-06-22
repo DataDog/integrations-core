@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import logging
 import os
 
 import mock
@@ -362,18 +363,42 @@ def test_all_org_metric_groups(instance):
     ]
 
 
-def test_metric_group_exceptions(instance):
+@pytest.mark.parametrize(
+    'schema',
+    [
+        pytest.param('ACCOUNT_USAGE'),
+        pytest.param('ORGANIZATION_USAGE'),
+    ],
+)
+def test_no_valid_metric_groups(instance, schema):
     instance = copy.deepcopy(instance)
     instance['metric_groups'] = ['fake.metric.group']
+    instance['schema'] = schema
     with pytest.raises(
         Exception,
-        match='No valid metric_groups for `ACCOUNT_USAGE` or custom query configured, please list at least one.',
+        match='No valid metric_groups for `{}` or custom query configured, please list at least one.'.format(schema),
     ):
         check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check.log = mock.MagicMock()
-        check.log.warning.assert_called_once_with(
-            "Invalid metric_groups found in snowflake conf.yaml: fake.metric.group"
-        )
+
+
+@pytest.mark.parametrize(
+    'schema',
+    [
+        pytest.param('ACCOUNT_USAGE'),
+        pytest.param('ORGANIZATION_USAGE'),
+    ],
+)
+def test_metric_group_exceptions(instance, schema, caplog):
+    caplog.clear()
+    caplog.set_level(logging.WARNING)
+    instance = copy.deepcopy(instance)
+    instance['metric_groups'] = ['fake.metric.group', 'snowflake.organization.warehouse', 'snowflake.logins']
+    instance['schema'] = schema
+    SnowflakeCheck(CHECK_NAME, {}, [instance])
+    assert (
+        "Invalid metric_groups for `{}` found in snowflake conf.yaml: fake.metric.group".format(schema) in caplog.text
+    )
 
 
 def test_no_metric_group(instance):
