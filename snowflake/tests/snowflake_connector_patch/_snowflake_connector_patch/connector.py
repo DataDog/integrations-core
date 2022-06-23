@@ -22,9 +22,10 @@ def connect(*args, **kwargs):
 class Connection(object):
     def __init__(self, *args, **kwargs):
         super(Connection, self).__init__()
+        self.schema = kwargs.get('schema')
 
     def cursor(self, *args, **kwargs):
-        return Cursor(*args, **kwargs)
+        return Cursor(*args, **kwargs, schema=self.schema)
 
     def close(self):
         pass
@@ -33,7 +34,7 @@ class Connection(object):
 class Cursor(object):
     def __init__(self, *args, **kwargs):
         super(Cursor, self).__init__()
-
+        self.schema = kwargs.get('schema')
         self.__data = []
 
     @property
@@ -44,11 +45,11 @@ class Cursor(object):
         match = TABLE_PATTERN.search(query)
         if match:
             table_name = match.group(1)
-            # look for ACCOUNT_NAME or CONTRACT_NUMBER since some views have
+            # check the schema since some views have
             # the same name in ACCOUNT_USAGE and ORGANIZATION_USAGE
-            table_prefix = ""
-            if "ACCOUNT_NAME" in query or "CONTRACT_NUMBER" in query:
-                table_prefix = "ORGANIZATION_"
+            table_prefix = ''
+            if self.schema == 'ORGANIZATION_USAGE':
+                table_prefix = 'ORGANIZATION_'
             table_attr = "{}{}".format(table_prefix, table_name)
             self.__data = getattr(tables, table_attr, [])
         elif query == 'select current_version();':
