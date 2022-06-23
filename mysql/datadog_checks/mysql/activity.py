@@ -87,7 +87,7 @@ WHERE
         waits_a.event_id = (
            SELECT
               MAX(waits_b.EVENT_ID)
-          FROM  performance_schema.events_waits_current AS waits_b 
+          FROM  performance_schema.events_waits_current AS waits_b
           Where waits_b.thread_id = thread_a.thread_id
     ) OR waits_a.event_id is NULL)
     -- We ignore rows without SQL text because there will be rows for background operations that do not have
