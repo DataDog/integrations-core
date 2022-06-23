@@ -339,7 +339,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             return []
 
         available_columns = set(rows[0].keys())
-        metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
+        metric_columns = available_columns & (PG_STAT_STATEMENTS_METRICS_COLUMNS | PG_STAT_STATEMENTS_TIMING_COLUMNS)
         rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
         self._check.gauge(
             'dd.postgres.queries.query_rows_raw',
