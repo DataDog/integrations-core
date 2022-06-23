@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-CockroachDB Integration",
+  "public_title": "CockroachDB Integration",
   "categories": [
     "cloud",
     "data store",

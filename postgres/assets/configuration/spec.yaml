@@ -515,6 +515,24 @@ files:
           value:
             type: boolean
             example: true
+        - name: keep_sql_alias
+          description: |
+            Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
+            `with select 1 as alias`, `select column as other_name`, or `select * from table t`.
+            When `true` these aliases will not be removed.
+          value:
+            type: boolean
+            example: true
+            display_default: true
+        - name: keep_dollar_quoted_func
+          description: |
+            Set to `true` to prevent dollar quoted function strings (e.g. `$func$`) from being removed.
+            When not removed, the sql content of dollar quoted func strings will be obfuscated.
+            Only strings with the tag `$func$` are supported.
+          value:
+            type: boolean
+            example: true
+            display_default: true
     - template: instances/default
       overrides:
         disable_generic_tags.hidden: False

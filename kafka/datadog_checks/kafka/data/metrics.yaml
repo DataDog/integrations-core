@@ -560,6 +560,13 @@ jmx_metrics:
             alias: kafka.replication.under_replicated_partitions
     - include:
         domain: 'kafka.server'
+        bean: 'kafka.server:type=ReplicaManager,name=UnderMinIsrPartitionCount'
+        attribute:
+          Value:
+            metric_type: gauge
+            alias: kafka.replication.under_min_isr_partition_count
+    - include:
+        domain: 'kafka.server'
         bean: 'kafka.server:type=ReplicaManager,name=IsrShrinksPerSec'
         attribute:
           Count:

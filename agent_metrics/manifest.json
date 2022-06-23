@@ -11,7 +11,7 @@
   "metric_prefix": "datadog.agent.",
   "metric_to_check": "",
   "name": "agent_metrics",
-  "public_title": "Datadog-Agent Metrics Integration",
+  "public_title": "Agent Metrics Integration",
   "short_description": "agent_metrics description.",
   "support": "core",
   "supported_os": [

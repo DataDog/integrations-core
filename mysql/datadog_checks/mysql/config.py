@@ -32,6 +32,7 @@ class MySQLConfig(object):
         self.max_custom_queries = instance.get('max_custom_queries', DEFAULT_MAX_CUSTOM_QUERIES)
         self.charset = instance.get('charset')
         self.dbm_enabled = is_affirmative(instance.get('dbm', instance.get('deep_database_monitoring', False)))
+        self.table_rows_stats_enabled = is_affirmative(instance.get('table_rows_stats_metrics', False))
         self.statement_metrics_limits = instance.get('statement_metrics_limits', None)
         self.full_statement_text_cache_max_size = instance.get('full_statement_text_cache_max_size', 10000)
         self.full_statement_text_samples_per_hour_per_query = instance.get(
@@ -62,6 +63,7 @@ class MySQLConfig(object):
                     'replace_digits', obfuscator_options_config.get('quantize_sql_tables', False)
                 )
             ),
+            'keep_sql_alias': is_affirmative(obfuscator_options_config.get('keep_sql_alias', True)),
             'return_json_metadata': is_affirmative(obfuscator_options_config.get('collect_metadata', True)),
             'table_names': is_affirmative(obfuscator_options_config.get('collect_tables', True)),
             'collect_commands': is_affirmative(obfuscator_options_config.get('collect_commands', True)),

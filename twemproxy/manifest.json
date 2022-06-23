@@ -13,7 +13,7 @@
   "metric_prefix": "twemproxy.",
   "metric_to_check": "twemproxy.total_connections",
   "name": "twemproxy",
-  "public_title": "Datadog-Twemproxy Integration",
+  "public_title": "Twemproxy Integration",
   "short_description": "Visualize twemproxy performance and correlate with the rest of your applications",
   "support": "core",
   "supported_os": [

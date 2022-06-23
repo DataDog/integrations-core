@@ -273,6 +273,19 @@ instances:
         #
         # system_table_size_metrics: false
 
+        ## @param table_rows_stats_metrics - boolean - optional - default: false
+        ## These metrics are reported if you have a Percona MySQL instance with `userstat` enabled
+        ## Set to `true` to collect table stats metrics.
+        ## Metrics provided by the options:
+        ##   - mysql.info.table.rows.read (total per table)
+        ##   - mysql.info.table.rows.changed (total per table)
+        ## Note that this runs a heavy query against your database to compute the relevant metrics
+        ## for all your existing tables. Due to the nature of these calls, if you have a
+        ## high number of tables and schemas, this may have a negative impact on your database performance.
+        ## See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
+        #
+        # table_rows_stats_metrics: false
+
         ## @param extra_performance_metrics - boolean - optional - default: false
         ## These metrics are reported if `performance_schema` is enabled in the MySQL instance
         ## and if the version for that instance is >= 5.6.0.
@@ -417,78 +430,78 @@ instances:
         #
         # collection_interval: 10
 
-## This block defines the configuration for AWS RDS and Aurora instances. 
-##
-## Complete this section if you have installed the Datadog AWS Integration 
-## (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
-## with MySQL integration telemetry.
-##
-## These values are only applied when `dbm: true` option is set.
-#
-# aws:
-
-    ## @param instance_endpoint - string - optional - default: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
-    ## Equal to the Endpoint.Address of the instance the agent is connecting to. 
-    ## This value is optional if the value of `host` is already configured to the instance endpoint.
+    ## This block defines the configuration for AWS RDS and Aurora instances. 
     ##
-    ## For more information on instance endpoints, 
-    ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
-    #
-    # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
-
-## This block defines the configuration for Google Cloud SQL instances.
-##
-## Complete this section if you have installed the Datadog GCP Integration 
-## (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
-## with MySQL integration telemetry.
-##
-## These values are only applied when `dbm: true` option is set.
-#
-# gcp:
-
-    ## @param project_id - string - optional - default: foo-project
-    ## Equal to the GCP resource's project ID.
+    ## Complete this section if you have installed the Datadog AWS Integration 
+    ## (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
+    ## with MySQL integration telemetry.
     ##
-    ## For more information on project IDs,
-    ## See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+    ## These values are only applied when `dbm: true` option is set.
     #
-    # project_id: foo-project
+    # aws:
 
-    ## @param instance_id - string - optional - default: foo-database
-    ## Equal to the GCP resource's instance ID.
+        ## @param instance_endpoint - string - optional - default: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+        ## Equal to the Endpoint.Address of the instance the agent is connecting to. 
+        ## This value is optional if the value of `host` is already configured to the instance endpoint.
+        ##
+        ## For more information on instance endpoints, 
+        ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
+        #
+        # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+
+    ## This block defines the configuration for Google Cloud SQL instances.
     ##
-    ## For more information on instance IDs,
-    ## See the GCP docs https://cloud.google.com/sql/docs/mysql/instance-settings#instance-id-2ndgen
-    #
-    # instance_id: foo-database
-
-## This block defines the configuration for Azure Database for MySQL.
-##
-## Complete this section if you have installed the Datadog Azure Integration 
-## (https://docs.datadoghq.com/integrations/azure) to enrich instances 
-## with MySQL integration telemetry.
-##
-## These values are only applied when `dbm: true` option is set.
-#
-# azure:
-
-    ## @param deployment_type - string - optional - default: flexible_server
-    ## Equal to the deployment type for the managed database. 
+    ## Complete this section if you have installed the Datadog GCP Integration 
+    ## (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
+    ## with MySQL integration telemetry.
     ##
-    ## Acceptable values are:
-    ##   - `flexible_server` 
-    ##   - `single_server`
-    ##   - `virtual_machine`
-    ##
-    ## For more information on deployment types, 
-    ## see the Azure docs https://docs.microsoft.com/en-us/azure/mysql/select-right-deployment-type
+    ## These values are only applied when `dbm: true` option is set.
     #
-    # deployment_type: flexible_server
+    # gcp:
 
-    ## @param name - string - optional - default: mysql-database
-    ## Equal to the name of the Azure MySQL database instance.
+        ## @param project_id - string - optional - default: foo-project
+        ## Equal to the GCP resource's project ID.
+        ##
+        ## For more information on project IDs,
+        ## See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+        #
+        # project_id: foo-project
+
+        ## @param instance_id - string - optional - default: foo-database
+        ## Equal to the GCP resource's instance ID.
+        ##
+        ## For more information on instance IDs,
+        ## See the GCP docs https://cloud.google.com/sql/docs/mysql/instance-settings#instance-id-2ndgen
+        #
+        # instance_id: foo-database
+
+    ## This block defines the configuration for Azure Database for MySQL.
+    ##
+    ## Complete this section if you have installed the Datadog Azure Integration 
+    ## (https://docs.datadoghq.com/integrations/azure) to enrich instances 
+    ## with MySQL integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
     #
-    # name: mysql-database
+    # azure:
+
+        ## @param deployment_type - string - optional - default: flexible_server
+        ## Equal to the deployment type for the managed database. 
+        ##
+        ## Acceptable values are:
+        ##   - `flexible_server` 
+        ##   - `single_server`
+        ##   - `virtual_machine`
+        ##
+        ## For more information on deployment types, 
+        ## see the Azure docs https://docs.microsoft.com/en-us/azure/mysql/select-right-deployment-type
+        #
+        # deployment_type: flexible_server
+
+        ## @param name - string - optional - default: mysql-database
+        ## Equal to the name of the Azure MySQL database instance.
+        #
+        # name: mysql-database
 
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
@@ -526,6 +539,13 @@ instances:
         ## Requires `collect_metadata: true`.
         #
         # collect_comments: true
+
+        ## @param keep_sql_alias - boolean - optional - default: true
+        ## Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
+        ## `with select 1 as alias`, `select column as other_name`, or `select * from table t`.
+        ## When `true` these aliases will not be removed.
+        #
+        # keep_sql_alias: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

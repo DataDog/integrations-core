@@ -22,7 +22,7 @@
     "apache",
     "apache2"
   ],
-  "public_title": "Datadog-Apache Integration",
+  "public_title": "Apache Integration",
   "short_description": "Track requests per second, bytes served, worker threads, uptime, and more.",
   "support": "core",
   "supported_os": [

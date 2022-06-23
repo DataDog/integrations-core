@@ -67,6 +67,7 @@ class ObfuscatorOptions(BaseModel):
     collect_comments: Optional[bool]
     collect_metadata: Optional[bool]
     collect_tables: Optional[bool]
+    keep_sql_alias: Optional[bool]
     replace_digits: Optional[bool]
 
 
@@ -135,6 +136,7 @@ class InstanceConfig(BaseModel):
     query_activity: Optional[QueryActivity]
     query_metrics: Optional[QueryMetrics]
     reported_hostname: Optional[str]
+    server_version: Optional[str]
     service: Optional[str]
     stored_procedure: Optional[str]
     tags: Optional[Sequence[str]]

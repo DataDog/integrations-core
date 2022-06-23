@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 system.core.count,gauge,,core,,The number of CPU cores on the host,0,system,cpu cores,
-system.core.user,gauge,,second,,A given core's user-space CPU time,0,system,cpu user,
-system.core.system,gauge,,second,,A given core's system CPU time,0,system,cpu system,
-system.core.idle,gauge,,second,,A given core's idle CPU time,0,system,cpu idle,
+system.core.user,gauge,,percent,,The percentage of time a given CPU core has spent in user mode,0,system,cpu user,
+system.core.system,gauge,,percent,,The percentage of time a given CPU core has spent in kernel mode,0,system,cpu system,
+system.core.idle,gauge,,percent,,The percentage of time a given CPU core has spent idle,0,system,cpu idle,

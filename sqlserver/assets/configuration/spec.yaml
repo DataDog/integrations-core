@@ -39,6 +39,15 @@ files:
       description: Password for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
       value:
         type: string
+    - name: server_version
+      description: |
+        Server version year of sqlserver the agent will connect to. 
+        Important for validating connection string attributes for older sqlserver versions.
+        
+        This is required if connecting to a SQLServer instance older than 2014.
+      value:
+        type: string
+        example: "2014"
     - name: database
       description: |
         Database name to query.  Not compatible with `database_autodiscovery`.
@@ -272,7 +281,6 @@ files:
             type: boolean
             example: True
           hidden: true
-
     - name: query_activity
       description: Configure collection of active sessions monitoring
       options:
@@ -416,6 +424,15 @@ files:
           value:
             type: boolean
             example: true
+        - name: keep_sql_alias
+          description: |
+            Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
+            `with select 1 as alias`, `select column as other_name`, or `select * from table t`.
+            When `true` these aliases will not be removed.
+          value:
+            type: boolean
+            example: true
+            display_default: true
     - name: command_timeout
       description: Timeout in seconds for the connection and each command run
       value:

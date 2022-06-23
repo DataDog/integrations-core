@@ -11,7 +11,7 @@
     "linux",
     "mac_os"
   ],
-  "public_title": "Datadog-Pivotal Container Service Integration",
+  "public_title": "Pivotal Container Service Integration",
   "categories": [
     "containers",
     "orchestration",

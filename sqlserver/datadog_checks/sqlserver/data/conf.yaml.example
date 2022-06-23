@@ -51,6 +51,14 @@ instances:
     #
     # password: <PASSWORD>
 
+    ## @param server_version - string - optional - default: 2014
+    ## Server version year of sqlserver the agent will connect to. 
+    ## Important for validating connection string attributes for older sqlserver versions.
+    ##
+    ## This is required if connecting to a SQLServer instance older than 2014.
+    #
+    # server_version: '2014'
+
     ## @param database - string - optional - default: master
     ## Database name to query.  Not compatible with `database_autodiscovery`.
     #
@@ -366,6 +374,13 @@ instances:
         ## Requires `collect_metadata: true`.
         #
         # collect_comments: true
+
+        ## @param keep_sql_alias - boolean - optional - default: true
+        ## Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
+        ## `with select 1 as alias`, `select column as other_name`, or `select * from table t`.
+        ## When `true` these aliases will not be removed.
+        #
+        # keep_sql_alias: true
 
     ## @param command_timeout - integer - optional - default: 5
     ## Timeout in seconds for the connection and each command run

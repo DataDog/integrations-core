@@ -121,6 +121,9 @@ class DBExplainError(Enum):
     # database error i.e connection error
     database_error = 'database_error'
 
+    # datatype mismatch occurs when return type is not json, for instance when multiple queries are explained
+    datatype_mismatch = 'datatype_mismatch'
+
     # this could be the result of a missing EXPLAIN function
     invalid_schema = 'invalid_schema'
 
@@ -456,6 +459,8 @@ class PostgresStatementSamples(DBMAsyncJob):
         except psycopg2.errors.InvalidSchemaName as e:
             self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
             return DBExplainError.invalid_schema, e
+        except psycopg2.errors.DatatypeMismatch as e:
+            return DBExplainError.datatype_mismatch, e
         except psycopg2.DatabaseError as e:
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
             # incorrect definition)

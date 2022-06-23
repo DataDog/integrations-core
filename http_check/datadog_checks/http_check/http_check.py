@@ -303,7 +303,10 @@ class HTTPCheck(AgentCheck):
 
             ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
             cert = ssl_sock.getpeercert()
-            exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
+            if cert:
+                exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
+            else:
+                raise Exception("Empty or no certificate found.")
         except Exception as e:
             msg = repr(e)
             if any(word in msg for word in ['expired', 'expiration']):

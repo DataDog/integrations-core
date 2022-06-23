@@ -14,12 +14,6 @@ e2e-env = false
 [envs.default.env-vars]
 DDEV_TESTING_PLUGIN = "true"
 
-[envs.default.scripts]
-# Explicitly set the target path because pytest errors when
-# reading the file names of new check templates
-test = "dd-test tests"
-benchmark = "dd-benchmark tests"
-
 [[envs.default.matrix]]
 python = ["27", "38"]
 
@@ -28,5 +22,5 @@ matrix.python.features = [
   { value = "cli", if = ["38"] },
 ]
 matrix.python.scripts = [
-  { key = "test", value = "dd-test tests --ignore tests/tooling", if = ["27"] },
+  { key = "test", value = "dd-test --ignore tests/tooling", if = ["27"] },
 ]

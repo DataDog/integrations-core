@@ -28,6 +28,7 @@ __author__ = 'Allan Saddi <allan@saddi.com>'
 __version__ = '$Revision$'
 
 import select
+import sys
 import struct
 import socket
 import errno

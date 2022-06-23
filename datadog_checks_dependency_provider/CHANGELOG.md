@@ -1,6 +1,6 @@
 # CHANGELOG - datadog_checks_dependency_provider
 
-## 1.3.0 / 2022-04-05
+## 1.3.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Move foundationdb to core. See [#11636](https://github.com/DataDog/integrations-core/pull/11636).
 

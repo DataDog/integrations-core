@@ -15,7 +15,7 @@
   "process_signatures": [
     "gunicorn: master"
   ],
-  "public_title": "Datadog-Gunicorn Integration",
+  "public_title": "Gunicorn Integration",
   "short_description": "Monitor request rates and durations, log-message rates, and worker processes.",
   "support": "core",
   "supported_os": [

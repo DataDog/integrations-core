@@ -1,16 +1,25 @@
 # CHANGELOG - Vault
 
+## 3.3.0 / 2022-06-01
+
+* [Added] Add config option to collect from secondary replication mode. See [#12099](https://github.com/DataDog/integrations-core/pull/12099).
+* [Fixed] Ensure vault_wal_gc_total is collected as gauge. See [#12036](https://github.com/DataDog/integrations-core/pull/12036).
+
+## 3.2.1 / 2022-05-18
+
+* [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
+
 ## 3.2.0 / 2022-05-11
 
 * [Added] Add `vault.replication.wal.gc.*` metrics. See [#11984](https://github.com/DataDog/integrations-core/pull/11984).
 * [Fixed] Fix metric naming. See [#11847](https://github.com/DataDog/integrations-core/pull/11847).
 
-## 3.1.0 / 2022-04-05
+## 3.1.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 * [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
 
-## 3.0.2 / 2022-02-23
+## 3.0.2 / 2022-02-23 / Agent 7.35.0
 
 * [Fixed] Add OpenMetrics V2 service check to Vault. See [#11558](https://github.com/DataDog/integrations-core/pull/11558).
 
