@@ -370,23 +370,6 @@ def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize(
-    "instance_host,split_host,split_port",
-    [
-        ("localhost,1433,some-typo", "localhost", "1433"),
-        ("localhost, 1433,some-typo", "localhost", "1433"),
-        ("localhost,1433", "localhost", "1433"),
-        ("localhost", "localhost", None),
-    ],
-)
-def test_split_sqlserver_host(instance_docker, instance_host, split_host, split_port):
-    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    s_host, s_port = sqlserver_check.split_sqlserver_host_port(instance_host)
-    assert (s_host, s_port) == (split_host, split_port)
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize('database_autodiscovery', [True, False])
 def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, database_autodiscovery):
     instance_docker['database_autodiscovery'] = database_autodiscovery

@@ -263,6 +263,22 @@ def test_parse_sqlserver_major_version(version, expected_major_version):
 
 
 @pytest.mark.parametrize(
+    "instance_host,split_host,split_port",
+    [
+        ("localhost,1433,some-typo", "localhost", "1433"),
+        ("localhost, 1433,some-typo", "localhost", "1433"),
+        ("localhost,1433", "localhost", "1433"),
+        ("localhost", "localhost", None),
+    ],
+)
+def test_split_sqlserver_host(instance_host, split_host, split_port):
+    instance = {'host': instance_host}
+    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance])
+    s_host, s_port = sqlserver_check.split_sqlserver_host_port(instance_host)
+    assert (s_host, s_port) == (split_host, split_port)
+
+
+@pytest.mark.parametrize(
     "dbm_enabled, instance_host, database, reported_hostname, engine_edition, expected_hostname",
     [
         (False, 'localhost,1433,some-typo', None, '', ENGINE_EDITION_STANDARD, 'stubbed.hostname'),
@@ -278,7 +294,14 @@ def test_parse_sqlserver_major_version(version, expected_major_version):
         (True, 'foo.database.windows.net', None, None, ENGINE_EDITION_SQL_DATABASE, 'foo/master'),
         (True, 'foo.database.windows.net', 'master', None, ENGINE_EDITION_SQL_DATABASE, 'foo/master'),
         (True, 'foo.database.windows.net', 'bar', None, ENGINE_EDITION_SQL_DATABASE, 'foo/bar'),
-        (True, 'foo.database.windows.net', 'bar', 'override-reported', ENGINE_EDITION_SQL_DATABASE, 'override-reported'),
+        (
+            True,
+            'foo.database.windows.net',
+            'bar',
+            'override-reported',
+            ENGINE_EDITION_SQL_DATABASE,
+            'override-reported',
+        ),
         (True, 'foo-custom-dns', 'bar', None, ENGINE_EDITION_SQL_DATABASE, 'foo-custom-dns/bar'),
     ],
 )
