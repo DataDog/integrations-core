@@ -657,7 +657,6 @@ class SQLServer(AgentCheck):
     def check(self, _):
         if self.do_check:
             self.load_static_information()
-
             if self.proc:
                 self.do_stored_procedure_check()
             else:
