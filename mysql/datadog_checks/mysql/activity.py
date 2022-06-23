@@ -44,9 +44,7 @@ SELECT
     thread_a.processlist_db,
     thread_a.processlist_command,
     thread_a.processlist_state,
-    COALESCE(
-        COALESCE(statement.sql_text, thread_a.PROCESSLIST_info), thread_a.processlist_state)
-            AS sql_text,
+    COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) AS sql_text,
     statement.timer_start AS event_timer_start,
     statement.timer_end AS event_timer_end,
     statement.lock_time,
@@ -91,7 +89,10 @@ WHERE
               MAX(waits_b.EVENT_ID)
           FROM  performance_schema.events_waits_current AS waits_b 
           Where waits_b.thread_id = thread_a.thread_id
-    ) OR waits_a.event_id is NULL);
+    ) OR waits_a.event_id is NULL)
+    -- We ignore rows without SQL text because there will be rows for background operations that do not have
+    -- SQL text associated with it.
+    AND COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) != "";
 """
 
 
