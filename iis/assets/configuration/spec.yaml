@@ -86,13 +86,13 @@ files:
       hidden: true
       required: false
       description: |
-        For backward compatibility reasons, it is possible to use a legacy version of the IIS
+        For backward compatibility reasons, it is possible to use a legacy version of the 
         integration by setting this field to "true".
       value:
           type: boolean
           example: false
-    - template: logs
-      example:
-      - type: file
-        path: C:\inetpub\logs\LogFiles\W3SVC1\u_ex*
-        source: iis
+  - template: logs
+    example:
+    - type: file
+      path: C:\inetpub\logs\LogFiles\W3SVC1\u_ex*
+      source: iis

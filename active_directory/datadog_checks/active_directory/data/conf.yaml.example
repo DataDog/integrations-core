@@ -184,4 +184,3 @@ instances:
 #     path: /path/to/active_directory/file.log
 #     source: ruby
 #     service: <SERVICE_NAME>
-
