@@ -243,6 +243,7 @@ class SQLServer(AgentCheck):
                 if engine_edition == ENGINE_EDITION_SQL_DATABASE:
                     configured_database = self.instance.get('database', None)
                     if not configured_database:
+                        configured_database = 'master'
                         self.warning(
                             "Missing 'database' in instance configuration."
                             "For Azure SQL Database a non-master application database must be specified."
@@ -252,11 +253,13 @@ class SQLServer(AgentCheck):
                             "Wrong 'database' configured."
                             "For Azure SQL Database a non-master application database must be specified."
                         )
-                    else:
-                        # for Azure SQL Database, each database on a given "server" has isolated compute resources,
-                        # meaning that the agent is only able to see query activity for the specific database it's
-                        # connected to. For this reason, each Azure SQL database is modeled as an independent host.
-                        self._resolved_hostname = "{}/{}".format(host, configured_database)
+                    azure_db_server_hostname_suffix = ".database.windows.net"
+                    if host.endswith(azure_db_server_hostname_suffix):
+                        host = host[: -len(azure_db_server_hostname_suffix)]
+                    # for Azure SQL Database, each database on a given "server" has isolated compute resources,
+                    # meaning that the agent is only able to see query activity for the specific database it's
+                    # connected to. For this reason, each Azure SQL database is modeled as an independent host.
+                    self._resolved_hostname = "{}/{}".format(host, configured_database)
             else:
                 self._resolved_hostname = self.agent_hostname
         return self._resolved_hostname
@@ -285,6 +288,10 @@ class SQLServer(AgentCheck):
                             self.static_info_cache[STATIC_INFO_ENGINE_EDITION] = result
                         else:
                             self.log.warning("failed to load version static information due to empty results")
+
+            # re-initialize resolved_hostname to ensure we take into consideration the static information
+            # after it's loaded
+            self._resolved_hostname = None
 
     def debug_tags(self):
         return self.tags + ['agent_hostname:{}'.format(self.agent_hostname)]
@@ -650,11 +657,6 @@ class SQLServer(AgentCheck):
     def check(self, _):
         if self.do_check:
             self.load_static_information()
-
-            # re-initialize resolved_hostname to ensure we take into consideration the static information
-            # after it's loaded
-            self._resolved_hostname = None
-            self.resolved_hostname()
 
             if self.proc:
                 self.do_stored_procedure_check()

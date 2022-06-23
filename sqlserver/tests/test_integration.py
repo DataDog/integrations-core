@@ -387,31 +387,6 @@ def test_split_sqlserver_host(instance_docker, instance_host, split_host, split_
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize(
-    "dbm_enabled, instance_host, reported_hostname, expected_hostname",
-    [
-        (False, 'localhost,1433,some-typo', '', 'stubbed.hostname'),
-        (True, 'localhost,1433', '', 'stubbed.hostname'),
-        (False, 'localhost', '', 'stubbed.hostname'),
-        (False, '8.8.8.8', '', 'stubbed.hostname'),
-        (True, 'localhost', 'forced_hostname', 'forced_hostname'),
-        (True, 'datadoghq.com,1433', '', 'datadoghq.com'),
-        (True, 'datadoghq.com', '', 'datadoghq.com'),
-        (True, 'datadoghq.com', 'forced_hostname', 'forced_hostname'),
-        (True, '8.8.8.8,1433', '', '8.8.8.8'),
-        (False, '8.8.8.8', 'forced_hostname', 'forced_hostname'),
-    ],
-)
-def test_resolved_hostname(instance_docker, dbm_enabled, instance_host, reported_hostname, expected_hostname):
-    instance_docker['dbm'] = dbm_enabled
-    instance_docker['host'] = instance_host
-    instance_docker['reported_hostname'] = reported_hostname
-    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    assert sqlserver_check.resolved_hostname == expected_hostname
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize('database_autodiscovery', [True, False])
 def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, database_autodiscovery):
     instance_docker['database_autodiscovery'] = database_autodiscovery
