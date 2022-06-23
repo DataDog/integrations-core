@@ -239,6 +239,17 @@ class SQLServer(AgentCheck):
             elif self.dbm_enabled:
                 host, port = self.split_sqlserver_host_port(self.instance.get('host'))
                 self._resolved_hostname = resolve_db_host(host)
+                engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+                if engine_edition == ENGINE_EDITION_SQL_DATABASE:
+                    configured_database = self.instance.get('database', None)
+                    if not configured_database:
+                        self.warning("Missing 'database' in instance configuration. For Azure SQL Database a non-master application database must be specified.")
+                    elif configured_database == 'master':
+                        self.warning("Wrong 'database' configured for this instance. For Azure SQL Database a non-master application database must be specified.")
+                    else:
+                        # for Azure SQL Database, each database on a given "server" has isolated compute resources, meaning that the agent is only able to
+                        # see query activity for the specific database it is connected to. For this reason, each Azure SQL database is modeled as an independent host.
+                        self._resolved_hostname = "{}/{}".format(host, configured_database)
             else:
                 self._resolved_hostname = self.agent_hostname
         return self._resolved_hostname
@@ -632,6 +643,11 @@ class SQLServer(AgentCheck):
     def check(self, _):
         if self.do_check:
             self.load_static_information()
+
+            # re-initialize resolved_hostname to ensure we take into consideration the static information after it's loaded from the database
+            self._resolved_hostname = None
+            self.resolved_hostname()
+
             if self.proc:
                 self.do_stored_procedure_check()
             else:
