@@ -141,6 +141,8 @@ class Connection(object):
             else:
                 self.log.error("Invalid database connector %s, defaulting to adodbapi", connector)
             self.default_connector = 'adodbapi'
+        else:
+            self.default_connector = connector
 
         self.connector = self.get_connector()
 
