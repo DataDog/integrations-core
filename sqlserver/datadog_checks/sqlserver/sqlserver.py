@@ -285,7 +285,7 @@ class SQLServer(AgentCheck):
                         cursor.execute("SELECT CAST(ServerProperty('EngineEdition') AS INT) AS Edition")
                         result = cursor.fetchone()
                         if result:
-                            self.static_info_cache[STATIC_INFO_ENGINE_EDITION] = result
+                            self.static_info_cache[STATIC_INFO_ENGINE_EDITION] = result[0]
                         else:
                             self.log.warning("failed to load version static information due to empty results")
 

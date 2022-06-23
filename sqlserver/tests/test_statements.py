@@ -425,6 +425,9 @@ def test_statement_cloud_metadata(aggregator, dd_run_check, dbm_instance, bob_co
     assert payload['ddagenthostname'] == datadog_agent.get_hostname()
     # cloud metadata
     assert payload['cloud_metadata'] == cloud_metadata, "wrong cloud_metadata"
+    # test that we're reading the edition out of the db instance. Note that this edition is what
+    # is running in our test docker containers so it's not expected to match the test cloud metadata
+    assert payload['sqlserver_engine_edition'] == 3, "wrong edition"
 
 
 @pytest.mark.integration
