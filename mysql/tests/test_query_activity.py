@@ -50,14 +50,14 @@ def dbm_instance(instance_complex):
     [
         (
             'SELECT id, name FROM testdb.users FOR UPDATE',
-            'aca1be410fbadb61',
+            '4d09873d44c33af7',
             StatementTruncationState.not_truncated.value,
         ),
         (
             'SELECT id, {} FROM testdb.users FOR UPDATE'.format(
                 ", ".join("name as name{}".format(i) for i in range(254))
             ),
-            '63bd1fd025c7f7fb'
+            '87523f8c5aabfda5'
             if MYSQL_VERSION_PARSED > parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb'
             else '4a12d7afe06cf40',
             StatementTruncationState.truncated.value,
@@ -193,7 +193,7 @@ def test_activity_metadata(aggregator, dd_run_check, dbm_instance, datadog_agent
     -- Test comment
     SELECT id, name FROM testdb.users FOR UPDATE
     """
-    query_signature = 'e7f7cb251194df29'
+    query_signature = '4d09873d44c33af7'
 
     def _run_test_query(conn, _query):
         conn.cursor().execute(_query)
