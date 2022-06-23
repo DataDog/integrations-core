@@ -14,6 +14,9 @@ from .metrics import ALL_METRICS
 
 
 @pytest.mark.e2e
+@pytest.mark.skipif(
+    parse_major_version(os.environ.get('VERTICA_VERSION', 9)) >= 11, reason='Some metrics are not yet supported on v11'
+)
 def test_check_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
 
