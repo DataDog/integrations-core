@@ -47,10 +47,11 @@ SELECT
     DB_NAME(sess.database_id) as database_name,
     sess.status as session_status,
     req.status as request_status,
-    substring(text.text, 
-        ((case req.statement_start_offset when '-1' 
-        then 0 else req.statement_start_offset end) / 2 + 1),
-        (req.statement_end_offset - req.statement_start_offset) / 2 ) as text,
+    SUBSTRING(text.text, (req.statement_start_offset/2)+1,
+        ((CASE req.statement_end_offset
+        WHEN -1 THEN DATALENGTH(text.text)
+        ELSE req.statement_end_offset
+        END - req.statement_start_offset)/2) + 1) AS text,
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
