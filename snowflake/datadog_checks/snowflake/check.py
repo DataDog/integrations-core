@@ -13,7 +13,7 @@ from datadog_checks.base.utils.db import QueryManager
 from . import queries
 from .config import Config
 
-METRIC_GROUPS = {
+ACCOUNT_USAGE_METRIC_GROUPS = {
     'snowflake.query': [queries.WarehouseLoad, queries.QueryHistory],
     'snowflake.billing': [queries.CreditUsage, queries.WarehouseCreditUsage],
     'snowflake.storage': [queries.StorageUsageMetrics],
@@ -24,6 +24,17 @@ METRIC_GROUPS = {
     'snowflake.auto_recluster': [queries.AutoReclusterHistory],
     'snowflake.pipe': [queries.PipeHistory],
     'snowflake.replication': [queries.ReplicationUsage],
+}
+
+ORGANIZATION_USAGE_METRIC_GROUPS = {
+    'snowflake.organization.contracts': [queries.OrgContractItems],
+    'snowflake.organization.credit': [queries.OrgCreditUsage],
+    'snowflake.organization.currency': [queries.OrgCurrencyUsage],
+    'snowflake.organization.warehouse': [queries.OrgWarehouseCreditUsage],
+    'snowflake.organization.storage': [queries.OrgStorageDaily],
+    'snowflake.organization.balance': [queries.OrgBalance],
+    'snowflake.organization.rate': [queries.OrgRateSheet],
+    'snowflake.organization.data_transfer': [queries.OrgDataTransfer],
 }
 
 
@@ -60,24 +71,36 @@ class SnowflakeCheck(AgentCheck):
                 'Snowflake `role` is set as `ACCOUNTADMIN` which should be used cautiously, '
                 'refer to docs about custom roles.'
             )
-
+        metric_groups = (
+            ORGANIZATION_USAGE_METRIC_GROUPS
+            if (self._config.schema == 'ORGANIZATION_USAGE')
+            else ACCOUNT_USAGE_METRIC_GROUPS
+        )
         self.metric_queries = []
         self.errors = []
         for mgroup in self._config.metric_groups:
             try:
                 if not self._config.aggregate_last_24_hours:
-                    for query in range(len(METRIC_GROUPS[mgroup])):
-                        METRIC_GROUPS[mgroup][query]['query'] = METRIC_GROUPS[mgroup][query]['query'].replace(
+                    for query in range(len(metric_groups[mgroup])):
+                        metric_groups[mgroup][query]['query'] = metric_groups[mgroup][query]['query'].replace(
                             'DATEADD(hour, -24, current_timestamp())', 'date_trunc(day, current_date)'
                         )
-                self.metric_queries.extend(METRIC_GROUPS[mgroup])
+                self.metric_queries.extend(metric_groups[mgroup])
             except KeyError:
                 self.errors.append(mgroup)
 
         if self.errors:
-            self.log.warning('Invalid metric_groups found in snowflake conf.yaml: %s', (', '.join(self.errors)))
+            self.log.warning(
+                'Invalid metric_groups for `%s` found in snowflake conf.yaml: %s',
+                self._config.schema,
+                (', '.join(self.errors)),
+            )
         if not self.metric_queries and not self._config.custom_queries_defined:
-            raise ConfigurationError('No valid metric_groups or custom query configured, please list at least one.')
+            raise ConfigurationError(
+                'No valid metric_groups for `{}` or custom query configured, please list at least one.'.format(
+                    self._config.schema
+                )
+            )
 
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=self.metric_queries, tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
