@@ -243,12 +243,19 @@ class SQLServer(AgentCheck):
                 if engine_edition == ENGINE_EDITION_SQL_DATABASE:
                     configured_database = self.instance.get('database', None)
                     if not configured_database:
-                        self.warning("Missing 'database' in instance configuration. For Azure SQL Database a non-master application database must be specified.")
+                        self.warning(
+                            "Missing 'database' in instance configuration."
+                            "For Azure SQL Database a non-master application database must be specified."
+                        )
                     elif configured_database == 'master':
-                        self.warning("Wrong 'database' configured for this instance. For Azure SQL Database a non-master application database must be specified.")
+                        self.warning(
+                            "Wrong 'database' configured."
+                            "For Azure SQL Database a non-master application database must be specified."
+                        )
                     else:
-                        # for Azure SQL Database, each database on a given "server" has isolated compute resources, meaning that the agent is only able to
-                        # see query activity for the specific database it is connected to. For this reason, each Azure SQL database is modeled as an independent host.
+                        # for Azure SQL Database, each database on a given "server" has isolated compute resources,
+                        # meaning that the agent is only able to see query activity for the specific database it's
+                        # connected to. For this reason, each Azure SQL database is modeled as an independent host.
                         self._resolved_hostname = "{}/{}".format(host, configured_database)
             else:
                 self._resolved_hostname = self.agent_hostname
@@ -644,7 +651,8 @@ class SQLServer(AgentCheck):
         if self.do_check:
             self.load_static_information()
 
-            # re-initialize resolved_hostname to ensure we take into consideration the static information after it's loaded from the database
+            # re-initialize resolved_hostname to ensure we take into consideration the static information
+            # after it's loaded
             self._resolved_hostname = None
             self.resolved_hostname()
 

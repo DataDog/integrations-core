@@ -23,7 +23,7 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
-from .const import STATIC_INFO_VERSION, STATIC_INFO_ENGINE_EDITION
+from .const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 
 DEFAULT_COLLECTION_INTERVAL = 10
 
