@@ -45,6 +45,7 @@ SELECT
     thread_a.processlist_command,
     thread_a.processlist_state,
     statement.sql_text,
+    statement.digest_text,
     statement.timer_start AS event_timer_start,
     statement.timer_end AS event_timer_end,
     statement.lock_time,
@@ -220,7 +221,11 @@ class MySQLActivity(DBMAsyncJob):
         if "sql_text" not in row:
             return row
         try:
-            self._finalize_row(row, obfuscate_sql_with_metadata(row["sql_text"], self._obfuscator_options))
+            self._finalize_row(
+				row,
+				obfuscate_sql_with_metadata(row["sql_text"], self._obfuscator_options),
+				obfuscate_sql_with_metadata(row["digest_text"], self._obfuscator_options)
+			)
         except Exception as e:
             row["sql_text"] = "ERROR: failed to obfuscate"
             self._log.debug("Failed to obfuscate | err=[%s]", e)
@@ -232,11 +237,11 @@ class MySQLActivity(DBMAsyncJob):
         return {key: val for key, val in row.items() if val is not None}
 
     @staticmethod
-    def _finalize_row(row, statement):
-        # type: (Dict[str], Dict[str]) -> None
+    def _finalize_row(row, statement, digest_statement):
+        # type: (Dict[str], Dict[str], Dict[str]) -> None
         obfuscated_statement = statement["query"]
         row["sql_text"] = obfuscated_statement
-        row["query_signature"] = compute_sql_signature(obfuscated_statement)
+        row["query_signature"] = compute_sql_signature(digest_statement['query'])
 
         metadata = statement["metadata"]
         row["dd_commands"] = metadata.get("commands", None)
