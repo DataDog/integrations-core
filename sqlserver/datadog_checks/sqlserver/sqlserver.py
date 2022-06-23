@@ -253,9 +253,9 @@ class SQLServer(AgentCheck):
                             "Wrong 'database' configured."
                             "For Azure SQL Database a non-master application database must be specified."
                         )
-                    azure_db_server_hostname_suffix = ".database.windows.net"
-                    if host.endswith(azure_db_server_hostname_suffix):
-                        host = host[: -len(azure_db_server_hostname_suffix)]
+                    azure_server_suffix = ".database.windows.net"
+                    if host.endswith(azure_server_suffix):
+                        host = host[: -len(azure_server_suffix)]
                     # for Azure SQL Database, each database on a given "server" has isolated compute resources,
                     # meaning that the agent is only able to see query activity for the specific database it's
                     # connected to. For this reason, each Azure SQL database is modeled as an independent host.
