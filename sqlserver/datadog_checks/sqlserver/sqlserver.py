@@ -239,6 +239,27 @@ class SQLServer(AgentCheck):
             elif self.dbm_enabled:
                 host, port = self.split_sqlserver_host_port(self.instance.get('host'))
                 self._resolved_hostname = resolve_db_host(host)
+                engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+                if engine_edition == ENGINE_EDITION_SQL_DATABASE:
+                    configured_database = self.instance.get('database', None)
+                    if not configured_database:
+                        configured_database = 'master'
+                        self.warning(
+                            "Missing 'database' in instance configuration."
+                            "For Azure SQL Database a non-master application database must be specified."
+                        )
+                    elif configured_database == 'master':
+                        self.warning(
+                            "Wrong 'database' configured."
+                            "For Azure SQL Database a non-master application database must be specified."
+                        )
+                    azure_server_suffix = ".database.windows.net"
+                    if host.endswith(azure_server_suffix):
+                        host = host[: -len(azure_server_suffix)]
+                    # for Azure SQL Database, each database on a given "server" has isolated compute resources,
+                    # meaning that the agent is only able to see query activity for the specific database it's
+                    # connected to. For this reason, each Azure SQL database is modeled as an independent host.
+                    self._resolved_hostname = "{}/{}".format(host, configured_database)
             else:
                 self._resolved_hostname = self.agent_hostname
         return self._resolved_hostname
@@ -264,9 +285,13 @@ class SQLServer(AgentCheck):
                         cursor.execute("SELECT CAST(ServerProperty('EngineEdition') AS INT) AS Edition")
                         result = cursor.fetchone()
                         if result:
-                            self.static_info_cache[STATIC_INFO_ENGINE_EDITION] = result
+                            self.static_info_cache[STATIC_INFO_ENGINE_EDITION] = result[0]
                         else:
                             self.log.warning("failed to load version static information due to empty results")
+
+            # re-initialize resolved_hostname to ensure we take into consideration the static information
+            # after it's loaded
+            self._resolved_hostname = None
 
     def debug_tags(self):
         return self.tags + ['agent_hostname:{}'.format(self.agent_hostname)]
