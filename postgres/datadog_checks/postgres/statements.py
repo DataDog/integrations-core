@@ -54,23 +54,26 @@ PG_STAT_STATEMENTS_TIMING_COLUMNS = frozenset(
     }
 )
 
-PG_STAT_STATEMENTS_METRICS_COLUMNS = frozenset(
-    {
-        'calls',
-        'rows',
-        'total_time',
-        'total_exec_time',
-        'shared_blks_hit',
-        'shared_blks_read',
-        'shared_blks_dirtied',
-        'shared_blks_written',
-        'local_blks_hit',
-        'local_blks_read',
-        'local_blks_dirtied',
-        'local_blks_written',
-        'temp_blks_read',
-        'temp_blks_written',
-    }
+PG_STAT_STATEMENTS_METRICS_COLUMNS = (
+    frozenset(
+        {
+            'calls',
+            'rows',
+            'total_time',
+            'total_exec_time',
+            'shared_blks_hit',
+            'shared_blks_read',
+            'shared_blks_dirtied',
+            'shared_blks_written',
+            'local_blks_hit',
+            'local_blks_read',
+            'local_blks_dirtied',
+            'local_blks_written',
+            'temp_blks_read',
+            'temp_blks_written',
+        }
+    )
+    | PG_STAT_STATEMENTS_TIMING_COLUMNS
 )
 
 PG_STAT_STATEMENTS_TAG_COLUMNS = frozenset(
@@ -227,8 +230,8 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
             desired_columns = PG_STAT_ALL_DESIRED_COLUMNS
 
-            if self._check.pg_settings.get("track_io_timing") == "on":
-                desired_columns |= PG_STAT_STATEMENTS_TIMING_COLUMNS
+            if self._check.pg_settings.get("track_io_timing") != "on":
+                desired_columns -= PG_STAT_STATEMENTS_TIMING_COLUMNS
 
             query_columns = sorted(list(available_columns & desired_columns))
             params = ()
@@ -339,7 +342,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             return []
 
         available_columns = set(rows[0].keys())
-        metric_columns = available_columns & (PG_STAT_STATEMENTS_METRICS_COLUMNS | PG_STAT_STATEMENTS_TIMING_COLUMNS)
+        metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
         rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
         self._check.gauge(
             'dd.postgres.queries.query_rows_raw',
