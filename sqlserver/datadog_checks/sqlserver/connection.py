@@ -128,17 +128,18 @@ class Connection(object):
         self.existing_databases = None
         self.server_version = int(self.instance.get('server_version', self.DEFAULT_SQLSERVER_VERSION))
 
-        self.adoprovider = self.default_adoprovider
-
         self.valid_connectors = []
         if adodbapi is not None:
             self.valid_connectors.append('adodbapi')
         if pyodbc is not None:
             self.valid_connectors.append('odbc')
 
-        self.default_connector = init_config.get('connector', 'adodbapi')
-        if self.default_connector.lower() not in self.valid_connectors:
-            self.log.error("Invalid database connector %s, defaulting to adodbapi", self.default_connector)
+        connector = init_config.get('connector')
+        if connector is None or connector.lower() not in self.valid_connectors:
+            if connector is None:
+                self.log.debug("`connector` config value was not set, defaulting to adodbapi")
+            else:
+                self.log.error("Invalid database connector %s, defaulting to adodbapi", connector)
             self.default_connector = 'adodbapi'
 
         self.connector = self.get_connector()
@@ -148,7 +149,6 @@ class Connection(object):
             self.log.error(
                 "Invalid ADODB provider string %s, defaulting to %s", self.adoprovider, self.default_adoprovider
             )
-            self.adoprovider = self.default_adoprovider
 
         self.log.debug('Connection initialized.')
 
