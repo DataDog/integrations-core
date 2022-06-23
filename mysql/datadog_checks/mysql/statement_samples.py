@@ -506,7 +506,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         obfuscated_statement = statement['query']
         obfuscated_digest_text = statement_digest_text['query']
         apm_resource_hash = compute_sql_signature(obfuscated_statement)
-        query_signature = compute_sql_signature(obfuscated_digest_text)
+        query_signature = compute_sql_signature(obfuscated_statement)
 
         query_cache_key = (row['current_schema'], query_signature)
         if not self._explained_statements_ratelimiter.acquire(query_cache_key):
