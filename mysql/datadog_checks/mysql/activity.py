@@ -51,7 +51,7 @@ SELECT
     statement.timer_end AS event_timer_end,
     statement.lock_time,
     statement.current_schema,
-    MAX(waits_a.event_id) AS event_id,
+    waits_a.event_id AS event_id,
     waits_a.end_event_id,
     IF(waits_a.thread_id IS NULL,
         thread_a.processlist_state,
@@ -83,39 +83,15 @@ WHERE
     AND thread_a.PROCESSLIST_COMMAND != 'Daemon'
     AND (waits_a.EVENT_NAME != 'idle' OR waits_a.EVENT_NAME IS NULL)
     AND (waits_a.operation != 'idle' OR waits_a.operation IS NULL)
-GROUP BY
-    thread_a.thread_id,
-    thread_a.processlist_id,
-    thread_a.processlist_user,
-    thread_a.processlist_host,
-    thread_a.processlist_db,
-    thread_a.processlist_command,
-    thread_a.processlist_state,
-    COALESCE(
-        COALESCE(statement.sql_text, thread_a.PROCESSLIST_info), thread_a.processlist_state),
-    statement.timer_start,
-    statement.timer_end,
-    statement.lock_time,
-    statement.current_schema,
-    waits_a.end_event_id,
-    If(waits_a.thread_id IS NULL,
-        thread_a.processlist_state,
-        COALESCE(
-            IF(thread_a.processlist_state = 'User sleep', 'User sleep',
-            IF(waits_a.event_id = waits_a.end_event_id, 'CPU', waits_a.event_name)), 'CPU'
-        )
-    ),
-    waits_a.operation,
-    waits_a.timer_start,
-    waits_a.timer_end,
-    waits_a.object_schema,
-    waits_a.object_name,
-    waits_a.index_name,
-    waits_a.object_type,
-    waits_a.source,
-    socket.ip,
-    socket.port,
-    socket.event_name;
+    -- events_waits_current can have multiple rows per thread, thus we use EVENT_ID to identify the row we want to use.
+    -- Additionally, we want the row with the highest EVENT_ID which reflects the most recent and current wait.
+    AND (
+        waits_a.event_id = (
+           SELECT
+              MAX(waits_b.EVENT_ID)
+          FROM  performance_schema.events_waits_current AS waits_b 
+          Where waits_b.thread_id = thread_a.thread_id
+    ) OR waits_a.event_id is NULL);
 """
 
 
