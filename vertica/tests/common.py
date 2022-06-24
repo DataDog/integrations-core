@@ -56,14 +56,3 @@ TLS_CONFIG_LEGACY = {
     'private_key': private_key,
     'ca_cert': CERTIFICATE_DIR,
 }
-
-
-def compose_file(vertica_version):
-    major_version = int(vertica_version.split('.', 1)[0])
-
-    if major_version < 10:
-        fname = 'docker-compose-9.yaml'
-    else:
-        fname = 'docker-compose.yaml'
-
-    return os.path.join(HERE, 'docker', fname)
