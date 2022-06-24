@@ -52,7 +52,7 @@ SELECT
     waits_a.event_id AS event_id,
     waits_a.end_event_id,
     IF(waits_a.thread_id IS NULL,
-        thread_a.processlist_state,
+        'other',
         COALESCE(
             IF(thread_a.processlist_state = 'User sleep', 'User sleep',
             IF(waits_a.event_id = waits_a.end_event_id, 'CPU', waits_a.event_name)), 'CPU'
