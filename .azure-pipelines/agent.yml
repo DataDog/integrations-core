@@ -10,11 +10,11 @@ parameters:
 - name: agent_image
   displayName: Agent Docker Image
   type: string
-  default: datadog/agent:7-rc
+  default: datadog/agent-dev:carlosroman-aml-204-python-3-8-upgrade-py3
 - name: agent_windows_image
   displayName: Windows Agent Docker Image
   type: string
-  default: datadog/agent:7-rc-servercore
+  default: datadog/agent-dev:carlosroman-aml-204-python-3-8-upgrade-py3-win-servercore
 - name: run_py2_tests
   displayName: Run Python 2 tests
   type: boolean
