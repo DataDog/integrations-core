@@ -1,6 +1,6 @@
 # CHANGELOG - ArangoDB
 
-## 1.1.0 / 2022-05-27
+## 1.1.0 / 2022-05-27 / Agent 7.37.0
 
 * [Added] Add connectivity metrics. See [#12093](https://github.com/DataDog/integrations-core/pull/12093).
 

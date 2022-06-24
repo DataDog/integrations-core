@@ -1,6 +1,6 @@
 # CHANGELOG - vsphere
 
-## 6.1.2 / 2022-05-15
+## 6.1.2 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Fix uncommented parent options. See [#12013](https://github.com/DataDog/integrations-core/pull/12013).
 
