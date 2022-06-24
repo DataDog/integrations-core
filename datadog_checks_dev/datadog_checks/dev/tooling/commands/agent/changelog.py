@@ -8,7 +8,7 @@ import click
 
 from ....fs import write_file
 from ...constants import get_agent_changelog
-from ...utils import get_display_name
+from ...manifest_utils import Manifest
 from ..console import CONTEXT_SETTINGS, abort, echo_info
 from .common import get_changes_per_agent
 
@@ -66,7 +66,11 @@ def changelog(since, to, write, force):
             for entry in CHANGELOG_MANUAL_ENTRIES.get(agent, []):
                 changelog_contents.write(f'{entry}\n')
             for name, ver in version_changes.items():
-                display_name = get_display_name(name)
+                manifest = Manifest.load_manifest(name)
+                if manifest is None:
+                    display_name = name
+                else:
+                    display_name = manifest.get_display_name()
                 display_name = DISPLAY_NAME_MAPPING.get(display_name, display_name)
 
                 breaking_notice = " **BREAKING CHANGE**" if ver[1] else ""
