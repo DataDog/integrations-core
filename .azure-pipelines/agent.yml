@@ -1,6 +1,9 @@
 trigger: none
 
-pr: none
+pr:
+  branches:
+    include:
+    - master
 
 parameters:
 - name: run_py3_tests
