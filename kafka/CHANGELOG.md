@@ -2,7 +2,7 @@
 
 ## 2.13.0 / 2022-06-27
 
-* [Added] [kafka-check] add under min ISR partition count metric. See [#12108](https://github.com/DataDog/integrations-core/pull/12108). Thanks [OuesFa](https://github.com/OuesFa).
+* [Added] Add under min ISR partition count metric. See [#12108](https://github.com/DataDog/integrations-core/pull/12108). Thanks [OuesFa](https://github.com/OuesFa).
 
 ## 2.12.1 / 2022-04-05 / Agent 7.36.0
 

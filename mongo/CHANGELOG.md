@@ -2,7 +2,7 @@
 
 ## 3.2.3 / 2022-06-27
 
-* [Fixed] [Mongo] Allow hosts to be a singular value. See [#12090](https://github.com/DataDog/integrations-core/pull/12090).
+* [Fixed] Allow hosts to be a singular value. See [#12090](https://github.com/DataDog/integrations-core/pull/12090).
 
 ## 3.2.2 / 2022-05-15 / Agent 7.37.0
 

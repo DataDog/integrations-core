@@ -2,7 +2,7 @@
 
 ## 5.2.1 / 2022-06-27
 
-* [Fixed] change default value for the send_monotonic_counter to false. See [#12022](https://github.com/DataDog/integrations-core/pull/12022).
+* [Fixed] Change default value for the send_monotonic_counter to false. See [#12022](https://github.com/DataDog/integrations-core/pull/12022).
 
 ## 5.2.0 / 2022-05-15 / Agent 7.37.0
 
