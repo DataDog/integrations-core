@@ -10,6 +10,7 @@ datadog-arangodb==1.2.0
 datadog-aspdotnet==1.11.1; sys_platform == 'win32'
 datadog-avi-vantage==3.1.1
 datadog-azure-iot-edge==3.2.0
+datadog-boundary==1.0.0
 datadog-btrfs==1.14.0; sys_platform != 'win32'
 datadog-cacti==1.11.0; sys_platform == 'linux2'
 datadog-calico==1.0.1
@@ -65,7 +66,7 @@ datadog-hudi==2.1.1
 datadog-hyperv==1.7.0; sys_platform == 'win32'
 datadog-ibm-ace==1.0.2
 datadog-ibm-db2==1.11.0
-datadog-ibm-i==1.4.0
+datadog-ibm-i==1.4.0; sys_platform != 'win32'
 datadog-ibm-mq==3.22.0
 datadog-ibm-was==2.1.0
 datadog-ignite==2.2.1
