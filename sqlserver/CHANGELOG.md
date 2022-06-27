@@ -1,5 +1,11 @@
 # CHANGELOG - sqlserver
 
+## 8.0.1 / 2022-06-27
+
+* [Fixed] fix engine edition logic bug and simplify configuration for Azure SQL Database . See [#12397](https://github.com/DataDog/integrations-core/pull/12397).
+* [Fixed] Support virtual file stats on SQL Server 2012. See [#12094](https://github.com/DataDog/integrations-core/pull/12094).
+* [Fixed] improve handling of encrypted stored procedures. See [#12060](https://github.com/DataDog/integrations-core/pull/12060).
+
 ## 8.0.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Add AlwaysOn metrics. See [#11979](https://github.com/DataDog/integrations-core/pull/11979).
