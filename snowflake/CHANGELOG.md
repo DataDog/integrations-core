@@ -1,5 +1,9 @@
 # CHANGELOG - Snowflake
 
+## 4.4.0 / 2022-06-27
+
+* [Added] Add support for organization level metrics. See [#12375](https://github.com/DataDog/integrations-core/pull/12375).
+
 ## 4.3.2 / 2022-06-15
 
 * [Fixed] Fix reading of `token_path` option. See [#12366](https://github.com/DataDog/integrations-core/pull/12366).
