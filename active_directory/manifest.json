@@ -13,7 +13,7 @@
   "metric_prefix": "active_directory.",
   "metric_to_check": "active_directory.dra.inbound.objects.persec",
   "name": "active_directory",
-  "public_title": "Active Directory Integration",
+  "public_title": "Active Directory",
   "short_description": "Collect and graph Microsoft Active Directory metrics",
   "support": "core",
   "supported_os": [

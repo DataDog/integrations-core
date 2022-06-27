@@ -16,7 +16,7 @@
   "process_signatures": [
     "beam.smp couchbase"
   ],
-  "public_title": "CouchBase Integration",
+  "public_title": "CouchBase",
   "short_description": "Track and graph your Couchbase activity and performance metrics.",
   "support": "core",
   "supported_os": [

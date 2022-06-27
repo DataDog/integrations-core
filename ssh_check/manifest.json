@@ -21,7 +21,7 @@
     "sshd",
     "sshd:"
   ],
-  "public_title": "SSH Integration",
+  "public_title": "SSH",
   "short_description": "Monitor SSH connectivity and SFTP latency.",
   "support": "core",
   "supported_os": [

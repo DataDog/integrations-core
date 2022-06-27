@@ -16,7 +16,7 @@
   "metric_prefix": "network.",
   "metric_to_check": "network.tcp.can_connect",
   "name": "tcp_check",
-  "public_title": "TCP Check Integration",
+  "public_title": "TCP Check",
   "short_description": "Monitor TCP connectivity to remote hosts.",
   "support": "core",
   "supported_os": [

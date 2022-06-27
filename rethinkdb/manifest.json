@@ -17,7 +17,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "RethinkDB Integration",
+  "public_title": "RethinkDB",
   "categories": [
     "data store",
     "log collection"

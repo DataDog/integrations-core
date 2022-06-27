@@ -11,7 +11,7 @@
   "metric_prefix": "system.",
   "metric_to_check": "system.disk.free",
   "name": "disk",
-  "public_title": "Disk Integration",
+  "public_title": "Disk",
   "short_description": "The disk check gathers metrics on mounted disks.",
   "support": "core",
   "supported_os": [

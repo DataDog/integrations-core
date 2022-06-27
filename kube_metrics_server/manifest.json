@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Kubernetes Metrics Server Integration",
+  "public_title": "Kubernetes Metrics Server",
   "categories": [
     "orchestration",
     "containers"

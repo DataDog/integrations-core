@@ -12,7 +12,7 @@
   "supported_os": [
     "linux"
   ],
-  "public_title": "Aerospike Integration",
+  "public_title": "Aerospike",
   "categories": [
     "data store",
     "autodiscovery",

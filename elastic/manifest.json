@@ -19,7 +19,7 @@
   "process_signatures": [
     "java org.elasticsearch.bootstrap.Elasticsearch"
   ],
-  "public_title": "ElasticSearch Integration",
+  "public_title": "ElasticSearch",
   "short_description": "Monitor overall cluster status down to JVM heap usage and everything in between.",
   "support": "core",
   "supported_os": [

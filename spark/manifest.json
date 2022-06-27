@@ -13,7 +13,7 @@
   "metric_prefix": "spark.",
   "metric_to_check": "spark.job.count",
   "name": "spark",
-  "public_title": "Spark Integration",
+  "public_title": "Spark",
   "short_description": "Track failed task rates, shuffled bytes, and much more.",
   "support": "core",
   "supported_os": [

@@ -20,7 +20,7 @@
     "python supervisord",
     "supervisord"
   ],
-  "public_title": "Supervisord Integration",
+  "public_title": "Supervisord",
   "short_description": "Monitor the status, uptime, and number of supervisor-managed processes.",
   "support": "core",
   "supported_os": [

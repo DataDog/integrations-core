@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "nginx-ingress-controller Integration",
+  "public_title": "nginx-ingress-controller",
   "categories": [
     "orchestration",
     "containers",

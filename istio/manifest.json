@@ -17,7 +17,7 @@
     "istio.galley.endpoint_no_pod"
   ],
   "name": "istio",
-  "public_title": "Istio Integration",
+  "public_title": "Istio",
   "short_description": "Collect performance schema metrics, query throughput, custom metrics, and more.",
   "support": "core",
   "supported_os": [

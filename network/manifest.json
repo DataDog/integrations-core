@@ -12,7 +12,7 @@
   "metric_prefix": "system.",
   "metric_to_check": "system.net.bytes_rcvd",
   "name": "network",
-  "public_title": "Network Integration",
+  "public_title": "Network",
   "short_description": "Track bytes and packets in/out, connection states, round trip times, and more.",
   "support": "core",
   "supported_os": [

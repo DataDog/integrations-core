@@ -16,7 +16,7 @@
   "process_signatures": [
     "java tomcat"
   ],
-  "public_title": "Tomcat Integration",
+  "public_title": "Tomcat",
   "short_description": "Track requests per second, bytes served, cache hits, servlet metrics, and more.",
   "support": "core",
   "supported_os": [

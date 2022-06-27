@@ -17,7 +17,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Hazelcast Integration",
+  "public_title": "Hazelcast",
   "categories": [
     "data store",
     "caching",

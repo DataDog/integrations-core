@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "CockroachDB Integration",
+  "public_title": "CockroachDB",
   "categories": [
     "cloud",
     "data store",

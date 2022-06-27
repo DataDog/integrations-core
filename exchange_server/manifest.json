@@ -12,7 +12,7 @@
   "metric_prefix": "exchange.",
   "metric_to_check": "exchange.processor.cpu_user",
   "name": "exchange_server",
-  "public_title": "Microsoft Exchange Server Integration",
+  "public_title": "Microsoft Exchange Server",
   "short_description": "Collect and graph Microsoft Exchange Server metrics",
   "support": "core",
   "supported_os": [

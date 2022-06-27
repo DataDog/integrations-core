@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "ClickHouse Integration",
+  "public_title": "ClickHouse",
   "categories": [
     "data store",
     "log collection"

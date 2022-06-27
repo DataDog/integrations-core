@@ -26,7 +26,7 @@
     "systemctl restart php-fpm.service",
     "php7.0-fpm.service"
   ],
-  "public_title": "PHP FPM Integration",
+  "public_title": "PHP FPM",
   "short_description": "Monitor process states, slow requests, and accepted requests.",
   "support": "core",
   "supported_os": [

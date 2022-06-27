@@ -21,7 +21,7 @@
     "consul_agent",
     "consul-agent"
   ],
-  "public_title": "Consul Integration",
+  "public_title": "Consul",
   "short_description": "Alert on Consul health checks, see service-to-node mappings, and much more.",
   "support": "core",
   "supported_os": [

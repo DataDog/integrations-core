@@ -14,7 +14,7 @@
   "metric_prefix": "activemq.",
   "metric_to_check": "activemq.queue.count",
   "name": "activemq_xml",
-  "public_title": "ActiveMQ XML Integration",
+  "public_title": "ActiveMQ XML",
   "short_description": "Collect metrics for brokers and queues, producers and consumers, and more.",
   "support": "core",
   "supported_os": [

@@ -20,7 +20,7 @@
   "process_signatures": [
     "memcached"
   ],
-  "public_title": "Memcache Integration",
+  "public_title": "Memcache",
   "short_description": "Track memory use, hits, misses, evictions, fill percent, and more.",
   "support": "core",
   "supported_os": [

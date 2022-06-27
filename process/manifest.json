@@ -11,7 +11,7 @@
   "metric_prefix": "system.",
   "metric_to_check": "system.processes.cpu.pct",
   "name": "process",
-  "public_title": "Processes Integration",
+  "public_title": "Processes",
   "short_description": "Capture metrics and monitor the status of running processes.",
   "support": "core",
   "supported_os": [

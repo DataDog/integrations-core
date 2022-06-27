@@ -16,7 +16,7 @@
     "teamcity-server.sh",
     "teamcity-server"
   ],
-  "public_title": "Teamcity Integration",
+  "public_title": "Teamcity",
   "short_description": "Track builds and understand the performance impact of every deploy.",
   "support": "core",
   "supported_os": [

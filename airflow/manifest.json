@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Airflow Integration",
+  "public_title": "Airflow",
   "categories": [
     "processing",
     "log collection"

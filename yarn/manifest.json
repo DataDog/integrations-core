@@ -13,7 +13,7 @@
   "metric_prefix": "yarn.",
   "metric_to_check": "yarn.metrics.total_mb",
   "name": "yarn",
-  "public_title": "Yarn Integration",
+  "public_title": "Yarn",
   "short_description": "Collect cluster-wide health metrics and track application progress.",
   "support": "core",
   "supported_os": [

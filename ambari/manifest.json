@@ -13,7 +13,7 @@
     "linux",
     "mac_os"
   ],
-  "public_title": "Ambari Integration",
+  "public_title": "Ambari",
   "categories": [
     "processing",
     "log collection",

@@ -18,7 +18,7 @@
     "gitlab.ruby.process_start_time_seconds"
   ],
   "name": "gitlab",
-  "public_title": "Gitlab Integration",
+  "public_title": "Gitlab",
   "short_description": "Track all your Gitlab metrics with Datadog",
   "support": "core",
   "supported_os": [

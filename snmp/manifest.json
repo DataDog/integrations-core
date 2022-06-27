@@ -13,7 +13,7 @@
   "manifest_version": "1.0.0",
   "metric_prefix": "snmp.",
   "name": "snmp",
-  "public_title": "SNMP Integration",
+  "public_title": "SNMP",
   "short_description": "Collect SNMP metrics from your network devices.",
   "support": "core",
   "supported_os": [

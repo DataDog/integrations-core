@@ -18,7 +18,7 @@
   "process_signatures": [
     "nginx: master process"
   ],
-  "public_title": "Nginx Integration",
+  "public_title": "Nginx",
   "short_description": "Monitor connection and request metrics. Get more metrics with NGINX Plus.",
   "support": "core",
   "supported_os": [

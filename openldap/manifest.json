@@ -14,7 +14,7 @@
   "metric_prefix": "openldap.",
   "metric_to_check": "openldap.connections.current",
   "name": "openldap",
-  "public_title": "OpenLDAP Integration",
+  "public_title": "OpenLDAP",
   "short_description": "Collect metrics from your OpenLDAP server using the cn=monitor backend",
   "support": "core",
   "supported_os": [

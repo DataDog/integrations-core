@@ -9,7 +9,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "prometheus",
-  "public_title": "Prometheus (legacy) Integration",
+  "public_title": "Prometheus (legacy)",
   "short_description": "Prometheus is an open source monitoring system for timeseries metric data",
   "support": "core",
   "supported_os": [

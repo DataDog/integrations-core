@@ -15,7 +15,7 @@
   "metric_prefix": "go_expvar.",
   "metric_to_check": "go_expvar.memstats.alloc",
   "name": "go_expvar",
-  "public_title": "Go-Expvar Integration",
+  "public_title": "Go-Expvar",
   "short_description": "Collect expvar-instrumented metrics and memory stats from your Go service.",
   "support": "core",
   "supported_os": [

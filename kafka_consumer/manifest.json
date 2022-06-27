@@ -13,7 +13,7 @@
   "metric_prefix": "kafka.",
   "metric_to_check": "kafka.consumer_lag",
   "name": "kafka_consumer",
-  "public_title": "Kafka Consumer Integration",
+  "public_title": "Kafka Consumer",
   "short_description": "Collect metrics for Kafka consumers.",
   "support": "core",
   "supported_os": [

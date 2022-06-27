@@ -15,7 +15,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Palo Alto Networks Firewall Integration",
+  "public_title": "Palo Alto Networks Firewall",
   "categories": [
     "log collection",
     "security"

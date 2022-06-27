@@ -11,7 +11,7 @@
   "metric_prefix": "winkmem.",
   "metric_to_check": "winkmem.paged_pool_bytes",
   "name": "winkmem",
-  "public_title": "Windows Kernel Memory Integration",
+  "public_title": "Windows Kernel Memory",
   "short_description": "Monitor your Windows kernel memory allocation.",
   "support": "core",
   "supported_os": [

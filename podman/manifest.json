@@ -9,7 +9,7 @@
   "supported_os": [
     "linux"
   ],
-  "public_title": "Podman Integration",
+  "public_title": "Podman",
   "categories": [
     "containers"
   ],

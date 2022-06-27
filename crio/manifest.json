@@ -11,7 +11,7 @@
   "metric_prefix": "crio.",
   "metric_to_check": "crio.operations.count",
   "name": "crio",
-  "public_title": "CRI-O Integration",
+  "public_title": "CRI-O",
   "short_description": "Track all your CRI-O metrics with Datadog",
   "support": "core",
   "supported_os": [

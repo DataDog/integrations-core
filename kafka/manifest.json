@@ -17,7 +17,7 @@
   "process_signatures": [
     "java kafka.kafka"
   ],
-  "public_title": "Kafka Integration",
+  "public_title": "Kafka",
   "short_description": "Collect metrics for producers and consumers, replication, max lag, and more.",
   "support": "core",
   "supported_os": [

@@ -13,7 +13,7 @@
   "manifest_version": "1.0.0",
   "metric_prefix": "wmi.",
   "name": "wmi_check",
-  "public_title": "WMI Check Integration",
+  "public_title": "WMI Check",
   "short_description": "Collect and graph any WMI metrics.",
   "support": "core",
   "supported_os": [

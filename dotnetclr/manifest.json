@@ -11,7 +11,7 @@
   "metric_prefix": "dotnetclr.",
   "metric_to_check": "dotnetclr.memory.time_in_gc",
   "name": "dotnetclr",
-  "public_title": ".NET CLR Integration",
+  "public_title": ".NET CLR",
   "short_description": "Visualize and monitor Dotnetclr states",
   "support": "core",
   "supported_os": [

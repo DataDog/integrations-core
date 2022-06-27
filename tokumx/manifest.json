@@ -13,7 +13,7 @@
   "metric_to_check": "tokumx.uptime",
   "name": "tokumx",
   "process_signatures": [],
-  "public_title": "TokuMX Integration",
+  "public_title": "TokuMX",
   "short_description": "Track metrics for opcounters, replication lag, cache table size, and more.",
   "support": "core",
   "supported_os": [

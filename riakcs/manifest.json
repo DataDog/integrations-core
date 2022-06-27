@@ -14,7 +14,7 @@
   "process_signatures": [
     "riak-cs start"
   ],
-  "public_title": "Riak CS Integration",
+  "public_title": "Riak CS",
   "short_description": "Track the rate and mean latency of GETs, PUTs, DELETEs, and other operations.",
   "support": "core",
   "supported_os": [

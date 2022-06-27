@@ -15,7 +15,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Amazon EKS on AWS Fargate Integration",
+  "public_title": "Amazon EKS on AWS Fargate",
   "categories": [
     "cloud",
     "aws",

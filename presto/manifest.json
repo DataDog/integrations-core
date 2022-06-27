@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Presto Integration",
+  "public_title": "Presto",
   "categories": [
     "data store",
     "log collection"

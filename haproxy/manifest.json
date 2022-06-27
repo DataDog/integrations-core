@@ -23,7 +23,7 @@
     "haproxy-master",
     "haproxy-controller"
   ],
-  "public_title": "HAProxy Integration",
+  "public_title": "HAProxy",
   "short_description": "Monitor key metrics for requests, responses, errors, bytes served, and more.",
   "support": "core",
   "supported_os": [

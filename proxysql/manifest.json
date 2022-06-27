@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "ProxySQL Integration",
+  "public_title": "ProxySQL",
   "categories": [
     "data store",
     "log collection",

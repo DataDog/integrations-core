@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Vertica Integration",
+  "public_title": "Vertica",
   "categories": [
     "data store",
     "log collection"

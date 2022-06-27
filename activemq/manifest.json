@@ -20,7 +20,7 @@
   "process_signatures": [
     "activemq"
   ],
-  "public_title": "ActiveMQ Integration",
+  "public_title": "ActiveMQ",
   "short_description": "Collect metrics for brokers and queues, producers and consumers, and more.",
   "support": "core",
   "supported_os": [

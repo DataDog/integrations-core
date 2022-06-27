@@ -17,7 +17,7 @@
     "service varnish start",
     "varnishd"
   ],
-  "public_title": "Varnish Integration",
+  "public_title": "Varnish",
   "short_description": "Track client and backend connections, cache misses and evictions, and more.",
   "support": "core",
   "supported_os": [

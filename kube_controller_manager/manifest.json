@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Kubernetes Controller Manager Integration",
+  "public_title": "Kubernetes Controller Manager",
   "categories": [
     "orchestration",
     "containers"

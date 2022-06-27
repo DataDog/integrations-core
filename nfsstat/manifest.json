@@ -12,7 +12,7 @@
   "metric_prefix": "system.",
   "metric_to_check": "system.nfs.ops",
   "name": "nfsstat",
-  "public_title": "Nfsstat Integration",
+  "public_title": "Nfsstat",
   "short_description": "nfsstat gets nfsiostat-sysstat metrics.",
   "support": "core",
   "supported_os": [

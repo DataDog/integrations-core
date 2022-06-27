@@ -12,7 +12,7 @@
   "metric_prefix": "kubedns.",
   "metric_to_check": "kubedns.request_count",
   "name": "kube_dns",
-  "public_title": "Kube DNS Integration",
+  "public_title": "Kube DNS",
   "short_description": "Track all your Kube DNS metrics with Datadog",
   "support": "core",
   "supported_os": [

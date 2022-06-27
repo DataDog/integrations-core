@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Kubernetes Scheduler Integration",
+  "public_title": "Kubernetes Scheduler",
   "categories": [
     "orchestration",
     "containers",

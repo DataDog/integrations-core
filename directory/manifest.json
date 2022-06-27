@@ -11,7 +11,7 @@
   "metric_prefix": "system.",
   "metric_to_check": "system.disk.directory.file.bytes",
   "name": "directory",
-  "public_title": "Directory Integration",
+  "public_title": "Directory",
   "short_description": "The Directory integration reports metrics on files for a provided directory",
   "support": "core",
   "supported_os": [

@@ -23,7 +23,7 @@
   "process_signatures": [
     "couchjs"
   ],
-  "public_title": "CouchDB Integration",
+  "public_title": "CouchDB",
   "short_description": "Track and graph your CouchDB activity and performance metrics.",
   "support": "core",
   "supported_os": [

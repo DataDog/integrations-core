@@ -11,7 +11,7 @@
   "metric_prefix": "system.",
   "metric_to_check": "system.net.tcp.rtt",
   "name": "go-metro",
-  "public_title": "Go-Metro Integration",
+  "public_title": "Go-Metro",
   "short_description": "Passively calculate TCP RTT between hosts",
   "support": "core",
   "supported_os": [

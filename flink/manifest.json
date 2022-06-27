@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Flink Integration",
+  "public_title": "Flink",
   "categories": [
     "processing",
     "log collection"

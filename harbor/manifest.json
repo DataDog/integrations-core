@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Harbor Integration",
+  "public_title": "Harbor",
   "categories": [
     "containers",
     "log collection",

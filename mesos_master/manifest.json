@@ -21,7 +21,7 @@
     "mesos-master.sh",
     "mesos-agent.sh"
   ],
-  "public_title": "Mesos Master Integration",
+  "public_title": "Mesos Master",
   "short_description": "Track cluster resource usage, master and slave counts, tasks statuses, and more.",
   "support": "core",
   "supported_os": [

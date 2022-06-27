@@ -16,7 +16,7 @@
   "process_signatures": [
     "kong start"
   ],
-  "public_title": "Kong Integration",
+  "public_title": "Kong",
   "short_description": "Track total requests, response codes, client connections, and more.",
   "support": "core",
   "supported_os": [

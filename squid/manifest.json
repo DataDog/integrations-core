@@ -14,7 +14,7 @@
   "metric_prefix": "squid.",
   "metric_to_check": "squid.cachemgr.cpu_time",
   "name": "squid",
-  "public_title": "Squid Integration",
+  "public_title": "Squid",
   "short_description": "Track metrics from your squid-cache servers with Datadog",
   "support": "core",
   "supported_os": [

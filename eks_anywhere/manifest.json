@@ -13,7 +13,7 @@
   "manifest_version": "1.0.0",
   "metric_prefix": "aws.eks.",
   "name": "eks_anywhere",
-  "public_title": "Amazon EKS Anywhere Integration",
+  "public_title": "Amazon EKS Anywhere",
   "short_description": "An EKS deployment option for operating Kubernetes clusters on-premises",
   "support": "core",
   "supported_os": [

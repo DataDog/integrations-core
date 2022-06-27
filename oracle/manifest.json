@@ -12,7 +12,7 @@
   "metric_prefix": "oracle.",
   "metric_to_check": "oracle.session_count",
   "name": "Oracle",
-  "public_title": "Oracle Integration",
+  "public_title": "Oracle",
   "short_description": "Oracle relational database system designed for enterprise grid computing",
   "support": "core",
   "supported_os": [

@@ -10,7 +10,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "openmetrics",
-  "public_title": "OpenMetrics Integration",
+  "public_title": "OpenMetrics",
   "short_description": "OpenMetrics is an open standard for exposing metric data",
   "support": "core",
   "supported_os": [

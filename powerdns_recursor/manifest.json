@@ -21,7 +21,7 @@
     "pdns_server",
     "systemctl start pdns@"
   ],
-  "public_title": "Power DNS Recursor Integration",
+  "public_title": "Power DNS Recursor",
   "short_description": "Keep an eye on strange traffic to and from your PowerDNS recursors.",
   "support": "core",
   "supported_os": [

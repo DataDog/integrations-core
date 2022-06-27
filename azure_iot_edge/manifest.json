@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Azure IoT Edge Integration",
+  "public_title": "Azure IoT Edge",
   "categories": [
     "azure",
     "log collection"

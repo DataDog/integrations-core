@@ -13,7 +13,7 @@
   "metric_prefix": "aspdotnet.",
   "metric_to_check": "aspdotnet.request.wait_time",
   "name": "aspdotnet",
-  "public_title": "ASP.NET Integration",
+  "public_title": "ASP.NET",
   "short_description": "Track your ASP.NET service metrics in real time",
   "support": "core",
   "supported_os": [

@@ -20,7 +20,7 @@
     "gearmand",
     "gearman"
   ],
-  "public_title": "Gearman Integration",
+  "public_title": "Gearman",
   "short_description": "Track the number of jobs queued and running - in total or by task.",
   "support": "core",
   "supported_os": [

@@ -16,7 +16,7 @@
   "process_signatures": [
     "nagios"
   ],
-  "public_title": "Nagios Integration",
+  "public_title": "Nagios",
   "short_description": "Send Nagios service flaps, host alerts, and more to your Datadog event stream.",
   "support": "core",
   "supported_os": [

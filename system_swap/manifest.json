@@ -11,7 +11,7 @@
   "metric_prefix": "system.",
   "metric_to_check": "system.swap.swapped_in",
   "name": "system_swap",
-  "public_title": "System Swap Integration",
+  "public_title": "System Swap",
   "short_description": "Adds some optional swap memory checks.",
   "support": "core",
   "supported_os": [

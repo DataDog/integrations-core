@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Scylla Integration",
+  "public_title": "Scylla",
   "categories": [
     "data store",
     "log collection"

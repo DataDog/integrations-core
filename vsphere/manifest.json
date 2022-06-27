@@ -15,7 +15,7 @@
   "metric_prefix": "vsphere.",
   "metric_to_check": "vsphere.vm.count",
   "name": "vsphere",
-  "public_title": "vSphere Integration",
+  "public_title": "vSphere",
   "short_description": "Understand how vSphere resource usage affects your application.",
   "support": "core",
   "supported_os": [

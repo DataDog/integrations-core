@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Sidekiq Integration",
+  "public_title": "Sidekiq",
   "categories": [
     "log collection"
   ],

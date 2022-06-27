@@ -12,7 +12,7 @@
   "metric_prefix": "kubeproxy.",
   "metric_to_check": "kubeproxy.cpu.time",
   "name": "kube_proxy",
-  "public_title": "Kube Proxy Integration",
+  "public_title": "Kube Proxy",
   "short_description": "kube_proxy description.",
   "support": "core",
   "supported_os": [

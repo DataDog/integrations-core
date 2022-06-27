@@ -18,7 +18,7 @@
     "ceph-mgr",
     "ceph-osd"
   ],
-  "public_title": "Ceph Integration",
+  "public_title": "Ceph",
   "short_description": "Collect per-pool performance metrics and monitor overall cluster status.",
   "support": "core",
   "supported_os": [
