@@ -4,7 +4,7 @@
 
 * [Fixed] Fix reading of `token_path` option. See [#12366](https://github.com/DataDog/integrations-core/pull/12366).
 
-## 4.3.1 / 2022-05-15
+## 4.3.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Properly validate `only_custom_queries`. See [#11992](https://github.com/DataDog/integrations-core/pull/11992).
 * [Fixed] Fix small typo in config option. See [#11990](https://github.com/DataDog/integrations-core/pull/11990).

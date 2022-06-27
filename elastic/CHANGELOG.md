@@ -1,6 +1,6 @@
 # CHANGELOG - elastic
 
-## 5.1.1 / 2022-05-15
+## 5.1.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Update metrics. See [#11783](https://github.com/DataDog/integrations-core/pull/11783).
 

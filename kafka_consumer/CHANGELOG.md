@@ -1,6 +1,6 @@
 # CHANGELOG - kafka_consumer
 
-## 2.15.1 / 2022-05-31
+## 2.15.1 / 2022-05-31 / Agent 7.37.0
 
 * [Fixed] Does not fail reading and writing to cache when file is too long. See [#12109](https://github.com/DataDog/integrations-core/pull/12109).
 

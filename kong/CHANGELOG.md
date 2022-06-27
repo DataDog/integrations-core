@@ -1,6 +1,6 @@
 # CHANGELOG - kong
 
-## 2.1.1 / 2022-05-18
+## 2.1.1 / 2022-05-18 / Agent 7.37.0
 
 * [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
 

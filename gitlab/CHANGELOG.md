@@ -1,6 +1,6 @@
 # CHANGELOG - gitlab
 
-## 5.2.0 / 2022-05-15
+## 5.2.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).

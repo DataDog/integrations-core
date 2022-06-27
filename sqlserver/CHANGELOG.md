@@ -1,6 +1,6 @@
 # CHANGELOG - sqlserver
 
-## 8.0.0 / 2022-05-15
+## 8.0.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Add AlwaysOn metrics. See [#11979](https://github.com/DataDog/integrations-core/pull/11979).
 * [Added] sqlserver: Add option to keep aliases in sql server (`keep_sql_alias`). See [#12020](https://github.com/DataDog/integrations-core/pull/12020).

@@ -1,6 +1,6 @@
 # CHANGELOG - postgres
 
-## 12.4.0 / 2022-05-15
+## 12.4.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Add option to keep alias and dollar quote functions in postgres (`keep_sql_alias` and `keep_dollar_quoted_func`). See [#12019](https://github.com/DataDog/integrations-core/pull/12019).
 * [Added] Add support to ingest cloud_metadata for DBM host linking. See [#11987](https://github.com/DataDog/integrations-core/pull/11987).
