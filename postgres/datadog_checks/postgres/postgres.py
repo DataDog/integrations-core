@@ -35,7 +35,7 @@ except ImportError:
 
 MAX_CUSTOM_RESULTS = 100
 
-PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s)"
+PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s)"
 
 
 class PostgreSql(AgentCheck):
@@ -417,7 +417,7 @@ class PostgreSql(AgentCheck):
                 self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
                 cursor.execute(
                     PG_SETTINGS_QUERY,
-                    ("pg_stat_statements.max", "track_activity_query_size"),
+                    ("pg_stat_statements.max", "track_activity_query_size", "track_io_timing"),
                 )
                 rows = cursor.fetchall()
                 self.pg_settings.clear()

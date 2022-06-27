@@ -19,7 +19,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres.statement_samples import DBExplainError, StatementTruncationState
-from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS
+from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
 
 from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION
 
@@ -103,8 +103,15 @@ def test_statement_metrics_version(integration_check, dbm_instance, version, exp
 
 @pytest.mark.parametrize("dbstrict", [True, False])
 @pytest.mark.parametrize("pg_stat_statements_view", ["pg_stat_statements", "datadog.pg_stat_statements()"])
+@pytest.mark.parametrize("track_io_timing_enabled", [True, False])
 def test_statement_metrics(
-    aggregator, integration_check, dbm_instance, dbstrict, pg_stat_statements_view, datadog_agent
+    aggregator,
+    integration_check,
+    dbm_instance,
+    dbstrict,
+    pg_stat_statements_view,
+    datadog_agent,
+    track_io_timing_enabled,
 ):
     dbm_instance['dbstrict'] = dbstrict
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
@@ -122,6 +129,11 @@ def test_statement_metrics(
 
     check = integration_check(dbm_instance)
     check._connect()
+    check.check(dbm_instance)
+
+    # We can't change track_io_timing at runtime, but we can change what the integration thinks the runtime value is
+    # This must be done after the first check since postgres settings are loaded from the database then
+    check.pg_settings["track_io_timing"] = "on" if track_io_timing_enabled else "off"
 
     _run_queries()
     check.check(dbm_instance)
@@ -141,8 +153,8 @@ def test_statement_metrics(
         return True
 
     events = aggregator.get_event_platform_events("dbm-metrics")
-    assert len(events) == 1
-    event = events[0]
+    assert len(events) == 2
+    event = events[1]  # first item is from the initial dummy check to load pg_settings
 
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
@@ -175,6 +187,10 @@ def test_statement_metrics(
         assert row['query'] == expected_query[0:200], "query should be truncated when sending to metrics"
         available_columns = set(row.keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
+        if track_io_timing_enabled:
+            assert (available_columns & PG_STAT_STATEMENTS_TIMING_COLUMNS) == PG_STAT_STATEMENTS_TIMING_COLUMNS
+        else:
+            assert (available_columns & PG_STAT_STATEMENTS_TIMING_COLUMNS) == set()
         for col in metric_columns:
             assert type(row[col]) in (float, int)
 
