@@ -1,5 +1,10 @@
 # CHANGELOG - postgres
 
+## 12.5.0 / 2022-06-27
+
+* [Added] Track blk_read_time and blk_write_time for Postgres databases if track_io_timing is enabled. See [#12380](https://github.com/DataDog/integrations-core/pull/12380).
+* [Fixed] Fix Postgres calculation of blk_read_time and blk_write_time metrics. See [#12399](https://github.com/DataDog/integrations-core/pull/12399).
+
 ## 12.4.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Add option to keep alias and dollar quote functions in postgres (`keep_sql_alias` and `keep_dollar_quoted_func`). See [#12019](https://github.com/DataDog/integrations-core/pull/12019).
