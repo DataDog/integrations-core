@@ -1,0 +1,8 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["38"]
+version = ["0.8"]
+
+[envs.default.overrides]
+matrix.version.env-vars = "BOUNDARY_VERSION"
