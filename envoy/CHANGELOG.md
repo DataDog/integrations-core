@@ -1,5 +1,9 @@
 # CHANGELOG - Envoy
 
+## 2.2.0 / 2022-06-27
+
+* [Added] Add ext_authz metrics to envoy integration. See [#12374](https://github.com/DataDog/integrations-core/pull/12374). Thanks [Kaycell](https://github.com/Kaycell).
+
 ## 2.1.1 / 2022-05-18 / Agent 7.37.0
 
 * [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
