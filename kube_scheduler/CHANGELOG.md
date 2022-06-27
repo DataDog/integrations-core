@@ -1,5 +1,9 @@
 # CHANGELOG - Kube_scheduler
 
+## 4.3.0 / 2022-06-27
+
+* [Added] Add new scheduling metrics available in k8s v1.23+. See [#12111](https://github.com/DataDog/integrations-core/pull/12111).
+
 ## 4.2.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
