@@ -1,5 +1,13 @@
 # CHANGELOG - mysql
 
+## 8.4.0 / 2022-06-27
+
+* [Added] add new metric for tables rows stats for mysql. See [#11043](https://github.com/DataDog/integrations-core/pull/11043). Thanks [aymeric-ledizes](https://github.com/aymeric-ledizes).
+* [Fixed] Fix rows with empty SQL text in DBM Activity Query. See [#12393](https://github.com/DataDog/integrations-core/pull/12393).
+* [Fixed] Stop query activity collection due to misconfiguration. See [#12343](https://github.com/DataDog/integrations-core/pull/12343).
+* [Fixed] Fix race conditions when running many instances of the Agent. See [#12342](https://github.com/DataDog/integrations-core/pull/12342).
+* [Fixed] Revert mysql.net.connections metric type. See [#12088](https://github.com/DataDog/integrations-core/pull/12088).
+
 ## 8.3.2 / 2022-06-08
 
 * [Fixed] Fix race conditions when running many instances of the Agent. See [#12342](https://github.com/DataDog/integrations-core/pull/12342).
