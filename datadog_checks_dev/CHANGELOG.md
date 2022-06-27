@@ -1,5 +1,12 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 16.5.0 / 2022-06-27
+
+* [Added] Add a `--debug` (`-d`) flag to `ddev env test`. See [#12379](https://github.com/DataDog/integrations-core/pull/12379).
+* [Fixed] Fix tooling to support v2 manifests. See [#12411](https://github.com/DataDog/integrations-core/pull/12411).
+* [Fixed] Fix agent changelog command for manifest v2. See [#12406](https://github.com/DataDog/integrations-core/pull/12406).
+* [Fixed] Change `get_commits_since` so that it won't take commits from other branches. See [#12376](https://github.com/DataDog/integrations-core/pull/12376).
+
 ## 16.4.0 / 2022-06-16
 
 * [Added] Emulate an Agent shutdown after every test that uses the `dd_run_check` fixture by default. See [#12371](https://github.com/DataDog/integrations-core/pull/12371).
