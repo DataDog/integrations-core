@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "An EKS deployment option for operating Kubernetes clusters on-premises",
-    "title": "Amazon EKS Anywhere Integration",
+    "title": "Amazon EKS Anywhere",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
