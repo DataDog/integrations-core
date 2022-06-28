@@ -119,9 +119,8 @@ instances:
 
     ## @param named_service_tags - boolean - optional - default: true
     ## Controls addition of metric tags with `consul_service` name in the tag name
-    #
+    ##
     ## If set to `true`, the integrition will emit metrics with tags like:
-    #
     ## 'consul_service-1_service_tag:active'
     ## where `service-1` is `consul_service` and `active` is a consul tag on the service
     #
