@@ -313,11 +313,11 @@ class ConsulCheck(OpenMetricsBaseCheck):
         return services
 
     @staticmethod
-    def _get_service_tags(service, tags):
+    def _get_service_tags(named_service_tags, service, tags):
         service_tags = ['consul_service_id:{}'.format(service)]
 
         for tag in tags:
-            if self.named_service_tags:
+            if named_service_tags:
                 service_tags.append('consul_{}_service_tag:{}'.format(service, tag))
             service_tags.append('consul_service_tag:{}'.format(tag))
 
@@ -482,7 +482,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
         # `consul.catalog.nodes_passing` : # of Nodes with service status `passing` from those registered
         # `consul.catalog.nodes_warning` : # of Nodes with service status `warning` from those registered
         # `consul.catalog.nodes_critical` : # of Nodes with service status `critical` from those registered
-        all_service_tags = self._get_service_tags(service, service_tags)
+        all_service_tags = self._get_service_tags(self.named_service_tags, service, service_tags)
         # {'up': 0, 'passing': 0, 'warning': 0, 'critical': 0}
         node_count_per_status = defaultdict(int)
         for node in nodes_with_service:
