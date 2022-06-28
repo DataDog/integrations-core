@@ -175,14 +175,14 @@ Here is an example regex pattern to only collect Windows Events Logs from a cert
 
 ```yaml
 logs:
-    - type: windows_event
-      channel_path: Security
-      source: windows.event
-      service: Windows
-      log_processing_rules:
-        - type: include_at_match
-          name: include_x01
-          pattern: \"value\":\"(101|201|301)\"         
+  - type: windows_event
+    channel_path: Security
+    source: windows.event
+    service: Windows
+    log_processing_rules:
+      - type: include_at_match
+        name: include_x01
+        pattern: \"value\":\"(101|201|301)\"
 ```
 
 **Note**: the pattern may vary based on the format of the logs
