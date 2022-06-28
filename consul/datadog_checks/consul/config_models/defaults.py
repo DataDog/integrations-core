@@ -125,8 +125,10 @@ def instance_metric_patterns(field, value):
 def instance_min_collection_interval(field, value):
     return 15
 
+
 def instance_named_service_tags(field, value):
     return True
+
 
 def instance_network_latency_checks(field, value):
     return False
