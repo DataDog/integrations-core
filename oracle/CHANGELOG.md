@@ -1,6 +1,6 @@
 # CHANGELOG - oracle
 
-## 3.9.4 / 2022-05-15
+## 3.9.4 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Add a lock around jdbc connection. See [#11877](https://github.com/DataDog/integrations-core/pull/11877).
 * [Fixed] Do not close closed connection. See [#11874](https://github.com/DataDog/integrations-core/pull/11874).

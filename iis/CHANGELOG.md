@@ -1,6 +1,6 @@
 # CHANGELOG - iis
 
-## 2.16.2 / 2022-05-15
+## 2.16.2 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
 
