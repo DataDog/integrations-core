@@ -99,6 +99,13 @@ files:
           - <SERVICE_1>
           - <SERVICE_2>
 
+    - name: named_service_tags
+      description: |
+        Control the addition of metric tags with consul_service name in the key
+      value:
+        type: boolean
+        example: false
+
     - name: max_services
       description: |
         Increase the maximum number of queried services.

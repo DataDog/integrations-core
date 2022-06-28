@@ -73,6 +73,7 @@ class InstanceConfig(BaseModel):
     max_services: Optional[float]
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
+    named_service_tags: Optional[bool]
     network_latency_checks: Optional[bool]
     new_leader_checks: Optional[bool]
     ntlm_domain: Optional[str]

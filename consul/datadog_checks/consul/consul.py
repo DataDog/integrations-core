@@ -106,6 +106,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
         )
         self.services_exclude = set(self.instance.get('services_exclude', self.init_config.get('services_exclude', [])))
         self.max_services = self.instance.get('max_services', self.init_config.get('max_services', MAX_SERVICES))
+        self.named_service_tags = self.instance.get('named_service_tags', self.init_config.get('named_service_tags', True))
         self.threads_count = self.instance.get('threads_count', self.init_config.get('threads_count', THREADS_COUNT))
         if self.threads_count > 1:
             self.thread_pool = ThreadPool(self.threads_count)
@@ -316,7 +317,8 @@ class ConsulCheck(OpenMetricsBaseCheck):
         service_tags = ['consul_service_id:{}'.format(service)]
 
         for tag in tags:
-            service_tags.append('consul_{}_service_tag:{}'.format(service, tag))
+            if self.named_service_tags:
+                service_tags.append('consul_{}_service_tag:{}'.format(service, tag))
             service_tags.append('consul_service_tag:{}'.format(tag))
 
         return service_tags

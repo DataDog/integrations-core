@@ -16,6 +16,43 @@ pytestmark = pytest.mark.unit
 log = logging.getLogger(__file__)
 
 
+def test_get_nodes_with_service_no_tags(aggregator):
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
+    consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
+    consul_check.check(None)
+
+    # Big include list with max_services
+    consul_check.named_service_tags = False
+
+    expected_tags = [
+        'consul_datacenter:dc1',
+        'consul_service_id:service-1',
+        'consul_service_tag:active',
+        'consul_service_tag:standby',
+    ]
+
+    aggregator.assert_metric('consul.catalog.nodes_up', value=4, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.nodes_passing', value=4, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.nodes_warning', value=0, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.nodes_critical', value=0, tags=expected_tags)
+
+    expected_tags = ['consul_datacenter:dc1', 'consul_node_id:node-1']
+
+    aggregator.assert_metric('consul.catalog.services_up', value=24, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.services_passing', value=24, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.services_warning', value=0, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.services_critical', value=0, tags=expected_tags)
+
+    expected_tags = [
+        'consul_datacenter:dc1',
+        'consul_service_id:service-1',
+        'consul_node_id:node-1',
+        'consul_status:passing',
+    ]
+    aggregator.assert_metric('consul.catalog.services_count', value=3, tags=expected_tags)
+    expected_tags.append('consul_service-1_service_tag:active')
+    aggregator.assert_metric('consul.catalog.services_count', value=1, tags=expected_tags)
+
 def test_get_nodes_with_service(aggregator):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
     consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
