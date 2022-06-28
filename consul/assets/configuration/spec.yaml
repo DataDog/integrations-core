@@ -107,7 +107,7 @@ files:
         where `service-1` is `consul_service` and `active` is a consul tag on the service
       value:
         type: boolean
-        example: false
+        example: true
 
     - name: max_services
       description: |
