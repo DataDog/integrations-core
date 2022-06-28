@@ -115,9 +115,12 @@ ORGANIZATION_RATE_SHEET_DAILY = [
     ),
 ]
 
-ORGANIZATION_DATA_TRANSFER_DAILY_HISTORY = [
+ORGANIZATION_DATA_TRANSFER_HISTORY = [
     (
         'test_account',
+        'AWS',
+        'GCP',
+        'COPY',
         Decimal('13.56'),
     ),
 ]

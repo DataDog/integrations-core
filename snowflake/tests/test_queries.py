@@ -352,10 +352,18 @@ def test_org_data_transfer(dd_run_check, aggregator, instance):
     expected_data_transfer_metrics = [
         (
             'test_account',
+            'AWS',
+            'GCP',
+            'COPY',
             Decimal('13.56'),
         ),
     ]
-    expected_tags = EXPECTED_TAGS + ['billing_account:test_account']
+    expected_tags = EXPECTED_TAGS + [
+        'billing_account:test_account',
+        'source_cloud:AWS',
+        'target_cloud:GCP',
+        'transfer_type:COPY',
+    ]
     with mock.patch(
         'datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_data_transfer_metrics
     ):
