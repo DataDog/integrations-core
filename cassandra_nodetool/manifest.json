@@ -11,7 +11,7 @@
   "metric_prefix": "cassandra.",
   "metric_to_check": "cassandra.nodetool.status.status",
   "name": "cassandra_nodetool",
-  "public_title": "Cassandra",
+  "public_title": "Cassandra Nodetool",
   "short_description": "monitor cassandra using the nodetool utility",
   "support": "core",
   "supported_os": [
