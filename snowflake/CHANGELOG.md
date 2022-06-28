@@ -1,5 +1,9 @@
 # CHANGELOG - Snowflake
 
+## 4.4.1 / 2022-06-28
+
+* [Fixed] Fix organization data transfer query. See [#12420](https://github.com/DataDog/integrations-core/pull/12420).
+
 ## 4.4.0 / 2022-06-27
 
 * [Added] Add support for organization level metrics. See [#12375](https://github.com/DataDog/integrations-core/pull/12375).
