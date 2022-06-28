@@ -198,7 +198,7 @@ Need help? Contact [Datadog support][13].
 [3]: https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.performancecounter
 [4]: https://wmie.codeplex.com
 [5]: https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-wmiobject
-[6]: https://docs.datadoghq.com/integrations/faq/how-to-retrieve-wmi-metrics/
+[6]: https://docs.datadoghq.com/integrations/guide/retrieving-wmi-metrics/
 [7]: https://msdn.microsoft.com/en-us/library/windows/desktop/aa394084.aspx
 [8]: https://technet.microsoft.com/en-us/library/Hh921475.aspx
 [9]: https://msdn.microsoft.com/en-us/library/aa393067.aspx

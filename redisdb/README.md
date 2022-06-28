@@ -302,8 +302,6 @@ See [service_checks.json][24] for a list of service checks provided by this inte
 
 ## Troubleshooting
 
-- [Redis Integration Error: "unknown command 'CONFIG'"][25]
-
 ### Agent cannot connect
 
 ```shell
