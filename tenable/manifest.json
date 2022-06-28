@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Track nessus backend and webserver logs",
-    "title": "Tenable Nessus Integration",
+    "title": "Tenable Nessus",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
