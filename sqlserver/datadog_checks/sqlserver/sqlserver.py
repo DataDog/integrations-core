@@ -58,11 +58,11 @@ from datadog_checks.sqlserver.const import (
 )
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
 from datadog_checks.sqlserver.queries import (
-    QUERY_AO_AVAILABILITY_GROUPS,
     QUERY_AO_FAILOVER_CLUSTER,
     QUERY_AO_FAILOVER_CLUSTER_MEMBER,
     QUERY_FAILOVER_CLUSTER_INSTANCE,
     QUERY_SERVER_STATIC_INFO,
+    get_ao_availability_groups,
     get_query_file_stats,
 )
 from datadog_checks.sqlserver.utils import set_default_driver_conf
@@ -162,7 +162,6 @@ class SQLServer(AgentCheck):
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
             check_queries.extend(
                 [
-                    QUERY_AO_AVAILABILITY_GROUPS,
                     QUERY_AO_FAILOVER_CLUSTER,
                     QUERY_AO_FAILOVER_CLUSTER_MEMBER,
                 ]
@@ -691,6 +690,10 @@ class SQLServer(AgentCheck):
             return None
 
         queries = [get_query_file_stats(major_version)]
+
+        if is_affirmative(self.instance.get('include_ao_metrics', False)):
+            queries.extend([get_ao_availability_groups(major_version)])
+
         self._dynamic_queries = self._new_query_executor(queries)
         self._dynamic_queries.compile_queries()
         self.log.debug("initialized dynamic queries")
