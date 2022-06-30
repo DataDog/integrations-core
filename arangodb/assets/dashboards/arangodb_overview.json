@@ -1863,6 +1863,34 @@
         "width": 8,
         "height": 3
       }
+    },
+    {
+      "id": 6945772072614450,
+      "definition": {
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "log_stream",
+        "indexes": [],
+        "query": "service:arangodb",
+        "sort": {
+          "column": "time",
+          "order": "desc"
+        },
+        "columns": [
+          "host",
+          "service"
+        ],
+        "show_date_column": true,
+        "show_message_column": true,
+        "message_display": "expanded-md"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 4,
+        "height": 4
+      }
     }
   ],
   "template_variables": [
