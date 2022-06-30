@@ -69,6 +69,7 @@ class Vault(OpenMetricsBaseCheck):
         self._tags = list(self.instance.get('tags', []))
         self._tags.append('api_url:{}'.format(self._api_url))
         self._disable_legacy_cluster_tag = is_affirmative(self.instance.get('disable_legacy_cluster_tag', False))
+        self._collect_secondary_dr = is_affirmative(self.instance.get('collect_secondary_dr', False))
 
         # Keep track of the previous cluster leader to detect changes
         self._previous_leader = None
@@ -83,8 +84,9 @@ class Vault(OpenMetricsBaseCheck):
         # Avoid error on the first attempt to refresh tokens
         self._refreshing_token = False
 
-        # Detect if Vault is in replication mode
-        self._replication_dr_secondary_mode = False
+        # we skip metric collection for DR if Vault is in replication mode
+        # and collect_secondary_dr is not enabled
+        self._skip_dr_metric_collection = False
 
         # The Agent only makes one attempt to instantiate each AgentCheck so any errors occurring
         # in `__init__` are logged just once, making it difficult to spot. Therefore, we emit
@@ -114,7 +116,7 @@ class Vault(OpenMetricsBaseCheck):
             for submit_function in submission_queue:
                 submit_function(tags=tags)
 
-        if (self._client_token or self._no_token) and not self._replication_dr_secondary_mode:
+        if (self._client_token or self._no_token) and not self._skip_dr_metric_collection:
             self._scraper_config['_metric_tags'] = dynamic_tags
             try:
                 self.process(self._scraper_config, self._metric_transformers)
@@ -213,19 +215,19 @@ class Vault(OpenMetricsBaseCheck):
 
         replication_mode = health_data.get('replication_dr_mode', '').lower()
         if replication_mode == 'secondary':
-            if self.instance.get("collect_secondary_dr", False):
-                self._replication_dr_secondary_mode = False
+            if self._collect_secondary_dr:
+                self._skip_dr_metric_collection = False
                 self.log.debug(
                     'Detected vault in replication DR secondary mode but also detected that '
                     '`collect_secondary_dr` is enabled, Prometheus metric collection will still occur.'
                 )
             else:
-                self._replication_dr_secondary_mode = True
+                self._skip_dr_metric_collection = True
                 self.log.debug(
                     'Detected vault in replication DR secondary mode, skipping Prometheus metric collection.'
                 )
         else:
-            self._replication_dr_secondary_mode = False
+            self._skip_dr_metric_collection = False
 
         vault_version = health_data.get('version')
         if vault_version:
