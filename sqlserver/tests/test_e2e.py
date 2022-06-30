@@ -28,7 +28,6 @@ except ImportError:
 pytestmark = pytest.mark.e2e
 
 
-@not_windows_ci
 @always_on
 def test_ao_primary_replica(dd_agent_check, init_config, instance_ao_docker_primary):
     aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_ao_docker_primary]})
@@ -52,7 +51,6 @@ def test_ao_primary_replica(dd_agent_check, init_config, instance_ao_docker_prim
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
 
 
-@not_windows_ci
 @always_on
 def test_ao_local_primary_replica_only(dd_agent_check, init_config, instance_ao_docker_primary_local_only):
     aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_ao_docker_primary_local_only]})
@@ -63,7 +61,6 @@ def test_ao_local_primary_replica_only(dd_agent_check, init_config, instance_ao_
         aggregator.assert_metric(mname, count=0)
 
 
-@not_windows_ci
 @always_on
 def test_ao_primary_with_non_exist_ag(dd_agent_check, init_config, instance_ao_docker_primary_non_existing_ag):
     aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_ao_docker_primary_non_existing_ag]})
@@ -74,7 +71,6 @@ def test_ao_primary_with_non_exist_ag(dd_agent_check, init_config, instance_ao_d
         aggregator.assert_metric(mname, count=0)
 
 
-@not_windows_ci
 @always_on
 def test_ao_secondary_replica(dd_agent_check, init_config, instance_ao_docker_secondary):
     aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_ao_docker_secondary]})
