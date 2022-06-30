@@ -54,7 +54,7 @@ class TileDescriptionValidator(BaseManifestValidator):
         if current_length > max_desc_length:
             output = (
                 f'  The tile description is {current_length} characters long. It should be no longer than '
-                f'{self.MAX_DESCRIPTION_LENGTH} characters.'
+                f'{max_desc_length} characters.'
             )
             self.fail(output)
 
