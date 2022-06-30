@@ -29,6 +29,7 @@
         "creates_events": false
       },
       "metrics": {
+        "check": ["edgecast.request_count"],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
