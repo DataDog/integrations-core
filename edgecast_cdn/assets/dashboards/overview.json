@@ -1,0 +1,1008 @@
+{
+  "title": "Edgecast Overview",
+  "author_name": "Datadog",
+  "description": "This dashboard provides a high-level overview of your Edgecast services, so you can view aggregated throughput and latency metrics as well as the cache hit ratio of your CDN.\n\nSee the [Edgecast Documentation](https://docs.datadoghq.com/integrations/edgecast_cdn/) for further reading.\n\n \nClone this template dashboard to make changes and add your own graph widgets.",
+  "widgets": [
+    {
+      "id": 1458243209757706,
+      "definition": {
+        "title": " ",
+        "type": "group",
+        "banner_img": "/static/images/integration_dashboard/edgecast-cdn_hero_1.png",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6083385962796916,
+            "definition": {
+              "type": "note",
+              "content": "A high level dashboard to monitor key Edgecast metrics such as: hit ratio, error rates, bandwidth usage, cache coverage, and many more. \n\nAll Edgecast metrics are auto-tagged by origin, allowing you to view metrics in aggregate or across select hosts.\n\nSee the [Edgecast Documentation](https://docs.datadoghq.com/integrations/edgecast_cdn/) for further reading.\n",
+              "background_color": "transparent",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 5
+      }
+    },
+    {
+      "id": 5306130912860412,
+      "definition": {
+        "title": "Overview",
+        "type": "group",
+        "background_color": "white",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2980960147103146,
+            "definition": {
+              "title": "Cache Hit Ratio",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_green",
+                      "value": 95
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "black_on_light_green",
+                      "value": 85
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "black_on_light_yellow",
+                      "value": 75
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_yellow",
+                      "value": 65
+                    },
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_red",
+                      "value": 65
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:edgecast.cache_hit_percentage{$origin}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_unit": "%",
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 6570404465649146,
+            "definition": {
+              "title": "Success Rate (2xx %)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": "<=",
+                      "palette": "white_on_red",
+                      "value": 0.7
+                    },
+                    {
+                      "comparator": "<=",
+                      "palette": "white_on_yellow",
+                      "value": 0.8
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_green",
+                      "value": 0.9
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:edgecast.status_2xx_percentage{$origin}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": false,
+              "custom_unit": "%",
+              "precision": 2
+            },
+            "layout": {
+              "x": 2,
+              "y": 0,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 5230073719669656,
+            "definition": {
+              "title": "Error Rate (4xx + 5xx %)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 + query5"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_red",
+                      "value": 10
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_yellow",
+                      "value": 5
+                    },
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_green",
+                      "value": 5
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:edgecast.status_4xx_percentage{$origin}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "avg:edgecast.status_5xx_percentage{$origin}",
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": false,
+              "custom_unit": "%",
+              "precision": 2
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 5847222948270,
+            "definition": {
+              "type": "note",
+              "content": "The Cache Hit Ratio is the percentage of incoming requests that are satisfied read from cache.\n",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 8515412824575358,
+            "definition": {
+              "title": "Total Requests",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:edgecast.request_count{edgecast_origin:*} by {edgecast_origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "sum"
+                    }
+                  ]
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "inline"
+              }
+            },
+            "layout": {
+              "x": 2,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 8214209778320686,
+            "definition": {
+              "title": "Average Outbound Bandwidth",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:edgecast.bytes_out{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 1478958936357730,
+            "definition": {
+              "title": "Weekly Bandwidth Change",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "change",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "week_before(query1)"
+                    },
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "order_by": "change",
+                  "order_dir": "desc",
+                  "compare_to": "hour_before",
+                  "response_format": "scalar",
+                  "increase_good": true,
+                  "queries": [
+                    {
+                      "query": "avg:edgecast.bytes_out{edgecast_origin:*} by {edgecast_origin}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "change_type": "absolute"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 7979259804688924,
+            "definition": {
+              "title": "Monitor Summary",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "manage_status",
+              "summary_type": "monitors",
+              "display_format": "countsAndList",
+              "color_preference": "background",
+              "hide_zero_counts": true,
+              "show_last_triggered": false,
+              "show_priority": false,
+              "query": "edgecast OR metric:edgecast.* ",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 6,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 12
+      }
+    },
+    {
+      "id": 3581108604233930,
+      "definition": {
+        "title": "Caching",
+        "type": "group",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1160487651835182,
+            "definition": {
+              "type": "note",
+              "content": "Cache Hit Ratio (CHR) is a signal of how efficiently Edgecast is serving traffic from its cache, as opposed to requesting the content from the origin. A higher CHR implies lower client latency, and lower load on the origin. \n\nCHR should generally be high for static content (such as website images), and is expected to be lower for dynamic content. \n\nSudden changes in CHR over time could be a precursor for issues, as it increases overall system load to the origin. CHR can be influenced by tweaking your cache control policy. \n",
+              "background_color": "purple",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "right",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 2,
+              "height": 4
+            }
+          },
+          {
+            "id": 1550122502211274,
+            "definition": {
+              "title": "Cache Hit Ratio",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Hit Ratio",
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:edgecast.cache_hit_percentage{$origin}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ]
+            },
+            "layout": {
+              "x": 2,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 1870614231943142,
+            "definition": {
+              "title": "Weekly Hit Ratio Change",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "change",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "week_before(query1)"
+                    },
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "order_by": "change",
+                  "order_dir": "desc",
+                  "compare_to": "hour_before",
+                  "response_format": "scalar",
+                  "increase_good": true,
+                  "queries": [
+                    {
+                      "query": "avg:edgecast.cache_hit_percentage{edgecast_origin:*} by {edgecast_origin}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "change_type": "absolute"
+                }
+              ]
+            },
+            "layout": {
+              "x": 2,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 2334656108427396,
+            "definition": {
+              "title": "Caching Overview",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Cache Hits",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Cache Misses",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Uncacheable Requests",
+                      "formula": "query4"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:edgecast.cache_hit{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "avg:edgecast.cache_miss{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    },
+                    {
+                      "query": "avg:edgecast.uncacheable{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query4"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 6,
+        "height": 7
+      }
+    },
+    {
+      "id": 232768600748154,
+      "definition": {
+        "title": "Traffic",
+        "type": "group",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 42458844746636,
+            "definition": {
+              "type": "note",
+              "content": "Bandwidth usage should generally be steady, and correlate with request rate. \n\nSudden spikes in bandwidth could either be good (organic traffic increase), or bad (malicious actors trying to increase your system load with a high number of Get requests).\n\n",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "right",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 2,
+              "height": 4
+            }
+          },
+          {
+            "id": 6221159434127984,
+            "definition": {
+              "title": "Requests by Response",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Success (2xx)",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Redirection (3xx)",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Client Error (4xx)",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Server Error (5xx)",
+                      "formula": "query5"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:edgecast.status_2xx{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    },
+                    {
+                      "query": "sum:edgecast.status_3xx{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query4"
+                    },
+                    {
+                      "query": "sum:edgecast.status_4xx{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "sum:edgecast.status_5xx{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query5"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "markers": [
+                {
+                  "value": "y = 0",
+                  "display_type": "error dashed"
+                }
+              ]
+            },
+            "layout": {
+              "x": 2,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 2880058781155094,
+            "definition": {
+              "title": "TCP Performance",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Hits",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Partial Hits",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Mem Hits",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Expired Hits",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Misses",
+                      "formula": "query5"
+                    },
+                    {
+                      "alias": "Partial Misses",
+                      "formula": "query6"
+                    },
+                    {
+                      "alias": "Refresh Misses",
+                      "formula": "query7"
+                    },
+                    {
+                      "alias": "Expired Misses",
+                      "formula": "query8"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:edgecast.tcp_hit{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:edgecast.tcp_partial_hit{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "avg:edgecast.tcp_mem_hit{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    },
+                    {
+                      "query": "avg:edgecast.tcp_expired_hit{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query4"
+                    },
+                    {
+                      "query": "avg:edgecast.tcp_miss{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query5"
+                    },
+                    {
+                      "query": "avg:edgecast.tcp_partial_miss{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query6"
+                    },
+                    {
+                      "query": "avg:edgecast.tcp_client_refresh_miss{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query7"
+                    },
+                    {
+                      "query": "avg:edgecast.tcp_expired_miss{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query8"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 8974983693528458,
+            "definition": {
+              "title": "Download Attempts",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:edgecast.download_attempts{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "text_align": "center",
+              "precision": 0
+            },
+            "layout": {
+              "x": 10,
+              "y": 0,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 975250318210518,
+            "definition": {
+              "title": "Average Bandwidth Sent",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Bandwidth",
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:edgecast.bytes_out{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "blue",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ]
+            },
+            "layout": {
+              "x": 2,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 5579341630019448,
+            "definition": {
+              "title": "Average File Size",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Average File Size",
+                      "formula": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:edgecast.file_size{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 77216957302372,
+            "definition": {
+              "title": "Download Failures",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 - query2"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:edgecast.download_attempts{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:edgecast.completed_downloads{$origin}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 10,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 12,
+        "width": 12,
+        "height": 5
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "origin",
+      "default": "*",
+      "prefix": "edgecast_origin",
+      "available_values": []
+    }
+  ],
+  "layout_type": "ordered",
+  "is_read_only": false,
+  "notify_list": [],
+  "reflow_type": "fixed",
+  "id": "eez-8va-ckf"
+}

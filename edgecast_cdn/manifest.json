@@ -1,0 +1,39 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "6c5666e8-b80d-43f6-85c0-acd253561418",
+  "app_id": "edgecast-cdn",
+  "classifier_tags": [],
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor Edgecast CDN traffic with Datadog Metrics",
+    "title": "Edgecast",
+    "media": []
+  },
+  "author": {
+    "support_email": "help@datadoghq.com"
+  },
+  "oauth": {},
+  "assets": {
+    "dashboards": {
+      "Edgecast Overview": "assets/dashboards/overview.json"
+    },
+    "integration": {
+      "source_type_name": "Edgecast",
+      "source_type_id": 619,
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  }
+}
