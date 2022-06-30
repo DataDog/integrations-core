@@ -143,8 +143,8 @@ def get_all_log_pipelines_ids():
     files.sort()
     for file in files:
         with open(file, 'r') as f:
-            yield yaml.load(f, Loader=yaml.SafeLoader)['id']
-
+            definition = yaml.load(f, Loader=yaml.SafeLoader)
+            yield definition['id'] if definition['metric_id'] is None else definition['metric_id']
 
 def get_log_to_metric_map(file_path):
     with open(file_path) as f:
