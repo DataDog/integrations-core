@@ -278,7 +278,7 @@ External table indexes must be a subset of the indexes of the current table, or 
 
 ##### Using an index
 
-Important: "_index_" refers to one digit of the index part of the row OID. Example, if the column OID is `1.2.3.1.2` and the row OID is `1.2.3.1.2.7.8.9`, the full index is `7.8.9`. In this example, when using `index: 1`, we will refer to `7`, `index: 2` will refer to `8`, and so on.  
+Important: "_index_" refers to one digit of the index part of the row OID. For example, if the column OID is `1.2.3.1.2` and the row OID is `1.2.3.1.2.7.8.9`, the full index is `7.8.9`. In this example, `index: 1` refers to `7` and `index: 2` refers to `8`, and so on.  
 
 Here is specific example of an OID with multiple positions in the index ([OID ref](https://oidref.com/1.3.6.1.2.1.4.20.1)):
 
