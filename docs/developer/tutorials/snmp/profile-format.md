@@ -153,7 +153,7 @@ exampleColumn2 OBJECT-TYPE
 -- ...
 ```
 
-In profiles, tables can be specified as entries containing the `MIB`, `table` and `symbols` fields:
+In profiles, tables can be specified as entries containing the `MIB`, `table` and `symbols` fields. The syntax for the value contained in each row is typically `<TABLE_OID>.1.<COLUMN_ID>.<INDEX>`:
 
 ```yaml
 metrics:
@@ -166,7 +166,7 @@ metrics:
     symbols:
       # List of symbols ('columns') to retrieve.
       # Same format as for a single OID.
-      # Each row in the table will emit these metrics.
+      # The value from each row (index) in the table will be collected `<TABLE_OID>.1.<COLUMN_ID>.<INDEX>.*`
       - OID: 1.3.6.1.4.1.10.1.1
         name: exampleColumn1
       - OID: 1.3.6.1.4.1.10.1.2
@@ -278,7 +278,37 @@ External table indexes must be a subset of the indexes of the current table, or 
 
 ##### Using an index
 
-Important: "_index_" refers to one digit of the index part of the row OID. Example, if the column OID is `1.2.3.1.2` and the row OID is `1.2.3.1.2.7.8.9`, the full index is `7.8.9`. In this example, when using `index: 1`, we will refer to `7`, `index: 2` will refer to `8`, and so on.
+Important: "_index_" refers to one digit of the index part of the row OID. Example, if the column OID is `1.2.3.1.2` and the row OID is `1.2.3.1.2.7.8.9`, the full index is `7.8.9`. In this example, when using `index: 1`, we will refer to `7`, `index: 2` will refer to `8`, and so on.  
+
+Here is specific example of an OID with multiple positions in the index ([OID ref](https://oidref.com/1.3.6.1.2.1.4.20.1)):
+
+```
+ipAddrEntry OBJECT-TYPE
+    SYNTAX     IpAddrEntry
+    MAX-ACCESS not-accessible
+    STATUS     deprecated
+    DESCRIPTION
+           "The addressing information for one of this entity's IPv4
+            addresses."
+    INDEX      { ipAdEntAddr }
+    ::= { ipAddrTable 1 }
+```
+
+The index in the case is the `ipAdEntAddr`. Inspecting this `OBJECT-TYPE` reveals the `SYNTAX` as `IpAddress` ([OID ref](https://oidref.com/1.3.6.1.2.1.4.20.1.1)):
+
+```
+ipAdEntAddr OBJECT-TYPE
+    SYNTAX     IpAddress
+    MAX-ACCESS read-only
+    STATUS     deprecated
+    DESCRIPTION
+
+
+           "The IPv4 address to which this entry's addressing
+            information pertains."
+    ::= { ipAddrEntry 1 }
+```
+The value corresponding to the `index `of a row in this table will be found at the following OID: `.1.3.6.1.2.1.4.20.1.1.<INDEX>`.  Retrieving the value of `.1.3.6.1.2.1.4.20.1.1.127.0.0.1` will return `127.0.0.1`.  To capture the value `127` and apply it as a metric tag, target `index: 1`.
 
 ```yaml
 metrics:
