@@ -55,8 +55,8 @@ The instructions below show you how to configure the task using the [Amazon Web 
     4. Add another environment variable using the **Key** `ECS_FARGATE` and the value `true`. Click **Add** to add the container.
     5. Add another environment variable using the **Key** `DD_SITE` and the value {{< region-param key="dd_site" code="true" >}}. This defaults to `datadoghq.com` if you don't set it.
     6. (Windows Only) Select `C:\` as the working directory.
-11. Add your other application containers to the task definition. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][3].
-12. Click **Create** to create the task definition.
+5. Add your other application containers to the task definition. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][3].
+6. Click **Create** to create the task definition.
 
 [1]: https://aws.amazon.com/console
 [2]: https://app.datadoghq.com/organization-settings/api-keys
@@ -85,7 +85,7 @@ aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-
 
 You can use [AWS CloudFormation][1] templating to configure your Fargate containers. Use the `AWS::ECS::TaskDefinition` resource within your CloudFormation template to set the Amazon ECS task and specify `FARGATE` as the required launch type for that task.
 
-Update this this CloudFormation template below with your [Datadog API Key][2]. As well as include the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}) environment variable if necessary, as this defaults to `datadoghq.com` if you don't set it.
+Update this CloudFormation template below with your [Datadog API Key][2]. As well as include the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}) environment variable if necessary, as this defaults to `datadoghq.com` if you don't set it.
 
 ```yaml
 Resources:
@@ -277,7 +277,7 @@ Datadog's default CloudWatch crawler polls metrics once every 10 minutes. If you
 ### Log collection
 
 You can monitor Fargate logs by using either:
-- The AWS FireLens integration built on Datadog's Fluentbit output plugin to send logs directly to Datadog
+- The AWS FireLens integration built on Datadog's Fluent Bit output plugin to send logs directly to Datadog
 - Using the `awslogs` log driver to store the logs in a CloudWatch Log Group, and then a Lambda function to route logs to Datadog
 
 Datadog recommends using AWS FireLens because you can configure Fluent Bit directly in your Fargate tasks.
@@ -300,7 +300,7 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
    }
    ```
 
-    If your containers are publishing serialized JSON logs over stdout, you should use this [extra firelens configuration][23] to get them correctly parsed within Datadog:
+    If your containers are publishing serialized JSON logs over stdout, you should use this [extra FireLens configuration][23] to get them correctly parsed within Datadog:
 
    ```json
    {
@@ -426,7 +426,7 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
   ```
 {{< /site-region >}}
 
-  **Note**: Set your `apikey` as well as the `Host` relative to your respective site `http-intake.logs.{{< region-param key="dd_site" code="true" >}}`. The full list of available parameters is described in the [Datadog Fluentbit documentation][24].
+  **Note**: Set your `apikey` as well as the `Host` relative to your respective site `http-intake.logs.{{< region-param key="dd_site" code="true" >}}`. The full list of available parameters is described in the [Datadog Fluent Bit documentation][24].
 
   The `dd_service`, `dd_source`, and `dd_tags` can be adjusted for your desired tags.
 
@@ -436,7 +436,7 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
 {{% tab "Web UI" %}}
 ##### Web UI
 
-To add the FluentBit container to your existing Task Definition check the **Enable FireLens integration** checkbox under **Log router integration** to automatically create the `log_router` container for you. This pulls the regional image, however, we do recommend to use the `stable` image tag instead of `latest`. Once you click **Apply** this creates the base container. To further customize the `firelensConfiguration` click the **Configure via JSON** button at the bottom to edit this manually.
+To add the Fluent Bit container to your existing Task Definition check the **Enable FireLens integration** checkbox under **Log router integration** to automatically create the `log_router` container for you. This pulls the regional image, however, we do recommend to use the `stable` image tag instead of `latest`. Once you click **Apply** this creates the base container. To further customize the `firelensConfiguration` click the **Configure via JSON** button at the bottom to edit this manually.
 
 After this has been added edit the application container in your Task Definition that you want to submit logs from and change the **Log driver** to `awsfirelens` filling in the **Log options** with the keys shown in the above example.
 
