@@ -308,7 +308,7 @@ ipAdEntAddr OBJECT-TYPE
             information pertains."
     ::= { ipAddrEntry 1 }
 ```
-The value corresponding to the `index `of a row in this table will be found at the following OID: `.1.3.6.1.2.1.4.20.1.1.<INDEX>`.  Retrieving the value of `.1.3.6.1.2.1.4.20.1.1.127.0.0.1` will return `127.0.0.1`.  To capture the value `127` and apply it as a metric tag, target `index: 1`.
+You can find the value corresponding to the `index` of a row in this table at the following OID: `.1.3.6.1.2.1.4.20.1.1.<INDEX>`.  Retrieving the value of `.1.3.6.1.2.1.4.20.1.1.127.0.0.1` returns `127.0.0.1`. To capture the value `127` and apply it as a metric tag, target `index: 1`.
 
 ```yaml
 metrics:
