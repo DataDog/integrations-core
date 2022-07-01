@@ -28,7 +28,6 @@ except ImportError:
 pytestmark = pytest.mark.e2e
 
 
-@always_on
 def test_ao_primary_replica(dd_agent_check, init_config, instance_ao_docker_primary):
     aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_ao_docker_primary]})
 
