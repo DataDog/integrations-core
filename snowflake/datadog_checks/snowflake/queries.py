@@ -358,10 +358,15 @@ OrgRateSheet = {
 OrgDataTransfer = {
     'name': 'organization.data_transfer.metrics',
     'query': (
-        'select ACCOUNT_NAME, BYTES_TRANSFERRED from DATA_TRANSFER_DAILY_HISTORY ORDER BY USAGE_DATE DESC LIMIT 1;'
+        'select ACCOUNT_NAME, SOURCE_CLOUD, TARGET_CLOUD, TRANSFER_TYPE, '
+        'sum(BYTES_TRANSFERRED) from DATA_TRANSFER_HISTORY '
+        'where USAGE_DATE = DATEADD(day, -1, current_date) group by 1, 2, 3, 4;'
     ),
     'columns': [
         {'name': 'billing_account', 'type': 'tag'},
+        {'name': 'source_cloud', 'type': 'tag'},
+        {'name': 'target_cloud', 'type': 'tag'},
+        {'name': 'transfer_type', 'type': 'tag'},
         {'name': 'organization.data_transfer.bytes_transferred', 'type': 'gauge'},
     ],
 }
