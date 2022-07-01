@@ -38,7 +38,7 @@ listener "tcp" {
 }
 ```
 
-The `boundary.controller.health` service check submits as `WARNING` when the controller is shutting down. To enable this shutdown grace period, update the `controller` block with a defined wait duration:
+The `boundary.controller.health` [service check](#service-checks) submits as `WARNING` when the controller is shutting down. To enable this shutdown grace period, update the `controller` block with a defined wait duration:
 
 ```hcl
 controller {
