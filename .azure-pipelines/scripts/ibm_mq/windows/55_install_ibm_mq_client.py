@@ -24,7 +24,7 @@ def main():
     with TemporaryDirectory() as d:
         temp_dir = os.path.realpath(d)
 
-        print('Downloading client')
+        print('Downloading client from %s' % CLIENT_URL)
         client_archive_path = os.path.join(temp_dir, CLIENT_ARCHIVE_NAME)
         download_file(CLIENT_URL, client_archive_path)
 
