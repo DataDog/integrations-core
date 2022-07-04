@@ -1,11 +1,12 @@
 import os
 
 import pytest
+import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.envoy import Envoy
 
-from .common import DEFAULT_INSTANCE, DOCKER_DIR, ENVOY_LEGACY, FIXTURE_DIR, URL
+from .common import DEFAULT_INSTANCE, DOCKER_DIR, ENVOY_LEGACY, FIXTURE_DIR, HOST, URL
 from .legacy.common import FLAVOR, INSTANCES
 
 
@@ -27,6 +28,9 @@ def dd_environment():
         endpoints="{}/stats".format(URL),
         log_patterns=['all dependencies initialized. starting workers'],
     ):
+        # Exercising envoy a bit will trigger extra metrics
+        requests.get('http://{}:8000/service/1'.format(HOST))
+        requests.get('http://{}:8000/service/2'.format(HOST))
         yield instance
 
 

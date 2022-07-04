@@ -269,6 +269,7 @@ envoy.vhost.vcluster.upstream_rq_total,count,,request,,[Legacy] Total requests i
 envoy.cluster.ratelimit.ok,count,,response,,[Legacy] Total under limit responses from the rate limit service,1,envoy,,
 envoy.cluster.ratelimit.error,count,,response,,[Legacy] Total errors contacting the rate limit service,-1,envoy,,
 envoy.cluster.ratelimit.over_limit,count,,response,,[Legacy] Total over limit responses from the rate limit service,-1,envoy,,
+envoy.cluster.ratelimit.failure_mode_allowed,count,,response,,[Legacy] Total requests that were error(s) but were allowed through because of failure_mode_deny set to false,-1,envoy,,
 envoy.http.ip_tagging.hit,count,,request,,[Legacy] Total number of requests that have the tag_name tag applied to it,0,envoy,,
 envoy.http.ip_tagging.no_hit,count,,request,,[Legacy] Total number of requests with no applicable IP tags,0,envoy,,
 envoy.http.ip_tagging.total,count,,request,,[Legacy] Total number of requests the IP Tagging Filter operated on,0,envoy,,

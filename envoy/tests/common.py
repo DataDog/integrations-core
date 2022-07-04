@@ -15,6 +15,7 @@ PORT = '8001'
 
 URL = 'http://{}:{}'.format(HOST, PORT)
 DEFAULT_INSTANCE = {'openmetrics_endpoint': '{}/stats/prometheus'.format(URL)}
+LEGACY_INSTANCE = {'stats_url': '{}/stats'.format(URL)}
 requires_new_environment = pytest.mark.skipif(ENVOY_LEGACY != 'false', reason='Requires prometheus environment')
 
 PROMETHEUS_METRICS = [

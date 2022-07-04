@@ -43,8 +43,32 @@ static_resources:
                   prefix: "/service/2"
                 route:
                   cluster: service2
+              rate_limits:
+              - actions:                                 
+                - header_value_match:
+                    descriptor_value: quote-path-auth
+                    expect_match: false
+                    headers:
+                    - name: ":path"
+                      exact_match: "/quote"
+                    - name: "Authorization"                      
+                stage: 0
           http_filters:
-          - name: envoy.router
+          - name: envoy.filters.http.ratelimit
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.ratelimit.v3.RateLimit
+              domain: apis
+              stage: 0
+              request_type: external
+              failure_mode_deny: false
+              rate_limit_service:
+                transport_api_version: V3
+                grpc_service:
+                  envoy_grpc:
+                    cluster_name: ratelimiter
+          - name: envoy.filters.http.router
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
   clusters:
   - name: service1
     connect_timeout: 0.25s
@@ -88,6 +112,20 @@ static_resources:
               socket_address:
                 address: xds
                 port_value: 8080
+  - name: ratelimiter
+    type: STATIC
+    connect_timeout: 0.25s
+    lb_policy: ROUND_ROBIN
+    load_assignment:
+      cluster_name: ratelimiter
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: 127.0.0.1
+                port_value: 8081
+    http2_protocol_options: {}
 dynamic_resources:
   cds_config:
     resource_api_version: V3
