@@ -5,7 +5,7 @@ from zipfile import ZipFile
 import requests
 
 
-CLIENT_VERSION = '9.2.2.0'
+CLIENT_VERSION = '9.2.5.0'
 CLIENT_ARCHIVE_NAME = f'{CLIENT_VERSION}-IBM-MQC-Redist-Win64.zip'
 CLIENT_URL = f'https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/mqdev/redist/{CLIENT_ARCHIVE_NAME}'
 CLIENT_TARGET_DIR = 'C:\\ibm_mq'
