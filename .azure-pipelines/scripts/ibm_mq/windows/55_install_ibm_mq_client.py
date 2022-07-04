@@ -28,7 +28,7 @@ def main():
         client_archive_path = os.path.join(temp_dir, CLIENT_ARCHIVE_NAME)
         download_file(CLIENT_URL, client_archive_path)
 
-        print('Extracting client')
+        print('Extracting client to %s ' % CLIENT_TARGET_DIR)
         with ZipFile(client_archive_path) as zip_file:
             zip_file.extractall(CLIENT_TARGET_DIR)
 
