@@ -224,7 +224,7 @@ class VerticaCheck(AgentCheck):
 
         # Vertica v11 has removed some columns, skip these metrics until we implement them
         if self._major_version() >= 11:
-            self.log.debug('Skipping collection of projection_storage metrics as they're not yet supported for v11+')
+            self.log.debug("Skipping collection of projection_storage metrics as they're not yet supported for v11+")
             return
 
         projection_data = defaultdict(
@@ -326,7 +326,7 @@ class VerticaCheck(AgentCheck):
 
         # Vertica v11 has removed some columns, skip these metrics until we implement them
         if self._major_version() >= 11:
-            self.log.debug('Skipping collection of storage_containers metrics as they're not yet supported for v11+')
+            self.log.debug("Skipping collection of storage_containers metrics as they're not yet supported for v11+")
             return
 
         container_data = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: {'delete_vectors': 0})))
