@@ -2,7 +2,7 @@
 
 ## Overview
 
-OpenTelemetry is a vendor-agnostic standard for telemetry data. Datadog supports ingesting OpenTelemetry data through the OpenTelemetry Collector and the Datadog Agent. This tile documents how to export data to Datadog through the OpenTelemetry Collector with Datadog Exporter [OpenTelemetry collector Datadog exporter][3]. Please also see [OTLP ingest in Datadog Agent][7] for further information on ingesting OTLP traces to Datadog Agent.
+OpenTelemetry is a vendor-agnostic standard for telemetry data. Datadog supports ingesting OpenTelemetry data through the OpenTelemetry Collector and the Datadog Agent. This tile documents how to export data to Datadog through the OpenTelemetry Collector with Datadog Exporter [OpenTelemetry collector Datadog exporter][3]. Also see [OTLP ingest in Datadog Agent][7] for further information on ingesting OTLP traces with Datadog Agent.
 
 The OpenTelemetry Collector is a vendor-agnostic agent process that, through the Datadog exporter, exports telemetry data directly to Datadog servers (no Agent installation required). It reports metrics and traces from instrumented applications as well as general system metrics.
 
@@ -54,7 +54,7 @@ service:
 
 For further information on the Datadog exporter settings and how to configure the pipeline, see [Datadog exporter for OpenTelemetry Collector][3].
 
-See the [Metrics section][5] for a list of metrics that are provided by this check. If you're using the `hostmetrics` receiver as in the sample configuration above. You can send arbitrary metrics with other OpenTelemetry Collector components.
+See the [Metrics section][5] for metrics types and [metadata.csv][8] for a list of metrics provided by this check. If you're using the `hostmetrics` receiver as in the sample configuration above. You can send arbitrary metrics with other OpenTelemetry Collector components.
 
 Different groups of metrics can be enabled and customized by following the [hostmetrics receiver instructions][4].
 CPU and disk metrics are not available on macOS.
@@ -77,7 +77,7 @@ Everything is ready. Begin running and processing data.
 
 #### OpenTelemetry Collector
 
-See [OTLP Metrics][5] for a list of metrics provided by this integration.
+See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Service Checks
 
@@ -99,4 +99,4 @@ Need help? Contact [Datadog support][6].
 [5]: https://docs.datadoghq.com/metrics/otlp/
 [6]: https://docs.datadoghq.com/help/
 [7]: https://docs.datadoghq.com/tracing/setup_overview/open_standards/otlp_ingest_in_the_agent/
-
+[8]: https://github.com/DataDog/integrations-core/blob/master/otel/metadata.csv
