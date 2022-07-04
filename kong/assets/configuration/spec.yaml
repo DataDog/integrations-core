@@ -6,32 +6,27 @@ files:
     options:
     - template: init_config/openmetrics
   - template: instances
-    multiple_instances_defined: true
     options:
-    - name: openmetrics
-      description: Metrics collected from the Prometheus Plugin
-      options:
-      - template: instances/openmetrics
-        overrides:
-          openmetrics_endpoint.enabled: true
-          openmetrics_endpoint.required: false
-          openmetrics_endpoint.display_priority: 1
-          openmetrics_endpoint.value.example: http://localhost:8001/metrics
-          extra_metrics.value.example:
-          - kong_memory_workers_lua_vms_bytes: memory.workers.lua.vms.bytes
-    - name: status_endpoint
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.enabled: true
+        openmetrics_endpoint.required: false
+        openmetrics_endpoint.display_priority: 1
+        openmetrics_endpoint.value.example: http://localhost:8001/metrics
+        extra_metrics.value.example:
+        - kong_memory_workers_lua_vms_bytes: memory.workers.lua.vms.bytes
+    - name: kong_status_url
+      display_priority: 1
       description: |
-        Metrics collected from the Status endpoint.
-        Note: Collecting metrics through the status endpoint can cause performance effects on your kong server.
-        If you experience any issues consider adjusting the `min_collection_interval` of this instance.
-      options:
-      - name: kong_status_url
-        description: URL where Kong exposes its status.
-        value:
-          example: http://localhost:8001/status/
-          type: string
-      - template: instances/http
-      - template: instances/default
+        The check collects and parses metrics from the admin /status endpoint.
+        For more info see:
+        https://docs.konghq.com/gateway-oss/2.5.x/admin-api/
+        
+        Note: See the configuration options specific to this option here,
+        https://github.com/DataDog/integrations-core/blob/7.27.x/kong/datadog_checks/kong/data/conf.yaml.example
+      value:
+        example: http://localhost:8001/status/
+        type: string
   - template: logs
     example:
     - type: file
