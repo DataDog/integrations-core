@@ -1,0 +1,9 @@
+{
+    "name": "Traffic Server error patterns",
+    "type": "logs",
+    "page": "patterns",
+    "query": "source:traffic_server status:ERROR",
+    "timerange": {
+      "interval_ms": 3600000
+    }
+}

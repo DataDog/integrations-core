@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  silk:
+    image: caddy:2.1.1-alpine
+    container_name: silk
+    volumes:
+      - ./silk_metrics:/usr/share/caddy
+    ports:
+      - 80:80

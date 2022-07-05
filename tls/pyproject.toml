@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools; python_version < '3.0'",
+    "setuptools<61",
 ]
 build-backend = "hatchling.build"
 
@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 name = "datadog-tls"
 description = "The TLS check"
 readme = "README.md"
-license = "BSD-3-Clause"
+license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -29,7 +29,7 @@ classifiers = [
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=15.3.0",
+    "datadog-checks-base>=25.1.0",
 ]
 dynamic = [
     "version",
@@ -40,7 +40,7 @@ deps = [
     "cryptography==3.3.2; python_version < '3.0'",
     "cryptography==3.4.8; python_version > '3.0'",
     "ipaddress==1.0.23; python_version < '3.0'",
-    "service_identity[idna]==18.1.0",
+    "service-identity[idna]==21.1.0",
 ]
 
 [project.urls]
@@ -60,7 +60,7 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 include = [
-    "/datadog_checks",
+    "/datadog_checks/tls",
 ]
 dev-mode-dirs = [
     ".",

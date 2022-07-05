@@ -20,7 +20,7 @@ from ...console import (
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Show all the pending PRs for a given check.')
-@click.argument('check', autocompletion=complete_valid_checks, callback=validate_check_arg)
+@click.argument('check', shell_complete=complete_valid_checks, callback=validate_check_arg)
 @click.option('--organization', '-r', default='DataDog', help="The Github organization the repository belongs to")
 @click.option(
     '--tag-pattern',
@@ -34,9 +34,10 @@ from ...console import (
 @click.option(
     '--since', default=None, help="The git ref to use instead of auto-detecting the tag to view changes since"
 )
+@click.option('--end')
 @click.option('--exclude-branch', default=None, help="Exclude changes comming from a specific branch")
 @click.pass_context
-def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since, exclude_branch):
+def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since, end, exclude_branch):
     """Show all the pending PRs for a given check."""
     if not dry_run and check and check not in get_valid_checks():
         abort(f'Check `{check}` is not an Agent-based Integration')
@@ -51,7 +52,7 @@ def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since, e
     target_tag = get_release_tag_string(check, cur_version)
 
     # get the diff from HEAD
-    diff_lines = get_commits_since(check, target_tag, exclude_branch=exclude_branch)
+    diff_lines = get_commits_since(check, target_tag, end=end, exclude_branch=exclude_branch)
 
     # for each PR get the title, we'll use it to populate the changelog
     pr_numbers = parse_pr_numbers(diff_lines)

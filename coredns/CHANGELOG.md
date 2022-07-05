@@ -1,6 +1,30 @@
 # CHANGELOG - CoreDNS
 
-## 1.11.4 / 2022-01-27
+## 2.2.1 / 2022-05-18
+
+* [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
+
+## 2.2.0 / 2022-05-15
+
+* [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
+
+## 2.1.0 / 2022-04-05 / Agent 7.36.0
+
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+
+## 2.0.0 / 2022-02-19 / Agent 7.35.0
+
+* [Added] Add `pyproject.toml` file. See [#11332](https://github.com/DataDog/integrations-core/pull/11332).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* [Fixed] Fix License Header Dates. See [#11200](https://github.com/DataDog/integrations-core/pull/11200).
+* [Fixed] Enable prometheus_url option in auto_conf.yaml. See [#11146](https://github.com/DataDog/integrations-core/pull/11146).
+* [Fixed] Enable openmetrics_endpoint in auto_conf.yaml. See [#11133](https://github.com/DataDog/integrations-core/pull/11133).
+* [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
+* [Fixed] Fix example config. See [#11109](https://github.com/DataDog/integrations-core/pull/11109).
+* [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
+
+## 1.11.4 / 2022-01-27 / Agent 7.34.0
 
 * [Fixed] Fix license header dates. See [#11200](https://github.com/DataDog/integrations-core/pull/11200).
 

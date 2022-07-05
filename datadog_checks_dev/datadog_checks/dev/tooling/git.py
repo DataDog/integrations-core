@@ -68,7 +68,7 @@ def files_changed(include_uncommitted=True):
     return sorted([f for f in set(changed_files) if f])
 
 
-def get_commits_since(check_name, target_tag=None, exclude_branch=None):
+def get_commits_since(check_name, target_tag=None, end=None, exclude_branch=None):
     """
     Get the list of commits from `target_tag` to `HEAD` for the given check
     """
@@ -78,15 +78,18 @@ def get_commits_since(check_name, target_tag=None, exclude_branch=None):
     else:
         target_path = root
 
+    if end is None:
+        end = ''
+
     if exclude_branch is not None and check_name not in {".", None}:
         raise ValueError(f"Cannot exclude a branch from a non-root check {check_name}")
     elif exclude_branch is not None:
         command = f"git cherry -v {exclude_branch} HEAD {'' if target_tag is None else f'{target_tag} '}"
     else:
-        command = f"git log --pretty=%s {'' if target_tag is None else f'{target_tag}... '}{target_path}"
+        command = f"git log --pretty=%s {'' if target_tag is None else f'{target_tag}..{end} '}{target_path}"
 
     with chdir(root):
-        return run_command(command, capture=True).stdout.splitlines()
+        return run_command(command, capture=True, check=True).stdout.splitlines()
 
 
 def git_show_file(path, ref):

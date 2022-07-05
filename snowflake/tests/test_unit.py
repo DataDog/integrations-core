@@ -50,7 +50,7 @@ def test_invalid_oauth(oauth_instance):
 
     # Test oauth without token
     no_token_config = copy.deepcopy(INVALID_CONFIG)
-    no_token_config['user'] = "test_user"
+    no_token_config['username'] = "test_user"
     with pytest.raises(Exception, match='If using OAuth, you must specify a `token` or a `token_path`'):
         SnowflakeCheck(CHECK_NAME, {}, [no_token_config])
 
@@ -58,6 +58,14 @@ def test_invalid_oauth(oauth_instance):
     oauth_inst['authenticator'] = 'testauth'
     with pytest.raises(Exception, match='The Authenticator method set is invalid: testauth'):
         SnowflakeCheck(CHECK_NAME, {}, [oauth_inst])
+
+
+def test_read_token(oauth_instance):
+    oauth_token_path_inst = copy.deepcopy(oauth_instance)
+    oauth_token_path_inst['token'] = None
+    oauth_token_path_inst['token_path'] = os.path.join(os.path.dirname(__file__), 'keys', 'token')
+    check = SnowflakeCheck(CHECK_NAME, {}, [oauth_token_path_inst])
+    check.read_token()
 
 
 def test_default_auth(instance):
@@ -315,7 +323,7 @@ def test_emit_non_generic_tags_when_disabled(instance):
 def test_aggregate_last_24_hours_queries(aggregate_last_24_hours, expected_query):
     inst = {
         'metric_groups': ['snowflake.replication'],
-        'user': 'user',
+        'username': 'user',
         'password': 'password',
         'account': 'account',
         'role': 'role',

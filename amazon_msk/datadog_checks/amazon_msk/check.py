@@ -89,17 +89,20 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
 
             for endpoint in broker_info['Endpoints']:
                 for port, metrics in self._exporter_data:
-                    url = f'{self._endpoint_prefix}://{endpoint}:{port}{self.config.prometheus_metrics_path}'
-                    if url in self.scrapers:
-                        scrapers[url] = self.scrapers[url]
-                        continue
+                    if port:
+                        url = f'{self._endpoint_prefix}://{endpoint}:{port}{self.config.prometheus_metrics_path}'
+                        if url in self.scrapers:
+                            scrapers[url] = self.scrapers[url]
+                            continue
 
-                    scraper = self.create_scraper({'openmetrics_endpoint': url, 'metrics': metrics, **self.instance})
-                    scraper.static_tags += self._static_tags
-                    scraper.set_dynamic_tags(broker_id_tag)
-                    self.configure_additional_transformers(scraper.metric_transformer.transformer_data)
+                        scraper = self.create_scraper(
+                            {'openmetrics_endpoint': url, 'metrics': metrics, **self.instance}
+                        )
+                        scraper.static_tags += self._static_tags
+                        scraper.set_dynamic_tags(broker_id_tag)
+                        self.configure_additional_transformers(scraper.metric_transformer.transformer_data)
 
-                    scrapers[url] = scraper
+                        scrapers[url] = scraper
 
         self.scrapers = scrapers
 

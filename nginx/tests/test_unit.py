@@ -247,3 +247,41 @@ def test_only_query_enabled_endpoints(check, dd_run_check, instance_plus_v7, onl
         endpoints = check._get_enabled_endpoints()
         expected_endpoints = [('nginx', []), ('http/requests', ['requests'])]
         assert sorted(expected_endpoints) == sorted(list(endpoints))
+
+
+@pytest.mark.parametrize(
+    'test_input, expected_output',
+    [
+        (
+            {
+                '1': {
+                    "stream/server_zones": ["stream", "server_zones"],
+                    "stream/upstreams": ["stream", "upstreams"],
+                },
+                '3': {
+                    "stream/zone_sync": ["stream", "zone_sync"],
+                },
+                '6': {
+                    "stream/limit_conns": ["stream", "limit_conns"],
+                },
+            },
+            ['stream/server_zones', 'stream/upstreams', 'stream/zone_sync', 'stream/limit_conns'],
+        ),
+        (
+            {
+                'foo': {"biz": ["stream1"], "buz": ["stream1", "stream2"], "bes": "stream3"},
+                "baz": {"bux": "zone_sync", "bus": "zone_sync"},
+                "bar": {
+                    "bis": ["stream1", "stream2", "stream3"],
+                },
+            },
+            ['biz', 'buz', 'bes', 'bux', 'bus', 'bis'],
+        ),
+    ],
+)
+def test_list_endpoints(instance, test_input, expected_output):
+    nginx = Nginx('nginx', {}, [instance])
+    # Python 2 seems to have some different order of processing the keys.
+    # Sorting the arrays before comparison to account for this.
+    sorted_test_output = nginx.list_endpoints(test_input).sort()
+    assert eval(str(sorted_test_output)) == expected_output.sort()

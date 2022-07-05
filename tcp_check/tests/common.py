@@ -11,6 +11,15 @@ INSTANCE = {'host': 'datadoghq.com', 'port': 80, 'timeout': 1.5, 'name': 'UpServ
 INSTANCE_MULTIPLE = {'multiple_ips': True}
 INSTANCE_MULTIPLE.update(INSTANCE)
 
+INSTANCE_IPV6 = {
+    'host': 'app.datad0g.com',
+    'port': 80,
+    'timeout': 1.5,
+    'name': 'UpService',
+    'tags': ["foo:bar"],
+    'multiple_ips': True,
+}
+
 INSTANCE_KO = {'host': '127.0.0.1', 'port': 65530, 'timeout': 1.5, 'name': 'DownService', 'tags': ["foo:bar"]}
 
 E2E_METADATA = {'docker_platform': 'windows' if using_windows_containers() else 'linux'}

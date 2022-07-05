@@ -28,6 +28,7 @@ class TrelloClient:
             'Core': '5ae1e3d62a5167779e65e87d',
             'Database Monitoring': '60ec3d30532b9072b44d3900',
             'Integrations': '5ae1e3e2c81fff836d00497e',
+            'Triage': '5d9b687492952e6578ecf04d',  # unused
             'Platform': '5d9b687492952e6578ecf04d',
             'Networks': '5e1de8cf867357791ec5ee47',
             'Processes': '5aeca4c8621e4359b9cb9c27',
@@ -36,6 +37,8 @@ class TrelloClient:
             'Runtime-Security': '5f3148683b7428276f0f2133',
             'Infra-Integrations': '5f9f9e09af18c18c628d80ee',
             'Remote-Config': '619262c91ae65d40bafb576f',
+            'Agent-Metrics-Logs': '62a9bbeb1c71b2208581744e',
+            'Agent-Shared-Components': '62a9bc0c9ab7f433a5c26f2f',
         }
 
         # Maps the team to the trello team label
@@ -43,6 +46,7 @@ class TrelloClient:
             'team/agent-apm': 'Trace',
             'team/agent-core': 'Core',
             'team/agent-platform': 'Platform',
+            'team/triage': 'Platform',
             'team/networks': 'Networks',
             'team/processes': 'Processes',
             'team/containers': 'Containers',
@@ -53,6 +57,8 @@ class TrelloClient:
             'team/agent-security': 'Runtime-Security',
             'team/infra-integrations': 'Infra-Integrations',
             'team/remote-config': 'Remote-Config',
+            'team/agent-metrics-logs': 'Agent-Metrics-Logs',
+            'team/agent-shared-components': 'Agent-Shared-Components',
         }
 
         # Maps the team to the github team
@@ -60,6 +66,7 @@ class TrelloClient:
             'team/agent-apm': 'agent-apm',
             'team/agent-core': 'agent-core',
             'team/agent-platform': 'agent-platform',
+            'team/triage': 'agent-platform',
             'team/networks': 'agent-network',
             'team/processes': 'processes',
             'team/containers': 'container-integrations',
@@ -69,6 +76,8 @@ class TrelloClient:
             'team/agent-security': 'agent-security',
             'team/infra-integrations': 'infrastructure-integrations',
             'team/remote-config': 'remote-config',
+            'team/agent-metrics-logs': 'agent-metrics-logs',
+            'team/agent-shared-components': 'agent-shared-components',
         }
 
         # Maps the trello label name to trello label ID
@@ -78,6 +87,7 @@ class TrelloClient:
             'Core': '5e79105d4c45a45adb9e7730',
             'Integrations': '5e790ff25bd3dd48da67608d',
             'Database Monitoring': '60ec4973bd1b8652312af938',
+            'Triage': '5e7910a45d711a6382f08bb9',  # unused
             'Platform': '5e7910a45d711a6382f08bb9',
             'Networks': '5e79109821620a60014fc016',
             'Processes': '5e7910789f92a918152b700d',
@@ -86,6 +96,8 @@ class TrelloClient:
             'Runtime-Security': '5f314f0a364ee16ea4e78868',
             'Infra-Integrations': '5f9fa48537fb6633584b0e3e',
             'Remote-Config': '61939089d51b6f842dba4c8f',
+            'Agent-Metrics-Logs': '62a9bc5e60fb632602641d07',
+            'Agent-Shared-Components': '62a9bc4cdb0cc563932f532f',
         }
 
         self.progress_columns = {

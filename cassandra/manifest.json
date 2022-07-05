@@ -16,7 +16,7 @@
   "process_signatures": [
     "java org.apache.cassandra.service.CassandraDaemon"
   ],
-  "public_title": "Datadog-Cassandra Integration",
+  "public_title": "Cassandra Integration",
   "short_description": "Track cluster performance, capacity, overall health, and much more.",
   "support": "core",
   "supported_os": [

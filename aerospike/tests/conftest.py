@@ -9,7 +9,7 @@ from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.docker import CheckDockerLogs, docker_run
 
-from .common import COMPOSE_FILE, HOST, INSTANCE, PORT
+from .common import COMPOSE_FILE, HOST, INSTANCE, OPENMETRICS_V2_INSTANCE, PORT
 
 
 def init_db():
@@ -56,9 +56,14 @@ def dd_environment():
         COMPOSE_FILE,
         conditions=[CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!']), WaitFor(init_db)],
     ):
-        yield INSTANCE
+        yield OPENMETRICS_V2_INSTANCE
 
 
 @pytest.fixture
 def instance():
     return deepcopy(INSTANCE)
+
+
+@pytest.fixture
+def instance_openmetrics_v2():
+    return deepcopy(OPENMETRICS_V2_INSTANCE)

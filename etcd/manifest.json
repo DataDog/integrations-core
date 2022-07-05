@@ -21,7 +21,7 @@
   "process_signatures": [
     "etcd"
   ],
-  "public_title": "Datadog-etcd Integration",
+  "public_title": "etcd Integration",
   "short_description": "Track writes, updates, deletes, inter-node latencies, and more Etcd metrics.",
   "support": "core",
   "supported_os": [

@@ -37,9 +37,10 @@ Follow the [Envoy host][7] instructions to configure log collection.
 Follow the [Envoy containerized instructions][8] to configure your Datadog Agent for Envoy. 
 
 ##### Metric collection
+
 1. In Consul Connect, enable the config option [`envoy_stats_bind_addr`][9] to ensure the `/stats` endpoint is exposed on the public network.
 
- 2. Configure the [Envoy integration for containerized environments instructions][10] to start collecting metrics. 
+ 2. Configure the [Envoy integration for containerized environments][10] to start collecting metrics. 
 
 ##### Log collection
 

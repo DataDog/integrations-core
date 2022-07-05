@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
+import json
 import os
+from collections import defaultdict
 
 import mock
 import pytest
@@ -23,6 +25,17 @@ BROKER_METRICS = ['kafka.broker_offset']
 CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
 
 
+def mocked_read_persistent_cache(cache_key):
+    cached_offsets = defaultdict(dict)
+    cached_offsets["marvel_0"][25] = 150
+    cached_offsets["marvel_0"][40] = 200
+    return json.dumps(cached_offsets)
+
+
+def mocked_time():
+    return 400
+
+
 @pytest.mark.unit
 def test_uses_legacy_implementation_when_legacy_version_specified(kafka_instance):
     instance = copy.deepcopy(kafka_instance)
@@ -41,6 +54,35 @@ def test_uses_new_implementation_when_new_version_specified(kafka_instance):
     kafka_consumer_check._init_check_based_on_kafka_version()
 
     assert isinstance(kafka_consumer_check.sub_check, NewKafkaConsumerCheck)
+
+
+@pytest.mark.unit
+def test_get_interpolated_timestamp(kafka_instance):
+    instance = copy.deepcopy(kafka_instance)
+    instance['kafka_client_api_version'] = '0.10.2'
+    instance['sasl_kerberos_service_name'] = 'kafka'
+    check = KafkaCheck('kafka_consumer', {}, [instance])
+    check._init_check_based_on_kafka_version()
+    # at offset 0, time is 100s, at offset 10, time is 200sec.
+    # by interpolation, at offset 5, time should be 150sec.
+    assert check.sub_check._get_interpolated_timestamp({0: 100, 10: 200}, 5) == 150
+    assert check.sub_check._get_interpolated_timestamp({10: 100, 20: 200}, 5) == 50
+    assert check.sub_check._get_interpolated_timestamp({0: 100, 10: 200}, 15) == 250
+    assert check.sub_check._get_interpolated_timestamp({10: 200}, 15) is None
+
+
+@pytest.mark.unit
+def test_gssapi(kafka_instance, dd_run_check):
+    instance = copy.deepcopy(kafka_instance)
+    instance['kafka_client_api_version'] = '0.10.2'
+    instance['sasl_mechanism'] = 'GSSAPI'
+    instance['security_protocol'] = 'SASL_PLAINTEXT'
+    instance['sasl_kerberos_service_name'] = 'kafka'
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+    # assert the check doesn't fail with:
+    # Exception: Could not find main GSSAPI shared library.
+    with pytest.raises(Exception, match='check_version'):
+        dd_run_check(kafka_consumer_check)
 
 
 @pytest.mark.unit
@@ -87,13 +129,17 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, kafka_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@mock.patch(
+    'datadog_checks.kafka_consumer.new_kafka_consumer.NewKafkaConsumerCheck._read_persistent_cache',
+    mocked_read_persistent_cache,
+)
+@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.time', mocked_time)
 def test_check_kafka(aggregator, kafka_instance, dd_run_check):
     """
     Testing Kafka_consumer check.
     """
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
     dd_run_check(kafka_consumer_check)
-
     assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
 
 
@@ -123,11 +169,10 @@ def test_check_kafka_metrics_limit(aggregator, kafka_instance, dd_run_check):
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, kafka_instance):
     aggregator = dd_agent_check(kafka_instance)
+    assert_check_kafka(aggregator, kafka_instance['consumer_groups'], e2e=True)
 
-    assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
 
-
-def assert_check_kafka(aggregator, consumer_groups):
+def assert_check_kafka(aggregator, consumer_groups, e2e=False):
     for name, consumer_group in consumer_groups.items():
         for topic, partitions in consumer_group.items():
             for partition in partitions:
@@ -136,6 +181,13 @@ def assert_check_kafka(aggregator, consumer_groups):
                     aggregator.assert_metric(mname, tags=tags, at_least=1)
                 for mname in CONSUMER_METRICS:
                     aggregator.assert_metric(mname, tags=tags + ["consumer_group:{}".format(name)], at_least=1)
+    if not is_legacy_check() and not e2e:
+        # in the e2e test, Kafka is not actively receiving data. So we never populate the broker
+        # timestamps with more than one timestamp. So we can't interpolate to get the consumer
+        # timestamp.
+        aggregator.assert_metric(
+            "kafka.consumer_lag_seconds", tags=tags + ["consumer_group:{}".format(name)], at_least=1
+        )
 
     aggregator.assert_all_metrics_covered()
 
@@ -154,6 +206,11 @@ def test_consumer_config_error(caplog, dd_run_check):
 @pytest.mark.skipif(is_legacy_check(), reason="This test does not apply to the legacy check.")
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@mock.patch(
+    'datadog_checks.kafka_consumer.new_kafka_consumer.NewKafkaConsumerCheck._read_persistent_cache',
+    mocked_read_persistent_cache,
+)
+@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.time', mocked_time)
 def test_no_topics(aggregator, kafka_instance, dd_run_check):
     kafka_instance['consumer_groups'] = {'my_consumer': {}}
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
@@ -164,6 +221,11 @@ def test_no_topics(aggregator, kafka_instance, dd_run_check):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@mock.patch(
+    'datadog_checks.kafka_consumer.new_kafka_consumer.NewKafkaConsumerCheck._read_persistent_cache',
+    mocked_read_persistent_cache,
+)
+@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.time', mocked_time)
 def test_no_partitions(aggregator, kafka_instance, dd_run_check):
     kafka_instance['consumer_groups'] = {'my_consumer': {'marvel': []}}
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])

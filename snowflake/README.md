@@ -117,6 +117,25 @@ datadog-agent integration install datadog-snowflake==2.0.1
 
 3. [Restart the Agent][6].
 
+#### Collecting data for multiple environments
+
+If you want to collect data for multiple Snowflake environments, add each environment as an instance in your `snowflake.d/conf.yaml` file. For example, if you needed to collect data for two users named `DATADOG_SYSADMIN` and `DATADOG_USER`:
+
+```yaml
+instances:
+  - account: example-inc
+    username: DATADOG_SYSADMIN
+    password: '<PASSWORD>'
+    role: SYSADMIN
+    database: EXAMPLE-INC
+
+  - account: example-inc
+    username: DATADOG_USER
+    password: '<PASSWORD>'
+    role: DATADOG_USER
+    database: EXAMPLE-INC
+```
+
 #### Proxy configuration
 
 Snowflake recommends setting [environment variables for proxy configuration][7].
@@ -125,6 +144,14 @@ You can also set the `proxy_host`, `proxy_port`, `proxy_user`, and `proxy_passwo
 
 **NOTE**: Snowflake automatically formats the proxy configurations and sets [standard proxy environment variables][8]. 
 These variables also impact every requests from integrations, including orchestrators like Docker, ECS, and Kubernetes.
+
+#### Private connectivity to Snowflake configuration
+
+If [private connectivity][9] (such as [AWS PrivateLink][10]) is enabled in Snowflake, you can configure the Snowflake integration by updating the `account` configuration option to the following format:
+
+  ```yaml
+        - account: <ACCOUNT>.<REGION_ID>.privatelink
+  ```
 
 ### Snowflake custom queries
 
@@ -163,7 +190,7 @@ custom_queries:
 ```
 
 #### Example
-The following example is a query that counts all queries in the [`QUERY_HISTORY` view][9] tagged by database, schema, and warehouse names.
+The following example is a query that counts all queries in the [`QUERY_HISTORY` view][11] tagged by database, schema, and warehouse names.
 
 ```TEXT
 select count(*), DATABASE_NAME, SCHEMA_NAME, WAREHOUSE_NAME from QUERY_HISTORY group by 2, 3, 4;
@@ -191,14 +218,14 @@ custom_queries:
 
 ##### Validation
 
-To verify the result, search for the metrics using [Metrics Summary][10]:
+To verify the result, search for the metrics using [Metrics Summary][12]:
 
-![Snowflake Metric Summary][11]
+![Snowflake Metric Summary][13]
 
 
 ### Validation
 
-[Run the Agent's status subcommand][12] and look for `snowflake` under the Checks section.
+[Run the Agent's status subcommand][14] and look for `snowflake` under the Checks section.
 
 ## Data Collected
 
@@ -209,7 +236,7 @@ If you would like to collect metrics from other metric groups, please refer <a h
 
 ### Metrics
 
-See [metadata.csv][13] for a list of metrics provided by this check.
+See [metadata.csv][15] for a list of metrics provided by this check.
 
 ### Events
 
@@ -217,11 +244,11 @@ Snowflake does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][14] for a list of service checks provided by this integration.
+See [service_checks.json][16] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][15].
+Need help? Contact [Datadog support][17].
 
 
 [1]: https://www.snowflake.com/
@@ -232,10 +259,12 @@ Need help? Contact [Datadog support][15].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [7]: https://docs.snowflake.com/en/user-guide/python-connector-example.html#using-a-proxy-server
 [8]: https://github.com/snowflakedb/snowflake-connector-python/blob/d6df58f1c338b255393571a08a1f9f3a71d8f7b6/src/snowflake/connector/proxy.py#L40-L41
-[9]: https://docs.snowflake.com/en/sql-reference/account-usage/query_history.html
-[10]: https://docs.datadoghq.com/metrics/summary/
-[11]: https://raw.githubusercontent.com/DataDog/integrations-core/master/snowflake/images/custom_query.png
-[12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[13]: https://github.com/DataDog/integrations-core/blob/master/snowflake/metadata.csv
-[14]: https://github.com/DataDog/integrations-core/blob/master/snowflake/assets/service_checks.json
-[15]: https://docs.datadoghq.com/help/
+[9]: https://docs.snowflake.com/en/user-guide/private-snowflake-service.html
+[10]: https://docs.snowflake.com/en/user-guide/admin-security-privatelink.html
+[11]: https://docs.snowflake.com/en/sql-reference/account-usage/query_history.html
+[12]: https://docs.datadoghq.com/metrics/summary/
+[13]: https://raw.githubusercontent.com/DataDog/integrations-core/master/snowflake/images/custom_query.png
+[14]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[15]: https://github.com/DataDog/integrations-core/blob/master/snowflake/metadata.csv
+[16]: https://github.com/DataDog/integrations-core/blob/master/snowflake/assets/service_checks.json
+[17]: https://docs.datadoghq.com/help/

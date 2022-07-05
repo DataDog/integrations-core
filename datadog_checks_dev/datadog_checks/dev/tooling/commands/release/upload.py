@@ -14,7 +14,7 @@ from ..console import CONTEXT_SETTINGS, abort, echo_success, echo_waiting
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Build and upload a check to PyPI')
-@click.argument('check', autocompletion=complete_valid_checks)
+@click.argument('check', shell_complete=complete_valid_checks)
 @click.option('--sdist', '-s', is_flag=True)
 @click.option('--dry-run', '-n', is_flag=True)
 @click.pass_context

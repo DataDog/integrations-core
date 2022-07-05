@@ -16,7 +16,7 @@
   "process_signatures": [
     "kong start"
   ],
-  "public_title": "Datadog-Kong Integration",
+  "public_title": "Kong Integration",
   "short_description": "Track total requests, response codes, client connections, and more.",
   "support": "core",
   "supported_os": [

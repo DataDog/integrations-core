@@ -1,0 +1,36 @@
+{
+  "display_name": "IBM ACE",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "ibm_ace",
+  "metric_prefix": "ibm_ace.",
+  "metric_to_check": "ibm_ace.messages.current",
+  "creates_events": false,
+  "short_description": "Monitor IBM ACE resource statistics and message flows.",
+  "guid": "381ef23a-76c8-49d3-8a0a-7cddac6142f0",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "IBM ACE",
+  "categories": [
+    "processing",
+    "log collection"
+  ],
+  "type": "check",
+  "is_public": true,
+  "integration_id": "ibm-ace",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}

@@ -78,7 +78,7 @@ class TestDBExcepption(BaseException):
 
 
 @pytest.mark.parametrize(
-    "obfuscator_return_value,expected_value,return_json_metadata",
+    "obfuscator_return_value,expected_value",
     [
         (
             json.dumps(
@@ -91,7 +91,15 @@ class TestDBExcepption(BaseException):
                 'query': 'SELECT * FROM datadog',
                 'metadata': {'commands': ['SELECT'], 'comments': None, 'tables': ['datadog']},
             },
-            True,
+        ),
+        (
+            # Whitespace test
+            "  {\"query\":\"SELECT * FROM datadog\",\"metadata\":{\"tables_csv\":\"datadog\",\"commands\":[\"SELECT\"],"
+            "\"comments\":null}}          ",
+            {
+                'query': 'SELECT * FROM datadog',
+                'metadata': {'commands': ['SELECT'], 'comments': None, 'tables': ['datadog']},
+            },
         ),
         (
             json.dumps(
@@ -112,7 +120,6 @@ class TestDBExcepption(BaseException):
                     'tables': ['datadog', 'datadog2'],
                 },
             },
-            True,
         ),
         (
             json.dumps(
@@ -125,7 +132,6 @@ class TestDBExcepption(BaseException):
                 'query': 'COMMIT',
                 'metadata': {'commands': ['COMMIT'], 'comments': None, 'tables': None},
             },
-            True,
         ),
         (
             'SELECT * FROM datadog',
@@ -133,10 +139,6 @@ class TestDBExcepption(BaseException):
                 'query': 'SELECT * FROM datadog',
                 'metadata': {},
             },
-            # This test ensures that we handle the failed json decoder when requesting for metadata.
-            # This scenario could happen when newer integrations run against older agents which might not have the
-            # metadata API.
-            True,
         ),
         (
             'SELECT * FROM datadog',
@@ -144,19 +146,16 @@ class TestDBExcepption(BaseException):
                 'query': 'SELECT * FROM datadog',
                 'metadata': {},
             },
-            False,
         ),
     ],
 )
-def test_obfuscate_sql_with_metadata(obfuscator_return_value, expected_value, return_json_metadata):
+def test_obfuscate_sql_with_metadata(obfuscator_return_value, expected_value):
     def _mock_obfuscate_sql(query, options=None):
         return obfuscator_return_value
 
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = _mock_obfuscate_sql
-        statement = obfuscate_sql_with_metadata(
-            'query here does not matter', json.dumps({'return_json_metadata': return_json_metadata})
-        )
+        statement = obfuscate_sql_with_metadata('query here does not matter', None)
         assert statement == expected_value
 
     # Check that it can handle None values
@@ -236,13 +235,14 @@ def test_dbm_async_job_run_sync(aggregator):
 def test_dbm_async_job_rate_limit(aggregator):
     # test the main collection loop rate limit
     rate_limit = 10
+    limit_time = 1.0
     sleep_time = 0.9  # just below what the rate limit should hit to buffer before cancelling the loop
 
     job = TestJob(AgentCheck(), rate_limit=rate_limit)
     job.run_job_loop([])
 
     time.sleep(sleep_time)
-    max_collections = int(rate_limit * sleep_time) + 1
+    max_collections = int(rate_limit * limit_time) + 1
     job.cancel()
 
     metrics = aggregator.metrics("dbm.async_job_test.run_job")

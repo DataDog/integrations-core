@@ -36,12 +36,16 @@ files:
       value:
         type: string
     - name: jmx_exporter_port
-      description: The port on which the JMX Exporter serves metrics.
+      description: |
+        The port on which the JMX Exporter serves metrics.
+        Set the port to 0 to disable.
       value:
         type: integer
         example: 11001
     - name: node_exporter_port
-      description: The port on which the Node Exporter serves metrics.
+      description: |
+        The port on which the Node Exporter serves metrics.
+        Set the port to 0 to disable.
       value:
         type: integer
         example: 11002

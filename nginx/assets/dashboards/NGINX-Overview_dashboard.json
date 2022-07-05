@@ -215,6 +215,63 @@
       }
     },
     {
+      "id": 5337379359809210,
+      "definition": {
+        "title": "Anomaly Detection",
+        "type": "group",
+        "background_color": "white",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8461082730453168,
+            "definition": {
+              "title": "Nginx Watchdog alerts",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "event_stream",
+              "query": "source:watchdog story_type:nginx",
+              "tags_execution": "and",
+              "event_size": "s"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 8,
+              "height": 3
+            }
+          },
+          {
+            "id": 2165182479929144,
+            "definition": {
+              "type": "note",
+              "content": "Watchdog proactively detects and surfaces anomalous behavior across your services and infrastructure to help you catch issues early.\n\nGet notified of new Watchdog alerts by creating a Watchdog Monitor [here](https://app.datadoghq.com/monitors#create/watchdog).",
+              "background_color": "transparent",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": false
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 12,
+        "height": 4
+      }
+  },
+    {
       "id": 5323257507468104,
       "definition": {
         "title": "Logs",

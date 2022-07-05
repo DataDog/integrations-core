@@ -22,7 +22,7 @@ def dd_environment():
     """
     Start a cluster with one master, one replica and one unhealthy replica and
     stop it after the tests are done.
-    If there's any problem executing docker-compose, let the exception bubble
+    If there's any problem executing `docker compose`, let the exception bubble
     up.
     """
     with docker_run(common.COMPOSE_FILE, service_name="etcd0", conditions=[setup_post_data]):

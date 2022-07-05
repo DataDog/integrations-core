@@ -16,7 +16,7 @@
   "process_signatures": [
     "pgbouncer"
   ],
-  "public_title": "Datadog-PGBouncer Integration",
+  "public_title": "PGBouncer Integration",
   "short_description": "Track connection pool metrics and monitor traffic to and from your application.",
   "support": "core",
   "supported_os": [

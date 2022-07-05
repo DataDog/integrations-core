@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools; python_version < '3.0'",
+    "setuptools<61",
 ]
 build-backend = "hatchling.build"
 
@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 name = "datadog-oracle"
 description = "The Oracle Database check"
 readme = "README.md"
-license = "BSD-3-Clause"
+license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -29,7 +29,7 @@ classifiers = [
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=20.1.0",
+    "datadog-checks-base>=25.1.0",
 ]
 dynamic = [
     "version",
@@ -37,10 +37,11 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "cx-oracle==7.2.0",
+    "cx-oracle==7.3.0; python_version < '3.0'",
+    "cx-oracle==8.3.0; python_version > '3.0'",
     "jaydebeapi==1.2.3",
-    "jpype1==0.7.1 ; python_version <= '2.7'",
-    "jpype1==1.3.0; python_version > '3'",
+    "jpype1==0.7.0; python_version < '3.0'",
+    "jpype1==1.3.0; python_version > '3.0'",
 ]
 
 [project.urls]
@@ -60,7 +61,7 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 include = [
-    "/datadog_checks",
+    "/datadog_checks/oracle",
 ]
 dev-mode-dirs = [
     ".",

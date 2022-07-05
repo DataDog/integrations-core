@@ -104,6 +104,7 @@ Need help? Contact [Datadog support][11].
 
 ## Further Reading
 
+- [Kubernetes Control Plane Monitoring][13]
 - [Monitor etcd performance to ensure consistent Docker configuration][12]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/etcd/images/etcd_dashboard.png
@@ -118,3 +119,4 @@ Need help? Contact [Datadog support][11].
 [10]: https://github.com/DataDog/integrations-core/blob/master/etcd/assets/service_checks.json
 [11]: https://docs.datadoghq.com/help/
 [12]: https://www.datadoghq.com/blog/monitor-etcd-performance
+[13]: https://docs.datadoghq.com/agent/kubernetes/control_plane/?tab=helm

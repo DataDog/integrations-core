@@ -13,6 +13,11 @@ from .common import YARN_CONFIG
     'tags, expected_tags',
     [
         pytest.param("test:example", ["app_test:example"], id='tag_key_value'),
+        pytest.param("test:example,,test", ["app_test:example", "app_", "app_test"], id='test_empty_tag'),
+        pytest.param("test:example,:,test", ["app_test:example", "app_:", "app_test"], id='test_empty_kv_tag'),
+        pytest.param(
+            "test:example,test::test", ["app_test:example", "job_tag:test:example,test::test"], id='test_failure'
+        ),
         pytest.param(
             "test:example1,test:example2", ["app_test:example1", "app_test:example2"], id='multiple_tag_key_value'
         ),

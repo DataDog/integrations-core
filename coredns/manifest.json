@@ -11,7 +11,7 @@
     "linux"
   ],
   "guid": "9b316155-fc8e-4cb0-8bd5-8af270759cfb",
-  "public_title": "Datadog-CoreDNS Integration",
+  "public_title": "CoreDNS Integration",
   "categories": [
     "containers",
     "network",

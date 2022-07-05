@@ -36,6 +36,14 @@ class ExtraMetric(BaseModel):
     type: Optional[str]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class Metric(BaseModel):
     class Config:
         extra = Extra.allow
@@ -103,6 +111,7 @@ class InstanceConfig(BaseModel):
     kerberos_keytab: Optional[str]
     kerberos_principal: Optional[str]
     log_requests: Optional[bool]
+    metric_patterns: Optional[MetricPatterns]
     metrics: Optional[Sequence[Union[str, Mapping[str, Union[str, Metric]]]]]
     min_collection_interval: Optional[float]
     namespace: Optional[str] = Field(None, regex='\\w*')
@@ -123,6 +132,7 @@ class InstanceConfig(BaseModel):
     service: Optional[str]
     share_labels: Optional[Mapping[str, Union[bool, ShareLabel]]]
     skip_proxy: Optional[bool]
+    tag_by_endpoint: Optional[bool]
     tags: Optional[Sequence[str]]
     telemetry: Optional[bool]
     timeout: Optional[float]

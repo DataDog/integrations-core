@@ -83,6 +83,8 @@ def download():
         '--force', action='store_true', help='Force download even if the type of integration may be incorrect.'
     )
 
+    parser.add_argument('--ignore-python-version', action='store_true', help='Ignore Python version requirements.')
+
     parser.add_argument(
         '-v', '--verbose', action='count', default=0, help='Show verbose information about TUF and in-toto.'
     )
@@ -93,6 +95,7 @@ def download():
     version = args.version
     root_layout_type = args.type
     force = args.force
+    ignore_python_version = args.ignore_python_version
     verbose = args.verbose
 
     if not standard_distribution_name.startswith('datadog-'):
@@ -115,6 +118,8 @@ def download():
     tuf_downloader = TUFDownloader(
         repository_url_prefix=repository_url_prefix, root_layout_type=root_layout_type, verbose=verbose
     )
-    wheel_relpath = tuf_downloader.get_wheel_relpath(standard_distribution_name, version=version)
+    wheel_relpath = tuf_downloader.get_wheel_relpath(
+        standard_distribution_name, version=version, ignore_python_version=ignore_python_version
+    )
     wheel_abspath = tuf_downloader.download(wheel_relpath)
     print(wheel_abspath)  # pylint: disable=print-statement

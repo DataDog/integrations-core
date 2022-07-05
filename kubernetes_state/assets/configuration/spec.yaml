@@ -1,0 +1,92 @@
+name: Kubernetes State
+files:
+- name: kubernetes_state.yaml
+  options:
+  - template: init_config
+    options:
+      - template: init_config/openmetrics_legacy
+  - template: instances
+    options:
+    - name: kube_state_url
+      required: true
+      description: |
+        To enable Kube State metrics you must specify the URL exposing the API
+      value:
+        type: string
+        example: http://example.com:8080/metrics
+    - name: join_standard_tags
+      description: |
+        To enable joining standard tags from labels, you must set this parameter to true.
+        It will join standard tags found in these labels coming from info Kube State metrics (*_labels).
+          tags.datadoghq.com/env     => env
+          tags.datadoghq.com/service => service
+          tags.datadoghq.com/version => version
+        
+        Resources enabled for join_standard_tags include:
+        Pod, Deployment, ReplicaSet, DaemonSet, StatefulSet, Job, CronJob
+      value:
+        type: boolean
+        example: false
+    - name: hostname_override
+      description: |
+        By default the hostname for metrics containing the node label is
+        overridden by the value of the label, this can be deactivated (all metrics
+        will be attached to the host running KSM)
+      value:
+        type: boolean
+        example: true
+    - template: instances/openmetrics_legacy
+      overrides:
+        prometheus_url.required: false
+        prometheus_url.hidden: true
+        prometheus_metrics_prefix.hidden: true
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - kube-state-metrics
+  - template: init_config
+    options: []
+  - name: ignore_autodiscovery_tags
+    description: |
+      Ignore tags coming from autodiscovery
+    enabled: true
+    value:
+      type: boolean
+      example: true
+  - template: instances
+    options:
+    - name: kube_state_url
+      description: |
+        To enable Kube State metrics you must specify the URL exposing the API.
+      required: true
+      value:
+        type: string
+        example: http://%%host%%:8080/metrics
+    - name: labels_mapper
+      description: |
+        Tags are reported as set by kube-state-metrics. If you want to translate
+        them to other tags, use the labels_mapper dictionary.
+      example:
+        namespace: kube_namespace
+    - name: label_joins
+      description: |
+        Add the tags to join from other KSM metrics.
+        Example: Joining for deployment metrics. Based on:
+        kube_deployment_labels{deployment="kube-dns",label_addonmanager_kubernetes_io_mode="Reconcile"}
+        Use the following config to add the value of label_addonmanager_kubernetes_io_mode as a tag to your KSM
+        deployment metrics.
+      example:
+        kube_deployment_labels:
+          labels_to_match:
+            - deployment
+          labels_to_get:
+            - label_addonmanager_kubernetes_io_mode
+    - name: hostname_override
+      description: |
+        By default the hostname for metrics containing the node label is
+        overridden by the value of the label, this can be deactivated (all metrics
+        will be attached to the host running KSM)
+      example: true

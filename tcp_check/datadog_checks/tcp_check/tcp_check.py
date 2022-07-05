@@ -8,6 +8,28 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.time import get_precise_time
 
+# For Linux and python 3 on Windows
+if "inet_pton" in socket.__dict__:
+
+    def is_ipv6(addr):
+        try:
+            socket.inet_pton(socket.AF_INET6, addr)
+            return True
+        except socket.error:
+            return False
+
+
+# Only for python 2 on Windows
+else:
+
+    import re
+
+    def is_ipv6(addr):
+        if re.match(r'^[0-9a-f:]+$', addr):
+            return True
+        else:
+            return False
+
 
 class TCPCheck(AgentCheck):
 
@@ -44,9 +66,7 @@ class TCPCheck(AgentCheck):
             self.port = int(port)
         except Exception:
             raise ConfigurationError(self.CONFIGURATION_ERROR_MSG.format(port, 'port', 'number'))
-        try:
-            split_url = self.host.split(":")
-        except Exception:  # Would be raised if url is not a string
+        if not isinstance(self.host, str):  # Would be raised if url is not a string
             raise ConfigurationError(self.CONFIGURATION_ERROR_MSG.format(self.host, 'url', 'string'))
 
         custom_tags = instance.get('tags', [])
@@ -62,14 +82,8 @@ class TCPCheck(AgentCheck):
         ]
 
         # IPv6 address format: 2001:db8:85a3:8d3:1319:8a2e:370:7348
-        if len(split_url) == 8:  # It may then be a IP V6 address, we check that
-            for block in split_url:
-                if len(block) != 4:
-                    raise ConfigurationError(
-                        self.CONFIGURATION_ERROR_MSG.format(self.host, 'IPv6 address', 'valid address')
-                    )
+        if is_ipv6(self.host):  # It may then be a IP V6 address, we check that
             # It's a correct IP V6 address
-            self._addrs = self.host
             self.socket_type = socket.AF_INET6
         else:
             self.socket_type = socket.AF_INET
@@ -87,10 +101,11 @@ class TCPCheck(AgentCheck):
         return self._addrs
 
     def resolve_ips(self):
-        if self.multiple_ips:
-            _, _, self._addrs = socket.gethostbyname_ex(self.host)
-        else:
-            self._addrs = [socket.gethostbyname(self.host)]
+        self._addrs = [
+            sockaddr[0] for (_, _, _, _, sockaddr) in socket.getaddrinfo(self.host, self.port, 0, 0, socket.IPPROTO_TCP)
+        ]
+        if not self.multiple_ips:
+            self._addrs = self._addrs[:1]
 
         if self._addrs == []:
             raise Exception("No IPs attached to host")

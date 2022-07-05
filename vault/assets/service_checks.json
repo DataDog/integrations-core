@@ -40,5 +40,35 @@
         ],
         "name": "Initialized OK",
         "description": "Returns Critical if the vault isn't initialized, OK otherwise."
+    },
+    {
+        "agent_version": "7.17.0",
+        "integration": "Vault",
+        "check": "vault.prometheus.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Vault prometheus health",
+        "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.35.0",
+        "integration": "Vault",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "check": "vault.openmetrics.health",
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the OpenMetrics endpoint, otherwise returns `OK`."
     }
 ]

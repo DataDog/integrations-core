@@ -24,16 +24,17 @@ def get_queue_manager_connection(config, logger):
         # By testing with a normal connection first, we avoid making unnecessary SSL connections.
         # This does not fix the memory leak but mitigate its likelihood.
         # Details: https://github.com/dsuch/pymqi/issues/208
-        try:
-            get_normal_connection(config, logger)
-        except pymqi.MQMIError as e:
-            logger.debug(
-                "Tried normal connection before SSL connection to ensure channel exists."
-                "This is expected to fail with SSL or host unavailable errors. It failed with: %s",
-                e,
-            )
-            if e.reason == pymqi.CMQC.MQRC_UNKNOWN_CHANNEL_NAME:
-                raise
+        if config.try_basic_auth:
+            try:
+                get_normal_connection(config, logger)
+            except pymqi.MQMIError as e:
+                logger.debug(
+                    "Tried basic authentication before SSL connection to ensure channel exists."
+                    "This is expected to fail with SSL or host unavailable errors. It failed with: %s",
+                    e,
+                )
+                if e.reason == pymqi.CMQC.MQRC_UNKNOWN_CHANNEL_NAME:
+                    raise
         return get_ssl_connection(config, logger)
     else:
         return get_normal_connection(config, logger)

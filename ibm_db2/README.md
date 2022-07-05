@@ -30,10 +30,16 @@ For Agent versions <= 6.11:
 "C:\Program Files\Datadog\Datadog Agent\embedded\python.exe" -m pip install ibm_db==3.0.1
 ```
 
-For Agent versions >= 6.12:
+For Agent versions >= 6.12 and < 7.0:
 
 ```text
 "C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\python.exe" -m pip install ibm_db==3.0.1
+```
+
+For Agent versions >= 7.0:
+
+```text
+"C:\Program Files\Datadog\Datadog Agent\embedded3\python.exe" -m pip install ibm_db==3.1.0
 ```
 
 On Linux there may be need for XML functionality. If you encounter errors during

@@ -141,6 +141,10 @@ class CadvisorScraper(object):
         if pod is not None and is_static_pending_pod(pod):
             in_static_pod = True
 
+        namespace = pod.get('metadata', {}).get('namespace')
+        if pod_list_utils.is_namespace_excluded(namespace):
+            return
+
         # Let's see who we have here
         if is_pod:
             tags = tags_for_pod(pod_uid, tagger.HIGH)

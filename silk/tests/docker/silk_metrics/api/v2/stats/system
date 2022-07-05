@@ -1,0 +1,15 @@
+{
+   "hits":[
+      {
+         "iops_avg":81905,
+         "iops_max":82470,
+         "latency_inner":0.42999999999999999,
+         "latency_outer":0.040000000000000001,
+         "resolution":5,
+         "throughput_avg":1341938074,
+         "throughput_max":1351188480,
+         "timestamp":1639693060
+      }
+   ],
+   "total":1
+}

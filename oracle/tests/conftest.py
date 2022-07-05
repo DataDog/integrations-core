@@ -138,6 +138,17 @@ def dd_environment():
         yield instance, e2e_metadata
 
 
+@pytest.fixture
+def bad_instance():
+    return {
+        "password": "badpassword",
+        "protocol": "TCP",
+        "server": "localhost:1521",
+        "service_name": "InfraDB.us.oracle.com",
+        "username": "datadog",
+    }
+
+
 def create_user():
     output = run_docker_command(
         [

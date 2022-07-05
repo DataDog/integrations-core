@@ -1,0 +1,28 @@
+{
+   "hits":[
+      {
+         "current_user_role":"admin",
+         "id":1,
+         "is_system_functionality_degraded":false,
+         "iscsi_qualified_target_name":"iqn.2009-01.com.kaminario:storage.k2.21761",
+         "last_online_time":1638831533.5060999,
+         "next_state":"None",
+         "replication_default_target_exposure":"Mapped - Not Exposed",
+         "replication_min_protocol_version":1,
+         "replication_protocol_version":2,
+         "rest_api_version":"2.2.0",
+         "sra_protocol_version":"1.2",
+         "state":"ONLINE",
+         "system_connectivity_type":"FC",
+         "system_id":"5501",
+         "system_name":"K2-5501",
+         "system_time":1638892528.0592959,
+         "system_tz":"America/New_York",
+         "system_tz_short":"EST",
+         "system_version":"6.0.102.25"
+      }
+   ],
+   "limit":100,
+   "offset":0,
+   "total":1
+}

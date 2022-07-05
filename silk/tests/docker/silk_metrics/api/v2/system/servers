@@ -1,0 +1,37 @@
+{
+   "hits":[
+      {
+         "contained_in":{
+            "ref":"/system/pairs/2"
+         },
+         "display_name":"",
+         "fru_type":"SM-SRV-F",
+         "id":3,
+         "is_expansion_in_progress":false,
+         "is_fru":true,
+         "is_phased_out":false,
+         "is_phasing_in":false,
+         "name":"kblock01-knode01",
+         "ndu_state":"component upgrade idle",
+         "status":"ok"
+      },
+      {
+         "contained_in":{
+            "ref":"/system/pairs/2"
+         },
+         "display_name":"",
+         "fru_type":"SM-SRV-F",
+         "id":20,
+         "is_expansion_in_progress":false,
+         "is_fru":true,
+         "is_phased_out":false,
+         "is_phasing_in":false,
+         "name":"kblock01-knode02",
+         "ndu_state":"component upgrade idle",
+         "status":"ok"
+      }
+   ],
+   "limit":100,
+   "offset":0,
+   "total":2
+}

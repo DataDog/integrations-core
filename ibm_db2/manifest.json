@@ -15,7 +15,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-IBM Db2 Integration",
+  "public_title": "IBM Db2 Integration",
   "categories": [
     "data store",
     "log collection",

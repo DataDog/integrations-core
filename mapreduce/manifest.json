@@ -13,7 +13,7 @@
   "metric_prefix": "mapreduce.",
   "metric_to_check": "mapreduce.job.elapsed_time.max",
   "name": "mapreduce",
-  "public_title": "Datadog-Map Reduce Integration",
+  "public_title": "Map Reduce Integration",
   "short_description": "Monitor the status and duration of map and reduce tasks.",
   "support": "core",
   "supported_os": [

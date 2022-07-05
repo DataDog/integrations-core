@@ -1,11 +1,12 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 from itertools import chain
 from typing import Any, Callable, Dict, List, Tuple
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.db.types import QueryExecutor, Transformer
+from datadog_checks.base.utils.db.types import QueriesExecutor, QueriesSubmitter, Transformer
 
 from ...config import is_affirmative
 from ..containers import iter_unique
@@ -14,91 +15,43 @@ from .transform import COLUMN_TRANSFORMERS, EXTRA_TRANSFORMERS
 from .utils import SUBMISSION_METHODS, create_submission_transformer
 
 
-class QueryManager(object):
+class QueryExecutor(object):
     """
-    This class is in charge of running any number of `Query` instances for a single Check instance.
-
-    You will most often see it created during Check initialization like this:
-
-    ```python
-    self._query_manager = QueryManager(
-        self,
-        self.execute_query,
-        queries=[
-            queries.SomeQuery1,
-            queries.SomeQuery2,
-            queries.SomeQuery3,
-            queries.SomeQuery4,
-            queries.SomeQuery5,
-        ],
-        tags=self.instance.get('tags', []),
-        error_handler=self._error_sanitizer,
-    )
-    self.check_initializations.append(self._query_manager.compile_queries)
-    ```
-
-    Note: This class is not in charge of opening or closing connections, just running queries.
+    QueryExecutor is a lower-level implementation of QueryManager which supports multiple instances
+    per AgentCheck. It is used to execute queries via the `executor` parameter and submit resulting
+    telemetry via the `submitter` parameter.
     """
 
     def __init__(
         self,
-        check,  # type: AgentCheck
-        executor,  # type:  QueryExecutor
+        executor,  # type: QueriesExecutor
+        submitter,  # type: QueriesSubmitter
         queries=None,  # type: List[Dict[str, Any]]
         tags=None,  # type: List[str]
         error_handler=None,  # type: Callable[[str], str]
         hostname=None,  # type: str
-    ):  # type: (...) -> QueryManager
-        """
-        - **check** (_AgentCheck_) - an instance of a Check
-        - **executor** (_callable_) - a callable accepting a `str` query as its sole argument and returning
-          a sequence representing either the full result set or an iterator over the result set
-        - **queries** (_List[Dict]_) - a list of queries in dict format
-        - **tags** (_List[str]_) - a list of tags to associate with every submission
-        - **error_handler** (_callable_) - a callable accepting a `str` error as its sole argument and returning
-          a sanitized string, useful for scrubbing potentially sensitive information libraries emit
-        """
-        self.check = check  # type: AgentCheck
-        self.executor = executor  # type:  QueryExecutor
+        logger=None,
+    ):  # type: (...) -> QueryExecutor
+        self.executor = executor  # type: QueriesExecutor
+        self.submitter = submitter  # type: QueriesSubmitter
+        for submission_method in SUBMISSION_METHODS.keys():
+            if not hasattr(self.submitter, submission_method):
+                raise ValueError(
+                    'QueryExecutor submitter is missing required submission method `{}`'.format(submission_method)
+                )
+
         self.tags = tags or []
         self.error_handler = error_handler
         self.queries = [Query(payload) for payload in queries or []]  # type: List[Query]
         self.hostname = hostname  # type: str
-        self.logger = self.check.log
-
-        only_custom_queries = is_affirmative(self.check.instance.get('only_custom_queries', False))  # type: bool
-        custom_queries = list(self.check.instance.get('custom_queries', []))  # type: List[str]
-        use_global_custom_queries = self.check.instance.get('use_global_custom_queries', True)  # type: str
-
-        # Handle overrides
-        if use_global_custom_queries == 'extend':
-            custom_queries.extend(self.check.init_config.get('global_custom_queries', []))
-        elif (
-            not custom_queries
-            and 'global_custom_queries' in self.check.init_config
-            and is_affirmative(use_global_custom_queries)
-        ):
-            custom_queries = self.check.init_config.get('global_custom_queries', [])
-
-        # Override statement queries if only running custom queries
-        if only_custom_queries:
-            self.queries = []
-
-        # Deduplicate
-        for i, custom_query in enumerate(iter_unique(custom_queries), 1):
-            query = Query(custom_query)
-            query.query_data.setdefault('name', 'custom query #{}'.format(i))
-            self.queries.append(query)
-
-        if len(self.queries) == 0:
-            self.logger.warning('QueryManager initialized with no query')
+        self.logger = logger or logging.getLogger(__name__)
 
     def compile_queries(self):
         """This method compiles every `Query` object."""
         column_transformers = COLUMN_TRANSFORMERS.copy()  # type: Dict[str, Transformer]
 
         for submission_method, transformer_name in SUBMISSION_METHODS.items():
-            method = getattr(self.check, submission_method)
+            method = getattr(self.submitter, submission_method)
             # Save each method in the initializer -> callable format
             column_transformers[transformer_name] = create_submission_transformer(method)
 
@@ -106,10 +59,7 @@ class QueryManager(object):
             query.compile(column_transformers, EXTRA_TRANSFORMERS.copy())
 
     def execute(self, extra_tags=None):
-        """This method is what you call every check run."""
-        # This needs to stay here b/c when we construct a QueryManager in a check's __init__
-        # there is no check ID at that point
-        self.logger = self.check.log
+        """This method executes all of the compiled queries."""
 
         global_tags = list(self.tags)
         if extra_tags:
@@ -209,3 +159,93 @@ class QueryManager(object):
             return iter([])
 
         return chain((first_row,), rows)
+
+
+class QueryManager(QueryExecutor):
+    """
+    This class is in charge of running any number of `Query` instances for a single Check instance.
+
+    You will most often see it created during Check initialization like this:
+
+    ```python
+    self._query_manager = QueryManager(
+        self,
+        self.execute_query,
+        queries=[
+            queries.SomeQuery1,
+            queries.SomeQuery2,
+            queries.SomeQuery3,
+            queries.SomeQuery4,
+            queries.SomeQuery5,
+        ],
+        tags=self.instance.get('tags', []),
+        error_handler=self._error_sanitizer,
+    )
+    self.check_initializations.append(self._query_manager.compile_queries)
+    ```
+
+    Note: This class is not in charge of opening or closing connections, just running queries.
+    """
+
+    def __init__(
+        self,
+        check,  # type: AgentCheck
+        executor,  # type:  QueriesExecutor
+        queries=None,  # type: List[Dict[str, Any]]
+        tags=None,  # type: List[str]
+        error_handler=None,  # type: Callable[[str], str]
+        hostname=None,  # type: str
+    ):  # type: (...) -> QueryManager
+        """
+        - **check** (_AgentCheck_) - an instance of a Check
+        - **executor** (_callable_) - a callable accepting a `str` query as its sole argument and returning
+          a sequence representing either the full result set or an iterator over the result set
+        - **queries** (_List[Dict]_) - a list of queries in dict format
+        - **tags** (_List[str]_) - a list of tags to associate with every submission
+        - **error_handler** (_callable_) - a callable accepting a `str` error as its sole argument and returning
+          a sanitized string, useful for scrubbing potentially sensitive information libraries emit
+        """
+        super(QueryManager, self).__init__(
+            executor=executor,
+            submitter=check,
+            queries=queries,
+            tags=tags,
+            error_handler=error_handler,
+            hostname=hostname,
+            logger=check.log,
+        )
+        self.check = check  # type: AgentCheck
+
+        only_custom_queries = is_affirmative(self.check.instance.get('only_custom_queries', False))  # type: bool
+        custom_queries = list(self.check.instance.get('custom_queries', []))  # type: List[str]
+        use_global_custom_queries = self.check.instance.get('use_global_custom_queries', True)  # type: str
+
+        # Handle overrides
+        if use_global_custom_queries == 'extend':
+            custom_queries.extend(self.check.init_config.get('global_custom_queries', []))
+        elif (
+            not custom_queries
+            and 'global_custom_queries' in self.check.init_config
+            and is_affirmative(use_global_custom_queries)
+        ):
+            custom_queries = self.check.init_config.get('global_custom_queries', [])
+
+        # Override statement queries if only running custom queries
+        if only_custom_queries:
+            self.queries = []
+
+        # Deduplicate
+        for i, custom_query in enumerate(iter_unique(custom_queries), 1):
+            query = Query(custom_query)
+            query.query_data.setdefault('name', 'custom query #{}'.format(i))
+            self.queries.append(query)
+
+        if len(self.queries) == 0:
+            self.logger.warning('QueryManager initialized with no query')
+
+    def execute(self, extra_tags=None):
+        # This needs to stay here b/c when we construct a QueryManager in a check's __init__
+        # there is no check ID at that point
+        self.logger = self.check.log
+
+        return super(QueryManager, self).execute(extra_tags)

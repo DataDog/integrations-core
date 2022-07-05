@@ -265,6 +265,7 @@ STATS_METRICS = {
     'elasticsearch.thread_pool.warmer.threads': ('gauge', 'thread_pool.warmer.threads'),
     'elasticsearch.thread_pool.warmer.queue': ('gauge', 'thread_pool.warmer.queue'),
     'elasticsearch.thread_pool.warmer.rejected': ('rate', 'thread_pool.warmer.rejected'),
+    'elasticsearch.thread_pool.warmer.rejected.count': ('monotonic_count', 'thread_pool.warmer.rejected'),
     'elasticsearch.thread_pool.warmer.completed': ('gauge', 'thread_pool.warmer.completed'),
     'elasticsearch.http.current_open': ('gauge', 'http.current_open'),
     'elasticsearch.http.total_opened': ('gauge', 'http.total_opened'),
@@ -286,6 +287,21 @@ STATS_METRICS = {
     'elasticsearch.fs.total.total_in_bytes': ('gauge', 'fs.total.total_in_bytes'),
     'elasticsearch.fs.total.free_in_bytes': ('gauge', 'fs.total.free_in_bytes'),
     'elasticsearch.fs.total.available_in_bytes': ('gauge', 'fs.total.available_in_bytes'),
+}
+
+ADDITIONAL_METRICS_POST_7_9_0 = {
+    'elasticsearch.indexing_pressure.memory.current.coordinating_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.current.coordinating_in_bytes',
+    ),
+    'elasticsearch.indexing_pressure.memory.current.primary_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.current.primary_in_bytes',
+    ),
+    'elasticsearch.indexing_pressure.memory.current.replica_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.current.replica_in_bytes',
+    ),
 }
 
 ADDITIONAL_METRICS_POST_7_2_0 = {
@@ -313,10 +329,12 @@ ADDITIONAL_METRICS_PRE_5_0_0 = {
     'elasticsearch.thread_pool.percolate.threads': ('gauge', 'thread_pool.percolate.threads'),
     'elasticsearch.thread_pool.percolate.queue': ('gauge', 'thread_pool.percolate.queue'),
     'elasticsearch.thread_pool.percolate.rejected': ('rate', 'thread_pool.percolate.rejected'),
+    'elasticsearch.thread_pool.percolate.rejected.count': ('monotonic_count', 'thread_pool.percolate.rejected'),
     'elasticsearch.thread_pool.suggest.active': ('gauge', 'thread_pool.suggest.active'),
     'elasticsearch.thread_pool.suggest.threads': ('gauge', 'thread_pool.suggest.threads'),
     'elasticsearch.thread_pool.suggest.queue': ('gauge', 'thread_pool.suggest.queue'),
     'elasticsearch.thread_pool.suggest.rejected': ('rate', 'thread_pool.suggest.rejected'),
+    'elasticsearch.thread_pool.suggest.rejected.count': ('monotonic_count', 'thread_pool.suggest.rejected'),
 }
 
 # Metrics for index level
@@ -527,16 +545,19 @@ ADDITIONAL_METRICS_POST_2_0 = {
     'elasticsearch.indices.request_cache.evictions': ('rate', 'indices.request_cache.evictions'),
     'elasticsearch.indices.request_cache.evictions.count': ('monotonic_count', 'indices.request_cache.evictions'),
     'elasticsearch.indices.request_cache.hit_count': ('rate', 'indices.request_cache.hit_count'),
+    'elasticsearch.indices.request_cache.hit_count.count': ('monotonic_count', 'indices.request_cache.hit_count'),
     'elasticsearch.indices.request_cache.miss_count': ('rate', 'indices.request_cache.miss_count'),
     'elasticsearch.indices.request_cache.miss_count.count': ('monotonic_count', 'indices.request_cache.miss_count'),
 }
 
 ADDITIONAL_METRICS_POST_2_1 = {
+    'elasticsearch.indices.indexing.index_failed.count': ('monotonic_count', 'indices.indexing.index_failed'),
     'elasticsearch.indices.indexing.index_failed': ('rate', 'indices.indexing.index_failed'),
     'elasticsearch.thread_pool.force_merge.active': ('gauge', 'thread_pool.force_merge.active'),
     'elasticsearch.thread_pool.force_merge.threads': ('gauge', 'thread_pool.force_merge.threads'),
     'elasticsearch.thread_pool.force_merge.queue': ('gauge', 'thread_pool.force_merge.queue'),
     'elasticsearch.thread_pool.force_merge.rejected': ('rate', 'thread_pool.force_merge.rejected'),
+    'elasticsearch.thread_pool.force_merge.rejected.count': ('monotonic_count', 'thread_pool.force_merge.rejected'),
 }
 
 ADDITIONAL_METRICS_5_x = {
@@ -716,6 +737,9 @@ def stats_for_version(version, jvm_rate=False):
 
     if version >= [7, 2, 0]:
         metrics.update(ADDITIONAL_METRICS_POST_7_2_0)
+
+    if version >= [7, 9, 0]:
+        metrics.update(ADDITIONAL_METRICS_POST_7_9_0)
 
     return metrics
 

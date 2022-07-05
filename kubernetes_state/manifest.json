@@ -12,7 +12,7 @@
   "metric_prefix": "kubernetes_state.",
   "metric_to_check": "kubernetes_state.container.running",
   "name": "kubernetes_state",
-  "public_title": "Datadog-Kubernetes State Integration",
+  "public_title": "Kubernetes State Integration",
   "short_description": "Capture Pod scheduling events, track the status of your Kubelets, and more.",
   "support": "core",
   "supported_os": [
@@ -27,6 +27,9 @@
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
     "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    }
   }
 }

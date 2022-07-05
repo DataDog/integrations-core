@@ -26,7 +26,7 @@ DOCS_LINK_FORMAT_URL = (
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate README.md files')
 @click.pass_context
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 @click.option('--format-links', '-fl', is_flag=True, help='Automatically format links')
 def readmes(ctx, check, format_links):
     """Validates README files.
@@ -90,7 +90,13 @@ def readmes(ctx, check, format_links):
 
 def validate_readme(integration, repo, display_queue, files_failed, readme_counter):
     readme_path = get_readme_file(integration)
-    html = markdown.markdown(read_readme_file(integration))
+    readme_contents = read_readme_file(integration)
+
+    if repo != 'marketplace' and (error_lines := get_ascii_enforcement_error_lines(readme_contents)):
+        files_failed[readme_path] = True
+        display_queue.extend((echo_failure, line) for line in error_lines)
+
+    html = markdown.markdown(readme_contents)
     soup = BeautifulSoup(html, features="html.parser")
     readme_counter.add(readme_path)
 
@@ -109,11 +115,12 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
     allow_relative = False
     if repo == "marketplace":
         allow_relative = True
+    github_path = f"https://raw.githubusercontent.com/DataDog/{repo}"
     img_srcs = [img.attrs.get("src") for img in soup.find_all("img")]
     for img_src in img_srcs:
         image_name = os.path.split(img_src)[-1]
         file_path = os.path.join(get_root(), integration, "images", image_name)
-        if img_src.startswith("https://raw.githubusercontent") or (img_src.startswith("images/") and allow_relative):
+        if img_src.startswith(github_path) or (img_src.startswith("images/") and allow_relative):
             if not os.path.exists(file_path):
                 files_failed[readme_path] = True
                 display_queue.append(
@@ -130,3 +137,27 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
             error_msg += f" Image currently is: {img_src}"
 
             display_queue.append((echo_failure, error_msg))
+
+
+def get_ascii_enforcement_error_lines(contents):
+    errors_lines = []
+    for i, line in enumerate(contents.splitlines()):
+        # Don't print newlines
+        line = line.rstrip('\n')
+        invalid_code_unit_indices = []
+        indicator_code_units = []
+        for code_unit in line:
+            if ord(code_unit) > 256:
+                invalid_code_unit_indices.append(i)
+                indicator_code_units.append('^')
+            else:
+                indicator_code_units.append(' ')
+
+        if invalid_code_unit_indices:
+            errors_lines.append(f'    | {line}')
+            errors_lines.append(f'    | {"".join(indicator_code_units)}')
+
+    if errors_lines:
+        errors_lines.insert(0, '    readme contains non-ASCII character(s)')
+
+    return errors_lines

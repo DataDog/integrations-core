@@ -1,5 +1,21 @@
 # CHANGELOG - Openstack_controller
 
+## 2.1.1 / 2022-06-17
+
+* [Fixed] Attempt to use token from project scope with an admin role. See [#12135](https://github.com/DataDog/integrations-core/pull/12135).
+
+## 2.1.0 / 2022-04-05 / Agent 7.36.0
+
+* [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+
+## 2.0.0 / 2022-02-19 / Agent 7.35.0
+
+* [Added] Add `pyproject.toml` file. See [#11409](https://github.com/DataDog/integrations-core/pull/11409).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
+
 ## 1.13.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Update dependencies. See [#10258](https://github.com/DataDog/integrations-core/pull/10258).
