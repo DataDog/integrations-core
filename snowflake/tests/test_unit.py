@@ -68,6 +68,7 @@ def test_read_token(oauth_instance):
     check = SnowflakeCheck(CHECK_NAME, {}, [oauth_token_path_inst])
     token = check.read_token()
     assert token == 'testtoken'
+    check.check(oauth_instance)
 
 
 def test_default_auth(instance):
