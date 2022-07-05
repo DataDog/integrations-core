@@ -128,6 +128,8 @@ class Connection(object):
         self.existing_databases = None
         self.server_version = int(self.instance.get('server_version', self.DEFAULT_SQLSERVER_VERSION))
 
+        self.adoprovider = self.default_adoprovider
+        
         self.valid_connectors = []
         if adodbapi is not None:
             self.valid_connectors.append('adodbapi')
@@ -151,6 +153,7 @@ class Connection(object):
             self.log.error(
                 "Invalid ADODB provider string %s, defaulting to %s", self.adoprovider, self.default_adoprovider
             )
+            self.adoprovider = self.default_adoprovider
 
         self.log.debug('Connection initialized.')
 
