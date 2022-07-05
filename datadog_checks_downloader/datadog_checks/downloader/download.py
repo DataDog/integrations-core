@@ -49,7 +49,7 @@ REPOSITORY_DIR = 'repo'
 REPOSITORY_URL_PREFIX = 'https://dd-integrations-core-wheels-build-stable.datadoghq.com'
 # Where to find our in-toto root layout.
 IN_TOTO_METADATA_DIR = 'in-toto-metadata'
-ROOT_LAYOUTS = {'core': '3.core.root.layout', 'extras': '1.extras.root.layout'}
+ROOT_LAYOUTS = {'core': '4.core.root.layout', 'extras': '1.extras.root.layout'}
 DEFAULT_ROOT_LAYOUT_TYPE = 'core'
 
 
@@ -303,7 +303,7 @@ class TUFDownloader:
 
         return wheels
 
-    def get_wheel_relpath(self, standard_distribution_name, version=None):
+    def get_wheel_relpath(self, standard_distribution_name, version=None, ignore_python_version=False):
         """
         Returns:
             If download over TUF is successful, this function will return the
@@ -332,6 +332,9 @@ class TUFDownloader:
 
         # Otherwise, fuhgedaboutit.
         if not href:
-            raise PythonVersionMismatch(standard_distribution_name, version, this_python, python_tags)
+            if ignore_python_version:
+                href = list(python_tags.values())[0]
+            else:
+                raise PythonVersionMismatch(standard_distribution_name, version, this_python, python_tags)
 
         return 'simple/{}/{}'.format(standard_distribution_name, href)

@@ -9,6 +9,7 @@ from collections import OrderedDict
 
 import mock
 import pytest
+from six import PY2
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.http_check import HTTPCheck
@@ -29,17 +30,37 @@ from .conftest import mock_get_ca_certs_path
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check_cert_expiration(http_check):
+def test_check_cert_expiration_up(http_check):
     cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
-
-    # up
     instance = {'url': 'https://valid.mock/'}
+
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     assert status == AgentCheck.OK
     assert days_left > 0
     assert seconds_left > 0
 
-    # bad hostname
+
+@pytest.mark.usefixtures("dd_environment")
+def test_cert_expiration_no_cert(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    instance = {'url': 'https://valid.mock/'}
+
+    with mock.patch('ssl.SSLSocket.getpeercert', return_value={}):
+
+        status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
+        assert status == AgentCheck.UNKNOWN
+        expected_msg = 'Exception(\'Empty or no certificate found.\')'
+        if PY2:
+            expected_msg = (
+                'ValueError(\'empty or no certificate, match_hostname needs a SSL socket '
+                'or SSL context with either CERT_OPTIONAL or CERT_REQUIRED\',)'
+            )
+        assert msg == expected_msg
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_bad_hostname(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     instance = {'url': 'https://wronghost.mock/'}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     assert status == AgentCheck.UNKNOWN
@@ -47,14 +68,20 @@ def test_check_cert_expiration(http_check):
     assert seconds_left is None
     assert 'Hostname mismatch' in msg or "doesn't match" in msg
 
-    # site is down
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_site_down(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     instance = {'url': 'https://this.does.not.exist.foo'}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     assert status == AgentCheck.UNKNOWN
     assert days_left is None
     assert seconds_left is None
 
-    # cert expired
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_cert_expired(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     instance = {'url': 'https://expired.mock/'}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     if sys.version_info[0] < 3:
@@ -68,20 +95,29 @@ def test_check_cert_expiration(http_check):
         assert days_left == 0
         assert seconds_left == 0
 
-    # critical in days
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_critical(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+
+    # in days
     days_critical = 200
     instance = {'url': 'https://valid.mock/', 'days_critical': days_critical}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     assert status == AgentCheck.CRITICAL
     assert 0 < days_left < days_critical
 
-    # critical in seconds (ensure seconds take precedence over days config)
+    # in seconds (ensure seconds take precedence over days config)
     seconds_critical = days_critical * 24 * 3600
     instance = {'url': 'https://valid.mock/', 'days_critical': 0, 'seconds_critical': seconds_critical}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     assert status == AgentCheck.CRITICAL
     assert 0 < seconds_left < seconds_critical
 
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_warning(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     # warning in days
     days_warning = 200
     instance = {'url': 'https://valid.mock/', 'days_warning': days_warning}
@@ -373,3 +409,48 @@ def test_expected_headers(dd_run_check, instance, expected_headers):
 
     dd_run_check(check)
     assert expected_headers == check.http.options['headers']
+
+
+@pytest.mark.parametrize(
+    'instance, check_hostname',
+    [
+        pytest.param(
+            {
+                'url': 'https://valid.mock',
+                'name': 'UpService',
+                'tls_verify': True,
+                'check_hostname': False,
+            },
+            False,
+            id='check_hostname disabled',
+        ),
+        pytest.param(
+            {
+                'url': 'https://valid.mock',
+                'name': 'UpService',
+                'tls_verify': True,
+                'check_hostname': True,
+            },
+            True,
+            id='check_hostname enabled',
+        ),
+        pytest.param(
+            {
+                'url': 'https://valid.mock',
+                'name': 'UpService',
+                'tls_verify': False,
+                'check_hostname': True,
+            },
+            False,
+            id='tls not verify',
+        ),
+    ],
+)
+def test_tls_config_ok(dd_run_check, instance, check_hostname):
+    check = HTTPCheck(
+        'http_check',
+        {'ca_certs': mock_get_ca_certs_path()},
+        [instance],
+    )
+    tls_context = check.get_tls_context()
+    assert tls_context.check_hostname is check_hostname

@@ -37,6 +37,8 @@ from ..console import (
     echo_success,
 )
 
+LICENSE_HEADER = "(C) Datadog, Inc."
+
 
 def standardize_new_lines(lines):
     # If a new line is at the start or end of a line, remove it and add it to the list
@@ -64,7 +66,7 @@ def content_matches(current_model_file_lines, expected_model_file_lines):
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate configuration data models')
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 @click.option('--sync', '-s', is_flag=True, help='Generate data models based on specifications')
 @click.option('--verbose', '-v', is_flag=True, help='Verbose mode')
 @click.pass_context
@@ -176,7 +178,8 @@ def models(ctx, check, sync, verbose):
                 expected_model_file_lines.extend(generated_model_file_lines)
 
             # If we're re-generating a file, we should ensure we do not change the license date
-            if len(current_model_file_lines) > 0:
+            # We also want to handle the case where there is no license header
+            if len(current_model_file_lines) > 0 and LICENSE_HEADER in current_model_file_lines[0]:
                 expected_model_file_lines[0] = current_model_file_lines[0]
 
             if not current_model_file_lines or not content_matches(current_model_file_lines, expected_model_file_lines):

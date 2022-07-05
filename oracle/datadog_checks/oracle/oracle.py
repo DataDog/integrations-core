@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import itertools
+import threading
 from contextlib import closing
 
 import cx_Oracle
@@ -30,6 +31,12 @@ PROTOCOL_TCP = 'TCP'
 PROTOCOL_TCPS = 'TCPS'
 VALID_PROTOCOLS = [PROTOCOL_TCP, PROTOCOL_TCPS]
 VALID_TRUSTSTORE_TYPES = ['JKS', 'SSO', 'PKCS12']
+
+# When using JDBC connection and multiple instances of the check
+# It causes the following error
+# Native Library .../_jpype.cpython-38-x86_64-linux-gnu.so already loaded in another classloader
+# To prevent it we're adding a lock over jpype operations
+jdbc_lock = threading.Lock()
 
 
 class Oracle(AgentCheck):
@@ -101,7 +108,7 @@ class Oracle(AgentCheck):
         if not self._server or not self._user:
             raise ConfigurationError("Oracle host and user are needed")
 
-        if self._protocol.upper() not in VALID_PROTOCOLS:
+        if not self._protocol or self._protocol.upper() not in VALID_PROTOCOLS:
             raise ConfigurationError("Protocol %s is not valid, must either be TCP or TCPS" % self._protocol)
 
         if self._jdbc_driver and self._protocol.upper() == PROTOCOL_TCPS:
@@ -125,6 +132,10 @@ class Oracle(AgentCheck):
 
     def handle_query_error(self, error):
         self._query_errors += 1
+        if self._cached_connection is None:
+            self.log.debug("Couldn't close the connection after a query failure because there was no connection")
+            return error
+
         try:
             self._cached_connection.close()
         except Exception as e:
@@ -154,12 +165,10 @@ class Oracle(AgentCheck):
 
     @property
     def _connection(self):
+        """Creates a connection or raises an exception"""
         if self._cached_connection is None:
             if self.can_use_oracle_client():
-                dsn = self._get_dsn()
-                self.log.debug("Connecting via Oracle Instant Client with DSN: %s", dsn)
-                self._cached_connection = cx_Oracle.connect(user=self._user, password=self._password, dsn=dsn)
-                self.log.debug("Connected to Oracle DB using Oracle Instant Client")
+                self._cached_connection = self._oracle_client_connect()
             elif JDBC_IMPORT_ERROR:
                 self._connection_errors += 1
                 self.log.error(
@@ -183,6 +192,18 @@ class Oracle(AgentCheck):
         else:
             self.log.debug('Running cx_Oracle version %s', cx_Oracle.version)
             return True
+
+    def _oracle_client_connect(self):
+        dsn = self._get_dsn()
+        self.log.debug("Connecting via Oracle Instant Client with DSN: %s", dsn)
+        try:
+            connection = cx_Oracle.connect(user=self._user, password=self._password, dsn=dsn)
+            self.log.debug("Connected to Oracle DB using Oracle Instant Client")
+            return connection
+        except cx_Oracle.DatabaseError as e:
+            self._connection_errors += 1
+            self.log.error("Failed to connect to Oracle DB using Oracle Instant Client, error: %s", str(e))
+            raise
 
     def _get_dsn(self):
         host = self._server
@@ -216,15 +237,15 @@ class Oracle(AgentCheck):
 
         self.log.debug("Connecting via JDBC with connection string: %s", connect_string)
         try:
-            if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
-                jpype.attachThreadToJVM()
-                jpype.java.lang.Thread.currentThread().setContextClassLoader(
-                    jpype.java.lang.ClassLoader.getSystemClassLoader()
+            with jdbc_lock:
+                if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
+                    jpype.attachThreadToJVM()
+                    jpype.java.lang.Thread.currentThread().setContextClassLoader(
+                        jpype.java.lang.ClassLoader.getSystemClassLoader()
+                    )
+                connection = jdb.connect(
+                    self.ORACLE_DRIVER_CLASS, connect_string, jdbc_connect_properties, self._jdbc_driver
                 )
-
-            connection = jdb.connect(
-                self.ORACLE_DRIVER_CLASS, connect_string, jdbc_connect_properties, self._jdbc_driver
-            )
             self.log.debug("Connected to Oracle DB using JDBC connector")
             return connection
         except Exception as e:

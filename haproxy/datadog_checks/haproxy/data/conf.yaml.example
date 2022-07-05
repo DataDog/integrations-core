@@ -45,225 +45,169 @@ init_config:
 #
 instances:
 
-  -
-    ## @param use_prometheus - boolean - optional - default: false
+    ## @param use_openmetrics - boolean - optional - default: false
     ## Enable to preview the new version of the check which supports HAProxy version 2+
     ## or environments using the HAProxy exporter.
     ##
-    ## Prometheus-related options take effect only when this is set to `true`.
-    #
-    # use_prometheus: false
-
-    ## @param url - string - optional
-    ## Haproxy URL to connect to gather metrics.
-    ## Set the according <USERNAME> and <PASSWORD> or use directly a unix stats
-    ## or admin socket: unix:///var/run/haproxy.sock
+    ## OpenMetrics-related options take effect only when this is set to `true`. 
     ##
-    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
+    ## This check uses the latest OpenMetrics V2 implementation for more features and better performance.
+    ## Note: To see the configuration options for the OpenMetrics V1 implementation (Agent 7.34 or older),
+    ## https://github.com/DataDog/integrations-core/blob/7.34.x/haproxy/datadog_checks/haproxy/data/conf.yaml.example
     #
-    url: http://localhost/admin?stats
+    # use_openmetrics: false
 
-    ## @param status_check - boolean - optional - default: false
-    ## This parameter instructs the check to send events on status changes in the backend.
-    ## This is DEPRECATED in favor of the creation of a monitor on the service check status
-    ## and will be removed in a future version.
+    ## @param openmetrics_endpoint - string - optional
+    ## The URL exposing metrics in the OpenMetrics format.
+    #
+    # openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
+
+    ## @param raw_metric_prefix - string - optional
+    ## A prefix that will be removed from all exposed metric names, if present.
+    ## All configuration options will use the prefix-less name.
+    #
+    # raw_metric_prefix: <PREFIX>_
+
+    ## @param extra_metrics - (list of string or mapping) - optional
+    ## This list defines metrics to collect from the `openmetrics_endpoint`, in addition to
+    ## what the check collects by default. If the check already collects a metric, then
+    ## metric definitions here take precedence. Metrics may be defined in 3 ways:
     ##
-    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
-    #
-    # status_check: false
-
-    ## @param collect_aggregates_only - boolean or string - optional - default: true
-    ## This parameter instructs the check to collect metrics only from the aggregate frontend/backend
-    ## status lines from the stats output instead of for each backend. With this parameter set to false the agent
-    ## collects data for each backend but ignores the aggregated data for backends. Because some metrics are only
-    ## available for aggregates, you can also set this parameter to the string 'both' to collect everything.
-    ## Please note that this mean that if if you have queries like computing the sum of all requests being made, the
-    ## result will be twice as expected. To get the correct result, you have to explicitly add some filters to the
-    ## query.
+    ## 1. If the item is a string, then it represents the exposed metric name, and
+    ##    the sent metric name will be identical. For example:
     ##
-    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
-    #
-    # collect_aggregates_only: true
-
-    ## @param collect_status_metrics - boolean - optional - default: false
-    ## This parameter instructs the check to collect metrics on status counts (e.g. haproxy.count_per_status)
+    ##      extra_metrics:
+    ##      - <METRIC_1>
+    ##      - <METRIC_2>
+    ## 2. If the item is a mapping, then the keys represent the exposed metric names.
     ##
-    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
-    #
-    # collect_status_metrics: false
-
-    ## @param collect_status_metrics_by_host - boolean - optional - default: false
-    ## This parameter instructs the check to collect status metrics per host instead of per service.
-    ## This only applies if `collect_status_metrics` is true.
+    ##      a. If a value is a string, then it represents the sent metric name. For example:
     ##
-    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
-    #
-    # collect_status_metrics_by_host: false
-
-    ## @param collate_status_tags_per_host - boolean - optional - default: true
-    ## This parameter collects `status` tags for `haproxy.count_per_status` up to one of
-    ## (`available`, `unavailable`) for each discovered backend.
+    ##           extra_metrics:
+    ##           - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
+    ##           - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
+    ##      b. If a value is a mapping, then it must have a `name` and/or `type` key.
+    ##         The `name` represents the sent metric name, and the `type` represents how
+    ##         the metric should be handled, overriding any type information the endpoint
+    ##         may provide. For example:
     ##
-    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
-    #
-    # collate_status_tags_per_host: true
-
-    ## @param count_status_by_service - boolean - optional - default: true
-    ## This parameter instructs the check to tag the status counts it collects by service in addition to by host.
-    ## This only applies if `collect_status_metrics` is `true`.
+    ##           extra_metrics:
+    ##           - <EXPOSED_METRIC_1>:
+    ##               name: <SENT_METRIC_1>
+    ##               type: <METRIC_TYPE_1>
+    ##           - <EXPOSED_METRIC_2>:
+    ##               name: <SENT_METRIC_2>
+    ##               type: <METRIC_TYPE_2>
     ##
-    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
-    #
-    # count_status_by_service: true
-
-    ## @param tag_service_check_by_host - boolean - optional - default: false
-    ## This parameter instructs the check to tag the service check status by host on top of other tags.
-    ## The default case will only tag by backend and service.
+    ##         The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
     ##
-    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
-    #
-    # tag_service_check_by_host: false
-
-    ## @param services_include - list of strings - optional
-    ## Filter metrics by services. If a tag matches an exclude rule, it won't be included
-    ## unless it also matches an include rule.
+    ## Note: To collect counter metrics with names ending in `_total`, specify the metric name without the `_total`
+    ## suffix. For example, to collect the counter metric `promhttp_metric_handler_requests_total`, specify
+    ## `promhttp_metric_handler_requests`. This submits to Datadog the metric name appended with `.count`.
+    ## For more information, see:
+    ## https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
     ##
-    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
-    #
-    # services_include:
-    #   - <SERVICE_NAME_1>
-    #   - <SERVICE_NAME_2>
-
-    ## @param services_exclude - list of strings - optional
-    ## Filter metrics by services. If a service name matches an exclude rule, it won't be included
-    ## unless it also matches an include rule.
+    ## Regular expressions may be used to match the exposed metric names, for example:
     ##
-    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
+    ##   extra_metrics:
+    ##   - ^network_(ingress|egress)_.+
+    ##   - .+:
+    ##       type: gauge
     #
-    # services_exclude:
-    #   - .*
+    # extra_metrics: []
 
-    ## @param disable_legacy_service_tag - boolean - optional - default: false
-    ## Whether or not to stop submitting the tag `service` that has been renamed
-    ## to `haproxy_service` and disable the associated deprecation warning.
+    ## @param exclude_metrics - list of strings - optional
+    ## A list of metrics to exclude, with each entry being either
+    ## the exact metric name or a regular expression.
+    ## In order to exclude all metrics but the ones matching a specific filter,
+    ## you can use a negative lookahead regex like:
+    ##   - ^(?!foo).*$
+    #
+    # exclude_metrics: []
+
+    ## @param exclude_metrics_by_labels - mapping - optional
+    ## A mapping of labels where metrics with matching label name and values are ignored. To match
+    ## all values of a label, set it to `true`.
     ##
-    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
-    #
-    # disable_legacy_service_tag: false
-
-    ## @param active_tag - boolean - optional - default: false
-    ## Includes the 'active' tag to metrics to denote whether a backend belongs to the
-    ## "active" pool of connections normally used for servicing requests.
+    ## Note: Labels filtering happens before `rename_labels`.
     ##
-    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
-    #
-    # active_tag: false
-
-    ## @param enable_service_check - boolean - optional - default: false
-    ## Enable the Haproxy service check.
-    #
-    # enable_service_check: false
-
-    ## @param tags_regex - string - optional
-    ## This parameter instructs the check to use the defined named regex for creating
-    ## additional tags based on the name of the HAProxy service.
+    ## For example, the following configuration instructs the check to exclude all metrics with
+    ## a label `worker` or a label `pid` with the value of either `23` or `42`.
     ##
-    ##  tags_regex: 'be_edge_http_(?P<team>[a-z]+)\-(?P<env>[a-z]+)_(?P<app>.*)'
+    ##   exclude_metrics_by_labels:
+    ##     worker: true
+    ##     pid:
+    ##     - '23'
+    ##     - '42'
+    #
+    # exclude_metrics_by_labels: {}
+
+    ## @param exclude_labels - list of strings - optional
+    ## A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
+    ## May be used in conjunction with `include_labels`.
+    ## Labels defined in `excluded labels` will take precedence in case of overlap.
     ##
-    ## would match service name be_edge_http_sre-prod_elk and include additional
-    ## tags: ['team:sre','env:prod','app:elk']
+    ## Note: Labels filtering happens before `rename_labels`.
+    #
+    # exclude_labels: []
+
+    ## @param include_labels - list of strings - optional
+    ## A list of labels to include. May be used in conjunction with `exclude_labels`.
+    ## Labels defined in `excluded labels` will take precedence in case of overlap.
     ##
-    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
+    ## Note: Labels filtering happens before `rename_labels`.
     #
-    # tags_regex: <TAGS_REGEX>
+    # include_labels: []
 
-    ## @param startup_grace_seconds - number - optional - default: 0
-    ## Time to wait on startup or reload of haproxy before sending metrics
+    ## @param rename_labels - mapping - optional
+    ## A mapping of label names to how they should be renamed.
+    #
+    # rename_labels:
+    #   <LABEL_NAME_1>: <NEW_LABEL_NAME_1>
+    #   <LABEL_NAME_2>: <NEW_LABEL_NAME_2>
+
+    ## @param enable_health_service_check - boolean - optional - default: true
+    ## Whether or not to send a service check named `<NAMESPACE>.openmetrics.health` which reports
+    ## the health of the `openmetrics_endpoint`.
+    #
+    # enable_health_service_check: true
+
+    ## @param hostname_label - string - optional
+    ## Override the hostname for every metric submission with the value of one of its labels.
+    #
+    # hostname_label: <HOSTNAME_LABEL>
+
+    ## @param hostname_format - string - optional
+    ## When `hostname_label` is set, this instructs the check how to format the values. The string
+    ## `<HOSTNAME>` will be replaced by the value of the label defined by `hostname_label`.
+    #
+    # hostname_format: <HOSTNAME>
+
+    ## @param collect_histogram_buckets - boolean - optional - default: true
+    ## Whether or not to send histogram buckets.
+    #
+    # collect_histogram_buckets: true
+
+    ## @param non_cumulative_histogram_buckets - boolean - optional - default: false
+    ## Whether or not histogram buckets should be non-cumulative and to come with a `lower_bound` tag.
+    #
+    # non_cumulative_histogram_buckets: false
+
+    ## @param histogram_buckets_as_distributions - boolean - optional - default: false
+    ## Whether or not to send histogram buckets as Datadog distribution metrics. This implicitly
+    ## enables the `collect_histogram_buckets` and `non_cumulative_histogram_buckets` options.
     ##
-    ## When haproxy reloads, if there is a `grace` period on some proxies, 2
-    ## haproxies will stay running for that period, possibly including the
-    ## stats endpoint. Stats returned by haproxy during this period will only
-    ## refer to one of the multiple instances of haproxy, and will not
-    ## accurately reflect the state of the system.
-    ## If this parameter is >0, no datapoints will be sent until the uptime of
-    ## haproxy reaches this many seconds.
-    ##
-    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
+    ## Learn more about distribution metrics:
+    ## https://docs.datadoghq.com/developers/metrics/types/?tab=distribution#metric-types
     #
-    # startup_grace_seconds: 0
+    # histogram_buckets_as_distributions: false
 
-    ## @param prometheus_url - string - optional
-    ## The URL where your application metrics are exposed by Prometheus.
+    ## @param collect_counters_with_distributions - boolean - optional - default: false
+    ## Whether or not to also collect the observation counter metrics ending in `.sum` and `.count`
+    ## when sending histogram buckets as Datadog distribution metrics. This implicitly enables the
+    ## `histogram_buckets_as_distributions` option.
     #
-    # prometheus_url: <PROMETHEUS_URL>
-
-    ## @param prometheus_metrics_prefix - string - optional
-    ## Removes a given <PREFIX> from exposed Prometheus metrics.
-    #
-    # prometheus_metrics_prefix: <PREFIX>_
-
-    ## @param health_service_check - boolean - optional - default: true
-    ## Send a service check reporting about the health of the Prometheus endpoint.
-    ## The service check is named <NAMESPACE>.prometheus.health
-    #
-    # health_service_check: true
-
-    ## @param label_to_hostname - string - optional
-    ## Override the hostname with the value of one label.
-    #
-    # label_to_hostname: <LABEL>
-
-    ## @param label_joins - mapping - optional
-    ## Allows targeting a metric to retrieve its label with a 1:1 mapping.
-    #
-    # label_joins:
-    #   target_metric:
-    #     label_to_match: <MATCHED_LABEL>
-    #     labels_to_get:
-    #     - <EXTRA_LABEL_1>
-    #     - <EXTRA_LABEL_2>
-
-    ## @param labels_mapper - mapping - optional
-    ## The label mapper allows you to rename labels.
-    ## Format is <LABEL_TO_RENAME>: <NEW_LABEL_NAME>
-    #
-    # labels_mapper:
-    #   flavor: origin
-
-    ## @param type_overrides - mapping - optional
-    ## Override a type in the Prometheus payload or type an untyped metric (ignored by default).
-    ## Supported <METRIC_TYPE> are `gauge`, `counter`, `histogram`, and `summary`.
-    ## The "*" wildcard can be used to match multiple metric names.
-    #
-    # type_overrides:
-    #   <METRIC_NAME>: <METRIC_TYPE>
-
-    ## @param send_histograms_buckets - boolean - optional - default: true
-    ## Set send_histograms_buckets to true to send the histograms bucket.
-    #
-    # send_histograms_buckets: true
-
-    ## @param send_distribution_buckets - boolean - optional - default: false
-    ## Set `send_distribution_buckets` to `true` to send histograms as Datadog distribution metrics.
-    ##
-    ## Learn more about distribution metrics: https://docs.datadoghq.com/developers/metrics/distributions/
-    #
-    # send_distribution_buckets: false
-
-    ## @param send_monotonic_counter - boolean - optional - default: true
-    ## Set send_monotonic_counter to true to send counters as monotonic counter.
-    #
-    # send_monotonic_counter: true
-
-    ## @param send_distribution_counts_as_monotonic - boolean - optional - default: false
-    ## If set to true, sends histograms and summary counters as monotonic counters (instead of gauges).
-    #
-    # send_distribution_counts_as_monotonic: false
-
-    ## @param send_distribution_sums_as_monotonic - boolean - optional - default: false
-    ## If set to true, sends histograms and summary sums as monotonic counters (instead of gauges).
-    #
-    # send_distribution_sums_as_monotonic: false
+    # collect_counters_with_distributions: false
 
     ## @param use_process_start_time - boolean - optional - default: false
     ## Whether to enable a heuristic for reporting counter values on the first scrape. When true,
@@ -273,51 +217,65 @@ instances:
     #
     # use_process_start_time: false
 
-    ## @param exclude_labels - list of strings - optional
-    ## A list of labels to be excluded. May be used in conjunction with `include_labels`.
-    ## Labels defined in `excluded labels` will take precedence in case of overlap.
+    ## @param share_labels - mapping - optional
+    ## This mapping allows for the sharing of labels across multiple metrics. The keys represent the
+    ## exposed metrics from which to share labels, and the values are mappings that configure the
+    ## sharing behavior. Each mapping must have at least one of the following keys:
+    ##
+    ##   labels - This is a list of labels to share. All labels are shared if this is not set.
+    ##   match - This is a list of labels to match on other metrics as a condition for sharing.
+    ##   values - This is a list of allowed values as a condition for sharing.
+    ##
+    ## To unconditionally share all labels of a metric, set it to `true`.
+    ##
+    ## For example, the following configuration instructs the check to apply all labels from `metric_a`
+    ## to all other metrics, the `node` label from `metric_b` to only those metrics that have a `pod`
+    ## label value that matches the `pod` label value of `metric_b`, and all labels from `metric_c`
+    ## to all other metrics if its value is equal to `23` or `42`.
+    ##
+    ##   share_labels:
+    ##     metric_a: true
+    ##     metric_b:
+    ##       labels:
+    ##       - node
+    ##       match:
+    ##       - pod
+    ##     metric_c:
+    ##       values:
+    ##       - 23
+    ##       - 42
     #
-    # exclude_labels:
-    #   - timestamp
+    # share_labels: {}
 
-    ## @param include_labels - list of strings - optional
-    ## A list of labels to include. May be used in conjunction with `exclude_labels`.
-    ## Labels defined in `excluded labels` will take precedence in case of overlap.
+    ## @param cache_shared_labels - boolean - optional - default: true
+    ## When `share_labels` is set, it instructs the check to cache labels collected from the first payload
+    ## for increased performance.
+    ##
+    ## Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
     #
-    # include_labels: []
+    # cache_shared_labels: true
 
-    ## @param bearer_token_auth - boolean or string - optional - default: false
-    ## If set to true, adds a bearer token authentication header.
-    ## If set to 'tls_only', only adds a bearer token authentication header if the endpoint is secure https.
-    ## Note: If bearer_token_path is not set, the default path is /var/run/secrets/kubernetes.io/serviceaccount/token.
+    ## @param raw_line_filters - list of strings - optional
+    ## A list of regular expressions used to exclude lines read from the `openmetrics_endpoint`
+    ## from being parsed.
     #
-    # bearer_token_auth: false
+    # raw_line_filters: []
 
-    ## @param bearer_token_path - string - optional
-    ## The path to a Kubernetes service account bearer token file. Make sure the file exists and is mounted correctly.
-    ## Note: bearer_token_auth should be set to true to enable adding the token to HTTP headers for authentication.
+    ## @param cache_metric_wildcards - boolean - optional - default: true
+    ## Whether or not to cache data from metrics that are defined by regular expressions rather
+    ## than the full metric name.
     #
-    # bearer_token_path: <TOKEN_PATH>
+    # cache_metric_wildcards: true
 
-    ## @param ignore_metrics - list of strings - optional
-    ## A list of metrics to ignore, the "*" wildcard can be used to match multiple metric names.
-    ## The wildcard matching is done via fnmatch, it locates a match anywhere in the string.
+    ## @param use_latest_spec - boolean - optional - default: false
+    ## Whether or not the parser will strictly adhere to the latest version of the OpenMetrics specification.
     #
-    # ignore_metrics:
-    #   - <IGNORED_METRIC_NAME>
-    #   - <SUBSTRING_*>
-    #   - <*_SUBSTRING>
+    # use_latest_spec: false
 
-    ## @param ignore_metrics_by_labels - mapping - optional
-    ## A mapping of labels where metrics with matching label key and values are ignored.
-    ## Use the "*" wildcard to match all label values.
+    ## @param telemetry - boolean - optional - default: false
+    ## Whether or not to submit metrics prefixed by `<NAMESPACE>.telemetry.` for debugging purposes.
     #
-    # ignore_metrics_by_labels:
-    #   <KEY_1>:
-    #   - <LABEL_1>
-    #   - <LABEL_2>
-    #   <KEY_2>:
-    #   - '*'
+    # telemetry: false
 
     ## @param ignore_tags - list of strings - optional
     ## A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
@@ -534,10 +492,6 @@ instances:
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable those by setting `tls_ignore_warning` to true.
-    ##
-    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
-    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
-    ## to true.
     #
     # tls_ignore_warning: false
 
@@ -611,10 +565,10 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
-    ## @param request_size - number - optional - default: 10
+    ## @param request_size - number - optional - default: 16
     ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
     #
-    # request_size: 10
+    # request_size: 16
 
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
@@ -659,6 +613,17 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
 
 ## Log Section
 ##

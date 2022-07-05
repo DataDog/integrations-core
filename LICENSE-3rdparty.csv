@@ -22,7 +22,7 @@ clickhouse-driver,PyPI,MIT,Konstantin Lebedev
 contextlib2,PyPI,PSF,Nick Coghlan
 cryptography,PyPI,Apache-2.0,The Python Cryptographic Authority and individual contributors | The cryptography developers
 cryptography,PyPI,BSD-3-Clause,The Python Cryptographic Authority and individual contributors | The cryptography developers
-cx-Oracle,PyPI,BSD-3-Clause,Anthony Tuininga
+cx-Oracle,PyPI,BSD-3-Clause,""Anthony Tuininga", | Anthony Tuininga"
 ddtrace,PyPI,BSD-3-Clause,"Datadog, Inc."
 dnspython,PyPI,ISC,Bob Halley
 enum34,PyPI,BSD-3-Clause,Ethan Furman
@@ -31,6 +31,7 @@ flup-py3,Vendor,BSD-3-Clause,Allan Saddi
 foundationdb,PyPI,Apache-2.0,FoundationDB
 futures,PyPI,PSF,Brian Quinlan
 gearman,PyPI,Apache-2.0,Matthew Tai
+gssapi,PyPI,ISC,The Python GSSAPI Team
 immutables,PyPI,Apache-2.0,MagicStack Inc
 in-toto,PyPI,Apache-2.0,New York University: Secure Systems Lab
 ipaddress,PyPI,PSF,Philipp Hagemeister
@@ -56,7 +57,6 @@ pyasn1,PyPI,BSD-3-Clause,Ilya Etingof
 pycryptodomex,PyPI,BSD-2-Clause,Helder Eijs
 pycryptodomex,PyPI,Unlicense,Helder Eijs
 pydantic,PyPI,MIT,Samuel Colvin
-pyhdb,PyPI,Apache-2.0,Christoph Heer
 pymongo,PyPI,Apache-2.0,Bernie Hackett
 pymqi,PyPI,PSF,Dariusz Suchojad
 pyodbc,PyPI,MIT,Michael Kleehammer
@@ -91,7 +91,6 @@ tuf,PyPI,Apache-2.0,https://www.updateframework.com
 tuf,PyPI,MIT,https://www.updateframework.com
 typing,PyPI,PSF,"Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Ivan Levkivskyi"
 uptime,PyPI,BSD-2-Clause,Koen Crolla
-urllib3,PyPI,MIT,Andrey Petrov
 vertica-python,PyPI,Apache-2.0,"Justin Berka, Alex Kim, Siting Ren"
 win-inet-pton,PyPI,Unlicense,Ryan Vennell
 wrapt,PyPI,BSD-3-Clause,Graham Dumpleton

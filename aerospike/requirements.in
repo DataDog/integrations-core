@@ -1,4 +1,0 @@
-aerospike==4.0.0; sys_platform != 'win32' and sys_platform != 'darwin' and python_version < '3.0'
-# When bumping check if this is still needed
-# https://github.com/DataDog/datadog-agent/blob/71a595fabc8bd5b087581c41dcabcf43f6864935/omnibus/config/software/datadog-agent-integrations-py3.rb#L43
-aerospike==6.0.0; sys_platform != 'win32' and sys_platform != 'darwin' and python_version > '3.0'

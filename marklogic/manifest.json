@@ -17,7 +17,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-MarkLogic Integration",
+  "public_title": "MarkLogic Integration",
   "categories": [
     "data store",
     "log collection"

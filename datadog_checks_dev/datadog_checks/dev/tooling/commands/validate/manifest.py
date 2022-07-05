@@ -27,7 +27,7 @@ from ..console import (
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `manifest.json` files')
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 @click.option('--fix', is_flag=True, help='Attempt to fix errors')
 @click.pass_context
 def manifest(ctx, check, fix):

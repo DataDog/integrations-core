@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools; python_version < '3.0'",
+    "setuptools<61",
 ]
 build-backend = "hatchling.build"
 
@@ -9,7 +9,8 @@ build-backend = "hatchling.build"
 name = "datadog-tokumx"
 description = "The TokuMX check"
 readme = "README.md"
-license = "BSD-3-Clause"
+license = {text = "BSD-3-Clause"}
+requires-python = "==2.7.*"
 keywords = [
     "datadog",
     "datadog agent",
@@ -25,11 +26,10 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: 3.8",
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=11.2.0",
+    "datadog-checks-base>=25.1.0",
 ]
 dynamic = [
     "version",
@@ -55,7 +55,7 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 include = [
-    "/datadog_checks",
+    "/datadog_checks/tokumx",
 ]
 dev-mode-dirs = [
     ".",

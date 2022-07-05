@@ -54,6 +54,11 @@ COMPLEX_STATUS_VARS = [
     'mysql.performance.qcache_lowmem_prunes',
 ]
 
+TABLE_VARS = [
+    'mysql.info.table.index_size',
+    'mysql.info.table.data_size',
+]
+
 # Possibly from SHOW GLOBAL VARIABLES
 VARIABLES_VARS = [
     'mysql.myisam.key_buffer_size',

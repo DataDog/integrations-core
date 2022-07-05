@@ -1,0 +1,17 @@
+name: pulsar
+files:
+- name: pulsar.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.value.example: http://localhost:8080/metrics
+  - template: logs
+    example:
+    - type: file
+      path: /pulsar/logs/pulsar.log
+      source: pulsar

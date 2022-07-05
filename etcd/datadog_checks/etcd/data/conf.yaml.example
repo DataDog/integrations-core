@@ -47,7 +47,8 @@ instances:
 
   -
     ## @param use_preview - boolean - optional - default: true
-    ## Whether or not to preview the new version of the check supporting only ETCD 3+
+    ## Enable this option to run the Prometheus-based check of etcd.
+    ## Note: This requires etcd v3 or greater.
     #
     # use_preview: true
 
@@ -157,6 +158,11 @@ instances:
     ## Note: bearer_token_auth should be set to true to enable adding the token to HTTP headers for authentication.
     #
     # bearer_token_path: <TOKEN_PATH>
+
+    ## @param bearer_token_refresh_interval - integer - optional - default: 60
+    ## The refresh interval to keep the bearer token up-to-date.
+    #
+    # bearer_token_refresh_interval: 60
 
     ## @param ignore_metrics - list of strings - optional
     ## A list of metrics to ignore, the "*" wildcard can be used to match multiple metric names.
@@ -393,10 +399,6 @@ instances:
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable those by setting `tls_ignore_warning` to true.
-    ##
-    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
-    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
-    ## to true.
     #
     # tls_ignore_warning: false
 
@@ -518,6 +520,17 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
 
     ## @param leader_tag - boolean - optional - default: true
     ## Enable to tag metrics with `is_leader:true` or `is_leader:false`.

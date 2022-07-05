@@ -1,4 +1,0 @@
-cryptography==3.3.2; python_version < '3.0'
-cryptography==3.4.8; python_version > "3.0"
-requests_ntlm==1.1.0
-urllib3==1.26.8

@@ -16,6 +16,9 @@ class {check_class}(AgentCheck):
     def __init__(self, name, init_config, instances):
         super({check_class}, self).__init__(name, init_config, instances)
 
+        # Use self.instance to read the check configuration
+        # self.url = self.instance.get("url")
+
         # If the check is going to perform SQL queries you should define a query manager here.
         # More info at
         # https://datadoghq.dev/integrations-core/base/databases/#datadog_checks.base.utils.db.core.QueryManager
@@ -33,13 +36,10 @@ class {check_class}(AgentCheck):
         # type: (Any) -> None
         # The following are useful bits of code to help new users get started.
 
-        # Use self.instance to read the check configuration
-        # url = self.instance.get("url")
-
         # Perform HTTP Requests with our HTTP wrapper.
         # More info at https://datadoghq.dev/integrations-core/base/http/
         # try:
-        #     response = self.http.get(url)
+        #     response = self.http.get(self.url)
         #     response.raise_for_status()
         #     response_json = response.json()
 
@@ -47,7 +47,7 @@ class {check_class}(AgentCheck):
         #     self.service_check(
         #         "can_connect",
         #         AgentCheck.CRITICAL,
-        #         message="Request timeout: {{}}, {{}}".format(url, e),
+        #         message="Request timeout: {{}}, {{}}".format(self.url, e),
         #     )
         #     raise
 
@@ -55,7 +55,7 @@ class {check_class}(AgentCheck):
         #     self.service_check(
         #         "can_connect",
         #         AgentCheck.CRITICAL,
-        #         message="Request failed: {{}}, {{}}".format(url, e),
+        #         message="Request failed: {{}}, {{}}".format(self.url, e),
         #     )
         #     raise
 
@@ -63,7 +63,7 @@ class {check_class}(AgentCheck):
         #     self.service_check(
         #         "can_connect",
         #         AgentCheck.CRITICAL,
-        #         message="JSON Parse failed: {{}}, {{}}".format(url, e),
+        #         message="JSON Parse failed: {{}}, {{}}".format(self.url, e),
         #     )
         #     raise
 

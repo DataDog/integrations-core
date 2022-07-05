@@ -378,7 +378,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "sum:kube_apiserver.etcd_object_counts{$kube_cluster_name}",
+                      "query": "sum:kube_apiserver.storage_objects{$kube_cluster_name}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -428,7 +428,7 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "sum:kube_apiserver.etcd_object_counts{$kube_cluster_name} by {resource}",
+                      "query": "sum:kube_apiserver.storage_objects{$kube_cluster_name} by {resource}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "last"

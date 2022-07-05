@@ -76,14 +76,14 @@ instances:
     ## 1. If the item is a string, then it represents the exposed metric name, and
     ##    the sent metric name will be identical. For example:
     ##
-    ##      metrics:
+    ##      extra_metrics:
     ##      - <METRIC_1>
     ##      - <METRIC_2>
     ## 2. If the item is a mapping, then the keys represent the exposed metric names.
     ##
     ##      a. If a value is a string, then it represents the sent metric name. For example:
     ##
-    ##           metrics:
+    ##           extra_metrics:
     ##           - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
     ##           - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
     ##      b. If a value is a mapping, then it must have a `name` and/or `type` key.
@@ -91,7 +91,7 @@ instances:
     ##         the metric should be handled, overriding any type information the endpoint
     ##         may provide. For example:
     ##
-    ##           metrics:
+    ##           extra_metrics:
     ##           - <EXPOSED_METRIC_1>:
     ##               name: <SENT_METRIC_1>
     ##               type: <METRIC_TYPE_1>
@@ -101,9 +101,15 @@ instances:
     ##
     ##         The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
     ##
+    ## Note: To collect counter metrics with names ending in `_total`, specify the metric name without the `_total`
+    ## suffix. For example, to collect the counter metric `promhttp_metric_handler_requests_total`, specify
+    ## `promhttp_metric_handler_requests`. This submits to Datadog the metric name appended with `.count`.
+    ## For more information, see:
+    ## https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
+    ##
     ## Regular expressions may be used to match the exposed metric names, for example:
     ##
-    ##   metrics:
+    ##   extra_metrics:
     ##   - ^network_(ingress|egress)_.+
     ##   - .+:
     ##       type: gauge
@@ -486,10 +492,6 @@ instances:
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable those by setting `tls_ignore_warning` to true.
-    ##
-    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
-    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
-    ## to true.
     #
     # tls_ignore_warning: false
 
@@ -611,6 +613,17 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
 
 ## Log Section
 ##

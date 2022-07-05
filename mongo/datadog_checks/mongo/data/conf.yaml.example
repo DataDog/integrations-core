@@ -13,7 +13,7 @@ init_config:
 #
 instances:
 
-    ## @param hosts - list of strings - optional
+    ## @param hosts - string or list of strings - optional
     ## The host (and optional port number) where the mongod instance (or mongos instances for
     ## a sharded cluster) is running. You can specify a hostname, IP address, or UNIX domain
     ## socket. Specify as many hosts as appropriate for your deployment topology:
@@ -198,6 +198,17 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
 
 ## Log Section
 ##

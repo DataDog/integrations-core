@@ -239,7 +239,7 @@ class FargateCheck(AgentCheck):
                     try:
                         t_delta = int((parser.isoparse(t1) - parser.isoparse(t0)).total_seconds())
                         # Simplified formula for cpu_percent where system_delta = t_delta * active_cpus * (10 ** 9)
-                        cpu_percent = (cpu_delta / (t_delta * (10 ** 9))) * 100.0
+                        cpu_percent = (cpu_delta / (t_delta * (10**9))) * 100.0
                         cpu_percent = round_value(cpu_percent, 2)
                         self.gauge('ecs.fargate.cpu.percent', cpu_percent, tags)
                     except ValueError:
@@ -266,7 +266,9 @@ class FargateCheck(AgentCheck):
                 self.gauge('ecs.fargate.mem.usage', value, tags)
 
             value = memory_stats.get('limit')
-            if value is not None:
+            # When there is no hard-limit defined, the ECS API returns that value of 8 EiB
+            # It's not exactly 2^63, but a rounded value of it most probably because of a int->float->int conversion
+            if value is not None and value != 9223372036854771712:
                 self.gauge('ecs.fargate.mem.limit', value, tags)
 
             # I/O metrics

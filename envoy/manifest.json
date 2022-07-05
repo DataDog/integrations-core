@@ -14,7 +14,7 @@
   "metric_prefix": "envoy.",
   "metric_to_check": "envoy.server.uptime",
   "name": "envoy",
-  "public_title": "Datadog-Envoy Integration",
+  "public_title": "Envoy Integration",
   "short_description": "Envoy is an open source edge and service proxy",
   "support": "core",
   "supported_os": [

@@ -36,12 +36,12 @@ class ReplicationOpLogCollector(MongoCollector):
 
         if ol_options:
             try:
-                oplog_data['logSizeMB'] = round_value(ol_options['size'] / 2.0 ** 20, 2)
+                oplog_data['logSizeMB'] = round_value(ol_options['size'] / 2.0**20, 2)
 
                 oplog = localdb[collection_name]
 
                 oplog_data['usedSizeMB'] = round_value(
-                    localdb.command("collstats", collection_name)['size'] / 2.0 ** 20, 2
+                    localdb.command("collstats", collection_name)['size'] / 2.0**20, 2
                 )
 
                 op_asc_cursor = oplog.find({"ts": {"$exists": 1}}).sort("$natural", pymongo.ASCENDING).limit(1)

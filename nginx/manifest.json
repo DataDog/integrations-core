@@ -18,7 +18,7 @@
   "process_signatures": [
     "nginx: master process"
   ],
-  "public_title": "Datadog-Nginx Integration",
+  "public_title": "Nginx Integration",
   "short_description": "Monitor connection and request metrics. Get more metrics with NGINX Plus.",
   "support": "core",
   "supported_os": [

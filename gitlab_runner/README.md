@@ -78,7 +78,7 @@ The Gitlab Runner check provides a service check to ensure that the Runner can t
 
 Need help? Contact [Datadog support][10].
 
-[1]: https://docs.gitlab.com/runner/monitoring/README.html
+[1]: https://docs.gitlab.com/runner/monitoring/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

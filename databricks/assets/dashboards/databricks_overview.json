@@ -290,7 +290,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:system.cpu.system{$spark_node,$databricks_cluster_name,$app_name}"
+                                            "query": "avg:system.cpu.system{$spark_node,$databricks_cluster_name,$app_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",

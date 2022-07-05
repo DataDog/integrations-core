@@ -50,7 +50,7 @@ def redis_auth():
     """
     Start a standalone redis server requiring authentication before running a
     test and stop it afterwards.
-    If there's any problem executing docker-compose, let the exception bubble
+    If there's any problem executing `docker compose`, let the exception bubble
     up.
     """
     with docker_run(

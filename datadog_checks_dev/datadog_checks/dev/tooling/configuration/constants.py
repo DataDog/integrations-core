@@ -30,7 +30,6 @@ OPENAPI_SCHEMA_PROPERTIES = {
     'maximum',
     'minItems',
     'minLength',
-    'minProperties',
     'minimum',
     'multipleOf',
     'not',
@@ -40,5 +39,4 @@ OPENAPI_SCHEMA_PROPERTIES = {
     'required',
     'title',
     'type',
-    'uniqueItems',
 }

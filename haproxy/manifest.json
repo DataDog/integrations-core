@@ -13,6 +13,7 @@
   "manifest_version": "1.0.0",
   "metric_prefix": "haproxy.",
   "metric_to_check": [
+    "haproxy.frontend.bytes.in.count",
     "haproxy.frontend.bytes.in_rate",
     "haproxy.frontend.bytes.in.total"
   ],
@@ -22,7 +23,7 @@
     "haproxy-master",
     "haproxy-controller"
   ],
-  "public_title": "Datadog-HAProxy Integration",
+  "public_title": "HAProxy Integration",
   "short_description": "Monitor key metrics for requests, responses, errors, bytes served, and more.",
   "support": "core",
   "supported_os": [
@@ -51,7 +52,8 @@
     },
     "dashboards": {
       "haproxy": "assets/dashboards/overview.json",
-      "HAProxy - Overview (Prometheus)": "assets/dashboards/prometheus_overview.json"
+      "HAProxy - Overview (Prometheus)": "assets/dashboards/prometheus_overview.json",
+      "HAProxy - Overview (OpenMetrics)": "assets/dashboards/openmetrics_overview.json"
     },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",

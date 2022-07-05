@@ -14,8 +14,14 @@ from ..fs import (
     write_file,
     write_file_binary,
 )
-from .constants import integration_type_links
-from .utils import get_config_models_documentation, get_license_header, kebab_case_name, normalize_package_name
+from .constants import REPO_CHOICES, integration_type_links
+from .utils import (
+    get_config_models_documentation,
+    get_license_header,
+    kebab_case_name,
+    normalize_package_name,
+    normalize_project_name,
+)
 
 TEMPLATES_DIR = path_join(os.path.dirname(os.path.abspath(__file__)), 'templates', 'integration')
 BINARY_EXTENSIONS = ('.png',)
@@ -91,6 +97,7 @@ To install the {integration_name} check on your host:
         'author': author,
         'check_class': f"{''.join(part.capitalize() for part in normalized_integration_name.split('_'))}Check",
         'check_name': check_name,
+        'project_name': normalize_project_name(normalized_integration_name),
         'documentation': get_config_models_documentation(),
         'integration_name': integration_name,
         'check_name_kebab': check_name_kebab,
@@ -100,6 +107,7 @@ To install the {integration_name} check on your host:
         'license_header': license_header,
         'install_info': install_info,
         'repo_choice': repo_choice,
+        'repo_name': REPO_CHOICES[repo_choice],
         'manifest_v2': manifest_v2,
         'support_type': support_type,
         'test_dev_dep': test_dev_dep,
@@ -121,10 +129,16 @@ def create_template_files(template_name, new_root, config, read=False):
     for root, _, template_files in os.walk(template_root):
         for template_file in template_files:
             if not template_file.endswith(('.pyc', '.pyo')):
-                # Use a special README for the marketplace/partner support_type integrations
-                if template_file == 'README.md' and config.get('support_type') == 'partner':
-                    template_path = path_join(TEMPLATES_DIR, 'marketplace/', 'README.md')
-                    file_path = path_join("/", config.get('check_name'), "README.md")
+                if template_file == 'README.md' and config.get('support_type') in ('partner', 'contrib'):
+                    # Custom README for the marketplace/partner support_type integrations
+                    if config.get('support_type') == 'partner':
+                        template_path = path_join(TEMPLATES_DIR, 'marketplace/', 'README.md')
+                        file_path = path_join("/", config.get('check_name'), "README.md")
+
+                    # Custom README for tile apps
+                    elif config.get('support_type') == 'contrib' and config.get('manifest_v2'):
+                        template_path = path_join(TEMPLATES_DIR, 'tile_v2/', 'README.md')
+                        file_path = path_join("/", config.get('check_name'), "README.md")
 
                 # Use a special readme file for media carousel information
                 # .gitkeep currently only used for images, but double check anyway

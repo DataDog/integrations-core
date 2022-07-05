@@ -85,7 +85,7 @@ class IBMMQConfig:
         self.collect_statistics_metrics = is_affirmative(
             instance.get('collect_statistics_metrics', False)
         )  # type: bool
-
+        self.collect_reset_queue_metrics = is_affirmative(instance.get('collect_reset_queue_metrics', True))
         if int(self.auto_discover_queues) + int(bool(self.queue_patterns)) + int(bool(self.queue_regex)) > 1:
             self.log.warning(
                 "Configurations auto_discover_queues, queue_patterns and queue_regex are not intended to be used "
@@ -100,6 +100,7 @@ class IBMMQConfig:
 
         self.convert_endianness = instance.get('convert_endianness', False)  # type: bool
         self.qm_timezone = instance.get('queue_manager_timezone', 'UTC')  # type: str
+        self.auto_discover_channels = instance.get('auto_discover_channels', True)  # type: bool
 
         custom_tags = instance.get('tags', [])  # type: List[str]
         tags = [
@@ -119,6 +120,7 @@ class IBMMQConfig:
 
         # SSL options
         self.ssl = is_affirmative(instance.get('ssl_auth', False))  # type: bool
+        self.try_basic_auth = is_affirmative(instance.get('try_basic_auth', True))  # type: bool
         self.ssl_cipher_spec = instance.get('ssl_cipher_spec', 'TLS_RSA_WITH_AES_256_CBC_SHA')  # type: str
         self.ssl_key_repository_location = instance.get(
             'ssl_key_repository_location', '/var/mqm/ssl-db/client/KeyringClient'

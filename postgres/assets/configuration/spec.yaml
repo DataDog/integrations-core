@@ -150,7 +150,7 @@ files:
         you can specify the `schemas` attribute and provide a list of schemas to use for filtering.
 
         Size metrics are collected only for ordinary tables. Index metrics are collected only for user indexes. Lock
-        metrics are are collected for all relation types (table, index , view, etc.). The rest of the metrics are
+        metrics are collected for all relation types (table, index , view, etc.). The rest of the metrics are
         collected only for user tables.
         To track lock metrics for relations of a specific kind only, specify the `relkind` attribute
         as a list of the options:
@@ -392,6 +392,87 @@ files:
           value:
             type: number
             example: 3500
+            
+    - name: aws
+      description: |
+        This block defines the configuration for AWS RDS and Aurora instances. 
+        
+        Complete this section if you have installed the Datadog AWS Integration 
+        (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
+        with Postgres integration telemetry.
+        
+        These values are only applied when `dbm: true` option is set.
+      options:
+        - name: instance_endpoint
+          description: |
+            Equal to the Endpoint.Address of the instance the agent is connecting to. 
+            This value is optional if the value of `host` is already configured to the instance endpoint.
+            
+            For more information on instance endpoints, 
+            see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
+          value:
+            type: string
+            example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+
+    - name: gcp
+      description: |
+        This block defines the configuration for Google Cloud SQL instances.
+        
+        Complete this section if you have installed the Datadog GCP Integration 
+        (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
+        with Postgres integration telemetry.
+        
+        These values are only applied when `dbm: true` option is set.
+      options:
+        - name: project_id
+          description: |
+            Equal to the GCP resource's project ID.
+            
+            For more information on project IDs,
+            See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+          value:
+            type: string
+            example: foo-project
+        - name: instance_id
+          description: |
+            Equal to the GCP resource's instance ID.
+            
+            For more information on instance IDs,
+            See the GCP docs https://cloud.google.com/sql/docs/postgres/instance-settings#instance-id-2ndgen
+          value:
+            type: string
+            example: foo-database
+
+    - name: azure
+      description: |
+        This block defines the configuration for Azure Database for PostgreSQL.
+        
+        Complete this section if you have installed the Datadog Azure Integration 
+        (https://docs.datadoghq.com/integrations/azure) to enrich instances 
+        with Postgres integration telemetry.
+        These values are only applied when `dbm: true` option is set.
+      options:
+        - name: deployment_type
+          description: |
+            Equal to the deployment type for the managed database. 
+            
+            Acceptable values are:
+              - `flexible_server` 
+              - `single_server`
+              - `virtual_machine`
+            
+            For more information on deployment types, 
+            see the Azure docs https://docs.microsoft.com/en-us/azure/postgresql/overview-postgres-choose-server-options
+          value:
+            type: string
+            example: flexible_server
+        - name: name
+          description: |
+            Equal to the name of the Azure PostgreSQL database.
+          value:
+            type: string
+            example: my-postgres-database
+
     - name: obfuscator_options
       description: |
         Configure how the SQL obfuscator behaves.
@@ -406,11 +487,11 @@ files:
             example: false
         - name: collect_metadata
           description: |
-            Set to `true` to enable the collection of metadata in your SQL statements.
+            Set to `false` to disable the collection of metadata in your SQL statements.
             Metadata includes things such as tables, commands, and comments.
           value:
             type: boolean
-            example: false
+            example: true
         - name: collect_tables
           description: |
             Set to `false` to disable the collection of tables in your SQL statements.
@@ -434,6 +515,24 @@ files:
           value:
             type: boolean
             example: true
+        - name: keep_sql_alias
+          description: |
+            Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
+            `with select 1 as alias`, `select column as other_name`, or `select * from table t`.
+            When `true` these aliases will not be removed.
+          value:
+            type: boolean
+            example: true
+            display_default: true
+        - name: keep_dollar_quoted_func
+          description: |
+            Set to `true` to prevent dollar quoted function strings (e.g. `$func$`) from being removed.
+            When not removed, the sql content of dollar quoted func strings will be obfuscated.
+            Only strings with the tag `$func$` are supported.
+          value:
+            type: boolean
+            example: true
+            display_default: true
     - template: instances/default
       overrides:
         disable_generic_tags.hidden: False

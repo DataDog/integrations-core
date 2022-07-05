@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-ignite Integration",
+  "public_title": "ignite Integration",
   "categories": [
     "caching",
     "data store",

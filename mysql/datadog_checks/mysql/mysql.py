@@ -4,6 +4,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
+import copy
 import traceback
 from collections import defaultdict
 from contextlib import closing, contextmanager
@@ -16,6 +17,7 @@ from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 
+from .activity import MySQLActivity
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
 from .config import MySQLConfig
 from .const import (
@@ -35,6 +37,8 @@ from .const import (
     SCHEMA_VARS,
     STATUS_VARS,
     SYNTHETIC_VARS,
+    TABLE_ROWS_STATS_VARS,
+    TABLE_VARS,
     VARIABLES_VARS,
 )
 from .innodb_metrics import InnoDBMetrics
@@ -47,6 +51,9 @@ from .queries import (
     SQL_INNODB_ENGINES,
     SQL_PROCESS_LIST,
     SQL_QUERY_SCHEMA_SIZE,
+    SQL_QUERY_SYSTEM_TABLE_SIZE,
+    SQL_QUERY_TABLE_ROWS_STATS,
+    SQL_QUERY_TABLE_SIZE,
     SQL_REPLICATION_ROLE_AWS_AURORA,
     SQL_SERVER_ID_AWS_AURORA,
     SQL_WORKER_THREADS,
@@ -98,9 +105,13 @@ class MySql(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
+        self.performance_schema_enabled = None
+        self.userstat_enabled = None
+        self.events_wait_current_enabled = None
         self._warnings_by_code = {}
         self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
+        self._query_activity = MySQLActivity(self, self._config, self._get_connection_args())
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
@@ -130,6 +141,46 @@ class MySql(AgentCheck):
         if self._agent_hostname is None:
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
+
+    def _check_database_configuration(self, db):
+        self._check_performance_schema_enabled(db)
+        self._check_events_wait_current_enabled(db)
+
+    def _check_performance_schema_enabled(self, db):
+        if self.performance_schema_enabled is None:
+            with closing(db.cursor()) as cursor:
+                cursor.execute("SHOW VARIABLES LIKE 'performance_schema'")
+                results = dict(cursor.fetchall())
+                self.performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
+
+        return self.performance_schema_enabled
+
+    def check_userstat_enabled(self, db):
+        if self.userstat_enabled is None:
+            with closing(db.cursor()) as cursor:
+                cursor.execute("SHOW VARIABLES LIKE 'userstat'")
+                results = dict(cursor.fetchall())
+                self.userstat_enabled = self._get_variable_enabled(results, 'userstat')
+
+        return self.userstat_enabled
+
+    def _check_events_wait_current_enabled(self, db):
+        if not self._check_performance_schema_enabled(db):
+            self.log.debug('`performance_schema` is required to enable `events_waits_current`')
+            return
+        if self.events_wait_current_enabled is None:
+            with closing(db.cursor()) as cursor:
+                cursor.execute(
+                    """\
+                    SELECT
+                        NAME,
+                        ENABLED
+                    FROM performance_schema.setup_consumers WHERE NAME = 'events_waits_current'
+                    """
+                )
+                results = dict(cursor.fetchall())
+                self.events_wait_current_enabled = self._get_variable_enabled(results, 'events_waits_current')
+        return self.events_wait_current_enabled
 
     def resolve_db_host(self):
         return agent_host_resolver(self._config.host)
@@ -162,13 +213,21 @@ class MySql(AgentCheck):
                 if self._get_is_aurora(db):
                     tags = tags + self._get_runtime_aurora_tags(db)
 
+                self._check_database_configuration(db)
+
+                if self._config.table_rows_stats_enabled:
+                    self.check_userstat_enabled(db)
+
                 # Metric collection
-                self._collect_metrics(db, tags=tags)
-                self._collect_system_metrics(self._config.host, db, tags)
+                if not self._config.only_custom_queries:
+                    self._collect_metrics(db, tags=tags)
+                    self._collect_system_metrics(self._config.host, db, tags)
+
                 if self._config.dbm_enabled:
                     dbm_tags = list(set(self.service_check_tags) | set(tags))
                     self._statement_metrics.run_job_loop(dbm_tags)
                     self._statement_samples.run_job_loop(dbm_tags)
+                    self._query_activity.run_job_loop(dbm_tags)
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -186,6 +245,7 @@ class MySql(AgentCheck):
     def cancel(self):
         self._statement_samples.cancel()
         self._statement_metrics.cancel()
+        self._query_activity.cancel()
 
     def _set_qcache_stats(self):
         host_key = self._get_host_key()
@@ -272,7 +332,7 @@ class MySql(AgentCheck):
     def _collect_metrics(self, db, tags):
 
         # Get aggregate of all VARS we want to collect
-        metrics = STATUS_VARS
+        metrics = copy.deepcopy(STATUS_VARS)
 
         # collect results from db
         results = self._get_stats_from_status(db)
@@ -323,14 +383,13 @@ class MySql(AgentCheck):
             self.log.debug("Collecting Galera Metrics.")
             metrics.update(GALERA_VARS)
 
-        self.performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
         above_560 = self.version.version_compatible((5, 6, 0))
         if (
             is_affirmative(self._config.options.get('extra_performance_metrics', False))
             and above_560
             and self.performance_schema_enabled
         ):
-            # report avg query response time per schema to Datadog
+            # report size of schemas in MiB to Datadog
             results['perf_digest_95th_percentile_avg_us'] = self._get_query_exec_time_95th_us(db)
             results['query_run_time_avg'] = self._query_exec_time_per_schema(db)
             metrics.update(PERFORMANCE_VARS)
@@ -339,6 +398,27 @@ class MySql(AgentCheck):
             # report avg query response time per schema to Datadog
             results['information_schema_size'] = self._query_size_per_schema(db)
             metrics.update(SCHEMA_VARS)
+
+        if is_affirmative(self._config.options.get('table_rows_stats_metrics', False)) and self.userstat_enabled:
+            # report size of tables in MiB to Datadog
+            (rows_read_total, rows_changed_total) = self._query_rows_stats_per_table(db)
+            results['information_table_rows_read_total'] = rows_read_total
+            results['information_table_rows_changed_total'] = rows_changed_total
+            metrics.update(TABLE_ROWS_STATS_VARS)
+
+        if is_affirmative(self._config.options.get('table_size_metrics', False)):
+            # report size of tables in MiB to Datadog
+            (table_index_size, table_data_size) = self._query_size_per_table(db)
+            results['information_table_index_size'] = table_index_size
+            results['information_table_data_size'] = table_data_size
+            metrics.update(TABLE_VARS)
+
+        if is_affirmative(self._config.options.get('system_table_size_metrics', False)):
+            # report size of tables in MiB to Datadog
+            (table_index_size, table_data_size) = self._query_size_per_table(db, system_tables=True)
+            results['information_table_index_size'] = table_index_size
+            results['information_table_data_size'] = table_data_size
+            metrics.update(TABLE_VARS)
 
         if is_affirmative(self._config.options.get('replication', self._config.dbm_enabled)):
             if self.performance_schema_enabled and self._is_group_replication_active(db):
@@ -591,7 +671,12 @@ class MySql(AgentCheck):
         for tag, value in collect_all_scalars(variable, db_results):
             metric_tags = list(tags)
             if tag:
-                metric_tags.append(tag)
+                if "," in tag:
+                    t_split = tag.split(",")
+                    for t in t_split:
+                        metric_tags.append(t)
+                else:
+                    metric_tags.append(tag)
             if value is not None:
                 if metric_type == RATE:
                     self.rate(metric_name, value, tags=metric_tags, hostname=self.resolved_hostname)
@@ -870,9 +955,10 @@ class MySql(AgentCheck):
     def _are_values_numeric(cls, array):
         return all(v.isdigit() for v in array)
 
-    def _get_variable_enabled(self, results, var):
+    @staticmethod
+    def _get_variable_enabled(results, var):
         enabled = collect_string(var, results)
-        return enabled and enabled.lower().strip() == 'on'
+        return enabled and is_affirmative(enabled.lower().strip())
 
     def _get_query_exec_time_95th_us(self, db):
         # Fetches the 95th percentile query execution time and returns the value
@@ -920,7 +1006,38 @@ class MySql(AgentCheck):
 
                 return schema_query_avg_run_time
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("Avg exec time performance metrics unavailable at this time: %s", e)
+            self.warning("Size of schemas metrics unavailable at this time: %s", e)
+
+        return {}
+
+    def _query_size_per_table(self, db, system_tables=False):
+        try:
+            with closing(db.cursor()) as cursor:
+                if system_tables:
+                    cursor.execute(SQL_QUERY_SYSTEM_TABLE_SIZE)
+                else:
+                    cursor.execute(SQL_QUERY_TABLE_SIZE)
+
+                if cursor.rowcount < 1:
+                    self.warning("Failed to fetch records from the information schema 'tables' table.")
+                    return None
+
+                table_index_size = {}
+                table_data_size = {}
+                for row in cursor.fetchall():
+                    table_schema = str(row[0])
+                    table_name = str(row[1])
+                    index_size = float(row[2])
+                    data_size = float(row[3])
+
+                    # set the tag as the dictionary key
+                    table_index_size["schema:{},table:{}".format(table_schema, table_name)] = index_size
+                    table_data_size["schema:{},table:{}".format(table_schema, table_name)] = data_size
+
+                return table_index_size, table_data_size
+        except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
+            self.warning("Size of tables metrics unavailable at this time: %s", e)
+
             return None
 
     def _query_size_per_schema(self, db):
@@ -945,6 +1062,33 @@ class MySql(AgentCheck):
                 return schema_size
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             self.warning("Avg exec time performance metrics unavailable at this time: %s", e)
+
+        return {}
+
+    def _query_rows_stats_per_table(self, db):
+        try:
+            with closing(db.cursor()) as cursor:
+                cursor.execute(SQL_QUERY_TABLE_ROWS_STATS)
+
+                if cursor.rowcount < 1:
+                    self.warning("Failed to fetch records from the tables rows stats 'tables' table.")
+                    return None
+
+                table_rows_read_total = {}
+                table_rows_changed_total = {}
+                for row in cursor.fetchall():
+                    table_schema = str(row[0])
+                    table_name = str(row[1])
+                    rows_read_total = long(row[2])
+                    rows_changed_total = long(row[3])
+
+                    # set the tag as the dictionary key
+                    table_rows_read_total["schema:{},table:{}".format(table_schema, table_name)] = rows_read_total
+                    table_rows_changed_total["schema:{},table:{}".format(table_schema, table_name)] = rows_changed_total
+
+                return table_rows_read_total, table_rows_changed_total
+        except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
+            self.warning("Tables rows stats metrics unavailable at this time: %s", e)
 
         return {}
 

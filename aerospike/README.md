@@ -27,9 +27,13 @@ No additional installation is needed on your server.
 ##### Metric collection
 To configure this check for an Agent running on a host:
 
-1. Edit the `aerospike.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your aerospike performance data. See the [sample aerospike.d/conf.yaml][3] for all available configuration options.
+1. Install and configure the [Aerospike Prometheus Exporter][10]- refer to [Aerospike's documentation][11] for more details.
 
-2. [Restart the Agent][4].
+2. Edit the `aerospike.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Aerospike performance data. See the [sample aerospike.d/conf.yaml][3] for all available configuration options.
+
+3. [Restart the Agent][4].
+
+**Note**: Version 1.16.0+ of this check uses [OpenMetrics][12] for metric collection, which requires Python 3. For hosts that are unable to use Python 3, or if you would like to use a legacy version of this check, refer to the [example config][13].
 
 ##### Log collection
 
@@ -67,7 +71,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 | -------------------- | ------------------------------------ |
 | `<INTEGRATION_NAME>` | `aerospike`                          |
 | `<INIT_CONFIG>`      | blank or `{}`                        |
-| `<INSTANCE_CONFIG>`  | `{"host":"%%host%%", "port":"3000"}` |
+| `<INSTANCE_CONFIG>`  | `{"openmetrics_endpoint": "http://%%host%%:9145/metrics"}` |
 
 ##### Log collection
 
@@ -114,3 +118,7 @@ Need help? Contact [Datadog support][9].
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/aerospike/metadata.csv
 [9]: https://docs.datadoghq.com/help/
+[10]: https://github.com/aerospike/aerospike-prometheus-exporter
+[11]: https://docs.aerospike.com/monitorstack/new/installing-components
+[12]: https://docs.datadoghq.com/integrations/openmetrics/
+[13]: https://github.com/DataDog/integrations-core/blob/7.36.x/aerospike/datadog_checks/aerospike/data/conf.yaml.example

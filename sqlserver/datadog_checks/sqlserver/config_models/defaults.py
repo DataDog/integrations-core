@@ -46,6 +46,14 @@ def instance_availability_group(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_aws(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_azure(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_command_timeout(field, value):
     return 5
 
@@ -98,6 +106,10 @@ def instance_empty_default_hostname(field, value):
     return False
 
 
+def instance_gcp(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_ignore_missing_database(field, value):
     return False
 
@@ -124,6 +136,10 @@ def instance_include_master_files_metrics(field, value):
 
 def instance_include_task_scheduler_metrics(field, value):
     return False
+
+
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_min_collection_interval(field, value):
@@ -164,6 +180,10 @@ def instance_query_metrics(field, value):
 
 def instance_reported_hostname(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_server_version(field, value):
+    return '2014'
 
 
 def instance_service(field, value):

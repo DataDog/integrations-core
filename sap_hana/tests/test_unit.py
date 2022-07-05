@@ -1,16 +1,12 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import logging
 
 import certifi
 import mock
 import pytest
 
 from datadog_checks.sap_hana import SapHanaCheck
-from datadog_checks.sap_hana.connection import HanaConnection
-
-from .common import requires_legacy_library, requires_proprietary_library
 
 pytestmark = pytest.mark.unit
 
@@ -139,63 +135,6 @@ def test_custom_query_configuration(instance):
     gauge.assert_not_called()
 
 
-@requires_legacy_library
-def test_tls_overwrite():
-    """Tests that the connection class correctly overrides the `_open_socket_and_init_protocoll` method.
-    The fact that there is a typo in the private method name makes it possible that this could change in the future.
-    """
-    tls_context = mock.MagicMock()
-    socket = mock.MagicMock()
-    conn = HanaConnection("localhost", 8000, 'foo', 'bar', tls_context=tls_context)
-    with mock.patch('socket.create_connection', mock.MagicMock(return_value=socket)):
-        socket.recv.return_value = b'12345678'
-        tls_context.wrap_socket.return_value = socket
-        with pytest.raises(Exception, match='Invalid message header received'):
-            conn.connect()
-        tls_context.wrap_socket.assert_called()
-
-
-@requires_legacy_library
-def test_no_tls_overwrite_by_default():
-    tls_context = mock.MagicMock(__nonzero__=lambda *args: False, __bool__=lambda *args: False)
-    socket = mock.MagicMock()
-    conn = HanaConnection("localhost", 8000, 'foo', 'bar', tls_context=tls_context)
-    with mock.patch('socket.create_connection', mock.MagicMock(return_value=socket)):
-        socket.recv.return_value = b'12345678'
-        tls_context.wrap_socket.return_value = socket
-        with pytest.raises(Exception, match='Invalid message header received'):
-            conn.connect()
-        tls_context.wrap_socket.assert_not_called()
-
-
-@requires_legacy_library
-@pytest.mark.parametrize(
-    'init_config, instance_config, default_instance, persist',
-    [
-        pytest.param({'persist_db_connections': False}, None, True, False, id='Test option set in init_config'),
-        pytest.param({}, False, False, False, id='Test option set in instance'),
-        pytest.param({'persist_db_connections': False}, True, False, True, id='Test instance override'),
-        pytest.param({}, None, True, True, id='Test instance default behavior'),
-    ],
-)
-def test_persisted_db_connection(
-    instance, dd_run_check, caplog, init_config, instance_config, persist, default_instance
-):
-    caplog.clear()
-    caplog.set_level(logging.DEBUG)
-    expected_message = 'Refreshing database connection.'
-    if not default_instance:
-        instance['persist_db_connections'] = instance_config
-    check = SapHanaCheck('sap_hana', init_config, [instance])
-    dd_run_check(check)
-    if persist:
-        assert expected_message not in caplog.text
-    else:
-        assert expected_message in caplog.text
-    assert check._persist_db_connections == persist
-
-
-@requires_proprietary_library
 class TestConnectionProperties:
     def test_default(self, instance):
         check = SapHanaCheck('sap_hana', {}, [instance])

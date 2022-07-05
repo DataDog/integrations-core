@@ -3,9 +3,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from datadog_checks.exchange_server.metrics import METRICS_CONFIG
 
+CHECK_NAME = 'exchange_server'
 MINIMAL_INSTANCE = {'host': '.'}
 
-CHECK_NAME = 'exchange_server'
+INSTANCE = {'host': '.'}
 
 DATABASE_INSTANCES = [
     'Information Store/_Total',

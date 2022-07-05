@@ -16,7 +16,7 @@ from ..console import CONTEXT_SETTINGS, annotate_error, echo_failure, echo_succe
     context_settings=CONTEXT_SETTINGS,
     short_help='Validate that no integration uses the legacy signature',
 )
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 def legacy_signature(check):
     """Validate that no integration uses the legacy signature.
 

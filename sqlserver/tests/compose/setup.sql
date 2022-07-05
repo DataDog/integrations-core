@@ -33,6 +33,19 @@ EXEC sp_addrolemember 'db_datareader', 'fred'
 EXEC sp_addrolemember 'db_datawriter', 'bob'
 GO
 
+-- create an offline database to have an unavailable database to test with
+CREATE DATABASE unavailable_db;
+GO
+ALTER DATABASE unavailable_db SET OFFLINE;
+GO
+
+-- create a a restricted database to ensure the agent gracefully handles not being able to connect
+-- to it
+CREATE DATABASE restricted_db;
+GO
+ALTER DATABASE restricted_db SET RESTRICTED_USER
+GO
+
 -- create test procedure for metrics loading feature
 USE master;
 GO
@@ -54,3 +67,24 @@ BEGIN
 END;
 GO
 GRANT EXECUTE on pyStoredProc to datadog;
+GO
+
+CREATE PROCEDURE exampleProcWithoutNocount AS
+BEGIN
+    CREATE TABLE #Hello
+    (
+        [value] int not null,
+    )
+    INSERT INTO #Hello VALUES (1)
+    select * from #Hello;
+END;
+GO
+GRANT EXECUTE on exampleProcWithoutNocount to datadog;
+GO
+
+CREATE PROCEDURE encryptedProc WITH ENCRYPTION AS
+BEGIN
+    select count(*) from sys.databases;
+END;
+GO
+GRANT EXECUTE on encryptedProc to bob;

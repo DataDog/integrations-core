@@ -78,7 +78,7 @@ class Platform(object):
 
     @staticmethod
     def python_architecture():
-        if sys.maxsize > 2 ** 32:
+        if sys.maxsize > 2**32:
             return "64bit"
         else:
             return "32bit"

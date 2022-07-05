@@ -11,10 +11,10 @@ This check monitors [IBM MQ][1] versions 8 to 9.0.
 The IBM MQ check is included in the [Datadog Agent][2] package.
 
 To use the IBM MQ check, you need to make sure the [IBM MQ Client][3] 9.1+ is installed (unless a compatible version of IBM MQ server is installed on the Agent host). Currently, the IBM MQ check does not support connecting to an IBM MQ server on z/OS.
-   
+
 #### On Linux
 
-Update your `LD_LIBRARY_PATH` and `C_INCLUDE_PATH` to include the location of the libraries. (Create these two environment variables if they don’t exist yet.)
+Update your `LD_LIBRARY_PATH` and `C_INCLUDE_PATH` to include the location of the libraries. (Create these two environment variables if they don't exist yet.)
 For example, if you installed it in `/opt`:
 
 ```text
@@ -138,7 +138,7 @@ Configure the environment variable `MQ_FILE_PATH`, to point at the data director
 
 ### Permissions and authentication
 
-There are many ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions.
+There are many ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions and, optionally, `+chg` permissions. `+chg` permissions are required to collect metrics for [reset queue statistics][14] (`MQCMD_RESET_Q_STATS`). If you do not wish to collect these metrics you can disable `collect_reset_queue_metrics` on the configuration. Collecting reset queue statistics performance data will also reset the performance data.
 
 **Note**: "Queue Monitoring" must be enabled and set to at least "Medium". This can be done using the MQ UI or with an mqsc command:
 
@@ -263,7 +263,33 @@ See [service_checks.json][11] for a list of service checks provided by this inte
 
 ## Troubleshooting
 
+### Reset queue statistics MQRC_NOT_AUTHORIZED permission warning
+If you are getting the following warning:
+
+```
+Warning: Error getting pcf queue reset metrics for SAMPLE.QUEUE.1: MQI Error. Comp: 2, Reason 2035: FAILED: MQRC_NOT_AUTHORIZED
+```
+
+This is due to the `datadog` user not having the `+chg` permission to collect reset queue metrics. To fix this, you can either give `+chg` permissions to the `datadog` user [using `setmqaut`][15] and collect queue reset metrics, or you can disable the `collect_reset_queue_metrics`:
+```yaml
+    collect_reset_queue_metrics: false
+```
+
+### High resource utilization
+The IBM MQ check performs queries on the server, sometimes these queries can be expensive and cause a degradation on the check.
+
+If you observe that the check is taking a long time to execute or that is consuming many resources on your host,
+you can potentially reduce the scope of the check by trying the following:
+
+* If you are using `auto_discover_queues`, try using `queue_patterns` or `queue_regex` instead to only discover certain queues. This is particularly relevant if your system creates dynamic queues.
+* If you are autodiscovering queues with `queue_patterns` or `queue_regex`, try tightening the pattern or regex so it matches _less_ queues.
+* Disable `auto_discover_channels` if you have too many channels.
+* Disable `collect_statistics_metrics`.
+
+### Other
+
 Need help? Contact [Datadog support][12].
+
 
 ## Further Reading
 
@@ -284,3 +310,5 @@ Additional helpful documentation, links, and articles:
 [11]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/assets/service_checks.json
 [12]: https://docs.datadoghq.com/help/
 [13]: https://www.datadoghq.com/blog/monitor-ibmmq-with-datadog
+[14]: https://www.ibm.com/docs/en/ibm-mq/9.1?topic=formats-reset-queue-statistics
+[15]: https://www.ibm.com/docs/en/ibm-mq/9.2?topic=reference-setmqaut-grant-revoke-authority

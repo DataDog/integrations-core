@@ -8,6 +8,13 @@ from contextlib import closing
 from itertools import chain
 
 import certifi
+
+from datadog_checks.base.errors import CheckException
+
+try:
+    from hdbcli.dbapi import Connection as HanaConnection
+except ImportError:
+    HanaConnection = None
 from six import iteritems
 from six.moves import zip
 
@@ -17,7 +24,6 @@ from datadog_checks.base.utils.constants import MICROSECOND
 from datadog_checks.base.utils.containers import iter_unique
 
 from . import queries
-from .connection import USING_HDBCLI, HanaConnection
 from .exceptions import OperationalError, QueryExecutionError
 from .utils import compute_percent, positive
 
@@ -79,7 +85,7 @@ class SapHanaCheck(AgentCheck):
         self.check_initializations.append(self.parse_config)
         self.check_initializations.append(self.set_default_methods)
 
-    def check(self, instance):
+    def check(self, _):
 
         if self._only_custom_queries:
             query_methods = [self.query_custom]
@@ -600,68 +606,46 @@ class SapHanaCheck(AgentCheck):
         if password:
             self.register_secret(password)
 
-    if USING_HDBCLI:
+    def get_connection(self):
+        if HanaConnection is None:
+            raise CheckException("hdbcli is not installed. Check the integration documentation to install it.")
+        # https://help.sap.com/viewer/f1b440ded6144a54ada97ff95dac7adf/2.10/en-US/ee592e89dcce4480a99571a4ae7a702f.html
+        connection_properties = self.instance.get('connection_properties', {}).copy()
 
-        def get_connection(self):
-            # https://help.sap.com/viewer/f1b440ded6144a54ada97ff95dac7adf/2.10/en-US/ee592e89dcce4480a99571a4ae7a702f.html
-            connection_properties = self.instance.get('connection_properties', {}).copy()
+        connection_properties.setdefault('address', self._server)
+        connection_properties.setdefault('port', self._port)
+        connection_properties.setdefault('user', self._username)
+        connection_properties.setdefault('password', self._password)
 
-            connection_properties.setdefault('address', self._server)
-            connection_properties.setdefault('port', self._port)
-            connection_properties.setdefault('user', self._username)
-            connection_properties.setdefault('password', self._password)
+        timeout_milliseconds = int(self._timeout * 1000)
+        connection_properties.setdefault('communicationTimeout', timeout_milliseconds)
+        connection_properties.setdefault('nodeConnectTimeout', timeout_milliseconds)
 
-            timeout_milliseconds = int(self._timeout * 1000)
-            connection_properties.setdefault('communicationTimeout', timeout_milliseconds)
-            connection_properties.setdefault('nodeConnectTimeout', timeout_milliseconds)
+        if self._use_tls:
+            connection_properties.setdefault('encrypt', True)
+            connection_properties.setdefault('sslHostNameInCertificate', self._server)
+            connection_properties.setdefault('sslSNIHostname', self._server)
 
-            if self._use_tls:
-                connection_properties.setdefault('encrypt', True)
-                connection_properties.setdefault('sslHostNameInCertificate', self._server)
-                connection_properties.setdefault('sslSNIHostname', self._server)
+            tls_verify = self.instance.get('tls_verify', True)
+            if not tls_verify:
+                connection_properties.setdefault('sslValidateCertificate', False)
 
-                tls_verify = self.instance.get('tls_verify', True)
-                if not tls_verify:
-                    connection_properties.setdefault('sslValidateCertificate', False)
+            tls_cert = self.instance.get('tls_cert')
+            if tls_cert:
+                connection_properties.setdefault('sslKeyStore', tls_cert)
 
-                tls_cert = self.instance.get('tls_cert')
-                if tls_cert:
-                    connection_properties.setdefault('sslKeyStore', tls_cert)
+            tls_ca_cert = self.instance.get('tls_ca_cert')
+            if tls_ca_cert:
+                connection_properties.setdefault('sslTrustStore', tls_ca_cert)
+            elif not connection_properties.get('sslUseDefaultTrustStore', True):
+                connection_properties.setdefault('sslTrustStore', certifi.where())
 
-                tls_ca_cert = self.instance.get('tls_ca_cert')
-                if tls_ca_cert:
-                    connection_properties.setdefault('sslTrustStore', tls_ca_cert)
-                elif not connection_properties.get('sslUseDefaultTrustStore', True):
-                    connection_properties.setdefault('sslTrustStore', certifi.where())
-
-            try:
-                connection = HanaConnection(**connection_properties)
-            except Exception as e:
-                error = str(e)
-                self.log.error('Unable to connect to SAP HANA: %s', error)
-                self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=error, tags=self._tags)
-            else:
-                self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
-                return connection
-
-    else:
-
-        def get_connection(self):
-            try:
-                tls_context = self.get_tls_context() if self._use_tls else None
-                connection = HanaConnection(
-                    host=self._server,
-                    port=self._port,
-                    user=self._username,
-                    password=self._password,
-                    tls_context=tls_context,
-                    timeout=self._timeout,
-                )
-                connection.connect()
-            except Exception as e:
-                error = str(e)
-                self.log.error('Unable to connect to SAP HANA: %s', error)
-                self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=error, tags=self._tags)
-            else:
-                self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
-                return connection
+        try:
+            connection = HanaConnection(**connection_properties)
+        except Exception as e:
+            error = str(e)
+            self.log.error('Unable to connect to SAP HANA: %s', error)
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=error, tags=self._tags)
+        else:
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
+            return connection

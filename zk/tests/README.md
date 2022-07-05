@@ -10,7 +10,8 @@ keytool -genkey -alias server \
         -keyalg RSA \
         -keypass testpass \
         -storepass testpass \
-        -keystore sample_keystore.jks 
+        -keystore sample_keystore.jks \
+        -validity 3650
 ```
 
 This generates a `sample_keystore.jks` file with password `testpass` and alias `server`. This `keystore` contains the public cert and private key of the server. 
@@ -36,7 +37,8 @@ keytool -import -v -trustcacerts \
         -file server.cer \
         -keystore sample_truststore.jks \
         -keypass testpass \
-        -storepass testpass
+        -storepass testpass \
+        -validity 3650
 ```
 
 This generates a `sample_truststore.jks` file with password `testpass`. The server cert from the `sample_keystore.jks` is placed into this `truststore` because the server trusts itself. Normally, `truststore` contains the CA certs of trusted authorities. In testing, we self-sign this.
@@ -48,10 +50,12 @@ openssl req -x509 -newkey rsa:4096 \
             -keyout private_key.pem \
             -out cert.pem \
             -sha256 \
-            -days 365
+            -days 3650
 ```
 
-This generates a `private_key.pem` and `cert.pem` file for the client. While you are prompted to input the server name, organizational unit, organization, locality, state, and country code, you only need to input the server name. Enter `localhost` for the server name.
+This generates a `private_key.pem` and `cert.pem` file for the client. When it asks for PEM pass phrase, enter `testpass`.
+
+While you are prompted to input the server name, organizational unit, organization, locality, state, and country code, you only need to input the server name. Enter `localhost` for the server name.
 
 ## Import client cert into server `truststore`
 

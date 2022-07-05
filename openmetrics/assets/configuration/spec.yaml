@@ -13,6 +13,9 @@ files:
             metrics.required: true
             metrics.hidden: false
             openmetrics_endpoint.required: false
+            tag_by_endpoint.example: false
+            tag_by_endpoint.hidden: false
+            tag_by_endpoint.enabled: true
         - template: instances/openmetrics_legacy_base
           hidden: true
           overrides:

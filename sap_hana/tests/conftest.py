@@ -4,8 +4,8 @@
 from contextlib import closing
 from copy import deepcopy
 
-import pyhdb
 import pytest
+from hdbcli.dbapi import Connection as HanaConnection
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
@@ -17,7 +17,7 @@ from .common import ADMIN_CONFIG, COMPOSE_FILE, CONFIG, E2E_METADATA
 class DbManager(object):
     def __init__(self, config):
         self.connection_args = {
-            'host': config['server'],
+            'address': config['server'],
             'port': config['port'],
             'user': config['username'],
             'password': config['password'],
@@ -48,7 +48,7 @@ class DbManager(object):
                 cursor.execute("BACKUP DATA USING FILE ('/tmp/backup')")
 
     def connect(self):
-        self.conn = pyhdb.connect(**self.connection_args)
+        self.conn = HanaConnection(**self.connection_args)
 
 
 @pytest.fixture(scope='session')

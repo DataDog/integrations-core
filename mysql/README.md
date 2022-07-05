@@ -110,7 +110,7 @@ Edit the `mysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [
   instances:
     - server: 127.0.0.1
       user: datadog
-      pass: "<YOUR_CHOSEN_PASSWORD>" # from the CREATE USER step earlier
+      password: "<YOUR_CHOSEN_PASSWORD>" # from the CREATE USER step earlier
       port: "<YOUR_MYSQL_PORT>" # e.g. 3306
       options:
         replication: false
@@ -235,7 +235,7 @@ Set [Autodiscovery Integration Templates][11] as Docker labels on your applicati
 ```yaml
 LABEL "com.datadoghq.ad.check_names"='["mysql"]'
 LABEL "com.datadoghq.ad.init_configs"='[{}]'
-LABEL "com.datadoghq.ad.instances"='[{"server": "%%host%%", "user": "datadog","pass": "<UNIQUEPASSWORD>"}]'
+LABEL "com.datadoghq.ad.instances"='[{"server": "%%host%%", "user": "datadog","password": "<UNIQUEPASSWORD>"}]'
 ```
 
 See [Autodiscovery template variables][12] for details on using `<UNIQUEPASSWORD>` as an environment variable instead of a label.
@@ -275,7 +275,7 @@ metadata:
         {
           "server": "%%host%%", 
           "user": "datadog",
-          "pass": "<UNIQUEPASSWORD>"
+          "password": "<UNIQUEPASSWORD>"
         }
       ]
   labels:
@@ -324,7 +324,7 @@ Set [Autodiscovery Integrations Templates][11] as Docker labels on your applicat
     "dockerLabels": {
       "com.datadoghq.ad.check_names": "[\"mysql\"]",
       "com.datadoghq.ad.init_configs": "[{}]",
-      "com.datadoghq.ad.instances": "[{\"server\": \"%%host%%\", \"user\": \"datadog\",\"pass\": \"<UNIQUEPASSWORD>\"}]"
+      "com.datadoghq.ad.instances": "[{\"server\": \"%%host%%\", \"user\": \"datadog\",\"password\": \"<UNIQUEPASSWORD>\"}]"
     }
   }]
 }

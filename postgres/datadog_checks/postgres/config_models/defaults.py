@@ -18,6 +18,14 @@ def instance_application_name(field, value):
     return 'datadog-agent'
 
 
+def instance_aws(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_azure(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_collect_activity_metrics(field, value):
     return False
 
@@ -74,12 +82,20 @@ def instance_empty_default_hostname(field, value):
     return False
 
 
+def instance_gcp(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_ignore_databases(field, value):
     return ['template%', 'rdsadmin', 'azure_maintenance', 'postgres']
 
 
 def instance_max_relations(field, value):
     return 300
+
+
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_min_collection_interval(field, value):

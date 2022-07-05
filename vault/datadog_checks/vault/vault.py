@@ -2,13 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
-from collections import namedtuple
 
 import requests
 from six import PY2
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 
+from .common import API_METHODS, DEFAULT_API_VERSION, SYS_HEALTH_DEFAULT_CODES, SYS_LEADER_DEFAULT_CODES, Api, Leader
 from .errors import ApiUnreachable
 from .metrics import METRIC_MAP, METRIC_ROLLBACK_COMPAT_MAP, ROUTE_METRICS_TO_TRANSFORM
 
@@ -17,19 +17,14 @@ try:
 except ImportError:
     from simplejson import JSONDecodeError
 
-Api = namedtuple('Api', ('check_health', 'check_leader'))
-Leader = namedtuple('Leader', ('leader_addr', 'leader_cluster_addr'))
-
 
 class Vault(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
     CHECK_NAME = 'vault'
-    DEFAULT_API_VERSION = '1'
     EVENT_LEADER_CHANGE = 'vault.leader_change'
     SERVICE_CHECK_CONNECT = 'vault.can_connect'
     SERVICE_CHECK_UNSEALED = 'vault.unsealed'
     SERVICE_CHECK_INITIALIZED = 'vault.initialized'
-    API_METHODS = ('check_health', 'check_leader')
 
     HTTP_CONFIG_REMAPPER = {
         'ssl_verify': {'name': 'tls_verify'},
@@ -39,18 +34,22 @@ class Vault(OpenMetricsBaseCheck):
         'ssl_ignore_warning': {'name': 'tls_ignore_warning'},
     }
 
-    # Expected HTTP Error codes for /sys/health endpoint
-    # https://www.vaultproject.io/api/system/health.html
-    SYS_HEALTH_DEFAULT_CODES = {
-        200,  # initialized, unsealed, and active
-        429,  # unsealed and standby
-        472,  # data recovery mode replication secondary and active
-        473,  # performance standby
-        501,  # not initialized
-        503,  # sealed
-    }
+    def __new__(cls, name, init_config, instances):
+        instance = instances[0]
 
-    SYS_LEADER_DEFAULT_CODES = {503}  # sealed
+        if is_affirmative(instance.get('use_openmetrics', False)):
+            if PY2:
+                raise ConfigurationError(
+                    'This version of the integration is only available when using Python 3. '
+                    'Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3/ '
+                    'for more information or use the older style config.'
+                )
+            # TODO: when we drop Python 2 move this import up top
+            from .check import VaultCheckV2
+
+            return VaultCheckV2(name, init_config, instances)
+        else:
+            return super(Vault, cls).__new__(cls)
 
     def __init__(self, name, init_config, instances):
         super(Vault, self).__init__(
@@ -140,7 +139,7 @@ class Vault(OpenMetricsBaseCheck):
 
     def check_leader_v1(self, submission_queue, dynamic_tags):
         url = self._api_url + '/sys/leader'
-        leader_data = self.access_api(url, ignore_status_codes=self.SYS_LEADER_DEFAULT_CODES)
+        leader_data = self.access_api(url, ignore_status_codes=SYS_LEADER_DEFAULT_CODES)
         errors = leader_data.get('errors')
         if errors:
             error_msg = ';'.join(errors)
@@ -205,7 +204,7 @@ class Vault(OpenMetricsBaseCheck):
 
     def check_health_v1(self, submission_queue, dynamic_tags):
         url = self._api_url + '/sys/health'
-        health_data = self.access_api(url, ignore_status_codes=self.SYS_HEALTH_DEFAULT_CODES)
+        health_data = self.access_api(url, ignore_status_codes=SYS_HEALTH_DEFAULT_CODES)
         cluster_name = health_data.get('cluster_name')
         if cluster_name:
             dynamic_tags.append('vault_cluster:{}'.format(cluster_name))
@@ -214,8 +213,17 @@ class Vault(OpenMetricsBaseCheck):
 
         replication_mode = health_data.get('replication_dr_mode', '').lower()
         if replication_mode == 'secondary':
-            self._replication_dr_secondary_mode = True
-            self.log.debug("Detected vault in replication DR secondary mode, skipping Prometheus metric collection.")
+            if self.instance.get("collect_secondary_dr", False):
+                self._replication_dr_secondary_mode = False
+                self.log.debug(
+                    'Detected vault in replication DR secondary mode but also detected that '
+                    '`collect_secondary_dr` is enabled, Prometheus metric collection will still occur.'
+                )
+            else:
+                self._replication_dr_secondary_mode = True
+                self.log.debug(
+                    'Detected vault in replication DR secondary mode, skipping Prometheus metric collection.'
+                )
         else:
             self._replication_dr_secondary_mode = False
 
@@ -273,13 +281,11 @@ class Vault(OpenMetricsBaseCheck):
 
         api_version = self._api_url[-1]
         if api_version not in ('1',):
-            self.log.warning(
-                'Unknown Vault API version `%s`, using version `%s`', api_version, self.DEFAULT_API_VERSION
-            )
-            api_version = self.DEFAULT_API_VERSION
+            self.log.warning('Unknown Vault API version `%s`, using version `%s`', api_version, DEFAULT_API_VERSION)
+            api_version = DEFAULT_API_VERSION
             self._api_url = self._api_url[:-1] + api_version
 
-        methods = {method: getattr(self, '{}_v{}'.format(method, api_version)) for method in self.API_METHODS}
+        methods = {method: getattr(self, '{}_v{}'.format(method, api_version)) for method in API_METHODS}
         self._api = Api(**methods)
 
         if self._client_token_path or self._client_token or self._no_token:

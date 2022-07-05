@@ -17,7 +17,7 @@
     "rabbitmq",
     "rabbitmq-server"
   ],
-  "public_title": "Datadog-RabbitMQ Integration",
+  "public_title": "RabbitMQ Integration",
   "short_description": "Track queue size, consumer count, unacknowledged messages, and more.",
   "support": "core",
   "supported_os": [

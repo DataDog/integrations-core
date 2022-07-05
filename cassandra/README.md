@@ -70,11 +70,11 @@ _Available for Agent versions >6.0_
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below. 
 
 ##### Metric collection
 
-For containerized environments, see the [Autodiscovery with JMX][9] guide.
+For containerized environments, see the [Autodiscovery with JMX][9] guide, which includes [updating your Agent Image][17] on your clusters through Autodiscovery.
 
 ##### Log collection
 
@@ -133,3 +133,4 @@ Need help? Contact [Datadog support][4].
 [14]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics
 [15]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics
 [16]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog
+[17]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containeragent#autodiscovery-annotations

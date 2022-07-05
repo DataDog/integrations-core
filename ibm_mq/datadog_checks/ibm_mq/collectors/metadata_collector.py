@@ -31,7 +31,7 @@ class MetadataCollector(object):
             queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
         )
         resp = pcf.MQCMD_INQUIRE_Q_MGR({pymqi.CMQCFC.MQIACF_Q_MGR_ATTRS: [pymqi.CMQC.MQCA_VERSION]})
-
+        pcf.disconnect()
         try:
             version = to_native_string(resp[0][pymqi.CMQC.MQCA_VERSION])
             self.log.debug("IBM MQ version from response: %s", version)

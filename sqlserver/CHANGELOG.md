@@ -1,6 +1,64 @@
 # CHANGELOG - sqlserver
 
-## 7.0.3 / 2022-02-03
+## 8.0.0 / 2022-05-15
+
+* [Added] Add AlwaysOn metrics. See [#11979](https://github.com/DataDog/integrations-core/pull/11979).
+* [Added] sqlserver: Add option to keep aliases in sql server (`keep_sql_alias`). See [#12020](https://github.com/DataDog/integrations-core/pull/12020).
+* [Added] Add support to ingest cloud_metadata for DBM host linking. See [#11982](https://github.com/DataDog/integrations-core/pull/11982).
+* [Added] Add static server OS metrics. See [#11864](https://github.com/DataDog/integrations-core/pull/11864).
+* [Fixed] Don't use connection resiliency for older versions of sqlserver and update valid driver list. See [#12026](https://github.com/DataDog/integrations-core/pull/12026).
+* [Fixed] Fix uncommented parent options. See [#12013](https://github.com/DataDog/integrations-core/pull/12013).
+* [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
+* [Fixed] Fix missing object_name for index fragmentation metrics. See [#11986](https://github.com/DataDog/integrations-core/pull/11986).
+* [Changed] Remove execution plan `user_name` attribute. See [#12007](https://github.com/DataDog/integrations-core/pull/12007).
+
+## 7.6.2 / 2022-04-20 / Agent 7.36.0
+
+* [Fixed] Fix activity and plan host reporting. See [#11853](https://github.com/DataDog/integrations-core/pull/11853).
+
+## 7.6.1 / 2022-04-14
+
+* [Fixed] Update base version. See [#11826](https://github.com/DataDog/integrations-core/pull/11826).
+
+## 7.6.0 / 2022-04-05
+
+* [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Added] Add request_status in sqlserver activity query. See [#11699](https://github.com/DataDog/integrations-core/pull/11699).
+* [Added] Add SQL metadata to SQL Server activity events. See [#11689](https://github.com/DataDog/integrations-core/pull/11689).
+* [Added] Add a log line when activity limit is reached. See [#11661](https://github.com/DataDog/integrations-core/pull/11661).
+* [Fixed] Gracefully handle inaccessible database for `sqlserver.files.*`. See [#11711](https://github.com/DataDog/integrations-core/pull/11711).
+* [Fixed] Fix SQL Server false configuration error. See [#11664](https://github.com/DataDog/integrations-core/pull/11664).
+
+## 7.5.0 / 2022-03-15
+
+* [Added] Enable SQL metadata collection by default. See [#11606](https://github.com/DataDog/integrations-core/pull/11606).
+* [Fixed] Include SQL metadata in FQT. See [#11641](https://github.com/DataDog/integrations-core/pull/11641).
+
+## 7.4.0 / 2022-03-15 / Agent 7.35.0
+
+* [Added] Add execution_count and total_elapsed_time fields to SQLServer Samples. See [#11652](https://github.com/DataDog/integrations-core/pull/11652).
+
+## 7.3.0 / 2022-03-14
+
+* [Added] Add missing wait_resource column for activity collections. See [#11638](https://github.com/DataDog/integrations-core/pull/11638).
+* [Fixed] Fix service check failures on auto discovered dbs failing full check execution. See [#11563](https://github.com/DataDog/integrations-core/pull/11563).
+* [Fixed] Use remote hostname on all metrics when DBM is enabled. See [#11634](https://github.com/DataDog/integrations-core/pull/11634).
+* [Fixed] Fix SQLServer activity query, only query for load not transactions. See [#11629](https://github.com/DataDog/integrations-core/pull/11629).
+
+## 7.2.0 / 2022-02-19
+
+* [Added] Add `pyproject.toml` file. See [#11437](https://github.com/DataDog/integrations-core/pull/11437).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* [Fixed] remove aggregation by SQL text from query stats query. See [#11524](https://github.com/DataDog/integrations-core/pull/11524).
+
+## 7.1.0 / 2022-02-14
+
+* [Added] Add ddagenthostname to dbm-metrics payloads. See [#11232](https://github.com/DataDog/integrations-core/pull/11232).
+* [Added] Add recovery_model_desc tag for sqlserver database metrics. See [#11210](https://github.com/DataDog/integrations-core/pull/11210). Thanks [lowlydba](https://github.com/lowlydba).
+* [Fixed] Disable modified rowcounts in result sets for all connections. See [#11486](https://github.com/DataDog/integrations-core/pull/11486).
+
+## 7.0.3 / 2022-02-03 / Agent 7.34.0
 
 * [Fixed] Update base version. See [#11287](https://github.com/DataDog/integrations-core/pull/11287).
 
@@ -244,30 +302,30 @@
 
 ## 1.8.1 / 2019-01-04 / Agent 6.9.0
 
-* [Fixed] Bump pyodbc for python3.7 compatibility. See [#2801][1].
+* [Fixed] Bump pyodbc for python3.7 compatibility. See [#2801](https://github.com/DataDog/integrations-core/pull/2801).
 
 ## 1.8.0 / 2018-11-30 / Agent 6.8.0
 
-* [Added] Add linux as supported OS. See [#2614][2].
-* [Fixed] Additional debug logging when calling a stored procedure. See [#2151][3].
-* [Fixed] Use raw string literals when \ is present. See [#2465][4].
+* [Added] Add linux as supported OS. See [#2614](https://github.com/DataDog/integrations-core/pull/2614).
+* [Fixed] Additional debug logging when calling a stored procedure. See [#2151](https://github.com/DataDog/integrations-core/pull/2151).
+* [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).
 
 ## 1.7.0 / 2018-10-12 / Agent 6.6.0
 
-* [Added] Pin pywin32 dependency. See [#2322][5].
+* [Added] Pin pywin32 dependency. See [#2322](https://github.com/DataDog/integrations-core/pull/2322).
 
 ## 1.6.0 / 2018-09-04 / Agent 6.5.0
 
-* [Added] Support higher query granularity. See [#2017][6].
-* [Added] Add ability to support (via configuration flag) the newer ADO provider. See [#1673][7].
-* [Fixed] Stop leaking db password when a connection is not in the pool. See [#2031][8].
-* [Fixed] Bump pyro4 and serpent dependencies. See [#2007][9].
-* [Fixed] Fix for case sensitivity in the `proc_type_mapping` dict.. See [#1860][10].
-* [Fixed] Add data files to the wheel package. See [#1727][11].
+* [Added] Support higher query granularity. See [#2017](https://github.com/DataDog/integrations-core/pull/2017).
+* [Added] Add ability to support (via configuration flag) the newer ADO provider. See [#1673](https://github.com/DataDog/integrations-core/pull/1673).
+* [Fixed] Stop leaking db password when a connection is not in the pool. See [#2031](https://github.com/DataDog/integrations-core/pull/2031).
+* [Fixed] Bump pyro4 and serpent dependencies. See [#2007](https://github.com/DataDog/integrations-core/pull/2007).
+* [Fixed] Fix for case sensitivity in the `proc_type_mapping` dict.. See [#1860](https://github.com/DataDog/integrations-core/pull/1860).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
 
 ## 1.5.0 / 2018-06-20 / Agent 6.4.0
 
-* [Added] support object_name metric identifiers. See [#1679][12].
+* [Added] support object_name metric identifiers. See [#1679](https://github.com/DataDog/integrations-core/pull/1679).
 
 ## 1.4.0 / 2018-05-11
 
@@ -275,45 +333,22 @@
 
 ## 1.3.0 / 2018-02-13
 
-* [IMPROVEMENT] Allow custom connection string to connect. See [#1068][13].
+* [IMPROVEMENT] Allow custom connection string to connect. See [#1068](https://github.com/DataDog/integrations-core/pull/1065).
 
 ## 1.2.1 / 2018-01-10
 
-* [BUGFIX] Allows metric collection from all instances in custom query. See [#959][14].
-* [BUGFIX] Repair reporting of stats from sys.dm_os_wait_stats. See [#975][15].
+* [BUGFIX] Allows metric collection from all instances in custom query. See [#959](https://github.com/DataDog/integrations-core/issues/959).
+* [BUGFIX] Repair reporting of stats from sys.dm_os_wait_stats. See [#975](https://github.com/DataDog/integrations-core/pull/975).
 
 ## 1.2.0 / 2017-10-10
 
-* [FEATURE] single bulk query of all of metrics, then filter locally. See [#573][16].
+* [FEATURE] single bulk query of all of metrics, then filter locally. See [#573](https://github.com/DataDog/integrations-core/issues/573).
 
 ## 1.1.0 / 2017-07-18
 
-* [FEATURE] Allow calling custom proc to return metrics, and improve transaction handling. See [#357][17] and [#456][18], thanks [@rlaveycal][19]
-* [SANITY] Fix yaml example file spacing. See [#342][20], thanks [@themsquared][21]
+* [FEATURE] Allow calling custom proc to return metrics, and improve transaction handling. See [#357](https://github.com/DataDog/integrations-core/issues/357) and [#456](https://github.com/DataDog/integrations-core/issues/456), thanks [@rlaveycal](https://github.com/rlaveycal)
+* [SANITY] Fix yaml example file spacing. See [#342](https://github.com/DataDog/integrations-core/issues/342), thanks [@themsquared](https://github.com/themsquared)
 
 ## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds sqlserver integration.
-
-<!--- The following link definition list is generated by PimpMyChangelog --->
-[1]: https://github.com/DataDog/integrations-core/pull/2801
-[2]: https://github.com/DataDog/integrations-core/pull/2614
-[3]: https://github.com/DataDog/integrations-core/pull/2151
-[4]: https://github.com/DataDog/integrations-core/pull/2465
-[5]: https://github.com/DataDog/integrations-core/pull/2322
-[6]: https://github.com/DataDog/integrations-core/pull/2017
-[7]: https://github.com/DataDog/integrations-core/pull/1673
-[8]: https://github.com/DataDog/integrations-core/pull/2031
-[9]: https://github.com/DataDog/integrations-core/pull/2007
-[10]: https://github.com/DataDog/integrations-core/pull/1860
-[11]: https://github.com/DataDog/integrations-core/pull/1727
-[12]: https://github.com/DataDog/integrations-core/pull/1679
-[13]: https://github.com/DataDog/integrations-core/pull/1065
-[14]: https://github.com/DataDog/integrations-core/issues/959
-[15]: https://github.com/DataDog/integrations-core/pull/975
-[16]: https://github.com/DataDog/integrations-core/issues/573
-[17]: https://github.com/DataDog/integrations-core/issues/357
-[18]: https://github.com/DataDog/integrations-core/issues/456
-[19]: https://github.com/rlaveycal
-[20]: https://github.com/DataDog/integrations-core/issues/342
-[21]: https://github.com/themsquared

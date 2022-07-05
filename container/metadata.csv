@@ -13,7 +13,7 @@ container.memory.soft_limit,gauge,,byte,,The container memory soft limit,0,conta
 container.memory.rss,gauge,,byte,,The container RSS usage,0,container,mem_rss,
 container.memory.cache,gauge,,byte,,The container cache usage,0,container,mem_cache,
 container.memory.swap,gauge,,byte,,The container swap usage,0,container,mem_swap,
-container.memory.oom_events,gauge,,byte,,The number of OOM events triggered by the container,0,container,mem_oom_events,
+container.memory.oom_events,gauge,,,,The number of OOM events triggered by the container,0,container,mem_oom_events,
 container.memory.working_set,gauge,,byte,,The container working set usage,0,container,mem_workingset,
 container.memory.commit,gauge,,byte,,The container commit memory usage,0,container,mem_commit,
 container.memory.commit.peak,gauge,,byte,,The container peak commit memory usage,0,container,mem_commit_peak,

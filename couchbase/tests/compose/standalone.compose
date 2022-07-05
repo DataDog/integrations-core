@@ -9,7 +9,7 @@ services:
     container_name: ${CB_CONTAINER_NAME}
   couchbase-sync-gateway:
     container_name: couchbase-sync-gateway
-    image: couchbase/sync-gateway:latest
+    image: couchbase/sync-gateway:2.8.3-enterprise
     command:
       - "-adminInterface"
       - ":4985"

@@ -91,6 +91,9 @@ METRICS_OPTIONAL = {
     'vault.rollback.attempt.cubbyhole',
     'vault.rollback.attempt.identity',
     'vault.rollback.attempt.sys',
+    'vault.route.create',
+    'vault.route.read',
+    'vault.route.rollback',
     'vault.route.rollback.auth.jwt',
     'vault.route.rollback.auth.token',
     'vault.route.rollback.cubbyhole',
@@ -102,3 +105,27 @@ METRICS_OPTIONAL = {
     'vault.token.create',
     'vault.token.creation',
 }
+
+KNOWN_COUNTERS = {
+    'vault.audit.log.request.failure',
+    'vault.audit.log.response.failure',
+    'vault.cache.delete',
+    'vault.cache.hit',
+    'vault.cache.miss',
+    'vault.cache.write',
+    'vault.identity.entity.creation',
+    'vault.token.creation',
+}
+
+MERKLE_WAL_METRICS = [
+    'vault.vault.merkle.flushdirty',
+    'vault.vault.merkle.savecheckpoint',
+    'vault.vault.wal.deletewals',
+    'vault.vault.wal.persistwals',
+    'vault.vault.wal.flushready',
+]
+
+MERKLE_WAL_QUANTILES = [
+    'vault.vault.merkle.flushdirty',
+    'vault.vault.merkle.savecheckpoint',
+]

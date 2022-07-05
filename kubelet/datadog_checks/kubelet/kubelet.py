@@ -12,6 +12,7 @@ from copy import deepcopy
 import requests
 from kubeutil import get_connection_info
 from six import iteritems
+from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials, urljoin
@@ -19,7 +20,14 @@ from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.tagging import tagger
 
 from .cadvisor import CadvisorScraper
-from .common import CADVISOR_DEFAULT_PORT, PodListUtils, replace_container_rt_prefix
+from .common import (
+    CADVISOR_DEFAULT_PORT,
+    PodListUtils,
+    get_container_label,
+    replace_container_rt_prefix,
+    tags_for_docker,
+)
+from .probes import ProbesPrometheusScraperMixin
 from .prometheus import CadvisorPrometheusScraperMixin
 from .summary import SummaryScraperMixin
 
@@ -29,6 +37,7 @@ POD_LIST_PATH = '/pods'
 CADVISOR_METRICS_PATH = '/metrics/cadvisor'
 KUBELET_METRICS_PATH = '/metrics'
 STATS_PATH = '/stats/summary/'
+PROBES_METRICS_PATH = '/metrics/probes'
 
 # Suffixes per
 # https://github.com/kubernetes/kubernetes/blob/8fd414537b5143ab039cb910590237cabf4af783/pkg/api/resource/suffix.go#L108
@@ -60,6 +69,7 @@ DEFAULT_GAUGES = {
     'rest_client_requests_total': 'rest.client.requests',
     'go_threads': 'go_threads',
     'go_goroutines': 'go_goroutines',
+    'kubelet_pleg_last_seen_seconds': 'kubelet.pleg.last_seen',
 }
 
 DEPRECATED_GAUGES = {
@@ -72,19 +82,12 @@ DEPRECATED_GAUGES = {
 NEW_1_14_GAUGES = {
     'kubelet_runtime_operations_total': 'kubelet.runtime.operations',
     'kubelet_runtime_operations_errors_total': 'kubelet.runtime.errors',
-    'kubelet_container_log_filesystem_used_bytes': 'kubelet.container.log_filesystem.used_bytes',
 }
 
 DEFAULT_HISTOGRAMS = {
     'apiserver_client_certificate_expiration_seconds': 'apiserver.certificate.expiration',
-}
-
-DEPRECATED_HISTOGRAMS = {
-    'rest_client_request_latency_seconds': 'rest.client.latency',
-}
-
-NEW_1_14_HISTOGRAMS = {
-    'rest_client_request_duration_seconds': 'rest.client.latency',
+    'kubelet_pleg_relist_duration_seconds': 'kubelet.pleg.relist_duration',
+    'kubelet_pleg_relist_interval_seconds': 'kubelet.pleg.relist_interval',
 }
 
 DEFAULT_SUMMARIES = {}
@@ -128,6 +131,7 @@ class KubeletCheck(
     OpenMetricsBaseCheck,
     CadvisorScraper,
     SummaryScraperMixin,
+    ProbesPrometheusScraperMixin,
     KubeletBase,
 ):
     """
@@ -136,7 +140,10 @@ class KubeletCheck(
 
     DEFAULT_METRIC_LIMIT = 0
 
-    COUNTER_METRICS = {'kubelet_evictions': 'kubelet.evictions'}
+    COUNTER_METRICS = {
+        'kubelet_evictions': 'kubelet.evictions',
+        'kubelet_pleg_discard_events': 'kubelet.pleg.discard_events',
+    }
 
     VOLUME_METRICS = {
         'kubelet_volume_stats_available_bytes': 'kubelet.volume.stats.available_bytes',
@@ -150,6 +157,12 @@ class KubeletCheck(
     VOLUME_TAG_KEYS_TO_EXCLUDE = ['persistentvolumeclaim', 'pod_phase']
 
     def __init__(self, name, init_config, instances):
+        self.KUBELET_METRIC_TRANSFORMERS = {
+            'kubelet_container_log_filesystem_used_bytes': self.kubelet_container_log_filesystem_used_bytes,
+            'rest_client_request_latency_seconds': self.rest_client_latency,
+            'rest_client_request_duration_seconds': self.rest_client_latency,
+        }
+
         self.NAMESPACE = 'kubernetes'
         if instances is not None and len(instances) > 1:
             raise Exception('Kubelet check only supports one configured instance.')
@@ -173,7 +186,8 @@ class KubeletCheck(
         self.pod_level_metrics = ["{0}.{1}".format(self.NAMESPACE, x) for x in pod_level_metrics]
 
         kubelet_instance = self._create_kubelet_prometheus_instance(inst)
-        generic_instances = [cadvisor_instance, kubelet_instance]
+        probes_instance = self._create_probes_prometheus_instance(inst)
+        generic_instances = [cadvisor_instance, kubelet_instance, probes_instance]
         super(KubeletCheck, self).__init__(name, init_config, generic_instances)
 
         self.cadvisor_legacy_port = inst.get('cadvisor_port', CADVISOR_DEFAULT_PORT)
@@ -189,6 +203,8 @@ class KubeletCheck(
 
         self.kubelet_scraper_config = self.get_scraper_config(kubelet_instance)
 
+        self.probes_scraper_config = self.get_scraper_config(probes_instance)
+
         counter_transformers = {k: self.send_always_counter for k in self.COUNTER_METRICS}
 
         histogram_transformers = {
@@ -199,7 +215,9 @@ class KubeletCheck(
 
         self.transformers = {}
         for d in [
+            self.PROBES_METRIC_TRANSFORMERS,
             self.CADVISOR_METRIC_TRANSFORMERS,
+            self.KUBELET_METRIC_TRANSFORMERS,
             counter_transformers,
             histogram_transformers,
             volume_metric_transformers,
@@ -226,8 +244,6 @@ class KubeletCheck(
                     DEPRECATED_GAUGES,
                     NEW_1_14_GAUGES,
                     DEFAULT_HISTOGRAMS,
-                    DEPRECATED_HISTOGRAMS,
-                    NEW_1_14_HISTOGRAMS,
                     DEFAULT_SUMMARIES,
                     DEPRECATED_SUMMARIES,
                     NEW_1_14_SUMMARIES,
@@ -320,9 +336,19 @@ class KubeletCheck(
             'kubelet_metrics_endpoint', urljoin(endpoint, KUBELET_METRICS_PATH)
         )
 
+        probes_metrics_endpoint = urljoin(endpoint, PROBES_METRICS_PATH)
+        if self.detect_probes(probes_metrics_endpoint):
+            self.probes_scraper_config['prometheus_url'] = instance.get(
+                'probes_metrics_endpoint', probes_metrics_endpoint
+            )
+        else:
+            # Disable probe metrics collection (k8s 1.15+ required)
+            self.probes_scraper_config['prometheus_url'] = ''
+
         # Kubelet credentials handling
         self.kubelet_credentials.configure_scraper(self.cadvisor_scraper_config)
         self.kubelet_credentials.configure_scraper(self.kubelet_scraper_config)
+        self.kubelet_credentials.configure_scraper(self.probes_scraper_config)
 
         # Legacy cadvisor support
         try:
@@ -355,6 +381,10 @@ class KubeletCheck(
         if self.kubelet_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing kubelet metrics')
             self.process(self.kubelet_scraper_config, metric_transformers=self.transformers)
+
+        if self.probes_scraper_config['prometheus_url']:
+            self.log.debug('processing probe metrics')
+            self.process(self.probes_scraper_config, metric_transformers=self.transformers)
 
         self.first_run = False
 
@@ -650,6 +680,47 @@ class KubeletCheck(
                 if pvc_name and kube_ns:
                     break
 
+            if self.pod_list_utils.is_namespace_excluded(kube_ns):
+                continue
+
             pod_tags = self.pod_tags_by_pvc.get('{}/{}'.format(kube_ns, pvc_name), {})
             tags.extend(pod_tags)
             self.gauge(metric_name_with_namespace, val, tags=list(set(tags)), hostname=custom_hostname)
+
+    def kubelet_container_log_filesystem_used_bytes(self, metric, scraper_config):
+        metric_name = scraper_config['namespace'] + '.kubelet.container.log_filesystem.used_bytes'
+        for sample in metric.samples:
+            self._filter_and_send_gauge_sample(metric_name, sample)
+
+    def _filter_and_send_gauge_sample(self, metric_name, sample):
+        labels = sample[OpenMetricsBaseCheck.SAMPLE_LABELS]
+        container_id = self.pod_list_utils.get_cid_by_labels(labels)
+        tags = []
+        if container_id is not None:
+            if self.pod_list_utils.is_excluded(container_id):
+                return
+
+            tags = tags_for_docker(replace_container_rt_prefix(container_id), tagger.HIGH, True)
+            if not tags:
+                self.log.debug(
+                    "Tags not found for container: %s/%s/%s:%s",
+                    get_container_label(labels, 'namespace'),
+                    get_container_label(labels, 'pod'),
+                    get_container_label(labels, 'container'),
+                    container_id,
+                )
+
+        self.gauge(metric_name, sample[self.SAMPLE_VALUE], tags + self.instance_tags)
+
+    def rest_client_latency(self, metric, scraper_config):
+        for sample in metric.samples:
+            try:
+                sample.labels['url'] = self._sanitize_url_label(sample.labels['url'])
+            except KeyError:
+                pass
+        return self.submit_openmetric("rest.client.latency", metric, scraper_config)
+
+    @staticmethod
+    def _sanitize_url_label(url):
+        u = urlparse(url)
+        return u.path

@@ -347,7 +347,7 @@ Required environment variables on the Agent container:
 | `<DD_APM_ENABLED>`      | true                                                              |
 | `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
 
-See [Tracing Docker Applications][12] for a complete list of available environment variables and configuration.
+See [Tracing Docker Applications][27] for a complete list of available environment variables and configuration.
 
 Then, [instrument your application container that makes requests to Postgres][11] and set `DD_AGENT_HOST` to the [EC2 private IP address][17].
 
@@ -421,3 +421,4 @@ Additional helpful documentation, links, and articles:
 [24]: https://www.datadoghq.com/blog/postgresql-monitoring
 [25]: https://www.datadoghq.com/blog/postgresql-monitoring-tools
 [26]: https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog
+[27]: https://docs.datadoghq.com/agent/docker/apm/

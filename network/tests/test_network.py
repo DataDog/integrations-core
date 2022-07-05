@@ -50,12 +50,79 @@ CONNTRACK_STATS = {
     'system.net.conntrack.search_restart': (39936711, 36983181),
 }
 
+LINUX_SYS_NET_STATS = {
+    'system.net.iface.mtu': (65536, 9001),
+    'system.net.iface.tx_queue_len': (1000, 1000),
+    'system.net.iface.num_rx_queues': (1, 2),
+    'system.net.iface.num_tx_queues': (1, 3),
+}
+
+
+PROC_NET_STATS = {
+    'system.net.ip.in_receives': 159747123,
+    'system.net.ip.in_header_errors': 23,
+    'system.net.ip.in_addr_errors': 0,
+    'system.net.ip.in_unknown_protos': 0,
+    'system.net.ip.in_discards': 0,
+    'system.net.ip.in_delivers': 159745645,
+    'system.net.ip.out_requests': 162992767,
+    'system.net.ip.out_discards': 613,
+    'system.net.ip.out_no_routes': 0,
+    'system.net.ip.forwarded_datagrams': 1449,
+    'system.net.ip.reassembly_timeouts': 0,
+    'system.net.ip.reassembly_requests': 0,
+    'system.net.ip.reassembly_oks': 0,
+    'system.net.ip.reassembly_fails': 0,
+    'system.net.ip.fragmentation_oks': 0,
+    'system.net.ip.fragmentation_fails': 0,
+    'system.net.ip.fragmentation_creates': 0,
+    'system.net.ip.in_receives.count': 159747123,
+    'system.net.ip.in_header_errors.count': 23,
+    'system.net.ip.in_addr_errors.count': 0,
+    'system.net.ip.in_unknown_protos.count': 0,
+    'system.net.ip.in_discards.count': 0,
+    'system.net.ip.in_delivers.count': 159745645,
+    'system.net.ip.out_requests.count': 162992767,
+    'system.net.ip.out_discards.count': 613,
+    'system.net.ip.out_no_routes.count': 0,
+    'system.net.ip.forwarded_datagrams.count': 1449,
+    'system.net.ip.reassembly_timeouts.count': 0,
+    'system.net.ip.reassembly_requests.count': 0,
+    'system.net.ip.reassembly_oks.count': 0,
+    'system.net.ip.reassembly_fails.count': 0,
+    'system.net.ip.fragmentation_oks.count': 0,
+    'system.net.ip.fragmentation_fails.count': 0,
+    'system.net.ip.fragmentation_creates.count': 0,
+    'system.net.tcp.active_opens': 6828054,
+    'system.net.tcp.passive_opens': 4198200,
+    'system.net.tcp.attempt_fails': 174,
+    'system.net.tcp.established_resets': 761431,
+    'system.net.tcp.current_established': 59,
+    'system.net.tcp.in_errors': 0,
+    'system.net.tcp.out_resets': 792992,
+    'system.net.tcp.in_csum_errors': 0,
+    'system.net.tcp.active_opens.count': 6828054,
+    'system.net.tcp.passive_opens.count': 4198200,
+    'system.net.tcp.attempt_fails.count': 174,
+    'system.net.tcp.established_resets.count': 761431,
+    'system.net.tcp.in_errors.count': 0,
+    'system.net.tcp.out_resets.count': 792992,
+    'system.net.tcp.in_csum_errors.count': 0,
+    'system.net.ip.in_no_routes': 6,
+    'system.net.ip.in_truncated_pkts': 0,
+    'system.net.ip.in_csum_errors': 0,
+    'system.net.ip.reassembly_overlaps': 0,
+    'system.net.ip.in_no_routes.count': 6,
+    'system.net.ip.in_truncated_pkts.count': 0,
+    'system.net.ip.in_csum_errors.count': 0,
+    'system.net.ip.reassembly_overlaps.count': 0,
+}
+
 if PY3:
     ESCAPE_ENCODING = 'unicode-escape'
 
     def decode_string(s):
         return s.decode(ESCAPE_ENCODING)
-
 
 else:
     ESCAPE_ENCODING = 'string-escape'
@@ -63,6 +130,32 @@ else:
     def decode_string(s):
         s.decode(ESCAPE_ENCODING)
         return s.decode("utf-8")
+
+
+def read_int_file_mock(location):
+    if location == '/sys/class/net/lo/mtu':
+        return 65536
+    elif location == '/sys/class/net/lo/tx_queue_len':
+        return 1000
+    elif location == '/sys/class/net/ens5/mtu':
+        return 9001
+    elif location == '/sys/class/net/ens5/tx_queue_len':
+        return 1000
+    elif location == '/sys/class/net/invalid/mtu':
+        return None
+    elif location == '/sys/class/net/invalid/tx_queue_len':
+        return None
+
+
+def os_list_dir_mock(location):
+    if location == '/sys/class/net':
+        return ['ens5', 'lo', 'invalid']
+    elif location == '/sys/class/net/lo/queues':
+        return ['rx-1', 'tx-1']
+    elif location == '/sys/class/net/ens5/queues':
+        return ['rx-1', 'rx-2', 'tx-1', 'tx-2', 'tx-3']
+    elif location == '/sys/class/net/invalid/queues':
+        raise OSError()
 
 
 def ss_subprocess_mock(*args, **kwargs):
@@ -106,12 +199,25 @@ def test_cx_state(aggregator, check):
             aggregator.assert_metric(metric, value=value)
 
 
+@pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+@mock.patch('os.listdir', side_effect=os_list_dir_mock)
+@mock.patch('datadog_checks.network.network.Network._read_int_file', side_effect=read_int_file_mock)
+def test_linux_sys_net(is_linux, listdir, read_int_file, aggregator, check):
+    check.check({})
+    for metric, value in iteritems(LINUX_SYS_NET_STATS):
+        aggregator.assert_metric(metric, value=value[0], tags=['iface:lo'])
+        aggregator.assert_metric(metric, value=value[1], tags=['iface:ens5'])
+    aggregator.reset()
+
+
 @mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
 def test_cx_state_mocked(is_linux, aggregator, check):
     instance = {'collect_connection_state': True}
     with mock.patch('datadog_checks.network.network.get_subprocess_output') as out:
         out.side_effect = ss_subprocess_mock
         check._collect_cx_state = True
+        check._get_linux_sys_net = lambda x: True
         check._is_collect_cx_state_runnable = lambda x: True
         check._get_net_proc_base_location = lambda x: FIXTURE_DIR
         check.check(instance)
@@ -123,6 +229,15 @@ def test_cx_state_mocked(is_linux, aggregator, check):
         check.check(instance)
         for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
             aggregator.assert_metric(metric, value=value)
+
+
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_proc_net_metrics(is_linux, aggregator, check):
+    check._get_net_proc_base_location = lambda x: FIXTURE_DIR
+    instance = {'collect_count_metrics': True}
+    check.check(instance)
+    for metric, value in iteritems(PROC_NET_STATS):
+        aggregator.assert_metric(metric, value=value)
 
 
 def test_add_conntrack_stats_metrics(aggregator, check):
@@ -364,6 +479,7 @@ def test_is_collect_cx_state_runnable(aggregator, check, proc_location, ss_found
 @mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=False)
 @mock.patch('distutils.spawn.find_executable', return_value='/bin/ss')
 def test_ss_with_custom_procfs(is_linux, is_bsd, is_solaris, is_windows, aggregator, check):
+    check._get_linux_sys_net = lambda x: True
     instance = {'collect_connection_state': True}
     with mock.patch(
         'datadog_checks.network.network.get_subprocess_output', side_effect=ss_subprocess_mock

@@ -12,6 +12,6 @@
             "device"
         ],
         "name": "Disk read_write",
-        "description": "Returns `CRITICAL` if filesystem is in read-only mode."
+        "description": "Returns `CRITICAL` if filesystem is in read-only mode.\n\n**Note**: This service check is not enabled by default. To enable the service check, set `service_check_rw` to `true` in the disk check's `conf.yaml` file."
     }
 ]

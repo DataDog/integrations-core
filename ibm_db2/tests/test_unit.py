@@ -114,10 +114,10 @@ def test_get_connection_data(instance):
     check = IbmDb2Check('ibm_db2', {}, [instance])
 
     expected = 'database=db1;hostname=host1;port=1000;protocol=tcpip;uid=user1;pwd=pass1'
-    assert (expected, '', '') == check.get_connection_data('db1', 'user1', 'pass1', 'host1', 1000, None)
+    assert (expected, '', '') == check.get_connection_data('db1', 'user1', 'pass1', 'host1', 1000, 'none', None)
 
     expected = (
         'database=db1;hostname=host1;port=1000;protocol=tcpip;uid=user1;pwd=pass1;'
         'security=ssl;sslservercertificate=/path/cert'
     )
-    assert (expected, '', '') == check.get_connection_data('db1', 'user1', 'pass1', 'host1', 1000, '/path/cert')
+    assert (expected, '', '') == check.get_connection_data('db1', 'user1', 'pass1', 'host1', 1000, 'none', '/path/cert')

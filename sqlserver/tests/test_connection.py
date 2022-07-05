@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf8 -*-
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
@@ -9,11 +11,68 @@ import pytest
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.sqlserver import SQLServer
-from datadog_checks.sqlserver.connection import Connection
+from datadog_checks.sqlserver.connection import Connection, parse_connection_string_properties
 
 from .common import CHECK_NAME
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize(
+    'cs,parsed',
+    [
+        pytest.param(
+            'HOST=foo;password={πA s";{}}w0rd};',
+            {"HOST": "foo", "password": 'πA s";{}w0rd'},
+            id="closing bracket escape sequence",
+        ),
+        pytest.param(
+            'host=foo;password={πass";{}}word}',
+            {"host": "foo", "password": 'πass";{}word'},
+            id="final semicolon is optional",
+        ),
+        pytest.param('A=B; C=D', {"A": "B", "C": 'D'}, id="spaces after semicolons are ignored"),
+        pytest.param('A B=C;', {"A B": "C"}, id="spaces allowed inside a key"),
+        pytest.param('A=B C;', {"A": "B C"}, id="spaces allowed inside a value"),
+        pytest.param('A=C ;', {"A": "C "}, id="spaces allowed after a value"),
+        pytest.param('A=B ;C=D', {"A": "B ", "C": 'D'}, id="spaces allowed after a value, they become part of it"),
+        pytest.param('host=foo;password={pass";{}word}', None, id="escape too early then invalid character"),
+        pytest.param('host=foo;password={incomplete_escape;', None, id="incomplete escape"),
+        pytest.param('host=foo;password=;', None, id="empty value"),
+        pytest.param('host=foo;=hello;', None, id="empty key"),
+        pytest.param('host=foo;;', None, id="empty both"),
+        pytest.param('host==foo;', None, id="double equal"),
+    ],
+)
+def test_parse_connection_string_properties(cs, parsed):
+    if parsed:
+        assert parse_connection_string_properties(cs) == parsed
+        return
+    with pytest.raises(ConfigurationError):
+        parse_connection_string_properties(cs)
+
+
+@pytest.mark.parametrize(
+    'cs,username,password,expect_warning',
+    [
+        pytest.param('host=A;Trusted_Connection=true', "bob", "password123", True),
+        pytest.param('host=A;Trusted_Connection=true', None, None, False),
+        pytest.param('host=A;', "bob", "password123", False),
+    ],
+)
+def test_warn_trusted_connection_username_pass(instance_minimal_defaults, cs, username, password, expect_warning):
+    instance_minimal_defaults["connection_string"] = cs
+    instance_minimal_defaults["username"] = username
+    instance_minimal_defaults["password"] = password
+    connection = Connection({}, instance_minimal_defaults, None)
+    connection.log = mock.MagicMock()
+    connection._connection_options_validation('somekey', 'somedb')
+    if expect_warning:
+        connection.log.warning.assert_called_once_with(
+            "Username and password are ignored when using Windows authentication"
+        )
+    else:
+        connection.log.warning.assert_not_called()
 
 
 @pytest.mark.parametrize(
@@ -35,28 +94,38 @@ def test_will_warn_parameters_for_the_wrong_connection(instance_minimal_defaults
 
 
 @pytest.mark.parametrize(
-    'connector, cs, param',
+    'connector, cs, param, should_fail',
     [
-        pytest.param('odbc', 'DSN', 'dsn', id='Cannot define DSN twice'),
-        pytest.param('odbc', 'DRIVER', 'driver', id='Cannot define DRIVER twice'),
-        pytest.param('odbc', 'SERVER', 'host', id='Cannot define DRIVER twice'),
-        pytest.param('odbc', 'UID', 'username', id='Cannot define UID twice'),
-        pytest.param('odbc', 'PWD', 'password', id='Cannot define PWD twice'),
-        pytest.param('adodbapi', 'PROVIDER', 'adoprovider', id='Cannot define PROVIDER twice'),
-        pytest.param('adodbapi', 'Data Source', 'host', id='Cannot define Data Source twice'),
-        pytest.param('adodbapi', 'User ID', 'username', id='Cannot define User ID twice'),
-        pytest.param('adodbapi', 'Password', 'password', id='Cannot define Password twice'),
+        pytest.param('odbc', 'DSN', 'dsn', True, id='Cannot define DSN twice'),
+        pytest.param('odbc', 'DRIVER', 'driver', True, id='Cannot define DRIVER twice'),
+        pytest.param('odbc', 'SERVER', 'host', True, id='Cannot define DRIVER twice'),
+        pytest.param('odbc', 'UID', 'username', True, id='Cannot define UID twice'),
+        pytest.param('odbc', 'PWD', 'password', True, id='Cannot define PWD twice'),
+        pytest.param(
+            'odbc',
+            'TrustServerCertificate',
+            None,
+            False,
+            id='Should not fail as this option is not configurable in the base instance.',
+        ),
+        pytest.param('adodbapi', 'PROVIDER', 'adoprovider', True, id='Cannot define PROVIDER twice'),
+        pytest.param('adodbapi', 'Data Source', 'host', True, id='Cannot define Data Source twice'),
+        pytest.param('adodbapi', 'User ID', 'username', True, id='Cannot define User ID twice'),
+        pytest.param('adodbapi', 'Password', 'password', True, id='Cannot define Password twice'),
     ],
 )
-def test_will_fail_for_duplicate_parameters(instance_minimal_defaults, connector, cs, param):
+def test_will_fail_for_duplicate_parameters(instance_minimal_defaults, connector, cs, param, should_fail):
     instance_minimal_defaults.update({'connector': connector, param: 'foo', 'connection_string': cs + "=foo"})
     connection = Connection({}, instance_minimal_defaults, None)
-    match = (
-        "%s has been provided both in the connection string and as a configuration option (%s), "
-        "please specify it only once" % (cs, param)
-    )
+    if should_fail:
+        match = (
+            "%s has been provided both in the connection string and as a configuration option (%s), "
+            "please specify it only once" % (cs, param)
+        )
 
-    with pytest.raises(ConfigurationError, match=re.escape(match)):
+        with pytest.raises(ConfigurationError, match=re.escape(match)):
+            connection._connection_options_validation('somekey', 'somedb')
+    else:
         connection._connection_options_validation('somekey', 'somedb')
 
 

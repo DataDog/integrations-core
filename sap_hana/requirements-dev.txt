@@ -1,1 +1,2 @@
 -e ../datadog_checks_dev
+hdbcli==2.10.15

@@ -235,10 +235,6 @@
   description: |
     If `tls_verify` is disabled, security warnings are logged by the check.
     Disable those by setting `tls_ignore_warning` to true.
-
-    Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
-    If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
-    to true.
 - name: tls_cert
   value:
     example: <CERT_PATH>
@@ -335,4 +331,4 @@
   value:
     example: true
     type: boolean
-  description: Whether or not to allow URL redirection. 
+  description: Whether or not to allow URL redirection.

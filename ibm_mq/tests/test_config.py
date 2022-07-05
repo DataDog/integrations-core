@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
+from six import PY2
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.ibm_mq.config import IBMMQConfig
@@ -48,3 +49,67 @@ def test_cannot_override_hostname_if_no_host_provided(instance):
     instance['override_hostname'] = True
     with pytest.raises(ConfigurationError, match="You cannot override the hostname if you don't provide a `host`"):
         IBMMQConfig(instance)
+
+
+@pytest.mark.skipif(PY2, reason="Config model validation only available in PY3.")
+@pytest.mark.parametrize(
+    'param, values, should_error',
+    [
+        pytest.param('queues', ['queue1', 'queue2'], False, id="Unique queues values"),
+        pytest.param('queues', ['queue1', 'queue1', 'queue2'], True, id="Non-unique queues values"),
+        pytest.param('queue_patterns', ['queue1.*', 'queue2.*'], False, id="Unique queue_patterns values"),
+        pytest.param(
+            'queue_patterns', ['queue1.*', 'queue2.*', 'queue2.*'], True, id="Non-unique queue_patterns values"
+        ),
+        pytest.param('queue_regex', [r'^DEV\..*$', r'^SYSTEM\..*$'], False, id="Unique queue_regex values"),
+        pytest.param(
+            'queue_regex', [r'^DEV\..*$', r'^SYSTEM\..*$', r'^SYSTEM\..*$'], True, id="Non-unique queue_regex values"
+        ),
+        pytest.param('channels', ['channel_a', 'channel_b'], False, id="Unique channels values"),
+        pytest.param('channels', ['channel_a', 'channel_b', 'channel_a'], True, id="Non-unique channels values"),
+    ],
+)
+def test_unique_items_queues_channels(instance, get_check, dd_run_check, param, values, should_error):
+    instance[param] = values
+    check = get_check(instance)
+    if should_error:
+        with pytest.raises(Exception, match="`{}` must contain unique values.".format(param)):
+            dd_run_check(check)
+    else:
+        try:
+            dd_run_check(check)
+        except Exception as e:
+            AssertionError("`{}` contains non-unique values. Error is: {}".format(param, e))
+
+
+@pytest.mark.skipif(PY2, reason="Config model validation only available in PY3.")
+@pytest.mark.parametrize(
+    'param, values, should_error',
+    [
+        pytest.param(
+            'channel_status_mapping',
+            {'inactive': 'critical', 'binding': 'warning', 'starting': 'warning'},
+            False,
+            id="Valid min properties in channel_status_mapping",
+        ),
+        pytest.param('channel_status_mapping', {}, True, id="Invalid empty map in channel_status_mapping"),
+        pytest.param(
+            'queue_tag_re',
+            {'SYSTEM.*': 'queue_type:system', 'DEV.*': 'role:dev,queue_type:default'},
+            False,
+            id="Valid min properties in queue_tag_re",
+        ),
+        pytest.param('queue_tag_re', {}, True, id="Invalid empty map in queue_tag_re"),
+    ],
+)
+def test_min_properties_queue_tags_channel_status(instance, get_check, dd_run_check, param, values, should_error):
+    instance[param] = values
+    check = get_check(instance)
+    if should_error:
+        with pytest.raises(Exception, match="`{}` must contain at least 1 mapping.".format(param)):
+            dd_run_check(check)
+    else:
+        try:
+            dd_run_check(check)
+        except Exception as e:
+            AssertionError("`{}` contains empty mapping. Error is: {}".format(param, e))

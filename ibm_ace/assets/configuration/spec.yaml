@@ -1,0 +1,123 @@
+name: IBM ACE
+files:
+- name: ibm_ace.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: mq_server
+      required: true
+      description: |
+        The server IBM MQ is running on.
+      value:
+        type: string
+        minLength: 1
+    - name: mq_port
+      required: true
+      description: |
+        The port IBM MQ is listening on.
+      value:
+        example: 1414
+        type: integer
+    - name: channel
+      required: true
+      description: |
+        The IBM MQ channel to use for subscriptions.
+      value:
+        type: string
+        minLength: 1
+    - name: queue_manager
+      required: true
+      description: |
+        The IBM MQ queue manager to use.
+      value:
+        type: string
+        minLength: 1
+    - name: mq_user
+      description: |
+        The user with which to authenticate to IBM MQ.
+      value:
+        type: string
+        minLength: 1
+    - name: mq_password
+      secret: true
+      description: |
+        The password with which to authenticate to IBM MQ.
+      value:
+        type: string
+        minLength: 1
+    - name: resource_statistics
+      description: |
+        Whether to collect resource statistics.
+      value:
+        example: true
+        type: boolean
+    - name: message_flows
+      description: |
+        Whether to collect information about message flows.
+      value:
+        example: true
+        type: boolean
+    - name: persist_connections
+      description: |
+        Whether to keep connections open rather than disconnecting after every check run.
+      value:
+        example: false
+        type: boolean
+    - name: mqcd_version
+      description: |
+        The channel definition version to use. Supported values are 1 to 9 (inclusive).
+        If you're having connection issues make sure it matches your IBM MQ version.
+        TLS encryption requires at least version 7 of MQCD.
+      value:
+        example: 9
+        type: integer
+        enum:
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+        - 8
+        - 9
+    - name: tls_auth
+      description: |
+        Whether to use TLS auth while connecting to the channel.
+      value:
+        example: false
+        type: boolean
+    - name: tls_cipher_spec
+      type: string
+      description: |
+        The TLS cipher to use. It should match the value of the channel's SSLCIPH attribute.
+      value:
+        example: 'TLS_RSA_WITH_AES_256_CBC_SHA'
+        type: string
+    - name: tls_key_repository_location
+      description: |
+        The location of the key database file in which keys and certificates are stored.
+        The key database file must have a file extension of `.kdb`.
+        The KeyRepository field contains the path to this file, along with the file name stem
+        (all characters in the file name up to but not including the final .kdb).
+        Each key database file has an associated password stash file. This holds encoded passwords that are used to
+        allow programmatic access to the key database. The password stash file must reside in the same directory and
+        have the same file stem as the key database, and must end with the extension `.sth`.
+      value:
+        example: '/var/mqm/tls-db/client/KeyringClient'
+        type: string
+        minLength: 1
+    - name: tls_certificate_label
+      description: |
+        Certificate label used for TLS connection.
+      value:
+        type: string
+    - template: instances/default
+  - template: logs
+    example:
+      - type: file
+        source: ibm_ace
+        path: /home/aceuser/ace-server/log/integration_server.txt

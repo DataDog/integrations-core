@@ -1,6 +1,7 @@
 CREATE USER datadog WITH PASSWORD 'datadog';
 CREATE USER datadog_no_catalog WITH PASSWORD 'datadog';
 CREATE USER bob WITH PASSWORD 'bob';
+CREATE USER blocking_bob WITH PASSWORD 'bob';
 CREATE USER dd_admin WITH PASSWORD 'dd_admin';
 ALTER USER dd_admin WITH SUPERUSER;
 REVOKE SELECT ON ALL tables IN SCHEMA pg_catalog from public;
@@ -11,5 +12,6 @@ CREATE DATABASE datadog_test;
 GRANT ALL PRIVILEGES ON DATABASE datadog_test TO datadog;
 CREATE DATABASE dogs;
 GRANT USAGE on SCHEMA public to bob;
+GRANT USAGE on SCHEMA public to blocking_bob;
 CREATE DATABASE dogs_nofunc;
 CREATE DATABASE dogs_noschema;

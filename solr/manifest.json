@@ -16,7 +16,7 @@
   "process_signatures": [
     "solr start"
   ],
-  "public_title": "Datadog-Solr Integration",
+  "public_title": "Solr Integration",
   "short_description": "Monitor request rate, handler errors, cache misses and evictions, and more.",
   "support": "core",
   "supported_os": [

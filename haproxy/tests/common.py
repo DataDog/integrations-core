@@ -22,6 +22,7 @@ else:
 ENDPOINT_PROMETHEUS = 'http://{}:8404/metrics'.format(HOST)
 
 INSTANCE = {'use_prometheus': True, 'prometheus_url': ENDPOINT_PROMETHEUS}
+INSTANCEV2 = {'use_openmetrics': True, 'openmetrics_endpoint': ENDPOINT_PROMETHEUS}
 
 requires_new_environment = pytest.mark.skipif(HAPROXY_LEGACY != 'false', reason='Requires prometheus environment')
 requires_static_version = pytest.mark.skipif(

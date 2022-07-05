@@ -9,7 +9,7 @@ import pytest
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import SQLConnectionError
 
-from .common import CHECK_NAME, CUSTOM_METRICS, CUSTOM_QUERY_A, CUSTOM_QUERY_B, EXPECTED_DEFAULT_METRICS, assert_metrics
+from .common import CHECK_NAME, CUSTOM_METRICS, EXPECTED_DEFAULT_METRICS, assert_metrics
 from .utils import not_windows_ci, windows_ci
 
 try:
@@ -37,14 +37,21 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_check_docker(aggregator, dd_run_check, init_config, instance_docker):
+@pytest.mark.parametrize('database_autodiscovery', [True, False])
+def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, database_autodiscovery):
+    instance_docker['database_autodiscovery'] = database_autodiscovery
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     expected_tags = instance_docker.get('tags', []) + [
         'sqlserver_host:{}'.format(instance_docker.get('host')),
         'db:master',
     ]
-    assert_metrics(aggregator, expected_tags)
+    assert_metrics(
+        aggregator,
+        expected_tags,
+        hostname=sqlserver_check.resolved_hostname,
+        database_autodiscovery=database_autodiscovery,
+    )
 
 
 @pytest.mark.integration
@@ -85,7 +92,9 @@ def test_custom_metrics_object_name(aggregator, dd_run_check, init_config_object
     dd_run_check(sqlserver_check)
 
     aggregator.assert_metric('sqlserver.cache.hit_ratio', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
-    aggregator.assert_metric('sqlserver.active_requests', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
+    aggregator.assert_metric(
+        'sqlserver.broker_activation.tasks_running', tags=['optional:tag1', 'optional_tag:tag1'], count=1
+    )
 
 
 @pytest.mark.integration
@@ -155,7 +164,7 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
 def test_autodiscovery_db_service_checks(
     aggregator, dd_run_check, instance_autodiscovery, service_check_enabled, default_count, extra_count
 ):
-    instance_autodiscovery['autodiscovery_include'] = ['master', 'msdb']
+    instance_autodiscovery['autodiscovery_include'] = ['master', 'msdb', 'unavailable_db']
     instance_autodiscovery['autodiscovery_db_service_check'] = service_check_enabled
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     dd_run_check(check)
@@ -179,6 +188,14 @@ def test_autodiscovery_db_service_checks(
         count=extra_count,
         tags=['db:msdb', 'optional:tag1', 'sqlserver_host:localhost,1433'],
         status=SQLServer.OK,
+    )
+    # unavailable_db is an 'offline' database which prevents connections so we expect this service check to be
+    # critical but not cause a failure of the check
+    aggregator.assert_service_check(
+        'sqlserver.database.can_connect',
+        count=extra_count,
+        tags=['db:unavailable_db', 'optional:tag1', 'sqlserver_host:localhost,1433'],
+        status=SQLServer.CRITICAL,
     )
 
 
@@ -287,23 +304,43 @@ def test_autodiscovery_multiple_instances(aggregator, dd_run_check, instance_aut
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_custom_queries(aggregator, dd_run_check, instance_docker):
+@pytest.mark.parametrize(
+    "custom_query, assert_metrics",
+    [
+        (
+            {
+                'query': "SELECT letter, num FROM (VALUES (97, 'a'), (98, 'b')) AS t (num,letter)",
+                'columns': [{'name': 'customtag', 'type': 'tag'}, {'name': 'num', 'type': 'gauge'}],
+                'tags': ['query:custom'],
+            },
+            [
+                ("sqlserver.num", {"value": 97, "tags": ["customtag:a", "query:custom"]}),
+                ("sqlserver.num", {"value": 98, "tags": ["customtag:b", "query:custom"]}),
+            ],
+        ),
+        (
+            {
+                'query': "EXEC exampleProcWithoutNocount",
+                'columns': [{'name': 'value', 'type': 'gauge'}],
+                'tags': ['hello:there'],
+            },
+            [
+                ("sqlserver.value", {"value": 1, "tags": ["hello:there"]}),
+            ],
+        ),
+    ],
+)
+def test_custom_queries(aggregator, dd_run_check, instance_docker, custom_query, assert_metrics):
     instance = copy(instance_docker)
-    querya = copy(CUSTOM_QUERY_A)
-    queryb = copy(CUSTOM_QUERY_B)
-    instance['custom_queries'] = [querya, queryb]
+    instance['custom_queries'] = [custom_query]
 
     check = SQLServer(CHECK_NAME, {}, [instance])
     dd_run_check(check)
-    tags = list(instance['tags'])
 
-    for tag in ('a', 'b', 'c'):
-        value = ord(tag)
-        custom_tags = ['customtag:{}'.format(tag)]
-        custom_tags.extend(tags)
-
-        aggregator.assert_metric('sqlserver.num', value=value, tags=custom_tags + ['query:custom'])
-        aggregator.assert_metric('sqlserver.num', value=value, tags=custom_tags + ['query:another_custom_one'])
+    for metric_name, kwargs in assert_metrics:
+        kwargs = copy(kwargs)
+        kwargs['tags'] = instance['tags'] + kwargs.get('tags', [])
+        aggregator.assert_metric(metric_name, **kwargs)
 
 
 @pytest.mark.integration
@@ -371,3 +408,21 @@ def test_resolved_hostname(instance_docker, dbm_enabled, instance_host, reported
     instance_docker['reported_hostname'] = reported_hostname
     sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
     assert sqlserver_check.resolved_hostname == expected_hostname
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('database_autodiscovery', [True, False])
+def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, database_autodiscovery):
+    instance_docker['database_autodiscovery'] = database_autodiscovery
+    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    dd_run_check(sqlserver_check)
+    seen_databases = set()
+    for m in aggregator.metrics("sqlserver.database.avg_fragmentation_in_percent"):
+        tags_by_key = {k: v for k, v in [t.split(':') for t in m.tags]}
+        seen_databases.add(tags_by_key['database_name'])
+        assert tags_by_key['object_name'].lower() != 'none'
+
+    assert 'master' in seen_databases
+    if database_autodiscovery:
+        assert 'datadog_test' in seen_databases

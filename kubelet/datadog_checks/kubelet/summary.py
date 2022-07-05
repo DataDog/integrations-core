@@ -32,6 +32,9 @@ class SummaryScraperMixin(object):
                 self.log.warning("Got incomplete results from '/stats/summary', missing data for POD: %s", pod)
                 continue
 
+            if pod_list_utils.is_namespace_excluded(pod_namespace):
+                continue
+
             self._report_pod_stats(
                 pod_namespace, pod_name, pod_uid, pod, pod_list_utils, instance_tags, main_stats_source
             )

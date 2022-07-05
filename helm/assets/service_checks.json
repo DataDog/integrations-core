@@ -1,0 +1,20 @@
+[
+  {
+    "agent_version": "7.36.0",
+    "integration": "Helm",
+    "check": "helm.release_state",
+    "statuses": [
+      "ok",
+      "critical"
+    ],
+    "groups": [
+      "helm_chart_name",
+      "helm_namespace",
+      "helm_release",
+      "helm_storage",
+      "kube_cluster_name"
+    ],
+    "name": "Helm release status",
+    "description": "Returns `CRITICAL` for a release when its latest revision is in failed state. Returns `OK` otherwise."
+  }
+]

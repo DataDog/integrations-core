@@ -1,3 +1,0 @@
-# Note: Patched in omnibus
-# https://github.com/DataDog/datadog-agent/blob/main/omnibus/config/software/snowflake-connector-python-py3.rb
-snowflake-connector-python==2.6.0; python_version > '3.0'

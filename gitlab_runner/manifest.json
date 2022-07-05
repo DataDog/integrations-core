@@ -14,7 +14,7 @@
   "metric_prefix": "gitlab_runner.",
   "metric_to_check": "gitlab_runner.process_max_fds",
   "name": "gitlab_runner",
-  "public_title": "Datadog-Gitlab Runners Integration",
+  "public_title": "Gitlab Runners Integration",
   "short_description": "Track all the metrics from your Gitlab runners with Datadog",
   "support": "core",
   "supported_os": [
