@@ -219,8 +219,10 @@ class MongoDb(AgentCheck):
             dbnames = []
         else:
             if self._config.db_names is None:
+                self.log.debug("Retrieving list of databases")
                 dbnames = api.list_database_names()
             else:
+                self.log.debug("Collecting only from the provided databases")
                 dbnames = self._config.db_names
             self.gauge('mongodb.dbs', len(dbnames), tags=tags)
 
