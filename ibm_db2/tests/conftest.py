@@ -3,7 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
-import ibm_db
+try:
+    import ibm_db
+except ImportError as e:
+    import os
+
+    raise Exception(
+        "Could not load ibm_db, ensure IBM_DB_HOME is correctly set. Currently is %s" % os.getenv('IBM_DB_HOME')
+    ) from e
+
 import pytest
 
 from datadog_checks.dev import WaitFor, docker_run, run_command
