@@ -11,7 +11,7 @@ DB2_URL=https://ddintegrations.blob.core.windows.net/ibm-db2/linuxx64_odbc_cli.t
 
 
 sudo apt-get update
-sudo apt-get install -y --no-install-recommends gcc python-devel, libxml2 pam tar
+sudo apt-get install -y --no-install-recommends gcc libxml2 tar
 
 echo "Downloading ODBC clidriver"
 
