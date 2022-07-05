@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 
-from .common import HEALTH_ENDPOINT
+from .common import HEALTH_ENDPOINT, METRIC_ENDPOINT
 
 pytestmark = [pytest.mark.unit]
 
@@ -22,6 +22,9 @@ def test_health_wrong_endpoint(aggregator, dd_run_check, get_check, instance):
     aggregator.assert_service_check(
         'boundary.controller.health', ServiceCheck.CRITICAL, tags=[f'endpoint:{health_endpoint}', *instance['tags']]
     )
+    aggregator.assert_service_check(
+        'boundary.openmetrics.health', ServiceCheck.OK, tags=[f'endpoint:{METRIC_ENDPOINT}', *instance['tags']]
+    )
 
 
 def test_health_error(aggregator, dd_run_check, get_check, instance, mock_http_response):
@@ -34,6 +37,9 @@ def test_health_error(aggregator, dd_run_check, get_check, instance, mock_http_r
     aggregator.assert_service_check(
         'boundary.controller.health', ServiceCheck.CRITICAL, tags=[f'endpoint:{HEALTH_ENDPOINT}', *instance['tags']]
     )
+    aggregator.assert_service_check(
+        'boundary.openmetrics.health', ServiceCheck.CRITICAL, tags=[f'endpoint:{METRIC_ENDPOINT}', *instance['tags']]
+    )
 
 
 def test_health_warning(aggregator, dd_run_check, get_check, instance, mock_http_response):
@@ -45,4 +51,8 @@ def test_health_warning(aggregator, dd_run_check, get_check, instance, mock_http
 
     aggregator.assert_service_check(
         'boundary.controller.health', ServiceCheck.WARNING, tags=[f'endpoint:{HEALTH_ENDPOINT}', *instance['tags']]
+    )
+
+    aggregator.assert_service_check(
+        'boundary.openmetrics.health', ServiceCheck.CRITICAL, tags=[f'endpoint:{METRIC_ENDPOINT}', *instance['tags']]
     )
