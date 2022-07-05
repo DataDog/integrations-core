@@ -30,3 +30,20 @@ def test_hosts_can_be_singular(instance):
     if not PY2:
         check.load_configuration_models()
         assert check._config_model_instance.hosts == ('localfoost',)
+
+
+def test_dbnames_not_exists(instance):
+    config = MongoConfig(instance, mock.Mock())
+    assert config.db_names is None
+
+
+def test_dbnames_empty(instance):
+    instance['dbnames'] = []
+    config = MongoConfig(instance, mock.Mock())
+    assert config.db_names == []
+
+
+def test_dbnames_non_empty(instance):
+    instance['dbnames'] = ['test']
+    config = MongoConfig(instance, mock.Mock())
+    assert config.db_names == ['test']

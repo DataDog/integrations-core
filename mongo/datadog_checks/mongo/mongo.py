@@ -218,7 +218,10 @@ class MongoDb(AgentCheck):
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
             dbnames = []
         else:
-            dbnames = api.list_database_names()
+            if self._config.db_names is None:
+                dbnames = api.list_database_names()
+            else:
+                dbnames = self._config.db_names
             self.gauge('mongodb.dbs', len(dbnames), tags=tags)
 
         self.refresh_collectors(deployment, mongo_version, dbnames, tags)
