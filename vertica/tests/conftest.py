@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from copy import deepcopy
 
 import pytest
@@ -37,9 +38,9 @@ class InitializeDB(LazyFunction):
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with docker_run(
-        common.COMPOSE_FILE, log_patterns=['Vertica is now running'], conditions=[InitializeDB(common.CONFIG)]
-    ):
+    compose_file = get_compose_file(os.environ['VERTICA_VERSION'])
+
+    with docker_run(compose_file, log_patterns=['Vertica is now running'], conditions=[InitializeDB(common.CONFIG)]):
         yield common.CONFIG
 
 
@@ -56,3 +57,14 @@ def tls_instance():
 @pytest.fixture
 def tls_instance_legacy():
     return deepcopy(common.TLS_CONFIG_LEGACY)
+
+
+def get_compose_file(vertica_version):
+    major_version = int(vertica_version.split('.', 1)[0])
+
+    if major_version < 10:
+        fname = 'docker-compose-9.yaml'
+    else:
+        fname = 'docker-compose.yaml'
+
+    return os.path.join(common.HERE, 'docker', fname)
