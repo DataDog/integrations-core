@@ -102,7 +102,7 @@ class VSphereCheck(AgentCheck):
             self.log.debug("Connected")
         except APIConnectionError:
             # Clear the API connection object if the authentication fails
-            self.api = None
+            self.api = cast(VSphereAPI, None)
             self.log.error("Cannot authenticate to vCenter API. The check will not run.")
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.base_tags, hostname=None)
             raise
