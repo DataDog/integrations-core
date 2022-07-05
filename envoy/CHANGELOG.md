@@ -1,5 +1,9 @@
 # CHANGELOG - Envoy
 
+## 2.3.0 / 2022-07-05
+
+* [Added] Add ext_authz and ratelimiter metrics to OpenMetrics implementation. See [#12451](https://github.com/DataDog/integrations-core/pull/12451).
+
 ## 2.2.0 / 2022-06-27
 
 * [Added] Add ext_authz metrics to envoy integration. See [#12374](https://github.com/DataDog/integrations-core/pull/12374). Thanks [Kaycell](https://github.com/Kaycell).
