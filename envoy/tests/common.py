@@ -77,6 +77,8 @@ PROMETHEUS_METRICS = [
     "cluster.membership_healthy",
     "cluster.membership_total",
     "cluster.original_dst_host_invalid.count",
+    "cluster.ratelimit.error.count",
+    "cluster.ratelimit.failure_mode_allowed.count",
     "cluster.retry_or_shadow_abandoned.count",
     "cluster.update_attempt.count",
     "cluster.update_empty.count",
