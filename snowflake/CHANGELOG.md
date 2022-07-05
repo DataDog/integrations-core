@@ -1,5 +1,9 @@
 # CHANGELOG - Snowflake
 
+## 4.4.2 / 2022-07-05
+
+* [Fixed] Properly read from `token_path` parameter. See [#12452](https://github.com/DataDog/integrations-core/pull/12452).
+
 ## 4.4.1 / 2022-06-28
 
 * [Fixed] Fix organization data transfer query. See [#12420](https://github.com/DataDog/integrations-core/pull/12420).
