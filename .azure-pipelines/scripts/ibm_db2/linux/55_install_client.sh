@@ -31,6 +31,7 @@ pushd $IBM_DB_FOLDER
 
 popd
 
+chmod -R a+xr /opt/ibm_db/clidriver
 ls /opt/ibm_db
 ls /opt/ibm_db/clidriver
 
