@@ -28,6 +28,8 @@ PROMETHEUS_METRICS = [
     "cluster.circuit_breakers.rq_pending_open",
     "cluster.circuit_breakers.rq_retry_open",
     "cluster.default_total_match.count",
+    "cluster.ext_authz.error.count",
+    "cluster.ext_authz.failure_mode_allowed.count",
     "cluster.http1.dropped_headers_with_underscores.count",
     "cluster.http1.metadata_not_supported_error.count",
     "cluster.http1.requests_rejected_with_underscores_in_headers.count",
