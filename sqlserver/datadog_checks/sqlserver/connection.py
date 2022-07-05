@@ -129,7 +129,7 @@ class Connection(object):
         self.server_version = int(self.instance.get('server_version', self.DEFAULT_SQLSERVER_VERSION))
 
         self.adoprovider = self.default_adoprovider
-        
+
         self.valid_connectors = []
         if adodbapi is not None:
             self.valid_connectors.append('adodbapi')
