@@ -683,6 +683,11 @@ instances:
         #
         # allow_redirects: true
 
+    ## @param connection_reset_timeout - integer - optional - default: 900
+    ## The time interval in seconds at which the agent should re-authenticate using the provided credentials
+    #
+    # connection_reset_timeout: 900
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
