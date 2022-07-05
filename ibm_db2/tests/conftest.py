@@ -5,12 +5,12 @@ from copy import deepcopy
 
 try:
     import ibm_db
-except ImportError as e:
+except ImportError:
     import os
 
-    raise Exception(
+    raise ImportError(
         "Could not load ibm_db, ensure IBM_DB_HOME is correctly set. Currently is %s" % os.getenv('IBM_DB_HOME')
-    ) from e
+    )
 
 import pytest
 
