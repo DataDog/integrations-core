@@ -34,5 +34,8 @@ popd
 chmod -R a+xr /opt/ibm_db/clidriver
 ls /opt/ibm_db
 ls /opt/ibm_db/clidriver
+echo "Finding libdb2.so.1"
+find / -name libdb2.so.1
+
 
 set +ex
