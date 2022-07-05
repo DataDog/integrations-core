@@ -227,6 +227,7 @@ class MongoDb(AgentCheck):
                 self.log.trace("Collecting only from the configured databases: %s", self._config.db_names)
                 dbnames = []
                 server_databases = api.list_database_names()
+                self.gauge('mongodb.dbs', len(server_databases), tags=tags)
                 self.log.debug("Checking the configured databases that exist on the mongo server")
                 for config_dbname in self._config.db_names:
                     if config_dbname in server_databases:
