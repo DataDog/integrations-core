@@ -62,7 +62,7 @@ def test_token_path(dd_run_check, aggregator):
         'proxy_password': None,
     }
 
-    tokens = [b'mytoken1', b'mytoken2', b'mytoken3']
+    tokens = ['mytoken1', 'mytoken2', 'mytoken3']
 
     check = SnowflakeCheck(CHECK_NAME, {}, [instance])
     with mock.patch(
