@@ -26,7 +26,7 @@ def dd_environment():
         os.path.join(DOCKER_DIR, FLAVOR, 'docker-compose.yaml'),
         build=True,
         endpoints="{}/stats".format(URL),
-        log_patterns=['all dependencies initialized. starting workers'],
+        log_patterns=['front-envoy(.*?)all dependencies initialized. starting workers'],
     ):
         # Exercising envoy a bit will trigger extra metrics
         requests.get('http://{}:8000/service/1'.format(HOST))
