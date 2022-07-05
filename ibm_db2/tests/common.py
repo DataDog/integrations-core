@@ -26,17 +26,12 @@ CONFIG = {
 
 E2E_METADATA = {
     'env_vars': {
-        'IBM_DB_HOME': '/opt/ibm_db/clidriver',
-        'LD_LIBRARY_PATH': '/opt/ibm_db/clidriver/lib',
+        'IBM_DB_INSTALLER_URL': 'https://ddintegrations.blob.core.windows.net/ibm-db2/',
     },
     'docker_volumes': ['{}/requirements.txt:/dev/requirements.txt'.format(os.path.join(HERE, 'docker'))],
     'start_commands': [
         'apt-get update',
         'apt-get install -y build-essential libxslt-dev',
-        'wget https://ddintegrations.blob.core.windows.net/ibm-db2/linuxx64_odbc_cli.tar.gz',
-        'mkdir -p /opt/ibm_db',
-        'tar -zxvf linuxx64_odbc_cli.tar.gz.tar.gz --directory /opt/ibm_db/',
-        'ldconfig',
         'pip install -r /dev/requirements.txt',
     ],
 }
