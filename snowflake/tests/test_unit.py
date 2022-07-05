@@ -66,7 +66,8 @@ def test_read_token(oauth_instance):
     oauth_token_path_inst['token'] = None
     oauth_token_path_inst['token_path'] = os.path.join(os.path.dirname(__file__), 'keys', 'token')
     check = SnowflakeCheck(CHECK_NAME, {}, [oauth_token_path_inst])
-    check.read_token()
+    token = check.read_token()
+    assert token == 'testtoken'
 
 
 def test_default_auth(instance):
