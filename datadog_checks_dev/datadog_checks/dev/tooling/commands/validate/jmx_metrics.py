@@ -18,6 +18,8 @@ from ...utils import (
 )
 from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_info, echo_success
 
+# List of integrations to skip the duplicate bean check on
+SKIP_DUPLICATE_CHECK = ["hive"]
 
 @click.command('jmx-metrics', context_settings=CONTEXT_SETTINGS, short_help='Validate JMX metrics files')
 @click.argument('check', shell_complete=complete_valid_checks, required=False)
@@ -72,6 +74,9 @@ def validate_jmx_metrics(check_name, saved_errors, verbose):
         errors = literal_eval(str(errors))
         for e in errors:
             saved_errors[(check_name, jmx_metrics_file)].append(f"{e[0]} on line {e[-1]}")
+
+    if check_name in SKIP_DUPLICATE_CHECK:
+        return
 
     jmx_metrics_data = yaml.safe_load(read_file(jmx_metrics_file)).get('jmx_metrics')
     if jmx_metrics_data is None:
