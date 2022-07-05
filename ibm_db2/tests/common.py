@@ -36,6 +36,7 @@ E2E_METADATA = {
         'wget https://ddintegrations.blob.core.windows.net/ibm-db2/linuxx64_odbc_cli.tar.gz',
         'mkdir -p /opt/ibm_db',
         'tar -zxvf linuxx64_odbc_cli.tar.gz.tar.gz --directory /opt/ibm_db/',
+        'ldconfig',
         'pip install -r /dev/requirements.txt',
     ],
 }
