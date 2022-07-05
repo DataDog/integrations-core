@@ -166,7 +166,7 @@ metrics:
     symbols:
       # List of symbols ('columns') to retrieve.
       # Same format as for a single OID.
-      # The value from each row (index) in the table will be collected `<TABLE_OID>.1.<COLUMN_ID>.<INDEX>.*`
+      # The value from each row (index) in the table will be collected `<TABLE_OID>.1.<COLUMN_ID>.<INDEX>`
       - OID: 1.3.6.1.4.1.10.1.1
         name: exampleColumn1
       - OID: 1.3.6.1.4.1.10.1.2
