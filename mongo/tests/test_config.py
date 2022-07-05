@@ -10,6 +10,29 @@ from datadog_checks.mongo import MongoDb
 from datadog_checks.mongo.config import MongoConfig
 
 
+def test_invalid_scheme(instance):
+    instance['hosts'] = ['sandbox.foo.bar.mongodb.com']
+    instance['connection_scheme'] = 'invalid'
+    with pytest.raises(ConfigurationError, match='Could not build a mongo uri with the given hosts'):
+        MongoConfig(instance, mock.Mock())
+
+
+def test_mongodb_scheme(instance):
+    instance['hosts'] = ['localhost']
+    instance['connection_scheme'] = 'mongodb'
+    MongoConfig(instance, mock.Mock())
+
+
+def test_mongodb_srv_scheme(instance):
+    instance['hosts'] = ['test.mongodb.com']
+    instance['connection_scheme'] = 'mongodb+srv'
+    with mock.patch(
+        'pymongo.uri_parser.parse_uri', return_value={'nodelist': ["resolved.mongodb.com"]}
+    ) as mock_parse_uri:
+        MongoConfig(instance, mock.Mock())
+        mock_parse_uri.assert_called_once_with("mongodb+srv://test.mongodb.com/")
+
+
 def test_badly_formatted_server(instance):
     instance['hosts'] = ['sandbox.foo.bar.mongodb.com\\:27017\\']
     with pytest.raises(ConfigurationError, match='Could not build a mongo uri with the given hosts'):
