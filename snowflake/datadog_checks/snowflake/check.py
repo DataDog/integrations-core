@@ -108,7 +108,7 @@ class SnowflakeCheck(AgentCheck):
     def read_token(self):
         if self._config.token_path:
             self.log.debug("Renewing Snowflake client token")
-            with open(self._config.token_path, 'r') as f:
+            with open(self._config.token_path, 'r', encoding="UTF-8") as f:
                 self._config.token = f.read()
 
         return self._config.token
