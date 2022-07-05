@@ -9,6 +9,12 @@ set -ex
 IBM_DB_FOLDER=/opt/ibm_db
 DB2_URL=https://ddintegrations.blob.core.windows.net/ibm-db2/linuxx64_odbc_cli.tar.gz
 
+
+sudo apt-get update
+sudo apt-get install -y --no-install-recommends gcc python-devel, libxml2 pam tar
+
+echo "Downloading ODBC clidriver"
+
 mkdir -p $IBM_DB_FOLDER
 pushd $IBM_DB_FOLDER
 
@@ -20,11 +26,12 @@ pushd $IBM_DB_FOLDER
     sleep $i
   done
 
+  echo "Extracting ODBC clidriver"
   tar -zxvf ./*.tar.gz
 
 popd
 
-ls $IBM_DB_FOLDER
-ls $IBM_DB_FOLDER/clidriver
+ls /opt/ibm_db
+ls /opt/ibm_db/clidriver
 
 set +ex
