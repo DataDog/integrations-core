@@ -163,7 +163,7 @@ def test_ipv6(aggregator, check):
 
     nb_ipv4, nb_ipv6 = 0, 0
     for addr in check.addrs:
-        expected_tags = ["instance:UpService", "target_host:app.datad0g.com", "port:80", "foo:bar"]
+        expected_tags = ["instance:UpService", "target_host:ip-ranges.datadoghq.com", "port:80", "foo:bar"]
         expected_tags.append("address:{}".format(addr))
         if re.match(r'^[0-9a-f:]+$', addr):
             nb_ipv6 += 1
@@ -177,8 +177,8 @@ def test_ipv6(aggregator, check):
             nb_ipv4 += 1
             aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
             aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
-    assert nb_ipv4 == 3
+    assert nb_ipv4 == 4
     # The Windows CI machine doesn't return IPv6
-    assert nb_ipv6 == 3 or platform.system() == 'Windows' and nb_ipv6 == 0
+    assert nb_ipv6 == 8 or platform.system() == 'Windows' and nb_ipv6 == 0
     aggregator.assert_all_metrics_covered()
     assert len(aggregator.service_checks('tcp.can_connect')) == nb_ipv4 + nb_ipv6
