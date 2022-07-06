@@ -78,7 +78,7 @@ See [metadata.csv][11] for a list of metrics provided by this integration.
 
 For Linkerd v1, see the [finagle metrics guide][12] for metric descriptions and [this gist][13] for an example of metrics exposed by Linkerd.
 
-**Note**: Depending on your Linkerd configuration, some metrics might not be exposed by Linkerd.
+**Note**: Linkerd is a prometheus based integration. Depending on your Linkerd configuration, some metrics might not be exposed by Linkerd. To check which metrics Datadog can collect, you can execute the below curl command in order to output all the exposed metrics by your current configuration. Meaning that if any metric is not present in the curl output, Datadog will not be collecting it.
 
 To list the metrics exposed by your current configuration, run:
 
@@ -91,6 +91,10 @@ Where `linkerd_prometheus_endpoint` is the Linkerd Prometheus endpoint (you shou
 If you need to use a metric that is not provided by default, you can add an entry to `linkerd.yaml`.
 
 Simply follow the examples present in the [default configuration][4].
+
+**Note**: we append, in our code, linkerd metrics ending with '_total' to 'count' (ex. "linkerd.tcp.open_total" will be "linkerd.tcp.open.count")
+https://github.com/DataDog/integrations-core/blob/7585dad4f622339f87eed87ad15e2986d9025bde/linkerd/datadog_checks/linkerd/metrics.py#L123-L125 
+
 
 ### Service Checks
 
