@@ -4,7 +4,7 @@
 import mock
 
 
-def test_get_agent_tags(reset_root):
+def test_get_agent_tags():
     with mock.patch('datadog_checks.dev.tooling.git.git_tag_list') as tag_lst:
         from datadog_checks.dev.tooling.commands.agent.common import get_agent_tags
 
