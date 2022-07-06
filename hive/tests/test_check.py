@@ -35,8 +35,9 @@ def test(dd_agent_check):
         "hive.metastore.api.init.active_call",
         "hive.server.memory.heap.usage",
     ]
+    unavailable_metrics = ['jvm.gc.parnew.time', 'jvm.gc.cms.count']
     # Removing jvm metrics that aren't exposed in hive
-    jvm_metrics = list(set(JVM_E2E_METRICS) - set(['jvm.gc.parnew.time', 'jvm.gc.cms.count']))
+    jvm_metrics = list(set(JVM_E2E_METRICS) - set(unavailable_metrics))
     metrics = hive_metrics + jvm_metrics
     for metric in metrics:
         aggregator.assert_metric(metric)
