@@ -247,4 +247,3 @@ class MongoDb(AgentCheck):
                         self.log.warning("'%s' database not found on the mongo server", config_dbname)
         self.log.trace("List of databases to check: %s", dbnames)
         return dbnames
-
