@@ -215,28 +215,7 @@ class MongoDb(AgentCheck):
         elif isinstance(deployment, MongosDeployment):
             tags.append('sharding_cluster_role:mongos')
 
-        if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
-            self.log.debug("Replicaset and arbiter deployment, no databases will be checked")
-            dbnames = []
-        else:
-            if self._config.db_names is None:
-                self.log.debug("No databases configured. Retrieving list of databases from the mongo server")
-                dbnames = api.list_database_names()
-                self.gauge('mongodb.dbs', len(dbnames), tags=tags)
-            else:
-                self.log.trace("Collecting only from the configured databases: %s", self._config.db_names)
-                dbnames = []0
-                server_databases = api.list_database_names()
-                self.gauge('mongodb.dbs', len(server_databases), tags=tags)
-                self.log.debug("Checking the configured databases that exist on the mongo server")
-                for config_dbname in self._config.db_names:
-                    if config_dbname in server_databases:
-                        self.log.trace("'%s' database found on the mongo server", config_dbname)
-                        dbnames.append(config_dbname)
-                    else:
-                        self.log.warning("'%s' database not found on the mongo server", config_dbname)
-        self.log.trace("List of databases to check: %s", dbnames)
-
+        dbnames = self._get_db_names(api, deployment, tags)
         self.refresh_collectors(deployment, mongo_version, dbnames, tags)
         for collector in self.collectors:
             try:
@@ -245,3 +224,27 @@ class MongoDb(AgentCheck):
                 self.log.info(
                     "Unable to collect logs from collector %s. Some metrics will be missing.", collector, exc_info=True
                 )
+
+    def _get_db_names(self, api, deployment, tags):
+        if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
+            self.log.debug("Replicaset and arbiter deployment, no databases will be checked")
+            dbnames = []
+        else:
+            server_databases = api.list_database_names()
+            self.gauge('mongodb.dbs', len(server_databases), tags=tags)
+            if self._config.db_names is None:
+                self.log.debug("No databases configured. Retrieving list of databases from the mongo server")
+                dbnames = server_databases
+            else:
+                self.log.trace("Collecting only from the configured databases: %s", self._config.db_names)
+                dbnames = []
+                self.log.debug("Checking the configured databases that exist on the mongo server")
+                for config_dbname in self._config.db_names:
+                    if config_dbname in server_databases:
+                        self.log.trace("'%s' database found on the mongo server", config_dbname)
+                        dbnames.append(config_dbname)
+                    else:
+                        self.log.warning("'%s' database not found on the mongo server", config_dbname)
+        self.log.trace("List of databases to check: %s", dbnames)
+        return dbnames
+
