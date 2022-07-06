@@ -68,10 +68,7 @@ def dd_environment():
             conditions=[
                 CheckDockerLogs(
                     'db',
-                    [
-                        "MySQL init process done. Ready for start up.",
-                        "mysqld: ready for connections",
-                    ],
+                    ["MySQL init process done. Ready for start up."],
                     wait=5,
                 ),
                 CheckDockerLogs('proxysql', ["read_only_action RO=0 phase 3"], wait=5),
