@@ -220,12 +220,12 @@ class MongoDb(AgentCheck):
             dbnames = []
         else:
             if self._config.db_names is None:
-                self.log.debug("Not configured databases. Retrieving list of databases on the mongo server")
+                self.log.debug("No databases configured. Retrieving list of databases from the mongo server")
                 dbnames = api.list_database_names()
                 self.gauge('mongodb.dbs', len(dbnames), tags=tags)
             else:
                 self.log.trace("Collecting only from the configured databases: %s", self._config.db_names)
-                dbnames = []
+                dbnames = []0
                 server_databases = api.list_database_names()
                 self.gauge('mongodb.dbs', len(server_databases), tags=tags)
                 self.log.debug("Checking the configured databases that exist on the mongo server")
