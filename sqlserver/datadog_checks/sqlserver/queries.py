@@ -95,7 +95,7 @@ QUERY_FAILOVER_CLUSTER_INSTANCE = {
 }
 
 
-def get_ao_availability_groups(sqlserver_major_version):
+def get_query_ao_availability_groups(sqlserver_major_version):
     """
     Construct the sys.availability_groups QueryExecutor configuration based on the SQL Server major version
 
@@ -149,10 +149,6 @@ def get_ao_availability_groups(sqlserver_major_version):
             'sql_column': 'DRS.database_id',
             'metric_definition': {'name': 'database_id', 'type': 'tag'},
         },
-        'ao_is_primary_replica': {
-            'sql_column': 'DRS.is_primary_replica',
-            'metric_definition': {'name': 'ao.is_primary_replica', 'type': 'gauge'},
-        },
         'database_state': {
             'sql_column': 'DRS.database_state',
             'metric_definition': {'name': 'database_state', 'type': 'tag'},
@@ -185,10 +181,6 @@ def get_ao_availability_groups(sqlserver_major_version):
             'sql_column': '(DRS.filestream_send_rate * 1024) AS filestream_send_rate',
             'metric_definition': {'name': 'ao.filestream_send_rate', 'type': 'gauge'},
         },
-        'ao_secondary_lag_seconds': {
-            'sql_column': 'DRS.secondary_lag_seconds',
-            'metric_definition': {'name': 'ao.secondary_lag_seconds', 'type': 'gauge'},
-        },
     }
 
     # FC - sys.dm_hadr_cluster
@@ -199,10 +191,17 @@ def get_ao_availability_groups(sqlserver_major_version):
         },
     }
 
-    if sqlserver_major_version <= 2014:
-        drs_column_definitions.pop('ao_secondary_lag_seconds')
-    if sqlserver_major_version <= 2012:
-        drs_column_definitions.pop('ao_is_primary_replica')
+    # Include metrics based on version
+    if sqlserver_major_version >= 2016:
+        drs_column_definitions['ao_secondary_lag_seconds'] = {
+            'sql_column': 'DRS.secondary_lag_seconds',
+            'metric_definition': {'name': 'ao.secondary_lag_seconds', 'type': 'gauge'},
+        }
+    if sqlserver_major_version >= 2014:
+        drs_column_definitions['ao_is_primary_replica'] = {
+            'sql_column': 'DRS.is_primary_replica',
+            'metric_definition': {'name': 'ao.is_primary_replica', 'type': 'gauge'},
+        }
 
     def _sort_column_definitions(column_definitions):
         sql_columns = []
@@ -212,7 +211,7 @@ def get_ao_availability_groups(sqlserver_major_version):
             metric_columns.append(column_definitions[column]['metric_definition'])
         return sql_columns, metric_columns
 
-    # sort columns to ensure a static column order
+    # Sort columns to ensure a static column order
     ag_sql_columns, ag_metric_columns = _sort_column_definitions(ag_column_definitions)
     ar_sql_columns, ar_metric_columns = _sort_column_definitions(ar_column_definitions)
     adc_sql_columns, adc_metric_columns = _sort_column_definitions(adc_column_definitions)

@@ -62,7 +62,7 @@ from datadog_checks.sqlserver.queries import (
     QUERY_AO_FAILOVER_CLUSTER_MEMBER,
     QUERY_FAILOVER_CLUSTER_INSTANCE,
     QUERY_SERVER_STATIC_INFO,
-    get_ao_availability_groups,
+    get_query_ao_availability_groups,
     get_query_file_stats,
 )
 from datadog_checks.sqlserver.utils import set_default_driver_conf
@@ -158,19 +158,6 @@ class SQLServer(AgentCheck):
         )
 
         # Query declarations
-        check_queries = []
-        if is_affirmative(self.instance.get('include_ao_metrics', False)):
-            check_queries.extend(
-                [
-                    QUERY_AO_FAILOVER_CLUSTER,
-                    QUERY_AO_FAILOVER_CLUSTER_MEMBER,
-                ]
-            )
-        if is_affirmative(self.instance.get('include_fci_metrics', False)):
-            check_queries.extend([QUERY_FAILOVER_CLUSTER_INSTANCE])
-        self._check_queries = self._new_query_executor(check_queries)
-        self.check_initializations.append(self._check_queries.compile_queries)
-
         self.server_state_queries = self._new_query_executor([QUERY_SERVER_STATIC_INFO])
         self.check_initializations.append(self.server_state_queries.compile_queries)
 
@@ -692,7 +679,21 @@ class SQLServer(AgentCheck):
         queries = [get_query_file_stats(major_version)]
 
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
-            queries.extend([get_ao_availability_groups(major_version)])
+            if major_version > 2012:
+                queries.extend(
+                    [
+                        get_query_ao_availability_groups(major_version),
+                        QUERY_AO_FAILOVER_CLUSTER,
+                        QUERY_AO_FAILOVER_CLUSTER_MEMBER,
+                    ]
+                )
+            else:
+                self.log.warning('Collecting AlwaysOn metrics is only supported on versions 2014+')
+        if is_affirmative(self.instance.get('include_fci_metrics', False)):
+            if major_version > 2012:
+                queries.extend([QUERY_FAILOVER_CLUSTER_INSTANCE])
+            else:
+                self.log.warning('Collecting Failover Cluster Instance metrics is only supported on versions 2014+')
 
         self._dynamic_queries = self._new_query_executor(queries)
         self._dynamic_queries.compile_queries()
@@ -757,7 +758,6 @@ class SQLServer(AgentCheck):
                 ]:
                     self.server_state_queries.execute()
 
-                self._check_queries.execute()
                 if self.dynamic_queries:
                     self.dynamic_queries.execute()
                 # reuse connection for any custom queries
