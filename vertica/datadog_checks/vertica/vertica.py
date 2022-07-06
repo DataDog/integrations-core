@@ -220,13 +220,6 @@ class VerticaCheck(AgentCheck):
         self.gauge('projection.unsafe_percent', unsafe_percent, tags=self._tags)
 
     def query_projection_storage(self):
-        # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/PROJECTION_STORAGE.htm
-
-        # Vertica v11 has removed some columns, skip these metrics until we implement them
-        if self._major_version() >= 11:
-            self.log.debug("Skipping collection of projection_storage metrics as they're not yet supported for v11+")
-            return
-
         queries = views.make_projection_storage_queries(self._major_version())
 
         for projection in self.iter_rows_query(queries['per_projection']):
@@ -236,11 +229,11 @@ class VerticaCheck(AgentCheck):
                 'node_name:{}'.format(projection['node_name']),
             ]
             self.gauge('projection.ros.containers', projection['ros_count'], tags=tags)
-            self.gauge('projection.row.ros', projection['ros_row_count'], tags=tags)
-            self.gauge('projection.row.wos', projection['wos_row_count'], tags=tags)
+            self._maybe_gauge('projection.row.ros', projection.get('ros_row_count'), tags=tags)
+            self._maybe_gauge('projection.row.wos', projection.get('wos_row_count'), tags=tags)
             self.gauge('projection.row.total', projection['row_count'], tags=tags)
-            self.gauge('projection.disk.used.ros', projection['ros_used_bytes'], tags=tags)
-            self.gauge('projection.disk.used.wos', projection['wos_used_bytes'], tags=tags)
+            self._maybe_gauge('projection.disk.used.ros', projection.get('ros_used_bytes'), tags=tags)
+            self._maybe_gauge('projection.disk.used.wos', projection.get('wos_used_bytes'), tags=tags)
             self.gauge('projection.disk.used', projection['used_bytes'], tags=tags)
 
         for table in self.iter_rows_query(queries['per_table']):
@@ -248,31 +241,30 @@ class VerticaCheck(AgentCheck):
                 'table_name:{}'.format(projection['anchor_table_name']),
                 'node_name:{}'.format(projection['node_name']),
             ]
-            self.gauge('table.row.ros', table['ros_row_count'], tags=tags)
-            self.gauge('table.row.wos', table['wos_row_count'], tags=tags)
+            self._maybe_gauge('table.row.ros', table.get('ros_row_count'), tags=tags)
+            self._maybe_gauge('table.row.wos', table.get('wos_row_count'), tags=tags)
             self.gauge('table.row.total', table['row_count'], tags=tags)
-            self.gauge('table.disk.used.ros', table['ros_used_bytes'], tags=tags)
-            self.gauge('table.disk.used.wos', table['wos_used_bytes'], tags=tags)
+            self._maybe_gauge('table.disk.used.ros', table.get('ros_used_bytes'), tags=tags)
+            self._maybe_gauge('table.disk.used.wos', table.get('wos_used_bytes'), tags=tags)
             self.gauge('table.disk.used', table['used_bytes'], tags=tags)
 
         for node in self.iter_rows_query(queries['per_node']):
             tags = self._tags + ['node_name:{}'.format(projection['node_name'])]
 
-            self.gauge('node.row.ros', node['ros_row_count'], tags=tags)
-            self.gauge('node.row.wos', node['wos_row_count'], tags=tags)
+            self._maybe_gauge('node.row.ros', node.get('ros_row_count'), tags=tags)
+            self._maybe_gauge('node.row.wos', node.get('wos_row_count'), tags=tags)
             self.gauge('node.row.total', node['row_count'], tags=tags)
-            self.gauge('node.disk.used.ros', node['ros_used_bytes'], tags=tags)
-            self.gauge('node.disk.used.wos', node['wos_used_bytes'], tags=tags)
+            self._maybe_gauge('node.disk.used.ros', node.get('ros_used_bytes'), tags=tags)
+            self._maybe_gauge('node.disk.used.wos', node.get('wos_used_bytes'), tags=tags)
             self.gauge('node.disk.used', node['used_bytes'], tags=tags)
 
         # Total metrics
         total = self._connection.cursor('dict').execute(queries['total']).fetchone()
-        self.gauge('row.ros', total['ros_row_count'], tags=self._tags)
-        self.gauge('row.wos', total['wos_row_count'], tags=self._tags)
+        self._maybe_gauge('row.ros', total.get('ros_row_count'), tags=self._tags)
+        self._maybe_gauge('row.wos', total.get('wos_row_count'), tags=self._tags)
         self.gauge('row.total', total['row_count'], tags=self._tags)
-        self.gauge('disk.used.ros', total['ros_used_bytes'], tags=self._tags)
-        self.gauge('disk.used.wos', total['wos_used_bytes'], tags=self._tags)
-        self.gauge('disk.used', total['wos_used_bytes'], tags=self._tags)
+        self._maybe_gauge('disk.used.ros', total.get('ros_used_bytes'), tags=self._tags)
+        self._maybe_gauge('disk.used.wos', total.get('wos_used_bytes'), tags=self._tags)
         self.gauge('disk.used', total['used_bytes'], tags=self._tags)
 
     def query_storage_containers(self):
@@ -611,3 +603,8 @@ class VerticaCheck(AgentCheck):
         self._metric_groups.extend(
             default_metric_groups[group] for group in default_metric_groups if group in metric_groups
         )
+
+    def _maybe_gauge(self, name, value, *args, **kwargs):
+        "Record a gauge metric only if the value is not None"
+        if value is not None:
+            self.gauge(name, value, *args, **kwargs)
