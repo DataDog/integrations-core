@@ -27,3 +27,21 @@ def test_make_projection_storage_queries():
         'sum(wos_used_bytes) as wos_used_bytes '
         'FROM v_monitor.projection_storage GROUP BY anchor_table_name, node_name, projection_name'
     )
+
+
+def test_make_storage_containers_queries():
+    queries = views.make_storage_containers_queries(9)
+
+    assert 'per_projection' in queries
+    assert 'per_node' in queries
+    assert 'total' in queries
+
+    assert queries['per_projection'] == (
+        'SELECT '
+        'node_name, '
+        'projection_name, '
+        'storage_type, '
+        'sum(delete_vector_count) as delete_vector_count '
+        'FROM v_monitor.storage_containers '
+        'GROUP BY node_name, projection_name, storage_type'
+    )

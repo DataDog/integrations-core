@@ -10,7 +10,6 @@ from datetime import datetime
 from itertools import chain
 
 import vertica_python as vertica
-from six import iteritems
 from vertica_python.vertica.column import timestamp_tz_parse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -268,51 +267,24 @@ class VerticaCheck(AgentCheck):
         self.gauge('disk.used', total['used_bytes'], tags=self._tags)
 
     def query_storage_containers(self):
-        # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/STORAGE_CONTAINERS.htm
+        queries = views.make_storage_containers_queries(self._major_version())
 
-        # Vertica v11 has removed some columns, skip these metrics until we implement them
-        if self._major_version() >= 11:
-            self.log.debug("Skipping collection of storage_containers metrics as they're not yet supported for v11+")
-            return
+        for projection in self.iter_rows_query(queries['per_projection']):
+            tags = self._tags + [
+                'projection_name:{}'.format(projection['projection_name']),
+                'node_name:{}'.format(projection['node_name']),
+            ]
+            if 'storage_type' in projection:
+                tags.append('container_type:{}'.format(projection['storage_type']))
 
-        container_data = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: {'delete_vectors': 0})))
+            self.gauge('projection.delete_vectors', projection['delete_vector_count'], tags=tags)
 
-        for sc in self.iter_rows(views.StorageContainers):
-            container = container_data[sc['node_name']][sc['projection_name']][sc['storage_type'].lower()]
+        for node in self.iter_rows_query(queries['per_node']):
+            tags = self._tags + ['node_name:{}'.format(projection['node_name'])]
+            self.gauge('node.delete_vectors', node['delete_vector_count'], tags=tags)
 
-            container['delete_vectors'] += sc['delete_vector_count']
-
-        total_delete_vectors = 0
-
-        for node, projections in iteritems(container_data):
-            node_tags = ['node_name:{}'.format(node)]
-            node_tags.extend(self._tags)
-
-            node_delete_vectors = 0
-
-            for projection, containers in iteritems(projections):
-                projection_tags = ['projection_name:{}'.format(projection)]
-                projection_tags.extend(node_tags)
-
-                projection_delete_vectors = 0
-
-                for container_type, data in iteritems(containers):
-                    container_tags = ['container_type:{}'.format(container_type)]
-                    container_tags.extend(projection_tags)
-
-                    container_type_delete_vectors = data['delete_vectors']
-
-                    self.gauge('projection.delete_vectors', container_type_delete_vectors, tags=container_tags)
-
-                    projection_delete_vectors += container_type_delete_vectors
-
-                node_delete_vectors += projection_delete_vectors
-
-            self.gauge('node.delete_vectors', node_delete_vectors, tags=node_tags)
-
-            total_delete_vectors += node_delete_vectors
-
-        self.gauge('delete_vectors', total_delete_vectors, tags=self._tags)
+        total = self._connection.cursor('dict').execute(queries['total']).fetchone()
+        self.gauge('delete_vectors', total['delete_vector_count'], tags=self._tags)
 
     def query_host_resources(self):
         # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/HOST_RESOURCES.htm

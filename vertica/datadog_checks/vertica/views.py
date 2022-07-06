@@ -103,14 +103,30 @@ def make_projection_storage_queries(version):
     }
 
 
-class StorageContainers:
-    """
-    https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/STORAGE_CONTAINERS.htm
-    """
+def make_storage_containers_queries(version):
+    """Builds a dict of queries for storage_containers metrics depending on the vertica version."""
+    # https://www.vertica.com/docs/9.3.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/STORAGE_CONTAINERS.htm
 
-    name = 'storage_containers'
-    fields = ('delete_vector_count', 'node_name', 'projection_name', 'storage_type')
-    query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
+    sum_fields = ['sum(delete_vector_count) as delete_vector_count']
+
+    def build_query(group_fields):
+        columns = ', '.join(group_fields + sum_fields)
+        return ('SELECT {columns} FROM v_monitor.storage_containers GROUP BY {group_fields}').format(
+            columns=columns, group_fields=', '.join(group_fields)
+        )
+
+    queries = {
+        'per_node': build_query(['node_name']),
+        'total': 'SELECT {} FROM v_monitor.storage_containers'.format(', '.join(sum_fields)),
+    }
+
+    if version < 11:
+        # https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/STORAGE_CONTAINERS.htm
+        queries['per_projection'] = build_query(['node_name', 'projection_name', 'storage_type'])
+    else:
+        queries['per_projection'] = build_query(['node_name', 'projection_name'])
+
+    return queries
 
 
 class QueryMetrics:
