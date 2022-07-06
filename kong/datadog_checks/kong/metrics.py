@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# https://github.com/Kong/kong-plugin-prometheus/blob/1.2.0/kong/plugins/prometheus/exporter.lua
+# https://docs.konghq.com/hub/kong-inc/prometheus/#available-metrics
 METRIC_MAP = {
     'kong_bandwidth': 'bandwidth',
     'kong_datastore_reachable': {
