@@ -244,6 +244,6 @@ class MongoDb(AgentCheck):
                         self.log.trace("'%s' database found on the mongo server", config_dbname)
                         dbnames.append(config_dbname)
                     else:
-                        self.log.warning("'%s' database not found on the mongo server", config_dbname)
+                        self.log.warning("'%s' database not found on the mongo server, will not append to list of databases to check", config_dbname)
         self.log.trace("List of databases to check: %s", dbnames)
         return dbnames
