@@ -4,13 +4,13 @@
 
 import os
 import shutil
-import sys
 
 import pytest
 from click.testing import CliRunner
 
-from datadog_checks.dev import run_command
-from datadog_checks.dev.tooling.utils import get_license_header
+from datadog_checks.dev.tooling.commands.validate import models
+from datadog_checks.dev.tooling.config import copy_default_config
+from datadog_checks.dev.tooling.utils import get_license_header, initialize_root
 
 
 @pytest.mark.parametrize(
@@ -20,27 +20,16 @@ from datadog_checks.dev.tooling.utils import get_license_header
         ("extras", False),
     ],
 )
-def test_generate_new_files_check_licenses(repo, expect_licenses):
+def test_generate_new_files_check_licenses(repo, expect_licenses, reset_root):
     runner = CliRunner()
 
     with runner.isolated_filesystem():
-
         # Generate the check structure
         shutil.copytree(os.path.dirname(os.path.realpath(__file__)) + "/data/my_check", "./my_check")
 
-        run_command(
-            [sys.executable, '-m', 'datadog_checks.dev', "config", "set", repo, os.getcwd()],
-        )
-        run_command(
-            [sys.executable, '-m', 'datadog_checks.dev', "config", "set", "repo", repo],
-        )
+        result = runner.invoke(models, ["my_check", "-s"], obj=__get_config(repo))
 
-        result = run_command(
-            [sys.executable, '-m', 'datadog_checks.dev', 'validate', 'models', 'my_check', "-s"],
-            capture=True,
-        )
-
-        assert 0 == result.code
+        assert 0 == result.exit_code
         assert 'All 5 data model files are in sync!' in result.stdout
         assert 5 == result.stdout.count("Writing data model file")
 
@@ -48,3 +37,13 @@ def test_generate_new_files_check_licenses(repo, expect_licenses):
             if filename != ".gitkeep":
                 with open(f"my_check/datadog_checks/my_check/config_models/{filename}", mode='r') as file:
                     assert expect_licenses == file.read().startswith(get_license_header())
+
+
+def __get_config(repo):
+    config = copy_default_config()
+    config["repo"] = repo
+    config["repo_choice"] = repo
+    config["repos"][repo] = os.getcwd()
+    initialize_root(config)
+
+    return config
