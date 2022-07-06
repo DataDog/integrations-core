@@ -71,10 +71,10 @@ def dd_environment():
                     [
                         "MySQL init process done. Ready for start up.",
                         "mysqld: ready for connections",
-                        "read_only_action RO=0 phase 3",
                     ],
                     wait=5,
                 ),
+                CheckDockerLogs('proxysql', ["read_only_action RO=0 phase 3"], wait=5),
                 WaitFor(init_mysql, wait=2),
                 WaitFor(init_proxy, wait=2),
             ],
