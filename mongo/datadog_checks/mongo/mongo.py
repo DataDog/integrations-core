@@ -236,14 +236,14 @@ class MongoDb(AgentCheck):
                 self.log.debug("No databases configured. Retrieving list of databases from the mongo server")
                 dbnames = server_databases
             else:
-                self.log.trace("Collecting only from the configured databases: %s", self._config.db_names)
+                self.log.debug("Collecting only from the configured databases: %s", self._config.db_names)
                 dbnames = []
                 self.log.debug("Checking the configured databases that exist on the mongo server")
                 for config_dbname in self._config.db_names:
                     if config_dbname in server_databases:
-                        self.log.trace("'%s' database found on the mongo server", config_dbname)
+                        self.log.debug("'%s' database found on the mongo server", config_dbname)
                         dbnames.append(config_dbname)
                     else:
                         self.log.warning("'%s' database not found on the mongo server, will not append to list of databases to check", config_dbname)
-        self.log.trace("List of databases to check: %s", dbnames)
+        self.log.debug("List of databases to check: %s", dbnames)
         return dbnames
