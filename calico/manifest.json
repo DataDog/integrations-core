@@ -1,0 +1,36 @@
+{
+  "display_name": "Calico",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "calico",
+  "metric_prefix": "calico.",
+  "metric_to_check": "calico.felix.active.local_endpoints",
+  "creates_events": false,
+  "short_description": "Calico is a networking and network security solution for containers.",
+  "guid": "ec6d9801-9b42-4c40-b198-3482375a7d69",
+  "support": "core",
+  "supported_os": ["linux", "mac_os", "windows"],
+  "public_title": "calico",
+  "categories": ["metrics", "network", "security", "log collection"],
+  "type": "check",
+  "is_public": true,
+  "integration_id": "calico",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {
+      "[calico] dashboard overview": "./assets/dashboards/calico_overview.json"
+    },
+    "monitors": {
+      "[calico] monitor ipsets error": "./assets/monitors/ipset_error.json",
+      "[calico] monitor iptables save errors": "./assets/monitors/iptables_save_errors.json",
+      "[calico] monitor iptables restore errors": "./assets/monitors/iptables_restore_errors.json",
+      "[calico] monitor dataplane failures": "./assets/monitors/dataplane_failures.json"
+    },
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}

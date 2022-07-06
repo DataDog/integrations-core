@@ -19,6 +19,14 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
@@ -31,6 +39,7 @@ class InstanceConfig(BaseModel):
     fetch_intermediate_certs: Optional[bool]
     intermediate_cert_refresh_interval: Optional[float]
     local_cert_path: Optional[str]
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     name: Optional[str]
     port: Optional[int]

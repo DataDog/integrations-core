@@ -1,0 +1,27 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "container.",
+  "name": "podman",
+  "short_description": "Track all your Podman containers metrics with Datadog",
+  "guid": "a2f38981-b8ff-40c4-8494-ac150b3fca6e",
+  "support": "core",
+  "supported_os": [
+    "linux"
+  ],
+  "public_title": "Podman Integration",
+  "categories": [
+    "containers"
+  ],
+  "type": "check",
+  "is_public": true,
+  "display_name": "Podman",
+  "creates_events": true,
+  "integration_id": "podman",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {}
+  }
+}

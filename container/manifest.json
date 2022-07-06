@@ -11,7 +11,7 @@
     "linux",
     "windows"
   ],
-  "public_title": "Datadog-Container Integration",
+  "public_title": "Container Integration",
   "categories": [
     "containers"
   ],
@@ -22,7 +22,9 @@
   "integration_id": "container",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Containers": "assets/dashboards/containers.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {},
     "metrics_metadata": "metadata.csv"

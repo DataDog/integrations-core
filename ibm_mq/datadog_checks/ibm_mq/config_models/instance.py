@@ -19,20 +19,31 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    auto_discover_channels: Optional[bool]
     auto_discover_queues: Optional[bool]
     channel: str = Field(..., min_length=1)
     channel_status_mapping: Optional[Mapping[str, Any]]
     channels: Optional[Sequence[str]]
+    collect_reset_queue_metrics: Optional[bool]
     collect_statistics_metrics: Optional[bool]
     connection_name: Optional[str] = Field(None, min_length=1)
     convert_endianness: Optional[bool]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: Optional[str] = Field(None, min_length=1)
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     mqcd_version: Optional[float] = Field(None, ge=1.0)
     override_hostname: Optional[bool]
@@ -51,6 +62,7 @@ class InstanceConfig(BaseModel):
     ssl_key_repository_location: Optional[str] = Field(None, min_length=1)
     tags: Optional[Sequence[str]]
     timeout: Optional[int]
+    try_basic_auth: Optional[bool]
     username: Optional[str] = Field(None, min_length=1)
 
     @root_validator(pre=True)

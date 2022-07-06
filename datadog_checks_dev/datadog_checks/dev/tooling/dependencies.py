@@ -4,46 +4,57 @@ from copy import deepcopy
 
 from packaging.requirements import InvalidRequirement, Requirement
 
-from ..fs import stream_file_lines
+from ..fs import stream_file_lines, write_file_lines
 from .constants import NOT_CHECKS, get_agent_requirements, get_root
 from .utils import (
+    get_normalized_dependency,
     get_project_file,
     get_valid_checks,
     has_project_file,
     load_project_file_at_cached,
     load_project_file_cached,
+    normalize_project_name,
     write_project_file_at,
 )
 
 
-class DependencyDefinition:
-    __slots__ = ('name', 'requirement', 'file_path', 'line_number', 'check_name')
-
-    def __init__(self, name, requirement, file_path, line_number, check_name=None):
-        self.name = name
-        self.requirement = requirement
-        self.file_path = file_path
-        self.line_number = line_number
-        self.check_name = check_name
-
-    def __repr__(self):
-        return f'<DependencyDefinition name={self.name} check_name={self.check_name} requirement={self.requirement}'
-
-    @property
-    def _normalized_marker(self):
-        if self.requirement.marker is None:
-            return self.requirement.marker
-
-        new_marker = str(self.requirement.marker).strip()
-        new_marker = new_marker.replace('\'', "\"")
-        return new_marker
-
-    def same_name_marker(self, other):
-        return self.name == other.name and self._normalized_marker == other._normalized_marker
-
-
 def create_dependency_data():
-    return defaultdict(lambda: defaultdict(lambda: []))
+    # Structure:
+    # dependency name ->
+    #   Python major version ->
+    #     dependency definition -> set of checks with definition
+    return defaultdict(lambda: {'py2': defaultdict(set), 'py3': defaultdict(set)})
+
+
+def get_dependency_set(python_versions):
+    return {
+        dependency_definition
+        for dependency_definitions in python_versions.values()
+        for dependency_definition in dependency_definitions
+    }
+
+
+def set_project_dependency(project, dependency, check_name):
+    if 'python_version <' in dependency:
+        project['py2'][dependency].add(check_name)
+    elif 'python_version >' in dependency:
+        project['py3'][dependency].add(check_name)
+    else:
+        project['py2'][dependency].add(check_name)
+        project['py3'][dependency].add(check_name)
+
+
+def update_project_dependency(project, dependency):
+    if 'python_version <' in dependency:
+        project['py2'][dependency] = project['py2'].popitem()[1]
+        return project['py2'][dependency]
+    elif 'python_version >' in dependency:
+        project['py3'][dependency] = project['py3'].popitem()[1]
+        return project['py3'][dependency]
+    else:
+        project['py2'][dependency] = project['py2'].popitem()[1]
+        project['py3'][dependency] = project['py3'].popitem()[1]
+        return project['py2'][dependency] | project['py3'][dependency]
 
 
 def load_dependency_data_from_metadata(check_name, dependencies, errors):
@@ -60,13 +71,13 @@ def load_dependency_data_from_metadata(check_name, dependencies, errors):
                 )
                 continue
 
-            name = req.name.lower().replace('_', '-')
-            dependency = dependencies[name][req.specifier]
-            dependency.append(DependencyDefinition(name, req, get_project_file(check_name), None, check_name))
+            project = dependencies[normalize_project_name(req.name)]
+            dependency = get_normalized_dependency(req)
+            set_project_dependency(project, dependency, check_name)
 
 
 def load_dependency_data_from_requirements(req_file, dependencies, errors, check_name=None):
-    for i, line in enumerate(stream_file_lines(req_file)):
+    for line in stream_file_lines(req_file):
         line = line.strip()
         if not line or line.startswith('#'):
             continue
@@ -77,9 +88,9 @@ def load_dependency_data_from_requirements(req_file, dependencies, errors, check
             errors.append(f'File `{os.path.basename(req_file)}` has an invalid dependency: `{line}`\n{e}')
             continue
 
-        name = req.name.lower().replace('_', '-')
-        dependency = dependencies[name][req.specifier]
-        dependency.append(DependencyDefinition(name, req, req_file, i, check_name))
+        project = dependencies[normalize_project_name(req.name)]
+        dependency = get_normalized_dependency(req)
+        set_project_dependency(project, dependency, check_name)
 
 
 def load_base_check(check_name, dependencies, errors):
@@ -92,17 +103,16 @@ def load_base_check(check_name, dependencies, errors):
             errors.append(f'File `{check_name}/pyproject.toml` has an invalid dependency: `{check_dependency}`\n{e}')
             continue
 
-        name = req.name.lower().replace('_', '-')
+        name = normalize_project_name(req.name)
         if name == 'datadog-checks-base':
-            dependency = dependencies[name][req.specifier]
-            dependency.append(DependencyDefinition(name, req, get_project_file(check_name), None, check_name))
+            dependencies[check_name] = get_normalized_dependency(req)
             break
     else:
         errors.append(f'File `{check_name}/pyproject.toml` is missing the base check dependency `datadog-checks-base`')
 
 
 def load_base_check_legacy(req_file, dependencies, errors, check_name=None):
-    for i, line in enumerate(stream_file_lines(req_file)):
+    for line in stream_file_lines(req_file):
         line = line.strip()
         if line.startswith('CHECKS_BASE_REQ'):
             try:
@@ -112,9 +122,7 @@ def load_base_check_legacy(req_file, dependencies, errors, check_name=None):
                 errors.append(f'File `{req_file}` has an invalid base check dependency: `{line}`\n{e}')
                 return
 
-            name = req.name.lower().replace('_', '-')
-            dependency = dependencies[name][req.specifier]
-            dependency.append(DependencyDefinition(name, req, req_file, i, check_name))
+            dependencies[check_name] = get_normalized_dependency(req)
             return
 
     # no `CHECKS_BASE_REQ` found in setup.py file ..
@@ -146,7 +154,7 @@ def read_check_dependencies(check=None):
 
 def read_check_base_dependencies(check=None):
     root = get_root()
-    dependencies = create_dependency_data()
+    dependencies = {}
     errors = []
 
     if isinstance(check, list):
@@ -169,27 +177,29 @@ def read_check_base_dependencies(check=None):
     return dependencies, errors
 
 
-def update_check_dependencies_at(path, dependency_definitions):
+def update_check_dependencies_at(path, dependencies):
     project_data = deepcopy(load_project_file_at_cached(path))
     optional_dependencies = project_data['project'].get('optional-dependencies', {})
 
     updated = False
-    for dependencies in optional_dependencies.values():
-        for i, old_dependency in enumerate(dependencies):
+    for old_dependencies in optional_dependencies.values():
+        new_dependencies = defaultdict(set)
+
+        for old_dependency in old_dependencies:
             old_requirement = Requirement(old_dependency)
+            name = normalize_project_name(old_requirement.name)
+            if name not in dependencies:
+                new_dependencies[name].add(old_dependency)
+                continue
 
-            for dependency_definition in dependency_definitions:
-                new_requirement = dependency_definition.requirement
-                if new_requirement.name == old_requirement.name:
-                    if str(new_requirement) != str(old_requirement):
-                        dependencies[i] = str(new_requirement)
-                        updated = True
+            for dependency_set in dependencies[name].values():
+                for dep in dependency_set:
+                    new_dependencies[name].add(dep)
 
-                    break
-
-        if updated:
-            # sort, and prevent backslash escapes since strings are written using double quotes
-            dependencies[:] = sorted(str(dependency).replace('"', "'") for dependency in dependencies)
+        new_dependencies = sorted(d for dep_set in new_dependencies.values() for d in dep_set)
+        if new_dependencies != old_dependencies:
+            updated = True
+            old_dependencies[:] = new_dependencies
 
     if updated:
         write_project_file_at(path, project_data)
@@ -208,3 +218,13 @@ def read_agent_dependencies():
     load_dependency_data_from_requirements(get_agent_requirements(), dependencies, errors)
 
     return dependencies, errors
+
+
+def update_agent_dependencies(dependencies):
+    lines = sorted(
+        f'{dependency_definition}\n'
+        for python_versions in dependencies.values()
+        for dependency_definition in get_dependency_set(python_versions)
+    )
+
+    write_file_lines(get_agent_requirements(), lines)

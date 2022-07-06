@@ -22,7 +22,7 @@ _Server Properties_ -> _Security_ -> _SQL Server and Windows Authentication mode
 
 1. Create a read-only login to connect to your server:
 
-    ```text
+    ```SQL
         CREATE LOGIN datadog WITH PASSWORD = '<PASSWORD>';
         CREATE USER datadog FOR LOGIN datadog;
         GRANT SELECT on sys.dm_os_performance_counters to datadog;
@@ -31,7 +31,7 @@ _Server Properties_ -> _Security_ -> _SQL Server and Windows Authentication mode
    
    To collect file size metrics per database, ensure the user you created (`datadog`) has [connect permission access][3] to your databases by running:
    
-   ```text
+   ```SQL
        GRANT CONNECT ANY DATABASE to datadog; 
    ```
 
@@ -39,7 +39,7 @@ _Server Properties_ -> _Security_ -> _SQL Server and Windows Authentication mode
 
 3. (Required for AlwaysOn and `sys.master_files` metrics) To gather AlwaysOn and `sys.master_files` metrics, grant the following additional permission:
 
-    ```text
+    ```SQL
         GRANT VIEW ANY DEFINITION to datadog;
     ```
 

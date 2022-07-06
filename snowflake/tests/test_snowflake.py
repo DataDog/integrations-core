@@ -161,7 +161,7 @@ def test_warehouse_load(dd_run_check, aggregator, instance):
 
 def test_token_path(dd_run_check, aggregator):
     instance = {
-        'user': 'testuser',
+        'username': 'testuser',
         'account': 'account',
         'role': 'ACCOUNTADMIN',
         'authenticator': 'oauth',

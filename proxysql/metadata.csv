@@ -72,3 +72,4 @@ proxysql.memory.stack_memory_cluster_threads,gauge,,byte,,Memory used by the sta
 proxysql.frontend.user_connections,gauge,,connection,,Current number of frontend connections by user.,0,proxysql,current_frontend_connections_by_user,
 proxysql.frontend.user_max_connections,gauge,,connection,,Max number of frontend connections the user can create (as defined in mysql_users.max_connections).,0,proxysql,max_frontend_connections_by_user,
 proxysql.query_rules.rule_hits,gauge,,hit,second,The number of times query rules matched traffic.,0,proxysql,query_rules_hits,
+proxysql.backends.count,gauge,,node,,Number of mysql servers connected.,0,proxysql,mysql_backends_connected_count,

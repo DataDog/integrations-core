@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Scylla Integration",
+  "public_title": "Scylla Integration",
   "categories": [
     "data store",
     "log collection"

@@ -20,7 +20,7 @@ from ...console import (
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Show all the pending PRs for a given check.')
-@click.argument('check', autocompletion=complete_valid_checks, callback=validate_check_arg)
+@click.argument('check', shell_complete=complete_valid_checks, callback=validate_check_arg)
 @click.option('--organization', '-r', default='DataDog', help="The Github organization the repository belongs to")
 @click.option(
     '--tag-pattern',

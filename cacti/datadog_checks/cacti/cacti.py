@@ -74,7 +74,11 @@ class CactiCheck(AgentCheck):
 
     def _get_connection(self):
         return pymysql.connect(
-            self._config.host, self._config.user, self._config.password, self._config.db, self._config.port
+            host=self._config.host,
+            port=self._config.port,
+            user=self._config.user,
+            password=self._config.password,
+            database=self._config.db,
         )
 
     def _get_whitelist_patterns(self, whitelist=None):

@@ -18,7 +18,7 @@
     "ceph-mgr",
     "ceph-osd"
   ],
-  "public_title": "Datadog-Ceph Integration",
+  "public_title": "Ceph Integration",
   "short_description": "Collect per-pool performance metrics and monitor overall cluster status.",
   "support": "core",
   "supported_os": [

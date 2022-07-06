@@ -13,7 +13,7 @@
   "metric_prefix": "kubernetes",
   "metric_to_check": "kubernetes.cpu.usage.total",
   "name": "kubernetes",
-  "public_title": "Datadog-Kubernetes Integration",
+  "public_title": "Kubernetes Integration",
   "short_description": "Capture Pod scheduling events, track the status of your Kubelets, and much more.",
   "support": "core",
   "supported_os": [

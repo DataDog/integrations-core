@@ -11,7 +11,7 @@
   "metric_prefix": "cri.",
   "metric_to_check": "cri.cpu.usage",
   "name": "CRI",
-  "public_title": "Datadog-CRI Integration",
+  "public_title": "CRI Integration",
   "short_description": "Track all your CRI metrics with Datadog",
   "support": "core",
   "supported_os": [

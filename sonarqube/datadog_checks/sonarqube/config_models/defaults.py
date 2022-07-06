@@ -94,10 +94,6 @@ def instance_default_tag(field, value):
     return 'component'
 
 
-def instance_disable_generic_tags(field, value):
-    return False
-
-
 def instance_empty_default_hostname(field, value):
     return False
 

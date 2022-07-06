@@ -98,6 +98,10 @@ def instance_message_filters(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_min_collection_interval(field, value):
     return 15
 

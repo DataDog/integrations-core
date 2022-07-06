@@ -1,0 +1,2 @@
+-e ../datadog_checks_dev
+teradatasql==17.10.0.12

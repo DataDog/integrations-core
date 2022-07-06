@@ -23,9 +23,17 @@ from datadog_checks.downloader.download import REPOSITORY_URL_PREFIX
 log = logging.getLogger('test_downloader')
 IntegrationMetadata = namedtuple("IntegrationMetadata", ["version", "root_layout_type"])
 
-# Integrations released for the last time by a revoked developper but not shipped anymore.
+# Integrations released for the last time by a revoked developer but not shipped anymore.
 EXCLUDED_INTEGRATIONS = [
     "datadog-docker-daemon",
+    "datadog-dd-cluster-agent",  # excluding this since actual integration is called `datadog-cluster-agent`
+    "datadog-kubernetes",  # excluding this since `kubernetes` check is Agent v5 only
+]
+
+# Specific integration versions released for the last time by a revoked developer but not shipped anymore.
+EXCLUDED_INTEGRATION_VERSION = [
+    "simple/datadog-ibm-mq/datadog_ibm_mq-4.1.0rc1-py2.py3-none-any.whl",
+    "simple/datadog-network/datadog_network-9.1.1rc1-py2.py3-none-any.whl",
 ]
 
 
@@ -120,7 +128,7 @@ def get_all_integrations_metadata():
             # An html file, safe to ignore
             continue
         integration_name, version = match.groups()
-        if integration_name in EXCLUDED_INTEGRATIONS:
+        if target in EXCLUDED_INTEGRATION_VERSION or integration_name in EXCLUDED_INTEGRATIONS:
             continue
         root_layout_type = metadata['custom']['root-layout-type']
         assert root_layout_type in ('core', 'extras')

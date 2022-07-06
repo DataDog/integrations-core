@@ -22,7 +22,7 @@
     "docker daemon",
     "docker-containerd-shim"
   ],
-  "public_title": "Datadog-Docker Daemon Integration",
+  "public_title": "Docker Daemon Integration",
   "short_description": "Correlate container performance with that of the services running inside them.",
   "support": "core",
   "supported_os": [

@@ -1,6 +1,21 @@
 # CHANGELOG - Aerospike
 
-## 1.14.0 / 2022-02-19
+## 1.16.1 / 2022-05-18
+
+* [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
+
+## 1.16.0 / 2022-05-15
+
+* [Added] Add OpenMetricsV2 Implementation. See [#11845](https://github.com/DataDog/integrations-core/pull/11845).
+
+## 1.15.0 / 2022-04-05 / Agent 7.36.0
+
+* [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Fixed] Fix broken latency metric collection. See [#11752](https://github.com/DataDog/integrations-core/pull/11752).
+* [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
+
+## 1.14.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11311](https://github.com/DataDog/integrations-core/pull/11311).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).

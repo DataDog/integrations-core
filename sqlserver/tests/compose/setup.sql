@@ -39,6 +39,13 @@ GO
 ALTER DATABASE unavailable_db SET OFFLINE;
 GO
 
+-- create a a restricted database to ensure the agent gracefully handles not being able to connect
+-- to it
+CREATE DATABASE restricted_db;
+GO
+ALTER DATABASE restricted_db SET RESTRICTED_USER
+GO
+
 -- create test procedure for metrics loading feature
 USE master;
 GO
@@ -74,3 +81,10 @@ END;
 GO
 GRANT EXECUTE on exampleProcWithoutNocount to datadog;
 GO
+
+CREATE PROCEDURE encryptedProc WITH ENCRYPTION AS
+BEGIN
+    select count(*) from sys.databases;
+END;
+GO
+GRANT EXECUTE on encryptedProc to bob;

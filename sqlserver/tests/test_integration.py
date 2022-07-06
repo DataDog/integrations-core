@@ -37,14 +37,21 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_check_docker(aggregator, dd_run_check, init_config, instance_docker):
+@pytest.mark.parametrize('database_autodiscovery', [True, False])
+def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, database_autodiscovery):
+    instance_docker['database_autodiscovery'] = database_autodiscovery
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     expected_tags = instance_docker.get('tags', []) + [
         'sqlserver_host:{}'.format(instance_docker.get('host')),
         'db:master',
     ]
-    assert_metrics(aggregator, expected_tags)
+    assert_metrics(
+        aggregator,
+        expected_tags,
+        hostname=sqlserver_check.resolved_hostname,
+        database_autodiscovery=database_autodiscovery,
+    )
 
 
 @pytest.mark.integration
@@ -85,7 +92,9 @@ def test_custom_metrics_object_name(aggregator, dd_run_check, init_config_object
     dd_run_check(sqlserver_check)
 
     aggregator.assert_metric('sqlserver.cache.hit_ratio', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
-    aggregator.assert_metric('sqlserver.active_requests', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
+    aggregator.assert_metric(
+        'sqlserver.broker_activation.tasks_running', tags=['optional:tag1', 'optional_tag:tag1'], count=1
+    )
 
 
 @pytest.mark.integration
@@ -399,3 +408,21 @@ def test_resolved_hostname(instance_docker, dbm_enabled, instance_host, reported
     instance_docker['reported_hostname'] = reported_hostname
     sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
     assert sqlserver_check.resolved_hostname == expected_hostname
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('database_autodiscovery', [True, False])
+def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, database_autodiscovery):
+    instance_docker['database_autodiscovery'] = database_autodiscovery
+    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    dd_run_check(sqlserver_check)
+    seen_databases = set()
+    for m in aggregator.metrics("sqlserver.database.avg_fragmentation_in_percent"):
+        tags_by_key = {k: v for k, v in [t.split(':') for t in m.tags]}
+        seen_databases.add(tags_by_key['database_name'])
+        assert tags_by_key['object_name'].lower() != 'none'
+
+    assert 'master' in seen_databases
+    if database_autodiscovery:
+        assert 'datadog_test' in seen_databases

@@ -253,6 +253,9 @@ class Network(AgentCheck):
         if self._collect_count_metrics:
             self.monotonic_count('{}.count'.format(metric), value, tags=tags)
 
+    def _submit_netmetric_gauge(self, metric, value, tags=None):
+        self.gauge(metric, value, tags=tags)
+
     def _submit_devicemetrics(self, iface, vals_by_metric, tags):
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
             # Skip this network interface.
@@ -499,10 +502,42 @@ class Network(AgentCheck):
                 self.log.debug("Unable to read %s.", proc_data_path)
 
         nstat_metrics_names = {
+            'Ip': {
+                'InReceives': 'system.net.ip.in_receives',
+                'InHdrErrors': 'system.net.ip.in_header_errors',
+                'InAddrErrors': 'system.net.ip.in_addr_errors',
+                'InUnknownProtos': 'system.net.ip.in_unknown_protos',
+                'InDiscards': 'system.net.ip.in_discards',
+                'InDelivers': 'system.net.ip.in_delivers',
+                'OutRequests': 'system.net.ip.out_requests',
+                'OutDiscards': 'system.net.ip.out_discards',
+                'OutNoRoutes': 'system.net.ip.out_no_routes',
+                'ForwDatagrams': 'system.net.ip.forwarded_datagrams',
+                'ReasmTimeout': 'system.net.ip.reassembly_timeouts',
+                'ReasmReqds': 'system.net.ip.reassembly_requests',
+                'ReasmOKs': 'system.net.ip.reassembly_oks',
+                'ReasmFails': 'system.net.ip.reassembly_fails',
+                'FragOKs': 'system.net.ip.fragmentation_oks',
+                'FragFails': 'system.net.ip.fragmentation_fails',
+                'FragCreates': 'system.net.ip.fragmentation_creates',
+            },
+            'IpExt': {
+                'InNoRoutes': 'system.net.ip.in_no_routes',
+                'InTruncatedPkts': 'system.net.ip.in_truncated_pkts',
+                'InCsumErrors': 'system.net.ip.in_csum_errors',
+                'ReasmOverlaps': 'system.net.ip.reassembly_overlaps',
+            },
             'Tcp': {
                 'RetransSegs': 'system.net.tcp.retrans_segs',
                 'InSegs': 'system.net.tcp.in_segs',
                 'OutSegs': 'system.net.tcp.out_segs',
+                'ActiveOpens': 'system.net.tcp.active_opens',
+                'PassiveOpens': 'system.net.tcp.passive_opens',
+                'AttemptFails': 'system.net.tcp.attempt_fails',
+                'EstabResets': 'system.net.tcp.established_resets',
+                'InErrs': 'system.net.tcp.in_errors',
+                'OutRsts': 'system.net.tcp.out_resets',
+                'InCsumErrors': 'system.net.tcp.in_csum_errors',
             },
             'TcpExt': {
                 'ListenOverflows': 'system.net.tcp.listen_overflows',
@@ -534,13 +569,24 @@ class Network(AgentCheck):
                 'InCsumErrors': 'system.net.udp.in_csum_errors',
             },
         }
+        nstat_metrics_gauge_names = {
+            'Tcp': {
+                'CurrEstab': 'system.net.tcp.current_established',
+            },
+        }
 
-        # Skip the first line, as it's junk
         for k in nstat_metrics_names:
             for met in nstat_metrics_names[k]:
                 if met in netstat_data.get(k, {}):
                     self._submit_netmetric(
                         nstat_metrics_names[k][met], self._parse_value(netstat_data[k][met]), tags=custom_tags
+                    )
+
+        for k in nstat_metrics_gauge_names:
+            for met in nstat_metrics_gauge_names[k]:
+                if met in netstat_data.get(k, {}):
+                    self._submit_netmetric_gauge(
+                        nstat_metrics_gauge_names[k][met], self._parse_value(netstat_data[k][met]), tags=custom_tags
                     )
 
         # Get the conntrack -S information

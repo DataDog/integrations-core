@@ -17,7 +17,7 @@ from .show import changes
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Release one or more checks')
-@click.argument('checks', autocompletion=complete_valid_checks, nargs=-1, required=True)
+@click.argument('checks', shell_complete=complete_valid_checks, nargs=-1, required=True)
 @click.option('--version')
 @click.option('--end')
 @click.option('--new', 'initial_release', is_flag=True, help='Ensure versions are at 1.0.0')

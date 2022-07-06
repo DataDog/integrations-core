@@ -19,7 +19,7 @@ from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, ech
 
 
 @click.command('jmx-metrics', context_settings=CONTEXT_SETTINGS, short_help='Validate JMX metrics files')
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 @click.option('--verbose', '-v', is_flag=True, help='Verbose mode')
 def jmx_metrics(check, verbose):
     """Validate all default JMX metrics definitions.

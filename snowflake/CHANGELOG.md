@@ -1,5 +1,24 @@
 # CHANGELOG - Snowflake
 
+## 4.3.2 / 2022-06-15
+
+* [Fixed] Fix reading of `token_path` option. See [#12366](https://github.com/DataDog/integrations-core/pull/12366).
+
+## 4.3.1 / 2022-05-15
+
+* [Fixed] Properly validate `only_custom_queries`. See [#11992](https://github.com/DataDog/integrations-core/pull/11992).
+* [Fixed] Fix small typo in config option. See [#11990](https://github.com/DataDog/integrations-core/pull/11990).
+* [Fixed] Add section in docs about private link setup. See [#11883](https://github.com/DataDog/integrations-core/pull/11883).
+
+## 4.3.0 / 2022-04-05 / Agent 7.36.0
+
+* [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+
+## 4.2.1 / 2022-03-10 / Agent 7.35.0
+
+* [Fixed] Convert private key password into string instead of byte. See [#11648](https://github.com/DataDog/integrations-core/pull/11648).
+
 ## 4.2.0 / 2022-02-19
 
 * [Added] Add `pyproject.toml` file. See [#11433](https://github.com/DataDog/integrations-core/pull/11433).

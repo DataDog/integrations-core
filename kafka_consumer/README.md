@@ -69,6 +69,45 @@ The Kafka-consumer check does not include any service checks.
 - [Troubleshooting and Deep Dive for Kafka][10]
 - [Agent failed to retrieve RMIServer stub][11]
 
+**Kerberos GSSAPI Authentication**
+
+Depending on your Kafka cluster's Kerberos setup, you may need to configure the following:
+
+* Kafka client configured for the Datadog Agent to connect to the Kafka broker. The Kafka client should be added as a Kerberos principal and added to a Kerberos keytab. The Kafka client should also have a valid kerberos ticket. 
+* TLS certificate to authenticate a secure connection to the Kafka broker.
+  * If JKS keystore is used, a certificate needs to be exported from the keystore and the file path should be configured with the applicable `tls_cert` and/or `tls_ca_cert` options. 
+  * If a private key is required to authenticate the certificate, it should be configured with the `tls_private_key` option. If applicable, the private key password should be configured with the `tls_private_key_password`. 
+* `KRB5_CLIENT_KTNAME` environment variable pointing to the Kafka client's Kerberos keytab location if it differs from the default path (for example, `KRB5_CLIENT_KTNAME=/etc/krb5.keytab`)
+* `KRB5CCNAME` environment variable pointing to the Kafka client's Kerberos credentials ticket cache if it differs from the default path (for example, `KRB5CCNAME=/tmp/krb5cc_xxx`)
+* If the Datadog Agent is unable to access the environment variables, configure the environment variables in a Datadog Agent service configuration override file for your operating system. The procedure for modifying the Datadog Agent service unit file may vary for different Linux operating systems. For example, in a Linux `systemd` environment: 
+
+**Linux Systemd Example**
+
+1. Configure the environment variables in an environment file.
+   For example: `/path/to/environment/file`
+
+  ```
+  KRB5_CLIENT_KTNAME=/etc/krb5.keytab
+  KRB5CCNAME=/tmp/krb5cc_xxx
+  ```
+
+2. Create a Datadog Agent service configuration override file: `sudo systemctl edit datadog-agent.service`
+
+3. Configure the following in the override file:
+
+  ```
+  [Service]
+  EnvironmentFile=/path/to/environment/file
+  ```
+
+4. Run the following commands to reload the systemd daemon, datadog-agent service, and Datadog Agent:
+
+```
+sudo systemctl daemon-reload
+sudo systemctl restart datadog-agent.service
+sudo service datadog-agent restart
+```
+
 ## Further Reading
 
 - [Monitoring Kafka performance metrics][13]
@@ -85,7 +124,7 @@ The Kafka-consumer check does not include any service checks.
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/metadata.csv
 [10]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka/
-[11]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub/
+[11]: https://docs.datadoghq.com/integrations/guide/agent-failed-to-retrieve-rmiserver-stub/
 [13]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
 [14]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
 [15]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog

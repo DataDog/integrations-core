@@ -20,7 +20,7 @@
     "fluentd",
     "ruby td-agent"
   ],
-  "public_title": "Datadog-FluentD Integration",
+  "public_title": "FluentD Integration",
   "short_description": "Monitor buffer queues and retry counts for each Fluentd plugin you've enabled.",
   "support": "core",
   "supported_os": [

@@ -20,6 +20,11 @@ files:
         URL of the kubelet metrics prometheus endpoint
         Pass an empty string to disable kubelet metrics collection.
       example: http://10.8.0.1:10255/metrics
+    - name: probes_metrics_endpoint
+      description: |
+        URL of the probe metrics prometheus endpoint
+        Pass an empty string to disable probe metrics collection.
+      example: http://10.8.0.1:10255/metrics/probes
     - name: cadvisor_port
       description: |
         Metric collection for legacy (< 1.7.6) clusters via the kubelet's cadvisor port.

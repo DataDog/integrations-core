@@ -17,11 +17,11 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Dell Inc.",
-  "categories": [ 
-    "monitoring", 
-    "notification", 
-    "network", 
+  "public_title": "Dell Inc.",
+  "categories": [
+    "monitoring",
+    "notification",
+    "network",
     "autodiscovery",
     "snmp"
   ],

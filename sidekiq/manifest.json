@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Sidekiq Integration",
+  "public_title": "Sidekiq Integration",
   "categories": [
     "log collection"
   ],

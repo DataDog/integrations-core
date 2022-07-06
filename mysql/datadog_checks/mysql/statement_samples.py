@@ -23,7 +23,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 
-from .util import DatabaseConfigurationError, warning_with_tags
+from .util import DatabaseConfigurationError, StatementTruncationState, get_truncation_state, warning_with_tags
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
@@ -212,15 +212,6 @@ PYMYSQL_MISSING_EXPLAIN_STATEMENT_PROC_ERRORS = frozenset(
 )
 
 
-class StatementTruncationState(Enum):
-    """
-    Denotes the various possible states of a statement's truncation
-    """
-
-    truncated = 'truncated'
-    not_truncated = 'not_truncated'
-
-
 class DBExplainErrorCode(Enum):
     """
     Denotes the various reasons a query may not have an explain statement.
@@ -264,7 +255,6 @@ class MySQLStatementSamples(DBMAsyncJob):
             run_sync=is_affirmative(config.statement_samples_config.get('run_sync', False)),
             enabled=is_affirmative(config.statement_samples_config.get('enabled', True)),
             min_collection_interval=config.min_collection_interval,
-            config_host=config.host,
             dbms="mysql",
             expected_db_exceptions=(pymysql.err.DatabaseError,),
             job_name="statement-samples",
@@ -580,7 +570,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                         "commands": statement['metadata'].get('commands', None),
                         "comments": statement['metadata'].get('comments', None),
                     },
-                    "query_truncated": self._get_truncation_state(row['sql_text']).value,
+                    "query_truncated": get_truncation_state(row['sql_text']).value,
                 },
                 'mysql': {k: v for k, v in row.items() if k not in EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS},
             }
@@ -746,7 +736,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         returns: An execution plan, otherwise it returns a list of error ExplainStates
         rtype: Optional[Dict], List[ExplainState]
         """
-        if self._get_truncation_state(statement) == StatementTruncationState.truncated:
+        if get_truncation_state(statement) == StatementTruncationState.truncated:
             error_state = ExplainState(
                 strategy=None,
                 error_code=DBExplainErrorCode.query_truncated,
@@ -932,10 +922,3 @@ class MySQLStatementSamples(DBMAsyncJob):
     @staticmethod
     def _can_explain(obfuscated_statement):
         return obfuscated_statement.split(' ', 1)[0].lower() in SUPPORTED_EXPLAIN_STATEMENTS
-
-    @staticmethod
-    def _get_truncation_state(statement):
-        # Mysql adds 3 dots at the end of truncated statements so we use this to check if
-        # a statement is truncated
-        truncated = statement[-3:] == '...'
-        return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated

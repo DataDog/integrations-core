@@ -48,6 +48,9 @@ instances:
     ## Name of your account (provided by Snowflake), including the platform and region if applicable.
     ## For more information on Snowflake account names,
     ## see https://docs.snowflake.com/en/user-guide/connecting.html#your-snowflake-account-name
+    ##
+    ## If you are using private connectivity with Snowflake, your account name should be in the following format:
+    ##   account: <ACCOUNT>.<REGION_ID>.privatelink
     #
   - account: <ACCOUNT>
 
@@ -145,7 +148,7 @@ instances:
     # client_session_keep_alive: false
 
     ## @param metric_groups - list of strings - optional
-    ## List Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.
+    ## List of Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.
     ##
     ## The available metric groups are:
     ##
@@ -257,3 +260,14 @@ instances:
     ## getting mixed with other integraton tags.
     #
     disable_generic_tags: true
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

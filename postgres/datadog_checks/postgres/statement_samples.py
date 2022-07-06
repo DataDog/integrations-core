@@ -75,12 +75,13 @@ PG_STAT_ACTIVITY_COLS = [
 ]
 
 PG_BLOCKING_PIDS_FUNC = ",pg_blocking_pids(pid) as blocking_pids"
+CURRENT_TIME_FUNC = "clock_timestamp() as now,"
 
 PG_STAT_ACTIVITY_QUERY = re.sub(
     r'\s+',
     ' ',
     """
-    SELECT {pg_stat_activity_cols} {pg_blocking_func} FROM {pg_stat_activity_view}
+    SELECT {current_time_func} {pg_stat_activity_cols} {pg_blocking_func} FROM {pg_stat_activity_view}
     WHERE coalesce(TRIM(query), '') != ''
     AND query_start IS NOT NULL
     {extra_filters}
@@ -120,6 +121,9 @@ class DBExplainError(Enum):
     # database error i.e connection error
     database_error = 'database_error'
 
+    # datatype mismatch occurs when return type is not json, for instance when multiple queries are explained
+    datatype_mismatch = 'datatype_mismatch'
+
     # this could be the result of a missing EXPLAIN function
     invalid_schema = 'invalid_schema'
 
@@ -158,7 +162,6 @@ class PostgresStatementSamples(DBMAsyncJob):
             enabled=is_affirmative(config.statement_samples_config.get('enabled', True)),
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
-            config_host=config.host,
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
             job_name="query-samples",
             shutdown_callback=shutdown_callback,
@@ -205,6 +208,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._activity_max_rows = self._config.statement_activity_config.get('payload_row_limit', 3500)
         # Keep track of last time we sent an activity event
         self._time_since_last_activity_event = 0
+        self._pg_stat_activity_cols = None
 
     def _dbtags(self, db, *extra_tags):
         """
@@ -235,12 +239,17 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_new_pg_stat_activity(self, available_activity_columns):
         start_time = time.time()
         extra_filters, params = self._get_extra_filters_and_params(filter_stale_idle_conn=True)
+        report_activity = self._report_activity_event()
+        cur_time_func = ""
         blocking_func = ""
         # minimum version for pg_blocking_pids function is v9.6
         # only call pg_blocking_pids as often as we collect activity snapshots
-        if self._check.version >= V9_6 and self._report_activity_event():
+        if self._check.version >= V9_6 and report_activity:
             blocking_func = PG_BLOCKING_PIDS_FUNC
+        if report_activity:
+            cur_time_func = CURRENT_TIME_FUNC
         query = PG_STAT_ACTIVITY_QUERY.format(
+            current_time_func=cur_time_func,
             pg_stat_activity_cols=', '.join(available_activity_columns),
             pg_blocking_func=blocking_func,
             pg_stat_activity_view=self._config.pg_stat_activity_view,
@@ -253,6 +262,13 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return rows
+
+    def _get_pg_stat_activity_cols_cached(self, expected_cols):
+        if self._pg_stat_activity_cols:
+            return self._pg_stat_activity_cols
+
+        self._pg_stat_activity_cols = self._get_available_activity_columns(expected_cols)
+        return self._pg_stat_activity_cols
 
     def _get_available_activity_columns(self, all_expected_columns):
         with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
@@ -355,7 +371,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def _collect_statement_samples(self):
         start_time = time.time()
-        pg_activity_cols = self._get_available_activity_columns(PG_STAT_ACTIVITY_COLS)
+        pg_activity_cols = self._get_pg_stat_activity_cols_cached(PG_STAT_ACTIVITY_COLS)
         rows = self._get_new_pg_stat_activity(pg_activity_cols)
         rows = self._filter_and_normalize_statement_rows(rows)
         event_samples = self._collect_plans(rows)
@@ -406,12 +422,15 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
 
     @staticmethod
-    def _to_active_session(row):
+    def _to_active_session(row, track_activity_query_size):
         if row['state'] is not None and row['state'] != 'idle':
             # Create an active_row, for each session by
             # 1. Removing all null key/value pairs and the original query
             # 2. if row['statement'] is none, replace with ERROR: failed to obfuscate so we can still collect activity
             active_row = {key: val for key, val in row.items() if val is not None and key != 'query'}
+            active_row['query_truncated'] = PostgresStatementSamples._get_truncation_state(
+                track_activity_query_size, row['query']
+            ).value
             if row['statement'] is None:
                 active_row['statement'] = "ERROR: failed to obfuscate"
             return active_row
@@ -440,6 +459,8 @@ class PostgresStatementSamples(DBMAsyncJob):
         except psycopg2.errors.InvalidSchemaName as e:
             self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
             return DBExplainError.invalid_schema, e
+        except psycopg2.errors.DatatypeMismatch as e:
+            return DBExplainError.datatype_mismatch, e
         except psycopg2.DatabaseError as e:
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
             # incorrect definition)
@@ -593,7 +614,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         statement_plan_sig = (row['query_signature'], plan_signature)
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
             event = {
-                "host": self._db_hostname,
+                "host": self._check.resolved_hostname,
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "postgres",
                 "ddtags": ",".join(self._dbtags(row['datname'])),
@@ -667,13 +688,13 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._time_since_last_activity_event = time.time()
         active_sessions = []
         for row in rows:
-            active_row = self._to_active_session(row)
+            active_row = self._to_active_session(row, self._get_track_activity_query_size())
             if active_row:
                 active_sessions.append(active_row)
         if len(active_sessions) > self._activity_max_rows:
             active_sessions = self._truncate_activity_rows(active_sessions, self._activity_max_rows)
         event = {
-            "host": self._db_hostname,
+            "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "postgres",
             "dbm_type": "activity",

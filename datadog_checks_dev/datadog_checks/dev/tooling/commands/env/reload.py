@@ -9,8 +9,8 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 
 
 @click.command('reload', context_settings=CONTEXT_SETTINGS, short_help='Restart an Agent to detect environment changes')
-@click.argument('check', autocompletion=complete_active_checks)
-@click.argument('env', autocompletion=complete_configured_envs, required=False)
+@click.argument('check', shell_complete=complete_active_checks)
+@click.argument('env', shell_complete=complete_configured_envs, required=False)
 def reload_env(check, env):
     """Restart an Agent to detect environment changes."""
     envs = get_configured_envs(check)

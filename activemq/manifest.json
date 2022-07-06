@@ -13,14 +13,14 @@
   "manifest_version": "1.0.0",
   "metric_prefix": "activemq.",
   "metric_to_check": [
-      "activemq.queue.size",
-      "activemq.artemis.queue.message_count"
+    "activemq.queue.size",
+    "activemq.artemis.queue.message_count"
   ],
   "name": "activemq",
   "process_signatures": [
     "activemq"
   ],
-  "public_title": "Datadog-ActiveMQ Integration",
+  "public_title": "ActiveMQ Integration",
   "short_description": "Collect metrics for brokers and queues, producers and consumers, and more.",
   "support": "core",
   "supported_os": [

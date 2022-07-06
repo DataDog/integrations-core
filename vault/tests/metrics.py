@@ -116,3 +116,16 @@ KNOWN_COUNTERS = {
     'vault.identity.entity.creation',
     'vault.token.creation',
 }
+
+MERKLE_WAL_METRICS = [
+    'vault.vault.merkle.flushdirty',
+    'vault.vault.merkle.savecheckpoint',
+    'vault.vault.wal.deletewals',
+    'vault.vault.wal.persistwals',
+    'vault.vault.wal.flushready',
+]
+
+MERKLE_WAL_QUANTILES = [
+    'vault.vault.merkle.flushdirty',
+    'vault.vault.merkle.savecheckpoint',
+]

@@ -39,6 +39,8 @@ def dbm_instance(instance_complex):
     instance_complex['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
     # set a very small collection interval so the tests go fast
     instance_complex['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    # don't need query activity for these tests
+    instance_complex['query_activity'] = {'enabled': False}
     return instance_complex
 
 
@@ -218,6 +220,69 @@ def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instanc
 
     assert row['query_signature'] == query_signature
     assert row['count_star'] == 2
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "cloud_metadata",
+    [
+        {},
+        {
+            'azure': {
+                'deployment_type': 'flexible_server',
+                'database_name': 'test-server',
+            },
+        },
+        {
+            'aws': {
+                'instance_endpoint': 'foo.aws.com',
+            },
+            'azure': {
+                'deployment_type': 'flexible_server',
+                'database_name': 'test-server',
+            },
+        },
+        {
+            'gcp': {
+                'project_id': 'foo-project',
+                'instance_id': 'bar',
+                'extra_field': 'included',
+            },
+        },
+    ],
+)
+def test_statement_metrics_cloud_metadata(aggregator, dd_run_check, dbm_instance, cloud_metadata, datadog_agent):
+    if cloud_metadata:
+        for k, v in cloud_metadata.items():
+            dbm_instance[k] = v
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    def run_query(q):
+        with mysql_check._connect() as db:
+            with closing(db.cursor()) as cursor:
+                cursor.execute(q)
+
+    query = "SELECT * FROM `testdb` . `users`"
+
+    # Run a query
+    run_query(query)
+    dd_run_check(mysql_check)
+
+    # Run the query and check a second time so statement metrics are computed from the previous run
+    run_query(query)
+    dd_run_check(mysql_check)
+
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(events) == 1, "should produce exactly one metrics payload"
+    event = events[0]
+
+    assert event['host'] == 'stubbed.hostname'
+    assert event['ddagentversion'] == datadog_agent.get_version()
+    assert event['ddagenthostname'] == datadog_agent.get_hostname()
+    assert event['mysql_version'] == mysql_check.version.version + '+' + mysql_check.version.build
+    assert event['mysql_flavor'] == mysql_check.version.flavor
+    assert event['cloud_metadata'] == cloud_metadata, "wrong cloud_metadata"
 
 
 @pytest.mark.integration
@@ -460,6 +525,8 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
     ]
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
     "metadata,expected_metadata_payload",
     [
@@ -498,21 +565,22 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agen
         mock_agent.side_effect = obfuscate_sql
         run_query(test_query)
         dd_run_check(mysql_check)
+        run_query(test_query)
+        dd_run_check(mysql_check)
 
     samples = aggregator.get_event_platform_events("dbm-samples")
-    matching = [s for s in samples if s['db']['query_signature'] == query_signature]
+    matching = [s for s in samples if s['db']['query_signature'] == query_signature and s.get('dbm_type') != 'fqt']
     assert len(matching) == 1
-
     sample = matching[0]
     assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
     assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
     assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
 
-    # Run the query and check a second time so statement metrics are computed from the previous run
-    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
-        mock_agent.side_effect = obfuscate_sql
-        run_query(test_query)
-        dd_run_check(mysql_check)
+    fqt_samples = [s for s in samples if s['db']['query_signature'] == query_signature and s.get('dbm_type') == 'fqt']
+    assert len(fqt_samples) == 1
+    fqt = fqt_samples[0]
+    assert fqt['db']['metadata']['tables'] == expected_metadata_payload['tables']
+    assert fqt['db']['metadata']['commands'] == expected_metadata_payload['commands']
 
     metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(metrics) == 1
@@ -522,6 +590,37 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agen
     metric = matching_metrics[0]
     assert metric['dd_tables'] == expected_metadata_payload['tables']
     assert metric['dd_commands'] == expected_metadata_payload['commands']
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "reported_hostname,expected_hostname",
+    [
+        (None, 'stubbed.hostname'),
+        ('override.hostname', 'override.hostname'),
+    ],
+)
+def test_statement_reported_hostname(
+    aggregator, dd_run_check, dbm_instance, datadog_agent, reported_hostname, expected_hostname
+):
+    dbm_instance['reported_hostname'] = reported_hostname
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    dd_run_check(mysql_check)
+    dd_run_check(mysql_check)
+
+    samples = aggregator.get_event_platform_events("dbm-samples")
+    assert samples, "should have at least one sample"
+    assert samples[0]['host'] == expected_hostname
+
+    fqt_samples = [s for s in samples if s.get('dbm_type') == 'fqt']
+    assert fqt_samples, "should have at least one fqt sample"
+    assert fqt_samples[0]['host'] == expected_hostname
+
+    metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert metrics, "should have at least one metric"
+    assert metrics[0]['host'] == expected_hostname
 
 
 @pytest.mark.integration

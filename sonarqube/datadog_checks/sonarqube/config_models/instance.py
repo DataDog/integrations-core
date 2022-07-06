@@ -61,7 +61,6 @@ class InstanceConfig(BaseModel):
     default_exclude: Optional[Sequence[str]]
     default_include: Optional[Sequence[str]]
     default_tag: Optional[str]
-    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]
     headers: Optional[Mapping[str, Any]]

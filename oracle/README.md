@@ -277,6 +277,7 @@ If you are connecting to Oracle Database using JDBC, you also need to specify `j
 ```
 
 For more information about connecting to the Oracle Database through TCPS on JDBC, see the official [Oracle whitepaper][17].
+
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
@@ -488,7 +489,7 @@ variable to the new install as explained above.
 Ensure the displayed output matches the correct value.
 
     ```shell script
-      sudo -u dd-agent -- /opt/datadog-agent/embedded/bin/python -c "import os; print("JAVA_HOME:{}".format(os.environ.get("JAVA_HOME")))"
+      sudo -u dd-agent -- /opt/datadog-agent/embedded/bin/python -c "import os; print(\"JAVA_HOME:{}\".format(os.environ.get(\"JAVA_HOME\")))"
     ```
 
 Need help? Contact [Datadog support][16].

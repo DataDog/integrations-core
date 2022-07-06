@@ -94,6 +94,14 @@ instances:
     # channels:
     #   - <CHANNEL_NAME>
 
+    ## @param auto_discover_channels - boolean - optional - default: true
+    ## Autodiscover channels to monitor. This finds all discoverable channels.
+    ##
+    ## Note: autodiscovered channels are in addition to the ones provided in `channels`.
+    ## Disabling this option will stop autodiscovery only for status metrics but not for property metrics.
+    #
+    # auto_discover_channels: true
+
     ## @param channel_status_mapping - mapping - optional
     ## Custom channel status mapping for service check `ibm_mq.channel.status`.
     ##
@@ -129,6 +137,16 @@ instances:
     #
     # collect_statistics_metrics: false
 
+    ## @param collect_reset_queue_metrics - boolean - optional - default: true
+    ## Collect metrics from Reset Queue Statistics. Statistics collected are:
+    ##   - reset queue statistics (MQCMD_RESET_Q_STATS)
+    ##
+    ## Note: Collecting reset queue statistics will also reset the performance data and requires `+chg`
+    ## permissions. More information found here:
+    ## https://www.ibm.com/docs/en/ibm-mq/9.1?topic=formats-reset-queue-statistics
+    #
+    # collect_reset_queue_metrics: true
+
     ## @param mqcd_version - number - optional - default: 6
     ## Which channel definition version to use. Supported values are 1 to 9 including.
     ## If you're having connection issues make sure it matches your MQ version.
@@ -160,6 +178,14 @@ instances:
     ## Whether or not to use SSL auth while connecting to the channel.
     #
     # ssl_auth: false
+
+    ## @param try_basic_auth - boolean - optional - default: true
+    ## Whether or not to try connecting with just username and password before SSL when `ssl_auth` is enabled.
+    ##
+    ## WARNING: There is a known issue with the client library in which disabling
+    ## this option has the potential to cause a memory leak.
+    #
+    # try_basic_auth: false
 
     ## @param ssl_cipher_spec - string - optional - default: TLS_RSA_WITH_AES_256_CBC_SHA
     ## The ssl cipher to use. It should match the value of the channels SSLCIPH attribute.
@@ -221,6 +247,17 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
 
 ## Log Section
 ##

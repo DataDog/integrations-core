@@ -14,12 +14,11 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Oracle Container Engine for Kubernetes Integration",
+  "public_title": "Oracle Container Engine for Kubernetes Integration",
   "categories": [
     "oracle",
     "containers",
-    "orchestration",
-    "log collection"
+    "orchestration"
   ],
   "type": "check",
   "is_public": true,
@@ -27,6 +26,7 @@
   "assets": {
     "dashboards": {},
     "monitors": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {}
   }
 }

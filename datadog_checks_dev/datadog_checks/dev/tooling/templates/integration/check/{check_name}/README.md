@@ -26,7 +26,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this check.
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
