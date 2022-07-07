@@ -459,7 +459,7 @@ class TestVault:
 
         with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
             dd_run_check(c)
-            assert not c._replication_dr_secondary_mode
+            assert not c._skip_dr_metric_collection
             aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
             aggregator.assert_metric('vault.is_leader', 1)
             assert_all_metrics(aggregator)
@@ -469,7 +469,7 @@ class TestVault:
             c.log.debug.assert_called_with(
                 "Detected vault in replication DR secondary mode, skipping Prometheus metric collection."
             )
-            assert c._replication_dr_secondary_mode
+            assert c._skip_dr_metric_collection
             aggregator.assert_metric('vault.is_leader', 1)
             aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
             assert_all_metrics(aggregator)
