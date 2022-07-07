@@ -6,7 +6,7 @@
 import json
 import logging
 from collections import OrderedDict
-from typing import Any, Optional
+from typing import Any
 
 import mock
 import pytest
@@ -1049,8 +1049,13 @@ def test_load_configuration_models(dd_run_check, mocker):
 if PY3:
 
     class BaseModelTest(BaseModel):
-        field: str
-        schema_: Optional[str] = Field(None, alias='schema')
+        field = ""
+        schema_ = Field("", alias='schema')
+else:
+
+    class BaseModelTest:
+        def __init__(self, **kwargs):
+            pass
 
 
 @requires_py3
