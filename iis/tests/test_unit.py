@@ -202,3 +202,12 @@ def test_check_exclude_patterns(aggregator, dd_default_hostname, dd_run_check, m
             )
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_legacy_check_version(aggregator, dd_default_hostname, dd_run_check, mock_performance_objects):
+    mock_performance_objects(PERFORMANCE_OBJECTS)
+    check = IIS('iis', {}, [{'host': dd_default_hostname, 'use_legacy_check_version': True}])
+    check.hostname = dd_default_hostname
+    dd_run_check(check)
+
+    aggregator.assert_service_check('iis.windows.perf.health', ServiceCheck.OK, count=0)
