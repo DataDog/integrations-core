@@ -1046,9 +1046,10 @@ def test_load_configuration_models(dd_run_check, mocker):
     assert check._config_model_shared is shared_config
 
 
-class BaseModelTest(BaseModel):
-    field: str
-    schema_: Optional[str] = Field(None, alias='schema')
+if PY3:
+    class BaseModelTest(BaseModel):
+        field: str
+        schema_: Optional[str] = Field(None, alias='schema')
 
 
 @requires_py3
