@@ -670,3 +670,8 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
+
+    ## @param max_returned_metrics - integer - optional - default: 2000
+    ## The check limits itself to 2000 metrics by default, increase this limit if needed.
+    #
+    # max_returned_metrics: 2000
