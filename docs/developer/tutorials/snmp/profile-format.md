@@ -280,35 +280,38 @@ External table indexes must be a subset of the indexes of the current table, or 
 
 Important: "_index_" refers to one digit of the index part of the row OID. For example, if the column OID is `1.2.3.1.2` and the row OID is `1.2.3.1.2.7.8.9`, the full index is `7.8.9`. In this example, `index: 1` refers to `7` and `index: 2` refers to `8`, and so on.  
 
-Here is an example of an OID with multiple positions in the index ([OID ref](https://oidref.com/1.3.6.1.2.1.4.20.1)):
+Here is specific example of an OID with multiple positions in the index ([OID ref](http://oidref.com/1.3.6.1.4.1.5.1.1.19.25.1)):
 
 ```
-ipAddrEntry OBJECT-TYPE
-    SYNTAX     IpAddrEntry
-    MAX-ACCESS not-accessible
-    STATUS     deprecated
-    DESCRIPTION
-           "The addressing information for one of this entity's IPv4
-            addresses."
-    INDEX      { ipAdEntAddr }
-    ::= { ipAddrTable 1 }
+accDnForwardFilterEntry OBJECT-TYPE
+         SYNTAX   AccDnForwardFilterEntry
+         ACCESS   not-accessible
+         STATUS   mandatory
+         DESCRIPTION
+             " A single set of messages that the Network Manager
+               wants selectively treated."
+         INDEX { accDnForwardFilterDest, 
+                 accDnForwardFilterSource }
+         ::= { accDnForwardFilterTable 1 }
 ```
 
-The index in the case is the `ipAdEntAddr`. Inspecting this `OBJECT-TYPE` reveals the `SYNTAX` as `IpAddress` ([OID ref](https://oidref.com/1.3.6.1.2.1.4.20.1.1)):
+The index in the case is a combination of `accDnForwardFilterDest` and `accDnForwardFilterSource`. Inspecting the `OBJECT-TYPE` of `accDnForwardFilterDest` reveals the `SYNTAX` as `INTEGER` ([OID ref](http://oidref.com/1.3.6.1.4.1.5.1.1.19.25.1.1)):
 
 ```
-ipAdEntAddr OBJECT-TYPE
-    SYNTAX     IpAddress
-    MAX-ACCESS read-only
-    STATUS     deprecated
-    DESCRIPTION
-
-
-           "The IPv4 address to which this entry's addressing
-            information pertains."
-    ::= { ipAddrEntry 1 }
+accDnForwardFilterDest OBJECT-TYPE
+             SYNTAX   INTEGER (0..65535)
+             ACCESS   read-write
+             STATUS   mandatory
+            DESCRIPTION
+                 " If 0, all DECNET Addresses.
+                   If an Area with Host Part  0,  all  traffic  to
+                   that Area.
+                   If a DECNET Host ID, all traffic to that Host."
+            ::= { accDnForwardFilterEntry 1 }
 ```
-You can find the value corresponding to the `index` of a row in this table at the following OID: `.1.3.6.1.2.1.4.20.1.1.<INDEX>`.  Retrieving the value of `.1.3.6.1.2.1.4.20.1.1.127.0.0.1` returns `127.0.0.1`. To capture the value `127` and apply it as a metric tag, target `index: 1`.
+The value corresponding to the `accDnForwardFilterDest` of a row in this table will be found at the following OID: `.1.3.6.1.4.1.5.1.1.19.25.1.1.<accDnForwardFilterDest>`.  Retrieving the value of `.1.3.6.1.4.1.5.1.1.19.25.1.1.123` will return `123`.  To capture the value `123` and apply it as a metric tag, target `index: 1`.  
+
+The value corresponding to the `accDnForwardFilterSource` of a row in this table will be found at the following OID: `.1.3.6.1.4.1.5.1.1.19.25.1.1.<accDnForwardFilterDest>.<accDnForwardFilterSource>`.  Retrieving the value of `.1.3.6.1.4.1.5.1.1.19.25.1.1.123.456` will return `456`.  To capture the value `456` and apply it as a metric tag, target `index: 2`.  
 
 ```yaml
 metrics:
