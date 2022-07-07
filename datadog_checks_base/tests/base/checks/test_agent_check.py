@@ -6,7 +6,7 @@
 import json
 import logging
 from collections import OrderedDict
-from typing import Any
+from typing import Any, Optional
 
 import mock
 import pytest
@@ -17,6 +17,9 @@ from datadog_checks.base import __version__ as base_package_version
 from datadog_checks.base import to_native_string
 from datadog_checks.base.checks.base import datadog_agent
 from datadog_checks.dev.testing import requires_py3
+
+if PY3:
+    from pydantic import BaseModel, Field
 
 
 def test_instance():
@@ -1043,27 +1046,48 @@ def test_load_configuration_models(dd_run_check, mocker):
     assert check._config_model_shared is shared_config
 
 
+class BaseModelTest(BaseModel):
+    field: str
+    schema_: Optional[str] = Field(None, alias='schema')
+
+
 @requires_py3
 @pytest.mark.parametrize(
     'check_instance_config, default_instance_config, log_lines, unknown_options',
     [
         pytest.param(
-            {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
+            {
+                'endpoint': 'url',
+                'tags': ['foo:bar'],
+                'proxy': {'http': 'http://1.2.3.4:9000'},
+            },
             [],
             None,
             [],
             id='empty default',
         ),
         pytest.param(
-            {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            [('endpoint', 'url')],
+            {
+                'endpoint': 'url',
+                'tags': ['foo:bar'],
+                'proxy': {'http': 'http://1.2.3.4:9000'},
+            },
+            [
+                ('endpoint', 'url'),
+            ],
             None,
             [],
             id='no typo',
         ),
         pytest.param(
-            {'endpoints': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            [('endpoint', 'url')],
+            {
+                'endpoints': 'url',
+                'tags': ['foo:bar'],
+                'proxy': {'http': 'http://1.2.3.4:9000'},
+            },
+            [
+                ('endpoint', 'url'),
+            ],
             [
                 (
                     'Detected potential typo in configuration option in test/instance section: `endpoints`. '
@@ -1074,15 +1098,29 @@ def test_load_configuration_models(dd_run_check, mocker):
             id='typo',
         ),
         pytest.param(
-            {'endpoints': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            [('endpoint', 'url'), ('endpoints', 'url')],
+            {
+                'endpoints': 'url',
+                'tags': ['foo:bar'],
+                'proxy': {'http': 'http://1.2.3.4:9000'},
+            },
+            [
+                ('endpoint', 'url'),
+                ('endpoints', 'url'),
+            ],
             None,
             [],
             id='no typo similar option',
         ),
         pytest.param(
-            {'endpont': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            [('endpoint', 'url'), ('endpoints', 'url')],
+            {
+                'endpont': 'url',
+                'tags': ['foo:bar'],
+                'proxy': {'http': 'http://1.2.3.4:9000'},
+            },
+            [
+                ('endpoint', 'url'),
+                ('endpoints', 'url'),
+            ],
             [
                 (
                     'Detected potential typo in configuration option in test/instance section: `endpont`. '
@@ -1092,10 +1130,24 @@ def test_load_configuration_models(dd_run_check, mocker):
             ["endpont"],
             id='typo two candidates',
         ),
-        pytest.param({'tag': 'test'}, [('tags', 'test')], None, [], id='short option cant catch'),
         pytest.param(
-            {'testing_long_para': 'test'},
-            [('testing_long_param', 'test'), ('test_short_param', 'test')],
+            {
+                'tag': 'test',
+            },
+            [
+                ('tags', 'test'),
+            ],
+            None,
+            [],
+            id='short option cant catch'),
+        pytest.param(
+            {
+                'testing_long_para': 'test',
+            },
+            [
+                ('testing_long_param', 'test'),
+                ('test_short_param', 'test'),
+            ],
             [
                 (
                     'Detected potential typo in configuration option in test/instance section: `testing_long_para`. '
@@ -1106,14 +1158,23 @@ def test_load_configuration_models(dd_run_check, mocker):
             id='somewhat similar option',
         ),
         pytest.param(
-            {'send_distribution_sums_as_monotonic': False, 'exclude_labels': True},
-            [('send_distribution_counts_as_monotonic', True), ('include_labels', True)],
+            {
+                'send_distribution_sums_as_monotonic': False,
+                'exclude_labels': True,
+            },
+            [
+                ('send_distribution_counts_as_monotonic', True),
+                ('include_labels', True),
+            ],
             None,
             [],
             id='different options no typos',
         ),
         pytest.param(
-            {'send_distribution_count_as_monotonic': True, 'exclude_label': True},
+            {
+                'send_distribution_count_as_monotonic': True,
+                'exclude_label': True,
+            },
             [
                 ('send_distribution_sums_as_monotonic', False),
                 ('send_distribution_counts_as_monotonic', True),
@@ -1130,24 +1191,45 @@ def test_load_configuration_models(dd_run_check, mocker):
                     'Did you mean exclude_labels?'
                 ),
             ],
-            ["send_distribution_count_as_monotonic", "exclude_label"],
+            [
+                "send_distribution_count_as_monotonic",
+                "exclude_label",
+            ],
             id='different options typo',
+        ),
+        pytest.param(
+            {
+                "field": "value",
+                "schema": "my_schema",
+            },
+            BaseModelTest(field="my_field", schema_="the_schema"),
+            None,
+            [],
+            id='using an alias',
+        ),
+        pytest.param(
+            {
+                "field": "value",
+                "schema_": "my_schema",
+            },
+            BaseModelTest(field="my_field", schema_="the_schema"),
+            None,
+            [],
+            id='not using an alias',
         ),
     ],
 )
 def test_detect_typos_configuration_models(
-    dd_run_check, mocker, caplog, check_instance_config, default_instance_config, log_lines, unknown_options,
+    dd_run_check, caplog, check_instance_config, default_instance_config, log_lines, unknown_options,
 ):
     caplog.clear()
     caplog.set_level(logging.WARNING)
     empty_config = {}
-    default_instance = mocker.MagicMock()
-    default_instance.__iter__ = mocker.MagicMock(return_value=iter(default_instance_config))
 
     check = AgentCheck('test', empty_config, [check_instance_config])
     check.check_id = 'test:123'
 
-    typos = check.log_typos_in_options(check_instance_config, default_instance, 'instance')
+    typos = check.log_typos_in_options(check_instance_config, default_instance_config, 'instance')
 
     if log_lines is not None:
         for log_line in log_lines:
