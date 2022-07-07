@@ -688,12 +688,12 @@ class SQLServer(AgentCheck):
                     ]
                 )
             else:
-                self.log.warning('Collecting AlwaysOn metrics is only supported on versions 2014+')
+                self.log.warning('Collecting AlwaysOn metrics is not supported on version 2012')
         if is_affirmative(self.instance.get('include_fci_metrics', False)):
             if major_version > 2012:
                 queries.extend([QUERY_FAILOVER_CLUSTER_INSTANCE])
             else:
-                self.log.warning('Collecting Failover Cluster Instance metrics is only supported on versions 2014+')
+                self.log.warning('Collecting Failover Cluster Instance metrics is not supported on version 2012')
 
         self._dynamic_queries = self._new_query_executor(queries)
         self._dynamic_queries.compile_queries()
