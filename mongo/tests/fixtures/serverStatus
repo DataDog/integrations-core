@@ -911,7 +911,8 @@
             "idhack": 13
         },
         "queryExecutor": {
-            "scanned": 46
+            "scanned": 46,
+            "scannedObjects": 97
         },
         "record": {
             "moves": 0
