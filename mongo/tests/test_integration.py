@@ -516,8 +516,10 @@ def test_user_pass_options(check, instance_user, dd_run_check):
         dd_run_check(check, extract_message=True)
 
 
-def test_db_names(check, instance_integration, aggregator, dd_run_check):
-    instance_integration['dbnames'] = ['admin', 'config', 'test', 'local', 'not_found']
+def test_db_names_with_nonexistent_database(check, instance_integration, aggregator, dd_run_check):
+    with open(os.path.join(HERE, "fixtures", "list_database_names"), 'r') as f:
+        instance_integration['dbnames'] = json.load(f)
+    instance_integration['dbnames'].append('nonexistent_database')
     check = check(instance_integration)
     with mock_pymongo("standalone"):
         # ensure we don't get a pymongo exception
@@ -529,6 +531,40 @@ def test_db_names(check, instance_integration, aggregator, dd_run_check):
         'custom-queries',
         'top',
         'dbstats-local',
+        'fsynclock',
+        'dbstats',
+        'indexes-stats',
+        'collection',
+    ]
+    _assert_metrics(aggregator, metrics_categories)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        exclude=[
+            'dd.custom.mongo.aggregate.total',
+            'dd.custom.mongo.count',
+            'dd.custom.mongo.query_a.amount',
+            'dd.custom.mongo.query_a.el',
+        ],
+        check_submission_type=True,
+    )
+    assert len(aggregator._events) == 0
+
+
+def test_db_names_missing_existent_database(check, instance_integration, aggregator, dd_run_check):
+    with open(os.path.join(HERE, "fixtures", "list_database_names"), 'r') as f:
+        instance_integration['dbnames'] = json.load(f)
+    instance_integration['dbnames'].remove('local')
+    check = check(instance_integration)
+    with mock_pymongo("standalone"):
+        # ensure we don't get a pymongo exception
+        dd_run_check(check, extract_message=True)
+
+    metrics_categories = [
+        'count-dbs',
+        'serverStatus',
+        'custom-queries',
+        'top',
         'fsynclock',
         'dbstats',
         'indexes-stats',
