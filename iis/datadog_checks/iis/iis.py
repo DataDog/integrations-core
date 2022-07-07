@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from six import PY3, iteritems
 
-from datadog_checks.base import PDHBaseCheck, is_affirmative
+from datadog_checks.base import is_affirmative,PDHBaseCheck
 
 DEFAULT_COUNTERS = [
     ["Web Service", None, "Service Uptime", "iis.uptime", "gauge"],

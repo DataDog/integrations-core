@@ -12,12 +12,3 @@ files:
     - template: instances/pdh_legacy
       hidden: true
     - template: instances/default
-    - name: use_legacy_check_version
-      hidden: true
-      required: false
-      description: |
-        For backward compatibility reasons, it is possible to use a legacy version of the aspdotnet
-        integration by setting this field to "true".
-      value:
-          type: boolean
-          example: false

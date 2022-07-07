@@ -12,6 +12,9 @@ EVENT_TYPE = SOURCE_TYPE_NAME = 'aspdotnet'
 
 class AspdotnetCheck(PDHBaseCheck):
     def __new__(cls, name, init_config, instances):
+        import pdb
+
+        pdb.set_trace()
         if PY3 and not is_affirmative(instances[0].get('use_legacy_check_version', False)):
             from .check import AspdotnetCheckV2
 
