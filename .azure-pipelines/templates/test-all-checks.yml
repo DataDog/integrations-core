@@ -78,6 +78,9 @@ jobs:
     - checkName: azure_iot_edge
       displayName: Azure IoT Edge
       os: linux
+    - checkName: boundary
+      displayName: Boundary
+      os: linux
     - checkName: btrfs
       displayName: Btrfs
       os: linux

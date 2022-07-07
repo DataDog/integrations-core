@@ -1,6 +1,6 @@
 # CHANGELOG - pgbouncer
 
-## 4.2.1 / 2022-05-15
+## 4.2.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Handle errors for individual rows. See [#11993](https://github.com/DataDog/integrations-core/pull/11993).
 

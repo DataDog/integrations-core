@@ -18,7 +18,7 @@
     "data store"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "teradata",
   "assets": {
     "configuration": {

@@ -236,6 +236,7 @@ def test_cert_expired(aggregator, instance_remote_cert_expired):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.skip(reason="expired certified, reactivate test when certified valid again")
 def test_fetch_intermediate_certs(aggregator, instance_remote_fetch_intermediate_certs):
     c = TLSCheck('tls', {}, [instance_remote_fetch_intermediate_certs])
     c.check(None)

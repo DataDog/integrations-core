@@ -1,6 +1,6 @@
 # CHANGELOG - IBM i
 
-## 1.4.0 / 2022-05-15
+## 1.4.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Add option to select which queries to run. See [#11806](https://github.com/DataDog/integrations-core/pull/11806).
 * [Fixed] Fix enumerated integer validation. See [#11964](https://github.com/DataDog/integrations-core/pull/11964).

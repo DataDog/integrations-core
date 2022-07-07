@@ -15,6 +15,7 @@ PORT = '8001'
 
 URL = 'http://{}:{}'.format(HOST, PORT)
 DEFAULT_INSTANCE = {'openmetrics_endpoint': '{}/stats/prometheus'.format(URL)}
+LEGACY_INSTANCE = {'stats_url': '{}/stats'.format(URL)}
 requires_new_environment = pytest.mark.skipif(ENVOY_LEGACY != 'false', reason='Requires prometheus environment')
 
 PROMETHEUS_METRICS = [
@@ -27,6 +28,8 @@ PROMETHEUS_METRICS = [
     "cluster.circuit_breakers.rq_pending_open",
     "cluster.circuit_breakers.rq_retry_open",
     "cluster.default_total_match.count",
+    "cluster.ext_authz.error.count",
+    "cluster.ext_authz.failure_mode_allowed.count",
     "cluster.http1.dropped_headers_with_underscores.count",
     "cluster.http1.metadata_not_supported_error.count",
     "cluster.http1.requests_rejected_with_underscores_in_headers.count",
@@ -74,6 +77,8 @@ PROMETHEUS_METRICS = [
     "cluster.membership_healthy",
     "cluster.membership_total",
     "cluster.original_dst_host_invalid.count",
+    "cluster.ratelimit.error.count",
+    "cluster.ratelimit.failure_mode_allowed.count",
     "cluster.retry_or_shadow_abandoned.count",
     "cluster.update_attempt.count",
     "cluster.update_empty.count",

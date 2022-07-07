@@ -1,4 +1,4 @@
-Backend default is Healthy
+Backend backend2 is Healthy
 Current states  good:  5 threshold:  3 window:  5
 Average responsetime of good probes: 0.016226
 Oldest                                                    Newest

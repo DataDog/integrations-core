@@ -1,6 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
-## 25.4.1 / 2022-05-15
+## 25.4.2 / 2022-06-27
+
+* [Fixed] Change refreshing counters log level to debug. See [#12069](https://github.com/DataDog/integrations-core/pull/12069).
+
+## 25.4.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
 
@@ -61,6 +65,10 @@
 
 * [Added] Upgrade psutil to 5.9.0. See [#11139](https://github.com/DataDog/integrations-core/pull/11139).
 * [Changed] Add tls_protocols_allowed configuration option. See [#11237](https://github.com/DataDog/integrations-core/pull/11237).
+
+## 23.7.7 / 2022-04-12
+
+* [Fixed] Fix obfuscate_sql_with_metadata wrapper memory usage. See [#11815](https://github.com/DataDog/integrations-core/pull/11815).
 
 ## 23.7.6 / 2022-02-03 / Agent 7.34.0
 
