@@ -1218,6 +1218,21 @@ else:
         pytest.param(
             {
                 "field": "value",
+                "schem": "my_schema",
+            },
+            BaseModelTest(field="my_field", schema_="the_schema"),
+            [
+                (
+                    "Detected potential typo in configuration option in test/instance section: "
+                    "`schem`. Did you mean schema?"
+                ),
+            ],
+            ["schem"],
+            id="typo in an alias",
+        ),
+        pytest.param(
+            {
+                "field": "value",
                 "schema_": "my_schema",
             },
             BaseModelTest(field="my_field", schema_="the_schema"),
