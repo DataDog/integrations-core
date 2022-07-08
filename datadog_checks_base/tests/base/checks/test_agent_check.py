@@ -18,9 +18,6 @@ from datadog_checks.base import to_native_string
 from datadog_checks.base.checks.base import datadog_agent
 from datadog_checks.dev.testing import requires_py3
 
-if PY3:
-    from pydantic import BaseModel, Field
-
 
 def test_instance():
     """
@@ -1047,6 +1044,8 @@ def test_load_configuration_models(dd_run_check, mocker):
 
 
 if PY3:
+
+    from pydantic import BaseModel, Field
 
     class BaseModelTest(BaseModel):
         field = ""

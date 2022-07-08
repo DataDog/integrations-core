@@ -438,7 +438,6 @@ class AgentCheck(object):
     def log_typos_in_options(self, user_config, models_config, level):
         # only import it when running in python 3
         from jellyfish import jaro_winkler_similarity
-        from pydantic import BaseModel
 
         user_configs = user_config or {}  # type: Dict[str, Any]
         models_config = models_config or {}
@@ -446,9 +445,12 @@ class AgentCheck(object):
 
         known_options = set([k for k, _ in models_config])  # type: Set[str]
 
-        if isinstance(models_config, BaseModel):
-            # Also add aliases, if any
-            known_options.update(set(models_config.dict(by_alias=True)))
+        if not PY2:
+            from pydantic import BaseModel
+
+            if isinstance(models_config, BaseModel):
+                # Also add aliases, if any
+                known_options.update(set(models_config.dict(by_alias=True)))
 
         unknown_options = [option for option in user_configs.keys() if option not in known_options]  # type: List[str]
 
