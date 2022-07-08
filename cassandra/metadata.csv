@@ -23,7 +23,7 @@ cassandra.exceptions.count,gauge,10,error,,The number of exceptions thrown from 
 cassandra.key_cache_hit_rate,gauge,10,fraction,,The key cache hit rate.,1,cassandra,hit,
 cassandra.latency.75th_percentile,gauge,10,microsecond,,The client request latency - p75.,-1,cassandra,request latency p75,
 cassandra.latency.95th_percentile,gauge,10,microsecond,,The client request latency - p95.,-1,cassandra,request latency p95,
-cassandra.latency.one_minute_rate,gauge,10,request,second,The number of client requests.,0,cassandra,request cout,
+cassandra.latency.one_minute_rate,gauge,10,request,second,The number of client requests.,0,cassandra,request count,
 cassandra.live_disk_space_used.count,gauge,10,byte,,"The disk space used by ""live"" SSTables (only counts in use files).",0,cassandra,live disk used,
 cassandra.live_ss_table_count,gauge,10,file,,"Number of ""live"" (in use) SSTables.",0,cassandra,live sstables,
 cassandra.load.count,gauge,10,byte,,The disk space used by live data on a node.,0,cassandra,load,
