@@ -105,110 +105,62 @@ def get_query_ao_availability_groups(sqlserver_major_version):
 
     # AG - sys.availability_groups
     ag_column_definitions = {
-        'availability_group': {
-            'sql_column': 'AG.group_id AS availability_group',
-            'metric_definition': {'name': 'availability_group', 'type': 'tag'},
-        },
-        'availability_group_name': {
-            'sql_column': 'AG.name AS availability_group_name',
-            'metric_definition': {'name': 'availability_group_name', 'type': 'tag'},
-        },
+        'AG.group_id AS availability_group': {'name': 'availability_group', 'type': 'tag'},
+        'AG.name AS availability_group_name': {'name': 'availability_group_name', 'type': 'tag'},
     }
 
     # AR - sys.availability_replicas
     ar_column_definitions = {
-        'replica_server_name': {
-            'sql_column': 'AR.replica_server_name',
-            'metric_definition': {'name': 'replica_server_name', 'type': 'tag'},
-        },
-        'failover_mode': {
-            'sql_column': 'LOWER(AR.failover_mode_desc) AS failover_mode_desc',
-            'metric_definition': {'name': 'failover_mode', 'type': 'tag'},
-        },
-        'availability_mode': {
-            'sql_column': 'LOWER(AR.availability_mode_desc) AS availability_mode_desc',
-            'metric_definition': {'name': 'availability_mode', 'type': 'tag'},
-        },
+        'AR.replica_server_name': {'name': 'replica_server_name', 'type': 'tag'},
+        'LOWER(AR.failover_mode_desc) AS failover_mode_desc': {'name': 'failover_mode', 'type': 'tag'},
+        'LOWER(AR.availability_mode_desc) AS availability_mode_desc': {'name': 'availability_mode', 'type': 'tag'},
     }
 
     # ADC - sys.availability_databases_cluster
     adc_column_definitions = {
-        'database_name': {
-            'sql_column': 'ADC.database_name',
-            'metric_definition': {'name': 'database_name', 'type': 'tag'},
-        },
+        'ADC.database_name': {'name': 'database_name', 'type': 'tag'},
     }
 
     # DRS - sys.dm_hadr_database_replica_states
     drs_column_definitions = {
-        'replica_id': {
-            'sql_column': 'DRS.replica_id',
-            'metric_definition': {'name': 'replica_id', 'type': 'tag'},
+        'DRS.replica_id': {'name': 'replica_id', 'type': 'tag'},
+        'DRS.database_id': {'name': 'database_id', 'type': 'tag'},
+        'DRS.database_state': {'name': 'database_state', 'type': 'tag'},
+        'LOWER(DRS.synchronization_state_desc) AS synchronization_state_desc': {
+            'name': 'synchronization_state',
+            'type': 'tag',
         },
-        'database_id': {
-            'sql_column': 'DRS.database_id',
-            'metric_definition': {'name': 'database_id', 'type': 'tag'},
-        },
-        'database_state': {
-            'sql_column': 'DRS.database_state',
-            'metric_definition': {'name': 'database_state', 'type': 'tag'},
-        },
-        'synchronization_state': {
-            'sql_column': 'LOWER(DRS.synchronization_state_desc) AS synchronization_state_desc',
-            'metric_definition': {'name': 'synchronization_state', 'type': 'tag'},
-        },
-        'ao_log_send_queue_size': {
-            'sql_column': '(DRS.log_send_queue_size * 1024) AS log_send_queue_size',
-            'metric_definition': {'name': 'ao.log_send_queue_size', 'type': 'gauge'},
-        },
-        'ao_log_send_rate': {
-            'sql_column': '(DRS.log_send_rate * 1024) AS log_send_rate',
-            'metric_definition': {'name': 'ao.log_send_rate', 'type': 'gauge'},
-        },
-        'ao_redo_queue_size': {
-            'sql_column': '(DRS.redo_queue_size * 1024) AS redo_queue_size',
-            'metric_definition': {'name': 'ao.redo_queue_size', 'type': 'gauge'},
-        },
-        'ao_redo_rate': {
-            'sql_column': '(DRS.redo_rate * 1024) AS redo_rate',
-            'metric_definition': {'name': 'ao.redo_rate', 'type': 'gauge'},
-        },
-        'ao_low_water_mark_for_ghosts': {
-            'sql_column': 'DRS.low_water_mark_for_ghosts',
-            'metric_definition': {'name': 'ao.low_water_mark_for_ghosts', 'type': 'gauge'},
-        },
-        'ao_filestream_send_rate': {
-            'sql_column': '(DRS.filestream_send_rate * 1024) AS filestream_send_rate',
-            'metric_definition': {'name': 'ao.filestream_send_rate', 'type': 'gauge'},
+        '(DRS.log_send_queue_size * 1024) AS log_send_queue_size': {'name': 'ao.log_send_queue_size', 'type': 'gauge'},
+        '(DRS.log_send_rate * 1024) AS log_send_rate': {'name': 'ao.log_send_rate', 'type': 'gauge'},
+        '(DRS.redo_queue_size * 1024) AS redo_queue_size': {'name': 'ao.redo_queue_size', 'type': 'gauge'},
+        '(DRS.redo_rate * 1024) AS redo_rate': {'name': 'ao.redo_rate', 'type': 'gauge'},
+        'DRS.low_water_mark_for_ghosts': {'name': 'ao.low_water_mark_for_ghosts', 'type': 'gauge'},
+        '(DRS.filestream_send_rate * 1024) AS filestream_send_rate': {
+            'name': 'ao.filestream_send_rate',
+            'type': 'gauge',
         },
     }
 
     # FC - sys.dm_hadr_cluster
     fc_column_definitions = {
-        'failover_cluster': {
-            'sql_column': 'FC.cluster_name',
-            'metric_definition': {'name': 'failover_cluster', 'type': 'tag'},
+        'FC.cluster_name': {
+            'name': 'failover_cluster',
+            'type': 'tag',
         },
     }
 
     # Include metrics based on version
     if sqlserver_major_version >= 2016:
-        drs_column_definitions['ao_secondary_lag_seconds'] = {
-            'sql_column': 'DRS.secondary_lag_seconds',
-            'metric_definition': {'name': 'ao.secondary_lag_seconds', 'type': 'gauge'},
-        }
+        drs_column_definitions['DRS.secondary_lag_seconds'] = {'name': 'ao.secondary_lag_seconds', 'type': 'gauge'}
     if sqlserver_major_version >= 2014:
-        drs_column_definitions['ao_is_primary_replica'] = {
-            'sql_column': 'DRS.is_primary_replica',
-            'metric_definition': {'name': 'ao.is_primary_replica', 'type': 'gauge'},
-        }
+        drs_column_definitions['DRS.is_primary_replica'] = {'name': 'ao.is_primary_replica', 'type': 'gauge'}
 
     def _sort_column_definitions(column_definitions):
         sql_columns = []
         metric_columns = []
         for column in sorted(column_definitions.keys()):
-            sql_columns.append(column_definitions[column]['sql_column'])
-            metric_columns.append(column_definitions[column]['metric_definition'])
+            sql_columns.append(column)
+            metric_columns.append(column_definitions[column])
         return sql_columns, metric_columns
 
     # Sort columns to ensure a static column order
