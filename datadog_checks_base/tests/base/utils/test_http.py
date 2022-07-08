@@ -29,8 +29,6 @@ from datadog_checks.dev.fs import read_file, write_file
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import ON_WINDOWS
 
-pytestmark = pytest.mark.http
-
 DEFAULT_OPTIONS = {
     'auth': None,
     'cert': None,
@@ -315,6 +313,14 @@ class TestAuth:
         http = RequestsWrapper(instance, init_config)
 
         assert http.options['auth'] is None
+
+    @pytest.mark.parametrize('username,password', [('user', ''), ('', 'pass'), ('', '')])
+    def test_config_basic_allows_empty_strings(self, username, password):
+        instance = {'username': username, 'password': password}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.options['auth'] == (username, password)
 
     def test_config_kerberos_legacy(self):
         instance = {'kerberos_auth': 'required'}
@@ -2041,6 +2047,7 @@ class TestIntegration:
 
 
 class TestAIAChasing:
+    @pytest.mark.skip(reason="expired certified, reactivate test when certified valid again")
     def test_incomplete_chain(self):
         # Protocol 1.2 is allowed by default
         http = RequestsWrapper({}, {})
@@ -2052,6 +2059,7 @@ class TestAIAChasing:
             assert "Unknown protocol `unknown` configured, ignoring it." in caplog.text
         caplog.clear()
 
+    @pytest.mark.skip(reason="expired certified, reactivate test when certified valid again")
     def test_protocol_allowed(self):
         http = RequestsWrapper({'tls_protocols_allowed': ['TLSv1.2']}, {})
         http.get("https://incomplete-chain.badssl.com/")

@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-HiveMQ Integration",
+  "public_title": "HiveMQ Integration",
   "categories": [
     "messaging",
     "processing",

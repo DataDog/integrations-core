@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Harbor Integration",
+  "public_title": "Harbor Integration",
   "categories": [
     "containers",
     "log collection",

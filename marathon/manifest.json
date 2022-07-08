@@ -17,7 +17,7 @@
   "process_signatures": [
     "start --master mesos marathon"
   ],
-  "public_title": "Datadog-Marathon Integration",
+  "public_title": "Marathon Integration",
   "short_description": "Track application metrics: required memory and disk, instance count, and more.",
   "support": "core",
   "supported_os": [

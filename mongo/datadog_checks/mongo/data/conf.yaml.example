@@ -13,7 +13,7 @@ init_config:
 #
 instances:
 
-    ## @param hosts - list of strings - optional
+    ## @param hosts - string or list of strings - optional
     ## The host (and optional port number) where the mongod instance (or mongos instances for
     ## a sharded cluster) is running. You can specify a hostname, IP address, or UNIX domain
     ## socket. Specify as many hosts as appropriate for your deployment topology:
@@ -63,6 +63,14 @@ instances:
     ## connect to the same host. Instead configure one check instance for each node.
     #
     # options: {}
+
+    ## @param dbnames - list of strings - optional
+    ## Set a list of the names of all databases to collect metrics from.
+    ## If this key does not exist, all metrics from all databases on the server will be collected.
+    #
+    # dbnames:
+    #   - one_database
+    #   - other_database
 
     ## @param replica_check - boolean - optional - default: true
     ## Whether or not to read from available replicas.

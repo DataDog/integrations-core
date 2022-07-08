@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 
 from datadog_checks.base.utils.platform import Platform
 
@@ -22,3 +23,15 @@ def set_default_driver_conf():
 
 def construct_use_statement(database):
     return 'use [{}]'.format(database)
+
+
+def parse_sqlserver_major_version(version):
+    """
+    Parses the SQL Server major version out of the full version
+    :param version: String representation of full SQL Server version (from @@version)
+    :return: integer representation of SQL Server major version (i.e. 2012, 2019)
+    """
+    match = re.search(r"Microsoft SQL Server (\d+)", version)
+    if not match:
+        return None
+    return int(match.group(1))

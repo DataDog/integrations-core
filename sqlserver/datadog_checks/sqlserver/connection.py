@@ -136,10 +136,15 @@ class Connection(object):
         if pyodbc is not None:
             self.valid_connectors.append('odbc')
 
-        self.default_connector = init_config.get('connector', 'adodbapi')
-        if self.default_connector.lower() not in self.valid_connectors:
-            self.log.error("Invalid database connector %s, defaulting to adodbapi", self.default_connector)
+        connector = init_config.get('connector')
+        if connector is None or connector.lower() not in self.valid_connectors:
+            if connector is None:
+                self.log.debug("`connector` config value was not set, defaulting to adodbapi")
+            else:
+                self.log.error("Invalid database connector %s, defaulting to adodbapi", connector)
             self.default_connector = 'adodbapi'
+        else:
+            self.default_connector = connector
 
         self.connector = self.get_connector()
 

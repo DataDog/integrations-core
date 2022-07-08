@@ -32,9 +32,11 @@ files:
       value:
         example:
         - <HOST>:<PORT>
-        type: array
-        items:
-          type: string
+        anyOf:
+          - type: string
+          - type: array
+            items:
+              type: string
     - name: username
       description: |
         The username to use for authentication.
@@ -63,6 +65,16 @@ files:
       value:
         type: object
         properties: []
+    - name: dbnames
+      description: |
+        Set a list of the names of all databases to collect metrics from.
+        If this key does not exist, all metrics from all databases on the server will be collected.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          [ one_database, other_database ]
     - name: replica_check
       description: |
         Whether or not to read from available replicas.

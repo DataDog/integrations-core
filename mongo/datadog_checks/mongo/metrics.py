@@ -72,6 +72,7 @@ BASE_METRICS = {
     "metrics.operation.scanAndOrder": RATE,
     "metrics.operation.writeConflicts": RATE,
     "metrics.queryExecutor.scanned": RATE,
+    "metrics.queryExecutor.scannedObjects": RATE,
     "metrics.record.moves": RATE,
     "metrics.repl.apply.batches.num": RATE,
     "metrics.repl.apply.batches.totalMillis": RATE,

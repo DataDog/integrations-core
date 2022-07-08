@@ -44,6 +44,8 @@ class MongoConfig(object):
         else:
             self.server = None
             self.hosts = instance.get('hosts', [])
+            if type(self.hosts) == str:
+                self.hosts = [self.hosts]
             self.username = instance.get('username')
             self.password = instance.get('password')
             # Deprecated
@@ -65,6 +67,8 @@ class MongoConfig(object):
         if not self.db_name:
             self.log.info('No MongoDB database found in URI. Defaulting to admin.')
             self.db_name = 'admin'
+
+        self.db_names = instance.get('dbnames', None)
 
         self.timeout = float(instance.get('timeout', DEFAULT_TIMEOUT)) * 1000
         self.additional_metrics = instance.get('additional_metrics', [])

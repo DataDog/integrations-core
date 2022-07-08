@@ -74,6 +74,10 @@ def instance_collect_histogram_buckets(field, value):
     return True
 
 
+def instance_collect_secondary_dr(field, value):
+    return False
+
+
 def instance_connect_timeout(field, value):
     return get_default_field_value(field, value)
 

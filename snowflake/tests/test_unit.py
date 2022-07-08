@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import logging
 import os
 
 import mock
@@ -58,6 +59,16 @@ def test_invalid_oauth(oauth_instance):
     oauth_inst['authenticator'] = 'testauth'
     with pytest.raises(Exception, match='The Authenticator method set is invalid: testauth'):
         SnowflakeCheck(CHECK_NAME, {}, [oauth_inst])
+
+
+def test_read_token(oauth_instance):
+    oauth_token_path_inst = copy.deepcopy(oauth_instance)
+    oauth_token_path_inst['token'] = None
+    oauth_token_path_inst['token_path'] = os.path.join(os.path.dirname(__file__), 'keys', 'token')
+    check = SnowflakeCheck(CHECK_NAME, {}, [oauth_token_path_inst])
+    token = check.read_token()
+    assert token == 'testtoken'
+    check.check(oauth_instance)
 
 
 def test_default_auth(instance):
@@ -247,21 +258,166 @@ def test_additional_metric_groups(instance):
     ]
 
 
-def test_metric_group_exceptions(instance):
+def test_wrong_account_metric_groups(instance):
+    instance = copy.deepcopy(instance)
+    instance['metric_groups'] = [
+        'snowflake.organization.warehouse',
+        'snowflake.organization.currency',
+        'snowflake.organization.storage',
+    ]
+    with pytest.raises(
+        Exception,
+        match='No valid metric_groups for `ACCOUNT_USAGE` or custom query configured, please list at least one.',
+    ):
+        SnowflakeCheck(CHECK_NAME, {}, [instance])
+
+
+def test_wrong_org_metric_groups(instance):
+    instance = copy.deepcopy(instance)
+    instance['schema'] = 'ORGANIZATION_USAGE'
+    instance['metric_groups'] = [
+        'snowflake.logins',
+    ]
+    with pytest.raises(
+        Exception,
+        match='No valid metric_groups for `ORGANIZATION_USAGE` or custom query configured, please list at least one.',
+    ):
+        SnowflakeCheck(CHECK_NAME, {}, [instance])
+
+
+def test_account_org_metric_groups(instance):
+    instance = copy.deepcopy(instance)
+    instance['metric_groups'] = [
+        'snowflake.organization.warehouse',
+        'snowflake.organization.currency',
+        'snowflake.organization.storage',
+        'snowflake.data_transfer',
+    ]
+    check = SnowflakeCheck(CHECK_NAME, {}, [instance])
+    assert check._config.metric_groups == [
+        'snowflake.organization.warehouse',
+        'snowflake.organization.currency',
+        'snowflake.organization.storage',
+        'snowflake.data_transfer',
+    ]
+
+    assert check.metric_queries == [
+        queries.DataTransferHistory,
+    ]
+
+
+def test_default_org_metric_groups(instance):
+    instance = copy.deepcopy(instance)
+    instance['schema'] = 'ORGANIZATION_USAGE'
+    check = SnowflakeCheck(CHECK_NAME, {}, [instance])
+    assert check._config.metric_groups == [
+        'snowflake.organization.warehouse',
+        'snowflake.organization.currency',
+        'snowflake.organization.storage',
+    ]
+
+    assert check.metric_queries == [
+        queries.OrgWarehouseCreditUsage,
+        queries.OrgCurrencyUsage,
+        queries.OrgStorageDaily,
+    ]
+
+
+def test_org_metric_groups(instance):
+    instance = copy.deepcopy(instance)
+    instance['schema'] = 'ORGANIZATION_USAGE'
+    instance['metric_groups'] = ['snowflake.organization.currency', 'snowflake.organization.contracts']
+    check = SnowflakeCheck(CHECK_NAME, {}, [instance])
+    assert check._config.metric_groups == ['snowflake.organization.currency', 'snowflake.organization.contracts']
+
+    assert check.metric_queries == [
+        queries.OrgCurrencyUsage,
+        queries.OrgContractItems,
+    ]
+
+
+def test_all_org_metric_groups(instance):
+    instance = copy.deepcopy(instance)
+    instance['schema'] = 'ORGANIZATION_USAGE'
+    instance['metric_groups'] = [
+        'snowflake.organization.contracts',
+        'snowflake.organization.credit',
+        'snowflake.organization.currency',
+        'snowflake.organization.warehouse',
+        'snowflake.organization.storage',
+        'snowflake.organization.balance',
+        'snowflake.organization.rate',
+        'snowflake.organization.data_transfer',
+    ]
+    check = SnowflakeCheck(CHECK_NAME, {}, [instance])
+    assert check._config.metric_groups == [
+        'snowflake.organization.contracts',
+        'snowflake.organization.credit',
+        'snowflake.organization.currency',
+        'snowflake.organization.warehouse',
+        'snowflake.organization.storage',
+        'snowflake.organization.balance',
+        'snowflake.organization.rate',
+        'snowflake.organization.data_transfer',
+    ]
+
+    assert check.metric_queries == [
+        queries.OrgContractItems,
+        queries.OrgCreditUsage,
+        queries.OrgCurrencyUsage,
+        queries.OrgWarehouseCreditUsage,
+        queries.OrgStorageDaily,
+        queries.OrgBalance,
+        queries.OrgRateSheet,
+        queries.OrgDataTransfer,
+    ]
+
+
+@pytest.mark.parametrize(
+    'schema',
+    [
+        pytest.param('ACCOUNT_USAGE'),
+        pytest.param('ORGANIZATION_USAGE'),
+    ],
+)
+def test_no_valid_metric_groups(instance, schema):
     instance = copy.deepcopy(instance)
     instance['metric_groups'] = ['fake.metric.group']
-    with pytest.raises(Exception, match='No valid metric_groups or custom query configured, please list at least one.'):
+    instance['schema'] = schema
+    with pytest.raises(
+        Exception,
+        match='No valid metric_groups for `{}` or custom query configured, please list at least one.'.format(schema),
+    ):
         check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check.log = mock.MagicMock()
-        check.log.warning.assert_called_once_with(
-            "Invalid metric_groups found in snowflake conf.yaml: fake.metric.group"
-        )
+
+
+@pytest.mark.parametrize(
+    'schema',
+    [
+        pytest.param('ACCOUNT_USAGE'),
+        pytest.param('ORGANIZATION_USAGE'),
+    ],
+)
+def test_metric_group_exceptions(instance, schema, caplog):
+    caplog.clear()
+    caplog.set_level(logging.WARNING)
+    instance = copy.deepcopy(instance)
+    instance['metric_groups'] = ['fake.metric.group', 'snowflake.organization.warehouse', 'snowflake.logins']
+    instance['schema'] = schema
+    SnowflakeCheck(CHECK_NAME, {}, [instance])
+    assert (
+        "Invalid metric_groups for `{}` found in snowflake conf.yaml: fake.metric.group".format(schema) in caplog.text
+    )
 
 
 def test_no_metric_group(instance):
     inst = copy.deepcopy(instance)
     inst['metric_groups'] = []
-    with pytest.raises(Exception, match='No valid metric_groups or custom query configured, please list at least one.'):
+    with pytest.raises(
+        Exception,
+        match='No valid metric_groups for `ACCOUNT_USAGE` or custom query configured, please list at least one.',
+    ):
         SnowflakeCheck(CHECK_NAME, {}, [inst])
 
     inst['custom_queries'] = [

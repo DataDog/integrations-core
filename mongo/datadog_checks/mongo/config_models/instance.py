@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence, Union
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -56,9 +56,10 @@ class InstanceConfig(BaseModel):
     collections_indexes_stats: Optional[bool]
     custom_queries: Optional[Sequence[CustomQuery]]
     database: Optional[str]
+    dbnames: Optional[Sequence[str]]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
-    hosts: Optional[Sequence[str]]
+    hosts: Optional[Union[str, Sequence[str]]]
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     options: Optional[Mapping[str, Any]]

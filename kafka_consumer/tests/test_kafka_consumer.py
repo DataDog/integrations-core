@@ -129,7 +129,10 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, kafka_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.read_persistent_cache', mocked_read_persistent_cache)
+@mock.patch(
+    'datadog_checks.kafka_consumer.new_kafka_consumer.NewKafkaConsumerCheck._read_persistent_cache',
+    mocked_read_persistent_cache,
+)
 @mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.time', mocked_time)
 def test_check_kafka(aggregator, kafka_instance, dd_run_check):
     """
@@ -178,13 +181,13 @@ def assert_check_kafka(aggregator, consumer_groups, e2e=False):
                     aggregator.assert_metric(mname, tags=tags, at_least=1)
                 for mname in CONSUMER_METRICS:
                     aggregator.assert_metric(mname, tags=tags + ["consumer_group:{}".format(name)], at_least=1)
-                if not is_legacy_check() and not e2e:
-                    # in the e2e test, Kafka is not actively receiving data. So we never populate the broker
-                    # timestamps with more than one timestamp. So we can't interpolate to get the consumer
-                    # timestamp.
-                    aggregator.assert_metric(
-                        "kafka.consumer_lag_seconds", tags=tags + ["consumer_group:{}".format(name)], at_least=1
-                    )
+    if not is_legacy_check() and not e2e:
+        # in the e2e test, Kafka is not actively receiving data. So we never populate the broker
+        # timestamps with more than one timestamp. So we can't interpolate to get the consumer
+        # timestamp.
+        aggregator.assert_metric(
+            "kafka.consumer_lag_seconds", tags=tags + ["consumer_group:{}".format(name)], at_least=1
+        )
 
     aggregator.assert_all_metrics_covered()
 
@@ -203,7 +206,10 @@ def test_consumer_config_error(caplog, dd_run_check):
 @pytest.mark.skipif(is_legacy_check(), reason="This test does not apply to the legacy check.")
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.read_persistent_cache', mocked_read_persistent_cache)
+@mock.patch(
+    'datadog_checks.kafka_consumer.new_kafka_consumer.NewKafkaConsumerCheck._read_persistent_cache',
+    mocked_read_persistent_cache,
+)
 @mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.time', mocked_time)
 def test_no_topics(aggregator, kafka_instance, dd_run_check):
     kafka_instance['consumer_groups'] = {'my_consumer': {}}
@@ -215,7 +221,10 @@ def test_no_topics(aggregator, kafka_instance, dd_run_check):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.read_persistent_cache', mocked_read_persistent_cache)
+@mock.patch(
+    'datadog_checks.kafka_consumer.new_kafka_consumer.NewKafkaConsumerCheck._read_persistent_cache',
+    mocked_read_persistent_cache,
+)
 @mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.time', mocked_time)
 def test_no_partitions(aggregator, kafka_instance, dd_run_check):
     kafka_instance['consumer_groups'] = {'my_consumer': {'marvel': []}}
