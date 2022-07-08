@@ -408,6 +408,14 @@
         ]
     },
     {
+        "name": "mongodb.metrics.queryexecutor.scannedobjectsps",
+        "type": 1,
+        "value": 97.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
         "name": "mongodb.metrics.record.movesps",
         "type": 1,
         "value": 0.0,

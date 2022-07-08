@@ -1,6 +1,6 @@
 # CHANGELOG - IBM MQ
 
-## 3.22.0 / 2022-05-15
+## 3.22.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Add `collect_reset_queue_metrics` option. See [#11818](https://github.com/DataDog/integrations-core/pull/11818).
 

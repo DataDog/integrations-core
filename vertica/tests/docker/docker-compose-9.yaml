@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+
+  vertica:
+    image: jbfavre/vertica:${VERTICA_VERSION}
+    container_name: vertica
+    ports:
+      - "5433:5433"
+    environment:
+      - DATABASE_NAME=datadog
+      - DATABASE_PASSWORD=monitor

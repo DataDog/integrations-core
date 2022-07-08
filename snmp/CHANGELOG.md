@@ -1,6 +1,6 @@
 # CHANGELOG - snmp
 
-## 5.8.0 / 2022-05-15
+## 5.8.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Add memory and cpu abstract metrics. See [#11781](https://github.com/DataDog/integrations-core/pull/11781).
 * [Fixed] Fix meraki profile mac address. See [#11871](https://github.com/DataDog/integrations-core/pull/11871).

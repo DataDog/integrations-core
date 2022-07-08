@@ -401,6 +401,7 @@ class MySql(AgentCheck):
 
         if is_affirmative(self._config.options.get('table_rows_stats_metrics', False)) and self.userstat_enabled:
             # report size of tables in MiB to Datadog
+            self.log.debug("Collecting Table Row Stats Metrics.")
             (rows_read_total, rows_changed_total) = self._query_rows_stats_per_table(db)
             results['information_table_rows_read_total'] = rows_read_total
             results['information_table_rows_changed_total'] = rows_changed_total
@@ -1085,7 +1086,6 @@ class MySql(AgentCheck):
                     # set the tag as the dictionary key
                     table_rows_read_total["schema:{},table:{}".format(table_schema, table_name)] = rows_read_total
                     table_rows_changed_total["schema:{},table:{}".format(table_schema, table_name)] = rows_changed_total
-
                 return table_rows_read_total, table_rows_changed_total
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             self.warning("Tables rows stats metrics unavailable at this time: %s", e)
