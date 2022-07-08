@@ -34,7 +34,7 @@
       },
       "metrics": {
         "prefix": "datadog.agent.",
-        "check": "",
+        "check": [],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
