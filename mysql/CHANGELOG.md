@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 8.4.1 / 2022-07-08
+
+* [Fixed] Fix bug where mysql table row stats were not being collected. See [#12472](https://github.com/DataDog/integrations-core/pull/12472).
+
 ## 8.4.0 / 2022-06-27
 
 * [Added] Add new metric for tables rows stats. See [#11043](https://github.com/DataDog/integrations-core/pull/11043). Thanks [aymeric-ledizes](https://github.com/aymeric-ledizes).
