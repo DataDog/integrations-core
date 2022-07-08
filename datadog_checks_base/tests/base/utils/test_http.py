@@ -314,12 +314,13 @@ class TestAuth:
 
         assert http.options['auth'] is None
 
-    def test_config_basic_allows_empty_string_as_password(self):
-        instance = {'username': 'user', 'password': ''}
+    @pytest.mark.parametrize('username,password', [('user', ''), ('', 'pass'), ('', '')])
+    def test_config_basic_allows_empty_strings(self, username, password):
+        instance = {'username': username, 'password': password}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['auth'] == ('user', '')
+        assert http.options['auth'] == (username, password)
 
     def test_config_kerberos_legacy(self):
         instance = {'kerberos_auth': 'required'}
