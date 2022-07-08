@@ -67,7 +67,7 @@ if datadog_agent.get_config('disable_unsafe_yaml'):
     monkey_patch_pyyaml()
 
 if not PY2:
-    from pydantic import ValidationError, BaseModel
+    from pydantic import ValidationError
 
 if TYPE_CHECKING:
     import ssl
@@ -438,6 +438,7 @@ class AgentCheck(object):
     def log_typos_in_options(self, user_config, models_config, level):
         # only import it when running in python 3
         from jellyfish import jaro_winkler_similarity
+        from pydantic import BaseModel
 
         user_configs = user_config or {}  # type: Dict[str, Any]
         models_config = models_config or {}

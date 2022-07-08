@@ -1051,6 +1051,7 @@ if PY3:
     class BaseModelTest(BaseModel):
         field = ""
         schema_ = Field("", alias='schema')
+
 else:
 
     class BaseModelTest:
