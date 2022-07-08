@@ -29,7 +29,7 @@
               "x": 0,
               "y": 0,
               "width": 3,
-              "height": 2
+              "height": 4
             }
           },
           {
@@ -50,7 +50,7 @@
               "x": 3,
               "y": 0,
               "width": 3,
-              "height": 2
+              "height": 4
             }
           }
         ]
@@ -59,7 +59,7 @@
         "x": 0,
         "y": 0,
         "width": 6,
-        "height": 5
+        "height": 7
       }
     },
     {
@@ -539,7 +539,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 5,
+        "y": 7,
         "width": 6,
         "height": 7
       }
@@ -1845,7 +1845,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
