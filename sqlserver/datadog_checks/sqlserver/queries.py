@@ -102,27 +102,17 @@ def get_query_ao_availability_groups(sqlserver_major_version):
     :params sqlserver_major_version: SQL Server major version (i.e. 2012, 2019, ...)
     :return: a QueryExecutor query config object
     """
-
-    # AG - sys.availability_groups
-    ag_column_definitions = {
+    column_definitions = {
+        # AG - sys.availability_groups
         'AG.group_id AS availability_group': {'name': 'availability_group', 'type': 'tag'},
         'AG.name AS availability_group_name': {'name': 'availability_group_name', 'type': 'tag'},
-    }
-
-    # AR - sys.availability_replicas
-    ar_column_definitions = {
+        # AR - sys.availability_replicas
         'AR.replica_server_name': {'name': 'replica_server_name', 'type': 'tag'},
         'LOWER(AR.failover_mode_desc) AS failover_mode_desc': {'name': 'failover_mode', 'type': 'tag'},
         'LOWER(AR.availability_mode_desc) AS availability_mode_desc': {'name': 'availability_mode', 'type': 'tag'},
-    }
-
-    # ADC - sys.availability_databases_cluster
-    adc_column_definitions = {
+        # ADC - sys.availability_databases_cluster
         'ADC.database_name': {'name': 'database_name', 'type': 'tag'},
-    }
-
-    # DRS - sys.dm_hadr_database_replica_states
-    drs_column_definitions = {
+        # DRS - sys.dm_hadr_database_replica_states
         'DRS.replica_id': {'name': 'replica_id', 'type': 'tag'},
         'DRS.database_id': {'name': 'database_id', 'type': 'tag'},
         'DRS.database_state': {'name': 'database_state', 'type': 'tag'},
@@ -139,10 +129,7 @@ def get_query_ao_availability_groups(sqlserver_major_version):
             'name': 'ao.filestream_send_rate',
             'type': 'gauge',
         },
-    }
-
-    # FC - sys.dm_hadr_cluster
-    fc_column_definitions = {
+        # FC - sys.dm_hadr_cluster
         'FC.cluster_name': {
             'name': 'failover_cluster',
             'type': 'tag',
@@ -151,34 +138,22 @@ def get_query_ao_availability_groups(sqlserver_major_version):
 
     # Include metrics based on version
     if sqlserver_major_version >= 2016:
-        drs_column_definitions['DRS.secondary_lag_seconds'] = {'name': 'ao.secondary_lag_seconds', 'type': 'gauge'}
+        column_definitions['DRS.secondary_lag_seconds'] = {'name': 'ao.secondary_lag_seconds', 'type': 'gauge'}
     if sqlserver_major_version >= 2014:
-        drs_column_definitions['DRS.is_primary_replica'] = {'name': 'ao.is_primary_replica', 'type': 'gauge'}
-
-    def _sort_column_definitions(column_definitions):
-        sql_columns = []
-        metric_columns = []
-        for column in sorted(column_definitions.keys()):
-            sql_columns.append(column)
-            metric_columns.append(column_definitions[column])
-        return sql_columns, metric_columns
+        column_definitions['DRS.is_primary_replica'] = {'name': 'ao.is_primary_replica', 'type': 'gauge'}
 
     # Sort columns to ensure a static column order
-    ag_sql_columns, ag_metric_columns = _sort_column_definitions(ag_column_definitions)
-    ar_sql_columns, ar_metric_columns = _sort_column_definitions(ar_column_definitions)
-    adc_sql_columns, adc_metric_columns = _sort_column_definitions(adc_column_definitions)
-    drs_sql_columns, drs_metric_columns = _sort_column_definitions(drs_column_definitions)
-    fc_sql_columns, fc_metric_columns = _sort_column_definitions(fc_column_definitions)
+    sql_columns = []
+    metric_columns = []
+    for column in sorted(column_definitions.keys()):
+        sql_columns.append(column)
+        metric_columns.append(column_definitions[column])
 
     return {
         'name': 'sys.availability_groups',
         'query': """
         SELECT
-            {ag_sql_columns},
-            {ar_sql_columns},
-            {adc_sql_columns},
-            {drs_sql_columns},
-            {fc_sql_columns}
+            {sql_columns}
         FROM
             sys.availability_groups AS AG
             INNER JOIN sys.availability_replicas AS AR ON AG.group_id = AR.group_id
@@ -191,13 +166,9 @@ def get_query_ao_availability_groups(sqlserver_major_version):
             -- all the rows in the right table. Note, there will only be one row from `sys.dm_hadr_cluster`.
             CROSS JOIN (SELECT TOP 1 cluster_name FROM sys.dm_hadr_cluster) AS FC
     """.strip().format(
-            ag_sql_columns=", ".join(ag_sql_columns),
-            ar_sql_columns=", ".join(ar_sql_columns),
-            adc_sql_columns=", ".join(adc_sql_columns),
-            drs_sql_columns=", ".join(drs_sql_columns),
-            fc_sql_columns=", ".join(fc_sql_columns),
+            sql_columns=", ".join(sql_columns),
         ),
-        'columns': ag_metric_columns + ar_metric_columns + adc_metric_columns + drs_metric_columns + fc_metric_columns,
+        'columns': metric_columns,
     }
 
 
