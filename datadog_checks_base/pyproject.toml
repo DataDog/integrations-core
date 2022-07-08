@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-checks-base"
 description = "The Datadog Check Toolkit"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "agent",
@@ -30,6 +29,9 @@ classifiers = [
 dynamic = [
     "version",
 ]
+
+[project.license]
+text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 db = [
@@ -73,7 +75,7 @@ http = [
     "botocore==1.20.112; python_version < '3.0'",
     "botocore==1.25.8; python_version > '3.0'",
     "pyjwt==1.7.1; python_version < '3.0'",
-    "pyjwt==2.3.0; python_version > '3.0'",
+    "pyjwt==2.4.0; python_version > '3.0'",
     "pysocks==1.7.1",
     "requests-kerberos==0.12.0; python_version < '3.0'",
     "requests-kerberos==0.14.0; python_version > '3.0'",
