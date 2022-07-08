@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 16.5.2 / 2022-07-08
+
+* [Fixed] Do not include Datadog licenses to community files. See [#12445](https://github.com/DataDog/integrations-core/pull/12445).
+
 ## 16.5.1 / 2022-07-06
 
 * [Fixed] Fix validation error message and wrong parameters. See [#12428](https://github.com/DataDog/integrations-core/pull/12428).
