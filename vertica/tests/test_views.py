@@ -5,7 +5,7 @@
 from datadog_checks.vertica import views
 
 
-def test_make_projection_storage_queries():
+def test_make_projection_storage_queries_old_versions():
     queries = views.make_projection_storage_queries(9)
 
     assert 'per_projection' in queries
@@ -29,7 +29,27 @@ def test_make_projection_storage_queries():
     )
 
 
-def test_make_storage_containers_queries():
+def test_make_projection_storage_queries():
+    queries = views.make_projection_storage_queries(11)
+
+    assert 'per_projection' in queries
+    assert 'per_table' in queries
+    assert 'per_node' in queries
+    assert 'total' in queries
+
+    assert queries['per_projection'] == (
+        'SELECT '
+        'anchor_table_name, '
+        'node_name, '
+        'projection_name, '
+        'sum(ros_count) as ros_count, '
+        'sum(row_count) as row_count, '
+        'sum(used_bytes) as used_bytes '
+        'FROM v_monitor.projection_storage GROUP BY anchor_table_name, node_name, projection_name'
+    )
+
+
+def test_make_storage_containers_queries_old():
     queries = views.make_storage_containers_queries(9)
 
     assert 'per_projection' in queries
@@ -44,4 +64,21 @@ def test_make_storage_containers_queries():
         'sum(delete_vector_count) as delete_vector_count '
         'FROM v_monitor.storage_containers '
         'GROUP BY node_name, projection_name, storage_type'
+    )
+
+
+def test_make_storage_containers_queries():
+    queries = views.make_storage_containers_queries(11)
+
+    assert 'per_projection' in queries
+    assert 'per_node' in queries
+    assert 'total' in queries
+
+    assert queries['per_projection'] == (
+        'SELECT '
+        'node_name, '
+        'projection_name, '
+        'sum(delete_vector_count) as delete_vector_count '
+        'FROM v_monitor.storage_containers '
+        'GROUP BY node_name, projection_name'
     )
