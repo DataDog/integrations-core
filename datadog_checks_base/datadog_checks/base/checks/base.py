@@ -67,7 +67,7 @@ if datadog_agent.get_config('disable_unsafe_yaml'):
     monkey_patch_pyyaml()
 
 if not PY2:
-    from pydantic import ValidationError
+    from pydantic import BaseModel, ValidationError
 
 if TYPE_CHECKING:
     import ssl
@@ -443,7 +443,14 @@ class AgentCheck(object):
         models_config = models_config or {}
         typos = set()  # type: Set[str]
 
-        known_options = [k for k, _ in models_config]  # type: List[str]
+        known_options = set([k for k, _ in models_config])  # type: Set[str]
+
+        if not PY2:
+
+            if isinstance(models_config, BaseModel):
+                # Also add aliases, if any
+                known_options.update(set(models_config.dict(by_alias=True)))
+
         unknown_options = [option for option in user_configs.keys() if option not in known_options]  # type: List[str]
 
         for unknown_option in unknown_options:
