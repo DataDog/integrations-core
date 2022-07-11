@@ -2,7 +2,7 @@
 
 ## 25.6.0 / 2022-07-09
 
-* [Added] [Mongo] Reintroduce connection_schema in mongo. See [#12442](https://github.com/DataDog/integrations-core/pull/12442).
+* [Added] Ship `pymongo-srv` to support DNS seed connection schemas. See [#12442](https://github.com/DataDog/integrations-core/pull/12442).
 * [Fixed] [PerfCountersBaseCheck] Refresh performance objects in a separate thread. See [#12372](https://github.com/DataDog/integrations-core/pull/12372).
 * [Fixed] Allow empty username and password for basic auth. See [#12437](https://github.com/DataDog/integrations-core/pull/12437).
 
