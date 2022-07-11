@@ -88,7 +88,7 @@ class Varnish(AgentCheck):
     # XML parsing bits, a.k.a. Kafka in Code
     def _reset(self):
         self._current_element = ""
-        self._current_metric = "varnish"
+        self._current_metric = ""
         self._current_value = 0
         self._current_str = ""
         self._current_type = ""
@@ -98,7 +98,8 @@ class Varnish(AgentCheck):
 
     def _end_element(self, name):
         if name == "stat":
-            m_name = self.normalize(self._current_metric)
+            m_name = parse_metric_name(self._current_metric)
+            m_name = self.normalize(m_name, prefix='varnish')
             if self._current_type in ("a", "c"):
                 self.rate(m_name, long(self._current_value), tags=self.tags)
             elif self._current_type in ("i", "g"):
@@ -113,7 +114,7 @@ class Varnish(AgentCheck):
             # reset for next stat element
             self._reset()
         elif name in ("ident", "name") or (name == "type" and self._current_str != "MAIN"):
-            self._current_metric += "." + self._current_str
+            self._current_metric = '{}.{}'.format(self._current_metric, self._current_str).strip('.')
 
     def _char_data(self, data):
         self.log.debug("Data %s [%s]", data, self._current_element)
@@ -250,14 +251,15 @@ class Varnish(AgentCheck):
                 if name.startswith("MAIN."):
                     name = name.split('.', 1)[1]
 
-                metric_name = self.normalize(name, prefix="varnish")
+                metric_name = parse_metric_name(name)
+                metric_name = self.normalize(metric_name, prefix="varnish")
                 value = metric.get("value", 0)
 
                 if metric.get("flag") in ("a", "c"):
                     self.rate(metric_name, long(value), tags=self.tags)
                 elif metric.get("flag") in ("g", "i"):
                     self.gauge(metric_name, long(value), tags=self.tags)
-                    if 'n_purges' in self.normalize(name, prefix="varnish"):
+                    if 'n_purges' in metric_name:
                         self.rate('varnish.n_purgesps', long(value), tags=self.tags)
                 elif 'flag' not in metric:
                     self.log.warning("Could not determine the type of metric %s, skipping submission", metric_name)
@@ -269,7 +271,8 @@ class Varnish(AgentCheck):
                 if len(fields) < 3:
                     break
                 name, gauge_val, rate_val = fields[0], fields[1], fields[2]
-                metric_name = self.normalize(name, prefix="varnish")
+                metric_name = parse_metric_name(name)
+                metric_name = self.normalize(metric_name, prefix="varnish")
 
                 # Now figure out which value to pick
                 if rate_val.lower() in ("nan", "."):
@@ -366,3 +369,11 @@ class Varnish(AgentCheck):
             for backend, message in backends:
                 service_checks_tags = ['backend:%s' % backend] + self.custom_tags
                 self.service_check(self.SERVICE_CHECK_NAME, check_status, tags=service_checks_tags, message=message)
+
+
+def parse_metric_name(varnish_name):
+    # For VBE metrics, drop the backend name
+    parts = varnish_name.split('.')
+    if parts[0] == 'VBE':
+        return '{}.{}'.format(parts[0], parts[-1])
+    return varnish_name

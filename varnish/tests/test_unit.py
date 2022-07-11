@@ -8,6 +8,7 @@ import mock
 import pytest
 
 from datadog_checks.varnish import Varnish
+from datadog_checks.varnish.varnish import parse_metric_name
 
 from . import common, mocks
 
@@ -170,3 +171,11 @@ def test_command_line_healthy(
     aggregator.assert_service_check(
         "varnish.backend_healthy", status=check.OK, tags=['backend:backend2', 'varnish_cluster:webs'], count=1
     )
+
+
+@pytest.mark.parametrize(
+    'original,expected', [('VBE.boot.default.conn', 'VBE.conn'), ('MEMPOOL.busyobj.live', 'MEMPOOL.busyobj.live')]
+)
+def test_parse_metric_name(original, expected):
+    transformed_name = parse_metric_name(original)
+    assert expected == transformed_name
