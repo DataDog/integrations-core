@@ -289,7 +289,7 @@
         "title_align": "center",
         "check": "vsphere.can_connect",
         "grouping": "cluster",
-        "group_by": ["$vcenter_server"],
+        "group_by": ["vcenter_server"],
         "tags": ["*"]
       },
       "layout": { "x": 0, "y": 12, "width": 15, "height": 9 }

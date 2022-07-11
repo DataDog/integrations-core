@@ -233,7 +233,7 @@ def test_org_usage_mock_data(dd_agent_check, datadog_agent, instance):
     )
     aggregator.assert_metric('snowflake.organization.balance.rollover', value=455435, tags=EXPECTED_TAGS + balance_tags)
 
-    data_transfer_tags = ['billing_account:test_account']
+    data_transfer_tags = ['billing_account:test_account', 'source_cloud:AWS', 'target_cloud:GCP', 'transfer_type:COPY']
     aggregator.assert_metric(
         'snowflake.organization.data_transfer.bytes_transferred', value=13.56, tags=EXPECTED_TAGS + data_transfer_tags
     )

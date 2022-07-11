@@ -34,6 +34,10 @@ def instance_database(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_dbnames(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_disable_generic_tags(field, value):
     return False
 

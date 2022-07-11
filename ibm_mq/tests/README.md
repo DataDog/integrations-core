@@ -3,7 +3,7 @@
 ## Download the IBM MQ Client
 
 You can find it here: 
-https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/mqdev/mactoolkit/9.2.2.0-IBM-MQ-Toolkit-MacX64.pkg
+https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/mqdev/mactoolkit/9.2.5.0-IBM-MQ-DevToolkit-MacX64.pkg
 
 Follow the instructions in the installation guide to update your PATH.
 

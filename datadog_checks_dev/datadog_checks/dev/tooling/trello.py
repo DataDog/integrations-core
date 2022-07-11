@@ -66,7 +66,6 @@ class TrelloClient:
         # Maps the team to the github team
         self.label_github_team_map = {
             'team/agent-apm': 'agent-apm',
-            'team/agent-core': 'agent-core',
             'team/agent-platform': 'agent-platform',
             'team/triage': 'agent-platform',
             'team/networks': 'agent-network',
@@ -74,6 +73,7 @@ class TrelloClient:
             'team/containers': 'container-integrations',
             'team/container-app': 'container-app',
             'team/integrations': 'agent-integrations',
+            'team/database-monitoring': 'database-monitoring',
             'team/intg-tools-libs': 'integrations-tools-and-libraries',
             'team/agent-security': 'agent-security',
             'team/infra-integrations': 'infrastructure-integrations',
@@ -81,6 +81,9 @@ class TrelloClient:
             'team/container-ecosystems': 'container-ecosystems',
             'team/agent-metrics-logs': 'agent-metrics-logs',
             'team/agent-shared-components': 'agent-shared-components',
+            # 'agent-core' must be after 'agent-metrics-logs' and 'agent-shared-components'
+            # as the team of a user is the first team available.
+            'team/agent-core': 'agent-core',
         }
 
         # Maps the trello label name to trello label ID

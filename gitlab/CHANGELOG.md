@@ -1,5 +1,9 @@
 # CHANGELOG - gitlab
 
+## 5.2.2 / 2022-06-30
+
+* [Fixed] Fix default config value. See [#12429](https://github.com/DataDog/integrations-core/pull/12429).
+
 ## 5.2.1 / 2022-06-27
 
 * [Fixed] Change default value for the send_monotonic_counter to false. See [#12022](https://github.com/DataDog/integrations-core/pull/12022).

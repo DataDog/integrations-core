@@ -12,17 +12,17 @@ redis.aof.loading_total_bytes,gauge,,byte,,The total amount of bytes already loa
 redis.aof.loading_loaded_bytes,gauge,,byte,,The amount of bytes to load.,0,redis,aof total bytes loaded,
 redis.aof.loading_loaded_perc,gauge,,percent,,The percent loaded.,0,redis,aof loaded percent,
 redis.aof.loading_eta_seconds,gauge,,second,,The estimated amount of time left to load.,0,redis,aof loading time left,
-redis.clients.biggest_input_buf,gauge,,,,The biggest input buffer among current client connections.,0,redis,biggest input buf,
-redis.clients.recent_max_input_buffer,gauge,,,,The biggest input buffer among recent client connections.,0,redis,biggest input buf,
+redis.clients.biggest_input_buf,gauge,,,,The biggest input buffer among current client connections [v3 & v4].,0,redis,biggest input buf,
+redis.clients.recent_max_input_buffer,gauge,,,,The biggest input buffer among recent client connections [v5+].,0,redis,biggest input buf,
 redis.clients.blocked,gauge,,connection,,The number of connections waiting on a blocking call.,0,redis,clients blocked,memory
-redis.clients.longest_output_list,gauge,,,,The longest output list among current client connections.,0,redis,long output list,
-redis.clients.recent_max_output_buffer,gauge,,,,The longest output buffer among recent client connections.,0,redis,long output list,
+redis.clients.longest_output_list,gauge,,,,The longest output list among current client connections [v3 & v4].,0,redis,long output list,
+redis.clients.recent_max_output_buffer,gauge,,,,The longest output buffer among recent client connections [v5+].,0,redis,long output list,
 redis.cpu.sys,gauge,,,,System CPU consumed by the Redis server.,-1,redis,cpu sys,cpu
 redis.cpu.sys_children,gauge,,,,System CPU consumed by the background processes.,-1,redis,cpu sys children,
 redis.cpu.user,gauge,,,,User CPU consumed by the Redis server.,-1,redis,cpu user,
 redis.cpu.user_children,gauge,,,,User CPU consumed by the background processes.,-1,redis,cpu user children,
-redis.cpu.sys_main_thread,gauge,,,,System CPU consumed by the Redis server main thread. This metric is only provided by redis >=6.x.,-1,redis,cpu sys main thread,
-redis.cpu.user_main_thread,gauge,,,,User CPU consumed by the Redis server main thread. This metric is only provided by redis >=6.x.,-1,redis,cpu sys main thread,
+redis.cpu.sys_main_thread,gauge,,,,System CPU consumed by the Redis server main thread. [v7+].,-1,redis,cpu sys main thread,
+redis.cpu.user_main_thread,gauge,,,,User CPU consumed by the Redis server main thread. [v7+].,-1,redis,cpu sys main thread,
 redis.expires,gauge,,key,,The number of keys with an expiration.,0,redis,expires,
 redis.expires.percent,gauge,,percent,,Percentage of total keys with an expiration.,0,redis,expires pct,
 redis.info.latency_ms,gauge,,millisecond,,The latency of the redis INFO command.,0,redis,info latency,cpu
@@ -37,7 +37,7 @@ redis.mem.peak,gauge,,byte,,The peak amount of memory used by Redis.,-1,redis,me
 redis.mem.rss,gauge,,byte,,Amount of memory that Redis allocated as seen by the os.,-1,redis,mem rss,
 redis.mem.used,gauge,,byte,,Amount of memory allocated by Redis.,-1,redis,mem used,memory
 redis.mem.startup,gauge,,byte,,Amount of memory consumed by Redis at startup.,-1,redis,mem startup,
-redis.mem.overhead,gauge,,byte,,Sum of all overheads allocated by Redis for managing its internal datastructures.,-1,redis,mem overhead,
+redis.mem.overhead,gauge,,byte,,Sum of all overheads allocated by Redis for managing its internal datastructures [v4+].,-1,redis,mem overhead,
 redis.net.clients,gauge,,connection,,The number of connected clients (excluding slaves).,0,redis,clients,cpu
 redis.net.commands,gauge,,command,,The number of commands processed by the server.,0,redis,net commands,
 redis.net.commands.instantaneous_ops_per_sec,gauge,,command,second,The number of commands processed by the server per second.,0,redis,net commands,cpu
