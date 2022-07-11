@@ -8,7 +8,7 @@ import mock
 import pytest
 
 from datadog_checks.varnish import Varnish
-from datadog_checks.varnish.varnish import parse_metric_name
+from datadog_checks.varnish.varnish import sanitize_metric_name
 
 from . import common, mocks
 
@@ -174,8 +174,8 @@ def test_command_line_healthy(
 
 
 @pytest.mark.parametrize(
-    'original,expected', [('VBE.boot.default.conn', 'VBE.conn'), ('MEMPOOL.busyobj.live', 'MEMPOOL.busyobj.live')]
+    'original,expected', [('VBE.reload_20220530_163054_49600.default.conn', 'VBE.boot.default.conn'), ('MEMPOOL.busyobj.live', 'MEMPOOL.busyobj.live')]
 )
-def test_parse_metric_name(original, expected):
-    transformed_name = parse_metric_name(original)
+def test_sanitize_metric_name(original, expected):
+    transformed_name = sanitize_metric_name(original)
     assert expected == transformed_name

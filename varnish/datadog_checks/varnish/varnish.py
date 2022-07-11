@@ -98,7 +98,7 @@ class Varnish(AgentCheck):
 
     def _end_element(self, name):
         if name == "stat":
-            m_name = parse_metric_name(self._current_metric)
+            m_name = sanitize_metric_name(self._current_metric)
             m_name = self.normalize(m_name, prefix='varnish')
             if self._current_type in ("a", "c"):
                 self.rate(m_name, long(self._current_value), tags=self.tags)
@@ -251,7 +251,7 @@ class Varnish(AgentCheck):
                 if name.startswith("MAIN."):
                     name = name.split('.', 1)[1]
 
-                metric_name = parse_metric_name(name)
+                metric_name = sanitize_metric_name(name)
                 metric_name = self.normalize(metric_name, prefix="varnish")
                 value = metric.get("value", 0)
 
@@ -271,7 +271,7 @@ class Varnish(AgentCheck):
                 if len(fields) < 3:
                     break
                 name, gauge_val, rate_val = fields[0], fields[1], fields[2]
-                metric_name = parse_metric_name(name)
+                metric_name = sanitize_metric_name(name)
                 metric_name = self.normalize(metric_name, prefix="varnish")
 
                 # Now figure out which value to pick
@@ -371,9 +371,8 @@ class Varnish(AgentCheck):
                 self.service_check(self.SERVICE_CHECK_NAME, check_status, tags=service_checks_tags, message=message)
 
 
-def parse_metric_name(varnish_name):
-    # For VBE metrics, drop the backend name
-    parts = varnish_name.split('.')
-    if parts[0] == 'VBE':
-        return '{}.{}'.format(parts[0], parts[-1])
-    return varnish_name
+_RELOAD_PATTERN = re.compile(r'\.reload_.*?\.')
+
+
+def sanitize_metric_name(varnish_name):
+    return _RELOAD_PATTERN.sub('.boot.', varnish_name)
