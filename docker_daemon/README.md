@@ -188,7 +188,7 @@ Need help? Contact [Datadog support][22].
 [20]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/assets/service_checks.json
 [21]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/datadog_checks/docker_daemon/data/conf.yaml.example#L124
 [22]: https://docs.datadoghq.com/help
-[23]: https://docs.datadoghq.com/integrations/guide/compose-and-the-datadog-agent
+[23]: https://docs.datadoghq.com/agent/guide/compose-and-the-datadog-agent
 [24]: https://docs.datadoghq.com/integrations/faq/dogstatsd-and-docker
 [25]: https://www.datadoghq.com/blog/the-docker-monitoring-problem
 [26]: https://www.datadoghq.com/blog/how-to-monitor-docker-resource-metrics

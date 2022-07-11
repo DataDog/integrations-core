@@ -20,7 +20,7 @@ If you are only collecting standard metrics from Microsoft Windows and other pac
 1. Submit performance counters using System.Diagnostics in .NET, then access them with WMI.
 2. Implement a COM-based WMI provider for your application. You would typically only do this if you are using a non-.NET language.
 
-To learn more about using System.Diagnostics, see the [PerformanceCounter Class][3]). After adding your metric you should be able to find it in WMI. To browse the WMI namespaces, you may find [WMI Explorer][4] useful. You can find the same information with Powershell using [Get-WmiObject][5]. Also, review the information in [How to retrieve WMI metrics][6].
+To learn more about using System.Diagnostics, see the [PerformanceCounter Class][3]). After adding your metric you should be able to find it in WMI. To browse the WMI namespaces, you may find [WMI Explorer][4] useful. You can find the same information with Powershell using [Get-WmiObject][5]. Also, review the information in [Retrieving WMI metrics][6].
 
 If you assign the new metric a category of My_New_Metric, the WMI path is
 `\\<ComputerName>\ROOT\CIMV2:Win32_PerfFormattedData_My_New_Metric`
