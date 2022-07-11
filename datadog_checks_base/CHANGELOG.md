@@ -1,5 +1,12 @@
 # CHANGELOG - datadog_checks_base
 
+## 25.6.0 / 2022-07-11
+
+* [Added] Ship `pymongo-srv` to support DNS seed connection schemas. See [#12442](https://github.com/DataDog/integrations-core/pull/12442).
+* [Fixed] Fix typo detection for config field aliases. See [#12468](https://github.com/DataDog/integrations-core/pull/12468).
+* [Fixed] [PerfCountersBaseCheck] Refresh performance objects in a separate thread. See [#12372](https://github.com/DataDog/integrations-core/pull/12372).
+* [Fixed] Allow empty username and password for basic auth. See [#12437](https://github.com/DataDog/integrations-core/pull/12437).
+
 ## 25.5.0 / 2022-07-08
 
 * [Security] Upgrade pyjwt to 2.4.0. See [#12481](https://github.com/DataDog/integrations-core/pull/12481).
