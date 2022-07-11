@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 25.5.0 / 2022-07-08
+
+* [Security] Upgrade pyjwt to 2.4.0. See [#12481](https://github.com/DataDog/integrations-core/pull/12481).
+
 ## 25.4.2 / 2022-06-27
 
 * [Fixed] Change refreshing counters log level to debug. See [#12069](https://github.com/DataDog/integrations-core/pull/12069).

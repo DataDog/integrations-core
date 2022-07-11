@@ -244,8 +244,8 @@ def get_v2_validators(ctx, is_extras, is_marketplace):
         common.ImmutableAttributesValidator(version=V2),
         common.LogsCategoryValidator(version=V2),
         DisplayOnPublicValidator(version=V2),
-        TileDescriptionValidator(is_marketplace, is_extras, version=V2),
-        MediaGalleryValidator(is_marketplace, is_extras, version=V2),
+        TileDescriptionValidator(is_marketplace=is_marketplace, is_extras=is_extras, version=V2),
+        MediaGalleryValidator(is_marketplace=is_marketplace, is_extras=is_extras, version=V2),
         # keep SchemaValidator last, and avoid running this validation if errors already found
         SchemaValidator(ctx=ctx, version=V2, skip_if_errors=True),
     ]

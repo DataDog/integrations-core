@@ -1,5 +1,15 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 16.5.2 / 2022-07-08
+
+* [Fixed] Update trello.py. See [#12475](https://github.com/DataDog/integrations-core/pull/12475).
+* [Fixed] Do not include Datadog licenses to community files. See [#12445](https://github.com/DataDog/integrations-core/pull/12445).
+
+## 16.5.1 / 2022-07-06
+
+* [Fixed] Fix validation error message and wrong parameters. See [#12428](https://github.com/DataDog/integrations-core/pull/12428).
+* [Fixed] Use the correct team when using `ddev -a release trello testable`. See [#12418](https://github.com/DataDog/integrations-core/pull/12418).
+
 ## 16.5.0 / 2022-06-27
 
 * [Added] Add a `--debug` (`-d`) flag to `ddev env test`. See [#12379](https://github.com/DataDog/integrations-core/pull/12379).

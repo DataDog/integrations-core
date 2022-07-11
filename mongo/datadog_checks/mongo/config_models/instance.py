@@ -56,6 +56,7 @@ class InstanceConfig(BaseModel):
     collections_indexes_stats: Optional[bool]
     custom_queries: Optional[Sequence[CustomQuery]]
     database: Optional[str]
+    dbnames: Optional[Sequence[str]]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     hosts: Optional[Union[str, Sequence[str]]]

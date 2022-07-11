@@ -125,6 +125,7 @@ mongodb.metrics.operation.idhackps,gauge,,query,second,Number of queries per sec
 mongodb.metrics.operation.writeconflictsps,gauge,,event,second,Number of times per second that write concern operations has encounter a conflict.,0,mongodb,write conflict,
 mongodb.metrics.operation.scanandorderps,gauge,,query,second,Number of queries per second that return sorted numbers that cannot perform the sort operation using an index.,0,mongodb,operation scanandorder ps,
 mongodb.metrics.queryexecutor.scannedps,gauge,,operation,second,Number of index items scanned per second during queries and query-plan evaluation.,0,mongodb,queryexecutor scanned ps,
+mongodb.metrics.queryexecutor.scannedobjectsps,gauge,,operation,second,Number of documents scanned per second during queries and query-plan evaluation.,0,mongodb,queryexecutor scanned object ps,
 mongodb.metrics.record.movesps,gauge,,operation,second,Number of times per second documents move within the on-disk representation of the MongoDB data set.,0,mongodb,record moves ps,
 mongodb.metrics.repl.apply.batches.numps,gauge,,operation,second,Number of batches applied across all databases per second.,0,mongodb,repl apply batches num ps,
 mongodb.metrics.repl.apply.batches.totalmillisps,gauge,,fraction,,Fraction of time (ms/s) the mongod has spent applying operations from the oplog.,0,mongodb,repl apply batches totalmillis ps,

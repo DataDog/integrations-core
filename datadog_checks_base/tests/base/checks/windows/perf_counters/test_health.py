@@ -39,28 +39,6 @@ def test_ok(aggregator, dd_run_check, mock_performance_objects):
     aggregator.assert_service_check('test.windows.perf.health', ServiceCheck.OK, tags=GLOBAL_TAGS)
 
 
-def test_critical_objects_refresh(aggregator, dd_run_check, mock_performance_objects, mocker, caplog):
-    import pywintypes
-
-    mock_performance_objects({'Foo': (['baz'], {'Bar': [9000]})})
-    mocker.patch('win32pdh.EnumObjects', side_effect=pywintypes.error(None, None, 'foo failed'))
-    check = get_check({'metrics': {'Foo': {'name': 'foo', 'counters': [{'Bar': 'bar'}]}}})
-    dd_run_check(check)
-
-    aggregator.assert_all_metrics_covered()
-
-    expected_message = 'Error refreshing performance objects: foo failed'
-    aggregator.assert_service_check(
-        'test.windows.perf.health', ServiceCheck.CRITICAL, message=expected_message, tags=GLOBAL_TAGS
-    )
-
-    for _, level, message in caplog.record_tuples:
-        if level == logging.ERROR and message == expected_message:
-            break
-    else:
-        raise AssertionError('Expected ERROR log with message `{}`'.format(expected_message))
-
-
 def test_critical_query(aggregator, dd_run_check, mock_performance_objects, mocker, caplog):
     import pywintypes
 
