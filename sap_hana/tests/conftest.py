@@ -9,19 +9,32 @@ from hdbcli.dbapi import Connection as HanaConnection
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
-from datadog_checks.sap_hana.queries import Query
+from datadog_checks.sap_hana.queries import (
+    GlobalSystemBackupProgress,
+    GlobalSystemConnectionsStatus,
+    GlobalSystemDiskUsage,
+    GlobalSystemLicenses,
+    GlobalSystemRowStoreMemory,
+    GlobalSystemServiceComponentMemory,
+    GlobalSystemServiceMemory,
+    GlobalSystemServiceStatistics,
+    GlobalSystemVolumeIO,
+    MasterDatabase,
+    SystemDatabases,
+)
 
 from .common import ADMIN_CONFIG, COMPOSE_FILE, CONFIG, E2E_METADATA
 
 
 class DbManager(object):
-    def __init__(self, config):
+    def __init__(self, connection_config, tenant_databases_schema):
         self.connection_args = {
-            'address': config['server'],
-            'port': config['port'],
-            'user': config['username'],
-            'password': config['password'],
+            'address': connection_config['server'],
+            'port': connection_config['port'],
+            'user': connection_config['username'],
+            'password': connection_config['password'],
         }
+        self.tenant_databases_schema = tenant_databases_schema
         self.conn = None
 
     def initialize(self):
@@ -34,12 +47,27 @@ class DbManager(object):
                 # Create a role with the necessary monitoring privileges
                 cursor.execute('CREATE ROLE DD_MONITOR')
                 cursor.execute('GRANT CATALOG READ TO DD_MONITOR')
-                for cls in Query.__subclasses__():
-                    for view in cls.views:
-                        cursor.execute('GRANT SELECT ON {} TO DD_MONITOR'.format(view))
+
+                for cls in (MasterDatabase, SystemDatabases):
+                    instance = cls()
+                    cursor.execute('GRANT SELECT ON {}.{} TO DD_MONITOR'.format(instance.schema, instance.view))
+
+                for cls in (
+                    GlobalSystemBackupProgress,
+                    GlobalSystemLicenses,
+                    GlobalSystemConnectionsStatus,
+                    GlobalSystemDiskUsage,
+                    GlobalSystemServiceMemory,
+                    GlobalSystemServiceComponentMemory,
+                    GlobalSystemRowStoreMemory,
+                    GlobalSystemServiceStatistics,
+                    GlobalSystemVolumeIO,
+                ):
+                    instance = cls(self.tenant_databases_schema)
+                    cursor.execute('GRANT SELECT ON {}.{} TO DD_MONITOR'.format(instance.schema, instance.view))
 
                 # For custom query test
-                cursor.execute('GRANT SELECT ON SYS_DATABASES.M_DATA_VOLUMES TO DD_MONITOR')
+                cursor.execute('GRANT SELECT ON {}.M_DATA_VOLUMES TO DD_MONITOR'.format(self.tenant_databases_schema))
 
                 # Assign the monitoring role to the user
                 cursor.execute('GRANT DD_MONITOR TO datadog')
@@ -52,8 +80,8 @@ class DbManager(object):
 
 
 @pytest.fixture(scope='session')
-def dd_environment():
-    db = DbManager(ADMIN_CONFIG)
+def dd_environment(tenant_databases_schema="SYS_DATABASES"):
+    db = DbManager(ADMIN_CONFIG, tenant_databases_schema)
 
     with docker_run(
         COMPOSE_FILE,

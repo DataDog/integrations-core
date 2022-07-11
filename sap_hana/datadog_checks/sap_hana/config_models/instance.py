@@ -54,6 +54,7 @@ class InstanceConfig(BaseModel):
     server: str
     service: Optional[str]
     tags: Optional[Sequence[str]]
+    tenant_databases_schema: Optional[str]
     timeout: Optional[float]
     tls_ca_cert: Optional[str]
     tls_cert: Optional[str]

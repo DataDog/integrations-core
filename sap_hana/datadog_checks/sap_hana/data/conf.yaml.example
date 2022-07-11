@@ -213,3 +213,8 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
+
+    ## @param tenant_databases_schema - string - optional - default: SYS_DATABASES
+    ## The schema containing the tenant databases views.
+    #
+    # tenant_databases_schema: <TENANT_DATABASES_SCHEMA>
