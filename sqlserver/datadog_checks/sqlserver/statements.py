@@ -23,7 +23,7 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
-from .const import STATIC_INFO_VERSION
+from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 
 DEFAULT_COLLECTION_INTERVAL = 10
 
@@ -294,6 +294,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'cloud_metadata': self.check.cloud_metadata,
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
             'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
+            'sqlserver_engine_edition': self.check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             'ddagentversion': datadog_agent.get_version(),
             'ddagenthostname': self._check.agent_hostname,
         }

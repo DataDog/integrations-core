@@ -59,6 +59,11 @@ TABLE_VARS = [
     'mysql.info.table.data_size',
 ]
 
+ROW_TABLE_STATS_VARS = [
+    'mysql.info.table.rows.read',
+    'mysql.info.table.rows.changed',
+]
+
 # Possibly from SHOW GLOBAL VARIABLES
 VARIABLES_VARS = [
     'mysql.myisam.key_buffer_size',

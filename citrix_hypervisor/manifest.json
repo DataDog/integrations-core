@@ -1,44 +1,55 @@
 {
-  "aliases": [
-    "xenserver"
-  ],
-  "display_name": "Citrix Hypervisor",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "citrix_hypervisor",
-  "metric_prefix": "citrix_hypervisor.",
-  "metric_to_check": "citrix_hypervisor.host.cpu",
-  "creates_events": false,
-  "short_description": "Monitor the health and performance of a Citrix Hypervisor host.",
-  "guid": "d6c1911b-f7fd-4537-af4f-1aa40dae40c2",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Citrix Hypervisor",
-  "categories": [
-    "cloud",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "citrix-hypervisor",
+  "manifest_version": "2.0.0",
+  "app_uuid": "cf4ad6ea-85ae-4f7d-8e79-7b8d36924425",
+  "app_id": "citrix-hypervisor",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the health and performance of a Citrix Hypervisor host.",
+    "title": "Citrix Hypervisor",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Cloud",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Citrix Hypervisor",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "citrix_hypervisor.",
+        "check": "citrix_hypervisor.host.cpu",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "dashboards": {},
     "monitors": {
       "VM CPU high": "assets/recommended_monitors/vm_cpu_high.json",
       "Host CPU high": "assets/recommended_monitors/host_cpu_high.json"
     },
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "citrix_hypervisor"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

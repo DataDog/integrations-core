@@ -1043,106 +1043,226 @@ def test_load_configuration_models(dd_run_check, mocker):
     assert check._config_model_shared is shared_config
 
 
+if PY3:
+
+    from pydantic import BaseModel, Field
+
+    class BaseModelTest(BaseModel):
+        field = ""
+        schema_ = Field("", alias='schema')
+
+else:
+
+    class BaseModelTest:
+        def __init__(self, **kwargs):
+            pass
+
+
 @requires_py3
 @pytest.mark.parametrize(
-    'check_instance_config, default_instance_config, log_lines',
+    "check_instance_config, default_instance_config, log_lines, unknown_options",
     [
         pytest.param(
-            {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
+            {
+                "endpoint": "url",
+                "tags": ["foo:bar"],
+                "proxy": {"http": "http://1.2.3.4:9000"},
+            },
             [],
             None,
-            id='empty default',
+            [],
+            id="empty default",
         ),
         pytest.param(
-            {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            [('endpoint', 'url')],
+            {
+                "endpoint": "url",
+                "tags": ["foo:bar"],
+                "proxy": {"http": "http://1.2.3.4:9000"},
+            },
+            [
+                ("endpoint", "url"),
+            ],
             None,
-            id='no typo',
+            [],
+            id="no typo",
         ),
         pytest.param(
-            {'endpoints': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            [('endpoint', 'url')],
+            {
+                "endpoints": "url",
+                "tags": ["foo:bar"],
+                "proxy": {"http": "http://1.2.3.4:9000"},
+            },
+            [
+                ("endpoint", "url"),
+            ],
             [
                 (
-                    'Detected potential typo in configuration option in test/instance section: `endpoints`. '
-                    'Did you mean endpoint?'
+                    "Detected potential typo in configuration option in test/instance section: `endpoints`. "
+                    "Did you mean endpoint?"
                 )
             ],
-            id='typo',
+            ["endpoints"],
+            id="typo",
         ),
         pytest.param(
-            {'endpoints': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            [('endpoint', 'url'), ('endpoints', 'url')],
+            {
+                "endpoints": "url",
+                "tags": ["foo:bar"],
+                "proxy": {"http": "http://1.2.3.4:9000"},
+            },
+            [
+                ("endpoint", "url"),
+                ("endpoints", "url"),
+            ],
             None,
-            id='no typo similar option',
+            [],
+            id="no typo similar option",
         ),
         pytest.param(
-            {'endpont': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            [('endpoint', 'url'), ('endpoints', 'url')],
+            {
+                "endpont": "url",
+                "tags": ["foo:bar"],
+                "proxy": {"http": "http://1.2.3.4:9000"},
+            },
+            [
+                ("endpoint", "url"),
+                ("endpoints", "url"),
+            ],
             [
                 (
-                    'Detected potential typo in configuration option in test/instance section: `endpont`. '
-                    'Did you mean endpoint, or endpoints?'
+                    "Detected potential typo in configuration option in test/instance section: `endpont`. "
+                    "Did you mean endpoint, or endpoints?"
                 )
             ],
-            id='typo two candidates',
+            ["endpont"],
+            id="typo two candidates",
         ),
-        pytest.param({'tag': 'test'}, [('tags', 'test')], None, id='short option cant catch'),
         pytest.param(
-            {'testing_long_para': 'test'},
-            [('testing_long_param', 'test'), ('test_short_param', 'test')],
+            {
+                "tag": "test",
+            },
+            [
+                ("tags", "test"),
+            ],
+            None,
+            [],
+            id="short option cant catch",
+        ),
+        pytest.param(
+            {
+                "testing_long_para": "test",
+            },
+            [
+                ("testing_long_param", "test"),
+                ("test_short_param", "test"),
+            ],
             [
                 (
-                    'Detected potential typo in configuration option in test/instance section: `testing_long_para`. '
-                    'Did you mean testing_long_param?'
+                    "Detected potential typo in configuration option in test/instance section: `testing_long_para`. "
+                    "Did you mean testing_long_param?"
                 )
             ],
-            id='somewhat similar option',
+            ["testing_long_para"],
+            id="somewhat similar option",
         ),
         pytest.param(
-            {'send_distribution_sums_as_monotonic': False, 'exclude_labels': True},
-            [('send_distribution_counts_as_monotonic', True), ('include_labels', True)],
-            None,
-            id='different options no typos',
-        ),
-        pytest.param(
-            {'send_distribution_count_as_monotonic': True, 'exclude_label': True},
+            {
+                "send_distribution_sums_as_monotonic": False,
+                "exclude_labels": True,
+            },
             [
-                ('send_distribution_sums_as_monotonic', False),
-                ('send_distribution_counts_as_monotonic', True),
-                ('exclude_labels', False),
-                ('include_labels', True),
+                ("send_distribution_counts_as_monotonic", True),
+                ("include_labels", True),
+            ],
+            None,
+            [],
+            id="different options no typos",
+        ),
+        pytest.param(
+            {
+                "send_distribution_count_as_monotonic": True,
+                "exclude_label": True,
+            },
+            [
+                ("send_distribution_sums_as_monotonic", False),
+                ("send_distribution_counts_as_monotonic", True),
+                ("exclude_labels", False),
+                ("include_labels", True),
             ],
             [
                 (
-                    'Detected potential typo in configuration option in test/instance section: '
-                    '`send_distribution_count_as_monotonic`. Did you mean send_distribution_counts_as_monotonic?'
+                    "Detected potential typo in configuration option in test/instance section: "
+                    "`send_distribution_count_as_monotonic`. Did you mean send_distribution_counts_as_monotonic?"
                 ),
                 (
-                    'Detected potential typo in configuration option in test/instance section: `exclude_label`. '
-                    'Did you mean exclude_labels?'
+                    "Detected potential typo in configuration option in test/instance section: `exclude_label`. "
+                    "Did you mean exclude_labels?"
                 ),
             ],
-            id='different options typo',
+            [
+                "send_distribution_count_as_monotonic",
+                "exclude_label",
+            ],
+            id="different options typo",
+        ),
+        pytest.param(
+            {
+                "field": "value",
+                "schema": "my_schema",
+            },
+            BaseModelTest(field="my_field", schema_="the_schema"),
+            None,
+            [],
+            id="using an alias",
+        ),
+        pytest.param(
+            {
+                "field": "value",
+                "schem": "my_schema",
+            },
+            BaseModelTest(field="my_field", schema_="the_schema"),
+            [
+                (
+                    "Detected potential typo in configuration option in test/instance section: "
+                    "`schem`. Did you mean schema?"
+                ),
+            ],
+            ["schem"],
+            id="typo in an alias",
+        ),
+        pytest.param(
+            {
+                "field": "value",
+                "schema_": "my_schema",
+            },
+            BaseModelTest(field="my_field", schema_="the_schema"),
+            None,
+            [],
+            id="not using an alias",
         ),
     ],
 )
 def test_detect_typos_configuration_models(
-    dd_run_check, mocker, caplog, check_instance_config, default_instance_config, log_lines
+    dd_run_check,
+    caplog,
+    check_instance_config,
+    default_instance_config,
+    log_lines,
+    unknown_options,
 ):
     caplog.clear()
     caplog.set_level(logging.WARNING)
     empty_config = {}
-    default_instance = mocker.MagicMock()
-    default_instance.__iter__ = mocker.MagicMock(return_value=iter(default_instance_config))
 
-    check = AgentCheck('test', empty_config, [check_instance_config])
-    check.check_id = 'test:123'
+    check = AgentCheck("test", empty_config, [check_instance_config])
+    check.check_id = "test:123"
 
-    check.log_typos_in_options(check_instance_config, default_instance, 'instance')
+    typos = check.log_typos_in_options(check_instance_config, default_instance_config, "instance")
 
     if log_lines is not None:
         for log_line in log_lines:
             assert log_line in caplog.text
     else:
-        assert 'Detected potential typo in configuration option' not in caplog.text
+        assert "Detected potential typo in configuration option" not in caplog.text
+
+    assert typos == set(unknown_options)

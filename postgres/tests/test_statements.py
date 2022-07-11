@@ -188,7 +188,7 @@ def test_statement_metrics(
         available_columns = set(row.keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
         if track_io_timing_enabled:
-            metric_columns |= PG_STAT_STATEMENTS_TIMING_COLUMNS
+            assert (available_columns & PG_STAT_STATEMENTS_TIMING_COLUMNS) == PG_STAT_STATEMENTS_TIMING_COLUMNS
         else:
             assert (available_columns & PG_STAT_STATEMENTS_TIMING_COLUMNS) == set()
         for col in metric_columns:
