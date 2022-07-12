@@ -7,8 +7,8 @@ import re
 
 import pytest
 from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
-from datadog_checks.base.constants import ServiceCheck
 
+from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.testing import requires_py2
 from datadog_checks.iis import IIS
 
@@ -194,6 +194,7 @@ def test_check_without_sites_specified(aggregator, dd_run_check):
             )
 
     aggregator.assert_all_metrics_covered()
+
 
 def test_legacy_check_version(aggregator, dd_run_check):
     instance = WIN_SERVICES_MINIMAL_CONFIG2
