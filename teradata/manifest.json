@@ -24,7 +24,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
+    "dashboards": {
+      "Teradata Overview": "assets/dashboards/teradata_overview.json"
+    },
     "monitors": {},
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
