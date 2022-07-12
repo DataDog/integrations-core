@@ -115,7 +115,7 @@ def get_query_ao_availability_groups(sqlserver_major_version):
         # DRS - sys.dm_hadr_database_replica_states
         'DRS.replica_id': {'name': 'replica_id', 'type': 'tag'},
         'DRS.database_id': {'name': 'database_id', 'type': 'tag'},
-        'DRS.database_state_desc': {'name': 'database_state', 'type': 'tag'},
+        'LOWER(DRS.database_state_desc) AS database_state_desc': {'name': 'database_state', 'type': 'tag'},
         'LOWER(DRS.synchronization_state_desc) AS synchronization_state_desc': {
             'name': 'synchronization_state',
             'type': 'tag',
