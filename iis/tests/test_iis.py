@@ -207,14 +207,15 @@ def test_legacy_check_version(aggregator, dd_run_check):
     for metrics, namespace, values in namespace_data:
         for metric in metrics:
             for value in values:
-                aggregator.assert_metric(
-                    metric, tags=['{}:{}'.format(namespace, value), iis_host], count=1
-                )
+                aggregator.assert_metric(metric, tags=['{}:{}'.format(namespace, value), iis_host], count=1)
 
     for _, namespace, values in namespace_data:
         for value in values:
             aggregator.assert_service_check(
-                'iis.{}_up'.format(namespace), IIS.OK, tags=['{}:{}'.format(namespace, value), iis_host], count=1,
+                'iis.{}_up'.format(namespace),
+                IIS.OK,
+                tags=['{}:{}'.format(namespace, value), iis_host],
+                count=1,
             )
 
     aggregator.assert_all_metrics_covered()
