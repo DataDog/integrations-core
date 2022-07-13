@@ -627,10 +627,15 @@ class MySQLStatementSamples(DBMAsyncJob):
             enabled_consumers = self._get_enabled_performance_schema_consumers()
 
         if not enabled_consumers:
-            self._log.warning(
-                "Cannot collect statement samples as there are no enabled performance_schema.events_statements_* "
-                "consumers. Enable performance_schema and at least one events_statements consumer in order to collect "
-                "statement samples."
+            self._check.record_warning(
+                DatabaseConfigurationError.events_statements_consumer_missing,
+                warning_with_tags(
+                    'Cannot collect statement samples as there are no enabled performance_schema.events_statements_* '
+                    'consumers. Enable performance_schema and at least one events_statements consumer in order '
+                    'to collect statement samples.',
+                    code=DatabaseConfigurationError.events_statements_consumer_missing.value,
+                    host=self._check.resolved_hostname,
+                ),
             )
             self._check.count(
                 "dd.mysql.query_samples.error",
