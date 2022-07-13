@@ -27,17 +27,14 @@ def test_generate_new_files_check_licenses(repo, expect_licenses):
     with runner.isolated_filesystem():
 
         # Generate the check structure
-        shutil.copytree(os.path.dirname(os.path.realpath(__file__)) + "/data/my_check", "./my_check")
-
-        run_command(
-            [sys.executable, '-m', 'datadog_checks.dev', "config", "set", repo, os.getcwd()],
+        working_repo = 'integrations-{}'.format(repo)
+        shutil.copytree(
+            os.path.dirname(os.path.realpath(__file__)) + "/data/my_check", "./{}/my_check".format(working_repo)
         )
-        run_command(
-            [sys.executable, '-m', 'datadog_checks.dev', "config", "set", "repo", repo],
-        )
+        os.chdir(working_repo)
 
         result = run_command(
-            [sys.executable, '-m', 'datadog_checks.dev', 'validate', 'models', 'my_check', "-s"],
+            [sys.executable, '-m', 'datadog_checks.dev', '--here', 'validate', 'models', 'my_check', "-s"],
             capture=True,
         )
 
