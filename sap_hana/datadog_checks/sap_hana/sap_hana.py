@@ -45,7 +45,7 @@ class SapHanaCheck(AgentCheck):
         self._tags = self.instance.get('tags', [])
         self._use_tls = self.instance.get('use_tls', False)
         self._only_custom_queries = is_affirmative(self.instance.get('only_custom_queries', False))
-        self._tenant_databases_schema = self.instance.get('tenant_databases_schema', "SYS_DATABASES")
+        self._schema = self.instance.get('schema', "SYS_DATABASES")
 
         # Add server & port tags
         self._tags.append('server:{}'.format(self._server))
@@ -178,7 +178,7 @@ class SapHanaCheck(AgentCheck):
 
     def query_backup_status(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/783108ba8b8b4c709959220b4535a010.html
-        for backup in self.iter_rows(queries.GlobalSystemBackupProgress(schema=self._tenant_databases_schema)):
+        for backup in self.iter_rows(queries.GlobalSystemBackupProgress(schema=self._schema)):
             tags = [
                 'db:{}'.format(backup['db_name']),
                 'service_name:{}'.format(backup['service']),
@@ -195,7 +195,7 @@ class SapHanaCheck(AgentCheck):
 
     def query_licenses(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/1d7e7f52f6574a238c137e17b0840673.html
-        for hana_license in self.iter_rows(queries.GlobalSystemLicenses(schema=self._tenant_databases_schema)):
+        for hana_license in self.iter_rows(queries.GlobalSystemLicenses(schema=self._schema)):
             tags = ['sid:{}'.format(hana_license['sid']), 'product_name:{}'.format(hana_license['product_name'])]
             tags.extend(self._tags)
 
@@ -223,7 +223,7 @@ class SapHanaCheck(AgentCheck):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.05/en-US/20abcf1f75191014a254a82b3d0f66bf.html
         # Documented statuses: RUNNING, IDLE, QUEUING, EMPTY
         db_counts = defaultdict(lambda: defaultdict(int))
-        for conn in self.iter_rows(queries.GlobalSystemConnectionsStatus(schema=self._tenant_databases_schema)):
+        for conn in self.iter_rows(queries.GlobalSystemConnectionsStatus(schema=self._schema)):
             db_counts[(conn['db_name'], conn['host'], conn['port'])][conn['status'].lower()] += conn['total']
 
         for (db, host, port), counts in iteritems(db_counts):
@@ -245,7 +245,7 @@ class SapHanaCheck(AgentCheck):
 
     def query_disk_usage(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/a2aac2ee72b341699fa8eb3988d8cecb.html
-        for disk in self.iter_rows(queries.GlobalSystemDiskUsage(schema=self._tenant_databases_schema)):
+        for disk in self.iter_rows(queries.GlobalSystemDiskUsage(schema=self._schema)):
             tags = ['db:{}'.format(disk['db_name']), 'resource_type:{}'.format(disk['resource'])]
             tags.extend(self._tags)
 
@@ -267,7 +267,7 @@ class SapHanaCheck(AgentCheck):
 
     def query_service_memory(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20bf33c975191014bc16d7ffb7717db2.html
-        for memory in self.iter_rows(queries.GlobalSystemServiceMemory(schema=self._tenant_databases_schema)):
+        for memory in self.iter_rows(queries.GlobalSystemServiceMemory(schema=self._schema)):
             tags = [
                 'db:{}'.format(memory['db_name'] or 'none'),
                 'hana_port:{}'.format(memory['port']),
@@ -336,7 +336,7 @@ class SapHanaCheck(AgentCheck):
 
     def query_service_component_memory(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20bed4f675191014a4cf8e62c28d16ae.html
-        for memory in self.iter_rows(queries.GlobalSystemServiceComponentMemory(schema=self._tenant_databases_schema)):
+        for memory in self.iter_rows(queries.GlobalSystemServiceComponentMemory(schema=self._schema)):
             tags = [
                 'db:{}'.format(memory['db_name'] or 'none'),
                 'hana_port:{}'.format(memory['port']),
@@ -352,7 +352,7 @@ class SapHanaCheck(AgentCheck):
 
     def query_row_store_memory(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20bb47a975191014b1e2f6bd0a685d7b.html
-        for memory in self.iter_rows(queries.GlobalSystemRowStoreMemory(schema=self._tenant_databases_schema)):
+        for memory in self.iter_rows(queries.GlobalSystemRowStoreMemory(schema=self._schema)):
             tags = [
                 'db:{}'.format(memory['db_name']),
                 'hana_port:{}'.format(memory['port']),
@@ -378,7 +378,7 @@ class SapHanaCheck(AgentCheck):
 
     def query_service_statistics(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20c460be751910149173ac5c08d42be5.html
-        for service in self.iter_rows(queries.GlobalSystemServiceStatistics(schema=self._tenant_databases_schema)):
+        for service in self.iter_rows(queries.GlobalSystemServiceStatistics(schema=self._schema)):
             tags = [
                 'db:{}'.format(service['db_name'] or 'none'),
                 'hana_port:{}'.format(service['port']),
@@ -434,7 +434,7 @@ class SapHanaCheck(AgentCheck):
 
     def query_volume_io(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20cadec8751910148bab98528e3634a9.html
-        for volume in self.iter_rows(queries.GlobalSystemVolumeIO(schema=self._tenant_databases_schema)):
+        for volume in self.iter_rows(queries.GlobalSystemVolumeIO(schema=self._schema)):
             tags = [
                 'db:{}'.format(volume['db_name']),
                 'hana_port:{}'.format(volume['port']),

@@ -26,7 +26,7 @@ def test_check(aggregator, instance, dd_run_check):
 
 @pytest.mark.usefixtures('dd_environment')
 def test_check_invalid_schema(aggregator, instance, dd_run_check):
-    instance["tenant_databases_schema"] = "UNKNOWN_SCHEMA"
+    instance["schema"] = "UNKNOWN_SCHEMA"
     check = SapHanaCheck('sap_hana', {}, [instance])
     check.log = mock.MagicMock()
     dd_run_check(check)

@@ -33,7 +33,7 @@ files:
         required: true
         value:
           type: string
-      - name: tenant_databases_schema
+      - name: schema
         description: The schema containing the tenant databases views.
         value:
           type: string

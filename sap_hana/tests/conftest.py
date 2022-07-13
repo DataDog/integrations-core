@@ -27,14 +27,14 @@ from .common import ADMIN_CONFIG, COMPOSE_FILE, CONFIG, E2E_METADATA
 
 
 class DbManager(object):
-    def __init__(self, connection_config, tenant_databases_schema):
+    def __init__(self, connection_config, schema):
         self.connection_args = {
             'address': connection_config['server'],
             'port': connection_config['port'],
             'user': connection_config['username'],
             'password': connection_config['password'],
         }
-        self.tenant_databases_schema = tenant_databases_schema
+        self.schema = schema
         self.conn = None
 
     def initialize(self):
@@ -63,11 +63,11 @@ class DbManager(object):
                     GlobalSystemServiceStatistics,
                     GlobalSystemVolumeIO,
                 ):
-                    instance = cls(self.tenant_databases_schema)
+                    instance = cls(self.schema)
                     cursor.execute('GRANT SELECT ON {}.{} TO DD_MONITOR'.format(instance.schema, instance.view))
 
                 # For custom query test
-                cursor.execute('GRANT SELECT ON {}.M_DATA_VOLUMES TO DD_MONITOR'.format(self.tenant_databases_schema))
+                cursor.execute('GRANT SELECT ON {}.M_DATA_VOLUMES TO DD_MONITOR'.format(self.schema))
 
                 # Assign the monitoring role to the user
                 cursor.execute('GRANT DD_MONITOR TO datadog')
@@ -80,8 +80,8 @@ class DbManager(object):
 
 
 @pytest.fixture(scope='session')
-def dd_environment(tenant_databases_schema="SYS_DATABASES"):
-    db = DbManager(ADMIN_CONFIG, tenant_databases_schema)
+def dd_environment(schema="SYS_DATABASES"):
+    db = DbManager(ADMIN_CONFIG, schema)
 
     with docker_run(
         COMPOSE_FILE,

@@ -7,10 +7,10 @@ from datadog_checks.sap_hana import SapHanaCheck
 
 def test_default_tenant_databases(instance):
     check = SapHanaCheck('sap_hana', {}, [instance])
-    assert check._tenant_databases_schema == "SYS_DATABASES"
+    assert check._schema == "SYS_DATABASES"
 
 
 def test_override_tenant_databases(instance):
-    instance["tenant_databases_schema"] = "SYS"
+    instance["schema"] = "SYS"
     check = SapHanaCheck('sap_hana', {}, [instance])
-    assert check._tenant_databases_schema == "SYS"
+    assert check._schema == "SYS"
