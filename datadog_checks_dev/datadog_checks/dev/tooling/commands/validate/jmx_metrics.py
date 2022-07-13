@@ -18,7 +18,6 @@ from ...utils import (
 )
 from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_info, echo_success
 
-# List of integrations to skip the duplicate bean check on
 
 @click.command('jmx-metrics', context_settings=CONTEXT_SETTINGS, short_help='Validate JMX metrics files')
 @click.argument('check', shell_complete=complete_valid_checks, required=False)
