@@ -28,16 +28,9 @@ def test_generate_new_files_check_licenses(repo, expect_licenses):
 
         # Generate the check structure
         shutil.copytree(os.path.dirname(os.path.realpath(__file__)) + "/data/my_check", "./my_check")
-
-        run_command(
-            [sys.executable, '-m', 'datadog_checks.dev', "config", "set", repo, os.getcwd()],
-        )
-        run_command(
-            [sys.executable, '-m', 'datadog_checks.dev', "config", "set", "repo", repo],
-        )
-
+        repo_flag = '--{}'.format(repo)
         result = run_command(
-            [sys.executable, '-m', 'datadog_checks.dev', 'validate', 'models', 'my_check', "-s"],
+            [sys.executable, '-m', 'datadog_checks.dev', repo_flag, '--here', 'validate', 'models', 'my_check', "-s"],
             capture=True,
         )
 
