@@ -10,7 +10,7 @@
             "prefix": ""
         }
     ],
-    "title": "Kong Overview",
+    "title": "Kong Overview [OpenMetrics]",
     "widgets": [
         {
             "definition": {
