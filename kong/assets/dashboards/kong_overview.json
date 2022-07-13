@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "Using this dashboard, you can get a high-level view of your Kong metrics so you can monitor its performance.\n\nTo learn more about our Kong integration, see:\n\n- [Our official integration documentation](https://docs.datadoghq.com/integrations/kong/?tabs=host).\n\n- [Monitoring Kong Performance Metrics](https://www.datadoghq.com/blog/monitor-kong-datadog/).\n\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.",
+    "description": "Using this dashboard, you can get a high-level view of your Kong metrics so you can monitor the performance of Kong.\n\nTo learn more about the Datadog Kong integration, see:\n\n- [Datadog Kong integration documentation](https://docs.datadoghq.com/integrations/kong/?tabs=host).\n\n- [Monitoring Kong Performance Metrics](https://www.datadoghq.com/blog/monitor-kong-datadog/).\n\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.",
     "layout_type": "ordered",
     "template_variables": [
         {
