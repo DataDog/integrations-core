@@ -304,7 +304,10 @@ class PostgresStatementSamples(DBMAsyncJob):
             normalized_rows.append(self._normalize_row(row))
         if insufficient_privilege_count > 0:
             self._log.warning(
-                "Insufficient privilege for %s/%s queries when collecting from %s.", self._config.pg_stat_activity_view
+                "Insufficient privilege for %s/%s queries when collecting from %s.",
+                insufficient_privilege_count,
+                total_count,
+                self._config.pg_stat_activity_view,
             )
             self._check.count(
                 "dd.postgres.statement_samples.error",
