@@ -1723,61 +1723,6 @@
             }
           },
           {
-            "id": 6081340335661170,
-            "definition": {
-              "title": "Max profile temp space (temp vs spool)",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    },
-                    {
-                      "formula": "query2"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "queries": [
-                    {
-                      "query": "avg:teradata.disk_space.max_prof_temp{$host,$database,$table,$server,$port} by {td_table}",
-                      "data_source": "metrics",
-                      "name": "query1"
-                    },
-                    {
-                      "query": "avg:teradata.disk_space.max_prof_spool{$host,$database,$table,$server,$port} by {td_table}",
-                      "data_source": "metrics",
-                      "name": "query2"
-                    }
-                  ],
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "area"
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 8,
-              "width": 6,
-              "height": 2
-            }
-          },
-          {
             "id": 1275849014064832,
             "definition": {
               "title": "Space limit skew % (perm vs spool vs temp)",
@@ -1822,6 +1767,61 @@
                       "query": "avg:teradata.disk_space.temp_skew{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query3"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 6081340335661170,
+            "definition": {
+              "title": "Max profile temp space (temp vs spool)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    },
+                    {
+                      "formula": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:teradata.disk_space.max_prof_temp{$host,$database,$table,$server,$port} by {td_table}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:teradata.disk_space.max_prof_spool{$host,$database,$table,$server,$port} by {td_table}",
+                      "data_source": "metrics",
+                      "name": "query2"
                     }
                   ],
                   "style": {
