@@ -17,8 +17,8 @@ from datadog_checks.dev.tooling.utils import get_license_header
 @pytest.mark.parametrize(
     'repo,expect_licenses',
     [
-        ("extras", False),
         ("core", True),
+        ("extras", False),
     ],
 )
 def test_generate_new_files_check_licenses(repo, expect_licenses):
