@@ -45,7 +45,7 @@
                     {
                         "definition": {
                             "background_color": "transparent",
-                            "content": "\n\n**To learn more about our Kong integration**\n\n- [Our official integration documentation](https://docs.datadoghq.com/integrations/kong/?tabs=host).\n\n- [Monitoring Kong Performance Metrics](https://www.datadoghq.com/blog/monitor-kong-datadog/).",
+                            "content": "\n\n**To learn more about the Datadog Kong integration, see:**\n\n- [Datadog Kong integration documentation](https://docs.datadoghq.com/integrations/kong/?tabs=host).\n\n- [Monitoring Kong Performance Metrics](https://www.datadoghq.com/blog/monitor-kong-datadog/).",
                             "font_size": "12",
                             "has_padding": true,
                             "show_tick": false,
