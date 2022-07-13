@@ -24,7 +24,7 @@
                     {
                         "definition": {
                             "background_color": "transparent",
-                            "content": "Using this dashboard, you can get a high-level view of your Kong metrics so you can monitor its performance.",
+                            "content": "Using this dashboard, you can get a high-level view of your Kong metrics so you can monitor the performance of Kong.",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": false,
