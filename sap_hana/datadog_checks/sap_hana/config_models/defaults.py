@@ -62,16 +62,16 @@ def instance_port(field, value):
     return 30015
 
 
+def instance_schema_(field, value):
+    return 'SYS_DATABASES'
+
+
 def instance_service(field, value):
     return get_default_field_value(field, value)
 
 
 def instance_tags(field, value):
     return get_default_field_value(field, value)
-
-
-def instance_tenant_databases_schema(field, value):
-    return 'SYS_DATABASES'
 
 
 def instance_timeout(field, value):
