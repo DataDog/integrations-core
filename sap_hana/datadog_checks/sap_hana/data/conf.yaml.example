@@ -49,6 +49,11 @@ instances:
     #
     password: <PASSWORD>
 
+    ## @param tenant_databases_schema - string - optional - default: SYS_DATABASES
+    ## The schema containing the tenant databases views.
+    #
+    # tenant_databases_schema: <TENANT_DATABASES_SCHEMA>
+
     ## @param connection_properties - mapping - optional
     ## When `hdbcli` is installed, this defines the properties of the database connections. Any property
     ## defined here overrides any default value set by the check. For more information, see:
@@ -213,8 +218,3 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
-
-    ## @param tenant_databases_schema - string - optional - default: SYS_DATABASES
-    ## The schema containing the tenant databases views.
-    #
-    # tenant_databases_schema: <TENANT_DATABASES_SCHEMA>

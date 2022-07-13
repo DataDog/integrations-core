@@ -33,6 +33,11 @@ files:
         required: true
         value:
           type: string
+      - name: tenant_databases_schema
+        description: The schema containing the tenant databases views.
+        value:
+          type: string
+          display_default: SYS_DATABASES
       - name: connection_properties
         description: |
           When `hdbcli` is installed, this defines the properties of the database connections. Any property
@@ -75,8 +80,3 @@ files:
           type: boolean
       - template: instances/tls
       - template: instances/default
-      - name: tenant_databases_schema
-        description: The schema containing the tenant databases views.
-        value:
-          type: string
-          display_default: SYS_DATABASES
