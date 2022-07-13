@@ -28,6 +28,7 @@ def dd_environment():
             ),
             WaitFor(check_metrics_available, wait=5),
         ],
+        attempts=2,
     ):
         yield INSTANCE_STANDALONE, {'custom_hosts': get_custom_hosts()}
 
