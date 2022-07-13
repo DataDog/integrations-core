@@ -167,7 +167,7 @@ def test(
             echo_debug(f"No envs found for: `{check}`")
             continue
 
-        ddtrace_check = ddtrace
+        ddtrace_check = ddtrace and check != 'ddev'
         if ddtrace and ON_WINDOWS and any('py2' in env for env in env_names):
             # The pytest flag --ddtrace is not available for windows-py2 env.
             # Removing it so it does not fail.

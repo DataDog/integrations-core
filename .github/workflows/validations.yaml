@@ -29,7 +29,9 @@ jobs:
       run: pip install --disable-pip-version-check --upgrade pip setuptools wheel
 
     - name: Install ddev
-      run: pip install -e ./datadog_checks_dev[cli]
+      run: |
+        pip install -e ./datadog_checks_dev[cli]
+        pip install -e ./ddev
 
     - name: Configure ddev
       run: |
@@ -93,11 +95,11 @@ jobs:
     - name: Run models validation
       run: |
         ddev validate models $CHANGED
-        
+
     - name: Run package validation
       run: |
         ddev validate package $CHANGED
-        
+
     - name: Run readmes validation
       run: |
         ddev validate readmes $CHANGED
@@ -122,4 +124,3 @@ jobs:
         script: |
           const { issue: { number: issue_number }, repo: { owner, repo }  } = context;
           github.issues.createComment({ issue_number, owner, repo, body: "The `validations` job has failed; please review the `Files changed` tab for possible suggestions to resolve." });
-

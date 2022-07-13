@@ -582,6 +582,10 @@ coverage:
         target: 75
         flags:
         - zk
+      ddev:
+        target: 75
+        flags:
+        - ddev
       etcd:
         target: 75
         flags:
@@ -760,6 +764,11 @@ flags:
     paths:
     - datadog_cluster_agent/datadog_checks/datadog_cluster_agent
     - datadog_cluster_agent/tests
+  ddev:
+    carryforward: true
+    paths:
+    - ddev/datadog_checks/ddev
+    - ddev/tests
   directory:
     carryforward: true
     paths:
