@@ -140,7 +140,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.process.cpu_idle{$host}",
+                      "query": "avg:teradata.process.cpu_idle{$host,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -185,7 +185,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.process.cpu_io_wait{$host}",
+                      "query": "avg:teradata.process.cpu_io_wait{$host,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -232,7 +232,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.process.cpu_exec{$host}",
+                      "query": "avg:teradata.process.cpu_exec{$host,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -272,7 +272,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.io.throttle_time{$host}",
+                      "query": "avg:teradata.io.throttle_time{$host,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -306,7 +306,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.io.throttle_time_max{$host}",
+                      "query": "avg:teradata.io.throttle_time_max{$host,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -340,7 +340,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.io.throttle_count{$host}",
+                      "query": "avg:teradata.io.throttle_count{$host,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -374,7 +374,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.file_lock.deadlocks{$host}",
+                      "query": "avg:teradata.file_lock.deadlocks{$host,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -413,7 +413,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.file_lock.blocks{$host}",
+                      "query": "avg:teradata.file_lock.blocks{$host,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -460,7 +460,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.file_lock.enters{$host}",
+                      "query": "avg:teradata.file_lock.enters{$host,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -500,7 +500,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.process.ready_max{$host}",
+                      "query": "avg:teradata.process.ready_max{$host,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -541,7 +541,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.process.ready{$host}",
+                      "query": "avg:teradata.process.ready{$host,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -581,7 +581,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.process.blocked{$host}",
+                      "query": "avg:teradata.process.blocked{$host,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -622,7 +622,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.db_lock.deadlocks{$host}",
+                      "query": "avg:teradata.db_lock.deadlocks{$host,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -669,7 +669,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.db_lock.blocks{$host}",
+                      "query": "avg:teradata.db_lock.blocks{$host,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -709,7 +709,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.mem.page_faults_major{$host}",
+                      "query": "avg:teradata.mem.page_faults_major{$host,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -750,7 +750,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.mem.page_faults_minor{$host}",
+                      "query": "avg:teradata.mem.page_faults_minor{$host,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -813,7 +813,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.amp.cpu_time_norm{$host} by {td_amp}",
+                      "query": "avg:teradata.amp.cpu_time_norm{$host,$server,$port} by {td_amp}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -860,7 +860,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.amp.cpu_time{$host} by {td_amp}",
+                      "query": "avg:teradata.amp.cpu_time{$host,$server,$port} by {td_amp}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -907,7 +907,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.amp.disk_io{$host} by {td_amp}",
+                      "query": "avg:teradata.amp.disk_io{$host,$server,$port} by {td_amp}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -979,22 +979,22 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.disk_space.curr_perm.total{$host,$database}",
+                      "query": "avg:teradata.disk_space.curr_perm.total{$host,$database,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "avg:teradata.disk_space.alloc_perm.total{$host,$database}",
+                      "query": "avg:teradata.disk_space.alloc_perm.total{$host,$database,$server,$port}",
                       "data_source": "metrics",
                       "name": "query2"
                     },
                     {
-                      "query": "avg:teradata.disk_space.peak_perm.total{$host,$database}",
+                      "query": "avg:teradata.disk_space.peak_perm.total{$host,$database,$server,$port}",
                       "data_source": "metrics",
                       "name": "query3"
                     },
                     {
-                      "query": "avg:teradata.disk_space.max_perm.total{$host,$database}",
+                      "query": "avg:teradata.disk_space.max_perm.total{$host,$database,$server,$port}",
                       "data_source": "metrics",
                       "name": "query4"
                     }
@@ -1048,22 +1048,22 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.disk_space.max_temp.total{$host,$table}",
+                      "query": "avg:teradata.disk_space.max_temp.total{$host,$table,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "avg:teradata.disk_space.curr_temp.total{$host,$table}",
+                      "query": "avg:teradata.disk_space.curr_temp.total{$host,$table,$server,$port}",
                       "data_source": "metrics",
                       "name": "query2"
                     },
                     {
-                      "query": "avg:teradata.disk_space.alloc_temp.total{$host,$table}",
+                      "query": "avg:teradata.disk_space.alloc_temp.total{$host,$table,$server,$port}",
                       "data_source": "metrics",
                       "name": "query3"
                     },
                     {
-                      "query": "avg:teradata.disk_space.peak_temp.total{$host,$table}",
+                      "query": "avg:teradata.disk_space.peak_temp.total{$host,$table,$server,$port}",
                       "data_source": "metrics",
                       "name": "query4"
                     }
@@ -1117,22 +1117,22 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.disk_space.max_spool.total{$host,$database}",
+                      "query": "avg:teradata.disk_space.max_spool.total{$host,$database,$server,$port}",
                       "data_source": "metrics",
                       "name": "query2"
                     },
                     {
-                      "query": "avg:teradata.disk_space.alloc_spool.total{$host,$database}",
+                      "query": "avg:teradata.disk_space.alloc_spool.total{$host,$database,$server,$port}",
                       "data_source": "metrics",
                       "name": "query3"
                     },
                     {
-                      "query": "avg:teradata.disk_space.curr_spool.total{$host,$database}",
+                      "query": "avg:teradata.disk_space.curr_spool.total{$host,$database,$server,$port}",
                       "data_source": "metrics",
                       "name": "query4"
                     },
                     {
-                      "query": "avg:teradata.disk_space.peak_spool.total{$host,$database}",
+                      "query": "avg:teradata.disk_space.peak_spool.total{$host,$database,$server,$port}",
                       "data_source": "metrics",
                       "name": "query5"
                     }
@@ -1180,12 +1180,12 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.disk_space.peak_persist_spool.total{$host,$database}",
+                      "query": "avg:teradata.disk_space.peak_persist_spool.total{$host,$database,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "avg:teradata.disk_space.curr_persist_spool.total{$host,$database}",
+                      "query": "avg:teradata.disk_space.curr_persist_spool.total{$host,$database,$server,$port}",
                       "data_source": "metrics",
                       "name": "query2"
                     }
@@ -1238,17 +1238,17 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.disk_space.perm_skew.total{$host,$database}",
+                      "query": "avg:teradata.disk_space.perm_skew.total{$host,$database,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "avg:teradata.disk_space.spool_skew.total{$host,$database}",
+                      "query": "avg:teradata.disk_space.spool_skew.total{$host,$database,$server,$port}",
                       "data_source": "metrics",
                       "name": "query2"
                     },
                     {
-                      "query": "avg:teradata.disk_space.temp_skew.total{$host,$database}",
+                      "query": "avg:teradata.disk_space.temp_skew.total{$host,$database,$server,$port}",
                       "data_source": "metrics",
                       "name": "query3"
                     }
@@ -1298,12 +1298,12 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.disk_space.max_prof_temp.total{$host,$database}",
+                      "query": "avg:teradata.disk_space.max_prof_temp.total{$host,$database,$server,$port}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "avg:teradata.disk_space.max_prof_spool.total{$host,$database}",
+                      "query": "avg:teradata.disk_space.max_prof_spool.total{$host,$database,$server,$port}",
                       "data_source": "metrics",
                       "name": "query2"
                     }
@@ -1427,25 +1427,25 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "avg:teradata.disk_space.curr_perm{$host,$database} by {td_table}",
+                      "query": "avg:teradata.disk_space.curr_perm{$host,$database,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "avg:teradata.disk_space.max_perm{$host,$database} by {td_table}",
+                      "query": "avg:teradata.disk_space.max_perm{$host,$database,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query2",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "avg:teradata.disk_space.alloc_perm{$host,$database} by {td_table}",
+                      "query": "avg:teradata.disk_space.alloc_perm{$host,$database,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query3",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "avg:teradata.disk_space.peak_perm{$host,$database} by {td_table}",
+                      "query": "avg:teradata.disk_space.peak_perm{$host,$database,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query4",
                       "aggregator": "avg"
@@ -1495,22 +1495,22 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.disk_space.curr_perm{$host,$database,$table} by {td_table}",
+                      "query": "avg:teradata.disk_space.curr_perm{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "avg:teradata.disk_space.alloc_perm{$host,$database,$table} by {td_table}",
+                      "query": "avg:teradata.disk_space.alloc_perm{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query2"
                     },
                     {
-                      "query": "avg:teradata.disk_space.peak_perm{$host,$database,$table} by {td_table}",
+                      "query": "avg:teradata.disk_space.peak_perm{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query3"
                     },
                     {
-                      "query": "avg:teradata.disk_space.max_perm{$host,$database,$table} by {td_table}",
+                      "query": "avg:teradata.disk_space.max_perm{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query4"
                     }
@@ -1564,22 +1564,22 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.disk_space.max_temp{$host,$database,$table} by {td_table}",
+                      "query": "avg:teradata.disk_space.max_temp{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "avg:teradata.disk_space.curr_temp{$host,$database,$table} by {td_table}",
+                      "query": "avg:teradata.disk_space.curr_temp{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query2"
                     },
                     {
-                      "query": "avg:teradata.disk_space.alloc_temp{$host,$database,$table} by {td_table}",
+                      "query": "avg:teradata.disk_space.alloc_temp{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query3"
                     },
                     {
-                      "query": "avg:teradata.disk_space.peak_temp{$host,$database,$table} by {td_table}",
+                      "query": "avg:teradata.disk_space.peak_temp{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query4"
                     }
@@ -1633,22 +1633,22 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.disk_space.max_spool{$host,$database,$table} by {td_table}",
+                      "query": "avg:teradata.disk_space.max_spool{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query2"
                     },
                     {
-                      "query": "avg:teradata.disk_space.alloc_spool{$host,$database,$table} by {td_table}",
+                      "query": "avg:teradata.disk_space.alloc_spool{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query3"
                     },
                     {
-                      "query": "avg:teradata.disk_space.curr_spool{$host,$database,$table} by {td_table}",
+                      "query": "avg:teradata.disk_space.curr_spool{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query4"
                     },
                     {
-                      "query": "avg:teradata.disk_space.peak_spool{$host,$database,$table} by {td_table}",
+                      "query": "avg:teradata.disk_space.peak_spool{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query5"
                     }
@@ -1696,12 +1696,12 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.disk_space.peak_persist_spool{$host,$database,$table} by {td_table}",
+                      "query": "avg:teradata.disk_space.peak_persist_spool{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "avg:teradata.disk_space.curr_persist_spool{$host,$database,$table} by {td_table}",
+                      "query": "avg:teradata.disk_space.curr_persist_spool{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query2"
                     }
@@ -1751,12 +1751,12 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.disk_space.max_prof_temp{$host,$database,$table} by {td_table}",
+                      "query": "avg:teradata.disk_space.max_prof_temp{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "avg:teradata.disk_space.max_prof_spool{$host,$database,$table} by {td_table}",
+                      "query": "avg:teradata.disk_space.max_prof_spool{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query2"
                     }
@@ -1809,17 +1809,17 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:teradata.disk_space.perm_skew{$host,$database,$table} by {td_table}",
+                      "query": "avg:teradata.disk_space.perm_skew{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "avg:teradata.disk_space.spool_skew{$host,$database,$table} by {td_table}",
+                      "query": "avg:teradata.disk_space.spool_skew{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query2"
                     },
                     {
-                      "query": "avg:teradata.disk_space.temp_skew{$host,$database,$table} by {td_table}",
+                      "query": "avg:teradata.disk_space.temp_skew{$host,$database,$table,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query3"
                     }
@@ -1858,15 +1858,27 @@
       "available_values": []
     },
     {
-      "name": "table",
+      "name": "server",
       "default": "*",
-      "prefix": "td_table",
+      "prefix": "teradata_server",
+      "available_values": []
+    },
+    {
+      "name": "port",
+      "default": "*",
+      "prefix": "teradata_port",
       "available_values": []
     },
     {
       "name": "database",
       "default": "*",
       "prefix": "td_database",
+      "available_values": []
+    },
+    {
+      "name": "table",
+      "default": "*",
+      "prefix": "td_table",
       "available_values": []
     }
   ],
