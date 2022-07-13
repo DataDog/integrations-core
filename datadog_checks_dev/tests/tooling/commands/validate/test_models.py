@@ -17,8 +17,8 @@ from datadog_checks.dev.tooling.utils import get_license_header
 @pytest.mark.parametrize(
     'repo,expect_licenses',
     [
-        ("core", True),
         ("extras", False),
+        ("core", True),
     ],
 )
 def test_generate_new_files_check_licenses(repo, expect_licenses):
@@ -27,10 +27,14 @@ def test_generate_new_files_check_licenses(repo, expect_licenses):
     with runner.isolated_filesystem():
 
         # Generate the check structure
-        shutil.copytree(os.path.dirname(os.path.realpath(__file__)) + "/data/my_check", "./my_check")
-        repo_flag = '--{}'.format(repo)
+        working_repo = 'integrations-{}'.format(repo)
+        shutil.copytree(
+            os.path.dirname(os.path.realpath(__file__)) + "/data/my_check", "./{}/my_check".format(working_repo)
+        )
+        os.chdir(working_repo)
+
         result = run_command(
-            [sys.executable, '-m', 'datadog_checks.dev', repo_flag, '--here', 'validate', 'models', 'my_check', "-s"],
+            [sys.executable, '-m', 'datadog_checks.dev', '--here', 'validate', 'models', 'my_check', "-s"],
             capture=True,
         )
 
