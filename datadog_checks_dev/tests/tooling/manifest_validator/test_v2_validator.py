@@ -14,7 +14,6 @@ import datadog_checks.dev.tooling.manifest_validator.common.validator as common
 import datadog_checks.dev.tooling.manifest_validator.v2.validator as v2_validators
 from datadog_checks.dev.tooling.constants import get_root, set_root
 from datadog_checks.dev.tooling.datastructures import JSONDict
-from datadog_checks.dev.tooling.manifest_validator import get_all_validators
 from datadog_checks.dev.tooling.manifest_validator.constants import V2
 
 
@@ -47,24 +46,6 @@ def setup_route():
     set_root(str(root))
     yield root
     set_root(current_root)
-
-
-@mock.patch(
-    'datadog_checks.dev.tooling.utils.read_metadata_rows', return_value=input_constants.ORACLE_METADATA_CSV_EXAMPLE
-)
-def test_manifest_v2_all_pass(_, setup_route):
-    """
-    Run a valid manifest through all V2 validators
-    """
-    validators = get_all_validators(False, "2.0.0")
-    for validator in validators:
-        # Currently skipping SchemaValidator because of no context object and config
-        if isinstance(validator, v2_validators.SchemaValidator):
-            continue
-
-        validator.validate('active_directory', JSONDict(input_constants.V2_VALID_MANIFEST), False)
-        assert not validator.result.failed, validator.result
-        assert not validator.result.fixed
 
 
 def test_manifest_v2_maintainer_validator_incorrect_maintainer(setup_route):

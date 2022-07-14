@@ -90,5 +90,9 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_use_legacy_check_version(field, value):
+    return False
+
+
 def instance_username(field, value):
     return get_default_field_value(field, value)

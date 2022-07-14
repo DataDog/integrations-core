@@ -5,7 +5,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import logging
-from collections import OrderedDict
 from typing import Any
 
 import mock
@@ -917,52 +916,6 @@ class TestLimits:
 
 
 class TestCheckInitializations:
-    def test_default(self):
-        class TestCheck(AgentCheck):
-            def check(self, _):
-                pass
-
-        check = TestCheck('test', {}, [{}])
-        check.check_id = 'test:123'
-
-        with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
-            check.run()
-
-            assert m.call_count == 0
-
-    def test_default_config_sent(self):
-        class TestCheck(AgentCheck):
-            METADATA_DEFAULT_CONFIG_INIT_CONFIG = ['foo']
-            METADATA_DEFAULT_CONFIG_INSTANCE = ['bar']
-
-            def check(self, _):
-                pass
-
-        # Ordered by call order in `AgentCheck.send_config_metadata`
-        value_map = OrderedDict((('instance', 'mock'), ('init_config', 5)))
-
-        config = {'foo': value_map['init_config'], 'bar': value_map['instance']}
-        check = TestCheck('test', config, [config])
-        check.check_id = 'test:123'
-
-        with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
-            check.run()
-
-            assert m.call_count == 2
-            check.run()
-            assert m.call_count == 2
-
-            for (config_type, value), call_args in zip(value_map.items(), m.call_args_list):
-                args, _ = call_args
-                assert args[0] == 'test:123'
-                assert args[1] == 'config.{}'.format(config_type)
-
-                data = json.loads(args[2])[0]
-
-                assert data.pop('is_set', None) is True
-                assert data.pop('value', None) == value
-                assert not data
-
     def test_success_only_once(self):
         class TestCheck(AgentCheck):
             def __init__(self, *args, **kwargs):
