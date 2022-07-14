@@ -33,15 +33,21 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-'EOSQL'
     CREATE SCHEMA IF NOT EXISTS datadog;
     GRANT USAGE ON SCHEMA datadog TO datadog;
 
-    CREATE OR REPLACE FUNCTION datadog.explain_statement(l_query text, out explain JSON) RETURNS SETOF JSON AS
+    CREATE OR REPLACE FUNCTION datadog.explain_statement (
+      l_query text,
+      out explain JSON
+    )
+    RETURNS SETOF JSON AS
     $$
-      BEGIN
-          RETURN QUERY EXECUTE 'EXPLAIN (FORMAT JSON) ' || l_query;
-      END;
+    BEGIN
+      RETURN QUERY EXECUTE pg_catalog.concat('EXPLAIN (FORMAT JSON)',
+        pg_catalog.REPLACE ( l_query ,';', '')
+        );
+    END;
     $$
-    LANGUAGE plpgsql
+    LANGUAGE 'plpgsql'
     RETURNS NULL ON NULL INPUT
-    SECURITY DEFINER;
+    SECURITY DEFINER; 
 
     CREATE OR REPLACE FUNCTION datadog.pg_stat_activity() RETURNS SETOF pg_stat_activity AS
     $$ SELECT * FROM pg_catalog.pg_stat_activity; $$
@@ -53,15 +59,21 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-'EOSQL'
 
     -- datadog.explain_statement_noaccess is not part of the standard setup
     -- it's added only for the purpose of testing an explain function owned by a user with inadequate permissions
-    CREATE OR REPLACE FUNCTION datadog.explain_statement_noaccess(l_query text, out explain JSON) RETURNS SETOF JSON AS
+    CREATE OR REPLACE FUNCTION datadog.explain_statement_noaccess (
+      l_query text,
+      out explain JSON
+    )
+    RETURNS SETOF JSON AS
     $$
-      BEGIN
-          RETURN QUERY EXECUTE 'EXPLAIN (FORMAT JSON) ' || l_query;
-      END;
+    BEGIN
+      RETURN QUERY EXECUTE pg_catalog.concat('EXPLAIN (FORMAT JSON)',
+        pg_catalog.REPLACE(l_query ,';', '')
+        );
+    END;
     $$
-    LANGUAGE plpgsql
+    LANGUAGE 'plpgsql'
     RETURNS NULL ON NULL INPUT
-    SECURITY DEFINER;
+    SECURITY DEFINER; 
     ALTER FUNCTION datadog.explain_statement_noaccess(l_query text, out explain json) OWNER TO datadog;
 EOSQL
 
