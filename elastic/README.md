@@ -68,7 +68,7 @@ To configure this check for an Agent running on a host:
         }
         cluster = ["monitor"]
         ```
-        And in the user indicate his roles:
+        Add the role to the user:
         ```json
         roles = [<created role>, "monitoring_user"]
         ```
