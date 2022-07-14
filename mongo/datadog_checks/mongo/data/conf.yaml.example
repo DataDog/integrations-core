@@ -47,6 +47,14 @@ instances:
     #
     # password: <PASSWORD>
 
+    ## @param connection_scheme - string - optional - default: mongodb
+    ## Use `mongodb` to identify that this is a string in the standard connection format. This is the default value.
+    ## In order to leverage the DNS seed list, use a connection_scheme of `mongodb+srv` rather than the standard
+    ## `mongodb`.
+    ## For more information, see: https://www.mongodb.com/docs/manual/reference/connection-string/
+    #
+    # connection_scheme: mongodb
+
     ## @param database - string - optional
     ## The database to collect metrics from.
     ## This is also the authentication database to use if a `username` and `password` is set but the `authSource` is not
