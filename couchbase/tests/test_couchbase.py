@@ -176,13 +176,13 @@ def _assert_bucket_metrics(aggregator, tags, device=None):
     #  Because some metrics are deprecated, we can just see if we get an arbitrary number
     #  of bucket metrics. If there are more than that number, we assume that we're getting
     #  all the bucket metrics we should be getting
-    bucket_metric_count = 0
-    for bucket_metric in aggregator.metric_names:
-        if bucket_metric.find('couchbase.by_bucket.') == 0:
-            aggregator.assert_metric(bucket_metric, tags=tags, count=1, device=device)
-            bucket_metric_count += 1
+    bucket_metrics = []
+    for metric in aggregator.metric_names:
+        if metric.find('couchbase.by_bucket.') == 0:
+            aggregator.assert_metric(metric, tags=tags, count=1, device=device)
+            bucket_metrics.append(metric)
 
-    assert bucket_metric_count > 10
+    assert len(bucket_metrics) > 4, "Expected at least 5 bucket metrics found: " + str(bucket_metrics)
 
 
 def _assert_stats(aggregator, node_tags, device=None):
