@@ -197,17 +197,16 @@ class Redis(AgentCheck):
         conn = self._get_conn(self.instance)
         # Ping the database for info, and track the latency.
         # Process the service check: the check passes if we can connect to Redis
-        if PY2:
-            start = time.time()
-        else:
-            start = time.process_time()
+        start = (
+            time.time() if PY2 else time.process_time()
+        )  # New in python 3.3: time.process_time (It does not include time elapsed during sleep)
         tags = list(self.tags)
         try:
             info = conn.info()
-            if PY2:
-                latency_ms = round_value((time.time() - start) * 1000, 2)
-            else:
-                latency_ms = round_value((time.process_time() - start) * 1000, 2)
+            cur_time = (
+                time.time() if PY2 else time.process_time()
+            )  # New in python 3.3: time.process_time (It does not include time elapsed during sleep)
+            latency_ms = round_value((cur_time - start) * 1000, 2)
             self._collect_metadata(info)
         except ValueError as e:
             self.service_check('redis.can_connect', AgentCheck.CRITICAL, message=str(e), tags=self.tags)
