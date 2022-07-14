@@ -1,6 +1,6 @@
 # CHANGELOG - Aspdotnet
 
-## 1.11.1 / 2022-05-15
+## 1.11.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
 

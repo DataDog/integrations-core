@@ -1,6 +1,10 @@
 # CHANGELOG - elastic
 
-## 5.1.1 / 2022-05-15
+## 5.2.0 / 2022-06-27
+
+* [Added] Collect the count version of certain rate metrics. See [#12352](https://github.com/DataDog/integrations-core/pull/12352).
+
+## 5.1.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Update metrics. See [#11783](https://github.com/DataDog/integrations-core/pull/11783).
 

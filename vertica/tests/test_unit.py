@@ -10,6 +10,7 @@ import pytest
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.log import TRACE_LEVEL
 from datadog_checks.vertica import VerticaCheck
+from datadog_checks.vertica.utils import parse_major_version
 
 CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
 cert = os.path.join(CERTIFICATE_DIR, 'cert.cert')
@@ -150,3 +151,8 @@ def test_client_logging_disabled_if_agent_uses_info(aggregator, instance):
             connection_load_balance=mock.ANY,
             connection_timeout=mock.ANY,
         )
+
+
+@pytest.mark.parametrize('version_string, expected', [('v9.2.0-7', 9), ('v11.1.1-0', 11)])
+def test_parse_major_version(version_string, expected):
+    assert parse_major_version(version_string) == expected

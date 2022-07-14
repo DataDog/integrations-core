@@ -1,6 +1,14 @@
 # CHANGELOG - gitlab
 
-## 5.2.0 / 2022-05-15
+## 5.2.2 / 2022-06-30
+
+* [Fixed] Fix default config value. See [#12429](https://github.com/DataDog/integrations-core/pull/12429).
+
+## 5.2.1 / 2022-06-27
+
+* [Fixed] Change default value for the send_monotonic_counter to false. See [#12022](https://github.com/DataDog/integrations-core/pull/12022).
+
+## 5.2.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).

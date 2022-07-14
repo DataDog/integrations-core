@@ -30,3 +30,7 @@ def node_state_to_service_check(node_state):
 
 def kilobytes_to_bytes(kb):
     return convert_units(kb, unit=KILOBYTE, to=BYTE)[0]
+
+
+def parse_major_version(version_string):
+    return int(version_string.split('.')[0].lstrip('v'))

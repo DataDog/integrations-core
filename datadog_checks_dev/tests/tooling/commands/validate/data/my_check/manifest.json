@@ -1,0 +1,34 @@
+{
+  "display_name": "My Check",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "my_check",
+  "metric_prefix": "my_check.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "f84d2d4e-03c5-44d7-aa9e-53efc08346a7",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "My Check",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "my-check",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}

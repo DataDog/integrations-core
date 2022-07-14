@@ -1,6 +1,10 @@
 # CHANGELOG - mongo
 
-## 3.2.2 / 2022-05-15
+## 3.2.3 / 2022-06-27
+
+* [Fixed] Allow hosts to be a singular value. See [#12090](https://github.com/DataDog/integrations-core/pull/12090).
+
+## 3.2.2 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Capture badly formatted hosts. See [#11933](https://github.com/DataDog/integrations-core/pull/11933).
 

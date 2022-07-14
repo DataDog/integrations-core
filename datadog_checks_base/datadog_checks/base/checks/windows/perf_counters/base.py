@@ -15,9 +15,11 @@ from ....utils.functions import raise_exception
 from ... import AgentCheck
 from .connection import Connection
 from .counter import PerfObject
+from .refresh import WindowsPerformanceObjectRefresher
 
 
 class PerfCountersBaseCheck(AgentCheck):
+    OBJECT_REFRESHER = WindowsPerformanceObjectRefresher()
     SERVICE_CHECK_HEALTH = 'windows.perf.health'
 
     def __init__(self, name, init_config, instances):
@@ -38,6 +40,7 @@ class PerfCountersBaseCheck(AgentCheck):
         self._static_tags = None
 
         self.check_initializations.append(self.create_connection)
+        self.check_initializations.append(self.setup_refresher)
         self.check_initializations.append(self.configure_perf_objects)
 
     def check(self, _):
@@ -48,19 +51,6 @@ class PerfCountersBaseCheck(AgentCheck):
             self._query_counters()
 
     def _query_counters(self):
-        # Refresh the list of performance objects, see:
-        # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectitemsa#remarks
-        try:
-            # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectsa
-            # https://mhammond.github.io/pywin32/win32pdh__EnumObjects_meth.html
-            win32pdh.EnumObjects(None, self._connection.server, win32pdh.PERF_DETAIL_WIZARD, True)
-        except pywintypes.error as error:
-            message = 'Error refreshing performance objects: {}'.format(error.strerror)
-            self.submit_health_check(self.CRITICAL, message=message)
-            self.log.error(message)
-
-            return
-
         # Avoid collection of performance objects that failed to refresh
         collection_queue = []
 
@@ -131,6 +121,13 @@ class PerfCountersBaseCheck(AgentCheck):
         self.log.debug('Setting `server` to `%s`', self._connection.server)
         self._connection.connect()
 
+    def setup_refresher(self):
+        self.OBJECT_REFRESHER.add_server(self._connection.server)
+
+        # Expected for multiple calls
+        with suppress(RuntimeError):
+            self.OBJECT_REFRESHER.start()
+
     def get_perf_object(self, connection, object_name, object_config, use_localized_counters, tags):
         return PerfObject(self, connection, object_name, object_config, use_localized_counters, tags)
 
@@ -155,6 +152,8 @@ class PerfCountersBaseCheck(AgentCheck):
             self.__NAMESPACE__ = old_namespace
 
     def cancel(self):
+        self.OBJECT_REFRESHER.remove_server(self._connection.server)
+
         for perf_object in self.perf_objects:
             with suppress(Exception):
                 perf_object.clear()

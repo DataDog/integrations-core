@@ -323,7 +323,8 @@ def render_recommended_monitors_progress():
 
 
 def render_manifest_v2_progress():
-    valid_checks = get_valid_integrations()
+    valid_checks = sorted(get_valid_integrations())
+
     total_checks = len(valid_checks)
     checks_v2_manifest = 0
 
