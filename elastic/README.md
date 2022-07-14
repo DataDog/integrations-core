@@ -72,7 +72,7 @@ To configure this check for an Agent running on a host:
         ```json
         roles = [<created role>, "monitoring_user"]
         ```
-        More info: [create or update roles](https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-role.html) and [create or update users](https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html)
+        For more information, see [create or update roles](https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-role.html) and [create or update users](https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html).
 
 
 2. [Restart the Agent][8].
