@@ -221,7 +221,7 @@ instances:
 
     ## Configure collection of query metrics
     #
-    query_metrics:
+    # query_metrics:
 
         ## @param enabled - boolean - optional - default: true
         ## Enable collection of query metrics. Requires `dbm: true`.
@@ -248,7 +248,7 @@ instances:
 
     ## Configure collection of active sessions monitoring
     #
-    query_activity:
+    # query_activity:
 
         ## @param enabled - boolean - optional - default: true
         ## Enable collection of active sessions. Requires `dbm: true`.
@@ -271,7 +271,7 @@ instances:
     ##
     ## These values are only applied when `dbm: true` option is set.
     #
-    aws:
+    # aws:
 
         ## @param instance_endpoint - string - optional - default: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
         ## Equal to the Endpoint.Address of the instance the agent is connecting to. 
@@ -290,7 +290,7 @@ instances:
     ##
     ## These values are only applied when `dbm: true` option is set.
     #
-    gcp:
+    # gcp:
 
         ## @param project_id - string - optional - default: foo-project
         ## Equal to the GCP resource's project ID.
@@ -317,7 +317,7 @@ instances:
     ##
     ## These values are only applied when `dbm: true` option is set.
     #
-    azure:
+    # azure:
 
         ## @param deployment_type - string - optional - default: sql_database
         ## Equal to the deployment type for the managed database. 
@@ -340,7 +340,7 @@ instances:
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
     #
-    obfuscator_options:
+    # obfuscator_options:
 
         ## @param replace_digits - boolean - optional - default: false
         ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
