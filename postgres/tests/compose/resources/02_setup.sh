@@ -33,21 +33,26 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-'EOSQL'
     CREATE SCHEMA IF NOT EXISTS datadog;
     GRANT USAGE ON SCHEMA datadog TO datadog;
 
-    CREATE OR REPLACE FUNCTION datadog.explain_statement (
-      l_query text,
-      out explain JSON
+    CREATE OR REPLACE FUNCTION datadog.explain_statement(
+      l_query TEXT,
+      OUT explain JSON
     )
     RETURNS SETOF JSON AS
     $$
+    DECLARE
+    curs REFCURSOR;
+    plan JSON;
+
     BEGIN
-      RETURN QUERY EXECUTE pg_catalog.concat('EXPLAIN (FORMAT JSON)',
-        pg_catalog.REPLACE ( l_query ,';', '')
-        );
+      OPEN curs FOR EXECUTE pg_catalog.concat('EXPLAIN (FORMAT JSON) ', l_query);
+      FETCH curs INTO plan;
+      CLOSE curs;
+      RETURN QUERY SELECT plan;
     END;
     $$
     LANGUAGE 'plpgsql'
     RETURNS NULL ON NULL INPUT
-    SECURITY DEFINER; 
+    SECURITY DEFINER;
 
     CREATE OR REPLACE FUNCTION datadog.pg_stat_activity() RETURNS SETOF pg_stat_activity AS
     $$ SELECT * FROM pg_catalog.pg_stat_activity; $$
@@ -59,22 +64,27 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-'EOSQL'
 
     -- datadog.explain_statement_noaccess is not part of the standard setup
     -- it's added only for the purpose of testing an explain function owned by a user with inadequate permissions
-    CREATE OR REPLACE FUNCTION datadog.explain_statement_noaccess (
-      l_query text,
-      out explain JSON
+    CREATE OR REPLACE FUNCTION datadog.explain_statement_noaccess(
+      l_query TEXT,
+      OUT explain JSON
     )
     RETURNS SETOF JSON AS
     $$
+    DECLARE
+    curs REFCURSOR;
+    plan JSON;
+
     BEGIN
-      RETURN QUERY EXECUTE pg_catalog.concat('EXPLAIN (FORMAT JSON)',
-        pg_catalog.REPLACE(l_query ,';', '')
-        );
+      OPEN curs FOR EXECUTE pg_catalog.concat('EXPLAIN (FORMAT JSON) ', l_query);
+      FETCH curs INTO plan;
+      CLOSE curs;
+      RETURN QUERY SELECT plan;
     END;
     $$
     LANGUAGE 'plpgsql'
     RETURNS NULL ON NULL INPUT
-    SECURITY DEFINER; 
-    ALTER FUNCTION datadog.explain_statement_noaccess(l_query text, out explain json) OWNER TO datadog;
+    SECURITY DEFINER;
+    ALTER FUNCTION datadog.explain_statement_noaccess(l_query TEXT, OUT explain JSON) OWNER TO datadog;
 EOSQL
 
 done
