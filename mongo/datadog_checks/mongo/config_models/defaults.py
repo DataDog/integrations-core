@@ -26,6 +26,10 @@ def instance_collections_indexes_stats(field, value):
     return False
 
 
+def instance_connection_scheme(field, value):
+    return 'mongodb'
+
+
 def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 
