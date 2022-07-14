@@ -12,6 +12,18 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         return (self.root.parent / 'datadog_checks_base').is_dir()
 
     @cached_property
+    def is_base_package(self):
+        return self.root.name == 'datadog_checks_base'
+
+    @cached_property
+    def is_test_package(self):
+        return self.root.name == 'datadog_checks_dev'
+
+    @cached_property
+    def is_dev_package(self):
+        return self.root.name == 'ddev'
+
+    @cached_property
     def check_types(self):
         return self.config.get('check-types', False)
 
@@ -24,10 +36,10 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         return self.config.get('mypy-deps', [])
 
     @cached_property
-    def dev_package_install_command(self):
+    def test_package_install_command(self):
         if not self.in_core_repo:
             return self.pip_install_command('datadog-checks-dev')
-        elif self.root.name != 'datadog_checks_dev':
+        elif not self.is_test_package:
             return self.pip_install_command('-e', '../datadog_checks_dev')
 
     @lru_cache(maxsize=None)
@@ -36,7 +48,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             return self.pip_install_command(self.format_base_package(features))
         elif base_package_version := os.environ.get('BASE_PACKAGE_FORCE_VERSION'):
             return self.pip_install_command(self.format_base_package(features, version=base_package_version))
-        elif self.root.name != 'datadog_checks_base':
+        elif not self.is_base_package:
             return self.pip_install_command('-e', f'../{self.format_base_package(features, local=True)}')
 
     @staticmethod
@@ -53,7 +65,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
 
     @staticmethod
     def pip_install_command(*args):
-        return f'python -m pip install --disable-pip-version-check -q {" ".join(args)}'
+        return f'python -m pip install --disable-pip-version-check {{verbosity:flag:-1}} {" ".join(args)}'
 
     def finalize_config(self, config):
         for env_name, env_config in config.items():
@@ -63,24 +75,26 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             if not (is_test_env or is_e2e_env):
                 continue
 
-            scripts = env_config.setdefault('scripts', {})
+            if not (self.is_test_package or self.is_dev_package):
+                env_config.setdefault('features', ['deps'])
 
             install_commands = []
             if install_command := self.base_package_install_command(config.get('base-package-features')):
                 install_commands.append(install_command)
-            if self.dev_package_install_command:
-                install_commands.append(self.dev_package_install_command)
+            if self.test_package_install_command:
+                install_commands.append(self.test_package_install_command)
 
-            scripts['dd-install-packages'] = install_commands
-            env_config.setdefault('post-install-commands', []).insert(0, 'dd-install-packages')
+            scripts = env_config.setdefault('scripts', {})
+            scripts['_dd-install-packages'] = install_commands
+            env_config.setdefault('post-install-commands', []).insert(0, '_dd-install-packages')
 
-            scripts['dd-test'] = ['pytest -v --benchmark-skip {args:tests}']
-            scripts['dd-benchmark'] = ['pytest -v --benchmark-only --benchmark-cprofile=tottime {args:tests}']
+            scripts['_dd-test'] = ['pytest -v --benchmark-skip {args:tests}']
+            scripts['_dd-benchmark'] = ['pytest -v --benchmark-only --benchmark-cprofile=tottime {args:tests}']
 
             # Set defaults that will be called but allow users to override while
             # retaining access to them for reuse
-            scripts.setdefault('test', 'dd-test')
-            scripts.setdefault('benchmark', 'dd-benchmark')
+            scripts.setdefault('test', '_dd-test')
+            scripts.setdefault('benchmark', '_dd-benchmark')
 
     def get_initial_config(self):
         lint_env = {
