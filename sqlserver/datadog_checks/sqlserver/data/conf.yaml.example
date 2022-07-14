@@ -216,7 +216,6 @@ instances:
 
     ## @param dbm - boolean - optional - default: false
     ## Set to `true` to enable Database Monitoring.
-    ## Reach out to your Customer Success Manager to request access to the beta.
     #
     # dbm: false
 
