@@ -130,7 +130,7 @@ def test_response_time(aggregator):
                 (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip3', 80, 0, 0)),
             ],
             'ip1',
-            id='string hostname ipv4 address 1st in list',
+            id='string hostname: ipv4 address 1st in list',
         ),
         pytest.param(
             'another-hostname',
