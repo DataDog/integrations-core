@@ -8,6 +8,7 @@ import socket
 from copy import deepcopy
 
 import mock
+import pytest
 
 from datadog_checks.tcp_check import TCPCheck
 
@@ -109,31 +110,63 @@ def test_response_time(aggregator):
     assert len(aggregator.service_checks('tcp.can_connect')) == 1
 
 
-def test_localhost_resolution(aggregator):
+@pytest.mark.parametrize(
+    'hostname, getaddrinfo, expected_addrs',
+    [
+        pytest.param(
+            'localhost',
+            [
+                (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('::1', 80, 0, 0)),
+                (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('127.0.0.1', 80)),
+            ],
+            '127.0.0.1',
+            id='localhost',
+        ),
+        pytest.param(
+            'some-hostname',
+            [
+                (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip1', 80)),
+                (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip2', 80, 0, 0)),
+                (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip3', 80, 0, 0)),
+            ],
+            'ip1',
+            id='string hostname ipv4 address 1st in list',
+        ),
+        pytest.param(
+            'another-hostname',
+            [
+                (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip1', 80, 0, 0)),
+                (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip2', 80)),
+                (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip3', 80, 0, 0)),
+            ],
+            'ip2',
+            id='string hostname: ipv4 address 2nd in list',
+        ),
+    ],
+)
+def test_hostname_resolution(aggregator, hostname, getaddrinfo, expected_addrs):
     """
-    Test that localhost gets resolved to ipv4 address format properly.
+    Test that string hostnames get resolved to ipv4 address format properly.
     """
     instance = deepcopy(common.INSTANCE_LOCALHOST)
+    instance['host'] = hostname
+    instance['multiple_ips'] = False
     check = TCPCheck(common.CHECK_NAME, {}, [instance])
 
-    with mock.patch(
-        'socket.getaddrinfo',
-        return_value=[
-            (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('::1', 80, 0, 0)),
-            (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('127.0.0.1', 80)),
-        ],
+    with mock.patch('socket.getaddrinfo', return_value=getaddrinfo,), mock.patch(
+        'socket.gethostbyname', return_value=expected_addrs
     ), mock.patch.object(check, 'connect', wraps=check.connect) as connect:
         connect.side_effect = [None, Exception(), None]
         expected_tags = [
             "instance:LocalhostService",
-            "target_host:localhost",
+            "target_host:{}".format(hostname),
             "port:80",
             "foo:bar",
-            "address:127.0.0.1",
+            "address:{}".format(expected_addrs),
         ]
 
         check.check(instance)
-        assert check._addrs == ['127.0.0.1']
+        assert check._addrs == [expected_addrs]
         aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags, count=1)
         aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags, count=1)
 
