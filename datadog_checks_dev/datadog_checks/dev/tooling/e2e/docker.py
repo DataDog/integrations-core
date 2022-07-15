@@ -104,6 +104,8 @@ class DockerInterface(object):
 
         if kwargs.pop('interactive', False):
             cmd.append('-it')
+        if kwargs.get('docker_args'):
+            cmd.extend(kwargs.pop('docker_args'))
 
         cmd.append(self.container_name)
 

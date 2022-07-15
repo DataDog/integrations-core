@@ -196,7 +196,7 @@ def _run_start_commands(metadata, environment, check, env):
         echo_waiting('Running extra start-up commands... ', nl=False)
 
         for command in start_commands:
-            result = environment.exec_command(command, capture=True, interactive=True)
+            result = environment.exec_command(command, capture=True, docker_args=['-t'])
             if result.code:
                 click.echo()
                 echo_info(result.stdout + result.stderr)
