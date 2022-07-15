@@ -1412,12 +1412,6 @@
                       "formula": "query2"
                     },
                     {
-                      "alias": "Alloc Perm",
-                      "conditional_formats": [],
-                      "cell_display_mode": "bar",
-                      "formula": "query3"
-                    },
-                    {
                       "alias": "Peak Perm",
                       "conditional_formats": [],
                       "cell_display_mode": "bar",
@@ -1436,12 +1430,6 @@
                       "query": "avg:teradata.disk_space.max_perm{$host,$database,$server,$port} by {td_table}",
                       "data_source": "metrics",
                       "name": "query2",
-                      "aggregator": "avg"
-                    },
-                    {
-                      "query": "avg:teradata.disk_space.alloc_perm{$host,$database,$server,$port} by {td_table}",
-                      "data_source": "metrics",
-                      "name": "query3",
                       "aggregator": "avg"
                     },
                     {
