@@ -15,7 +15,7 @@ if "inet_pton" in socket.__dict__:
         try:
             socket.inet_pton(socket.AF_INET6, addr)
             return True
-        except socket.error:
+        except socket.error or OSError:
             return False
 
 
@@ -104,8 +104,8 @@ class TCPCheck(AgentCheck):
         self._addrs = [
             sockaddr[0] for (_, _, _, _, sockaddr) in socket.getaddrinfo(self.host, self.port, 0, 0, socket.IPPROTO_TCP)
         ]
-        if not self.multiple_ips:
-            self._addrs = self._addrs[:1]
+        if not self.multiple_ips and not is_ipv6(self.host):
+            self._addrs = [socket.gethostbyname(self.host)]
 
         if self._addrs == []:
             raise Exception("No IPs attached to host")
