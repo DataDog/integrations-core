@@ -109,6 +109,38 @@ def test_response_time(aggregator):
     assert len(aggregator.service_checks('tcp.can_connect')) == 1
 
 
+def test_localhost_resolution(aggregator):
+    """
+    Test that localhost gets resolved to ipv4 address format properly.
+    """
+    instance = deepcopy(common.INSTANCE_LOCALHOST)
+    check = TCPCheck(common.CHECK_NAME, {}, [instance])
+
+    with mock.patch(
+        'socket.getaddrinfo',
+        return_value=[
+            (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('::1', 80, 0, 0)),
+            (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('127.0.0.1', 80)),
+        ],
+    ), mock.patch.object(check, 'connect', wraps=check.connect) as connect:
+        connect.side_effect = [None, Exception(), None]
+        expected_tags = [
+            "instance:LocalhostService",
+            "target_host:localhost",
+            "port:80",
+            "foo:bar",
+            "address:127.0.0.1",
+        ]
+
+        check.check(instance)
+        assert check._addrs == ['127.0.0.1']
+        aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags, count=1)
+        aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags, count=1)
+
+        aggregator.assert_all_metrics_covered()
+    assert len(aggregator.service_checks('tcp.can_connect')) == 1
+
+
 def test_multiple(aggregator):
     """
     Test when a domain is attached to 3 IPs [UP, DOWN, UP]
