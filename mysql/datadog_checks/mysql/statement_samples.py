@@ -633,7 +633,8 @@ class MySQLStatementSamples(DBMAsyncJob):
                     'Cannot collect statement samples as there are no enabled performance_schema.events_statements_* '
                     'consumers. Enable performance_schema and at least one events_statements consumer in order '
                     'to collect statement samples. See https://docs.datadoghq.com/database_monitoring/setup_mysql/'
-                    'troubleshooting/#queries-are-missing-explain-plans for more details.',
+                    'troubleshooting/#%s for more details.',
+                    DatabaseConfigurationError.events_statements_consumer_missing.value,
                     code=DatabaseConfigurationError.events_statements_consumer_missing.value,
                     host=self._check.resolved_hostname,
                 ),
