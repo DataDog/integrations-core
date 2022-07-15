@@ -288,7 +288,7 @@ you can potentially reduce the scope of the check by trying the following:
 * Disable `collect_statistics_metrics`.
 
 ### Errors in the logs
-* `Unpack for type ((67108864,)) not implemented` If you're seeing errors like this and your MQ server is running on a IBM OS try enabling `convert_endianness` and restarting your agent.
+* `Unpack for type ((67108864,)) not implemented`: If you're seeing errors like this, and your MQ server is running on a IBM OS, enable `convert_endianness` and restart your Agent.
 
 
 ### Other
