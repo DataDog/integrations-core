@@ -148,7 +148,7 @@ def test_hostname_resolution(aggregator, hostname, getaddrinfo, expected_addrs):
     """
     Test that string hostnames get resolved to ipv4 address format properly.
     """
-    instance = deepcopy(common.INSTANCE_LOCALHOST)
+    instance = deepcopy(common.INSTANCE)
     instance['host'] = hostname
     instance['multiple_ips'] = False
     check = TCPCheck(common.CHECK_NAME, {}, [instance])
@@ -158,7 +158,7 @@ def test_hostname_resolution(aggregator, hostname, getaddrinfo, expected_addrs):
     ), mock.patch.object(check, 'connect', wraps=check.connect) as connect:
         connect.side_effect = [None, Exception(), None]
         expected_tags = [
-            "instance:LocalhostService",
+            "instance:UpService",
             "target_host:{}".format(hostname),
             "port:80",
             "foo:bar",

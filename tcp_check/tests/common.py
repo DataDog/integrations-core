@@ -21,7 +21,6 @@ INSTANCE_IPV6 = {
 }
 
 INSTANCE_KO = {'host': '127.0.0.1', 'port': 65530, 'timeout': 1.5, 'name': 'DownService', 'tags': ["foo:bar"]}
-INSTANCE_LOCALHOST = {'host': 'localhost', 'port': 80, 'timeout': 1.5, 'name': 'LocalhostService', 'tags': ["foo:bar"]}
 
 E2E_METADATA = {'docker_platform': 'windows' if using_windows_containers() else 'linux'}
 
