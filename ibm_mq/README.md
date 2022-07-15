@@ -138,13 +138,9 @@ Configure the environment variable `MQ_FILE_PATH`, to point at the data director
 
 ### Permissions and authentication
 
-There are many ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions and, optionally, `+chg` permissions.
-`+chg` permissions are required to collect metrics for [reset queue statistics][14] (`MQCMD_RESET_Q_STATS`).
-If you do not wish to collect these metrics you can disable `collect_reset_queue_metrics` on the configuration.
-Collecting reset queue statistics performance data will also reset the performance data.
+There are many ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions and, optionally, `+chg` permissions. `+chg` permissions are required to collect metrics for [reset queue statistics][14] (`MQCMD_RESET_Q_STATS`). If you do not wish to collect these metrics you can disable `collect_reset_queue_metrics` on the configuration. Collecting reset queue statistics performance data will also reset the performance data.
 
-**Note**: "Queue Monitoring" must be enabled on the MQ server and set to at least "Medium".
-This can be done using the MQ UI or with an `mqsc` command in the server's host:
+**Note**: "Queue Monitoring" must be enabled on the MQ server and set to at least "Medium". This can be done using the MQ UI or with an `mqsc` command in the server's host:
 
 ```text
 > /opt/mqm/bin/runmqsc
@@ -180,6 +176,7 @@ To configure this check for an Agent running on a host:
    - `queue_manager`: The Queue Manager named
    - `host`: The host where IBM MQ is running
    - `port`: The port that IBM MQ has exposed
+   - `convert_endianness`: You need to enable this if your MQ server is running on AIX or IBM i
 
     If you are using a username and password setup, you can set the `username` and `password`. If no username is set, the Agent process owner (`dd-agent`) is used.
 
@@ -289,6 +286,10 @@ you can potentially reduce the scope of the check by trying the following:
 * If you are autodiscovering queues with `queue_patterns` or `queue_regex`, try tightening the pattern or regex so it matches _less_ queues.
 * Disable `auto_discover_channels` if you have too many channels.
 * Disable `collect_statistics_metrics`.
+
+### Errors in the logs
+* `Unpack for type ((67108864,)) not implemented` If you're seeing errors like this and your MQ server is running on a IBM OS try enabling `convert_endianness` and restarting your agent.
+
 
 ### Other
 
