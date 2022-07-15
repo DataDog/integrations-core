@@ -351,6 +351,10 @@ def get_var_metadata(var_name, mib_name, search_locations=None):
 
     # grab enum if it exists in-line
     enum = file_content[var_name].get('syntax', {}).get('constraints', {}).get('enumeration', {})
+    # if there's not an integer enumeration, look for bits
+    if not enum:
+        enum = file_content[var_name].get('syntax', {}).get('bits', {})
+
     # if there is no enum in-line, check for type definition and enum in the same MIB and its imports
     if not enum:
         var_type = file_content[var_name].get('syntax', {}).get('type', '')
@@ -409,6 +413,11 @@ def get_enum(var_name, mib_name, search_locations=None):
             continue
 
         enum = file_content[var_name].get('type', {}).get('constraints', {}).get('enumeration', {})
+
+        # if there's not an integer enum, try for bits
+        if not enum:
+            enum = file_content[var_name].get('type', {}).get('bits', {})
+
         # update variable to the type name in case we have to go another layer down
         var_name = file_content[var_name].get('type', {}).get('type', '')
 
