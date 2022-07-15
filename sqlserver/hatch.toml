@@ -1,0 +1,69 @@
+[env.collectors.datadog-checks]
+base-package-features = ["deps", "db", "json"]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
+os = ["linux"]
+version = ["2017", "2019"]
+setup = ["single", "ha"]
+
+# test the full combination of python-version/driver against a the latest sql server version
+# ideally we'd test this against all sql server versions but that makes the test take too long and time out.
+# time out. until we're able to modify and parallelize the work we'll limit the per-driver tests to only a single
+# sqlserver version
+[[envs.default.matrix]]
+python = ["27", "38"]
+os = ["windows"]
+driver = ["SQLOLEDB", "SQLNCLI11", "MSOLEDBSQL", "odbc"]
+version = ["2019"]
+setup = ["single"]
+
+# older sql server versions tested on only a single python version and driver
+# TODO: Investigate versions 2016 & 2017 causing CI to fail. Flaky version as of 7/12/2022.
+# py38-windows-odbc-{2012,2014,2016,2017}-single
+[[envs.default.matrix]]
+python = ["38"]
+os = ["windows"]
+driver = ["odbc"]
+version = ["2012", "2014"]
+setup = ["single"]
+
+# temporarily exclude high cardinality windows env. to be fixed in a follow-up PR
+[[envs.default.matrix]]
+python = ["38"]
+os = ["linux"]
+driver = ["odbc"]
+version = ["2019"]
+case = ["high-cardinality"]
+
+[envs.default.env-vars]
+ODBCSYSINI = "{root}{/}tests{/}odbc"
+COMPOSE_FOLDER = "compose"
+PIP_EXTRA_INDEX_URL = "https://datadoghq.dev/ci-wheels/bin"
+
+[envs.default.overrides]
+platform.windows.e2e-env = { value = false }
+platform.windows.env-vars = [
+  "COMPOSE_FOLDER=compose-windows",
+  # we need SETUPTOOLS_USE_DISTUTILS=stdlib for setuptools versions 60+ in order for adodbapi to be able to install
+  # correctly for python3 on windows. If not set installation fails with the following error:
+  #    in ImportError: cannot import name 'build_py_2to3' from 'distutils.command.build_py'
+  "SETUPTOOLS_USE_DISTUTILS=stdlib",
+]
+matrix.os.platforms = [
+  { value = "windows", if = ["windows"] },
+  { value = "linux", if = ["linux"] },
+  { value = "macos", if = ["linux"] },
+]
+matrix.setup.env-vars = [
+  { key = "COMPOSE_FOLDER", value = "compose-ha", if = ["ha"] },
+]
+matrix.version.env-vars = [
+  { key = "SQLSERVER_MAJOR_VERSION" },
+  { key = "SQLSERVER_IMAGE_TAG", value = "2017-CU24-ubuntu-16.04", if = ["2017"], platform = ["linux"] },
+  { key = "SQLSERVER_IMAGE_TAG", value = "2019-CU11-ubuntu-16.04", if = ["2019"], platform = ["linux"] },
+  { key = "SQLSERVER_BASE_IMAGE", value = "datadog/docker-library:sqlserver_{matrix:version}", platform = ["windows"] },
+]
+matrix.driver.env-vars = "WINDOWS_SQLSERVER_DRIVER"
+name.linux-odbc-2019-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"
+name.windows-odbc-2019-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality-windows"
