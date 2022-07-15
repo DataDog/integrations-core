@@ -18,3 +18,8 @@ class SystemCore(AgentCheck):
             tags = instance_tags + ['core:{0}'.format(i)]
             for key, value in iteritems(cpu._asdict()):
                 self.rate('system.core.{0}'.format(key), 100.0 * value, tags=tags)
+
+        total_cpu_times = psutil.cpu_times()
+        n_cpus = psutil.cpu_count()
+        for key, value in iteritems(total_cpu_times._asdict()):
+            self.rate('system.core.{0}.total'.format(key), 100.0 * value / n_cpus, tags=instance_tags)
