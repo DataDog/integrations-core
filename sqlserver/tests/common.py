@@ -107,6 +107,7 @@ EXPECTED_QUERY_EXECUTOR_AO_METRICS_SECONDARY = [
 ]
 EXPECTED_QUERY_EXECUTOR_AO_METRICS_COMMON = [
     'sqlserver.ao.is_primary_replica',
+    'sqlserver.ao.replica_status',
     'sqlserver.ao.quorum_type',
     'sqlserver.ao.quorum_state',
     'sqlserver.ao.member.type',
