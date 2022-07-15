@@ -13,7 +13,7 @@ SERVICE_PATTERN_FLAGS = re.IGNORECASE
 
 class WindowsService(AgentCheck):
     SERVICE_CHECK_NAME = 'windows_service.state'
-    # https://docs.microsoft.com/en-us/windows/desktop/api/winsvc/ns-winsvc-_service_status
+    # https://docs.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_status_process
     STATE_TO_STATUS = {
         # STOPPED
         1: AgentCheck.CRITICAL,
