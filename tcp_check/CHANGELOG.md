@@ -1,5 +1,8 @@
 # CHANGELOG - tcp_check
 
+## 4.5.1-beta.1 / 2022-07-15
+
+
 ## 4.5.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Add IPv6 support. See [#11740](https://github.com/DataDog/integrations-core/pull/11740).
