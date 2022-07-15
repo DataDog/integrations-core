@@ -138,9 +138,13 @@ Configure the environment variable `MQ_FILE_PATH`, to point at the data director
 
 ### Permissions and authentication
 
-There are many ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions and, optionally, `+chg` permissions. `+chg` permissions are required to collect metrics for [reset queue statistics][14] (`MQCMD_RESET_Q_STATS`). If you do not wish to collect these metrics you can disable `collect_reset_queue_metrics` on the configuration. Collecting reset queue statistics performance data will also reset the performance data.
+There are many ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions and, optionally, `+chg` permissions.
+`+chg` permissions are required to collect metrics for [reset queue statistics][14] (`MQCMD_RESET_Q_STATS`).
+If you do not wish to collect these metrics you can disable `collect_reset_queue_metrics` on the configuration.
+Collecting reset queue statistics performance data will also reset the performance data.
 
-**Note**: "Queue Monitoring" must be enabled and set to at least "Medium". This can be done using the MQ UI or with an mqsc command:
+**Note**: "Queue Monitoring" must be enabled on the MQ server and set to at least "Medium".
+This can be done using the MQ UI or with an `mqsc` command in the server's host:
 
 ```text
 > /opt/mqm/bin/runmqsc
