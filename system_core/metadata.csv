@@ -20,3 +20,7 @@ system.core.guest_nice,gauge,,percent,,[Linux] The percentage of time a given CP
 system.core.guest_nice.total,gauge,,percent,,[Linux] The percentage of time the whole CPU has spent running running a niced guest,0,system,cpu guest_nice total,
 system.core.steal,gauge,,percent,,[Linux] The percentage of time a given CPU core has spent running a virtual CPU for guest operating systems under the control of the Linux kernel,0,system,cpu steal,
 system.core.steal.total,gauge,,percent,,[Linux] The percentage of time a given CPU core has spent running a virtual CPU for guest operating systems under the control of the Linux kernel,0,system,cpu steal total,
+system.core.interrupt,gauge,,percent,,[Windows] The percentage of time a given CPU core has spent servicing hardware interrupts,0,system,cpu interrupt,
+system.core.interrupt.total,gauge,,percent,,[Windows] The percentage of time the whole CPU has spent servicing hardware interrupts,0,system,cpu interrupt total,
+system.core.dpc,gauge,,percent,,[Windows] The percentage of time a given CPU core has spent servicing deferred procedure calls (DPCs),0,system,cpu dpc,
+system.core.dpc.total,gauge,,percent,,[Windows] The percentage of time the whole CPU has spent servicing deferred procedure calls (DPCs),0,system,cpu dpc total,
