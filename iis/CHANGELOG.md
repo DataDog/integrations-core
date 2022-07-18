@@ -1,5 +1,9 @@
 # CHANGELOG - iis
 
+## 2.17.0 / 2022-07-18
+
+* [Added] Add functionality to load the legacy version of the integration. See [#12396](https://github.com/DataDog/integrations-core/pull/12396).
+
 ## 2.16.2 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
