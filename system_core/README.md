@@ -57,11 +57,11 @@ values for Windows hosts with high (> 64) numbers of cores for a
 portion of the cores.
 
 Note that `*.total` metrics should still reflect accurate values in
-that situation and only per-core metrics are affected.
+the above situation, and only per-core metrics are affected.
 
-Users with this type of configuration are advised to set up the
+Datadog recommends that users with this type of configuration set up the
 [Windows Performance Counters integration][11] to track counters
-inside the `Processor Information` in order to get accurate per-core
+inside the `Processor Information`. This enables users to get accurate per-core
 metrics.
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/system_core/images/syscoredash.png
