@@ -92,6 +92,7 @@ class TCPCheck(AgentCheck):
     @property
     def addrs(self):
         if self._addrs is None or self._addrs == []:
+            # comment
             try:
                 self.resolve_ips()
             except Exception as e:
