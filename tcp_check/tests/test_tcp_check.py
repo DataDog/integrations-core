@@ -147,7 +147,7 @@ def test_response_time(aggregator):
         ),
     ],
 )
-def test_hostname_resolution(aggregator, hostname, getaddrinfo, gethostbyname_ex, expected_addrs):
+def test_hostname_resolution(aggregator, monkeypatch, hostname, getaddrinfo, gethostbyname_ex, expected_addrs):
     """
     Test that string hostnames get resolved to ipv4 address format properly.
     """
@@ -156,24 +156,24 @@ def test_hostname_resolution(aggregator, hostname, getaddrinfo, gethostbyname_ex
     instance['multiple_ips'] = False
     check = TCPCheck(common.CHECK_NAME, {}, [instance])
 
-    with mock.patch('socket.getaddrinfo', return_value=getaddrinfo,), mock.patch(
-        'socket.gethostbyname_ex', return_value=gethostbyname_ex
-    ), mock.patch.object(check, 'connect', wraps=check.connect) as connect:
-        connect.side_effect = [None, None, None]
-        expected_tags = [
-            "instance:UpService",
-            "target_host:{}".format(hostname),
-            "port:80",
-            "foo:bar",
-            "address:{}".format(expected_addrs[0]),
-        ]
+    monkeypatch.setattr('socket.getaddrinfo', mock.Mock(return_value=getaddrinfo))
+    monkeypatch.setattr('socket.gethostbyname_ex', mock.Mock(return_value=gethostbyname_ex))
+    monkeypatch.setattr(check, 'connect', mock.Mock(side_effect=[None, None, None]))
 
-        check.check(instance)
-        assert check._addrs == expected_addrs
-        aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags, count=1)
-        aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags, count=1)
+    expected_tags = [
+        "instance:UpService",
+        "target_host:{}".format(hostname),
+        "port:80",
+        "foo:bar",
+        "address:{}".format(expected_addrs[0]),
+    ]
 
-        aggregator.assert_all_metrics_covered()
+    check.check(instance)
+
+    assert check._addrs == expected_addrs
+    aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags, count=1)
+    aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags, count=1)
+    aggregator.assert_all_metrics_covered()
     assert len(aggregator.service_checks('tcp.can_connect')) == 1
 
 
