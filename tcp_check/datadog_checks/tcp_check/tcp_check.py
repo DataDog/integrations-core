@@ -101,14 +101,16 @@ class TCPCheck(AgentCheck):
         return self._addrs
 
     def resolve_ips(self):
-        self._addrs = [
-            sockaddr[0] for (_, _, _, _, sockaddr) in socket.getaddrinfo(self.host, self.port, 0, 0, socket.IPPROTO_TCP)
-        ]
+        if self.socket_type == socket.AF_INET:
+            # gethostbyname_ex only translates to IPv4 addresses
+            _, _, self._addrs = socket.gethostbyname_ex(self.host)
+        else:
+            self._addrs = [
+                sockaddr[0]
+                for (_, _, _, _, sockaddr) in socket.getaddrinfo(self.host, self.port, 0, 0, socket.IPPROTO_TCP)
+            ]
         if not self.multiple_ips:
-            if not is_ipv6(self.host):
-                self._addrs = [socket.gethostbyname(self.host)]
-            else:
-                self._addrs = self._addrs[:1]
+            self._addrs = self._addrs[:1]
 
         if self._addrs == []:
             raise Exception("No IPs attached to host")

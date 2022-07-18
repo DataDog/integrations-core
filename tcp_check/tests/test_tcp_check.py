@@ -111,7 +111,7 @@ def test_response_time(aggregator):
 
 
 @pytest.mark.parametrize(
-    'hostname, getaddrinfo, expected_addrs',
+    'hostname, getaddrinfo, gethostbyname_ex, expected_addrs',
     [
         pytest.param(
             'localhost',
@@ -119,7 +119,8 @@ def test_response_time(aggregator):
                 (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('::1', 80, 0, 0)),
                 (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('127.0.0.1', 80)),
             ],
-            '127.0.0.1',
+            ('localhost', [], ['127.0.0.1']),
+            ['127.0.0.1'],
             id='localhost',
         ),
         pytest.param(
@@ -129,7 +130,8 @@ def test_response_time(aggregator):
                 (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip2', 80, 0, 0)),
                 (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip3', 80, 0, 0)),
             ],
-            'ip1',
+            ('some-hostname', [], ['ip1']),
+            ['ip1'],
             id='string hostname: ipv4 address 1st in list',
         ),
         pytest.param(
@@ -139,12 +141,13 @@ def test_response_time(aggregator):
                 (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip2', 80)),
                 (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip3', 80, 0, 0)),
             ],
-            'ip2',
+            ('another-hostname', [], ['ip2']),
+            ['ip2'],
             id='string hostname: ipv4 address 2nd in list',
         ),
     ],
 )
-def test_hostname_resolution(aggregator, hostname, getaddrinfo, expected_addrs):
+def test_hostname_resolution(aggregator, hostname, getaddrinfo, gethostbyname_ex, expected_addrs):
     """
     Test that string hostnames get resolved to ipv4 address format properly.
     """
@@ -154,19 +157,19 @@ def test_hostname_resolution(aggregator, hostname, getaddrinfo, expected_addrs):
     check = TCPCheck(common.CHECK_NAME, {}, [instance])
 
     with mock.patch('socket.getaddrinfo', return_value=getaddrinfo,), mock.patch(
-        'socket.gethostbyname', return_value=expected_addrs
+        'socket.gethostbyname_ex', return_value=gethostbyname_ex
     ), mock.patch.object(check, 'connect', wraps=check.connect) as connect:
-        connect.side_effect = [None, Exception(), None]
+        connect.side_effect = [None, None, None]
         expected_tags = [
             "instance:UpService",
             "target_host:{}".format(hostname),
             "port:80",
             "foo:bar",
-            "address:{}".format(expected_addrs),
+            "address:{}".format(expected_addrs[0]),
         ]
 
         check.check(instance)
-        assert check._addrs == [expected_addrs]
+        assert check._addrs == expected_addrs
         aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags, count=1)
         aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags, count=1)
 
@@ -190,7 +193,11 @@ def test_multiple(aggregator):
             (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip2', 80, 0, 0)),
             (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip3', 80, 0, 0)),
         ],
-    ), mock.patch.object(check, 'connect', wraps=check.connect) as connect:
+    ), mock.patch(
+        'socket.gethostbyname_ex', return_value=('datadoghq.com', [], ['ip1', 'ip2', 'ip3'])
+    ), mock.patch.object(
+        check, 'connect', wraps=check.connect
+    ) as connect:
         connect.side_effect = [None, Exception(), None] * 2
         expected_tags = ['foo:bar', 'target_host:datadoghq.com', 'port:80', 'instance:multiple']
 
