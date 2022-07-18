@@ -4,13 +4,18 @@
 import pytest
 
 from . import metrics
+from .common import connection_flaked
 
 pytestmark = pytest.mark.e2e
 
 
 @pytest.mark.e2e
 def test_check(dd_agent_check, instance):
+    attempts = 3
     aggregator = dd_agent_check(instance, rate=True)
+    while attempts and connection_flaked(aggregator):
+        aggregator = dd_agent_check(instance, rate=True)
+        attempts -= 1
 
     for metric in metrics.STANDARD:
         aggregator.assert_metric_has_tag(metric, 'server:{}'.format(instance['server']))

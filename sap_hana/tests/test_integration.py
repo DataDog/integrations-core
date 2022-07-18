@@ -6,6 +6,7 @@ import pytest
 from datadog_checks.sap_hana import SapHanaCheck
 
 from . import metrics
+from .common import connection_flaked
 
 pytestmark = pytest.mark.integration
 
@@ -13,7 +14,13 @@ pytestmark = pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_check(aggregator, instance, dd_run_check):
     check = SapHanaCheck('sap_hana', {}, [instance])
+
+    attempts = 3
     dd_run_check(check)
+    while attempts and connection_flaked(aggregator):
+        aggregator.reset()
+        dd_run_check(check)
+        attempts -= 1
 
     for metric in metrics.STANDARD:
         aggregator.assert_metric_has_tag(metric, 'server:{}'.format(instance['server']))

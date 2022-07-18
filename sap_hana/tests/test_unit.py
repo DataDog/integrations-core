@@ -15,6 +15,10 @@ def error(*args, **kwargs):
     raise Exception('test')
 
 
+def connection_error(*args, **kwargs):
+    raise Exception('Lost connection to HANA server')
+
+
 def test_error_query(instance, dd_run_check):
     check = SapHanaCheck('sap_hana', {}, [instance])
     check.log = mock.MagicMock()
@@ -26,7 +30,30 @@ def test_error_query(instance, dd_run_check):
     check._conn = conn
 
     dd_run_check(check)
-    check.log.error.assert_any_call('Error querying %s: %s', 'SYS.M_DATABASE', 'test')
+
+
+def test_reconnect_on_connection_failure(instance, dd_run_check, aggregator):
+    check = SapHanaCheck('sap_hana', {}, [instance])
+    check.log = mock.MagicMock()
+
+    conn = mock.MagicMock()
+    cursor = mock.MagicMock()
+    cursor.execute = connection_error
+    conn.cursor = lambda: cursor
+    check._conn = conn
+
+    dd_run_check(check)
+
+    aggregator.assert_no_duplicate_service_checks()
+    aggregator.assert_service_check("sap_hana.{}".format(SapHanaCheck.SERVICE_CHECK_CONNECT), SapHanaCheck.WARNING)
+    conn.close.assert_called()
+    check.log.error.assert_any_call('Error querying %s: %s', 'SYS.M_DATABASE', 'Lost connection to HANA server')
+
+    # Assert than a connection is reattempted
+    check.get_connection = mock.MagicMock()
+    check.get_connection.return_value = conn
+    dd_run_check(check)
+    check.get_connection.assert_called()
 
 
 def test_error_unknown(instance, dd_run_check):
