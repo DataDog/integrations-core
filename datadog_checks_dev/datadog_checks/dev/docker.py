@@ -215,6 +215,7 @@ def docker_run(
         down=tear_down,
         on_error=on_error,
         sleep=sleep,
+        endpoints=endpoints,
         conditions=docker_conditions,
         env_vars=env_vars,
         wrappers=wrappers,
