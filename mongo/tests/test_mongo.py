@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-import time
 
 import mock
 import pytest
@@ -202,24 +201,7 @@ def test_mongo_custom_queries(aggregator, check, instance_custom_queries, dd_run
     aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag1:val1', count=2)
     aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag2:val2', count=2)
 
-    # Try repeatedly because the only collection-agnostic aggregation at time of
-    # writing is $currentOp and the results may be flaky depending on machine specs
-    retries = 120
-    for i in range(retries):
-        try:
-            dd_run_check(check)
-
-            aggregator.assert_metric(
-                'dd.mongodb.custom.queries_slower_than_60sec.secs_running', metric_type=aggregator.GAUGE
-            )
-        except Exception:
-            if i == retries - 1:
-                raise
-
-            time.sleep(1)
-            continue
-        else:
-            break
+    aggregator.assert_metric('dd.mongodb.custom.queries_slower_than_60sec.secs_running', metric_type=aggregator.GAUGE)
 
 
 def test_mongo_custom_query_with_empty_result_set(aggregator, check, instance_user, caplog, dd_run_check):

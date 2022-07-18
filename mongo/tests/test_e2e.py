@@ -46,6 +46,9 @@ MONGOS_METRICS = BASE_METRICS + [
 ]
 
 MONGOD_METRICS = BASE_METRICS + [
+    'mongodb.oplatencies.reads.latencyps',
+    'mongodb.oplatencies.writes.latencyps',
+    'mongodb.oplatencies.commands.latencyps',
     'mongodb.metrics.queryexecutor.scannedps',
     'mongodb.metrics.queryexecutor.scannedobjectsps',
     'mongodb.fsynclocked',
