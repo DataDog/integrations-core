@@ -99,7 +99,7 @@ INSTANCE_CUSTOM_QUERIES = {
                 'pipeline': [
                     {'$currentOp': {'allUsers': True}},
                 ],
-                'cursor': {'batchSize': 1},
+                'cursor': {},
             },
             'database': 'admin',
             'fields': [

@@ -7,7 +7,6 @@ from typing import Iterator
 
 from six import string_types
 from six.moves.urllib.parse import urlparse
-from tenacity import retry, stop_after_attempt, wait_fixed
 
 from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
@@ -157,7 +156,7 @@ def docker_run(
       check for errors
     - **env_vars** (_dict_) - A dictionary to update `os.environ` with during execution
     - **wrappers** (_List[callable]_) - A list of context managers to use during execution
-    - **attempts** (_int_) - Number of attempts to run `up` successfully
+    - **attempts** (_int_) - Number of attempts to run `up` and the `conditions` successfully
     - **attempts_wait** (_int_) - Time to wait between attempts
     """
     if compose_file and up:
@@ -177,15 +176,6 @@ def docker_run(
     else:
         set_up = up
         tear_down = down
-
-    if attempts is not None:
-        saved_set_up = set_up
-
-        @retry(wait=wait_fixed(attempts_wait), stop=stop_after_attempt(attempts))
-        def set_up_with_retry():
-            return saved_set_up()
-
-        set_up = set_up_with_retry
 
     docker_conditions = []
 
@@ -229,6 +219,8 @@ def docker_run(
         conditions=docker_conditions,
         env_vars=env_vars,
         wrappers=wrappers,
+        attempts=attempts,
+        attempts_wait=attempts_wait,
     ) as result:
         yield result
 

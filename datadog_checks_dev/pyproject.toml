@@ -62,7 +62,7 @@ cli = [
     "codespell",
     "colorama",
     "datamodel-code-generator~=0.12.0",
-    "hatch>=1.1.1",
+    "hatch>=1.3.1",
     "in-toto>=0.4.2",
     "jsonschema",
     "markdown",

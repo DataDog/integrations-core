@@ -7,16 +7,12 @@ import mock
 import pytest
 
 from datadog_checks.vertica import VerticaCheck
-from datadog_checks.vertica.utils import parse_major_version
 
 from . import common
 from .metrics import ALL_METRICS
 
 
 @pytest.mark.e2e
-@pytest.mark.skipif(
-    parse_major_version(os.environ.get('VERTICA_VERSION', 9)) >= 11, reason='Some metrics are not yet supported on v11'
-)
 def test_check_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
 
@@ -28,9 +24,6 @@ def test_check_e2e(dd_agent_check, instance):
 
 
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.xfail(
-    parse_major_version(os.environ.get('VERTICA_VERSION', 9)) >= 11, reason='Some metrics are not yet supported on v11'
-)
 def test_check(aggregator, datadog_agent, instance, dd_run_check):
 
     check = VerticaCheck('vertica', {}, [instance])
@@ -43,7 +36,7 @@ def test_check(aggregator, datadog_agent, instance, dd_run_check):
 
     aggregator.assert_all_metrics_covered()
 
-    major_version = parse_major_version(os.environ['VERTICA_VERSION'])
+    major_version = common.VERTICA_MAJOR_VERSION
     version_metadata = {'version.scheme': 'semver', 'version.major': str(major_version)}
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(len(version_metadata) + 4)
@@ -96,9 +89,6 @@ def test_custom_queries(aggregator, instance, dd_run_check):
 
 
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.xfail(
-    parse_major_version(os.environ.get('VERTICA_VERSION', 9)) >= 11, reason='Some metrics are not yet supported on v11'
-)
 def test_include_all_metric_groups(aggregator, instance, dd_run_check):
     check = VerticaCheck('vertica', {}, [instance])
     dd_run_check(check)

@@ -4,6 +4,8 @@
 import time
 from contextlib import contextmanager
 
+from tenacity import retry, stop_after_attempt, wait_fixed
+
 from ._env import (
     deserialize_data,
     get_env_vars,
@@ -24,7 +26,18 @@ except ImportError:
 
 
 @contextmanager
-def environment_run(up, down, on_error=None, sleep=None, endpoints=None, conditions=None, env_vars=None, wrappers=None):
+def environment_run(
+    up,
+    down,
+    on_error=None,
+    sleep=None,
+    endpoints=None,
+    conditions=None,
+    env_vars=None,
+    wrappers=None,
+    attempts=None,
+    attempts_wait=1,
+):
     """This utility provides a convenient way to safely set up and tear down arbitrary types of environments.
 
     :param up: A custom setup callable.
@@ -43,6 +56,10 @@ def environment_run(up, down, on_error=None, sleep=None, endpoints=None, conditi
     :param env_vars: A dictionary to update ``os.environ`` with during execution.
     :type env_vars: ``dict``
     :param wrappers: A list of context managers to use during execution.
+    :param attempts: Number of attempts to run `up` and the `conditions` successfully
+    :type attempts: ``int``
+    :param attempts_wait: Time to wait between attempts
+    :type attempts_wait: ``int``
     """
     if not callable(up):
         raise TypeError('The custom setup `{}` is not callable.'.format(repr(up)))
@@ -57,6 +74,24 @@ def environment_run(up, down, on_error=None, sleep=None, endpoints=None, conditi
     if env_vars is not None:
         wrappers.insert(0, EnvVars(env_vars))
 
+    def set_up():
+        set_up_result = up()
+
+        for condition in conditions:
+            condition()
+
+        return set_up_result
+
+    set_up_func = set_up
+
+    if attempts is not None:
+
+        @retry(wait=wait_fixed(attempts_wait), stop=stop_after_attempt(attempts))
+        def set_up_with_retry():
+            return set_up()
+
+        set_up_func = set_up_with_retry
+
     with ExitStack() as stack:
         for wrapper in wrappers:
             stack.enter_context(wrapper)
@@ -65,12 +100,9 @@ def environment_run(up, down, on_error=None, sleep=None, endpoints=None, conditi
             # Create an environment variable to store setup result
             key = 'environment_result_{}'.format(up.__class__.__name__.lower())
             if set_up_env():
-                result = up()
+                result = set_up_func()
                 # Store the serialized data in the environment
                 set_env_vars({key: serialize_data(result)})
-
-                for condition in conditions:
-                    condition()
 
                 if sleep:
                     time.sleep(sleep)

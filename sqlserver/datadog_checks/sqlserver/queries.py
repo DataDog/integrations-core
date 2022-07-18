@@ -115,7 +115,7 @@ def get_query_ao_availability_groups(sqlserver_major_version):
         # DRS - sys.dm_hadr_database_replica_states
         'DRS.replica_id': {'name': 'replica_id', 'type': 'tag'},
         'DRS.database_id': {'name': 'database_id', 'type': 'tag'},
-        'DRS.database_state': {'name': 'database_state', 'type': 'tag'},
+        'LOWER(DRS.database_state_desc) AS database_state_desc': {'name': 'database_state', 'type': 'tag'},
         'LOWER(DRS.synchronization_state_desc) AS synchronization_state_desc': {
             'name': 'synchronization_state',
             'type': 'tag',
@@ -134,6 +134,8 @@ def get_query_ao_availability_groups(sqlserver_major_version):
             'name': 'failover_cluster',
             'type': 'tag',
         },
+        # Other
+        '1 AS replica_sync_topology_indicator': {'name': 'ao.replica_status', 'type': 'gauge'},
     }
 
     # Include metrics based on version
@@ -141,6 +143,14 @@ def get_query_ao_availability_groups(sqlserver_major_version):
         column_definitions['DRS.secondary_lag_seconds'] = {'name': 'ao.secondary_lag_seconds', 'type': 'gauge'}
     if sqlserver_major_version >= 2014:
         column_definitions['DRS.is_primary_replica'] = {'name': 'ao.is_primary_replica', 'type': 'gauge'}
+        column_definitions[
+            """
+        CASE
+            WHEN DRS.is_primary_replica = 1 THEN 'primary'
+            WHEN DRS.is_primary_replica = 0 THEN 'secondary'
+        END AS replica_role_desc
+        """
+        ] = {'name': 'replica_role', 'type': 'tag'}
 
     # Sort columns to ensure a static column order
     sql_columns = []
