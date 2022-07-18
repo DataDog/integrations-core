@@ -48,7 +48,6 @@ files:
       value:
         type: string
     - name: connection_scheme
-      required: false
       description: |
         Use `mongodb` to identify that this is a string in the standard connection format. This is the default value.
         In order to leverage the DNS seed list, use a connection_scheme of `mongodb+srv` rather than the standard
