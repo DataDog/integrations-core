@@ -112,7 +112,7 @@ class CheckCommandOutput(LazyFunction):
         """
         Checks if the provided patterns are present in the output of a command
 
-        :param identifier: The docker image identifier
+        :param command: The command to run
         :param patterns: List of patterns to match
         :param matches: How many of the provided patterns need to match, it can be a number or "all"
         :param stdout: Whether to search for the provided patterns in stdout
