@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+import mock
 import pytest
 import tenacity
 
@@ -48,32 +49,17 @@ class TestDockerRun:
     @pytest.mark.parametrize(
         "attempts,expected_call_count",
         [
-            [
-                None,
-                1,
-            ],
-            [
-                0,
-                1,
-            ],
-            [
-                1,
-                1,
-            ],
-            [
-                3,
-                3,
-            ],
+            (None, 1),
+            (0, 1),
+            (1, 1),
+            (3, 3),
         ],
     )
     def test_retry_on_failed_conditions(self, attempts, expected_call_count):
         compose_file = os.path.join(DOCKER_DIR, "test_default.yaml")
 
-        def condition():
-            condition.call_count += 1
-            raise RetryError("boom!")
-
-        condition.call_count = 0
+        condition = mock.MagicMock()
+        condition.side_effect = RetryError("error")
 
         try:
             with pytest.raises(RetryError if attempts is None else tenacity.RetryError):
@@ -87,13 +73,8 @@ class TestDockerRun:
     def test_retry_condition_failed_only_on_first_run(self):
         compose_file = os.path.join(DOCKER_DIR, "test_default.yaml")
 
-        def condition():
-            condition.call_count += 1
-
-            if condition.call_count == 1:
-                raise RetryError("boom!")
-
-        condition.call_count = 0
+        condition = mock.MagicMock()
+        condition.side_effect = [RetryError("error"), None, None]
 
         try:
             with docker_run(compose_file, attempts=3, conditions=[condition]):
