@@ -63,6 +63,7 @@ def dd_environment():
             db.initialize,
         ],
         env_vars={'PASSWORD': ADMIN_CONFIG['password']},
+        attempts=2,
     ):
         yield CONFIG, E2E_METADATA
 
