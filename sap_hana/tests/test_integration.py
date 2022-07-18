@@ -6,7 +6,7 @@ import pytest
 from datadog_checks.sap_hana import SapHanaCheck
 
 from . import metrics
-from .common import connection_flaked
+from .common import CAN_CONNECT_SERVICE_CHECK, connection_flaked
 
 pytestmark = pytest.mark.integration
 
@@ -22,6 +22,7 @@ def test_check(aggregator, instance, dd_run_check):
         dd_run_check(check)
         attempts -= 1
 
+    aggregator.assert_service_check(CAN_CONNECT_SERVICE_CHECK, SapHanaCheck.OK)
     for metric in metrics.STANDARD:
         aggregator.assert_metric_has_tag(metric, 'server:{}'.format(instance['server']))
         aggregator.assert_metric_has_tag(metric, 'port:{}'.format(instance['port']))

@@ -16,10 +16,12 @@ ADMIN_CONFIG = {'server': SERVER, 'port': PORT, 'username': 'system', 'password'
 
 E2E_METADATA = {'start_commands': ['pip install hdbcli==2.10.15']}
 
+CAN_CONNECT_SERVICE_CHECK = 'sap_hana.{}'.format(SapHanaCheck.SERVICE_CHECK_CONNECT)
+
 
 def connection_flaked(aggregator):
     # HANA connection some times flakes, in that case the check will reconnect on next run
     # And a warning service check will be emitted
-    service_checks = aggregator.service_checks(SapHanaCheck.SERVICE_CHECK_CONNECT)
+    service_checks = aggregator.service_checks(CAN_CONNECT_SERVICE_CHECK)
     all_ok = all([service_check.status == SapHanaCheck.OK for service_check in service_checks])
     return not all_ok
