@@ -3,6 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+import pytest
+import tenacity
+
+from datadog_checks.dev import RetryError
 from datadog_checks.dev.docker import compose_file_active, docker_run
 from datadog_checks.dev.subprocess import run_command
 
@@ -40,3 +44,60 @@ class TestDockerRun:
             assert compose_file_active(compose_file) is False
         finally:
             run_command(['docker', 'compose', '-f', compose_file, 'down'], capture=True)
+
+    @pytest.mark.parametrize(
+        "attempts,expected_call_count",
+        [
+            [
+                None,
+                1,
+            ],
+            [
+                0,
+                1,
+            ],
+            [
+                1,
+                1,
+            ],
+            [
+                3,
+                3,
+            ],
+        ],
+    )
+    def test_retry_on_failed_conditions(self, attempts, expected_call_count):
+        compose_file = os.path.join(DOCKER_DIR, "test_default.yaml")
+
+        def condition():
+            condition.call_count += 1
+            raise RetryError("boom!")
+
+        condition.call_count = 0
+
+        try:
+            with pytest.raises(RetryError if attempts is None else tenacity.RetryError):
+                with docker_run(compose_file, attempts=attempts, conditions=[condition]):
+                    pass
+
+            assert condition.call_count == expected_call_count
+        finally:
+            run_command(["docker", "compose", "-f", compose_file, "down"], capture=True)
+
+    def test_retry_condition_failed_only_on_first_run(self):
+        compose_file = os.path.join(DOCKER_DIR, "test_default.yaml")
+
+        def condition():
+            condition.call_count += 1
+
+            if condition.call_count == 1:
+                raise RetryError("boom!")
+
+        condition.call_count = 0
+
+        try:
+            with docker_run(compose_file, attempts=3, conditions=[condition]):
+                assert condition.call_count == 2
+
+        finally:
+            run_command(["docker", "compose", "-f", compose_file, "down"], capture=True)

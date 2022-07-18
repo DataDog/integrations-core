@@ -9,7 +9,7 @@ from six import string_types
 from six.moves.urllib.parse import urlparse
 from tenacity import retry, stop_after_attempt, wait_fixed
 
-from .conditions import CheckDockerLogs
+from .conditions import CheckDockerLogs, CheckEndpoints
 from .env import environment_run, get_state, save_state
 from .fs import create_file, file_exists
 from .spec import load_spec
@@ -157,7 +157,7 @@ def docker_run(
       check for errors
     - **env_vars** (_dict_) - A dictionary to update `os.environ` with during execution
     - **wrappers** (_List[callable]_) - A list of context managers to use during execution
-    - **attempts** (_int_) - Number of attempts to run `up` successfully
+    - **attempts** (_int_) - Number of attempts to run `up` and the `conditions` successfully
     - **attempts_wait** (_int_) - Time to wait between attempts
     """
     if compose_file and up:
@@ -178,15 +178,6 @@ def docker_run(
         set_up = up
         tear_down = down
 
-    if attempts is not None:
-        saved_set_up = set_up
-
-        @retry(wait=wait_fixed(attempts_wait), stop=stop_after_attempt(attempts))
-        def set_up_with_retry():
-            return saved_set_up()
-
-        set_up = set_up_with_retry
-
     docker_conditions = []
 
     if log_patterns is not None:
@@ -199,6 +190,23 @@ def docker_run(
 
     if conditions is not None:
         docker_conditions.extend(conditions)
+
+    if endpoints is not None:
+        docker_conditions.append(CheckEndpoints(endpoints))
+
+    if attempts is not None:
+        saved_set_up = set_up
+
+        @retry(wait=wait_fixed(attempts_wait), stop=stop_after_attempt(attempts))
+        def set_up_with_retry():
+            set_up_result = saved_set_up()
+
+            for condition in docker_conditions:
+                condition()
+
+            return set_up_result
+
+        set_up = set_up_with_retry
 
     wrappers = list(wrappers) if wrappers is not None else []
 
@@ -225,8 +233,7 @@ def docker_run(
         down=tear_down,
         on_error=on_error,
         sleep=sleep,
-        endpoints=endpoints,
-        conditions=docker_conditions,
+        conditions=docker_conditions if attempts is None else None,
         env_vars=env_vars,
         wrappers=wrappers,
     ) as result:
