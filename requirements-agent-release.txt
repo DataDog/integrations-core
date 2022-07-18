@@ -43,7 +43,7 @@ datadog-eks-fargate==3.1.0
 datadog-elastic==5.2.0
 datadog-envoy==2.3.0
 datadog-etcd==3.2.0
-datadog-exchange-server==1.13.1; sys_platform == 'win32'
+datadog-exchange-server==1.14.0; sys_platform == 'win32'
 datadog-external-dns==2.2.0
 datadog-flink==1.4.0
 datadog-fluentd==2.1.0
@@ -63,7 +63,7 @@ datadog-hive==1.8.1
 datadog-hivemq==1.6.1
 datadog-http-check==8.0.1
 datadog-hudi==2.1.1
-datadog-hyperv==1.7.0; sys_platform == 'win32'
+datadog-hyperv==1.8.0; sys_platform == 'win32'
 datadog-ibm-ace==1.0.2
 datadog-ibm-db2==1.11.0
 datadog-ibm-i==1.4.0; sys_platform != 'win32'
