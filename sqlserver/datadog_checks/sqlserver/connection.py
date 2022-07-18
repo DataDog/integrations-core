@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-from contextlib import contextmanager
+import socket
+from contextlib import closing, contextmanager
 
 from six import raise_from
 
@@ -11,6 +11,8 @@ from datadog_checks.base.log import get_check_logger
 
 try:
     import adodbapi
+    from adodbapi.apibase import OperationalError
+    from pywintypes import com_error
 except ImportError:
     adodbapi = None
 
@@ -103,6 +105,41 @@ def parse_connection_string_properties(cs):
     return params
 
 
+known_hresult_codes = {
+    -2147352567: "unable to connect",
+    -2147217843: "login failed for user",
+    # this error can also be caused by a failed TCP connection but we are already reporting on the TCP
+    # connection status via test_network_connectivity so we don't need to explicitly state that
+    # as an error condition in this message
+    -2147467259: "could not open database requested by login",
+}
+
+
+def _format_connection_exception(e):
+    """
+    Formats the provided database connection exception.
+    If the exception comes from an ADO Provider and contains a misleading 'Invalid connection string attribute' message
+    then the message is replaced with more descriptive messages based on the contained HResult error codes.
+    """
+    if adodbapi is not None:
+        if isinstance(e, OperationalError) and e.args and isinstance(e.args[0], com_error):
+            e_comm = e.args[0]
+            hresult = e_comm.hresult
+            sub_hresult = None
+            internal_message = None
+            if e_comm.args and len(e_comm.args) == 4:
+                internal_args = e_comm.args[2]
+                if len(internal_args) == 6:
+                    internal_message = internal_args[2]
+                    sub_hresult = internal_args[5]
+            if internal_message == 'Invalid connection string attribute':
+                base_message = known_hresult_codes.get(hresult)
+                sub_message = known_hresult_codes.get(sub_hresult)
+                if base_message and sub_message:
+                    return base_message + ": " + sub_message
+    return repr(e)
+
+
 class Connection(object):
     """Manages the connection to a SQL Server instance."""
 
@@ -156,6 +193,27 @@ class Connection(object):
             self.adoprovider = self.default_adoprovider
 
         self.log.debug('Connection initialized.')
+
+    def split_sqlserver_host_port(self, host):
+        """
+        Splits the host & port out of the provided SQL Server host connection string, returning (host, port).
+        """
+        if not host:
+            return host, None
+        host_split = [s.strip() for s in host.split(',')]
+        if len(host_split) == 1:
+            return host_split[0], None
+        if len(host_split) == 2:
+            return host_split
+        # else len > 2
+        s_host, s_port = host_split[0:2]
+        self.log.warning(
+            "invalid sqlserver host string has more than one comma: %s. using only 1st two items: host:%s, port:%s",
+            host,
+            s_host,
+            s_port,
+        )
+        return s_host, s_port
 
     @contextmanager
     def get_managed_cursor(self, key_prefix=None):
@@ -245,6 +303,8 @@ class Connection(object):
                 rawconn = pyodbc.connect(cs, timeout=self.timeout, autocommit=True)
                 rawconn.timeout = self.timeout
 
+            self.log.debug("CONNECTED_SQLSERVER: %s", cs)
+
             self.service_check_handler(AgentCheck.OK, host, database, is_default=is_default)
             if conn_key not in self._conns:
                 self._conns[conn_key] = rawconn
@@ -258,12 +318,11 @@ class Connection(object):
                 self._conns[conn_key] = rawconn
             self._setup_new_connection(rawconn)
         except Exception as e:
-            cx = "{} - {}".format(host, database)
+            connection_ok, connection_message = self.test_network_connectivity()
+            message = "Unable to connect to SQL Server (host={} database={}). TCP-connection({}). Exception: {}".format(
+                host, database, connection_message, _format_connection_exception(e)
+            )
 
-            if is_default:
-                message = "Unable to connect to SQL Server for instance {}: {}".format(cx, repr(e))
-            else:
-                message = "Unable to connect to Database: {} for instance {}: {}".format(database, host, repr(e))
             password = self.instance.get('password')
             if password is not None:
                 message = message.replace(password, "*" * 6)
@@ -487,3 +546,24 @@ class Connection(object):
         if not username and not password:
             conn_str += 'Integrated Security=SSPI;'
         return conn_str
+
+    def test_network_connectivity(self):
+        host, port = self.split_sqlserver_host_port(self.instance.get('host'))
+        if port is None:
+            port = 1433
+
+        try:
+            port = int(port)
+        except ValueError as e:
+            return "ERROR: invalid port: {}".format(repr(e))
+
+        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+            sock.settimeout(self.timeout)
+            try:
+                sock.connect((host, port))
+            except (ConnectionError, socket.gaierror) as e:
+                return False, "ERROR: {}".format(e.strerror)
+            except Exception as e:
+                return False, "ERROR: {}".format(repr(e))
+
+        return True, "OK"

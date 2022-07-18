@@ -274,7 +274,7 @@ def test_parse_sqlserver_major_version(version, expected_major_version):
 def test_split_sqlserver_host(instance_host, split_host, split_port):
     instance = {'host': instance_host}
     sqlserver_check = SQLServer(CHECK_NAME, {}, [instance])
-    s_host, s_port = sqlserver_check.split_sqlserver_host_port(instance_host)
+    s_host, s_port = sqlserver_check.connection.split_sqlserver_host_port(instance_host)
     assert (s_host, s_port) == (split_host, split_port)
 
 
