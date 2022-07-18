@@ -68,33 +68,65 @@ class Projections:
     query = 'SELECT {} FROM v_catalog.{}'.format(', '.join(fields), name)
 
 
-class ProjectionStorage:
-    """
-    https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/PROJECTION_STORAGE.htm
-    """
-
-    name = 'projection_storage'
-    fields = (
-        'anchor_table_name',
-        'node_name',
-        'projection_name',
+def make_projection_storage_queries(version):
+    """Builds a dict of queries for projection_storage metrics depending on the vertica version."""
+    # https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/PROJECTION_STORAGE.htm
+    common_value_fields = (
         'ros_count',
+        'row_count',
+        'used_bytes',
+    )
+
+    # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/PROJECTION_STORAGE.htm
+    legacy_value_fields = (
         'ros_row_count',
-        'ros_used_bytes',
         'wos_row_count',
+        'ros_used_bytes',
         'wos_used_bytes',
     )
-    query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
+
+    value_fields = common_value_fields + legacy_value_fields if version < 11 else common_value_fields
+
+    sum_fields = ['sum({0}) as {0}'.format(field) for field in value_fields]
+
+    def build_query(group_fields):
+        columns = ', '.join(group_fields + sum_fields)
+        return ('SELECT {columns} FROM v_monitor.projection_storage GROUP BY {group_fields}').format(
+            columns=columns, group_fields=', '.join(group_fields)
+        )
+
+    return {
+        'per_projection': build_query(['anchor_table_name', 'node_name', 'projection_name']),
+        'per_table': build_query(['anchor_table_name', 'node_name']),
+        'per_node': build_query(['node_name']),
+        'total': 'SELECT {} FROM v_monitor.projection_storage'.format(', '.join(sum_fields)),
+    }
 
 
-class StorageContainers:
-    """
-    https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/STORAGE_CONTAINERS.htm
-    """
+def make_storage_containers_queries(version):
+    """Builds a dict of queries for storage_containers metrics depending on the vertica version."""
+    # https://www.vertica.com/docs/9.3.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/STORAGE_CONTAINERS.htm
 
-    name = 'storage_containers'
-    fields = ('delete_vector_count', 'node_name', 'projection_name', 'storage_type')
-    query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
+    sum_fields = ['sum(delete_vector_count) as delete_vector_count']
+
+    def build_query(group_fields):
+        columns = ', '.join(group_fields + sum_fields)
+        return ('SELECT {columns} FROM v_monitor.storage_containers GROUP BY {group_fields}').format(
+            columns=columns, group_fields=', '.join(group_fields)
+        )
+
+    queries = {
+        'per_node': build_query(['node_name']),
+        'total': 'SELECT {} FROM v_monitor.storage_containers'.format(', '.join(sum_fields)),
+    }
+
+    if version < 11:
+        # https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/STORAGE_CONTAINERS.htm
+        queries['per_projection'] = build_query(['node_name', 'projection_name', 'storage_type'])
+    else:
+        queries['per_projection'] = build_query(['node_name', 'projection_name'])
+
+    return queries
 
 
 class QueryMetrics:
