@@ -7,9 +7,8 @@ from typing import Iterator
 
 from six import string_types
 from six.moves.urllib.parse import urlparse
-from tenacity import retry, stop_after_attempt, wait_fixed
 
-from .conditions import CheckDockerLogs, CheckEndpoints
+from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
 from .fs import create_file, file_exists
 from .spec import load_spec
@@ -191,23 +190,6 @@ def docker_run(
     if conditions is not None:
         docker_conditions.extend(conditions)
 
-    if endpoints is not None:
-        docker_conditions.append(CheckEndpoints(endpoints))
-
-    if attempts is not None:
-        saved_set_up = set_up
-
-        @retry(wait=wait_fixed(attempts_wait), stop=stop_after_attempt(attempts))
-        def set_up_with_retry():
-            set_up_result = saved_set_up()
-
-            for condition in docker_conditions:
-                condition()
-
-            return set_up_result
-
-        set_up = set_up_with_retry
-
     wrappers = list(wrappers) if wrappers is not None else []
 
     if mount_logs:
@@ -233,9 +215,11 @@ def docker_run(
         down=tear_down,
         on_error=on_error,
         sleep=sleep,
-        conditions=docker_conditions if attempts is None else None,
+        conditions=docker_conditions,
         env_vars=env_vars,
         wrappers=wrappers,
+        attempts=attempts,
+        attempts_wait=attempts_wait,
     ) as result:
         yield result
 
