@@ -1,45 +1,49 @@
 {
-  "display_name": "Databricks",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "databricks",
-  "metric_prefix": "databricks.",
-  "metric_to_check": "",
-  "creates_events": false,
-  "short_description": "Monitor Apache Spark in Databricks clusters.",
-  "guid": "3e1c7918-f224-46c6-836f-1169857e2564",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Databricks",
-  "categories": [
-    "cloud",
-    "collaboration",
-    "processing",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "databricks",
+  "manifest_version": "2.0.0",
+  "app_uuid": "f99b6e79-f50a-479d-b916-955a577e4f41",
+  "app_id": "databricks",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor Apache Spark in Databricks clusters.",
+    "title": "Databricks",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Cloud",
+      "Category::Collaboration",
+      "Category::Processing",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
+    "integration": {
+      "source_type_name": "Databricks",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
     "dashboards": {
       "Databricks Spark Overview": "assets/dashboards/databricks_overview.json"
     },
-    "saved_views": {},
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "spark"
-    },
-    "metrics_metadata": "metadata.csv"
-  },
-  "further_reading": [
-    {"link": "https://www.datadoghq.com/blog/databricks-monitoring-datadog/",
-      "tag": "Blog",
-      "text": "Monitor Databricks with Datadog"
     }
-  ]
+  }
 }
