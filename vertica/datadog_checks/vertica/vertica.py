@@ -5,19 +5,18 @@ from __future__ import division
 
 import logging
 import ssl
-from collections import OrderedDict, defaultdict
-from datetime import datetime
 from itertools import chain
 
 import vertica_python as vertica
-from vertica_python.vertica.column import timestamp_tz_parse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.base.utils.containers import iter_unique
+from datadog_checks.base.utils.db import QueryManager
 
 from . import views
-from .utils import kilobytes_to_bytes, node_state_to_service_check, parse_major_version
+from .queries import get_queries
+from .utils import parse_major_version
 
 # Python 3 only
 PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)
@@ -26,7 +25,6 @@ PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)
 class VerticaCheck(AgentCheck):
     __NAMESPACE__ = 'vertica'
     SERVICE_CHECK_CONNECT = 'can_connect'
-    SERVICE_CHECK_NODE_STATE = 'node_state'
 
     # This remapper is used to support legacy Vertica integration config values
     TLS_CONFIG_REMAPPER = {
@@ -79,13 +77,11 @@ class VerticaCheck(AgentCheck):
 
         # We'll connect on the first check run
         self._connection = None
+        self._query_manager = None
 
-        # Cache database results for re-use among disparate functions
-        self._view = defaultdict(list)
+        self._metric_groups = {}
 
-        self._metric_groups = []
-
-        self.check_initializations.append(self.parse_metric_groups)
+        self.check_initializations.extend([self.parse_metric_groups])
 
     def _get_default_client_lib_log_level(self):
         if self.log.logger.getEffectiveLevel() <= logging.DEBUG:
@@ -101,313 +97,34 @@ class VerticaCheck(AgentCheck):
                 return
 
             self._connection = connection
+            self._initialize_query_manager()
+
         elif self._connection_load_balance or self._connection.closed():
             self._connection.reset_connection()
+
+    def _initialize_query_manager(self):
+        self._query_manager = QueryManager(
+            self,
+            self.execute_query,
+            queries=get_queries(self._major_version(), self._metric_groups),
+            tags=self._tags,
+        )
+
+        self._query_manager.compile_queries()
 
     def _major_version(self):
         return parse_major_version(self._connection.parameters['server_version'])
 
     def check(self, _):
         self._connect()
-        # The order of queries is important as some results are cached for later re-use
-        try:
-            for method in self._metric_groups:
-                method()
 
-            self.query_version()
-            self.query_custom()
+        if not self._connection:
+            self.log.debug('Skipping check due to connection issue.')
+            return
 
-        finally:
-            self._view.clear()
-
-    def query_licenses(self):
-        # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/CATALOG/LICENSES.htm
-        for db_license in self.iter_rows(views.Licenses):
-            self._view[views.Licenses].append(db_license)
-
-            tags = ['license_type:{}'.format(db_license['licensetype'])]
-            tags.extend(self._tags)
-
-            expiration = db_license['end_date']
-            if expiration and expiration != 'Perpetual':
-                expiration = timestamp_tz_parse(expiration)
-                seconds_until_expiration = (expiration - datetime.now(tz=expiration.tzinfo)).total_seconds()
-            else:
-                seconds_until_expiration = -1
-
-            self.gauge('license.expiration', seconds_until_expiration, tags=tags)
-
-    def query_license_audits(self):
-        # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/CATALOG/LICENSE_AUDITS.htm
-        for license_audit in self.iter_rows(views.LicenseAudits):
-            last_audit = license_audit['audit_start_timestamp']
-            if last_audit:
-                seconds_since_last_audit = (datetime.now(tz=last_audit.tzinfo) - last_audit).total_seconds()
-            else:
-                seconds_since_last_audit = -1
-            self.gauge('license.latest_audit', seconds_since_last_audit, tags=self._tags)
-
-            size = int(license_audit['license_size_bytes'])
-            used = int(license_audit['database_size_bytes'])
-            self.gauge('license.size', size, tags=self._tags)
-            self.gauge('license.used', used, tags=self._tags)
-            self.gauge('license.usable', size - used, tags=self._tags)
-            self.gauge('license.utilized', used / size * 100, tags=self._tags)
-
-    def query_system(self):
-        # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/SYSTEM.htm
-
-        # Will only be 1 system
-        for system in self.iter_rows(views.System):
-            total_nodes = system['node_count']
-            self.gauge('node.total', total_nodes, tags=self._tags)
-            self.gauge('node.down', system['node_down_count'], tags=self._tags)
-
-            # Is is possible for there to be no restriction
-            allowed_nodes = self._view[views.Licenses][0]['node_restriction']
-            if allowed_nodes is not None:
-                self.gauge('node.allowed', allowed_nodes, tags=self._tags)
-                self.gauge('node.available', allowed_nodes - total_nodes, tags=self._tags)
-
-            self.gauge('ksafety.current', system['current_fault_tolerance'], tags=self._tags)
-            self.gauge('ksafety.intended', system['designed_fault_tolerance'], tags=self._tags)
-
-            self.gauge('epoch.ahm', system['ahm_epoch'], tags=self._tags)
-            self.gauge('epoch.current', system['current_epoch'], tags=self._tags)
-            self.gauge('epoch.last_good', system['last_good_epoch'], tags=self._tags)
-
-    def query_nodes(self):
-        # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/CATALOG/NODES.htm
-        for node in self.iter_rows(views.Nodes):
-            tags = ['node_name:{}'.format(node['node_name'])]
-            tags.extend(self._tags)
-
-            node_state = node['node_state']
-            status = node_state_to_service_check(node_state)
-            message = node_state if status is not AgentCheck.OK else None
-            self.service_check(self.SERVICE_CHECK_NODE_STATE, status, message=message, tags=tags)
-
-    def query_projections(self):
-        # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/CATALOG/PROJECTIONS.htm
-        total_projections = 0
-        unsegmented_projections = 0
-        unsafe_projections = 0
-
-        for projection in self.iter_rows(views.Projections):
-            total_projections += 1
-
-            if not projection['is_segmented']:
-                unsegmented_projections += 1
-
-            if not projection['is_up_to_date']:
-                unsafe_projections += 1
-
-        self.gauge('projection.total', total_projections, tags=self._tags)
-
-        self.gauge('projection.unsegmented', unsegmented_projections, tags=self._tags)
-        if total_projections:
-            unsegmented_percent = unsegmented_projections / total_projections * 100
-        else:
-            unsegmented_percent = 0
-        self.gauge('projection.unsegmented_percent', unsegmented_percent, tags=self._tags)
-
-        self.gauge('projection.unsafe', unsafe_projections, tags=self._tags)
-        if total_projections:
-            unsafe_percent = unsafe_projections / total_projections * 100
-        else:
-            unsafe_percent = 0
-        self.gauge('projection.unsafe_percent', unsafe_percent, tags=self._tags)
-
-    def query_projection_storage(self):
-        queries = views.make_projection_storage_queries(self._major_version())
-
-        for projection in self.iter_rows_query(queries['per_projection']):
-            tags = self._tags + [
-                'projection_name:{}'.format(projection['projection_name']),
-                'table_name:{}'.format(projection['anchor_table_name']),
-                'node_name:{}'.format(projection['node_name']),
-            ]
-            self.gauge('projection.ros.containers', projection['ros_count'], tags=tags)
-            self.gauge('projection.row.ros', projection.get('ros_row_count'), tags=tags)
-            self.gauge('projection.row.wos', projection.get('wos_row_count'), tags=tags)
-            self.gauge('projection.row.total', projection['row_count'], tags=tags)
-            self.gauge('projection.disk.used.ros', projection.get('ros_used_bytes'), tags=tags)
-            self.gauge('projection.disk.used.wos', projection.get('wos_used_bytes'), tags=tags)
-            self.gauge('projection.disk.used', projection['used_bytes'], tags=tags)
-
-        for table in self.iter_rows_query(queries['per_table']):
-            tags = self._tags + [
-                'table_name:{}'.format(projection['anchor_table_name']),
-                'node_name:{}'.format(projection['node_name']),
-            ]
-            self.gauge('table.row.ros', table.get('ros_row_count'), tags=tags)
-            self.gauge('table.row.wos', table.get('wos_row_count'), tags=tags)
-            self.gauge('table.row.total', table['row_count'], tags=tags)
-            self.gauge('table.disk.used.ros', table.get('ros_used_bytes'), tags=tags)
-            self.gauge('table.disk.used.wos', table.get('wos_used_bytes'), tags=tags)
-            self.gauge('table.disk.used', table['used_bytes'], tags=tags)
-
-        for node in self.iter_rows_query(queries['per_node']):
-            tags = self._tags + ['node_name:{}'.format(projection['node_name'])]
-
-            self.gauge('node.row.ros', node.get('ros_row_count'), tags=tags)
-            self.gauge('node.row.wos', node.get('wos_row_count'), tags=tags)
-            self.gauge('node.row.total', node['row_count'], tags=tags)
-            self.gauge('node.disk.used.ros', node.get('ros_used_bytes'), tags=tags)
-            self.gauge('node.disk.used.wos', node.get('wos_used_bytes'), tags=tags)
-            self.gauge('node.disk.used', node['used_bytes'], tags=tags)
-
-        # Total metrics
-        total = self._connection.cursor('dict').execute(queries['total']).fetchone()
-        self.gauge('row.ros', total.get('ros_row_count'), tags=self._tags)
-        self.gauge('row.wos', total.get('wos_row_count'), tags=self._tags)
-        self.gauge('row.total', total['row_count'], tags=self._tags)
-        self.gauge('disk.used.ros', total.get('ros_used_bytes'), tags=self._tags)
-        self.gauge('disk.used.wos', total.get('wos_used_bytes'), tags=self._tags)
-        self.gauge('disk.used', total['used_bytes'], tags=self._tags)
-
-    def query_storage_containers(self):
-        queries = views.make_storage_containers_queries(self._major_version())
-
-        for projection in self.iter_rows_query(queries['per_projection']):
-            tags = self._tags + [
-                'projection_name:{}'.format(projection['projection_name']),
-                'node_name:{}'.format(projection['node_name']),
-            ]
-            if 'storage_type' in projection:
-                tags.append('container_type:{}'.format(projection['storage_type']))
-
-            self.gauge('projection.delete_vectors', projection['delete_vector_count'], tags=tags)
-
-        for node in self.iter_rows_query(queries['per_node']):
-            tags = self._tags + ['node_name:{}'.format(projection['node_name'])]
-            self.gauge('node.delete_vectors', node['delete_vector_count'], tags=tags)
-
-        total = self._connection.cursor('dict').execute(queries['total']).fetchone()
-        self.gauge('delete_vectors', total['delete_vector_count'], tags=self._tags)
-
-    def query_host_resources(self):
-        # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/HOST_RESOURCES.htm
-        for host in self.iter_rows(views.HostResources):
-            tags = ['host_name:{}'.format(host['host_name'])]
-            tags.extend(self._tags)
-
-            self.gauge('processor.cpu', host['processor_count'], tags=tags)
-            self.gauge('processor.core', host['processor_core_count'], tags=tags)
-            self.gauge('file.max', host['open_files_limit'], tags=tags)
-            self.gauge('file.open', host['opened_file_count'], tags=tags)
-            self.gauge('socket.open', host['opened_socket_count'], tags=tags)
-            self.gauge('thread.max', host['threads_limit'], tags=tags)
-
-            # Memory
-            total = host['total_memory_bytes']
-            usable = host['total_memory_free_bytes']
-            used = total - usable
-
-            self.gauge('memory.total', total, tags=tags)
-            self.gauge('memory.usable', usable, tags=tags)
-            self.gauge('memory.used', used, tags=tags)
-
-            if total:
-                utilized = used / total * 100
-            else:
-                utilized = 0
-            self.gauge('memory.utilized', utilized, tags=tags)
-
-            # Swap
-            total = host['total_swap_memory_bytes']
-            usable = host['total_swap_memory_free_bytes']
-            used = total - usable
-
-            self.gauge('memory.swap.total', total, tags=tags)
-            self.gauge('memory.swap.usable', usable, tags=tags)
-            self.gauge('memory.swap.used', used, tags=tags)
-
-            if total:
-                utilized = used / total * 100
-            else:
-                utilized = 0
-            self.gauge('memory.swap.utilized', utilized, tags=tags)
-
-    def query_query_metrics(self):
-        # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/QUERY_METRICS.htm
-        for node in self.iter_rows(views.QueryMetrics):
-            tags = ['node_name:{}'.format(node['node_name'])]
-            tags.extend(self._tags)
-
-            self.gauge('connection.active', node['active_user_session_count'], tags=tags)
-            self.monotonic_count('connection.total', node['total_user_session_count'], tags=tags)
-            self.gauge('query.active', node['running_query_count'], tags=tags)
-            self.monotonic_count('query.total', node['executed_query_count'], tags=tags)
-
-    def query_resource_pool_status(self):
-        # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/RESOURCE_POOL_STATUS.htm
-        for pool in self.iter_rows(views.ResourcePoolStatus):
-            tags = ['node_name:{}'.format(pool['node_name']), 'pool_name:{}'.format(pool['pool_name'])]
-            tags.extend(self._tags)
-
-            self.gauge(
-                'resource_pool.memory.borrowed', kilobytes_to_bytes(pool['general_memory_borrowed_kb']), tags=tags
-            )
-            self.gauge('resource_pool.memory.max', kilobytes_to_bytes(pool['max_memory_size_kb']), tags=tags)
-            self.gauge('resource_pool.memory.used', kilobytes_to_bytes(pool['memory_inuse_kb']), tags=tags)
-            self.gauge('resource_pool.query.running', pool['running_query_count'], tags=tags)
-
-    def query_disk_storage(self):
-        # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/DISK_STORAGE.htm
-        for storage in self.iter_rows(views.DiskStorage):
-            tags = [
-                'node_name:{}'.format(storage['node_name']),
-                'storage_status:{}'.format(storage['storage_status']),
-                'storage_usage:{}'.format(storage['storage_usage']),
-            ]
-            tags.extend(self._tags)
-
-            # Space
-            block_size = storage['disk_block_size_bytes']
-            usable = block_size * storage['disk_space_free_blocks']
-            used = block_size * storage['disk_space_used_blocks']
-            total = usable + used
-
-            self.gauge('storage.size', total, tags=tags)
-            self.gauge('storage.usable', usable, tags=tags)
-            self.gauge('storage.used', used, tags=tags)
-
-            if total:
-                utilized = used / total * 100
-            else:
-                utilized = 0
-            self.gauge('storage.utilized', utilized, tags=tags)
-
-            # Latency
-            latency = storage['latency']
-            self.gauge('storage.latency', latency, tags=tags)
-
-            if latency:
-                latency_reciprocal = 1 / latency
-            else:
-                latency_reciprocal = 0
-
-            # Throughput
-            throughput = storage['throughput']
-            self.gauge('storage.throughput', throughput, tags=tags)
-
-            if throughput:
-                throughput_reciprocal = 1 / throughput
-            else:
-                throughput_reciprocal = 0
-
-            # Time to read 1 MiB
-            self.gauge('storage.speed', latency_reciprocal + throughput_reciprocal, tags=tags)
-
-    def query_resource_usage(self):
-        # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/RESOURCE_USAGE.htm
-        for node in self.iter_rows(views.ResourceUsage):
-            tags = ['node_name:{}'.format(node['node_name'])]
-            tags.extend(self._tags)
-
-            self.gauge('node.resource_requests', node['request_count'], tags=tags)
-            self.gauge('thread.active', node['active_thread_count'], tags=tags)
+        self._query_manager.execute()
+        self.query_version()
+        self.query_custom()
 
     @AgentCheck.metadata_entrypoint
     def query_version(self):
@@ -533,25 +250,26 @@ class VerticaCheck(AgentCheck):
         for row in cursor.iterate():
             yield row
 
+    def execute_query(self, query):
+        return self._connection.cursor().execute(query).iterate()
+
     def parse_metric_groups(self):
         # If you create a new function, please add this to `default_metric_groups` below and
         # the config file (under `metric_groups`).
-        default_metric_groups = OrderedDict(
-            (
-                ('licenses', self.query_licenses),
-                ('license_audits', self.query_license_audits),
-                ('system', self.query_system),
-                ('nodes', self.query_nodes),
-                ('projections', self.query_projections),
-                ('projection_storage', self.query_projection_storage),
-                ('storage_containers', self.query_storage_containers),
-                ('host_resources', self.query_host_resources),
-                ('query_metrics', self.query_query_metrics),
-                ('resource_pool_status', self.query_resource_pool_status),
-                ('disk_storage', self.query_disk_storage),
-                ('resource_usage', self.query_resource_usage),
-            )
-        )
+        default_metric_groups = [
+            'licenses',
+            'license_audits',
+            'system',
+            'nodes',
+            'projections',
+            'projection_storage',
+            'storage_containers',
+            'host_resources',
+            'query_metrics',
+            'resource_pool_status',
+            'disk_storage',
+            'resource_usage',
+        ]
 
         metric_groups = self.instance.get('metric_groups') or list(default_metric_groups)
 
@@ -572,6 +290,4 @@ class VerticaCheck(AgentCheck):
             self.log.debug('Detected `system` metric group, adding the `licenses` to metric_groups.')
             metric_groups.insert(0, 'licenses')
 
-        self._metric_groups.extend(
-            default_metric_groups[group] for group in default_metric_groups if group in metric_groups
-        )
+        self._metric_groups = [group for group in default_metric_groups if group in metric_groups]
