@@ -38,6 +38,7 @@ files:
         value:
           type: string
           display_default: SYS_DATABASES
+          example: SYS_DATABASES
       - name: connection_properties
         description: |
           When `hdbcli` is installed, this defines the properties of the database connections. Any property

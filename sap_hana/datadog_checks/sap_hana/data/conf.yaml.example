@@ -52,7 +52,7 @@ instances:
     ## @param schema - string - optional - default: SYS_DATABASES
     ## The schema containing the tenant databases views.
     #
-    # schema: <SCHEMA>
+    # schema: SYS_DATABASES
 
     ## @param connection_properties - mapping - optional
     ## When `hdbcli` is installed, this defines the properties of the database connections. Any property
