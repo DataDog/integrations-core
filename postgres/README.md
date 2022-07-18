@@ -7,7 +7,7 @@
 Get metrics from PostgreSQL in real time to:
 
 - Visualize and monitor PostgreSQL states.
-- Received notifications about PostgreSQL failovers and events.
+- Receive notifications about PostgreSQL failovers and events.
 
 ## Setup
 
