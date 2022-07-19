@@ -318,9 +318,10 @@ class Connection(object):
                 self._conns[conn_key] = rawconn
             self._setup_new_connection(rawconn)
         except Exception as e:
-            connection_ok, connection_message = self.test_network_connectivity()
+            error_message = self.test_network_connectivity()
+            tcp_connection_status = error_message if error_message else "OK"
             message = "Unable to connect to SQL Server (host={} database={}). TCP-connection({}). Exception: {}".format(
-                host, database, connection_message, _format_connection_exception(e)
+                host, database, tcp_connection_status, _format_connection_exception(e)
             )
 
             password = self.instance.get('password')
@@ -551,7 +552,7 @@ class Connection(object):
         """
         Tries to establish a TCP connection to the database host. If there is an error, it returns a description of the error.
 
-        :return: (connection_success, error_message)
+        :return: error_message if failed connection else None
         """
         host, port = self.split_sqlserver_host_port(self.instance.get('host'))
         if port is None:
@@ -567,8 +568,8 @@ class Connection(object):
             try:
                 sock.connect((host, port))
             except (ConnectionError, socket.gaierror) as e:
-                return False, "ERROR: {}".format(e.strerror)
+                return "ERROR: {}".format(e.strerror)
             except Exception as e:
-                return False, "ERROR: {}".format(repr(e))
+                return "ERROR: {}".format(repr(e))
 
-        return True, "OK"
+        return None
