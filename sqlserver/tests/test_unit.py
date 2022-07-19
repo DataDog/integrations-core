@@ -19,6 +19,8 @@ from datadog_checks.sqlserver.const import (
 from datadog_checks.sqlserver.metrics import SqlMasterDatabaseFileStats
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import parse_sqlserver_major_version, set_default_driver_conf
+from datadog_checks.sqlserver.connection import split_sqlserver_host_port
+
 
 from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
 from .utils import windows_ci
@@ -272,9 +274,7 @@ def test_parse_sqlserver_major_version(version, expected_major_version):
     ],
 )
 def test_split_sqlserver_host(instance_host, split_host, split_port):
-    instance = {'host': instance_host}
-    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance])
-    s_host, s_port = sqlserver_check.connection.split_sqlserver_host_port(instance_host)
+    s_host, s_port = split_sqlserver_host_port(instance_host)
     assert (s_host, s_port) == (split_host, split_port)
 
 
