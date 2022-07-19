@@ -11,6 +11,7 @@ import pytest
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.connection import split_sqlserver_host_port
 from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_SQL_DATABASE,
     ENGINE_EDITION_STANDARD,
@@ -19,8 +20,6 @@ from datadog_checks.sqlserver.const import (
 from datadog_checks.sqlserver.metrics import SqlMasterDatabaseFileStats
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import parse_sqlserver_major_version, set_default_driver_conf
-from datadog_checks.sqlserver.connection import split_sqlserver_host_port
-
 
 from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
 from .utils import windows_ci
