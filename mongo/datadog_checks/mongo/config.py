@@ -25,6 +25,7 @@ class MongoConfig(object):
                 'ssl_certfile': instance.get('ssl_certfile', None),
                 'ssl_cert_reqs': instance.get('ssl_cert_reqs', None),
                 'ssl_ca_certs': cacert_cert_dir,
+                'ssl_match_hostname': instance.get('ssl_match_hostname', None),
             }
         )
 
@@ -59,9 +60,6 @@ class MongoConfig(object):
         self.clean_server_name = self._get_clean_server_name()
         if self.password and not self.username:
             raise ConfigurationError('`username` must be set when a `password` is specified')
-
-        if self.scheme != 'mongodb':
-            self.log.info("connection_scheme is deprecated and shouldn't be set to a value other than 'mongodb'")
 
         if not self.db_name:
             self.log.info('No MongoDB database found in URI. Defaulting to admin.')

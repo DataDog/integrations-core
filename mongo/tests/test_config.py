@@ -10,6 +10,31 @@ from datadog_checks.mongo import MongoDb
 from datadog_checks.mongo.config import MongoConfig
 
 
+def test_none_hosts():
+    instance = {}
+    with pytest.raises(ConfigurationError, match='No `hosts` specified'):
+        MongoConfig(instance, mock.Mock())
+
+
+def test_empty_hosts():
+    instance = {'hosts': []}
+    with pytest.raises(ConfigurationError, match='No `hosts` specified'):
+        MongoConfig(instance, mock.Mock())
+
+
+def test_default_ssl_params():
+    instance = {'hosts': ['test.mongodb.com']}
+    config = MongoConfig(instance, mock.Mock())
+    assert config.ssl_params == {}
+
+
+def test_default_scheme(instance):
+    instance['hosts'] = ['test.mongodb.com']
+    with mock.patch('pymongo.uri_parser.parse_uri', return_value={'nodelist': ["test.mongodb.com"]}) as mock_parse_uri:
+        MongoConfig(instance, mock.Mock())
+        mock_parse_uri.assert_called_once_with("mongodb://test.mongodb.com/")
+
+
 def test_invalid_scheme(instance):
     instance['hosts'] = ['sandbox.foo.bar.mongodb.com']
     instance['connection_scheme'] = 'invalid'
@@ -18,9 +43,11 @@ def test_invalid_scheme(instance):
 
 
 def test_mongodb_scheme(instance):
-    instance['hosts'] = ['localhost']
+    instance['hosts'] = ['test.mongodb.com']
     instance['connection_scheme'] = 'mongodb'
-    MongoConfig(instance, mock.Mock())
+    with mock.patch('pymongo.uri_parser.parse_uri', return_value={'nodelist': ["test.mongodb.com"]}) as mock_parse_uri:
+        MongoConfig(instance, mock.Mock())
+        mock_parse_uri.assert_called_once_with("mongodb://test.mongodb.com/")
 
 
 def test_mongodb_srv_scheme(instance):
@@ -35,12 +62,6 @@ def test_mongodb_srv_scheme(instance):
 
 def test_badly_formatted_server(instance):
     instance['hosts'] = ['sandbox.foo.bar.mongodb.com\\:27017\\']
-    with pytest.raises(ConfigurationError, match='Could not build a mongo uri with the given hosts'):
-        MongoConfig(instance, mock.Mock())
-
-
-def test_deprecated_schema(instance):
-    instance['hosts'] = ['mongodb+srv://sandbox.foo.bar.mongodb.com:27017']
     with pytest.raises(ConfigurationError, match='Could not build a mongo uri with the given hosts'):
         MongoConfig(instance, mock.Mock())
 
