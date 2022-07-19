@@ -285,7 +285,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
             "unknown_database",
             {"database": "wrong"},
             {
-                "odbc-windows|MSOLEDBSQL": "Cannot open database .* requested by the login.",
+                "odbc-windows|MSOLEDBSQL": "TCP-connection\\(OK\\).*Cannot open database .* requested by the login.",
                 "SQLOLEDB|SQLNCLI11": "TCP-connection\\(OK\\).*could not open database requested by login",
                 "odbc-linux": "TCP-connection\\(OK\\).*Login failed for user",
             },

@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 import socket
 from contextlib import closing, contextmanager
 
@@ -21,6 +22,8 @@ try:
 except ImportError:
     pyodbc = None
 
+logger = logging.getLogger(__file__)
+
 DATABASE_EXISTS_QUERY = 'select name, collation_name from sys.databases;'
 
 
@@ -28,6 +31,28 @@ class SQLConnectionError(Exception):
     """Exception raised for SQL instance connection issues"""
 
     pass
+
+
+def split_sqlserver_host_port(host):
+    """
+    Splits the host & port out of the provided SQL Server host connection string, returning (host, port).
+    """
+    if not host:
+        return host, None
+    host_split = [s.strip() for s in host.split(',')]
+    if len(host_split) == 1:
+        return host_split[0], None
+    if len(host_split) == 2:
+        return host_split
+    # else len > 2
+    s_host, s_port = host_split[0:2]
+    logger.warning(
+        "invalid sqlserver host string has more than one comma: %s. using only 1st two items: host:%s, port:%s",
+        host,
+        s_host,
+        s_port,
+    )
+    return s_host, s_port
 
 
 # we're only including the bare minimum set of special characters required to parse the connection string while
@@ -193,27 +218,6 @@ class Connection(object):
             self.adoprovider = self.default_adoprovider
 
         self.log.debug('Connection initialized.')
-
-    def split_sqlserver_host_port(self, host):
-        """
-        Splits the host & port out of the provided SQL Server host connection string, returning (host, port).
-        """
-        if not host:
-            return host, None
-        host_split = [s.strip() for s in host.split(',')]
-        if len(host_split) == 1:
-            return host_split[0], None
-        if len(host_split) == 2:
-            return host_split
-        # else len > 2
-        s_host, s_port = host_split[0:2]
-        self.log.warning(
-            "invalid sqlserver host string has more than one comma: %s. using only 1st two items: host:%s, port:%s",
-            host,
-            s_host,
-            s_port,
-        )
-        return s_host, s_port
 
     @contextmanager
     def get_managed_cursor(self, key_prefix=None):
@@ -550,11 +554,12 @@ class Connection(object):
 
     def test_network_connectivity(self):
         """
-        Tries to establish a TCP connection to the database host. If there is an error, it returns a description of the error.
+        Tries to establish a TCP connection to the database host.
+        If there is an error, it returns a description of the error.
 
         :return: error_message if failed connection else None
         """
-        host, port = self.split_sqlserver_host_port(self.instance.get('host'))
+        host, port = split_sqlserver_host_port(self.instance.get('host'))
         if port is None:
             port = 1433
 
