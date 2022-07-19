@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "Using this dashboard, you can get a high-level view of your Kong metrics so you can monitor the performance of Kong.\n\nTo learn more about the Datadog Kong integration, see:\n\n- [Datadog Kong integration documentation](https://docs.datadoghq.com/integrations/kong/?tabs=host).\n\n- [Monitoring Kong Performance Metrics](https://www.datadoghq.com/blog/monitor-kong-datadog/).\n\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.",
+    "description": "Using this dashboard, you can get a high-level view of your Kong metrics so you can monitor the performance of Kong.\n\nTo learn more about the Datadog Kong integration, see:\n\n- [Datadog Kong integration documentation](https://docs.datadoghq.com/integrations/kong/?tabs=host).\n\n- [Monitoring Kong Performance Metrics](https://www.datadoghq.com/blog/monitor-kong-datadog/).\n\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications. (cloned)",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -139,12 +139,13 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kong.nginx.http.current_connections{state:total}"
+                                            "query": "avg:kong.nginx.http.current_connections{state:total,$scope}"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
@@ -180,14 +181,15 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kong.bandwidth.count{*}.as_count()"
+                                            "query": "sum:kong.bandwidth.count{$scope}.as_count()"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "timeseries_background": {
-                                "type": "area",
+                                "type": "bars",
                                 "yaxis": {
                                     "include_zero": false
                                 }
@@ -225,17 +227,11 @@
                 "widgets": [
                     {
                         "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
+                            "autoscale": true,
+                            "custom_unit": " ",
+                            "precision": 0,
                             "requests": [
                                 {
-                                    "display_type": "bars",
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -243,46 +239,35 @@
                                     ],
                                     "queries": [
                                         {
+                                            "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kong.nginx.http.current_connections{state:active}"
+                                            "query": "avg:kong.nginx.http.current_connections{state:active,$scope}"
                                         }
                                     ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "blue"
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
-                            "show_legend": true,
                             "title": "Active",
                             "title_align": "left",
                             "title_size": "16",
-                            "type": "timeseries"
+                            "type": "query_value"
                         },
                         "id": 2453445216166472,
                         "layout": {
                             "height": 2,
-                            "width": 6,
+                            "width": 2,
                             "x": 0,
                             "y": 0
                         }
                     },
                     {
                         "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
+                            "autoscale": true,
+                            "custom_unit": " ",
+                            "precision": 0,
                             "requests": [
                                 {
-                                    "display_type": "bars",
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -290,142 +275,177 @@
                                     ],
                                     "queries": [
                                         {
+                                            "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kong.nginx.http.current_connections{state:waiting}"
+                                            "query": "avg:kong.nginx.http.current_connections{state:reading,$scope}"
                                         }
                                     ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "blue"
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "Idle",
+                            "title": "Reading",
                             "title_align": "left",
                             "title_size": "16",
-                            "type": "timeseries"
+                            "type": "query_value"
                         },
-                        "id": 7059712124629100,
+                        "id": 8670635201532290,
                         "layout": {
                             "height": 2,
-                            "width": 6,
+                            "width": 2,
+                            "x": 2,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "custom_unit": " ",
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:kong.nginx.http.current_connections{state:writing,$scope}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Writing",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 5608747059626248,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "custom_unit": " ",
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:kong.nginx.http.current_connections{state:waiting,$scope}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Waiting",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 6249831228701896,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
                             "x": 6,
                             "y": 0
                         }
                     },
                     {
                         "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "horizontal",
+                            "autoscale": true,
+                            "custom_unit": " ",
+                            "precision": 0,
                             "requests": [
                                 {
-                                    "display_type": "line",
                                     "formulas": [
                                         {
-                                            "alias": "Handled",
-                                            "formula": "per_minute(query1)"
-                                        },
-                                        {
-                                            "alias": "Accepted",
-                                            "formula": "per_minute(query2)"
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
                                         {
+                                            "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kong.nginx.http.current_connections{state:handled}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "avg:kong.nginx.http.current_connections{state:accepted}"
+                                            "query": "avg:kong.nginx.http.current_connections{state:accepted,$scope}"
                                         }
                                     ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "blue"
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
-                            "show_legend": false,
-                            "title": "Rate of accepted and handled",
+                            "title": "Accepted",
                             "title_align": "left",
                             "title_size": "16",
-                            "type": "timeseries"
+                            "type": "query_value"
                         },
-                        "id": 787989542148872,
+                        "id": 3368145340682354,
                         "layout": {
                             "height": 2,
-                            "width": 6,
-                            "x": 0,
-                            "y": 2
+                            "width": 2,
+                            "x": 8,
+                            "y": 0
                         }
                     },
                     {
                         "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
+                            "autoscale": true,
+                            "custom_unit": " ",
+                            "precision": 0,
                             "requests": [
                                 {
-                                    "display_type": "line",
                                     "formulas": [
                                         {
-                                            "formula": "per_minute(query1)"
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
                                         {
+                                            "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kong.nginx.http.current_connections{state:total}"
+                                            "query": "avg:kong.nginx.http.current_connections{state:handled,$scope}"
                                         }
                                     ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "blue"
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "Total requests rate",
+                            "title": "Handled",
                             "title_align": "left",
                             "title_size": "16",
-                            "type": "timeseries"
+                            "type": "query_value"
                         },
-                        "id": 1153890700777234,
+                        "id": 1851213606382248,
                         "layout": {
                             "height": 2,
-                            "width": 6,
-                            "x": 6,
-                            "y": 2
+                            "width": 2,
+                            "x": 10,
+                            "y": 0
                         }
                     }
                 ]
             },
             "id": 2575471079794398,
             "layout": {
-                "height": 5,
+                "height": 3,
                 "width": 12,
                 "x": 0,
                 "y": 5
@@ -461,7 +481,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kong.http.status.count{*} by {code}.as_count()"
+                                            "query": "avg:kong.http.status.count{$scope} by {code}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -508,7 +528,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kong.http.consumer.status.count{*} by {consumer}.as_count()"
+                                            "query": "avg:kong.http.consumer.status.count{$scope} by {consumer}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -540,7 +560,7 @@
                 "height": 5,
                 "width": 12,
                 "x": 0,
-                "y": 10
+                "y": 8
             }
         },
         {
@@ -574,7 +594,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kong.memory.lua.shared_dict.bytes{*} by {shared_dict}"
+                                            "query": "avg:kong.memory.lua.shared_dict.bytes{$scope} by {shared_dict}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -628,7 +648,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kong.memory.lua.shared_dict.total_bytes{*} by {shared_dict}"
+                                            "query": "avg:kong.memory.lua.shared_dict.total_bytes{$scope} by {shared_dict}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -682,7 +702,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kong.memory.workers.lua.vms.bytes{*} by {kong_subsystem}"
+                                            "query": "avg:kong.memory.workers.lua.vms.bytes{$scope} by {kong_subsystem}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -715,7 +735,7 @@
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 15
+                "y": 13
             }
         },
         {
@@ -749,7 +769,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kong.latency.count{*} by {service}.as_count()"
+                                            "query": "avg:kong.latency.count{$scope} by {service}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -761,7 +781,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Count",
                             "title_align": "left",
                             "title_size": "16",
@@ -804,7 +823,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kong.latency.bucket{*} by {service}.as_count()"
+                                            "query": "avg:kong.latency.bucket{$scope} by {service}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -858,7 +877,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kong.latency.sum{*} by {service}.as_count()"
+                                            "query": "avg:kong.latency.sum{$scope} by {service}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -897,7 +916,7 @@
                 "height": 5,
                 "width": 12,
                 "x": 0,
-                "y": 20
+                "y": 18
             }
         },
         {
@@ -909,6 +928,60 @@
                 "title_align": "center",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "data_source": "logs",
+                                            "group_by": [
+                                                {
+                                                    "facet": "status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "source:kong"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Log Volume by Status",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 902203802588548,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
                     {
                         "definition": {
                             "columns": [
@@ -932,37 +1005,63 @@
                         "id": 6626156661629262,
                         "layout": {
                             "height": 4,
-                            "width": 6,
-                            "x": 0,
+                            "width": 8,
+                            "x": 4,
                             "y": 0
                         }
                     },
                     {
                         "definition": {
-                            "columns": [
-                                "core_host",
-                                "core_service"
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "data_source": "logs",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url_details.path",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "source:kong"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
                             ],
-                            "indexes": [],
-                            "message_display": "expanded-md",
-                            "query": "source:kong",
-                            "show_date_column": true,
-                            "show_message_column": true,
-                            "sort": {
-                                "column": "time",
-                                "order": "desc"
-                            },
-                            "title": "All Logs",
+                            "title": "Log Volume by HTTP.url_path",
                             "title_align": "left",
                             "title_size": "16",
-                            "type": "log_stream"
+                            "type": "toplist"
                         },
-                        "id": 7693652234657664,
+                        "id": 6499094635168520,
                         "layout": {
-                            "height": 4,
-                            "width": 6,
-                            "x": 6,
-                            "y": 0
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 2
                         }
                     }
                 ]
@@ -972,7 +1071,7 @@
                 "height": 5,
                 "width": 12,
                 "x": 0,
-                "y": 25
+                "y": 23
             }
         }
     ]
