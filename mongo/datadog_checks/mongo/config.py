@@ -48,7 +48,6 @@ class MongoConfig(object):
                 self.hosts = [self.hosts]
             self.username = instance.get('username')
             self.password = instance.get('password')
-            # Deprecated
             self.scheme = instance.get('connection_scheme', 'mongodb')
             self.db_name = instance.get('database')
             self.additional_options = instance.get('options', {})
