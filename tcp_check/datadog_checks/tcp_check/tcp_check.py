@@ -82,12 +82,21 @@ class TCPCheck(AgentCheck):
         ]
 
         # IPv6 address format: 2001:db8:85a3:8d3:1319:8a2e:370:7348
-        if is_ipv6(self.host):  # It may then be a IP V6 address, we check that
+        if is_ipv6(self.host) or self.has_ipv6_connectivity():  # It may then be a IP V6 address, we check that
             # It's a correct IP V6 address
             self.socket_type = socket.AF_INET6
         else:
             self.socket_type = socket.AF_INET
             # IP will be resolved at check time
+
+    def has_ipv6_connectivity(self):
+        try:
+            for sockaddr in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET6, 0, socket.IPPROTO_TCP):
+                if not sockaddr[0].startswith('fe80:'):
+                    return True
+            return False
+        except socket.gaierror:
+            return False
 
     @property
     def addrs(self):
