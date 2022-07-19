@@ -182,3 +182,8 @@ INDEX_STATS_COUNT_METRICS = [
     'couchbase.index.num_scan_timeouts',
     'couchbase.index.scan_bytes_read',
 ]
+
+
+QUERY_OPTIONAL_STATS = {
+    'memory_system',
+}
