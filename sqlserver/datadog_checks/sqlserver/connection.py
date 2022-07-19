@@ -307,8 +307,6 @@ class Connection(object):
                 rawconn = pyodbc.connect(cs, timeout=self.timeout, autocommit=True)
                 rawconn.timeout = self.timeout
 
-            self.log.debug("CONNECTED_SQLSERVER: %s", cs)
-
             self.service_check_handler(AgentCheck.OK, host, database, is_default=is_default)
             if conn_key not in self._conns:
                 self._conns[conn_key] = rawconn
