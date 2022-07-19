@@ -548,6 +548,11 @@ class Connection(object):
         return conn_str
 
     def test_network_connectivity(self):
+        """
+        Tries to establish a TCP connection to the database host. If there is an error, it returns a description of the error.
+
+        :return: (connection_success, error_message)
+        """
         host, port = self.split_sqlserver_host_port(self.instance.get('host'))
         if port is None:
             port = 1433
