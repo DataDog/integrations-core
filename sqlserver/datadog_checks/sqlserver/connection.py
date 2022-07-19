@@ -570,9 +570,9 @@ class Connection(object):
             sock.settimeout(self.timeout)
             try:
                 sock.connect((host, port))
-            except (ConnectionError, socket.gaierror) as e:
-                return "ERROR: {}".format(e.strerror)
             except Exception as e:
-                return "ERROR: {}".format(repr(e))
+                return "ERROR: {}".format(
+                    e.strerror if hasattr(e, 'strerror') else repr(e)
+                )
 
         return None
