@@ -13,6 +13,7 @@ from datadog_test_libs.utils.mock_dns import mock_local
 from tests.mocked_api import MockedPyMongoClient
 
 from datadog_checks.dev import LazyFunction, WaitFor, docker_run, run_command
+from datadog_checks.dev.conditions import WaitForPortListening
 from datadog_checks.mongo import MongoDb
 
 from . import common
@@ -35,17 +36,26 @@ HOSTNAME_TO_PORT_MAPPING = {
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yml')
+    compose_file = os.path.join(common.HERE, 'compose', common.COMPOSE_FILE)
 
-    with docker_run(
-        compose_file,
-        conditions=[
+    if common.IS_TLS:
+        conditions = [WaitForPortListening(common.HOST, common.PORT1)]
+        with docker_run(
+            compose_file,
+            conditions=conditions,
+        ):
+            yield common.E2E_TLS_INSTANCE, common.E2E_METADATA
+    else:
+        conditions = [
             WaitFor(setup_sharding, args=(compose_file,), attempts=5, wait=5),
             InitializeDB(),
             WaitFor(create_shard_user, attempts=60, wait=5),
-        ],
-    ):
-        yield common.INSTANCE_CUSTOM_QUERIES, {'custom_hosts': get_custom_hosts()}
+        ]
+        with docker_run(
+            compose_file,
+            conditions=conditions,
+        ):
+            yield common.INSTANCE_CUSTOM_QUERIES, {'custom_hosts': get_custom_hosts()}
 
 
 def get_custom_hosts():

@@ -1,0 +1,11 @@
+version: '3'
+
+# This was heavily based upon: https://github.com/chefsplate/mongo-shard-docker-compose
+services:
+  standalone:
+    image: mongo:$MONGO_VERSION
+    command: mongod --tlsMode allowTLS --tlsAllowInvalidCertificates --tlsCertificateKeyFile /certs/server.pem  --tlsCAFile /certs/ca.pem --port 27017
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./certs:/certs
