@@ -16,6 +16,7 @@ from datadog_checks.couchbase.couchbase_consts import (
     SERVICE_CHECK_NAME,
     SG_SERVICE_CHECK_NAME,
 )
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
     BUCKET_NAME,
@@ -122,6 +123,7 @@ def test_query_monitoring_metrics(aggregator, dd_run_check, instance_query, couc
         aggregator.assert_metric('couchbase.query.{}'.format(mname), tags=CHECK_TAGS, count=1)
     for mname in QUERY_OPTIONAL_STATS:
         aggregator.assert_metric('couchbase.query.{}'.format(mname), tags=CHECK_TAGS, at_least=0)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
