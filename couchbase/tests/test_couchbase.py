@@ -107,6 +107,7 @@ def test_e2e(dd_agent_check, instance, couchbase_container_ip):
     _assert_stats(aggregator, node_tags, device=device)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
@@ -142,6 +143,7 @@ def test_sync_gateway_metrics(aggregator, dd_run_check, instance_sg, couchbase_c
         else:
             aggregator.assert_metric(mname, tags=CHECK_TAGS, count=1)
     aggregator.assert_service_check(SG_SERVICE_CHECK_NAME, status=Couchbase.OK, tags=CHECK_TAGS)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
@@ -218,6 +220,7 @@ def test_index_stats_metrics(aggregator, dd_run_check, instance_index_stats, cou
         aggregator.assert_metric(mname, metric_type=aggregator.MONOTONIC_COUNT, tags=INDEX_STATS_TAGS)
 
     aggregator.assert_service_check(INDEX_STATS_SERVICE_CHECK_NAME, status=Couchbase.OK, tags=CHECK_TAGS)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
@@ -242,3 +245,4 @@ def test_metrics(aggregator, dd_run_check, instance, couchbase_container_ip):
     _assert_stats(aggregator, node_tags)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
