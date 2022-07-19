@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Add labels
-      uses: DataDog/labeler@glob-all
+      uses: actions/labeler@v4
       with:
         repo-token: "${{ secrets.DD_CHANGELOG_CHECK_TOKEN }}"
         configuration-path: .github/workflows/config/labeler.yml
