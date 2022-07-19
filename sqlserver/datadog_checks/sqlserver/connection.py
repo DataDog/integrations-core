@@ -571,8 +571,6 @@ class Connection(object):
             try:
                 sock.connect((host, port))
             except Exception as e:
-                return "ERROR: {}".format(
-                    e.strerror if hasattr(e, 'strerror') else repr(e)
-                )
+                return "ERROR: {}".format(e.strerror if hasattr(e, 'strerror') else repr(e))
 
         return None
