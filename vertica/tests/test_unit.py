@@ -153,6 +153,17 @@ def test_client_logging_disabled_if_agent_uses_info(aggregator, instance):
         )
 
 
+@pytest.mark.parametrize(
+    'version_string, expected',
+    [
+        ('Vertica Analytic Database v11.1.1-0', '11.1.1+0'),
+        ('Vertica Analytic Database v10.0.0-1', '10.0.0+1'),
+    ],
+)
+def test_VerticaCheck_parse_db_version(version_string, expected):
+    assert VerticaCheck.parse_db_version(version_string) == expected
+
+
 @pytest.mark.parametrize('version_string, expected', [('v9.2.0-7', 9), ('v11.1.1-0', 11)])
 def test_parse_major_version(version_string, expected):
     assert parse_major_version(version_string) == expected

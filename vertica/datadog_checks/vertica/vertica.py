@@ -14,7 +14,6 @@ from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.base.utils.containers import iter_unique
 from datadog_checks.base.utils.db import QueryManager
 
-from . import views
 from .queries import get_queries
 from .utils import parse_major_version
 
@@ -113,7 +112,7 @@ class VerticaCheck(AgentCheck):
         self._query_manager.compile_queries()
 
     def _major_version(self):
-        return parse_major_version(self._connection.parameters['server_version'])
+        return parse_major_version(self.query_version())
 
     def check(self, _):
         self._connect()
@@ -123,19 +122,27 @@ class VerticaCheck(AgentCheck):
             return
 
         self._query_manager.execute()
-        self.query_version()
+        self.set_version_metadata()
         self.query_custom()
 
     @AgentCheck.metadata_entrypoint
+    def set_version_metadata(self):
+        self.set_metadata('version', self.query_version())
+
     def query_version(self):
-        # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/AdministratorsGuide/Diagnostics/DeterminingYourVersionOfVertica.htm
-        for v in self.iter_rows(views.Version):
-            version = v['version'].replace('Vertica Analytic Database v', '')
+        """Get the Vertica version by queriying the DB.
 
+        https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/AdministratorsGuide/Diagnostics/DeterminingYourVersionOfVertica.htm
+        """
+        return self.parse_db_version(self._connection.cursor().execute('SELECT version()').fetchone()[0])
+
+    @staticmethod
+    def parse_db_version(vertica_version_string):
+        return (
+            vertica_version_string.replace('Vertica Analytic Database v', '')
             # Force the last part to represent the build part of semver
-            version = version.replace('-', '+', 1)
-
-            self.set_metadata('version', version)
+            .replace('-', '+', 1)
+        )
 
     def query_custom(self):
         for custom_query in self._custom_queries:
@@ -238,17 +245,6 @@ class VerticaCheck(AgentCheck):
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             return connection
-
-    def iter_rows(self, view):
-        for row in self.iter_rows_query(view.query):
-            yield row
-
-    def iter_rows_query(self, query):
-        cursor = self._connection.cursor('dict')
-        cursor.execute(query)
-
-        for row in cursor.iterate():
-            yield row
 
     def execute_query(self, query):
         return self._connection.cursor().execute(query).iterate()

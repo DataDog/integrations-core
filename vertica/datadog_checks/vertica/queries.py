@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+# Using System tables to monitor Vertica:
+# https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/AdministratorsGuide/Monitoring/Vertica/UsingSystemTables.htm
+
 
 def get_queries(major_version, metric_groups):
     """Get query dicts for use with QueryManager.
