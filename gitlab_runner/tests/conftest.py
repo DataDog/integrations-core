@@ -40,9 +40,9 @@ def dd_environment():
         compose_file=compose_file,
         env_vars=env,
         conditions=[
-            CheckDockerLogs(compose_file, 'Gitlab is up!', wait=5),
-            CheckDockerLogs(compose_file, 'Configuration loaded', wait=5),
-            CheckDockerLogs('Metrics server listening', wait=5),
+            CheckDockerLogs(compose_file, patterns='Gitlab is up!', wait=5),
+            CheckDockerLogs(compose_file, patterns='Configuration loaded', wait=5),
+            CheckDockerLogs(compose_file, patterns='Metrics server listening', wait=5),
             CheckEndpoints(GITLAB_RUNNER_URL, attempts=180),
             CheckEndpoints('{}/ci'.format(GITLAB_MASTER_URL), attempts=90),
         ],
