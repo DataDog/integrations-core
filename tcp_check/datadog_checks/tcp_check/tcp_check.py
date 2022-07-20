@@ -8,28 +8,6 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.time import get_precise_time
 
-# For Linux and python 3 on Windows
-if "inet_pton" in socket.__dict__:
-
-    def is_ipv6(addr):
-        try:
-            socket.inet_pton(socket.AF_INET6, addr)
-            return True
-        except socket.error:
-            return False
-
-
-# Only for python 2 on Windows
-else:
-
-    import re
-
-    def is_ipv6(addr):
-        if re.match(r'^[0-9a-f:]+$', addr):
-            return True
-        else:
-            return False
-
 
 class TCPCheck(AgentCheck):
 
@@ -81,23 +59,6 @@ class TCPCheck(AgentCheck):
             'instance:{}'.format(self.instance_name),
         ]
 
-        # IPv6 address format: 2001:db8:85a3:8d3:1319:8a2e:370:7348
-        if is_ipv6(self.host) or self.has_ipv6_connectivity():  # It may then be a IP V6 address, we check that
-            # It's a correct IP V6 address
-            self.socket_type = socket.AF_INET6
-        else:
-            self.socket_type = socket.AF_INET
-            # IP will be resolved at check time
-
-    def has_ipv6_connectivity(self):
-        try:
-            for sockaddr in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET6, 0, socket.IPPROTO_TCP):
-                if not sockaddr[0].startswith('fe80:'):
-                    return True
-            return False
-        except socket.gaierror:
-            return False
-
     @property
     def addrs(self):
         if self._addrs is None or self._addrs == []:
@@ -111,27 +72,33 @@ class TCPCheck(AgentCheck):
 
     def resolve_ips(self):
         if self.socket_type == socket.AF_INET:
+            if self._addrs is None:
+                self._addrs = []
             # gethostbyname_ex only translates to IPv4 addresses
-            _, _, self._addrs = socket.gethostbyname_ex(self.host)
+            _, _, addrs = socket.gethostbyname_ex(self.host)
+            for addr in addrs:
+                self._addrs.append((addr, socket.AF_INET))
         else:
             self._addrs = [
-                sockaddr[0]
-                for (_, _, _, _, sockaddr) in socket.getaddrinfo(self.host, self.port, 0, 0, socket.IPPROTO_TCP)
+                (sockaddr[0], socket_type)
+                for (socket_type, _, _, _, sockaddr) in socket.getaddrinfo(
+                    self.host, self.port, 0, 0, socket.IPPROTO_TCP
+                )
             ]
         if not self.multiple_ips:
             self._addrs = self._addrs[:1]
 
         if self._addrs == []:
             raise Exception("No IPs attached to host")
-        self.log.debug("%s resolved to %s", self.host, self._addrs)
+        self.log.debug("%s resolved to %s. Socket type: %s", self.host, self._addrs[0][0], self._addrs[0][1])
 
     def should_resolve_ips(self):
         if self.ip_cache_duration is None:
             return False
         return get_precise_time() - self.ip_cache_last_ts > self.ip_cache_duration
 
-    def connect(self, addr):
-        with closing(socket.socket(self.socket_type)) as sock:
+    def connect(self, addr, socket_type):
+        with closing(socket.socket(socket_type)) as sock:
             sock.settimeout(self.timeout)
             start = get_precise_time()
             sock.connect((addr, self.port))
@@ -147,9 +114,10 @@ class TCPCheck(AgentCheck):
 
         self.log.debug("Connecting to %s on port %d", self.host, self.port)
 
-        for addr in self.addrs:
+        for addr, socket_type in self.addrs:
+            self.socket_type = socket_type
             try:
-                response_time = self.connect(addr)
+                response_time = self.connect(addr, self.socket_type)
                 self.log.debug("%s:%d is UP (%s)", self.host, self.port, addr)
                 self.report_as_service_check(AgentCheck.OK, addr, 'UP')
                 if self.collect_response_time:

@@ -45,7 +45,7 @@ def test_reattempt_resolution_on_error():
 
     # Upon connection failure, cached resolved IP is cleared
     with mock.patch.object(check, 'connect', wraps=check.connect) as connect:
-        connect.side_effect = lambda self, addr: Exception()
+        connect.side_effect = lambda self, addr, socket_type: Exception()
         check.check(instance)
         assert check._addrs is None
 
@@ -79,7 +79,7 @@ def test_up(aggregator, check):
     """
     check.check(deepcopy(common.INSTANCE))
     expected_tags = ["instance:UpService", "target_host:datadoghq.com", "port:80", "foo:bar"]
-    expected_tags.append("address:{}".format(check._addrs[0]))
+    expected_tags.append("address:{}".format(check._addrs[0][0]))
     aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
     aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
     aggregator.assert_all_metrics_covered()
@@ -98,62 +98,140 @@ def test_response_time(aggregator):
 
     # service check
     expected_tags = ['foo:bar', 'target_host:datadoghq.com', 'port:80', 'instance:instance:response_time']
-    expected_tags.append("address:{}".format(check._addrs[0]))
+    expected_tags.append("address:{}".format(check._addrs[0][0]))
     aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
     aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
 
     # response time metric
     expected_tags = ['url:datadoghq.com:80', 'instance:instance:response_time', 'foo:bar']
-    expected_tags.append("address:{}".format(check._addrs[0]))
+    expected_tags.append("address:{}".format(check._addrs[0][0]))
     aggregator.assert_metric('network.tcp.response_time', tags=expected_tags)
     aggregator.assert_all_metrics_covered()
     assert len(aggregator.service_checks('tcp.can_connect')) == 1
 
 
 @pytest.mark.parametrize(
-    'hostname, getaddrinfo, gethostbyname_ex, expected_addrs',
+    'hostname, getaddrinfo, gethostbyname_ex, expected_addrs, multiple_ips, service_checks_count',
     [
         pytest.param(
             'localhost',
-            [
-                (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('::1', 80, 0, 0)),
-                (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('127.0.0.1', 80)),
-            ],
+            common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV6,
+            None,
+            [('::1', socket.AF_INET6)],
+            False,
+            1,
+            id='Dual IPv4/IPv6: localhost, IPv6 resolution, multiple_ips False',
+        ),
+        pytest.param(
+            'localhost',
+            common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV4,
             ('localhost', [], ['127.0.0.1']),
-            ['127.0.0.1'],
-            id='localhost',
+            [('127.0.0.1', socket.AF_INET)],
+            False,
+            1,
+            id='Dual IPv4/IPv6: localhost, IPv4 resolution, multiple_ips False',
+        ),
+        pytest.param(
+            'localhost',
+            common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV6,
+            None,
+            [('::1', socket.AF_INET6), ('127.0.0.1', socket.AF_INET)],
+            True,
+            2,
+            id='Dual IPv4/IPv6: localhost, IPv6 resolution, multiple_ips True',
+        ),
+        pytest.param(
+            'localhost',
+            common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV4,
+            ('localhost', [], ['127.0.0.1']),
+            [('127.0.0.1', socket.AF_INET), ('::1', socket.AF_INET6)],
+            True,
+            2,
+            id='Dual IPv4/IPv6: localhost, IPv4 resolution, multiple_ips True',
         ),
         pytest.param(
             'some-hostname',
-            [
-                (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip1', 80)),
-                (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip2', 80, 0, 0)),
-                (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip3', 80, 0, 0)),
-            ],
+            common.DUAL_STACK_GETADDRINFO_IPV4,
             ('some-hostname', [], ['ip1']),
-            ['ip1'],
-            id='string hostname: ipv4 address 1st in list',
+            [('ip1', socket.AF_INET)],
+            False,
+            1,
+            id='Dual IPv4/IPv6: string hostname, IPv4 resolution, multiple_ips False',
         ),
         pytest.param(
             'another-hostname',
-            [
-                (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip1', 80, 0, 0)),
-                (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip2', 80)),
-                (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip3', 80, 0, 0)),
-            ],
-            ('another-hostname', [], ['ip2']),
-            ['ip2'],
-            id='string hostname: ipv4 address 2nd in list',
+            common.DUAL_STACK_GETADDRINFO_IPV6,
+            None,
+            [('ip1', socket.AF_INET6)],
+            False,
+            1,
+            id='Dual IPv4/IPv6: string hostname, IPv6 resolution, multiple_ips False',
+        ),
+        pytest.param(
+            'some-hostname',
+            common.DUAL_STACK_GETADDRINFO_IPV4,
+            ('some-hostname', [], ['ip1']),
+            [('ip1', socket.AF_INET), ('ip2', socket.AF_INET6), ('ip3', socket.AF_INET6)],
+            True,
+            3,
+            id='Dual IPv4/IPv6: string hostname, IPv4 resolution, multiple_ips True',
+        ),
+        pytest.param(
+            'another-hostname',
+            common.DUAL_STACK_GETADDRINFO_IPV6,
+            None,
+            [('ip1', socket.AF_INET6), ('ip2', socket.AF_INET), ('ip3', socket.AF_INET6)],
+            True,
+            3,
+            id='Dual IPv4/IPv6: string hostname, IPv6 resolution, multiple_ips True',
+        ),
+        pytest.param(
+            'localhost',
+            common.SINGLE_STACK_GETADDRINFO_LOCALHOST_IPV4,
+            ('localhost', [], ['127.0.0.1']),
+            [('127.0.0.1', socket.AF_INET)],
+            False,
+            1,
+            id='Single stack IPv4: localhost, IPv4 resolution, multiple_ips False',
+        ),
+        pytest.param(
+            'localhost',
+            common.SINGLE_STACK_GETADDRINFO_LOCALHOST_IPV4,
+            ('localhost', [], ['127.0.0.1', 'ip1']),
+            [('127.0.0.1', socket.AF_INET), ('ip2', socket.AF_INET)],
+            True,
+            2,
+            id='Single stack IPv4: localhost, IPv4 resolution, multiple_ips True',
+        ),
+        pytest.param(
+            'another-hostname',
+            common.SINGLE_STACK_GETADDRINFO_IPV4,
+            None,
+            [('ip1', socket.AF_INET)],
+            False,
+            1,
+            id='Single stack IPv4: string hostname, IPv4 resolution, multiple_ips False',
+        ),
+        pytest.param(
+            'another-hostname',
+            common.SINGLE_STACK_GETADDRINFO_IPV4,
+            None,
+            [('ip1', socket.AF_INET), ('ip2', socket.AF_INET), ('ip3', socket.AF_INET)],
+            True,
+            3,
+            id='Single stack IPv4: string hostname, IPv4 resolution, multiple_ips True',
         ),
     ],
 )
-def test_hostname_resolution(aggregator, monkeypatch, hostname, getaddrinfo, gethostbyname_ex, expected_addrs):
+def test_hostname_resolution(
+    aggregator, monkeypatch, hostname, getaddrinfo, gethostbyname_ex, expected_addrs, multiple_ips, service_checks_count
+):
     """
     Test that string hostnames get resolved to ipv4 address format properly.
     """
     instance = deepcopy(common.INSTANCE)
     instance['host'] = hostname
-    instance['multiple_ips'] = False
+    instance['multiple_ips'] = multiple_ips
     check = TCPCheck(common.CHECK_NAME, {}, [instance])
 
     monkeypatch.setattr('socket.getaddrinfo', mock.Mock(return_value=getaddrinfo))
@@ -165,16 +243,19 @@ def test_hostname_resolution(aggregator, monkeypatch, hostname, getaddrinfo, get
         "target_host:{}".format(hostname),
         "port:80",
         "foo:bar",
-        "address:{}".format(expected_addrs[0]),
+        "address:{}".format(expected_addrs[0][0]),
     ]
 
     check.check(instance)
 
     assert check._addrs == expected_addrs
+    # at the end of check.check() run, check.socket_type will be assigned to the last addr's socket type
+    assert check.socket_type == expected_addrs[-1:][0][1]
+
     aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags, count=1)
     aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags, count=1)
     aggregator.assert_all_metrics_covered()
-    assert len(aggregator.service_checks('tcp.can_connect')) == 1
+    assert len(aggregator.service_checks('tcp.can_connect')) == service_checks_count
 
 
 def test_multiple(aggregator):
@@ -216,6 +297,8 @@ def test_multiple(aggregator):
 
 
 def has_ipv6_connectivity():
+    # in macOS, `socket.gethostname()` might return a hostname that hasn't been configured with an IP in /etc/hosts
+    # regardless of whether the system has IPv6 connectivity or not
     try:
         for sockaddr in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET6, 0, socket.IPPROTO_TCP):
             if not sockaddr[0].startswith('fe80:'):
@@ -236,12 +319,16 @@ def test_ipv6(aggregator, check):
     nb_ipv4, nb_ipv6 = 0, 0
     for addr in check.addrs:
         expected_tags = ["instance:UpService", "target_host:ip-ranges.datadoghq.com", "port:80", "foo:bar"]
-        expected_tags.append("address:{}".format(addr))
-        if re.match(r'^[0-9a-f:]+$', addr):
+        expected_tags.append("address:{}".format(addr[0]))
+        if re.match(r'^[0-9a-f:]+$', addr[0]):
             nb_ipv6 += 1
             if has_ipv6_connectivity():
                 aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
                 aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
+            elif platform.system() == 'Darwin':
+                # IPv6 connectivity varies when running test locally on macOS, so we do not check status or metric value
+                aggregator.assert_service_check('tcp.can_connect', tags=expected_tags)
+                aggregator.assert_metric('network.tcp.can_connect', tags=expected_tags)
             else:
                 aggregator.assert_service_check('tcp.can_connect', status=check.CRITICAL, tags=expected_tags)
                 aggregator.assert_metric('network.tcp.can_connect', value=0, tags=expected_tags)
