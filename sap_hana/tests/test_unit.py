@@ -26,6 +26,7 @@ def test_error_query(instance, dd_run_check):
     check._conn = conn
 
     dd_run_check(check)
+    check.log.error.assert_any_call('Error querying %s: %s', 'SYS.M_DATABASE', 'test')
 
 
 def test_reconnect_on_connection_failure(instance, dd_run_check, aggregator):
