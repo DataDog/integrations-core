@@ -27,7 +27,7 @@ except ImportError:
     from ..stubs import datadog_agent
 
 from datadog_checks.sqlserver import metrics
-from datadog_checks.sqlserver.connection import Connection, SQLConnectionError
+from datadog_checks.sqlserver.connection import Connection, SQLConnectionError, split_sqlserver_host_port
 from datadog_checks.sqlserver.const import (
     AO_METRICS,
     AO_METRICS_PRIMARY,
@@ -187,27 +187,6 @@ class SQLServer(AgentCheck):
                 "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored"
             )
 
-    def split_sqlserver_host_port(self, host):
-        """
-        Splits the host & port out of the provided SQL Server host connection string, returning (host, port).
-        """
-        if not host:
-            return host, None
-        host_split = [s.strip() for s in host.split(',')]
-        if len(host_split) == 1:
-            return host_split[0], None
-        if len(host_split) == 2:
-            return host_split
-        # else len > 2
-        s_host, s_port = host_split[0:2]
-        self.log.warning(
-            "invalid sqlserver host string has more than one comma: %s. using only 1st two items: host:%s, port:%s",
-            host,
-            s_host,
-            s_port,
-        )
-        return s_host, s_port
-
     def _new_query_executor(self, queries):
         return QueryExecutor(
             self.execute_query_raw,
@@ -223,7 +202,7 @@ class SQLServer(AgentCheck):
             if self.reported_hostname:
                 self._resolved_hostname = self.reported_hostname
             elif self.dbm_enabled:
-                host, port = self.split_sqlserver_host_port(self.instance.get('host'))
+                host, port = split_sqlserver_host_port(self.instance.get('host'))
                 self._resolved_hostname = resolve_db_host(host)
                 engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
                 if engine_edition == ENGINE_EDITION_SQL_DATABASE:
