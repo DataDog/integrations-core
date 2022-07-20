@@ -185,5 +185,6 @@ INDEX_STATS_COUNT_METRICS = [
 
 
 QUERY_OPTIONAL_STATS = {
-    'memory_system', 'gc_pause_time',
+    'memory_system',
+    'gc_pause_time',
 }
