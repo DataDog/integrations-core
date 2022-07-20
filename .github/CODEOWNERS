@@ -73,6 +73,9 @@ assets/               @DataDog/agent-integrations
 /kubernetes_state/                        @DataDog/container-integrations @DataDog/agent-integrations
 /kubernetes_state/*.md                    @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kubernetes_state/manifest.json           @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/kubernetes_state_core/                   @DataDog/container-integrations @DataDog/agent-integrations
+/kubernetes_state_core/*.md               @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/kubernetes_state_core/manifest.json      @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /nginx_ingress_controller/                @DataDog/container-integrations @DataDog/agent-integrations
 /nginx_ingress_controller/*.md            @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /nginx_ingress_controller/manifest.json   @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
