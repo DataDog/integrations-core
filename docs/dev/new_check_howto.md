@@ -12,8 +12,8 @@ If you need to send data to Datadog that isn't supported by the Agent or an exis
 
 For a complete guide on creating a new integration, check out the Datadog Learning Center course, [Introduction to Integrations][90].
 
-TODO: Add information on the three different integration repos. From the learning lab:
-> The various Datadog Agent integrations fall into one of three categories: "core", "extras", or "marketplace". Core integrations are generally developed and maintained by Datadog directly. Extras integrations are developed and maintained by the community (this includes you). Marketplace integrations are developed and maintained by marketplace partners. The marketplace integrations repo is private, which is why you don't see a link to it here. The development process is similar to the one for "extras", but to release on the marketplace, you will need to become a marketplace partner.
+<!-- TODO: Add information on the three different integration repos. From the learning lab:
+  The various Datadog Agent integrations fall into one of three categories: "core", "extras", or "marketplace". Core integrations  are generally developed and maintained by Datadog directly. Extras integrations are developed and maintained by the community (this includes you). Marketplace integrations are developed and maintained by marketplace partners. The marketplace integrations repo is private, which is why you don't see a link to it here. The development process is similar to the one for "extras", but to release on the marketplace, you will need to become a marketplace partner. -->
 
 ## Prerequisites
 
@@ -74,13 +74,13 @@ One of the developer toolkit features is the `create` command, which creates the
 
 ### Dry-run
 
-Try a dry-run using the `-n/--dry-run` flag, which doesn't write anything to disk.
+Before you create your first integration directory, try a dry-run using the `-n/--dry-run` flag, which doesn't write anything to disk.
 
 ```bash
 ddev create -n Awesome
 ```
 
-This displays the path where the files would have been written, as well as the structure itself. Make sure the path in the _first line_ of output matches your Extras repository.
+This displays the path where the files would have been written, as well as the structure itself. Make sure the path in the first line of output matches your integrations-extras repository location.
 
 ### Interactive mode
 
@@ -92,11 +92,9 @@ ddev create Awesome
 
 After answering the questions, the output matches that of the dry-run above, except in this case the scaffolding for your new integration actually exists!
 
-## Write the check
+## Write a Check
 
-### Intro
-
-A Check is a Python class with the following requirements:
+At the core of each integration is a a Check that periodically collects information and sends it to Datadog. Checks inherit their logic from the `AgentCheck` base class and have the the following requirements:
 
 - Integrations run on Agent v7+ must be Python 3 compatible; however, Agents v5 and v6 still use Python 2.7.
 - It must derive from `AgentCheck`
