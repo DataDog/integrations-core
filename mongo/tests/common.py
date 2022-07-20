@@ -122,15 +122,7 @@ INSTANCE_CUSTOM_QUERIES = {
     ],
 }
 
-E2E_TLS_INSTANCE = {
-    'ssl': True,
-    'ssl_keyfile': '{}/client1.pem'.format(TLS_CERTS_FOLDER),
-    'ssl_ca_certs': '{}/ca.pem'.format(TLS_CERTS_FOLDER),
-    'ssl_cert_reqs': 'ssl.CERT_NONE',
-    'ssl_match_hostname:': False,
-}
-
-E2E_METADATA = {
+TLS_METADATA = {
     'docker_volumes': [
         '{}:/certs'.format(TLS_CERTS_FOLDER),
     ],

@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.mongo import MongoDb
 
-from .common import HOST, PORT1, PORT2, not_tls, tls
+from .common import HOST, PORT2, not_tls
 
 BASE_METRICS = [
     'mongodb.connections.available',
@@ -71,17 +71,6 @@ def test_e2e_mongod(dd_agent_check, instance):
     instance['hosts'] = ['{}:{}'.format(HOST, PORT2)]
     instance['username'] = 'testUser'
     instance['password'] = 'testPass'
-    aggregator = dd_agent_check(instance, rate=True)
-    for metric in MONGOD_METRICS:
-        aggregator.assert_metric(metric)
-
-    aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
-
-
-@tls
-@pytest.mark.e2e
-def test_e2e_mongod_tls(dd_agent_check, instance):
-    instance['hosts'] = ['{}:{}'.format(HOST, PORT1)]
     aggregator = dd_agent_check(instance, rate=True)
     for metric in MONGOD_METRICS:
         aggregator.assert_metric(metric)

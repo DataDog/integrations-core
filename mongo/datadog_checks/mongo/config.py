@@ -26,8 +26,13 @@ class MongoConfig(object):
                 'ssl_cert_reqs': instance.get('ssl_cert_reqs', None),
                 'ssl_ca_certs': cacert_cert_dir,
                 'ssl_match_hostname': instance.get('ssl_match_hostname', None),
+                'tls': instance.get('tls', None),
+                'tlsAllowInvalidCertificates': instance.get('tlsAllowInvalidCertificates', None),
+                'tlsCAFile': instance.get('tlsCAFile', None),
+                'tlsCertificateKeyFile': instance.get('tlsCertificateKeyFile', None),
             }
         )
+        self.log.debug('ssl_params: %s', self.ssl_params)
 
         if 'server' in instance:
             self.server = instance['server']

@@ -44,7 +44,7 @@ def dd_environment():
             compose_file,
             conditions=conditions,
         ):
-            yield common.E2E_TLS_INSTANCE, common.E2E_METADATA
+            yield common.INSTANCE_BASIC, common.TLS_METADATA
     else:
         conditions = [
             WaitFor(setup_sharding, args=(compose_file,), attempts=5, wait=5),

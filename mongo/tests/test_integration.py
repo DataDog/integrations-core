@@ -4,8 +4,9 @@ import os
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.mongo import MongoDb
 
-from .common import HERE
+from .common import HERE, HOST, PORT1, TLS_CERTS_FOLDER, tls
 from .conftest import mock_pymongo
 
 
@@ -583,3 +584,34 @@ def test_db_names_missing_existent_database(check, instance_integration, aggrega
         check_submission_type=True,
     )
     assert len(aggregator._events) == 0
+
+
+@tls
+@pytest.mark.usefixtures('dd_environment')
+def test_mongod_tls_ok(check, dd_run_check, aggregator):
+    instance = {
+        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'tls': True,
+        'tlsAllowInvalidCertificates': True,
+        'tlsCertificateKeyFile': '{}/client1.pem'.format(TLS_CERTS_FOLDER),
+        'tlsCAFile': '{}/ca.pem'.format(TLS_CERTS_FOLDER),
+    }
+    mongo_check = check(instance)
+    dd_run_check(mongo_check)
+    aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
+
+
+@tls
+@pytest.mark.usefixtures('dd_environment')
+def test_mongod_tls_fail(check, dd_run_check, aggregator):
+    instance = {
+        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'tls': True,
+        'tlsAllowInvalidCertificates': True,
+        'tlsCertificateKeyFile': '{}/fail.pem'.format(TLS_CERTS_FOLDER),
+        'tlsCAFile': '{}/ca.pem'.format(TLS_CERTS_FOLDER),
+    }
+    with pytest.raises(Exception, match="Private key doesn't match certificate"):
+        mongo_check = check(instance)
+        dd_run_check(mongo_check)
+    aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.CRITICAL)
