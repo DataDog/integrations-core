@@ -75,6 +75,7 @@ def dd_environment():
                 WaitFor(init_mysql, wait=2),
                 WaitFor(init_proxy, wait=2),
             ],
+            attempts=2,
         ):
             instance = deepcopy(INSTANCE_ALL_METRICS)
             cert_src = os.path.join(tmp_dir, 'proxysql-ca.pem')
