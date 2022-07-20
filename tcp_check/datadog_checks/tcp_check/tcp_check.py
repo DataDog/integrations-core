@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import socket
+from collections import namedtuple
 from contextlib import closing
+from typing import Any, List
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
@@ -29,6 +31,7 @@ class TCPCheck(AgentCheck):
         self.ip_cache_last_ts = 0
         self.ip_cache_duration = self.DEFAULT_IP_CACHE_DURATION
         self.multiple_ips = instance.get('multiple_ips', False)
+        self.addr_tuple = namedtuple('addr_tuple', ['address', 'socket_type'])
 
         ip_cache_duration = instance.get('ip_cache_duration', None)
         if ip_cache_duration is not None:
@@ -61,6 +64,7 @@ class TCPCheck(AgentCheck):
 
     @property
     def addrs(self):
+        # type: (Any) -> List[namedtuple(str, socket.AddressFamily)]
         if self._addrs is None or self._addrs == []:
             try:
                 self.resolve_ips()
@@ -71,16 +75,17 @@ class TCPCheck(AgentCheck):
         return self._addrs
 
     def resolve_ips(self):
+        # type: () -> None
         if self.socket_type == socket.AF_INET:
             if self._addrs is None:
                 self._addrs = []
             # gethostbyname_ex only translates to IPv4 addresses
             _, _, addrs = socket.gethostbyname_ex(self.host)
             for addr in addrs:
-                self._addrs.append((addr, socket.AF_INET))
+                self._addrs.append(self.addr_tuple(addr, socket.AF_INET))
         else:
             self._addrs = [
-                (sockaddr[0], socket_type)
+                self.addr_tuple(sockaddr[0], socket_type)
                 for (socket_type, _, _, _, sockaddr) in socket.getaddrinfo(
                     self.host, self.port, 0, 0, socket.IPPROTO_TCP
                 )
@@ -90,14 +95,18 @@ class TCPCheck(AgentCheck):
 
         if self._addrs == []:
             raise Exception("No IPs attached to host")
-        self.log.debug("%s resolved to %s. Socket type: %s", self.host, self._addrs[0][0], self._addrs[0][1])
+        self.log.debug(
+            "%s resolved to %s. Socket type: %s", self.host, self._addrs[0].address, self._addrs[0].socket_type
+        )
 
     def should_resolve_ips(self):
+        # type: () -> bool
         if self.ip_cache_duration is None:
             return False
         return get_precise_time() - self.ip_cache_last_ts > self.ip_cache_duration
 
     def connect(self, addr, socket_type):
+        # type: (Any, str, socket.AddressFamily) -> float
         with closing(socket.socket(socket_type)) as sock:
             sock.settimeout(self.timeout)
             start = get_precise_time()
@@ -106,6 +115,7 @@ class TCPCheck(AgentCheck):
             return response_time
 
     def check(self, _):
+        # type: (Any) -> None
         start = get_precise_time()  # Avoid initialisation warning
 
         if self.should_resolve_ips():
@@ -163,6 +173,7 @@ class TCPCheck(AgentCheck):
                     self._addrs = None
 
     def report_as_service_check(self, status, addr, msg=None):
+        # type: (AgentCheck.service_check, str, str) -> None
         if status is AgentCheck.OK:
             msg = None
         extra_tags = ['address:{}'.format(addr)]

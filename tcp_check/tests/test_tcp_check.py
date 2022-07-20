@@ -5,6 +5,7 @@
 import platform
 import re
 import socket
+from collections import namedtuple
 from copy import deepcopy
 
 import mock
@@ -13,6 +14,8 @@ import pytest
 from datadog_checks.tcp_check import TCPCheck
 
 from . import common
+
+addr_tuple = namedtuple('addr_tuple', ['address', 'socket_type'])
 
 
 def test_down(aggregator):
@@ -79,7 +82,7 @@ def test_up(aggregator, check):
     """
     check.check(deepcopy(common.INSTANCE))
     expected_tags = ["instance:UpService", "target_host:datadoghq.com", "port:80", "foo:bar"]
-    expected_tags.append("address:{}".format(check._addrs[0][0]))
+    expected_tags.append("address:{}".format(check._addrs[0].address))
     aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
     aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
     aggregator.assert_all_metrics_covered()
@@ -98,13 +101,13 @@ def test_response_time(aggregator):
 
     # service check
     expected_tags = ['foo:bar', 'target_host:datadoghq.com', 'port:80', 'instance:instance:response_time']
-    expected_tags.append("address:{}".format(check._addrs[0][0]))
+    expected_tags.append("address:{}".format(check._addrs[0].address))
     aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
     aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
 
     # response time metric
     expected_tags = ['url:datadoghq.com:80', 'instance:instance:response_time', 'foo:bar']
-    expected_tags.append("address:{}".format(check._addrs[0][0]))
+    expected_tags.append("address:{}".format(check._addrs[0].address))
     aggregator.assert_metric('network.tcp.response_time', tags=expected_tags)
     aggregator.assert_all_metrics_covered()
     assert len(aggregator.service_checks('tcp.can_connect')) == 1
@@ -117,7 +120,7 @@ def test_response_time(aggregator):
             'localhost',
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV6,
             None,
-            [('::1', socket.AF_INET6)],
+            [addr_tuple('::1', socket.AF_INET6)],
             False,
             1,
             id='Dual IPv4/IPv6: localhost, IPv6 resolution, multiple_ips False',
@@ -126,7 +129,7 @@ def test_response_time(aggregator):
             'localhost',
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV4,
             ('localhost', [], ['127.0.0.1']),
-            [('127.0.0.1', socket.AF_INET)],
+            [addr_tuple('127.0.0.1', socket.AF_INET)],
             False,
             1,
             id='Dual IPv4/IPv6: localhost, IPv4 resolution, multiple_ips False',
@@ -135,7 +138,7 @@ def test_response_time(aggregator):
             'localhost',
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV6,
             None,
-            [('::1', socket.AF_INET6), ('127.0.0.1', socket.AF_INET)],
+            [addr_tuple('::1', socket.AF_INET6), addr_tuple('127.0.0.1', socket.AF_INET)],
             True,
             2,
             id='Dual IPv4/IPv6: localhost, IPv6 resolution, multiple_ips True',
@@ -144,7 +147,7 @@ def test_response_time(aggregator):
             'localhost',
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV4,
             ('localhost', [], ['127.0.0.1']),
-            [('127.0.0.1', socket.AF_INET), ('::1', socket.AF_INET6)],
+            [addr_tuple('127.0.0.1', socket.AF_INET), addr_tuple('::1', socket.AF_INET6)],
             True,
             2,
             id='Dual IPv4/IPv6: localhost, IPv4 resolution, multiple_ips True',
@@ -153,7 +156,7 @@ def test_response_time(aggregator):
             'some-hostname',
             common.DUAL_STACK_GETADDRINFO_IPV4,
             ('some-hostname', [], ['ip1']),
-            [('ip1', socket.AF_INET)],
+            [addr_tuple('ip1', socket.AF_INET)],
             False,
             1,
             id='Dual IPv4/IPv6: string hostname, IPv4 resolution, multiple_ips False',
@@ -162,7 +165,7 @@ def test_response_time(aggregator):
             'another-hostname',
             common.DUAL_STACK_GETADDRINFO_IPV6,
             None,
-            [('ip1', socket.AF_INET6)],
+            [addr_tuple('ip1', socket.AF_INET6)],
             False,
             1,
             id='Dual IPv4/IPv6: string hostname, IPv6 resolution, multiple_ips False',
@@ -171,7 +174,7 @@ def test_response_time(aggregator):
             'some-hostname',
             common.DUAL_STACK_GETADDRINFO_IPV4,
             ('some-hostname', [], ['ip1']),
-            [('ip1', socket.AF_INET), ('ip2', socket.AF_INET6), ('ip3', socket.AF_INET6)],
+            [addr_tuple('ip1', socket.AF_INET), addr_tuple('ip2', socket.AF_INET6), addr_tuple('ip3', socket.AF_INET6)],
             True,
             3,
             id='Dual IPv4/IPv6: string hostname, IPv4 resolution, multiple_ips True',
@@ -180,7 +183,7 @@ def test_response_time(aggregator):
             'another-hostname',
             common.DUAL_STACK_GETADDRINFO_IPV6,
             None,
-            [('ip1', socket.AF_INET6), ('ip2', socket.AF_INET), ('ip3', socket.AF_INET6)],
+            [addr_tuple('ip1', socket.AF_INET6), addr_tuple('ip2', socket.AF_INET), addr_tuple('ip3', socket.AF_INET6)],
             True,
             3,
             id='Dual IPv4/IPv6: string hostname, IPv6 resolution, multiple_ips True',
@@ -189,7 +192,7 @@ def test_response_time(aggregator):
             'localhost',
             common.SINGLE_STACK_GETADDRINFO_LOCALHOST_IPV4,
             ('localhost', [], ['127.0.0.1']),
-            [('127.0.0.1', socket.AF_INET)],
+            [addr_tuple('127.0.0.1', socket.AF_INET)],
             False,
             1,
             id='Single stack IPv4: localhost, IPv4 resolution, multiple_ips False',
@@ -198,7 +201,7 @@ def test_response_time(aggregator):
             'localhost',
             common.SINGLE_STACK_GETADDRINFO_LOCALHOST_IPV4,
             ('localhost', [], ['127.0.0.1', 'ip1']),
-            [('127.0.0.1', socket.AF_INET), ('ip2', socket.AF_INET)],
+            [addr_tuple('127.0.0.1', socket.AF_INET), addr_tuple('ip2', socket.AF_INET)],
             True,
             2,
             id='Single stack IPv4: localhost, IPv4 resolution, multiple_ips True',
@@ -207,7 +210,7 @@ def test_response_time(aggregator):
             'another-hostname',
             common.SINGLE_STACK_GETADDRINFO_IPV4,
             None,
-            [('ip1', socket.AF_INET)],
+            [addr_tuple('ip1', socket.AF_INET)],
             False,
             1,
             id='Single stack IPv4: string hostname, IPv4 resolution, multiple_ips False',
@@ -216,7 +219,7 @@ def test_response_time(aggregator):
             'another-hostname',
             common.SINGLE_STACK_GETADDRINFO_IPV4,
             None,
-            [('ip1', socket.AF_INET), ('ip2', socket.AF_INET), ('ip3', socket.AF_INET)],
+            [addr_tuple('ip1', socket.AF_INET), addr_tuple('ip2', socket.AF_INET), addr_tuple('ip3', socket.AF_INET)],
             True,
             3,
             id='Single stack IPv4: string hostname, IPv4 resolution, multiple_ips True',
@@ -243,14 +246,14 @@ def test_hostname_resolution(
         "target_host:{}".format(hostname),
         "port:80",
         "foo:bar",
-        "address:{}".format(expected_addrs[0][0]),
+        "address:{}".format(expected_addrs[0].address),
     ]
 
     check.check(instance)
 
     assert check._addrs == expected_addrs
     # at the end of check.check() run, check.socket_type will be assigned to the last addr's socket type
-    assert check.socket_type == expected_addrs[-1:][0][1]
+    assert check.socket_type == expected_addrs[-1:][0].socket_type
 
     aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags, count=1)
     aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags, count=1)
@@ -319,8 +322,8 @@ def test_ipv6(aggregator, check):
     nb_ipv4, nb_ipv6 = 0, 0
     for addr in check.addrs:
         expected_tags = ["instance:UpService", "target_host:ip-ranges.datadoghq.com", "port:80", "foo:bar"]
-        expected_tags.append("address:{}".format(addr[0]))
-        if re.match(r'^[0-9a-f:]+$', addr[0]):
+        expected_tags.append("address:{}".format(addr.address))
+        if re.match(r'^[0-9a-f:]+$', addr.address):
             nb_ipv6 += 1
             if has_ipv6_connectivity():
                 aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
