@@ -31,7 +31,8 @@
     },
     "monitors": {},
     "dashboards": {
-      "vsphere-overview": "assets/dashboards/vsphere_overview.json"
+      "vsphere-overview": "assets/dashboards/vsphere_overview.json",
+      "VMware vSphere TKG - Overview": "assets/dashboards/vmware_vsphere_tkg_-_overview.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {},
