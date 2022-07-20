@@ -5,13 +5,11 @@ from __future__ import division
 
 import logging
 import ssl
-from itertools import chain
 
 import vertica_python as vertica
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import exclude_undefined_keys
-from datadog_checks.base.utils.containers import iter_unique
 from datadog_checks.base.utils.db import QueryManager
 
 from .queries import get_queries
@@ -58,18 +56,6 @@ class VerticaCheck(AgentCheck):
 
         if self._tls_verify and not self._use_tls:
             self._use_tls = True
-
-        custom_queries = self.instance.get('custom_queries', [])
-        use_global_custom_queries = self.instance.get('use_global_custom_queries', True)
-
-        # Handle overrides
-        if use_global_custom_queries == 'extend':
-            custom_queries.extend(self.init_config.get('global_custom_queries', []))
-        elif 'global_custom_queries' in self.init_config and is_affirmative(use_global_custom_queries):
-            custom_queries = self.init_config.get('global_custom_queries', [])
-
-        # Deduplicate
-        self._custom_queries = list(iter_unique(custom_queries))
 
         # Add global database tag
         self._tags.append('db:{}'.format(self._db))
@@ -123,7 +109,6 @@ class VerticaCheck(AgentCheck):
 
         self._query_manager.execute()
         self.set_version_metadata()
-        self.query_custom()
 
     @AgentCheck.metadata_entrypoint
     def set_version_metadata(self):
@@ -143,77 +128,6 @@ class VerticaCheck(AgentCheck):
             # Force the last part to represent the build part of semver
             .replace('-', '+', 1)
         )
-
-    def query_custom(self):
-        for custom_query in self._custom_queries:
-            query = custom_query.get('query')
-            if not query:  # no cov
-                self.log.error('Custom query field `query` is required')
-                continue
-
-            columns = custom_query.get('columns')
-            if not columns:  # no cov
-                self.log.error('Custom query field `columns` is required')
-                continue
-
-            self.log.debug('Running custom query for Vertica')
-            cursor = self._connection.cursor()
-            cursor.execute(query)
-
-            rows = cursor.iterate()
-
-            # Trigger query execution
-            try:
-                first_row = next(rows)
-            except Exception as e:  # no cov
-                self.log.error('Error executing custom query: %s', e)
-                continue
-
-            for row in chain((first_row,), rows):
-                if not row:  # no cov
-                    self.log.debug('Custom query returned an empty result')
-                    continue
-
-                if len(columns) != len(row):  # no cov
-                    self.log.error('Custom query result expected %s columns, got %s', len(columns), len(row))
-                    continue
-
-                metric_info = []
-                query_tags = list(self._tags)
-                query_tags.extend(custom_query.get('tags', []))
-
-                for column, value in zip(columns, row):
-                    # Columns can be ignored via configuration.
-                    if not column:  # no cov
-                        continue
-
-                    name = column.get('name')
-                    if not name:  # no cov
-                        self.log.error('Column field `name` is required')
-                        break
-
-                    column_type = column.get('type')
-                    if not column_type:  # no cov
-                        self.log.error('Column field `type` is required for column `%s`', name)
-                        break
-
-                    if column_type == 'tag':
-                        query_tags.append('{}:{}'.format(name, value))
-                    else:
-                        if not hasattr(self, column_type):
-                            self.log.error('Invalid submission method `%s` for metric column `%s`', column_type, name)
-                            break
-                        try:
-                            metric_info.append((name, float(value), column_type))
-                        except (ValueError, TypeError):  # no cov
-                            self.log.error('Non-numeric value `%s` for metric column `%s`', value, name)
-                            break
-
-                # Only submit metrics if there were absolutely no errors - all or nothing.
-                else:
-                    for info in metric_info:
-                        metric, value, method = info
-                        getattr(self, method)(metric, value, tags=query_tags)
 
     def get_connection(self):
         connection_options = {
