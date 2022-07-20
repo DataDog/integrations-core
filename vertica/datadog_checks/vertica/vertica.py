@@ -285,9 +285,4 @@ class VerticaCheck(AgentCheck):
                 'Invalid metric_groups found in vertica conf.yaml: {}'.format(', '.join(invalid_groups))
             )
 
-        # License query needs to be run before getting system
-        if 'system' in metric_groups and 'licenses' not in metric_groups:
-            self.log.debug('Detected `system` metric group, adding the `licenses` to metric_groups.')
-            metric_groups.insert(0, 'licenses')
-
         self._metric_groups = [group for group in default_metric_groups if group in metric_groups]
