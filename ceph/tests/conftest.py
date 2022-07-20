@@ -31,7 +31,7 @@ def dd_environment():
             CheckDockerLogs(compose_file, 'spawning ceph --cluster ceph -w', wait=5),
             CheckDockerLogs(compose_file, 'Running on http://0.0.0.0:5000/'),
         ],
-        attempts=2,
+        attempts=3,
     ):
         # Clean the disk space warning
         run_command(
