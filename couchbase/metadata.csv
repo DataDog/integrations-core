@@ -251,7 +251,7 @@ couchbase.sync_gateway.cbl_replication_pull.num_pull_repl_active_continuous,coun
 couchbase.sync_gateway.cbl_replication_pull.num_pull_repl_active_one_shot,count,,,,The total number of one-shot pull replications in the active state.,0,couchbase,,
 couchbase.sync_gateway.cbl_replication_pull.num_pull_repl_caught_up,count,,,,The number of replications which have caught up to the latest changes.,0,couchbase,,
 couchbase.sync_gateway.cbl_replication_pull.num_pull_repl_since_zero,count,,,,The total number of new replications started (/_changes?since=0).,0,couchbase,,
-couchbase.sync_gateway.cbl_replication_pull.num_pull_repl_total_caught_up,count,,,,The total number of replications which have caught up to the latest changes.,0,couchbase,,
+couchbase.sync_gateway.cbl_replication_pull.num_pull_repl_total_caught_up,gauge,,,,The total number of replications which have caught up to the latest changes.,0,couchbase,,
 couchbase.sync_gateway.cbl_replication_pull.num_pull_repl_total_continuous,count,,,,The total number of continuous pull replications.,0,couchbase,,
 couchbase.sync_gateway.cbl_replication_pull.num_pull_repl_total_one_shot,count,,,,The total number of one-shot pull replications.,0,couchbase,,
 couchbase.sync_gateway.cbl_replication_pull.num_replications_active,count,,,,The total number of active replications.,0,couchbase,,
