@@ -6,7 +6,7 @@ import requests
 from datadog_checks.dev import docker_run
 from datadog_checks.envoy import Envoy
 
-from .common import DEFAULT_INSTANCE, DOCKER_DIR, ENVOY_LEGACY, FIXTURE_DIR, HOST, URL
+from .common import DEFAULT_INSTANCE, DOCKER_DIR, FIXTURE_DIR, HOST, URL
 from .legacy.common import FLAVOR, INSTANCES
 
 
@@ -17,7 +17,7 @@ def fixture_path():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    if ENVOY_LEGACY == 'true':
+    if FLAVOR == 'api_v2':
         instance = INSTANCES['main']
     else:
         instance = DEFAULT_INSTANCE
