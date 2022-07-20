@@ -24,8 +24,13 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
-    "monitors": {},
+    "dashboards": {
+      "Teradata Overview": "assets/dashboards/teradata_overview.json"
+    },
+    "monitors": {
+      "High disk space": "assets/recommended_monitors/high_disk_space.json",
+      "Low ready threads": "assets/recommended_monitors/low_ready_threads.json"
+    },
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
     "logs": {},

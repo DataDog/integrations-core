@@ -47,6 +47,15 @@ files:
         The password to use for authentication.
       value:
         type: string
+    - name: connection_scheme
+      description: |
+        Use `mongodb` to identify that this is a string in the standard connection format. This is the default value.
+        In order to leverage the DNS seed list, use a connection_scheme of `mongodb+srv` rather than the standard
+        `mongodb`.
+        For more information, see: https://www.mongodb.com/docs/manual/reference/connection-string/
+      value:
+        type: string
+        example: mongodb
     - name: database
       description: |
         The database to collect metrics from.

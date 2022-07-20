@@ -2,9 +2,7 @@ import pytest
 
 from datadog_checks.envoy import Envoy
 
-from .common import INSTANCES, requires_legacy_environment
-
-pytestmark = [requires_legacy_environment]
+from .common import INSTANCES
 
 
 @pytest.mark.usefixtures('dd_environment')

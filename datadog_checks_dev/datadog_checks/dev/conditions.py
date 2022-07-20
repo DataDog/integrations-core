@@ -109,6 +109,17 @@ class CheckCommandOutput(LazyFunction):
         attempts=60,  # type: int
         wait=1,  # type: int
     ):
+        """
+        Checks if the provided patterns are present in the output of a command
+
+        :param command: The command to run
+        :param patterns: List of patterns to match
+        :param matches: How many of the provided patterns need to match, it can be a number or "all"
+        :param stdout: Whether to search for the provided patterns in stdout
+        :param stderr: Whether to search for the provided patterns in stderr
+        :param attempts: How many times to try searching for the patterns
+        :param wait: How long, in seconds, to wait between attempts
+        """
         self.command = command
         self.stdout = stdout
         self.stderr = stderr
@@ -175,6 +186,17 @@ class CheckDockerLogs(CheckCommandOutput):
         attempts=60,  # type: int,
         wait=1,  # type: int
     ):
+        """
+        Checks if the provided patterns are present in docker logs
+
+        :param identifier: The docker image identifier
+        :param patterns: List of patterns to match
+        :param matches: How many of the provided patterns need to match, it can be a number or "all"
+        :param stdout: Whether to search for the provided patterns in stdout
+        :param stderr: Whether to search for the provided patterns in stderr
+        :param attempts: How many times to try searching for the patterns
+        :param wait: How long, in seconds, to wait between attempts
+        """
         if file_exists(identifier):
             if using_legacy_docker_compose():
                 command = ['docker-compose', '-f', identifier, 'logs']

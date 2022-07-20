@@ -54,6 +54,7 @@ class InstanceConfig(BaseModel):
     additional_metrics: Optional[Sequence[str]]
     collections: Optional[Sequence[str]]
     collections_indexes_stats: Optional[bool]
+    connection_scheme: Optional[str]
     custom_queries: Optional[Sequence[CustomQuery]]
     database: Optional[str]
     dbnames: Optional[Sequence[str]]

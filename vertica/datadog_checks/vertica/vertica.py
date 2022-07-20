@@ -10,7 +10,6 @@ from datetime import datetime
 from itertools import chain
 
 import vertica_python as vertica
-from six import iteritems
 from vertica_python.vertica.column import timestamp_tz_parse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -220,153 +219,72 @@ class VerticaCheck(AgentCheck):
         self.gauge('projection.unsafe_percent', unsafe_percent, tags=self._tags)
 
     def query_projection_storage(self):
-        # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/PROJECTION_STORAGE.htm
+        queries = views.make_projection_storage_queries(self._major_version())
 
-        # Vertica v11 has removed some columns, skip these metrics until we implement them
-        if self._major_version() >= 11:
-            self.log.debug("Skipping collection of projection_storage metrics as they're not yet supported for v11+")
-            return
+        for projection in self.iter_rows_query(queries['per_projection']):
+            tags = self._tags + [
+                'projection_name:{}'.format(projection['projection_name']),
+                'table_name:{}'.format(projection['anchor_table_name']),
+                'node_name:{}'.format(projection['node_name']),
+            ]
+            self.gauge('projection.ros.containers', projection['ros_count'], tags=tags)
+            self.gauge('projection.row.ros', projection.get('ros_row_count'), tags=tags)
+            self.gauge('projection.row.wos', projection.get('wos_row_count'), tags=tags)
+            self.gauge('projection.row.total', projection['row_count'], tags=tags)
+            self.gauge('projection.disk.used.ros', projection.get('ros_used_bytes'), tags=tags)
+            self.gauge('projection.disk.used.wos', projection.get('wos_used_bytes'), tags=tags)
+            self.gauge('projection.disk.used', projection['used_bytes'], tags=tags)
 
-        projection_data = defaultdict(
-            lambda: defaultdict(
-                lambda: defaultdict(
-                    lambda: {'ros_count': 0, 'rows_ros': 0, 'rows_wos': 0, 'used_ros': 0, 'used_wos': 0}
-                )
-            )
-        )
+        for table in self.iter_rows_query(queries['per_table']):
+            tags = self._tags + [
+                'table_name:{}'.format(projection['anchor_table_name']),
+                'node_name:{}'.format(projection['node_name']),
+            ]
+            self.gauge('table.row.ros', table.get('ros_row_count'), tags=tags)
+            self.gauge('table.row.wos', table.get('wos_row_count'), tags=tags)
+            self.gauge('table.row.total', table['row_count'], tags=tags)
+            self.gauge('table.disk.used.ros', table.get('ros_used_bytes'), tags=tags)
+            self.gauge('table.disk.used.wos', table.get('wos_used_bytes'), tags=tags)
+            self.gauge('table.disk.used', table['used_bytes'], tags=tags)
 
-        for ps in self.iter_rows(views.ProjectionStorage):
-            projection = projection_data[ps['node_name']][ps['anchor_table_name']][ps['projection_name']]
+        for node in self.iter_rows_query(queries['per_node']):
+            tags = self._tags + ['node_name:{}'.format(projection['node_name'])]
 
-            projection['ros_count'] += ps['ros_count']
-            projection['rows_ros'] += ps['ros_row_count']
-            projection['rows_wos'] += ps['wos_row_count']
-            projection['used_ros'] += ps['ros_used_bytes']
-            projection['used_wos'] += ps['wos_used_bytes']
+            self.gauge('node.row.ros', node.get('ros_row_count'), tags=tags)
+            self.gauge('node.row.wos', node.get('wos_row_count'), tags=tags)
+            self.gauge('node.row.total', node['row_count'], tags=tags)
+            self.gauge('node.disk.used.ros', node.get('ros_used_bytes'), tags=tags)
+            self.gauge('node.disk.used.wos', node.get('wos_used_bytes'), tags=tags)
+            self.gauge('node.disk.used', node['used_bytes'], tags=tags)
 
-        total_rows_ros = 0
-        total_rows_wos = 0
-        total_used_ros = 0
-        total_used_wos = 0
-
-        # My understanding is that nodes have multiple tables, which in turn can have multiple projections
-        for node, tables in iteritems(projection_data):
-            node_tags = ['node_name:{}'.format(node)]
-            node_tags.extend(self._tags)
-
-            node_rows_ros = 0
-            node_rows_wos = 0
-            node_used_ros = 0
-            node_used_wos = 0
-
-            for table, projections in iteritems(tables):
-                table_tags = ['table_name:{}'.format(table)]
-                table_tags.extend(node_tags)
-
-                table_rows_ros = 0
-                table_rows_wos = 0
-                table_used_ros = 0
-                table_used_wos = 0
-
-                for projection, data in iteritems(projections):
-                    projection_tags = ['projection_name:{}'.format(projection)]
-                    projection_tags.extend(table_tags)
-
-                    projection_rows_ros = data['rows_ros']
-                    projection_rows_wos = data['rows_wos']
-                    projection_used_ros = data['used_ros']
-                    projection_used_wos = data['used_wos']
-
-                    self.gauge('projection.ros.containers', data['ros_count'], tags=projection_tags)
-                    self.gauge('projection.row.ros', projection_rows_ros, tags=projection_tags)
-                    self.gauge('projection.row.wos', projection_rows_wos, tags=projection_tags)
-                    self.gauge('projection.row.total', projection_rows_ros + projection_rows_wos, tags=projection_tags)
-                    self.gauge('projection.disk.used.ros', projection_used_ros, tags=projection_tags)
-                    self.gauge('projection.disk.used.wos', projection_used_wos, tags=projection_tags)
-                    self.gauge('projection.disk.used', projection_used_ros + projection_used_wos, tags=projection_tags)
-
-                    table_rows_ros += projection_rows_ros
-                    table_rows_wos += projection_rows_wos
-                    table_used_ros += projection_used_ros
-                    table_used_wos += projection_used_wos
-
-                self.gauge('table.row.ros', table_rows_ros, tags=table_tags)
-                self.gauge('table.row.wos', table_rows_wos, tags=table_tags)
-                self.gauge('table.row.total', table_rows_ros + table_rows_wos, tags=table_tags)
-                self.gauge('table.disk.used.ros', table_used_ros, tags=table_tags)
-                self.gauge('table.disk.used.wos', table_used_wos, tags=table_tags)
-                self.gauge('table.disk.used', table_used_ros + table_used_wos, tags=table_tags)
-
-                node_rows_ros += table_rows_ros
-                node_rows_wos += table_rows_wos
-                node_used_ros += table_used_ros
-                node_used_wos += table_used_wos
-
-            self.gauge('node.row.ros', node_rows_ros, tags=node_tags)
-            self.gauge('node.row.wos', node_rows_wos, tags=node_tags)
-            self.gauge('node.row.total', node_rows_ros + node_rows_wos, tags=node_tags)
-            self.gauge('node.disk.used.ros', node_used_ros, tags=node_tags)
-            self.gauge('node.disk.used.wos', node_used_wos, tags=node_tags)
-            self.gauge('node.disk.used', node_used_ros + node_used_wos, tags=node_tags)
-
-            total_rows_ros += node_rows_ros
-            total_rows_wos += node_rows_wos
-            total_used_ros += node_used_ros
-            total_used_wos += node_used_wos
-
-        self.gauge('row.ros', total_rows_ros, tags=self._tags)
-        self.gauge('row.wos', total_rows_wos, tags=self._tags)
-        self.gauge('row.total', total_rows_ros + total_rows_wos, tags=self._tags)
-        self.gauge('disk.used.ros', total_used_ros, tags=self._tags)
-        self.gauge('disk.used.wos', total_used_wos, tags=self._tags)
-        self.gauge('disk.used', total_used_ros + total_used_wos, tags=self._tags)
+        # Total metrics
+        total = self._connection.cursor('dict').execute(queries['total']).fetchone()
+        self.gauge('row.ros', total.get('ros_row_count'), tags=self._tags)
+        self.gauge('row.wos', total.get('wos_row_count'), tags=self._tags)
+        self.gauge('row.total', total['row_count'], tags=self._tags)
+        self.gauge('disk.used.ros', total.get('ros_used_bytes'), tags=self._tags)
+        self.gauge('disk.used.wos', total.get('wos_used_bytes'), tags=self._tags)
+        self.gauge('disk.used', total['used_bytes'], tags=self._tags)
 
     def query_storage_containers(self):
-        # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/STORAGE_CONTAINERS.htm
+        queries = views.make_storage_containers_queries(self._major_version())
 
-        # Vertica v11 has removed some columns, skip these metrics until we implement them
-        if self._major_version() >= 11:
-            self.log.debug("Skipping collection of storage_containers metrics as they're not yet supported for v11+")
-            return
+        for projection in self.iter_rows_query(queries['per_projection']):
+            tags = self._tags + [
+                'projection_name:{}'.format(projection['projection_name']),
+                'node_name:{}'.format(projection['node_name']),
+            ]
+            if 'storage_type' in projection:
+                tags.append('container_type:{}'.format(projection['storage_type']))
 
-        container_data = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: {'delete_vectors': 0})))
+            self.gauge('projection.delete_vectors', projection['delete_vector_count'], tags=tags)
 
-        for sc in self.iter_rows(views.StorageContainers):
-            container = container_data[sc['node_name']][sc['projection_name']][sc['storage_type'].lower()]
+        for node in self.iter_rows_query(queries['per_node']):
+            tags = self._tags + ['node_name:{}'.format(projection['node_name'])]
+            self.gauge('node.delete_vectors', node['delete_vector_count'], tags=tags)
 
-            container['delete_vectors'] += sc['delete_vector_count']
-
-        total_delete_vectors = 0
-
-        for node, projections in iteritems(container_data):
-            node_tags = ['node_name:{}'.format(node)]
-            node_tags.extend(self._tags)
-
-            node_delete_vectors = 0
-
-            for projection, containers in iteritems(projections):
-                projection_tags = ['projection_name:{}'.format(projection)]
-                projection_tags.extend(node_tags)
-
-                projection_delete_vectors = 0
-
-                for container_type, data in iteritems(containers):
-                    container_tags = ['container_type:{}'.format(container_type)]
-                    container_tags.extend(projection_tags)
-
-                    container_type_delete_vectors = data['delete_vectors']
-
-                    self.gauge('projection.delete_vectors', container_type_delete_vectors, tags=container_tags)
-
-                    projection_delete_vectors += container_type_delete_vectors
-
-                node_delete_vectors += projection_delete_vectors
-
-            self.gauge('node.delete_vectors', node_delete_vectors, tags=node_tags)
-
-            total_delete_vectors += node_delete_vectors
-
-        self.gauge('delete_vectors', total_delete_vectors, tags=self._tags)
+        total = self._connection.cursor('dict').execute(queries['total']).fetchone()
+        self.gauge('delete_vectors', total['delete_vector_count'], tags=self._tags)
 
     def query_host_resources(self):
         # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/HOST_RESOURCES.htm
@@ -605,8 +523,12 @@ class VerticaCheck(AgentCheck):
             return connection
 
     def iter_rows(self, view):
+        for row in self.iter_rows_query(view.query):
+            yield row
+
+    def iter_rows_query(self, query):
         cursor = self._connection.cursor('dict')
-        cursor.execute(view.query)
+        cursor.execute(query)
 
         for row in cursor.iterate():
             yield row
