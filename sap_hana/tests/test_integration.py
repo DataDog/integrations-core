@@ -8,6 +8,7 @@ from mock.mock import ANY, call
 from datadog_checks.sap_hana import SapHanaCheck
 
 from . import metrics
+from .common import CAN_CONNECT_SERVICE_CHECK, connection_flaked
 
 pytestmark = pytest.mark.integration
 
@@ -15,8 +16,15 @@ pytestmark = pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_check(aggregator, instance, dd_run_check):
     check = SapHanaCheck('sap_hana', {}, [instance])
-    dd_run_check(check)
 
+    attempts = 3
+    dd_run_check(check)
+    while attempts and connection_flaked(aggregator):
+        aggregator.reset()
+        dd_run_check(check)
+        attempts -= 1
+
+    aggregator.assert_service_check(CAN_CONNECT_SERVICE_CHECK, SapHanaCheck.OK)
     for metric in metrics.STANDARD:
         aggregator.assert_metric_has_tag(metric, 'server:{}'.format(instance['server']))
         aggregator.assert_metric_has_tag(metric, 'port:{}'.format(instance['port']))

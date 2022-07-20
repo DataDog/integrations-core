@@ -71,6 +71,7 @@ class SapHanaCheck(AgentCheck):
 
         # Whether or not the connection was lost
         self._connection_lost = False
+        self._connection_flaked = False
 
         # Whether or not to persist database connection. Default is True
         self._persist_db_connections = self.instance.get(
@@ -112,6 +113,9 @@ class SapHanaCheck(AgentCheck):
                     continue
         finally:
             if self._connection_lost:
+                self.service_check(
+                    self.SERVICE_CHECK_CONNECT, self.WARNING, message="Lost connection to HANA server", tags=self._tags
+                )
                 try:
                     self._conn.close()
                 except OperationalError:
@@ -125,6 +129,14 @@ class SapHanaCheck(AgentCheck):
                 except OperationalError:
                     self.log.error("Could not close connection.")
                 self._conn = None
+            if self._connection_flaked:
+                self.service_check(
+                    self.SERVICE_CHECK_CONNECT,
+                    self.WARNING,
+                    message="Session has been reconnected after an error",
+                    tags=self._tags,
+                )
+                self._connection_flaked = False
 
     def set_default_methods(self):
         self._default_methods.extend(
@@ -595,6 +607,9 @@ class SapHanaCheck(AgentCheck):
             error = str(e)
             if 'Lost connection to HANA server' in error:
                 self._connection_lost = True
+            if 'Session has been reconnected' in error:
+                # No need to attempt a reconnect in this case but some metrics will be missing
+                self._connection_flaked = True
 
             raise QueryExecutionError(error, source)
 
