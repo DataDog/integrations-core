@@ -11,7 +11,7 @@ class ChecksDownloaderException(Exception):
 
 
 class CLIError(ChecksDownloaderException):
-    pass
+    """An error raised if CLI encouters an error."""
 
 
 class NonCanonicalVersion(CLIError):
