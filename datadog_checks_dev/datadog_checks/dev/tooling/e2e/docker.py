@@ -328,7 +328,9 @@ class DockerInterface(object):
             f'{path_join(get_root(), self.check)}:{self.check_mount_dir}',
         ]
 
-        if not self.windows_container:
+        if self.windows_container:
+            volumes.append('\\.\\pipe\\docker_engine:\\.\\pipe\\docker_engine')
+        else:
             volumes.append('/proc:/host/proc')
 
         if self.config:
