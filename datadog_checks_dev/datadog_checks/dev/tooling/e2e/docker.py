@@ -7,7 +7,7 @@ from contextlib import contextmanager
 
 from ...errors import SubprocessError
 from ...subprocess import run_command
-from ...utils import ON_WINDOWS, file_exists, find_free_port, get_ip, path_join, get_hostname
+from ...utils import ON_WINDOWS, file_exists, find_free_port, get_hostname, get_ip, path_join
 from ..commands.console import echo_debug, echo_warning
 from ..constants import get_root
 from .agent import (

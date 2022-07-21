@@ -142,6 +142,7 @@ def get_metadata_metrics():
             metrics[row['metric_name']] = row
     return metrics
 
+
 def get_hostname():
     """Return the socket hostname"""
     return socket.gethostname()
