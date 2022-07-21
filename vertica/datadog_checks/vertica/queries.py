@@ -6,6 +6,7 @@
 # https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/AdministratorsGuide/Monitoring/Vertica/UsingSystemTables.htm
 
 from collections import OrderedDict
+from functools import partial
 
 
 def get_queries(major_version, metric_groups):
@@ -239,28 +240,15 @@ def build_projection_storage_queries(version):
     }
 
     value_fields = common_value_fields + legacy_value_fields if version < 11 else common_value_fields
-
     sum_fields = ['sum({0}) as {0}'.format(field) for field in value_fields]
 
-    def build_query(grouping, group_fields):
-        if not group_fields:
-            query_name = 'projection_storage_total'
-            query = 'SELECT {} FROM v_monitor.projection_storage'.format(', '.join(sum_fields))
-            prefix = ''
-
-        else:
-            query_name = 'projection_storage_per_{}'.format(grouping)
-            columns = ', '.join(group_fields + sum_fields)
-            query = 'SELECT {columns} FROM v_monitor.projection_storage GROUP BY {group_fields}'.format(
-                columns=columns, group_fields=', '.join(group_fields)
-            )
-            prefix = grouping + '.'
-
-        group_columns = [{'name': column_to_metric_mapping[field], 'type': 'tag'} for field in group_fields]
-
-        value_columns = [{'name': prefix + column_to_metric_mapping[field], 'type': 'gauge'} for field in value_fields]
-
-        return {'name': query_name, 'query': query, 'columns': group_columns + value_columns}
+    build_query = partial(
+        _build_grouped_query,
+        table_name='projection_storage',
+        column_to_metric_mapping=column_to_metric_mapping,
+        value_select_columns=sum_fields,
+        value_columns=value_fields,
+    )
 
     return [
         build_query('projection', ['anchor_table_name', 'node_name', 'projection_name']),
@@ -274,36 +262,23 @@ def build_storage_containers_queries(version):
     """Builds a list of queries for storage_containers metrics depending on the vertica version."""
     # https://www.vertica.com/docs/10.1.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/STORAGE_CONTAINERS.htm
     # https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/STORAGE_CONTAINERS.htm
-
-    queries = []
-
     column_to_metric_mapping = {
         'node_name': 'node_name',
         'projection_name': 'projection_name',
         'storage_type': 'container_type',
+        'delete_vector_count': 'delete_vectors',
     }
+    sum_fields = ['sum(delete_vector_count)']
 
-    sum_fields = ['sum(delete_vector_count) as delete_vector_count']
+    build_query = partial(
+        _build_grouped_query,
+        table_name='storage_containers',
+        column_to_metric_mapping=column_to_metric_mapping,
+        value_select_columns=sum_fields,
+        value_columns=['delete_vector_count'],
+    )
 
-    def build_query(grouping, group_fields):
-        if not group_fields:
-            query_name = 'storage_containers_total'
-            query = 'SELECT {} FROM v_monitor.storage_containers'.format(', '.join(sum_fields))
-            prefix = ''
-
-        else:
-            query_name = 'storage_containers_per_{}'.format(grouping)
-            columns = ', '.join(group_fields + sum_fields)
-            query = 'SELECT {columns} FROM v_monitor.storage_containers GROUP BY {group_fields}'.format(
-                columns=columns, group_fields=', '.join(group_fields)
-            )
-            prefix = grouping + '.'
-
-        group_columns = [{'name': column_to_metric_mapping[field], 'type': 'tag'} for field in group_fields]
-
-        value_columns = [{'name': prefix + 'delete_vectors', 'type': 'gauge'}]
-
-        return {'name': query_name, 'query': query, 'columns': group_columns + value_columns}
+    queries = []
 
     if version < 11:
         queries.append(build_query('projection', ['node_name', 'projection_name', 'storage_type']))
@@ -314,6 +289,33 @@ def build_storage_containers_queries(version):
     queries.extend([build_query('node', ['node_name']), build_query('total', [])])
 
     return queries
+
+
+def _build_grouped_query(
+    grouping, group_columns, table_name, column_to_metric_mapping, value_select_columns, value_columns
+):
+    """Dynamically create a generic query that aggregates by the given group_columns.
+
+    All value columns are assumed to be of type 'gauge'.
+    """
+    if not group_columns:
+        query_name = '{}_total'.format(table_name)
+        query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(value_select_columns), table_name)
+        prefix = ''
+
+    else:
+        query_name = '{}_per_{}'.format(table_name, grouping)
+        columns = ', '.join(group_columns + value_select_columns)
+        query = 'SELECT {columns} FROM v_monitor.{table_name} GROUP BY {group_fields}'.format(
+            columns=columns, group_fields=', '.join(group_columns), table_name=table_name
+        )
+        prefix = grouping + '.'
+
+    group_columns = [{'name': column_to_metric_mapping[field], 'type': 'tag'} for field in group_columns]
+
+    value_columns = [{'name': prefix + column_to_metric_mapping[field], 'type': 'gauge'} for field in value_columns]
+
+    return {'name': query_name, 'query': query, 'columns': group_columns + value_columns}
 
 
 def build_host_resources_queries(version=None):

@@ -62,7 +62,7 @@ def test_build_projection_storage_queries(version, expected_per_projection_query
                 'node_name, '
                 'projection_name, '
                 'storage_type, '
-                'sum(delete_vector_count) as delete_vector_count '
+                'sum(delete_vector_count) '
                 'FROM v_monitor.storage_containers '
                 'GROUP BY node_name, projection_name, storage_type'
             ),
@@ -73,14 +73,14 @@ def test_build_projection_storage_queries(version, expected_per_projection_query
                 'SELECT '
                 'node_name, '
                 'projection_name, '
-                'sum(delete_vector_count) as delete_vector_count '
+                'sum(delete_vector_count) '
                 'FROM v_monitor.storage_containers '
                 'GROUP BY node_name, projection_name'
             ),
         ),
     ],
 )
-def test_make_storage_containers_queries(version, expected_per_projection_query):
+def test_build_storage_containers_queries(version, expected_per_projection_query):
 
     queries = build_storage_containers_queries(version)
 
