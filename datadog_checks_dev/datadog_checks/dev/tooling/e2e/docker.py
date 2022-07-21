@@ -329,7 +329,7 @@ class DockerInterface(object):
         ]
 
         if self.windows_container:
-            volumes.append('\\.\\pipe\\docker_engine:\\.\\pipe\\docker_engine')
+            volumes.append('\\\\.\\pipe\\docker_engine:\\\\.\\pipe\\docker_engine')
         else:
             volumes.append('/proc:/host/proc')
 
