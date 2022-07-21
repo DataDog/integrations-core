@@ -29,7 +29,7 @@
                     {
                         "definition": {
                             "background_color": "purple",
-                            "content": "With Datadog's Snowflake integration, you can track key metrics about cost and credit usage at an organization-wide level. In this metric group you can see the hourly credit usage for all warehouses across all the accounts in your Snowflake organization. ",
+                            "content": "With Datadog's Snowflake integration, you can track key metrics about cost and credit usage at an organization level. In this metric group you can see the hourly credit usage for all warehouses across all the accounts in your Snowflake organization. ",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": false,
@@ -913,7 +913,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "With Datadog's Snowflake integration, you can track the amount of data transferred from Snowflake tables into a different cloud storage provider\u2019s network.",
+                            "content": "With Datadog's Snowflake integration, you can track the amount of data transferred from Snowflake tables from one cloud to another.",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": true,
