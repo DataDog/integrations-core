@@ -23,18 +23,25 @@ def get_queries(major_version, metric_groups):
     return queries
 
 
-def build_licenses_queries(_version=None):
+def build_licenses_queries(version=None):
     """
     https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/CATALOG/LICENSES.htm
     """
     name = 'licenses'
-    fields = (
-        'licensetype',
-        # We need to cast the time diff to get an actual number easily
-        "CASE WHEN end_date IS NOT NULL AND end_date != 'Perpetual' "
-        'THEN ((end_date::TIMESTAMPTZ - now()) second)::INT ELSE -1 END',
+    query = """
+SELECT
+  licensetype,
+  CASE
+    WHEN end_date IS NOT NULL AND end_date != 'Perpetual' THEN
+      ((end_date::TIMESTAMPTZ - now()) second)::INT
+    ELSE
+      -1
+  END
+FROM v_catalog.{}
+""".format(
+        name
     )
-    query = 'SELECT {} FROM v_catalog.{}'.format(', '.join(fields), name)
+
     return [
         {
             'name': name,
@@ -44,22 +51,22 @@ def build_licenses_queries(_version=None):
     ]
 
 
-def build_license_audits_queries(_version=None):
+def build_license_audits_queries(version=None):
     """
     https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/CATALOG/LICENSE_AUDITS.htm
     """
     name = 'license_audits'
-    fields = (
-        # We need to cast the time diff to get an actual number easily
-        'CASE WHEN audit_start_timestamp IS NULL THEN -1 ELSE ((now() - audit_start_timestamp) second)::INT END',
-        'license_size_bytes as size',
-        'database_size_bytes as used',
-        'size - used as usable',
-        'used / size * 100 as utilized',
-    )
-    query = (
-        "SELECT {} FROM v_catalog.{} WHERE audited_data = 'Total' "
-        "ORDER BY audit_start_timestamp DESC LIMIT 1".format(', '.join(fields), name)
+    query = """
+SELECT
+  CASE WHEN audit_start_timestamp IS NULL THEN -1 ELSE ((now() - audit_start_timestamp) second)::INT END,
+  license_size_bytes as size,
+  database_size_bytes as used,
+  size - used as usable,
+  used / size * 100 as utilized
+FROM v_catalog.{} WHERE audited_data = 'Total'
+ORDER BY audit_start_timestamp DESC LIMIT 1
+""".format(
+        name
     )
 
     return [
@@ -77,27 +84,28 @@ def build_license_audits_queries(_version=None):
     ]
 
 
-def build_system_queries(_version=None):
+def build_system_queries(version=None):
     """
     https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/SYSTEM.htm
     """
     name = 'system'
-
-    license_query = 'SELECT node_restriction FROM v_catalog.licenses LIMIT 1'
-
-    fields = (
-        'node_count',
-        'node_down_count',
-        'current_fault_tolerance',
-        'designed_fault_tolerance',
-        'ahm_epoch',
-        'current_epoch',
-        'last_good_epoch',
-        'license_query.node_restriction as allowed_nodes',
-        'CASE WHEN allowed_nodes IS NULL THEN NULL ELSE allowed_nodes - node_count END',
-    )
-    query = 'WITH license_query AS ({license_query}) SELECT {} FROM v_monitor.{} CROSS JOIN license_query'.format(
-        ', '.join(fields), name, license_query=license_query
+    query = """
+WITH license_query AS (
+  SELECT node_restriction FROM v_catalog.licenses LIMIT 1
+)
+SELECT
+  node_count,
+  node_down_count,
+  current_fault_tolerance,
+  designed_fault_tolerance,
+  ahm_epoch,
+  current_epoch,
+  last_good_epoch,
+  license_query.node_restriction as allowed_nodes,
+  CASE WHEN allowed_nodes IS NULL THEN NULL ELSE allowed_nodes - node_count END
+FROM v_monitor.{} CROSS JOIN license_query
+""".format(
+        name
     )
 
     return [
@@ -119,13 +127,12 @@ def build_system_queries(_version=None):
     ]
 
 
-def build_nodes_queries(_version=None):
+def build_nodes_queries(version=None):
     """
     https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/CATALOG/NODES.htm
     """
     name = 'nodes'
-    fields = ('node_name', 'node_state')
-    query = 'SELECT {} FROM v_catalog.{}'.format(', '.join(fields), name)
+    query = 'SELECT node_name, node_state FROM v_catalog.{}'.format(name)
 
     return [
         {
@@ -159,28 +166,32 @@ def build_nodes_queries(_version=None):
     ]
 
 
-def build_projections_queries(_version=None):
+def build_projections_queries(version=None):
     """
     https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/CATALOG/PROJECTIONS.htm
     """
     name = 'projections'
-    query = ' '.join(
-        [
-            'WITH',
-            'total_projections AS (SELECT count(*) FROM v_catalog.{name}),',
-            'unsegmented_projections AS (SELECT count(*) FROM v_catalog.{name} WHERE NOT is_segmented),',
-            'unsafe_projections AS (SELECT count(*) FROM v_catalog.{name} WHERE NOT is_up_to_date)',
-            'SELECT',
-            'total_projections.count,',
-            'unsegmented_projections.count,',
-            'unsafe_projections.count,',
-            'CASE WHEN total_projections.count = 0 THEN 0 '
-            'ELSE unsegmented_projections.count / total_projections.count * 100 END,',
-            'CASE WHEN total_projections.count = 0 THEN 0 '
-            'ELSE unsafe_projections.count / total_projections.count * 100 END',
-            'FROM total_projections CROSS JOIN unsegmented_projections CROSS JOIN unsafe_projections',
-        ]
-    ).format(name=name)
+    query = '''
+WITH
+  total_projections AS (SELECT count(*) FROM v_catalog.{name}),
+  unsegmented_projections AS (SELECT count(*) FROM v_catalog.{name} WHERE NOT is_segmented),
+  unsafe_projections AS (SELECT count(*) FROM v_catalog.{name} WHERE NOT is_up_to_date)
+SELECT
+  total_projections.count,
+  unsegmented_projections.count,
+  unsafe_projections.count,
+  CASE
+    WHEN total_projections.count = 0 THEN 0
+    ELSE unsegmented_projections.count / total_projections.count * 100
+  END,
+  CASE
+    WHEN total_projections.count = 0 THEN 0
+    ELSE unsafe_projections.count / total_projections.count * 100
+  END
+FROM total_projections CROSS JOIN unsegmented_projections CROSS JOIN unsafe_projections
+'''.format(
+        name=name
+    )
 
     return [
         {
@@ -305,29 +316,32 @@ def build_storage_containers_queries(version):
     return queries
 
 
-def build_host_resources_queries(_version=None):
+def build_host_resources_queries(version=None):
     """
     https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/HOST_RESOURCES.htm
     """
     name = 'host_resources'
-    fields = (
-        'host_name',
-        'processor_count',
-        'processor_core_count',
-        'open_files_limit',
-        'opened_file_count',
-        'opened_socket_count',
-        'threads_limit',
-        'total_memory_bytes as total',
-        'total_memory_free_bytes as usable',
-        'total - usable as used',
-        'CASE WHEN total = 0 THEN 0 ELSE used / total * 100 END as utilized',
-        'total_swap_memory_bytes as total_swap',
-        'total_swap_memory_free_bytes as usable_swap',
-        'total_swap - usable_swap as used_swap',
-        'CASE WHEN total_swap = 0 THEN 0 ELSE used_swap / total_swap * 100 END as utilized_swap',
+    query = """
+SELECT
+  host_name,
+  processor_count,
+  processor_core_count,
+  open_files_limit,
+  opened_file_count,
+  opened_socket_count,
+  threads_limit,
+  total_memory_bytes as total,
+  total_memory_free_bytes as usable,
+  total - usable as used,
+  CASE WHEN total = 0 THEN 0 ELSE used / total * 100 END as utilized,
+  total_swap_memory_bytes as total_swap,
+  total_swap_memory_free_bytes as usable_swap,
+  total_swap - usable_swap as used_swap,
+  CASE WHEN total_swap = 0 THEN 0 ELSE used_swap / total_swap * 100 END as utilized_swap
+FROM v_monitor.{}
+""".format(
+        name
     )
-    query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
 
     return [
         {
@@ -354,19 +368,22 @@ def build_host_resources_queries(_version=None):
     ]
 
 
-def build_query_metrics_queries(_version=None):
+def build_query_metrics_queries(version=None):
     """
     https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/QUERY_METRICS.htm
     """
     name = 'query_metrics'
-    fields = (
-        'node_name',
-        'active_user_session_count',
-        'total_user_session_count',
-        'running_query_count',
-        'executed_query_count',
+    query = """
+SELECT
+  node_name,
+  active_user_session_count,
+  total_user_session_count,
+  running_query_count,
+  executed_query_count
+FROM v_monitor.{}
+""".format(
+        name
     )
-    query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
 
     return [
         {
@@ -383,20 +400,23 @@ def build_query_metrics_queries(_version=None):
     ]
 
 
-def build_resource_pool_queries(_version=None):
+def build_resource_pool_queries(version=None):
     """
     https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/RESOURCE_POOL_STATUS.htm
     """
     name = 'resource_pool_status'
-    fields = (
-        'node_name',
-        'pool_name',
-        'general_memory_borrowed_kb * 1000',
-        'max_memory_size_kb * 1000',
-        'memory_inuse_kb * 1000',
-        'running_query_count',
+    query = """
+SELECT
+  node_name,
+  pool_name,
+  general_memory_borrowed_kb * 1000,
+  max_memory_size_kb * 1000,
+  memory_inuse_kb * 1000,
+  running_query_count
+FROM v_monitor.{}
+""".format(
+        name
     )
-    query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
 
     return [
         {
@@ -414,26 +434,29 @@ def build_resource_pool_queries(_version=None):
     ]
 
 
-def build_disk_storage_queries(_version=None):
+def build_disk_storage_queries(version=None):
     """
     https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/DISK_STORAGE.htm
     """
     name = 'disk_storage'
-    fields = (
-        'node_name',
-        'storage_status',
-        'storage_usage',
-        'disk_block_size_bytes * disk_space_free_blocks as usable',
-        'disk_block_size_bytes * disk_space_used_blocks as used',
-        'usable + used as total',
-        'CASE WHEN total = 0 THEN 0 ELSE used / total * 100 END as utilized',
-        'latency',
-        'throughput',
-        'CASE WHEN latency = 0 THEN 0 ELSE 1 / latency END as latency_reciprocal',
-        'CASE WHEN throughput = 0 THEN 0 ELSE 1 / throughput END as throughput_reciprocal',
-        'latency_reciprocal + throughput_reciprocal',
+    query = """
+SELECT
+  node_name,
+  storage_status,
+  storage_usage,
+  disk_block_size_bytes * disk_space_free_blocks as usable,
+  disk_block_size_bytes * disk_space_used_blocks as used,
+  usable + used as total,
+  CASE WHEN total = 0 THEN 0 ELSE used / total * 100 END as utilized,
+  latency,
+  throughput,
+  CASE WHEN latency = 0 THEN 0 ELSE 1 / latency END as latency_reciprocal,
+  CASE WHEN throughput = 0 THEN 0 ELSE 1 / throughput END as throughput_reciprocal,
+  latency_reciprocal + throughput_reciprocal
+FROM v_monitor.{}
+""".format(
+        name
     )
-    query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
 
     return [
         {
@@ -457,14 +480,12 @@ def build_disk_storage_queries(_version=None):
     ]
 
 
-def build_resource_usage_queries(_version=None):
+def build_resource_usage_queries(version=None):
     """
     https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/RESOURCE_USAGE.htm
     """
-
     name = 'resource_usage'
-    fields = ('active_thread_count', 'node_name', 'request_count')
-    query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
+    query = 'SELECT active_thread_count, node_name, request_count FROM v_monitor.{}'.format(name)
 
     return [
         {
