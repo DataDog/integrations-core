@@ -10,7 +10,8 @@ from copy import deepcopy
 import mock
 import pytest
 
-from datadog_checks.tcp_check import TCPCheck
+# from datadog_checks.tcp_check import TCPCheck
+from datadog_checks.tcp_check.tcp_check import AddrTuple, TCPCheck
 
 from . import common
 
@@ -116,7 +117,7 @@ def test_response_time(aggregator):
         pytest.param(
             'localhost',
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV6,
-            [TCPCheck.AddrTuple('::1', socket.AF_INET6)],
+            [AddrTuple('::1', socket.AF_INET6)],
             False,
             1,
             id='Dual IPv4/IPv6: localhost, IPv6 resolution, multiple_ips False',
@@ -124,7 +125,7 @@ def test_response_time(aggregator):
         pytest.param(
             'localhost',
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV4,
-            [TCPCheck.AddrTuple('127.0.0.1', socket.AF_INET)],
+            [AddrTuple('127.0.0.1', socket.AF_INET)],
             False,
             1,
             id='Dual IPv4/IPv6: localhost, IPv4 resolution, multiple_ips False',
@@ -132,7 +133,7 @@ def test_response_time(aggregator):
         pytest.param(
             'localhost',
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV6,
-            [TCPCheck.AddrTuple('::1', socket.AF_INET6), TCPCheck.AddrTuple('127.0.0.1', socket.AF_INET)],
+            [AddrTuple('::1', socket.AF_INET6), AddrTuple('127.0.0.1', socket.AF_INET)],
             True,
             2,
             id='Dual IPv4/IPv6: localhost, IPv6 resolution, multiple_ips True',
@@ -140,7 +141,7 @@ def test_response_time(aggregator):
         pytest.param(
             'localhost',
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV4,
-            [TCPCheck.AddrTuple('127.0.0.1', socket.AF_INET), TCPCheck.AddrTuple('::1', socket.AF_INET6)],
+            [AddrTuple('127.0.0.1', socket.AF_INET), AddrTuple('::1', socket.AF_INET6)],
             True,
             2,
             id='Dual IPv4/IPv6: localhost, IPv4 resolution, multiple_ips True',
@@ -148,7 +149,7 @@ def test_response_time(aggregator):
         pytest.param(
             'some-hostname',
             common.DUAL_STACK_GETADDRINFO_IPV4,
-            [TCPCheck.AddrTuple('ip1', socket.AF_INET)],
+            [AddrTuple('ip1', socket.AF_INET)],
             False,
             1,
             id='Dual IPv4/IPv6: string hostname, IPv4 resolution, multiple_ips False',
@@ -156,7 +157,7 @@ def test_response_time(aggregator):
         pytest.param(
             'another-hostname',
             common.DUAL_STACK_GETADDRINFO_IPV6,
-            [TCPCheck.AddrTuple('ip1', socket.AF_INET6)],
+            [AddrTuple('ip1', socket.AF_INET6)],
             False,
             1,
             id='Dual IPv4/IPv6: string hostname, IPv6 resolution, multiple_ips False',
@@ -165,9 +166,9 @@ def test_response_time(aggregator):
             'some-hostname',
             common.DUAL_STACK_GETADDRINFO_IPV4,
             [
-                TCPCheck.AddrTuple('ip1', socket.AF_INET),
-                TCPCheck.AddrTuple('ip2', socket.AF_INET6),
-                TCPCheck.AddrTuple('ip3', socket.AF_INET6),
+                AddrTuple('ip1', socket.AF_INET),
+                AddrTuple('ip2', socket.AF_INET6),
+                AddrTuple('ip3', socket.AF_INET6),
             ],
             True,
             3,
@@ -177,9 +178,9 @@ def test_response_time(aggregator):
             'another-hostname',
             common.DUAL_STACK_GETADDRINFO_IPV6,
             [
-                TCPCheck.AddrTuple('ip1', socket.AF_INET6),
-                TCPCheck.AddrTuple('ip2', socket.AF_INET),
-                TCPCheck.AddrTuple('ip3', socket.AF_INET6),
+                AddrTuple('ip1', socket.AF_INET6),
+                AddrTuple('ip2', socket.AF_INET),
+                AddrTuple('ip3', socket.AF_INET6),
             ],
             True,
             3,
@@ -188,7 +189,7 @@ def test_response_time(aggregator):
         pytest.param(
             'localhost',
             common.SINGLE_STACK_GETADDRINFO_LOCALHOST_IPV4,
-            [TCPCheck.AddrTuple('127.0.0.1', socket.AF_INET)],
+            [AddrTuple('127.0.0.1', socket.AF_INET)],
             False,
             1,
             id='Single stack IPv4: localhost, IPv4 resolution, multiple_ips False',
@@ -196,7 +197,7 @@ def test_response_time(aggregator):
         pytest.param(
             'localhost',
             common.SINGLE_STACK_GETADDRINFO_LOCALHOST_IPV4,
-            [TCPCheck.AddrTuple('127.0.0.1', socket.AF_INET), TCPCheck.AddrTuple('ip2', socket.AF_INET)],
+            [AddrTuple('127.0.0.1', socket.AF_INET), AddrTuple('ip2', socket.AF_INET)],
             True,
             2,
             id='Single stack IPv4: localhost, IPv4 resolution, multiple_ips True',
@@ -204,7 +205,7 @@ def test_response_time(aggregator):
         pytest.param(
             'another-hostname',
             common.SINGLE_STACK_GETADDRINFO_IPV4,
-            [TCPCheck.AddrTuple('ip1', socket.AF_INET)],
+            [AddrTuple('ip1', socket.AF_INET)],
             False,
             1,
             id='Single stack IPv4: string hostname, IPv4 resolution, multiple_ips False',
@@ -213,9 +214,9 @@ def test_response_time(aggregator):
             'another-hostname',
             common.SINGLE_STACK_GETADDRINFO_IPV4,
             [
-                TCPCheck.AddrTuple('ip1', socket.AF_INET),
-                TCPCheck.AddrTuple('ip2', socket.AF_INET),
-                TCPCheck.AddrTuple('ip3', socket.AF_INET),
+                AddrTuple('ip1', socket.AF_INET),
+                AddrTuple('ip2', socket.AF_INET),
+                AddrTuple('ip3', socket.AF_INET),
             ],
             True,
             3,

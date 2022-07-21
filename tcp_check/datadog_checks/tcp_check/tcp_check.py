@@ -10,6 +10,8 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.time import get_precise_time
 
+AddrTuple = namedtuple('AddrTuple', ['address', 'socket_type'])
+
 
 class TCPCheck(AgentCheck):
 
@@ -60,11 +62,9 @@ class TCPCheck(AgentCheck):
             'instance:{}'.format(self.instance_name),
         ]
 
-    AddrTuple = namedtuple('AddrTuple', ['address', 'socket_type'])
-
     @property
     def addrs(self):
-        # type: () -> List[self.AddrTuple]
+        # type: () -> List[AddrTuple]
         if self._addrs is None or self._addrs == []:
             try:
                 self.resolve_ips()
@@ -77,7 +77,7 @@ class TCPCheck(AgentCheck):
     def resolve_ips(self):
         # type: () -> None
         self._addrs = [
-            self.AddrTuple(sockaddr[0], socket_type)
+            AddrTuple(sockaddr[0], socket_type)
             for (socket_type, _, _, _, sockaddr) in socket.getaddrinfo(self.host, self.port, 0, 0, socket.IPPROTO_TCP)
         ]
         if not self.multiple_ips:
