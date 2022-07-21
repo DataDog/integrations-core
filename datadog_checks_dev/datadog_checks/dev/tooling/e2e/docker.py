@@ -300,6 +300,8 @@ class DockerInterface(object):
         env_vars = {
             # Agent 6 will simply fail without an API key
             'DD_API_KEY': self.api_key,
+            # Set agent hostname for CI
+            'DD_HOSTNAME': get_hostname(),
             # Run expvar on a random port
             'DD_EXPVAR_PORT': 0,
             # Run API on a random port
@@ -321,9 +323,6 @@ class DockerInterface(object):
         if self.log_url:
             # Set custom agent log intake
             env_vars['DD_LOGS_CONFIG_DD_URL'] = self.log_url
-        if self.windows_container:
-            # Set socket hostname for Windows CI
-            env_vars['DD_HOSTNAME'] = get_hostname()
         env_vars.update(self.env_vars)
 
         volumes = [
