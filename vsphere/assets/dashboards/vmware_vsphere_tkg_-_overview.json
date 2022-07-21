@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "This dashboard provides a high-level overview of your VMware vSphere Tanzu Kubernetes Grid environment, with metrics from your vSphere hosts and VMs, along with information about your Kubernetes cluster and its containers.\n\nFurther reading for vSphere Tanzu Kubernetes Grid monitoring:\n\n- [VMware Tanzu TKG Docs](https://tanzu.vmware.com/kubernetes-grid)\n- [Datadog's vSphere Integration Docs](https://docs.datadoghq.com/integrations/vsphere/)\n- [Datadog's Kubernetes Docs](https://docs.datadoghq.com/containers/kubernetes/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "description": "This dashboard provides a high-level overview of your VMware vSphere Tanzu Kubernetes Grid environment, with metrics from your vSphere hosts and VMs, along with information about your Kubernetes cluster and its containers.\n\nFurther reading for vSphere Tanzu Kubernetes Grid monitoring:\n\n- [VMware Tanzu TKG Docs](https://tanzu.vmware.com/kubernetes-grid)\n- [Datadog's vSphere Integration Docs](https://docs.datadoghq.com/integrations/vsphere/)\n- [Datadog's Kubernetes Docs](https://docs.datadoghq.com/containers/kubernetes/)\n- [Datadog's KSM Integration Docs](https://docs.datadoghq.com/integrations/kubernetes_state_core/?tab=operator)\n- [Datadog's Kubernetes Metrics Docs](https://docs.datadoghq.com/containers/kubernetes/data_collected/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -71,7 +71,7 @@
                     {
                         "definition": {
                             "background_color": "transparent",
-                            "content": "### Our VMware vSphere Tanzu Kubernetes Grid (TKG) dashboard gives you broad visibility into your vCenter and its Kubernetes environment\n\nThis dashboard provides a high-level overview of your VMware vSphere Tanzu Kubernetes Grid environment, with metrics from your vSphere hosts and VMs, along with information about your Kubernetes cluster and its containers.\n\nFurther reading for vSphere Tanzu Kubernetes Grid monitoring:\n\n- [VMware Tanzu TKG Docs](https://tanzu.vmware.com/kubernetes-grid)\n- [Datadog's vSphere Integration Docs](https://docs.datadoghq.com/integrations/vsphere/)\n- [Datadog's Kubernetes Docs](https://docs.datadoghq.com/containers/kubernetes/)",
+                            "content": "### Our VMware vSphere Tanzu Kubernetes Grid (TKG) dashboard gives you broad visibility into your vCenter and its Kubernetes environment\n\nThis dashboard provides a high-level overview of your VMware vSphere Tanzu Kubernetes Grid environment, with metrics from your vSphere hosts and VMs, along with information about your Kubernetes cluster and its containers.\n\nFurther reading for vSphere Tanzu Kubernetes Grid monitoring:\n\n- [VMware Tanzu TKG Docs](https://tanzu.vmware.com/kubernetes-grid)\n- [Datadog's vSphere Integration Docs](https://docs.datadoghq.com/integrations/vsphere/)\n- [Datadog's Kubernetes Docs](https://docs.datadoghq.com/containers/kubernetes/)\n- [Datadog's KSM Integration Docs](https://docs.datadoghq.com/integrations/kubernetes_state_core/?tab=operator)\n- [Datadog's Kubernetes Metrics Docs](https://docs.datadoghq.com/containers/kubernetes/data_collected/)",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -83,7 +83,7 @@
                         },
                         "id": 4034119923918144,
                         "layout": {
-                            "height": 3,
+                            "height": 4,
                             "width": 6,
                             "x": 0,
                             "y": 0
@@ -93,7 +93,7 @@
             },
             "id": 8736901664750432,
             "layout": {
-                "height": 6,
+                "height": 7,
                 "width": 6,
                 "x": 0,
                 "y": 0
@@ -138,14 +138,14 @@
                 "event_size": "l",
                 "query": "source:(vsphere OR kubernetes OR containerd OR docker OR datadog) $vsphere_host $vsphere_cluster $vsphere_vcenter",
                 "tags_execution": "and",
-                "title": "vCenter Events",
+                "title": "VMware TKG Events",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "event_stream"
             },
             "id": 1346452411294476,
             "layout": {
-                "height": 3,
+                "height": 4,
                 "width": 6,
                 "x": 6,
                 "y": 3
@@ -184,7 +184,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.pod.count{$scope,$namespace,$vsphere_cluster,$vsphere_host,pod_phase:running,$vsphere_vcenter}"
+                                            "query": "sum:kubernetes.pods.running{$scope,$namespace,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$job,$deployment,$statefulset,$daemonset,pod_phase:running}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -208,7 +208,7 @@
                                 "scale": "linear"
                             }
                         },
-                        "id": 3444290840959458,
+                        "id": 4438940685931776,
                         "layout": {
                             "height": 2,
                             "width": 6,
@@ -285,7 +285,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.pod.count{$scope,$namespace,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,pod_phase:running} by {kube_namespace}"
+                                            "query": "sum:kubernetes.pods.running{$scope,$namespace,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$deployment,$statefulset,$daemonset,$job,pod_phase:running} by {kube_namespace}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -309,7 +309,7 @@
                                 "scale": "linear"
                             }
                         },
-                        "id": 868367773936188,
+                        "id": 7006111163124590,
                         "layout": {
                             "height": 4,
                             "width": 6,
@@ -371,7 +371,7 @@
                 "height": 7,
                 "width": 12,
                 "x": 0,
-                "y": 6
+                "y": 7
             }
         },
         {
@@ -382,6 +382,45 @@
                 "title_align": "center",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "This group of metrics is generated from the [Kubernetes](https://docs.datadoghq.com/containers/kubernetes/data_collected/) integration and the [Kubernetes State Metrics Core](https://docs.datadoghq.com/integrations/kubernetes_state_core) integration. \n\nThese metrics show detailed information about your Kubernetes pods, allowing for easy drill down to seamlessly pinpoint problems.\n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 741311893555420,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "event_size": "l",
+                            "query": "source:kubernetes $vsphere_vcenter",
+                            "tags_execution": "and",
+                            "title": "Kubernetes Events",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "event_stream"
+                        },
+                        "id": 5774791259600788,
+                        "layout": {
+                            "height": 3,
+                            "width": 9,
+                            "x": 3,
+                            "y": 0
+                        }
+                    },
                     {
                         "definition": {
                             "legend_columns": [
@@ -462,7 +501,7 @@
                             "height": 3,
                             "width": 6,
                             "x": 0,
-                            "y": 0
+                            "y": 3
                         }
                     },
                     {
@@ -495,7 +534,7 @@
                             "height": 3,
                             "width": 6,
                             "x": 6,
-                            "y": 0
+                            "y": 3
                         }
                     },
                     {
@@ -535,7 +574,7 @@
                             "height": 3,
                             "width": 2,
                             "x": 0,
-                            "y": 3
+                            "y": 6
                         }
                     },
                     {
@@ -590,7 +629,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 2,
-                            "y": 3
+                            "y": 6
                         }
                     },
                     {
@@ -630,7 +669,7 @@
                             "height": 3,
                             "width": 2,
                             "x": 6,
-                            "y": 3
+                            "y": 6
                         }
                     },
                     {
@@ -685,7 +724,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 8,
-                            "y": 3
+                            "y": 6
                         }
                     },
                     {
@@ -740,7 +779,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 0,
-                            "y": 6
+                            "y": 9
                         }
                     },
                     {
@@ -795,7 +834,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 4,
-                            "y": 6
+                            "y": 9
                         }
                     },
                     {
@@ -845,17 +884,17 @@
                             "height": 3,
                             "width": 4,
                             "x": 8,
-                            "y": 6
+                            "y": 9
                         }
                     }
                 ]
             },
             "id": 8933567865449096,
             "layout": {
-                "height": 10,
+                "height": 13,
                 "width": 12,
                 "x": 0,
-                "y": 13
+                "y": 14
             }
         },
         {
@@ -869,7 +908,7 @@
                     {
                         "definition": {
                             "event_size": "l",
-                            "query": "source:(containerd OR docker) $vsphere_host $vsphere_cluster $vsphere_vcenter",
+                            "query": "source:(containerd OR docker) AND $vsphere_host AND $vsphere_cluster AND $vsphere_vcenter",
                             "tags_execution": "and",
                             "title": "Container Events",
                             "title_align": "left",
@@ -1410,7 +1449,7 @@
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 23
+                "y": 27
             }
         },
         {
@@ -1421,6 +1460,45 @@
                 "title": "vSphere",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "green",
+                            "content": "This group of metrics is collected via the VMware vCenter API using the [vSphere integration](https://docs.datadoghq.com/integrations/vsphere/). \n\nThese metrics allow for easy visualization of the overall states of Hosts, VMs, and Datastores in your vSphere environment",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5897850047060272,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "event_size": "l",
+                            "query": "source:vsphere $vsphere_vcenter",
+                            "tags_execution": "and",
+                            "title": "vSphere Events",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "event_stream"
+                        },
+                        "id": 7515715942197606,
+                        "layout": {
+                            "height": 3,
+                            "width": 9,
+                            "x": 3,
+                            "y": 0
+                        }
+                    },
                     {
                         "definition": {
                             "legend_columns": [
@@ -1465,7 +1543,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 0,
-                            "y": 0
+                            "y": 3
                         }
                     },
                     {
@@ -1523,7 +1601,7 @@
                             "height": 3,
                             "width": 2,
                             "x": 4,
-                            "y": 0
+                            "y": 3
                         }
                     },
                     {
@@ -1570,7 +1648,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 6,
-                            "y": 0
+                            "y": 3
                         }
                     },
                     {
@@ -1628,7 +1706,7 @@
                             "height": 3,
                             "width": 2,
                             "x": 10,
-                            "y": 0
+                            "y": 3
                         }
                     },
                     {
@@ -1675,7 +1753,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 0,
-                            "y": 3
+                            "y": 6
                         }
                     },
                     {
@@ -1733,7 +1811,7 @@
                             "height": 3,
                             "width": 2,
                             "x": 4,
-                            "y": 3
+                            "y": 6
                         }
                     },
                     {
@@ -1780,7 +1858,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 6,
-                            "y": 3
+                            "y": 6
                         }
                     },
                     {
@@ -1838,7 +1916,7 @@
                             "height": 3,
                             "width": 2,
                             "x": 10,
-                            "y": 3
+                            "y": 6
                         }
                     },
                     {
@@ -1889,7 +1967,7 @@
                             "height": 3,
                             "width": 6,
                             "x": 0,
-                            "y": 6
+                            "y": 9
                         }
                     },
                     {
@@ -1927,17 +2005,17 @@
                             "height": 3,
                             "width": 6,
                             "x": 6,
-                            "y": 6
+                            "y": 9
                         }
                     }
                 ]
             },
             "id": 2451476149426598,
             "layout": {
-                "height": 10,
+                "height": 13,
                 "width": 12,
                 "x": 0,
-                "y": 39
+                "y": 43
             }
         }
     ]
