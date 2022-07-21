@@ -321,6 +321,8 @@ class DockerInterface(object):
         if self.log_url:
             # Set custom agent log intake
             env_vars['DD_LOGS_CONFIG_DD_URL'] = self.log_url
+        if self.windows_container:
+            env_vars['DD_HOSTNAME'] = get_hostname()
         env_vars.update(self.env_vars)
 
         volumes = [
@@ -328,9 +330,7 @@ class DockerInterface(object):
             f'{path_join(get_root(), self.check)}:{self.check_mount_dir}',
         ]
 
-        if self.windows_container:
-            volumes.append('//var/run/docker.sock:/var/run/docker.sock:ro')
-        else:
+        if not self.windows_container:
             volumes.append('/proc:/host/proc')
 
         if self.config:
