@@ -12,7 +12,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.base.utils.db import QueryManager
 
-from .queries import get_queries
+from .queries import METRIC_GROUPS, get_queries
 from .utils import parse_major_version
 
 # Python 3 only
@@ -164,22 +164,7 @@ class VerticaCheck(AgentCheck):
         return self._connection.cursor().execute(query).iterate()
 
     def parse_metric_groups(self):
-        # If you create a new function, please add this to `default_metric_groups` below and
-        # the config file (under `metric_groups`).
-        default_metric_groups = [
-            'licenses',
-            'license_audits',
-            'system',
-            'nodes',
-            'projections',
-            'projection_storage',
-            'storage_containers',
-            'host_resources',
-            'query_metrics',
-            'resource_pool_status',
-            'disk_storage',
-            'resource_usage',
-        ]
+        default_metric_groups = list(METRIC_GROUPS)
 
         metric_groups = self.instance.get('metric_groups') or list(default_metric_groups)
 

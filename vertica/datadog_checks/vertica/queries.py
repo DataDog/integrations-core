@@ -5,6 +5,8 @@
 # Using System tables to monitor Vertica:
 # https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/AdministratorsGuide/Monitoring/Vertica/UsingSystemTables.htm
 
+from collections import OrderedDict
+
 
 def get_queries(major_version, metric_groups):
     """Get query dicts for use with QueryManager.
@@ -477,17 +479,21 @@ def build_resource_usage_queries(_version=None):
     ]
 
 
-METRIC_GROUPS = {
-    'licenses': build_licenses_queries,
-    'license_audits': build_license_audits_queries,
-    'system': build_system_queries,
-    'nodes': build_nodes_queries,
-    'projections': build_projections_queries,
-    'projection_storage': build_projection_storage_queries,
-    'storage_containers': build_storage_containers_queries,
-    'host_resources': build_host_resources_queries,
-    'query_metrics': build_query_metrics_queries,
-    'resource_pool_status': build_resource_pool_queries,
-    'disk_storage': build_disk_storage_queries,
-    'resource_usage': build_resource_usage_queries,
-}
+# If you create a new group, please add it to `METRIC_GROUPS` below and
+# the config file (under `metric_groups`).
+METRIC_GROUPS = OrderedDict(
+    [
+        ('licenses', build_licenses_queries),
+        ('license_audits', build_license_audits_queries),
+        ('system', build_system_queries),
+        ('nodes', build_nodes_queries),
+        ('projections', build_projections_queries),
+        ('projection_storage', build_projection_storage_queries),
+        ('storage_containers', build_storage_containers_queries),
+        ('host_resources', build_host_resources_queries),
+        ('query_metrics', build_query_metrics_queries),
+        ('resource_pool_status', build_resource_pool_queries),
+        ('disk_storage', build_disk_storage_queries),
+        ('resource_usage', build_resource_usage_queries),
+    ]
+)
