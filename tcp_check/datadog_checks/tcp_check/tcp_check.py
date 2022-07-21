@@ -76,20 +76,11 @@ class TCPCheck(AgentCheck):
     def resolve_ips(self):
         # type: () -> None
         addr_tuple = namedtuple('addr_tuple', ['address', 'socket_type'])
-        if self.socket_type == socket.AF_INET:
-            if self._addrs is None:
-                self._addrs = []
-            # gethostbyname_ex only translates to IPv4 addresses
-            _, _, addrs = socket.gethostbyname_ex(self.host)
-            for addr in addrs:
-                self._addrs.append(addr_tuple(addr, socket.AF_INET))
-        else:
-            self._addrs = [
-                addr_tuple(sockaddr[0], socket_type)
-                for (socket_type, _, _, _, sockaddr) in socket.getaddrinfo(
-                    self.host, self.port, 0, 0, socket.IPPROTO_TCP
-                )
-            ]
+
+        self._addrs = [
+            addr_tuple(sockaddr[0], socket_type)
+            for (socket_type, _, _, _, sockaddr) in socket.getaddrinfo(self.host, self.port, 0, 0, socket.IPPROTO_TCP)
+        ]
         if not self.multiple_ips:
             self._addrs = self._addrs[:1]
 

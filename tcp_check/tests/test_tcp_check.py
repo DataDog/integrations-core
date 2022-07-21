@@ -114,12 +114,11 @@ def test_response_time(aggregator):
 
 
 @pytest.mark.parametrize(
-    'hostname, getaddrinfo, gethostbyname_ex, expected_addrs, multiple_ips, service_checks_count',
+    'hostname, getaddrinfo, expected_addrs, multiple_ips, service_checks_count',
     [
         pytest.param(
             'localhost',
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV6,
-            None,
             [addr_tuple('::1', socket.AF_INET6)],
             False,
             1,
@@ -128,7 +127,6 @@ def test_response_time(aggregator):
         pytest.param(
             'localhost',
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV4,
-            ('localhost', [], ['127.0.0.1']),
             [addr_tuple('127.0.0.1', socket.AF_INET)],
             False,
             1,
@@ -137,7 +135,6 @@ def test_response_time(aggregator):
         pytest.param(
             'localhost',
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV6,
-            None,
             [addr_tuple('::1', socket.AF_INET6), addr_tuple('127.0.0.1', socket.AF_INET)],
             True,
             2,
@@ -146,7 +143,6 @@ def test_response_time(aggregator):
         pytest.param(
             'localhost',
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV4,
-            ('localhost', [], ['127.0.0.1']),
             [addr_tuple('127.0.0.1', socket.AF_INET), addr_tuple('::1', socket.AF_INET6)],
             True,
             2,
@@ -155,7 +151,6 @@ def test_response_time(aggregator):
         pytest.param(
             'some-hostname',
             common.DUAL_STACK_GETADDRINFO_IPV4,
-            ('some-hostname', [], ['ip1']),
             [addr_tuple('ip1', socket.AF_INET)],
             False,
             1,
@@ -164,7 +159,6 @@ def test_response_time(aggregator):
         pytest.param(
             'another-hostname',
             common.DUAL_STACK_GETADDRINFO_IPV6,
-            None,
             [addr_tuple('ip1', socket.AF_INET6)],
             False,
             1,
@@ -173,7 +167,6 @@ def test_response_time(aggregator):
         pytest.param(
             'some-hostname',
             common.DUAL_STACK_GETADDRINFO_IPV4,
-            ('some-hostname', [], ['ip1']),
             [addr_tuple('ip1', socket.AF_INET), addr_tuple('ip2', socket.AF_INET6), addr_tuple('ip3', socket.AF_INET6)],
             True,
             3,
@@ -182,7 +175,6 @@ def test_response_time(aggregator):
         pytest.param(
             'another-hostname',
             common.DUAL_STACK_GETADDRINFO_IPV6,
-            None,
             [addr_tuple('ip1', socket.AF_INET6), addr_tuple('ip2', socket.AF_INET), addr_tuple('ip3', socket.AF_INET6)],
             True,
             3,
@@ -191,7 +183,6 @@ def test_response_time(aggregator):
         pytest.param(
             'localhost',
             common.SINGLE_STACK_GETADDRINFO_LOCALHOST_IPV4,
-            ('localhost', [], ['127.0.0.1']),
             [addr_tuple('127.0.0.1', socket.AF_INET)],
             False,
             1,
@@ -200,7 +191,6 @@ def test_response_time(aggregator):
         pytest.param(
             'localhost',
             common.SINGLE_STACK_GETADDRINFO_LOCALHOST_IPV4,
-            ('localhost', [], ['127.0.0.1', 'ip1']),
             [addr_tuple('127.0.0.1', socket.AF_INET), addr_tuple('ip2', socket.AF_INET)],
             True,
             2,
@@ -209,7 +199,6 @@ def test_response_time(aggregator):
         pytest.param(
             'another-hostname',
             common.SINGLE_STACK_GETADDRINFO_IPV4,
-            None,
             [addr_tuple('ip1', socket.AF_INET)],
             False,
             1,
@@ -218,7 +207,6 @@ def test_response_time(aggregator):
         pytest.param(
             'another-hostname',
             common.SINGLE_STACK_GETADDRINFO_IPV4,
-            None,
             [addr_tuple('ip1', socket.AF_INET), addr_tuple('ip2', socket.AF_INET), addr_tuple('ip3', socket.AF_INET)],
             True,
             3,
@@ -227,7 +215,7 @@ def test_response_time(aggregator):
     ],
 )
 def test_hostname_resolution(
-    aggregator, monkeypatch, hostname, getaddrinfo, gethostbyname_ex, expected_addrs, multiple_ips, service_checks_count
+    aggregator, monkeypatch, hostname, getaddrinfo, expected_addrs, multiple_ips, service_checks_count
 ):
     """
     Test that string hostnames get resolved to ipv4 address format properly.
@@ -238,7 +226,6 @@ def test_hostname_resolution(
     check = TCPCheck(common.CHECK_NAME, {}, [instance])
 
     monkeypatch.setattr('socket.getaddrinfo', mock.Mock(return_value=getaddrinfo))
-    monkeypatch.setattr('socket.gethostbyname_ex', mock.Mock(return_value=gethostbyname_ex))
     monkeypatch.setattr(check, 'connect', mock.Mock(side_effect=[None, None, None]))
 
     expected_tags = [
@@ -277,11 +264,7 @@ def test_multiple(aggregator):
             (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip2', 80, 0, 0)),
             (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip3', 80, 0, 0)),
         ],
-    ), mock.patch(
-        'socket.gethostbyname_ex', return_value=('datadoghq.com', [], ['ip1', 'ip2', 'ip3'])
-    ), mock.patch.object(
-        check, 'connect', wraps=check.connect
-    ) as connect:
+    ), mock.patch.object(check, 'connect', wraps=check.connect) as connect:
         connect.side_effect = [None, Exception(), None] * 2
         expected_tags = ['foo:bar', 'target_host:datadoghq.com', 'port:80', 'instance:multiple']
 
@@ -300,8 +283,6 @@ def test_multiple(aggregator):
 
 
 def has_ipv6_connectivity():
-    # in macOS, `socket.gethostname()` might return a hostname that hasn't been configured with an IP in /etc/hosts
-    # regardless of whether the system has IPv6 connectivity or not
     try:
         for sockaddr in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET6, 0, socket.IPPROTO_TCP):
             if not sockaddr[0].startswith('fe80:'):
@@ -341,6 +322,13 @@ def test_ipv6(aggregator, check):
             aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
     assert nb_ipv4 == 4
     # The Windows CI machine doesn't return IPv6
-    assert nb_ipv6 == 8 or platform.system() == 'Windows' and nb_ipv6 == 0
+    # Windows or MacOS might not have IPv6 connectivity when testing locally
+    assert (
+        nb_ipv6 == 8
+        or platform.system() == 'Windows'
+        and nb_ipv6 == 0
+        or platform.system() == 'Darwin'
+        and nb_ipv6 == 0
+    )
     aggregator.assert_all_metrics_covered()
     assert len(aggregator.service_checks('tcp.can_connect')) == nb_ipv4 + nb_ipv6
