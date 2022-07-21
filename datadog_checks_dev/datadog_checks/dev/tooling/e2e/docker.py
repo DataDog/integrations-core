@@ -300,6 +300,8 @@ class DockerInterface(object):
         env_vars = {
             # Agent 6 will simply fail without an API key
             'DD_API_KEY': self.api_key,
+            # Windows agent needs explicit hostname
+            'DD_HOSTNAME': self.container_name,
             # Run expvar on a random port
             'DD_EXPVAR_PORT': 0,
             # Run API on a random port
