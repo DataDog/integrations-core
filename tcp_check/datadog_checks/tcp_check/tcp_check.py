@@ -4,7 +4,7 @@
 import socket
 from collections import namedtuple
 from contextlib import closing
-from typing import Any, List
+from typing import Any, List, Optional
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
@@ -162,7 +162,7 @@ class TCPCheck(AgentCheck):
                     self._addrs = None
 
     def report_as_service_check(self, status, addr, msg=None):
-        # type: (AgentCheck.service_check, str, str) -> None
+        # type: (AgentCheck.service_check, str, Optional[str]) -> None
         if status is AgentCheck.OK:
             msg = None
         extra_tags = ['address:{}'.format(addr)]
