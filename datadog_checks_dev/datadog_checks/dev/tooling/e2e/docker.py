@@ -322,6 +322,7 @@ class DockerInterface(object):
             # Set custom agent log intake
             env_vars['DD_LOGS_CONFIG_DD_URL'] = self.log_url
         if self.windows_container:
+            # Set socket hostname for Windows CI
             env_vars['DD_HOSTNAME'] = get_hostname()
         env_vars.update(self.env_vars)
 
