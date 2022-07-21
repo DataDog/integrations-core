@@ -226,7 +226,7 @@ def test_hostname_resolution(
     check = TCPCheck(common.CHECK_NAME, {}, [instance])
 
     monkeypatch.setattr('socket.getaddrinfo', mock.Mock(return_value=getaddrinfo))
-    monkeypatch.setattr(check, 'connect', mock.Mock(side_effect=[None, None, None]))
+    monkeypatch.setattr(check, 'connect', mock.Mock())
 
     expected_tags = [
         "instance:UpService",
@@ -239,9 +239,6 @@ def test_hostname_resolution(
     check.check(instance)
 
     assert check._addrs == expected_addrs
-    # at the end of check.check() run, check.socket_type will be assigned to the last addr's socket type
-    assert check.socket_type == expected_addrs[-1:][0].socket_type
-
     aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags, count=1)
     aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags, count=1)
     aggregator.assert_all_metrics_covered()
@@ -323,12 +320,8 @@ def test_ipv6(aggregator, check):
     assert nb_ipv4 == 4
     # The Windows CI machine doesn't return IPv6
     # Windows or MacOS might not have IPv6 connectivity when testing locally
-    assert (
-        nb_ipv6 == 8
-        or platform.system() == 'Windows'
-        and nb_ipv6 == 0
-        or platform.system() == 'Darwin'
-        and nb_ipv6 == 0
-    )
+    if platform.system() not in ('Windows', 'Darwin'):
+        assert nb_ipv6 == 8
+
     aggregator.assert_all_metrics_covered()
     assert len(aggregator.service_checks('tcp.can_connect')) == nb_ipv4 + nb_ipv6

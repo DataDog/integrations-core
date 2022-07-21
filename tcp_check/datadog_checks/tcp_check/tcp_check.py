@@ -26,7 +26,6 @@ class TCPCheck(AgentCheck):
         self.timeout = float(instance.get('timeout', 10))
         self.collect_response_time = instance.get('collect_response_time', False)
         self.host = instance.get('host', None)
-        self.socket_type = None
         self._addrs = None
         self.ip_cache_last_ts = 0
         self.ip_cache_duration = self.DEFAULT_IP_CACHE_DURATION
@@ -63,7 +62,7 @@ class TCPCheck(AgentCheck):
 
     @property
     def addrs(self):
-        # type: (Any) -> List[namedtuple(str, socket.AddressFamily)]
+        # type: () -> List[namedtuple(str, socket.AddressFamily)]
         if self._addrs is None or self._addrs == []:
             try:
                 self.resolve_ips()
@@ -97,7 +96,7 @@ class TCPCheck(AgentCheck):
         return get_precise_time() - self.ip_cache_last_ts > self.ip_cache_duration
 
     def connect(self, addr, socket_type):
-        # type: (Any, str, socket.AddressFamily) -> float
+        # type: (str, socket.AddressFamily) -> float
         with closing(socket.socket(socket_type)) as sock:
             sock.settimeout(self.timeout)
             start = get_precise_time()
@@ -116,9 +115,8 @@ class TCPCheck(AgentCheck):
         self.log.debug("Connecting to %s on port %d", self.host, self.port)
 
         for addr, socket_type in self.addrs:
-            self.socket_type = socket_type
             try:
-                response_time = self.connect(addr, self.socket_type)
+                response_time = self.connect(addr, socket_type)
                 self.log.debug("%s:%d is UP (%s)", self.host, self.port, addr)
                 self.report_as_service_check(AgentCheck.OK, addr, 'UP')
                 if self.collect_response_time:
@@ -159,7 +157,7 @@ class TCPCheck(AgentCheck):
                         AgentCheck.CRITICAL, addr, "{}. Connection failed after {} ms".format(str(e), length)
                     )
 
-                if self.socket_type == socket.AF_INET:
+                if socket_type == socket.AF_INET:
                     self.log.debug("Will attempt to re-resolve IP for %s:%d on next run", self.host, self.port)
                     self._addrs = None
 
