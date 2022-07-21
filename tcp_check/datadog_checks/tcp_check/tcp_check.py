@@ -31,7 +31,6 @@ class TCPCheck(AgentCheck):
         self.ip_cache_last_ts = 0
         self.ip_cache_duration = self.DEFAULT_IP_CACHE_DURATION
         self.multiple_ips = instance.get('multiple_ips', False)
-        # self.addr_tuple = namedtuple('addr_tuple', ['address', 'socket_type'])
 
         ip_cache_duration = instance.get('ip_cache_duration', None)
         if ip_cache_duration is not None:
