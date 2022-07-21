@@ -30,8 +30,10 @@ from .exceptions import (
     NoSuchDatadogPackage,
     NoSuchDatadogPackageVersion,
     PythonVersionMismatch,
+    UpdatedTargetsError,
     RevokedDeveloperOrMachine,
 )
+
 from .parameters import substitute
 
 # Increase requests timeout.
@@ -115,9 +117,14 @@ class TUFDownloader:
         # or, it has been updated, in which case...
         else:
             # First, we use TUF to download and verify the target.
-            assert len(updated_targets) == 1
+            if len(updated_targets) != 1:
+                raise UpdatedTargetsError(f"Expecting only one target {target!r} to be updated; got: {', '.join(updated_targets)}")
+
             updated_target = updated_targets[0]
-            assert updated_target == target
+
+            if updated_target != target:
+                raise UpdatedTargetsError(f"Unknown target updated, expected {target!r} but got {updated_target!r}")
+
             self.__updater.download_target(updated_target, self.__targets_dir)
 
         logger.info('TUF verified %s', target_relpath)

@@ -32,6 +32,9 @@ class NonDatadogPackage(CLIError):
 # Exceptions for the download module.
 
 
+class UpdatedTargetsError(ChecksDownloaderException):
+    """An exception raised when any issue with updated target arises."""
+
 class IncorrectRootLayoutType(ChecksDownloaderException):
     def __init__(self, found, expected):
         self.found = found
