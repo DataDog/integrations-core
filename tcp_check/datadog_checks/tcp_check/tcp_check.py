@@ -60,9 +60,11 @@ class TCPCheck(AgentCheck):
             'instance:{}'.format(self.instance_name),
         ]
 
+    AddrTuple = namedtuple('AddrTuple', ['address', 'socket_type'])
+
     @property
     def addrs(self):
-        # type: () -> List[namedtuple(str, socket.AddressFamily)]
+        # type: () -> List[self.AddrTuple]
         if self._addrs is None or self._addrs == []:
             try:
                 self.resolve_ips()
@@ -74,10 +76,8 @@ class TCPCheck(AgentCheck):
 
     def resolve_ips(self):
         # type: () -> None
-        addr_tuple = namedtuple('addr_tuple', ['address', 'socket_type'])
-
         self._addrs = [
-            addr_tuple(sockaddr[0], socket_type)
+            self.AddrTuple(sockaddr[0], socket_type)
             for (socket_type, _, _, _, sockaddr) in socket.getaddrinfo(self.host, self.port, 0, 0, socket.IPPROTO_TCP)
         ]
         if not self.multiple_ips:
