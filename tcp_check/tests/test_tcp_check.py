@@ -114,12 +114,12 @@ def test_response_time(aggregator):
 
 
 @pytest.mark.parametrize(
-    'hostname, getaddrinfo, expected_addrs, multiple_ips, service_checks_count',
+    'hostname, getaddrinfo, expected_addrs, multiple_ips, ip_count',
     [
         pytest.param(
             'localhost',
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV6,
-            [addr_tuple('::1', socket.AF_INET6)],
+            [TCPCheck.AddrTuple('::1', socket.AF_INET6)],
             False,
             1,
             id='Dual IPv4/IPv6: localhost, IPv6 resolution, multiple_ips False',
@@ -127,7 +127,7 @@ def test_response_time(aggregator):
         pytest.param(
             'localhost',
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV4,
-            [addr_tuple('127.0.0.1', socket.AF_INET)],
+            [TCPCheck.AddrTuple('127.0.0.1', socket.AF_INET)],
             False,
             1,
             id='Dual IPv4/IPv6: localhost, IPv4 resolution, multiple_ips False',
@@ -135,7 +135,7 @@ def test_response_time(aggregator):
         pytest.param(
             'localhost',
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV6,
-            [addr_tuple('::1', socket.AF_INET6), addr_tuple('127.0.0.1', socket.AF_INET)],
+            [TCPCheck.AddrTuple('::1', socket.AF_INET6), TCPCheck.AddrTuple('127.0.0.1', socket.AF_INET)],
             True,
             2,
             id='Dual IPv4/IPv6: localhost, IPv6 resolution, multiple_ips True',
@@ -143,7 +143,7 @@ def test_response_time(aggregator):
         pytest.param(
             'localhost',
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV4,
-            [addr_tuple('127.0.0.1', socket.AF_INET), addr_tuple('::1', socket.AF_INET6)],
+            [TCPCheck.AddrTuple('127.0.0.1', socket.AF_INET), TCPCheck.AddrTuple('::1', socket.AF_INET6)],
             True,
             2,
             id='Dual IPv4/IPv6: localhost, IPv4 resolution, multiple_ips True',
@@ -151,7 +151,7 @@ def test_response_time(aggregator):
         pytest.param(
             'some-hostname',
             common.DUAL_STACK_GETADDRINFO_IPV4,
-            [addr_tuple('ip1', socket.AF_INET)],
+            [TCPCheck.AddrTuple('ip1', socket.AF_INET)],
             False,
             1,
             id='Dual IPv4/IPv6: string hostname, IPv4 resolution, multiple_ips False',
@@ -159,7 +159,7 @@ def test_response_time(aggregator):
         pytest.param(
             'another-hostname',
             common.DUAL_STACK_GETADDRINFO_IPV6,
-            [addr_tuple('ip1', socket.AF_INET6)],
+            [TCPCheck.AddrTuple('ip1', socket.AF_INET6)],
             False,
             1,
             id='Dual IPv4/IPv6: string hostname, IPv6 resolution, multiple_ips False',
@@ -167,7 +167,11 @@ def test_response_time(aggregator):
         pytest.param(
             'some-hostname',
             common.DUAL_STACK_GETADDRINFO_IPV4,
-            [addr_tuple('ip1', socket.AF_INET), addr_tuple('ip2', socket.AF_INET6), addr_tuple('ip3', socket.AF_INET6)],
+            [
+                TCPCheck.AddrTuple('ip1', socket.AF_INET),
+                TCPCheck.AddrTuple('ip2', socket.AF_INET6),
+                TCPCheck.AddrTuple('ip3', socket.AF_INET6),
+            ],
             True,
             3,
             id='Dual IPv4/IPv6: string hostname, IPv4 resolution, multiple_ips True',
@@ -175,7 +179,11 @@ def test_response_time(aggregator):
         pytest.param(
             'another-hostname',
             common.DUAL_STACK_GETADDRINFO_IPV6,
-            [addr_tuple('ip1', socket.AF_INET6), addr_tuple('ip2', socket.AF_INET), addr_tuple('ip3', socket.AF_INET6)],
+            [
+                TCPCheck.AddrTuple('ip1', socket.AF_INET6),
+                TCPCheck.AddrTuple('ip2', socket.AF_INET),
+                TCPCheck.AddrTuple('ip3', socket.AF_INET6),
+            ],
             True,
             3,
             id='Dual IPv4/IPv6: string hostname, IPv6 resolution, multiple_ips True',
@@ -183,7 +191,7 @@ def test_response_time(aggregator):
         pytest.param(
             'localhost',
             common.SINGLE_STACK_GETADDRINFO_LOCALHOST_IPV4,
-            [addr_tuple('127.0.0.1', socket.AF_INET)],
+            [TCPCheck.AddrTuple('127.0.0.1', socket.AF_INET)],
             False,
             1,
             id='Single stack IPv4: localhost, IPv4 resolution, multiple_ips False',
@@ -191,7 +199,7 @@ def test_response_time(aggregator):
         pytest.param(
             'localhost',
             common.SINGLE_STACK_GETADDRINFO_LOCALHOST_IPV4,
-            [addr_tuple('127.0.0.1', socket.AF_INET), addr_tuple('ip2', socket.AF_INET)],
+            [TCPCheck.AddrTuple('127.0.0.1', socket.AF_INET), TCPCheck.AddrTuple('ip2', socket.AF_INET)],
             True,
             2,
             id='Single stack IPv4: localhost, IPv4 resolution, multiple_ips True',
@@ -199,7 +207,7 @@ def test_response_time(aggregator):
         pytest.param(
             'another-hostname',
             common.SINGLE_STACK_GETADDRINFO_IPV4,
-            [addr_tuple('ip1', socket.AF_INET)],
+            [TCPCheck.AddrTuple('ip1', socket.AF_INET)],
             False,
             1,
             id='Single stack IPv4: string hostname, IPv4 resolution, multiple_ips False',
@@ -207,16 +215,18 @@ def test_response_time(aggregator):
         pytest.param(
             'another-hostname',
             common.SINGLE_STACK_GETADDRINFO_IPV4,
-            [addr_tuple('ip1', socket.AF_INET), addr_tuple('ip2', socket.AF_INET), addr_tuple('ip3', socket.AF_INET)],
+            [
+                TCPCheck.AddrTuple('ip1', socket.AF_INET),
+                TCPCheck.AddrTuple('ip2', socket.AF_INET),
+                TCPCheck.AddrTuple('ip3', socket.AF_INET),
+            ],
             True,
             3,
             id='Single stack IPv4: string hostname, IPv4 resolution, multiple_ips True',
         ),
     ],
 )
-def test_hostname_resolution(
-    aggregator, monkeypatch, hostname, getaddrinfo, expected_addrs, multiple_ips, service_checks_count
-):
+def test_hostname_resolution(aggregator, monkeypatch, hostname, getaddrinfo, expected_addrs, multiple_ips, ip_count):
     """
     Test that string hostnames get resolved to ipv4 address format properly.
     """
@@ -239,10 +249,18 @@ def test_hostname_resolution(
     check.check(instance)
 
     assert check._addrs == expected_addrs
+
+    calls = []
+    for addr_tuple in expected_addrs:
+        address, socket_type = addr_tuple
+        calls.append(mock.call(address, socket_type))
+    check.connect.assert_has_calls(calls, any_order=True)
+    assert check.connect.call_count == ip_count
+
     aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags, count=1)
     aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags, count=1)
     aggregator.assert_all_metrics_covered()
-    assert len(aggregator.service_checks('tcp.can_connect')) == service_checks_count
+    assert len(aggregator.service_checks('tcp.can_connect')) == ip_count
 
 
 def test_multiple(aggregator):
