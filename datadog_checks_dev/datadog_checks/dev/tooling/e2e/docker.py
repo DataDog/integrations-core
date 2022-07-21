@@ -329,7 +329,7 @@ class DockerInterface(object):
         ]
 
         if self.windows_container:
-            volumes.append('/var/run/docker.sock:/var/run/docker.sock:ro')
+            volumes.append('//var/run/docker.sock:/var/run/docker.sock:ro')
         else:
             volumes.append('/proc:/host/proc')
 
