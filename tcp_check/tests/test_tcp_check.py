@@ -10,7 +10,6 @@ from copy import deepcopy
 import mock
 import pytest
 
-# from datadog_checks.tcp_check import TCPCheck
 from datadog_checks.tcp_check.tcp_check import AddrTuple, TCPCheck
 
 from . import common
