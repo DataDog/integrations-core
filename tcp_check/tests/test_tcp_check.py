@@ -5,7 +5,6 @@
 import platform
 import re
 import socket
-from collections import namedtuple
 from copy import deepcopy
 
 import mock
@@ -14,8 +13,6 @@ import pytest
 from datadog_checks.tcp_check import TCPCheck
 
 from . import common
-
-addr_tuple = namedtuple('addr_tuple', ['address', 'socket_type'])
 
 
 def test_down(aggregator):
@@ -249,13 +246,13 @@ def test_hostname_resolution(aggregator, monkeypatch, hostname, getaddrinfo, exp
     check.check(instance)
 
     assert check._addrs == expected_addrs
+    assert check.connect.call_count == ip_count
 
     calls = []
     for addr_tuple in expected_addrs:
         address, socket_type = addr_tuple
         calls.append(mock.call(address, socket_type))
     check.connect.assert_has_calls(calls, any_order=True)
-    assert check.connect.call_count == ip_count
 
     aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags, count=1)
     aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags, count=1)
