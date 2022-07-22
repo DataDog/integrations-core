@@ -248,10 +248,7 @@ def test_hostname_resolution(aggregator, monkeypatch, hostname, getaddrinfo, exp
     assert check._addrs == expected_addrs
     assert check.connect.call_count == ip_count
 
-    calls = []
-    for addr_tuple in expected_addrs:
-        address, socket_type = addr_tuple
-        calls.append(mock.call(address, socket_type))
+    calls = [mock.call(address, socket_type) for address, socket_type in expected_addrs]
     check.connect.assert_has_calls(calls, any_order=True)
 
     aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags, count=1)
