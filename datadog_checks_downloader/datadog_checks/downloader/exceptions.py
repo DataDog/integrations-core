@@ -5,6 +5,7 @@
 
 # Exceptions for the CLI module.
 
+
 class ChecksDownloaderException(Exception):
     """A top level exception type for datadog-checks-downloader module."""
 
@@ -34,6 +35,7 @@ class NonDatadogPackage(CLIError):
 
 class UpdatedTargetsError(ChecksDownloaderException):
     """An exception raised when any issue with updated target arises."""
+
 
 class IncorrectRootLayoutType(ChecksDownloaderException):
     def __init__(self, found, expected):
