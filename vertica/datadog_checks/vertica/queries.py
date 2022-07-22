@@ -10,10 +10,7 @@ from functools import partial
 
 
 def get_queries(major_version, metric_groups):
-    """Get query dicts for use with QueryManager.
-
-    If `metric_groups` is `None` (default), assume all metric_groups.
-    """
+    """Get query dicts for the given metric_groups for use with QueryManager."""
     queries = []
 
     metric_groups = set(metric_groups).intersection(METRIC_GROUPS)
