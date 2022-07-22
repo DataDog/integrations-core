@@ -117,13 +117,15 @@ class TUFDownloader:
             # First, we use TUF to download and verify the target.
             if len(updated_targets) != 1:
                 raise UpdatedTargetsError(
-                    f"Expecting only one target {target!r} to be updated; got: {', '.join(updated_targets)}"
+                    'Expecting only one target {!r} to be updated; got: {}'.format(target, ', '.join(updated_targets))
                 )
 
             updated_target = updated_targets[0]
 
             if updated_target != target:
-                raise UpdatedTargetsError(f"Unknown target updated, expected {target!r} but got {updated_target!r}")
+                raise UpdatedTargetsError(
+                    'Unknown target updated, expected {!r} but got {!r}'.format(target, updated_target)
+                )
 
             self.__updater.download_target(updated_target, self.__targets_dir)
 
