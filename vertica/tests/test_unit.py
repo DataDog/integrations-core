@@ -31,8 +31,6 @@ def test_ssl_config_ok(aggregator, tls_instance):
             tls_context.load_verify_locations.assert_called_with(cadata=None, cafile=None, capath=CERTIFICATE_DIR)
             tls_context.load_cert_chain.assert_called_with(cert, keyfile=private_key, password=None)
 
-            assert check._connection is not None
-
     aggregator.assert_service_check("vertica.can_connect", status=AgentCheck.OK, tags=['db:abc', 'foo:bar'])
 
 
@@ -49,8 +47,6 @@ def test_ssl_legacy_config_ok(aggregator, tls_instance_legacy):
             assert tls_context.check_hostname is True
             tls_context.load_verify_locations.assert_called_with(cadata=None, cafile=None, capath=CERTIFICATE_DIR)
             tls_context.load_cert_chain.assert_called_with(cert, keyfile=private_key, password=None)
-
-            assert check._connection is not None
 
     aggregator.assert_service_check("vertica.can_connect", status=AgentCheck.OK, tags=['db:abc', 'foo:bar'])
 
