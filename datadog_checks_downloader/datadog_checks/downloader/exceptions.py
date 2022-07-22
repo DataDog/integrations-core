@@ -5,8 +5,11 @@
 
 # Exceptions for the CLI module.
 
+class ChecksDownloaderException(Exception):
+    """A top level exception type for datadog-checks-downloader module."""
 
-class CLIError(Exception):
+
+class CLIError(ChecksDownloaderException):
     pass
 
 
@@ -29,7 +32,10 @@ class NonDatadogPackage(CLIError):
 # Exceptions for the download module.
 
 
-class IncorrectRootLayoutType(Exception):
+class UpdatedTargetsError(ChecksDownloaderException):
+    """An exception raised when any issue with updated target arises."""
+
+class IncorrectRootLayoutType(ChecksDownloaderException):
     def __init__(self, found, expected):
         self.found = found
         self.expected = expected
@@ -42,7 +48,7 @@ class IncorrectRootLayoutType(Exception):
         )
 
 
-class SimpleIndexError(Exception):
+class SimpleIndexError(ChecksDownloaderException):
     def __init__(self, standard_distribution_name):
         self.standard_distribution_name = standard_distribution_name
 
@@ -99,7 +105,7 @@ class PythonVersionMismatch(SimpleIndexError):
         )
 
 
-class TUFInTotoError(Exception):
+class TUFInTotoError(ChecksDownloaderException):
     def __init__(self, target_relpath):
         self.target_relpath = target_relpath
 
