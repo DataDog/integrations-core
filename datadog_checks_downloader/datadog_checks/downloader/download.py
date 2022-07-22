@@ -67,8 +67,7 @@ class TUFDownloader:
         # 3 => 30 (WARNING)
         # 4 => 20 (INFO)
         # 5 => 10 (DEBUG)
-        # And so it repeats from here...
-        remainder = verbose % 6
+        remainder = min(verbose, 5) % 6
         level = (6 - remainder) * 10
         assert level in range(10, 70, 10), level
         logging.basicConfig(format='%(levelname)-8s: %(message)s', level=level)
