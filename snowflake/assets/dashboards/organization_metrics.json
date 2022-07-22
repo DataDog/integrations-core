@@ -37,7 +37,7 @@
                             "tick_edge": "top",
                             "tick_pos": "50%",
                             "type": "note",
-                            "vertical_align": "top"
+                            "vertical_align": "center"
                         },
                         "id": 8085433307069582,
                         "layout": {
@@ -115,7 +115,7 @@
                         },
                         "id": 8265538452433954,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 6,
                             "x": 0,
                             "y": 2
@@ -152,7 +152,7 @@
                         },
                         "id": 2640985809960116,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 6,
                             "x": 6,
                             "y": 2
@@ -162,7 +162,7 @@
             },
             "id": 5888126069922378,
             "layout": {
-                "height": 5,
+                "height": 6,
                 "width": 12,
                 "x": 0,
                 "y": 0
@@ -187,7 +187,7 @@
                             "tick_edge": "bottom",
                             "tick_pos": "50%",
                             "type": "note",
-                            "vertical_align": "top"
+                            "vertical_align": "center"
                         },
                         "id": 3766700878304358,
                         "layout": {
@@ -257,7 +257,7 @@
                             "tick_edge": "bottom",
                             "tick_pos": "50%",
                             "type": "note",
-                            "vertical_align": "top"
+                            "vertical_align": "center"
                         },
                         "id": 3568889871424130,
                         "layout": {
@@ -333,7 +333,7 @@
                             "tick_edge": "top",
                             "tick_pos": "50%",
                             "type": "note",
-                            "vertical_align": "top"
+                            "vertical_align": "center"
                         },
                         "id": 8571645785666458,
                         "layout": {
@@ -525,7 +525,7 @@
                 "height": 10,
                 "width": 12,
                 "x": 0,
-                "y": 11
+                "y": 12
             }
         },
         {
@@ -735,7 +735,7 @@
                 "height": 5,
                 "width": 12,
                 "x": 0,
-                "y": 21
+                "y": 22
             }
         },
         {
@@ -760,12 +760,13 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:snowflake.organization.currency.usage{$billing_account,$scope} by {usage_type}"
+                                            "query": "avg:snowflake.organization.currency.usage{$billing_account,$scope} by {usage_type,currency}"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "title": "Credits Charged per Usage Type",
                             "type": "treemap"
                         },
@@ -791,12 +792,13 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:snowflake.organization.currency.usage_in_currency{$billing_account,$scope} by {usage_type}"
+                                            "query": "avg:snowflake.organization.currency.usage_in_currency{$billing_account,$scope} by {usage_type,currency}"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "title": "Amount Charged per Usage Type",
                             "type": "treemap"
                         },
@@ -918,10 +920,10 @@
                             "has_padding": true,
                             "show_tick": true,
                             "text_align": "left",
-                            "tick_edge": "bottom",
+                            "tick_edge": "right",
                             "tick_pos": "50%",
                             "type": "note",
-                            "vertical_align": "top"
+                            "vertical_align": "center"
                         },
                         "id": 437502800839114,
                         "layout": {
@@ -964,18 +966,18 @@
                         "layout": {
                             "height": 2,
                             "width": 6,
-                            "x": 0,
-                            "y": 2
+                            "x": 6,
+                            "y": 0
                         }
                     }
                 ]
             },
             "id": 8595743917159442,
             "layout": {
-                "height": 5,
-                "width": 6,
+                "height": 3,
+                "width": 12,
                 "x": 0,
-                "y": 0
+                "y": 32
             }
         }
     ]
