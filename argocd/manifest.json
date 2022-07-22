@@ -1,0 +1,35 @@
+{
+  "display_name": "ArgoCD",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "argocd",
+  "metric_prefix": "argocd.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "c7ee6111-ca10-417b-8df0-1f21bfc0e3ad",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "ArgoCD",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "argocd",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}
