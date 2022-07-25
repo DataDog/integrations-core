@@ -28,6 +28,13 @@
   "assets": {
     "integration": {
       "source_type_name": "Docker",
+      "process_signatures": [
+        "dockerd",
+        "docker-containerd",
+        "docker run",
+        "docker daemon",
+        "docker-containerd-shim"
+      ],
       "configuration": {},
       "events": {
         "creates_events": true
