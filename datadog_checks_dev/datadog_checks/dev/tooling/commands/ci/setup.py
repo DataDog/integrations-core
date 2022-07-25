@@ -54,7 +54,7 @@ def setup(checks, changed):
     Run CI setup scripts
     """
     cur_platform = platform.system().lower()
-    upgrade_docker_compose(cur_platform)
+    #upgrade_docker_compose(cur_platform)
     scripts_path = os.path.join(get_root(), '.azure-pipelines', 'scripts')
     echo_info("Run CI setup scripts")
     if checks:
