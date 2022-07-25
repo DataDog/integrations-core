@@ -75,11 +75,18 @@ class TCPCheck(AgentCheck):
         return self._addrs
 
     def resolve_ips(self):
-        # type: () -> None
-        self._addrs = [
-            AddrTuple(sockaddr[0], socket_type)
-            for (socket_type, _, _, _, sockaddr) in socket.getaddrinfo(self.host, self.port, 0, 0, socket.IPPROTO_TCP)
-        ]
+        if not self.has_ipv6_connectivity():
+            # socket.gethostbyname_ex returns IPv4 addresses
+            _, _, ipv4_list = socket.gethostbyname_ex(self.host)
+
+            self._addrs = [AddrTuple(ipv4_addr, socket.AF_INET) for ipv4_addr in ipv4_list]
+        else:
+            self._addrs = [
+                AddrTuple(sockaddr[0], socket_type)
+                for (socket_type, _, _, _, sockaddr) in socket.getaddrinfo(
+                    self.host, self.port, 0, 0, socket.IPPROTO_TCP
+                )
+            ]
         if not self.multiple_ips:
             self._addrs = self._addrs[:1]
 
@@ -94,6 +101,19 @@ class TCPCheck(AgentCheck):
         if self.ip_cache_duration is None:
             return False
         return get_precise_time() - self.ip_cache_last_ts > self.ip_cache_duration
+
+    def has_ipv6_connectivity(self):
+        # type: () -> bool
+        try:
+            for _, _, _, _, sockaddr in socket.getaddrinfo(
+                socket.gethostname(), None, socket.AF_INET6, 0, socket.IPPROTO_TCP
+            ):
+                if not sockaddr[0].startswith('fe80:'):
+                    return True
+            return False
+        except socket.gaierror as e:
+            self.log.warning("Encountered error checking host's IPv6 connectivity: %s", str(e))
+            return False
 
     def connect(self, addr, socket_type):
         # type: (str, socket.AddressFamily) -> float
