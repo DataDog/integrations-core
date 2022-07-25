@@ -7,7 +7,7 @@
 * [Fixed] [PerfCountersBaseCheck] Refresh performance objects in a separate thread. See [#12372](https://github.com/DataDog/integrations-core/pull/12372).
 * [Fixed] Allow empty username and password for basic auth. See [#12437](https://github.com/DataDog/integrations-core/pull/12437).
 
-## 25.5.0 / 2022-07-08
+## 25.5.0 / 2022-07-08 / Agent 7.38.0
 
 * [Security] Upgrade pyjwt to 2.4.0. See [#12481](https://github.com/DataDog/integrations-core/pull/12481).
 

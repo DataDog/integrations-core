@@ -1,6 +1,6 @@
 # CHANGELOG - VoltDB
 
-## 2.1.2 / 2022-06-27
+## 2.1.2 / 2022-06-27 / Agent 7.38.0
 
 * [Fixed] Fix mapping of columns and use delta=1 where required. See [#11775](https://github.com/DataDog/integrations-core/pull/11775). Thanks [kjmadscience](https://github.com/kjmadscience).
 
