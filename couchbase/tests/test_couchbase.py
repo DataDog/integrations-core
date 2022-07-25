@@ -190,7 +190,7 @@ def _assert_bucket_metrics(aggregator, tags, device=None):
             aggregator.assert_metric(metric, tags=tags, count=1, device=device)
             bucket_metrics.append(metric)
 
-    assert len(bucket_metrics) > 4, "Expected at least 5 bucket metrics found: " + str(bucket_metrics)
+    assert len(bucket_metrics) > 2, "Expected at least 3 bucket metrics found: " + str(bucket_metrics)
 
 
 def _assert_stats(aggregator, node_tags, device=None):

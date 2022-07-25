@@ -188,5 +188,7 @@ QUERY_OPTIONAL_STATS = {
     'gc_pause_time',
     'memory_system',
     'memory_usage',
+    'request_completed_count',
+    'request_time_median',
     'total_threads',
 }
