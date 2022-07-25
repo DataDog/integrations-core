@@ -165,4 +165,4 @@ class DirectoryCheck(AgentCheck):
         # total file size
         if not self._config.countonly:
             self.gauge('system.disk.directory.bytes', directory_bytes, tags=dirtags)
-            self.log.debug('`countonly` not enabled': Collecting system.disk.directory.bytes metric.)
+            self.log.debug("`countonly` not enabled: Collecting system.disk.directory.bytes metric.")
