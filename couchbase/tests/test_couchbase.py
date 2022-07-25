@@ -16,6 +16,7 @@ from datadog_checks.couchbase.couchbase_consts import (
     SERVICE_CHECK_NAME,
     SG_SERVICE_CHECK_NAME,
 )
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
     BUCKET_NAME,
@@ -26,6 +27,7 @@ from .common import (
     INDEX_STATS_INDEXER_METRICS,
     INDEX_STATS_TAGS,
     PORT,
+    QUERY_STATS_ALWAYS_PRESENT,
     SYNC_GATEWAY_METRICS,
 )
 
@@ -105,6 +107,7 @@ def test_e2e(dd_agent_check, instance, couchbase_container_ip):
     _assert_stats(aggregator, node_tags, device=device)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
@@ -116,8 +119,12 @@ def test_query_monitoring_metrics(aggregator, dd_run_check, instance_query, couc
     couchbase = Couchbase('couchbase', {}, [instance_query])
     dd_run_check(couchbase)
 
-    for mname in QUERY_STATS:
+    query_stats_optional = set(QUERY_STATS).difference(QUERY_STATS_ALWAYS_PRESENT)
+    for mname in QUERY_STATS_ALWAYS_PRESENT:
         aggregator.assert_metric('couchbase.query.{}'.format(mname), tags=CHECK_TAGS, count=1)
+    for mname in query_stats_optional:
+        aggregator.assert_metric('couchbase.query.{}'.format(mname), tags=CHECK_TAGS, at_least=0)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
@@ -136,6 +143,7 @@ def test_sync_gateway_metrics(aggregator, dd_run_check, instance_sg, couchbase_c
         else:
             aggregator.assert_metric(mname, tags=CHECK_TAGS, count=1)
     aggregator.assert_service_check(SG_SERVICE_CHECK_NAME, status=Couchbase.OK, tags=CHECK_TAGS)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
@@ -182,7 +190,7 @@ def _assert_bucket_metrics(aggregator, tags, device=None):
             aggregator.assert_metric(metric, tags=tags, count=1, device=device)
             bucket_metrics.append(metric)
 
-    assert len(bucket_metrics) > 4, "Expected at least 5 bucket metrics found: " + str(bucket_metrics)
+    assert len(bucket_metrics) > 2, "Expected at least 3 bucket metrics found: " + str(bucket_metrics)
 
 
 def _assert_stats(aggregator, node_tags, device=None):
@@ -212,6 +220,7 @@ def test_index_stats_metrics(aggregator, dd_run_check, instance_index_stats, cou
         aggregator.assert_metric(mname, metric_type=aggregator.MONOTONIC_COUNT, tags=INDEX_STATS_TAGS)
 
     aggregator.assert_service_check(INDEX_STATS_SERVICE_CHECK_NAME, status=Couchbase.OK, tags=CHECK_TAGS)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
@@ -236,3 +245,4 @@ def test_metrics(aggregator, dd_run_check, instance, couchbase_container_ip):
     _assert_stats(aggregator, node_tags)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
