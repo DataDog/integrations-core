@@ -102,7 +102,10 @@ def test_openmetrics_wildcard(dd_run_check, aggregator):
 
 @pytest.mark.skipif(PY2, reason='Test only available on Python 3')
 def test_linkerd_v2_new(aggregator, dd_run_check):
+    from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
+
     check = OpenMetricsCheck('openmetrics', {}, [instance_new])
+    scraper = OpenMetricsScraper(check, instance_new)
     dd_run_check(check)
 
     aggregator.assert_metric(
@@ -126,3 +129,6 @@ def test_linkerd_v2_new(aggregator, dd_run_check):
         metric_type=aggregator.MONOTONIC_COUNT,
     )
     aggregator.assert_all_metrics_covered()
+
+    assert check.http.options['headers']['Accept'] == '*/*'
+    assert scraper.http.options['headers']['Accept'] == 'text/plain'

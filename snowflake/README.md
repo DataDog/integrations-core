@@ -125,16 +125,16 @@ To collect organization metrics, change the schema field to `ORGANIZATION_USAGE`
 
 Note: To monitor organization metrics, your `user` must have the `ORGADMIN` role.
 
-    ```yaml
-       - schema: ORGANIZATION_USAGE
-         min_collection_interval: 43200
-    ```
+  ```yaml
+      - schema: ORGANIZATION_USAGE
+        min_collection_interval: 43200
+  ```
 
 
 Additionally, you can monitor both account and organization metrics at the same time:
 
-    ```yaml
-    instances:
+  ```yaml
+      instances:
       - account: example-inc
         username: DATADOG_ORG_ADMIN
         password: '<PASSWORD>'
@@ -150,7 +150,7 @@ Additionally, you can monitor both account and organization metrics at the same 
         schema: ACCOUNT_USAGE
         database: SNOWFLAKE
         min_collection_interval: 3600
-    ```
+  ```
 
 #### Collecting data for multiple environments
 

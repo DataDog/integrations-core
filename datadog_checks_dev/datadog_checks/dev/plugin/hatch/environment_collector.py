@@ -59,7 +59,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         base_package = 'datadog_checks_base' if local else 'datadog-checks-base'
         formatted = f'{base_package}[{",".join(sorted(features))}]'
         if version:
-            formatted = f'=={version}'
+            formatted += f'=={version}'
 
         return formatted
 

@@ -1,9 +1,5 @@
 from datadog_checks.envoy.utils import make_metric_tree
 
-from .common import requires_legacy_environment
-
-pytestmark = [requires_legacy_environment]
-
 
 def test_make_metric_tree():
     # fmt: off

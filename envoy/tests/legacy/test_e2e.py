@@ -6,9 +6,7 @@ import pytest
 
 from datadog_checks.envoy import Envoy
 
-from .common import FLAVOR, HOST, requires_legacy_environment
-
-pytestmark = [requires_legacy_environment]
+from .common import FLAVOR, HOST
 
 METRICS = [
     'envoy.cluster.assignment_stale',
