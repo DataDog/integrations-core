@@ -1,5 +1,7 @@
 # This script makes the necessary setup to be able to compile pymqi on the agent machine
 
+set -x
+
 INSTANT_CLIENT_URL="https://ddintegrations.blob.core.windows.net/oracle/instantclient-basiclite-linux.x64-19.3.0.0.0dbru.zip"
 
 mkdir -p /opt/oracle
@@ -14,3 +16,5 @@ for i in 2 4 8 16 32; do
 done
 
 unzip /opt/oracle/instantclient.zip -d /opt/oracle
+
+set +x
