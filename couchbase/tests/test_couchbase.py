@@ -27,7 +27,7 @@ from .common import (
     INDEX_STATS_INDEXER_METRICS,
     INDEX_STATS_TAGS,
     PORT,
-    QUERY_OPTIONAL_STATS,
+    QUERY_STATS_ALWAYS_PRESENT,
     SYNC_GATEWAY_METRICS,
 )
 
@@ -119,10 +119,10 @@ def test_query_monitoring_metrics(aggregator, dd_run_check, instance_query, couc
     couchbase = Couchbase('couchbase', {}, [instance_query])
     dd_run_check(couchbase)
 
-    query_stats_always_present = set(QUERY_STATS).difference(QUERY_OPTIONAL_STATS)
-    for mname in query_stats_always_present:
+    query_stats_optional = set(QUERY_STATS).difference(QUERY_STATS_ALWAYS_PRESENT)
+    for mname in QUERY_STATS_ALWAYS_PRESENT:
         aggregator.assert_metric('couchbase.query.{}'.format(mname), tags=CHECK_TAGS, count=1)
-    for mname in QUERY_OPTIONAL_STATS:
+    for mname in query_stats_optional:
         aggregator.assert_metric('couchbase.query.{}'.format(mname), tags=CHECK_TAGS, at_least=0)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 

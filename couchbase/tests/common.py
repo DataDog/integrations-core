@@ -184,11 +184,13 @@ INDEX_STATS_COUNT_METRICS = [
 ]
 
 
-QUERY_OPTIONAL_STATS = {
-    'gc_pause_time',
-    'memory_system',
-    'memory_usage',
-    'request_completed_count',
-    'request_time_median',
-    'total_threads',
+QUERY_STATS_ALWAYS_PRESENT = {
+    'cores',
+    'cpu_sys_percent',
+    'cpu_user_percent',
+    'memory_total',
+    'request_per_sec_15min',
+    'request_per_sec_1min',
+    'request_per_sec_5min',
+    'request_prepared_percent',
 }
