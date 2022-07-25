@@ -1,7 +1,7 @@
 version: '2.3'
 services:
   registry:
-    image: goharbor/registry-photon:v2.7.1-patch-2819-2553-v1.10.0
+    image: goharbor/registry-photon:v1.10.11
     container_name: registry
     restart: always
     cap_drop:
