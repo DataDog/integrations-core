@@ -1,7 +1,7 @@
 version: '2.3'
 services:
   registry:
-    image: goharbor/registry-photon:v2.3.2
+    image: goharbor/registry-photon:v2.3.5
     container_name: registry
     restart: always
     cap_drop:
@@ -16,7 +16,7 @@ services:
       - harbor
     dns_search: .
   registryctl:
-    image: goharbor/harbor-registryctl:v2.3.2
+    image: goharbor/harbor-registryctl:v2.3.5
     container_name: registryctl
     env_file:
       - ./config/registryctl/env
@@ -36,7 +36,7 @@ services:
       - harbor
     dns_search: .
   postgresql:
-    image: goharbor/harbor-db:v2.3.2
+    image: goharbor/harbor-db:v2.3.5
     container_name: harbor-db
     restart: always
     cap_drop:
@@ -52,7 +52,7 @@ services:
     env_file:
       - ./config/db/env
   core:
-    image: goharbor/harbor-core:v2.3.2
+    image: goharbor/harbor-core:v2.3.5
     container_name: harbor-core
     env_file:
       - ./config/core/env
@@ -81,7 +81,7 @@ services:
       - redis
       - postgresql
   portal:
-    image: goharbor/harbor-portal:v2.3.2
+    image: goharbor/harbor-portal:v2.3.5
     container_name: harbor-portal
     restart: always
     cap_drop:
@@ -96,7 +96,7 @@ services:
     dns_search: .
 
   jobservice:
-    image: goharbor/harbor-jobservice:v2.3.2
+    image: goharbor/harbor-jobservice:v2.3.5
     container_name: harbor-jobservice
     env_file:
       - ./config/jobservice/env
@@ -117,7 +117,7 @@ services:
     depends_on:
       - core
   redis:
-    image: goharbor/redis-photon:v2.3.2
+    image: goharbor/redis-photon:v2.3.5
     container_name: redis
     restart: always
     cap_drop:
@@ -133,7 +133,7 @@ services:
           - redis
     dns_search: .
   proxy:
-    image: goharbor/nginx-photon:v2.3.2
+    image: goharbor/nginx-photon:v2.3.5
     container_name: nginx
     restart: always
     cap_drop:
@@ -158,7 +158,7 @@ services:
       - portal
   chartmuseum:
     container_name: chartmuseum
-    image: goharbor/chartmuseum-photon:v2.3.2
+    image: goharbor/chartmuseum-photon:v2.3.5
     restart: always
     cap_drop:
       - ALL
