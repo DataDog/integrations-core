@@ -18,3 +18,4 @@ done
 unzip /opt/oracle/instantclient.zip -d /opt/oracle
 
 set +x
+exit 0
