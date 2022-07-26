@@ -1,6 +1,6 @@
 # CHANGELOG - kafka_consumer
 
-## 2.15.2 / 2022-06-27
+## 2.15.2 / 2022-06-27 / Agent 7.38.0
 
 * [Fixed] Fix failed reading and writing to cache when file is too long. See [#12109](https://github.com/DataDog/integrations-core/pull/12109).
 * [Fixed] Remove unnecessary agent cache implementation. See [#12083](https://github.com/DataDog/integrations-core/pull/12083).

@@ -1,6 +1,6 @@
 # CHANGELOG - Kube_scheduler
 
-## 4.3.0 / 2022-06-27
+## 4.3.0 / 2022-06-27 / Agent 7.38.0
 
 * [Added] Add new scheduling metrics available in k8s v1.23+. See [#12111](https://github.com/DataDog/integrations-core/pull/12111).
 

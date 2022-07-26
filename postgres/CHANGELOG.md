@@ -1,6 +1,6 @@
 # CHANGELOG - postgres
 
-## 12.5.0 / 2022-06-27
+## 12.5.0 / 2022-06-27 / Agent 7.38.0
 
 * [Added] Track blk_read_time and blk_write_time for Postgres databases if track_io_timing is enabled. See [#12380](https://github.com/DataDog/integrations-core/pull/12380).
 * [Fixed] Fix Postgres calculation of blk_read_time and blk_write_time metrics. See [#12399](https://github.com/DataDog/integrations-core/pull/12399).

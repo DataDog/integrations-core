@@ -1,6 +1,6 @@
 # CHANGELOG - gitlab
 
-## 5.2.2 / 2022-06-30
+## 5.2.2 / 2022-06-30 / Agent 7.38.0
 
 * [Fixed] Fix default config value. See [#12429](https://github.com/DataDog/integrations-core/pull/12429).
 
