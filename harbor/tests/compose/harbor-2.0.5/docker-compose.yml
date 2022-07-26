@@ -1,4 +1,4 @@
-version: '2.3'
+version: '3.8'
 services:
   registry:
     image: goharbor/registry-photon:v2.0.5
@@ -47,7 +47,7 @@ services:
       - SETGID
       - SETUID
     networks:
-      harbor:
+      - harbor
     dns_search: .
     env_file:
       - ./config/db/env
