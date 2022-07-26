@@ -133,5 +133,15 @@ files:
       description: Unique identifier for this instance that is added as a tag to all data emitted.
       value:
         type: string
+    - name: start_tls
+      description: |
+        Send protocol-specific message(s) to switch to TLS for communication.
+        StartTLS is implemented on those protocols: smtp, pop3, imap, ftp, xmpp, xmpp-server,
+        irc, postgres, mysql, lmtp, nntp. sieve and ldap.
+
+        Currently this checks supports only below protocols:
+          postgres
+      value:
+        type: string
     - template: instances/default
     - template: instances/tls
