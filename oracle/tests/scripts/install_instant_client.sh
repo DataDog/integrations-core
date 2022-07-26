@@ -16,6 +16,7 @@ for i in 2 4 8 16 32; do
 done
 
 unzip /opt/oracle/instantclient.zip -d /opt/oracle
+ls /opt/oracle
 
 set +x
 exit 0
