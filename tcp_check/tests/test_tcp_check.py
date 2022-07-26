@@ -324,12 +324,11 @@ def test_hostname_resolution(
     check = TCPCheck(common.CHECK_NAME, {}, [instance])
 
     monkeypatch.setattr('socket.getaddrinfo', mock.Mock(return_value=getaddrinfo))
-    if not ipv6_conn or ipv4_only:
-        monkeypatch.setattr(check, 'has_ipv6_connectivity', mock.Mock(return_value=ipv6_conn))
-        monkeypatch.setattr(
-            'socket.gethostbyname_ex',
-            mock.Mock(return_value=('localhost', [], [expected_addr.address for expected_addr in expected_addrs])),
-        )
+    monkeypatch.setattr(check, 'has_ipv6_connectivity', mock.Mock(return_value=ipv6_conn))
+    monkeypatch.setattr(
+        'socket.gethostbyname_ex',
+        mock.Mock(return_value=('localhost', [], [expected_addr.address for expected_addr in expected_addrs])),
+    )
     monkeypatch.setattr(check, 'connect', mock.Mock())
 
     expected_tags = [
@@ -407,10 +406,6 @@ def test_ipv6(aggregator, check):
     instance = deepcopy(common.INSTANCE_IPV6)
     check = TCPCheck(common.CHECK_NAME, {}, [instance])
     check.check(instance)
-
-    # The Linux CI machine has IPv6 connectivity, but its hostname does not return any IP addresses
-    if platform.system() == 'linux':
-        mock.patch('socket.gethostname', return_value='localhost')
 
     nb_ipv4, nb_ipv6 = 0, 0
     for addr in check.addrs:
