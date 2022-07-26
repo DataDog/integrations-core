@@ -70,7 +70,7 @@ No additional installation is needed on your server.
              worker: "$1"
     ```
     
-    These parameters can also be set by adding the 'DD_DOGSTATSD_MAPPER_PROFILES' environment variable to the Datadog Agent. 
+    These parameters can also be set by adding the `DD_DOGSTATSD_MAPPER_PROFILES` environment variable to the Datadog Agent. 
 
 4. [Restart the Agent][8].
 
