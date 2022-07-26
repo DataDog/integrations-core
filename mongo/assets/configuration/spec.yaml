@@ -149,7 +149,7 @@ files:
         type: string
     - name: tlsAllowInvalidHostnames
       description: |
-        If True, disables TLS hostname verification. tlsAllowInvalidHostnames=False implies tls=True. 
+        If `True`, disables TLS hostname verification. tlsAllowInvalidHostnames=False implies tls=True. 
         Think very carefully before setting this to True as that could make your application 
         vulnerable to on-path attackers.
       value:
@@ -157,7 +157,7 @@ files:
         example: false
     - name: tlsAllowInvalidCertificates
       description: |
-        If True, continues the TLS handshake regardless of the outcome of the certificate verification process. 
+        If `True`, continues the TLS handshake regardless of the outcome of the certificate verification process. 
         Think very carefully before setting this to True as that could make your application 
         vulnerable to on-path attackers.
       value:

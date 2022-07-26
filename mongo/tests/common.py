@@ -16,7 +16,7 @@ MAX_WAIT = 150
 
 COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 IS_TLS = COMPOSE_FILE == 'mongo-tls.yaml'
-TLS_CERTS_FOLDER = os.path.join(os.path.dirname(__file__), 'compose/certs')
+TLS_CERTS_FOLDER = os.path.join(os.path.dirname(__file__), 'compose', 'certs')
 
 tls = pytest.mark.skipif(not IS_TLS, reason='Test only valid for TLS')
 not_tls = pytest.mark.skipif(IS_TLS, reason='Test only valid for non-TLS')
