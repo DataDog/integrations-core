@@ -6,7 +6,7 @@ INSTANT_CLIENT_URL="https://ddintegrations.blob.core.windows.net/oracle/instantc
 
 mkdir -p /opt/oracle
 apt-get update
-apt-get install unzip
+DEBIAN_FRONTEND=noninteractive apt-get install -yq unzip
 
 # Retry necessary due to flaky download that might trigger:
 # curl: (56) OpenSSL SSL_read: SSL_ERROR_SYSCALL, errno 110
@@ -16,5 +16,7 @@ for i in 2 4 8 16 32; do
 done
 
 unzip /opt/oracle/instantclient.zip -d /opt/oracle
+ls /opt/oracle
 
 set +x
+exit 0
