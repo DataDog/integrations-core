@@ -390,7 +390,9 @@ def test_multiple(aggregator):
 
 def has_ipv6_connectivity():
     try:
-        for sockaddr in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET6, 0, socket.IPPROTO_TCP):
+        for _, _, _, _, sockaddr in socket.getaddrinfo(
+            socket.gethostname(), None, socket.AF_INET6, 0, socket.IPPROTO_TCP
+        ):
             if not sockaddr[0].startswith('fe80:'):
                 return True
         return False
@@ -405,6 +407,10 @@ def test_ipv6(aggregator, check):
     instance = deepcopy(common.INSTANCE_IPV6)
     check = TCPCheck(common.CHECK_NAME, {}, [instance])
     check.check(instance)
+
+    # The Linux CI machine has IPv6 connectivity, but its hostname does not return any IP addresses
+    if platform.system() == 'linux':
+        mock.patch('socket.gethostname', return_value='localhost')
 
     nb_ipv4, nb_ipv6 = 0, 0
     for addr in check.addrs:
