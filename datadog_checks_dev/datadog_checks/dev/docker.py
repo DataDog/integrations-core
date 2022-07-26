@@ -58,7 +58,7 @@ def compose_file_active(compose_file):
 
         return False
     else:
-        command = ['docker', 'compose', '--compatibility', '-f', compose_file, 'ps']
+        command = ['docker', 'compose', '-f', compose_file, 'ps']
         lines = run_command(command, capture='out', check=True).stdout.strip().splitlines()
 
         return len(lines) > 1
@@ -233,7 +233,7 @@ class ComposeFileUp(LazyFunction):
         if using_legacy_docker_compose():
             self.command = ['docker-compose', '-f', self.compose_file, 'up', '-d']
         else:
-            self.command = ['docker', 'compose', '--compatibility', '-f', self.compose_file, 'up', '-d']
+            self.command = ['docker', 'compose', '-f', self.compose_file, 'up', '-d']
 
         if self.build:
             self.command.append('--build')
@@ -252,7 +252,7 @@ class ComposeFileLogs(LazyFunction):
         if using_legacy_docker_compose():
             self.command = ['docker-compose', '-f', self.compose_file, 'logs']
         else:
-            self.command = ['docker', 'compose', '--compatibility', '-f', self.compose_file, 'logs']
+            self.command = ['docker', 'compose', '-f', self.compose_file, 'logs']
 
     def __call__(self, exception):
         return run_command(self.command, capture=False, check=self.check)
@@ -277,7 +277,6 @@ class ComposeFileDown(LazyFunction):
             self.command = [
                 'docker',
                 'compose',
-                '--compatibility',
                 '-f',
                 self.compose_file,
                 'down',
@@ -309,8 +308,8 @@ def temporarily_stop_service(service, compose_file, check=True):
         stop_command = ['docker-compose', '-f', compose_file, 'stop', service]
         start_command = ['docker-compose', '-f', compose_file, 'start', service]
     else:
-        stop_command = ['docker', 'compose', '--compatibility', '-f', compose_file, 'stop', service]
-        start_command = ['docker', 'compose', '--compatibility', '-f', compose_file, 'start', service]
+        stop_command = ['docker', 'compose', '-f', compose_file, 'stop', service]
+        start_command = ['docker', 'compose', '-f', compose_file, 'start', service]
 
     run_command(stop_command, capture=False, check=check)
     yield
