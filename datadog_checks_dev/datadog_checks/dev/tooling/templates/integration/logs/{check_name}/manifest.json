@@ -1,6 +1,6 @@
 {{
   "manifest_version": "2.0.0",
-  "app_uuid": "{guid}",
+  "app_uuid": "{app_uuid}",
   "app_id": "{integration_id}",
   "display_on_public_website": false,
   "tile": {{
@@ -17,8 +17,7 @@
       "Supported OS::macOS",
       "Category::Log Collection"
     ]
-  }},{author_info}
-  "oauth": {{}},
+  }},
   "assets": {{
     "integration": {{
       "source_type_name": "{integration_name}",
@@ -36,5 +35,6 @@
     "monitors": {{}},
     "logs": {{}},
     "saved_views": {{}}
-  }}
+  }},{pricing_plan}{terms}{author_info}
+  "oauth": {{}}
 }}

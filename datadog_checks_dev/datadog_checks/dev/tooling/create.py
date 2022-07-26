@@ -103,7 +103,7 @@ To install the {integration_name} check on your host:
         'check_name_kebab': check_name_kebab,
         'email': email,
         'email_packages': email_packages,
-        'guid': uuid4(),
+        'app_uuid': uuid4(),
         'license_header': license_header,
         'install_info': install_info,
         'repo_choice': repo_choice,

@@ -152,14 +152,25 @@ def create(ctx, name, integration_type, location, manifest_v2, non_interactive, 
         else:
             # Fill in all common non Marketplace fields
             template_fields['pricing_plan'] = ''
-            template_fields[
-                'author_info'
-            ] = """
+            if repo_choice == 'core':
+                template_fields[
+                    'author_info'
+                ] = """
   "author": {
     "support_email": "help@datadoghq.com",
     "name": "Datadog",
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
+  },"""
+            else:
+                template_fields[
+                    'author_info'
+                ] = """
+  "author": {
+    "support_email": "",
+    "name": "",
+    "homepage": "",
+    "sales_email": ""
   },"""
             template_fields['terms'] = ''
             template_fields['integration_id'] = kebab_case_name(name)
