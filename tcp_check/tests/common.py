@@ -59,6 +59,18 @@ SINGLE_STACK_GETADDRINFO_IPV4 = [
     (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip3', 80)),
 ]
 
+DUAL_STACK_GETADDRINFO_LOCALHOST_IPV4_ONLY = [
+    (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('::1', 80, 0, 0)),
+    (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('127.0.0.1', 80)),
+    (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip3', 80)),
+]
+
+DUAL_STACK_GETADDRINFO_IPV4_ONLY = [
+    (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip1', 80, 0, 0)),
+    (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip2', 80)),
+    (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip3', 80)),
+]
+
 
 def _test_check(aggregator, addrs):
     common_tags = ['foo:bar', 'target_host:datadoghq.com', 'port:80', 'instance:UpService']
