@@ -114,7 +114,9 @@ class TCPCheck(AgentCheck):
                     return True
             return False
         except socket.gaierror as e:
-            self.log.warning("Encountered error checking host's IPv6 connectivity: %s", str(e))
+            self.log.warning(
+                "Encountered error checking host's IPv6 connectivity with hostname %s: %s", socket.gethostname(), str(e)
+            )
             return False
 
     def connect(self, addr, socket_type):
