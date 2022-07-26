@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+import pytest
+
 from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
@@ -11,6 +13,13 @@ PORT1 = 27017
 PORT2 = 27018
 PORT_ARBITER = 27020
 MAX_WAIT = 150
+
+COMPOSE_FILE = os.getenv('COMPOSE_FILE')
+IS_TLS = COMPOSE_FILE == 'mongo-tls.yaml'
+TLS_CERTS_FOLDER = os.path.join(os.path.dirname(__file__), 'compose', 'certs')
+
+tls = pytest.mark.skipif(not IS_TLS, reason='Test only valid for TLS')
+not_tls = pytest.mark.skipif(IS_TLS, reason='Test only valid for non-TLS')
 
 MONGODB_SERVER = "mongodb://%s:%s/test" % (HOST, PORT1)
 SHARD_SERVER = "mongodb://%s:%s/test" % (HOST, PORT2)
@@ -110,5 +119,11 @@ INSTANCE_CUSTOM_QUERIES = {
             'metric_prefix': 'dd.mongodb.custom.queries_slower_than_60sec',
             'tags': ['tag1:val1', 'tag2:val2'],
         },
+    ],
+}
+
+TLS_METADATA = {
+    'docker_volumes': [
+        '{}:/certs'.format(TLS_CERTS_FOLDER),
     ],
 }

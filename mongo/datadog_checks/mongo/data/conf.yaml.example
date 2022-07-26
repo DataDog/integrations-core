@@ -122,6 +122,42 @@ instances:
     #
     # ssl_ca_certs: <SSL_CA_CERTS>
 
+    ## @param ssl_match_hostname - boolean - optional - default: true
+    ## If `False`, disables SSL hostname verification.
+    #
+    # ssl_match_hostname: true
+
+    ## @param tls - boolean - optional - default: false
+    ## If `True`, create the connection to the server using transport layer security.
+    #
+    # tls: false
+
+    ## @param tlsCertificateKeyFile - string - optional
+    ## A file containing the client certificate and private key. Implies tls=True.
+    #
+    # tlsCertificateKeyFile: <TLSCERTIFICATEKEYFILE>
+
+    ## @param tlsCAFile - string - optional
+    ## A file containing one or a bundle of “certification authority” certificates, 
+    ## which are used to validate certificates passed from the other end of the connection. 
+    ## Implies tls=True.
+    #
+    # tlsCAFile: <TLSCAFILE>
+
+    ## @param tlsAllowInvalidHostnames - boolean - optional - default: false
+    ## If `True`, disables TLS hostname verification. tlsAllowInvalidHostnames=False implies tls=True. 
+    ## Think very carefully before setting this to True as that could make your application 
+    ## vulnerable to on-path attackers.
+    #
+    # tlsAllowInvalidHostnames: false
+
+    ## @param tlsAllowInvalidCertificates - boolean - optional - default: false
+    ## If `True`, continues the TLS handshake regardless of the outcome of the certificate verification process. 
+    ## Think very carefully before setting this to True as that could make your application 
+    ## vulnerable to on-path attackers.
+    #
+    # tlsAllowInvalidCertificates: false
+
     ## @param additional_metrics - list of strings - optional
     ## By default, the check collects a sample of metrics from MongoDB.
     ## This  parameter instructs the check to collect additional metrics on specific topics.
