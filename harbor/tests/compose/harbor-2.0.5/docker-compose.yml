@@ -33,7 +33,7 @@ services:
         source: ./config/registryctl/config.yml
         target: /etc/registryctl/config.yml
     networks:
-      - harbor
+      - harbor-205
     dns_search: .
   postgresql:
     image: goharbor/harbor-db:v2.0.5
