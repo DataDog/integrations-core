@@ -6,7 +6,7 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mongo import MongoDb
 
-from .common import HERE, HOST, PORT1, TLS_CERTS_FOLDER, tls, auth
+from .common import HERE, HOST, PORT1, TLS_CERTS_FOLDER, auth, tls
 from .conftest import mock_pymongo
 
 
@@ -598,8 +598,8 @@ def test_mongod_auth_ok(check, dd_run_check, aggregator):
     mongo_check = check(instance)
     dd_run_check(mongo_check)
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
-    
-    
+
+
 @tls
 @pytest.mark.usefixtures('dd_environment')
 def test_mongod_tls_ok(check, dd_run_check, aggregator):
