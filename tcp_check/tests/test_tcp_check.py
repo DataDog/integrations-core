@@ -394,6 +394,7 @@ def test_ipv6(aggregator, check):
     instance = deepcopy(common.INSTANCE_IPV6)
     check = TCPCheck(common.CHECK_NAME, {}, [instance])
     check.check(instance)
+    has_ipv6 = check.has_ipv6_connectivity()
 
     nb_ipv4, nb_ipv6 = 0, 0
     for addr in check.addrs:
@@ -401,7 +402,7 @@ def test_ipv6(aggregator, check):
         expected_tags.append("address:{}".format(addr.address))
         if re.match(r'^[0-9a-f:]+$', addr.address):
             nb_ipv6 += 1
-            if check.has_ipv6_connectivity():
+            if has_ipv6:
                 aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
                 aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
             elif platform.system() == 'Darwin':
@@ -416,10 +417,11 @@ def test_ipv6(aggregator, check):
             aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
             aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
     assert nb_ipv4 == 4
-    # The Windows CI machine doesn't return IPv6
-    # Windows or MacOS might not have IPv6 connectivity when testing locally
-    if platform.system() not in ('Windows', 'Darwin'):
+
+    if has_ipv6:
         assert nb_ipv6 == 8
+    else:
+        assert nb_ipv6 == 0
 
     aggregator.assert_all_metrics_covered()
     assert len(aggregator.service_checks('tcp.can_connect')) == nb_ipv4 + nb_ipv6
