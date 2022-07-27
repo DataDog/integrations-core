@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.vertica import views
+from datadog_checks.vertica.queries import build_projection_storage_queries, build_storage_containers_queries
 
 
 @pytest.mark.parametrize(
@@ -41,15 +41,15 @@ from datadog_checks.vertica import views
         ),
     ],
 )
-def test_make_projection_storage_queries(version, expected_per_projection_query):
-    queries = views.make_projection_storage_queries(version)
+def test_build_projection_storage_queries(version, expected_per_projection_query):
+    queries = build_projection_storage_queries(version)
 
-    assert 'per_projection' in queries
-    assert 'per_table' in queries
-    assert 'per_node' in queries
-    assert 'total' in queries
+    assert len(queries) == 4
 
-    assert queries['per_projection'] == expected_per_projection_query
+    assert queries[0]['name'] == 'projection_storage_per_projection'
+    assert queries[0]['query'] == expected_per_projection_query
+    assert queries[0]['columns'][0] == {'name': 'table_name', 'type': 'tag'}
+    assert queries[0]['columns'][3] == {'name': 'projection.ros.containers', 'type': 'gauge'}
 
 
 @pytest.mark.parametrize(
@@ -62,7 +62,7 @@ def test_make_projection_storage_queries(version, expected_per_projection_query)
                 'node_name, '
                 'projection_name, '
                 'storage_type, '
-                'sum(delete_vector_count) as delete_vector_count '
+                'sum(delete_vector_count) '
                 'FROM v_monitor.storage_containers '
                 'GROUP BY node_name, projection_name, storage_type'
             ),
@@ -73,18 +73,19 @@ def test_make_projection_storage_queries(version, expected_per_projection_query)
                 'SELECT '
                 'node_name, '
                 'projection_name, '
-                'sum(delete_vector_count) as delete_vector_count '
+                'sum(delete_vector_count) '
                 'FROM v_monitor.storage_containers '
                 'GROUP BY node_name, projection_name'
             ),
         ),
     ],
 )
-def test_make_storage_containers_queries(version, expected_per_projection_query):
-    queries = views.make_storage_containers_queries(version)
+def test_build_storage_containers_queries(version, expected_per_projection_query):
 
-    assert 'per_projection' in queries
-    assert 'per_node' in queries
-    assert 'total' in queries
+    queries = build_storage_containers_queries(version)
 
-    assert queries['per_projection'] == expected_per_projection_query
+    assert len(queries) == 3
+
+    assert queries[0]['name'] == 'storage_containers_per_projection'
+    assert queries[0]['query'] == expected_per_projection_query
+    assert queries[0]['columns'][-1] == {'name': 'projection.delete_vectors', 'type': 'gauge'}

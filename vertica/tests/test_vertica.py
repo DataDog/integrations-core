@@ -113,7 +113,6 @@ def test_include_system_metric_group(aggregator, instance, dd_run_check):
     check = VerticaCheck('vertica', {}, [instance])
     dd_run_check(check)
 
-    aggregator.assert_metric('vertica.license.expiration', metric_type=aggregator.GAUGE)
     aggregator.assert_metric('vertica.node.total', metric_type=aggregator.GAUGE)
     aggregator.assert_metric('vertica.node.down', metric_type=aggregator.GAUGE)
     aggregator.assert_metric('vertica.node.allowed', metric_type=aggregator.GAUGE)
