@@ -106,9 +106,11 @@ class TCPCheck(AgentCheck):
 
     def has_ipv6_connectivity(self):
         # type: () -> bool
+        _, _, ip_list = socket.gethostbyname_ex(socket.gethostname())
+        host_ip = ip_list[0]
         try:
             for _, _, _, _, sockaddr in socket.getaddrinfo(
-                socket.gethostname(), None, socket.AF_INET6, 0, socket.IPPROTO_TCP
+                host_ip, None, socket.AF_INET6, 0, socket.IPPROTO_TCP
             ):
                 if not sockaddr[0].startswith('fe80:'):
                     return True
