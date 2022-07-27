@@ -109,15 +109,13 @@ class TCPCheck(AgentCheck):
         _, _, ip_list = socket.gethostbyname_ex(socket.gethostname())
         host_ip = ip_list[0]
         try:
-            for _, _, _, _, sockaddr in socket.getaddrinfo(
-                host_ip, None, socket.AF_INET6, 0, socket.IPPROTO_TCP
-            ):
+            for _, _, _, _, sockaddr in socket.getaddrinfo(host_ip, None, socket.AF_INET6, 0, socket.IPPROTO_TCP):
                 if not sockaddr[0].startswith('fe80:'):
                     return True
             return False
         except socket.gaierror as e:
             self.log.warning(
-                "Encountered error checking host's IPv6 connectivity with hostname %s: %s", socket.gethostname(), str(e)
+                "Encountered error checking host's IPv6 connectivity with hostname %s: %s", host_ip, str(e)
             )
             return False
 
