@@ -9,6 +9,7 @@ build-backend = "hatchling.build"
 name = "datadog-cacti"
 description = "The Cacti check"
 readme = "README.md"
+license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -33,9 +34,6 @@ dependencies = [
 dynamic = [
     "version",
 ]
-
-[project.license]
-text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
