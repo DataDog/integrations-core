@@ -174,7 +174,11 @@ def test_command_line_healthy(
 
 
 @pytest.mark.parametrize(
-    'original,expected', [('VBE.reload_20220530_163054_49600.default.conn', 'VBE.boot.default.conn'), ('MEMPOOL.busyobj.live', 'MEMPOOL.busyobj.live')]
+    'original,expected',
+    [
+        ('VBE.reload_20220530_163054_49600.default.conn', 'VBE.boot.default.conn'),
+        ('MEMPOOL.busyobj.live', 'MEMPOOL.busyobj.live'),
+    ],
 )
 def test_sanitize_metric_name(original, expected):
     transformed_name = sanitize_metric_name(original)
