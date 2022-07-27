@@ -17,6 +17,7 @@ MAX_WAIT = 150
 COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 IS_TLS = COMPOSE_FILE == 'mongo-tls.yaml'
 IS_AUTH = COMPOSE_FILE == 'mongo-auth.yaml'
+
 TLS_CERTS_FOLDER = os.path.join(os.path.dirname(__file__), 'compose', 'certs')
 
 tls = pytest.mark.skipif(not IS_TLS, reason='Test only valid for TLS')
@@ -127,5 +128,11 @@ INSTANCE_CUSTOM_QUERIES = {
             'metric_prefix': 'dd.mongodb.custom.queries_slower_than_60sec',
             'tags': ['tag1:val1', 'tag2:val2'],
         },
+    ],
+}
+
+TLS_METADATA = {
+    'docker_volumes': [
+        '{}:/certs'.format(TLS_CERTS_FOLDER),
     ],
 }

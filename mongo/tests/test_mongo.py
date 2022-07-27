@@ -53,6 +53,7 @@ pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration
 
 
 @common.not_auth
+@common.not_tls
 @pytest.mark.parametrize(
     'instance_authdb',
     [
@@ -76,6 +77,7 @@ def test_mongo(aggregator, check, instance_authdb, dd_run_check):
 
 
 @common.not_auth
+@common.not_tls
 @pytest.mark.parametrize(
     'instance_user',
     [pytest.param(common.INSTANCE_USER, id='standard'), pytest.param(common.INSTANCE_USER_LEGACY_CONFIG, id='legacy')],
@@ -98,6 +100,7 @@ def test_mongo2(aggregator, check, instance_user, dd_run_check):
 
 
 @common.not_auth
+@common.not_tls
 def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
     check = check(instance_arbiter)
     dd_run_check(check)
@@ -131,6 +134,7 @@ def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
 
 
 @common.not_auth
+@common.not_tls
 def test_mongo_old_config(aggregator, check, instance, dd_run_check):
     check = check(instance)
     dd_run_check(check)
@@ -146,6 +150,7 @@ def test_mongo_old_config(aggregator, check, instance, dd_run_check):
 
 
 @common.not_auth
+@common.not_tls
 def test_mongo_old_config_2(aggregator, check, instance, dd_run_check):
     check = check(instance)
     dd_run_check(check)
@@ -161,6 +166,7 @@ def test_mongo_old_config_2(aggregator, check, instance, dd_run_check):
 
 
 @common.not_auth
+@common.not_tls
 def test_mongo_1valid_and_1invalid_custom_queries(
     aggregator, check, instance_1valid_and_1invalid_custom_queries, dd_run_check
 ):
@@ -174,6 +180,7 @@ def test_mongo_1valid_and_1invalid_custom_queries(
 
 
 @common.not_auth
+@common.not_tls
 def test_mongo_custom_queries(aggregator, check, instance_custom_queries, dd_run_check):
     # Run the check against our running server
     check = check(instance_custom_queries)
@@ -212,6 +219,7 @@ def test_mongo_custom_queries(aggregator, check, instance_custom_queries, dd_run
 
 
 @common.not_auth
+@common.not_tls
 def test_mongo_custom_query_with_empty_result_set(aggregator, check, instance_user, caplog, dd_run_check):
     instance_user['custom_queries'] = [
         {
@@ -238,6 +246,7 @@ def test_mongo_custom_query_with_empty_result_set(aggregator, check, instance_us
 
 
 @common.not_auth
+@common.not_tls
 def test_mongo_replset(instance_shard, aggregator, check, dd_run_check):
     mongo_check = check(instance_shard)
     dd_run_check(mongo_check)
@@ -266,6 +275,7 @@ def test_mongo_replset(instance_shard, aggregator, check, dd_run_check):
 
 
 @common.not_auth
+@common.not_tls
 def test_metadata(check, instance, datadog_agent):
     check = check(instance)
     check.check_id = 'test:123'
@@ -278,6 +288,7 @@ def test_metadata(check, instance, datadog_agent):
 
 
 @common.not_auth
+@common.not_tls
 def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
     mongo_check = check(instance_shard)
     dd_run_check(mongo_check)

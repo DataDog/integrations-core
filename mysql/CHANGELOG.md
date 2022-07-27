@@ -1,6 +1,6 @@
 # CHANGELOG - mysql
 
-## 8.4.1 / 2022-07-08
+## 8.4.1 / 2022-07-08 / Agent 7.38.0
 
 * [Fixed] Fix bug where mysql table row stats were not being collected. See [#12472](https://github.com/DataDog/integrations-core/pull/12472).
 
@@ -27,7 +27,7 @@
 * [Added] Add query_truncated field on activity rows. See [#11886](https://github.com/DataDog/integrations-core/pull/11886).
 * [Fixed] Fix uncommented parent options. See [#12013](https://github.com/DataDog/integrations-core/pull/12013).
 
-## 8.2.3 / 2022-05-26
+## 8.2.3 / 2022-05-26 / Agent 7.36.1
 
 * [Fixed] Revert mysql.net.connections metric type. See [#12088](https://github.com/DataDog/integrations-core/pull/12088).
 

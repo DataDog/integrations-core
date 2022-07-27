@@ -183,12 +183,18 @@ class MongoDb(AgentCheck):
     def check(self, _):
         try:
             self._check()
-        except pymongo.errors.ConnectionFailure:
+        except (pymongo.errors.ConnectionFailure, Exception):
             self._api_client = None
             raise
 
     def _check(self):
-        api = self.api_client
+        try:
+            api = self.api_client
+        except Exception:
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
+            self.log.exception("Error when creating the api client.")
+            raise
+
         self._refresh_replica_role()
 
         try:

@@ -31,6 +31,7 @@ from .exceptions import (
     NoSuchDatadogPackageVersion,
     PythonVersionMismatch,
     RevokedDeveloperOrMachine,
+    UpdatedTargetsError,
 )
 from .parameters import substitute
 
@@ -67,8 +68,7 @@ class TUFDownloader:
         # 3 => 30 (WARNING)
         # 4 => 20 (INFO)
         # 5 => 10 (DEBUG)
-        # And so it repeats from here...
-        remainder = verbose % 6
+        remainder = min(verbose, 5) % 6
         level = (6 - remainder) * 10
         assert level in range(10, 70, 10), level
         logging.basicConfig(format='%(levelname)-8s: %(message)s', level=level)
@@ -115,9 +115,18 @@ class TUFDownloader:
         # or, it has been updated, in which case...
         else:
             # First, we use TUF to download and verify the target.
-            assert len(updated_targets) == 1
+            if len(updated_targets) != 1:
+                raise UpdatedTargetsError(
+                    'Expecting only one target {!r} to be updated; got: {}'.format(target, ', '.join(updated_targets))
+                )
+
             updated_target = updated_targets[0]
-            assert updated_target == target
+
+            if updated_target != target:
+                raise UpdatedTargetsError(
+                    'Unknown target updated, expected {!r} but got {!r}'.format(target, updated_target)
+                )
+
             self.__updater.download_target(updated_target, self.__targets_dir)
 
         logger.info('TUF verified %s', target_relpath)

@@ -1,6 +1,6 @@
 # CHANGELOG - Teradata
 
-## 1.0.1 / 2022-06-27
+## 1.0.1 / 2022-06-27 / Agent 7.38.0
 
 * [Fixed] Refactor util method signatures. See [#12063](https://github.com/DataDog/integrations-core/pull/12063).
 * [Fixed] Add error handling when collecting version. See [#12062](https://github.com/DataDog/integrations-core/pull/12062).

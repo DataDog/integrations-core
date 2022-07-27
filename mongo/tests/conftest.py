@@ -48,6 +48,13 @@ def dd_environment():
             conditions=conditions,
         ):
             yield common.INSTANCE_BASIC, {}
+    elif common.IS_TLS:
+        conditions = [WaitForPortListening(common.HOST, common.PORT1)]
+        with docker_run(
+            compose_file,
+            conditions=conditions,
+        ):
+            yield common.INSTANCE_BASIC, common.TLS_METADATA
     else:
         conditions = [
             WaitFor(setup_sharding, args=(compose_file,), attempts=5, wait=5),

@@ -3,7 +3,8 @@
     "monitoring",
     "notification",
     "network",
-    "autodiscovery"
+    "autodiscovery",
+    "snmp"
   ],
   "creates_events": false,
   "display_name": "SNMP",

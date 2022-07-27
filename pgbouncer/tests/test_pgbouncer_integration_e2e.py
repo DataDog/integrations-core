@@ -177,9 +177,9 @@ def assert_metric_coverage(env_version, aggregator, include_clients=False, inclu
     aggregator.assert_metric('pgbouncer.stats.bytes_received_per_second')
     aggregator.assert_metric('pgbouncer.stats.bytes_sent_per_second')
 
-    aggregator.assert_metric('pgbouncer.databases.pool_size')
-    aggregator.assert_metric('pgbouncer.databases.max_connections')
-    aggregator.assert_metric('pgbouncer.databases.current_connections')
+    aggregator.assert_metric('pgbouncer.databases.pool_size', at_least=0)
+    aggregator.assert_metric('pgbouncer.databases.max_connections', at_least=0)
+    aggregator.assert_metric('pgbouncer.databases.current_connections', at_least=0)
 
     aggregator.assert_metric('pgbouncer.max_client_conn')
 
