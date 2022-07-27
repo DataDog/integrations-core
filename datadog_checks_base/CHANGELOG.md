@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 26.0.0 / 2022-07-22
+
+* [Added] Support custom messages in `QueryManager` queries of type `'service_check'`. See [#12537](https://github.com/DataDog/integrations-core/pull/12537).
+* [Removed] Remove inventories configuration submission. See [#12500](https://github.com/DataDog/integrations-core/pull/12500).
+
 ## 25.6.0 / 2022-07-11
 
 * [Added] Ship `pymongo-srv` to support DNS seed connection schemas. See [#12442](https://github.com/DataDog/integrations-core/pull/12442).
