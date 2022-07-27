@@ -78,7 +78,7 @@ class TCPCheck(AgentCheck):
 
     def resolve_ips(self):
         # type: () -> None
-        if self.ipv4_only or (not self.ipv4_only and not self.has_ipv6_connectivity()):
+        if self.ipv4_only or not self.has_ipv6_connectivity():
             # socket.gethostbyname_ex returns IPv4 addresses
             _, _, ipv4_list = socket.gethostbyname_ex(self.host)
 
