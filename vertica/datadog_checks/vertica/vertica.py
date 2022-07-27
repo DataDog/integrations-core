@@ -179,9 +179,10 @@ class VerticaClient(object):
         if self.connection:
             if self._connection_load_balance or self.connection.closed():
                 self.connection.reset_connection()
-                return
         else:
             self.connection = vertica.connect(**exclude_undefined_keys(self.options))
+
+        return self.connection
 
     def query(self, query):
         return self.connection.cursor().execute(query).iterate()

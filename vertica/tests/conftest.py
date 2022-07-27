@@ -10,6 +10,7 @@ import vertica_python as vertica
 from datadog_checks.dev import LazyFunction, docker_run
 
 from . import common
+from .db import setup_db_tables  # noqa: F401
 
 
 class InitializeDB(LazyFunction):

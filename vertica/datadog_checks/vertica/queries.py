@@ -112,7 +112,7 @@ ORDER BY audit_start_timestamp DESC LIMIT 1
         name = 'system'
         query = """
 WITH license_query AS (
-  SELECT node_restriction FROM v_catalog.licenses LIMIT 1
+  SELECT node_restriction FROM {catalog_schema}.licenses LIMIT 1
 )
 SELECT
   node_count,
@@ -122,11 +122,11 @@ SELECT
   ahm_epoch,
   current_epoch,
   last_good_epoch,
-  license_query.node_restriction as allowed_nodes,
+  license_query.node_restriction::INT as allowed_nodes,
   CASE WHEN allowed_nodes IS NULL THEN NULL ELSE allowed_nodes - node_count END
 FROM {schema}.{table} CROSS JOIN license_query
 """.format(
-            schema=self.monitor_schema, table=name
+            schema=self.monitor_schema, table=name, catalog_schema=self.catalog_schema
         )
 
         return [
