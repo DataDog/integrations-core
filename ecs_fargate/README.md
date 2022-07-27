@@ -773,7 +773,7 @@ Need help? Contact [Datadog support][18].
 [33]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags/?tab=containerizedenvironments#environment-variables
 [34]: https://www.datadoghq.com/blog/monitor-aws-fargate
 [35]: https://www.datadoghq.com/blog/collect-fargate-logs-with-firelens/
-[36]: https://www.datadoghq.com/blog/aws-fargate-metrics/
+[36]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/assets/service_checks.json
 [37]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
 [38]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
 [39]: https://www.datadoghq.com/blog/aws-fargate-on-graviton2-monitoring/
