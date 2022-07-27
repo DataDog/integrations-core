@@ -39,7 +39,7 @@ class MockedCollection(object):
 class MockedDB(object):
     def __init__(self, db_name, deployment):
         self._db_name = db_name
-        # self.current_op = lambda: self.command("current_op")
+        self.current_op = lambda: self.command("current_op")
         self.deployment = deployment
 
     def __getitem__(self, coll_name):
