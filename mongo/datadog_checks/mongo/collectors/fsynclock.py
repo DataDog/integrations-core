@@ -1,5 +1,3 @@
-from six import PY2
-
 from datadog_checks.mongo.collectors.base import MongoCollector
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment
 
@@ -22,9 +20,7 @@ class FsyncLockCollector(MongoCollector):
 
     def collect(self, api):
         db = api[self.db_name]
-        if PY2:
-            ops = db.current_op()
-        else:
-            ops = db.aggregate([{"$currentOp": {}}])
-        payload = {'fsyncLocked': 1 if ops.get('fsyncLock') else 0}
-        self._submit_payload(payload)
+        ops = db.aggregate([{"$currentOp": {}}])
+        for op in ops:
+            payload = {'fsyncLocked': 1 if op.get('fsyncLock') else 0}
+            self._submit_payload(payload)

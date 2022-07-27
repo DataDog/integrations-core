@@ -11,7 +11,6 @@ if PY3:
     import urllib
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.dev.testing import requires_py2, requires_py3
 from datadog_checks.mongo import MongoDb, metrics
 from datadog_checks.mongo.api import MongoApi
 from datadog_checks.mongo.collectors import MongoCollector
@@ -116,43 +115,7 @@ def test_uri_fields(check, instance):
         assert expected_parse == parse_mongo_uri(server)
 
 
-@requires_py2
-def test_server_uri_sanitization_py2(check, instance):
-    # Batch with `sanitize_username` set to False
-    server_names = (
-        ("mongodb://localhost:27017/admin", "mongodb://localhost:27017/admin"),
-        ("mongodb://user:pass@localhost:27017/admin", "mongodb://user:*****@localhost:27017/admin"),
-        # pymongo parses the password as `pass_%2`
-        ("mongodb://user:pass_%2@localhost:27017/admin", "mongodb://user:*****@localhost:27017/admin"),
-        # pymongo parses the password as `pass_%` (`%25` is url-decoded to `%`)
-        ("mongodb://user:pass_%25@localhost:27017/admin", "mongodb://user:*****@localhost:27017/admin"),
-        # same thing here, parsed username: `user%2`
-        ("mongodb://user%2@localhost:27017/admin", "mongodb://user%2@localhost:27017/admin"),
-        # with the current sanitization approach, we expect the username to be decoded in the clean name
-        ("mongodb://user%25@localhost:27017/admin", "mongodb://user%@localhost:27017/admin"),
-    )
-
-    for server, expected_clean_name in server_names:
-        _, _, _, _, clean_name, _ = parse_mongo_uri(server, sanitize_username=False)
-        assert expected_clean_name == clean_name
-
-    # Batch with `sanitize_username` set to True
-    server_names = (
-        ("mongodb://localhost:27017/admin", "mongodb://localhost:27017/admin"),
-        ("mongodb://user:pass@localhost:27017/admin", "mongodb://*****@localhost:27017/admin"),
-        ("mongodb://user:pass_%2@localhost:27017/admin", "mongodb://*****@localhost:27017/admin"),
-        ("mongodb://user:pass_%25@localhost:27017/admin", "mongodb://*****@localhost:27017/admin"),
-        ("mongodb://user%2@localhost:27017/admin", "mongodb://localhost:27017/admin"),
-        ("mongodb://user%25@localhost:27017/admin", "mongodb://localhost:27017/admin"),
-    )
-
-    for server, expected_clean_name in server_names:
-        _, _, _, _, clean_name, _ = parse_mongo_uri(server, sanitize_username=True)
-        assert expected_clean_name == clean_name
-
-
-@requires_py3
-def test_server_uri_sanitization_py3(check, instance):
+def test_server_uri_sanitization(check, instance):
     # Batch with `sanitize_username` set to False
     server_names = (
         ("mongodb://localhost:27017/admin", "mongodb://localhost:27017/admin"),

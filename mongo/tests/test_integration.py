@@ -4,8 +4,9 @@ import os
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.mongo import MongoDb
 
-from .common import HERE
+from .common import HERE, HOST, PORT1, auth
 from .conftest import mock_pymongo
 
 
@@ -506,8 +507,8 @@ def test_user_pass_options(check, instance_user, dd_run_check):
     instance_user['options'] = {
         'authSource': '$external',
         'authMechanism': 'PLAIN',
-        'username': instance_user['username'],
-        'password': instance_user['password'],
+        # 'username': instance_user['username'],
+        # 'password': instance_user['password'],
     }
     check = check(instance_user)
 
@@ -583,3 +584,17 @@ def test_db_names_missing_existent_database(check, instance_integration, aggrega
         check_submission_type=True,
     )
     assert len(aggregator._events) == 0
+
+
+@auth
+@pytest.mark.usefixtures('dd_environment')
+def test_mongod_auth_ok(check, dd_run_check, aggregator):
+    instance = {
+        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'username': 'testUser',
+        'password': 'testPass',
+        'options': {'authSource': 'authDB'},
+    }
+    mongo_check = check(instance)
+    dd_run_check(mongo_check)
+    aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
