@@ -389,7 +389,7 @@ def test_multiple(aggregator):
 
 def has_ipv6_connectivity():
     try:
-        for _, _, _, _, sockaddr in socket.getaddrinfo(
+        for sockaddr in socket.getaddrinfo(
             socket.gethostname(), None, socket.AF_INET6, 0, socket.IPPROTO_TCP
         ):
             if not sockaddr[0].startswith('fe80:'):
