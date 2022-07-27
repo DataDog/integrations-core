@@ -8,6 +8,7 @@ from typing import Any, List, Optional
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 from datadog_checks.base.utils.time import get_precise_time
 
 AddrTuple = namedtuple('AddrTuple', ['address', 'socket_type'])
@@ -106,11 +107,18 @@ class TCPCheck(AgentCheck):
 
     def has_ipv6_connectivity(self):
         # type: () -> bool
+        # Try pinging Google's public IPv6 DNS server
+        _, _, code = get_subprocess_output(['ping6', '2001:4860:4860::8888', '-c', '1'], self.log, False)
+        if code == 0:
+            self.log.debug('Host is reporting public IPv6 connectivity.')
+            return True
+        # Server might still have internal IPv6 connectivity
         _, _, ip_list = socket.gethostbyname_ex(socket.gethostname())
         host_ip = ip_list[0]
         try:
             for _, _, _, _, sockaddr in socket.getaddrinfo(host_ip, None, socket.AF_INET6, 0, socket.IPPROTO_TCP):
                 if not sockaddr[0].startswith('fe80:'):
+                    self.log.debug('Host is reporting internal IPv6 connectivity.')
                     return True
             return False
         except socket.gaierror as e:
