@@ -136,10 +136,10 @@ files:
     - name: start_tls
       description: |
         Send protocol-specific message(s) to switch to TLS for communication.
-        StartTLS is implemented on those protocols: smtp, pop3, imap, ftp, xmpp, xmpp-server,
-        irc, postgres, mysql, lmtp, nntp. sieve and ldap.
+        StartTLS is implemented on these protocols: smtp, pop3, imap, ftp, xmpp, xmpp-server,
+        irc, postgres, mysql, lmtp, nntp, sieve, and ldap.
 
-        Currently this checks supports only below protocols:
+        Currently this checks supports only the below protocols:
           postgres
       value:
         type: string
