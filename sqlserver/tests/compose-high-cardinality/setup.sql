@@ -57,6 +57,19 @@ BEGIN
 END;
 GO
 GRANT EXECUTE on encryptedProc to bob;
+GO
+
+-- create test procedure with multiple queries
+CREATE PROCEDURE multiQueryProc AS
+BEGIN
+    declare @total int = 0;
+    select @total = @total + count(*) from sys.databases where name like '%_';
+    select @total = @total + count(*) from sys.sysobjects where type = 'U';
+    select @total;
+END;
+GO
+GRANT EXECUTE on multiQueryProc to bob;
+GO
 
 -- Create test database for integration tests.
 -- Only bob and fred have read/write access to this database.

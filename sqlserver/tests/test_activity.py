@@ -176,7 +176,7 @@ def test_activity_metadata(
     query = '''
     -- Test comment
     SELECT * FROM ϑings'''
-    query_signature = '5ff34f4267b108c6'
+    query_signature = '2fa838aee8217d23'
     blocking_query = "INSERT INTO ϑings WITH (TABLOCK, HOLDLOCK) (name) VALUES ('puppy')"
 
     bob_conn = _get_conn_for_user(instance_docker, 'bob')
