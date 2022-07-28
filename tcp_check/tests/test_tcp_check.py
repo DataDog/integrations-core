@@ -309,7 +309,7 @@ def test_ipv6(aggregator, check):
     instance = deepcopy(common.INSTANCE_IPV6)
     check = TCPCheck(common.CHECK_NAME, {}, [instance])
     check.check(instance)
-    has_ipv6 = has_ipv6_connectivity()
+    has_ipv6 = has_ipv6_connectivity(check)
 
     nb_ipv4, nb_ipv6 = 0, 0
     for addr in check.addrs:
