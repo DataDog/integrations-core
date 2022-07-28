@@ -8,6 +8,8 @@ import vertica_python as vertica
 
 from . import common
 
+BASE_DB_OPTIONS = common.connection_options_from_config(common.CONFIG)
+
 
 @pytest.fixture
 def setup_db_tables():

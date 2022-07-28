@@ -15,14 +15,7 @@ from .db import setup_db_tables  # noqa: F401
 
 class InitializeDB(LazyFunction):
     def __init__(self, config):
-        self.conn_info = {
-            'database': config['db'],
-            'host': config['server'],
-            'port': config['port'],
-            'user': config['username'],
-            'password': config['password'],
-            'connection_timeout': config['timeout'],
-        }
+        self.conn_info = common.connection_options_from_config(config)
 
     def __call__(self):
         with vertica.connect(**self.conn_info) as conn:

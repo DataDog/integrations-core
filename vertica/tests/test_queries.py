@@ -10,8 +10,7 @@ from datadog_checks.vertica.queries import QueryBuilder
 from datadog_checks.vertica.vertica import VerticaClient
 
 from . import common
-
-base_db_options = common.connection_options_from_config(common.CONFIG)
+from .db import BASE_DB_OPTIONS
 
 
 @pytest.mark.parametrize(
@@ -98,6 +97,22 @@ def test_build_storage_containers_queries(version, expected_per_projection_query
     assert queries[0]['columns'][-1] == {'name': 'projection.delete_vectors', 'type': 'gauge'}
 
 
+@pytest.fixture
+def client():
+    client = VerticaClient(BASE_DB_OPTIONS)
+    with client.connect():
+        yield client
+
+
+@pytest.fixture
+def builder():
+    yield QueryBuilder(
+        common.VERTICA_MAJOR_VERSION,
+        catalog_schema='fake_v_catalog',
+        monitor_schema='fake_v_monitor',
+    )
+
+
 def one_day_from_now():
     return datetime.now(timezone.utc) + timedelta(days=1)
 
@@ -111,7 +126,7 @@ def approx_a_day_in_seconds(t, margin=60):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_licenses_query(setup_db_tables):
+def test_licenses_query(client, builder, setup_db_tables):
     setup_db_tables(
         schema_name='fake_v_catalog',
         table_name='licenses',
@@ -125,13 +140,9 @@ def test_licenses_query(setup_db_tables):
         ),
     )
 
-    client = VerticaClient(base_db_options)
-    with client.connect():
-        query = QueryBuilder(common.VERTICA_MAJOR_VERSION, catalog_schema='fake_v_catalog',).build_licenses_queries()[
-            0
-        ]['query']
+    query = builder.build_licenses_queries()[0]['query']
 
-        results = list(client.query(query))
+    results = list(client.query(query))
 
     assert results[0] == ['Community Edition', -1]
     assert results[1] == ['Premium Edition', -1]
@@ -139,7 +150,7 @@ def test_licenses_query(setup_db_tables):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_license_audits_query(setup_db_tables):
+def test_license_audits_query(client, builder, setup_db_tables):
     setup_db_tables(
         schema_name='fake_v_catalog',
         table_name='license_audits',
@@ -159,14 +170,9 @@ def test_license_audits_query(setup_db_tables):
         ),
     )
 
-    client = VerticaClient(base_db_options)
-    with client.connect():
-        query = QueryBuilder(
-            common.VERTICA_MAJOR_VERSION,
-            catalog_schema='fake_v_catalog',
-        ).build_license_audits_queries()[0]['query']
+    query = builder.build_license_audits_queries()[0]['query']
 
-        results = list(client.query(query))
+    results = list(client.query(query))
 
     assert len(results) == 1
     assert approx_a_day_in_seconds(results[0][0])
@@ -174,7 +180,7 @@ def test_license_audits_query(setup_db_tables):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_system_query(setup_db_tables):
+def test_system_query(client, builder, setup_db_tables):
     setup_db_tables(
         schema_name='fake_v_monitor',
         table_name='system',
@@ -198,15 +204,10 @@ def test_system_query(setup_db_tables):
         data='100\n',
     )
 
-    client = VerticaClient(base_db_options)
-    with client.connect():
-        query = QueryBuilder(
-            common.VERTICA_MAJOR_VERSION,
-            monitor_schema='fake_v_monitor',
-            catalog_schema='fake_v_catalog_1',
-        ).build_system_queries()[0]['query']
+    builder.catalog_schema = 'fake_v_catalog_1'
+    query = builder.build_system_queries()[0]['query']
 
-        results = list(client.query(query))
+    results = list(client.query(query))
 
     assert results == [[40, 5, 1, 2, 20, 30, 10, 100, 60]]
 
@@ -218,21 +219,16 @@ def test_system_query(setup_db_tables):
         data=',\n',
     )
 
-    client = VerticaClient(base_db_options)
-    with client.connect():
-        query = QueryBuilder(
-            common.VERTICA_MAJOR_VERSION,
-            monitor_schema='fake_v_monitor',
-            catalog_schema='fake_v_catalog_2',
-        ).build_system_queries()[0]['query']
+    builder.catalog_schema = 'fake_v_catalog_2'
+    query = builder.build_system_queries()[0]['query']
 
-        results = list(client.query(query))
+    results = list(client.query(query))
 
     assert results == [[40, 5, 1, 2, 20, 30, 10, None, None]]
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_projections_query(setup_db_tables):
+def test_projections_query(client, builder, setup_db_tables):
     setup_db_tables(
         schema_name='fake_v_catalog',
         table_name='projections',
@@ -251,20 +247,15 @@ def test_projections_query(setup_db_tables):
         ),
     )
 
-    client = VerticaClient(base_db_options)
-    with client.connect():
-        query = QueryBuilder(
-            common.VERTICA_MAJOR_VERSION,
-            catalog_schema='fake_v_catalog',
-        ).build_projections_queries()[0]['query']
+    query = builder.build_projections_queries()[0]['query']
 
-        results = list(client.query(query))
+    results = list(client.query(query))
 
     assert results == [[5, 2, 3, 40, 60]]
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_projections_query_handles_zeros(setup_db_tables):
+def test_projections_query_handles_zeros(client, builder, setup_db_tables):
     setup_db_tables(
         schema_name='fake_v_catalog',
         table_name='projections',
@@ -275,21 +266,16 @@ def test_projections_query_handles_zeros(setup_db_tables):
         data='',
     )
 
-    client = VerticaClient(base_db_options)
-    with client.connect():
-        query = QueryBuilder(
-            common.VERTICA_MAJOR_VERSION,
-            catalog_schema='fake_v_catalog',
-        ).build_projections_queries()[0]['query']
+    query = builder.build_projections_queries()[0]['query']
 
-        results = list(client.query(query))
+    results = list(client.query(query))
 
     assert results == [[0, 0, 0, 0, 0]]
 
 
 @pytest.mark.skipif(common.VERTICA_MAJOR_VERSION >= 11, reason='Requires Vertica < 11')
 @pytest.mark.usefixtures('dd_environment')
-def test_projection_storage_queries_pre_11(setup_db_tables):
+def test_projection_storage_queries_pre_11(client, builder, setup_db_tables):
     setup_db_tables(
         schema_name='fake_v_monitor',
         table_name='projection_storage',
@@ -316,15 +302,9 @@ def test_projection_storage_queries_pre_11(setup_db_tables):
         ),
     )
 
-    client = VerticaClient(base_db_options)
-    with client.connect():
-        queries = QueryBuilder(
-            common.VERTICA_MAJOR_VERSION,
-            monitor_schema='fake_v_monitor',
-        ).build_projection_storage_queries()
-        queries = [q['query'] for q in queries]
+    queries = [q['query'] for q in builder.build_projection_storage_queries()]
 
-        results = [list(client.query(query)) for query in queries]
+    results = [list(client.query(query)) for query in queries]
 
     per_projection, per_table, per_node, total = results
 
@@ -354,7 +334,7 @@ def test_projection_storage_queries_pre_11(setup_db_tables):
 
 @pytest.mark.skipif(common.VERTICA_MAJOR_VERSION < 11, reason='Requires Vertica >= 11')
 @pytest.mark.usefixtures('dd_environment')
-def test_projection_storage_queries_11_plus(setup_db_tables):
+def test_projection_storage_queries_11_plus(client, builder, setup_db_tables):
     setup_db_tables(
         schema_name='fake_v_monitor',
         table_name='projection_storage',
@@ -377,15 +357,9 @@ def test_projection_storage_queries_11_plus(setup_db_tables):
         ),
     )
 
-    client = VerticaClient(base_db_options)
-    with client.connect():
-        queries = QueryBuilder(
-            common.VERTICA_MAJOR_VERSION,
-            monitor_schema='fake_v_monitor',
-        ).build_projection_storage_queries()
-        queries = [q['query'] for q in queries]
+    queries = [q['query'] for q in builder.build_projection_storage_queries()]
 
-        results = [list(client.query(query)) for query in queries]
+    results = [list(client.query(query)) for query in queries]
 
     per_projection, per_table, per_node, total = results
 
@@ -415,7 +389,7 @@ def test_projection_storage_queries_11_plus(setup_db_tables):
 
 @pytest.mark.skipif(common.VERTICA_MAJOR_VERSION >= 11, reason='Requires Vertica < 11')
 @pytest.mark.usefixtures('dd_environment')
-def test_storage_containers_queries_pre_11(setup_db_tables):
+def test_storage_containers_queries_pre_11(client, builder, setup_db_tables):
     setup_db_tables(
         schema_name='fake_v_monitor',
         table_name='storage_containers',
@@ -435,15 +409,9 @@ def test_storage_containers_queries_pre_11(setup_db_tables):
         ),
     )
 
-    client = VerticaClient(base_db_options)
-    with client.connect():
-        queries = QueryBuilder(
-            common.VERTICA_MAJOR_VERSION,
-            monitor_schema='fake_v_monitor',
-        ).build_storage_containers_queries()
-        queries = [q['query'] for q in queries]
+    queries = [q['query'] for q in builder.build_storage_containers_queries()]
 
-        results = [list(client.query(query)) for query in queries]
+    results = [list(client.query(query)) for query in queries]
 
     per_projection, per_node, total = results
 
@@ -466,7 +434,7 @@ def test_storage_containers_queries_pre_11(setup_db_tables):
 
 @pytest.mark.skipif(common.VERTICA_MAJOR_VERSION < 11, reason='Requires Vertica >= 11')
 @pytest.mark.usefixtures('dd_environment')
-def test_storage_containers_queries_11_plus(setup_db_tables):
+def test_storage_containers_queries_11_plus(client, builder, setup_db_tables):
     setup_db_tables(
         schema_name='fake_v_monitor',
         table_name='storage_containers',
@@ -480,15 +448,9 @@ def test_storage_containers_queries_11_plus(setup_db_tables):
         ),
     )
 
-    client = VerticaClient(base_db_options)
-    with client.connect():
-        queries = QueryBuilder(
-            common.VERTICA_MAJOR_VERSION,
-            monitor_schema='fake_v_monitor',
-        ).build_storage_containers_queries()
-        queries = [q['query'] for q in queries]
+    queries = [q['query'] for q in builder.build_storage_containers_queries()]
 
-        results = [list(client.query(query)) for query in queries]
+    results = [list(client.query(query)) for query in queries]
 
     per_projection, per_node, total = results
 
@@ -509,7 +471,7 @@ def test_storage_containers_queries_11_plus(setup_db_tables):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_host_resources_query(setup_db_tables):
+def test_host_resources_query(client, builder, setup_db_tables):
     setup_db_tables(
         schema_name='fake_v_monitor',
         table_name='host_resources',
@@ -534,14 +496,9 @@ def test_host_resources_query(setup_db_tables):
         ),
     )
 
-    client = VerticaClient(base_db_options)
-    with client.connect():
-        query = QueryBuilder(
-            common.VERTICA_MAJOR_VERSION,
-            monitor_schema='fake_v_monitor',
-        ).build_host_resources_queries()[0]['query']
+    query = builder.build_host_resources_queries()[0]['query']
 
-        results = list(client.query(query))
+    results = list(client.query(query))
 
     assert results == [
         ['host_a', 30, 60, 40, 10, 50, 20, 300, 30, 270, 90, 200, 50, 150, 75],
@@ -550,7 +507,7 @@ def test_host_resources_query(setup_db_tables):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_disk_storage_query(setup_db_tables):
+def test_disk_storage_query(client, builder, setup_db_tables):
     setup_db_tables(
         schema_name='fake_v_monitor',
         table_name='disk_storage',
@@ -572,14 +529,9 @@ def test_disk_storage_query(setup_db_tables):
         ),
     )
 
-    client = VerticaClient(base_db_options)
-    with client.connect():
-        query = QueryBuilder(
-            common.VERTICA_MAJOR_VERSION,
-            monitor_schema='fake_v_monitor',
-        ).build_disk_storage_queries()[0]['query']
+    query = builder.build_disk_storage_queries()[0]['query']
 
-        results = list(client.query(query))
+    results = list(client.query(query))
 
     assert results == [
         ['node_a', 'active', 'DATA', 100, 900, 1000, 90, 5, 2, Decimal('0.2'), Decimal('0.5'), Decimal('0.7')],
