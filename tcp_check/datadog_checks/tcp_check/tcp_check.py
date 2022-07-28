@@ -111,7 +111,7 @@ class TCPCheck(AgentCheck):
                 socket.gethostname(), None, socket.AF_INET6, 0, socket.IPPROTO_TCP
             ):
                 if not sockaddr[0].startswith('fe80:'):
-                    self.log.debug('Host is reporting internal IPv6 connectivity.')
+                    self.log.debug('Host %s is reporting IPv6 connectivity.', socket.gethostname())
                     return True
             return False
         except socket.gaierror as e:
