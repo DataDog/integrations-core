@@ -43,6 +43,7 @@ E2E_METADATA_JDBC_CLIENT = {
     # the integration will fallback to JDBC client
     'use_jmx': True,  # Using jmx to have a ready to use java runtime
     'docker_volumes': [
+        '{}/scripts/install_instant_client.sh:/tmp/install_instant_client.sh'.format(HERE),
         '{}/docker/client/client_wallet:/opt/oracle/instantclient_19_3/client_wallet'.format(HERE),
         '{}/docker/client/sqlnet.ora:/opt/oracle/instantclient_19_3/sqlnet.ora'.format(HERE),
         '{}/docker/client/tnsnames.ora:/opt/oracle/instantclient_19_3/tnsnames.ora'.format(HERE),
@@ -52,10 +53,9 @@ E2E_METADATA_JDBC_CLIENT = {
         '{}/docker/client/osdt_core.jar:/opt/oracle/instantclient_19_3/osdt_core.jar'.format(HERE),
     ],
     'start_commands': [
-        'apt-get update',
-        'apt-get install -yq gcc g++',
+        'bash /tmp/install_instant_client.sh',  # Still needed to set up the database
     ],
-    'env_vars': {'DEBIAN_FRONTEND': 'noninteractive', 'TNS_ADMIN': '/opt/oracle/instantclient_19_3'},
+    'env_vars': {'TNS_ADMIN': '/opt/oracle/instantclient_19_3'},
 }
 
 
