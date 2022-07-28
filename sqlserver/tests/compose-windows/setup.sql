@@ -58,6 +58,7 @@ BEGIN
     SELECT * FROM ϑings;
 END;
 GO
+
 GRANT EXECUTE on bobProc to bob;
 GO
 
