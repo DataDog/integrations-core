@@ -221,7 +221,9 @@ class InitializeDB(LazyFunction):
 
 def create_shard_user():
     cli_shard = pymongo.mongo_client.MongoClient(
-        common.SHARD_SERVER, socketTimeoutMS=30000, read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED
+        "mongodb://%s:%s" % (common.HOST, common.PORT2),
+        socketTimeoutMS=30000,
+        read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,
     )
     cli_shard['admin'].command("createUser", "testUser", pwd="testPass", roles=["root"])
 

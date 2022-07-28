@@ -27,7 +27,7 @@ auth = pytest.mark.skipif(not IS_AUTH, reason='Test only valid for mongo with --
 not_auth = pytest.mark.skipif(IS_AUTH, reason='Test only valid for mongo without --auth')
 
 MONGODB_SERVER = "mongodb://%s:%s/test" % (HOST, PORT1)
-SHARD_SERVER = "mongodb://%s:%s/test" % (HOST, PORT2)
+SHARD_SERVER = "mongodb://%s:%s" % (HOST, PORT2)
 MONGODB_VERSION = os.environ['MONGO_VERSION']
 
 ROOT = os.path.dirname(os.path.dirname(HERE))

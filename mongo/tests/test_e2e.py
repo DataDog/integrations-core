@@ -69,10 +69,8 @@ def test_e2e_mongos(dd_agent_check, instance_authdb):
 @not_tls
 @not_auth
 @pytest.mark.e2e
-def test_e2e_mongod(dd_agent_check, instance):
-    instance['hosts'] = ['{}:{}'.format(HOST, PORT2)]
-    instance['username'] = 'testUser'
-    instance['password'] = 'testPass'
+def test_e2e_mongod(dd_agent_check):
+    instance = {'hosts': ['{}:{}'.format(HOST, PORT2)], 'username': 'testUser', 'password': 'testPass'}
     aggregator = dd_agent_check(instance, rate=True)
     for metric in MONGOD_METRICS:
         aggregator.assert_metric(metric)
