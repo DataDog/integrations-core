@@ -81,6 +81,7 @@ METRICS_OPTIONAL = {
     'vault.core.handle.login_request',
     'vault.core.post_unseal',
     'vault.core.unseal',
+    'vault.expire.fetch.lease',
     'vault.expire.register.auth',
     'vault.expire.renew_token',
     'vault.identity.entity',
