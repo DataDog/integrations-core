@@ -14,6 +14,8 @@ from datadog_checks.tcp_check.tcp_check import AddrTuple, TCPCheck
 
 from . import common
 
+# from datadog_checks.tcp_check.utils import has_ipv6_connectivity
+
 
 def test_down(aggregator):
     """
@@ -424,3 +426,42 @@ def test_ipv6(aggregator, check):
 
     aggregator.assert_all_metrics_covered()
     assert len(aggregator.service_checks('tcp.can_connect')) == nb_ipv4 + nb_ipv6
+
+
+@pytest.mark.parametrize(
+    'hostname, getaddrinfo, gethostbyname_ex, expected_result',
+    [
+        pytest.param(
+            'localhost',
+            [(socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('::ffff:127.0.0.1', 0, 0, 0))],
+            ('localhost', [], ['127.0.0.1']),
+            True,
+            id="",
+        ),
+        pytest.param(
+            'another-host',
+            [(socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('fe80::1234:a56b:c789:d1e', 0, 0, 0))],
+            ('linklocal-host', [], ['127.0.0.1']),
+            False,
+            id="",
+        ),
+        pytest.param(
+            'hostname',
+            [(socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('::ffff:127.0.0.1', 0, 0, 0))],
+            ('hostname', [], ['127.0.0.1']),
+            True,
+            id="",
+        ),
+    ],
+)
+def test_has_ipv6_connectivity(monkeypatch, hostname, getaddrinfo, gethostbyname_ex, expected_result):
+    instance = deepcopy(common.INSTANCE_IPV6)
+    instance['hostname'] = hostname
+    check = TCPCheck(common.CHECK_NAME, {}, [instance])
+    monkeypatch.setattr('socket.gethostname', mock.Mock(return_value=hostname))
+    monkeypatch.setattr('socket.gethostbyname_ex', mock.Mock(return_value=gethostbyname_ex))
+    monkeypatch.setattr('socket.getaddrinfo', mock.Mock(return_value=getaddrinfo))
+
+    has_ipv6 = check.has_ipv6_connectivity()
+
+    assert has_ipv6 == expected_result
