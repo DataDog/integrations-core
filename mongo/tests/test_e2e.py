@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.mongo import MongoDb
 
-from .common import HOST, PORT2, not_tls, not_auth
+from .common import HOST, PORT2, not_auth, not_tls
 
 BASE_METRICS = [
     'mongodb.connections.available',
