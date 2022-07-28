@@ -39,6 +39,14 @@ BEGIN
 END;
 GO
 
+CREATE PROCEDURE bobProcParams @P1 INT = NULL, @P2 nvarchar(8) = NULL AS
+BEGIN
+    SELECT * FROM ϑings WHERE id = @P1;
+    SELECT id FROM ϑings WHERE name = @P2;
+END;
+GO
+
+GRANT EXECUTE on bobProcParams to bob;
 GRANT EXECUTE on bobProc to bob;
 GO
 
