@@ -293,7 +293,9 @@ def test_multiple(aggregator):
 
 def has_ipv6_connectivity():
     try:
-        for sockaddr in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET6, 0, socket.IPPROTO_TCP):
+        for _, _, _, _, sockaddr in socket.getaddrinfo(
+            socket.gethostname(), None, socket.AF_INET6, 0, socket.IPPROTO_TCP
+        ):
             if not sockaddr[0].startswith('fe80:'):
                 return True
         return False
@@ -318,10 +320,6 @@ def test_ipv6(aggregator, check):
             if has_ipv6_connectivity():
                 aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
                 aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
-            elif platform.system() == 'Darwin':
-                # IPv6 connectivity varies when running test locally on macOS, so we do not check status or metric value
-                aggregator.assert_service_check('tcp.can_connect', tags=expected_tags)
-                aggregator.assert_metric('network.tcp.can_connect', tags=expected_tags)
             else:
                 aggregator.assert_service_check('tcp.can_connect', status=check.CRITICAL, tags=expected_tags)
                 aggregator.assert_metric('network.tcp.can_connect', value=0, tags=expected_tags)
