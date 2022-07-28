@@ -143,5 +143,7 @@ files:
           postgres
       value:
         type: string
+        enum:
+        - postgres
     - template: instances/default
     - template: instances/tls
