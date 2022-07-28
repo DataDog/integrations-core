@@ -5,7 +5,7 @@ kube_apiserver.audit_event,gauge,,event,,The accumulated number audit events gen
 kube_apiserver.go_threads,gauge,,thread,,The number of OS threads created,0,kube_apiserver_metrics,go threads,
 kube_apiserver.go_goroutines,gauge,,,,The number of goroutines that currently exist,0,kube_apiserver_metrics,go routines,
 kube_apiserver.APIServiceRegistrationController_depth,gauge,,,,The current depth of workqueue: APIServiceRegistrationController,0,kube_apiserver_metrics,service registration controller depth,
-kube_apiserver.etcd_request_duration_seconds.sum,gauge,,second,,Etcd request latencies for each operation and object type (alpha),0,kube_apiserkube_apiserver_metrics,etcd latency,
+kube_apiserver.etcd_request_duration_seconds.sum,gauge,,second,,Etcd request latencies for each operation and object type (alpha),0,kube_apiserver_metrics,etcd latency,
 kube_apiserver.etcd_request_duration_seconds.count,count,,,,Etcd request latencies count for each operation and object type (alpha),0,kube_apiserver_metrics,etcd latency,
 kube_apiserver.etcd_object_counts,gauge,,object,,The number of stored objects at the time of last check split by kind (alpha; deprecated in Kubernetes 1.22),0,kube_apiserver_metrics,etcd object counts,
 kube_apiserver.etcd.db.total_size,gauge,,byte,,The total size of the etcd database file physically allocated in bytes (alpha; Kubernetes 1.19+),0,kube_apiserver_metrics,etcd db total size,
