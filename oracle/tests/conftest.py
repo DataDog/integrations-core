@@ -53,9 +53,12 @@ E2E_METADATA_JDBC_CLIENT = {
     ],
     'start_commands': [
         'apt-get update',
-        'DEBIAN_FRONTEND=noninteractive apt-get install -yq gcc g++',
+        'apt-get install -yq gcc g++',
     ],
-    'env_vars': {'TNS_ADMIN': '/opt/oracle/instantclient_19_3'},
+    'env_vars': {
+        'DEBIAN_FRONTEND': 'noninteractive',
+        'TNS_ADMIN': '/opt/oracle/instantclient_19_3'
+    },
 }
 
 
