@@ -267,8 +267,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         for row in rows:
             try:
                 statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
+                procedure_statement = None
+                if row['is_proc'] and 'text' in row:
+                    procedure_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
+                self.log.warning("unable to obfuscate query: %s", row['statement_text'])
                 self.log.debug("Failed to obfuscate query: %s", e)
                 self.check.count(
                     "dd.sqlserver.statements.error",
@@ -278,10 +282,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 continue
             obfuscated_statement = statement['query']
             row['statement_text'] = obfuscated_statement
-            # remove the text field, so we do not forward deobfuscated text
-            # to the backend
-            if row['text']:
-                del row['text']
+            if procedure_statement:
+                row['procedure_text'] = procedure_statement['query']
+                row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
             row['query_hash'] = _hash_to_hex(row['query_hash'])
             row['query_plan_hash'] = _hash_to_hex(row['query_plan_hash'])
@@ -307,11 +310,18 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         row = {k: v for k, v in row.items()}
         if 'dd_comments' in row:
             del row['dd_comments']
+        # remove the text field, so we do not forward deobfuscated text
+        # to the backend
+        if 'text' in row:
+            del row['text']
         # truncate query text to the maximum length supported by metrics tags
         row['statement_text'] = row['statement_text'][0:200]
         return row
 
     def _to_metrics_payload(self, rows):
+        sql_rows = [self._to_metrics_payload_row(r) for r in rows]
+        for r in sql_rows:
+            self.log.warning("query: %s", r['statement_text'])
         return {
             'host': self.check.resolved_hostname,
             'timestamp': time.time() * 1000,
@@ -382,6 +392,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 "db": {
                     "instance": row.get('database_name', None),
                     "query_signature": row['query_signature'],
+                    "procedure_signature": row.get('procedure_signature', None),
                     "statement": row['statement_text'],
                     "metadata": {
                         "tables": row['dd_tables'],
@@ -420,6 +431,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             # not every query that is executed within the proc. Queries from the same procedure
             # have the same plan_handle, but different query signatures & can have diff plan hashes.
             # taking the first 16 bytes should be unique enough to properly identify the plan.
+
+            # TODO: technically this could be the proc sig and the plan handle?? I believe that would
+            # work better??
             if row['is_proc']:
                 plan_key = row['plan_handle'][0:16]
             if self._seen_plans_ratelimiter.acquire(plan_key):
@@ -448,6 +462,14 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         **self.check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))])
                     )
                 tags = list(self.check.tags)
+
+                # for stored procedures, we want to send the plan
+                # events with the full procedure text, not the text
+                # for the individual statement encapsulated within the proc
+                text_key = 'statement_text'
+                if row['is_proc']:
+                    text_key = 'procedure_text'
+                    self.log.warning("proc text: %s", row["procedure_text"])
                 if 'database_name' in row:
                     tags += ["db:{}".format(row['database_name'])]
                 yield {
@@ -465,7 +487,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                             "collection_errors": collection_errors,
                         },
                         "query_signature": row['query_signature'],
-                        "statement": row['statement_text'],
+                        "procedure_signature": row.get('procedure_signature', None),
+                        "statement": row[text_key],
                         "metadata": {
                             "tables": row['dd_tables'],
                             "commands": row['dd_commands'],
