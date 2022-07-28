@@ -49,17 +49,11 @@ class VerticaCheck(AgentCheck):
 
         self._client_lib_log_level = self.instance.get('client_lib_log_level', self._get_default_client_lib_log_level())
 
-        # If `tls_verify` is explicitly set to true, set `use_tls` to true (for legacy support)
+        # `tls_verify` being explicitly set to true overrides the value `use_tls` for legacy reasons
         # `tls_verify` used to do what `use_tls` does now
-        self._tls_verify = is_affirmative(self.instance.get('tls_verify'))
-        self._use_tls = is_affirmative(self.instance.get('use_tls', False))
-
-        if self._tls_verify and not self._use_tls:
-            self._use_tls = True
-
-        self._tls_context = None
-        if self._use_tls:
-            self._tls_context = self.get_tls_context()
+        tls_verify = is_affirmative(self.instance.get('tls_verify'))
+        use_tls = is_affirmative(self.instance.get('use_tls', False))
+        self._tls_context = self.get_tls_context() if use_tls or tls_verify else None
 
         # Add global database tag
         self._tags.append('db:{}'.format(self._db))

@@ -44,6 +44,7 @@ def test_ssl_legacy_config_ok(aggregator, tls_instance_legacy):
             check = VerticaCheck('vertica', {}, [tls_instance_legacy])
             check.check(tls_instance_legacy)
 
+            assert check._client.use_tls
             assert tls_context.verify_mode == ssl.CERT_REQUIRED
             assert tls_context.check_hostname is True
             tls_context.load_verify_locations.assert_called_with(cadata=None, cafile=None, capath=CERTIFICATE_DIR)
