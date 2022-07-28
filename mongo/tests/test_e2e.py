@@ -92,7 +92,13 @@ def test_e2e_mongo_auth(dd_agent_check):
 @tls
 @pytest.mark.e2e
 def test_e2e_mongo_tls(dd_agent_check):
-    instance = {'hosts': ['{}:{}'.format(HOST, PORT1)], 'username': 'testUser', 'password': 'testPass'}
+    instance = {
+        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'tls': True,
+        'tlsAllowInvalidCertificates': True,
+        'tlsCertificateKeyFile': '/certs/client1.pem',
+        'tlsCAFile': '/certs/ca.pem',
+    }
     aggregator = dd_agent_check(instance, rate=True)
     for metric in MONGOD_METRICS:
         aggregator.assert_metric(metric)
