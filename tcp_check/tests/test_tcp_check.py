@@ -293,7 +293,9 @@ def test_multiple(aggregator):
 
 def has_ipv6_connectivity():
     try:
-        for sockaddr in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET6, 0, socket.IPPROTO_TCP):
+        for _, _, _, _, sockaddr in socket.getaddrinfo(
+            socket.gethostname(), None, socket.AF_INET6, 0, socket.IPPROTO_TCP
+        ):
             if not sockaddr[0].startswith('fe80:'):
                 return True
         return False
@@ -318,10 +320,6 @@ def test_ipv6(aggregator, check):
             if has_ipv6_connectivity():
                 aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
                 aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
-            elif platform.system() == 'Darwin':
-                # IPv6 connectivity varies when running test locally on macOS, so we do not check status or metric value
-                aggregator.assert_service_check('tcp.can_connect', tags=expected_tags)
-                aggregator.assert_metric('network.tcp.can_connect', tags=expected_tags)
             else:
                 aggregator.assert_service_check('tcp.can_connect', status=check.CRITICAL, tags=expected_tags)
                 aggregator.assert_metric('network.tcp.can_connect', value=0, tags=expected_tags)
@@ -331,99 +329,8 @@ def test_ipv6(aggregator, check):
             aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
     assert nb_ipv4 == 4
     # The Windows CI machine doesn't return IPv6
-    # Windows or MacOS might not have IPv6 connectivity when testing locally
-    if platform.system() not in ('Windows', 'Darwin'):
+    if platform.system() not in ('Windows'):
         assert nb_ipv6 == 8
-        assert has_ipv6_connectivity() is True
-
-    aggregator.assert_all_metrics_covered()
-    assert len(aggregator.service_checks('tcp.can_connect')) == nb_ipv4 + nb_ipv6
-
-
-def has_ipv6_connectivity_debug_1(check):
-    # type: () -> bool
-    _, _, ip_list = socket.gethostbyname_ex(socket.gethostname())
-    host_ip = ip_list[0]
-    try:
-        for _, _, _, _, sockaddr in socket.getaddrinfo(host_ip, None, socket.AF_INET6, 0, socket.IPPROTO_TCP):
-            if not sockaddr[0].startswith('fe80:'):
-                check.log.debug('Host is reporting internal IPv6 connectivity.')
-                return True
-        return False
-    except socket.gaierror as e:
-        check.log.warning("Encountered error checking host's IPv6 connectivity with hostname %s: %s", host_ip, str(e))
-        return False
-
-
-def has_ipv6_connectivity_debug_2(check):
-    # type: () -> bool
-    try:
-        for _, _, _, _, sockaddr in socket.getaddrinfo(
-            socket.gethostname(), None, socket.AF_INET6, 0, socket.IPPROTO_TCP
-        ):
-            if not sockaddr[0].startswith('fe80:'):
-                check.log.debug('Host is reporting internal IPv6 connectivity.')
-                return True
-        return False
-    except socket.gaierror as e:
-        check.log.warning(
-            "Encountered error checking host's IPv6 connectivity with hostname %s: %s", socket.gethostname(), str(e)
-        )
-        return False
-
-
-@pytest.mark.parametrize(
-    'debug',
-    [
-        pytest.param(has_ipv6_connectivity_debug_1, id='debug 1'),
-        pytest.param(has_ipv6_connectivity_debug_2, id='debug 2'),
-    ],
-)
-def test_ipv6_debug(aggregator, check, debug):
-    """
-    Service expected to be up
-    """
-    instance = deepcopy(common.INSTANCE_IPV6)
-    check = TCPCheck(common.CHECK_NAME, {}, [instance])
-    check.check(instance)
-    has_ipv6_debug = debug(check)
-
-    nb_ipv4, nb_ipv6 = 0, 0
-    for addr in check.addrs:
-        expected_tags = ["instance:UpService", "target_host:ip-ranges.datadoghq.com", "port:80", "foo:bar"]
-        expected_tags.append("address:{}".format(addr.address))
-        if re.match(r'^[0-9a-f:]+$', addr.address):
-            nb_ipv6 += 1
-            if has_ipv6_debug:
-                aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
-                aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
-            elif platform.system() == 'Darwin':
-                # IPv6 connectivity varies when running test locally on macOS, so we do not check status or metric value
-                aggregator.assert_service_check('tcp.can_connect', tags=expected_tags)
-                aggregator.assert_metric('network.tcp.can_connect', tags=expected_tags)
-            else:
-                aggregator.assert_service_check('tcp.can_connect', status=check.CRITICAL, tags=expected_tags)
-                aggregator.assert_metric('network.tcp.can_connect', value=0, tags=expected_tags)
-            if has_ipv6_debug:
-                aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
-                aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
-            elif platform.system() == 'Darwin':
-                # IPv6 connectivity varies when running test locally on macOS, so we do not check status or metric value
-                aggregator.assert_service_check('tcp.can_connect', tags=expected_tags)
-                aggregator.assert_metric('network.tcp.can_connect', tags=expected_tags)
-            else:
-                aggregator.assert_service_check('tcp.can_connect', status=check.CRITICAL, tags=expected_tags)
-                aggregator.assert_metric('network.tcp.can_connect', value=0, tags=expected_tags)
-        else:
-            nb_ipv4 += 1
-            aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
-            aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
-    assert nb_ipv4 == 4
-    # The Windows CI machine doesn't return IPv6
-    # Windows or MacOS might not have IPv6 connectivity when testing locally
-    if platform.system() not in ('Windows', 'Darwin'):
-        assert nb_ipv6 == 8
-        assert has_ipv6_debug is True
 
     aggregator.assert_all_metrics_covered()
     assert len(aggregator.service_checks('tcp.can_connect')) == nb_ipv4 + nb_ipv6
