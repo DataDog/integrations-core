@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 import pytest
@@ -114,11 +114,11 @@ def builder():
 
 
 def one_day_from_now():
-    return datetime.now(timezone.utc) + timedelta(days=1)
+    return datetime.utcnow() + timedelta(days=1)
 
 
 def one_day_ago():
-    return datetime.now(timezone.utc) - timedelta(days=1)
+    return datetime.utcnow() - timedelta(days=1)
 
 
 def approx_a_day_in_seconds(t, margin=60):
