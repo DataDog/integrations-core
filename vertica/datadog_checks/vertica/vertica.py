@@ -98,11 +98,13 @@ class VerticaCheck(AgentCheck):
 
     def setup_query_manager(self, monitor_schema='v_monitor', catalog_schema='v_catalog'):
         query_builder = QueryBuilder(self._major_version())
-        self._query_manager = self._client.query_manager(
+        self._query_manager = QueryManager(
+            self,
+            self._client.query,
             queries=query_builder.get_queries(self._metric_groups),
-            check=self,
-            extra_tags=self._tags,
+            tags=self._tags,
         )
+        self._query_manager.compile_queries()
 
     def check(self, _):
         connection = self._connect()
@@ -180,16 +182,6 @@ class VerticaClient(object):
 
     def query(self, query):
         return self.connection.cursor().execute(query).iterate()
-
-    def query_manager(self, queries, check, extra_tags=[]):
-        qm = QueryManager(
-            check,
-            self.query,
-            queries=queries,
-            tags=extra_tags,
-        )
-        qm.compile_queries()
-        return qm
 
     def query_version(self):
         """Get the Vertica version by queriying the DB.
