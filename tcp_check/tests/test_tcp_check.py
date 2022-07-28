@@ -111,12 +111,13 @@ def test_response_time(aggregator):
 
 
 @pytest.mark.parametrize(
-    'hostname, getaddrinfo, expected_addrs, multiple_ips, ip_count',
+    'hostname, getaddrinfo, expected_addrs, multiple_ips, ipv4_only, ip_count',
     [
         pytest.param(
             'localhost',
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV6,
             [AddrTuple('::1', socket.AF_INET6)],
+            False,
             False,
             1,
             id='Dual IPv4/IPv6: localhost, IPv6 resolution, multiple_ips False',
@@ -126,15 +127,21 @@ def test_response_time(aggregator):
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV4,
             [AddrTuple('127.0.0.1', socket.AF_INET)],
             False,
+            False,
             1,
             id='Dual IPv4/IPv6: localhost, IPv4 resolution, multiple_ips False',
         ),
         pytest.param(
             'localhost',
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV6,
-            [AddrTuple('::1', socket.AF_INET6), AddrTuple('127.0.0.1', socket.AF_INET)],
+            [
+                AddrTuple('::1', socket.AF_INET6),
+                AddrTuple('127.0.0.1', socket.AF_INET),
+                AddrTuple('ip3', socket.AF_INET),
+            ],
             True,
-            2,
+            False,
+            3,
             id='Dual IPv4/IPv6: localhost, IPv6 resolution, multiple_ips True',
         ),
         pytest.param(
@@ -142,6 +149,7 @@ def test_response_time(aggregator):
             common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV4,
             [AddrTuple('127.0.0.1', socket.AF_INET), AddrTuple('::1', socket.AF_INET6)],
             True,
+            False,
             2,
             id='Dual IPv4/IPv6: localhost, IPv4 resolution, multiple_ips True',
         ),
@@ -150,6 +158,7 @@ def test_response_time(aggregator):
             common.DUAL_STACK_GETADDRINFO_IPV4,
             [AddrTuple('ip1', socket.AF_INET)],
             False,
+            False,
             1,
             id='Dual IPv4/IPv6: string hostname, IPv4 resolution, multiple_ips False',
         ),
@@ -157,6 +166,7 @@ def test_response_time(aggregator):
             'another-hostname',
             common.DUAL_STACK_GETADDRINFO_IPV6,
             [AddrTuple('ip1', socket.AF_INET6)],
+            False,
             False,
             1,
             id='Dual IPv4/IPv6: string hostname, IPv6 resolution, multiple_ips False',
@@ -170,6 +180,7 @@ def test_response_time(aggregator):
                 AddrTuple('ip3', socket.AF_INET6),
             ],
             True,
+            False,
             3,
             id='Dual IPv4/IPv6: string hostname, IPv4 resolution, multiple_ips True',
         ),
@@ -180,15 +191,18 @@ def test_response_time(aggregator):
                 AddrTuple('ip1', socket.AF_INET6),
                 AddrTuple('ip2', socket.AF_INET),
                 AddrTuple('ip3', socket.AF_INET6),
+                AddrTuple('ip4', socket.AF_INET),
             ],
             True,
-            3,
+            False,
+            4,
             id='Dual IPv4/IPv6: string hostname, IPv6 resolution, multiple_ips True',
         ),
         pytest.param(
             'localhost',
             common.SINGLE_STACK_GETADDRINFO_LOCALHOST_IPV4,
             [AddrTuple('127.0.0.1', socket.AF_INET)],
+            False,
             False,
             1,
             id='Single stack IPv4: localhost, IPv4 resolution, multiple_ips False',
@@ -198,6 +212,7 @@ def test_response_time(aggregator):
             common.SINGLE_STACK_GETADDRINFO_LOCALHOST_IPV4,
             [AddrTuple('127.0.0.1', socket.AF_INET), AddrTuple('ip2', socket.AF_INET)],
             True,
+            False,
             2,
             id='Single stack IPv4: localhost, IPv4 resolution, multiple_ips True',
         ),
@@ -205,6 +220,7 @@ def test_response_time(aggregator):
             'another-hostname',
             common.SINGLE_STACK_GETADDRINFO_IPV4,
             [AddrTuple('ip1', socket.AF_INET)],
+            False,
             False,
             1,
             id='Single stack IPv4: string hostname, IPv4 resolution, multiple_ips False',
@@ -218,23 +234,51 @@ def test_response_time(aggregator):
                 AddrTuple('ip3', socket.AF_INET),
             ],
             True,
+            False,
             3,
             id='Single stack IPv4: string hostname, IPv4 resolution, multiple_ips True',
         ),
+        pytest.param(
+            'localhost',
+            common.DUAL_STACK_GETADDRINFO_LOCALHOST_IPV6,
+            [AddrTuple('127.0.0.1', socket.AF_INET), AddrTuple('ip3', socket.AF_INET)],
+            True,
+            True,
+            2,
+            id='Dual IPv4/IPv6: localhost, ipv4_only True, multiple_ips True',
+        ),
+        pytest.param(
+            'another-hostname',
+            common.DUAL_STACK_GETADDRINFO_IPV6,
+            [
+                AddrTuple('ip2', socket.AF_INET),
+                AddrTuple('ip4', socket.AF_INET),
+            ],
+            True,
+            True,
+            2,
+            id='Dual IPv4/IPv6: string hostname, ipv4_only True, multiple_ips True',
+        ),
     ],
 )
-def test_hostname_resolution(aggregator, monkeypatch, hostname, getaddrinfo, expected_addrs, multiple_ips, ip_count):
+def test_hostname_resolution(
+    aggregator, monkeypatch, hostname, getaddrinfo, expected_addrs, multiple_ips, ipv4_only, ip_count
+):
     """
     Test that string hostnames get resolved to ipv4 address format properly.
     """
     instance = deepcopy(common.INSTANCE)
     instance['host'] = hostname
     instance['multiple_ips'] = multiple_ips
+    instance['ipv4_only'] = ipv4_only
     check = TCPCheck(common.CHECK_NAME, {}, [instance])
 
     monkeypatch.setattr('socket.getaddrinfo', mock.Mock(return_value=getaddrinfo))
     monkeypatch.setattr(check, 'connect', mock.Mock())
-
+    if ipv4_only:
+        monkeypatch.setattr(
+            'socket.gethostbyname_ex', mock.Mock(return_value=(hostname, [], [addr.address for addr in expected_addrs]))
+        )
     expected_tags = [
         "instance:UpService",
         "target_host:{}".format(hostname),
