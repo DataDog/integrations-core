@@ -9,7 +9,7 @@ from datadog_checks.dev.testing import requires_py3
 
 from .utils import get_check
 
-pytestmark = [requires_py3, pytest.mark.openmetrics, pytest.mark.openmetrics_options]
+pytestmark = [requires_py3]
 
 
 class TestNamespace:

@@ -1,41 +1,56 @@
 {
-  "display_name": "IBM MQ",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "ibm_mq",
-  "metric_prefix": "ibm_mq.",
-  "metric_to_check": "ibm_mq.queue.usage",
-  "creates_events": false,
-  "short_description": "IBM MQ is a Message Queue",
-  "guid": "873153b6-5184-438a-8a32-1e2d2e490dde",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-IBM MQ Integration",
-  "categories": [
-    "processing",
-    "messaging",
-    "log collection",
-    "autodiscovery"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "ibm-mq",
+  "manifest_version": "2.0.0",
+  "app_uuid": "d29a1df9-6038-41f5-b017-82bf45f58767",
+  "app_id": "ibm-mq",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "IBM MQ is a Message Queue",
+    "title": "IBM MQ",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Processing",
+      "Category::Messaging",
+      "Category::Log Collection",
+      "Category::Autodiscovery"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "monitors": {},
+    "integration": {
+      "source_type_name": "IBM MQ",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "ibm_mq.",
+        "check": "ibm_mq.queue.usage",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
     "dashboards": {
       "IBM MQ": "assets/dashboards/overview.json"
     },
-    "service_checks": "assets/service_checks.json",
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
     "logs": {
       "source": "ibm_mq"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

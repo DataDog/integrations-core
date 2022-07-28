@@ -36,7 +36,8 @@ def test_check(aggregator, datadog_agent, instance, dd_run_check):
 
     aggregator.assert_all_metrics_covered()
 
-    version_metadata = {'version.scheme': 'semver', 'version.major': os.environ['VERTICA_VERSION'][0]}
+    major_version = common.VERTICA_MAJOR_VERSION
+    version_metadata = {'version.scheme': 'semver', 'version.major': str(major_version)}
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(len(version_metadata) + 4)
 
@@ -112,7 +113,6 @@ def test_include_system_metric_group(aggregator, instance, dd_run_check):
     check = VerticaCheck('vertica', {}, [instance])
     dd_run_check(check)
 
-    aggregator.assert_metric('vertica.license.expiration', metric_type=aggregator.GAUGE)
     aggregator.assert_metric('vertica.node.total', metric_type=aggregator.GAUGE)
     aggregator.assert_metric('vertica.node.down', metric_type=aggregator.GAUGE)
     aggregator.assert_metric('vertica.node.allowed', metric_type=aggregator.GAUGE)

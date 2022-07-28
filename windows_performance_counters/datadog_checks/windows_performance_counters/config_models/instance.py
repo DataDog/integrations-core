@@ -112,6 +112,7 @@ class InstanceConfig(BaseModel):
     server_tag: Optional[str]
     service: Optional[str]
     tags: Optional[Sequence[str]]
+    use_legacy_check_version: Optional[bool]
     username: Optional[str]
 
     @root_validator(pre=True)

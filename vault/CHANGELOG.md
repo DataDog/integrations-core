@@ -1,6 +1,11 @@
 # CHANGELOG - Vault
 
-## 3.2.1 / 2022-05-18
+## 3.3.0 / 2022-06-01 / Agent 7.38.0
+
+* [Added] Add config option to collect from secondary replication mode. See [#12099](https://github.com/DataDog/integrations-core/pull/12099).
+* [Fixed] Ensure vault_wal_gc_total is collected as gauge. See [#12036](https://github.com/DataDog/integrations-core/pull/12036).
+
+## 3.2.1 / 2022-05-18 / Agent 7.37.0
 
 * [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
 

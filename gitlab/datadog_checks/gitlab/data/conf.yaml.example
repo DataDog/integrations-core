@@ -74,7 +74,7 @@ instances:
     #
     # send_distribution_buckets: false
 
-    ## @param send_monotonic_counter - boolean - optional - default: true
+    ## @param send_monotonic_counter - boolean - optional - default: false
     ## Set send_monotonic_counter to true to send counters as monotonic counter.
     #
     send_monotonic_counter: true

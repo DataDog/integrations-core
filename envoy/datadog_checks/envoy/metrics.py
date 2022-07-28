@@ -10,6 +10,11 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_cluster_assignment_timeout_received': 'cluster.assignment_timeout_received',
     'envoy_cluster_bind_errors': 'cluster.bind_errors',
     'envoy_cluster_default_total_match_count': 'cluster.default_total_match',
+    'envoy_cluster_ext_authz_ok': 'cluster.ext_authz.ok',
+    'envoy_cluster_ext_authz_error': 'cluster.ext_authz.error',
+    'envoy_cluster_ext_authz_denied': 'cluster.ext_authz.denied',
+    'envoy_cluster_ext_authz_disabled': 'cluster.ext_authz.disabled',
+    'envoy_cluster_ext_authz_failure_mode_allowed': 'cluster.ext_authz.failure_mode_allowed',
     'envoy_cluster_http2_dropped_headers_with_underscores': 'cluster.http2.dropped_headers_with_underscores',
     'envoy_cluster_http2_header_overflow': 'cluster.http2.header_overflow',
     'envoy_cluster_http2_headers_cb_no_stream': 'cluster.http2.headers_cb_no_stream',
@@ -47,6 +52,10 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_cluster_lb_zone_routing_sampled': 'cluster.lb_zone_routing_sampled',
     'envoy_cluster_membership_change': 'cluster.membership_change',
     'envoy_cluster_original_dst_host_invalid': 'cluster.original_dst_host_invalid',
+    'envoy_cluster_ratelimit_ok': 'cluster.ratelimit.ok',
+    'envoy_cluster_ratelimit_error': 'cluster.ratelimit.error',
+    'envoy_cluster_ratelimit_over_limit': 'cluster.ratelimit.over_limit',
+    'envoy_cluster_ratelimit_failure_mode_allowed': 'cluster.ratelimit.failure_mode_allowed',
     'envoy_cluster_retry_or_shadow_abandoned': 'cluster.retry_or_shadow_abandoned',
     'envoy_cluster_update_attempt': 'cluster.update_attempt',
     'envoy_cluster_update_empty': 'cluster.update_empty',
@@ -757,6 +766,46 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'cluster.ext_authz.ok': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ext_authz.error': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ext_authz.denied': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ext_authz.disabled': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ext_authz.failure_mode_allowed': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
     'cluster.ratelimit.ok': {
         'tags': (
             ('envoy_cluster', ),
@@ -774,6 +823,14 @@ METRICS = {
         'method': 'monotonic_count',
     },
     'cluster.ratelimit.over_limit': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ratelimit.failure_mode_allowed': {
         'tags': (
             ('envoy_cluster', ),
             (),

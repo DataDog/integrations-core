@@ -31,6 +31,8 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    collect_per_client_metrics: Optional[bool]
+    collect_per_server_metrics: Optional[bool]
     database_url: Optional[str]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]

@@ -1,41 +1,56 @@
 {
-  "display_name": "IBM WAS",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "ibm_was",
-  "metric_prefix": "ibm_was.",
-  "metric_to_check": "ibm_was.can_connect",
-  "creates_events": false,
-  "short_description": "IBM Websphere Application Server is a framework that hosts Java applications",
-  "guid": "ba177bb7-1bad-4ea8-ac59-1bc8a016f4f7",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-IBM WAS Integration",
-  "categories": [
-    "web",
-    "os & system",
-    "log collection",
-    "autodiscovery"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "ibm-was",
+  "manifest_version": "2.0.0",
+  "app_uuid": "c4c79ae5-b702-415c-bc76-a7b71efd43d8",
+  "app_id": "ibm-was",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "IBM Websphere Application Server is a framework that hosts Java applications",
+    "title": "IBM WAS",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Web",
+      "Category::OS & System",
+      "Category::Log Collection",
+      "Category::Autodiscovery"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "IBM WAS",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "ibm_was.",
+        "check": "ibm_was.can_connect",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "IBM_WAS": "assets/dashboards/overview.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "ibm_was"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

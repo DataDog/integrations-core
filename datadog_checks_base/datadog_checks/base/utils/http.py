@@ -627,7 +627,7 @@ def should_bypass_proxy(url, no_proxy_uris):
 
 def create_basic_auth(config):
     # Since this is the default case, only activate when all fields are explicitly set
-    if config['username'] and config['password']:
+    if config['username'] is not None and config['password'] is not None:
         if config['use_legacy_auth_encoding']:
             return config['username'], config['password']
         else:

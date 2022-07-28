@@ -12,7 +12,7 @@
   "supported_os": [
     "linux"
   ],
-  "public_title": "Datadog-MapR Integration",
+  "public_title": "MapR Integration",
   "categories": [
     "data store",
     "os & system",

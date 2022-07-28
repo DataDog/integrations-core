@@ -1,11 +1,35 @@
 # CHANGELOG - mysql
 
+## 8.4.1 / 2022-07-08 / Agent 7.38.0
+
+* [Fixed] Fix bug where mysql table row stats were not being collected. See [#12472](https://github.com/DataDog/integrations-core/pull/12472).
+
+## 8.4.0 / 2022-06-27
+
+* [Added] Add new metric for tables rows stats. See [#11043](https://github.com/DataDog/integrations-core/pull/11043). Thanks [aymeric-ledizes](https://github.com/aymeric-ledizes).
+* [Fixed] Fix rows with empty SQL text in DBM Activity Query. See [#12393](https://github.com/DataDog/integrations-core/pull/12393).
+* [Fixed] Stop query activity collection due to misconfiguration. See [#12343](https://github.com/DataDog/integrations-core/pull/12343).
+* [Fixed] Fix race conditions when running many instances of the Agent. See [#12342](https://github.com/DataDog/integrations-core/pull/12342).
+* [Fixed] Revert mysql.net.connections metric type. See [#12088](https://github.com/DataDog/integrations-core/pull/12088).
+
+## 8.3.2 / 2022-06-08
+
+* [Fixed] Fix race conditions when running many instances of the Agent. See [#12342](https://github.com/DataDog/integrations-core/pull/12342).
+
+## 8.3.1 / 2022-05-27
+
+* [Fixed] Revert mysql.net.connections metric type. See [#12088](https://github.com/DataDog/integrations-core/pull/12088).
+
 ## 8.3.0 / 2022-05-15
 
 * [Added] Add option to keep aliases in mysql (`keep_sql_alias`). See [#12018](https://github.com/DataDog/integrations-core/pull/12018).
 * [Added] Add support to ingest cloud_metadata for DBM host linking. See [#11988](https://github.com/DataDog/integrations-core/pull/11988).
 * [Added] Add query_truncated field on activity rows. See [#11886](https://github.com/DataDog/integrations-core/pull/11886).
 * [Fixed] Fix uncommented parent options. See [#12013](https://github.com/DataDog/integrations-core/pull/12013).
+
+## 8.2.3 / 2022-05-26 / Agent 7.36.1
+
+* [Fixed] Revert mysql.net.connections metric type. See [#12088](https://github.com/DataDog/integrations-core/pull/12088).
 
 ## 8.2.2 / 2022-04-20 / Agent 7.36.0
 
@@ -274,23 +298,23 @@
 
 ## 1.5.0 / 2018-11-30 / Agent 6.8.0
 
-* [Added] Support Python 3. See [#2630][1].
-* [Fixed] Use raw string literals when \ is present. See [#2465][2].
+* [Added] Support Python 3. See [#2630](https://github.com/DataDog/integrations-core/pull/2630).
+* [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).
 
 ## 1.4.0 / 2018-09-04 / Agent 6.5.0
 
-* [Fixed] Make sure all checks' versions are exposed. See [#1945][3].
-* [Added] Add channel tag to replica metrics. See [#1753][4].
-* [Fixed] Add data files to the wheel package. See [#1727][5].
+* [Fixed] Make sure all checks' versions are exposed. See [#1945](https://github.com/DataDog/integrations-core/pull/1945).
+* [Added] Add channel tag to replica metrics. See [#1753](https://github.com/DataDog/integrations-core/pull/1753).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
 
 ## 1.3.0 / 2018-06-13
 
-* [Added] Make the max custom queries configurable in the yaml file. See [#1713][6].
+* [Added] Make the max custom queries configurable in the yaml file. See [#1713](https://github.com/DataDog/integrations-core/pull/1713).
 
 ### 1.2.1 / 2018-05-31
 
-* [Fixed] Fix replication data extraction when replication channel is set. See [#1639][7].
-* [Fixed] Fix error while fetching mysql pid from psutil . See [#1620][8].
+* [Fixed] Fix replication data extraction when replication channel is set. See [#1639](https://github.com/DataDog/integrations-core/pull/1639).
+* [Fixed] Fix error while fetching mysql pid from psutil . See [#1620](https://github.com/DataDog/integrations-core/pull/1620).
 
 ## 1.2.0 / 2018-05-11
 
@@ -308,7 +332,7 @@
 
 ## 1.1.1 / 2018-02-13
 
-* [BUGFIX] Changes default value of `connect_timeout` to 10. See [#1020][9]
+* [BUGFIX] Changes default value of `connect_timeout` to 10. See [#1020](https://github.com/DataDog/integrations-core/issues/1020)
 
 ## 1.1.0 / 2018-01-10
 
@@ -317,47 +341,27 @@
 
 ## 1.0.5 / 2017-11-21
 
-* [BUGFIX] Fixes [#783][10]
+* [BUGFIX] Fixes [#783](https://github.com/DataDog/integrations-core/issues/783)
 
 ## 1.0.4 / 2017-08-28
 
-* [BUGFIX] Add new innodb aio read/write format and prevent future crashes from new format. See [#660][11]
-* [BUGFIX] Fix bug when options dict is empty. See [#637][12]
-* [BUGFIX] Fix slow query check for 95th us percentile. See [#586][13], thanks [@EdwardMcConnell][14]
+* [BUGFIX] Add new innodb aio read/write format and prevent future crashes from new format. See [#660](https://github.com/DataDog/integrations-core/issues/660)
+* [BUGFIX] Fix bug when options dict is empty. See [#637](https://github.com/DataDog/integrations-core/issues/637)
+* [BUGFIX] Fix slow query check for 95th us percentile. See [#586](https://github.com/DataDog/integrations-core/issues/586), thanks [@EdwardMcConnell](https://github.com/EdwardMcConnell)
 
 ## 1.0.3 / 2017-05-11
 
-* [BUGFIX] MySQL: Fix replication service check for <5.6. See [#394][15]
+* [BUGFIX] MySQL: Fix replication service check for <5.6. See [#394](https://github.com/DataDog/integrations-core/issues/394)
 
 ## 1.0.2 / 2017-04-24
 
-* [BUGFIX] MySQL: Fix for replication service check. See [#329][16]
+* [BUGFIX] MySQL: Fix for replication service check. See [#329](https://github.com/DataDog/integrations-core/issues/329)
 
 ## 1.0.1 / 2017-03-23
 
-* [BUGFIX] MySQL: Allow for configurable collection of replica statuses. See [#288][17]
-* [BUGFIX] MySQL: Slaves_connected should be a gauge. See [#291][18]
+* [BUGFIX] MySQL: Allow for configurable collection of replica statuses. See [#288](https://github.com/DataDog/integrations-core/issues/288)
+* [BUGFIX] MySQL: Slaves_connected should be a gauge. See [#291](https://github.com/DataDog/integrations-core/issues/291)
 
 ## 1.0.0 / 2017-03-23
 
 * [FEATURE] adds mysql integration.
-
-<!--- The following link definition list is generated by PimpMyChangelog --->
-[1]: https://github.com/DataDog/integrations-core/pull/2630
-[2]: https://github.com/DataDog/integrations-core/pull/2465
-[3]: https://github.com/DataDog/integrations-core/pull/1945
-[4]: https://github.com/DataDog/integrations-core/pull/1753
-[5]: https://github.com/DataDog/integrations-core/pull/1727
-[6]: https://github.com/DataDog/integrations-core/pull/1713
-[7]: https://github.com/DataDog/integrations-core/pull/1639
-[8]: https://github.com/DataDog/integrations-core/pull/1620
-[9]: https://github.com/DataDog/integrations-core/issues/1020
-[10]: https://github.com/DataDog/integrations-core/issues/783
-[11]: https://github.com/DataDog/integrations-core/issues/660
-[12]: https://github.com/DataDog/integrations-core/issues/637
-[13]: https://github.com/DataDog/integrations-core/issues/586
-[14]: https://github.com/EdwardMcConnell
-[15]: https://github.com/DataDog/integrations-core/issues/394
-[16]: https://github.com/DataDog/integrations-core/issues/329
-[17]: https://github.com/DataDog/integrations-core/issues/288
-[18]: https://github.com/DataDog/integrations-core/issues/291

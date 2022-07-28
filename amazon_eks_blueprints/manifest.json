@@ -1,32 +1,42 @@
 {
-  "display_name": "amazon_eks_blueprints",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "amazon_eks_blueprints",
-  "metric_prefix": "amazon_eks_blueprints.",
-  "metric_to_check": "",
-  "creates_events": false,
-  "short_description": "Amazon EKS Blueprints consolidates cluster configuration and deployment tools.",
-  "guid": "8d904f9b-718b-4f43-aef9-6bf7dcc465b9",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog Blueprints Add-on",
-  "categories": [
-    "aws",
-    "containers",
-    "orchestration"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "amazon-eks-blueprints",
+  "manifest_version": "2.0.0",
+  "app_uuid": "4c0828d6-0c41-47d0-aa20-c174773e2bda",
+  "app_id": "amazon-eks-blueprints",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Amazon EKS Blueprints consolidates cluster configuration and deployment tools.",
+    "title": "Datadog Blueprints Add-on",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::AWS",
+      "Category::Containers",
+      "Category::Orchestration"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "dashboards": {},
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "integration": {
+      "source_type_name": "amazon_eks_blueprints",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

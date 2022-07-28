@@ -67,7 +67,10 @@ files:
           type: string
           example: SNOWFLAKE
       - name: schema
-        description: Name of the default schema to use for the database.
+        description: |
+          Name of the default schema to use for the database.
+
+          To collect organization level metrics, set this to ORGANIZATION_USAGE.
         value:
           type: string
           example: ACCOUNT_USAGE
@@ -147,7 +150,7 @@ files:
         description: |
           List of Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.
 
-          The available metric groups are:
+          When querying the ACCOUNT_USAGE schema, the available metric groups are:
 
             - snowflake.query (enabled by default)
             - snowflake.billing (enabled by default)
@@ -159,6 +162,16 @@ files:
             - snowflake.auto_recluster
             - snowflake.pipe
             - snowflake.replication
+
+          When querying the ORGANIZATION_USAGE schema, the available metric groups are:
+            - snowflake.organization.warehouse (enabled by default)
+            - snowflake.organization.currency (enabled by default)
+            - snowflake.organization.credit
+            - snowflake.organization.storage (enabled by default)
+            - snowflake.organization.contracts
+            - snowflake.organization.balance
+            - snowflake.organization.rate
+            - snowflake.organization.data_transfer
         value:
           type: array
           items:

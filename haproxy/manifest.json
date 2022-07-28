@@ -23,7 +23,7 @@
     "haproxy-master",
     "haproxy-controller"
   ],
-  "public_title": "Datadog-HAProxy Integration",
+  "public_title": "HAProxy Integration",
   "short_description": "Monitor key metrics for requests, responses, errors, bytes served, and more.",
   "support": "core",
   "supported_os": [

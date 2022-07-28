@@ -9,15 +9,6 @@ ORACLE_METADATA_CSV_EXAMPLE = [(0, {"metric_name": "oracle.session_count"})]
 
 V2_VALID_MANIFEST = {
     "app_id": "datadog-oracle",
-    "classifier_tags": [
-        "Category::Marketplace",
-        "Category::Cloud",
-        "Category::Log Collection",
-        "Supported OS::Windows",
-        "Supported OS::Mac OS",
-        "Offering::Integration",
-        "Offering::UI Extension",
-    ],
     "assets": {
         "dashboards": {"oracle": "assets/dashboards/example.json"},
         "integration": {
@@ -52,6 +43,15 @@ V2_VALID_MANIFEST = {
         "media": [],
         "overview": "README.md#Overview",
         "title": "Oracle",
+        "classifier_tags": [
+            "Category::Marketplace",
+            "Category::Cloud",
+            "Category::Log Collection",
+            "Supported OS::Windows",
+            "Supported OS::Mac OS",
+            "Offering::Integration",
+            "Offering::UI Extension",
+        ],
     },
 }
 

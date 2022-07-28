@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.mongo import MongoDb
 
-from .common import HOST, PORT2
+from .common import HOST, PORT2, not_tls
 
 BASE_METRICS = [
     'mongodb.connections.available',
@@ -45,9 +45,17 @@ MONGOS_METRICS = BASE_METRICS + [
     'mongodb.stats.objects',
 ]
 
-MONGOD_METRICS = BASE_METRICS + ['mongodb.fsynclocked']
+MONGOD_METRICS = BASE_METRICS + [
+    'mongodb.oplatencies.reads.latencyps',
+    'mongodb.oplatencies.writes.latencyps',
+    'mongodb.oplatencies.commands.latencyps',
+    'mongodb.metrics.queryexecutor.scannedps',
+    'mongodb.metrics.queryexecutor.scannedobjectsps',
+    'mongodb.fsynclocked',
+]
 
 
+@not_tls
 @pytest.mark.e2e
 def test_e2e_mongos(dd_agent_check, instance_authdb):
     aggregator = dd_agent_check(instance_authdb, rate=True)
@@ -57,6 +65,7 @@ def test_e2e_mongos(dd_agent_check, instance_authdb):
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
 
 
+@not_tls
 @pytest.mark.e2e
 def test_e2e_mongod(dd_agent_check, instance):
     instance['hosts'] = ['{}:{}'.format(HOST, PORT2)]

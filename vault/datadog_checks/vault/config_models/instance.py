@@ -87,6 +87,7 @@ class InstanceConfig(BaseModel):
     client_token_path: Optional[str]
     collect_counters_with_distributions: Optional[bool]
     collect_histogram_buckets: Optional[bool]
+    collect_secondary_dr: Optional[bool]
     connect_timeout: Optional[float]
     detect_leader: Optional[bool]
     disable_generic_tags: Optional[bool]

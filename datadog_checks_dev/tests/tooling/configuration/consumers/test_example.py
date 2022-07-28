@@ -8,8 +8,6 @@ from datadog_checks.dev.tooling.configuration.consumers.example import DESCRIPTI
 
 from ..utils import get_example_consumer, normalize_yaml
 
-pytestmark = [pytest.mark.conf, pytest.mark.conf_consumer, pytest.mark.conf_consumer_example]
-
 
 def test_option_no_section():
     consumer = get_example_consumer(

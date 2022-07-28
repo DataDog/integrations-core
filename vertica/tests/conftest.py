@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from copy import deepcopy
 
 import pytest
@@ -37,9 +38,9 @@ class InitializeDB(LazyFunction):
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with docker_run(
-        common.COMPOSE_FILE, log_patterns=['Vertica is now running'], conditions=[InitializeDB(common.CONFIG)]
-    ):
+    compose_file = os.path.join(common.HERE, 'docker', 'docker-compose.yaml')
+
+    with docker_run(compose_file, log_patterns=['Vertica is now running'], conditions=[InitializeDB(common.CONFIG)]):
         yield common.CONFIG
 
 

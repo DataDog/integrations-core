@@ -4,10 +4,9 @@
 import os
 
 from datadog_checks.dev import get_docker_hostname, get_here
+from datadog_checks.vertica.utils import parse_major_version
 
 HERE = get_here()
-COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
-
 HOST = get_docker_hostname()
 PORT = 5433
 ID = 'datadog'
@@ -58,3 +57,5 @@ TLS_CONFIG_LEGACY = {
     'private_key': private_key,
     'ca_cert': CERTIFICATE_DIR,
 }
+
+VERTICA_MAJOR_VERSION = parse_major_version(os.environ.get('VERTICA_VERSION', 9))

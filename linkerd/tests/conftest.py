@@ -35,6 +35,7 @@ def dd_environment():
         with docker_run(
             compose_file=compose_file,
             conditions=[CheckDockerLogs(compose_file, 'LINKERD DEPLOY COMPLETE', wait=5, attempts=120)],
+            attempts=2,
         ):
             with ExitStack() as stack:
                 ip, port = stack.enter_context(

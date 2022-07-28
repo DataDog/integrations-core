@@ -269,7 +269,7 @@ class LogsCategoryValidator(BaseManifestValidator):
 
     LOG_COLLECTION_CATEGORY = {V1: "log collection", V2: "Category::Log Collection"}
 
-    CATEGORY_PATH = {V1: "/categories", V2: "/classifier_tags"}
+    CATEGORY_PATH = {V1: "/categories", V2: "/tile/classifier_tags"}
 
     IGNORE_LIST = {
         'databricks',  # Logs are provided by Spark
