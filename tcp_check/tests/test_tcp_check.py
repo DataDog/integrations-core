@@ -423,9 +423,9 @@ def test_ipv6(aggregator, check):
     # Windows or MacOS might not have IPv6 connectivity when testing locally
     if has_ipv6 and platform.system() not in ('Windows', 'Darwin'):
         assert nb_ipv6 == 8
-    if platform.system() == linux:
-        assert has_ipv6 == True
-        
+    if platform.system() == 'Linux':
+        assert has_ipv6 is True
+
     aggregator.assert_all_metrics_covered()
     assert len(aggregator.service_checks('tcp.can_connect')) == nb_ipv4 + nb_ipv6
 
