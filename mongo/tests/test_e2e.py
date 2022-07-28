@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.mongo import MongoDb
 
-from .common import HOST, PORT2, not_tls
+from .common import HOST, PORT2, not_tls, not_auth
 
 BASE_METRICS = [
     'mongodb.connections.available',
@@ -56,6 +56,7 @@ MONGOD_METRICS = BASE_METRICS + [
 
 
 @not_tls
+@not_auth
 @pytest.mark.e2e
 def test_e2e_mongos(dd_agent_check, instance_authdb):
     aggregator = dd_agent_check(instance_authdb, rate=True)
@@ -66,6 +67,7 @@ def test_e2e_mongos(dd_agent_check, instance_authdb):
 
 
 @not_tls
+@not_auth
 @pytest.mark.e2e
 def test_e2e_mongod(dd_agent_check, instance):
     instance['hosts'] = ['{}:{}'.format(HOST, PORT2)]
