@@ -9,7 +9,6 @@ import click
 from ...fs import resolve_path
 from ..constants import get_root
 from ..create import construct_template_fields, create_template_files, get_valid_templates
-from ..manifest_validator.v2.migration import migrate_manifest
 from ..utils import kebab_case_name, normalize_package_name
 from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_warning
 
@@ -87,12 +86,11 @@ def display_path_tree(path_tree):
     help='The type of integration to create',
 )
 @click.option('--location', '-l', help='The directory where files will be written')
-@click.option('--manifest-v2', '-v2', is_flag=True, help='Use Manifest V2 instead of V1 default')
 @click.option('--non-interactive', '-ni', is_flag=True, help='Disable prompting for fields')
 @click.option('--quiet', '-q', is_flag=True, help='Show less output')
 @click.option('--dry-run', '-n', is_flag=True, help='Only show what would be created')
 @click.pass_context
-def create(ctx, name, integration_type, location, manifest_v2, non_interactive, quiet, dry_run):
+def create(ctx, name, integration_type, location, non_interactive, quiet, dry_run):
     """
     Create scaffolding for a new integration.
 
@@ -115,9 +113,6 @@ def create(ctx, name, integration_type, location, manifest_v2, non_interactive, 
     integration_dir = os.path.join(root, integration_dir_name)
     if os.path.exists(integration_dir):
         abort(f'Path `{integration_dir}` already exists!')
-
-    if repo_choice == 'marketplace':
-        manifest_v2 = True
 
     template_fields = {'manifest_version': '1.0.0'}
     if non_interactive and repo_choice != 'core':
@@ -165,20 +160,20 @@ def create(ctx, name, integration_type, location, manifest_v2, non_interactive, 
             else:
                 template_fields[
                     'author_info'
-                ] = """
-  "author": {
-    "support_email": "",
-    "name": "",
+                ] = f"""
+  "author": {{
+    "support_email": "{template_fields['email']}",
+    "name": "{template_fields['author']}",
     "homepage": "",
     "sales_email": ""
-  },"""
+  }},"""
             template_fields['terms'] = ''
             template_fields['integration_id'] = kebab_case_name(name)
             template_fields['package_url'] = (
                 f"\n    # The project's main homepage."
                 f"\n    url='https://github.com/DataDog/integrations-{repo_choice}',"
             )
-    config = construct_template_fields(name, repo_choice, manifest_v2, integration_type, **template_fields)
+    config = construct_template_fields(name, repo_choice, integration_type, **template_fields)
 
     files = create_template_files(integration_type, root, config, read=not dry_run)
     file_paths = [file.file_path.replace(f'{root}{path_sep}', '', 1) for file in files]
@@ -200,9 +195,6 @@ def create(ctx, name, integration_type, location, manifest_v2, non_interactive, 
 
     for file in files:
         file.write()
-
-    if manifest_v2:
-        migrate_manifest(repo_choice, config['check_name'], '2.0.0')
 
     if quiet:
         echo_info(f'Created `{integration_dir}`')
