@@ -70,6 +70,29 @@ def test_check_connection_load_balance(monkeypatch):
 
 
 @pytest.mark.usefixtures('dd_environment')
+def test_connect_resets_connection_when_connection_closed(monkeypatch):
+    options = common.connection_options_from_config(common.CONFIG)
+    client = VerticaClient(options)
+
+    client.connect()
+    client.connection.close()
+
+    monkeypatch.setattr(client.connection, 'reset_connection', mock.Mock())
+    client.connect()
+
+    assert client.connection.reset_connection.was_called_once()
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_connect_when_connection_is_open_reuses_connection():
+    options = common.connection_options_from_config(common.CONFIG)
+    client = VerticaClient(options)
+
+    conn = client.connect()
+    assert client.connect() == conn
+
+
+@pytest.mark.usefixtures('dd_environment')
 def test_custom_queries(aggregator, instance, dd_run_check):
     instance['custom_queries'] = [
         {
