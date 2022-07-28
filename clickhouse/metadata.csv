@@ -222,6 +222,8 @@ clickhouse.background_pool.message_broker.task.active,gauge,,task,,Number of act
 clickhouse.ddl.max_processed,gauge,,,,Max processed DDL entry of DDLWorker.,0,clickhouse,,
 clickhouse.parts.committed,gauge,,item,,"Active data part, used by current and upcoming SELECTs.",0,clickhouse,,
 clickhouse.parts.compact,gauge,,item,,Compact parts.,0,clickhouse,,
+clickhouse.parts.active,gauge,,item,,[Only versions => 22.7.1] Active data part used by current and upcoming SELECTs.,0,clickhouse,,
+clickhouse.parts.pre_active,gauge,,item,,[Only versions => 22.7.1] The part is in data_parts but not used for SELECTs.,0,clickhouse,,
 clickhouse.parts.delete_on_destroy,gauge,,item,,Part was moved to another disk and should be deleted in own destructor.,0,clickhouse,,
 clickhouse.parts.deleting,gauge,,item,,"Not active data part with identity refcounter, it is deleting right now by a cleaner.",0,clickhouse,,
 clickhouse.parts.inmemory,gauge,,item,,In-memory parts.,0,clickhouse,,
