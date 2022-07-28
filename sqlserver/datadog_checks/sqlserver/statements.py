@@ -51,6 +51,8 @@ STATEMENT_METRICS_QUERY = """\
 with qstats as (
     select TOP {limit} query_hash, query_plan_hash, last_execution_time, plan_handle,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
+            statement_start_offset,
+            statement_end_offset,
            {query_metrics_columns}
     from sys.dm_exec_query_stats
     where last_execution_time > dateadd(second, -?, getdate())
@@ -58,13 +60,23 @@ with qstats as (
 qstats_aggr as (
     select query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
        D.name as database_name, max(plan_handle) as plan_handle,
+       statement_start_offset,
+       statement_end_offset,
     {query_metrics_column_sums}
     from qstats S
     left join sys.databases D on S.dbid = D.database_id
-    group by query_hash, query_plan_hash, S.dbid, D.name
+    group by query_hash, query_plan_hash, S.dbid, D.name, statement_start_offset, statement_end_offset
 )
-select text, encrypted as is_encrypted, * from qstats_aggr
-    cross apply sys.dm_exec_sql_text(plan_handle)
+select
+    SUBSTRING(text, (statement_start_offset / 2) + 1,
+    ((CASE statement_end_offset
+        WHEN -1 THEN DATALENGTH(text)
+        ELSE statement_end_offset END
+            - statement_start_offset) / 2) + 1) AS statement_text,
+    encrypted as is_encrypted,
+    (SELECT IIF (EXISTS (SELECT 1 FROM sys.dm_exec_procedure_stats WHERE object_id =qt.objectid), 1, 0)) as is_proc,
+    * from qstats_aggr
+    cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
 
 # This query is an optimized version of the statement metrics query
@@ -72,13 +84,23 @@ select text, encrypted as is_encrypted, * from qstats_aggr
 STATEMENT_METRICS_QUERY_NO_AGGREGATES = """\
 with qstats_aggr as (
     select TOP {limit} query_hash, query_plan_hash, max(plan_handle) as plan_handle,
+        statement_start_offset,
+        statement_end_offset,
         {query_metrics_column_sums}
         from sys.dm_exec_query_stats S
         where last_execution_time > dateadd(second, -?, getdate())
-        group by query_hash, query_plan_hash
+        group by query_hash, query_plan_hash, statement_start_offset, statement_end_offset
 )
-select text, encrypted as is_encrypted, * from qstats_aggr
-    cross apply sys.dm_exec_sql_text(plan_handle)
+select
+    SUBSTRING(text, (statement_start_offset / 2) + 1,
+        ((CASE statement_end_offset
+        WHEN -1 THEN DATALENGTH(text)
+        ELSE statement_end_offset
+    END - statement_start_offset) / 2) + 1) AS statement_text,
+    encrypted as is_encrypted,
+    (SELECT IIF (EXISTS (SELECT 1 FROM sys.dm_exec_procedure_stats WHERE object_id = qt.objectid), 1, 0)) as is_proc,
+    * from qstats_aggr
+    cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
 
 PLAN_LOOKUP_QUERY = """\
@@ -244,7 +266,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         normalized_rows = []
         for row in rows:
             try:
-                statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
+                statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
                 self.log.debug("Failed to obfuscate query: %s", e)
@@ -255,7 +277,11 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 )
                 continue
             obfuscated_statement = statement['query']
-            row['text'] = obfuscated_statement
+            row['statement_text'] = obfuscated_statement
+            # remove the text field, so we do not forward deobfuscated text
+            # to the backend
+            if row['text']:
+                del row['text']
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
             row['query_hash'] = _hash_to_hex(row['query_hash'])
             row['query_plan_hash'] = _hash_to_hex(row['query_plan_hash'])
@@ -282,7 +308,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         if 'dd_comments' in row:
             del row['dd_comments']
         # truncate query text to the maximum length supported by metrics tags
-        row['text'] = row['text'][0:200]
+        row['statement_text'] = row['statement_text'][0:200]
         return row
 
     def _to_metrics_payload(self, rows):
@@ -356,7 +382,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 "db": {
                     "instance": row.get('database_name', None),
                     "query_signature": row['query_signature'],
-                    "statement": row['text'],
+                    "statement": row['statement_text'],
                     "metadata": {
                         "tables": row['dd_tables'],
                         "commands": row['dd_commands'],
@@ -390,6 +416,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 self.check.count("dd.sqlserver.statements.deadline_exceeded", 1, **self.check.debug_stats_kwargs())
                 return
             plan_key = (row['query_signature'], row['query_hash'], row['query_plan_hash'])
+            # for stored procedures, we only want to look up plans for the entire procedure
+            # not every query that is executed within the proc. Queries from the same procedure
+            # have the same plan_handle, but different query signatures & can have diff plan hashes.
+            # taking the first 16 bytes should be unique enough to properly identify the plan.
+            if row['is_proc']:
+                plan_key = row['plan_handle'][0:16]
             if self._seen_plans_ratelimiter.acquire(plan_key):
                 raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
                 obfuscated_plan, collection_errors = None, None
@@ -433,7 +465,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                             "collection_errors": collection_errors,
                         },
                         "query_signature": row['query_signature'],
-                        "statement": row['text'],
+                        "statement": row['statement_text'],
                         "metadata": {
                             "tables": row['dd_tables'],
                             "commands": row['dd_commands'],
