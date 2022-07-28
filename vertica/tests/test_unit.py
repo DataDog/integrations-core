@@ -7,7 +7,7 @@ import os
 import mock
 import pytest
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import TRACE_LEVEL
 from datadog_checks.vertica import VerticaCheck
 from datadog_checks.vertica.utils import parse_major_version
@@ -26,6 +26,7 @@ def test_ssl_config_ok(aggregator, tls_instance):
             check = VerticaCheck('vertica', {}, [tls_instance])
             check.check(tls_instance)
 
+            assert check._client.use_tls
             assert tls_context.verify_mode == ssl.CERT_REQUIRED
             assert tls_context.check_hostname is True
             tls_context.load_verify_locations.assert_called_with(cadata=None, cafile=None, capath=CERTIFICATE_DIR)
@@ -147,6 +148,23 @@ def test_client_logging_disabled_if_agent_uses_info(aggregator, instance):
             connection_load_balance=mock.ANY,
             connection_timeout=mock.ANY,
         )
+
+
+def test_connection_error_service_check(aggregator, instance, monkeypatch):
+    check = VerticaCheck('vertica', {}, [instance])
+
+    monkeypatch.setattr(check._client, 'connect', mock.Mock(side_effect=Exception))
+
+    check.check(instance)
+
+    aggregator.assert_service_check("vertica.can_connect", status=AgentCheck.CRITICAL, tags=['db:datadog', 'foo:bar'])
+
+
+def test_invalid_groups_in_config(instance):
+    instance['metric_groups'] = ['system', 'a_group_that_does_not_exist']
+
+    with pytest.raises(ConfigurationError):
+        VerticaCheck('vertica', {}, [instance]).parse_metric_groups()
 
 
 @pytest.mark.parametrize(

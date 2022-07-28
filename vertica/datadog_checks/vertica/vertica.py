@@ -177,7 +177,7 @@ class VerticaClient(object):
         balancing is not active.
         """
         if self.connection:
-            if self._connection_load_balance or self.connection.closed():
+            if self.connection_load_balance or self.connection.closed():
                 self.connection.reset_connection()
         else:
             self.connection = vertica.connect(**exclude_undefined_keys(self.options))
@@ -218,13 +218,13 @@ class VerticaClient(object):
             # but we still get logs via parent root logger
             self._options['log_path'] = ''
 
-        if self._use_tls:
+        if self.use_tls:
             self._options['ssl'] = self._tls_context
 
     @property
-    def _use_tls(self):
-        self._tls_context is not None
+    def use_tls(self):
+        return self._tls_context is not None
 
     @property
-    def _connection_load_balance(self):
+    def connection_load_balance(self):
         return self.options.get('connection_load_balance', False)
