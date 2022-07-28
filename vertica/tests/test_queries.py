@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.vertica.queries import build_projection_storage_queries, build_storage_containers_queries
+from datadog_checks.vertica.queries import QueryBuilder
 
 
 @pytest.mark.parametrize(
@@ -42,7 +42,7 @@ from datadog_checks.vertica.queries import build_projection_storage_queries, bui
     ],
 )
 def test_build_projection_storage_queries(version, expected_per_projection_query):
-    queries = build_projection_storage_queries(version)
+    queries = QueryBuilder(version).build_projection_storage_queries()
 
     assert len(queries) == 4
 
@@ -81,8 +81,7 @@ def test_build_projection_storage_queries(version, expected_per_projection_query
     ],
 )
 def test_build_storage_containers_queries(version, expected_per_projection_query):
-
-    queries = build_storage_containers_queries(version)
+    queries = QueryBuilder(version).build_storage_containers_queries()
 
     assert len(queries) == 3
 

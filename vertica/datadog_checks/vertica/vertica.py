@@ -12,7 +12,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.base.utils.db import QueryManager
 
-from .queries import METRIC_GROUPS, get_queries
+from .queries import METRIC_GROUPS, QueryBuilder
 from .utils import parse_major_version
 
 # Python 3 only
@@ -62,7 +62,7 @@ class VerticaCheck(AgentCheck):
 
         # We'll connect on the first check run
         self._connection = None
-        self._query_manager = None
+        self.query_manager = None
 
         self._metric_groups = {}
 
@@ -82,20 +82,23 @@ class VerticaCheck(AgentCheck):
                 return
 
             self._connection = connection
-            self._initialize_query_manager()
+            self.initialize_query_manager()
 
         elif self._connection_load_balance or self._connection.closed():
             self._connection.reset_connection()
 
-    def _initialize_query_manager(self):
-        self._query_manager = QueryManager(
+    def initialize_query_manager(self, monitor_schema='v_monitor', catalog_schema='v_catalog'):
+        query_builder = QueryBuilder(
+            self._major_version(), monitor_schema=monitor_schema, catalog_schema=catalog_schema
+        )
+        self.query_manager = QueryManager(
             self,
             self.execute_query,
-            queries=get_queries(self._major_version(), self._metric_groups),
+            queries=query_builder.get_queries(self._metric_groups),
             tags=self._tags,
         )
 
-        self._query_manager.compile_queries()
+        self.query_manager.compile_queries()
 
     def _major_version(self):
         return parse_major_version(self.query_version())
@@ -107,7 +110,7 @@ class VerticaCheck(AgentCheck):
             self.log.debug('Skipping check due to connection issue.')
             return
 
-        self._query_manager.execute()
+        self.query_manager.execute()
         self.set_version_metadata()
 
     @AgentCheck.metadata_entrypoint
