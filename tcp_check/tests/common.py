@@ -29,6 +29,7 @@ E2E_METADATA = {'docker_platform': 'windows' if using_windows_containers() else 
 DUAL_STACK_GETADDRINFO_LOCALHOST_IPV6 = [
     (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('::1', 80, 0, 0)),
     (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('127.0.0.1', 80)),
+    (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip3', 80)),
 ]
 
 DUAL_STACK_GETADDRINFO_LOCALHOST_IPV4 = [
@@ -51,22 +52,11 @@ DUAL_STACK_GETADDRINFO_IPV6 = [
     (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip1', 80, 0, 0)),
     (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip2', 80)),
     (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip3', 80, 0, 0)),
+    (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip4', 80)),
 ]
 
 SINGLE_STACK_GETADDRINFO_IPV4 = [
     (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip1', 80)),
-    (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip2', 80)),
-    (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip3', 80)),
-]
-
-DUAL_STACK_GETADDRINFO_LOCALHOST_IPV4_ONLY = [
-    (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('::1', 80, 0, 0)),
-    (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('127.0.0.1', 80)),
-    (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip3', 80)),
-]
-
-DUAL_STACK_GETADDRINFO_IPV4_ONLY = [
-    (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('ip1', 80, 0, 0)),
     (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip2', 80)),
     (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('ip3', 80)),
 ]
