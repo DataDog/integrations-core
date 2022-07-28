@@ -52,8 +52,7 @@ METRIC_VAL_CHECKS_OLD = {
 pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration]
 
 
-@common.not_auth
-@common.not_tls
+@common.standalone
 @pytest.mark.parametrize(
     'instance_authdb',
     [
@@ -62,7 +61,7 @@ pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration
         pytest.param(common.INSTANCE_AUTHDB_LEGACY_CONFIG, id='legacy'),
     ],
 )
-def test_mongo(aggregator, check, instance_authdb, dd_run_check):
+def test_mongo_authdb(aggregator, check, instance_authdb, dd_run_check):
     check = check(instance_authdb)
     dd_run_check(check)
 
@@ -76,13 +75,12 @@ def test_mongo(aggregator, check, instance_authdb, dd_run_check):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
-@common.not_auth
-@common.not_tls
+@common.standalone
 @pytest.mark.parametrize(
     'instance_user',
     [pytest.param(common.INSTANCE_USER, id='standard'), pytest.param(common.INSTANCE_USER_LEGACY_CONFIG, id='legacy')],
 )
-def test_mongo2(aggregator, check, instance_user, dd_run_check):
+def test_mongo_db_test(aggregator, check, instance_user, dd_run_check):
     check = check(instance_user)
     dd_run_check(check)
 
@@ -99,8 +97,7 @@ def test_mongo2(aggregator, check, instance_user, dd_run_check):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
-@common.not_auth
-@common.not_tls
+@common.shard
 def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
     check = check(instance_arbiter)
     dd_run_check(check)
@@ -133,8 +130,7 @@ def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
         aggregator.assert_metric(metric, value, expected_tags, count=1)
 
 
-@common.not_auth
-@common.not_tls
+@common.standalone
 def test_mongo_old_config(aggregator, check, instance, dd_run_check):
     check = check(instance)
     dd_run_check(check)
@@ -149,24 +145,7 @@ def test_mongo_old_config(aggregator, check, instance, dd_run_check):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
-@common.not_auth
-@common.not_tls
-def test_mongo_old_config_2(aggregator, check, instance, dd_run_check):
-    check = check(instance)
-    dd_run_check(check)
-
-    metric_names = aggregator.metric_names
-    assert metric_names
-
-    for metric_name in metric_names:
-        if metric_name in METRIC_VAL_CHECKS_OLD:
-            metric = aggregator.metrics(metric_name)[0]
-            assert METRIC_VAL_CHECKS_OLD[metric_name](metric.value)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
-
-
-@common.not_auth
-@common.not_tls
+@common.standalone
 def test_mongo_1valid_and_1invalid_custom_queries(
     aggregator, check, instance_1valid_and_1invalid_custom_queries, dd_run_check
 ):
@@ -179,8 +158,7 @@ def test_mongo_1valid_and_1invalid_custom_queries(
     aggregator.assert_metric("dd.custom.mongo.query_a.amount", count=0)
 
 
-@common.not_auth
-@common.not_tls
+@common.standalone
 def test_mongo_custom_queries(aggregator, check, instance_custom_queries, dd_run_check):
     # Run the check against our running server
     check = check(instance_custom_queries)
@@ -218,8 +196,7 @@ def test_mongo_custom_queries(aggregator, check, instance_custom_queries, dd_run
     aggregator.assert_metric('dd.mongodb.custom.queries_slower_than_60sec.secs_running', metric_type=aggregator.GAUGE)
 
 
-@common.not_auth
-@common.not_tls
+@common.standalone
 def test_mongo_custom_query_with_empty_result_set(aggregator, check, instance_user, caplog, dd_run_check):
     instance_user['custom_queries'] = [
         {
@@ -245,8 +222,7 @@ def test_mongo_custom_query_with_empty_result_set(aggregator, check, instance_us
     aggregator.assert_metric('dd.custom.mongo.query_a.amount', count=0)
 
 
-@common.not_auth
-@common.not_tls
+@common.shard
 def test_mongo_replset(instance_shard, aggregator, check, dd_run_check):
     mongo_check = check(instance_shard)
     dd_run_check(mongo_check)
@@ -274,8 +250,7 @@ def test_mongo_replset(instance_shard, aggregator, check, dd_run_check):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
-@common.not_auth
-@common.not_tls
+@common.standalone
 def test_metadata(check, instance, datadog_agent):
     check = check(instance)
     check.check_id = 'test:123'
@@ -287,8 +262,7 @@ def test_metadata(check, instance, datadog_agent):
     datadog_agent.assert_metadata_count(len(version_metadata) + 2)
 
 
-@common.not_auth
-@common.not_tls
+@common.shard
 def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
     mongo_check = check(instance_shard)
     dd_run_check(mongo_check)

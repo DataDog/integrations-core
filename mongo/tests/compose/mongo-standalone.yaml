@@ -1,0 +1,14 @@
+version: '3'
+
+# This was heavily based upon: https://github.com/chefsplate/mongo-shard-docker-compose
+services:
+  standalone:
+    image: mongo:$MONGO_VERSION
+    networks:
+      - mongo-standalone
+    command: mongod --port 27017 --bind_ip=0.0.0.0
+    ports:
+      - "27017:27017"
+
+networks:
+  mongo-standalone: {}

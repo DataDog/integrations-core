@@ -15,16 +15,17 @@ PORT_ARBITER = 27020
 MAX_WAIT = 150
 
 COMPOSE_FILE = os.getenv('COMPOSE_FILE')
+IS_STANDALONE = COMPOSE_FILE == 'mongo-standalone.yaml'
+IS_SHARD = COMPOSE_FILE == 'mongo-shard.yaml'
 IS_TLS = COMPOSE_FILE == 'mongo-tls.yaml'
 IS_AUTH = COMPOSE_FILE == 'mongo-auth.yaml'
 
 TLS_CERTS_FOLDER = os.path.join(os.path.dirname(__file__), 'compose', 'certs')
 
+standalone = pytest.mark.skipif(not IS_STANDALONE, reason='Test only valid for standalone mongo')
+shard = pytest.mark.skipif(not IS_SHARD, reason='Test only valid for sharded mongo')
 tls = pytest.mark.skipif(not IS_TLS, reason='Test only valid for TLS')
-not_tls = pytest.mark.skipif(IS_TLS, reason='Test only valid for non-TLS')
-
 auth = pytest.mark.skipif(not IS_AUTH, reason='Test only valid for mongo with --auth')
-not_auth = pytest.mark.skipif(IS_AUTH, reason='Test only valid for mongo without --auth')
 
 MONGODB_SERVER = "mongodb://%s:%s/test" % (HOST, PORT1)
 SHARD_SERVER = "mongodb://%s:%s" % (HOST, PORT2)

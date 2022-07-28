@@ -600,6 +600,34 @@ def test_mongod_auth_ok(check, dd_run_check, aggregator):
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
 
 
+@auth
+@pytest.mark.usefixtures('dd_environment')
+def test_mongod_auth_bad_user(check, dd_run_check, aggregator):
+    instance = {
+        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'username': 'badUser',
+        'password': 'testPass',
+        'options': {'authSource': 'authDB'},
+    }
+    with pytest.raises(Exception, match="Authentication failed"):
+        mongo_check = check(instance)
+        dd_run_check(mongo_check)
+
+
+@auth
+@pytest.mark.usefixtures('dd_environment')
+def test_mongod_auth_bad_password(check, dd_run_check, aggregator):
+    instance = {
+        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'username': 'testUser',
+        'password': 'badPass',
+        'options': {'authSource': 'authDB'},
+    }
+    with pytest.raises(Exception, match="Authentication failed"):
+        mongo_check = check(instance)
+        dd_run_check(mongo_check)
+
+
 @tls
 @pytest.mark.usefixtures('dd_environment')
 def test_mongod_tls_ok(check, dd_run_check, aggregator):

@@ -138,19 +138,22 @@ class MongoApi(object):
         return StandaloneDeployment()
 
     def _get_alibaba_deployment_type(self):
-        is_master_payload = self['admin'].command('isMaster')
-        if is_master_payload.get('msg') == 'isdbgrid':
-            return MongosDeployment()
+        try:
+            is_master_payload = self['admin'].command('isMaster')
+            if is_master_payload.get('msg') == 'isdbgrid':
+                return MongosDeployment()
 
-        # On alibaba cloud, a mongo node is either a mongos or part of a replica set.
-        repl_set_payload = self['admin'].command("replSetGetStatus")
-        if repl_set_payload.get('configsvr') is True:
-            cluster_role = 'configsvr'
-        elif self['admin'].command('shardingState').get('enabled') is True:
-            # Use `shardingState` command to know whether or not the replicaset
-            # is a shard or not.
-            cluster_role = 'shardsvr'
-        else:
-            cluster_role = None
-
-        return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
+            # On alibaba cloud, a mongo node is either a mongos or part of a replica set.
+            repl_set_payload = self['admin'].command("replSetGetStatus")
+            if repl_set_payload.get('configsvr') is True:
+                cluster_role = 'configsvr'
+            elif self['admin'].command('shardingState').get('enabled') is True:
+                # Use `shardingState` command to know whether or not the replicaset
+                # is a shard or not.
+                cluster_role = 'shardsvr'
+            else:
+                cluster_role = None
+            return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
+        except Exception as e:
+            self._log.debug("`get_alibaba_deployment_type` failed.", str(e))
+            raise
