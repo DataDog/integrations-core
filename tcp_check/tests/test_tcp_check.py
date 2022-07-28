@@ -387,18 +387,6 @@ def test_multiple(aggregator):
     assert len(aggregator.service_checks('tcp.can_connect')) == 6
 
 
-def has_ipv6_connectivity():
-    try:
-        for _, _, _, _, sockaddr in socket.getaddrinfo(
-            socket.gethostname(), None, socket.AF_INET6, 0, socket.IPPROTO_TCP
-        ):
-            if not sockaddr[0].startswith('fe80:'):
-                return True
-        return False
-    except socket.gaierror:
-        return False
-
-
 def test_ipv6(aggregator, check):
     """
     Service expected to be up
@@ -406,6 +394,7 @@ def test_ipv6(aggregator, check):
     instance = deepcopy(common.INSTANCE_IPV6)
     check = TCPCheck(common.CHECK_NAME, {}, [instance])
     check.check(instance)
+    has_ipv6 = check.has_ipv6_connectivity()
 
     nb_ipv4, nb_ipv6 = 0, 0
     for addr in check.addrs:
@@ -413,7 +402,7 @@ def test_ipv6(aggregator, check):
         expected_tags.append("address:{}".format(addr.address))
         if re.match(r'^[0-9a-f:]+$', addr.address):
             nb_ipv6 += 1
-            if has_ipv6_connectivity():
+            if has_ipv6:
                 aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
                 aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
             elif platform.system() == 'Darwin':
@@ -430,7 +419,7 @@ def test_ipv6(aggregator, check):
     assert nb_ipv4 == 4
     # The Windows CI machine doesn't return IPv6
     # Windows or MacOS might not have IPv6 connectivity when testing locally
-    if platform.system() not in ('Windows', 'Darwin'):
+    if has_ipv6 and platform.system() not in ('Windows', 'Darwin'):
         assert nb_ipv6 == 8
 
     aggregator.assert_all_metrics_covered()

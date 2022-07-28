@@ -77,7 +77,7 @@ class TCPCheck(AgentCheck):
 
     def resolve_ips(self):
         # type: () -> None
-        if self.ipv4_only or (not self.ipv4_only and not self.has_ipv6_connectivity()):
+        if self.ipv4_only or not self.has_ipv6_connectivity():
             # socket.gethostbyname_ex returns IPv4 addresses
             _, _, ipv4_list = socket.gethostbyname_ex(self.host)
 
@@ -106,16 +106,17 @@ class TCPCheck(AgentCheck):
 
     def has_ipv6_connectivity(self):
         # type: () -> bool
+        _, _, ip_list = socket.gethostbyname_ex(socket.gethostname())
+        host_ip = ip_list[0]
         try:
-            for _, _, _, _, sockaddr in socket.getaddrinfo(
-                socket.gethostname(), None, socket.AF_INET6, 0, socket.IPPROTO_TCP
-            ):
+            for _, _, _, _, sockaddr in socket.getaddrinfo(host_ip, None, socket.AF_INET6, 0, socket.IPPROTO_TCP):
                 if not sockaddr[0].startswith('fe80:'):
+                    self.log.debug('Host is reporting internal IPv6 connectivity.')
                     return True
             return False
         except socket.gaierror as e:
             self.log.warning(
-                "Encountered error checking host's IPv6 connectivity with hostname %s: %s", socket.gethostname(), str(e)
+                "Encountered error checking host's IPv6 connectivity with hostname %s: %s", host_ip, str(e)
             )
             return False
 
