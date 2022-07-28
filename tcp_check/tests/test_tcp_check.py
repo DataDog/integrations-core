@@ -398,11 +398,10 @@ def test_ipv6(aggregator, check):
 def test_has_ipv6_connectivity(monkeypatch, hostname, getaddrinfo, gethostbyname_ex, expected_result):
     instance = deepcopy(common.INSTANCE_IPV6)
     instance['hostname'] = hostname
-    check = TCPCheck(common.CHECK_NAME, {}, [instance])
     monkeypatch.setattr('socket.gethostname', mock.Mock(return_value=hostname))
     monkeypatch.setattr('socket.gethostbyname_ex', mock.Mock(return_value=gethostbyname_ex))
     monkeypatch.setattr('socket.getaddrinfo', mock.Mock(return_value=getaddrinfo))
 
-    has_ipv6 = check.has_ipv6_connectivity()
+    check = TCPCheck(common.CHECK_NAME, {}, [instance])
 
-    assert has_ipv6 == expected_result
+    assert check.has_ipv6 == expected_result
