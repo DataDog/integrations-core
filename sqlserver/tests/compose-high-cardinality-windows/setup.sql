@@ -53,6 +53,15 @@ EXEC sp_addrolemember 'db_datareader', 'fred'
 EXEC sp_addrolemember 'db_datawriter', 'bob'
 GO
 
+CREATE PROCEDURE bobProc AS
+BEGIN
+    SELECT * FROM ϑings;
+END;
+GO
+
+GRANT EXECUTE on bobProc to bob;
+GO
+
 -- create an offline database to have an unavailable database to test with
 CREATE DATABASE unavailable_db;
 GO
