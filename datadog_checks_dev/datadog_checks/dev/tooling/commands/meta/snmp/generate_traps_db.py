@@ -20,9 +20,11 @@ from .constants import CLEAR_LINE_ESCAPE_CODE, MIB_SOURCE_URL
 NOTIFICATION_TYPE = 'notificationtype'
 ALLOWED_EXTENSIONS_BY_FORMAT = {"json": [".json"], "yaml": [".yml", ".yaml"]}
 
+
 class MappingType(Enum):
     INTEGER = 0
     BITS = 1
+
 
 class MissingMIBException(Exception):
     pass
@@ -404,7 +406,9 @@ def get_var_metadata(var_name, mib_name, search_locations=None):
     for k, v in bits.items():
         parsed_bits[v] = k
 
-    return VarMetadata(file_content[var_name]['oid'], file_content[var_name].get('description', ''), parsed_enum, parsed_bits)
+    return VarMetadata(
+        file_content[var_name]['oid'], file_content[var_name].get('description', ''), parsed_enum, parsed_bits
+    )
 
 
 @lru_cache(maxsize=None)
