@@ -1,6 +1,5 @@
 version: '3'
 
-# This was heavily based upon: https://github.com/chefsplate/mongo-shard-docker-compose
 services:
   standalone:
     image: mongo:$MONGO_VERSION
