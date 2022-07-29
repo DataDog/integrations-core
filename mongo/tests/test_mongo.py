@@ -97,7 +97,7 @@ def test_mongo2(aggregator, check, instance_user, dd_run_check):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
-@common.standalone
+@common.shard
 def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
     check = check(instance_arbiter)
     dd_run_check(check)
