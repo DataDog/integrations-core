@@ -278,7 +278,7 @@ class RelationsManager(object):
             relation_filter.append(')')
             relations_filter.append(' '.join(relation_filter))
 
-        relations_filter = ' OR '.join(relations_filter)
+        relations_filter = '(' + ' OR '.join(relations_filter) + ')'
         self.log.debug("Running query: %s with relations matching: %s", str(query), relations_filter)
         return query.format(relations=relations_filter)
 
