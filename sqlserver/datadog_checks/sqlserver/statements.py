@@ -282,7 +282,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 )
                 continue
             obfuscated_statement = statement['query']
-            row['statement_text'] = obfuscated_statement
+            # update 'text' field to be obfuscated stmt
+            row['text'] = obfuscated_statement
             if procedure_statement:
                 row['procedure_text'] = procedure_statement['query']
                 row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
@@ -311,12 +312,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         row = {k: v for k, v in row.items()}
         if 'dd_comments' in row:
             del row['dd_comments']
-        # remove the text field, so we do not forward deobfuscated text
+        # remove the statement_text field, so we do not forward deobfuscated text
         # to the backend
-        if 'text' in row:
-            del row['text']
+        if 'statement_text' in row:
+            del row['statement_text']
         # truncate query text to the maximum length supported by metrics tags
-        row['statement_text'] = row['statement_text'][0:200]
+        row['text'] = row['text'][0:200]
         return row
 
     def _to_metrics_payload(self, rows):
@@ -391,7 +392,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     "instance": row.get('database_name', None),
                     "query_signature": row['query_signature'],
                     "procedure_signature": row.get('procedure_signature', None),
-                    "statement": row['statement_text'],
+                    "statement": row['text'],
                     "metadata": {
                         "tables": row['dd_tables'],
                         "commands": row['dd_commands'],
@@ -460,7 +461,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 # for stored procedures, we want to send the plan
                 # events with the full procedure text, not the text
                 # for the individual statement encapsulated within the proc
-                text_key = 'statement_text'
+                text_key = 'text'
                 if row['is_proc']:
                     text_key = 'procedure_text'
                 query_signature = row['query_signature']
