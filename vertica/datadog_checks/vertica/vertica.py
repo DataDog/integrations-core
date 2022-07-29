@@ -136,9 +136,8 @@ class VerticaCheck(AgentCheck):
         return self.parse_db_version(self._client.query_version())
 
     def parse_metric_groups(self):
-        default_metric_groups = list(METRIC_GROUPS)
-
-        metric_groups = self.instance.get('metric_groups') or list(default_metric_groups)
+        default_metric_groups = METRIC_GROUPS
+        metric_groups = self.instance.get('metric_groups') or default_metric_groups
 
         # Ensure all metric groups are valid
         invalid_groups = []
