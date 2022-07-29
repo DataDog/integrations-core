@@ -29,16 +29,23 @@ def dd_environment():
     compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
     env['CONTAINER_PORT'] = common.PORT
     env['CASSANDRA_SEEDS'] = '0.0.0.0'
+    cassandra_version = int(env['CASSANDRA_VERSION'].split('.')[0])
+    if cassandra_version >= 3:
+        log_patterns = ['Starting listening for CQL clients', 'Startup complete']
+    else:
+        log_patterns = ['Starting listening for CQL clients', 'All sessions completed']
 
     with docker_run(
-        compose_file, service_name=common.CASSANDRA_CONTAINER_NAME, log_patterns=['Listening for thrift clients']
+        compose_file,
+        service_name=common.CASSANDRA_CONTAINER_NAME,
+        log_patterns=['Listening for thrift clients'],
     ):
         cassandra_seed = get_container_ip("{}".format(common.CASSANDRA_CONTAINER_NAME))
         env['CASSANDRA_SEEDS'] = cassandra_seed
         with docker_run(
             compose_file,
             service_name=common.CASSANDRA_CONTAINER_NAME_2,
-            log_patterns=['All sessions completed', 'Starting listening for CQL clients'],
+            log_patterns=log_patterns,
         ):
             subprocess.check_call(
                 [
