@@ -5,6 +5,7 @@ import concurrent
 import datetime
 import json
 import os
+import re
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
@@ -49,19 +50,63 @@ def dbm_instance(instance_docker):
     return copy(instance_docker)
 
 
+test_collect_load_activity_parameterized = (
+    "database,query,match_pattern,use_autocommit,is_proc",
+    [
+        [
+            "datadog_test",
+            "SELECT * FROM ϑings",
+            r"SELECT \* FROM ϑings",
+            False,
+            False,
+        ],
+        [
+            "datadog_test",
+            "SELECT * FROM ϑings",
+            r"SELECT \* FROM ϑings",
+            True,
+            False,
+        ],
+        [
+            "datadog_test",
+            "EXEC bobProc",
+            r"SELECT \* FROM ϑings",
+            True,
+            True,
+        ],
+        [
+            "datadog_test",
+            "EXEC bobProc",
+            r"SELECT \* FROM ϑings",
+            False,
+            True,
+        ],
+    ],
+)
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize("use_autocommit", [True, False])
-def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_instance, use_autocommit):
+@pytest.mark.parametrize(*test_collect_load_activity_parameterized)
+def test_collect_load_activity(
+    aggregator,
+    instance_docker,
+    dd_run_check,
+    dbm_instance,
+    database,
+    query,
+    use_autocommit,
+    match_pattern,
+    is_proc,
+):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    query = "SELECT * FROM ϑings"
     blocking_query = "INSERT INTO ϑings WITH (TABLOCK, HOLDLOCK) (name) VALUES ('puppy')"
     fred_conn = _get_conn_for_user(instance_docker, "fred", _autocommit=use_autocommit)
     bob_conn = _get_conn_for_user(instance_docker, "bob")
 
     def run_test_query(c, q):
         cur = c.cursor()
-        cur.execute("USE {}".format("datadog_test"))
+        cur.execute("USE {}".format(database))
         cur.execute(q)
 
     # bob's query blocks until the tx is completed
@@ -113,7 +158,11 @@ def test_collect_load_activity(aggregator, instance_docker, dd_run_check, dbm_in
     assert blocked_row['session_status'] == "running", "incorrect session_status"
     assert blocked_row['request_status'] == "suspended", "incorrect request_status"
     assert blocked_row['blocking_session_id'], "missing blocking_session_id"
-    assert blocked_row['text'] == query, "incorrect blocked query"
+    assert blocked_row['is_proc'] == is_proc
+    assert 'text' not in blocked_row, "text field should not be forwarded"
+    if is_proc:
+        assert blocked_row['procedure_signature'], "missing procedure signature"
+    assert re.match(match_pattern, blocked_row['statement_text'], re.IGNORECASE), "incorrect blocked query"
     assert blocked_row['database_name'] == "datadog_test", "incorrect database_name"
     assert blocked_row['id'], "missing session id"
     assert blocked_row['now'], "missing current timestamp"
@@ -279,7 +328,7 @@ def very_old_time():
                     'last_request_start_time': 'suspended',
                     'id': 1,
                     'user_name': 'oldbob',
-                    'text': "something",
+                    'statement_text': "something",
                     'start_time': 2,
                     'query_start': old_time(),
                 },
@@ -287,14 +336,14 @@ def very_old_time():
                     'last_request_start_time': 'suspended',
                     'id': 1,
                     'user_name': 'olderbob',
-                    'text': "something",
+                    'statement_text': "something",
                     'start_time': 2,
                     'query_start': very_old_time(),
                 },
                 {
                     'last_request_start_time': 'suspended',
                     'id': 2,
-                    'text': "something",
+                    'statement_text': "something",
                     'user_name': 'bigbob',
                     'start_time': 2,
                     'query_start': new_time(),
@@ -304,7 +353,7 @@ def very_old_time():
                     'last_request_start_time': 'suspended',
                     'id': 1,
                     'user_name': 'onlytxbob',
-                    'text': "something",
+                    'statement_text': "something",
                     'start_time': 2,
                     'transaction_begin_time': very_old_time(),
                 },
@@ -318,7 +367,7 @@ def very_old_time():
                     'last_request_start_time': 'suspended',
                     'id': 1,
                     'user_name': 'newbob',
-                    'text': "something",
+                    'statement_text': "something",
                     'start_time': 2,
                     'query_start': new_time(),
                 },
@@ -326,14 +375,14 @@ def very_old_time():
                     'last_request_start_time': 'suspended',
                     'id': 1,
                     'user_name': 'oldestbob',
-                    'text': "something",
+                    'statement_text': "something",
                     'start_time': 2,
                     'query_start': very_old_time(),
                 },
                 {
                     'last_request_start_time': 'suspended',
                     'id': 2,
-                    'text': "something",
+                    'statement_text': "something",
                     'user_name': 'bigbob',
                     'start_time': 2,
                     'query_start': old_time(),
@@ -345,9 +394,9 @@ def very_old_time():
         ],
         [
             [
-                {'user_name': 'newbob', 'id': 1, 'text': "something", 'query_start': new_time()},
-                {'user_name': 'oldbob', 'id': 2, 'text': "something", 'query_start': old_time()},
-                {'user_name': 'olderbob', 'id': 2, 'text': "something", 'query_start': very_old_time()},
+                {'user_name': 'newbob', 'id': 1, 'statement_text': "something", 'query_start': new_time()},
+                {'user_name': 'oldbob', 'id': 2, 'statement_text': "something", 'query_start': old_time()},
+                {'user_name': 'olderbob', 'id': 2, 'statement_text': "something", 'query_start': very_old_time()},
             ],
             3,
             ["olderbob", "oldbob", "newbob"],
@@ -357,7 +406,7 @@ def very_old_time():
                 {
                     'user_name': 'bigbob',
                     'id': 1,
-                    'text': "something",
+                    'statement_text': "something",
                     'toobig': "shame" * 10000,
                 },
             ],
