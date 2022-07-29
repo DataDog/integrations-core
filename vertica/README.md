@@ -38,6 +38,21 @@ As the metrics for current license usage use the values from the most recent [au
 
 [Restart the Agent][8] to start sending Vertica metrics to Datadog.
 
+#### Authenticating with Kerberos
+
+The Vertica integration supports using Kerberos for authentication. To enable Kerberos authentication,
+you need to manually install the [kerberos][13] library:
+
+```bash
+sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install kerberos==1.3.1
+```
+
+Also, you may have to set the `kerberos_host_name` and `kerberos_service_name` options in the configuration
+to match your setup.
+
+Note that you need to make sure that a Ticket-Granting Ticket (TGT) is available and valid. This may
+be obtained by running `kinit` or by logging in.
+
 #### Log collection
 
 _Available for Agent versions >6.0_
@@ -95,3 +110,4 @@ Need help? Contact [Datadog support][12].
 [10]: https://github.com/DataDog/integrations-core/blob/master/vertica/metadata.csv
 [11]: https://github.com/DataDog/integrations-core/blob/master/vertica/assets/service_checks.json
 [12]: https://docs.datadoghq.com/help/
+[13]: https://pypi.org/project/kerberos/
