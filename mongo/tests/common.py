@@ -23,7 +23,6 @@ TLS_CERTS_FOLDER = os.path.join(os.path.dirname(__file__), 'compose', 'certs')
 standalone = pytest.mark.skipif(not IS_STANDALONE, reason='Test only valid for standalone mongo')
 shard = pytest.mark.skipif(not IS_SHARD, reason='Test only valid for sharded mongo')
 tls = pytest.mark.skipif(not IS_TLS, reason='Test only valid for TLS')
-not_tls = pytest.mark.skipif(IS_TLS, reason='Test only valid for non-TLS')
 
 MONGODB_SERVER = "mongodb://%s:%s/test" % (HOST, PORT1)
 SHARD_SERVER = "mongodb://%s:%s" % (HOST, PORT2)
