@@ -46,6 +46,14 @@ def instance_empty_default_hostname(field, value):
     return False
 
 
+def instance_kerberos_host_name(field, value):
+    return 'localhost'
+
+
+def instance_kerberos_service_name(field, value):
+    return 'vertica'
+
+
 def instance_metric_groups(field, value):
     return get_default_field_value(field, value)
 

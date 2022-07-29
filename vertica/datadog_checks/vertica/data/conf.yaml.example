@@ -238,6 +238,18 @@ instances:
     #
     # client_lib_log_level: <CLIENT_LIB_LOG_LEVEL>
 
+    ## @param kerberos_host_name - string - optional - default: localhost
+    ## The instance or host name portion of the Vertica Kerberos principal.
+    ## Defaults to using the same value as the `server` config option.
+    #
+    # kerberos_host_name: localhost
+
+    ## @param kerberos_service_name - string - optional - default: vertica
+    ## The service name portion of the Vertica Kerberos principal.
+    ## Defaults to `vertica`.
+    #
+    # kerberos_service_name: vertica
+
 ## Log Section
 ##
 ## type - required - Type of log input source (tcp / udp / file / windows_event)

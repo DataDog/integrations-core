@@ -119,6 +119,20 @@ files:
             value:
               type: string
               example: <CLIENT_LIB_LOG_LEVEL>
+          - name: kerberos_host_name
+            description: |
+              The instance or host name portion of the Vertica Kerberos principal.
+              Defaults to using the same value as the `server` config option.
+            value:
+              type: string
+              example: localhost
+          - name: kerberos_service_name
+            description: |
+              The service name portion of the Vertica Kerberos principal.
+              Defaults to `vertica`.
+            value:
+              type: string
+              example: vertica
       - template: logs
         example:
           - source: vertica

@@ -47,6 +47,8 @@ class InstanceConfig(BaseModel):
     db: Optional[str]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
+    kerberos_host_name: Optional[str]
+    kerberos_service_name: Optional[str]
     metric_groups: Optional[Sequence[str]]
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]

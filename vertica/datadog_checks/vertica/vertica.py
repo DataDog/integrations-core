@@ -55,6 +55,11 @@ class VerticaCheck(AgentCheck):
         use_tls = is_affirmative(self.instance.get('use_tls', False))
         self._tls_context = self.get_tls_context() if use_tls or tls_verify else None
 
+        self._kerberos_options = {
+            'host_name': self.instance.get('kerberos_host_name'),
+            'service_name': self.instance.get('kerberos_service_name'),
+        }
+
         # Add global database tag
         self._tags.append('db:{}'.format(self._db))
 
@@ -82,6 +87,8 @@ class VerticaCheck(AgentCheck):
             'backup_server_node': self._backup_servers,
             'connection_load_balance': self._connection_load_balance,
             'connection_timeout': self._timeout,
+            'kerberos_host_name': self._kerberos_options['host_name'],
+            'kerberos_service_name': self._kerberos_options['service_name'],
         }
 
         self._client = VerticaClient(connection_options, self._tls_context, self._client_lib_log_level, log=self.log)
