@@ -236,14 +236,16 @@ class SqlserverActivity(DBMAsyncJob):
 
     @staticmethod
     def _sanitize_row(row, obfuscated_statement):
-        row['statement_text'] = obfuscated_statement
+        # rename the statement_text field to 'text' because that
+        # is what our backend is expecting
+        row['text'] = obfuscated_statement
         if 'query_hash' in row:
             row['query_hash'] = _hash_to_hex(row['query_hash'])
         if 'query_plan_hash' in row:
             row['query_plan_hash'] = _hash_to_hex(row['query_plan_hash'])
         # remove deobfuscated sql text from event
-        if 'text' in row:
-            del row['text']
+        if 'statement_text' in row:
+            del row['statement_text']
         return row
 
     @staticmethod

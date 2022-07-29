@@ -159,10 +159,10 @@ def test_collect_load_activity(
     assert blocked_row['request_status'] == "suspended", "incorrect request_status"
     assert blocked_row['blocking_session_id'], "missing blocking_session_id"
     assert blocked_row['is_proc'] == is_proc
-    assert 'text' not in blocked_row, "text field should not be forwarded"
+    assert 'statement_text' not in blocked_row, "statement_text field should not be forwarded"
     if is_proc:
         assert blocked_row['procedure_signature'], "missing procedure signature"
-    assert re.match(match_pattern, blocked_row['statement_text'], re.IGNORECASE), "incorrect blocked query"
+    assert re.match(match_pattern, blocked_row['text'], re.IGNORECASE), "incorrect blocked query"
     assert blocked_row['database_name'] == "datadog_test", "incorrect database_name"
     assert blocked_row['id'], "missing session id"
     assert blocked_row['now'], "missing current timestamp"
@@ -328,7 +328,7 @@ def very_old_time():
                     'last_request_start_time': 'suspended',
                     'id': 1,
                     'user_name': 'oldbob',
-                    'statement_text': "something",
+                    'text': "something",
                     'start_time': 2,
                     'query_start': old_time(),
                 },
@@ -336,14 +336,14 @@ def very_old_time():
                     'last_request_start_time': 'suspended',
                     'id': 1,
                     'user_name': 'olderbob',
-                    'statement_text': "something",
+                    'text': "something",
                     'start_time': 2,
                     'query_start': very_old_time(),
                 },
                 {
                     'last_request_start_time': 'suspended',
                     'id': 2,
-                    'statement_text': "something",
+                    'text': "something",
                     'user_name': 'bigbob',
                     'start_time': 2,
                     'query_start': new_time(),
@@ -353,7 +353,7 @@ def very_old_time():
                     'last_request_start_time': 'suspended',
                     'id': 1,
                     'user_name': 'onlytxbob',
-                    'statement_text': "something",
+                    'text': "something",
                     'start_time': 2,
                     'transaction_begin_time': very_old_time(),
                 },
@@ -367,7 +367,7 @@ def very_old_time():
                     'last_request_start_time': 'suspended',
                     'id': 1,
                     'user_name': 'newbob',
-                    'statement_text': "something",
+                    'text': "something",
                     'start_time': 2,
                     'query_start': new_time(),
                 },
@@ -375,14 +375,14 @@ def very_old_time():
                     'last_request_start_time': 'suspended',
                     'id': 1,
                     'user_name': 'oldestbob',
-                    'statement_text': "something",
+                    'text': "something",
                     'start_time': 2,
                     'query_start': very_old_time(),
                 },
                 {
                     'last_request_start_time': 'suspended',
                     'id': 2,
-                    'statement_text': "something",
+                    'text': "something",
                     'user_name': 'bigbob',
                     'start_time': 2,
                     'query_start': old_time(),
@@ -394,9 +394,9 @@ def very_old_time():
         ],
         [
             [
-                {'user_name': 'newbob', 'id': 1, 'statement_text': "something", 'query_start': new_time()},
-                {'user_name': 'oldbob', 'id': 2, 'statement_text': "something", 'query_start': old_time()},
-                {'user_name': 'olderbob', 'id': 2, 'statement_text': "something", 'query_start': very_old_time()},
+                {'user_name': 'newbob', 'id': 1, 'text': "something", 'query_start': new_time()},
+                {'user_name': 'oldbob', 'id': 2, 'text': "something", 'query_start': old_time()},
+                {'user_name': 'olderbob', 'id': 2, 'text': "something", 'query_start': very_old_time()},
             ],
             3,
             ["olderbob", "oldbob", "newbob"],
@@ -406,7 +406,7 @@ def very_old_time():
                 {
                     'user_name': 'bigbob',
                     'id': 1,
-                    'statement_text': "something",
+                    'text': "something",
                     'toobig': "shame" * 10000,
                 },
             ],

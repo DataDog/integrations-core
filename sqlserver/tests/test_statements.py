@@ -345,9 +345,9 @@ def test_statement_metrics_and_plans(
     assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
     match_pattern = "(" + ")|(".join(expected_queries_patterns) + ")"
     if is_encrypted:
-        matching_rows = [r for r in sqlserver_rows if not r['statement_text']]
+        matching_rows = [r for r in sqlserver_rows if not r['text']]
     else:
-        matching_rows = [r for r in sqlserver_rows if re.match(match_pattern, r['statement_text'], re.IGNORECASE)]
+        matching_rows = [r for r in sqlserver_rows if re.match(match_pattern, r['text'], re.IGNORECASE)]
     assert len(matching_rows) == len(expected_queries_patterns), "missing expected matching rows"
     total_execution_count = sum([r['execution_count'] for r in matching_rows])
     assert (
@@ -359,7 +359,7 @@ def test_statement_metrics_and_plans(
             assert not row['query_signature']
         else:
             assert row['query_signature'], "missing query signature"
-        assert 'text' not in row, "text field should not be forwarded"
+        assert 'statement_text' not in row, "statement_text field should not be forwarded"
         assert row['is_encrypted'] == is_encrypted
         assert row['is_proc'] == is_proc
         if is_proc and not is_encrypted:
