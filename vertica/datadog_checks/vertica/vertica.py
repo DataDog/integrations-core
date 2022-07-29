@@ -12,7 +12,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.base.utils.db import QueryManager
 
-from .queries import METRIC_GROUPS, get_queries
+from .queries import METRIC_GROUPS, QueryBuilder
 from .utils import parse_major_version
 
 # Python 3 only
@@ -49,23 +49,20 @@ class VerticaCheck(AgentCheck):
 
         self._client_lib_log_level = self.instance.get('client_lib_log_level', self._get_default_client_lib_log_level())
 
-        # If `tls_verify` is explicitly set to true, set `use_tls` to true (for legacy support)
+        # `tls_verify` being explicitly set to true overrides the value `use_tls` for legacy reasons
         # `tls_verify` used to do what `use_tls` does now
-        self._tls_verify = is_affirmative(self.instance.get('tls_verify'))
-        self._use_tls = is_affirmative(self.instance.get('use_tls', False))
-
-        if self._tls_verify and not self._use_tls:
-            self._use_tls = True
+        tls_verify = is_affirmative(self.instance.get('tls_verify'))
+        use_tls = is_affirmative(self.instance.get('use_tls', False))
+        self._tls_context = self.get_tls_context() if use_tls or tls_verify else None
 
         # Add global database tag
         self._tags.append('db:{}'.format(self._db))
 
-        # We'll connect on the first check run
-        self._connection = None
-        self._query_manager = None
+        self.query_manager = None
 
         self._metric_groups = {}
 
+        self._initialize_vertica_client()
         self.check_initializations.extend([self.parse_metric_groups])
 
     def _get_default_client_lib_log_level(self):
@@ -75,61 +72,7 @@ class VerticaCheck(AgentCheck):
         # Default to no library logs, since they're too verbose even at the INFO level.
         return None
 
-    def _connect(self):
-        if self._connection is None:
-            connection = self.get_connection()
-            if connection is None:
-                return
-
-            self._connection = connection
-            self._initialize_query_manager()
-
-        elif self._connection_load_balance or self._connection.closed():
-            self._connection.reset_connection()
-
-    def _initialize_query_manager(self):
-        self._query_manager = QueryManager(
-            self,
-            self.execute_query,
-            queries=get_queries(self._major_version(), self._metric_groups),
-            tags=self._tags,
-        )
-
-        self._query_manager.compile_queries()
-
-    def _major_version(self):
-        return parse_major_version(self.query_version())
-
-    def check(self, _):
-        self._connect()
-
-        if not self._connection:
-            self.log.debug('Skipping check due to connection issue.')
-            return
-
-        self._query_manager.execute()
-        self.set_version_metadata()
-
-    @AgentCheck.metadata_entrypoint
-    def set_version_metadata(self):
-        self.set_metadata('version', self.query_version())
-
-    def query_version(self):
-        """Get the Vertica version by queriying the DB.
-
-        https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/AdministratorsGuide/Diagnostics/DeterminingYourVersionOfVertica.htm
-        """
-        return self.parse_db_version(self._connection.cursor().execute('SELECT version()').fetchone()[0])
-
-    @staticmethod
-    def parse_db_version(vertica_version_string):
-        return (
-            vertica_version_string.replace('Vertica Analytic Database v', '')
-            # Force the last part to represent the build part of semver
-            .replace('-', '+', 1)
-        )
-
-    def get_connection(self):
+    def _initialize_vertica_client(self):
         connection_options = {
             'database': self._db,
             'host': self._server,
@@ -140,33 +83,61 @@ class VerticaCheck(AgentCheck):
             'connection_load_balance': self._connection_load_balance,
             'connection_timeout': self._timeout,
         }
-        if self._client_lib_log_level:
-            connection_options['log_level'] = self._client_lib_log_level
-            # log_path is required by vertica client for using logging
-            # when log_path is set to '', vertica won't log to a file
-            # but we still get logs via parent root logger
-            connection_options['log_path'] = ''
 
-        if self._use_tls:
-            tls_context = self.get_tls_context()
-            connection_options['ssl'] = tls_context
+        self._client = VerticaClient(connection_options, self._tls_context, self._client_lib_log_level, log=self.log)
 
+    def _connect(self):
         try:
-            connection = vertica.connect(**exclude_undefined_keys(connection_options))
+            self._client.connect()
         except Exception as e:
             self.log.error('Unable to connect to database `%s` as user `%s`: %s', self._db, self._username, e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags)
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
-            return connection
+            return self._client.connection
 
-    def execute_query(self, query):
-        return self._connection.cursor().execute(query).iterate()
+    def setup_query_manager(self, monitor_schema='v_monitor', catalog_schema='v_catalog'):
+        query_builder = QueryBuilder(self._major_version())
+        self._query_manager = QueryManager(
+            self,
+            self._client.query,
+            queries=query_builder.get_queries(self._metric_groups),
+            tags=self._tags,
+        )
+        self._query_manager.compile_queries()
+
+    def check(self, _):
+        connection = self._connect()
+
+        if not connection:
+            self.log.debug('Skipping check due to connection issue.')
+            return
+
+        self.setup_query_manager()
+        self._query_manager.execute()
+        self.set_version_metadata()
+
+    @AgentCheck.metadata_entrypoint
+    def set_version_metadata(self):
+        self.set_metadata('version', self._version())
+
+    @staticmethod
+    def parse_db_version(vertica_version_string):
+        return (
+            vertica_version_string.replace('Vertica Analytic Database v', '')
+            # Force the last part to represent the build part of semver
+            .replace('-', '+', 1)
+        )
+
+    def _major_version(self):
+        return parse_major_version(self._version())
+
+    def _version(self):
+        return self.parse_db_version(self._client.query_version())
 
     def parse_metric_groups(self):
-        default_metric_groups = list(METRIC_GROUPS)
-
-        metric_groups = self.instance.get('metric_groups') or list(default_metric_groups)
+        default_metric_groups = METRIC_GROUPS
+        metric_groups = self.instance.get('metric_groups') or default_metric_groups
 
         # Ensure all metric groups are valid
         invalid_groups = []
@@ -181,3 +152,64 @@ class VerticaCheck(AgentCheck):
             )
 
         self._metric_groups = [group for group in default_metric_groups if group in metric_groups]
+
+
+class VerticaClient(object):
+    """Wrapper around interactions with vertica."""
+
+    def __init__(self, connection_options, tls_context=None, client_lib_log_level=None, log=None):
+        self._client_lib_log_level = client_lib_log_level
+        self._tls_context = tls_context
+
+        self.connection = None
+        self.log = log or logging.getLogger()
+        self.options = connection_options
+
+    def connect(self):
+        """Establish connection to Vertica database.
+
+        It does nothing if the connection is already open and load
+        balancing is not active.
+        """
+        if self.connection:
+            if self.connection_load_balance or self.connection.closed():
+                self.connection.reset_connection()
+        else:
+            self.connection = vertica.connect(**exclude_undefined_keys(self.options))
+
+        return self.connection
+
+    def query(self, query):
+        return self.connection.cursor().execute(query).iterate()
+
+    def query_version(self):
+        """Get the Vertica version by queriying the DB.
+
+        https://www.vertica.com/docs/11.1.x/HTML/Content/Authoring/AdministratorsGuide/Diagnostics/DeterminingYourVersionOfVertica.htm
+        """
+        return self.connection.cursor().execute('SELECT version()').fetchone()[0]
+
+    @property
+    def options(self):
+        return self._options
+
+    @options.setter
+    def options(self, options):
+        self._options = dict(options)
+        if self._client_lib_log_level:
+            self._options['log_level'] = self._client_lib_log_level
+            # log_path is required by vertica client for using logging
+            # when log_path is set to '', vertica won't log to a file
+            # but we still get logs via parent root logger
+            self._options['log_path'] = ''
+
+        if self.use_tls:
+            self._options['ssl'] = self._tls_context
+
+    @property
+    def use_tls(self):
+        return self._tls_context is not None
+
+    @property
+    def connection_load_balance(self):
+        return self.options.get('connection_load_balance', False)

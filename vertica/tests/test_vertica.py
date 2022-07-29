@@ -7,6 +7,7 @@ import mock
 import pytest
 
 from datadog_checks.vertica import VerticaCheck
+from datadog_checks.vertica.vertica import VerticaClient
 
 from . import common
 from .metrics import ALL_METRICS
@@ -56,18 +57,39 @@ def test_vertica_log_file_not_created(aggregator, instance, dd_run_check):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_check_connection_load_balance(instance, dd_run_check):
-    instance['connection_load_balance'] = True
-    check = VerticaCheck('vertica', {}, [instance])
+def test_check_connection_load_balance(monkeypatch):
+    options = common.connection_options_from_config(common.CONFIG)
+    options['connection_load_balance'] = True
+    client = VerticaClient(options)
 
-    def mock_reset_connection():
-        raise Exception('reset_connection was called')
+    client.connect()
+    monkeypatch.setattr(client.connection, 'reset_connection', mock.Mock())
+    client.connect()
 
-    with mock.patch('vertica_python.vertica.connection.Connection.reset_connection', side_effect=mock_reset_connection):
-        dd_run_check(check)
+    assert client.connection.reset_connection.was_called_once()
 
-        with pytest.raises(Exception, match='reset_connection was called'):
-            dd_run_check(check, extract_message=True)
+
+@pytest.mark.usefixtures('dd_environment')
+def test_connect_resets_connection_when_connection_closed(monkeypatch):
+    options = common.connection_options_from_config(common.CONFIG)
+    client = VerticaClient(options)
+
+    client.connect()
+    client.connection.close()
+
+    monkeypatch.setattr(client.connection, 'reset_connection', mock.Mock())
+    client.connect()
+
+    assert client.connection.reset_connection.was_called_once()
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_connect_when_connection_is_open_reuses_connection():
+    options = common.connection_options_from_config(common.CONFIG)
+    client = VerticaClient(options)
+
+    conn = client.connect()
+    assert client.connect() == conn
 
 
 @pytest.mark.usefixtures('dd_environment')
