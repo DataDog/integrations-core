@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.mongo import MongoDb
 
-from .common import HOST, PORT2, not_tls
+from .common import HOST, PORT1, shard, standalone, tls
 
 BASE_METRICS = [
     'mongodb.connections.available',
@@ -55,9 +55,19 @@ MONGOD_METRICS = BASE_METRICS + [
 ]
 
 
-@not_tls
+@standalone
 @pytest.mark.e2e
-def test_e2e_mongos(dd_agent_check, instance_authdb):
+def test_e2e_mongo_standalone(dd_agent_check):
+    instance = {'hosts': ['{}:{}'.format(HOST, PORT1)], 'username': 'testUser', 'password': 'testPass'}
+    aggregator = dd_agent_check(instance, rate=True)
+    for metric in MONGOD_METRICS:
+        aggregator.assert_metric(metric)
+    aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
+
+
+@shard
+@pytest.mark.e2e
+def test_e2e_mongo_shard(dd_agent_check, instance_authdb):
     aggregator = dd_agent_check(instance_authdb, rate=True)
     for metric in MONGOS_METRICS:
         aggregator.assert_metric(metric)
@@ -65,14 +75,17 @@ def test_e2e_mongos(dd_agent_check, instance_authdb):
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
 
 
-@not_tls
+@tls
 @pytest.mark.e2e
-def test_e2e_mongod(dd_agent_check, instance):
-    instance['hosts'] = ['{}:{}'.format(HOST, PORT2)]
-    instance['username'] = 'testUser'
-    instance['password'] = 'testPass'
+def test_e2e_mongo_tls(dd_agent_check):
+    instance = {
+        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'tls': True,
+        'tlsAllowInvalidCertificates': True,
+        'tlsCertificateKeyFile': '/certs/client1.pem',
+        'tlsCAFile': '/certs/ca.pem',
+    }
     aggregator = dd_agent_check(instance, rate=True)
     for metric in MONGOD_METRICS:
         aggregator.assert_metric(metric)
-
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)

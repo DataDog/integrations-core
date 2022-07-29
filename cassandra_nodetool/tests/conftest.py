@@ -46,7 +46,7 @@ def dd_environment():
         with docker_run(
             compose_file,
             service_name=common.CASSANDRA_CONTAINER_NAME_2,
-            conditions=[CheckDockerLogs(compose_file, log_patterns, wait=2)],
+            conditions=[CheckDockerLogs(compose_file, log_patterns, matches='all', wait=2)],
         ):
             subprocess.check_call(
                 [
