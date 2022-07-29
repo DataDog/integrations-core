@@ -20,151 +20,34 @@
     "widgets": [
         {
             "definition": {
-                "background_color": "vivid_blue",
-                "layout_type": "ordered",
-                "show_title": true,
-                "title": "Credit Usage",
-                "type": "group",
-                "widgets": [
-                    {
-                        "definition": {
-                            "background_color": "purple",
-                            "content": "With Datadog's Snowflake integration, you can track key metrics about cost and credit usage at an organization level. In this metric group you can see the hourly credit usage for all warehouses across all the accounts in your Snowflake organization. ",
-                            "font_size": "16",
-                            "has_padding": true,
-                            "show_tick": false,
-                            "text_align": "left",
-                            "tick_edge": "top",
-                            "tick_pos": "50%",
-                            "type": "note",
-                            "vertical_align": "center"
-                        },
-                        "id": 8085433307069582,
-                        "layout": {
-                            "height": 2,
-                            "width": 6,
-                            "x": 0,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "count": 10,
-                                                "order": "desc"
-                                            }
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:snowflake.organization.warehouse.total_credit.sum{$billing_account,$scope} by {warehouse}"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "title": "Credits Used per Warehouse",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "toplist"
-                        },
-                        "id": 8890610446950900,
-                        "layout": {
-                            "height": 2,
-                            "width": 6,
-                            "x": 6,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "count": 10,
-                                                "order": "desc"
-                                            }
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:snowflake.organization.warehouse.virtual_warehouse.sum{$billing_account,$scope} by {warehouse}"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "title": "Credits Used per Warehouse",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "toplist"
-                        },
-                        "id": 8265538452433954,
-                        "layout": {
-                            "height": 3,
-                            "width": 6,
-                            "x": 0,
-                            "y": 2
-                        }
-                    },
-                    {
-                        "definition": {
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "count": 10,
-                                                "order": "desc"
-                                            }
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "avg",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:snowflake.organization.warehouse.cloud_service.sum{$billing_account,$scope} by {warehouse}"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "title": "Credits Used by Cloud Services per Warehouse",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "toplist"
-                        },
-                        "id": 2640985809960116,
-                        "layout": {
-                            "height": 3,
-                            "width": 6,
-                            "x": 6,
-                            "y": 2
-                        }
-                    }
-                ]
+                "sizing": "zoom",
+                "type": "image",
+                "url": "/static/images/saas_logos/bot/snowflake@2x.png"
             },
-            "id": 5888126069922378,
+            "id": 6435834079877548,
             "layout": {
-                "height": 6,
-                "width": 12,
+                "height": 2,
+                "width": 3,
                 "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "content": "Use the Organization Usage dashboard to understand your current contractual limits for your organization, consumption by account, and data transfer history from Snowflake into different cloud storage provider's network.\n\n**Note**: By default, the integration minimum collection interval is 12 hours for organization metrics, setting the global dashboard time selector to **past 12 hours or less may result in sparse graphs**.\n\nSnowflake `ORGANIZATION_USAGE` views have a [known latency](https://docs.snowflake.com/en/sql-reference/account-usage.html#data-latency) of 2 to 24 hours, so the integration reports values from the past day.\n\nFor more information on setup and use-cases, check out the following:\n\n- [Snowflake integration docs](https://docs.datadoghq.com/integrations/snowflake/)\n- [How to setup custom queries](https://docs.datadoghq.com/integrations/snowflake/#snowflake-custom-queries)\n- [Blog post on Snowflake monitoring use-cases](https://www.datadoghq.com/blog/snowflake-monitoring-datadog/)",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 5744622409182850,
+            "layout": {
+                "height": 2,
+                "width": 9,
+                "x": 3,
                 "y": 0
             }
         },
@@ -173,28 +56,111 @@
                 "background_color": "vivid_blue",
                 "layout_type": "ordered",
                 "show_title": true,
-                "title": "Contract Items",
+                "title": "Credit Usage",
                 "type": "group",
                 "widgets": [
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "Datadog's Snowflake integration allows you to view key information about your Snowflake contracts, including the amount in currency of all your current contracts, broken down by contract item. ",
+                            "content": "With Datadog's Snowflake integration, you can track key metrics about cost and credit usage at an organization-wide level. In this metric group you can see the hourly credit usage for all warehouses across all the accounts in your Snowflake organization. ",
                             "font_size": "16",
                             "has_padding": true,
-                            "show_tick": true,
-                            "text_align": "left",
-                            "tick_edge": "bottom",
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
                             "tick_pos": "50%",
                             "type": "note",
                             "vertical_align": "center"
                         },
-                        "id": 3766700878304358,
+                        "id": 8085433307069582,
                         "layout": {
                             "height": 2,
-                            "width": 6,
+                            "width": 12,
                             "x": 0,
                             "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snowflake.organization.warehouse.total_credit.sum{$billing_account,$scope} by {billing_account}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "dog_classic_area"
+                                    }
+                                }
+                            ],
+                            "title": "Credit Usage by Billing Account",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 4037530573617664,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snowflake.organization.warehouse.total_credit.sum{$billing_account,$scope} by {billing_account}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Credit Usage by Billing Account by Day",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2013170705551102,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 2
                         }
                     },
                     {
@@ -211,45 +177,166 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:snowflake.organization.contract.amount{$billing_account,$scope} by {contract_item,contract_number,currency}"
+                                            "query": "avg:snowflake.organization.warehouse.virtual_warehouse.sum{$billing_account,$scope} by {warehouse,billing_account}"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
-                            "title": "Contract Item Amount",
-                            "type": "treemap"
+                            "title": "Credits Used by Billing Account & Warehouse",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
                         },
-                        "id": 1652193372904860,
+                        "id": 8265538452433954,
                         "layout": {
                             "height": 3,
                             "width": 6,
                             "x": 0,
-                            "y": 2
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snowflake.organization.warehouse.total_credit.sum{$billing_account,$scope} by {warehouse,billing_account}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Credits Used by Billing Account & Warehouse",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8890610446950900,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snowflake.organization.warehouse.cloud_service.sum{$billing_account,$scope} by {warehouse,billing_account}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Credits Used by Cloud Services by Billing Account & Warehouse",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 2322890034626944,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snowflake.organization.warehouse.cloud_service.sum{$billing_account,$scope} by {warehouse,billing_account}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Credits Used by Cloud Services per Warehouse by Day",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2640985809960116,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 8
                         }
                     }
                 ]
             },
-            "id": 2904655527205698,
+            "id": 5888126069922378,
             "layout": {
-                "height": 6,
-                "width": 6,
+                "height": 12,
+                "width": 12,
                 "x": 0,
-                "y": 0
+                "y": 2
             }
         },
         {
             "definition": {
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "layout_type": "ordered",
                 "show_title": true,
-                "title": "Rate Sheet",
+                "title": "Contract & Rate Sheet Items",
                 "type": "group",
                 "widgets": [
                     {
                         "definition": {
-                            "background_color": "blue",
-                            "content": "You can view the rate used for calculating usage, which also takes into account any discounts from the contract for your organization. You can also see the breakdown of usage per service type and usage type.\n\n",
+                            "background_color": "purple",
+                            "content": "Review your contract info and the effective rates, accounting for any discounts, used for calculating usage for your org based on credits used for all Snowflake accounts in your organization.",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": true,
@@ -259,12 +346,49 @@
                             "type": "note",
                             "vertical_align": "center"
                         },
-                        "id": 3568889871424130,
+                        "id": 3766700878304358,
                         "layout": {
                             "height": 2,
-                            "width": 6,
+                            "width": 12,
                             "x": 0,
                             "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Contract Amount",
+                                            "cell_display_mode": "number",
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snowflake.organization.contract.amount{$billing_account,$scope} by {contract_item,contract_number,currency}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Contract Item Amount",
+                            "type": "query_table"
+                        },
+                        "id": 1652193372904860,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
                         }
                     },
                     {
@@ -300,18 +424,18 @@
                         "layout": {
                             "height": 3,
                             "width": 6,
-                            "x": 0,
+                            "x": 6,
                             "y": 2
                         }
                     }
                 ]
             },
-            "id": 6294530637407728,
+            "id": 2904655527205698,
             "layout": {
                 "height": 6,
-                "width": 6,
-                "x": 6,
-                "y": 0
+                "width": 12,
+                "x": 0,
+                "y": 14
             }
         },
         {
@@ -324,7 +448,7 @@
                 "widgets": [
                     {
                         "definition": {
-                            "background_color": "purple",
+                            "background_color": "blue",
                             "content": "You can also view the daily credit usage across all your accounts, including information about the usage from cloud services and the rebates applied to your cloud service usage. Finally, you can see what was actually billed to your account from the previous day given these adjustments.",
                             "font_size": "16",
                             "has_padding": true,
@@ -525,12 +649,12 @@
                 "height": 10,
                 "width": 12,
                 "x": 0,
-                "y": 12
+                "y": 20
             }
         },
         {
             "definition": {
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "layout_type": "ordered",
                 "show_title": true,
                 "title": "Balance",
@@ -735,7 +859,7 @@
                 "height": 5,
                 "width": 12,
                 "x": 0,
-                "y": 22
+                "y": 30
             }
         },
         {
@@ -766,7 +890,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Credits Charged per Usage Type",
                             "type": "treemap"
                         },
@@ -798,7 +921,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Amount Charged per Usage Type",
                             "type": "treemap"
                         },
@@ -906,7 +1028,7 @@
         },
         {
             "definition": {
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "layout_type": "ordered",
                 "show_title": true,
                 "title": "Data Transfer",
@@ -914,12 +1036,12 @@
                 "widgets": [
                     {
                         "definition": {
-                            "background_color": "blue",
-                            "content": "With Datadog's Snowflake integration, you can track the amount of data transferred from Snowflake tables from one cloud to another.",
+                            "background_color": "purple",
+                            "content": "With Datadog's Snowflake integration, you can track the amount of data transferred from Snowflake tables into a different cloud storage provider's network.",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": true,
-                            "text_align": "left",
+                            "text_align": "center",
                             "tick_edge": "right",
                             "tick_pos": "50%",
                             "type": "note",
@@ -977,7 +1099,7 @@
                 "height": 3,
                 "width": 12,
                 "x": 0,
-                "y": 32
+                "y": 40
             }
         }
     ]
