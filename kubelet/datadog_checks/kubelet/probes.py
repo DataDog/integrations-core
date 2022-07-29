@@ -5,8 +5,6 @@ from __future__ import division
 
 from copy import deepcopy
 
-import requests
-
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.utils.tagging import tagger
 
