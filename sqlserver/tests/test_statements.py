@@ -372,8 +372,9 @@ def test_statement_metrics_and_plans(
             assert column in row, "missing required metrics column {}".format(column)
             assert type(row[column]) in (float, int), "wrong type for metrics column {}".format(column)
     if is_proc:
-        # all the plan handles should be the same for the same procedure execution
+        # all the plan handles / proc sigs should be the same for the same procedure execution
         assert all(row['plan_handle'] == matching_rows[0]['plan_handle'] for row in matching_rows)
+        assert all(row['procedure_signature'] == matching_rows[0]['procedure_signature'] for row in matching_rows)
 
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     assert dbm_samples, "should have collected at least one sample"
@@ -407,17 +408,15 @@ def test_statement_metrics_and_plans(
             assert not event['db']['plan']['definition']
             assert event['sqlserver']['is_plan_encrypted']
             assert event['sqlserver']['is_statement_encrypted']
+        elif is_proc:
+            assert event['db']['procedure_signature'], "missing proc signature"
+            assert not event['db']['query_signature'], "procedure plans should not have query_signature field set"
         else:
             assert event['db']['plan']['definition'], "event plan definition missing"
             parsed_plan = ET.fromstring(event['db']['plan']['definition'])
             assert parsed_plan.tag.endswith("ShowPlanXML"), "plan does not match expected structure"
             assert not event['sqlserver']['is_plan_encrypted']
             assert not event['sqlserver']['is_statement_encrypted']
-        if is_proc and not is_encrypted:
-            assert row['procedure_signature'], "missing proc signature"
-            assert (
-                row['procedure_signature'] != row['query_signature']
-            ), "proc signature and query sig should be different"
 
     fqt_events = [s for s in matching_samples if s['dbm_type'] == "fqt"]
     assert len(fqt_events) == len(

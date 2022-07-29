@@ -426,14 +426,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 return
             plan_key = (row['query_signature'], row['query_hash'], row['query_plan_hash'])
             # for stored procedures, we only want to look up plans for the entire procedure
-            # not every query that is executed within the proc. Queries from the same procedure
-            # have the same plan_handle, but different query signatures & can have diff plan hashes.
-            # taking the first 16 bytes should be unique enough to properly identify the plan.
-
-            # TODO: technically this could be the proc sig and the plan handle?? I believe that would
-            # work better??
+            # not every query that is executed within the proc. In order to accomplish this,
+            # we use the procedure_signature as the plan key
             if row['is_proc']:
-                plan_key = row['plan_handle'][0:16]
+                plan_key = row['procedure_signature']
             if self._seen_plans_ratelimiter.acquire(plan_key):
                 raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
                 obfuscated_plan, collection_errors = None, None
@@ -467,6 +463,11 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 text_key = 'statement_text'
                 if row['is_proc']:
                     text_key = 'procedure_text'
+                query_signature = row['query_signature']
+                # for procedure plans, it only makes sense to send the
+                # procedure_signature
+                if row['is_proc']:
+                    query_signature = None
                 if 'database_name' in row:
                     tags += ["db:{}".format(row['database_name'])]
                 yield {
@@ -483,7 +484,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                             "signature": row['query_plan_hash'],
                             "collection_errors": collection_errors,
                         },
-                        "query_signature": row['query_signature'],
+                        "query_signature": query_signature,
                         "procedure_signature": row.get('procedure_signature', None),
                         "statement": row[text_key],
                         "metadata": {
