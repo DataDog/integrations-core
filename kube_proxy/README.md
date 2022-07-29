@@ -42,5 +42,5 @@ The Kube Proxy integration does not include any service checks.
 Need help? Contact [Datadog support][3].
 
 [1]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[2]: https://github.com/DataDog/integrations-core/blob/master/kube_metrics_server/metadata.csv
+[2]: https://github.com/DataDog/integrations-core/blob/master/kube_proxy/metadata.csv
 [3]: https://docs.datadoghq.com/help/
