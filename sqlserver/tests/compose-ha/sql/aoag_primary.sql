@@ -65,6 +65,7 @@ GO
 
 GRANT EXECUTE on bobProcParams to bob;
 GRANT EXECUTE on bobProc to bob;
+GRANT EXECUTE on bobProc to fred;
 GO
 
 -- create test procedure for metrics loading feature

@@ -73,6 +73,7 @@ END;
 GO
 GRANT EXECUTE on bobProcParams to bob;
 GRANT EXECUTE on bobProc to bob;
+GRANT EXECUTE on bobProc to fred;
 GO
 
 -- create an offline database to have an unavailable database to test with
