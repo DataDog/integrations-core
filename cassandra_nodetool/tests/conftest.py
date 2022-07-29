@@ -57,7 +57,7 @@ def dd_environment():
                     "CREATE KEYSPACE IF NOT EXISTS test \
                 WITH REPLICATION={'class':'SimpleStrategy', 'replication_factor':2}",
                     "--request-timeout",
-                    "20"
+                    "20",
                 ]
             )
             yield common.CONFIG_INSTANCE, E2E_METADATA
