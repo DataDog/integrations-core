@@ -359,6 +359,7 @@ def test_statement_metrics_and_plans(
             assert not row['query_signature']
         else:
             assert row['query_signature'], "missing query signature"
+        assert 'text' not in row, "text field should not be forwarded"
         assert row['is_encrypted'] == is_encrypted
         assert row['is_proc'] == is_proc
         if is_proc and not is_encrypted:
@@ -414,6 +415,9 @@ def test_statement_metrics_and_plans(
             assert not event['sqlserver']['is_statement_encrypted']
         if is_proc and not is_encrypted:
             assert row['procedure_signature'], "missing proc signature"
+            assert (
+                row['procedure_signature'] != row['query_signature']
+            ), "proc signature and query sig should be different"
 
     fqt_events = [s for s in matching_samples if s['dbm_type'] == "fqt"]
     assert len(fqt_events) == len(

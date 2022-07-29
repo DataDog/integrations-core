@@ -73,6 +73,7 @@ select
         WHEN -1 THEN DATALENGTH(text)
         ELSE statement_end_offset END
             - statement_start_offset) / 2) + 1) AS statement_text,
+    qt.text,
     encrypted as is_encrypted,
     (SELECT IIF (EXISTS (SELECT 1 FROM sys.dm_exec_procedure_stats WHERE object_id =qt.objectid), 1, 0)) as is_proc,
     * from qstats_aggr
@@ -97,6 +98,7 @@ select
         WHEN -1 THEN DATALENGTH(text)
         ELSE statement_end_offset
     END - statement_start_offset) / 2) + 1) AS statement_text,
+    qt.text,
     encrypted as is_encrypted,
     (SELECT IIF (EXISTS (SELECT 1 FROM sys.dm_exec_procedure_stats WHERE object_id = qt.objectid), 1, 0)) as is_proc,
     * from qstats_aggr
