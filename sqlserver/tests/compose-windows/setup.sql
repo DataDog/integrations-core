@@ -59,12 +59,6 @@ BEGIN
 END;
 GO
 
-CREATE PROCEDURE bobProcParams AS
-BEGIN
-    SELECT * FROM ϑings;
-END;
-GO
-
 CREATE PROCEDURE bobProcParams @P1 INT = NULL, @P2 nvarchar(8) = NULL AS
 BEGIN
     SELECT * FROM ϑings WHERE id = @P1;
