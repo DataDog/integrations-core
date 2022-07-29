@@ -237,7 +237,7 @@ def test_mongo_custom_query_with_empty_result_set(aggregator, check, instance_us
     aggregator.assert_metric('dd.custom.mongo.query_a.amount', count=0)
 
 
-@common.standalone
+@common.shard
 def test_mongo_replset(instance_shard, aggregator, check, dd_run_check):
     mongo_check = check(instance_shard)
     dd_run_check(mongo_check)
@@ -277,7 +277,7 @@ def test_metadata(check, instance, datadog_agent):
     datadog_agent.assert_metadata_count(len(version_metadata) + 2)
 
 
-@common.standalone
+@common.shard
 def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
     mongo_check = check(instance_shard)
     dd_run_check(mongo_check)
