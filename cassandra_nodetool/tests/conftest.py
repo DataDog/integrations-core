@@ -8,6 +8,7 @@ import subprocess
 import pytest
 
 from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.docker import get_container_ip
 
 from . import common
@@ -45,7 +46,7 @@ def dd_environment():
         with docker_run(
             compose_file,
             service_name=common.CASSANDRA_CONTAINER_NAME_2,
-            log_patterns=log_patterns,
+            conditions=[CheckDockerLogs(compose_file, log_patterns, wait=2)],
         ):
             subprocess.check_call(
                 [
