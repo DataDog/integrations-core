@@ -45,11 +45,21 @@ def dd_environment():
             conditions=conditions,
         ):
             yield common.INSTANCE_BASIC, common.TLS_METADATA
-    else:
+    elif common.IS_STANDALONE:
+        conditions = [
+            WaitForPortListening(common.HOST, common.PORT1),
+            InitializeDB(),
+        ]
+        with docker_run(
+            compose_file,
+            conditions=conditions,
+        ):
+            yield common.INSTANCE_BASIC, {}
+    elif common.IS_SHARD:
         conditions = [
             WaitFor(setup_sharding, args=(compose_file,), attempts=5, wait=5),
             InitializeDB(),
-            WaitFor(create_shard_user, attempts=60, wait=5),
+            # WaitFor(create_shard_user, attempts=60, wait=5),
         ]
         with docker_run(
             compose_file,
