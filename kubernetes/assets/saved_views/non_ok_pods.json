@@ -1,5 +1,5 @@
 {
-  "name": "Pods with non OK statuses by Cluster",
+  "name": "Pods in symptomatic phases by cluster/namespace",
   "query": "Filter by: -pod_status:(running OR completed)",
   "page": "container_orchestration_pods",
   "type": "container",
@@ -13,13 +13,18 @@
         {
           "kind": "tag",
           "value": "kube_cluster_name"
+        },
+        {
+          "kind": "tag",
+          "value": "kube_namespace"
         }
       ],
-      "query": "-pod_status:(running OR completed)",
+      "query": "-tag#pod_status:(running OR completed)",
       "view": "pod",
       "columns": [
         "name",
         "status",
+        "cluster",
         "namespace",
         "age",
         "ready",
