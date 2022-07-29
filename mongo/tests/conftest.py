@@ -69,7 +69,6 @@ def dd_environment():
         conditions = [
             WaitFor(setup_sharding, args=(compose_file,), attempts=5, wait=5),
             InitializeDB(),
-            # WaitFor(create_shard_user, attempts=60, wait=5),
         ]
         with docker_run(
             compose_file,
@@ -227,16 +226,6 @@ class InitializeDB(LazyFunction):
         auth_db = cli['authDB']
         auth_db.command("createUser", 'testUser', pwd='testPass', roles=[{'role': 'read', 'db': 'test'}])
         auth_db.command("createUser", 'special test user', pwd='s3\\kr@t', roles=[{'role': 'read', 'db': 'test'}])
-
-
-def create_shard_user():
-    cli_shard = pymongo.mongo_client.MongoClient(
-        "mongodb://%s:%s" % (common.HOST, common.PORT2),
-        socketTimeoutMS=30000,
-        read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,
-    )
-    cli_shard['admin'].command("createUser", "testUser", pwd="testPass", roles=["root"])
-
 
 class InitializeAuthDB(LazyFunction):
     def __call__(self):

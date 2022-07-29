@@ -394,7 +394,7 @@ class PostgreSql(AgentCheck):
                 args['sslpassword'] = self._config.ssl_password
             conn = psycopg2.connect(**args)
         # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
-        conn.set_session(autocommit=True)
+        conn.set_session(autocommit=True, readonly=True)
         return conn
 
     def _connect(self):
@@ -446,7 +446,6 @@ class PostgreSql(AgentCheck):
             if not db or db.closed:
                 self.log.debug("initializing connection to dbname=%s", dbname)
                 db = self._new_connection(dbname)
-                db.set_session(autocommit=True)
                 self._db_pool[dbname] = db
                 if self._config.dbname == dbname:
                     # reload settings for the main DB only once every time the connection is reestablished

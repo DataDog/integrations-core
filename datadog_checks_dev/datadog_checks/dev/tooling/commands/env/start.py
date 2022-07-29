@@ -199,7 +199,7 @@ def _run_start_commands(metadata, environment, check, env):
             result = environment.exec_command(command, capture=True)
             if result.code:
                 click.echo()
-                echo_failure('An error occurred running "{}"'.format(str(command)))
+                echo_failure('An error occurred running "{}". Exit code: {}'.format(str(command), result.code))
                 echo_failure(result.stdout + result.stderr, indent=True)
                 echo_waiting('Stopping the environment...')
                 stop_environment(check, env, metadata=metadata)
