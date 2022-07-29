@@ -2,9 +2,6 @@ from pymongo import MongoClient, ReadPreference
 
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, StandaloneDeployment
 
-# from pymongo.errors import PyMongoError
-
-
 # The name of the application that created this MongoClient instance. MongoDB 3.4 and newer will print this value in
 # the server log upon establishing each connection. It is also recorded in the slow query log and profile collections.
 DD_APP_NAME = 'datadog-agent'
@@ -68,37 +65,6 @@ class MongoApi(object):
             self._cli = MongoClient(**options)
 
         self.deployment_type = self.get_deployment_type()
-
-    # def _authenticate(self):
-    #     """
-    #     Authenticate to the database.
-    #
-    #     Available mechanisms:
-    #     * Username & password
-    #     * X.509
-    #
-    #     More information:
-    #     https://api.mongodb.com/python/current/examples/authentication.html
-    #     """
-    #     authenticated = False
-    #     database = self[self._config.auth_source]
-    #     username = self._config.username
-    #     try:
-    #         # X.509
-    #         if self._config.use_x509 and username:
-    #             self._log.debug(u"Authenticate `%s` to `%s` using `MONGODB-X509` mechanism", username, database)
-    #             authenticated = database.authenticate(username, mechanism='MONGODB-X509')
-    #         elif self._config.use_x509:
-    #             self._log.debug(u"Authenticate to `%s` using `MONGODB-X509` mechanism", database)
-    #             authenticated = database.authenticate(mechanism='MONGODB-X509')
-    #         # Username & password
-    #         else:
-    #             authenticated = database.authenticate(username, self._config.password)
-    #
-    #     except PyMongoError as e:
-    #         self._log.error(u"Authentication failed due to invalid credentials or configuration issues. %s", e)
-    #
-    #     return authenticated
 
     @staticmethod
     def _get_rs_deployment_from_status_payload(repl_set_payload, cluster_role):

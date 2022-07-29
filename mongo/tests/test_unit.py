@@ -2,13 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import urllib
 
 import mock
 import pytest
-from six import PY3, iteritems
-
-if PY3:
-    import urllib
+from six import iteritems
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.mongo import MongoDb, metrics
