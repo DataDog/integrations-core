@@ -274,7 +274,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     procedure_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
-                self.log.warning("unable to obfuscate query: %s", row['statement_text'])
                 self.log.debug("Failed to obfuscate query: %s", e)
                 self.check.count(
                     "dd.sqlserver.statements.error",
@@ -321,9 +320,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         return row
 
     def _to_metrics_payload(self, rows):
-        sql_rows = [self._to_metrics_payload_row(r) for r in rows]
-        for r in sql_rows:
-            self.log.warning("query: %s", r['statement_text'])
         return {
             'host': self.check.resolved_hostname,
             'timestamp': time.time() * 1000,
@@ -471,7 +467,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 text_key = 'statement_text'
                 if row['is_proc']:
                     text_key = 'procedure_text'
-                    self.log.warning("proc text: %s", row["procedure_text"])
                 if 'database_name' in row:
                     tags += ["db:{}".format(row['database_name'])]
                 yield {
