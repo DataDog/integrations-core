@@ -45,8 +45,6 @@ class MockedDB(object):
     def __getitem__(self, coll_name):
         return MockedCollection(self._db_name, coll_name)
 
-    # def authenticate(self, *_, **__):
-    #     return True
 
     def aggregate(self, *_):
         with open(os.path.join(HERE, "fixtures", "current_op"), 'r') as f:
