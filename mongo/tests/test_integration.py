@@ -602,25 +602,18 @@ def test_mongod_auth_ok(check, dd_run_check, aggregator):
 
 @auth
 @pytest.mark.usefixtures('dd_environment')
-def test_mongod_auth_bad_user(check, dd_run_check, aggregator):
+@pytest.mark.parametrize(
+    'username, password',
+    [
+        pytest.param('badUser', 'testPass', id='bad_user'),
+        pytest.param('testUser', 'badPass', id='bad_password'),
+    ],
+)
+def test_mongod_auth(check, dd_run_check, aggregator, username, password):
     instance = {
         'hosts': ['{}:{}'.format(HOST, PORT1)],
-        'username': 'badUser',
-        'password': 'testPass',
-        'options': {'authSource': 'authDB'},
-    }
-    with pytest.raises(Exception, match="Authentication failed"):
-        mongo_check = check(instance)
-        dd_run_check(mongo_check)
-
-
-@auth
-@pytest.mark.usefixtures('dd_environment')
-def test_mongod_auth_bad_password(check, dd_run_check, aggregator):
-    instance = {
-        'hosts': ['{}:{}'.format(HOST, PORT1)],
-        'username': 'testUser',
-        'password': 'badPass',
+        'username': username,
+        'password': password,
         'options': {'authSource': 'authDB'},
     }
     with pytest.raises(Exception, match="Authentication failed"):
