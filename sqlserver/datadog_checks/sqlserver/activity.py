@@ -211,7 +211,7 @@ class SqlserverActivity(DBMAsyncJob):
         try:
             statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
             procedure_statement = None
-            # sqlserver doesn't have a boolean data type so we use 1 == True
+            # sqlserver doesn't have a boolean data type so convert integer to boolean
             row['is_proc'] = row['is_proc'] == 1
             if row['is_proc'] and 'text' in row:
                 procedure_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)

@@ -50,44 +50,26 @@ def dbm_instance(instance_docker):
     return copy(instance_docker)
 
 
-test_collect_load_activity_parameterized = (
-    "database,query,match_pattern,use_autocommit,is_proc",
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize("use_autocommit", [True, False])
+@pytest.mark.parametrize(
+    "database,query,match_pattern,is_proc",
     [
         [
             "datadog_test",
             "SELECT * FROM ϑings",
             r"SELECT \* FROM ϑings",
             False,
-            False,
-        ],
-        [
-            "datadog_test",
-            "SELECT * FROM ϑings",
-            r"SELECT \* FROM ϑings",
-            True,
-            False,
         ],
         [
             "datadog_test",
             "EXEC bobProc",
             r"SELECT \* FROM ϑings",
             True,
-            True,
-        ],
-        [
-            "datadog_test",
-            "EXEC bobProc",
-            r"SELECT \* FROM ϑings",
-            False,
-            True,
-        ],
+        ]
     ],
 )
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize(*test_collect_load_activity_parameterized)
 def test_collect_load_activity(
     aggregator,
     instance_docker,
