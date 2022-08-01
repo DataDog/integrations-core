@@ -217,17 +217,17 @@ class TUFDownloader:
         # Make a temporary directory in a parent directory we control.
         tempdir = tempfile.mkdtemp(dir=REPOSITORIES_DIR)
 
-        # Copy files over into temp dir.
-        for abs_path in inspection_packet:
-            shutil.copy(abs_path, tempdir)
-
-        # Switch to the temp dir.
-        os.chdir(tempdir)
-
-        # Load the root layout and public keys in this temp dir.
-        root_layout, root_layout_pubkeys, root_layout_params = self.__load_root_layout(target_relpath)
-
         try:
+            # Copy files over into temp dir.
+            for abs_path in inspection_packet:
+                shutil.copy(abs_path, tempdir)
+
+            # Switch to the temp dir.
+            os.chdir(tempdir)
+
+            # Load the root layout and public keys in this temp dir.
+            root_layout, root_layout_pubkeys, root_layout_params = self.__load_root_layout(target_relpath)
+
             verifylib.in_toto_verify(root_layout, root_layout_pubkeys, substitution_parameters=root_layout_params)
         except Exception as e:
             self.__handle_in_toto_verification_exception(target_relpath, e)
