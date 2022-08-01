@@ -71,6 +71,13 @@ test_collect_load_activity_parameterized = (
             "datadog_test",
             "EXEC bobProc",
             r"SELECT \* FROM ϑings",
+            True,
+            True,
+        ],
+        [
+            "datadog_test",
+            "EXEC bobProc",
+            r"SELECT \* FROM ϑings",
             False,
             True,
         ],
