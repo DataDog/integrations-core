@@ -8,23 +8,11 @@ DD_APP_NAME = 'datadog-agent'
 
 
 class MongoApi(object):
-    def __init__(self, config, log, replicaset=None):
+    # :params replicaset: If replication is enabled, this parameter specifies the name of the replicaset.
+    # Valid for ReplicaSetDeployment deployments
+    def __init__(self, config, log, replicaset: str = None):
         self._config = config
         self._log = log
-        self.deployment_type = None
-        options = {
-            'host': self._config.server if self._config.server else self._config.hosts,
-            'socketTimeoutMS': self._config.timeout,
-            'connectTimeoutMS': self._config.timeout,
-            'serverSelectionTimeoutMS': self._config.timeout,
-            'directConnection': True,
-            'read_preference': ReadPreference.PRIMARY_PREFERRED,
-            'appname': DD_APP_NAME,
-        }
-        options.update(self._config.additional_options)
-        options.update(self._config.ssl_params)
-        self._log.debug("options: %s", options)
-        self._cli = MongoClient(**options)
         self._initialize(replicaset)
 
     def __getitem__(self, item):
@@ -36,34 +24,36 @@ class MongoApi(object):
     def list_database_names(self, session=None):
         return self._cli.list_database_names(session)
 
+    def _is_arbiter(self):
+        cli = MongoClient(host=self._config.server if self._config.server else self._config.hosts)
+        is_master_payload = cli['admin'].command('isMaster')
+        return is_master_payload.get('arbiterOnly', False)
+
     def _initialize(self, replicaset=None):
         self._log.debug("Connecting to '%s'", self._config.hosts)
-
-        is_master_payload = self['admin'].command('isMaster')
-        is_arbiter = is_master_payload.get('arbiterOnly', False)
-
-        self._log.debug("is_master_payload: %s", is_master_payload)
-        if not is_arbiter and self._config.do_auth:
+        options = {
+            'host': self._config.server if self._config.server else self._config.hosts,
+            'socketTimeoutMS': self._config.timeout,
+            'connectTimeoutMS': self._config.timeout,
+            'serverSelectionTimeoutMS': self._config.timeout,
+            'directConnection': True,
+            'read_preference': ReadPreference.PRIMARY_PREFERRED,
+            'appname': DD_APP_NAME,
+        }
+        if self._config.do_auth and not self._is_arbiter():
             self._log.info("Using '%s' as the authentication database", self._config.auth_source)
-            options = {
-                'host': self._config.server if self._config.server else self._config.hosts,
-                'username': self._config.username,
-                'password': self._config.password,
-                'authSource': self._config.auth_source,
-                'socketTimeoutMS': self._config.timeout,
-                'connectTimeoutMS': self._config.timeout,
-                'serverSelectionTimeoutMS': self._config.timeout,
-                'directConnection': True,
-                'read_preference': ReadPreference.PRIMARY_PREFERRED,
-                'appname': DD_APP_NAME,
-            }
-            if replicaset:
-                options['replicaSet'] = replicaset
-            options.update(self._config.additional_options)
-            options.update(self._config.ssl_params)
-            self._log.debug("options: %s", options)
-            self._cli = MongoClient(**options)
-
+            if self._config.username:
+                options['username'] = self._config.username
+            if self._config.password:
+                options['password'] = self._config.password
+            if self._config.auth_source:
+                options['authSource'] = self._config.auth_source
+        if replicaset:
+            options['replicaSet'] = replicaset
+        options.update(self._config.additional_options)
+        options.update(self._config.ssl_params)
+        self._log.debug("options: %s", options)
+        self._cli = MongoClient(**options)
         self.deployment_type = self.get_deployment_type()
 
     @staticmethod
@@ -120,6 +110,5 @@ class MongoApi(object):
             else:
                 cluster_role = None
             return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
-        except Exception as e:
-            self._log.debug("`get_alibaba_deployment_type` failed.", str(e))
+        except Exception:
             raise
