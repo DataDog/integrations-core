@@ -136,7 +136,6 @@ def test_server_uri_sanitization(check, instance):
             "mongodb://user%2@localhost:27017/admin",
         ),
         # with the current sanitization approach, we expect the username to be decoded in the clean name
-        # ("mongodb://user%25@localhost:27017/admin", "mongodb://user%@localhost:27017/admin"),
         (
             "mongodb://%s@localhost:27017/admin" % (urllib.parse.quote_plus('user%25')),
             "mongodb://user%25@localhost:27017/admin",
