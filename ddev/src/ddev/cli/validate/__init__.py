@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2022-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 from datadog_checks.dev.tooling.commands.validate.agent_reqs import agent_reqs
 from datadog_checks.dev.tooling.commands.validate.agent_signature import legacy_signature
