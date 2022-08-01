@@ -215,27 +215,30 @@ class TUFDownloader:
 
     def __in_toto_verify(self, inspection_packet, target_relpath):
         # Make a temporary directory in a parent directory we control.
-        with tempfile.TemporaryDirectory(dir=REPOSITORIES_DIR) as tempdir:
-            # Copy files over into temp dir.
-            for abs_path in inspection_packet:
-                shutil.copy(abs_path, tempdir)
+        tempdir = tempfile.mkdtemp(dir=REPOSITORIES_DIR)
 
-            # Switch to the temp dir.
-            os.chdir(tempdir)
+        # Copy files over into temp dir.
+        for abs_path in inspection_packet:
+            shutil.copy(abs_path, tempdir)
 
-            # Load the root layout and public keys in this temp dir.
-            root_layout, root_layout_pubkeys, root_layout_params = self.__load_root_layout(target_relpath)
+        # Switch to the temp dir.
+        os.chdir(tempdir)
 
-            try:
-                verifylib.in_toto_verify(root_layout, root_layout_pubkeys, substitution_parameters=root_layout_params)
-            except Exception as e:
-                self.__handle_in_toto_verification_exception(target_relpath, e)
-            else:
-                logger.info('in-toto verified %s', target_relpath)
-            finally:
-                # Switch back to a parent directory we control, so that we can
-                # safely delete temp dir.
-                os.chdir(REPOSITORIES_DIR)
+        # Load the root layout and public keys in this temp dir.
+        root_layout, root_layout_pubkeys, root_layout_params = self.__load_root_layout(target_relpath)
+
+        try:
+            verifylib.in_toto_verify(root_layout, root_layout_pubkeys, substitution_parameters=root_layout_params)
+        except Exception as e:
+            self.__handle_in_toto_verification_exception(target_relpath, e)
+        else:
+            logger.info('in-toto verified %s', target_relpath)
+        finally:
+            # Switch back to a parent directory we control, so that we can
+            # safely delete temp dir.
+            os.chdir(REPOSITORIES_DIR)
+            # Delete temp dir.
+            shutil.rmtree(tempdir)
 
     def __download_and_verify_in_toto_metadata(self, target_relpath, target_abspath, target):
         # First, get our in-toto root layout.
