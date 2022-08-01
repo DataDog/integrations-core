@@ -252,3 +252,14 @@ def instance_remote_cert_warning_seconds():
         'seconds_warning': days_to_seconds(200),
         'tls_ca_cert': CA_CERT,
     }
+
+
+@pytest.fixture
+def instance_remote_postgresql_valid():
+    return {
+        'server': 'localhost',
+        'port': 55432,
+        'server_hostname': 'valid.mock',
+        'start_tls': 'postgres',
+        'tls_ca_cert': CA_CERT,
+    }
