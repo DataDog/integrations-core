@@ -1,5 +1,10 @@
 # CHANGELOG - SAP HANA
 
+## 2.2.0 / 2022-08-01
+
+* [Added] Add retries to test & emit warnings when connections fail. See [#12528](https://github.com/DataDog/integrations-core/pull/12528).
+* [Added] Add an option to set the tenant databases schema. See [#12492](https://github.com/DataDog/integrations-core/pull/12492).
+
 ## 2.1.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
