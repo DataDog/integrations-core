@@ -59,7 +59,8 @@ def test_relation_filter():
 
     query_filter = relations.filter_relation_query(query, SCHEMA_NAME)
     assert (
-        query_filter == "Select foo from bar where (( relname = 'breed' AND schemaname = ANY(array['public']::text[]) ))"
+        query_filter
+        == "Select foo from bar where (( relname = 'breed' AND schemaname = ANY(array['public']::text[]) ))"
     )
 
 
