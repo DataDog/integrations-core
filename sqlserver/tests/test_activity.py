@@ -67,7 +67,7 @@ def dbm_instance(instance_docker):
             "EXEC bobProc",
             r"SELECT \* FROM ϑings",
             True,
-        ]
+        ],
     ],
 )
 def test_collect_load_activity(
@@ -75,9 +75,9 @@ def test_collect_load_activity(
     instance_docker,
     dd_run_check,
     dbm_instance,
+    use_autocommit,
     database,
     query,
-    use_autocommit,
     match_pattern,
     is_proc,
 ):
@@ -90,6 +90,12 @@ def test_collect_load_activity(
         cur = c.cursor()
         cur.execute("USE {}".format(database))
         cur.execute(q)
+
+    # run the test query once before the blocking test to ensure that if it's
+    # a procedure then it is populated in the sys.dm_exec_procedure_stats table
+    # the first time a procedure is run we won't know it's a procedure because
+    # it won't appear in that stats table
+    run_test_query(fred_conn, query)
 
     # bob's query blocks until the tx is completed
     run_test_query(bob_conn, blocking_query)
