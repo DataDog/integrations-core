@@ -507,8 +507,8 @@ def test_user_pass_options(check, instance_user, dd_run_check):
     instance_user['options'] = {
         'authSource': '$external',
         'authMechanism': 'PLAIN',
-        # 'username': instance_user['username'],
-        # 'password': instance_user['password'],
+        'username': instance_user['username'],
+        'password': instance_user['password'],
     }
     check = check(instance_user)
 
