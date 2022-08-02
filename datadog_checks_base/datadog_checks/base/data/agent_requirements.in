@@ -46,8 +46,8 @@ lz4==2.2.1; python_version < '3.0'
 lz4==4.0.2; python_version > '3.0'
 mmh3==2.5.1; python_version < '3.0'
 mmh3==3.0.0; python_version > '3.0'
-openstacksdk==0.100.0; python_version > '3.0'
-openstacksdk==0.45.0; python_version < '3.0'
+openstacksdk==0.39.0; python_version < '3.0'
+openstacksdk==0.61.0; python_version > '3.0'
 orjson==3.7.11; python_version > '3.0'
 paramiko==2.11.0
 ply==3.11

@@ -39,8 +39,8 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "openstacksdk==0.100.0; python_version > '3.0'",
-    "openstacksdk==0.45.0; python_version < '3.0'",
+    "openstacksdk==0.39.0; python_version < '3.0'",
+    "openstacksdk==0.61.0; python_version > '3.0'",
 ]
 
 [project.urls]
