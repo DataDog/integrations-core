@@ -19,6 +19,7 @@ authors = [
     { name = "Datadog", email = "packages@datadoghq.com" },
 ]
 classifiers = [
+    "Private :: Do Not Upload",
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
