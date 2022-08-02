@@ -13,23 +13,6 @@ class MongoApi(object):
     def __init__(self, config, log, replicaset: str = None):
         self._config = config
         self._log = log
-        self._initialize(replicaset)
-
-    def __getitem__(self, item):
-        return self._cli[item]
-
-    def server_info(self, session=None):
-        return self._cli.server_info(session)
-
-    def list_database_names(self, session=None):
-        return self._cli.list_database_names(session)
-
-    def _is_arbiter(self):
-        cli = MongoClient(host=self._config.server if self._config.server else self._config.hosts)
-        is_master_payload = cli['admin'].command('isMaster')
-        return is_master_payload.get('arbiterOnly', False)
-
-    def _initialize(self, replicaset=None):
         self._log.debug("Connecting to '%s'", self._config.hosts)
         options = {
             'host': self._config.server if self._config.server else self._config.hosts,
@@ -55,6 +38,20 @@ class MongoApi(object):
         self._log.debug("options: %s", options)
         self._cli = MongoClient(**options)
         self.deployment_type = self.get_deployment_type()
+
+    def __getitem__(self, item):
+        return self._cli[item]
+
+    def server_info(self, session=None):
+        return self._cli.server_info(session)
+
+    def list_database_names(self, session=None):
+        return self._cli.list_database_names(session)
+
+    def _is_arbiter(self):
+        cli = MongoClient(host=self._config.server if self._config.server else self._config.hosts)
+        is_master_payload = cli['admin'].command('isMaster')
+        return is_master_payload.get('arbiterOnly', False)
 
     @staticmethod
     def _get_rs_deployment_from_status_payload(repl_set_payload, cluster_role):
