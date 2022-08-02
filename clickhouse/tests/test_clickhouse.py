@@ -33,7 +33,6 @@ def test_check(aggregator, instance, dd_run_check):
         at_least=1,
     )
 
-    aggregator.assert_metric('clickhouse.table.replicated.total', 2)
     aggregator.assert_service_check("clickhouse.can_connect", count=1)
 
 

@@ -92,6 +92,16 @@ def test_check_metrics_1_23(aggregator, mock_metrics, mock_leader):
     assert_metric('.scheduling.pod.scheduling_attempts.sum', value=10.0)
     assert_metric('.scheduling.pod.scheduling_attempts.count', value=7.0)
 
+    assert_metric(
+        '.client.http.requests_duration.count',
+        tags=['url:https://172.18.0.2:6443/apis/events.k8s.io/v1', 'upper_bound:0.001', 'verb:GET'],
+    )
+    assert_metric(
+        '.client.http.requests_duration.sum',
+        value=0.022055548,
+        tags=['url:https://172.18.0.2:6443/apis/events.k8s.io/v1', 'verb:GET'],
+    )
+
     assert_metric('.goroutines')
     assert_metric('.gc_duration_seconds.sum')
     assert_metric('.gc_duration_seconds.count')

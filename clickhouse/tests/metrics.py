@@ -6,9 +6,8 @@
 # immediately available upon the start up of our environment. Some
 # metrics take a while to show up and others we cannot trigger.
 # Additionally, these are metrics that are present across all versions
-# we support (v18-v21).
+# we support (v18-v22).
 BASE_METRICS = [
-    'clickhouse.background_pool.processing.task.active',
     'clickhouse.background_pool.schedule.task.active',
     'clickhouse.connection.http',
     'clickhouse.connection.interserver',
@@ -70,6 +69,7 @@ BASE_METRICS = [
 ]
 
 V_18_19_METRICS = [
+    'clickhouse.background_pool.processing.task.active',
     'clickhouse.background_pool.processing.memory',
     'clickhouse.background_pool.schedule.memory',
     'clickhouse.merge.memory',
@@ -78,6 +78,7 @@ V_18_19_METRICS = [
 ]
 
 V_20_METRICS = [
+    'clickhouse.background_pool.processing.task.active',
     'clickhouse.background_pool.buffer_flush_schedule.task.active',
     'clickhouse.background_pool.distributed.task.active',
     'clickhouse.background_pool.fetches.task.active',
@@ -90,8 +91,8 @@ V_20_METRICS = [
     'clickhouse.selected.bytes.total',
 ]
 
-# This is not tested by our current envs.
 V_21_METRICS = [
+    'clickhouse.background_pool.processing.task.active',
     'clickhouse.ddl.max_processed',
     'clickhouse.parts.committed',
     'clickhouse.parts.compact',
@@ -103,8 +104,19 @@ V_21_METRICS = [
     'clickhouse.parts.temporary',
 ]
 
-version_mapper = {'18': V_18_19_METRICS, '19': V_18_19_METRICS, '20': V_20_METRICS, '21': V_21_METRICS}
+V_22_METRICS = [
+    'clickhouse.parts.pre_active',
+    'clickhouse.parts.active',
+]
+
+version_mapper = {
+    '18': V_18_19_METRICS,
+    '19': V_18_19_METRICS,
+    '20': V_20_METRICS,
+    '21': V_21_METRICS,
+    '22': V_22_METRICS,
+}
 
 
 def get_metrics(version):
-    return BASE_METRICS + version_mapper.get(version, [])
+    return BASE_METRICS + version_mapper.get(version.split(".")[0], [])

@@ -11,6 +11,7 @@ import pytest
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.connection import split_sqlserver_host_port
 from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_SQL_DATABASE,
     ENGINE_EDITION_STANDARD,
@@ -272,9 +273,7 @@ def test_parse_sqlserver_major_version(version, expected_major_version):
     ],
 )
 def test_split_sqlserver_host(instance_host, split_host, split_port):
-    instance = {'host': instance_host}
-    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance])
-    s_host, s_port = sqlserver_check.split_sqlserver_host_port(instance_host)
+    s_host, s_port = split_sqlserver_host_port(instance_host)
     assert (s_host, s_port) == (split_host, split_port)
 
 

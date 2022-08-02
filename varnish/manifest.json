@@ -30,6 +30,10 @@
   "assets": {
     "integration": {
       "source_type_name": "Varnish",
+      "process_signatures": [
+        "service varnish start",
+        "varnishd"
+      ],
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },

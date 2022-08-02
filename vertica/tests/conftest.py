@@ -10,18 +10,12 @@ import vertica_python as vertica
 from datadog_checks.dev import LazyFunction, docker_run
 
 from . import common
+from .db import setup_db_tables  # noqa: F401
 
 
 class InitializeDB(LazyFunction):
     def __init__(self, config):
-        self.conn_info = {
-            'database': config['db'],
-            'host': config['server'],
-            'port': config['port'],
-            'user': config['username'],
-            'password': config['password'],
-            'connection_timeout': config['timeout'],
-        }
+        self.conn_info = common.connection_options_from_config(config)
 
     def __call__(self):
         with vertica.connect(**self.conn_info) as conn:
@@ -38,7 +32,7 @@ class InitializeDB(LazyFunction):
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    compose_file = get_compose_file(os.environ['VERTICA_VERSION'])
+    compose_file = os.path.join(common.HERE, 'docker', 'docker-compose.yaml')
 
     with docker_run(compose_file, log_patterns=['Vertica is now running'], conditions=[InitializeDB(common.CONFIG)]):
         yield common.CONFIG
@@ -57,14 +51,3 @@ def tls_instance():
 @pytest.fixture
 def tls_instance_legacy():
     return deepcopy(common.TLS_CONFIG_LEGACY)
-
-
-def get_compose_file(vertica_version):
-    major_version = int(vertica_version.split('.', 1)[0])
-
-    if major_version < 10:
-        fname = 'docker-compose-9.yaml'
-    else:
-        fname = 'docker-compose.yaml'
-
-    return os.path.join(common.HERE, 'docker', fname)

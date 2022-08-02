@@ -234,7 +234,9 @@ class AggregatorStub(object):
                 + "\n".join(["     {}".format(m) for m in candidates])
             )
         else:
+            expected_stub = MetricStub(metric_name, type=None, value=None, tags=[tag], hostname=None, device=None)
             msg = "Metric '{}' not found".format(metric_name)
+            msg = "{}\n{}".format(msg, build_similar_elements_msg(expected_stub, self._metrics))
 
         if count is not None:
             assert len(candidates_with_tag) == count, msg

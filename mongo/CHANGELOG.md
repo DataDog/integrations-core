@@ -1,6 +1,6 @@
 # CHANGELOG - mongo
 
-## 3.2.3 / 2022-06-27
+## 3.2.3 / 2022-06-27 / Agent 7.38.0
 
 * [Fixed] Allow hosts to be a singular value. See [#12090](https://github.com/DataDog/integrations-core/pull/12090).
 

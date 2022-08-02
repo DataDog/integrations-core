@@ -19,7 +19,7 @@ The [ibm_db][4] client library is required. To install it, ensure you have a wor
 ##### Unix
 
 ```text
-/opt/datadog-agent/embedded/bin/pip install ibm_db==3.0.1
+sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install ibm_db==3.0.1
 ```
 
 ##### Windows

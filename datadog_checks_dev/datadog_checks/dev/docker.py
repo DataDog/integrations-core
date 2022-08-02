@@ -7,7 +7,6 @@ from typing import Iterator
 
 from six import string_types
 from six.moves.urllib.parse import urlparse
-from tenacity import retry, stop_after_attempt, wait_fixed
 
 from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
@@ -150,14 +149,14 @@ def docker_run(
       `CheckEndpoints(endpoints)` to the `conditions` argument.
     - **log_patterns** (_List[str|re.Pattern]_) - Regular expression patterns to find in Docker logs before yielding.
       This is only available when `compose_file` is provided. Shorthand for adding
-      `CheckDockerLogs(compose_file, log_patterns)` to the `conditions` argument.
+      `CheckDockerLogs(compose_file, log_patterns, 'all')` to the `conditions` argument.
     - **mount_logs** (_bool_) - Whether or not to mount log files in Agent containers based on example logs
       configuration
     - **conditions** (_callable_) - A list of callable objects that will be executed before yielding to
       check for errors
     - **env_vars** (_dict_) - A dictionary to update `os.environ` with during execution
     - **wrappers** (_List[callable]_) - A list of context managers to use during execution
-    - **attempts** (_int_) - Number of attempts to run `up` successfully
+    - **attempts** (_int_) - Number of attempts to run `up` and the `conditions` successfully
     - **attempts_wait** (_int_) - Time to wait between attempts
     """
     if compose_file and up:
@@ -178,15 +177,6 @@ def docker_run(
         set_up = up
         tear_down = down
 
-    if attempts is not None:
-        saved_set_up = set_up
-
-        @retry(wait=wait_fixed(attempts_wait), stop=stop_after_attempt(attempts))
-        def set_up_with_retry():
-            return saved_set_up()
-
-        set_up = set_up_with_retry
-
     docker_conditions = []
 
     if log_patterns is not None:
@@ -195,7 +185,7 @@ def docker_run(
                 'The `log_patterns` convenience is unavailable when using '
                 'a custom setup. Please use a custom condition instead.'
             )
-        docker_conditions.append(CheckDockerLogs(compose_file, log_patterns))
+        docker_conditions.append(CheckDockerLogs(compose_file, log_patterns, 'all'))
 
     if conditions is not None:
         docker_conditions.extend(conditions)
@@ -229,6 +219,8 @@ def docker_run(
         conditions=docker_conditions,
         env_vars=env_vars,
         wrappers=wrappers,
+        attempts=attempts,
+        attempts_wait=attempts_wait,
     ) as result:
         yield result
 

@@ -3,11 +3,35 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-from six import PY2
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.mongo import MongoDb
 from datadog_checks.mongo.config import MongoConfig
+
+
+def test_none_hosts():
+    instance = {}
+    with pytest.raises(ConfigurationError, match='No `hosts` specified'):
+        MongoConfig(instance, mock.Mock())
+
+
+def test_empty_hosts():
+    instance = {'hosts': []}
+    with pytest.raises(ConfigurationError, match='No `hosts` specified'):
+        MongoConfig(instance, mock.Mock())
+
+
+def test_default_ssl_params():
+    instance = {'hosts': ['test.mongodb.com']}
+    config = MongoConfig(instance, mock.Mock())
+    assert config.ssl_params == {}
+
+
+def test_default_scheme(instance):
+    instance['hosts'] = ['test.mongodb.com']
+    with mock.patch('pymongo.uri_parser.parse_uri', return_value={'nodelist': ["test.mongodb.com"]}) as mock_parse_uri:
+        MongoConfig(instance, mock.Mock())
+        mock_parse_uri.assert_called_once_with("mongodb://test.mongodb.com/")
 
 
 def test_invalid_scheme(instance):
@@ -18,9 +42,11 @@ def test_invalid_scheme(instance):
 
 
 def test_mongodb_scheme(instance):
-    instance['hosts'] = ['localhost']
+    instance['hosts'] = ['test.mongodb.com']
     instance['connection_scheme'] = 'mongodb'
-    MongoConfig(instance, mock.Mock())
+    with mock.patch('pymongo.uri_parser.parse_uri', return_value={'nodelist': ["test.mongodb.com"]}) as mock_parse_uri:
+        MongoConfig(instance, mock.Mock())
+        mock_parse_uri.assert_called_once_with("mongodb://test.mongodb.com/")
 
 
 def test_mongodb_srv_scheme(instance):
@@ -39,20 +65,13 @@ def test_badly_formatted_server(instance):
         MongoConfig(instance, mock.Mock())
 
 
-def test_deprecated_schema(instance):
-    instance['hosts'] = ['mongodb+srv://sandbox.foo.bar.mongodb.com:27017']
-    with pytest.raises(ConfigurationError, match='Could not build a mongo uri with the given hosts'):
-        MongoConfig(instance, mock.Mock())
-
-
 def test_hosts_can_be_singular(instance):
     instance['hosts'] = 'localfoost'
     check = MongoDb('mongo_check', {}, instances=[instance])
     assert check._config.hosts == ['localfoost']
 
-    if not PY2:
-        check.load_configuration_models()
-        assert check._config_model_instance.hosts == ('localfoost',)
+    check.load_configuration_models()
+    assert check._config_model_instance.hosts == ('localfoost',)
 
 
 def test_dbnames_not_exists(instance):

@@ -3,14 +3,7 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-from .common import (
-    DEFAULT_INSTANCE,
-    ENVOY_VERSION,
-    FLAKY_METRICS,
-    LEGACY_INSTANCE,
-    PROMETHEUS_METRICS,
-    requires_new_environment,
-)
+from .common import DEFAULT_INSTANCE, ENVOY_VERSION, FLAKY_METRICS, PROMETHEUS_METRICS, requires_new_environment
 
 pytestmark = [requires_new_environment]
 
@@ -46,20 +39,6 @@ def test_check(aggregator, dd_run_check, check):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_check_legacy(aggregator, dd_run_check, check):
-    c = check(LEGACY_INSTANCE)
-
-    dd_run_check(c)
-
-    metadata_metrics = get_metadata_metrics()
-    # Metric that has a different type in legacy
-    metadata_metrics['envoy.cluster.upstream_cx_tx_bytes_total']['metric_type'] = 'count'
-
-    aggregator.assert_metrics_using_metadata(metadata_metrics)
 
 
 @pytest.mark.integration

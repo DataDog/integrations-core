@@ -47,6 +47,8 @@ NEW_1_14_HISTOGRAMS = {
     'scheduler_scheduling_duration_seconds': 'scheduling.scheduling_duration',
     # (from 1.14) Binding latency in seconds
     'scheduler_binding_duration_seconds': 'binding_duration',
+    # (from 1.14) Request latency in seconds. Broken down by verb and URL (new name)
+    'rest_client_request_duration_seconds': 'client.http.requests_duration',
 }
 
 NEW_1_23_HISTOGRAMS = {
