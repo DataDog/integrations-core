@@ -609,7 +609,7 @@ def test_mongod_auth_ok(check, dd_run_check, aggregator):
         pytest.param('testUser', 'badPass', id='bad_password'),
     ],
 )
-def test_mongod_auth(check, dd_run_check, aggregator, username, password):
+def test_mongod_bad_auth(check, dd_run_check, aggregator, username, password):
     instance = {
         'hosts': ['{}:{}'.format(HOST, PORT1)],
         'username': username,
