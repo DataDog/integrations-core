@@ -40,6 +40,7 @@ class TrelloClient:
             'Container-Ecosystems': '627e693a6c58bc2144accc85',
             'Agent-Metrics-Logs': '62a9bbeb1c71b2208581744e',
             'Agent-Shared-Components': '62a9bc0c9ab7f433a5c26f2f',
+            'Windows-Agent': '62e8dd8d256d8968c20af29e',
         }
 
         # Maps the team to the trello team label
@@ -61,6 +62,7 @@ class TrelloClient:
             'team/container-ecosystems': 'Container-Ecosystems',
             'team/agent-metrics-logs': 'Agent-Metrics-Logs',
             'team/agent-shared-components': 'Agent-Shared-Components',
+            'team/windows-agent': 'Windows-Agent',
         }
 
         # Maps the team to the github team
@@ -84,6 +86,7 @@ class TrelloClient:
             # 'agent-core' must be after 'agent-metrics-logs' and 'agent-shared-components'
             # as the team of a user is the first team available.
             'team/agent-core': 'agent-core',
+            'team/windows-agent': 'windows-agent',
         }
 
         # Maps the trello label name to trello label ID
@@ -105,6 +108,7 @@ class TrelloClient:
             'Container-Ecosystems': '627e69f0963c334272a31f19',
             'Agent-Metrics-Logs': '62a9bc5e60fb632602641d07',
             'Agent-Shared-Components': '62a9bc4cdb0cc563932f532f',
+            'Windows-Agent': '62e8ddb35919c982499a7ccf',
         }
 
         self.progress_columns = {
