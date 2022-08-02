@@ -38,6 +38,7 @@ IGNORED_DEPS = {
     'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
     'protobuf',  # https://github.com/DataDog/integrations-core/pull/12653
     'foundationdb',  # https://github.com/DataDog/integrations-core/pull/12653
+    'openstacksdk',  # https://github.com/DataDog/integrations-core/pull/12653
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
