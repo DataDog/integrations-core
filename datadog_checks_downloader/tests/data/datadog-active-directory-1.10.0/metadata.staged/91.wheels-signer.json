@@ -1,0 +1,353 @@
+{
+ "signatures": [
+  {
+   "keyid": "bd25e4db5e685ddbd0c8d6b644b210b0894ffdfa1441243ae34f6a0a58286ab7",
+   "sig": "c59f332ba6a553ee9080bd4fa47a4855eba25a3c60c8e188fad7b18fcd689c4fda9a723d59ca7c6d5cee368dcf46b9459db1122413ea9f1c3abc2c0ad23341a666c22066927eaa9db4f8a23f5457a440056bc152fb1bb4515e84f2f517917a1b71d54c0af51da64b149c377a596601bd534483abb0c370632062884fcb317edcceb3928790b693caab2546901af4ec96f600b9f9c422fa9233af0d50c3558f72e19d99ea84ae7f5cef2a798d602262e61efd8e82c7431468fc85d7e4ef4d887b549c3ddfe4636b25d3555b08363fcfe452e0a5c8668e610af9b95c74e5d15e0687545b5c1f3c6a6da44afafa94639fdd97012bc074ff5ec752aadeccbc6c44beab62157b84560a9e0ccfebcac33da8dea67765829adb43578ba2ba2be822b62487b41560124f50feaa57341fbba3e50b484e5a813d86ba0e3695ff7d6e10e0b6a6590d25de6e54738a4b778262a3524801098170ea8b73dfc726504b7b263adcd13a8a1fdadaf8d065eb3b4e028fbf2810538156bc5e34558dde64473a409286ca37490eea1de7114052753518ea38bd4ba553403729e99d551332bfb8a977f9d05e526617eb5c7d158eb336498e1f9358ed82a2b552969370d8c22964a49f4dbf9ac07361213f5f5f5898026f3bc499bb457fc1c2eae2ce541f1ec29d1a22dee9014d5a884c0835d82ffa91803994c450258713743c44540f0556812259a1cc"
+  },
+  {
+   "keyid": "bf92c649a698eae02d97477a595927f16e512e44fa89138304a7feafcaa654ef",
+   "sig": "4533b56c06c6675251326eda5878d7d15d06d991bb87215cfcc46e3a004f975c9944e06f6b8047563deab230ee5770516d59a019f952c00d252b3b981ad1bbe60e016707c3efdd6c8040499519f63855daebbbc8cc6f90b19f4e967df922c3a9d54705fb60c9b3d38862fade6f17f177586f341e9a18ad3467cd35ac84ba2a9e6eb52d6b4d6e6e3b43c093f91a155f54dd09494fb5e23ac1bc21fe959d03a43ab9120f8cac813277d27605ff3510291c34adc4d9e5bb3c3a61be7fd15c2e19584af4b378716e1dc0b57a27859b3528ab36c6cab77ad855c2c2feebe6ef45e98aadd1094f2dcddd60dcab2f23f58ede383a8462dad7cdd7464cbb428924aef710d9f67a0ad260c70318183c2830dc08065188c2f1fc4bbd3057c3ccecc6a8b28d3a9fc9603892c82d8dfd6c4f7ba67973a6ef476ba86168cb16d4aedc04cdf294561ba68b0d631e13f303dfae11ca5e3c8494b0e7025a69c45934dc737097c3c5fb3b2eb9b327c61c5dbe812e7bfc37bdbf0f622f3e6c4227025920a6df653e3f0d2df4fbbccb9c572003ffe7688929a392a6270dc5f192685d73f957f671a9296d687554644336bd5d36725fd0c610557d5e51360e8251d06f59ab9b3a6aa5c1c79e64a0bdda4a20778a4341819d25ec827cf8cb95e83d8cea91cca07de845814437af94ca136584a7cbf80709e827160276ec7931537673aea78cd4ae204147"
+  },
+  {
+   "keyid": "f688e7e820bbce1a4ca6a042d0eb9525d27fd525b2c64d4803fdf22d51bf98ff",
+   "sig": "6aac76a6a3169aea7877f59fea4b4e15e8c4d10eccd224a1382df2abfe696db96c035b887e713ff6931d5a436f49dbd608883c0721885ee3b65303cf4c3f9c0465d39b4fd926a370cfb95dfecdc67e92014a2a0713d756001017575458d5829e9e8502e11ff68927210b0e89af9865d0a313258d7e439d2b210ad53dd8f066eeee95b0ef629c64f3fc78bf79302e87688f755cf0e7ecf630d9afc7e710e720370deecc76a15048bf064c85e7c4483b1ba77fc3ced96313d052c275463895057d61a078a26d8fad103b3fe6bce41f0dd10257a60b8e7e34279859b18fd415f6dd0c94562ba8ab03b1c77e284d94c300e19624575d4186dcb00e536354c8a7f5e5ccdc447efe70d9ba177ab2764f433d466054397be4b43b068b5b4ad0e2d7b2352a09db999f2d1a0958ac9276c371ceafe369a5f1a60fa9049ee14636a877ac6e75e22bb138774f40c6bd8add2a05bac3971f5367c6f94595b01ec023bfada5ebd45c6226b77670ad2465359fc270df7fc4f22516697ed43e0c1ee8a12da06918f51d6cdc8157277b5314c69eab89a85331939c0b955347d0171f351ca8b1bd2f4296331c34bd9eedf0e5f43a3b9f09bbc5f854a1f433d9c1cd1edfefbd79337ddbd7d872f192aa877f6301e87d68296459576ce6153d335346b8b45b1d57ca1227bb8178fa07efff841fad3c1f2d2b7283d24cd3317eaf1ecdf71dd6a075c809"
+  }
+ ],
+ "signed": {
+  "_type": "targets",
+  "delegations": {
+   "keys": {
+    "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4": {
+     "keyid_hash_algorithms": [
+      "sha256",
+      "sha512"
+     ],
+     "keytype": "rsa",
+     "keyval": {
+      "public": "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAxH2Z/Khx7Bq+4NuuG6uj\ngyN0nZfisd718u7osCfPU3I6i2Ze1vaMaRoHGIcl6JTgE/zL75NFRBDkkxZcD6Px\nrmC+Y2TXXIvSduwRUnfaRDvdSFOnDg3kHeOODjdxipIl8JTqhTG8t65oF7+58guf\nydtbZaUhFeWuHU+Q2Td+czbA6HLQaN3lUhbks2UR7fw7MqQ5zBkTN7jqDYFH0mMs\nI66ZjApvyN7o5G7AjLkCjbRpVcg3jsmHnpV/fcYWagZBP116hGL9yvPmSQX1/bE4\nXqUCAheddjZcFZBArBJSbLtX8Ih89ewPo0T/PiNBwBhRnQxpETnOcZBV3Z7iQbTh\nVgBOLOdtp0UTomZYZQQIhjvFtv+MUPCu9HMGRZ/vq+bHJBBy5Af0IG1YHec/3Dtw\nwVFUan7jOdT7sXRuwO7Lu1VbhUEJOj4MQX51pqoSspXDBwjuRLOKkGYcdg2crOPJ\nvCIQsgjaBsbpUezXrLzREbxwROh6V3dJ43nwRdjB69kVh9BiJ16x889NBBz04fZd\nySqAMuKtOH35vqOzoIbR0XBAfEy6ikODK7jQC2YWWPihygyveQAlGIhvyb+UCtmB\nK3GmRER9mVl+ahVLAlQ3DZb/xDQHXxxOu81/mIqfz5CdOiTWP2IhJ4ZagprwHdm5\n7TkJ15VfFGbtTHe6e/CGLSkCAwEAAQ==\n-----END PUBLIC KEY-----"
+     },
+     "scheme": "rsassa-pss-sha256"
+    }
+   },
+   "roles": [
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-a",
+     "paths": [
+      "simple/index.html",
+      "simple/datadog-a*/index.html",
+      "simple/datadog-a*/datadog_a*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-b",
+     "paths": [
+      "simple/datadog-b*/index.html",
+      "simple/datadog-b*/datadog_b*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-c",
+     "paths": [
+      "simple/datadog-c*/index.html",
+      "simple/datadog-c*/datadog_c*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-d",
+     "paths": [
+      "simple/datadog-d*/index.html",
+      "simple/datadog-d*/datadog_d*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-e",
+     "paths": [
+      "simple/datadog-e*/index.html",
+      "simple/datadog-e*/datadog_e*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-f",
+     "paths": [
+      "simple/datadog-f*/index.html",
+      "simple/datadog-f*/datadog_f*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-g",
+     "paths": [
+      "simple/datadog-g*/index.html",
+      "simple/datadog-g*/datadog_g*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-h",
+     "paths": [
+      "simple/datadog-h*/index.html",
+      "simple/datadog-h*/datadog_h*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-i",
+     "paths": [
+      "simple/datadog-i*/index.html",
+      "simple/datadog-i*/datadog_i*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-j",
+     "paths": [
+      "simple/datadog-j*/index.html",
+      "simple/datadog-j*/datadog_j*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-k",
+     "paths": [
+      "simple/datadog-k*/index.html",
+      "simple/datadog-k*/datadog_k*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-l",
+     "paths": [
+      "simple/datadog-l*/index.html",
+      "simple/datadog-l*/datadog_l*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-m",
+     "paths": [
+      "simple/datadog-m*/index.html",
+      "simple/datadog-m*/datadog_m*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-n",
+     "paths": [
+      "simple/datadog-n*/index.html",
+      "simple/datadog-n*/datadog_n*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-o",
+     "paths": [
+      "simple/datadog-o*/index.html",
+      "simple/datadog-o*/datadog_o*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-p",
+     "paths": [
+      "simple/datadog-p*/index.html",
+      "simple/datadog-p*/datadog_p*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-q",
+     "paths": [
+      "simple/datadog-q*/index.html",
+      "simple/datadog-q*/datadog_q*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-r",
+     "paths": [
+      "simple/datadog-r*/index.html",
+      "simple/datadog-r*/datadog_r*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-s",
+     "paths": [
+      "simple/datadog-s*/index.html",
+      "simple/datadog-s*/datadog_s*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-t",
+     "paths": [
+      "simple/datadog-t*/index.html",
+      "simple/datadog-t*/datadog_t*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-u",
+     "paths": [
+      "simple/datadog-u*/index.html",
+      "simple/datadog-u*/datadog_u*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-v",
+     "paths": [
+      "simple/datadog-v*/index.html",
+      "simple/datadog-v*/datadog_v*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-w",
+     "paths": [
+      "simple/datadog-w*/index.html",
+      "simple/datadog-w*/datadog_w*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-x",
+     "paths": [
+      "simple/datadog-x*/index.html",
+      "simple/datadog-x*/datadog_x*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-y",
+     "paths": [
+      "simple/datadog-y*/index.html",
+      "simple/datadog-y*/datadog_y*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    },
+    {
+     "keyids": [
+      "803887f202d2da0518fd078acc3b50d1daae9d1c7b7569021f97e5a28558ced4"
+     ],
+     "name": "wheels-signer-z",
+     "paths": [
+      "simple/datadog-z*/index.html",
+      "simple/datadog-z*/datadog_z*-*-py*-none-any.whl"
+     ],
+     "terminating": true,
+     "threshold": 1
+    }
+   ]
+  },
+  "expires": "2022-07-01T07:33:04Z",
+  "spec_version": "1.0.0",
+  "targets": {},
+  "version": 91
+ }
+}

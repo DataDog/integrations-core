@@ -1,0 +1,151 @@
+{
+ "signatures": [
+  {
+   "keyid": "b2f94f2bf3d36832854da19ba53c538c9664ef85a663855a95e599bc743511e8",
+   "sig": "a920cff3750f7497057800e7336d9de1a9bf1a4910452067ac2327b7a63813a8bd1b79caa2e9a80fafc04e0219fa9e8e4cd9346ec2ac4c9fa18c40de451541e0fe2b86d500ac78756c4cb1d7c68e6d1d8c4aecda27bad4bb8fb0c73e51651606eec57af3fc2a0a038774f71d6ecb0d140e7b078a22c200226da265247e9c421fa8997240451ef1995dbdff8f2823e3c787bf2ca677232253bb00354c74d593e9d2770a9f5723e3d05cab628aa8ef2b462ef7858bfb622cc6ec07fc2a76f64bf1ad6b2136e6fb6b3846c027b74c26699082b0f0ae63c0baee6d25a276657e81c0e78e1eb9950444612873e8283482d149d3feb5d7aba67263a3917b3091b9dc590fecd3c5eee12096322c61d3ed578eb3228470d70a57589c7d985dd0d503bd5d115973eca3daae200ea13b641d23a1ab59a3c6a5a18dbd193bb09533aa442a41afd45ff5675ba34113abc90247f84cb6823e8b3e52efa12275895af2069288a9f71619eee04565232db5dc1179ca882497843a42727712c2893aec0aa48620f5cdacd4e5b83c2190ede0290c8ea535d7e58a13e0ac4616ec8eb99054af8852b7d634124df787e4218942a26595f87ddd3a0ac590a5ef18cb127f1ecc7196a5eafba7d86755e0377b28787dbe6b4ccfcfd6ff2e7e6c0572e57f066332e9cc18c5cbd765d05a260da424263cadd29b526f6a197df1b19fb3b136ab20543a925ffb"
+  }
+ ],
+ "signed": {
+  "_type": "snapshot",
+  "expires": "2022-07-31T14:15:44Z",
+  "meta": {
+   "in-toto-metadata-signer-0.json": {
+    "version": 2833
+   },
+   "in-toto-metadata-signer-1.json": {
+    "version": 2833
+   },
+   "in-toto-metadata-signer-2.json": {
+    "version": 2833
+   },
+   "in-toto-metadata-signer-3.json": {
+    "version": 2833
+   },
+   "in-toto-metadata-signer-4.json": {
+    "version": 2833
+   },
+   "in-toto-metadata-signer-5.json": {
+    "version": 2833
+   },
+   "in-toto-metadata-signer-6.json": {
+    "version": 2833
+   },
+   "in-toto-metadata-signer-7.json": {
+    "version": 2833
+   },
+   "in-toto-metadata-signer-8.json": {
+    "version": 2833
+   },
+   "in-toto-metadata-signer-9.json": {
+    "version": 2833
+   },
+   "in-toto-metadata-signer-a.json": {
+    "version": 2833
+   },
+   "in-toto-metadata-signer-b.json": {
+    "version": 2833
+   },
+   "in-toto-metadata-signer-c.json": {
+    "version": 2833
+   },
+   "in-toto-metadata-signer-d.json": {
+    "version": 2833
+   },
+   "in-toto-metadata-signer-e.json": {
+    "version": 2833
+   },
+   "in-toto-metadata-signer-f.json": {
+    "version": 2833
+   },
+   "in-toto-metadata-signer.json": {
+    "version": 7
+   },
+   "targets.json": {
+    "version": 9
+   },
+   "wheels-signer-a.json": {
+    "version": 2833
+   },
+   "wheels-signer-b.json": {
+    "version": 2833
+   },
+   "wheels-signer-c.json": {
+    "version": 2833
+   },
+   "wheels-signer-d.json": {
+    "version": 2833
+   },
+   "wheels-signer-e.json": {
+    "version": 2833
+   },
+   "wheels-signer-f.json": {
+    "version": 2833
+   },
+   "wheels-signer-g.json": {
+    "version": 2833
+   },
+   "wheels-signer-h.json": {
+    "version": 2833
+   },
+   "wheels-signer-i.json": {
+    "version": 2833
+   },
+   "wheels-signer-j.json": {
+    "version": 2833
+   },
+   "wheels-signer-k.json": {
+    "version": 2833
+   },
+   "wheels-signer-l.json": {
+    "version": 2833
+   },
+   "wheels-signer-m.json": {
+    "version": 2833
+   },
+   "wheels-signer-n.json": {
+    "version": 2833
+   },
+   "wheels-signer-o.json": {
+    "version": 2833
+   },
+   "wheels-signer-p.json": {
+    "version": 2833
+   },
+   "wheels-signer-q.json": {
+    "version": 2833
+   },
+   "wheels-signer-r.json": {
+    "version": 2833
+   },
+   "wheels-signer-s.json": {
+    "version": 2833
+   },
+   "wheels-signer-t.json": {
+    "version": 2833
+   },
+   "wheels-signer-u.json": {
+    "version": 2833
+   },
+   "wheels-signer-v.json": {
+    "version": 2833
+   },
+   "wheels-signer-w.json": {
+    "version": 2833
+   },
+   "wheels-signer-x.json": {
+    "version": 2833
+   },
+   "wheels-signer-y.json": {
+    "version": 2833
+   },
+   "wheels-signer-z.json": {
+    "version": 2833
+   },
+   "wheels-signer.json": {
+    "version": 92
+   }
+  },
+  "spec_version": "1.0.0",
+  "version": 3574
+ }
+}

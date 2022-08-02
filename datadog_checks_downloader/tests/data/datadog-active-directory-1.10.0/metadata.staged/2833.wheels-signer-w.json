@@ -1,0 +1,1380 @@
+{
+ "signatures": [
+  {
+   "keyid": "b2f94f2bf3d36832854da19ba53c538c9664ef85a663855a95e599bc743511e8",
+   "sig": "16812b4e4f51b0d7b7e960d24deff936b8b0029228c1323a8d8562e7e41df7e0d8f3a241d9f2723d0e9349262ddedd762e4297eae5f9ed7ba94e457b3a22f9bc8ad42c42aabc74c4fa88feb88ffb89a37e2aea87adbe2058f98c5afd1c0726df72e89af1309d7368fe6630681c1539834bbe4afadd179e56abe9eb985206bfa44ea0737ebdf59fe6a3bddf4cfba4d1703a1889ea094fdc5ee71c994b166b0d2fca724cc25c8cf2ee4720980c8564833967d1a93c1c5e01e74ea28e825cc3fbfdc71d5eabc3dd9e20a8d8f0485fde1855eae5a837fe714e04e3c7d34195d773923155047d7a03958c16b7fe8107621675a377c615e60c9c965f7468a74b5085cf23291b3bc1392b9273eae5fee110f05d98ea77a58ad9c64e578882b2646f762dceb5b2b9171e2f4f22227292dbc4b526c786c76c1741bbb9265881a2dc4b16a5ad0595e95444adc7656f1a9a603e579064e2e2d8254cf6d5bc5be099146514496eb1363092907b1fd4af0b3b41bbbf6500945bdd09e4b35d51beca45b8e38c27884104e341655e3b6b80aa754c4abb6a81e2520a71c6c7578c7eb0f112f7e8dbc90408ca5b3273e29b16cfa135c60d8ab13330332a59f4e6befdea8ce23c59275ee919078aadcc932c66d548de83a89f49187dfd9d0c82008c3cd9189cc8194d352197c57643597bd00a141867f8a36ce5af4f5948a604209c84ee03bc2a3263"
+  }
+ ],
+ "signed": {
+  "_type": "targets",
+  "delegations": {
+   "keys": {},
+   "roles": []
+  },
+  "expires": "2022-07-31T14:15:44Z",
+  "spec_version": "1.0.0",
+  "targets": {
+   "simple/datadog-weblogic/datadog_weblogic-1.0.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/f900d3b0398fdaeb16c385b9fdbc10ddfae245c55c7641ad52400fcc1a269eb8/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/f900d3b0398fdaeb16c385b9fdbc10ddfae245c55c7641ad52400fcc1a269eb8/tag.eabca4ac.link",
+      "in-toto-metadata/f900d3b0398fdaeb16c385b9fdbc10ddfae245c55c7641ad52400fcc1a269eb8/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "bd0696d2942fc5011561e06cacaa5ee0a795b2dc5bb88ddb8776819fd4d15e95",
+     "sha512": "f5994d7b1d57c41474b4416d753de924f889acb7a9e38e8a23a6991c833ede60fca01c607d8f8d1db77c174ce185a55248fd8922805b5e5f422581c740e93cdb"
+    },
+    "length": 12194
+   },
+   "simple/datadog-weblogic/datadog_weblogic-1.0.1-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/0097025b155dda18e54706f33f1f9660151a2bfec2fcad2f80682e0e05e32ab2/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/0097025b155dda18e54706f33f1f9660151a2bfec2fcad2f80682e0e05e32ab2/tag.eabca4ac.link",
+      "in-toto-metadata/0097025b155dda18e54706f33f1f9660151a2bfec2fcad2f80682e0e05e32ab2/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "35cc4fd055f9a2eefeccea0fe075b52c1cfc345f886af199e48943ee266faf11",
+     "sha512": "57f216979373ba22e75dec519747e544779d64e39d9d1af8d1e13aa11da608bfbeac47b4cee79150bc9466b185a7624f58d176f907b56f039d0dd1c76784c1f4"
+    },
+    "length": 12209
+   },
+   "simple/datadog-weblogic/datadog_weblogic-1.0.2-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/5a9bf82fb49447d57911dc30f0d3b21a4c6d177c9e9f4649d369e3e2fc4f93d3/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/5a9bf82fb49447d57911dc30f0d3b21a4c6d177c9e9f4649d369e3e2fc4f93d3/tag.eabca4ac.link",
+      "in-toto-metadata/5a9bf82fb49447d57911dc30f0d3b21a4c6d177c9e9f4649d369e3e2fc4f93d3/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "92046fb49288f8a65417ff21264ebb34917b0d6ff94b0ee6a5711a3738fb8569",
+     "sha512": "7ac6036d5ba532ed9443dff7e87e1421693570262c87801aa54b5755802f6936e2997050b35e22902a07782959c925f0607229c0eadd571fcde8bd7628754c84"
+    },
+    "length": 12221
+   },
+   "simple/datadog-weblogic/datadog_weblogic-1.1.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/53ecb3c2fe8f67499dbc9ff4ff351d851914dfbb87b50da1d7adeb4af2809d0e/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/53ecb3c2fe8f67499dbc9ff4ff351d851914dfbb87b50da1d7adeb4af2809d0e/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/53ecb3c2fe8f67499dbc9ff4ff351d851914dfbb87b50da1d7adeb4af2809d0e/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "ff3cacd4904cefb34237963bba30cd408f54db6f67dcd24a500dcbe7ab507879",
+     "sha512": "2b293a7bda529cadd011e2c99979e7bb3581f415a7b425180703630b872dfee54312b90eef43e16845d15d1587f299d81aa4b77625fe3e47aec56d5d842e0084"
+    },
+    "length": 12193
+   },
+   "simple/datadog-weblogic/datadog_weblogic-1.1.1-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/tag.ec45eb9d.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "a3c021697eb3153804959ddb107daf2da8f189b2ac24839f1ea16d64146959d9",
+     "sha512": "465eb59c7170aae74eeaa21e783eedf722d48194e7d407058f2e7c83eb8417b04e3baeebb71cacfb7061fab90f6d9362d2978f017b3a3f9c05a211bef026ed5e"
+    },
+    "length": 12169
+   },
+   "simple/datadog-weblogic/index.html": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/tag.ec45eb9d.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "066f08aeda2c79ae30d0ae7a011850cd3640674c6d2f783e91f4418a45440368",
+     "sha512": "ee27141306a681aa278d233453960213662d82bdbd2f510dffa491e6caf5e94cbb71023590a946ea9153f4e559ab64e31d53f52af8fc15e44254d3837c713436"
+    },
+    "length": 540
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-1.3.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/3e592d47ab815cb9bd8aa064bbaa2a217c1baa9a55a7f8b73d2da6dfd14a247e/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/3e592d47ab815cb9bd8aa064bbaa2a217c1baa9a55a7f8b73d2da6dfd14a247e/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/3e592d47ab815cb9bd8aa064bbaa2a217c1baa9a55a7f8b73d2da6dfd14a247e/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "c233e6c2dc272ebdf1b6f134a5a6f220145ec148c68a6d26b550e596169d1baf",
+     "sha512": "a4c8469f9de4d30105fa834c4924f2f95053f6c4d3afc3101351dbe1fa9ca57a2cdd1b02c9ee99230a372e1c4f3b4e155394a90a8c746aa6ab4072b80284b1a5"
+    },
+    "length": 9332
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-1.4.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/0a33cbf67b70f315c0b7a83923bcef35308e986140169950e609e3be38585289/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/0a33cbf67b70f315c0b7a83923bcef35308e986140169950e609e3be38585289/tag.87d52666.link",
+      "in-toto-metadata/0a33cbf67b70f315c0b7a83923bcef35308e986140169950e609e3be38585289/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "eab2cfb3dd15c82a06917baa44aa40aab363c86cfe1785d014b1b2c1580d867b",
+     "sha512": "8fea85d29d2335cfedf2742a1c13da10beac27db2ea125b208d36e3689b9637beaf354e35b8b518ed2685b096bdac1dc66ad7c78cb5db4fee2085ae14d327e0e"
+    },
+    "length": 9456
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.0.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/279bd557f179e24b46ce875881d3bd0ad5d3c92558314ebf520c185bb993ec46/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/279bd557f179e24b46ce875881d3bd0ad5d3c92558314ebf520c185bb993ec46/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/279bd557f179e24b46ce875881d3bd0ad5d3c92558314ebf520c185bb993ec46/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "18ef14fe4e866075537e5d8cd0e6c26cde5f450626080ffb5e51b932e3fba9a3",
+     "sha512": "882aa8cf9cb7c359012e0ed7f19ca925972bb2cca0040a9e39f59dec6dc432a38b707a8a711b233fbdd21dfd904a4487c94bb2f6a608a297408f9b215eceb04b"
+    },
+    "length": 9608
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.0.1-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/272d6b973177e29e6f7f1a592e73547acc92cd1613f71bf52b44f875546975ed/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/272d6b973177e29e6f7f1a592e73547acc92cd1613f71bf52b44f875546975ed/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/272d6b973177e29e6f7f1a592e73547acc92cd1613f71bf52b44f875546975ed/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "857d50f9b43d64bc3766c44687c78dc673da4b0ca13cdfd72772b42557376843",
+     "sha512": "e297d6966be51b5c936b127235947344c1626d6c1a1a42aba19f0caf42549e78350577e5e9254ba19ecabfd6e2915a7217c591618a1a454f0d48e8b8ee4f1395"
+    },
+    "length": 9664
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.1.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/ac89ee097abc077fd991dc373761562bf75ebe1af6415fb23b60fccfb8670935/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/ac89ee097abc077fd991dc373761562bf75ebe1af6415fb23b60fccfb8670935/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/ac89ee097abc077fd991dc373761562bf75ebe1af6415fb23b60fccfb8670935/tag.31091c85.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "0a68df20790d6f5428d92f76e6fe65805d4f31db219d1ea1be7ea2b3f2f84bec",
+     "sha512": "92d5898ee349a6d43327a5cd36ab318d9146651fff27306d5cc04ba72f9d3e827c46146bfc0c6b74226488b84c14e32df0b9b7b0df6ce0fa0214f4568bc63af0"
+    },
+    "length": 9666
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.10.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/ee68e8bbd790c912c458030c9818068d4ec176cc4c688a787f18b4f34ae4f590/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/ee68e8bbd790c912c458030c9818068d4ec176cc4c688a787f18b4f34ae4f590/tag.57ce2495.link",
+      "in-toto-metadata/ee68e8bbd790c912c458030c9818068d4ec176cc4c688a787f18b4f34ae4f590/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "d5eb3bca3dfb17ac9fd0adf44af4e894c2a062b2c9c3c01aaaedfad66bb04ad8",
+     "sha512": "405f9aea46d87f18b58f5da9586a4a15431841fa6850f5d102b8643e39c34e778e821e53a55bf68fdad3860b4759c0bfac991ab1a9801d226dfe043f04121e8e"
+    },
+    "length": 24712
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.11.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/8b60d1a40bfd7772e0b44457fb51194bb72a16b0e4fa145fe78115b03b9c6100/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/8b60d1a40bfd7772e0b44457fb51194bb72a16b0e4fa145fe78115b03b9c6100/tag.47c5a022.link",
+      "in-toto-metadata/8b60d1a40bfd7772e0b44457fb51194bb72a16b0e4fa145fe78115b03b9c6100/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "99ec48745850271d37d3666eb5567f15828b23be384224d278c150ae32cc991f",
+     "sha512": "84cab426c45787541dbe801f559489901ae4854f2d2ba2ebfaf9a71b4edfdea6f9c818a21e8a72d24b5114ce6b555d276723a4ae715a577b026e86aaec4277ab"
+    },
+    "length": 24754
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.11.1-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/f0f47144a7bc84cc8f52f032140013bff4384419c3fd0e1a8bad675963db1790/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/f0f47144a7bc84cc8f52f032140013bff4384419c3fd0e1a8bad675963db1790/tag.eabca4ac.link",
+      "in-toto-metadata/f0f47144a7bc84cc8f52f032140013bff4384419c3fd0e1a8bad675963db1790/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "fde46c21db1bf73dfe741beaf1dccd50391ed222bb0cede103d45c2e369d6220",
+     "sha512": "36a35c6baf85dde835edac840e7b3b2e030e69775f8262f4764e300ffbfada2c91a2599a4d995887004e4989bf4ba0531781b52dbbd89ec7ba85ea92273b808b"
+    },
+    "length": 25243
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.12.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/53ecb3c2fe8f67499dbc9ff4ff351d851914dfbb87b50da1d7adeb4af2809d0e/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/53ecb3c2fe8f67499dbc9ff4ff351d851914dfbb87b50da1d7adeb4af2809d0e/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/53ecb3c2fe8f67499dbc9ff4ff351d851914dfbb87b50da1d7adeb4af2809d0e/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "5552fe1dc4138cc3ee982303a8e8b87948d6e13c95e1a750df0ab1a845c161e1",
+     "sha512": "5ec67440b1079587559c78f531270829f1c54906f02a4e794f13fca9190c831043625efc9bac3171d4575a7ebff9317267bd736b6fa50eda18e2e9b2f0a65c71"
+    },
+    "length": 25499
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.13.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/tag.ec45eb9d.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "1cdd4d74fa0bc144eeec74e8a6d8753bc374807af9da5c593fee783a0cad129c",
+     "sha512": "c27c3350e8e9e4447c8511ec45d699326c9277acd0660dbd271a0efa6178f89f3933fd9adbb7b925d0412fe08955710204b8ca16cf4db1ed3f0e17daec1fac44"
+    },
+    "length": 25641
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.13.1-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/2825dd400f1368dcff8de05d8a5958d3d007bffe98aff2c80cee9dcb3d9033bc/tag.47c5a022.link",
+      "in-toto-metadata/2825dd400f1368dcff8de05d8a5958d3d007bffe98aff2c80cee9dcb3d9033bc/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/2825dd400f1368dcff8de05d8a5958d3d007bffe98aff2c80cee9dcb3d9033bc/wheels-signer.b2f94f2b.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "0284f5ec1c2c36476498bbe54e0ec514548a37a45962945083a8a0e6cec43b0a",
+     "sha512": "a45318e919117995b53cb2c4cd7f1e9b2157a42169b4ea22687741d78560401265629a78d3e9a65c6e579223ce300af628fd6cfd9f7ccb66a6bc64eb47bd38f8"
+    },
+    "length": 25763
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.2.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/696ed5a30947eb05949fa8c68bdf90f85029517bec2cd798ffc8e03944a2e517/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/696ed5a30947eb05949fa8c68bdf90f85029517bec2cd798ffc8e03944a2e517/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/696ed5a30947eb05949fa8c68bdf90f85029517bec2cd798ffc8e03944a2e517/tag.59db2532.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "e4577059c13b6aea6b079d57708369a800db1221edbf9a42b7eb9593e99753ff",
+     "sha512": "f3ddfa56dfd1006f59f3d9185290b7e9c97e22c60c5c2dd096ae402cb3c02cebe58a8f6dcd3fc09807494953ef50e754ad91a4e41380ab8e2bc44731b30c96aa"
+    },
+    "length": 9659
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.3.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/cf7997a0c15fe4b8053be4835f9f32d5d5473cb3e2db02c4c426fe12e27b5119/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/cf7997a0c15fe4b8053be4835f9f32d5d5473cb3e2db02c4c426fe12e27b5119/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/cf7997a0c15fe4b8053be4835f9f32d5d5473cb3e2db02c4c426fe12e27b5119/tag.b023b02a.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "148d1547241a0ff6d57d2dbf7a85d79cf4d492583add7d16af5f2c1f725ea0ef",
+     "sha512": "cf7132829cec3f7d17d753d36517c44d6c0ceb5b1d6b1e597355bc741b5d8fe8dc307c70f06ed95b9ff3a3bebdf476ecdeafc4e6f1543c1b40a4cae029dd5dd9"
+    },
+    "length": 9630
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.3.1-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/5288841e78ec5e37e778f5fc1b24d2048480d88fb71a880e5399761226267a33/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/5288841e78ec5e37e778f5fc1b24d2048480d88fb71a880e5399761226267a33/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/5288841e78ec5e37e778f5fc1b24d2048480d88fb71a880e5399761226267a33/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "9115c0ff899017bbb86c36cccc2aa31646b03fb96cf53e14dbc56b215adad28b",
+     "sha512": "d7b286f05e871da197d1fa3cdb664e1d98520d4470645cbdff8eb971a8cea2c0e04783a7c9cfc8209321daf929a36c6a2b899223b157c143d4d4fc90d08f3c8b"
+    },
+    "length": 9641
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.3.2-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/8031702952afbf70e2143083ef4eb8683cc5424932bab9baa6acf5084ec1bd95/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/8031702952afbf70e2143083ef4eb8683cc5424932bab9baa6acf5084ec1bd95/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/8031702952afbf70e2143083ef4eb8683cc5424932bab9baa6acf5084ec1bd95/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "9079831f98926de1a7de9554e19cae6576fd061f171f45a7849be5c5c7261eb5",
+     "sha512": "df629a06b7b7d4724dd6090928304bebf73e0a72652ccd982d1b5ea09d70f3dd5f13841b4bb7f649a68e25255b4405fa5d0f32b387968722ca89ef497cfefacc"
+    },
+    "length": 9654
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.3.3-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/3e1356a1a44fee5cb98b2e916a5003f55a79da8e0b788a8b9544f537289e4aa2/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/3e1356a1a44fee5cb98b2e916a5003f55a79da8e0b788a8b9544f537289e4aa2/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/3e1356a1a44fee5cb98b2e916a5003f55a79da8e0b788a8b9544f537289e4aa2/tag.31091c85.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "b2424923f02f0d8d96e97754be6fbc008ce273a99d7132085e9bc4b8a6e67c3f",
+     "sha512": "b95432b18d46963013d2937bdc6e75ead304747da8ccb402564ec11a94b5f5322bed99951fedf39c4fa37e3039902920f2c406d3b1655a5899b0b4687f8b17d8"
+    },
+    "length": 9599
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.3.4-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/df04f2495d865c98e9967f0694987533240371f9bb4d7d15261f584db358bfec/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/df04f2495d865c98e9967f0694987533240371f9bb4d7d15261f584db358bfec/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/df04f2495d865c98e9967f0694987533240371f9bb4d7d15261f584db358bfec/tag.fbc63ae0.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "47bd326cdda1b3f1f7fe0f4f0c14bdf0455cf3af3030a37e14a056de6c598554",
+     "sha512": "0fc31965ce9229337c887dd02e9c7d4843bea0a434c9d0f4704699f8f65056b985201b8cb58b72db6cb9863fac5c9bfecf3103ec32c6080a8a44bf469ef00775"
+    },
+    "length": 9792
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.4.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/a802478a5e5c56adce34629606c88593c3914c600d9075a42e703f4927ec9983/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/a802478a5e5c56adce34629606c88593c3914c600d9075a42e703f4927ec9983/tag.57ce2495.link",
+      "in-toto-metadata/a802478a5e5c56adce34629606c88593c3914c600d9075a42e703f4927ec9983/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "35b37e2925f4b77c14e5a97b5ec85d8acd69a3b11331fc922bb0d06006cb3c02",
+     "sha512": "9c594654bb09ce681a8ec5f29818466cb4aa77376ad5d59359c718bed3042b7c3e2c8d2f6c6d08643c77212862798a51c325ab5cca1cbfd58f2f080571aaf261"
+    },
+    "length": 11137
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.5.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/1d466f02e43ff0660948531d7c03ebbb53f00c4759ed87239b3f271f20af5c1b/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/1d466f02e43ff0660948531d7c03ebbb53f00c4759ed87239b3f271f20af5c1b/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/1d466f02e43ff0660948531d7c03ebbb53f00c4759ed87239b3f271f20af5c1b/tag.31091c85.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "387a555f68b325fe7c2a30379c1abcdb981ad15bd8db7a7ecc0f1efc24128792",
+     "sha512": "3253042301b73742337e563752b3ce6181482df78d76df3d251b84488c16410d151665acfd8c8784aa6ae67667b294e8bc241d1b607420915063eb97580b5eda"
+    },
+    "length": 11139
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.6.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/a1e6626d8443fe2e170d2c6a1d823c37839d4555a3162489fdf560a6aa584672/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/a1e6626d8443fe2e170d2c6a1d823c37839d4555a3162489fdf560a6aa584672/tag.4a5409a2.link",
+      "in-toto-metadata/a1e6626d8443fe2e170d2c6a1d823c37839d4555a3162489fdf560a6aa584672/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "81ffc4a8167432dea28ff942dfbc00ba284768631cfe912b1acd9a8b3d4d5a06",
+     "sha512": "60902901eaecf34dc9a262b944f21d883bcccc250a3768e986193432d1c18842300a3cbd0f5c96e6e342177be0f0f1ba29d4aac1f5af5056f579bdbbb18e9c8a"
+    },
+    "length": 20149
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.6.1-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/314bcc8fdf664a6e222d4515153e84929afbb99586b51f6f58d71543dc6cabac/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/314bcc8fdf664a6e222d4515153e84929afbb99586b51f6f58d71543dc6cabac/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/314bcc8fdf664a6e222d4515153e84929afbb99586b51f6f58d71543dc6cabac/tag.f90c0097.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "59639cea944d957c6022ad55a9152bb881788e84dc7dce994ebc637dd48992b6",
+     "sha512": "f06b054bf123d1b79450ed1baa4b37c972ec0adf16bc38cf34d1a2e539fb1bece6390dd2d09a0a15b8697d8d1b4093b6f680c04c0f2185418d8b31bd65bcd909"
+    },
+    "length": 20473
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.7.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/73c79d67b14f88b372c8ddf3a760135c6e0db188f71936392175c2c946773079/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/73c79d67b14f88b372c8ddf3a760135c6e0db188f71936392175c2c946773079/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/73c79d67b14f88b372c8ddf3a760135c6e0db188f71936392175c2c946773079/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "df07fcb6e0b20d21bc42a8b29b4e997e60e19e1fd8ac4202ad4bfefaa2b3adc1",
+     "sha512": "2f014d7c5202985ae0ca4cee2945ab9ac5c2827251151acf3cac46487c136e3a1e1f77359d352b16ccfe311a86f04291b3a5d6036ef309c2468d08ca59092f7f"
+    },
+    "length": 20620
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.7.1-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/c66aa9debfcba2ef235e848487720da85c1bf9f8a9fd6592bd438af9162187cf/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/c66aa9debfcba2ef235e848487720da85c1bf9f8a9fd6592bd438af9162187cf/tag.024e42fe.link",
+      "in-toto-metadata/c66aa9debfcba2ef235e848487720da85c1bf9f8a9fd6592bd438af9162187cf/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "9e5e0bc5fb45f79c9cd31005dbf9f3679e687acae38fc77ffd751055dd73188e",
+     "sha512": "dc78b4bed8d19fb00602185c58fc843fb4e1df995421c62b060df31b85f0ea61c738575aceb04cee9438944e7e42abc92aefb64585eaa44b44e6c9d433006068"
+    },
+    "length": 21045
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.8.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/cb68a22c6096d7cdede23559df0e303a921d05b724006024e23ca9bb8b3cc2fd/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/cb68a22c6096d7cdede23559df0e303a921d05b724006024e23ca9bb8b3cc2fd/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/cb68a22c6096d7cdede23559df0e303a921d05b724006024e23ca9bb8b3cc2fd/tag.31091c85.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "4c43fb7c55076e20e1653af8b02cdfc4cc8ef16b605b3a4406cc052cf2b4dba6",
+     "sha512": "c646a39d419a9e24f670d31136223811bb1107b5740e7b627cbb374440152ab0b17f9f1740771a272ad3612bc4df6dd3d4da9c7a56ed5130bc613f4950d217e0"
+    },
+    "length": 21029
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.8.0rc1-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/8abc7b90ca4a57be78ccfec0d8eb22deec58cd55fc1a9edcba69f35de0aa71af/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/8abc7b90ca4a57be78ccfec0d8eb22deec58cd55fc1a9edcba69f35de0aa71af/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/8abc7b90ca4a57be78ccfec0d8eb22deec58cd55fc1a9edcba69f35de0aa71af/tag.31091c85.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "8ba24f4cdbd3bfa054274506877616b449009080c279c421abbb800f60803ce3",
+     "sha512": "8ac4f1f70f474575732665c261ac6d5a729c998cba9c7e25d93d63fcac796d6caa2a70c1504adbc67b9db1554fa6e52bc61b534489aeefc93fe7016b8b5afaf3"
+    },
+    "length": 21078
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.9.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/e07c33f07817d227e1e6836df1349e481909f2e7937b6a6a31c5c1117e580cf2/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/e07c33f07817d227e1e6836df1349e481909f2e7937b6a6a31c5c1117e580cf2/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/e07c33f07817d227e1e6836df1349e481909f2e7937b6a6a31c5c1117e580cf2/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "573694a133703a2241be56d93bc153dfec5a89f745aec6cff1f23ffd59ebefd5",
+     "sha512": "99879c1e3362c44bc80710fcbd4d49411b82cdd789539e17de3f92f57b6f79f5aee29a2f2a24e9dcd5550196e2e82ab54f7a4b7e04aba22d392aef7e40f84bba"
+    },
+    "length": 24483
+   },
+   "simple/datadog-win32-event-log/datadog_win32_event_log-2.9.1-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/782789cdfba208e9acf701268d13a1f32124ed044a997ed0dd017df03b00fdd9/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/782789cdfba208e9acf701268d13a1f32124ed044a997ed0dd017df03b00fdd9/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/782789cdfba208e9acf701268d13a1f32124ed044a997ed0dd017df03b00fdd9/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "c40172e984d80690747c90be7e7b420f7b1f881a429da08bb7f1dab63223e943",
+     "sha512": "0650a7848b50a6c4e69a5e20678dcad490c074c03ff4a6f1a7ad84e057a1e48766bf6244edf9f10f33f0ce7a01def7ec8257284f55f867d52f73dc510d3b4948"
+    },
+    "length": 24482
+   },
+   "simple/datadog-win32-event-log/index.html": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/2825dd400f1368dcff8de05d8a5958d3d007bffe98aff2c80cee9dcb3d9033bc/tag.47c5a022.link",
+      "in-toto-metadata/2825dd400f1368dcff8de05d8a5958d3d007bffe98aff2c80cee9dcb3d9033bc/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/2825dd400f1368dcff8de05d8a5958d3d007bffe98aff2c80cee9dcb3d9033bc/wheels-signer.b2f94f2b.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "757e3f0bb01d0db31815bcd0584db21a74e6ec9ad50b4dafae561fa6b31c74e3",
+     "sha512": "85c9e01566fa2ee2b1412d632eca393b9f3a7a5f6570ddc494e0781ea5050a025f7c49e05e15a707c2d29c1fff0c49b56ee4fd08c721f6338fcb3df395f79db5"
+    },
+    "length": 3312
+   },
+   "simple/datadog-windows-performance-counters/datadog_windows_performance_counters-1.0.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/3d87a96ecb678b3ab0e56af86a8d65ec4af06b6f5f184f1bc7e53fba205cc12b/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/3d87a96ecb678b3ab0e56af86a8d65ec4af06b6f5f184f1bc7e53fba205cc12b/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/3d87a96ecb678b3ab0e56af86a8d65ec4af06b6f5f184f1bc7e53fba205cc12b/tag.bb47f8e8.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "ef8db4b30d6b9d527b0bc1156aef1b679b933875b00522b8a184dcdc7864dc2c",
+     "sha512": "e93f1553117da6be4302b3cc7f75900ad1d5ee40ccbdf35d2fd2249109554f8c6624b5bc9032ac68f149c2898d0c015b3494906614573013067a54dd61c433c2"
+    },
+    "length": 9426
+   },
+   "simple/datadog-windows-performance-counters/datadog_windows_performance_counters-1.0.1-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/f0f47144a7bc84cc8f52f032140013bff4384419c3fd0e1a8bad675963db1790/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/f0f47144a7bc84cc8f52f032140013bff4384419c3fd0e1a8bad675963db1790/tag.eabca4ac.link",
+      "in-toto-metadata/f0f47144a7bc84cc8f52f032140013bff4384419c3fd0e1a8bad675963db1790/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "85e5023f71d94875098a6a4d1b1fee891c7698138f2a8e60865acebc76ac4e57",
+     "sha512": "f665529eb7d578a0327b96c0abc67aaa931aa390be45c61619d1570d16838097e61d3af9ebe4b6f6957bd6e07cd24c331462f45662311205bab52f9054993d21"
+    },
+    "length": 10123
+   },
+   "simple/datadog-windows-performance-counters/datadog_windows_performance_counters-1.1.0-py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/53ecb3c2fe8f67499dbc9ff4ff351d851914dfbb87b50da1d7adeb4af2809d0e/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/53ecb3c2fe8f67499dbc9ff4ff351d851914dfbb87b50da1d7adeb4af2809d0e/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/53ecb3c2fe8f67499dbc9ff4ff351d851914dfbb87b50da1d7adeb4af2809d0e/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "306b356f18ad3885d9aef78049a9986db4179172e3dfa4e6b8f625858e440e71",
+     "sha512": "951248c9e15ac22be382f34a689d1f339fb63f5bcd59eecbf08c04c73eb6c6599af08c639dbae80c1e43c2df8d2a496a84eb6f83d3e315ba1338aa94359062ab"
+    },
+    "length": 10093
+   },
+   "simple/datadog-windows-performance-counters/datadog_windows_performance_counters-1.2.0-py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/tag.ec45eb9d.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "cfdf35149633bd7659a42692073e6a43a403e0316abc46a010c229922a3fd5d6",
+     "sha512": "5a024de7f78c1eb1eb3618c1b178e6ba1cfaf7f9fd9fc14061af3e3ec697bc8d0d9feb313c2e3547e817317fac2dc5219e7b90ac3e54eb9d4646a2a015f58eec"
+    },
+    "length": 10242
+   },
+   "simple/datadog-windows-performance-counters/index.html": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/tag.ec45eb9d.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "706068a13f33a9c772afef2df616b603487fe226605576a76387cf2a958549ae",
+     "sha512": "0d81b8eaa1c06dc48a752e7e089b7a573306b22793dae36ce63f576531df401d872c47858da17ff81f4f121f0fadc235d01b2a81336d6cb37cba37a41a9f4c70"
+    },
+    "length": 576
+   },
+   "simple/datadog-windows-service/datadog_windows_service-2.0.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/3e592d47ab815cb9bd8aa064bbaa2a217c1baa9a55a7f8b73d2da6dfd14a247e/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/3e592d47ab815cb9bd8aa064bbaa2a217c1baa9a55a7f8b73d2da6dfd14a247e/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/3e592d47ab815cb9bd8aa064bbaa2a217c1baa9a55a7f8b73d2da6dfd14a247e/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "9925bceb35aadf37ba89a22d1cfe4aeebafe2f83f65b0afc0a61687d52d875df",
+     "sha512": "953b2f40177a4bbf13bc6f098988aa55baa718f9ed27bd51f04213f272dfc4a009798fb50f1889ffcef7f7d1bea53590d0889834f7c5833ca07914269de69519"
+    },
+    "length": 5388
+   },
+   "simple/datadog-windows-service/datadog_windows_service-2.1.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/279bd557f179e24b46ce875881d3bd0ad5d3c92558314ebf520c185bb993ec46/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/279bd557f179e24b46ce875881d3bd0ad5d3c92558314ebf520c185bb993ec46/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/279bd557f179e24b46ce875881d3bd0ad5d3c92558314ebf520c185bb993ec46/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "552d15bba767bf35d30156fc40c4ec4f5e247ce23fa87ac66e7bb009006dbf7f",
+     "sha512": "b1432d3e3124750e944a791715a9846c66075c8ddb625373b4a2f7542adbadb1316109cb69c3cb3c998c5add08feb7915a19e6af14abaf1eafa9b43d6523d338"
+    },
+    "length": 5409
+   },
+   "simple/datadog-windows-service/datadog_windows_service-2.2.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/ac89ee097abc077fd991dc373761562bf75ebe1af6415fb23b60fccfb8670935/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/ac89ee097abc077fd991dc373761562bf75ebe1af6415fb23b60fccfb8670935/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/ac89ee097abc077fd991dc373761562bf75ebe1af6415fb23b60fccfb8670935/tag.31091c85.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "7dd785c1b28c129b2d15f9dac11fde6c811ee05e2be5c8b57749fd5132db6587",
+     "sha512": "e6b722a2ff9dc34fcbc78cf4c3a6e0f6d55c084be8555cb840a5929fc48fd85c8a45dec832c86db0ad55dfa0b2e6faae20bed4ac0267c9d317fee9a1a900141c"
+    },
+    "length": 5517
+   },
+   "simple/datadog-windows-service/datadog_windows_service-2.3.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/696ed5a30947eb05949fa8c68bdf90f85029517bec2cd798ffc8e03944a2e517/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/696ed5a30947eb05949fa8c68bdf90f85029517bec2cd798ffc8e03944a2e517/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/696ed5a30947eb05949fa8c68bdf90f85029517bec2cd798ffc8e03944a2e517/tag.59db2532.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "aaaa56f7480976853d3ad7124fe551325e31e305001e7374c8ca303fe2415e15",
+     "sha512": "a5ae74fdeb9d8d87f874df4a72d705ef76530e2153f2f52ce2ce64fd85936eb19e43c49ef8a83c99b5505378f38ff0fa8b1aa90281809a25a8e518fd977cfe8e"
+    },
+    "length": 5515
+   },
+   "simple/datadog-windows-service/datadog_windows_service-2.4.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/cf7997a0c15fe4b8053be4835f9f32d5d5473cb3e2db02c4c426fe12e27b5119/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/cf7997a0c15fe4b8053be4835f9f32d5d5473cb3e2db02c4c426fe12e27b5119/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/cf7997a0c15fe4b8053be4835f9f32d5d5473cb3e2db02c4c426fe12e27b5119/tag.b023b02a.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "674487dca314d2098845b46f0e6298d3bb1af8706c746999249f931e46f55dc6",
+     "sha512": "6e446f5c9161b13556918603f12b30d974c7eebfd58729863ae76ee062d614fdbe642aecde37a26285ed16cdab3d10633644c11bb35da00880d0859d638fc191"
+    },
+    "length": 5513
+   },
+   "simple/datadog-windows-service/datadog_windows_service-2.5.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/5288841e78ec5e37e778f5fc1b24d2048480d88fb71a880e5399761226267a33/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/5288841e78ec5e37e778f5fc1b24d2048480d88fb71a880e5399761226267a33/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/5288841e78ec5e37e778f5fc1b24d2048480d88fb71a880e5399761226267a33/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "76911d8db2df510fe8642f7661e914301af9f7bb32cfd7e206eae49fa01ead93",
+     "sha512": "66f6cff3ca19bcec46a029e3aa14df972608b706fe2e70c4367455461f70976cd123d4dad7aa056c08efb26fc961788b1d26bfe88b30d0624958f9efcd5034d1"
+    },
+    "length": 5719
+   },
+   "simple/datadog-windows-service/datadog_windows_service-2.5.1-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/cc65b871db7b1f972c15cf13bea524ca205fef16d36474931baa01968af74ff2/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/cc65b871db7b1f972c15cf13bea524ca205fef16d36474931baa01968af74ff2/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/cc65b871db7b1f972c15cf13bea524ca205fef16d36474931baa01968af74ff2/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "1886edde3d871bfa83c2fca6d28cd3063178b9bec9b8ffb6bbca6f88ec744865",
+     "sha512": "6dd0b442bd94b47438f34a8a5f43fbb316ff2d612a23418d0812dfbc4b7db361b4a1b56dadeeb1ffc80d5bf0e5f5dd7cfec03f6399efce255bd8b7a92d797a15"
+    },
+    "length": 5733
+   },
+   "simple/datadog-windows-service/datadog_windows_service-2.5.2-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/3e1356a1a44fee5cb98b2e916a5003f55a79da8e0b788a8b9544f537289e4aa2/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/3e1356a1a44fee5cb98b2e916a5003f55a79da8e0b788a8b9544f537289e4aa2/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/3e1356a1a44fee5cb98b2e916a5003f55a79da8e0b788a8b9544f537289e4aa2/tag.31091c85.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "182361f11bdb718882ae9eb1b8ede3d006ca37b397e4707510afa3abb9cd3b0f",
+     "sha512": "2572a3c559e59415b927927a6b8e5f8a5becc8d1ce5f0988f6290a9c59355aac015846484c6c5592059819ac1582edd630efbe2a6d7f3a295a0f5e6ba1c78528"
+    },
+    "length": 5735
+   },
+   "simple/datadog-windows-service/datadog_windows_service-2.6.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/a802478a5e5c56adce34629606c88593c3914c600d9075a42e703f4927ec9983/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/a802478a5e5c56adce34629606c88593c3914c600d9075a42e703f4927ec9983/tag.57ce2495.link",
+      "in-toto-metadata/a802478a5e5c56adce34629606c88593c3914c600d9075a42e703f4927ec9983/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "f4ca5a91a7ffab34c17736bde3bf7d7093871685a19aaa7cf91e9d7f258e65bd",
+     "sha512": "e86c29378d9204b77c06c4dd3082d260177b13938b0e8145f24bcebb12fc7eb7ef7137b95deeb7666852193e88531322fad85ca836152298b70ab2eee854d5e1"
+    },
+    "length": 5788
+   },
+   "simple/datadog-windows-service/datadog_windows_service-2.7.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/1d466f02e43ff0660948531d7c03ebbb53f00c4759ed87239b3f271f20af5c1b/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/1d466f02e43ff0660948531d7c03ebbb53f00c4759ed87239b3f271f20af5c1b/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/1d466f02e43ff0660948531d7c03ebbb53f00c4759ed87239b3f271f20af5c1b/tag.31091c85.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "e63fbb427d32a5db3b7b9d9d6f431ef5b3ed7a1156ca4cbfa7f9d4a6d05c2078",
+     "sha512": "f0bee8ab728cd7ae5dd51f9a1edde1dc7f8c5eb9fbfc08e4f0c4098f53a38f1d9c6de4f4bca5be9da44b7860266dd513d2e5091503cab358022636b54c3a54eb"
+    },
+    "length": 5790
+   },
+   "simple/datadog-windows-service/datadog_windows_service-2.8.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/be299603c7f4400d5a7c23a46fc799c2612411fe0e39158402891f78e8b3ed76/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/be299603c7f4400d5a7c23a46fc799c2612411fe0e39158402891f78e8b3ed76/tag.57ce2495.link",
+      "in-toto-metadata/be299603c7f4400d5a7c23a46fc799c2612411fe0e39158402891f78e8b3ed76/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "892bd3467987c52e71c39507f2c81d62d163bb338bb3cfca01079461b875676a",
+     "sha512": "2b9a2ee3a6451e52a6c45fec0bcf4601287d89a5ffedbd1c665eb53b8e59ee9f22bd7daf610c40b7d109edf449480624b256d9b10c38b5998826f9b00e84337e"
+    },
+    "length": 6277
+   },
+   "simple/datadog-windows-service/datadog_windows_service-3.0.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/3d5813c52e4a4c7f8a1266e08478472222a4b0e4c8c25d349e21099a229a2ae0/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/3d5813c52e4a4c7f8a1266e08478472222a4b0e4c8c25d349e21099a229a2ae0/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/3d5813c52e4a4c7f8a1266e08478472222a4b0e4c8c25d349e21099a229a2ae0/tag.b023b02a.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "aa1040ce4bd8a173cf98d1af7248b4448d34e7b6a9d867ef0d483e9df873608e",
+     "sha512": "c1bf34a35a0030b19d52f8619c4f9ae6556e68926b89d788f67de8ad85a5b43957e6e5065a2ee3af4843d8cab0301758f4a9e432b8fc97a63ffc9cf10bd430bf"
+    },
+    "length": 6401
+   },
+   "simple/datadog-windows-service/datadog_windows_service-3.0.1-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/c66aa9debfcba2ef235e848487720da85c1bf9f8a9fd6592bd438af9162187cf/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/c66aa9debfcba2ef235e848487720da85c1bf9f8a9fd6592bd438af9162187cf/tag.024e42fe.link",
+      "in-toto-metadata/c66aa9debfcba2ef235e848487720da85c1bf9f8a9fd6592bd438af9162187cf/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "e4a6d8b0a1a9a7ff6a96f255c3bf874410e37e7bd7b1212cfdfaa5ca50942cbe",
+     "sha512": "a955a5f69ffaf7aaaf0fd7ad29c0f08d5ea66b440eed2cbe1fc26d645d163e71237a1a8885d0ceeaa9476f34579356ac13d4195381b2f4439a22352d986abdfc"
+    },
+    "length": 6400
+   },
+   "simple/datadog-windows-service/datadog_windows_service-3.1.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/cb68a22c6096d7cdede23559df0e303a921d05b724006024e23ca9bb8b3cc2fd/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/cb68a22c6096d7cdede23559df0e303a921d05b724006024e23ca9bb8b3cc2fd/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/cb68a22c6096d7cdede23559df0e303a921d05b724006024e23ca9bb8b3cc2fd/tag.31091c85.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "b9a8fc406fc37d6f8c9d3709f4cfadd609f25a9ddd87c30731cc183647d769c0",
+     "sha512": "6ba54951ad4c9b6a3be6dc7f538419d601bfe1e72f90b2de68b1f2d5d1cd5c66947f790140f99e63c28799a89051b0cea911e90b7d3943f89e444abaabccd477"
+    },
+    "length": 6429
+   },
+   "simple/datadog-windows-service/datadog_windows_service-3.2.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/e07c33f07817d227e1e6836df1349e481909f2e7937b6a6a31c5c1117e580cf2/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/e07c33f07817d227e1e6836df1349e481909f2e7937b6a6a31c5c1117e580cf2/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/e07c33f07817d227e1e6836df1349e481909f2e7937b6a6a31c5c1117e580cf2/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "a9d3979ebb64db5eb86f81ac9a28e39d1f772b7472d38e1f5fb7e66d4401ed0e",
+     "sha512": "4529b0d8f2331485d24f8028c8c2534f2c27728eb3df501878862a779b17505a11e6b051a6076f225ca97f54dc3a5f90e8021de18937d3dc152e5740eaef0d7a"
+    },
+    "length": 9278
+   },
+   "simple/datadog-windows-service/datadog_windows_service-3.3.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/8b60d1a40bfd7772e0b44457fb51194bb72a16b0e4fa145fe78115b03b9c6100/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/8b60d1a40bfd7772e0b44457fb51194bb72a16b0e4fa145fe78115b03b9c6100/tag.47c5a022.link",
+      "in-toto-metadata/8b60d1a40bfd7772e0b44457fb51194bb72a16b0e4fa145fe78115b03b9c6100/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "674d2d914d68df854ba3fd39488a076ee13041b5a163b21f58d70f50ce21d317",
+     "sha512": "a36330d94a168546f7f2e56c3cacee11cfbfa36cd5468b047aa8c62170782fdbc9f1f3fa10acc8399a50d34e6c1c5ee0f24ea5b16dac9e04ca6c81e3ec3bffaf"
+    },
+    "length": 8553
+   },
+   "simple/datadog-windows-service/datadog_windows_service-4.0.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/f0f47144a7bc84cc8f52f032140013bff4384419c3fd0e1a8bad675963db1790/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/f0f47144a7bc84cc8f52f032140013bff4384419c3fd0e1a8bad675963db1790/tag.eabca4ac.link",
+      "in-toto-metadata/f0f47144a7bc84cc8f52f032140013bff4384419c3fd0e1a8bad675963db1790/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "cfa80ba0885651cf845e07c9dcf52cbf48a49d34f4e64866e6c0f77a99c42baf",
+     "sha512": "b9d51b6262c725b036b8d07cd0c8d05be3a3c88ebd414f7e71c445bb9d2208c886f8496eee27d20272a6b0fdcac97d2f134922315b3f3488a9e8a991f3881229"
+    },
+    "length": 9246
+   },
+   "simple/datadog-windows-service/datadog_windows_service-4.1.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/53ecb3c2fe8f67499dbc9ff4ff351d851914dfbb87b50da1d7adeb4af2809d0e/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/53ecb3c2fe8f67499dbc9ff4ff351d851914dfbb87b50da1d7adeb4af2809d0e/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/53ecb3c2fe8f67499dbc9ff4ff351d851914dfbb87b50da1d7adeb4af2809d0e/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "99b3d836caf4d1a53df058f612045a3f23cf9baf2574db88003276e0a64ba150",
+     "sha512": "0b62bfb5c77e1e8583d0c558de0a283c1a899e17a1c07337b21a7ec57b6555c0065fb9da83f14df040c36d53c3ee07ac94aa16f661706e8cfb318b77235a4fc9"
+    },
+    "length": 9214
+   },
+   "simple/datadog-windows-service/datadog_windows_service-4.2.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/tag.ec45eb9d.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "bf20c2f9523eb270c1093c43c2d370944450f276c049fd2809432c1af8403a12",
+     "sha512": "a88ca0711aa0e9c17017b0fc81b5b186bb757a8dba2aba5547bf964eb6196df5c2f2623bd686192dd56de55d027a16d1c0b216c35c07f225f1cd1f80884cbb04"
+    },
+    "length": 9396
+   },
+   "simple/datadog-windows-service/datadog_windows_service-4.2.1-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/2825dd400f1368dcff8de05d8a5958d3d007bffe98aff2c80cee9dcb3d9033bc/tag.47c5a022.link",
+      "in-toto-metadata/2825dd400f1368dcff8de05d8a5958d3d007bffe98aff2c80cee9dcb3d9033bc/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/2825dd400f1368dcff8de05d8a5958d3d007bffe98aff2c80cee9dcb3d9033bc/wheels-signer.b2f94f2b.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "58eff50b85e2c7bf4a12b7cae51fe423c557d8eb6ae4e33c475b2f75e3b75101",
+     "sha512": "de77aa5d0cb956a75ca0df761e977a2b23bcaa8395dc9ae850b220c67159c2f3f1b71db9c31db53fe3abad920d0fc1c9743a77307d9b4558e97613d01d4d1f23"
+    },
+    "length": 9548
+   },
+   "simple/datadog-windows-service/index.html": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/2825dd400f1368dcff8de05d8a5958d3d007bffe98aff2c80cee9dcb3d9033bc/tag.47c5a022.link",
+      "in-toto-metadata/2825dd400f1368dcff8de05d8a5958d3d007bffe98aff2c80cee9dcb3d9033bc/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/2825dd400f1368dcff8de05d8a5958d3d007bffe98aff2c80cee9dcb3d9033bc/wheels-signer.b2f94f2b.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "06996679ae7d081bd2a66adf6471108838cf6b7eae4318e9551503bd02a19f28",
+     "sha512": "122e15037f37bec66266a79aa5202604d4e7bc5adcdf99da47d611c79222c4bb1385780d2db569791dab362f3c3f51205d3451dd35256fd2a3e57bae5858e453"
+    },
+    "length": 2440
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.10.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/cb68a22c6096d7cdede23559df0e303a921d05b724006024e23ca9bb8b3cc2fd/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/cb68a22c6096d7cdede23559df0e303a921d05b724006024e23ca9bb8b3cc2fd/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/cb68a22c6096d7cdede23559df0e303a921d05b724006024e23ca9bb8b3cc2fd/tag.31091c85.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "399425c0a70679ab53de6550c8b184240f7de77ef7d1518c1d7a80072fb5a98f",
+     "sha512": "54fe6528b02db054b34c122476aec2f40143345de102b248488ea396b2851c9da05db3eddeae04a2117f3bc26217fc173c777a30f2f640cbf175d39379ea8a0a"
+    },
+    "length": 11189
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.11.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/ee68e8bbd790c912c458030c9818068d4ec176cc4c688a787f18b4f34ae4f590/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/ee68e8bbd790c912c458030c9818068d4ec176cc4c688a787f18b4f34ae4f590/tag.57ce2495.link",
+      "in-toto-metadata/ee68e8bbd790c912c458030c9818068d4ec176cc4c688a787f18b4f34ae4f590/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "d02a2d03fcfb9dcd1a47297aec74a2eaf448fe25f7c60c79a6dd43a2c503f6c2",
+     "sha512": "3976d1a9ef0c51ed316694e9bb4d7845dca6607f8b4a82c47ddc3e024165d261f24f642cf64cd7bdec8f46ae43e3de554288fe3f68397e3f3097a5eb78772898"
+    },
+    "length": 11698
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.12.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/8b60d1a40bfd7772e0b44457fb51194bb72a16b0e4fa145fe78115b03b9c6100/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/8b60d1a40bfd7772e0b44457fb51194bb72a16b0e4fa145fe78115b03b9c6100/tag.47c5a022.link",
+      "in-toto-metadata/8b60d1a40bfd7772e0b44457fb51194bb72a16b0e4fa145fe78115b03b9c6100/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "8fb4c1935e828a2f03d74ae7f75824652fc9e7b84d7e5a39378a224b28a833c4",
+     "sha512": "9524fe48354067051d34e2bf07b91cddaa7a756b5159a0d3f84cbfd6cd8443b918a3c6919e9d2a4658c7d9960824e74cc425b796a501dc61ffe0f06a8c780dba"
+    },
+    "length": 11742
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.13.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/218df0b9fdfc3833bd1e5ff88dc52e9af873d869bc1d493bf9e571ec8c554b9e/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/218df0b9fdfc3833bd1e5ff88dc52e9af873d869bc1d493bf9e571ec8c554b9e/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/218df0b9fdfc3833bd1e5ff88dc52e9af873d869bc1d493bf9e571ec8c554b9e/tag.bb47f8e8.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "ac495e31d629d4a1e633338bff6e622099b4a7df1e528c78c610b5fd9fc68de2",
+     "sha512": "d4edb42b3542dc1282cf03c0e91d9fbe3db9a17ff5821fd569fdde9e1f983460f2760a8d6afb191c21727265cfeca30dfb9fe56b114d846e250b6175196d0f42"
+    },
+    "length": 11922
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.13.1-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/f0f47144a7bc84cc8f52f032140013bff4384419c3fd0e1a8bad675963db1790/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/f0f47144a7bc84cc8f52f032140013bff4384419c3fd0e1a8bad675963db1790/tag.eabca4ac.link",
+      "in-toto-metadata/f0f47144a7bc84cc8f52f032140013bff4384419c3fd0e1a8bad675963db1790/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "115eafd0e324e4051111f6cb1a2cd5ebec037899803781d8874237138cc2e1da",
+     "sha512": "8e619c5961c1de6bb5b5e74c8886450ceaff930162bd601dfe348bc7f0f3dcaf15e6383fd3d24f9194f607b9fc11aeb31002440c44a477ad94122571761cf044"
+    },
+    "length": 12618
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.14.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/53ecb3c2fe8f67499dbc9ff4ff351d851914dfbb87b50da1d7adeb4af2809d0e/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/53ecb3c2fe8f67499dbc9ff4ff351d851914dfbb87b50da1d7adeb4af2809d0e/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/53ecb3c2fe8f67499dbc9ff4ff351d851914dfbb87b50da1d7adeb4af2809d0e/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "38fc7b2df26ce9ee04cc184cbcec641c65cd52129db341a44c697ee1766db46c",
+     "sha512": "2d3dfa49fabc3807ceb52523a56a39fd7478afd6908b65b0189e12dc95a96ad76dbf44f979f110d9f217eef3e5867b48af5b0304fa7ace8032c64f405764f698"
+    },
+    "length": 12575
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.15.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/5bfb4f53bd4f3d431a246d9f696725610c49524818ea95b1ca87875589bf87b7/tag.ec45eb9d.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "233a4bad0427b6b6117b5ba92acc644760a093a2f44d1841def1f7ded4c9038b",
+     "sha512": "bedff8640e1734dfb61b2210bf7f81f0c5f829bee08969f453a07a652723276d7a7787c2b1146c7ff5e9e64c0d4d3f324f97b82bff6a34ddbbf43f6676002e15"
+    },
+    "length": 12745
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.15.1-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/2825dd400f1368dcff8de05d8a5958d3d007bffe98aff2c80cee9dcb3d9033bc/tag.47c5a022.link",
+      "in-toto-metadata/2825dd400f1368dcff8de05d8a5958d3d007bffe98aff2c80cee9dcb3d9033bc/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/2825dd400f1368dcff8de05d8a5958d3d007bffe98aff2c80cee9dcb3d9033bc/wheels-signer.b2f94f2b.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "ec790acd6979eaca02c2f175f6a999fe35da675a9bf3b084ecd9d69f6cf5ac1b",
+     "sha512": "0c8653463050dbf5454c1b2e7d426772a6c16e73e4ce706c9dcdb2d81b1a58060b4292601e2b81373b0d0c59609db1d3f914dcb31b674f7b0d296704bd5a2b78"
+    },
+    "length": 12759
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.2.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/3e592d47ab815cb9bd8aa064bbaa2a217c1baa9a55a7f8b73d2da6dfd14a247e/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/3e592d47ab815cb9bd8aa064bbaa2a217c1baa9a55a7f8b73d2da6dfd14a247e/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/3e592d47ab815cb9bd8aa064bbaa2a217c1baa9a55a7f8b73d2da6dfd14a247e/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "9397bee9bbe582ac204076eeab36f6ebc9908932fa6cdccd002c25635b4675c5",
+     "sha512": "6b23290269eec7b9f72d442a39b650769685c73e16ab02368081c8096a48d85e697ef2b33ce2a80f138c8ab4b080ed63831912ddf3f1a09a552c061944ebe282"
+    },
+    "length": 7751
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.3.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/0a33cbf67b70f315c0b7a83923bcef35308e986140169950e609e3be38585289/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/0a33cbf67b70f315c0b7a83923bcef35308e986140169950e609e3be38585289/tag.87d52666.link",
+      "in-toto-metadata/0a33cbf67b70f315c0b7a83923bcef35308e986140169950e609e3be38585289/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "c28bbe6adc0b1714474b942a7bf673142a2bbe7961ba187fb3a2509eb705c9ad",
+     "sha512": "d52761d3998ce15004ee1931ec0eae13852d5bc6dd585e1db8a247884bfad51a755b994e0ea6e0699c4f8a167fd1098a4a9f971ad0a1d6cd948f0c9c99cdcf39"
+    },
+    "length": 7742
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.4.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/279bd557f179e24b46ce875881d3bd0ad5d3c92558314ebf520c185bb993ec46/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/279bd557f179e24b46ce875881d3bd0ad5d3c92558314ebf520c185bb993ec46/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/279bd557f179e24b46ce875881d3bd0ad5d3c92558314ebf520c185bb993ec46/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "73403fe73f9821837f69053da377223023e4c4171fa53c21a08ddf31643c43bf",
+     "sha512": "f00c9a6c9fa52577522e32dd2b0412fc6966a03016e408b835c9ebbc73aba38b6f6460cf4db66c1d8a0264ff4e925c9fb02367d6b7cd8c68d6fc4e805cfaf6f3"
+    },
+    "length": 7328
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.4.1-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/12ab637f6db2bf7f0c51b2daaf586d6624800fa8324206bbf42e29426937310a/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/12ab637f6db2bf7f0c51b2daaf586d6624800fa8324206bbf42e29426937310a/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/12ab637f6db2bf7f0c51b2daaf586d6624800fa8324206bbf42e29426937310a/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "c82753149ee9c58680dbeb5265334072b994a1d7faa27ff12506464414c8edb9",
+     "sha512": "21bf817946d98e2b9076d7e5aa38933300ac96fdc6f9b65736ccc1565331d64ee55723bee8dde068619a75490e999a8839b4f7957d5aa3667b0bac23d5fc75f4"
+    },
+    "length": 7418
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.4.2-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/fa66aef54974d3c67c68ebffd65354160d8148240b3416134d45ef56bd5c6c3e/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/fa66aef54974d3c67c68ebffd65354160d8148240b3416134d45ef56bd5c6c3e/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/fa66aef54974d3c67c68ebffd65354160d8148240b3416134d45ef56bd5c6c3e/tag.fbc63ae0.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "8327b37c3e83089f41761dd705ffee96d924010f5ed16c5e70546aea634b7c53",
+     "sha512": "46e4c49368498d9293ad88757fa1acf53d0eeba7f4a233b6a46944a0c34576c121634cc5ba6e8737299c4c76164fd43c9c4ad3677b327399415126ab68e35d14"
+    },
+    "length": 7408
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.5.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/ac89ee097abc077fd991dc373761562bf75ebe1af6415fb23b60fccfb8670935/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/ac89ee097abc077fd991dc373761562bf75ebe1af6415fb23b60fccfb8670935/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/ac89ee097abc077fd991dc373761562bf75ebe1af6415fb23b60fccfb8670935/tag.31091c85.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "f442430b047d4943021ff8eb0262089f318f11a88b65a10eff9d0e57bc6d84ef",
+     "sha512": "c4b22ce5fc0c53d900224086daaa8490a7291063172742db02caeed29592d6f5407c1f231908b5a2820989f12c531e9ba677ddcc526389a7d7b8e30636b381dc"
+    },
+    "length": 7501
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.6.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/696ed5a30947eb05949fa8c68bdf90f85029517bec2cd798ffc8e03944a2e517/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/696ed5a30947eb05949fa8c68bdf90f85029517bec2cd798ffc8e03944a2e517/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/696ed5a30947eb05949fa8c68bdf90f85029517bec2cd798ffc8e03944a2e517/tag.59db2532.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "117c85245526d94a23dda4fa23bacbb89c215f35599bb0cd1cd63c5f181ba0fd",
+     "sha512": "6cd1ae7fb79b4a32540c20071acaced44c8b73e20567078b132b29b6e5736ee4f0b771790a0d3d61d64e46315bb08313dcacbdd31f7aab9f0dabc7c03d2316ff"
+    },
+    "length": 7504
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.7.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/cf7997a0c15fe4b8053be4835f9f32d5d5473cb3e2db02c4c426fe12e27b5119/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/cf7997a0c15fe4b8053be4835f9f32d5d5473cb3e2db02c4c426fe12e27b5119/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/cf7997a0c15fe4b8053be4835f9f32d5d5473cb3e2db02c4c426fe12e27b5119/tag.b023b02a.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "5a67544dced33539d9d90f220bc05f963680f4d018ba1c6a5c3b82399d4fbc90",
+     "sha512": "f86a6e63408d211d87434047523a9935925302b096f4e03ab7200349156a2d9275fb52fc9d1fb7e516b5b58d60ecf54eb44d2bd81dd4b3c374d708502afff7ed"
+    },
+    "length": 7561
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.7.1-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/5288841e78ec5e37e778f5fc1b24d2048480d88fb71a880e5399761226267a33/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/5288841e78ec5e37e778f5fc1b24d2048480d88fb71a880e5399761226267a33/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/5288841e78ec5e37e778f5fc1b24d2048480d88fb71a880e5399761226267a33/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "409eac1f4e419bcb7574041a83d1a5c3b34bc21e136734c8ea4343a0c1ef776d",
+     "sha512": "8f6b9d4726d5cb345d231c34bfffbdaa8e4fdbec7299078b9cdb12fe9e2af600888e9dd6567075287c9ac19043f012d52334b328701717270d7f93ae60cb65f3"
+    },
+    "length": 7787
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.7.2-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/8031702952afbf70e2143083ef4eb8683cc5424932bab9baa6acf5084ec1bd95/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/8031702952afbf70e2143083ef4eb8683cc5424932bab9baa6acf5084ec1bd95/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/8031702952afbf70e2143083ef4eb8683cc5424932bab9baa6acf5084ec1bd95/tag.c295cf63.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "1268059e6283fa1c7d1d7da624bc45e2f318f226bfb7fce78c54a75543f347dc",
+     "sha512": "48a4680efce37d2aa2f41e3ee983968b5662c3d230d66900e0a61c8eef781a04fb70af8ab0ef42606b90dcda9d1bfb7e81989d83127c109b9fd50930550a19e4"
+    },
+    "length": 7799
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.7.3-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/3e1356a1a44fee5cb98b2e916a5003f55a79da8e0b788a8b9544f537289e4aa2/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/3e1356a1a44fee5cb98b2e916a5003f55a79da8e0b788a8b9544f537289e4aa2/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/3e1356a1a44fee5cb98b2e916a5003f55a79da8e0b788a8b9544f537289e4aa2/tag.31091c85.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "5f9cdd90e127bbf91af3547b30587ac7dff506325d631c2cbcc8e1ff1c2110c8",
+     "sha512": "4a2d1ba5f4f5fd073bb51bec649b115dcf2a5d09aff5562a7fbe29691da3448c8526b5b5ca95465714156078288b1d4ff9e6ade01fa65bfd833b507f045cb6b3"
+    },
+    "length": 7802
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.8.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/a802478a5e5c56adce34629606c88593c3914c600d9075a42e703f4927ec9983/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/a802478a5e5c56adce34629606c88593c3914c600d9075a42e703f4927ec9983/tag.57ce2495.link",
+      "in-toto-metadata/a802478a5e5c56adce34629606c88593c3914c600d9075a42e703f4927ec9983/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "92c36e614d48b39e252de6cd56f85d565e829c31798781a2395a16d586789308",
+     "sha512": "6872767fcdf6141c1712369e511b3069aaf787b5c532fc5b4143146366b2f2e0c6074e500d76d05796b509bda59938f2d29b0a35894138a29d3ce3101b00f427"
+    },
+    "length": 8238
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.9.0-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/1d466f02e43ff0660948531d7c03ebbb53f00c4759ed87239b3f271f20af5c1b/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/1d466f02e43ff0660948531d7c03ebbb53f00c4759ed87239b3f271f20af5c1b/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/1d466f02e43ff0660948531d7c03ebbb53f00c4759ed87239b3f271f20af5c1b/tag.31091c85.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "e6c18a0540bce0ce5ed9e5c2c123c6b6eb0be8dffaa7a42858dc790ae527626d",
+     "sha512": "973cf9298dcfcc1b63bb6a822227128bd3f5853e9ffb9e9f5c6153cb76983a30e733cef31dcf53f0c3b381f821c659ab6a54baa3200dd805bd59a04dd8f26549"
+    },
+    "length": 8176
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.9.1-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/d8cca00897d4442845278baaace27ce07c0521e5e8360914570f450bba861512/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/d8cca00897d4442845278baaace27ce07c0521e5e8360914570f450bba861512/tag.024e42fe.link",
+      "in-toto-metadata/d8cca00897d4442845278baaace27ce07c0521e5e8360914570f450bba861512/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "4252ca1395b4709a23735ad47d6c830e996b88b352aed55d1448752891264ad3",
+     "sha512": "597d0a028264bd97e942604810c92bcf1097f69f6bf0ce724f2f17b01a78ece129a530d446e2b539e80ff8e7396410a6d01b28225b10138c8dad0e5dc1f4849d"
+    },
+    "length": 8183
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.9.2-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/701a63a8a675c7d1ca728c609a52e2c2b119ba61ad9f53ea7b69fcd89162feac/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/701a63a8a675c7d1ca728c609a52e2c2b119ba61ad9f53ea7b69fcd89162feac/tag.4a5409a2.link",
+      "in-toto-metadata/701a63a8a675c7d1ca728c609a52e2c2b119ba61ad9f53ea7b69fcd89162feac/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "1431ed148f9bfaa5d5b4b44c6f6e9160bc397d658731e24803fc98b678630d88",
+     "sha512": "fab9229e59805363a090c7bfb9dfdfdc82bcad4a43f972a6c459cf287153c5b19f2465ab5798f88070615af3d24264ba014d029e04eeb8ff31a0c2d91eec89d1"
+    },
+    "length": 8187
+   },
+   "simple/datadog-wmi-check/datadog_wmi_check-1.9.3-py2.py3-none-any.whl": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/c66aa9debfcba2ef235e848487720da85c1bf9f8a9fd6592bd438af9162187cf/wheels-signer.b2f94f2b.link",
+      "in-toto-metadata/c66aa9debfcba2ef235e848487720da85c1bf9f8a9fd6592bd438af9162187cf/tag.024e42fe.link",
+      "in-toto-metadata/c66aa9debfcba2ef235e848487720da85c1bf9f8a9fd6592bd438af9162187cf/wheels-builder.1be24f7f.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "3ddc28a8a72d373e8d2450dfc0807000ef88fd31d4c433ebadc8db1f3e29ae44",
+     "sha512": "66e52a9dd8819b96c2b345b3e77d6f75944d697f5455d3d5d6f0759af7e496db12683724308885a01f64494d8e8b9929cc263ad2d139135322f8bd295f204213"
+    },
+    "length": 8190
+   },
+   "simple/datadog-wmi-check/index.html": {
+    "custom": {
+     "in-toto": [
+      "in-toto-metadata/root.layout",
+      "in-toto-metadata/2825dd400f1368dcff8de05d8a5958d3d007bffe98aff2c80cee9dcb3d9033bc/tag.47c5a022.link",
+      "in-toto-metadata/2825dd400f1368dcff8de05d8a5958d3d007bffe98aff2c80cee9dcb3d9033bc/wheels-builder.1be24f7f.link",
+      "in-toto-metadata/2825dd400f1368dcff8de05d8a5958d3d007bffe98aff2c80cee9dcb3d9033bc/wheels-signer.b2f94f2b.link"
+     ],
+     "root-layout-type": "core"
+    },
+    "hashes": {
+     "sha256": "d4cde99f25f420f82fc7ae676d141e6a59d5c84ad8d0fae54b8e019a85b30880",
+     "sha512": "8262d52638459f964bd7e5d7a1893f9f716104de8e2ced8b3b3b35a2ae139167abef983671143b4fce70273e3d9f08e4b6b8372890ffde8165755b7e26233458"
+    },
+    "length": 2656
+   }
+  },
+  "version": 2833
+ }
+}
