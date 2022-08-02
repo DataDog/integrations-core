@@ -8,8 +8,14 @@ DD_APP_NAME = 'datadog-agent'
 
 
 class MongoApi(object):
-    # :params replicaset: If replication is enabled, this parameter specifies the name of the replicaset.
-    # Valid for ReplicaSetDeployment deployments
+    """Mongodb connection through pymongo.MongoClient
+
+    :params config: MongoConfig object.
+    :params log: Check log.
+    :params replicaset: If replication is enabled, this parameter specifies the name of the replicaset.
+        Valid for ReplicaSetDeployment deployments
+    """
+
     def __init__(self, config, log, replicaset: str = None):
         self._config = config
         self._log = log
@@ -91,21 +97,18 @@ class MongoApi(object):
         return StandaloneDeployment()
 
     def _get_alibaba_deployment_type(self):
-        try:
-            is_master_payload = self['admin'].command('isMaster')
-            if is_master_payload.get('msg') == 'isdbgrid':
-                return MongosDeployment()
+        is_master_payload = self['admin'].command('isMaster')
+        if is_master_payload.get('msg') == 'isdbgrid':
+            return MongosDeployment()
 
-            # On alibaba cloud, a mongo node is either a mongos or part of a replica set.
-            repl_set_payload = self['admin'].command("replSetGetStatus")
-            if repl_set_payload.get('configsvr') is True:
-                cluster_role = 'configsvr'
-            elif self['admin'].command('shardingState').get('enabled') is True:
-                # Use `shardingState` command to know whether or not the replicaset
-                # is a shard or not.
-                cluster_role = 'shardsvr'
-            else:
-                cluster_role = None
-            return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
-        except Exception:
-            raise
+        # On alibaba cloud, a mongo node is either a mongos or part of a replica set.
+        repl_set_payload = self['admin'].command("replSetGetStatus")
+        if repl_set_payload.get('configsvr') is True:
+            cluster_role = 'configsvr'
+        elif self['admin'].command('shardingState').get('enabled') is True:
+            # Use `shardingState` command to know whether or not the replicaset
+            # is a shard or not.
+            cluster_role = 'shardsvr'
+        else:
+            cluster_role = None
+        return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
