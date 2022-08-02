@@ -91,11 +91,11 @@ You can limit the number of VMs pulled in with the VMWare integration using the 
 
 ### Monitoring vSphere Tanzu Kubernetes Grid (TKG)
 
-The Datadog vSphere integration collects metrics and events from your TKG VMs and control plane VMs automatically. To collect more granular information about your TKG cluster and its containers, including pod and node-level metrics, you can install the [Datadog agent][13] on your cluster. See the [distribution documentation][14] for example configuration files specific to TKG.
+The Datadog vSphere integration collects metrics and events from your [TKG][13] VMs and control plane VMs automatically. To collect more granular information about your TKG cluster and its containers, including pod and node-level metrics, you can install the [Datadog agent][14] on your cluster. See the [distribution documentation][15] for example configuration files specific to TKG.
 
 ## Further Reading
 
-- [Monitor vSphere with Datadog][15]
+- [Monitor vSphere with Datadog][16]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/vsphere/images/vsphere_graph.png
@@ -109,6 +109,7 @@ The Datadog vSphere integration collects metrics and events from your TKG VMs an
 [10]: https://github.com/DataDog/integrations-core/blob/master/vsphere/metadata.csv
 [11]: https://www.vmware.com/pdf/vi_architecture_wp.pdf
 [12]: https://github.com/DataDog/integrations-core/blob/master/vsphere/assets/service_checks.json
-[13]: https://docs.datadoghq.com/containers/kubernetes/installation/?tab=operator
-[14]: https://docs.datadoghq.com/containers/kubernetes/distributions/?tab=operator#TKG
-[15]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers
+[13]: https://tanzu.vmware.com/kubernetes-grid
+[14]: https://docs.datadoghq.com/containers/kubernetes/installation/?tab=operator
+[15]: https://docs.datadoghq.com/containers/kubernetes/distributions/?tab=operator#TKG
+[16]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers
