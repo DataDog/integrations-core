@@ -104,6 +104,17 @@ def test_check_metrics_1_23(aggregator, mock_metrics, mock_leader):
         tags=['url:https://172.18.0.2:6443/apis/events.k8s.io/v1', 'verb:GET'],
     )
 
+    assert_metric(
+        '.pod_preemption.victims.sum',
+        value=2.0,
+        tags=[],
+    )
+
+    assert_metric(
+        '.pod_preemption.victims.count',
+        value=2.0,
+        tags=[],
+    )
     assert_metric('.goroutines')
     assert_metric('.gc_duration_seconds.sum')
     assert_metric('.gc_duration_seconds.count')
