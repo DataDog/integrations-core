@@ -2,7 +2,7 @@
 
 ## 2.2.0 / 2022-08-01
 
-* [Added] Add retries to test & emit warnings when connections fail. See [#12528](https://github.com/DataDog/integrations-core/pull/12528).
+* [Added] Add retries to test and emit warnings when connections fail. See [#12528](https://github.com/DataDog/integrations-core/pull/12528).
 * [Added] Add an option to set the tenant databases schema. See [#12492](https://github.com/DataDog/integrations-core/pull/12492).
 
 ## 2.1.0 / 2022-04-05 / Agent 7.36.0
