@@ -214,7 +214,9 @@ class Connection(object):
         self.adoprovider = init_config.get('adoprovider', self.default_adoprovider)
         if self.adoprovider.upper() not in self.valid_adoproviders:
             self.log.error(
-                "Invalid ADODB provider string %s, defaulting to %s", self.adoprovider, self.default_adoprovider
+                "Invalid ADODB provider string %s, defaulting to %s",
+                self.adoprovider,
+                self.default_adoprovider,
             )
             self.adoprovider = self.default_adoprovider
 
@@ -380,7 +382,10 @@ class Connection(object):
                 for row in cursor:
                     # collation_name can be NULL if db offline, in that case assume its case_insensitive
                     case_insensitive = not row.collation_name or 'CI' in row.collation_name
-                    self.existing_databases[row.name.lower()] = case_insensitive, row.name
+                    self.existing_databases[row.name.lower()] = (
+                        case_insensitive,
+                        row.name,
+                    )
 
             except Exception as e:
                 self.log.error("Failed to check if database %s exists: %s", database, e)
@@ -400,20 +405,36 @@ class Connection(object):
         connector = self.instance.get('connector', self.default_connector)
         if connector != self.default_connector:
             if connector.lower() not in self.valid_connectors:
-                self.log.warning("Invalid database connector %s using default %s", connector, self.default_connector)
+                self.log.warning(
+                    "Invalid database connector %s using default %s",
+                    connector,
+                    self.default_connector,
+                )
                 connector = self.default_connector
             else:
-                self.log.debug("Overriding default connector for %s with %s", self.instance['host'], connector)
+                self.log.debug(
+                    "Overriding default connector for %s with %s",
+                    self.instance['host'],
+                    connector,
+                )
         return connector
 
     def _get_adoprovider(self):
         provider = self.instance.get('adoprovider', self.default_adoprovider)
         if provider != self.adoprovider:
             if provider.upper() not in self.valid_adoproviders:
-                self.log.warning("Invalid ADO provider %s using default %s", provider, self.adoprovider)
+                self.log.warning(
+                    "Invalid ADO provider %s using default %s",
+                    provider,
+                    self.adoprovider,
+                )
                 provider = self.adoprovider
             else:
-                self.log.debug("Overriding default ADO provider for %s with %s", self.instance['host'], provider)
+                self.log.debug(
+                    "Overriding default ADO provider for %s with %s",
+                    self.instance['host'],
+                    provider,
+                )
         return provider
 
     def _get_access_info(self, db_key, db_name=None):
@@ -427,9 +448,7 @@ class Connection(object):
 
         if not dsn:
             if not host:
-                self.log.debug(
-                    "No host provided, falling back to defaults: host=127.0.0.1, port=1433"
-                )
+                self.log.debug("No host provided, falling back to defaults: host=127.0.0.1, port=1433")
                 host = "127.0.0.1,1433"
             if not database:
                 self.log.debug(
@@ -514,7 +533,11 @@ class Connection(object):
             for key, value in other_connector_options.items()
             if value not in connector_options.values() and self.instance.get(value) is not None
         }:
-            self.log.warning("%s option will be ignored since %s connection is used", option, self.connector)
+            self.log.warning(
+                "%s option will be ignored since %s connection is used",
+                option,
+                self.connector,
+            )
 
         if cs is None:
             return
@@ -522,7 +545,10 @@ class Connection(object):
         parsed_cs = parse_connection_string_properties(cs)
         lowercased_keys_cs = {k.lower(): v for k, v in parsed_cs.items()}
 
-        if lowercased_keys_cs.get('trusted_connection', "false").lower() in {'yes', 'true'} and (username or password):
+        if lowercased_keys_cs.get('trusted_connection', "false").lower() in {
+            'yes',
+            'true',
+        } and (username or password):
             self.log.warning("Username and password are ignored when using Windows authentication")
 
         for key, value in connector_options.items():
