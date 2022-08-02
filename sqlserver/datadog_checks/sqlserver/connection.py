@@ -25,6 +25,7 @@ except ImportError:
 logger = logging.getLogger(__file__)
 
 DATABASE_EXISTS_QUERY = 'select name, collation_name from sys.databases;'
+DEFAULT_CONN_PORT = 1433
 
 
 class SQLConnectionError(Exception):
@@ -418,19 +419,57 @@ class Connection(object):
     def _get_access_info(self, db_key, db_name=None):
         """Convenience method to extract info from instance"""
         dsn = self.instance.get('dsn')
-        host = self.instance.get('host')
         username = self.instance.get('username')
         password = self.instance.get('password')
         database = self.instance.get(db_key) if db_name is None else db_name
         driver = self.instance.get('driver')
+        host = self._get_host_with_port()
+
         if not dsn:
             if not host:
-                host = '127.0.0.1,1433'
+                self.log.debug(
+                    "No host provided, falling back to defaults: host=127.0.0.1, port=1433"
+                )
+                host = "127.0.0.1,1433"
             if not database:
+                self.log.debug(
+                    "No database provided, falling back to default: %s",
+                    self.DEFAULT_DATABASE,
+                )
                 database = self.DEFAULT_DATABASE
             if not driver:
+                self.log.debug(
+                    "No driver provided, falling back to default: %s",
+                    self.DEFAULT_DRIVER,
+                )
                 driver = self.DEFAULT_DRIVER
         return dsn, host, username, password, database, driver
+
+    def _get_host_with_port(self):
+        """Return a string with format host,port.
+        If the host string in the config contains a port, that port is used.
+        If not, any port provided as a separate port config option is used.
+        If the port is misconfigured or missing, default port is used.
+        """
+        host = self.instance.get("host")
+        if not host:
+            return None
+
+        port = str(DEFAULT_CONN_PORT)
+        split_host, split_port = split_sqlserver_host_port(host)
+        config_port = self.instance.get("port")
+
+        if split_port is not None:
+            port = split_port
+        elif config_port is not None:
+            port = config_port
+        try:
+            int(port)
+        except ValueError:
+            self.log.warning("Invalid port %s; falling back to default 1433", port)
+            port = str(DEFAULT_CONN_PORT)
+
+        return split_host + "," + port
 
     def _conn_key(self, db_key, db_name=None, key_prefix=None):
         """Return a key to use for the connection cache"""
@@ -559,7 +598,10 @@ class Connection(object):
         """
         host, port = split_sqlserver_host_port(self.instance.get('host'))
         if port is None:
-            port = 1433
+            port = DEFAULT_CONN_PORT
+            provided_port = self.instance.get("port")
+            if provided_port is not None:
+                port = provided_port
 
         try:
             port = int(port)
