@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-network"
 description = "The Network check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -35,9 +34,12 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
-    "psutil==5.9.0",
+    "psutil==5.9.1",
 ]
 
 [project.urls]

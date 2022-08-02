@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-snmp"
 description = "The SNMP check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -35,16 +34,19 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
     "futures==3.3.0; python_version < '3.0'",
     "ipaddress==1.0.23; python_version < '3.0'",
     "ply==3.11",
-    "pyasn1==0.4.6",
-    "pycryptodomex==3.10.1",
+    "pyasn1==0.4.8",
+    "pycryptodomex==3.15.0",
     "pysmi==0.3.4",
     "pysnmp-mibs==0.1.6",
-    "pysnmp==4.4.9",
+    "pysnmp==4.4.12",
 ]
 
 [project.urls]
