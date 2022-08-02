@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-from six import PY2
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.mongo import MongoDb
@@ -71,9 +70,8 @@ def test_hosts_can_be_singular(instance):
     check = MongoDb('mongo_check', {}, instances=[instance])
     assert check._config.hosts == ['localfoost']
 
-    if not PY2:
-        check.load_configuration_models()
-        assert check._config_model_instance.hosts == ('localfoost',)
+    check.load_configuration_models()
+    assert check._config_model_instance.hosts == ('localfoost',)
 
 
 def test_dbnames_not_exists(instance):

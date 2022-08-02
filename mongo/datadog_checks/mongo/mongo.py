@@ -190,9 +190,9 @@ class MongoDb(AgentCheck):
     def _check(self):
         try:
             api = self.api_client
-        except Exception:
+        except Exception as e:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
-            self.log.exception("Error when creating the api client.")
+            self.log.exception("Error when creating the api client: %s.", str(e))
             raise
 
         self._refresh_replica_role()
