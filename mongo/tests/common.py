@@ -62,11 +62,7 @@ INSTANCE_USER = {
 }
 INSTANCE_USER_LEGACY_CONFIG = {'server': 'mongodb://testUser2:testPass2@{}:{}/test'.format(HOST, PORT1)}
 
-INSTANCE_ARBITER = {
-    'hosts': ['{}:{}'.format(HOST, PORT_ARBITER)],
-    'username': 'testUser',
-    'password': 'testPass',
-}
+INSTANCE_ARBITER = {'hosts': ['{}:{}'.format(HOST, PORT_ARBITER)]}
 
 INSTANCE_CUSTOM_QUERIES = {
     'hosts': ['{}:{}'.format(HOST, PORT1)],

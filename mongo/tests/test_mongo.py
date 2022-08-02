@@ -121,7 +121,7 @@ def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
         'mongodb.replset.state': 7,
     }
     expected_tags = [
-        'server:mongodb://testUser:*****@localhost:27020/',
+        'server:mongodb://localhost:27020/',
         'replset_name:shard01',
         'replset_state:arbiter',
         'sharding_cluster_role:shardsvr',
