@@ -62,8 +62,7 @@ pycryptodomex==3.15.0
 pydantic==1.9.1; python_version > '3.0'
 pyjwt==1.7.1; python_version < '3.0'
 pyjwt==2.4.0; python_version > '3.0'
-pymongo[srv]==3.12.3; python_version < '3.0'
-pymongo[srv]==4.2.0; python_version > '3.0'
+pymongo[srv]==4.2; python_version >= '3.8'
 pymqi==1.12.8
 pymysql==0.10.1
 pyodbc==4.0.34

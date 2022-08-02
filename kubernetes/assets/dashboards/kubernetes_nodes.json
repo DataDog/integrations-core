@@ -8,7 +8,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "top(sum:kubernetes_state.node.by_condition{$cluster,status:true,$host,!condition:ready} by {status,condition,kube_cluster_name}, 10, 'last', 'desc')",
+                        "q": "top(sum:kubernetes_state.node.by_condition{$cluster,status:false,$host,condition:ready} by {kube_cluster_name}, 10, 'last', 'desc')",
                         "display_type": "line",
                         "style": {
                             "palette": "warm",
@@ -1469,7 +1469,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.node.by_condition{$cluster,status:true,$host,!condition:ready}",
+                        "q": "sum:kubernetes_state.node.by_condition{$cluster,status:false,$host,condition:ready}",
                         "aggregator": "avg",
                         "conditional_formats": [
                             {

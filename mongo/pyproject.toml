@@ -9,6 +9,7 @@ build-backend = "hatchling.build"
 name = "datadog-mongo"
 description = "The MongoDB check"
 readme = "README.md"
+requires-python = ">=3.8"
 keywords = [
     "datadog",
     "datadog agent",
@@ -39,8 +40,7 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "pymongo[srv]==3.12.3; python_version < '3.0'",
-    "pymongo[srv]==4.2.0; python_version > '3.0'",
+    "pymongo[srv]==4.2; python_version >= '3.8'"
 ]
 
 [project.urls]
