@@ -36,6 +36,7 @@ IGNORED_DEPS = {
     'cryptography',
     'dnspython',
     'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
+    'protobuf',  # https://github.com/DataDog/integrations-core/pull/12653
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
