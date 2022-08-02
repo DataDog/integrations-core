@@ -89,9 +89,13 @@ See [service_checks.json][12] for a list of service checks provided by this inte
 
 You can limit the number of VMs pulled in with the VMWare integration using the `vsphere.d/conf.yaml` file. See the `resource_filters` parameter section in the [sample vsphere.d/conf.yaml][4].
 
+### Monitoring vSphere Tanzu Kubernetes Grid (TKG)
+
+The Datadog vSphere integration collects metrics and events from your TKG VMs and control plane VMs automatically. To collect more granular information about your TKG cluster and its containers, including pod and node-level metrics, you can install the [Datadog agent][13] on your cluster. See the [distribution documentation][14] for example configuration files specific to TKG.
+
 ## Further Reading
 
-- [Monitor vSphere with Datadog][13]
+- [Monitor vSphere with Datadog][15]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/vsphere/images/vsphere_graph.png
@@ -105,4 +109,6 @@ You can limit the number of VMs pulled in with the VMWare integration using the 
 [10]: https://github.com/DataDog/integrations-core/blob/master/vsphere/metadata.csv
 [11]: https://www.vmware.com/pdf/vi_architecture_wp.pdf
 [12]: https://github.com/DataDog/integrations-core/blob/master/vsphere/assets/service_checks.json
-[13]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers
+[13]: https://docs.datadoghq.com/containers/kubernetes/installation/?tab=operator
+[14]: https://docs.datadoghq.com/containers/kubernetes/distributions/?tab=operator#TKG
+[15]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers
