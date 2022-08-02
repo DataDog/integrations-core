@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
-import urllib
+from urllib.parse import quote_plus
 
 import mock
 import pytest
@@ -120,24 +120,22 @@ def test_server_uri_sanitization(check, instance):
         ("mongodb://user:pass@localhost:27017/admin", "mongodb://user:*****@localhost:27017/admin"),
         # pymongo parses the password as `pass_%2`
         (
-            "mongodb://%s:%s@localhost:27017/admin"
-            % (urllib.parse.quote_plus('user'), urllib.parse.quote_plus('pass_%2')),
+            "mongodb://%s:%s@localhost:27017/admin" % (quote_plus('user'), quote_plus('pass_%2')),
             "mongodb://user:*****@localhost:27017/admin",
         ),
         # pymongo parses the password as `pass_%` (`%25` is url-decoded to `%`)
         (
-            "mongodb://%s:%s@localhost:27017/admin"
-            % (urllib.parse.quote_plus('user'), urllib.parse.quote_plus('pass_%25')),
+            "mongodb://%s:%s@localhost:27017/admin" % (quote_plus('user'), quote_plus('pass_%25')),
             "mongodb://user:*****@localhost:27017/admin",
         ),
         # same thing here, parsed username: `user%2`
         (
-            "mongodb://%s@localhost:27017/admin" % (urllib.parse.quote_plus('user%2')),
+            "mongodb://%s@localhost:27017/admin" % (quote_plus('user%2')),
             "mongodb://user%2@localhost:27017/admin",
         ),
         # with the current sanitization approach, we expect the username to be decoded in the clean name
         (
-            "mongodb://%s@localhost:27017/admin" % (urllib.parse.quote_plus('user%25')),
+            "mongodb://%s@localhost:27017/admin" % (quote_plus('user%25')),
             "mongodb://user%25@localhost:27017/admin",
         ),
     )
@@ -151,21 +149,19 @@ def test_server_uri_sanitization(check, instance):
         ("mongodb://localhost:27017/admin", "mongodb://localhost:27017/admin"),
         ("mongodb://user:pass@localhost:27017/admin", "mongodb://*****@localhost:27017/admin"),
         (
-            "mongodb://%s:%s@localhost:27017/admin"
-            % (urllib.parse.quote_plus('user'), urllib.parse.quote_plus('pass_%2')),
+            "mongodb://%s:%s@localhost:27017/admin" % (quote_plus('user'), quote_plus('pass_%2')),
             "mongodb://*****@localhost:27017/admin",
         ),
         (
-            "mongodb://%s:%s@localhost:27017/admin"
-            % (urllib.parse.quote_plus('user'), urllib.parse.quote_plus('pass_%25')),
+            "mongodb://%s:%s@localhost:27017/admin" % (quote_plus('user'), quote_plus('pass_%25')),
             "mongodb://*****@localhost:27017/admin",
         ),
         (
-            "mongodb://%s@localhost:27017/admin" % (urllib.parse.quote_plus('user%2')),
+            "mongodb://%s@localhost:27017/admin" % (quote_plus('user%2')),
             "mongodb://localhost:27017/admin",
         ),
         (
-            "mongodb://%s@localhost:27017/admin" % (urllib.parse.quote_plus('user%25')),
+            "mongodb://%s@localhost:27017/admin" % (quote_plus('user%25')),
             "mongodb://localhost:27017/admin",
         ),
     )
