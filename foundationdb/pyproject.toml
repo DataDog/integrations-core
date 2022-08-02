@@ -39,7 +39,7 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "foundationdb==7.1.17; python_version > '3.0'",
+    "foundationdb==6.3.24; python_version > '3.0'",
 ]
 
 [project.urls]

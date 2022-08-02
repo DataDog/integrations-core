@@ -24,7 +24,7 @@ ddtrace==0.32.2; sys_platform == 'win32' and python_version < '3.0'
 ddtrace==0.53.2; sys_platform != 'win32' or python_version > '3.0'
 dnspython==1.16.0
 enum34==1.1.10; python_version < '3.0'
-foundationdb==7.1.17; python_version > '3.0'
+foundationdb==6.3.24; python_version > '3.0'
 futures==3.3.0; python_version < '3.0'
 gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
 gssapi==1.6.1; python_version < '3.0'
