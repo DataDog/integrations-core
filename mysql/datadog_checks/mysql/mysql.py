@@ -14,7 +14,7 @@ import pymysql
 from six import PY3, iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
-from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 
 from .activity import MySQLActivity
@@ -43,6 +43,7 @@ from .const import (
 )
 from .innodb_metrics import InnoDBMetrics
 from .queries import (
+    QUERY_USER_CONNECTIONS,
     SQL_95TH_PERCENTILE,
     SQL_AVG_QUERY_RUN_TIME,
     SQL_GROUP_REPLICATION_MEMBER,
@@ -101,10 +102,7 @@ class MySql(AgentCheck):
         # Create a new connection on every check run
         self._conn = None
 
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[])
-        self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
-        self.check_initializations.append(self._config.configuration_checks)
         self.performance_schema_enabled = None
         self.userstat_enabled = None
         self.events_wait_current_enabled = None
@@ -112,6 +110,15 @@ class MySql(AgentCheck):
         self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
         self._query_activity = MySQLActivity(self, self._config, self._get_connection_args())
+
+        # Query declarations
+        self._internal_queries = self._new_query_executor([QUERY_USER_CONNECTIONS])
+        self.check_initializations.append(self._internal_queries.compile_queries)
+
+        # Process custom queries with QueryManager
+        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[])
+        self.check_initializations.append(self._config.configuration_checks)
+        self.check_initializations.append(self._query_manager.compile_queries)
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
@@ -232,6 +239,8 @@ class MySql(AgentCheck):
                 # keeping track of these:
                 self._put_qcache_stats()
 
+                self._internal_queries.execute(extra_tags=tags)
+
                 # Custom queries
                 self._query_manager.execute(extra_tags=tags)
 
@@ -246,6 +255,14 @@ class MySql(AgentCheck):
         self._statement_samples.cancel()
         self._statement_metrics.cancel()
         self._query_activity.cancel()
+
+    def _new_query_executor(self, queries):
+        return QueryExecutor(
+            self.execute_query_raw,
+            self,
+            queries=queries,
+            hostname=self.resolved_hostname,
+        )
 
     def _set_qcache_stats(self):
         host_key = self._get_host_key()

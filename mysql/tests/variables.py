@@ -22,6 +22,7 @@ STATUS_VARS = [
     'mysql.net.max_connections',
     'mysql.net.aborted_clients',
     'mysql.net.aborted_connects',
+    'mysql.performance.user_connections',
     # Table Cache Metrics
     'mysql.performance.open_files',
     'mysql.performance.open_tables',
