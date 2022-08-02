@@ -7,7 +7,7 @@
 * [Added] Update Hatch plugin. See [#12518](https://github.com/DataDog/integrations-core/pull/12518).
 * [Added] Add functionality to load the legacy version of the integration. See [#12396](https://github.com/DataDog/integrations-core/pull/12396).
 * [Added] Add validations for duplicate JMX bean entries. See [#11505](https://github.com/DataDog/integrations-core/pull/11505).
-* [Fixed] log_patterns to match all logs. See [#12623](https://github.com/DataDog/integrations-core/pull/12623).
+* [Fixed] Make log_patterns match all logs. See [#12623](https://github.com/DataDog/integrations-core/pull/12623).
 * [Fixed] Add pymysql to dependency update exclude list. See [#12631](https://github.com/DataDog/integrations-core/pull/12631).
 * [Fixed] Better failed assertion message, print return code. See [#12615](https://github.com/DataDog/integrations-core/pull/12615).
 * [Fixed] Do not update docker compose. See [#12576](https://github.com/DataDog/integrations-core/pull/12576).
