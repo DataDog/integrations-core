@@ -42,6 +42,7 @@ IGNORED_DEPS = {
     'pyasn1',  # https://github.com/DataDog/integrations-core/pull/12653
     'pycryptodomex',  # https://github.com/DataDog/integrations-core/pull/12653
     'pysnmp',  # https://github.com/DataDog/integrations-core/pull/12653
+    'lz4',  # https://github.com/DataDog/integrations-core/pull/12653
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
