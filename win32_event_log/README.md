@@ -116,30 +116,41 @@ Double-check your filters' values with <code>Get-WmiObject</code> if the integra
     Some example filters:
     
     ```yaml
-      - type: windows_event
-        channel_path: Security
-        source: windows.events
-        service: Windows       
-        log_processing_rules:
-        - type: include_at_match
-          name: relevant_security_events
-          pattern: .*(?i)eventid.+(1102|4624|4625|4634|4648|4728|4732|4735|4737|4740|4755|4756)
-      - type: windows_event
-        channel_path: System
-        source: windows.events
-        service: Windows       
-        log_processing_rules:
-        - type: include_at_match
-          name: system_errors_and_warnings
-          pattern: .*(?i)level.+((?i)(warning|error))
-      - type: windows_event
-        channel_path: Application
-        source: windows.events
-        service: Windows       
-        log_processing_rules:
-        - type: include_at_match
-          name: application_errors_and_warnings
-          pattern: .*(?i)level.+((?i)(warning|error))
+    - type: windows_event
+      channel_path: Security
+      source: windows.events
+      service: Windows       
+      log_processing_rules:
+      - type: include_at_match
+        name: relevant_security_events
+        pattern: .*(?i)eventid.+(1102|4624|4625|4634|4648|4728|4732|4735|4737|4740|4755|4756)
+    
+    - type: windows_event
+      channel_path: Security
+      source: windows.events
+      service: Windows       
+      log_processing_rules:
+      - type: exclude_at_match
+        name: relevant_security_events
+        pattern: \"EventID\":\"1102\"|\"4624\"t\"
+     
+    - type: windows_event
+      channel_path: System
+      source: windows.events
+      service: Windows       
+      log_processing_rules:
+      - type: include_at_match
+        name: system_errors_and_warnings
+        pattern: .*(?i)level.+((?i)(warning|error))
+    
+    - type: windows_event
+      channel_path: Application
+      source: windows.events
+      service: Windows       
+      log_processing_rules:
+      - type: include_at_match
+        name: application_errors_and_warnings
+        pattern: .*(?i)level.+((?i)(warning|error))
     ```
 
     ```yaml
