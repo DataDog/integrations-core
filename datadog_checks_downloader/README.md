@@ -71,6 +71,13 @@ run tests against:
 pytest -vvvv -m online --distribution-name datadog-active-directory --distribution-version 1.10.0
 ```
 
+To check all Datadog integrations, you can privde
+```--verify-all-integrations``` option:
+
+```shell
+pytest -vvvv --verify-all-integrations
+```
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][9].

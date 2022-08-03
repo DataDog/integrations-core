@@ -414,7 +414,11 @@ def get_all_integrations_metadata():
     return dict(results)
 
 
-def test_downloader():
+@pytest.mark.online
+def test_downloader(verify_all_integrations):
+    if not verify_all_integrations:
+        pytest.skip("Checking all Datadog integrations not requested")
+
     integrations_metadata = get_all_integrations_metadata()
     # The regex corresponding to package names in a global simple index.
     HTML_PATTERN = r"<a href='(datadog-[\w-]+?)/'>\w+?</a><br />"
