@@ -29,7 +29,7 @@ class PerfCountersBaseCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
-        
+
         self.interval = 60
         if datadog_agent and datadog_agent.get_config('window_counter_refresh_interval'):
             self.interval = datadog_agent.get_config('window_counter_refresh_interval')
