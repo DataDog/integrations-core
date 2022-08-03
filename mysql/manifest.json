@@ -16,7 +16,7 @@
   "process_signatures": [
     "mysqld"
   ],
-  "public_title": "Datadog-MySQL Integration",
+  "public_title": "MySQL Integration",
   "short_description": "Collect performance schema metrics, query throughput, custom metrics, and more.",
   "support": "core",
   "supported_os": [

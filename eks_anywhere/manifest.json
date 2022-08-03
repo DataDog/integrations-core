@@ -1,32 +1,43 @@
 {
-  "categories": [
-    "aws",
-    "containers",
-    "orchestration",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Amazon EKS Anywhere",
-  "guid": "2f0cb8fd-5541-419d-8e58-af9b80cf4d80",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "aws.eks.",
-  "name": "eks_anywhere",
-  "public_title": "Datadog-Amazon EKS Anywhere Integration",
-  "short_description": "An EKS deployment option for operating Kubernetes clusters on-premises",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "eks-anywhere",
+  "manifest_version": "2.0.0",
+  "app_uuid": "21bd91d8-7594-4c2f-bbd8-11595e4511d1",
+  "app_id": "eks-anywhere",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "An EKS deployment option for operating Kubernetes clusters on-premises",
+    "title": "Amazon EKS Anywhere",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::AWS",
+      "Category::Containers",
+      "Category::Orchestration",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "integration": {
+      "source_type_name": "Amazon EKS Anywhere",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

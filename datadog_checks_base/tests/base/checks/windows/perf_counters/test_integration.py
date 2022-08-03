@@ -3,14 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-import pytest
-
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.testing import requires_py3, requires_windows
 
 from .utils import SERVER, get_check
 
-pytestmark = [requires_py3, requires_windows, pytest.mark.perf_counters]
+pytestmark = [requires_py3, requires_windows]
 
 
 def test(aggregator, dd_run_check):

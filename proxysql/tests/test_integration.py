@@ -67,16 +67,14 @@ def test_server_down(aggregator, instance_basic, dd_run_check):
         (['connection_pool_metrics'], CONNECTION_POOL_METRICS, ['hostgroup', 'srv_host', 'srv_port']),
         (['users_metrics'], USER_TAGS_METRICS, ['username']),
         (['memory_metrics'], MEMORY_METRICS, []),
-        (['backends_metrics'], BACKENDS_METRICS, ['hostgroup_id', 'status']),
-        (
-            ['query_rules_metrics'],
-            QUERY_RULES_TAGS_METRICS,
-            ['rule_id'],
-        ),
+        (['backends_metrics'], BACKENDS_METRICS, ['hostgroup', 'status']),
+        (['query_rules_metrics'], QUERY_RULES_TAGS_METRICS, ['rule_id']),
     ),
     ids=('global', 'command_counters', 'connection_pool', 'users', 'memory', 'backends', 'query_rules'),
 )
-def test_metric(aggregator, instance_basic, dd_run_check, additional_metrics, expected_metrics, tag_prefixes):
+def test_additional_metric(
+    aggregator, instance_basic, dd_run_check, additional_metrics, expected_metrics, tag_prefixes
+):
     instance_basic['additional_metrics'] = additional_metrics
 
     check = get_check(instance_basic)

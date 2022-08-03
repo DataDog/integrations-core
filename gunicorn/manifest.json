@@ -1,34 +1,51 @@
 {
-  "categories": [
-    "web",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Gunicorn",
-  "guid": "5347bfe1-2e9b-4c92-9410-48b8659ce10f",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "gunicorn.",
-  "metric_to_check": "gunicorn.workers",
-  "name": "gunicorn",
-  "process_signatures": [
-    "gunicorn: master"
-  ],
-  "public_title": "Datadog-Gunicorn Integration",
-  "short_description": "Monitor request rates and durations, log-message rates, and worker processes.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os"
-  ],
-  "type": "check",
-  "integration_id": "gunicorn",
+  "manifest_version": "2.0.0",
+  "app_uuid": "49687997-bbf2-45db-9b4f-223cf7c492ed",
+  "app_id": "gunicorn",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor request rates and durations, log-message rates, and worker processes.",
+    "title": "Gunicorn",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::Web",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Gunicorn",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "gunicorn.",
+        "check": "gunicorn.workers",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "gunicorn: master"
+      ]
     },
-    "monitors": {},
     "dashboards": {
       "gunicorn": "assets/dashboards/gunicorn_dashboard.json"
     },
@@ -39,10 +56,8 @@
       "bot_errors": "assets/saved_views/bot_errors.json",
       "gunicorn_processes": "assets/saved_views/gunicorn_processes.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "gunicorn"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

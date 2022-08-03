@@ -16,7 +16,7 @@
     "openshift.clusterquota.cpu.used"
   ],
   "name": "openshift",
-  "public_title": "Datadog-OpenShift Integration",
+  "public_title": "OpenShift Integration",
   "short_description": "The Kubernetes platform for big ideas",
   "support": "core",
   "supported_os": [

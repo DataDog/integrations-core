@@ -131,9 +131,9 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 /mysql/                                             @DataDog/database-monitoring @DataDog/agent-integrations
 /mysql/*.md                                         @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /mysql/manifest.json                                @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
-/sqlserver/                                         @DataDog/agent-integrations @DataDog/database-monitoring
-/sqlserver/*.md                                     @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
-/sqlserver/manifest.json                            @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
+/sqlserver/                                         @DataDog/database-monitoring @DataDog/agent-integrations
+/sqlserver/*.md                                     @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/sqlserver/manifest.json                            @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /oracle/                                            @DataDog/agent-integrations @DataDog/database-monitoring
 /oracle/*.md                                        @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
 /oracle/manifest.json                               @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation

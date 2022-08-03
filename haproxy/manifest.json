@@ -1,41 +1,63 @@
 {
-  "categories": [
-    "web",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": true,
-  "description": "The HAProxy integration helps to collect performance and availability metrics from HAProxy instances.",
-  "display_name": "HAProxy",
-  "guid": "cd935030-131f-4545-8b6a-a4ca21b8565b",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "haproxy.",
-  "metric_to_check": [
-    "haproxy.frontend.bytes.in.count",
-    "haproxy.frontend.bytes.in_rate",
-    "haproxy.frontend.bytes.in.total"
-  ],
-  "name": "haproxy",
-  "process_signatures": [
-    "haproxy",
-    "haproxy-master",
-    "haproxy-controller"
-  ],
-  "public_title": "Datadog-HAProxy Integration",
-  "short_description": "Monitor key metrics for requests, responses, errors, bytes served, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "haproxy",
+  "manifest_version": "2.0.0",
+  "app_uuid": "804dd2ae-d0a9-4063-a2bc-bd949ac7bb62",
+  "app_id": "haproxy",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor key metrics for requests, responses, errors, bytes served, and more.",
+    "title": "HAProxy",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Web",
+      "Category::Log Collection",
+      "Category::Autodiscovery"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "HAProxy",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "haproxy.",
+        "check": [
+          "haproxy.frontend.bytes.in.count",
+          "haproxy.frontend.bytes.in_rate",
+          "haproxy.frontend.bytes.in.total"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "haproxy",
+        "haproxy-master",
+        "haproxy-controller"
+      ]
+    },
+    "dashboards": {
+      "haproxy": "assets/dashboards/overview.json",
+      "HAProxy - Overview (Prometheus)": "assets/dashboards/prometheus_overview.json",
+      "HAProxy - Overview (OpenMetrics)": "assets/dashboards/openmetrics_overview.json"
     },
     "monitors": {
       "[HAProxy] Anomalous number of frontend 4xx HTTP responses for host: {{host.name}}": "assets/monitors/frontend_5xx.json",
@@ -50,11 +72,6 @@
       "[HAProxy] Backend queue time went above 500ms for host: {{host.name}}": "assets/monitors/backend_queue_time.json",
       "[HAProxy] Backend response time is above 500ms for host: {{host.name}}": "assets/monitors/backend_rtime.json"
     },
-    "dashboards": {
-      "haproxy": "assets/dashboards/overview.json",
-      "HAProxy - Overview (Prometheus)": "assets/dashboards/prometheus_overview.json",
-      "HAProxy - Overview (OpenMetrics)": "assets/dashboards/openmetrics_overview.json"
-    },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",
       "5xx_errors": "assets/saved_views/5xx_errors.json",
@@ -63,10 +80,8 @@
       "response_time_overview": "assets/saved_views/response_time.json",
       "haproxy_processes": "assets/saved_views/haproxy_processes.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "haproxy"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

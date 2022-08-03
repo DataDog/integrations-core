@@ -56,5 +56,19 @@ services:
     depends_on:
       - cert-builder
 
+  # postgres serving valid.postgresql.mock
+  starttls-postgres:
+    container_name: postgres-valid
+    image: postgres:12-alpine
+    volumes:
+      - certs:/var/lib/postgresql/certs/:ro
+    ports:
+      - "55432:5432"
+    command: -c ssl=on -c ssl_cert_file=/var/lib/postgresql/certs/postgres.valid.mock.crt -c ssl_key_file=/var/lib/postgresql/certs/postgres.valid.mock.key
+    environment:
+      - POSTGRES_PASSWORD=masterpassw0rd
+    depends_on:
+      - cert-builder
+
 volumes:
   certs:

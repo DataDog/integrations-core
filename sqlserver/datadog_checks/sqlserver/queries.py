@@ -70,69 +70,6 @@ QUERY_AO_FAILOVER_CLUSTER_MEMBER = {
     ],
 }
 
-QUERY_AO_AVAILABILITY_GROUPS = {
-    'name': 'sys.availability_groups',
-    'query': """
-        SELECT
-            AG.group_id AS availability_group,
-            AG.name AS availability_group_name,
-            AR.replica_server_name,
-            LOWER(AR.failover_mode_desc) AS failover_mode_desc,
-            LOWER(AR.availability_mode_desc) AS failover_mode_desc,
-            ADC.database_name,
-            DRS.replica_id,
-            DRS.database_id,
-            DRS.is_primary_replica,
-            DRS.database_state,
-            LOWER(DRS.synchronization_state_desc) AS synchronization_state_desc,
-            (DRS.log_send_queue_size * 1024) AS log_send_queue_size,
-            (DRS.log_send_rate * 1024) AS log_send_rate,
-            (DRS.redo_queue_size * 1024) AS redo_queue_size,
-            (DRS.redo_rate * 1024) AS redo_rate,
-            DRS.low_water_mark_for_ghosts,
-            (DRS.filestream_send_rate * 1024) AS filestream_send_rate,
-            DRS.secondary_lag_seconds,
-            FC.cluster_name
-        FROM
-            sys.availability_groups AS AG
-            INNER JOIN sys.availability_replicas AS AR ON AG.group_id = AR.group_id
-            INNER JOIN sys.availability_databases_cluster AS ADC ON AG.group_id = ADC.group_id
-            INNER JOIN sys.dm_hadr_database_replica_states AS DRS ON AG.group_id = DRS.group_id
-                AND ADC.group_database_id = DRS.group_database_id
-                AND AR.replica_id = DRS.replica_id
-            -- `sys.dm_hadr_cluster` does not have a related column to join on, this cross join will add the
-            -- `cluster_name` column to every row by multiplying all the rows in the left table against
-            -- all the rows in the right table. Note, there will only be one row from `sys.dm_hadr_cluster`.
-            CROSS JOIN (SELECT TOP 1 cluster_name FROM sys.dm_hadr_cluster) AS FC
-    """.strip(),
-    'columns': [
-        # AG - sys.availability_groups
-        {'name': 'availability_group', 'type': 'tag'},
-        {'name': 'availability_group_name', 'type': 'tag'},
-        # AR - sys.availability_replicas
-        {'name': 'replica_server_name', 'type': 'tag'},
-        {'name': 'failover_mode', 'type': 'tag'},
-        {'name': 'availability_mode', 'type': 'tag'},
-        # ADC - sys.availability_databases_cluster
-        {'name': 'database_name', 'type': 'tag'},
-        # DRS - sys.dm_hadr_database_replica_states
-        {'name': 'replica_id', 'type': 'tag'},
-        {'name': 'database_id', 'type': 'tag'},
-        {'name': 'ao.is_primary_replica', 'type': 'gauge'},
-        {'name': 'database_state', 'type': 'tag'},
-        {'name': 'synchronization_state', 'type': 'tag'},
-        {'name': 'ao.log_send_queue_size', 'type': 'gauge'},
-        {'name': 'ao.log_send_rate', 'type': 'gauge'},
-        {'name': 'ao.redo_queue_size', 'type': 'gauge'},
-        {'name': 'ao.redo_rate', 'type': 'gauge'},
-        {'name': 'ao.low_water_mark_for_ghosts', 'type': 'gauge'},
-        {'name': 'ao.filestream_send_rate', 'type': 'gauge'},
-        {'name': 'ao.secondary_lag_seconds', 'type': 'gauge'},
-        # FC - sys.dm_hadr_cluster
-        {'name': 'failover_cluster', 'type': 'tag'},
-    ],
-}
-
 QUERY_FAILOVER_CLUSTER_INSTANCE = {
     'name': 'sys.dm_os_cluster_nodes',
     'query': """
@@ -156,3 +93,148 @@ QUERY_FAILOVER_CLUSTER_INSTANCE = {
         {'name': 'failover_cluster', 'type': 'tag'},
     ],
 }
+
+
+def get_query_ao_availability_groups(sqlserver_major_version):
+    """
+    Construct the sys.availability_groups QueryExecutor configuration based on the SQL Server major version
+
+    :params sqlserver_major_version: SQL Server major version (i.e. 2012, 2019, ...)
+    :return: a QueryExecutor query config object
+    """
+    column_definitions = {
+        # AG - sys.availability_groups
+        'AG.group_id AS availability_group': {'name': 'availability_group', 'type': 'tag'},
+        'AG.name AS availability_group_name': {'name': 'availability_group_name', 'type': 'tag'},
+        # AR - sys.availability_replicas
+        'AR.replica_server_name': {'name': 'replica_server_name', 'type': 'tag'},
+        'LOWER(AR.failover_mode_desc) AS failover_mode_desc': {'name': 'failover_mode', 'type': 'tag'},
+        'LOWER(AR.availability_mode_desc) AS availability_mode_desc': {'name': 'availability_mode', 'type': 'tag'},
+        # ADC - sys.availability_databases_cluster
+        'ADC.database_name': {'name': 'database_name', 'type': 'tag'},
+        # DRS - sys.dm_hadr_database_replica_states
+        'DRS.replica_id': {'name': 'replica_id', 'type': 'tag'},
+        'DRS.database_id': {'name': 'database_id', 'type': 'tag'},
+        'LOWER(DRS.database_state_desc) AS database_state_desc': {'name': 'database_state', 'type': 'tag'},
+        'LOWER(DRS.synchronization_state_desc) AS synchronization_state_desc': {
+            'name': 'synchronization_state',
+            'type': 'tag',
+        },
+        '(DRS.log_send_queue_size * 1024) AS log_send_queue_size': {'name': 'ao.log_send_queue_size', 'type': 'gauge'},
+        '(DRS.log_send_rate * 1024) AS log_send_rate': {'name': 'ao.log_send_rate', 'type': 'gauge'},
+        '(DRS.redo_queue_size * 1024) AS redo_queue_size': {'name': 'ao.redo_queue_size', 'type': 'gauge'},
+        '(DRS.redo_rate * 1024) AS redo_rate': {'name': 'ao.redo_rate', 'type': 'gauge'},
+        'DRS.low_water_mark_for_ghosts': {'name': 'ao.low_water_mark_for_ghosts', 'type': 'gauge'},
+        '(DRS.filestream_send_rate * 1024) AS filestream_send_rate': {
+            'name': 'ao.filestream_send_rate',
+            'type': 'gauge',
+        },
+        # FC - sys.dm_hadr_cluster
+        'FC.cluster_name': {
+            'name': 'failover_cluster',
+            'type': 'tag',
+        },
+        # Other
+        '1 AS replica_sync_topology_indicator': {'name': 'ao.replica_status', 'type': 'gauge'},
+    }
+
+    # Include metrics based on version
+    if sqlserver_major_version >= 2016:
+        column_definitions['DRS.secondary_lag_seconds'] = {'name': 'ao.secondary_lag_seconds', 'type': 'gauge'}
+    if sqlserver_major_version >= 2014:
+        column_definitions['DRS.is_primary_replica'] = {'name': 'ao.is_primary_replica', 'type': 'gauge'}
+        column_definitions[
+            """
+        CASE
+            WHEN DRS.is_primary_replica = 1 THEN 'primary'
+            WHEN DRS.is_primary_replica = 0 THEN 'secondary'
+        END AS replica_role_desc
+        """
+        ] = {'name': 'replica_role', 'type': 'tag'}
+
+    # Sort columns to ensure a static column order
+    sql_columns = []
+    metric_columns = []
+    for column in sorted(column_definitions.keys()):
+        sql_columns.append(column)
+        metric_columns.append(column_definitions[column])
+
+    return {
+        'name': 'sys.availability_groups',
+        'query': """
+        SELECT
+            {sql_columns}
+        FROM
+            sys.availability_groups AS AG
+            INNER JOIN sys.availability_replicas AS AR ON AG.group_id = AR.group_id
+            INNER JOIN sys.availability_databases_cluster AS ADC ON AG.group_id = ADC.group_id
+            INNER JOIN sys.dm_hadr_database_replica_states AS DRS ON AG.group_id = DRS.group_id
+                AND ADC.group_database_id = DRS.group_database_id
+                AND AR.replica_id = DRS.replica_id
+            -- `sys.dm_hadr_cluster` does not have a related column to join on, this cross join will add the
+            -- `cluster_name` column to every row by multiplying all the rows in the left table against
+            -- all the rows in the right table. Note, there will only be one row from `sys.dm_hadr_cluster`.
+            CROSS JOIN (SELECT TOP 1 cluster_name FROM sys.dm_hadr_cluster) AS FC
+    """.strip().format(
+            sql_columns=", ".join(sql_columns),
+        ),
+        'columns': metric_columns,
+    }
+
+
+def get_query_file_stats(sqlserver_major_version):
+    """
+    Construct the dm_io_virtual_file_stats QueryExecutor configuration based on the SQL Server major version
+
+    :param sqlserver_major_version: SQL Server major version (i.e. 2012, 2019, ...)
+    :return: a QueryExecutor query config object
+    """
+
+    column_definitions = {
+        'size_on_disk_bytes': {'name': 'files.size_on_disk', 'type': 'gauge'},
+        'num_of_reads': {'name': 'files.reads', 'type': 'monotonic_count'},
+        'num_of_bytes_read': {'name': 'files.read_bytes', 'type': 'monotonic_count'},
+        'io_stall_read_ms': {'name': 'files.read_io_stall', 'type': 'monotonic_count'},
+        'io_stall_queued_read_ms': {'name': 'files.read_io_stall_queued', 'type': 'monotonic_count'},
+        'num_of_writes': {'name': 'files.writes', 'type': 'monotonic_count'},
+        'num_of_bytes_written': {'name': 'files.written_bytes', 'type': 'monotonic_count'},
+        'io_stall_write_ms': {'name': 'files.write_io_stall', 'type': 'monotonic_count'},
+        'io_stall_queued_write_ms': {'name': 'files.write_io_stall_queued', 'type': 'monotonic_count'},
+        'io_stall': {'name': 'files.io_stall', 'type': 'monotonic_count'},
+    }
+
+    if sqlserver_major_version <= 2012:
+        column_definitions.pop("io_stall_queued_read_ms")
+        column_definitions.pop("io_stall_queued_write_ms")
+
+    # sort columns to ensure a static column order
+    sql_columns = []
+    metric_columns = []
+    for column in sorted(column_definitions.keys()):
+        sql_columns.append("fs.{}".format(column))
+        metric_columns.append(column_definitions[column])
+
+    return {
+        'name': 'sys.dm_io_virtual_file_stats',
+        'query': """
+        SELECT
+            DB_NAME(fs.database_id),
+            mf.state_desc,
+            mf.name,
+            mf.physical_name,
+            {sql_columns}
+        FROM sys.dm_io_virtual_file_stats(NULL, NULL) fs
+            LEFT JOIN sys.master_files mf
+                ON mf.database_id = fs.database_id
+                AND mf.file_id = fs.file_id;
+    """.strip().format(
+            sql_columns=", ".join(sql_columns)
+        ),
+        'columns': [
+            {'name': 'db', 'type': 'tag'},
+            {'name': 'state', 'type': 'tag'},
+            {'name': 'logical_name', 'type': 'tag'},
+            {'name': 'file_location', 'type': 'tag'},
+        ]
+        + metric_columns,
+    }

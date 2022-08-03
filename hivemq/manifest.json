@@ -1,41 +1,55 @@
 {
-  "display_name": "HiveMQ",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "hivemq",
-  "metric_prefix": "hivemq.",
-  "metric_to_check": "hivemq.messages.queued.count",
-  "creates_events": false,
-  "short_description": "Monitor your HiveMQ clusters.",
-  "guid": "905e4d87-2777-4253-ad44-f91ee66ad888",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-HiveMQ Integration",
-  "categories": [
-    "messaging",
-    "processing",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "hivemq",
+  "manifest_version": "2.0.0",
+  "app_uuid": "ba1769d1-c71b-4cf1-8169-8ce3b66629dd",
+  "app_id": "hivemq",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor your HiveMQ clusters.",
+    "title": "HiveMQ",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Messaging",
+      "Category::Processing",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "HiveMQ",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "hivemq.",
+        "check": "hivemq.messages.queued.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "HiveMQ": "assets/dashboards/hivemq.json"
     },
-    "monitors": {},
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "hivemq"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

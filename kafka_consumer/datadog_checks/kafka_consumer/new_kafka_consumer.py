@@ -10,11 +10,11 @@ from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResp
 from kafka.structs import TopicPartition
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.kafka_consumer.datadog_agent import read_persistent_cache, write_persistent_cache
 
 from .constants import BROKER_REQUESTS_BATCH_SIZE, KAFKA_INTERNAL_TOPICS
 
 MAX_TIMESTAMPS = 1000
+BROKER_TIMESTAMP_CACHE_KEY = 'broker_timestamps'
 
 
 class NewKafkaConsumerCheck(object):
@@ -28,7 +28,6 @@ class NewKafkaConsumerCheck(object):
         self._parent_check = parent_check
         self._broker_requests_batch_size = self.instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
         self._kafka_client = None
-        self._broker_timestamp_cache_key = 'broker_timestamps' + "".join(sorted(self._custom_tags))
 
     def __getattr__(self, item):
         try:
@@ -101,14 +100,18 @@ class NewKafkaConsumerCheck(object):
         """Loads broker timestamps from persistent cache."""
         self._broker_timestamps = defaultdict(dict)
         try:
-            for topic_partition, content in json.loads(read_persistent_cache(self._broker_timestamp_cache_key)).items():
+            json_cache = self._read_persistent_cache()
+            for topic_partition, content in json.loads(json_cache).items():
                 for offset, timestamp in content.items():
                     self._broker_timestamps[topic_partition][int(offset)] = timestamp
         except Exception as e:
             self.log.warning('Could not read broker timestamps from cache: %s', str(e))
 
+    def _read_persistent_cache(self):
+        return self._parent_check.read_persistent_cache(BROKER_TIMESTAMP_CACHE_KEY)
+
     def _save_broker_timestamps(self):
-        write_persistent_cache(self._broker_timestamp_cache_key, json.dumps(self._broker_timestamps))
+        self._parent_check.write_persistent_cache(BROKER_TIMESTAMP_CACHE_KEY, json.dumps(self._broker_timestamps))
 
     def _create_kafka_admin_client(self, api_version):
         """Return a KafkaAdminClient."""
@@ -281,8 +284,8 @@ class NewKafkaConsumerCheck(object):
                 if reported_contexts >= contexts_limit:
                     continue
                 timestamps = self._broker_timestamps["{}_{}".format(topic, partition)]
-                # producer_timestamp is set in the same check, so it should never be None
-                producer_timestamp = timestamps[producer_offset]
+                # The producer timestamp can be not set if there was an error fetching broker offsets.
+                producer_timestamp = timestamps.get(producer_offset, None)
                 consumer_timestamp = self._get_interpolated_timestamp(timestamps, consumer_offset)
                 if consumer_timestamp is None or producer_timestamp is None:
                     continue

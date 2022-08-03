@@ -306,6 +306,17 @@
             "threadsRunning": 2
         }
     },
+    "opLatencies": {
+        "reads": {
+            "latency": 2874788
+        },
+        "writes": {
+            "latency": 193160
+        },
+        "commands": {
+            "latency": 67574004
+        }
+    },
     "opcounters": {
         "insert": 316,
         "query": 1,
@@ -911,7 +922,8 @@
             "idhack": 13
         },
         "queryExecutor": {
-            "scanned": 46
+            "scanned": 46,
+            "scannedObjects": 97
         },
         "record": {
             "moves": 0

@@ -5,9 +5,9 @@ from zipfile import ZipFile
 import requests
 
 
-CLIENT_VERSION = '9.2.2.0'
+CLIENT_VERSION = '9.2.5.0'
 CLIENT_ARCHIVE_NAME = f'{CLIENT_VERSION}-IBM-MQC-Redist-Win64.zip'
-CLIENT_URL = f'https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/mqdev/redist/{CLIENT_ARCHIVE_NAME}'
+CLIENT_URL = f'https://ddintegrations.blob.core.windows.net/ibm-mq/{CLIENT_ARCHIVE_NAME}'
 CLIENT_TARGET_DIR = 'C:\\ibm_mq'
 
 
@@ -24,11 +24,11 @@ def main():
     with TemporaryDirectory() as d:
         temp_dir = os.path.realpath(d)
 
-        print('Downloading client')
+        print('Downloading client from %s' % CLIENT_URL)
         client_archive_path = os.path.join(temp_dir, CLIENT_ARCHIVE_NAME)
         download_file(CLIENT_URL, client_archive_path)
 
-        print('Extracting client')
+        print('Extracting client to %s ' % CLIENT_TARGET_DIR)
         with ZipFile(client_archive_path) as zip_file:
             zip_file.extractall(CLIENT_TARGET_DIR)
 

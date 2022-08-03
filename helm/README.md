@@ -33,7 +33,13 @@ See [metadata.csv][4] for a list of metrics provided by this check.
 
 ### Events
 
-The Helm integration does not include any events.
+This check emits events when the `collect_events` option is set to `true`. The default is `false`.
+
+When the option is enabled, the check emits events when:
+- A new release is deployed.
+- A release is deleted.
+- A release is upgraded (new revision).
+- There's a status change, for example from deployed to superseded.
 
 ### Service Checks
 
@@ -43,6 +49,12 @@ See [service_checks.json][5] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][6].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Blog: Monitor your Helm-managed Kubernetes applications with Datadog][7]
+
 
 [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [2]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/
@@ -50,3 +62,4 @@ Need help? Contact [Datadog support][6].
 [4]: https://github.com/DataDog/integrations-core/blob/master/helm/metadata.csv
 [5]: https://github.com/DataDog/integrations-core/blob/master/helm/assets/service_checks.json
 [6]: https://docs.datadoghq.com/help/
+[7]: https://www.datadoghq.com/blog/monitor-helm-kubernetes-with-datadog/

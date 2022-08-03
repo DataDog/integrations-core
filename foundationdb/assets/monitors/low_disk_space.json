@@ -1,6 +1,6 @@
 {
 	"name": "FoundationDB Low Disk Space",
-	"type": "event alert",
+	"type": "query alert",
 	"query": "avg(last_5m):min:foundationdb.process.disk.free_bytes{*} by {fdb_process} < 200000000",
 	"message": "A FoundationDB process is running very low on disk space. This may soon impact its ability to process new transactions.",
 	"tags": [

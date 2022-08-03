@@ -260,6 +260,7 @@ files:
                   Note that this runs a heavy query against your database to compute the relevant metrics
                   for all your existing schemas. Due to the nature of these calls, if you have a
                   high number of tables and schemas, this may have a negative impact on your database performance.
+                  Only tables and schemas for which the user has been granted SELECT privileges are collected. 
 
                   See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
                 value:
@@ -283,6 +284,21 @@ files:
                   Set to `true` to collect system table size metrics from performance_schema, information_schema and mysql.
                   Note that only tables and schemas for which the user has been granted SELECT privileges are collected.
                   This runs a heavy query against your database to compute the relevant metrics
+                  for all your existing tables. Due to the nature of these calls, if you have a
+                  high number of tables and schemas, this may have a negative impact on your database performance.
+                  See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
+                value:
+                  type: boolean
+                  example: false
+
+              - name: table_rows_stats_metrics
+                description: |
+                  These metrics are reported if you have a Percona MySQL instance with `userstat` enabled
+                  Set to `true` to collect table stats metrics.
+                  Metrics provided by the options:
+                    - mysql.info.table.rows.read (total per table)
+                    - mysql.info.table.rows.changed (total per table)
+                  Note that this runs a heavy query against your database to compute the relevant metrics
                   for all your existing tables. Due to the nature of these calls, if you have a
                   high number of tables and schemas, this may have a negative impact on your database performance.
                   See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
