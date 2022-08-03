@@ -39,6 +39,7 @@ IGNORED_DEPS = {
     'protobuf',  # https://github.com/DataDog/integrations-core/pull/12653
     'foundationdb',  # https://github.com/DataDog/integrations-core/pull/12653
     'openstacksdk',  # https://github.com/DataDog/integrations-core/pull/12653
+    'pycryptodomex',  # https://github.com/DataDog/integrations-core/pull/12653
     'pysnmp',  # https://github.com/DataDog/integrations-core/pull/12653
 }
 
