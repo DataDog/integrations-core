@@ -2,7 +2,7 @@
 
 ## 16.6.0 / 2022-08-02
 
-* [Added] [SNMP Traps] Include BITS enums in traps DB . See [#12581](https://github.com/DataDog/integrations-core/pull/12581).
+* [Added] [SNMP Traps] Include BITS enums in traps DB. See [#12581](https://github.com/DataDog/integrations-core/pull/12581).
 * [Added] Include the conditions in the retry for the `docker_run` function. See [#12527](https://github.com/DataDog/integrations-core/pull/12527).
 * [Added] Update Hatch plugin. See [#12518](https://github.com/DataDog/integrations-core/pull/12518).
 * [Added] Add functionality to load the legacy version of the integration. See [#12396](https://github.com/DataDog/integrations-core/pull/12396).
