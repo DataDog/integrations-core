@@ -18,23 +18,6 @@
     ]
   }},
   "assets": {{
-    "integration": {{
-      "source_type_name": "{integration_name}",
-      "configuration": {{
-        "spec": "assets/configuration/spec.yaml"
-      }},
-      "events": {{
-        "creates_events": false
-      }},
-      "metrics": {{
-        "prefix": "{check_name}.",
-        "check": "",
-        "metadata_path": "metadata.csv"
-      }},
-      "service_checks": {{
-        "metadata_path": "assets/service_checks.json"
-      }}
-    }},
     "dashboards": {{}},
     "monitors": {{}},
     "logs": {{}},
