@@ -20,21 +20,22 @@ FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
 # Style deps:
 # We pin deps in order to make CI more stable/reliable.
 ISORT_DEP = 'isort==5.10.1'
-BLACK_DEP = 'black==22.3.0'
-FLAKE8_DEP = 'flake8==4.0.1'
-FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==22.1.11'
-FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.6.0'
+BLACK_DEP = 'black==22.6.0'
+FLAKE8_DEP = 'flake8==5.0.3'
+FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==22.7.1'
+# TODO: update when fix is released https://github.com/globality-corp/flake8-logging-format/pull/33
+FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format @ git+https://github.com/globality-corp/flake8-logging-format.git@f3cdb24468241ebe85e41b0bd2e8958c76b4dec6'
 # TODO: remove extra when we drop Python 2
-MYPY_DEP = 'mypy[python2]==0.910'
+MYPY_DEP = 'mypy[python2]==0.971'
 # TODO: when we drop Python 2 and replace with --install-types --non-interactive
 TYPES_DEPS = [
-    'types-PyYAML==5.4.10',
-    'types-python-dateutil==2.8.2',
-    'types_requests==2.25.11',
-    'types_six==1.16.2',
-    'types-simplejson==3.17.5',
+    'types-PyYAML==6.0.11',
+    'types-python-dateutil==2.8.19',
+    'types_requests==2.28.7',
+    'types_six==1.16.18',
+    'types-simplejson==3.17.7',
 ]
-PYDANTIC_DEP = 'pydantic==1.8.2'  # Keep in sync with: /datadog_checks_base/requirements.in
+PYDANTIC_DEP = 'pydantic==1.9.1'  # Keep in sync with: /datadog_checks_base/requirements.in
 
 
 @tox.hookimpl
