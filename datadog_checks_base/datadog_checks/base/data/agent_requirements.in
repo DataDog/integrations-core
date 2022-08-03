@@ -14,7 +14,7 @@ cachetools==3.1.1; python_version < '3.0'
 cachetools==5.2.0; python_version > '3.0'
 clickhouse-cityhash==1.0.2.3
 clickhouse-driver==0.2.0; python_version < '3.0'
-clickhouse-driver==0.2.4; python_version > '3.0'
+clickhouse-driver==0.2.3; python_version > '3.0'
 contextlib2==0.6.0.post1; python_version < '3.0'
 cryptography==3.3.2; python_version < '3.0'
 cryptography==3.4.8; python_version > '3.0'
