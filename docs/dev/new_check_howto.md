@@ -139,6 +139,10 @@ class AwesomeCheck(AgentCheck):
 
 To learn more about the base Python class, see [Anatomy of a Python Check][6].
 
+### Sending custom events to Datadog
+
+Integrations sometimes become more powerful when they submit custom [events][17]. You can submit your own events with an [event dictionary][18]. Note that [source_type_name][19] should remain blank until your integration's initial pull request is approved and the proposed source_type_name must appear in `assets[integration[source_type_name]]` in your [manifest.json][11].
+
 ### Writing tests
 
 There are two basic types of tests:
@@ -454,3 +458,7 @@ For Agent versions >= 6.12:
 [14]: https://packaging.python.org/en/latest/tutorials/packaging-projects/
 [15]: https://docs.datadoghq.com/agent/
 [16]: https://datadoghq.dev/integrations-core/meta/config-specs/
+[17]: https://docs.datadoghq.com/events/
+[18]: https://docs.datadoghq.com/events/guides/agent/
+[19]: https://docs.datadoghq.com/integrations/faq/list-of-api-source-attribute-value/
+
