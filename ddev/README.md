@@ -11,8 +11,8 @@ This is the redesigned command line tooling for Datadog Agent integrations.
 
 ## Installation
 
-See [this guide](https://datadoghq.dev/integrations-core/setup/#ddev).
+Read the [`ddev` installation guide](https://datadoghq.dev/integrations-core/setup/#ddev).
 
 ## Documentation
 
-Docs are available [here](https://datadoghq.dev/integrations-core/ddev/about/).
+Read the [`ddev` documentation](https://datadoghq.dev/integrations-core/ddev/about/).
