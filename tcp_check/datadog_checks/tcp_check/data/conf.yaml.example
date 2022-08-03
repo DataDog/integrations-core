@@ -53,6 +53,11 @@ instances:
     #
     # multiple_ips: false
 
+    ## @param ipv4_only - boolean - optional - default: false
+    ## Enable to run the check against only IPv4-formatted addresses on every check run.
+    #
+    # ipv4_only: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
