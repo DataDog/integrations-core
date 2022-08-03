@@ -74,7 +74,7 @@ linkerd.tcp.close_total,count,,connection,,[OpenMetricsV1] Total count of closed
 linkerd.tcp.close.count,count,,connection,,[OpenMetricsV2] Total count of closed connections.,0,linkerd,,
 linkerd.tcp.connection_duration.sum,gauge,,millisecond,,Connection lifetimes.,0,linkerd,,
 linkerd.tcp.connection_duration.count,gauge,,connection,,Number of connections on which the linkerd.tcp.connection_duration.sum metric is evaluated.,0,linkerd,,
-linkerd.control.request_total,count,,request,,[OpenMetricsV2] Total count of control HTTP requests.,0,linkerd,,
+linkerd.control.request_total,count,,request,,[OpenMetricsV1] Total count of control HTTP requests.,0,linkerd,,
 linkerd.control.request.count,count,,request,,[OpenMetricsV2] Total count of control HTTP requests.,0,linkerd,,
 linkerd.control.response_latency.sum,gauge,,millisecond,,Elapsed times between a control request's headers being received and its response stream completing.,0,linkerd,,
 linkerd.control.response_latency.count,gauge,,response,,Number of control responses on which the linkerd.control.response_latency.sum is evaluated.,0,linkerd,,
