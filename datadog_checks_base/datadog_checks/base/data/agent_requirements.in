@@ -6,10 +6,10 @@ beautifulsoup4==4.11.1; python_version > '3.0'
 beautifulsoup4==4.9.3; python_version < '3.0'
 binary==1.0.0
 boto3==1.17.112; python_version < '3.0'
-boto3==1.24.43; python_version > '3.0'
+boto3==1.24.44; python_version > '3.0'
 boto==2.49.0
 botocore==1.20.112; python_version < '3.0'
-botocore==1.27.43; python_version > '3.0'
+botocore==1.27.44; python_version > '3.0'
 cachetools==3.1.1; python_version < '3.0'
 cachetools==5.2.0; python_version > '3.0'
 clickhouse-cityhash==1.0.2.3
@@ -57,19 +57,19 @@ protobuf==3.17.3; python_version < '3.0'
 protobuf==3.20.1; python_version > '3.0'
 psutil==5.9.1
 psycopg2-binary==2.8.6
-pyasn1==0.4.6
+pyasn1==0.4.8
 pycryptodomex==3.10.1
 pydantic==1.9.1; python_version > '3.0'
 pyjwt==1.7.1; python_version < '3.0'
 pyjwt==2.4.0; python_version > '3.0'
-pymongo[srv]==4.2; python_version >= '3.8'
+pymongo[srv]==4.2.0; python_version >= '3.8'
 pymqi==1.12.8
 pymysql==0.10.1
 pyodbc==4.0.34
 pyro4==4.82; sys_platform == 'win32'
 pysmi==0.3.4
 pysnmp-mibs==0.1.6
-pysnmp==4.4.9
+pysnmp==4.4.12
 pysocks==1.7.1
 python-binary-memcached==0.26.1; sys_platform != 'win32' and python_version < '3.0'
 python-binary-memcached==0.31.1; sys_platform != 'win32' and python_version > '3.0'

@@ -40,7 +40,7 @@ text = "BSD-3-Clause"
 [project.optional-dependencies]
 deps = [
     "boto3==1.17.112; python_version < '3.0'",
-    "boto3==1.24.43; python_version > '3.0'",
+    "boto3==1.24.44; python_version > '3.0'",
 ]
 
 [project.urls]
