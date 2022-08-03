@@ -1,5 +1,9 @@
 # CHANGELOG - Vertica
 
+## 3.4.0 / 2022-08-03
+
+* [Added] Use QueryManager to get metrics from queries. See [#12542](https://github.com/DataDog/integrations-core/pull/12542).
+
 ## 3.3.2 / 2022-07-19
 
 * [Fixed] Support projection storage and storage containers for Vertica 11+. See [#12465](https://github.com/DataDog/integrations-core/pull/12465).
