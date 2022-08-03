@@ -13,12 +13,13 @@ from ....utils.time import get_precise_time
 
 
 class WindowsPerformanceObjectRefresher(threading.Thread):
-    INTERVAL = 60
+    # INTERVAL = 60
 
     def __init__(self):
         name = self.__class__.__name__
         super(WindowsPerformanceObjectRefresher, self).__init__(name=name)
 
+        self.interval = 60
         self.logger = logging.getLogger(name)
         self.last_refresh = {}
         self.servers = defaultdict(int)
@@ -38,7 +39,7 @@ class WindowsPerformanceObjectRefresher(threading.Thread):
                     continue
 
                 now = get_precise_time()
-                if server in self.last_refresh and now - self.last_refresh[server] < self.INTERVAL:
+                if server in self.last_refresh and now - self.last_refresh[server] < self.interval:
                     continue
 
                 self.logger.info('Refreshing performance objects for server: %s', server)
@@ -67,3 +68,7 @@ class WindowsPerformanceObjectRefresher(threading.Thread):
 
     def log_server_count(self, server):
         self.logger.info('Refresh counter set to %d for server: %s', self.servers[server], server)
+
+    def add_refresh(self, interval):
+        self.interval = interval
+        self.logger.info('Refresh interval set to %d seconds', interval)
