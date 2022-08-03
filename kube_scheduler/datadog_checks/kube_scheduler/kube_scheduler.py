@@ -56,6 +56,11 @@ NEW_1_14_HISTOGRAMS = {
     'rest_client_request_duration_seconds': 'client.http.requests_duration',
 }
 
+NEW_1_19_HISTOGRAMS = {
+    # (from 1.19) Number of selected preemption victims (new name and type)
+    'scheduler_preemption_victims': 'pod_preemption.victims',
+}
+
 NEW_1_23_HISTOGRAMS = {
     # (from 1.23) Number of attempts to successfully schedule a pod.
     'scheduler_pod_scheduling_attempts': 'scheduling.pod.scheduling_attempts',
@@ -139,6 +144,7 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
                         DEFAULT_HISTOGRAMS,
                         NEW_1_19_COUNTERS,
                         NEW_1_14_HISTOGRAMS,
+                        NEW_1_19_HISTOGRAMS,
                         DEFAULT_GAUGES,
                         DEFAULT_GO_METRICS,
                         DEPRECARED_SUMMARIES,
