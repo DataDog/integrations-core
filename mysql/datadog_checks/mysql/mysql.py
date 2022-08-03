@@ -102,7 +102,10 @@ class MySql(AgentCheck):
         # Create a new connection on every check run
         self._conn = None
 
+        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[])
+        self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
+        self.check_initializations.append(self._config.configuration_checks)
         self.performance_schema_enabled = None
         self.userstat_enabled = None
         self.events_wait_current_enabled = None
@@ -111,14 +114,7 @@ class MySql(AgentCheck):
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
         self._query_activity = MySQLActivity(self, self._config, self._get_connection_args())
 
-        # Query declarations
-        self._internal_queries = self._new_query_executor([QUERY_USER_CONNECTIONS])
-        self.check_initializations.append(self._internal_queries.compile_queries)
-
-        # Process custom queries with QueryManager
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[])
-        self.check_initializations.append(self._config.configuration_checks)
-        self.check_initializations.append(self._query_manager.compile_queries)
+        self._runtime_queries = None
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
@@ -229,6 +225,8 @@ class MySql(AgentCheck):
                 if not self._config.only_custom_queries:
                     self._collect_metrics(db, tags=tags)
                     self._collect_system_metrics(self._config.host, db, tags)
+                    if self.runtime_queries:
+                        self.runtime_queries.execute(extra_tags=tags)
 
                 if self._config.dbm_enabled:
                     dbm_tags = list(set(self.service_check_tags) | set(tags))
@@ -238,8 +236,6 @@ class MySql(AgentCheck):
 
                 # keeping track of these:
                 self._put_qcache_stats()
-
-                self._internal_queries.execute(extra_tags=tags)
 
                 # Custom queries
                 self._query_manager.execute(extra_tags=tags)
@@ -263,6 +259,24 @@ class MySql(AgentCheck):
             queries=queries,
             hostname=self.resolved_hostname,
         )
+
+    @property
+    def runtime_queries(self):
+        """
+        Initializes runtime queries which depend on outside factors (e.g. permission checks) to load first.
+        """
+        if self._runtime_queries:
+            return self._runtime_queries
+
+        queries = []
+
+        if self.performance_schema_enabled:
+            queries.extend([QUERY_USER_CONNECTIONS])
+
+        self._runtime_queries = self._new_query_executor(queries)
+        self._runtime_queries.compile_queries()
+        self.log.debug("initialized runtime queries")
+        return self._runtime_queries
 
     def _set_qcache_stats(self):
         host_key = self._get_host_key()

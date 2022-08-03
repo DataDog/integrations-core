@@ -249,6 +249,10 @@ PERFORMANCE_VARS = {
     'perf_digest_95th_percentile_avg_us': ('mysql.performance.digest_95th_percentile.avg_us', GAUGE),
 }
 
+COMMON_PERFORMANCE_VARS = {
+    'user_connections': ('mysql.performance.user_connections', GAUGE),
+}
+
 SCHEMA_VARS = {'information_schema_size': ('mysql.info.schema.size', GAUGE)}
 
 TABLE_VARS = {

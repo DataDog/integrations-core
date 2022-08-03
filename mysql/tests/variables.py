@@ -22,7 +22,6 @@ STATUS_VARS = [
     'mysql.net.max_connections',
     'mysql.net.aborted_clients',
     'mysql.net.aborted_connects',
-    'mysql.performance.user_connections',
     # Table Cache Metrics
     'mysql.performance.open_files',
     'mysql.performance.open_tables',
@@ -249,6 +248,8 @@ OPTIONAL_INNODB_VARS = [
 ]
 
 PERFORMANCE_VARS = ['mysql.performance.query_run_time.avg', 'mysql.performance.digest_95th_percentile.avg_us']
+
+COMMON_PERFORMANCE_VARS = ['mysql.performance.user_connections']
 
 SCHEMA_VARS = ['mysql.info.schema.size']
 
