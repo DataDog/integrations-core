@@ -39,6 +39,14 @@ class Application(Terminal):
         return self.__repo
 
     def set_repo(self, core: bool, extras: bool, marketplace: bool, agent: bool, here: bool):
+        # Config looks like this:
+        #
+        # repo = "core"
+        # [repos]
+        # core = "~/dd/integrations-core"
+        # extras = "~/dd/integrations-extras"
+        # marketplace = "~/dd/marketplace"
+        # agent = "~/dd/datadog-agent"
         if core:
             self.__repo = Repository('core', self.config.repos['core'])
         elif extras:

@@ -21,9 +21,6 @@ class Terminal:
         self.console = Console(
             force_terminal=enable_color,
             no_color=enable_color is False,
-            markup=False,
-            emoji=False,
-            highlight=False,
             # Force consistent output for test assertions
             legacy_windows=False if 'DDEV_SELF_TESTING' in os.environ else None,
         )
@@ -102,6 +99,11 @@ class Terminal:
     def display_header(self, title='', *, stderr=False):
         self.console.rule(Text(title, self._style_level_success))
 
+    def display_markdown(self, text, stderr=False, **kwargs):
+        from rich.markdown import Markdown
+
+        self.display_raw(Markdown(text), stderr=stderr, **kwargs)
+
     @contextmanager
     def status_waiting(self, text='', final_text=None, **kwargs):
         if not self.interactive or not self.console.is_terminal:
@@ -142,10 +144,10 @@ class Terminal:
             finally:
                 self.console.stderr = False
 
-    def display_raw(self, text='', **kwargs):
+    def display_raw(self, text, **kwargs):
         self.console.print(text, overflow='ignore', no_wrap=True, crop=False, **kwargs)
 
-    def display_always(self, text='', **kwargs):
+    def display_always(self, text, **kwargs):
         self.console.print(text, style=self._style_level_info, overflow='ignore', no_wrap=True, crop=False, **kwargs)
 
     @staticmethod
