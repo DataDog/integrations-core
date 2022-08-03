@@ -81,7 +81,7 @@ select
             - statement_start_offset) / 2) + 1) AS statement_text,
     qt.text,
     encrypted as is_encrypted,
-    (SELECT IIF (EXISTS (SELECT 1 FROM sys.dm_exec_procedure_stats WHERE object_id =qt.objectid), 1, 0)) as is_proc,
+    (SELECT IIF (EXISTS (SELECT 1 FROM sys.dm_exec_procedure_stats proc_stats WHERE proc_stats.plan_handle = qstats_aggr_split.plan_handle), 1, 0)) as is_proc,
     * from qstats_aggr_split
     cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
@@ -114,7 +114,7 @@ select
     END - statement_start_offset) / 2) + 1) AS statement_text,
     qt.text,
     encrypted as is_encrypted,
-    (SELECT IIF (EXISTS (SELECT 1 FROM sys.dm_exec_procedure_stats WHERE object_id = qt.objectid), 1, 0)) as is_proc,
+    (SELECT IIF (EXISTS (SELECT 1 FROM sys.dm_exec_procedure_stats proc_stats WHERE proc_stats.plan_handle = qstats_aggr_split.plan_handle), 1, 0)) as is_proc,
     * from qstats_aggr_split
     cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
