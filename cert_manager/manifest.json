@@ -7,7 +7,7 @@
   "metric_to_check": "cert_manager.prometheus.health",
   "creates_events": false,
   "short_description": "Track all your cert-manager metrics with Datadog",
-  "guid": "17888d72-430b-4c0b-b557-e08fd96d4f1f",
+  "guid": "c9bdaf11-fe15-4892-ae30-47c5124144e5",
   "support": "core",
   "supported_os": [
     "linux",
