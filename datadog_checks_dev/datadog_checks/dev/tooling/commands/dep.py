@@ -45,6 +45,7 @@ IGNORED_DEPS = {
     'clickhouse-driver',  # https://github.com/DataDog/integrations-core/pull/12653
     'lz4',  # https://github.com/DataDog/integrations-core/pull/12653
     'pyodbc',  # https://github.com/DataDog/integrations-core/pull/12653
+    'psutil',  # https://github.com/DataDog/integrations-core/pull/12653
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
