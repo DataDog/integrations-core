@@ -39,7 +39,7 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "pyodbc==4.0.34",
+    "pyodbc==4.0.32",
 ]
 
 [project.urls]

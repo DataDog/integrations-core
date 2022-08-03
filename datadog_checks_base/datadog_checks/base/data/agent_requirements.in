@@ -65,7 +65,7 @@ pyjwt==2.4.0; python_version > '3.0'
 pymongo[srv]==4.2.0; python_version >= '3.8'
 pymqi==1.12.8
 pymysql==0.10.1
-pyodbc==4.0.34
+pyodbc==4.0.32
 pyro4==4.82; sys_platform == 'win32'
 pysmi==0.3.4
 pysnmp-mibs==0.1.6
