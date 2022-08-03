@@ -52,7 +52,8 @@
       ]
     },
     "dashboards": {
-      "couchdb": "assets/dashboards/overview.json"
+      "couchdb": "assets/dashboards/CouchDB-overview_dashboard.json",
+      "couchdb-v1": "assets/dashboards/CouchDBv1-overview_dashboard.json"
     },
     "saved_views": {
       "couchdb_processes": "assets/saved_views/couchdb_processes.json"
