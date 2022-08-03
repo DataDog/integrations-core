@@ -39,7 +39,7 @@ IGNORED_DEPS = {
     'protobuf',  # https://github.com/DataDog/integrations-core/pull/12653
     'foundationdb',  # https://github.com/DataDog/integrations-core/pull/12653
     'openstacksdk',  # https://github.com/DataDog/integrations-core/pull/12653
-    'snmp',  # https://github.com/DataDog/integrations-core/pull/12653
+    'pycryptodomex',  # https://github.com/DataDog/integrations-core/pull/12653
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
