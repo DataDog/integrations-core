@@ -11,7 +11,7 @@
 * [Fixed] Add pymysql to dependency update exclude list. See [#12631](https://github.com/DataDog/integrations-core/pull/12631).
 * [Fixed] Better failed assertion message, print return code. See [#12615](https://github.com/DataDog/integrations-core/pull/12615).
 * [Fixed] Do not update docker compose. See [#12576](https://github.com/DataDog/integrations-core/pull/12576).
-* [Fixed] Better print the error on extra startup commands for e2e tests on agent image set up. See [#12578](https://github.com/DataDog/integrations-core/pull/12578).
+* [Fixed] Better print the error on extra startup commands for e2e tests on Agent image set up. See [#12578](https://github.com/DataDog/integrations-core/pull/12578).
 * [Fixed] Fix nightly base package builds that use Hatch. See [#12544](https://github.com/DataDog/integrations-core/pull/12544).
 
 ## 16.5.2 / 2022-07-08
