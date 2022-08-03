@@ -25,6 +25,11 @@ DEFAULT_COUNTERS = {
     'scheduler_total_preemption_attempts': 'pod_preemption.attempts',
 }
 
+NEW_1_19_COUNTERS = {
+    # Total preemption attempts in the cluster till now (new name)
+    'scheduler_preemption_attempts_total': 'pod_preemption.attempts',
+}
+
 DEFAULT_HISTOGRAMS = {
     # Request latency in seconds. Broken down by verb and URL.
     'rest_client_request_latency_seconds': 'client.http.requests_duration',
@@ -47,6 +52,13 @@ NEW_1_14_HISTOGRAMS = {
     'scheduler_scheduling_duration_seconds': 'scheduling.scheduling_duration',
     # (from 1.14) Binding latency in seconds
     'scheduler_binding_duration_seconds': 'binding_duration',
+    # (from 1.14) Request latency in seconds. Broken down by verb and URL (new name)
+    'rest_client_request_duration_seconds': 'client.http.requests_duration',
+}
+
+NEW_1_19_HISTOGRAMS = {
+    # (from 1.19) Number of selected preemption victims (new name and type)
+    'scheduler_preemption_victims': 'pod_preemption.victims',
 }
 
 NEW_1_23_HISTOGRAMS = {
@@ -130,7 +142,9 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
                     'metrics': [
                         DEFAULT_COUNTERS,
                         DEFAULT_HISTOGRAMS,
+                        NEW_1_19_COUNTERS,
                         NEW_1_14_HISTOGRAMS,
+                        NEW_1_19_HISTOGRAMS,
                         DEFAULT_GAUGES,
                         DEFAULT_GO_METRICS,
                         DEPRECARED_SUMMARIES,

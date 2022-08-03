@@ -37,7 +37,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "lxml==4.8.0",
+    "lxml==4.9.1",
 ]
 
 [project.urls]

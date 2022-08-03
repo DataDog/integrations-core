@@ -1,12 +1,30 @@
-version: '3'
+version: "3.9"
 
 services:
-
   vertica:
-    image: jbfavre/vertica:${VERTICA_VERSION}
-    container_name: vertica
+    build:
+      # We use a custom Dockerfile that adds a modified entrypoint
+      # script that avoids loading the data.
+      context: .
+      dockerfile: ./Dockerfile_custom
+      args:
+        VERTICA_VERSION: ${VERTICA_VERSION}
+    image: datadog/vertica-ce-custom:${VERTICA_VERSION}
+    environment:
+      APP_DB_PASSWORD: "monitor"
+      # VERTICA_MEMDEBUG=2 solves problems when running this image on M1
+      # https://forum.vertica.com/discussion/242629/support-apple-silicon-m1-for-docker-vertica-ce
+      VERTICA_MEMDEBUG: 2
+      VERTICA_DB_NAME: "datadog"
+      TZ: "UTC"
+    container_name: vertica-ce
     ports:
       - "5433:5433"
-    environment:
-      - DATABASE_NAME=datadog
-      - DATABASE_PASSWORD=monitor
+      - "5444:5444"
+    volumes:
+      - type: volume
+        source: vertica-data2
+        target: /data
+
+volumes:
+  vertica-data2:

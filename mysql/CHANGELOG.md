@@ -1,5 +1,17 @@
 # CHANGELOG - mysql
 
+## 8.4.1 / 2022-07-08 / Agent 7.38.0
+
+* [Fixed] Fix bug where mysql table row stats were not being collected. See [#12472](https://github.com/DataDog/integrations-core/pull/12472).
+
+## 8.4.0 / 2022-06-27
+
+* [Added] Add new metric for tables rows stats. See [#11043](https://github.com/DataDog/integrations-core/pull/11043). Thanks [aymeric-ledizes](https://github.com/aymeric-ledizes).
+* [Fixed] Fix rows with empty SQL text in DBM Activity Query. See [#12393](https://github.com/DataDog/integrations-core/pull/12393).
+* [Fixed] Stop query activity collection due to misconfiguration. See [#12343](https://github.com/DataDog/integrations-core/pull/12343).
+* [Fixed] Fix race conditions when running many instances of the Agent. See [#12342](https://github.com/DataDog/integrations-core/pull/12342).
+* [Fixed] Revert mysql.net.connections metric type. See [#12088](https://github.com/DataDog/integrations-core/pull/12088).
+
 ## 8.3.2 / 2022-06-08
 
 * [Fixed] Fix race conditions when running many instances of the Agent. See [#12342](https://github.com/DataDog/integrations-core/pull/12342).
@@ -14,6 +26,10 @@
 * [Added] Add support to ingest cloud_metadata for DBM host linking. See [#11988](https://github.com/DataDog/integrations-core/pull/11988).
 * [Added] Add query_truncated field on activity rows. See [#11886](https://github.com/DataDog/integrations-core/pull/11886).
 * [Fixed] Fix uncommented parent options. See [#12013](https://github.com/DataDog/integrations-core/pull/12013).
+
+## 8.2.3 / 2022-05-26 / Agent 7.36.1
+
+* [Fixed] Revert mysql.net.connections metric type. See [#12088](https://github.com/DataDog/integrations-core/pull/12088).
 
 ## 8.2.2 / 2022-04-20 / Agent 7.36.0
 

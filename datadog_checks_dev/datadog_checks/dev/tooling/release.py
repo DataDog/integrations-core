@@ -80,7 +80,18 @@ def get_agent_requirement_line(check, version):
         return f'{package_name}=={version}'
 
     m = load_manifest(check)
-    platforms = sorted(m.get('supported_os', []))
+    if 'tile' in m:
+        platforms = []
+        for classifier_tag in m['tile']['classifier_tags']:
+            key, value = classifier_tag.split('::', 1)
+            if key != 'Supported OS':
+                continue
+            elif value == 'macOS':
+                value = 'mac_os'
+            platforms.append(value.lower())
+        platforms.sort()
+    else:
+        platforms = sorted(m.get('supported_os', []))
 
     # all platforms
     if platforms == ALL_PLATFORMS:
@@ -96,7 +107,7 @@ def get_agent_requirement_line(check, version):
         elif 'linux' not in platforms:
             return f"{package_name}=={version}; sys_platform != 'linux2'"
 
-    raise ManifestError(f"Can't parse the `supported_os` list for the check {check}: {platforms}")
+    raise ManifestError(f"Can't parse the supported OS list for the check {check}: {platforms}")
 
 
 def update_agent_requirements(req_file, check, newline):

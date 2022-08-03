@@ -47,6 +47,14 @@ instances:
     #
     # password: <PASSWORD>
 
+    ## @param connection_scheme - string - optional - default: mongodb
+    ## Use `mongodb` to identify that this is a string in the standard connection format. This is the default value.
+    ## In order to leverage the DNS seed list, use a connection_scheme of `mongodb+srv` rather than the standard
+    ## `mongodb`.
+    ## For more information, see: https://www.mongodb.com/docs/manual/reference/connection-string/
+    #
+    # connection_scheme: mongodb
+
     ## @param database - string - optional
     ## The database to collect metrics from.
     ## This is also the authentication database to use if a `username` and `password` is set but the `authSource` is not
@@ -63,6 +71,14 @@ instances:
     ## connect to the same host. Instead configure one check instance for each node.
     #
     # options: {}
+
+    ## @param dbnames - list of strings - optional
+    ## Set a list of the names of all databases to collect metrics from.
+    ## If this key does not exist, all metrics from all databases on the server will be collected.
+    #
+    # dbnames:
+    #   - one_database
+    #   - other_database
 
     ## @param replica_check - boolean - optional - default: true
     ## Whether or not to read from available replicas.
@@ -105,6 +121,42 @@ instances:
     ## Path to the ca_certs file.
     #
     # ssl_ca_certs: <SSL_CA_CERTS>
+
+    ## @param ssl_match_hostname - boolean - optional - default: true
+    ## If `False`, disables SSL hostname verification.
+    #
+    # ssl_match_hostname: true
+
+    ## @param tls - boolean - optional - default: false
+    ## If `True`, create the connection to the server using transport layer security.
+    #
+    # tls: false
+
+    ## @param tlsCertificateKeyFile - string - optional
+    ## A file containing the client certificate and private key. Implies tls=True.
+    #
+    # tlsCertificateKeyFile: <TLSCERTIFICATEKEYFILE>
+
+    ## @param tlsCAFile - string - optional
+    ## A file containing one or a bundle of “certification authority” certificates, 
+    ## which are used to validate certificates passed from the other end of the connection. 
+    ## Implies tls=True.
+    #
+    # tlsCAFile: <TLSCAFILE>
+
+    ## @param tlsAllowInvalidHostnames - boolean - optional - default: false
+    ## If `True`, disables TLS hostname verification. tlsAllowInvalidHostnames=False implies tls=True. 
+    ## Think very carefully before setting this to True as that could make your application 
+    ## vulnerable to on-path attackers.
+    #
+    # tlsAllowInvalidHostnames: false
+
+    ## @param tlsAllowInvalidCertificates - boolean - optional - default: false
+    ## If `True`, continues the TLS handshake regardless of the outcome of the certificate verification process. 
+    ## Think very carefully before setting this to True as that could make your application 
+    ## vulnerable to on-path attackers.
+    #
+    # tlsAllowInvalidCertificates: false
 
     ## @param additional_metrics - list of strings - optional
     ## By default, the check collects a sample of metrics from MongoDB.

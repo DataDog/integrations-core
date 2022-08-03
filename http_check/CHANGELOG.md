@@ -1,6 +1,6 @@
 # CHANGELOG - http_check
 
-## 8.0.1 / 2022-05-23
+## 8.0.1 / 2022-05-23 / Agent 7.37.0
 
 * [Fixed] Clarify no cert service check message. See [#12064](https://github.com/DataDog/integrations-core/pull/12064).
 

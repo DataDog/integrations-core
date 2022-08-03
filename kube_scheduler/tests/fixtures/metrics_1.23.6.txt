@@ -1802,19 +1802,19 @@ scheduler_pod_scheduling_duration_seconds_count{attempts="2"} 3
 scheduler_preemption_attempts_total 3
 # HELP scheduler_preemption_victims [STABLE] Number of selected preemption victims
 # TYPE scheduler_preemption_victims histogram
-scheduler_preemption_victims_bucket{le="5"} 0
-scheduler_preemption_victims_bucket{le="10"} 0
-scheduler_preemption_victims_bucket{le="15"} 0
-scheduler_preemption_victims_bucket{le="20"} 0
-scheduler_preemption_victims_bucket{le="25"} 0
-scheduler_preemption_victims_bucket{le="30"} 0
-scheduler_preemption_victims_bucket{le="35"} 0
-scheduler_preemption_victims_bucket{le="40"} 0
-scheduler_preemption_victims_bucket{le="45"} 0
-scheduler_preemption_victims_bucket{le="50"} 0
-scheduler_preemption_victims_bucket{le="+Inf"} 0
-scheduler_preemption_victims_sum 0
-scheduler_preemption_victims_count 0
+scheduler_preemption_victims_bucket{le="5"} 2
+scheduler_preemption_victims_bucket{le="10"} 2
+scheduler_preemption_victims_bucket{le="15"} 2
+scheduler_preemption_victims_bucket{le="20"} 2
+scheduler_preemption_victims_bucket{le="25"} 2
+scheduler_preemption_victims_bucket{le="30"} 2
+scheduler_preemption_victims_bucket{le="35"} 2
+scheduler_preemption_victims_bucket{le="40"} 2
+scheduler_preemption_victims_bucket{le="45"} 2
+scheduler_preemption_victims_bucket{le="50"} 2
+scheduler_preemption_victims_bucket{le="+Inf"} 2
+scheduler_preemption_victims_sum 2
+scheduler_preemption_victims_count 2
 # HELP scheduler_queue_incoming_pods_total [STABLE] Number of pods added to scheduling queues by event and queue type.
 # TYPE scheduler_queue_incoming_pods_total counter
 scheduler_queue_incoming_pods_total{event="NodeTaintChange",queue="active"} 3

@@ -1,14 +1,11 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
 import logging
-import re
 
 from six import iteritems
 
 from ..common import to_native_string
-from .constants import DEFAULT_BLACKLIST
 from .utils import is_primitive
 from .version import parse_version
 
@@ -62,7 +59,7 @@ class MetadataManager(object):
         self.check_name = check_name
         self.check_id = check_id
         self.logger = logger or LOGGER
-        self.metadata_transformers = {'config': self.transform_config, 'version': self.transform_version}
+        self.metadata_transformers = {'version': self.transform_version}
 
         if metadata_transformers:
             self.metadata_transformers.update(metadata_transformers)
@@ -129,82 +126,3 @@ class MetadataManager(object):
         data['version.scheme'] = scheme
 
         return data
-
-    def transform_config(self, config, options):
-        """
-        !!! note
-            You should never need to collect configuration data directly, but instead define 2 class level
-            attributes that will be used as whitelists of fields to allow:
-
-            - `METADATA_DEFAULT_CONFIG_INSTANCE`
-            - `METADATA_DEFAULT_CONFIG_INIT_CONFIG`
-
-        This transforms a `dict` of arbitrary user configuration. A `section` must be defined indicating
-        what the configuration represents e.g. `init_config`.
-
-        The metadata name submitted will become `config.<section>`.
-
-        The value will be a JSON `str` with the root being an array. There will be one map element for every
-        allowed field. Every map may have 2 entries:
-
-        1. `is_set` - a boolean indicating whether or not the field exists
-        2. `value` - the value of the field. this is only set if the field exists and the value is a
-           primitive type (`None` | `bool` | `float` | `int` | `str`)
-
-        The allowed fields are derived from the optional `whitelist` and `blacklist`. By default, nothing
-        will be sent.
-
-        User configuration can override defaults allowing complete, granular control of metadata submissions. In
-        any section, one may set `metadata_whitelist` and/or `metadata_blacklist` which will override their
-        keyword argument counterparts. In following our standard, blacklists take precedence over whitelists.
-
-        Blacklists are special in that each item is considered a regular expression.
-        """
-        section = options.get('section')
-        if section is None:
-            raise ValueError('The `section` option is required')
-
-        # Although we define the default fields to send in code i.e. the default whitelist, there
-        # may be cases where a subclass (for example of OpenMetricsBaseCheck) would want to ignore
-        # just a few fields, hence for convenience we have the ability to also pass a blacklist.
-        whitelist = config.get('metadata_whitelist', options.get('whitelist')) or ()
-        blacklist = config.get('metadata_blacklist', options.get('blacklist', DEFAULT_BLACKLIST)) or ()
-        blacklist = re.compile('|'.join(blacklist), re.IGNORECASE)
-
-        transformed_data = {}
-
-        data = []
-        for field in whitelist:
-            if blacklist.search(field):
-                self.logger.debug(
-                    'Skipping metadata submission of blacklisted field `%s` in section `%s`', field, section
-                )
-                continue
-
-            field_data = {}
-
-            if field in config:
-                field_data['is_set'] = True
-
-                value = config[field]
-                if is_primitive(value):
-                    field_data['value'] = value
-                else:
-                    self.logger.debug(
-                        'Skipping metadata submission of non-primitive type `%s` for field `%s` in section `%s`',
-                        type(value).__name__,
-                        field,
-                        section,
-                    )
-            else:
-                field_data['is_set'] = False
-
-            data.append(field_data)
-
-        if data:
-            # To avoid the backend having to parse a potentially unbounded number of unique keys, we
-            # send `config.<SECTION_NAME>` rather than `config.<SECTION_NAME>.<OPTION_NAME>` since
-            # the number of sections is finite (currently only `instance` and `init_config`).
-            transformed_data['config.{}'.format(section)] = json.dumps(data)
-
-        return transformed_data

@@ -1,5 +1,9 @@
 # CHANGELOG - php_fpm
 
+## 2.1.1 / 2022-06-27 / Agent 7.38.0
+
+* [Fixed] Fix missing import in PHP-FPM's check. See [#12365](https://github.com/DataDog/integrations-core/pull/12365). Thanks [DennisCGc](https://github.com/DennisCGc).
+
 ## 2.1.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).

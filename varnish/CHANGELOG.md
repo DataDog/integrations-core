@@ -1,6 +1,6 @@
 # CHANGELOG - varnish
 
-## 1.14.1 / 2022-05-15
+## 1.14.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Refactor methods. See [#11909](https://github.com/DataDog/integrations-core/pull/11909).
 * [Fixed] Adapt to new check signature. See [#11910](https://github.com/DataDog/integrations-core/pull/11910).

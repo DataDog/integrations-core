@@ -1,6 +1,11 @@
 # CHANGELOG - Vertica
 
-## 3.3.1 / 2022-05-15
+## 3.3.2 / 2022-07-19
+
+* [Fixed] Support projection storage and storage containers for Vertica 11+. See [#12465](https://github.com/DataDog/integrations-core/pull/12465).
+* [Fixed] Make integration compatible with Vertica 11. See [#12394](https://github.com/DataDog/integrations-core/pull/12394).
+
+## 3.3.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
 
