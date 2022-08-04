@@ -39,7 +39,7 @@ linkerd.rt.client.request_latency_ms.quantile,gauge,,millisecond,,Stats of the l
 linkerd.rt.server.connections,gauge,,connection,,Number of active connections for the server (Linkerd v1 only).,0,linkerd,server active connections,
 linkerd.rt.server.connects_s,rate,,connection,second,Number of connection par second for the server (Linkerd v1 only).,0,linkerd,server connects/s,
 linkerd.rt.server.request_latency_ms.quantile,gauge,,millisecond,,Stats of the latency of requests in milliseconds for the server (Linkerd v1 only).,-1,linkerd,server requests latency,
-linkerd.request_total,count,,request,, [OpenMetricsV1] Total count of HTTP requests.,0,linkerd,,
+linkerd.request_total,count,,request,,[OpenMetricsV1] Total count of HTTP requests.,0,linkerd,,
 linkerd.request.count,count,,request,,[OpenMetricsV2] Total count of HTTP requests.,0,linkerd,,
 linkerd.response_latency.sum,gauge,,millisecond,,Elapsed times between a request's headers being received and its response stream completing.,0,linkerd,,
 linkerd.response_latency.count,gauge,,response,,Number of responses on which the linkerd.response_latency.sum metric is evaluated.,0,linkerd,,
