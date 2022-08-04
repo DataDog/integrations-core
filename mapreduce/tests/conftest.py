@@ -35,6 +35,7 @@ def dd_environment():
         compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
         conditions=[WaitFor(setup_mapreduce, attempts=5, wait=5)],
         env_vars=env,
+        attempts=2,
     ):
         # 'custom_hosts' in metadata provides native /etc/hosts mappings in the agent's docker container
         yield INSTANCE_INTEGRATION, {'custom_hosts': get_custom_hosts()}

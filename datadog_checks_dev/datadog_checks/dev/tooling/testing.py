@@ -7,6 +7,7 @@ import re
 from fnmatch import fnmatch
 
 from ..fs import chdir, file_exists, path_join, read_file_binary, write_file_binary
+from ..structures import EnvVars
 from ..subprocess import run_command
 from .commands.console import abort, echo_debug, echo_info, echo_success
 from .constants import NON_TESTABLE_FILES, TESTABLE_FILE_PATTERNS, get_root
@@ -235,7 +236,7 @@ def select_tox_envs(
 
 
 def get_hatch_env_data(check):
-    with chdir(path_join(get_root(), check)):
+    with chdir(path_join(get_root(), check), env_vars=EnvVars({'NO_COLOR': '1'})):
         return json.loads(run_command(['hatch', 'env', 'show', '--json'], capture='out').stdout)
 
 
@@ -530,9 +531,11 @@ def construct_pytest_options(
         test_group = 'e2e' if e2e else 'unit'
         pytest_options += (
             # junit report file must contain the env name to handle multiple envs
+            # $HATCH_ENV_ACTIVE is a Hatch injected variable
+            # See https://hatch.pypa.io/latest/plugins/environment/reference/#hatch.env.plugin.interface.EnvironmentInterface.get_env_vars  # noqa
             # $TOX_ENV_NAME is a tox injected variable
             # See https://tox.readthedocs.io/en/latest/config.html#injected-environment-variables
-            f' --junit-xml=.junit/test-{test_group}-$TOX_ENV_NAME.xml'
+            f' --junit-xml=.junit/test-{test_group}-$HATCH_ENV_ACTIVE$TOX_ENV_NAME.xml'
             # Junit test results class prefix
             f' --junit-prefix={check}'
         )

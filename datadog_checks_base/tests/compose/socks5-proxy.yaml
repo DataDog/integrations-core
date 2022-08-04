@@ -13,3 +13,5 @@ services:
     image: nginx:stable-alpine
     ports:
       - "80:80"
+    depends_on:
+      - socks5
