@@ -37,3 +37,4 @@ kube_scheduler.scheduling.pod.scheduling_duration.sum,gauge,,,second,"Total e2e 
 kube_scheduler.scheduling.pod.scheduling_duration.count,gauge,,,,"E2e latency for a pod being scheduled which may include multiple scheduling attempts (requires k8s v1.23+)",0,kube_scheduler,scheduling.pod.scheduling_duration.count,
 kube_scheduler.scheduling.attempt_duration.sum,gauge,,,second,"Total scheduling attempt latency in seconds (scheduling algorithm + binding) (requires k8s v1.23+)",0,kube_scheduler,scheduling.attempt_duration.sum,
 kube_scheduler.scheduling.attempt_duration.count,gauge,,,,"Scheduling attempt latency in seconds (scheduling algorithm + binding) (requires k8s v1.23+)",0,kube_scheduler,scheduling.attempt_duration.count,
+kube_scheduler.pending_pods,gauge,,,,"Number of pending pods, by the queue type (requires k8s v1.15+)",0,kube_scheduler,pending_pods,
