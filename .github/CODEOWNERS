@@ -148,6 +148,9 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/ag
 /aspdotnet/                                                          @DataDog/agent-integrations @DataDog/windows-agent
 /aspdotnet/*.md                                                      @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
 /aspdotnet/manifest.json                                             @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/dotnetclr/                                                          @DataDog/agent-integrations @DataDog/windows-agent
+/dotnetclr/*.md                                                      @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/dotnetclr/manifest.json                                             @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
 /exchange_server/                                                    @DataDog/agent-integrations @DataDog/windows-agent
 /exchange_server/*.md                                                @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
 /exchange_server/manifest.json                                       @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
