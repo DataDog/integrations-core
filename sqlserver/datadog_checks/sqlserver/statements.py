@@ -18,6 +18,8 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
+from .utils import get_stmt_is_proc
+
 try:
     import datadog_agent
 except ImportError:
@@ -81,7 +83,6 @@ select
             - statement_start_offset) / 2) + 1) AS statement_text,
     qt.text,
     encrypted as is_encrypted,
-    (SELECT IIF (EXISTS (SELECT 1 FROM sys.dm_exec_procedure_stats proc_stats WHERE proc_stats.plan_handle = qstats_aggr_split.plan_handle), 1, 0)) as is_proc,
     * from qstats_aggr_split
     cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
@@ -114,7 +115,6 @@ select
     END - statement_start_offset) / 2) + 1) AS statement_text,
     qt.text,
     encrypted as is_encrypted,
-    (SELECT IIF (EXISTS (SELECT 1 FROM sys.dm_exec_procedure_stats proc_stats WHERE proc_stats.plan_handle = qstats_aggr_split.plan_handle), 1, 0)) as is_proc,
     * from qstats_aggr_split
     cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
@@ -284,7 +284,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             try:
                 statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
                 procedure_statement = None
-                if row['is_proc'] and 'text' in row:
+                row['is_proc'] = get_stmt_is_proc(row['text'])
+                if row['is_proc']:
                     procedure_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
@@ -443,8 +444,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             # for stored procedures, we only want to look up plans for the entire procedure
             # not every query that is executed within the proc. In order to accomplish this,
             # we use the procedure_signature as the plan key
-            if row['is_proc']:
-                plan_key = row['procedure_signature']
+            if row['is_proc'] or row['is_encrypted']:
+                plan_key = row['plan_handle'][0:16]
             if self._seen_plans_ratelimiter.acquire(plan_key):
                 raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
                 obfuscated_plan, collection_errors = None, None

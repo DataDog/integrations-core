@@ -25,6 +25,13 @@ def construct_use_statement(database):
     return 'use [{}]'.format(database)
 
 
+def get_stmt_is_proc(text):
+    if text:
+        t = text.upper()
+        return ("CREATE" in t) and (("PROC" or "PROCEDURE") in t)
+    return False
+
+
 def parse_sqlserver_major_version(version):
     """
     Parses the SQL Server major version out of the full version
