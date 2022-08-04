@@ -98,24 +98,24 @@ assets/               @DataDog/agent-integrations
 /docs/developer/tutorials/snmp/                                    @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
 
 # Agent Platform
-/disk/                                    @DataDog/agent-integrations @DataDog/agent-platform
-/disk/*.md                                @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/disk/manifest.json                       @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/network/                                 @DataDog/agent-integrations @DataDog/agent-platform
-/network/*.md                             @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/network/manifest.json                    @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/process/                                 @DataDog/agent-integrations @DataDog/agent-platform
-/process/*.md                             @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/process/manifest.json                    @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/otel/                                    @DataDog/agent-integrations @DataDog/agent-platform
-/otel/*.md                                @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/otel/manifest.json                       @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/nvidia_jetson/                           @DataDog/agent-integrations @DataDog/agent-platform
-/nvidia_jetson/*.md                       @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/nvidia_jetson/manifest.json              @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/ibm_i/                                   @DataDog/agent-integrations @DataDog/agent-platform
-/ibm_i/*.md                               @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/ibm_i/manifest.json                      @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
+/disk/                                    @DataDog/agent-platform @DataDog/agent-integrations
+/disk/*.md                                @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/disk/manifest.json                       @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/network/                                 @DataDog/agent-platform @DataDog/agent-integrations
+/network/*.md                             @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/network/manifest.json                    @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/process/                                 @DataDog/agent-platform @DataDog/agent-integrations
+/process/*.md                             @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/process/manifest.json                    @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/otel/                                    @DataDog/agent-platform @DataDog/agent-integrations
+/otel/*.md                                @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/otel/manifest.json                       @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/nvidia_jetson/                           @DataDog/agent-platform @DataDog/agent-integrations
+/nvidia_jetson/*.md                       @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/nvidia_jetson/manifest.json              @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/ibm_i/                                   @DataDog/agent-platform @DataDog/agent-integrations
+/ibm_i/*.md                               @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/ibm_i/manifest.json                      @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
 
 
 # Database monitoring
