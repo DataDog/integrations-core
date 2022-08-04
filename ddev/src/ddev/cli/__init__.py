@@ -106,7 +106,7 @@ def ddev(ctx: click.Context, core, extras, marketplace, agent, here, color, inte
             )
 
     if not ctx.invoked_subcommand:
-        app.display_info(ctx.get_help())
+        app.display_info(ctx.get_help(), highlight=False)
         return
 
     # Persist app data for sub-commands
