@@ -115,6 +115,11 @@ def test_check_metrics_1_23(aggregator, mock_metrics, mock_leader):
         value=2.0,
         tags=[],
     )
+
+    assert_metric('.pending_pods', value=1.0, tags=['queue:active'])
+    assert_metric('.pending_pods', value=2.0, tags=['queue:backoff'])
+    assert_metric('.pending_pods', value=3.0, tags=['queue:unschedulable'])
+
     assert_metric('.goroutines')
     assert_metric('.gc_duration_seconds.sum')
     assert_metric('.gc_duration_seconds.count')

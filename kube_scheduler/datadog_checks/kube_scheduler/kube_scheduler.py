@@ -97,6 +97,11 @@ DEFAULT_GAUGES = {
     'scheduler_pod_preemption_victims': 'pod_preemption.victims'
 }
 
+NEW_1_15_GAUGES = {
+    # Number of pending pods, by the queue type
+    'scheduler_pending_pods': 'pending_pods'
+}
+
 DEFAULT_GO_METRICS = {
     'go_gc_duration_seconds': 'gc_duration_seconds',
     'go_goroutines': 'goroutines',
@@ -146,6 +151,7 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
                         NEW_1_14_HISTOGRAMS,
                         NEW_1_19_HISTOGRAMS,
                         DEFAULT_GAUGES,
+                        NEW_1_15_GAUGES,
                         DEFAULT_GO_METRICS,
                         DEPRECARED_SUMMARIES,
                         NEW_1_23_HISTOGRAMS,
