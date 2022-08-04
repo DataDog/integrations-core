@@ -169,6 +169,9 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /windows_service/                                                    @DataDog/windows-agent @DataDog/agent-integrations
 /windows_service/*.md                                                @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
 /windows_service/manifest.json                                       @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
+/wmi_check/                                                          @DataDog/windows-agent @DataDog/agent-integrations
+/wmi_check/*.md                                                      @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
+/wmi_check/manifest.json                                             @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
 
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/software-integrity-and-trust
