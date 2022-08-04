@@ -190,7 +190,10 @@ Run the [Agent's status subcommand][13] and look for `vault` under the Checks se
 
 See [metadata.csv][14] for a list of metrics provided by this integration.
 
-**Note**: Version 3.4.0+ of this check uses [OpenMetrics][21] for metric collection, which requires Python 3. For hosts that are unable to use Python 3, or if you would like to use a legacy version of this check, set the value of `use_openmetrics` to `false` in the configuration.
+**Notes:** 
+
+* Metrics starting with `vault.replication.fetchRemoteKeys`, `vault.replication.merkleDiff`, and `vault.replication.merkleSync` are not reported unless the replication is in an unhealthy state. 
+* Versions 3.4.0 and later of this check use [OpenMetrics][21] for metric collection, which requires Python 3. For hosts that are unable to use Python 3, or if you would like to use a legacy version of this check, set the value of `use_openmetrics` to `false` in the configuration.
 
 ### Events
 
