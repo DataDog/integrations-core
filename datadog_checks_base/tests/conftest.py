@@ -16,7 +16,7 @@ def socks5_proxy():
     auth = "proxy_user:proxy_password"
 
     def check_proxy():
-        proxies = {'http': 'socks5://{}@{}'.format(auth, proxy)}
+        proxies = {'http': 'socks5h://{}@{}'.format(auth, proxy)}
         url = 'http://www.google.com'
         resp = requests.get(url, proxies=proxies)
         resp.raise_for_status()
