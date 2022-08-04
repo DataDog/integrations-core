@@ -56,7 +56,9 @@ SELECT
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
-    (SELECT IIF (EXISTS (SELECT 1 FROM sys.dm_exec_procedure_stats WHERE object_id = qt.objectid), 1, 0)) as is_proc,
+    (SELECT IIF (EXISTS
+        (SELECT 1 FROM sys.dm_exec_procedure_stats proc_stats
+            WHERE proc_stats.plan_handle = req.plan_handle), 1, 0)) as is_proc,
     {exec_request_columns}
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
