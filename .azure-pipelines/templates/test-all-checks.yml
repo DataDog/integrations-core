@@ -138,6 +138,9 @@ jobs:
     - checkName: datadog_cluster_agent
       displayName: Datadog Cluster Agent
       os: linux
+    - checkName: ddev
+      displayName: ddev
+      os: linux
     - checkName: directory
       displayName: Directory
       os: linux
