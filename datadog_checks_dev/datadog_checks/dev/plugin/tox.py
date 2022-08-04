@@ -24,8 +24,10 @@ BLACK_DEP = 'black==22.6.0'
 FLAKE8_DEP = 'flake8==5.0.3'
 FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==22.7.1'
 # TODO: update when fix is released https://github.com/globality-corp/flake8-logging-format/pull/33
-FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format @ git+https://github.com/globality-corp/flake8-logging-format.git' \
-                            '@f3cdb24468241ebe85e41b0bd2e8958c76b4dec6 '
+FLAKE8_LOGGING_FORMAT_DEP = (
+    'flake8-logging-format @ git+https://github.com/globality-corp/flake8-logging-format.git'
+    '@f3cdb24468241ebe85e41b0bd2e8958c76b4dec6 '
+)
 # TODO: remove extra when we drop Python 2
 MYPY_DEP = 'mypy[python2]==0.910'
 # TODO: when we drop Python 2 and replace with --install-types --non-interactive
